@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2021 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fileListCoordinator"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    tools:context=".ui.fileList.FileListFragment">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/appBarHeight"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/collapsingToolbarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            tools:title="/">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin"
+                app:menu="@menu/file_list_menu" />
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/multiSelectLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/closeButtonMultiSelect"
+                style="@style/IconButton"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="@dimen/marginStandardMedium"
+                android:contentDescription="@string/buttonClose"
+                app:icon="@drawable/ic_close"
+                app:iconSize="20dp"
+                app:iconTint="@color/primary"
+                app:layout_constraintBottom_toBottomOf="@id/selectAllButton"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/selectAllButton" />
+
+            <!-- TODO in futur version -->
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/selectAllButton"
+                style="@style/TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/marginStandardMedium"
+                android:text="@string/buttonSelectAll"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/titleMultiSelect"
+                style="@style/BoldTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/marginStandard"
+                android:layout_marginEnd="@dimen/marginStandardVerySmall"
+                android:textSize="22sp"
+                app:layout_constraintBottom_toBottomOf="@id/moveButtonMultiSelect"
+                app:layout_constraintEnd_toStartOf="@id/moveButtonMultiSelect"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/moveButtonMultiSelect"
+                tools:text="500 sélectionné(s)" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/moveButtonMultiSelect"
+                style="@style/IconButton"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:layout_marginEnd="@dimen/marginStandardSmall"
+                android:layout_marginBottom="@dimen/marginStandardSmall"
+                android:contentDescription="@string/buttonMoveTo"
+                app:icon="@drawable/ic_folder_select"
+                app:iconSize="20dp"
+                app:iconTint="@color/icon_toolbar_button"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/deleteButtonMultiSelect" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/deleteButtonMultiSelect"
+                style="@style/IconButton"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:layout_marginEnd="@dimen/marginStandardVerySmall"
+                android:layout_marginBottom="@dimen/marginStandardSmall"
+                android:contentDescription="@string/buttonDelete"
+                app:icon="@drawable/ic_delete"
+                app:iconSize="20dp"
+                app:iconTint="@color/icon_toolbar_button"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/menuButtonMultiSelect" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/menuButtonMultiSelect"
+                style="@style/IconButton"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:layout_marginEnd="@dimen/marginStandardMedium"
+                android:layout_marginBottom="@dimen/marginStandardSmall"
+                android:contentDescription="@string/buttonMenu"
+                app:icon="@drawable/ic_menu"
+                app:iconSize="20dp"
+                app:iconTint="@color/icon_toolbar_button"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:id="@+id/fileListLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <include
+                android:id="@+id/searchViewCard"
+                layout="@layout/item_search_view"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginHorizontal="@dimen/marginStandard"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <include
+                android:id="@+id/uploadFileInProgress"
+                layout="@layout/cardview_file_list"
+                android:visibility="gone" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/convertedTypeLayout"
+                style="@style/CardViewInfomaniak"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/marginStandard"
+                android:layout_marginTop="@dimen/marginStandard"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardMedium"
+                    android:layout_marginTop="@dimen/marginStandardSmall"
+                    android:layout_marginBottom="@dimen/marginStandardSmall"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/convertedTypeIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        tools:ignore="ContentDescription"
+                        tools:src="@drawable/ic_file_text" />
+
+                    <TextView
+                        android:id="@+id/convertedType"
+                        style="@style/MediumTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="@dimen/marginStandardSmall"
+                        android:gravity="center"
+                        tools:text="@string/allOfficeDocs" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/convertedTypeClose"
+                        style="@style/IconButton"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="@dimen/marginStandardSmall"
+                        android:contentDescription="@string/buttonClose"
+                        app:icon="@drawable/ic_remove"
+                        app:iconPadding="0dp"
+                        app:iconSize="16dp"
+                        app:iconTint="@color/primaryText" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:id="@+id/noNetwork"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandard"
+                android:layout_marginVertical="@dimen/marginStandardSmall"
+                android:drawablePadding="10dp"
+                android:gravity="center"
+                android:text="@string/allNoNetwork"
+                android:textColor="@color/actionColor"
+                android:textSize="13sp"
+                android:visibility="gone"
+                app:drawableStartCompat="@drawable/ic_no_network"
+                tools:visibility="visible" />
+
+            <LinearLayout
+                android:id="@+id/currentActivity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandard"
+                android:visibility="gone"
+                tools:ignore="UseCompoundDrawables"
+                tools:visibility="visible">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/currentActivityAvatar"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    app:shapeAppearanceOverlay="@style/CircleImageView"
+                    app:srcCompat="@drawable/placeholder" />
+
+                <TextView
+                    android:id="@+id/currentActivityContent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="@dimen/marginStandardSmall"
+                    android:layout_marginStart="@dimen/marginStandardSmall"
+                    tools:text="Zarela Reed a importé 16 nouveaux fichiers" />
+            </LinearLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/sortLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandard">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/sortButton"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="0dp"
+                    android:textAllCaps="false"
+                    android:textColor="@color/actionColor"
+                    app:icon="@drawable/ic_keyboard_arrow_down"
+                    app:iconGravity="textEnd"
+                    app:iconSize="16dp"
+                    app:iconTint="@color/actionColor"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="Nom" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/toggleDisplayButton"
+                    style="@style/IconButton"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:contentDescription="@string/buttonToggleDisplay"
+                    app:icon="@drawable/ic_list"
+                    app:iconSize="16dp"
+                    app:iconTint="@color/actionColor"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <com.infomaniak.drive.views.com.liuzhenlin.simrv.SlidingItemMenuRecyclerView
+                android:id="@+id/fileRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/marginStandardMedium"
+                android:paddingTop="@dimen/marginStandardSmall"
+                android:paddingBottom="@dimen/recyclerViewPaddingBottom"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="7"
+                tools:listitem="@layout/cardview_file_list" />
+
+            <com.infomaniak.drive.views.NoItemsLayoutView
+                android:id="@+id/noFilesLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

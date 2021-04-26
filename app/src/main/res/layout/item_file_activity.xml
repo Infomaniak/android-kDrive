@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2021 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clipToPadding="false">
+
+    <View
+        android:id="@+id/line1"
+        android:layout_width="1dp"
+        android:layout_height="30dp"
+        android:background="@color/border"
+        app:layout_constraintBottom_toTopOf="@id/activityDateCardView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/activityDateCardView"
+        style="@style/CardViewInfomaniak"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/marginStandardSmall"
+        app:cardBackgroundColor="@color/backgroundSecondary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/line1">
+
+        <TextView
+            android:id="@+id/activityDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/marginStandard"
+            android:layout_marginTop="@dimen/marginStandardSmall"
+            android:layout_marginEnd="@dimen/marginStandard"
+            android:layout_marginBottom="@dimen/marginStandardSmall"
+            tools:text="@string/allToday" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <View
+        android:id="@+id/line2"
+        android:layout_width="1dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="@dimen/marginStandardSmall"
+        android:background="@color/border"
+        app:layout_constraintBottom_toTopOf="@id/activityContainer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/activityDateCardView" />
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/activityContainer"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginVertical="@dimen/marginStandardMedium"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/line2">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/activityUserAvatar"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearanceOverlay="@style/CircleImageView"
+            app:srcCompat="@drawable/ic_placeholder_avatar" />
+
+        <TextView
+            android:id="@+id/activityUserName"
+            style="@style/SmallTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="6dp"
+            android:layout_marginVertical="2dp"
+            app:layout_constraintBottom_toTopOf="@id/activityAction"
+            app:layout_constraintEnd_toStartOf="@+id/activityHourLayout"
+            app:layout_constraintStart_toEndOf="@id/activityUserAvatar"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="@string/allUserAnonymous" />
+
+        <TextView
+            android:id="@+id/activityAction"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="6dp"
+            android:layout_marginVertical="2dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/activityHourLayout"
+            app:layout_constraintStart_toEndOf="@id/activityUserAvatar"
+            app:layout_constraintTop_toBottomOf="@id/activityUserName"
+            tools:text="a modifié le fichier" />
+
+        <LinearLayout
+            android:id="@+id/activityHourLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="@id/activityUserName"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/activityUserName"
+            tools:ignore="UseCompoundDrawables">
+
+            <ImageView
+                android:id="@+id/activityHourIcon"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:paddingBottom="2dp"
+                android:src="@drawable/ic_clock"
+                tools:ignore="ContentDescription" />
+
+            <TextView
+                android:id="@+id/activityHour"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/marginStandardVerySmall"
+                android:textSize="12sp"
+                tools:text="10:10" />
+
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,46 @@
+<!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2021 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="400dp"
+    android:height="400dp"
+    android:viewportWidth="400"
+    android:viewportHeight="400">
+    <path
+        android:fillColor="#2E2F30"
+        android:fillType="evenOdd"
+        android:pathData="M200,200m-200,0a200,200 0,1 1,400 0a200,200 0,1 1,-400 0" />
+    <path
+        android:fillColor="#BCBCBC"
+        android:fillType="evenOdd"
+        android:pathData="M200,100.535c30.125,0 54.545,24.42 54.545,54.545v54.546l-17.112,-0.001V155.08c0,-20.467 -16.426,-37.097 -36.814,-37.428l-0.619,-0.005c-20.674,0 -37.433,16.76 -37.433,37.433v54.545h-17.112V155.08c0,-30.124 24.42,-54.545 54.545,-54.545z" />
+    <path
+        android:fillColor="#FFCC01"
+        android:fillType="evenOdd"
+        android:pathData="M136.898,179.68L263.101,179.68a6.417,6.417 0,0 1,6.417 6.417v89.84c0,14.176 -11.492,25.668 -25.668,25.668h-87.7C141.972,301.605 130.481,290.113 130.481,275.937L130.481,186.097A6.417,6.417 0,0 1,136.898 179.68z" />
+    <group>
+        <clip-path android:pathData="M136.898,179.68L263.101,179.68a6.417,6.417 0,0 1,6.417 6.417v89.84c0,14.176 -11.492,25.668 -25.668,25.668h-87.7C141.972,301.605 130.481,290.113 130.481,275.937L130.481,186.097A6.417,6.417 0,0 1,136.898 179.68z" />
+        <path
+            android:fillColor="#FFC000"
+            android:fillType="evenOdd"
+            android:pathData="M201.069,175.402h74.866v128.342L201.069,303.744z" />
+    </group>
+    <path
+        android:fillColor="#2E2F30"
+        android:fillType="nonZero"
+        android:pathData="M198.275,260.963V251.7l5.266,-5.034 7.4,14.297h15.797l-13.87,-23.156 13.113,-12.484h-17.243l-10.463,11.812v-25.37h-14.318v49.198z" />
+</vector>

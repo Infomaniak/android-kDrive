@@ -1,0 +1,27 @@
+<!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2021 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:tint="#F44336"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#fff"
+        android:pathData="M15.586,0a1,1 0,0 1,0.707 0.291l5.414,5.414a1,1 0,0 1,0.293 0.707L22,22a2,2 0,0 1,-2 2L4,24a2,2 0,0 1,-2 -2L2,2a2,2 0,0 1,2 -2zM14.965,2L4.5,2a0.5,0.5 0,0 0,-0.5 0.5v19a0.5,0.5 0,0 0,0.5 0.5h15a0.5,0.5 0,0 0,0.5 -0.5L20,7.033a0.5,0.5 0,0 0,-0.146 -0.353l-4.536,-4.533A0.5,0.5 0,0 0,14.965 2zM8.787,5.588l0.153,0.005a1.412,1.412 0,0 1,1.184 0.978c0.399,1.114 0.671,2.27 0.812,3.445a0.521,0.521 0,0 0,0.164 0.32c0.6,0.538 1.255,1.01 1.954,1.41a0.49,0.49 0,0 0,0.377 0.043c1.183,-0.334 2.41,-0.48 3.639,-0.433a1.7,1.7 0,0 1,1.393 2.656c-0.326,0.46 -0.885,0.695 -1.442,0.605a12.647,12.647 0,0 1,-3.735 -1.065,0.527 0.527,0 0,0 -0.394,-0.019c-0.661,0.248 -1.3,0.552 -1.909,0.91a0.493,0.493 0,0 0,-0.229 0.318,8.925 8.925,0 0,1 -1.451,3.257 1.725,1.725 0,0 1,-1.611 0.717,1.637 1.637,0 0,1 -1.332,-0.992 1.592,1.592 0,0 1,0.3 -1.622,12.958 12.958,0 0,1 2.579,-2.339 0.511,0.511 0,0 0,0.217 -0.349c0.096,-0.784 0.117,-1.576 0.063,-2.364a0.48,0.48 0,0 0,-0.137 -0.307A14.74,14.74 0,0 1,7.429 8.2a1.7,1.7 0,0 1,-0.008 -1.827,1.628 1.628,0 0,1 1.519,-0.78z" />
+</vector>

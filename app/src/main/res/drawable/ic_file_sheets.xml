@@ -1,0 +1,27 @@
+<!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2021 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:tint="#4BAF50"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#4BAF50"
+        android:pathData="M15.586,0a1,1 0,0 1,0.707 0.291l5.414,5.414a1,1 0,0 1,0.293 0.707L22,22a2,2 0,0 1,-2 2L4,24a2,2 0,0 1,-2 -2L2,2a2,2 0,0 1,2 -2zM14.75,2L4.5,2a0.5,0.5 0,0 0,-0.5 0.5v19a0.5,0.5 0,0 0,0.5 0.5h15a0.5,0.5 0,0 0,0.5 -0.5L20,7.25a0.25,0.25 0,0 0,-0.25 -0.25L17,7a2,2 0,0 1,-2 -2L15,2.25a0.25,0.25 0,0 0,-0.25 -0.25zM9,17.498a0.5,0.5 0,0 1,0.5 0.5v1a0.5,0.5 0,0 1,-0.5 0.5L7,19.498a0.5,0.5 0,0 1,-0.5 -0.5v-1a0.5,0.5 0,0 1,0.5 -0.5h2zM17,17.498a0.5,0.5 0,0 1,0.5 0.5v1a0.5,0.5 0,0 1,-0.5 0.5h-5.5a0.5,0.5 0,0 1,-0.5 -0.5v-1a0.5,0.5 0,0 1,0.5 -0.5L17,17.498zM9,13.998a0.5,0.5 0,0 1,0.5 0.5v1a0.5,0.5 0,0 1,-0.5 0.5L7,15.998a0.5,0.5 0,0 1,-0.5 -0.5v-1a0.5,0.5 0,0 1,0.5 -0.5h2zM17,13.998a0.5,0.5 0,0 1,0.5 0.5v1a0.5,0.5 0,0 1,-0.5 0.5h-5.5a0.5,0.5 0,0 1,-0.5 -0.5v-1a0.5,0.5 0,0 1,0.5 -0.5L17,13.998zM9,10.498a0.5,0.5 0,0 1,0.5 0.5v1a0.5,0.5 0,0 1,-0.5 0.5L7,12.498a0.5,0.5 0,0 1,-0.5 -0.5v-1a0.5,0.5 0,0 1,0.5 -0.5h2zM17,10.498a0.5,0.5 0,0 1,0.5 0.5v1a0.5,0.5 0,0 1,-0.5 0.5h-5.5a0.5,0.5 0,0 1,-0.5 -0.5v-1a0.5,0.5 0,0 1,0.5 -0.5L17,10.498z" />
+</vector>

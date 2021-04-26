@@ -1,0 +1,125 @@
+/*
+ * Infomaniak kDrive - Android
+ * Copyright (C) 2021 Infomaniak Network SA
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package com.infomaniak.drive.ui.menu
+
+import android.os.Bundle
+import androidx.navigation.navGraphViewModels
+import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.drive.utils.safeNavigate
+import com.infomaniak.drive.utils.showSnackbar
+import kotlinx.android.synthetic.main.fragment_file_list.*
+
+class TrashFragment : FileSubTypeListFragment() {
+
+    val trashViewModel: TrashViewModel by navGraphViewModels(R.id.trashFragment)
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        sortType = File.SortType.RECENT_TRASHED
+        downloadFiles =
+            DownloadFiles(
+                if (folderID != ROOT_ID) File(id = folderID, name = folderName, driveId = AccountUtils.currentDriveId)
+                else null
+            )
+
+        super.onActivityCreated(savedInstanceState)
+
+        if (folderID == ROOT_ID) collapsingToolbarLayout.title = getString(R.string.trashTitle)
+        noFilesLayout.setup(icon = R.drawable.ic_delete, title = R.string.trashNoFile, initialListView = fileRecyclerView)
+
+        fileAdapter.apply {
+            showShareFileButton = false
+            onFileClicked = { file ->
+                trashViewModel.cancelTrashFileJob()
+                if (file.isFolder()) safeNavigate(
+                    TrashFragmentDirections.actionTrashFragmentSelf(
+                        file.id,
+                        file.name
+                    )
+                )
+                else showTrashedFileActions(file)
+            }
+            onMenuClicked = { view, file, _ ->
+                when (view.id) {
+                    R.id.menuButton -> showTrashedFileActions(file)
+                    R.id.deleteButton -> {
+                        Utils.confirmFileDeletion(requireContext(), fileName = file.name, fromTrash = true) {
+                            trashViewModel.deleteTrashFile(file).observe(viewLifecycleOwner) { apiResponse ->
+                                if (apiResponse.isSuccess()) {
+                                    val title = resources.getQuantityString(R.plurals.snackbarDeleteConfirmation, 1, file.name)
+                                    requireActivity().showSnackbar(title)
+                                    removeFileFromAdapter(file.id)
+                                } else {
+                                    requireActivity().showSnackbar(R.string.errorDelete)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        trashViewModel.removeFileId.observe(viewLifecycleOwner) { fileToRemove ->
+            removeFileFromAdapter(fileToRemove)
+        }
+    }
+
+    private fun showTrashedFileActions(file: File) {
+        trashViewModel.selectedFile.value = file
+        safeNavigate(R.id.trashedFileActionsBottomSheetDialog)
+    }
+
+    private fun removeFileFromAdapter(fileId: Int) {
+        val trashedFileList = fileAdapter.getItems()
+        fileAdapter.deleteAt(trashedFileList.indexOf(trashedFileList.find { it.id == fileId }))
+        noFilesLayout.toggleVisibility(trashedFileList.isEmpty())
+    }
+
+    private inner class DownloadFiles() : (Boolean) -> Unit {
+        private var folder: File? = null
+
+        constructor(folder: File?) : this() {
+            this.folder = folder
+        }
+
+        override fun invoke(ignoreCache: Boolean) {
+            if (ignoreCache) fileAdapter.setList(arrayListOf())
+            timer.start()
+            fileAdapter.isComplete = false
+
+            folder?.let { folder ->
+                trashViewModel.getTrashFile(folder, sortType).observe(viewLifecycleOwner) { pairResponse ->
+                    val files = ArrayList(pairResponse?.first?.children ?: ArrayList())
+                    populateFileList(files = files, isComplete = pairResponse?.second ?: true)
+                }
+            } ?: run {
+                trashViewModel.getDriveTrash(AccountUtils.currentDriveId, sortType)
+                    .observe(viewLifecycleOwner) { pairResponse ->
+                        populateFileList(
+                            files = pairResponse?.first ?: ArrayList(),
+                            isComplete = pairResponse?.second ?: true
+                        )
+                    }
+            }
+        }
+    }
+}
+

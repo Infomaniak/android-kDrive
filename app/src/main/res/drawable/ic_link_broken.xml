@@ -1,0 +1,39 @@
+<!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2021 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:tint="@color/iconColor"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="M5.727,5.283C6.121,5.6648 6.747,5.6648 7.141,5.283C7.5314,4.8925 7.5314,4.2595 7.141,3.869L5.141,1.869C4.7486,1.49 4.1249,1.4954 3.7392,1.8812C3.3534,2.2669 3.348,2.8906 3.727,3.283L5.727,5.283Z" />
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="M9.5,4.5C10.0523,4.5 10.5,4.0523 10.5,3.5L10.5,1C10.5,0.4477 10.0523,0 9.5,0C8.9477,0 8.5,0.4477 8.5,1L8.5,3.5C8.5,4.0523 8.9477,4.5 9.5,4.5Z" />
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="M2.909,9L5.409,9C5.9613,9 6.409,8.5523 6.409,8C6.409,7.4477 5.9613,7 5.409,7L2.909,7C2.3567,7 1.909,7.4477 1.909,8C1.909,8.5523 2.3567,9 2.909,9Z" />
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="M10.727,17.869L7.327,21.269C6.3358,22.2081 4.7832,22.2081 3.792,21.269L2.731,20.209C1.7604,19.2301 1.7604,17.6519 2.731,16.673L6.131,13.273C6.391,13.0219 6.4952,12.6501 6.4037,12.3005C6.3122,11.9509 6.0391,11.6778 5.6895,11.5863C5.3399,11.4948 4.9681,11.599 4.717,11.859L1.317,15.259C-0.4349,17.0186 -0.4349,19.8634 1.317,21.623L2.378,22.683C4.1373,24.4348 6.9817,24.4348 8.741,22.683L12.141,19.283C12.401,19.0319 12.5052,18.6601 12.4137,18.3105C12.3222,17.9609 12.0491,17.6878 11.6995,17.5963C11.3499,17.5048 10.9781,17.609 10.727,17.869L10.727,17.869Z" />
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="M19.377,7L14.877,7C14.3247,7 13.877,7.4477 13.877,8C13.877,8.5523 14.3247,9 14.877,9L19.377,9C20.7912,9.0389 21.9356,10.1628 22,11.576L22,13.576C21.9184,14.9669 20.7457,16.0408 19.353,16L14.877,16C14.3247,16 13.877,16.4477 13.877,17C13.877,17.5523 14.3247,18 14.877,18L19.353,18C21.8564,18.0576 23.9345,16.0792 24,13.576L24,11.576C23.9535,9.05 21.9034,7.0207 19.377,7Z" />
+</vector>

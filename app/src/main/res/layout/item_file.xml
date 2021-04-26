@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2021 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/iconLayout"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
+        android:layout_marginVertical="10dp"
+        android:layout_marginStart="10dp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardElevation="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/filePreview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"
+            android:src="@drawable/sample_wallpaper"
+            tools:ignore="ContentDescription" />
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/fileProgression"
+            style="@style/CircularIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:visibility="gone" />
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/fileChecked"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:button="@drawable/ic_checkbox"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:visibility="gone"
+            app:useMaterialThemeColors="false" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <FrameLayout
+        android:id="@+id/fileNameLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintBottom_toTopOf="@id/fileDate"
+        app:layout_constraintEnd_toStartOf="@id/fileFavorite"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toEndOf="@id/iconLayout"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/fileName"
+            style="@style/MediumTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:ellipsize="middle"
+            android:singleLine="true"
+            tools:text="Fichier.pdf" />
+    </FrameLayout>
+
+    <ImageView
+        android:id="@+id/fileFavorite"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:layout_marginEnd="10dp"
+        android:contentDescription="@string/favoritesTitle"
+        android:src="@drawable/ic_star_filled"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/fileNameLayout"
+        app:layout_constraintEnd_toStartOf="@id/endIconLayout"
+        app:layout_constraintStart_toEndOf="@id/fileNameLayout"
+        app:layout_constraintTop_toTopOf="@id/fileNameLayout"
+        tools:visibility="visible" />
+
+    <FrameLayout
+        android:id="@+id/progressLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/iconLayout"
+        app:layout_constraintTop_toBottomOf="@id/fileNameLayout"
+        tools:visibility="visible">
+
+        <ImageView
+            android:id="@+id/fileOffline"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:contentDescription="@string/buttonAvailableOffline"
+            android:src="@drawable/ic_check" />
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/fileOfflineProgression"
+            style="@style/CircularIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:indicatorSize="14dp" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/fileSize"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/marginStandardVerySmall"
+        android:textColor="@color/secondaryText"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/progressLayout"
+        app:layout_constraintTop_toBottomOf="@id/fileNameLayout"
+        app:layout_goneMarginStart="10dp"
+        tools:ignore="SmallSp"
+        tools:text="25 Mo" />
+
+    <TextView
+        android:id="@+id/fileSeparator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="&#160;&#x2022;&#160;"
+        android:textColor="@color/secondaryText"
+        android:textSize="12sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/fileSize"
+        app:layout_constraintTop_toBottomOf="@id/fileNameLayout"
+        tools:ignore="HardcodedText,SmallSp"
+        tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/fileDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/secondaryText"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/endIconLayout"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/fileSeparator"
+        app:layout_constraintTop_toBottomOf="@+id/fileNameLayout"
+        tools:ignore="SmallSp"
+        tools:text="Modifié le 5 oct. 16:10" />
+
+    <FrameLayout
+        android:id="@+id/endIconLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
+
+        <ImageView
+            android:id="@+id/imageRow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_chevron_right"
+            tools:ignore="ContentDescription" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/stopUploadButton"
+            style="@style/IconButton"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="@string/buttonStopUpload"
+            android:visibility="gone"
+            app:icon="@drawable/ic_close"
+            app:iconSize="16dp"
+            app:iconTint="@color/iconColor" />
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

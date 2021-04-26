@@ -1,0 +1,27 @@
+<!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2021 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:tint="#9E9E9E"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#fff"
+        android:pathData="M15.318,2.146l4.536,4.536a0.5,0.5 0,0 1,0.146 0.353V21.5a0.5,0.5 0,0 1,-0.5 0.5h-15a0.5,0.5 0,0 1,-0.5 -0.5v-19a0.5,0.5 0,0 1,0.5 -0.5h10.465a0.5,0.5 0,0 1,0.353 0.146zM15.586,0H4a2,2 0,0 0,-2 2v20a2,2 0,0 0,2 2h16a2,2 0,0 0,2 -2V6.414a1,1 0,0 0,-0.293 -0.707L16.293,0.293A1,1 0,0 0,15.586 0z" />
+</vector>

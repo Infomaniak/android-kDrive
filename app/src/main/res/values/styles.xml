@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2021 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<resources>
+
+    <!--AppTheme-->
+
+    <style name="AppTheme.LauncherBase">
+        <item name="android:navigationBarColor">@color/background</item>
+        <item name="android:statusBarColor">@color/background</item>
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+    </style>
+
+    <style name="AppTheme.Launcher" parent="AppTheme.LauncherBase" />
+
+    <style name="AppThemeBase" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="android:adjustViewBounds">true</item>
+        <item name="android:colorBackground">@color/background</item>
+        <item name="android:fontFamily">@font/suisseintl_regular</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:lineSpacingMultiplier">1.25</item>
+        <item name="android:statusBarColor">@android:color/black</item>
+        <item name="android:textColor">@color/primaryText</item>
+        <item name="android:textColorHint">@color/secondaryText</item>
+        <item name="android:textColorPrimary">@color/title</item>
+        <item name="android:textColorSecondary">@color/secondaryText</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:windowBackground">@color/background</item>
+        <item name="appBarLayoutStyle">@style/AppTheme.AppBarOverlay</item>
+        <item name="bottomSheetDialogTheme">@style/BottomSheetDialogTheme</item>
+        <item name="bottomSheetStyle">@style/BottomSheetStyle</item>
+        <item name="collapsingToolbarLayoutStyle">@style/AppTheme.CollapsingToolbarLayoutTheme</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="colorControlNormal">@color/primary</item>
+        <item name="colorOnSecondary">@android:color/white</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primaryDark</item>
+        <item name="colorSecondary">@color/primary</item>
+        <item name="snackbarButtonStyle">@style/Widget.App.SnackbarButton</item>
+        <item name="snackbarStyle">@style/Widget.App.Snackbar</item>
+        <item name="snackbarTextViewStyle">@style/Widget.App.SnackbarTextView</item>
+        <item name="toolbarStyle">@style/AppTheme.ToolbarTheme</item>
+    </style>
+
+    <style name="AppTheme" parent="AppThemeBase" />
+
+    <style name="AppTheme.LoginBase" parent="AppThemeBase">
+        <item name="android:windowBackground">@color/appBar</item>
+    </style>
+
+    <style name="AppTheme.Login" parent="AppTheme.LoginBase" />
+
+    <style name="WebViewTheme" parent="AppTheme.Login">
+        <item name="colorAccent">@color/accent</item>
+        <item name="colorCloseIcon">@color/title</item>
+        <item name="colorPrimary">@color/background</item>
+        <item name="colorPrimaryDark">@color/background</item>
+        <item name="themeLoginToolbar">@style/LoginToolbarTheme</item>
+    </style>
+
+    <!--AppBar-->
+
+    <style name="AppTheme.AppBarOverlay" parent="Widget.Design.AppBarLayout">
+        <item name="android:backgroundTint">@color/background</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <style name="AppTheme.CollapsingToolbarLayoutTheme">
+        <item name="collapsedTitleGravity">center</item>
+        <item name="collapsedTitleTextAppearance">@style/Title</item>
+        <item name="expandedTitleGravity">bottom</item>
+        <item name="expandedTitleMarginBottom">@dimen/marginStandardMedium</item>
+        <item name="expandedTitleMarginStart">@dimen/marginStandard</item>
+        <item name="expandedTitleTextAppearance">@style/BoldTitle</item>
+        <item name="maxLines">2</item>
+    </style>
+
+    <style name="AppTheme.ToolbarTheme" parent="Widget.MaterialComponents.Toolbar">
+        <item name="contentInsetEnd">54dp</item>
+        <item name="contentInsetStartWithNavigation">0dp</item>
+        <item name="iconTint">@color/primary</item>
+        <item name="navigationIcon">@drawable/ic_chevron_left</item>
+        <item name="titleMarginTop">8dp</item>
+    </style>
+
+    <style name="FullScreenBottomSheetDialogTheme.ToolbarTheme" parent="AppTheme.ToolbarTheme">
+        <item name="navigationIcon">@drawable/ic_close</item>
+    </style>
+
+    <style name="LoginToolbarTheme" parent="Theme.AppCompat">
+        <item name="android:textColorPrimary">@color/title</item>
+        <item name="android:textColorSecondary">@color/title</item>
+    </style>
+
+
+    <!--BottomSheetDialogTheme-->
+
+    <style name="BottomSheetDialogTheme.Base" parent="Theme.MaterialComponents.Light.BottomSheetDialog">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="bottomSheetStyle">@style/BottomSheetDialogTheme.ModalStyle</item>
+        <item name="colorAccent">@color/primary</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="snackbarButtonStyle">@style/Widget.App.SnackbarButton</item>
+        <item name="snackbarStyle">@style/Widget.App.Snackbar</item>
+        <item name="snackbarTextViewStyle">@style/Widget.App.SnackbarTextView</item>
+    </style>
+
+    <style name="BottomSheetDialogTheme" parent="BottomSheetDialogTheme.Base" />
+
+    <style name="BottomSheetDialogTheme.ModalStyle" parent="Widget.MaterialComponents.BottomSheet">
+        <item name="backgroundTint">@color/appBar</item>
+        <item name="shapeAppearanceOverlay">@style/BottomSheetDialogTheme.ShapeAppearanceOverlay</item>
+    </style>
+
+    <style name="BottomSheetDialogTheme.ShapeAppearanceOverlay">
+        <item name="cornerSizeTopLeft">20dp</item>
+        <item name="cornerSizeTopRight">20dp</item>
+    </style>
+
+    <style name="BottomSheetStyle" parent="BottomSheetDialogTheme.ModalStyle">
+        <item name="shapeAppearance">?attr/shapeAppearanceLargeComponent</item>
+        <item name="behavior_hideable">false</item>
+        <item name="behavior_draggable">true</item>
+        <item name="behavior_skipCollapsed">false</item>
+        <item name="behavior_peekHeight">90dp</item>
+        <item name="behavior_fitToContents">false</item>
+        <item name="behavior_halfExpandedRatio">0.5</item>
+        <item name="behavior_expandedOffset">0dp</item>
+    </style>
+
+    <style name="FullScreenBottomSheetDialogTheme.Base" parent="BottomSheetDialogTheme">
+        <item name="android:textColor">@color/primaryText</item>
+        <item name="android:textColorHint">@color/secondaryText</item>
+        <item name="android:textColorPrimary">@color/title</item>
+        <item name="android:textColorSecondary">@color/secondaryText</item>
+        <item name="appBarLayoutStyle">@style/AppTheme.AppBarOverlay</item>
+        <item name="bottomSheetStyle">@style/FullScreenBottomSheetDialogTheme.ModalStyle</item>
+        <item name="toolbarStyle">@style/FullScreenBottomSheetDialogTheme.ToolbarTheme</item>
+    </style>
+
+    <style name="FullScreenBottomSheetDialogTheme" parent="FullScreenBottomSheetDialogTheme.Base" />
+
+    <style name="FullScreenBottomSheetDialogTheme.ModalStyle" parent="Widget.MaterialComponents.BottomSheet">
+        <item name="backgroundTint">@color/background</item>
+    </style>
+
+
+    <!--DialogTheme-->
+
+    <style name="DialogStyle" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="buttonBarNegativeButtonStyle">@style/PositiveButtonStyle</item>
+        <item name="buttonBarPositiveButtonStyle">@style/PositiveButtonStyle</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="colorControlNormal">@color/primary</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorSurface">@color/appBar</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialogMaterialComponentsTitle</item>
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlayDialogRounded</item>
+    </style>
+
+    <style name="PositiveButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:fontFamily">@font/suisseintl_medium</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="DeleteDialogStyle" parent="DialogStyle">
+        <item name="buttonBarPositiveButtonStyle">@style/DeletePositiveButtonStyle</item>
+    </style>
+
+    <style name="DeletePositiveButtonStyle" parent="PositiveButtonStyle">
+        <item name="android:textColor">@color/red_error</item>
+    </style>
+
+    <style name="MaterialAlertDialogMaterialComponentsTitle" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+        <item name="android:fontFamily">@font/suisseintl_regular</item>
+        <item name="android:textColor">@color/title</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="ShapeAppearanceOverlayDialogRounded">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
+
+    <!--Text-->
+
+    <style name="Title">
+        <item name="android:fontFamily">@font/suisseintl_medium</item>
+        <item name="android:textColor">@color/title</item>
+        <item name="android:textSize">@dimen/title</item>
+    </style>
+
+    <style name="MediumTitle" parent="Title">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="SmallTitle" parent="Title">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="BoldTitle" parent="Title">
+        <item name="android:fontFamily">@font/suisseintl_bold</item>
+        <item name="android:textSize">@dimen/expandedTitle</item>
+    </style>
+
+    <!--CardView-->
+
+    <style name="CardViewInfomaniak" parent="Widget.MaterialComponents.CardView">
+        <item name="android:layout_height">@dimen/standardHeightCardview</item>
+        <item name="cardBackgroundColor">@color/backgroundCardview</item>
+        <item name="cardCornerRadius">@dimen/cardViewRadius</item>
+        <item name="cardElevation">0dp</item> <!-- Shadow remove feature, awaiting approve -->
+
+    </style>
+
+    <style name="BorderedCardViewInfomaniak" parent="CardViewInfomaniak">
+        <item name="strokeWidth">1dp</item>
+        <item name="strokeColor">@color/border</item>
+    </style>
+
+
+    <!--Button-->
+
+    <style name="ButtonInfomaniak" parent="Widget.MaterialComponents.Button">
+        <item name="android:fontFamily">@font/suisseintl_medium</item>
+        <item name="android:layout_height">70dp</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:maxWidth">500dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">@dimen/title</item>
+        <item name="cornerRadius">@dimen/radius</item>
+        <item name="iconTint">@color/white</item>
+        <item name="layout_constraintWidth_max">500dp</item>
+        <item name="android:stateListAnimator">@null</item> <!-- Shadow remove feature, awaiting approve -->
+
+    </style>
+
+    <style name="ButtonInfomaniak.Light" parent="ButtonInfomaniak">
+        <item name="android:backgroundTint">@color/backgroundSecondary</item>
+        <item name="android:textColor">@color/title</item>
+        <item name="iconTint">@color/title</item>
+    </style>
+
+    <style name="TextButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:letterSpacing">0</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="HomeFileTextButton" parent="TextButton">
+        <item name="android:ellipsize">middle</item>
+        <item name="android:fontFamily">@font/suisseintl_medium</item>
+        <item name="android:gravity">start|center_vertical</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textColor">@color/title</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="IconButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:insetLeft">0dp</item>
+        <item name="android:insetRight">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="cornerRadius">40dp</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconPadding">0dp</item>
+        <item name="iconTint">@color/iconColor</item>
+    </style>
+
+    <style name="ButtonToggleGroup" parent="ButtonInfomaniak">
+        <item name="android:padding">0dp</item>
+        <item name="android:textColor">@color/tabs_text</item>
+        <item name="android:textSize">14sp</item>
+        <item name="backgroundTint">@color/tabs_background</item>
+    </style>
+
+    <!--Snackbar-->
+
+    <style name="Widget.App.Snackbar" parent="Widget.MaterialComponents.Snackbar">
+        <item name="actionTextColorAlpha">0.8</item>
+        <item name="android:background">@drawable/background_popup</item>
+        <item name="android:backgroundTint">@color/appBar</item>
+        <item name="android:layout_margin">@dimen/marginStandard</item>
+    </style>
+
+    <style name="Widget.App.SnackbarButton" parent="Widget.MaterialComponents.Button.TextButton.Snackbar">
+        <item name="android:textColor">@color/primary</item>
+    </style>
+
+    <style name="Widget.App.SnackbarTextView" parent="Widget.MaterialComponents.Snackbar.TextView">
+        <item name="android:textColor">@color/title</item>
+    </style>
+
+
+    <!--Other-->
+
+    <style name="ChipLink" parent="Widget.MaterialComponents.Chip.Action">
+        <item name="chipBackgroundColor">@color/background</item>
+        <item name="android:textColor">@color/infomaniak</item>
+    </style>
+
+    <style name="MaterialCalendarThemeBackground" parent="ThemeOverlay.MaterialComponents.MaterialCalendar">
+        <item name="colorSurface">@color/background</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+    </style>
+
+    <style name="CircularIndicator" parent="Widget.MaterialComponents.CircularProgressIndicator">
+        <item name="indicatorColor">@color/primary</item>
+        <item name="indicatorInset">0dp</item>
+        <item name="indicatorSize">24dp</item>
+        <item name="trackColor">@color/border</item>
+        <item name="trackThickness">2dp</item>
+    </style>
+
+    <style name="ShapeAppearanceOnlyBottomCornersRounded">
+        <item name="cornerSizeBottomLeft">@dimen/radius</item>
+        <item name="cornerSizeBottomRight">@dimen/radius</item>
+    </style>
+
+    <style name="CircleImageView">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <!-- TODO wait: https://github.com/material-components/material-components-android/issues/2135 -->
+
+    <style name="TextInputLayout.OutlinedBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:textColorHint">@color/secondaryText</item>
+        <item name="boxBackgroundColor">@color/backgroundCardview</item>
+        <item name="boxBackgroundMode">outline</item>
+        <item name="boxStrokeColor">@color/border</item>
+    </style>
+
+    <style name="TextInputLayout.OutlinedBox.ExposedDropdownMenu" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="boxBackgroundColor">@color/backgroundCardview</item>
+        <item name="boxBackgroundMode">outline</item>
+        <item name="boxStrokeWidth">0dp</item>
+    </style>
+
+    <style name="DisabledView">
+        <item name="android:alpha">.5</item>
+        <item name="android:background">@color/backgroundCardview</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+</resources>

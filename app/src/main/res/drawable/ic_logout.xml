@@ -1,0 +1,27 @@
+<!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2021 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:tint="@color/iconColor"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#fff"
+        android:pathData="M15.552,3.3907C16.0314,3.1106 16.627,3.1143 17.1027,3.4005C20.2212,5.0445 22.3661,8.0619 22.8807,11.5287C23.3924,14.9358 22.2399,18.3812 19.7765,20.8082C16.4259,24.1277 11.3111,24.9478 7.0774,22.8445C2.8438,20.7411 0.4409,16.1858 1.1114,11.5347C1.6216,8.07 3.7613,5.0523 6.8752,3.4055C7.3495,3.1401 7.931,3.1484 8.3975,3.4272C8.864,3.7059 9.1433,4.2121 9.1289,4.7523C9.1144,5.2925 8.8083,5.7832 8.3275,6.0369C6.0488,7.2316 4.4785,9.4304 4.0976,11.9598C3.7288,14.4303 4.5657,16.9277 6.3521,18.6868C8.7813,21.099 12.4943,21.6959 15.5667,20.1683C18.6391,18.6406 20.3801,15.3318 19.8874,11.9568C19.5058,9.4261 17.9344,7.2262 15.6545,6.0309C15.1548,5.7882 14.8298,5.2928 14.8084,4.7412C14.787,4.1895 15.0726,3.6708 15.552,3.3907ZM11.996,-0C12.8309,-0 13.5078,0.6717 13.5078,1.5002L13.5078,1.5002L13.5078,10.9167C13.5078,11.7452 12.8309,12.4169 11.996,12.4169C11.1611,12.4169 10.4843,11.7452 10.4843,10.9167L10.4843,10.9167L10.4843,1.5002C10.4843,0.6717 11.1611,-0 11.996,-0Z" />
+</vector>

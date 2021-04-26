@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2021 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/marginStandardSmall">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/fileCardView"
+        style="@style/CardViewInfomaniak"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?android:attr/selectableItemBackground"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="4:3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/fileChecked"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:layout_marginStart="@dimen/marginStandardSmall"
+                android:layout_marginTop="@dimen/marginStandardSmall"
+                android:button="@drawable/ic_checkbox"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:useMaterialThemeColors="false"
+                tools:visibility="visible" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/menuButton"
+                style="@style/IconButton"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:layout_marginTop="@dimen/marginStandardSmall"
+                android:layout_marginEnd="@dimen/marginStandardSmall"
+                android:contentDescription="@string/buttonMenu"
+                app:icon="@drawable/ic_menu"
+                app:iconSize="18dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/filePreview"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_marginBottom="@dimen/marginStandardMedium"
+                android:src="@drawable/ic_folder_filled"
+                app:layout_constraintBottom_toTopOf="@id/fileNameLayout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed"
+                tools:ignore="ContentDescription" />
+
+            <FrameLayout
+                android:id="@+id/progressLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/marginStandardSmall"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@id/fileNameLayout"
+                app:layout_constraintEnd_toStartOf="@id/fileNameLayout"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/fileNameLayout"
+                app:layout_constraintVertical_bias="0.0"
+                tools:visibility="visible">
+
+                <ImageView
+                    android:id="@+id/fileOffline"
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:contentDescription="@string/offlineFileTitle"
+                    android:src="@drawable/ic_check" />
+
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:id="@+id/fileOfflineProgression"
+                    style="@style/CircularIndicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:indicatorSize="12dp" />
+            </FrameLayout>
+
+
+            <FrameLayout
+                android:id="@+id/fileNameLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandardVerySmall"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/fileFavorite"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toEndOf="@id/progressLayout"
+                app:layout_constraintTop_toBottomOf="@id/filePreview">
+
+                <TextView
+                    android:id="@+id/fileName"
+                    style="@style/SmallTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="2"
+                    tools:text="Fichier.pdf" />
+            </FrameLayout>
+
+            <ImageView
+                android:id="@+id/fileFavorite"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_marginEnd="@dimen/marginStandardSmall"
+                android:contentDescription="@string/favoritesTitle"
+                android:src="@drawable/ic_star_filled"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@id/fileNameLayout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/fileNameLayout"
+                app:layout_constraintTop_toTopOf="@id/fileNameLayout"
+                app:layout_constraintVertical_bias="0.0"
+                tools:visibility="visible" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <View
+            android:id="@+id/disabled"
+            style="@style/DisabledView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+    </com.google.android.material.card.MaterialCardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

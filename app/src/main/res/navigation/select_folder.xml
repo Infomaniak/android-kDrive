@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2021 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_navigation"
+    app:startDestination="@id/selectFolderFragment">
+
+    <fragment
+        android:id="@+id/selectFolderFragment"
+        android:name="com.infomaniak.drive.ui.fileList.SelectFolderFragment"
+        android:label="@string/app_name"
+        tools:layout="@layout/fragment_file_list">
+        <argument
+            android:name="folderID"
+            app:argType="integer" />
+        <argument
+            android:name="folderName"
+            android:defaultValue="/"
+            app:argType="string" />
+        <argument
+            android:name="ignoreCreateFolderStack"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <action
+            android:id="@+id/fileListFragmentToFileListFragment"
+            app:destination="@id/selectFolderFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+        <action
+            android:id="@+id/action_fileListFragment_to_sortFilesBottomSheetDialog"
+            app:destination="@id/sortFilesBottomSheetDialog" />
+        <action
+            android:id="@+id/action_fileListFragment_to_dropBoxResultBottomSheetDialog"
+            app:destination="@id/dropBoxResultBottomSheetDialog" />
+        <action
+            android:id="@+id/action_selectFolderFragment_to_newFolderFragment"
+            app:destination="@id/newFolderFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/newFolderFragment"
+        android:name="com.infomaniak.drive.ui.addFiles.NewFolderFragment"
+        android:label="newFolderFragment"
+        tools:layout="@layout/fragment_new_folder">
+        <argument
+            android:name="parentFolderId"
+            app:argType="integer" />
+        <argument
+            android:name="userDrive"
+            app:argType="com.infomaniak.drive.data.models.UserDrive"
+            app:nullable="true" />
+        <action
+            android:id="@+id/action_newFolderFragment_to_CreatePrivateFolderFragment"
+            app:destination="@id/createPrivateFolderFragment" />
+        <action
+            android:id="@+id/action_newFolderFragment_to_createDropBoxFolderFragment2"
+            app:destination="@id/createDropBoxFolderFragment" />
+        <action
+            android:id="@+id/action_newFolderFragment_to_createCommonFolderFragment2"
+            app:destination="@id/createCommonFolderFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/createPrivateFolderFragment"
+        android:name="com.infomaniak.drive.ui.addFiles.CreatePrivateFolderFragment"
+        android:label="CreatePrivateFolderFragment"
+        tools:layout="@layout/fragment_create_folder">
+        <action
+            android:id="@+id/action_createPrivateFolderFragment_to_fileListFragment"
+            app:destination="@id/selectFolderFragment" />
+        <action
+            android:id="@+id/action_createPrivateFolderFragment_to_fileShareDetailsFragment"
+            app:destination="@id/fileShareDetailsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/createCommonFolderFragment"
+        android:name="com.infomaniak.drive.ui.addFiles.CreateCommonFolderFragment"
+        android:label="CreateCommonFolderFragment"
+        tools:layout="@layout/fragment_create_folder">
+        <action
+            android:id="@+id/action_createCommonFolderFragment_to_fileListFragment"
+            app:destination="@id/selectFolderFragment" />
+        <action
+            android:id="@+id/action_createCommonFolderFragment_to_fileShareDetailsFragment"
+            app:destination="@id/fileShareDetailsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/createDropBoxFolderFragment"
+        android:name="com.infomaniak.drive.ui.addFiles.CreateDropBoxFolderFragment"
+        android:label="CreateDropBoxFolderFragment"
+        tools:layout="@layout/fragment_create_folder" />
+
+    <fragment
+        android:id="@+id/fileShareDetailsFragment"
+        android:name="com.infomaniak.drive.ui.fileList.fileShare.FileShareDetailsFragment"
+        android:label="FileShareDetailsFragment"
+        tools:layout="@layout/fragment_file_share_details">
+        <argument
+            android:name="fileId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="fileName"
+            android:defaultValue=""
+            app:argType="string" />
+        <argument
+            android:name="fileType"
+            android:defaultValue="file"
+            app:argType="string" />
+        <argument
+            android:name="ignoreCreateFolderStack"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <action
+            android:id="@+id/action_fileShareDetailsFragment_to_fileShareLinkSettings"
+            app:destination="@id/fileShareLinkSettingsFragment" />
+        <action
+            android:id="@+id/action_fileShareDetailsFragment_to_selectPermissionBottomSheetDialog"
+            app:destination="@id/selectPermissionBottomSheetDialog" />
+        <action
+            android:id="@+id/action_fileShareDetailsFragment_to_fileShareAddUserDialog"
+            app:destination="@id/fileShareAddUserDialog" />
+    </fragment>
+
+    <dialog
+        android:id="@+id/fileShareAddUserDialog"
+        android:name="com.infomaniak.drive.ui.fileList.fileShare.FileShareAddUserDialog"
+        android:label="FileShareAddUserDialog"
+        tools:layout="@layout/fragment_bottom_sheet_file_share">
+        <argument
+            android:name="sharedEmail"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="sharedUserId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <argument
+            android:name="sharedTagId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+    </dialog>
+
+    <dialog
+        android:id="@+id/sortFilesBottomSheetDialog"
+        android:name="com.infomaniak.drive.ui.fileList.SortFilesBottomSheetDialog"
+        android:label="SortFilesBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_sort_files">
+        <argument
+            android:name="sortType"
+            android:defaultValue="NAME_AZ"
+            app:argType="com.infomaniak.drive.data.models.File$SortType" />
+    </dialog>
+
+    <dialog
+        android:id="@+id/dropBoxResultBottomSheetDialog"
+        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.DropBoxResultBottomSheetDialog"
+        android:label="DropBoxResultBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_information">
+
+        <argument
+            android:name="url"
+            app:argType="string" />
+        <argument
+            android:name="name"
+            app:argType="string" />
+
+    </dialog>
+
+    <fragment
+        android:id="@+id/fileShareLinkSettingsFragment"
+        android:name="com.infomaniak.drive.ui.fileList.fileShare.FileShareLinkSettingsFragment"
+        android:label="FileShareLinkSettings"
+        tools:layout="@layout/fragment_file_share_link_settings">
+        <argument
+            android:name="fileId"
+            app:argType="integer" />
+        <argument
+            android:name="driveId"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_fileShareLinkSettingsFragment_to_selectPermissionBottomSheetDialog"
+            app:destination="@id/selectPermissionBottomSheetDialog" />
+        <argument
+            android:name="shareLink"
+            app:argType="com.infomaniak.drive.data.models.ShareLink" />
+    </fragment>
+
+    <dialog
+        android:id="@+id/selectPermissionBottomSheetDialog"
+        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog"
+        android:label="SelectPermissionBottomSheetDialog">
+        <argument
+            android:name="currentShareable"
+            android:defaultValue="@null"
+            app:argType="com.infomaniak.drive.data.models.Shareable"
+            app:nullable="true" />
+        <argument
+            android:name="currentFileId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="currentPermission"
+            app:argType="com.infomaniak.drive.data.models.Permission" />
+        <argument
+            android:name="permissionsGroup"
+            app:argType="com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog$PermissionsGroup" />
+    </dialog>
+</navigation>

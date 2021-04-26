@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2021 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    tools:context=".ui.SaveExternalFilesActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="@dimen/marginStandard" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="@dimen/marginStandard" />
+
+        <TextView
+            android:id="@+id/title"
+            style="@style/BoldTitle"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/appBarHeight"
+            android:gravity="bottom"
+            android:paddingBottom="@dimen/marginStandardMedium"
+            android:text="@string/saveExternalFileTitle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/start"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/fileNameEditLayout"
+            style="@style/TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/marginStandard"
+            android:hint="@string/saveExternalFileInputFileName"
+            app:layout_constraintEnd_toStartOf="@id/end"
+            app:layout_constraintStart_toEndOf="@id/start"
+            app:layout_constraintTop_toBottomOf="@id/title">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/fileNameEdit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:visibility="visible" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fileNames"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/marginStandardSmall"
+                android:divider="@android:color/transparent"
+                android:dividerHeight="@dimen/marginStandardSmall"
+                android:orientation="vertical"
+                android:visibility="gone"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="3"
+                tools:listitem="@layout/item_file_name"
+                tools:visibility="visible" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/kDriveTitle"
+            style="@style/SmallTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/marginStandard"
+            android:text="@string/app_name"
+            app:layout_constraintEnd_toStartOf="@id/end"
+            app:layout_constraintStart_toEndOf="@id/start"
+            app:layout_constraintTop_toBottomOf="@id/fileNameEditLayout" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/selectDrive"
+            style="@style/CardViewInfomaniak"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/marginStandardSmall"
+            app:layout_constraintEnd_toStartOf="@id/end"
+            app:layout_constraintStart_toEndOf="@id/start"
+            app:layout_constraintTop_toBottomOf="@id/kDriveTitle">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/buttonHeight">
+
+                <ImageView
+                    android:id="@+id/driveIcon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginStart="@dimen/marginStandard"
+                    android:src="@drawable/ic_drive"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="ContentDescription" />
+
+                <TextView
+                    android:id="@+id/driveName"
+                    style="@style/SmallTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardMedium"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/switchDrive"
+                    app:layout_constraintStart_toEndOf="@id/driveIcon"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="@string/selectDriveTitle" />
+
+                <ImageView
+                    android:id="@+id/switchDrive"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/marginStandardMedium"
+                    android:src="@drawable/ic_chevron_right"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="ContentDescription"
+                    tools:visibility="visible" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:id="@+id/pathTitle"
+            style="@style/SmallTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/marginStandard"
+            android:text="@string/allPathTitle"
+            android:visibility="gone"
+            app:layout_constraintEnd_toStartOf="@id/end"
+            app:layout_constraintStart_toEndOf="@id/start"
+            app:layout_constraintTop_toBottomOf="@id/selectDrive"
+            tools:visibility="visible" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/selectPath"
+            style="@style/CardViewInfomaniak"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/marginStandardSmall"
+            android:visibility="gone"
+            app:layout_constraintEnd_toStartOf="@id/end"
+            app:layout_constraintStart_toEndOf="@id/start"
+            app:layout_constraintTop_toBottomOf="@id/pathTitle"
+            tools:visibility="visible">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/buttonHeight">
+
+                <ImageView
+                    android:id="@+id/folderIcon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginStart="@dimen/marginStandard"
+                    android:src="@drawable/ic_folder_filled"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="ContentDescription" />
+
+                <TextView
+                    android:id="@+id/pathName"
+                    style="@style/SmallTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardMedium"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:text="@string/selectFolderTitle"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/switchPath"
+                    app:layout_constraintStart_toEndOf="@id/folderIcon"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:id="@+id/switchPath"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/marginStandardMedium"
+                    android:src="@drawable/ic_chevron_right"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="ContentDescription" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/saveButton"
+            style="@style/ButtonInfomaniak"
+            android:layout_width="0dp"
+            android:layout_marginTop="@dimen/marginStandard"
+            android:layout_marginBottom="@dimen/marginStandard"
+            android:enabled="false"
+            android:text="@string/buttonSave"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/end"
+            app:layout_constraintStart_toEndOf="@id/start"
+            app:layout_constraintTop_toBottomOf="@id/selectPath" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

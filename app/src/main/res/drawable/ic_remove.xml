@@ -1,0 +1,27 @@
+<!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2021 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:tint="@color/iconColor"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#fff"
+        android:pathData="M12,24c1.662,0 3.218,-0.318 4.668,-0.953a12,12 0,0 0,3.813 -2.566,12 12,0 0,0 2.566,-3.813c0.635,-1.45 0.953,-3.006 0.953,-4.668 0,-1.662 -0.318,-3.218 -0.953,-4.668a12,12 0,0 0,-2.566 -3.813A12,12 0,0 0,16.668 0.953C15.218,0.318 13.662,0 12,0c-1.662,0 -3.218,0.318 -4.668,0.953A12,12 0,0 0,3.519 3.52,12 12,0 0,0 0.953,7.332C0.318,8.782 0,10.338 0,12c0,1.662 0.318,3.218 0.953,4.668a12.3,12.3 0,0 0,2.579 3.8,12.3 12.3,0 0,0 3.8,2.579c1.45,0.635 3.006,0.953 4.668,0.953zM15.69,17.475a0.942,0.942 0,0 1,-0.403 -0.086,1.154 1.154,0 0,1 -0.33,-0.232l-2.761,-2.762 -0.098,-0.049a0.217,0.217 0,0 0,-0.098 -0.024,0.217 0.217,0 0,0 -0.098,0.024l-0.098,0.05 -2.761,2.76a0.847,0.847 0,0 1,-0.318 0.233,1.025 1.025,0 0,1 -0.819,0 1.154,1.154 0,0 1,-0.33 -0.232l-0.733,-0.733a1.154,1.154 0,0 1,-0.232 -0.33,1.025 1.025,0 0,1 0,-0.819 0.847,0.847 0,0 1,0.232 -0.318l2.762,-2.761 0.049,-0.098A0.217,0.217 0,0 0,9.678 12a0.217,0.217 0,0 0,-0.024 -0.098l-0.05,-0.098 -2.76,-2.761a0.847,0.847 0,0 1,-0.233 -0.318,1.025 1.025,0 0,1 0,-0.819c0.057,-0.122 0.134,-0.232 0.232,-0.33l0.733,-0.733c0.098,-0.098 0.208,-0.175 0.33,-0.232a1.025,1.025 0,0 1,0.819 0c0.13,0.057 0.236,0.134 0.318,0.232l2.761,2.762 0.098,0.049a0.217,0.217 0,0 0,0.098 0.024,0.217 0.217,0 0,0 0.098,-0.024l0.098,-0.05 2.761,-2.76a0.847,0.847 0,0 1,0.318 -0.233,1.025 1.025,0 0,1 0.819,0c0.122,0.057 0.232,0.134 0.33,0.232l0.733,0.733c0.098,0.098 0.175,0.208 0.232,0.33a1.025,1.025 0,0 1,0 0.819,0.847 0.847,0 0,1 -0.232,0.318l-2.762,2.761 -0.049,0.098a0.217,0.217 0,0 0,-0.024 0.098c0,0.033 0.008,0.065 0.024,0.098l0.05,0.098 2.76,2.761a0.847,0.847 0,0 1,0.233 0.318,1.025 1.025,0 0,1 0,0.819 1.154,1.154 0,0 1,-0.232 0.33l-0.733,0.733a1.154,1.154 0,0 1,-0.33 0.232,0.942 0.942,0 0,1 -0.404,0.086z" />
+</vector>

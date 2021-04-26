@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2021 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/marginStandardMedium"
+    app:cardBackgroundColor="@color/appBar"
+    app:cardCornerRadius="0dp"
+    app:cardElevation="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/commentUserAvatar"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/commentUserName"
+                app:shapeAppearanceOverlay="@style/CircleImageView"
+                app:srcCompat="@drawable/ic_placeholder_avatar" />
+
+            <TextView
+                android:id="@+id/commentUserName"
+                style="@style/SmallTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandardMedium"
+                android:layout_marginTop="@dimen/marginStandardVerySmall"
+                app:layout_constraintBottom_toTopOf="@id/commentValue"
+                app:layout_constraintEnd_toStartOf="@id/likeButton"
+                app:layout_constraintStart_toEndOf="@id/commentUserAvatar"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed"
+                tools:text="Zarela Reed" />
+
+            <TextView
+                android:id="@+id/commentValue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandardMedium"
+                android:layout_marginTop="@dimen/marginStandardSmall"
+                app:layout_constraintBottom_toTopOf="@id/commentDateValue"
+                app:layout_constraintEnd_toStartOf="@id/likeButton"
+                app:layout_constraintStart_toEndOf="@id/commentUserAvatar"
+                app:layout_constraintTop_toBottomOf="@id/commentUserName"
+                tools:text="Ceci est un commentaire" />
+
+            <ImageView
+                android:id="@+id/commentDateIcon"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:src="@drawable/ic_clock"
+                app:layout_constraintBottom_toBottomOf="@id/commentDateValue"
+                app:layout_constraintStart_toStartOf="@+id/commentValue"
+                app:layout_constraintTop_toTopOf="@id/commentDateValue"
+                tools:ignore="ContentDescription" />
+
+            <TextView
+                android:id="@+id/commentDateValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/marginStandardVerySmall"
+                android:layout_marginTop="@dimen/marginStandardSmall"
+                android:textAlignment="center"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/commentDateIcon"
+                app:layout_constraintTop_toBottomOf="@id/commentValue"
+                tools:text="15 min" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/likeButton"
+                style="@style/TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/buttonLike"
+                app:icon="@drawable/ic_like"
+                app:iconGravity="top"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="1" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <FrameLayout
+            android:id="@+id/commentMenu"
+            android:layout_width="500dp"
+            android:layout_height="match_parent">
+
+            <FrameLayout
+                android:id="@+id/editButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center_vertical"
+                    android:background="?selectableItemBackground"
+                    android:paddingVertical="@dimen/marginStandardMedium"
+                    android:src="@drawable/ic_edit" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/deleteButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center_vertical"
+                    android:background="?selectableItemBackground"
+                    android:paddingVertical="@dimen/marginStandardMedium"
+                    android:src="@drawable/ic_delete" />
+            </FrameLayout>
+        </FrameLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

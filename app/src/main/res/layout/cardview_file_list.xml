@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2021 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/fileCardView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="@dimen/marginStandardSmall"
+    app:cardBackgroundColor="@color/appBar"
+    app:cardCornerRadius="0dp"
+    app:cardElevation="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <include
+            android:id="@+id/itemviewFile"
+            layout="@layout/item_file" />
+
+        <FrameLayout
+            android:id="@+id/fileMenu"
+            android:layout_width="500dp"
+            android:layout_height="match_parent">
+
+            <FrameLayout
+                android:id="@+id/shareButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/primary">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent"
+                    android:background="?selectableItemBackground"
+                    android:paddingVertical="@dimen/marginStandardMedium"
+                    android:src="@drawable/ic_share"
+                    app:tint="@android:color/white" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/primaryDark">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/menuButton"
+                    style="@style/IconButton"
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/buttonMenu"
+                    android:paddingVertical="@dimen/marginStandardMedium"
+                    app:backgroundTint="@color/primaryDark"
+                    app:cornerRadius="0dp"
+                    app:icon="@drawable/ic_menu"
+                    app:iconTint="@android:color/white" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/deleteButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/red_error">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent"
+                    android:background="?selectableItemBackground"
+                    android:paddingVertical="@dimen/marginStandardMedium"
+                    android:src="@drawable/ic_delete"
+                    app:tint="@android:color/white" />
+            </FrameLayout>
+        </FrameLayout>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/disabled"
+        style="@style/DisabledView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+</com.google.android.material.card.MaterialCardView>

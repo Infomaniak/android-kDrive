@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2021 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/searchItem"
+        android:icon="@drawable/ic_search"
+        android:title="@string/searchTitle"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/addFolderItem"
+        android:icon="@drawable/ic_add_folder"
+        android:title="@string/createFolderTitle"
+        android:visible="false"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/restartItem"
+        android:icon="@drawable/ic_retry"
+        android:title="@string/buttonRetry"
+        android:visible="false"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/closeItem"
+        android:icon="@drawable/ic_close"
+        android:title="@string/buttonClose"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
+
+</menu>

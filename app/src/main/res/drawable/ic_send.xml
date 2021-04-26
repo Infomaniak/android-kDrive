@@ -1,0 +1,30 @@
+<!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2021 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:tint="@color/iconColor"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#fff"
+        android:pathData="M22.985,0.638C23.0307,0.4472 22.9606,0.2472 22.8057,0.1268C22.6507,0.0063 22.4397,-0.0123 22.266,0.079L1.783,10.818C1.3218,11.0614 1.0252,11.5321 1.0045,12.0532C0.9839,12.5743 1.2425,13.0669 1.683,13.346L1.683,13.346L6.243,16.228C6.3372,16.2883 6.4601,16.278 6.543,16.203L18.7,5.335C18.7968,5.2466 18.9454,5.248 19.0405,5.3381C19.1357,5.4283 19.145,5.5766 19.062,5.678L9.346,17.864C9.3009,17.9202 9.2823,17.9931 9.295,18.064C9.307,18.1341 9.348,18.1958 9.408,18.234L15.84,22.3C16.237,22.5507 16.7308,22.5941 17.1655,22.4165C17.6002,22.2388 17.9222,21.862 18.03,21.405L22.985,0.638Z" />
+    <path
+        android:fillColor="#fff"
+        android:pathData="M7.885,19.182C7.808,19.1331 7.7105,19.13 7.6306,19.174C7.5507,19.2179 7.501,19.3018 7.501,19.393C7.501,20.448 7.501,22.977 7.501,22.977C7.5007,23.3816 7.7442,23.7465 8.1179,23.9015C8.4916,24.0565 8.9219,23.971 9.208,23.685L11.225,21.668C11.2783,21.6141 11.3045,21.5391 11.2961,21.4637C11.2878,21.3884 11.2458,21.3209 11.182,21.28L7.885,19.182Z" />
+</vector>
