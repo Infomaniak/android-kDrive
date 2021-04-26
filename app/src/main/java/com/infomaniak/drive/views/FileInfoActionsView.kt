@@ -255,21 +255,8 @@ class FileInfoActionsView @JvmOverloads constructor(
                                 onSuccess?.invoke(currentFile)
                             }
                         }
-                        postShareResponse?.error?.code == ErrorCode.SHARE_LINK_ALREADY_EXISTS.code -> {
-                            // TODO Wait fix api for remove this
-                            mainViewModel.getFileShare(currentFile.id).observe(ownerFragment) { shareResponse ->
-                                if (shareResponse?.isSuccess() == true) {
-                                    shareResponse.data?.link?.url?.let { url ->
-                                        updateFilePublicLink(url)
-                                        onSuccess?.invoke(currentFile)
-                                    }
-                                } else {
-                                    onError?.invoke(context.getString(shareResponse.translateError()))
-                                }
-                            }
-                        }
                         else -> {
-                            onError?.invoke(context.getString(R.string.errorShareLink))
+                            onError?.invoke(context.getString(postShareResponse.translateError()))
                         }
                     }
                     showCopyPublicLinkLoader(false)

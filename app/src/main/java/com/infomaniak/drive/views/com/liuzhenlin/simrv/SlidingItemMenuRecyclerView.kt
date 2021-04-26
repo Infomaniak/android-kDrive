@@ -27,7 +27,6 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Rect
-import android.os.Build
 import android.util.AttributeSet
 import android.view.*
 import android.view.animation.Interpolator
@@ -622,11 +621,7 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(context: Context, at
                     for (i in childrenLayerTypes.size() - 1 downTo 0) {
                         val child = childrenLayerTypes.keyAt(i)
                         child.setLayerType(LAYER_TYPE_HARDWARE, null)
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1
-                            && ViewCompat.isAttachedToWindow(child)
-                        ) {
-                            child.buildLayer()
-                        }
+                        if (ViewCompat.isAttachedToWindow(child)) child.buildLayer()
                     }
                 }
 
