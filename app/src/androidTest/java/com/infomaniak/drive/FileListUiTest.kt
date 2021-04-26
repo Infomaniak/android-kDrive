@@ -24,19 +24,35 @@ import androidx.test.espresso.matcher.ViewMatchers.assertThat
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.uiautomator.*
 import com.infomaniak.drive.UiTestHelper.APP_PACKAGE
-import com.infomaniak.drive.UiTestHelper.DEFAULT_DRIVE_ID
-import com.infomaniak.drive.UiTestHelper.DEFAULT_DRIVE_NAME
 import com.infomaniak.drive.UiTestHelper.LAUNCH_TIMEOUT
-import com.infomaniak.drive.utils.AccountUtils
 import org.hamcrest.CoreMatchers.notNullValue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * UI Tests
+
+TODO(s)
+ * testCreateFileByTakePicture()
+ * testCreateFileByUpload
+ * testCreateFolder
+ * testCreateOfficeDocument
+ * testCreateOfficeTable
+ * testCreateOfficePresentation
+ * testCreateOfficeText
+ * testRemoveFile
+
+INSTRUCTIONS
+ * Always remove a file at the end of the test, and pressBack (via automator) if needed
+ */
+
+
 @RunWith(AndroidJUnit4::class)
-class HomeUiTest {
+class FileListUiTest {
 
     private lateinit var device: UiDevice
+    private lateinit var context: Context
 
     @Before
     fun startApp() {
@@ -46,7 +62,8 @@ class HomeUiTest {
         val launcherPackage: String = device.launcherPackageName
         assertThat(launcherPackage, notNullValue())
         device.wait(Until.hasObject(By.pkg(launcherPackage).depth(0)), 3000)
-        val context = ApplicationProvider.getApplicationContext<Context>()
+        context = ApplicationProvider.getApplicationContext()
+
         val intent = context.packageManager.getLaunchIntentForPackage(APP_PACKAGE)?.apply {
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
         }
@@ -55,24 +72,20 @@ class HomeUiTest {
     }
 
     @Test
-    fun testSwitchDrive() {
-        val switchDrive = device.findObject(UiSelector().resourceId("$APP_PACKAGE:id/driveInfos"))
-        switchDrive.clickAndWaitForNewWindow()
+    fun testOpenMenu() {
+        val fileListFragmentNav = device.findObject(UiSelector().resourceId("$APP_PACKAGE:id/fileListFragment"))
+        fileListFragmentNav.click()
 
-        val driveRecyclerView = UiCollection(UiSelector().resourceId("$APP_PACKAGE:id/selectionRecyclerView"))
+        val fileRecyclerView = UiCollection(UiSelector().resourceId("$APP_PACKAGE:id/fileRecyclerView"))
+        val file = (fileRecyclerView.getChildByInstance(
+            UiSelector().resourceId("$APP_PACKAGE:id/fileCardView"),
+            0
+        ))
 
-        driveRecyclerView.getChildByInstance(
-            UiSelector().resourceId("$APP_PACKAGE:id/driveCard"),
-            driveRecyclerView.childCount - 1
-        ).clickAndWaitForNewWindow()
+        file.swipeLeft(3)
 
-        switchDrive.clickAndWaitForNewWindow()
-
-        driveRecyclerView.getChildByText(
-            UiSelector().resourceId("$APP_PACKAGE:id/driveCard"),
-            DEFAULT_DRIVE_NAME
-        ).clickAndWaitForNewWindow()
-
-        assert(AccountUtils.currentDriveId == DEFAULT_DRIVE_ID)
+        val menuButton = file.getChild((UiSelector().resourceId("$APP_PACKAGE:id/menuButton")))
+        menuButton.click()
+        // device.pressBack()
     }
 }
