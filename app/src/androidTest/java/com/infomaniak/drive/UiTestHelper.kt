@@ -27,4 +27,6 @@ object UiTestHelper {
     const val DEFAULT_DRIVE_ID = 100338
 
     fun getDevice(): UiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+
+    fun getViewIdentifier(id: String) = "$APP_PACKAGE:id/$id"
 }

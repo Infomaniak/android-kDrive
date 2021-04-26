@@ -25,10 +25,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.uiautomator.*
 import com.infomaniak.drive.UiTestHelper.APP_PACKAGE
 import com.infomaniak.drive.UiTestHelper.LAUNCH_TIMEOUT
+import com.infomaniak.drive.UiTestHelper.getViewIdentifier
 import org.hamcrest.CoreMatchers.notNullValue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.*
 
 /**
  * UI Tests
@@ -36,7 +38,6 @@ import org.junit.runner.RunWith
 TODO(s)
  * testCreateFileByTakePicture()
  * testCreateFileByUpload
- * testCreateFolder
  * testCreateOfficeDocument
  * testCreateOfficeTable
  * testCreateOfficePresentation
@@ -69,23 +70,67 @@ class FileListUiTest {
         }
         context.startActivity(intent)
         device.wait(Until.hasObject(By.pkg(APP_PACKAGE).depth(0)), LAUNCH_TIMEOUT)
+
+        val fileListFragmentNav = device.findObject(UiSelector().resourceId(getViewIdentifier("fileListFragment")))
+        fileListFragmentNav.click()
     }
 
     @Test
     fun testOpenMenu() {
-        val fileListFragmentNav = device.findObject(UiSelector().resourceId("$APP_PACKAGE:id/fileListFragment"))
-        fileListFragmentNav.click()
-
+        device.findObject(UiSelector().resourceId(getViewIdentifier("fileListFragment"))).click()
         val fileRecyclerView = UiCollection(UiSelector().resourceId("$APP_PACKAGE:id/fileRecyclerView"))
-        val file = (fileRecyclerView.getChildByInstance(
-            UiSelector().resourceId("$APP_PACKAGE:id/fileCardView"),
-            0
-        ))
+        (fileRecyclerView.getChildByInstance(UiSelector().resourceId(getViewIdentifier("fileCardView")), 0)).apply {
+            swipeLeft(3)
+            getChild(UiSelector().resourceId(getViewIdentifier("menuButton"))).click()
+        }
+    }
 
-        file.swipeLeft(3)
+    @Test
+    fun testCreateFolder() {
+        val fileRecyclerView = UiScrollable(UiSelector().resourceId(getViewIdentifier("fileRecyclerView")))
 
-        val menuButton = file.getChild((UiSelector().resourceId("$APP_PACKAGE:id/menuButton")))
-        menuButton.click()
-        // device.pressBack()
+        val initialFileNumber = fileRecyclerView.childCount
+
+        // Click on main fab
+        device.findObject(UiSelector().resourceId(getViewIdentifier("mainFab"))).clickAndWaitForNewWindow()
+
+        // Click on create folder
+        UiCollection(UiSelector().resourceId(getViewIdentifier("addFileBottomSheetLayout"))).getChildByText(
+            UiSelector().resourceId(getViewIdentifier("folderCreateText")),
+            context.getString(R.string.allFolder)
+        ).click()
+
+        // Click on private folder
+        UiCollection(UiSelector().resourceId(getViewIdentifier("newFolderLayout"))).getChildByText(
+            UiSelector().resourceId(getViewIdentifier("privateFolder")), context.getString(R.string.allFolder)
+        ).click()
+
+        // Create folder with UUID name
+        val randomFolderName = "UI-Test-${UUID.randomUUID()}"
+        UiCollection(UiSelector().resourceId(getViewIdentifier("createFolderLayout"))).apply {
+            getChildByInstance(UiSelector().resourceId(getViewIdentifier("folderNameValueInput")), 0).text = randomFolderName
+            getChildByText(
+                UiSelector().resourceId(getViewIdentifier("createFolderButton")),
+                context.getString(R.string.buttonCreateFolder)
+            ).clickAndWaitForNewWindow()
+        }
+
+        device.pressBack()
+        assert(fileRecyclerView.childCount == initialFileNumber + 1)
+
+        // Delete file
+        (fileRecyclerView.getChildByText(
+            UiSelector().resourceId(getViewIdentifier("fileCardView")), randomFolderName
+        )).apply {
+            fileRecyclerView.scrollIntoView(this)
+            swipeLeft(3)
+            getChild((UiSelector().resourceId(getViewIdentifier("deleteButton")))).clickAndWaitForNewWindow()
+        }
+
+        // Confirm deletion
+        device.findObject(UiSelector().text(context.getString(R.string.buttonMove))).clickAndWaitForNewWindow()
+
+        // Assert we retrieve the initial files number
+        assert(fileRecyclerView.childCount == initialFileNumber)
     }
 }
