@@ -23,6 +23,7 @@ import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.lib.core.BuildConfig
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.RealmResults
@@ -132,8 +133,7 @@ open class File(
         return "${ApiRoutes.imagePreviewFile(this)}&width=2500&height=1500&quality=80"
     }
 
-    // TODO Move auto log url to Core
-    fun onlyOfficeUrl() = "https://manager.infomaniak.com/v3/mobile_login?url=" + ApiRoutes.showOffice(this)
+    fun onlyOfficeUrl() = "${BuildConfig.AUTOLOG_URL}?url=" + ApiRoutes.showOffice(this)
 
     fun getFileType(): ConvertedType {
         return when (convertedType) {
