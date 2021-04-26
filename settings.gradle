@@ -1,2 +1,2 @@
 include ':app', ':Core'
-rootProject.name = "kDrive2"
+rootProject.name = "kDrive"
