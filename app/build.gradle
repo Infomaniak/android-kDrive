@@ -53,6 +53,7 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation project(path: ':Core')
 
+    def work_version = '2.5.0'
     implementation "androidx.work:work-runtime-ktx:$work_version"
 
     implementation "androidx.recyclerview:recyclerview:1.2.0"
@@ -74,7 +75,7 @@ dependencies {
     implementation 'com.google.android.play:core:1.10.0'
     implementation 'com.google.android.play:core-ktx:1.8.1'
 
-    implementation 'io.sentry:sentry-android:4.3.0'
+    implementation 'io.sentry:sentry-android:4.4.0-alpha.2'
 
     testImplementation 'io.github.serpro69:kotlin-faker:1.6.0'
     testImplementation 'junit:junit:4.13.2'
