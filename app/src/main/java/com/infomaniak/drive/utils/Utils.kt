@@ -62,7 +62,7 @@ object Utils {
         fileName: String?,
         fromTrash: Boolean = false,
         deletionCount: Int = 1,
-        onPositiveButtonClicked: () -> Unit
+        onPositiveButtonClicked: (dialog: Dialog) -> Unit
     ) {
         val title: Int
         val message: String
@@ -84,14 +84,20 @@ object Utils {
             )
             button = R.string.buttonMove
         }
-        MaterialAlertDialogBuilder(context, R.style.DeleteDialogStyle)
+        val dialog = MaterialAlertDialogBuilder(context, R.style.DeleteDialogStyle)
             .setTitle(title)
             .setMessage(message)
-            .setPositiveButton(button) { _, _ ->
-                onPositiveButtonClicked()
-            }
+            .setPositiveButton(button) { _, _ -> }
             .setNegativeButton(R.string.buttonCancel) { _, _ -> }
-            .setCancelable(false).show()
+            .setCancelable(false)
+            .show()
+
+        val buttonPositive = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+        buttonPositive.setOnClickListener {
+            onPositiveButtonClicked(dialog)
+            it.isEnabled = false
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).isEnabled = false
+        }
     }
 
     fun createConfirmation(context: Context, title: String, message: String? = null, onConfirmation: () -> Unit) {

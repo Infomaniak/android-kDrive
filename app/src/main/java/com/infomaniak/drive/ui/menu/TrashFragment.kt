@@ -61,8 +61,9 @@ class TrashFragment : FileSubTypeListFragment() {
                 when (view.id) {
                     R.id.menuButton -> showTrashedFileActions(file)
                     R.id.deleteButton -> {
-                        Utils.confirmFileDeletion(requireContext(), fileName = file.name, fromTrash = true) {
+                        Utils.confirmFileDeletion(requireContext(), fileName = file.name, fromTrash = true) { dialog ->
                             trashViewModel.deleteTrashFile(file).observe(viewLifecycleOwner) { apiResponse ->
+                                dialog.dismiss()
                                 if (apiResponse.isSuccess()) {
                                     val title = resources.getQuantityString(R.plurals.snackbarDeleteConfirmation, 1, file.name)
                                     requireActivity().showSnackbar(title)

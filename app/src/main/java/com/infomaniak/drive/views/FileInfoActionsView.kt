@@ -354,20 +354,20 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     interface OnItemClickListener {
-        fun addFavoritesClicked()
-        fun displayInfoClicked()
-        fun fileRightsClicked()
-        fun copyPublicLink()
-        fun onDeleteFile()
-        fun openWithClicked()
-        fun onMoveFile(destinationFolder: File)
-        fun onDuplicateFile(result: String, onApiResponse: () -> Unit)
-        fun onRenameFile(newName: String, onApiResponse: () -> Unit)
-        fun downloadFileClicked()
-        fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File)
-        fun onCacheAddedToOffline() = Unit
-        fun dropBoxClicked(isDropBox: Boolean) = Unit
         fun onLeaveShare()
+        fun copyPublicLink()
+        fun openWithClicked()
+        fun fileRightsClicked()
+        fun displayInfoClicked()
+        fun downloadFileClicked()
+        fun addFavoritesClicked()
+        fun onCacheAddedToOffline() = Unit
+        fun onMoveFile(destinationFolder: File)
+        fun onDeleteFile(onApiResponse: () -> Unit)
+        fun dropBoxClicked(isDropBox: Boolean) = Unit
+        fun onRenameFile(newName: String, onApiResponse: () -> Unit)
+        fun onDuplicateFile(result: String, onApiResponse: () -> Unit)
+        fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File)
 
         fun editDocumentClicked(ownerFragment: Fragment, currentFile: File) {
             ownerFragment.apply {
@@ -446,8 +446,10 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         fun deleteFileClicked(context: Context, currentFile: File) {
-            Utils.confirmFileDeletion(context, fileName = currentFile.name) {
-                onDeleteFile()
+            Utils.confirmFileDeletion(context, fileName = currentFile.name) { dialog ->
+                onDeleteFile {
+                    dialog.dismiss()
+                }
             }
         }
     }

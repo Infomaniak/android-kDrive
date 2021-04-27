@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -348,8 +349,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             })
     }
 
-    override fun onDeleteFile() {
+    override fun onDeleteFile(onApiResponse: () -> Unit) {
         mainViewModel.deleteFile(requireContext(), currentPreviewFile).observe(viewLifecycleOwner) { apiResponse ->
+            onApiResponse()
             if (apiResponse.isSuccess()) {
                 mainViewModel.currentFileList.value?.remove(currentPreviewFile)
                 if (previewSliderAdapter.deleteFile(currentPreviewFile)) {
@@ -367,7 +369,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             } else {
                 requireActivity().showSnackbar(getString(R.string.errorDelete))
             }
-
         }
     }
 

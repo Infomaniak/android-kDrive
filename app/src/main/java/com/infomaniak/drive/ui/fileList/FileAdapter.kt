@@ -31,7 +31,6 @@ import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_file_list.view.*
 import kotlinx.android.synthetic.main.item_file.view.*
 
-
 open class FileAdapter(
     override val itemList: ArrayList<File> = arrayListOf()
 ) : PaginationAdapter<File>() {

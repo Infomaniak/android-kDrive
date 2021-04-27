@@ -185,7 +185,7 @@
     </style>
 
     <style name="DeletePositiveButtonStyle" parent="PositiveButtonStyle">
-        <item name="android:textColor">@color/red_error</item>
+        <item name="android:textColor">@color/delete_button</item>
     </style>
 
     <style name="MaterialAlertDialogMaterialComponentsTitle" parent="MaterialAlertDialog.MaterialComponents.Title.Text">

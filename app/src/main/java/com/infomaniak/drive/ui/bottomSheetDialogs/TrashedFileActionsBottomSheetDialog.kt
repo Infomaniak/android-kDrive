@@ -70,8 +70,9 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
         }
 
         delete.setOnClickListener {
-            Utils.confirmFileDeletion(requireContext(), fileName = currentTrashedFile.name, fromTrash = true) {
+            Utils.confirmFileDeletion(requireContext(), fileName = currentTrashedFile.name, fromTrash = true) { dialog ->
                 trashViewModel.deleteTrashFile(currentTrashedFile).observe(viewLifecycleOwner) { apiResponse ->
+                    dialog.dismiss()
                     if (apiResponse.data == true) {
                         val title = resources.getQuantityString(R.plurals.snackbarDeleteConfirmation, 1, currentTrashedFile.name)
                         requireActivity().showSnackbar(title)
