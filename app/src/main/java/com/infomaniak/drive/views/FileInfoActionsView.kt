@@ -31,7 +31,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.work.*
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
-import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.cache.FileController.startDownloadFile

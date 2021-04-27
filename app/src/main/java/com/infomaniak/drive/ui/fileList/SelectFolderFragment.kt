@@ -28,6 +28,7 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivity.SaveExternalViewMod
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.safeNavigate
+import com.infomaniak.drive.utils.showSnackbar
 import kotlinx.android.synthetic.main.fragment_file_list.*
 
 class SelectFolderFragment : FileListFragment() {
@@ -48,21 +49,24 @@ class SelectFolderFragment : FileListFragment() {
 
         collapsingToolbarLayout.title = getString(R.string.selectFolderTitle)
 
-        val currentFolder = FileController.getFileById(folderID, userDrive)
-
         toolbar.menu.apply {
             findItem(R.id.addFolderItem).apply {
                 setOnMenuItemClickListener {
-                    (requireActivity() as? SelectFolderActivity)?.hideSaveButton()
-                    safeNavigate(
-                        SelectFolderFragmentDirections.actionSelectFolderFragmentToNewFolderFragment(
-                            parentFolderId = folderID,
-                            userDrive = userDrive
+                    val selectFolderActivity = requireActivity() as? SelectFolderActivity
+                    if (FileController.getFileById(folderID, userDrive)?.rights?.newFolder == true) {
+                        selectFolderActivity?.hideSaveButton()
+                        safeNavigate(
+                            SelectFolderFragmentDirections.actionSelectFolderFragmentToNewFolderFragment(
+                                parentFolderId = folderID,
+                                userDrive = userDrive
+                            )
                         )
-                    )
+                    } else {
+                        selectFolderActivity?.showSnackbar(R.string.allFileAddRightError)
+                    }
                     true
                 }
-                isVisible = currentFolder?.rights?.newFolder == true
+                isVisible = true
             }
         }
 
@@ -94,6 +98,8 @@ class SelectFolderFragment : FileListFragment() {
         }
         val selectFolderActivity = requireActivity() as SelectFolderActivity
         selectFolderActivity.showSaveButton()
+
+        val currentFolder = FileController.getFileById(folderID, userDrive)
         val enable = folderID != saveExternalViewModel.disableSelectedFolder &&
                 (currentFolder?.rights?.moveInto == true || currentFolder?.rights?.newFile == true)
         selectFolderActivity.enableSaveButton(enable)

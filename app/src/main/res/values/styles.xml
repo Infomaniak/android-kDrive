@@ -92,7 +92,7 @@
     <style name="AppTheme.ToolbarTheme" parent="Widget.MaterialComponents.Toolbar">
         <item name="contentInsetEnd">54dp</item>
         <item name="contentInsetStartWithNavigation">0dp</item>
-        <item name="iconTint">@color/primary</item>
+        <item name="iconTint">@color/icon_toolbar_button</item>
         <item name="navigationIcon">@drawable/ic_chevron_left</item>
         <item name="titleMarginTop">8dp</item>
     </style>
