@@ -63,7 +63,6 @@ open class UploadFile(
         private const val DB_NAME = "Sync.realm"
         private const val ONE_DAY = 24 * 60 * 60 * 1000
         private var realmConfiguration: RealmConfiguration = RealmConfiguration.Builder().name(DB_NAME)
-            .deleteRealmIfMigrationNeeded()
             .modules(RealmModules.SyncFilesModule())
             .build()
 
