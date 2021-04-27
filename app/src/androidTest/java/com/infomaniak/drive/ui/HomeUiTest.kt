@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive
+package com.infomaniak.drive.ui
 
 import android.content.Context
 import android.content.Intent
@@ -26,13 +26,13 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiCollection
 import androidx.test.uiautomator.UiSelector
 import androidx.test.uiautomator.Until
-import com.infomaniak.drive.UiTestHelper.APP_PACKAGE
-import com.infomaniak.drive.UiTestHelper.DEFAULT_DRIVE_ID
-import com.infomaniak.drive.UiTestHelper.DEFAULT_DRIVE_NAME
-import com.infomaniak.drive.UiTestHelper.LAUNCH_TIMEOUT
-import com.infomaniak.drive.UiTestHelper.device
-import com.infomaniak.drive.UiTestHelper.getViewIdentifier
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.UiTestUtils.APP_PACKAGE
+import com.infomaniak.drive.utils.UiTestUtils.DEFAULT_DRIVE_ID
+import com.infomaniak.drive.utils.UiTestUtils.DEFAULT_DRIVE_NAME
+import com.infomaniak.drive.utils.UiTestUtils.LAUNCH_TIMEOUT
+import com.infomaniak.drive.utils.UiTestUtils.device
+import com.infomaniak.drive.utils.UiTestUtils.getViewIdentifier
 import org.hamcrest.CoreMatchers.notNullValue
 import org.junit.Before
 import org.junit.Test

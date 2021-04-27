@@ -276,26 +276,31 @@ object FileController {
         userDrive: UserDrive,
         sortType: File.SortType,
         page: Int = 1,
+        ignoreCloud: Boolean = false,
         transaction: (files: ArrayList<File>, isComplete: Boolean) -> Unit
     ) {
-        val apiResponse = ApiRepository.getMySharedFiles(
-            KDriveHttpClient.getHttpClient(userDrive.userId), userDrive.driveId, sortType.order, sortType.orderBy, page
-        )
-        if (apiResponse.isSuccess()) {
-            val apiResponseData = apiResponse.data
-            when {
-                apiResponseData.isNullOrEmpty() -> transaction(arrayListOf(), true)
-                apiResponseData.size < ApiRepository.PER_PAGE -> {
-                    saveMySharesFiles(apiResponseData, page == 1)
-                    transaction(apiResponseData, true)
+        if (ignoreCloud) {
+            transaction(getFilesFromCache(MY_SHARES_FILE_ID, userDrive), true)
+        } else {
+            val apiResponse = ApiRepository.getMySharedFiles(
+                KDriveHttpClient.getHttpClient(userDrive.userId), userDrive.driveId, sortType.order, sortType.orderBy, page
+            )
+            if (apiResponse.isSuccess()) {
+                val apiResponseData = apiResponse.data
+                when {
+                    apiResponseData.isNullOrEmpty() -> transaction(arrayListOf(), true)
+                    apiResponseData.size < ApiRepository.PER_PAGE -> {
+                        saveMySharesFiles(apiResponseData, page == 1)
+                        transaction(apiResponseData, true)
+                    }
+                    else -> {
+                        saveMySharesFiles(apiResponseData, page == 1)
+                        transaction(apiResponseData, false)
+                        getMySharedFiles(userDrive, sortType, page + 1, false, transaction)
+                    }
                 }
-                else -> {
-                    saveMySharesFiles(apiResponseData, page == 1)
-                    transaction(apiResponseData, false)
-                    getMySharedFiles(userDrive, sortType, page + 1, transaction)
-                }
-            }
-        } else if (page == 1) transaction(getFilesFromCache(MY_SHARES_FILE_ID, userDrive), true)
+            } else if (page == 1) transaction(getFilesFromCache(MY_SHARES_FILE_ID, userDrive), true)
+        }
     }
 
     suspend fun cloudStorageSearch(
@@ -324,7 +329,7 @@ object FileController {
                 }
             }
         } else if (page == 1) {
-            onResponse(searchFiles(query, order, getRealmInstance(userDrive)))
+            onResponse(searchFiles(query, order, userDrive))
         }
     }
 
@@ -345,12 +350,13 @@ object FileController {
         return activityResults
     }
 
-    fun getDriveSoloPictures(): ArrayList<File> {
-        return Realm.getDefaultInstance().use { realm ->
+    fun getDriveSoloPictures(customRealm: Realm? = null): ArrayList<File> {
+        val operation: (Realm) -> ArrayList<File> = { realm ->
             realm.where(File::class.java).equalTo(File::id.name, PICTURES_FILE_ID).findFirst()?.let { picturesFolder ->
                 realm.copyFromRealm(picturesFolder.children, 0) as ArrayList<File>
             } ?: arrayListOf()
         }
+        return customRealm?.let(operation) ?: Realm.getDefaultInstance().use(operation)
     }
 
     fun storeFileActivities(fileActivities: ArrayList<FileActivity>) {
@@ -370,14 +376,15 @@ object FileController {
         }
     }
 
-    fun storeDriveSoloPictures(pictures: ArrayList<File>) {
-        Realm.getDefaultInstance().use {
+    fun storeDriveSoloPictures(pictures: ArrayList<File>, customRealm: Realm? = null) {
+        val block: (Realm) -> Unit = {
             it.executeTransaction { realm ->
                 val picturesFolder = realm.where(File::class.java).equalTo(File::id.name, PICTURES_FILE_ID).findFirst()
                     ?: realm.copyToRealm(PICTURES_FILE)
                 picturesFolder.children.addAll(pictures)
             }
         }
+        customRealm?.let(block) ?: Realm.getDefaultInstance().use(block)
     }
 
     fun removeFileActivities() {
@@ -398,9 +405,10 @@ object FileController {
         ignoreCache: Boolean = false,
         ignoreCloud: Boolean = false,
         order: File.SortType = File.SortType.NAME_AZ,
-        userDrive: UserDrive?
+        userDrive: UserDrive?,
+        customRealm: Realm? = null
     ): Pair<File, ArrayList<File>>? {
-        return getRealmInstance(userDrive).use { realm ->
+        val operation: (Realm) -> Pair<File, ArrayList<File>>? = { realm ->
             var result: Pair<File, ArrayList<File>>? = null
             val localFolder = getFileById(realm, parentId)
             val localFolderWithoutChildren = localFolder?.let { realm.copyFromRealm(it, 1) }
@@ -420,6 +428,7 @@ object FileController {
             }
             result
         }
+        return customRealm?.let(operation) ?: getRealmInstance(userDrive).use(operation)
     }
 
     fun getFilesFromIdList(idList: Array<Int>, order: File.SortType = File.SortType.NAME_AZ): ArrayList<File> {
@@ -637,22 +646,28 @@ object FileController {
         }
     }
 
-    fun getOfflineFiles(order: File.SortType?, userDrive: UserDrive = UserDrive()): ArrayList<File> {
-        return getRealmInstance(userDrive).use { realm ->
+    fun getOfflineFiles(order: File.SortType?, userDrive: UserDrive = UserDrive(), customRealm: Realm? = null): ArrayList<File> {
+        val block: (Realm) -> ArrayList<File> = { realm ->
             realm.where(File::class.java).equalTo(File::isOffline.name, true).findAll()?.let { files ->
                 if (order == null) realm.copyFromRealm(files) as ArrayList
                 else getLocalSortedFolderFiles(null, order, realm, files)
             } ?: arrayListOf()
         }
+        return customRealm?.let(block) ?: getRealmInstance(userDrive).use(block)
     }
 
-    fun searchFiles(query: String, order: File.SortType, realm: Realm? = null): ArrayList<File> {
-        val currentRealm = realm ?: Realm.getDefaultInstance()
-        return currentRealm?.use { currRealm ->
+    fun searchFiles(
+        query: String,
+        order: File.SortType,
+        userDrive: UserDrive = UserDrive(),
+        customRealm: Realm? = null
+    ): ArrayList<File> {
+        val block: (Realm) -> ArrayList<File> = { currRealm ->
             currRealm.where(File::class.java).like(File::name.name, "*$query*").findAll()?.let { files ->
                 getLocalSortedFolderFiles(null, order, currRealm, files)
             } ?: arrayListOf()
-        } ?: arrayListOf()
+        }
+        return customRealm?.let(block) ?: getRealmInstance(userDrive).use(block)
     }
 
     private fun updateFileFromActivity(

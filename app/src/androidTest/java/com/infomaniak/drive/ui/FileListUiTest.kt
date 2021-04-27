@@ -15,24 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive
+package com.infomaniak.drive.ui
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.uiautomator.UiScrollable
 import androidx.test.uiautomator.UiSelector
-import com.infomaniak.drive.UiTestHelper.device
-import com.infomaniak.drive.UiTestHelper.getViewIdentifier
-import com.infomaniak.drive.UiTestHelper.startApp
+import com.infomaniak.drive.utils.UiTestUtils
+import com.infomaniak.drive.utils.UiTestUtils.device
+import com.infomaniak.drive.utils.UiTestUtils.getViewIdentifier
+import com.infomaniak.drive.utils.UiTestUtils.startApp
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.*
 
 /**
- * UI Tests relative to a file item (sharing, comments, details, activities)
+ * UI Tests relative to file list (quick operations, file creation, upload, import, ...)
  */
 @RunWith(AndroidJUnit4::class)
-class FileItemUiTest {
+class FileListUiTest {
 
     @Before
     fun init() {
@@ -41,19 +42,16 @@ class FileItemUiTest {
     }
 
     @Test
-    fun testCreateFileShareLink() {
-        val randomFolderName = "UI-Test-${UUID.randomUUID()}"
+    fun testCreateFolder() {
         val fileRecyclerView = UiScrollable(UiSelector().resourceId(getViewIdentifier("fileRecyclerView")))
+        val initialFileNumber = fileRecyclerView.childCount
+        val randomFolderName = "UI-Test-${UUID.randomUUID()}"
 
-        UiTestHelper.createPrivateFolder(randomFolderName)
-        UiTestHelper.openFileShareDetails(fileRecyclerView, randomFolderName)
+        UiTestUtils.createPrivateFolder(randomFolderName)
+        device.waitForWindowUpdate(null, 5000)
+        assert(fileRecyclerView.childCount == initialFileNumber + 1)
 
-        device.apply {
-            findObject(UiSelector().resourceId(getViewIdentifier("shareLinkSwitch"))).clickAndWaitForNewWindow()
-            findObject(UiSelector().resourceId(getViewIdentifier("urlValue"))).let {
-                assert(it.exists())
-                assert(it.text.isNotEmpty())
-            }
-        }
+        UiTestUtils.deleteFile(fileRecyclerView, randomFolderName)
+        assert(fileRecyclerView.childCount == initialFileNumber)
     }
 }

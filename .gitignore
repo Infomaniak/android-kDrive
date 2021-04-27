@@ -12,3 +12,4 @@
 /captures
 .externalNativeBuild
 .cxx
+app/src/androidTest/java/com/infomaniak/drive/utils/Env.kt

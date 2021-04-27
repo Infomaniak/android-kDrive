@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive
+package com.infomaniak.drive.utils
 
 import android.content.Context
 import android.content.Intent
@@ -23,9 +23,10 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.*
+import com.infomaniak.drive.R
 import org.hamcrest.CoreMatchers
 
-object UiTestHelper {
+object UiTestUtils {
     const val APP_PACKAGE = "com.infomaniak.drive"
     const val LAUNCH_TIMEOUT = 5000L
     const val DEFAULT_DRIVE_NAME = "infomaniak"
