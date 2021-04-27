@@ -22,11 +22,15 @@ import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.matcher.ViewMatchers.assertThat
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.uiautomator.*
+import androidx.test.uiautomator.By
+import androidx.test.uiautomator.UiCollection
+import androidx.test.uiautomator.UiSelector
+import androidx.test.uiautomator.Until
 import com.infomaniak.drive.UiTestHelper.APP_PACKAGE
 import com.infomaniak.drive.UiTestHelper.DEFAULT_DRIVE_ID
 import com.infomaniak.drive.UiTestHelper.DEFAULT_DRIVE_NAME
 import com.infomaniak.drive.UiTestHelper.LAUNCH_TIMEOUT
+import com.infomaniak.drive.UiTestHelper.device
 import com.infomaniak.drive.UiTestHelper.getViewIdentifier
 import com.infomaniak.drive.utils.AccountUtils
 import org.hamcrest.CoreMatchers.notNullValue
@@ -34,14 +38,14 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * UI Tests relative to a home (drive switch, drive activities, file search)
+ */
 @RunWith(AndroidJUnit4::class)
 class HomeUiTest {
 
-    private lateinit var device: UiDevice
-
     @Before
     fun startApp() {
-        device = UiTestHelper.getDevice()
         device.pressHome()
 
         val launcherPackage: String = device.launcherPackageName

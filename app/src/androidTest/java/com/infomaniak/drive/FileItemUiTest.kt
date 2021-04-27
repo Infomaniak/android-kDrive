@@ -29,10 +29,10 @@ import org.junit.runner.RunWith
 import java.util.*
 
 /**
- * UI Tests relative to file list (quick operations, file creation, upload, import, ...)
+ * UI Tests relative to a file item (sharing, comments, details, activities)
  */
 @RunWith(AndroidJUnit4::class)
-class FileListUiTest {
+class FileItemUiTest {
 
     @Before
     fun init() {
@@ -41,16 +41,19 @@ class FileListUiTest {
     }
 
     @Test
-    fun testCreateFolder() {
-        val fileRecyclerView = UiScrollable(UiSelector().resourceId(getViewIdentifier("fileRecyclerView")))
-        val initialFileNumber = fileRecyclerView.childCount
+    fun testCreateFileShareLink() {
         val randomFolderName = "UI-Test-${UUID.randomUUID()}"
+        val fileRecyclerView = UiScrollable(UiSelector().resourceId(getViewIdentifier("fileRecyclerView")))
 
         UiTestHelper.createPrivateFolder(randomFolderName)
-        device.waitForWindowUpdate(null, 5000)
-        assert(fileRecyclerView.childCount == initialFileNumber + 1)
+        UiTestHelper.openFileShareDetails(fileRecyclerView, randomFolderName)
 
-        UiTestHelper.deleteFile(fileRecyclerView, randomFolderName)
-        assert(fileRecyclerView.childCount == initialFileNumber)
+        device.apply {
+            findObject(UiSelector().resourceId(getViewIdentifier("shareLinkSwitch"))).clickAndWaitForNewWindow()
+            findObject(UiSelector().resourceId(getViewIdentifier("urlValue"))).let {
+                assert(it.exists())
+                assert(it.text.isNotEmpty())
+            }
+        }
     }
 }

@@ -17,8 +17,13 @@
  */
 package com.infomaniak.drive
 
+import android.content.Context
+import android.content.Intent
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.*
+import org.hamcrest.CoreMatchers
 
 object UiTestHelper {
     const val APP_PACKAGE = "com.infomaniak.drive"
@@ -26,7 +31,63 @@ object UiTestHelper {
     const val DEFAULT_DRIVE_NAME = "infomaniak"
     const val DEFAULT_DRIVE_ID = 100338
 
-    fun getDevice(): UiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+    var context: Context = ApplicationProvider.getApplicationContext()
+    var device: UiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
 
     fun getViewIdentifier(id: String) = "$APP_PACKAGE:id/$id"
+
+    fun startApp() {
+        device.pressHome()
+        val launcherPackage: String = device.launcherPackageName
+        ViewMatchers.assertThat(launcherPackage, CoreMatchers.notNullValue())
+        device.wait(Until.hasObject(By.pkg(launcherPackage).depth(0)), 3000)
+        context = ApplicationProvider.getApplicationContext()
+
+        val intent = context.packageManager.getLaunchIntentForPackage(APP_PACKAGE)?.apply {
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        }
+        context.startActivity(intent)
+        device.wait(Until.hasObject(By.pkg(APP_PACKAGE).depth(0)), LAUNCH_TIMEOUT)
+    }
+
+    fun createPrivateFolder(folderName: String) {
+        device.findObject(UiSelector().resourceId(getViewIdentifier("mainFab"))).clickAndWaitForNewWindow()
+
+        UiCollection(UiSelector().resourceId(getViewIdentifier("addFileBottomSheetLayout"))).getChildByText(
+            UiSelector().resourceId(getViewIdentifier("folderCreateText")),
+            context.getString(R.string.allFolder)
+        ).click()
+
+        UiCollection(UiSelector().resourceId(getViewIdentifier("newFolderLayout"))).getChildByText(
+            UiSelector().resourceId(getViewIdentifier("privateFolder")), context.getString(R.string.allFolder)
+        ).click()
+
+        UiCollection(UiSelector().resourceId(getViewIdentifier("createFolderLayout"))).apply {
+            getChildByInstance(UiSelector().resourceId(getViewIdentifier("folderNameValueInput")), 0).text = folderName
+            getChildByText(
+                UiSelector().resourceId(getViewIdentifier("createFolderButton")),
+                context.getString(R.string.buttonCreateFolder)
+            ).clickAndWaitForNewWindow()
+        }
+
+        device.pressBack()
+    }
+
+    fun deleteFile(fileRecyclerView: UiScrollable, fileName: String) {
+        (fileRecyclerView.getChildByText(UiSelector().resourceId(getViewIdentifier("fileCardView")), fileName)).apply {
+            fileRecyclerView.scrollIntoView(this)
+            swipeLeft(3)
+            getChild((UiSelector().resourceId(getViewIdentifier("deleteButton")))).clickAndWaitForNewWindow()
+        }
+        device.findObject(UiSelector().text(context.getString(R.string.buttonMove))).clickAndWaitForNewWindow()
+    }
+
+    fun openFileShareDetails(fileRecyclerView: UiScrollable, fileName: String) {
+        (fileRecyclerView.getChildByText(UiSelector().resourceId(getViewIdentifier("fileCardView")), fileName)).apply {
+            fileRecyclerView.scrollIntoView(this)
+            swipeLeft(3)
+            getChild((UiSelector().resourceId(getViewIdentifier("menuButton")))).clickAndWaitForNewWindow()
+        }
+        device.findObject(UiSelector().resourceId(getViewIdentifier("fileRights"))).clickAndWaitForNewWindow()
+    }
 }
