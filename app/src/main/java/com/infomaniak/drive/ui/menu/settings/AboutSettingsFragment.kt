@@ -32,8 +32,8 @@ class AboutSettingsFragment : Fragment() {
 
     companion object {
         const val GDPR_URL = "https://infomaniak.com/gtl/rgpd"
-        const val GITHUB_URL = "https://github.com/Infomaniak/android-drive/"
-        const val GPL_LICENSE_URL = "https://www.gnu.org/licenses/old-licenses/gpl-2.0.html"
+        const val GITHUB_URL = "https://github.com/Infomaniak/android-kDrive"
+        const val GPL_LICENSE_URL = "https://www.gnu.org/licenses/gpl-3.0.html"
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
