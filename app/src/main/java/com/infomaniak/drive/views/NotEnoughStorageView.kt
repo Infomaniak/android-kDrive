@@ -54,7 +54,7 @@ class NotEnoughStorageView @JvmOverloads constructor(
                 val usedStorage = FormatterFileSize.formatShortFileSize(context, usedSize, justValue = true)
                 val totalStorage = FormatterFileSize.formatShortFileSize(context, size)
                 progressIndicator.progress = (storagePercentage).toInt()
-                title.text = "${"%.2f".format(usedStorage)} / $totalStorage"
+                title.text = "$usedStorage / $totalStorage"
 
                 when (pack) {
                     Drive.DrivePack.SOLO.value, Drive.DrivePack.FREE.value -> {

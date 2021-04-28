@@ -108,8 +108,9 @@ object FormatterFileSize {
 
         // Note this might overflow if abs(result) >= Long.MAX_VALUE / 100, but that's like 80PB so
         // it's okay (for now)...
-        val roundedBytes = if (flags and FLAG_CALCULATE_ROUNDED == 0) 0 else (result * roundFactor).roundToLong()
-            .toLong() * mult / roundFactor
+        val roundedBytes =
+            if (flags and FLAG_CALCULATE_ROUNDED == 0) 0
+            else (result * roundFactor).roundToLong() * mult / roundFactor
         val units = res.getString(suffix)
         return BytesResult(roundedString, units, roundedBytes)
     }
