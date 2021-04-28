@@ -619,17 +619,23 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(context: Context, at
                 override fun onAnimationStart(animation: Animator) {
                     ensureChildrenLayerTypes()
                     for (i in childrenLayerTypes.size() - 1 downTo 0) {
-                        val child = childrenLayerTypes.keyAt(i)
-                        child.setLayerType(LAYER_TYPE_HARDWARE, null)
-                        if (ViewCompat.isAttachedToWindow(child)) child.buildLayer()
+                        childrenLayerTypes.keyAt(i).apply {
+                            post {
+                                this.setLayerType(LAYER_TYPE_HARDWARE, null)
+                                if (ViewCompat.isAttachedToWindow(this)) this.buildLayer()
+                            }
+                        }
                     }
                 }
 
                 override fun onAnimationEnd(animation: Animator) {
                     for (i in childrenLayerTypes.size() - 1 downTo 0) {
-                        childrenLayerTypes.keyAt(i).setLayerType(
-                            childrenLayerTypes.valueAt(i), null
-                        )
+                        childrenLayerTypes.keyAt(i).apply {
+                            post {
+                                setLayerType(childrenLayerTypes.valueAt(i), null)
+                            }
+                        }
+
                     }
                 }
             }
