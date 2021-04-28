@@ -137,10 +137,12 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
                 Utils.createConfirmation(
                     context = requireContext(),
                     title = "",
+                    autoDismiss = false,
                     message = getString(R.string.modalCommentDeleteDescription)
-                ) {
+                ) { dialog ->
                     fileDetailsViewModel.deleteFileComment(currentFile, comment.id)
                         .observe(viewLifecycleOwner) { apiResponse ->
+                            dialog.dismiss()
                             if (apiResponse.isSuccess()) {
                                 commentsAdapter.deleteComment(comment)
                                 noCommentsLayout.toggleVisibility(commentsAdapter.itemCount == 0, showRefreshButton = false)

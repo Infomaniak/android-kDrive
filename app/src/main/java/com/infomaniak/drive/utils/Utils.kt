@@ -92,22 +92,36 @@ object Utils {
             .setCancelable(false)
             .show()
 
-        val buttonPositive = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-        buttonPositive.setOnClickListener {
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             onPositiveButtonClicked(dialog)
             it.isEnabled = false
             dialog.getButton(AlertDialog.BUTTON_NEGATIVE).isEnabled = false
         }
     }
 
-    fun createConfirmation(context: Context, title: String, message: String? = null, onConfirmation: () -> Unit) {
-        MaterialAlertDialogBuilder(context, R.style.DialogStyle).apply {
-            setTitle(title)
-            setMessage(message)
-            setPositiveButton(R.string.buttonConfirm) { _, _ -> onConfirmation() }
-            setNegativeButton(R.string.buttonCancel) { _, _ -> }
-            setCancelable(false)
-            show()
+    fun createConfirmation(
+        context: Context,
+        title: String,
+        message: String? = null,
+        autoDismiss: Boolean = true,
+        onConfirmation: (dialog: Dialog) -> Unit
+    ) {
+        val dialog = MaterialAlertDialogBuilder(context, R.style.DialogStyle)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton(R.string.buttonConfirm) { _, _ -> }
+            .setNegativeButton(R.string.buttonCancel) { _, _ -> }
+            .setCancelable(false)
+            .show()
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            onConfirmation(dialog)
+            if (autoDismiss) {
+                dialog.dismiss()
+            } else {
+                it.isEnabled = false
+                dialog.getButton(AlertDialog.BUTTON_NEGATIVE).isEnabled = false
+            }
         }
     }
 

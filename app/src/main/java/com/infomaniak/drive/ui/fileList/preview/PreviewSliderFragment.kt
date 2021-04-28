@@ -295,8 +295,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
-    override fun onLeaveShare() {
+    override fun onLeaveShare(onApiResponse: () -> Unit) {
         mainViewModel.deleteFile(requireContext(), currentPreviewFile).observe(viewLifecycleOwner) { apiResponse ->
+            onApiResponse()
             if (apiResponse.isSuccess()) {
                 if (previewSliderAdapter.deleteFile(currentPreviewFile)) {
                     findNavController().popBackStack()

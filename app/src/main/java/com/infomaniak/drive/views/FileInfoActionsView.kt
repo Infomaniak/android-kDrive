@@ -354,7 +354,6 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     interface OnItemClickListener {
-        fun onLeaveShare()
         fun copyPublicLink()
         fun openWithClicked()
         fun fileRightsClicked()
@@ -364,6 +363,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun onCacheAddedToOffline() = Unit
         fun onMoveFile(destinationFolder: File)
         fun onDeleteFile(onApiResponse: () -> Unit)
+        fun onLeaveShare(onApiResponse: () -> Unit)
         fun dropBoxClicked(isDropBox: Boolean) = Unit
         fun onRenameFile(newName: String, onApiResponse: () -> Unit)
         fun onDuplicateFile(result: String, onApiResponse: () -> Unit)
@@ -421,9 +421,12 @@ class FileInfoActionsView @JvmOverloads constructor(
                 Utils.createConfirmation(
                     context = context,
                     title = context.getString(R.string.modalLeaveShareTitle),
-                    message = context.getString(R.string.modalLeaveShareDescription, currentFile.name)
-                ) {
-                    onLeaveShare()
+                    message = context.getString(R.string.modalLeaveShareDescription, currentFile.name),
+                    autoDismiss = true
+                ) { dialog ->
+                    onLeaveShare {
+                        dialog.dismiss()
+                    }
                 }
             }
         }
