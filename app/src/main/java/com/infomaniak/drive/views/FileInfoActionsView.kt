@@ -422,7 +422,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                     context = context,
                     title = context.getString(R.string.modalLeaveShareTitle),
                     message = context.getString(R.string.modalLeaveShareDescription, currentFile.name),
-                    autoDismiss = true
+                    autoDismiss = false
                 ) { dialog ->
                     onLeaveShare {
                         dialog.dismiss()
