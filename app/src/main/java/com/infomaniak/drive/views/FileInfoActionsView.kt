@@ -354,20 +354,20 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     interface OnItemClickListener {
-        fun addFavoritesClicked()
-        fun displayInfoClicked()
-        fun fileRightsClicked()
         fun copyPublicLink()
-        fun onDeleteFile()
         fun openWithClicked()
-        fun onMoveFile(destinationFolder: File)
-        fun onDuplicateFile(result: String, onApiResponse: () -> Unit)
-        fun onRenameFile(newName: String, onApiResponse: () -> Unit)
+        fun fileRightsClicked()
+        fun displayInfoClicked()
         fun downloadFileClicked()
-        fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File)
+        fun addFavoritesClicked()
         fun onCacheAddedToOffline() = Unit
+        fun onMoveFile(destinationFolder: File)
+        fun onDeleteFile(onApiResponse: () -> Unit)
+        fun onLeaveShare(onApiResponse: () -> Unit)
         fun dropBoxClicked(isDropBox: Boolean) = Unit
-        fun onLeaveShare()
+        fun onRenameFile(newName: String, onApiResponse: () -> Unit)
+        fun onDuplicateFile(result: String, onApiResponse: () -> Unit)
+        fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File)
 
         fun editDocumentClicked(ownerFragment: Fragment, currentFile: File) {
             ownerFragment.apply {
@@ -421,9 +421,12 @@ class FileInfoActionsView @JvmOverloads constructor(
                 Utils.createConfirmation(
                     context = context,
                     title = context.getString(R.string.modalLeaveShareTitle),
-                    message = context.getString(R.string.modalLeaveShareDescription, currentFile.name)
-                ) {
-                    onLeaveShare()
+                    message = context.getString(R.string.modalLeaveShareDescription, currentFile.name),
+                    autoDismiss = false
+                ) { dialog ->
+                    onLeaveShare {
+                        dialog.dismiss()
+                    }
                 }
             }
         }
@@ -446,8 +449,10 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         fun deleteFileClicked(context: Context, currentFile: File) {
-            Utils.confirmFileDeletion(context, fileName = currentFile.name) {
-                onDeleteFile()
+            Utils.confirmFileDeletion(context, fileName = currentFile.name) { dialog ->
+                onDeleteFile {
+                    dialog.dismiss()
+                }
             }
         }
     }

@@ -217,8 +217,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             })
     }
 
-    override fun onDeleteFile() {
+    override fun onDeleteFile(onApiResponse: () -> Unit) {
         mainViewModel.deleteFile(requireContext(), currentFile).observe(viewLifecycleOwner) { apiResponse ->
+            onApiResponse()
             if (apiResponse.isSuccess()) {
                 mainViewModel.refreshActivities.value = true
                 val title = resources.getQuantityString(
@@ -249,8 +250,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
     }
 
-    override fun onLeaveShare() {
+    override fun onLeaveShare(onApiResponse: () -> Unit) {
         mainViewModel.deleteFile(requireContext(), currentFile).observe(viewLifecycleOwner) { apiResponse ->
+            onApiResponse()
             if (apiResponse.isSuccess()) {
                 transmitActionAndPopBack(getString(R.string.snackbarLeaveShareConfirmation))
                 mainViewModel.refreshActivities.value = true

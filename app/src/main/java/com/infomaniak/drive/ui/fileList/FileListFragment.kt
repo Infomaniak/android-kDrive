@@ -219,7 +219,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         setupFileAdapter()
 
-        if (enabledMultiSelectMode) setupMultiselect()
+        if (enabledMultiSelectMode) setupMultiSelect()
 
         setupDisplay()
 
@@ -245,13 +245,13 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         onSelectFolderResult(requestCode, resultCode, data)
     }
 
-    private fun setupMultiselect() {
+    private fun setupMultiSelect() {
         fileAdapter.enabledMultiSelectMode = true
         closeButtonMultiSelect.setOnClickListener { closeMultiSelect() }
         deleteButtonMultiSelect.setOnClickListener {
             val selectedFiles = fileAdapter.itemSelected
 
-            Utils.confirmFileDeletion(requireContext(), fileName = null, deletionCount = selectedFiles.count()) {
+            Utils.confirmFileDeletion(requireContext(), fileName = null, deletionCount = selectedFiles.count()) { dialog ->
                 val mediator = mainViewModel.createMultiSelectMediator()
                 val selectedCount = selectedFiles.count()
                 enableButtonMultiSelect(false)
@@ -267,6 +267,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 }
 
                 mediator.observe(viewLifecycleOwner) { (success, total) ->
+                    dialog.dismiss()
                     if (total == selectedCount) {
                         val title = if (success == 0) {
                             getString(R.string.anErrorHasOccurred)
@@ -378,8 +379,9 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     safeNavigate(R.id.fileInfoActionsBottomSheetDialog, bundle)
                 }
                 R.id.deleteButton -> {
-                    Utils.confirmFileDeletion(requireContext(), fileName = file.name) {
+                    Utils.confirmFileDeletion(requireContext(), fileName = file.name) { dialog ->
                         mainViewModel.deleteFile(requireContext(), file).observe(viewLifecycleOwner) { apiResponse ->
+                            dialog.dismiss()
                             if (apiResponse.isSuccess()) {
                                 apiResponse?.data?.let { cancellableAction ->
                                     cancellableAction.driveId = file.driveId
