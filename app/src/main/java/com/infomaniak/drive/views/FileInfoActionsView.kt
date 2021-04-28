@@ -160,6 +160,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                 addFavorites.visibility = if (rights?.canFavorite == true) VISIBLE else GONE
                 editDocument.visibility =
                     if ((currentFile.onlyoffice && rights?.write == true) || currentFile.onlyofficeConvertExtension != null) VISIBLE else GONE
+                availableOffline.visibility = if (isSharedWithMe) GONE else VISIBLE
                 moveFile.visibility = if (rights?.move == true && !isSharedWithMe) VISIBLE else GONE
                 renameFile.visibility = if (rights?.rename == true && !isSharedWithMe) VISIBLE else GONE
                 deleteFile.visibility = if (rights?.delete == true) VISIBLE else GONE
