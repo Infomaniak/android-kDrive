@@ -182,18 +182,23 @@ class SearchFragment : FileListFragment() {
             fileListViewModel.searchFiles(currentQuery, sortType, fileListViewModel.currentPage).observe(viewLifecycleOwner) {
                 it?.let { apiResponse ->
                     if (apiResponse.isSuccess()) {
+                        val searchList = (apiResponse.data ?: arrayListOf()).apply {
+                            map { file ->
+                                file.isFromSearch = true
+                            }
+                        }
                         when {
                             fileListViewModel.currentPage == 1 -> {
-                                fileAdapter.setList(apiResponse.data ?: arrayListOf())
+                                fileAdapter.setList(searchList)
                                 changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, false)
                                 fileRecyclerView.scrollTo(0, 0)
                             }
-                            apiResponse.data.isNullOrEmpty() || apiResponse.data!!.size < ApiRepository.PER_PAGE -> {
-                                apiResponse.data?.let { files -> fileAdapter.addFileList(files) }
+                            searchList.isNullOrEmpty() || searchList.size < ApiRepository.PER_PAGE -> {
+                                fileAdapter.addFileList(searchList)
                                 fileAdapter.isComplete = true
                             }
                             else -> {
-                                fileAdapter.addFileList(apiResponse.data ?: arrayListOf())
+                                fileAdapter.addFileList(searchList)
                             }
                         }
                     } else {

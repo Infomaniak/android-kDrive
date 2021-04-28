@@ -19,6 +19,7 @@ package com.infomaniak.drive.utils
 
 import android.content.Context
 import android.content.res.Resources
+import android.text.format.Formatter
 import kotlin.math.roundToLong
 
 
@@ -32,14 +33,18 @@ object FormatterFileSize {
     class BytesResult(val value: String, val units: String, val roundedBytes: Long)
 
     fun formatShortFileSize(context: Context, sizeBytes: Long, justValue: Boolean = false): String {
-        val res = formatBytes(
-            context.resources, sizeBytes,
-            FLAG_IEC_UNITS or FLAG_SHORTER
-        )
-        return if (justValue) res.value else context.getString(
-            Resources.getSystem().getIdentifier("fileSizeSuffix", "string", "android"),
-            res.value, res.units
-        )
+        return try {
+            val res = formatBytes(
+                context.resources, sizeBytes,
+                FLAG_IEC_UNITS or FLAG_SHORTER
+            )
+            if (justValue) res.value else context.getString(
+                Resources.getSystem().getIdentifier("fileSizeSuffix", "string", "android"),
+                res.value, res.units
+            )
+        } catch (notFoundException: Resources.NotFoundException) {
+            Formatter.formatShortFileSize(context, sizeBytes)
+        }
     }
 
     fun formatBytes(res: Resources, sizeBytes: Long, flags: Int): BytesResult {
