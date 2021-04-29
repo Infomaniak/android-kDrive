@@ -221,7 +221,6 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                 apiResponse.data?.valid?.users?.forEach {
                     it.permission = selectedPermission.apiValue
                 }
-
                 setBackNavigationResult(SHARE_SELECTION_KEY, apiResponse.data?.valid)
             } else {
                 Utils.showSnackbar(requireView(), apiResponse.translateError())
