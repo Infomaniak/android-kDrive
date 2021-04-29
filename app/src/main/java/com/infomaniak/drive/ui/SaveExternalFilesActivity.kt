@@ -35,12 +35,9 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.menu.settings.SelectDriveDialog
 import com.infomaniak.drive.ui.menu.settings.SelectDriveViewModel
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.SyncUtils
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.checkSyncPermissions
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.showOrHideEmptyError
 import kotlinx.android.synthetic.main.activity_save_external_file.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -106,16 +103,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
         saveButton.setOnClickListener {
             if (isValidFields()) {
-                runBlocking(Dispatchers.IO) {
-                    val userID = selectDriveViewModel.selectedUserId.value
-                    val driveID = selectDriveViewModel.selectedDrive.value?.id
-                    val folderID = folderID
-
-                    if (userID != null && driveID != null && folderID != null) {
-                        storeFiles(userID, driveID, folderID)
-                    }
-                }
-                finish()
+                runBlocking(Dispatchers.IO) { storeFilesIfPossible() }
             }
         }
         checkSyncPermissions()
@@ -132,6 +120,21 @@ class SaveExternalFilesActivity : BaseActivity() {
             }
             pathName.text = folderName
             saveButton.isEnabled = isValidFields()
+        }
+    }
+
+    private fun storeFilesIfPossible() {
+        val userID = selectDriveViewModel.selectedUserId.value
+        val driveID = selectDriveViewModel.selectedDrive.value?.id
+        val folderID = folderID
+
+        if (userID != null && driveID != null && folderID != null) {
+            if (storeFiles(userID, driveID, folderID)) {
+                applicationContext.syncImmediately()
+                finish()
+            } else {
+                showSnackbar(R.string.anErrorHasOccurred)
+            }
         }
     }
 
@@ -197,19 +200,19 @@ class SaveExternalFilesActivity : BaseActivity() {
         }
     }
 
-    private fun storeFiles(userID: Int, driveID: Int, folderID: Int) {
-        if (isMultiple) {
+    private fun storeFiles(userID: Int, driveID: Int, folderID: Int): Boolean {
+        return if (isMultiple) {
             val adapter = fileNames.adapter as SaveExternalUriAdapter
             adapter.uris.forEach { currentUri ->
-                store(uri = currentUri, userId = userID, driveId = driveID, folderId = folderID)
+                if (!store(uri = currentUri, userId = userID, driveId = driveID, folderId = folderID)) return false
             }
+            true
         } else {
             store(currentUri!!, fileNameEdit.text.toString(), userID, driveID, folderID)
         }
-        applicationContext.syncImmediately()
     }
 
-    private fun store(uri: Uri, name: String? = null, userId: Int, driveId: Int, folderId: Int) {
+    private fun store(uri: Uri, name: String? = null, userId: Int, driveId: Int, folderId: Int): Boolean {
         val folder = File(cacheDir, SHARED_FILE_FOLDER).apply { if (!exists()) mkdirs() }
 
         contentResolver.query(uri, null, null, null, null)?.use { cursor ->
@@ -217,27 +220,36 @@ class SaveExternalFilesActivity : BaseActivity() {
             val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
             val fileSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
             val fileName = name ?: SyncUtils.getFileName(cursor)
-            val outputFile = File(folder, fileName)
+            val outputFile = File(folder, fileName).also { if (it.exists()) it.delete() }
 
-            outputFile.setLastModified(fileModifiedAt.time)
-            contentResolver.openInputStream(uri)?.use { input ->
-                outputFile.outputStream().use { output ->
-                    input.copyTo(output)
+            try {
+                if (outputFile.createNewFile()) {
+                    outputFile.setLastModified(fileModifiedAt.time)
+                    contentResolver.openInputStream(uri)?.use { input ->
+                        outputFile.outputStream().use { output ->
+                            input.copyTo(output)
+                        }
+                    }
+
+                    UploadFile(
+                        uri = outputFile.toUri().toString(),
+                        userId = userId,
+                        driveId = driveId,
+                        remoteFolder = folderId,
+                        type = UploadFile.Type.SHARED_FILE.name,
+                        fileSize = fileSize,
+                        fileName = fileName,
+                        fileCreatedAt = fileCreatedAt,
+                        fileModifiedAt = fileModifiedAt
+                    ).store()
+                    return true
                 }
+            } catch (exception: Exception) {
+                exception.printStackTrace()
+                return false
             }
-
-            UploadFile(
-                uri = outputFile.toUri().toString(),
-                userId = userId,
-                driveId = driveId,
-                remoteFolder = folderId,
-                type = UploadFile.Type.SHARED_FILE.name,
-                fileSize = fileSize,
-                fileName = fileName,
-                fileCreatedAt = fileCreatedAt,
-                fileModifiedAt = fileModifiedAt
-            ).store()
         }
+        return false
     }
 
     private fun Uri.fileName(): String {
