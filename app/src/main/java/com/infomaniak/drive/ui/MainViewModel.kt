@@ -210,10 +210,6 @@ class MainViewModel : ViewModel() {
         emit(ApiRepository.duplicateFile(file, copyName, folderId ?: Utils.ROOT_ID))
     }
 
-    fun cancelAction(action: CancellableAction) = liveData(Dispatchers.IO) {
-        emit(ApiRepository.cancelAction(action))
-    }
-
     fun convertFile(file: File) = liveData(Dispatchers.IO) {
         emit(ApiRepository.convertFile(file))
     }

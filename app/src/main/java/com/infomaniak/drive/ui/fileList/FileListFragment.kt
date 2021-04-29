@@ -46,6 +46,7 @@ import androidx.work.WorkManager
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.services.DownloadWorker
@@ -66,8 +67,7 @@ import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_new_folder.*
 import kotlinx.android.synthetic.main.fragment_new_folder.toolbar
 import kotlinx.android.synthetic.main.item_file.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 
 open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
@@ -151,9 +151,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     }
 
                     requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab) {
-                        mainViewModel.cancelAction(action).observe(viewLifecycleOwner) { apiResponse ->
-                            if (apiResponse.data == true) {
-                                refreshActivities()
+                        GlobalScope.launch(Dispatchers.IO) {
+                            if (ApiRepository.cancelAction(action).data == true && isResumed) {
+                                withContext(Dispatchers.Main) {
+                                    refreshActivities()
+                                }
                             }
                         }
                     }
@@ -394,9 +396,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                                         file.name
                                     )
                                     requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab) {
-                                        mainViewModel.cancelAction(cancellableAction).observe(viewLifecycleOwner) { apiResponse ->
-                                            if (apiResponse.data == true) {
-                                                refreshActivities()
+                                        GlobalScope.launch(Dispatchers.IO) {
+                                            if (ApiRepository.cancelAction(cancellableAction).data == true && isResumed) {
+                                                withContext(Dispatchers.Main) {
+                                                    refreshActivities()
+                                                }
                                             }
                                         }
                                     }
