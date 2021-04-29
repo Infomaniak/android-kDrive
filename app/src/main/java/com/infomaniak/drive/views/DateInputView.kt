@@ -23,9 +23,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.datepicker.CalendarConstraints
-import com.google.android.material.datepicker.DateValidatorPointForward
-import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.datepicker.*
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.view_date_input.view.*
@@ -69,7 +67,14 @@ class DateInputView @JvmOverloads constructor(
     private fun showDatePicker(defaultDate: Date, onDateSet: (timestamp: Long) -> Unit) {
         val yesterday = Calendar.getInstance().apply { this.add(Calendar.DATE, -1) }
         val calendarConstraints = CalendarConstraints.Builder()
-            .setValidator(DateValidatorPointForward.from(yesterday.timeInMillis))
+            .setValidator(
+                CompositeDateValidator.allOf(
+                    listOf(
+                        DateValidatorPointForward.from(yesterday.timeInMillis),
+                        DateValidatorPointBackward.before(Calendar.getInstance().apply { set(2038, 0, 0) }.timeInMillis)
+                    )
+                )
+            )
             .build()
 
         val materialDatePickerBuilder = MaterialDatePicker.Builder
@@ -78,8 +83,17 @@ class DateInputView @JvmOverloads constructor(
             .setSelection(defaultDate.time)
             .setCalendarConstraints(calendarConstraints)
 
+        // TODO : Waiting https://github.com/material-components/material-components-android/issues/366 (icon padding issue)
         materialDatePickerBuilder.build().apply {
-            addOnPositiveButtonClickListener { onDateSet(it) }
-        }.show((context as AppCompatActivity).supportFragmentManager, materialDatePickerBuilder.toString())
+            addOnNegativeButtonClickListener { this@DateInputView.clearFocus() }
+            addOnCancelListener { this@DateInputView.clearFocus() }
+            addOnPositiveButtonClickListener {
+                this@DateInputView.clearFocus()
+                onDateSet(it)
+            }
+
+        }.show(
+            (context as AppCompatActivity).supportFragmentManager, materialDatePickerBuilder.toString()
+        )
     }
 }

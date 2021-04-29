@@ -347,7 +347,7 @@
         <item name="android:textColorHint">@color/secondaryText</item>
         <item name="boxBackgroundColor">@color/backgroundCardview</item>
         <item name="boxBackgroundMode">outline</item>
-        <item name="boxStrokeColor">@color/border</item>
+        <item name="boxStrokeColor">@color/input_stroke</item>
     </style>
 
     <style name="TextInputLayout.OutlinedBox.ExposedDropdownMenu" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
