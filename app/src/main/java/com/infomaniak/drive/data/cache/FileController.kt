@@ -89,7 +89,7 @@ object FileController {
                     if (!keepFiles.contains(it.id)) removeFileCascade(it.id, keepFileCaches, keepFiles, realm)
                 }
                 if (!keepFileCaches.contains(fileId)) file.deleteCaches(Realm.getApplicationContext()!!)
-                if (!keepFiles.contains(fileId)) currentRealm.executeTransaction { file.deleteFromRealm() }
+                if (!keepFiles.contains(fileId) && file.isValid) currentRealm.executeTransaction { file.deleteFromRealm() }
             }
         }
         realm?.let(block) ?: Realm.getDefaultInstance()?.use(block)
