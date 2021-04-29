@@ -180,6 +180,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                 .observe(viewLifecycleOwner) { apiResponse ->
                     if (apiResponse.isSuccess()) {
                         requireActivity().showSnackbar(getString(R.string.modalCreateFileSucces, createFile.name))
+                        apiResponse.data?.let { file -> requireContext().openOnlyOfficeActivity(file) }
                     } else {
                         requireActivity().showSnackbar(R.string.errorFileCreate)
                     }
