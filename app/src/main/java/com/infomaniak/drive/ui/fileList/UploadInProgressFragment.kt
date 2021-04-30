@@ -24,6 +24,7 @@ import android.util.Log
 import android.view.View
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
@@ -36,7 +37,9 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.showSnackbar
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 class UploadInProgressFragment : FileListFragment() {
 
@@ -147,28 +150,31 @@ class UploadInProgressFragment : FileListFragment() {
 
             timer.start()
             fileAdapter.isComplete = false
-            fileListViewModel.getPendingFiles(folderID)
-                .observe(viewLifecycleOwner) { syncFiles ->
-                    val files = syncFiles.map {
+            fileListViewModel.getPendingFiles(folderID).observe(viewLifecycleOwner) { syncFiles ->
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val files = arrayListOf<File>()
+                    syncFiles.forEach {
                         val uri = it.uri.toUri()
-                        var size: Long? = null
 
                         if (uri.scheme.equals(ContentResolver.SCHEME_CONTENT)) {
                             requireContext().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                                cursor.moveToFirst()
-                                size = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
+                                if (cursor.moveToFirst()) {
+                                    val size = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
+                                    files.add(File(id = 0, name = it.fileName, size = size, path = it.uri))
+                                }
                             }
                         }
-
-                        File(id = 0, name = it.fileName, size = size, path = it.uri)
-                    } as ArrayList
+                    }
                     pendingFiles = syncFiles
-                    fileAdapter.setList(files)
-                    fileAdapter.isComplete = true
-                    timer.cancel()
-                    swipeRefreshLayout.isRefreshing = false
-                    noFilesLayout.toggleVisibility(pendingFiles.isEmpty())
+                    withContext(Dispatchers.Main) {
+                        fileAdapter.setList(files)
+                        fileAdapter.isComplete = true
+                        timer.cancel()
+                        swipeRefreshLayout.isRefreshing = false
+                        noFilesLayout.toggleVisibility(pendingFiles.isEmpty())
+                    }
                 }
+            }
         }
     }
 }
