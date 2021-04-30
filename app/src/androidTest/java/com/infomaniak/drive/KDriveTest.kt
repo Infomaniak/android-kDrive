@@ -23,6 +23,7 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Env
+import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.models.User
 import com.infomaniak.lib.core.networking.HttpClient
@@ -45,19 +46,19 @@ open class KDriveTest {
             if (Env.USE_CURRENT_USER) {
                 user = runBlocking(Dispatchers.IO) { AccountUtils.requestCurrentUser() }!!
                 InfomaniakCore.bearerToken = user.apiToken.accessToken
-                userDrive = UserDrive(user.id, Env.DRIVE_ID)
+
             } else {
                 InfomaniakCore.bearerToken = Env.TOKEN
 
                 val apiResponse = ApiRepository.getUserProfile(HttpClient.okHttpClientNoInterceptor)
                 user = apiResponse.data!!
-                userDrive = UserDrive(user.id, Env.DRIVE_ID)
                 runBlocking {
                     user.apiToken = ApiToken(Env.TOKEN, "", "Bearer", userId = user.id, expiresAt = null)
                     user.organizations = arrayListOf()
                     AccountUtils.addUser(user)
                 }
             }
+            userDrive = UserDrive(user.id, Env.DRIVE_ID)
         }
 
         @AfterClass
@@ -68,6 +69,10 @@ open class KDriveTest {
             }
         }
 
-        internal fun getConfig() = RealmConfiguration.Builder().inMemory().name("KDrive-test.realm").build()
+        internal fun getConfig() = RealmConfiguration.Builder().inMemory()
+            .name("KDrive-test.realm")
+            .deleteRealmIfMigrationNeeded()
+            .modules(RealmModules.LocalFilesModule())
+            .build()
     }
 }
