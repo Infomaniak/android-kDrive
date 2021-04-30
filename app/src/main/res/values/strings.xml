@@ -437,7 +437,7 @@
     <string name="secureLinkShareTitle">Liens de partage sécurisés</string>
     <string name="selectDriveTitle">Sélectionner un kDrive</string>
     <string name="selectFolderTitle">Sélectionner un dossier</string>
-    <string name="settingsOnlyWifiSyncDescription">L’importation des fichiers et la mise à jour des fichiers hors ligne s’effectuera lorsque l’appareil est connecté à un réseau Wi-Fi.</string>
+    <string name="settingsOnlyWifiSyncDescription">La sauvegarde automatique des photos/vidéos et la mise à jour des fichiers hors ligne seront uniquement effectuées avec une connexion Wifi.</string>
     <string name="settingsOnlyWifiSyncTitle">Transfert uniquement en Wi-Fi</string>
     <string name="settingsTitle">Paramètres</string>
     <string name="shareFileInputUserAndEmail">Invitez un utilisateur ou une adresse mail…</string>

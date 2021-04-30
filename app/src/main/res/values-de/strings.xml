@@ -204,7 +204,7 @@
     <string name="errorRightModification">Fehler bei der Änderung der Rechte</string>
     <string name="errorSave">Fehler bei der Speicherung</string>
     <string name="errorShareLink">Fehler bei der Erstellung des Links</string>
-    <string name="favoritesNoFile">Derzeit kein Favorit</string>
+    <string name="favoritesNoFile">Derzeit keine Favoriten</string>
     <string name="favoritesTitle">Favoriten</string>
     <plurals name="fileActivityCommentCreate">
         <item quantity="one">hat folgende Datei kommentiert</item>
@@ -398,8 +398,8 @@
     <string name="notificationTitle">Benachrichtigungen</string>
     <string name="notificationUploadDownloadChannelName">Importe und Benachrichtigungen</string>
     <string name="notificationUploadServiceChannelName">Dienst für den Dateiimport</string>
-    <string name="offlineFileNoFile">Keine Datei offline</string>
-    <string name="offlineFileNoFileDescription">Wählen Sie eine Datei und machen Sie sie offline verfügbar, damit Sie sie auch ohne Netzwerkverbindung hier abrufen können.</string>
+    <string name="offlineFileNoFile">Keine offline Dateien</string>
+    <string name="offlineFileNoFileDescription">Wählen Sie eine Datei aus und machen Sie diese offline verfügbar, so dass Sie diese auch ohne Netzwerkverbindung hier abrufen können</string>
     <string name="offlineFileTitle">Offline</string>
     <string name="onBoardingDescription1">kDrive ist mit allen Geräten kompatibel. Ob im Büro, zu Hause oder unterwegs – Sie können alle Ihre Daten benutzerfreundlich bearbeiten, teilen und einsehen.</string>
     <string name="onBoardingDescription2">Teilen Sie Ihre Dateien und bearbeiten Sie diese gemeinsam in Echtzeit: Textdokumente, Tabellenblätter oder Präsentationen im Team.</string>
@@ -428,7 +428,7 @@
     <string name="secureLinkShareTitle">Sichere Freigabelinks</string>
     <string name="selectDriveTitle">kDrive auswählen</string>
     <string name="selectFolderTitle">Ordner auswählen</string>
-    <string name="settingsOnlyWifiSyncDescription">Der Import und die Aktualisierung der Dateien offline erfolgen, wenn das Gerät mit einem WLAN verbunden ist.</string>
+    <string name="settingsOnlyWifiSyncDescription">Die automatische Sicherung von Fotos/Videos und die Aktualisierung von Offline-Dateien wird nur bei einer Wifi-Verbindung durchgeführt.</string>
     <string name="settingsOnlyWifiSyncTitle">Übertragung nur im WLAN</string>
     <string name="settingsTitle">Einstellungen</string>
     <string name="shareFileInputUserAndEmail">Laden Sie einen Benutzer oder eine E-Mail-Adresse ein…</string>

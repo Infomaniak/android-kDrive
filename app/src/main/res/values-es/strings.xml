@@ -428,7 +428,7 @@
     <string name="secureLinkShareTitle">Enlaces de uso compartido seguros</string>
     <string name="selectDriveTitle">Seleccionar un kDrive</string>
     <string name="selectFolderTitle">Seleccionar una carpeta</string>
-    <string name="settingsOnlyWifiSyncDescription">La importación de archivos y la actualización de archivos sin conexión se realizará cuando el dispositivo se conecte a una red WiFi.</string>
+    <string name="settingsOnlyWifiSyncDescription">La copia de seguridad automática de las fotos/vídeos y la actualización de los archivos sin conexión sólo se realizará con una conexión Wifi.</string>
     <string name="settingsOnlyWifiSyncTitle">Transferencia sólo con WiFi</string>
     <string name="settingsTitle">Parámetros</string>
     <string name="shareFileInputUserAndEmail">Invita a un usuario o una dirección de correo electrónico…</string>

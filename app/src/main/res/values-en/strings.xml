@@ -428,7 +428,7 @@
     <string name="secureLinkShareTitle">Secure sharing links</string>
     <string name="selectDriveTitle">Select a kDrive</string>
     <string name="selectFolderTitle">Select a folder</string>
-    <string name="settingsOnlyWifiSyncDescription">Uploading files and updating files offline will take place when the device is connected to a WiFi network.</string>
+    <string name="settingsOnlyWifiSyncDescription">Automatic backup of photos/videos and updating of offline files will only be done with a Wi-Fi connection.</string>
     <string name="settingsOnlyWifiSyncTitle">WiFi-only transfer</string>
     <string name="settingsTitle">Settings</string>
     <string name="shareFileInputUserAndEmail">Invite a user or an email address…</string>
