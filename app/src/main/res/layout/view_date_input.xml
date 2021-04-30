@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
@@ -26,16 +27,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/marginStandardMedium"
-        android:hint="@string/inputExpirationDate">
+        android:hint="@string/inputExpirationDate"
+        app:endIconDrawable="@drawable/ic_calendar"
+        app:endIconMode="custom">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/dateValueInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif"
-            android:inputType="none"
-            tools:text="24/12/2020" />
+            android:inputType="date"
+            tools:text="24.12.2020" />
 
     </com.google.android.material.textfield.TextInputLayout>
+
 
 </FrameLayout>
