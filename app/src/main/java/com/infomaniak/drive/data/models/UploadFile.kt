@@ -111,6 +111,15 @@ open class UploadFile(
             }
         }
 
+        fun update(uri: String, transaction: (uploadFile: UploadFile) -> Unit): Boolean {
+            getRealmInstance().use { realm ->
+                return syncFileByUriQuery(realm, uri).findFirst()?.let { uploadFile ->
+                    realm.executeTransaction { transaction(uploadFile) }
+                    true
+                } ?: false
+            }
+        }
+
         fun getLastDate(context: Context): Date {
             val date: Date? = getRealmInstance().use { realm ->
                 realm.where(SyncSettings::class.java).findFirst()?.lastSync

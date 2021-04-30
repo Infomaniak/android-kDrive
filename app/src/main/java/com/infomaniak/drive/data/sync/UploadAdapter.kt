@@ -206,6 +206,10 @@ class UploadAdapter @JvmOverloads constructor(
     @Throws(Exception::class)
     private suspend fun startUploadFile(uploadFile: UploadFile, size: Long, syncResult: SyncResult?) {
         if (size != 0L) {
+            if (uploadFile.fileSize < size) {
+                UploadFile.update(uploadFile.uri) { it.fileSize = size }
+            }
+
             UploadTask(
                 context = context.applicationContext,
                 uploadFile = uploadFile,

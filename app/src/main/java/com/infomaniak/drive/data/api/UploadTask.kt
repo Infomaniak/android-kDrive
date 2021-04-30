@@ -107,14 +107,15 @@ class UploadTask(
             previousChunkBytesWritten.set(uploadedChunks?.uploadedSize ?: 0)
 
             for (chunkNumber in 1..totalChunks) {
-                if (uploadedChunks?.validChunks?.contains(chunkNumber) == true) {
-                    Log.d("kDrive", "chunk $chunkNumber ignored")
-                    input.read(ByteArray(chunkSize))
-                    continue
-                }
 
                 val coroutineRequest = launch(Dispatchers.Main) {
                     requestSemaphore.withPermit {
+                        if (uploadedChunks?.validChunks?.contains(chunkNumber) == true) {
+                            Log.d("kDrive", "chunk $chunkNumber ignored")
+                            input.read(ByteArray(chunkSize))
+                            return@withPermit
+                        }
+
                         Log.i("kDrive", "Upload > ${uploadFile.fileName} chunk:$chunkNumber has permission")
                         var data = ByteArray(chunkSize)
                         val count = input.read(data)
@@ -179,10 +180,13 @@ class UploadTask(
         if (!response.isSuccessful) {
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
             val apiResponse = ApiController.gson.fromJson(bodyResponse, ApiResponse::class.java)
-            if (apiResponse.error?.code.equals("object_not_found")) {
-                throw FolderNotFoundException()
+            when {
+                apiResponse.error?.code.equals("object_not_found") -> {
+                    throw FolderNotFoundException()
+                }
+                apiResponse.error?.code.equals("file_already_exists_error") -> Unit
+                else -> throw Exception(bodyResponse)
             }
-            throw Exception(bodyResponse)
         }
     }
 
@@ -258,7 +262,7 @@ class UploadTask(
                 "&chunk_size=${chunkSize}" +
                 "&current_chunk_size=$currentChunkSize" +
                 "&total_chunks=$totalChunks" +
-                "&total_size=${uploadFile.fileSize}" +
+                "&total_size=${if (uploadFile.fileSize < currentChunkSize) currentChunkSize else uploadFile.fileSize}" +
                 "&identifier=${uploadFile.identifier}" +
                 "&file_name=${uploadFile.encodedName()}" +
                 "&last_modified_at=${uploadFile.fileModifiedAt.time / 1000}" +
