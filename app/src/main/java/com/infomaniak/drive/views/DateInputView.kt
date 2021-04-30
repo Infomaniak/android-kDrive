@@ -91,9 +91,7 @@ class DateInputView @JvmOverloads constructor(
                 this@DateInputView.clearFocus()
                 onDateSet(it)
             }
-
-        }.show(
-            (context as AppCompatActivity).supportFragmentManager, materialDatePickerBuilder.toString()
-        )
+            show((context as AppCompatActivity).supportFragmentManager, materialDatePickerBuilder.toString())
+        }
     }
 }
