@@ -42,8 +42,10 @@ import com.infomaniak.drive.ui.menu.PicturesAdapter
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.safeNavigate
+import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.setPagination
 import com.infomaniak.lib.core.views.ViewHolder
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.item_search_view.*
 
@@ -168,7 +170,12 @@ class HomeFragment : Fragment() {
                             )
                         }
                         onFileClicked = { currentFile, validPreviewFiles ->
-                            Utils.displayFile(mainViewModel, findNavController(), currentFile, validPreviewFiles)
+                            if (currentFile.isTrashed()) {
+                                requireActivity().showSnackbar(
+                                    getString(R.string.errorPreviewTrash),
+                                    anchorView = requireActivity().mainFab
+                                )
+                            } else Utils.displayFile(mainViewModel, findNavController(), currentFile, validPreviewFiles)
                         }
                     }
                 } else {
