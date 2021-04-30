@@ -45,7 +45,7 @@ class PreviewPictureFragment : PreviewFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        val imageViewDisposable = imageView.load(file.thumbnail()) {
+        val imageViewDisposable = imageView.load(previewViewModel.currentFile.thumbnail()) {
             error(R.drawable.ic_images)
             fallback(R.drawable.ic_images)
             placeholder(R.drawable.ic_images)
@@ -79,7 +79,7 @@ class PreviewPictureFragment : PreviewFragment() {
             }
         }
 
-        if (file.isOffline && !file.isOldData(requireContext())) {
+        if (previewViewModel.currentFile.isOffline && !previewViewModel.currentFile.isOldData(requireContext())) {
             if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
             if (offlineFile.exists()) imageView?.setImageURI(offlineFile.toUri())
         } else {
@@ -87,7 +87,7 @@ class PreviewPictureFragment : PreviewFragment() {
                 val imageLoader = Coil.imageLoader(requireContext())
                 val request = ImageRequest.Builder(requireContext())
                     .headers(HttpUtils.getHeaders())
-                    .data(file.imagePreview())
+                    .data(previewViewModel.currentFile.imagePreview())
                     .build()
 
                 imageLoader.execute(request).drawable?.let { drawable ->

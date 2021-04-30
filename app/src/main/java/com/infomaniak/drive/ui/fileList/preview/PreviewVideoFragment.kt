@@ -28,7 +28,7 @@ import android.view.ViewGroup
 import androidx.core.net.toUri
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.audio.AudioAttributes
-import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSourceFactory
+import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSource
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.MediaSourceFactory
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
@@ -56,9 +56,9 @@ open class PreviewVideoFragment : PreviewFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        fileIcon.setImageResource(file.getFileType().icon)
+        fileIcon.setImageResource(previewViewModel.currentFile.getFileType().icon)
         container?.layoutTransition?.setAnimateParentHierarchy(false)
-        fileName.text = file.name
+        fileName.text = previewViewModel.currentFile.name
     }
 
     override fun onStart() {
@@ -117,10 +117,10 @@ open class PreviewVideoFragment : PreviewFragment() {
             playerView.player = this
             playerView.setControlDispatcher(DefaultControlDispatcher())
 
-            if (file.isOffline && !file.isOldData(requireContext())) {
+            if (previewViewModel.currentFile.isOffline && !previewViewModel.currentFile.isOldData(requireContext())) {
                 setMediaItem(MediaItem.fromUri(offlineFile.toUri()))
             } else {
-                setMediaItem(MediaItem.fromUri(Uri.parse(ApiRoutes.downloadFile(file))))
+                setMediaItem(MediaItem.fromUri(Uri.parse(ApiRoutes.downloadFile(previewViewModel.currentFile))))
             }
 
             prepare()
@@ -137,8 +137,9 @@ open class PreviewVideoFragment : PreviewFragment() {
         val appContext = context.applicationContext
 
         val userAgent = Util.getUserAgent(appContext, context.getString(R.string.app_name))
-        val okHttpDataSource = OkHttpDataSourceFactory(HttpClient.okHttpClient, userAgent).apply {
-            defaultRequestProperties.set(HttpUtils.getHeaders().toMap())
+        val okHttpDataSource = OkHttpDataSource.Factory(HttpClient.okHttpClient).apply {
+            setUserAgent(userAgent)
+            setDefaultRequestProperties(HttpUtils.getHeaders().toMap())
         }
         return DefaultDataSourceFactory(appContext, okHttpDataSource)
     }

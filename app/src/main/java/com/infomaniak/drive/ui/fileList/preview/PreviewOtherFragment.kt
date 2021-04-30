@@ -24,7 +24,7 @@ import android.view.ViewGroup
 import com.infomaniak.drive.R
 import kotlinx.android.synthetic.main.fragment_preview_others.*
 
-open class PreviewOtherFragment : PreviewFragment() {
+class PreviewOtherFragment : PreviewFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_preview_others, container, false)
@@ -34,7 +34,7 @@ open class PreviewOtherFragment : PreviewFragment() {
         super.onActivityCreated(savedInstanceState)
         container?.layoutTransition?.setAnimateParentHierarchy(false)
 
-        fileIcon.setImageResource(file.getFileType().icon)
-        fileName.text = file.name
+        fileIcon.setImageResource(previewViewModel.currentFile.getFileType().icon)
+        fileName.text = previewViewModel.currentFile.name
     }
 }

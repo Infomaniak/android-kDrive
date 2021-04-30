@@ -26,25 +26,22 @@ import com.infomaniak.drive.data.models.File
 
 open class PreviewFragment : Fragment() {
 
-    protected lateinit var file: File
+    private lateinit var file: File
     protected lateinit var offlineFile: java.io.File
-    private lateinit var previewViewModel: PreviewViewModel
+    protected lateinit var previewViewModel: PreviewViewModel
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         previewViewModel = ViewModelProvider(this)[PreviewViewModel::class.java]
-
-        if (previewViewModel.currentFile == null) previewViewModel.currentFile = file
-        else file = previewViewModel.currentFile!!
-
-        offlineFile = file.localPath(requireContext(), File.LocalType.OFFLINE)
+        previewViewModel.currentFile = file
+        offlineFile = previewViewModel.currentFile.localPath(requireContext(), File.LocalType.OFFLINE)
     }
 
-    fun setCurrentFile(file: File) {
+    fun init(file: File) {
         this.file = file
     }
 
     protected class PreviewViewModel : ViewModel() {
-        var currentFile: File? = null
+        lateinit var currentFile: File
     }
 }
