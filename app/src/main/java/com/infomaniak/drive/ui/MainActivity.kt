@@ -144,9 +144,7 @@ class MainActivity : BaseActivity() {
 
         launchAllUpload()
 
-        if (AppSettings.appLaunches == 20 || AppSettings.appLaunches % 120 == 0) {
-            launchInAppReview()
-        }
+        if (AppSettings.appLaunches == 20 || AppSettings.appLaunches % 100 == 0) launchInAppReview()
 
         if (!UISettings(this).updateLater || AppSettings.appLaunches % 10 == 0) {
             // Will never be successful on emulator (update check is not functional on AVD)
@@ -250,12 +248,7 @@ class MainActivity : BaseActivity() {
         ReviewManagerFactory.create(this).apply {
             val requestReviewFlow = requestReviewFlow()
             requestReviewFlow.addOnCompleteListener { request ->
-                if (request.isSuccessful) {
-                    val reviewInfo = request.result
-                    launchReviewFlow(this@MainActivity, reviewInfo)
-                } else {
-                    Log.d("Review Error: ", request.exception.toString())
-                }
+                if (request.isSuccessful) launchReviewFlow(this@MainActivity, request.result)
             }
         }
     }
