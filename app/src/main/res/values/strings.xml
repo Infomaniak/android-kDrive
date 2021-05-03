@@ -138,6 +138,7 @@
     <string name="buttonRefresh">Actualiser</string>
     <string name="buttonRemoveFavorites">Supprimer des favoris</string>
     <string name="buttonRename">Renommer</string>
+    <string name="buttonRenew">Renouveler</string>
     <string name="buttonRetry">Réessayer</string>
     <string name="buttonSave">Enregistrer</string>
     <string name="buttonSeeFolder">Voir le dossier</string>
@@ -354,6 +355,10 @@
     <string name="inputExpirationDate">Date d’expiration</string>
     <string name="lastEditsTitle">Dernières modifications</string>
     <string name="lockAppTitle">Application verrouillée</string>
+    <string name="maintenanceBlockedDriveDescription">Votre produit a expiré depuis le %s. Veuillez le renouveler pour le gérer et accéder à ses données.</string>
+    <string name="maintenanceBlockedDriveTitle">Votre kDrive %s est actuellement bloqué</string>
+    <string name="maintenanceDriveDescription">Une mise à jour est en cours pour améliorer votre kDrive. Ce processus peut durer quelques minutes. Merci pour votre patience.</string>
+    <string name="maintenanceDriveTitle">Votre kDrive %s est actuellement en maintenance</string>
     <string name="manageDropboxTitle">Gérer la boîte de dépôt %s</string>
     <string name="menuTitle">Menu</string>
     <string name="migrateNotificationDescription">Veuillez lancer l’app kDrive pour terminer la mise à jour</string>
