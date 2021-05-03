@@ -119,22 +119,23 @@ class UploadTask(
                         Log.i("kDrive", "Upload > ${uploadFile.fileName} chunk:$chunkNumber has permission")
                         var data = ByteArray(chunkSize)
                         val count = input.read(data)
+                        if (count == -1) return@withPermit
+
                         data = if (count == chunkSize) data else data.copyOf(count)
 
                         withContext(Dispatchers.IO) {
                             val url = uploadUrl(
-                                uploadFile = uploadFile,
                                 chunkNumber = chunkNumber,
                                 currentChunkSize = count,
                                 totalChunks = totalChunks,
+                                uploadFile = uploadFile,
                             )
                             Log.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url")
 
-                            val uploadRequestBody =
-                                ProgressRequestBody(data.toRequestBody()) { currentBytes, _, _ ->
-                                    ensureActive()
-                                    this@uploadTask.updateProgress(context, currentBytes, uploadFile, onProgress)
-                                }
+                            val uploadRequestBody = ProgressRequestBody(data.toRequestBody()) { currentBytes, _, _ ->
+                                ensureActive()
+                                this@uploadTask.updateProgress(context, currentBytes, uploadFile, onProgress)
+                            }
 
                             val request = Request.Builder().url(url)
                                 .headers(HttpUtils.getHeaders(contentType = null))
@@ -255,8 +256,8 @@ class UploadTask(
     private fun uploadUrl(
         chunkNumber: Int,
         currentChunkSize: Int,
-        uploadFile: UploadFile,
-        totalChunks: Int
+        totalChunks: Int,
+        uploadFile: UploadFile
     ): String {
         return "${ApiRoutes.uploadFile(uploadFile.driveId, uploadFile.remoteFolder)}?chunk_number=$chunkNumber" +
                 "&chunk_size=${chunkSize}" +

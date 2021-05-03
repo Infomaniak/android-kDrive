@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.annotation.SuppressLint
-import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater

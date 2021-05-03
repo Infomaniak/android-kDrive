@@ -96,17 +96,17 @@ class DownloadProgressDialog : DialogFragment() {
             val cacheFile = file.localPath(context, File.LocalType.CLOUD_STORAGE, userDrive)
 
             if (file.isOldData(context, userDrive) || file.isIncompleteFile(offlineFile, cacheFile)) {
-                val response = DownloadWorker.downloadFileResponse(ApiRoutes.downloadFile(file)) { progress ->
-                    runBlocking { emit(progress to false) }
-                }
-                if (response.isSuccessful) {
-                    try {
-                        saveData(file, offlineFile, cacheFile, response)
-                    } catch (exception: Exception) {
-                        exception.printStackTrace()
-                        emit(null)
+                try {
+                    val response = DownloadWorker.downloadFileResponse(ApiRoutes.downloadFile(file)) { progress ->
+                        runBlocking { emit(progress to false) }
                     }
-                } else emit(null)
+                    if (response.isSuccessful) {
+                        saveData(file, offlineFile, cacheFile, response)
+                    } else emit(null)
+                } catch (exception: Exception) {
+                    exception.printStackTrace()
+                    emit(null)
+                }
             } else {
                 emit(100 to true)
             }

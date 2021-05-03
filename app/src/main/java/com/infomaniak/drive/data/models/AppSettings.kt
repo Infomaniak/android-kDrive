@@ -46,7 +46,7 @@ open class AppSettings(
         fun getAppSettings(): AppSettings {
             return getRealmInstance().use { realm ->
                 var appSettings = getAppSettingsQuery(realm)
-                if (appSettings == null) realm.executeTransaction { appSettings = it.copyToRealm(AppSettings()) }
+                if (appSettings == null) appSettings = realm.copyToRealm(AppSettings())
                 realm.copyFromRealm(appSettings!!, 0)
             }
         }
