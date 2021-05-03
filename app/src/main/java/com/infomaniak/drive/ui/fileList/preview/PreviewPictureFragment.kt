@@ -29,13 +29,14 @@ import coil.Coil
 import coil.load
 import coil.request.ImageRequest
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.lib.core.networking.HttpUtils
 import kotlinx.android.synthetic.main.fragment_preview_picture.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class PreviewPictureFragment : PreviewFragment() {
+class PreviewPictureFragment(file: File) : PreviewFragment(file) {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_preview_picture, container, false)
@@ -45,7 +46,7 @@ class PreviewPictureFragment : PreviewFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        val imageViewDisposable = imageView.load(file.thumbnail()) {
+        val imageViewDisposable = imageView.load(previewViewModel.currentFile.thumbnail()) {
             error(R.drawable.ic_images)
             fallback(R.drawable.ic_images)
             placeholder(R.drawable.ic_images)
@@ -79,7 +80,7 @@ class PreviewPictureFragment : PreviewFragment() {
             }
         }
 
-        if (file.isOffline && !file.isOldData(requireContext())) {
+        if (previewViewModel.currentFile.isOffline && !previewViewModel.currentFile.isOldData(requireContext())) {
             if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
             if (offlineFile.exists()) imageView?.setImageURI(offlineFile.toUri())
         } else {
@@ -87,7 +88,7 @@ class PreviewPictureFragment : PreviewFragment() {
                 val imageLoader = Coil.imageLoader(requireContext())
                 val request = ImageRequest.Builder(requireContext())
                     .headers(HttpUtils.getHeaders())
-                    .data(file.imagePreview())
+                    .data(previewViewModel.currentFile.imagePreview())
                     .build()
 
                 imageLoader.execute(request).drawable?.let { drawable ->

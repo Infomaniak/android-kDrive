@@ -41,7 +41,7 @@ import kotlinx.android.synthetic.main.fragment_preview_pdf.*
 import kotlinx.android.synthetic.main.fragment_preview_pdf.container
 import kotlinx.coroutines.*
 
-open class PreviewPDFFragment : PreviewFragment() {
+class PreviewPDFFragment(file: File) : PreviewFragment(file) {
 
     private var previewPDFAdapter: PreviewPDFAdapter? = null
     private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
@@ -58,8 +58,8 @@ open class PreviewPDFFragment : PreviewFragment() {
         super.onActivityCreated(savedInstanceState)
         container?.layoutTransition?.setAnimateParentHierarchy(false)
 
-        fileIcon.setImageResource(file.getFileType().icon)
-        fileName.text = file.name
+        fileIcon.setImageResource(previewViewModel.currentFile.getFileType().icon)
+        fileName.text = previewViewModel.currentFile.name
         downloadProgress.visibility = VISIBLE
         previewDescription.setText(R.string.previewDownloadIndication)
         previewDescription.visibility = VISIBLE
@@ -119,17 +119,18 @@ open class PreviewPDFFragment : PreviewFragment() {
         if (previewPDFAdapter == null || previewPDFAdapter?.itemCount == 0) {
             previewSliderViewModel.pdfIsDownloading.value = true
             isDownloading = true
-            previewPDFViewModel.downloadPdfFile(requireContext(), file).observe(viewLifecycleOwner, Observer { apiResponse ->
-                apiResponse.data?.let { pdfCore ->
-                    this.pdfCore = pdfCore
-                    showPdf(pdfCore)
-                } ?: let {
-                    downloadProgress.visibility = GONE
-                    previewDescription.setText(R.string.previewNoPreview)
-                }
-                previewSliderViewModel.pdfIsDownloading.value = false
-                isDownloading = false
-            })
+            previewPDFViewModel.downloadPdfFile(requireContext(), previewViewModel.currentFile)
+                .observe(viewLifecycleOwner, Observer { apiResponse ->
+                    apiResponse.data?.let { pdfCore ->
+                        this.pdfCore = pdfCore
+                        showPdf(pdfCore)
+                    } ?: run {
+                        downloadProgress.visibility = GONE
+                        previewDescription.setText(R.string.previewNoPreview)
+                    }
+                    previewSliderViewModel.pdfIsDownloading.value = false
+                    isDownloading = false
+                })
         }
     }
 
