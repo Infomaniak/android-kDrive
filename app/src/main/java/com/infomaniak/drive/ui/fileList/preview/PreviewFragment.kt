@@ -25,7 +25,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.infomaniak.drive.data.models.File
 
 
-open class PreviewFragment(val file: File) : Fragment() {
+open class PreviewFragment(private val file: File) : Fragment() {
 
     protected lateinit var offlineFile: java.io.File
     protected val previewViewModel: PreviewViewModel by viewModels()

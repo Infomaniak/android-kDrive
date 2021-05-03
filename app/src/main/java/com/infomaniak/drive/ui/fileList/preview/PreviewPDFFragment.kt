@@ -124,7 +124,7 @@ class PreviewPDFFragment(file: File) : PreviewFragment(file) {
                     apiResponse.data?.let { pdfCore ->
                         this.pdfCore = pdfCore
                         showPdf(pdfCore)
-                    } ?: let {
+                    } ?: run {
                         downloadProgress.visibility = GONE
                         previewDescription.setText(R.string.previewNoPreview)
                     }
