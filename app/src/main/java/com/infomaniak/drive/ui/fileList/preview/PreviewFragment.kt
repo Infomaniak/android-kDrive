@@ -19,26 +19,21 @@ package com.infomaniak.drive.ui.fileList.preview
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.infomaniak.drive.data.models.File
 
 
-open class PreviewFragment : Fragment() {
+open class PreviewFragment(val file: File) : Fragment() {
 
-    private lateinit var file: File
     protected lateinit var offlineFile: java.io.File
-    protected lateinit var previewViewModel: PreviewViewModel
+    protected val previewViewModel: PreviewViewModel by viewModels()
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        previewViewModel = ViewModelProvider(this)[PreviewViewModel::class.java]
         previewViewModel.currentFile = file
         offlineFile = previewViewModel.currentFile.localPath(requireContext(), File.LocalType.OFFLINE)
-    }
-
-    fun init(file: File) {
-        this.file = file
     }
 
     protected class PreviewViewModel : ViewModel() {

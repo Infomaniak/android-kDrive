@@ -34,13 +34,13 @@ class PreviewSliderAdapter(manager: FragmentManager, lifecycle: Lifecycle) : Fra
         val file = getFile(position)
 
         return when (file.getFileType()) {
-            File.ConvertedType.IMAGE -> PreviewPictureFragment().apply { init(file) }
-            File.ConvertedType.VIDEO -> PreviewVideoFragment().apply { init(file) }
-            File.ConvertedType.AUDIO -> PreviewMusicFragment().apply { init(file) }
-            File.ConvertedType.PDF -> PreviewPDFFragment().apply { init(file) }
+            File.ConvertedType.IMAGE -> PreviewPictureFragment(file)
+            File.ConvertedType.VIDEO -> PreviewVideoFragment(file)
+            File.ConvertedType.AUDIO -> PreviewMusicFragment(file)
+            File.ConvertedType.PDF -> PreviewPDFFragment(file)
             else -> {
-                if (file.isOnlyOfficePreview()) PreviewPDFFragment().apply { init(file) }
-                else PreviewOtherFragment().apply { init(file) }
+                if (file.isOnlyOfficePreview()) PreviewPDFFragment(file)
+                else PreviewOtherFragment(file)
             }
         }
     }

@@ -29,13 +29,14 @@ import coil.Coil
 import coil.load
 import coil.request.ImageRequest
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.lib.core.networking.HttpUtils
 import kotlinx.android.synthetic.main.fragment_preview_picture.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class PreviewPictureFragment : PreviewFragment() {
+class PreviewPictureFragment(file: File) : PreviewFragment(file) {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_preview_picture, container, false)

@@ -17,4 +17,6 @@
  */
 package com.infomaniak.drive.ui.fileList.preview
 
-class PreviewMusicFragment : PreviewVideoFragment()
+import com.infomaniak.drive.data.models.File
+
+class PreviewMusicFragment(file: File) : PreviewVideoFragment(file)

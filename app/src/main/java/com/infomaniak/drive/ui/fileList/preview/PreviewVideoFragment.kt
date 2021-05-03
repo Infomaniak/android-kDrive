@@ -39,6 +39,7 @@ import com.google.android.exoplayer2.util.EventLogger
 import com.google.android.exoplayer2.util.Util
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
 import kotlinx.android.synthetic.main.fragment_preview_others.*
@@ -46,7 +47,7 @@ import kotlinx.android.synthetic.main.fragment_preview_video.*
 import kotlinx.android.synthetic.main.fragment_preview_video.container
 
 
-open class PreviewVideoFragment : PreviewFragment() {
+open class PreviewVideoFragment(file: File) : PreviewFragment(file) {
 
     private lateinit var simpleExoPlayer: SimpleExoPlayer
 
