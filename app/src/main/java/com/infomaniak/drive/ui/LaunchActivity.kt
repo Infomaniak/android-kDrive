@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.login.MigrationActivity
@@ -33,6 +34,7 @@ class LaunchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         GlobalScope.launch {
+            val driveList = DriveInfosController.getDrives(AccountUtils.currentUserId)
             when {
                 AccountUtils.requestCurrentUser() == null -> {
                     if (getOldkDriveUser().isEmpty) {
@@ -45,10 +47,17 @@ class LaunchActivity : AppCompatActivity() {
                     startActivity(Intent(this@LaunchActivity, LockActivity::class.java))
                 }
                 else -> {
-                    if (AccountUtils.getCurrentDrive() == null) {
-                        AccountUtils.updateCurrentUserAndDrives(this@LaunchActivity)
+                    if (AccountUtils.getCurrentDrive() == null) AccountUtils.updateCurrentUserAndDrives(this@LaunchActivity)
+                    if (driveList.all { it.maintenance }) {
+                        startActivity(Intent(this@LaunchActivity, MaintenanceActivity::class.java))
+                    } else {
+                        AccountUtils.getCurrentDrive()?.let { currentDrive ->
+                            if (currentDrive.maintenance) {
+                                AccountUtils.currentDriveId = driveList.find { !it.maintenance }?.id!!
+                            }
+                            startActivity(Intent(this@LaunchActivity, MainActivity::class.java))
+                        }
                     }
-                    startActivity(Intent(this@LaunchActivity, MainActivity::class.java))
                 }
             }
         }

@@ -73,6 +73,8 @@
 
         <activity android:name=".ui.LockActivity" />
 
+        <activity android:name=".ui.MaintenanceActivity" />
+
         <activity
             android:name=".ui.fileList.SelectFolderActivity"
             android:label="@string/selectFolderTitle" />

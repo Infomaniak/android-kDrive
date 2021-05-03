@@ -30,9 +30,9 @@ class NoDriveActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_no_drive)
 
-        iconLayout.icon.setImageResource(R.drawable.ic_no_drive)
+        noDriveIconLayout.icon.setImageResource(R.drawable.ic_no_drive)
 
-        subscribeButton.setOnClickListener {
+        noDriveActionButton.setOnClickListener {
             openUrl(ApiRoutes.orderDrive())
             onBackPressed()
         }
