@@ -677,6 +677,9 @@
         <action
             android:id="@+id/action_sharedWithMeFragment_self"
             app:destination="@id/sharedWithMeFragment" />
+        <action
+            android:id="@+id/action_sharedWithMeFragment_to_driveMaintenanceBottomSheetFragment"
+            app:destination="@id/driveMaintenanceBottomSheetFragment" />
     </fragment>
 
     <fragment

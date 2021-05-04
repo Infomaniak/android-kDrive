@@ -62,16 +62,36 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
         sortButton.visibility = if (inDriveList) View.GONE else View.VISIBLE
         fileAdapter.onFileClicked = { file ->
             fileListViewModel.cancelDownloadFiles()
-            if (file.isDrive() || file.isFolder()) {
-                safeNavigate(
-                    SharedWithMeFragmentDirections.actionSharedWithMeFragmentSelf(
-                        folderID = if (file.isDrive()) ROOT_ID else file.id,
-                        folderName = file.name,
-                        driveID = file.driveId
-                    )
-                )
-            } else Utils.displayFile(mainViewModel, findNavController(), file, fileAdapter.getItems(), isSharedWithMe = true)
+            when {
+                file.isDrive() -> {
+                    DriveInfosController.getDrives(AccountUtils.currentUserId, file.driveId, sharedWithMe = true).firstOrNull()
+                        ?.let { currentDrive ->
+                            if (currentDrive.maintenance) openMaintenanceDialog(currentDrive.name)
+                            else openSharedWithMeFolder(file)
+                        }
+                }
+                file.isFolder() -> openSharedWithMeFolder(file)
+                else -> Utils.displayFile(mainViewModel, findNavController(), file, fileAdapter.getItems(), isSharedWithMe = true)
+            }
         }
+    }
+
+    private fun openMaintenanceDialog(driveName: String) {
+        safeNavigate(
+            SharedWithMeFragmentDirections.actionSharedWithMeFragmentToDriveMaintenanceBottomSheetFragment(
+                driveName = driveName
+            )
+        )
+    }
+
+    private fun openSharedWithMeFolder(file: File) {
+        safeNavigate(
+            SharedWithMeFragmentDirections.actionSharedWithMeFragmentSelf(
+                folderID = if (file.isDrive()) ROOT_ID else file.id,
+                folderName = file.name,
+                driveID = file.driveId
+            )
+        )
     }
 
     private inner class DownloadFiles() : (Boolean) -> Unit {
