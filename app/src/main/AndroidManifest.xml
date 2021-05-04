@@ -75,6 +75,8 @@
 
         <activity android:name=".ui.MaintenanceActivity" />
 
+        <activity android:name=".ui.SwitchUserActivity" />
+
         <activity
             android:name=".ui.fileList.SelectFolderActivity"
             android:label="@string/selectFolderTitle" />

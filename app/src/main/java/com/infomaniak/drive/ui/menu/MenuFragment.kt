@@ -111,7 +111,7 @@ class MenuFragment : Fragment() {
 
             changeUser.setOnClickListener {
                 val switchUserExtra = FragmentNavigatorExtras(changeUser to changeUser.transitionName)
-                safeNavigate(R.id.switchUserFragment, null, null, switchUserExtra)
+                safeNavigate(R.id.switchUserActivity, null, null, switchUserExtra)
             }
 
             logout.setOnClickListener {

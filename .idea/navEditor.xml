@@ -585,7 +585,7 @@
                                 <LayoutPositions />
                               </value>
                             </entry>
-                            <entry key="action_menuFragment_to_switchUserFragment">
+                            <entry key="action_menuFragment_to_switchUserActivity">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -889,7 +889,7 @@
                       </LayoutPositions>
                     </value>
                   </entry>
-                  <entry key="switchUserFragment">
+                  <entry key="switchUserActivity">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">
