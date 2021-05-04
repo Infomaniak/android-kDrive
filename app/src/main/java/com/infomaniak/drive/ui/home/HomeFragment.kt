@@ -100,7 +100,7 @@ class HomeFragment : Fragment() {
         }
 
         driveInfos.setOnClickListener {
-            SwitchDriveDialog().show(childFragmentManager, "SwitchDriveDialog")
+            findNavController().navigate(R.id.switchDriveDialog)
         }
 
         searchView.visibility = GONE

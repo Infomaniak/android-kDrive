@@ -25,6 +25,7 @@ import android.view.WindowManager
 import android.widget.LinearLayout
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.DialogFragment
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -66,17 +67,24 @@ class SwitchDriveDialog : DialogFragment() {
             }
         }
         driveListAdapter = DriveListAdapter(initialDriveList) { drive ->
-            AccountUtils.currentDriveId = drive.id
-            FileController.switchDriveDB(UserDrive())
-            homeViewModel.driveSelectionDialogDismissed.value = true
             dismiss()
+            if (drive.maintenance) {
+                // TODO - Implement drive blocked BottomSheetDialog (for invoice issues)
+                findNavController().navigate(
+                    SwitchDriveDialogDirections.actionSwitchDriveDialogToDriveMaintenanceBottomSheetFragment(
+                        driveName = drive.name
+                    )
+                )
+            } else {
+                AccountUtils.currentDriveId = drive.id
+                FileController.switchDriveDB(UserDrive())
+                homeViewModel.driveSelectionDialogDismissed.value = true
+            }
         }
-        selectionRecyclerView.adapter = driveListAdapter
 
         clearButton.setOnClickListener { searchView.text = null }
-
+        selectionRecyclerView.adapter = driveListAdapter
         searchView.hint = getString(R.string.switchDriveSearchViewHint)
-
         searchView.doOnTextChanged { text, _, _, _ ->
             driveListAdapter.apply {
                 this.driveList = if (text.isNullOrEmpty()) {
