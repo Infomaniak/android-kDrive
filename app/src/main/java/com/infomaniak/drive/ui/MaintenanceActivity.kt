@@ -40,14 +40,14 @@ class MaintenanceActivity : AppCompatActivity() {
 
         AccountUtils.getCurrentDrive()?.let { currentDrive ->
             if (isTechnicalMaintenance) {
-                noDriveTitle.text = getString(R.string.maintenanceDriveTitle, currentDrive.name)
-                noDriveDescription.text = getString(R.string.maintenanceDriveDescription)
-                noDriveIconLayout.icon.setImageResource(R.drawable.ic_no_drive)
+                noDriveTitle.text = getString(R.string.driveMaintenanceTitle, currentDrive.name)
+                noDriveDescription.text = getString(R.string.driveMaintenanceDescription)
+                noDriveIconLayout.icon.setImageResource(R.drawable.ic_maintenance)
                 noDriveActionButton.visibility = GONE
             } else {
-                noDriveTitle.text = getString(R.string.maintenanceBlockedDriveTitle, currentDrive.name)
-                noDriveDescription.text = getString(R.string.maintenanceBlockedDriveDescription)
-                noDriveIconLayout.icon.setImageResource(R.drawable.ic_no_drive)
+                noDriveTitle.text = getString(R.string.driveBlockedTitle, currentDrive.name)
+                noDriveDescription.text = getString(R.string.driveBlockedDescription)
+                noDriveIconLayout.icon.setImageResource(R.drawable.ic_drive_blocked)
                 noDriveActionButton.visibility = VISIBLE
                 noDriveActionButton.text = getString(R.string.buttonRenew)
             }

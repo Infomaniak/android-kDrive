@@ -186,6 +186,10 @@
     <string name="createFolderTitle">Créer un dossier</string>
     <string name="createFolderValidUntilDescription">Une fois la date passée, les utilisateurs ne pourront plus transférer de fichiers.</string>
     <string name="createPrivateFolderSucces">Dossier créé avec succès</string>
+    <string name="driveBlockedDescription">Le produit a expiré depuis le %s. Veuillez le renouveler pour le gérer et accéder à ses données.</string>
+    <string name="driveBlockedTitle">Le kDrive %s est actuellement bloqué</string>
+    <string name="driveMaintenanceDescription">Une mise à jour est en cours pour améliorer kDrive. Ce processus peut durer quelques minutes. Merci pour votre patience.</string>
+    <string name="driveMaintenanceTitle">Le kDrive %s est actuellement en maintenance</string>
     <string name="dropBoxDescription">Invitez vos partenaires, utilisateurs ou clients à transférer des fichiers dans votre kDrive, même s’ils n’ont pas de compte Infomaniak.</string>
     <string name="dropBoxLinkTitle">Lien de la boîte de dépôt</string>
     <string name="dropBoxResultDescription">Partagez le lien ci-dessous aux personnes qui doivent vous envoyer des fichiers.</string>
@@ -355,10 +359,6 @@
     <string name="inputExpirationDate">Date d’expiration</string>
     <string name="lastEditsTitle">Dernières modifications</string>
     <string name="lockAppTitle">Application verrouillée</string>
-    <string name="maintenanceBlockedDriveDescription">Votre produit a expiré depuis le %s. Veuillez le renouveler pour le gérer et accéder à ses données.</string>
-    <string name="maintenanceBlockedDriveTitle">Votre kDrive %s est actuellement bloqué</string>
-    <string name="maintenanceDriveDescription">Une mise à jour est en cours pour améliorer votre kDrive. Ce processus peut durer quelques minutes. Merci pour votre patience.</string>
-    <string name="maintenanceDriveTitle">Votre kDrive %s est actuellement en maintenance</string>
     <string name="manageDropboxTitle">Gérer la boîte de dépôt %s</string>
     <string name="menuTitle">Menu</string>
     <string name="migrateNotificationDescription">Veuillez lancer l’app kDrive pour terminer la mise à jour</string>
