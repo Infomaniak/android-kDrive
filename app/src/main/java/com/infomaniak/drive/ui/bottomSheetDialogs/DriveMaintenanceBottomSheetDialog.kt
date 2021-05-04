@@ -37,8 +37,8 @@ class DriveMaintenanceBottomSheetDialog : InformationBottomSheetDialog() {
             setImageResource(R.drawable.ic_maintenance)
         }
 
-        title.text = getString(R.string.maintenanceDriveTitle, navigationArgs.driveName)
-        description.setText(R.string.maintenanceDriveDescription)
+        title.text = getString(R.string.driveMaintenanceTitle, navigationArgs.driveName)
+        description.setText(R.string.driveMaintenanceDescription)
         secondaryActionButton.visibility = GONE
 
         actionButton.apply {

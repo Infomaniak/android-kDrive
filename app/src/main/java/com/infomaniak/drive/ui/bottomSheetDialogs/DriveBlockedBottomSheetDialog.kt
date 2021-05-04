@@ -30,8 +30,8 @@ class DriveBlockedBottomSheetDialog : InformationBottomSheetDialog() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        title.text = getString(R.string.maintenanceBlockedDriveTitle, AccountUtils.getCurrentDrive()?.name)
-        description.setText(R.string.maintenanceBlockedDriveDescription)
+        title.text = getString(R.string.driveBlockedTitle, AccountUtils.getCurrentDrive()?.name)
+        description.setText(R.string.driveBlockedDescription)
         illu.apply {
             layoutParams.height = 70.toPx()
             layoutParams.width = 70.toPx()
