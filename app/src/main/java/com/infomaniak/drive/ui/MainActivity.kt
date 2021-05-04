@@ -48,6 +48,7 @@ import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.android.play.core.review.ReviewManagerFactory
+import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.AppSettings
@@ -144,7 +145,8 @@ class MainActivity : BaseActivity() {
 
         launchAllUpload()
 
-        if (AppSettings.appLaunches == 20 || AppSettings.appLaunches % 100 == 0) launchInAppReview()
+        if (!BuildConfig.BETA)
+            if (AppSettings.appLaunches == 20 || (AppSettings.appLaunches != 0 && AppSettings.appLaunches % 100 == 0)) launchInAppReview()
 
         if (!UISettings(this).updateLater || AppSettings.appLaunches % 10 == 0) {
             // Will never be successful on emulator (update check is not functional on AVD)

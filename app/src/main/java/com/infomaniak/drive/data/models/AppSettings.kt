@@ -45,10 +45,10 @@ open class AppSettings(
 
         fun getAppSettings(): AppSettings {
             return getRealmInstance().use { realm ->
-                var appSettings = getAppSettingsQuery(realm)
-                if (appSettings == null) appSettings = realm.copyToRealm(AppSettings())
-                realm.copyFromRealm(appSettings!!, 0)
-            }
+                getAppSettingsQuery(realm)?.let {
+                    realm.copyFromRealm(it, 0)
+                }
+            } ?: AppSettings()
         }
 
         fun updateAppSettings(onUpdate: (appSettings: AppSettings) -> Unit) {
