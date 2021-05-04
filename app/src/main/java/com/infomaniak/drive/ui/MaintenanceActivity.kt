@@ -55,6 +55,7 @@ class MaintenanceActivity : AppCompatActivity() {
             anotherProfileButton.setOnClickListener {
                 GlobalScope.launch {
                     if (AccountUtils.getAllUsersSync().size > 1) {
+                        startActivity(Intent(this@MaintenanceActivity, MainActivity::class.java))
                         // TODO : Display user list to allow switch
                     } else {
                         startActivity(Intent(this@MaintenanceActivity, LoginActivity::class.java))

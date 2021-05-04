@@ -1,0 +1,27 @@
+<!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2021 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:tint="@color/iconColor"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#fff"
+        android:pathData="M23.7011,4.9125C23.6473,4.7445 23.5098,4.6167 23.3382,4.5755C23.1667,4.5342 22.986,4.5854 22.8617,4.7106L19.2689,8.3C19.1626,8.4062 19.0145,8.4595 18.8649,8.4454L16.2447,8.2071C16.0021,8.1853 15.8096,7.9933 15.7872,7.7508L15.5508,5.1286C15.5371,4.9789 15.5907,4.8308 15.6973,4.7247L19.2911,1.1322C19.4158,1.0079 19.4667,0.8276 19.4255,0.6565C19.3842,0.4854 19.2567,0.3481 19.0891,0.2942C16.5264,-0.4583 13.7574,0.2577 11.8812,2.1581C9.885,4.1374 9.2549,7.1125 10.2772,9.7308C10.3546,9.9138 10.3148,10.1254 10.1762,10.2679L0.8028,19.6308C0.0285,20.3732 -0.212,21.5138 0.1967,22.5054C0.5381,23.2617 1.2276,23.8036 2.0434,23.9565C2.8592,24.1094 3.6983,23.8541 4.2906,23.2728L13.7196,13.8463C13.8625,13.7085 14.0737,13.6689 14.2569,13.7453C16.8715,14.7765 19.8491,14.155 21.8325,12.1641C23.7444,10.2757 24.4624,7.4892 23.7011,4.9125Z" />
+</vector>

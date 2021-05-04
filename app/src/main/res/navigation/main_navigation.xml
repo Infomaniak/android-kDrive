@@ -184,6 +184,16 @@
             app:argType="integer[]" />
     </dialog>
 
+    <dialog
+        android:id="@+id/switchDriveDialog"
+        android:name="com.infomaniak.drive.ui.home.SwitchDriveDialog"
+        android:label="ActionMultiSelectBottomSheetDialog"
+        tools:layout="@layout/dialog_switch_drive">
+        <action
+            android:id="@+id/action_switchDriveDialog_to_driveMaintenanceBottomSheetFragment"
+            app:destination="@id/driveMaintenanceBottomSheetFragment" />
+    </dialog>
+
     <fragment
         android:id="@+id/activityFilesFragment"
         android:name="com.infomaniak.drive.ui.home.ActivityFilesFragment"
@@ -207,7 +217,6 @@
         <argument
             android:name="activityTranslation"
             app:argType="string" />
-
     </fragment>
 
     <fragment
@@ -503,6 +512,31 @@
         <action
             android:id="@+id/action_accessDeniedBottomSheetFragment_to_fileListFragment"
             app:destination="@id/fileListFragment" />
+    </dialog>
+
+    <dialog
+        android:id="@+id/driveMaintenanceBottomSheetFragment"
+        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialog"
+        android:label="driveMaintenanceBottomSheetFragment"
+        tools:layout="@layout/fragment_bottom_sheet_information">
+        <argument
+            android:name="driveName"
+            app:argType="string"
+            app:nullable="false" />
+    </dialog>
+
+    <dialog
+        android:id="@+id/driveBlockedBottomSheetFragment"
+        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.DriveBlockedBottomSheetDialog"
+        android:label="driveBlockedBottomSheetFragment"
+        tools:layout="@layout/fragment_bottom_sheet_information">
+        <argument
+            android:name="driveId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="expirationDate"
+            app:argType="long" />
     </dialog>
 
     <dialog
