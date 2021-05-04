@@ -243,8 +243,8 @@
         android:label="@string/menuTitle"
         tools:layout="@layout/fragment_menu">
         <action
-            android:id="@+id/action_menuFragment_to_switchUserFragment"
-            app:destination="@id/switchUserFragment" />
+            android:id="@+id/action_menuFragment_to_switchUserActivity"
+            app:destination="@id/switchUserActivity" />
         <action
             android:id="@+id/action_menuFragment_to_homeFragment"
             app:destination="@id/homeFragment" />
@@ -291,10 +291,11 @@
             app:popEnterAnim="@anim/fragment_open_enter"
             app:popExitAnim="@anim/fragment_open_exit" />
     </fragment>
-    <fragment
-        android:id="@+id/switchUserFragment"
-        android:name="com.infomaniak.drive.ui.menu.SwitchUserFragment"
-        android:label="SwitchUserFragment"
+
+    <activity
+        android:id="@+id/switchUserActivity"
+        android:name="com.infomaniak.drive.ui.SwitchUserActivity"
+        android:label="SwitchUserActivity"
         tools:layout="@layout/fragment_base_settings" />
 
     <activity

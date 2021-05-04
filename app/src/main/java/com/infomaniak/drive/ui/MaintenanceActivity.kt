@@ -23,12 +23,9 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
 import com.infomaniak.drive.R
-import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.utils.AccountUtils
 import kotlinx.android.synthetic.main.activity_no_drive.*
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 class MaintenanceActivity : AppCompatActivity() {
 
@@ -53,14 +50,7 @@ class MaintenanceActivity : AppCompatActivity() {
             }
 
             anotherProfileButton.setOnClickListener {
-                GlobalScope.launch {
-                    if (AccountUtils.getAllUsersSync().size > 1) {
-                        startActivity(Intent(this@MaintenanceActivity, MainActivity::class.java))
-                        // TODO : Display user list to allow switch
-                    } else {
-                        startActivity(Intent(this@MaintenanceActivity, LoginActivity::class.java))
-                    }
-                }
+                startActivity(Intent(this@MaintenanceActivity, SwitchUserActivity::class.java))
             }
         }
     }

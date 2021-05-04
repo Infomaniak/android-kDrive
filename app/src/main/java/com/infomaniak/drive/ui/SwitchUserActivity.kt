@@ -15,34 +15,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.ui.menu
+package com.infomaniak.drive.ui
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.infomaniak.drive.R
-import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.login.LoginActivity
-import com.infomaniak.drive.ui.menu.settings.BaseSettingsFragment
+import com.infomaniak.drive.ui.menu.UserAdapter
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.models.User
-import com.infomaniak.lib.core.utils.UtilsUi
 import kotlinx.android.synthetic.main.fragment_base_settings.*
 
-class SwitchUserFragment : BaseSettingsFragment() {
+class SwitchUserActivity : AppCompatActivity() {
 
     private lateinit var mainViewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        UtilsUi.setupSharedElementTransition(this, R.id.changeUser, R.id.nestedScrollView)
-    }
+        setContentView(R.layout.fragment_base_settings)
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
-        super.onActivityCreated(savedInstanceState)
+        toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
 
-        AccountUtils.getAllUsers().observe(viewLifecycleOwner) { users ->
+        mainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
+        AccountUtils.getAllUsers().observe(this) { users ->
             usersRecyclerView.adapter = UserAdapter(users as ArrayList<User>) { user ->
                 AccountUtils.currentUser = user
                 AccountUtils.reloadApp?.invoke()
@@ -50,9 +49,7 @@ class SwitchUserFragment : BaseSettingsFragment() {
         }
 
         addUser.setOnClickListener {
-            requireActivity().apply {
-                startActivity(Intent(this, LoginActivity::class.java))
-            }
+            startActivity(Intent(this, LoginActivity::class.java))
         }
     }
 }

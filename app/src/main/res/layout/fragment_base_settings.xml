@@ -23,7 +23,7 @@
     android:layout_height="match_parent"
     android:fillViewport="true"
     android:transitionName="changeUserTransition"
-    tools:context=".ui.menu.SwitchUserFragment">
+    tools:context=".ui.SwitchUserActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
