@@ -43,7 +43,7 @@
                 android:scaleType="centerCrop"
                 app:shapeAppearanceOverlay="@style/ShapeAppearanceOnlyBottomCornersRounded"
                 tools:ignore="ContentDescription"
-                tools:src="@drawable/sample_wallpaper" />
+                tools:src="@tools:sample/backgrounds/scenic" />
 
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/collapsingBackgroundShadow"

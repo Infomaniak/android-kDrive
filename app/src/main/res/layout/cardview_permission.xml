@@ -52,7 +52,7 @@
             app:layout_constraintStart_toStartOf="@+id/mainIcon"
             app:layout_constraintTop_toBottomOf="@id/mainIcon"
             app:shapeAppearanceOverlay="@style/CircleImageView"
-            app:srcCompat="@drawable/ic_placeholder_avatar" />
+            tools:srcCompat="@tools:sample/avatars" />
 
         <include
             android:id="@+id/thirdIcon"

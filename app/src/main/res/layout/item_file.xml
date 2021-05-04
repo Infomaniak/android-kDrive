@@ -39,8 +39,8 @@
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:scaleType="centerCrop"
-            android:src="@drawable/sample_wallpaper"
-            tools:ignore="ContentDescription" />
+            tools:ignore="ContentDescription"
+            tools:src="@tools:sample/backgrounds/scenic" />
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/fileProgression"

@@ -84,7 +84,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:shapeAppearanceOverlay="@style/CircleImageView"
-            app:srcCompat="@drawable/ic_placeholder_avatar" />
+            tools:srcCompat="@tools:sample/avatars" />
 
         <TextView
             android:id="@+id/activityUserName"
@@ -97,7 +97,7 @@
             app:layout_constraintEnd_toStartOf="@+id/activityHourLayout"
             app:layout_constraintStart_toEndOf="@id/activityUserAvatar"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="@string/allUserAnonymous" />
+            tools:text="@tools:sample/full_names" />
 
         <TextView
             android:id="@+id/activityAction"

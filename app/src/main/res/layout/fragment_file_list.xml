@@ -241,14 +241,14 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     app:shapeAppearanceOverlay="@style/CircleImageView"
-                    app:srcCompat="@drawable/placeholder" />
+                    tools:srcCompat="@tools:sample/avatars" />
 
                 <TextView
                     android:id="@+id/currentActivityContent"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginVertical="@dimen/marginStandardSmall"
+                    android:layout_height="match_parent"
                     android:layout_marginStart="@dimen/marginStandardSmall"
+                    android:gravity="center_vertical"
                     tools:text="Zarela Reed a importé 16 nouveaux fichiers" />
             </LinearLayout>
 

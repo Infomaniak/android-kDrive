@@ -33,7 +33,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:shapeAppearanceOverlay="@style/CircleImageView"
-        app:srcCompat="@drawable/ic_placeholder_avatar" />
+        tools:srcCompat="@tools:sample/avatars" />
 
     <LinearLayout
         android:layout_width="0dp"
@@ -52,7 +52,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:maxLines="1"
-            tools:text="Thiago Silva" />
+            tools:text="@tools:sample/full_names" />
 
         <TextView
             android:id="@+id/userEmail"

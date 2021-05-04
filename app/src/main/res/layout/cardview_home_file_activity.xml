@@ -38,7 +38,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:shapeAppearanceOverlay="@style/CircleImageView"
-            app:srcCompat="@drawable/placeholder" />
+            tools:srcCompat="@tools:sample/avatars" />
 
         <com.infomaniak.lib.core.views.LoaderTextView
             android:id="@+id/userName"
@@ -54,7 +54,7 @@
             app:layout_constraintStart_toEndOf="@id/userAvatar"
             app:layout_constraintTop_toTopOf="parent"
             app:use_dark_color="true"
-            tools:text="Zarela Reed" />
+            tools:text="@tools:sample/full_names" />
 
         <com.infomaniak.lib.core.views.LoaderTextView
             android:id="@+id/actionValue"
@@ -285,7 +285,7 @@
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toEndOf="@id/fileIcon2"
             app:layout_constraintTop_toBottomOf="@id/fileName1"
-            tools:text="Fichier.pdf"
+            tools:text="@tools:sample/lorem"
             tools:visibility="visible" />
 
         <ImageView
@@ -312,7 +312,7 @@
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toEndOf="@id/fileIcon3"
             app:layout_constraintTop_toBottomOf="@id/fileName2"
-            tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit.pdf"
+            tools:text="@tools:sample/lorem/random"
             tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

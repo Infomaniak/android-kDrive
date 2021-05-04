@@ -30,4 +30,4 @@
     app:closeIconTint="@color/actionColor"
     app:closeIconVisible="true"
     app:iconStartPadding="@dimen/marginStandardVerySmall"
-    tools:text="Boris Siegenthaler" />
+    tools:text="@tools:sample/full_names" />

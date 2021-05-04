@@ -41,7 +41,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@id/commentUserName"
                 app:shapeAppearanceOverlay="@style/CircleImageView"
-                app:srcCompat="@drawable/ic_placeholder_avatar" />
+                tools:srcCompat="@tools:sample/avatars" />
 
             <TextView
                 android:id="@+id/commentUserName"
@@ -55,7 +55,7 @@
                 app:layout_constraintStart_toEndOf="@id/commentUserAvatar"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_chainStyle="packed"
-                tools:text="Zarela Reed" />
+                tools:text="@tools:sample/full_names" />
 
             <TextView
                 android:id="@+id/commentValue"
