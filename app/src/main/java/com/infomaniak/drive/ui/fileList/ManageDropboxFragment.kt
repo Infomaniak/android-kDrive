@@ -120,7 +120,7 @@ open class ManageDropboxFragment : Fragment() {
             if (limiteStorageSwitch.isChecked) limiteStorageValueLayout.visibility = View.VISIBLE
             if (limiteStorageSwitch.isChecked) limiteStorageValueUnit.visibility = View.VISIBLE
 
-            expirationDateInput.init(dropBox.validUntil ?: Date()) {
+            expirationDateInput.init(fragmentManager = parentFragmentManager, dropBox.validUntil ?: Date()) {
                 currentDropBox?.newValidUntil = Date(it)
                 if (validationCount <= 0) validationCount++
                 enableSaveButton()

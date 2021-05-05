@@ -108,7 +108,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
                 limiteStorageValueUnit
             )
         )
-        expirationDateInput.init()
+        expirationDateInput.init(fragmentManager = parentFragmentManager)
     }
 
     private fun createOnCheckedChangeListener(vararg viewsToReveal: View): CompoundButton.OnCheckedChangeListener {

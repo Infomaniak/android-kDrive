@@ -23,6 +23,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentManager
 import com.google.android.material.datepicker.*
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.utils.format
@@ -41,7 +42,7 @@ class DateInputView @JvmOverloads constructor(
         inflate(context, R.layout.view_date_input, this)
     }
 
-    fun init(defaultDate: Date = Date(), onDateSet: ((timestamp: Long) -> Unit)? = null) {
+    fun init(fragmentManager: FragmentManager, defaultDate: Date = Date(), onDateSet: ((timestamp: Long) -> Unit)? = null) {
         currentCalendarDate = defaultDate
 
         dateValueInput.apply {
@@ -49,7 +50,7 @@ class DateInputView @JvmOverloads constructor(
             keyListener = null
             setOnTouchListener { _, event ->
                 if (event.action == MotionEvent.ACTION_UP) {
-                    showDatePicker(currentCalendarDate) { calendarResult ->
+                    showDatePicker(fragmentManager, currentCalendarDate) { calendarResult ->
                         currentCalendarDate = Date(calendarResult)
                         dateValueInput.text = SpannableStringBuilder(currentCalendarDate.format())
                         onDateSet?.invoke(calendarResult)
@@ -64,7 +65,7 @@ class DateInputView @JvmOverloads constructor(
         return if (this::currentCalendarDate.isInitialized) currentCalendarDate.time / 1000 else null
     }
 
-    private fun showDatePicker(defaultDate: Date, onDateSet: (timestamp: Long) -> Unit) {
+    private fun showDatePicker(fragmentManager: FragmentManager, defaultDate: Date, onDateSet: (timestamp: Long) -> Unit) {
         val yesterday = Calendar.getInstance().apply { this.add(Calendar.DATE, -1) }
         val calendarConstraints = CalendarConstraints.Builder()
             .setValidator(
@@ -91,7 +92,7 @@ class DateInputView @JvmOverloads constructor(
                 this@DateInputView.clearFocus()
                 onDateSet(it)
             }
-            show((context as AppCompatActivity).supportFragmentManager, materialDatePickerBuilder.toString())
+            show(fragmentManager, materialDatePickerBuilder.toString())
         }
     }
 }

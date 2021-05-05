@@ -48,7 +48,7 @@ class ConvertToDropBoxFragment : ManageDropboxFragment() {
         FileController.getFileById(navigationArgs.fileId)?.let { file ->
             updateUI(file, null)
 
-            expirationDateInput.init()
+            expirationDateInput.init(fragmentManager = parentFragmentManager)
 
             enableSaveButton()
             saveButton.initProgress(this)

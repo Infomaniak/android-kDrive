@@ -117,7 +117,7 @@ class FileShareLinkSettingsFragment : Fragment() {
             }
 
             addExpirationDateSwitch.isChecked = shareLink.validUntil != null
-            expirationDateInput.init(defaultCalendarTimestamp) {
+            expirationDateInput.init(fragmentManager = parentFragmentManager, defaultCalendarTimestamp) {
                 shareLink.validUntil = Date(it)
             }
         }
