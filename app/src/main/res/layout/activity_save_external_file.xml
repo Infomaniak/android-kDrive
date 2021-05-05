@@ -68,8 +68,7 @@
                 android:id="@+id/fileNameEdit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
-                android:visibility="visible" />
+                android:fontFamily="sans-serif" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/fileNames"
