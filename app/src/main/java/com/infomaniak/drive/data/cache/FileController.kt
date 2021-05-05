@@ -219,9 +219,9 @@ object FileController {
      * @param driveID Drive ID (null if all user drive)
      */
     fun deleteUserDriveFiles(userID: Int, driveID: Int? = null) {
-        val filesDir = Realm.getApplicationContext()!!.cacheDir
+        val filesDir = Realm.getApplicationContext()!!.filesDir
         filesDir.listFiles()?.forEach { file ->
-            val match = Regex(REALM_DB_FILE.format("(\\d+)", "(\\d+)") + ".*").find(file.name)
+            val match = Regex("(\\d+)-(\\d+)").find(file.name)
             match?.destructured?.let {
                 val (fileUserId, fileDriveId) = it
                 if (fileUserId.toInt() == userID && (driveID == null || fileDriveId.toInt() == driveID)) {
