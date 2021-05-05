@@ -74,6 +74,7 @@ object AccountUtils : CredentialManager {
         set(user) {
             field = user
             currentUserId = user?.id ?: -1
+            currentDriveId = -1
             getCurrentDrive()
             Sentry.setUser(io.sentry.protocol.User().apply { email = user?.email })
             InfomaniakCore.bearerToken = user?.apiToken?.accessToken.toString()
