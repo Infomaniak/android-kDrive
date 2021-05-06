@@ -5,8 +5,8 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.CreateFile
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.utils.Env
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.`Env-Exemple`.DRIVE_ID
 import io.realm.Realm
 import kotlinx.android.parcel.RawValue
 import kotlinx.coroutines.Dispatchers
@@ -57,7 +57,7 @@ class FileControllerTest : KDriveTest() {
     @Test
     fun getFavoriteFiles_CanGetRemoteSavedFilesFromRealm() {
         // Get remote favorite files
-        val remoteResult = ApiRepository.getFavoriteFiles(Env.DRIVE_ID, File.SortType.NAME_AZ, 1)
+        val remoteResult = ApiRepository.getFavoriteFiles(DRIVE_ID, File.SortType.NAME_AZ, 1)
         Assert.assertTrue(remoteResult.isSuccess())
         Assert.assertFalse(remoteResult.data.isNullOrEmpty())
 
@@ -118,7 +118,7 @@ class FileControllerTest : KDriveTest() {
     @Test
     fun getPictures_CanGetRemoteSavedFilesFromRealm() {
         // Get remote pictures
-        val apiResponse = ApiRepository.getLastPictures(Env.DRIVE_ID, 1)
+        val apiResponse = ApiRepository.getLastPictures(DRIVE_ID, 1)
         Assert.assertTrue("get pictures request must pass", apiResponse.isSuccess())
         Assert.assertFalse("get pictures response data cannot be null or empty", apiResponse.data.isNullOrEmpty())
 
@@ -162,7 +162,7 @@ class FileControllerTest : KDriveTest() {
 
     private fun createAndStoreOfficeFile(transaction: ((remoteFile: File) -> Unit)? = null): @RawValue File {
         val createFile = CreateFile("offline doc ${UUID.randomUUID()}", File.Office.DOCS.extension)
-        val apiResponse = ApiRepository.createOfficeFile(Env.DRIVE_ID, Utils.ROOT_ID, createFile)
+        val apiResponse = ApiRepository.createOfficeFile(DRIVE_ID, Utils.ROOT_ID, createFile)
         Assert.assertTrue("create office file request must pass", apiResponse.isSuccess())
         Assert.assertNotNull("create office api response data cannot be null", apiResponse.data)
 

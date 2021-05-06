@@ -91,4 +91,8 @@ object UiTestUtils {
         }
         device.findObject(UiSelector().resourceId(getViewIdentifier("fileRights"))).clickAndWaitForNewWindow()
     }
+
+    fun getDeviceViewById(id: String): UiObject? {
+        return device.findObject(UiSelector().resourceId(getViewIdentifier(id)))
+    }
 }

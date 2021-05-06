@@ -22,7 +22,9 @@ import androidx.test.core.app.ApplicationProvider
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.Env
+import com.infomaniak.drive.utils.`Env-Exemple`.DRIVE_ID
+import com.infomaniak.drive.utils.`Env-Exemple`.TOKEN
+import com.infomaniak.drive.utils.`Env-Exemple`.USE_CURRENT_USER
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.models.User
 import com.infomaniak.lib.login.ApiToken
@@ -41,18 +43,18 @@ open class KDriveTest {
         @BeforeClass
         @JvmStatic
         fun beforeAll() {
-            if (Env.USE_CURRENT_USER) {
+            if (USE_CURRENT_USER) {
                 user = runBlocking(Dispatchers.IO) { AccountUtils.requestCurrentUser() }!!
                 InfomaniakCore.bearerToken = user.apiToken.accessToken
-                userDrive = UserDrive(user.id, Env.DRIVE_ID)
+                userDrive = UserDrive(user.id, DRIVE_ID)
             } else {
-                InfomaniakCore.bearerToken = Env.TOKEN
+                InfomaniakCore.bearerToken = TOKEN
 
                 val apiResponse = ApiRepository.getUserProfile(true)
                 user = apiResponse.data!!
-                userDrive = UserDrive(user.id, Env.DRIVE_ID)
+                userDrive = UserDrive(user.id, DRIVE_ID)
                 runBlocking {
-                    user.apiToken = ApiToken(Env.TOKEN, "", "Bearer", userId = user.id, expiresAt = null)
+                    user.apiToken = ApiToken(TOKEN, "", "Bearer", userId = user.id, expiresAt = null)
                     user.organizations = arrayListOf()
                     AccountUtils.addUser(user)
                 }
@@ -62,7 +64,7 @@ open class KDriveTest {
         @AfterClass
         @JvmStatic
         fun afterAll() {
-            if (!Env.USE_CURRENT_USER) {
+            if (!USE_CURRENT_USER) {
                 runBlocking { AccountUtils.removeUser(context, user) }
             }
         }
