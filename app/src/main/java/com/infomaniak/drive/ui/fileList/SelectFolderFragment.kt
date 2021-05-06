@@ -101,7 +101,7 @@ class SelectFolderFragment : FileListFragment() {
 
         val currentFolder = FileController.getFileById(folderID, userDrive)
         val enable = folderID != saveExternalViewModel.disableSelectedFolder &&
-                (currentFolder?.rights?.moveInto == true || currentFolder?.rights?.newFile == true)
+                (currentFolder?.rights?.moveInto != false || currentFolder.rights?.newFile != false)
         selectFolderActivity.enableSaveButton(enable)
     }
 

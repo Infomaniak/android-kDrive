@@ -37,13 +37,15 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UISettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.menu.settings.SelectDriveDialog
 import com.infomaniak.drive.ui.menu.settings.SelectDriveViewModel
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.drive.utils.SyncUtils.checkSyncPermissions
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import com.infomaniak.drive.utils.showOrHideEmptyError
+import com.infomaniak.drive.utils.showSnackbar
 import kotlinx.android.synthetic.main.activity_save_external_file.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -80,9 +82,9 @@ class SaveExternalFilesActivity : BaseActivity() {
                 driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(it.preferences.color))
                 driveName.text = it.name
                 saveButton.isEnabled = false
-                UISettings(this).getSaveExternalFilesPref().apply {
-                    if (first == selectDriveViewModel.selectedUserId.value && second == it.id) {
-                        saveExternalFilesViewModel.folderId.value = third
+                UISettings(this).getSaveExternalFilesPref().let { (userId, driveId, folderId) ->
+                    if (userId == selectDriveViewModel.selectedUserId.value && driveId == it.id) {
+                        saveExternalFilesViewModel.folderId.value = folderId
                     } else {
                         saveExternalFilesViewModel.folderId.value = -1
                     }
@@ -108,7 +110,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 driveId = selectDriveViewModel.selectedDrive.value?.id!!
             )
             FileController.getFileById(folderId, userDrive)?.let { folder ->
-                val folderName = if (folderId == Utils.ROOT_ID) {
+                val folderName = if (folder.isRoot()) {
                     getString(R.string.allRootName, selectDriveViewModel.selectedDrive.value?.name)
                 } else {
                     folder.name
@@ -131,10 +133,8 @@ class SaveExternalFilesActivity : BaseActivity() {
                 val driveId = selectDriveViewModel.selectedDrive.value?.id!!
                 val folderId = saveExternalFilesViewModel.folderId.value!!
 
-
                 UISettings(this).setSaveExternalFilesPref(userId, driveId, folderId)
                 runBlocking(Dispatchers.IO) {
-
                     if (storeFiles(userId, driveId, folderId)) {
                         applicationContext.syncImmediately()
                         finish()
@@ -157,28 +157,16 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private fun activeDefaultUser() {
         AccountUtils.getAllUsers().observe(this) { users ->
-            if (users.size > 1) {
-                activeSelectDrive()
-            }
+            if (users.size > 1) activeSelectDrive()
         }
         val currentUserDrives = DriveInfosController.getDrives(AccountUtils.currentUserId)
-        if (currentUserDrives.size > 1) {
-            activeSelectDrive()
-        }
+        if (currentUserDrives.size > 1) activeSelectDrive()
 
-        val saveExternalFilesPref = UISettings(this).getSaveExternalFilesPref()
-
-        val oldSelectDrive =
-            DriveInfosController.getDrives(saveExternalFilesPref.first, saveExternalFilesPref.second).firstOrNull()
-
-        val userId: Int
-        val drive: Drive?
-        if (oldSelectDrive == null) {
+        var (userId, driveId) = UISettings(this).getSaveExternalFilesPref()
+        var drive = DriveInfosController.getDrives(userId, driveId).firstOrNull()
+        if (drive == null) {
             userId = AccountUtils.currentUserId
             drive = AccountUtils.getCurrentDrive()
-        } else {
-            userId = saveExternalFilesPref.first
-            drive = oldSelectDrive
         }
 
         selectDriveViewModel.selectedUserId.value = userId
