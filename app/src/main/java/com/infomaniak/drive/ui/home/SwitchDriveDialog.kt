@@ -68,8 +68,8 @@ class SwitchDriveDialog : DialogFragment() {
         }
         driveListAdapter = DriveListAdapter(initialDriveList) { drive ->
             dismiss()
+            // TODO - Implement drive blocked BottomSheetDialog (for invoice issues) - Awaiting API attributes
             if (drive.maintenance) {
-                // TODO - Implement drive blocked BottomSheetDialog (for invoice issues)
                 findNavController().navigate(
                     SwitchDriveDialogDirections.actionSwitchDriveDialogToDriveMaintenanceBottomSheetFragment(
                         driveName = drive.name

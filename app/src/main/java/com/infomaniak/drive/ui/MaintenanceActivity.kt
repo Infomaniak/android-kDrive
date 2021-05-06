@@ -29,7 +29,7 @@ import kotlinx.android.synthetic.main.empty_icon_layout.view.*
 
 class MaintenanceActivity : AppCompatActivity() {
 
-    private val isTechnicalMaintenance: Boolean = true
+    private val isTechnicalMaintenance: Boolean = true // TODO - Default value to true until API available for invoice issues
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,8 +45,10 @@ class MaintenanceActivity : AppCompatActivity() {
                 noDriveTitle.text = getString(R.string.driveBlockedTitle, currentDrive.name)
                 noDriveDescription.text = getString(R.string.driveBlockedDescription)
                 noDriveIconLayout.icon.setImageResource(R.drawable.ic_drive_blocked)
-                noDriveActionButton.visibility = VISIBLE
-                noDriveActionButton.text = getString(R.string.buttonRenew)
+                noDriveActionButton.apply {
+                    visibility = VISIBLE
+                    noDriveActionButton.text = getString(R.string.buttonRenew)
+                }
             }
 
             anotherProfileButton.setOnClickListener {

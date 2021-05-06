@@ -30,26 +30,20 @@ class DriveBlockedBottomSheetDialog : InformationBottomSheetDialog() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        title.text = getString(R.string.driveBlockedTitle, AccountUtils.getCurrentDrive()?.name)
-        description.setText(R.string.driveBlockedDescription)
         illu.apply {
             layoutParams.height = 70.toPx()
             layoutParams.width = 70.toPx()
             setImageResource(R.drawable.ic_drive_blocked)
         }
+
+        title.text = getString(R.string.driveBlockedTitle, AccountUtils.getCurrentDrive()?.name)
+        description.setText(R.string.driveBlockedDescription)
         actionButton.apply {
-            visibility = VISIBLE
             setText(R.string.buttonRenew)
             setOnClickListener {
                 requireContext().openUrl("TODO") // Open renew URL from product, TODO : Awaiting invoices scope
             }
         }
-        secondaryActionButton.apply {
-            visibility = VISIBLE
-            setText(R.string.buttonClose)
-            setOnClickListener {
-                dismiss()
-            }
-        }
+        secondaryActionButton.setText(R.string.buttonClose)
     }
 }
