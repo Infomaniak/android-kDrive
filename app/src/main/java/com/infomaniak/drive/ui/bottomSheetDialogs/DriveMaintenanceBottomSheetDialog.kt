@@ -19,7 +19,6 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import android.os.Bundle
 import android.view.View.GONE
-import android.view.View.VISIBLE
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.utils.toPx
@@ -39,14 +38,13 @@ class DriveMaintenanceBottomSheetDialog : InformationBottomSheetDialog() {
 
         title.text = getString(R.string.driveMaintenanceTitle, navigationArgs.driveName)
         description.setText(R.string.driveMaintenanceDescription)
-        secondaryActionButton.visibility = GONE
-
         actionButton.apply {
-            visibility = VISIBLE
             setText(R.string.buttonClose)
             setOnClickListener {
                 dismiss()
             }
         }
+
+        secondaryActionButton.visibility = GONE
     }
 }
