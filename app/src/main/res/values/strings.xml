@@ -476,21 +476,14 @@
         <item quantity="one">%s déplacé dans la corbeille</item>
         <item quantity="other">%d éléments déplacés dans la corbeille</item>
     </plurals>
-    <string name="sortAzText">Nom : de A à Z</string>
     <string name="sortBigger">Plus grand</string>
-    <string name="sortBiggerText">Plus grand</string>
     <string name="sortExtension">Extension</string>
-    <string name="sortExtensionText">Extension</string>
-    <string name="sortMostRecentText">Plus récent</string>
-    <string name="sortNameAZ">Nom: de A à Z</string>
-    <string name="sortNameZA">Nom: de Z à A</string>
+    <string name="sortNameAZ">Nom : de A à Z</string>
+    <string name="sortNameZA">Nom : de Z à A</string>
     <string name="sortOlder">Plus ancien</string>
-    <string name="sortOlderText">Plus ancien</string>
     <string name="sortRecent">Plus récent</string>
     <string name="sortSmaller">Plus petit</string>
-    <string name="sortSmallerText">Plus petit</string>
     <string name="sortTitle">Trier</string>
-    <string name="sortZaText">Nom : de Z à A</string>
     <string name="switchDriveSearchViewHint">Rechercher un kDrive</string>
     <string name="switchUserDescription">Consulter les kDrives de vos autres profils Infomaniak. Vous pouvez ajouter autant de profil d’utilisateurs que vous souhaitez.</string>
     <string name="switchUserTitle">Changer d’utilisateur</string>

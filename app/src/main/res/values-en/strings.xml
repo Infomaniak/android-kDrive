@@ -467,21 +467,14 @@
         <item quantity="one">%s moved to the trash</item>
         <item quantity="other">%d items moved to the trash</item>
     </plurals>
-    <string name="sortAzText">Name: from A to Z</string>
     <string name="sortBigger">Larger</string>
-    <string name="sortBiggerText">Larger</string>
     <string name="sortExtension">Extension</string>
-    <string name="sortExtensionText">Extension</string>
-    <string name="sortMostRecentText">Newer</string>
     <string name="sortNameAZ">Name: from A to Z</string>
     <string name="sortNameZA">Name: from Z to A</string>
     <string name="sortOlder">Older</string>
-    <string name="sortOlderText">Older</string>
     <string name="sortRecent">Newer</string>
     <string name="sortSmaller">Smaller</string>
-    <string name="sortSmallerText">Smaller</string>
     <string name="sortTitle">Sort</string>
-    <string name="sortZaText">Name: from Z to A</string>
     <string name="switchDriveSearchViewHint">Search a kDrive</string>
     <string name="switchUserDescription">View the kDrives of your other Infomaniak profiles. You can add as many user profiles as you like.</string>
     <string name="switchUserTitle">Change user</string>

@@ -22,7 +22,6 @@ import android.text.SpannableStringBuilder
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.widget.FrameLayout
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.datepicker.*
 import com.infomaniak.drive.R

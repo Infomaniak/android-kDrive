@@ -467,21 +467,14 @@
         <item quantity="one">%s in den Papierkorb verschoben</item>
         <item quantity="other">%d Elemente in den Papierkorb verschoben</item>
     </plurals>
-    <string name="sortAzText">Name: von A bis Z</string>
     <string name="sortBigger">Grösser</string>
-    <string name="sortBiggerText">Grösser</string>
     <string name="sortExtension">Erweiterung</string>
-    <string name="sortExtensionText">Erweiterung</string>
-    <string name="sortMostRecentText">Jünger</string>
     <string name="sortNameAZ">Name: von A bis Z</string>
     <string name="sortNameZA">Name: von Z bis A</string>
     <string name="sortOlder">Älter</string>
-    <string name="sortOlderText">Älter</string>
     <string name="sortRecent">Jünger</string>
     <string name="sortSmaller">Kleiner</string>
-    <string name="sortSmallerText">Kleiner</string>
     <string name="sortTitle">Sortieren</string>
-    <string name="sortZaText">Name: von Z bis A</string>
     <string name="switchDriveSearchViewHint">kDrive suchen</string>
     <string name="switchUserDescription">Sehen Sie die kDrives Ihrer anderen Infomaniak-Profile. Sie können so viele Benutzerprofile hinzufügen wie Sie möchten.</string>
     <string name="switchUserTitle">Benutzer wechseln</string>

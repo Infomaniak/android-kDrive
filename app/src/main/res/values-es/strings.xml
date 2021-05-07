@@ -467,21 +467,14 @@
         <item quantity="one">%s enviado a la papelera</item>
         <item quantity="other">%d elementos enviados a la papelera</item>
     </plurals>
-    <string name="sortAzText">Nombre: de A a Z</string>
     <string name="sortBigger">Mayor tamaño</string>
-    <string name="sortBiggerText">Mayor tamaño</string>
     <string name="sortExtension">Extensión</string>
-    <string name="sortExtensionText">Extensión</string>
-    <string name="sortMostRecentText">Más reciente</string>
     <string name="sortNameAZ">Nombre: de A a Z</string>
     <string name="sortNameZA">Nombre: de Z a A</string>
     <string name="sortOlder">Más antiguo</string>
-    <string name="sortOlderText">Más antiguo</string>
     <string name="sortRecent">Más reciente</string>
     <string name="sortSmaller">Menor tamaño</string>
-    <string name="sortSmallerText">Menor tamaño</string>
     <string name="sortTitle">Clasificar</string>
-    <string name="sortZaText">Nombre: de Z a A</string>
     <string name="switchDriveSearchViewHint">Buscar un kDrive</string>
     <string name="switchUserDescription">Consultar las kDrives de tus otros perfiles Infomaniak. Puedes añadir tantos perfiles de usuario como desees.</string>
     <string name="switchUserTitle">Cambiar el usuario</string>

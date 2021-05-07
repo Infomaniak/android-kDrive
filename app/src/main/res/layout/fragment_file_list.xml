@@ -273,7 +273,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    tools:text="Nom" />
+                    tools:text="@string/sortNameAZ" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/toggleDisplayButton"

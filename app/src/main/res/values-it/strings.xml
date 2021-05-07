@@ -467,21 +467,14 @@
         <item quantity="one">%s spostato nel cestino</item>
         <item quantity="other">%d elementi spostati nel cestino</item>
     </plurals>
-    <string name="sortAzText">Nome: dalla A alla Z</string>
     <string name="sortBigger">Più grande</string>
-    <string name="sortBiggerText">Più grande</string>
     <string name="sortExtension">Estensione</string>
-    <string name="sortExtensionText">Estensione</string>
-    <string name="sortMostRecentText">Più recente</string>
     <string name="sortNameAZ">Nome: dalla A alla Z</string>
     <string name="sortNameZA">Nome: dalla Z alla A</string>
     <string name="sortOlder">Più vecchio</string>
-    <string name="sortOlderText">Più vecchio</string>
     <string name="sortRecent">Più recente</string>
     <string name="sortSmaller">Più piccolo</string>
-    <string name="sortSmallerText">Più piccolo</string>
     <string name="sortTitle">Ordina</string>
-    <string name="sortZaText">Nome: dalla Z alla A</string>
     <string name="switchDriveSearchViewHint">Cerca un kDrive</string>
     <string name="switchUserDescription">Consulta le kDrives dei tuoi altri profili Infomaniak. Puoi aggiungere tutti i profili utente che vuoi.</string>
     <string name="switchUserTitle">Cambia utente</string>
