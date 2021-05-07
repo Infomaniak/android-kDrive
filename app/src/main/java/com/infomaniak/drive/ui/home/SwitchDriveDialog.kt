@@ -56,7 +56,7 @@ class SwitchDriveDialog : DialogFragment() {
         dialog?.window?.attributes = layoutParams
         dialog?.window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
         view?.setOnClickListener { _ ->
-            dismiss()
+            findNavController().popBackStack()
         }
 
         initialDriveList = DriveInfosController.getDrives(AccountUtils.currentUserId)
