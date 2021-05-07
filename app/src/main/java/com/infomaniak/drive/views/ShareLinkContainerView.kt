@@ -90,6 +90,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
         updateUi()
         shareLinkTitle.setText(title)
         shareLinkSwitch.setOnCheckedChangeListener { _, isChecked ->
+            toggleSwitchingApproval(false)
             onSwitchClicked(isChecked)
         }
         shareLinkSettings.setOnClickListener {
@@ -104,6 +105,10 @@ class ShareLinkContainerView @JvmOverloads constructor(
         this.shareLink = shareLink
         if (shareLink == null) urlValue = ""
         updateUi()
+    }
+
+    fun toggleSwitchingApproval(allow: Boolean) {
+        shareLinkSwitch.isClickable = allow
     }
 
     private fun updateUi() {
