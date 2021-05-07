@@ -129,6 +129,7 @@
     <string name="buttonRefresh">Actualizar</string>
     <string name="buttonRemoveFavorites">Eliminar los favoritos</string>
     <string name="buttonRename">Cambiar el nombre</string>
+    <string name="buttonRenew">Renovar</string>
     <string name="buttonRetry">Volver a intentarlo</string>
     <string name="buttonSave">Guardar</string>
     <string name="buttonSeeFolder">Ver la carpeta</string>
@@ -176,6 +177,19 @@
     <string name="createFolderTitle">Crear una carpeta</string>
     <string name="createFolderValidUntilDescription">Una vez transcurrida la fecha, los usuarios ya no podrán transferir archivos.</string>
     <string name="createPrivateFolderSucces">Carpeta creada correctamente</string>
+    <plurals name="driveBlockedDescription">
+        <item quantity="one">El producto ha caducado desde el %s. Por favor, renuévelo para gestionarlo y acceder a sus datos.</item>
+        <item quantity="other">Todos sus productos han caducado. Por favor, renuévelos para gestionarlos y acceder a sus datos.</item>
+    </plurals>
+    <plurals name="driveBlockedTitle">
+        <item quantity="one">El kDrive %s está actualmente bloqueado</item>
+        <item quantity="other">Todos sus kDrives están actualmente bloqueados</item>
+    </plurals>
+    <string name="driveMaintenanceDescription">Se está realizando una actualización para mejorar kDrive. Este proceso puede durar unos minutos. Gracias por su paciencia.</string>
+    <plurals name="driveMaintenanceTitle">
+        <item quantity="one">El kDrive %s está actualmente en mantenimiento</item>
+        <item quantity="other">Todos sus kDrives están actualmente en mantenimiento</item>
+    </plurals>
     <string name="dropBoxDescription">Invita a tus socios, usuarios o clientes a transferir archivos a tu kDrive aunque no tengan cuenta Infomaniak.</string>
     <string name="dropBoxLinkTitle">Enlace del buzón de depósito</string>
     <string name="dropBoxResultDescription">Comparte el siguiente enlace con las personas que deban enviarte archivos.</string>

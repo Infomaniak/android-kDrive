@@ -129,6 +129,7 @@
     <string name="buttonRefresh">Update</string>
     <string name="buttonRemoveFavorites">Delete from favorites</string>
     <string name="buttonRename">Rename</string>
+    <string name="buttonRenew">Renew</string>
     <string name="buttonRetry">Try again</string>
     <string name="buttonSave">Save</string>
     <string name="buttonSeeFolder">View folder</string>
@@ -176,6 +177,19 @@
     <string name="createFolderTitle">Create folder</string>
     <string name="createFolderValidUntilDescription">Once the date has passed, users will no longer be able to transfer files.</string>
     <string name="createPrivateFolderSucces">Folder created successfully</string>
+    <plurals name="driveBlockedDescription">
+        <item quantity="one">The product has expired since %s. Please renew it to manage it and access its data.</item>
+        <item quantity="other">All your products have expired. Please renew them to manage them and access their data.</item>
+    </plurals>
+    <plurals name="driveBlockedTitle">
+        <item quantity="one">The kDrive %s is currently blocked</item>
+        <item quantity="other">All your kDrives are currently blocked</item>
+    </plurals>
+    <string name="driveMaintenanceDescription">An update is in progress to improve kDrive. This process may take a few minutes. Thank you for your patience.</string>
+    <plurals name="driveMaintenanceTitle">
+        <item quantity="one">The kDrive %s is currently under maintenance</item>
+        <item quantity="other">All your kDrives are currently under maintenance</item>
+    </plurals>
     <string name="dropBoxDescription">Invite your partners, users or customers to transfer files to your kDrive even if they don’t have an Infomaniak account.</string>
     <string name="dropBoxLinkTitle">Drop box link</string>
     <string name="dropBoxResultDescription">Share the link below with people who need to send you files.</string>
