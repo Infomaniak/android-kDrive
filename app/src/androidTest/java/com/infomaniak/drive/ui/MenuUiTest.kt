@@ -27,6 +27,7 @@ import androidx.test.uiautomator.UiSelector
 import androidx.test.uiautomator.Until
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.Env
 import com.infomaniak.drive.utils.UiTestUtils
 import com.infomaniak.drive.utils.UiTestUtils.device
 import com.infomaniak.drive.utils.UiTestUtils.getDeviceViewById
@@ -54,10 +55,6 @@ class MenuUiTest {
 
     @Test
     fun testAddUser() {
-        val finalUserId = 0 // To replace by Infomaniak User Id
-        val finalUsername = "user-name" // To replace by Infomaniak User email
-        val finalPassword = "password" // To replace by Infomaniak password
-
         getDeviceViewById("changeUser")?.clickAndWaitForNewWindow()
         getDeviceViewById("addUser")?.clickAndWaitForNewWindow()
         getDeviceViewById("nextButton")?.click()
@@ -65,15 +62,15 @@ class MenuUiTest {
         getDeviceViewById("connectButton")?.clickAndWaitForNewWindow()
 
         // Username
-        device.findObject(UiSelector().instance(0).className(EditText::class.java)).text = finalUsername
+        device.findObject(UiSelector().instance(0).className(EditText::class.java)).text = Env.NEW_USER_NAME
 
         // Password
-        device.findObject(UiSelector().text("Mot de passe")).text = finalPassword
+        device.findObject(UiSelector().text("Mot de passe")).text = Env.NEW_USER_PASSWORD
         device.findObject(UiSelector().text("CONNEXION")).clickAndWaitForNewWindow()
 
         sleep(6000)
 
-        assert(AccountUtils.currentUserId == finalUserId)
+        assert(AccountUtils.currentUserId == Env.NEW_USER_ID)
         getDeviceViewById("menuFragment")?.clickAndWaitForNewWindow()
         // Cheat to scroll to bottom of screen
         device.swipe(

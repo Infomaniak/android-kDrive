@@ -36,4 +36,20 @@ object `Env-Exemple` {
      * The drive used for the tests
      */
     const val DRIVE_ID = 140946
+
+    /**
+     * User id used for the addUser test (for assertion)
+     */
+    const val NEW_USER_ID = -1
+
+    /**
+     * User name used to connect on for addUser test (Disable 2FA !)
+     */
+    const val NEW_USER_NAME = "test@infomaniak.com"
+
+    /**
+     * User password used to connect on for addUser test
+     */
+    const val NEW_USER_PASSWORD = ""
+
 }
