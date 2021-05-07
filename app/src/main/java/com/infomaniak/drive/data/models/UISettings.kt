@@ -19,6 +19,7 @@ package com.infomaniak.drive.data.models
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.infomaniak.drive.R
 
 class UISettings(val context: Context) {
 
@@ -49,6 +50,15 @@ class UISettings(val context: Context) {
             apply()
         }
     }
+
+    var bottomNavigationSelectedItem: Int
+        get() = getUISettings().getInt("bottomNavigationSelectedItem", R.id.hostFragment)
+        set(value) {
+            with(getUISettings().edit()) {
+                putInt("bottomNavigationSelectedItem", value)
+                apply()
+            }
+        }
 
     var listMode: Boolean
         get() = getUISettings().getBoolean("listMode", true)

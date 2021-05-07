@@ -84,6 +84,7 @@ class MainActivity : BaseActivity() {
         val navController = findNavController(R.id.hostFragment)
         bottomNavigation.setupWithNavController(navController)
         bottomNavigation.itemIconTintList = ContextCompat.getColorStateList(this, R.color.item_icon_tint_bottom)
+        bottomNavigation.selectedItemId = UISettings(this).bottomNavigationSelectedItem
 
         intent?.getIntExtra(INTENT_SHOW_PROGRESS, 0)?.let { folderId ->
             if (folderId > 0) {
@@ -192,6 +193,11 @@ class MainActivity : BaseActivity() {
     override fun onPause() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(uploadProgressReceiver)
         super.onPause()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        UISettings(this).bottomNavigationSelectedItem = bottomNavigation.selectedItemId
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
