@@ -87,7 +87,12 @@ object DriveInfosController {
         }
     }
 
-    fun getDrives(userId: Int, driveId: Int? = null, sharedWithMe: Boolean? = false): ArrayList<Drive> {
+    fun getDrives(
+        userId: Int,
+        driveId: Int? = null,
+        sharedWithMe: Boolean? = false,
+        maintenance: Boolean? = null
+    ): ArrayList<Drive> {
         return getRealmInstance().use { realm ->
             val driveList = realm.copyFromRealm(
                 realm.where(Drive::class.java)
@@ -99,6 +104,9 @@ object DriveInfosController {
                         }
                         sharedWithMe?.let {
                             equalTo(Drive::sharedWithMe.name, it)
+                        }
+                        maintenance?.let {
+                            equalTo(Drive::maintenance.name, it)
                         }
                     }
                     .findAll(), 1
