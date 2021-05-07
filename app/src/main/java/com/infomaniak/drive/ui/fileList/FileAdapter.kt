@@ -194,21 +194,6 @@ open class FileAdapter(
             holder.itemView.apply {
                 val isGrid = viewHolderType == DisplayType.GRID
 
-                if (!isGrid) {
-                    var topCornerRadius = 0F
-                    var bottomCornerRadius = 0F
-                    if (position == 0) topCornerRadius = context.resources.getDimension(R.dimen.radius)
-                    if (position == itemCount - 1) bottomCornerRadius = context.resources.getDimension(R.dimen.radius)
-
-                    fileCardView.shapeAppearanceModel = fileCardView.shapeAppearanceModel
-                        .toBuilder()
-                        .setTopLeftCorner(CornerFamily.ROUNDED, topCornerRadius)
-                        .setTopRightCorner(CornerFamily.ROUNDED, topCornerRadius)
-                        .setBottomLeftCorner(CornerFamily.ROUNDED, bottomCornerRadius)
-                        .setBottomRightCorner(CornerFamily.ROUNDED, bottomCornerRadius)
-                        .build()
-                }
-
                 setFileItem(file, isGrid, true)
 
                 checkIfEnablefile(file, position)
