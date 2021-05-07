@@ -38,6 +38,6 @@ The structure of the app, its algorithms and the general functioning are common 
 
 ## Tests
 
-In order to test the app with Unit and UI tests, you have to copy `Env-Example` class in AndroidTest package and name it `Env`. 
-⚠️ Don't forget to disable 2FA on your Infomaniak account if you want to execute tests, this feature is not supported for AddUser test.
+In order to test the app with Unit and UI tests, you have to copy `Env-Example` class in AndroidTest package and name it `Env`.\
+⚠️ Don't forget to disable 2FA on your Infomaniak account if you want to execute tests, this feature is not supported for AddUser test.\
 Replace values contained in file by yours and launch the tests 👍
