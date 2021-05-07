@@ -21,7 +21,11 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.ui.LockActivity
@@ -29,9 +33,13 @@ import com.infomaniak.drive.ui.LockActivity.Companion.FACE_ID_LOG_TAG
 import com.infomaniak.drive.utils.requestCredentials
 import com.infomaniak.drive.utils.silentClick
 import com.infomaniak.lib.core.utils.UtilsUi
-import kotlinx.android.synthetic.main.fragment_base_settings.*
+import kotlinx.android.synthetic.main.view_switch_settings.*
 
-class AppSecuritySettingsFragment : BaseSettingsFragment() {
+class AppSecuritySettingsFragment : Fragment() {
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.view_switch_settings, container, false)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +65,10 @@ class AppSecuritySettingsFragment : BaseSettingsFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        toolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
+
         title.text = getString(R.string.appSecurityTitle)
         description.text = getString(R.string.appSecurityDescription)
         image.setImageResource(R.drawable.ic_face_id_edit)
