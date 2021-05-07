@@ -129,6 +129,7 @@
     <string name="buttonRefresh">Aggiorna</string>
     <string name="buttonRemoveFavorites">Elimina i preferiti</string>
     <string name="buttonRename">Rinomina</string>
+    <string name="buttonRenew">Rinnovare</string>
     <string name="buttonRetry">Riprova</string>
     <string name="buttonSave">Salva</string>
     <string name="buttonSeeFolder">Mostra la cartella</string>
@@ -176,6 +177,19 @@
     <string name="createFolderTitle">Crea una cartella</string>
     <string name="createFolderValidUntilDescription">Dopo tale data, gli utenti non potranno più trasferire i file.</string>
     <string name="createPrivateFolderSucces">Cartella creata con successo</string>
+    <plurals name="driveBlockedDescription">
+        <item quantity="one">Il prodotto è scaduto dal %s. Rinnovalo per gestirlo e accedere ai suoi dati.</item>
+        <item quantity="other">Tutti i tuoi prodotti sono scaduti. Rinnovateli per gestirli e accedere ai loro dati.</item>
+    </plurals>
+    <plurals name="driveBlockedTitle">
+        <item quantity="one">Il kDrive %s è attualmente bloccato</item>
+        <item quantity="other">Tutti i tuoi kDrive sono attualmente bloccati</item>
+    </plurals>
+    <string name="driveMaintenanceDescription">Un aggiornamento è in corso per migliorare kDrive. Questo processo può richiedere alcuni minuti. Grazie per la vostra pazienza.</string>
+    <plurals name="driveMaintenanceTitle">
+        <item quantity="one">Il kDrive %s è attualmente in manutenzione</item>
+        <item quantity="other">Tutti i tuoi kDrive sono attualmente in manutenzione</item>
+    </plurals>
     <string name="dropBoxDescription">Invita i tuoi partner, utenti o clienti a trasferire file nel tuo kDrive, anche se non dispongono di un account Infomaniak.</string>
     <string name="dropBoxLinkTitle">Link del deposito file</string>
     <string name="dropBoxResultDescription">Condividi il link sottostante con persone che ti devono inviare dei file.</string>

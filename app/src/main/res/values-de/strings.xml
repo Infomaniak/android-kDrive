@@ -129,6 +129,7 @@
     <string name="buttonRefresh">Aktualisieren</string>
     <string name="buttonRemoveFavorites">Von den Favoriten entfernen</string>
     <string name="buttonRename">Umbenennen</string>
+    <string name="buttonRenew">Erneuern</string>
     <string name="buttonRetry">Erneut versuchen</string>
     <string name="buttonSave">Aufnehmen</string>
     <string name="buttonSeeFolder">Ordner anzeigen</string>
@@ -176,6 +177,19 @@
     <string name="createFolderTitle">Ordner erstellen</string>
     <string name="createFolderValidUntilDescription">Nach Verstreichen dieses Datums können die Benutzer keine Dateien mehr übertragen.</string>
     <string name="createPrivateFolderSucces">Ordner erfolgreich angelegt</string>
+    <plurals name="driveBlockedDescription">
+        <item quantity="one">Das Produkt ist seit dem %s abgelaufen. Bitte erneuern Sie ihn, um ihn zu verwalten und auf seine Daten zuzugreifen.</item>
+        <item quantity="other">Alle Ihre Produkte sind abgelaufen. Bitte erneuern Sie diese, um sie zu verwalten und auf ihre Daten zuzugreifen.</item>
+    </plurals>
+    <plurals name="driveBlockedTitle">
+        <item quantity="one">Das kDrive %s ist derzeit gesperrt</item>
+        <item quantity="other">Alle Ihre kDrives sind derzeit gesperrt</item>
+    </plurals>
+    <string name="driveMaintenanceDescription">Ein Update zur Verbesserung von kDrive ist in Arbeit. Dieser Vorgang kann ein paar Minuten dauern. Wir danken Ihnen für Ihre Geduld.</string>
+    <plurals name="driveMaintenanceTitle">
+        <item quantity="one">Das kDrive %s wird derzeit gewartet</item>
+        <item quantity="other">Alle Ihre kDrives sind derzeit in Wartung</item>
+    </plurals>
     <string name="dropBoxDescription">Laden Sie Ihre Partner, Benutzer oder Kunden ein, Dateien in Ihren kDrive zu übertragen, auch wenn sie kein Infomaniak-Konto besitzen.</string>
     <string name="dropBoxLinkTitle">Link des Briefkastens</string>
     <string name="dropBoxResultDescription">Teilen Sie den nachfolgenden Link mit Benutzern, die Ihnen Dateien senden müssen.</string>
