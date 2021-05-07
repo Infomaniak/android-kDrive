@@ -186,10 +186,19 @@
     <string name="createFolderTitle">Créer un dossier</string>
     <string name="createFolderValidUntilDescription">Une fois la date passée, les utilisateurs ne pourront plus transférer de fichiers.</string>
     <string name="createPrivateFolderSucces">Dossier créé avec succès</string>
-    <string name="driveBlockedDescription">Le produit a expiré depuis le %s. Veuillez le renouveler pour le gérer et accéder à ses données.</string>
-    <string name="driveBlockedTitle">Le kDrive %s est actuellement bloqué</string>
+    <plurals name="driveBlockedDescription">
+        <item quantity="one">Le produit a expiré depuis le %s. Veuillez le renouveler pour le gérer et accéder à ses données.</item>
+        <item quantity="other">Tous vos produits ont expiré. Veuillez les renouveler pour les gérer et accéder à leurs données.</item>
+    </plurals>
+    <plurals name="driveBlockedTitle">
+        <item quantity="one">Le kDrive %s est actuellement bloqué</item>
+        <item quantity="other">Tous vos kDrives sont actuellement bloqués</item>
+    </plurals>
     <string name="driveMaintenanceDescription">Une mise à jour est en cours pour améliorer kDrive. Ce processus peut durer quelques minutes. Merci pour votre patience.</string>
-    <string name="driveMaintenanceTitle">Le kDrive %s est actuellement en maintenance</string>
+    <plurals name="driveMaintenanceTitle">
+        <item quantity="one">Le kDrive %s est actuellement en maintenance</item>
+        <item quantity="other">Tous vos kDrives sont actuellement en maintenance</item>
+    </plurals>
     <string name="dropBoxDescription">Invitez vos partenaires, utilisateurs ou clients à transférer des fichiers dans votre kDrive, même s’ils n’ont pas de compte Infomaniak.</string>
     <string name="dropBoxLinkTitle">Lien de la boîte de dépôt</string>
     <string name="dropBoxResultDescription">Partagez le lien ci-dessous aux personnes qui doivent vous envoyer des fichiers.</string>

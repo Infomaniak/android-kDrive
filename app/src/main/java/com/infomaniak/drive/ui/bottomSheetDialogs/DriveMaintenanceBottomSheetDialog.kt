@@ -36,7 +36,7 @@ class DriveMaintenanceBottomSheetDialog : InformationBottomSheetDialog() {
             setImageResource(R.drawable.ic_maintenance)
         }
 
-        title.text = getString(R.string.driveMaintenanceTitle, navigationArgs.driveName)
+        title.text = resources.getQuantityString(R.plurals.driveMaintenanceTitle, 1, navigationArgs.driveName)
         description.setText(R.string.driveMaintenanceDescription)
         actionButton.apply {
             setText(R.string.buttonClose)

@@ -20,12 +20,14 @@ package com.infomaniak.drive.ui
 import android.content.Intent
 import android.os.Bundle
 import android.view.View.GONE
-import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.utils.AccountUtils
 import kotlinx.android.synthetic.main.activity_no_drive.*
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
+import kotlinx.coroutines.launch
 
 class MaintenanceActivity : AppCompatActivity() {
 
@@ -35,18 +37,26 @@ class MaintenanceActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_no_drive)
 
-        AccountUtils.getCurrentDrive()?.let { currentDrive ->
-            if (isTechnicalMaintenance) {
-                noDriveTitle.text = getString(R.string.driveMaintenanceTitle, currentDrive.name)
-                noDriveDescription.text = getString(R.string.driveMaintenanceDescription)
-                noDriveIconLayout.icon.setImageResource(R.drawable.ic_maintenance)
-                noDriveActionButton.visibility = GONE
-            } else {
-                noDriveTitle.text = getString(R.string.driveBlockedTitle, currentDrive.name)
-                noDriveDescription.text = getString(R.string.driveBlockedDescription)
-                noDriveIconLayout.icon.setImageResource(R.drawable.ic_drive_blocked)
-                noDriveActionButton.apply {
-                    visibility = VISIBLE
+        DriveInfosController.getDrives(AccountUtils.currentUserId).let { driveList ->
+
+            noDriveIconLayout.icon.setImageResource(if (isTechnicalMaintenance) R.drawable.ic_maintenance else R.drawable.ic_drive_blocked)
+            noDriveTitle.text = resources.getQuantityString(
+                if (isTechnicalMaintenance) R.plurals.driveMaintenanceTitle else R.plurals.driveBlockedTitle,
+                driveList.size,
+                driveList.firstOrNull()?.name
+            )
+            noDriveDescription.text = if (isTechnicalMaintenance) {
+                resources.getQuantityString(
+                    R.plurals.driveBlockedDescription,
+                    driveList.size,
+                    driveList.firstOrNull()?.name
+                )
+            } else getString(R.string.driveMaintenanceDescription)
+
+            noDriveActionButton.apply {
+                if (isTechnicalMaintenance) {
+                    visibility = GONE
+                } else {
                     noDriveActionButton.text = getString(R.string.buttonRenew)
                 }
             }
@@ -54,6 +64,13 @@ class MaintenanceActivity : AppCompatActivity() {
             anotherProfileButton.setOnClickListener {
                 startActivity(Intent(this@MaintenanceActivity, SwitchUserActivity::class.java))
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        lifecycleScope.launch {
+            AccountUtils.updateCurrentUserAndDrives(this@MaintenanceActivity, fromMaintenance = true)
         }
     }
 }

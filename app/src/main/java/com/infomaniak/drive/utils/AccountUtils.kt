@@ -95,7 +95,7 @@ object AccountUtils : CredentialManager {
         userDatabase.userDao().insert(user)
     }
 
-    suspend fun updateCurrentUserAndDrives(context: Context) = withContext(Dispatchers.IO) {
+    suspend fun updateCurrentUserAndDrives(context: Context, fromMaintenance: Boolean = false) = withContext(Dispatchers.IO) {
         val userProfile = ApiRepository.getUserProfile()
 
         if (userProfile.result != ApiResponse.Status.ERROR) {
@@ -118,6 +118,19 @@ object AccountUtils : CredentialManager {
                                     }
                                 }
                                 FileController.deleteUserDriveFiles(user.id, driveRemoved.id)
+                            }
+
+                            if (fromMaintenance) {
+                                if (it.drives.main.any { drive -> !drive.maintenance }) {
+                                    GlobalScope.launch(Dispatchers.Main) {
+                                        reloadApp?.invoke()
+                                    }
+                                }
+                            } else if (it.drives.main.all { drive -> drive.maintenance } ||
+                                it.drives.main.any { drive -> drive.maintenance && drive.id == currentDriveId }) {
+                                GlobalScope.launch(Dispatchers.Main) {
+                                    reloadApp?.invoke()
+                                }
                             }
 
                             user.apply {
@@ -213,13 +226,13 @@ object AccountUtils : CredentialManager {
 
     fun getCurrentDrive(): Drive? {
         if (currentDriveId != currentDrive?.id) {
-            currentDrive = DriveInfosController.getDrives(currentUserId, currentDriveId).firstOrNull() ?: getFirstDrive()
+            currentDrive = DriveInfosController.getDrives(currentUserId, currentDriveId, maintenance = false).firstOrNull()
+                ?: getFirstDrive()
         }
         return currentDrive
     }
-
     private fun getFirstDrive(): Drive? {
-        val currentDrive = DriveInfosController.getDrives(currentUserId).firstOrNull()
+        val currentDrive = DriveInfosController.getDrives(currentUserId, maintenance = false).firstOrNull()
         currentDriveId = currentDrive?.id ?: -1
         return currentDrive
     }
