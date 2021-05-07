@@ -32,6 +32,7 @@ import com.infomaniak.drive.utils.UiTestUtils.DEFAULT_DRIVE_ID
 import com.infomaniak.drive.utils.UiTestUtils.DEFAULT_DRIVE_NAME
 import com.infomaniak.drive.utils.UiTestUtils.LAUNCH_TIMEOUT
 import com.infomaniak.drive.utils.UiTestUtils.device
+import com.infomaniak.drive.utils.UiTestUtils.getDeviceViewById
 import com.infomaniak.drive.utils.UiTestUtils.getViewIdentifier
 import org.hamcrest.CoreMatchers.notNullValue
 import org.junit.Before
@@ -61,8 +62,8 @@ class HomeUiTest {
 
     @Test
     fun testSwitchDrive() {
-        val switchDrive = device.findObject(UiSelector().resourceId(getViewIdentifier("driveInfos")))
-        switchDrive.clickAndWaitForNewWindow()
+        val switchDrive = getDeviceViewById("driveInfos")
+        switchDrive?.clickAndWaitForNewWindow()
 
         val driveRecyclerView = UiCollection(UiSelector().resourceId(getViewIdentifier("selectionRecyclerView")))
 
@@ -71,7 +72,7 @@ class HomeUiTest {
             driveRecyclerView.childCount - 1
         ).clickAndWaitForNewWindow()
 
-        switchDrive.clickAndWaitForNewWindow()
+        switchDrive?.clickAndWaitForNewWindow()
 
         driveRecyclerView.getChildByText(
             UiSelector().resourceId(getViewIdentifier("driveCard")),
