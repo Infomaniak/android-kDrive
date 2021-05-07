@@ -109,8 +109,16 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
             shareDivider.visibility = VISIBLE
             shareLinkContainer.setup(shareLink = share?.link, file = currentFile, onSwitchClicked = { isEnabled ->
                 mainViewModel.apply {
-                    if (isEnabled) createShareLink(currentFile)
-                    else deleteShareLink(currentFile)
+                    if (isEnabled) {
+                        createShareLink(currentFile) {
+                            shareLinkContainer.toggleSwitchingApproval(true)
+                        }
+                    }
+                    else {
+                        deleteShareLink(currentFile) {
+                            shareLinkContainer.toggleSwitchingApproval(true)
+                        }
+                    }
                 }
             })
         } else {
@@ -158,8 +166,9 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         }
     }
 
-    private fun createShareLink(currentFile: File) {
+    private fun createShareLink(currentFile: File, onApiResponse: () -> Unit) {
         mainViewModel.postFileShareLink(currentFile).observe(viewLifecycleOwner) { apiResponse ->
+            onApiResponse()
             if (apiResponse.isSuccess()) {
                 shareLinkContainer.update(apiResponse.data)
             } else {
@@ -168,7 +177,8 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         }
     }
 
-    private fun deleteShareLink(currentFile: File) {
+    private fun deleteShareLink(currentFile: File, onApiResponse: () -> Unit) {
+        onApiResponse()
         mainViewModel.deleteFileShareLink(currentFile).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.data == true) {
                 shareLinkContainer.update(null)

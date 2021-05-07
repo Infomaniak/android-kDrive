@@ -143,15 +143,20 @@ class FileShareDetailsFragment : Fragment() {
             shareLinkLayout.visibility = VISIBLE
             shareLinkContainer.setup(shareLink = shareLink,
                 file = file,
-                onSwitchClicked = { isEnabled -> shareLinkSwitched(isEnabled, file) }
+                onSwitchClicked = { isEnabled ->
+                    shareLinkSwitched(isEnabled, file) {
+                        shareLinkContainer.toggleSwitchingApproval(true)
+                    }
+                }
             )
         }
     }
 
-    private fun shareLinkSwitched(isEnabled: Boolean, file: File) {
+    private fun shareLinkSwitched(isEnabled: Boolean, file: File, onApiResponse: () -> Unit) {
         mainViewModel.apply {
             if (isEnabled) {
                 postFileShareLink(file).observe(viewLifecycleOwner) { apiResponse ->
+                    onApiResponse()
                     if (apiResponse.isSuccess()) {
                         shareLinkContainer.update(apiResponse.data)
                     } else {
@@ -160,6 +165,7 @@ class FileShareDetailsFragment : Fragment() {
                 }
             } else {
                 deleteFileShareLink(file).observe(viewLifecycleOwner) { apiResponse ->
+                    onApiResponse()
                     if (apiResponse.data == true) {
                         shareLinkContainer.update(null)
                     } else {
