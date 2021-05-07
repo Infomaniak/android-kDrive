@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 import android.os.Bundle
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRoutes.orderDrive
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.toPx
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
@@ -42,7 +43,7 @@ class DriveBlockedBottomSheetDialog : InformationBottomSheetDialog() {
         actionButton.apply {
             setText(R.string.buttonRenew)
             setOnClickListener {
-                requireContext().openUrl("TODO") // Open renew URL from product, TODO : Awaiting invoices scope
+                requireContext().openUrl(orderDrive()) // Open renew URL from product, TODO : Awaiting invoices scope
             }
         }
         secondaryActionButton.setText(R.string.buttonClose)

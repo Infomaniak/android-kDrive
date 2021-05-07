@@ -296,7 +296,7 @@
         android:id="@+id/switchUserActivity"
         android:name="com.infomaniak.drive.ui.SwitchUserActivity"
         android:label="SwitchUserActivity"
-        tools:layout="@layout/fragment_base_settings" />
+        tools:layout="@layout/view_switch_settings" />
 
     <activity
         android:id="@+id/mainActivity"
@@ -387,7 +387,7 @@
         android:id="@+id/appSecurityFragment"
         android:name="com.infomaniak.drive.ui.menu.settings.AppSecuritySettingsFragment"
         android:label="AppSecurityFragment"
-        tools:layout="@layout/fragment_base_settings" />
+        tools:layout="@layout/view_switch_settings" />
     <fragment
         android:id="@+id/aboutSettingsFragment"
         android:name="com.infomaniak.drive.ui.menu.settings.AboutSettingsFragment"

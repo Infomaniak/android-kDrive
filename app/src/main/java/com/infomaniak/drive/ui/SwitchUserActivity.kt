@@ -26,7 +26,7 @@ import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.menu.UserAdapter
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.models.User
-import kotlinx.android.synthetic.main.fragment_base_settings.*
+import kotlinx.android.synthetic.main.view_switch_settings.*
 
 class SwitchUserActivity : AppCompatActivity() {
 
@@ -34,7 +34,7 @@ class SwitchUserActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.fragment_base_settings)
+        setContentView(R.layout.view_switch_settings)
 
         toolbar.setNavigationOnClickListener {
             onBackPressed()
