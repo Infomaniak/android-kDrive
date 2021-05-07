@@ -23,8 +23,10 @@ import android.view.View.GONE
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import kotlinx.android.synthetic.main.activity_no_drive.*
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
 import kotlinx.coroutines.launch
@@ -59,7 +61,9 @@ class MaintenanceActivity : AppCompatActivity() {
                 visibility = GONE
             } else {
                 noDriveActionButton.text = getString(R.string.buttonRenew)
-                setOnClickListener { } // TODO - Awaiting invoice data from API
+                setOnClickListener {
+                    openUrl(ApiRoutes.orderDrive())
+                }
             }
         }
 
