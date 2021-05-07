@@ -38,7 +38,7 @@ class FileListUiTest {
     @Before
     fun init() {
         startApp()
-        device.findObject(UiSelector().resourceId(getViewIdentifier("fileListFragment"))).click()
+        UiTestUtils.getDeviceViewById("fileListFragment")?.click()
     }
 
     @Test

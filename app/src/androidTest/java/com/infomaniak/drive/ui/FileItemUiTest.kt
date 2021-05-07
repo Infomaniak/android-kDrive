@@ -22,6 +22,7 @@ import androidx.test.uiautomator.UiScrollable
 import androidx.test.uiautomator.UiSelector
 import com.infomaniak.drive.utils.UiTestUtils
 import com.infomaniak.drive.utils.UiTestUtils.device
+import com.infomaniak.drive.utils.UiTestUtils.getDeviceViewById
 import com.infomaniak.drive.utils.UiTestUtils.getViewIdentifier
 import com.infomaniak.drive.utils.UiTestUtils.startApp
 import org.junit.Before
@@ -38,7 +39,7 @@ class FileItemUiTest {
     @Before
     fun init() {
         startApp()
-        device.findObject(UiSelector().resourceId(getViewIdentifier("fileListFragment"))).click()
+        getDeviceViewById("fileListFragment")?.click()
     }
 
     @Test

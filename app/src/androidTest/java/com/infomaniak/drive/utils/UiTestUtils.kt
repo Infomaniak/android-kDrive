@@ -52,7 +52,7 @@ object UiTestUtils {
     }
 
     fun createPrivateFolder(folderName: String) {
-        device.findObject(UiSelector().resourceId(getViewIdentifier("mainFab"))).clickAndWaitForNewWindow()
+        getDeviceViewById("mainFab")?.clickAndWaitForNewWindow()
 
         UiCollection(UiSelector().resourceId(getViewIdentifier("addFileBottomSheetLayout"))).getChildByText(
             UiSelector().resourceId(getViewIdentifier("folderCreateText")),
@@ -89,6 +89,10 @@ object UiTestUtils {
             swipeLeft(3)
             getChild((UiSelector().resourceId(getViewIdentifier("menuButton")))).clickAndWaitForNewWindow()
         }
-        device.findObject(UiSelector().resourceId(getViewIdentifier("fileRights"))).clickAndWaitForNewWindow()
+        getDeviceViewById("fileRights")?.clickAndWaitForNewWindow()
+    }
+
+    fun getDeviceViewById(id: String): UiObject? {
+        return device.findObject(UiSelector().resourceId(getViewIdentifier(id)))
     }
 }
