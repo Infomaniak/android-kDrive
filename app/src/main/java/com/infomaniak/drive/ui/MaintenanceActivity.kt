@@ -37,33 +37,34 @@ class MaintenanceActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_no_drive)
 
-        DriveInfosController.getDrives(AccountUtils.currentUserId).let { driveList ->
+        noDriveIconLayout.icon.setImageResource(if (isTechnicalMaintenance) R.drawable.ic_maintenance else R.drawable.ic_drive_blocked)
 
-            noDriveIconLayout.icon.setImageResource(if (isTechnicalMaintenance) R.drawable.ic_maintenance else R.drawable.ic_drive_blocked)
+        DriveInfosController.getDrives(AccountUtils.currentUserId).apply {
             noDriveTitle.text = resources.getQuantityString(
                 if (isTechnicalMaintenance) R.plurals.driveMaintenanceTitle else R.plurals.driveBlockedTitle,
-                driveList.size,
-                driveList.firstOrNull()?.name
+                this.size,
+                this.firstOrNull()?.name
             )
             noDriveDescription.text = if (isTechnicalMaintenance) {
                 resources.getQuantityString(
                     R.plurals.driveBlockedDescription,
-                    driveList.size,
-                    driveList.firstOrNull()?.name
+                    this.size,
+                    this.firstOrNull()?.name
                 )
             } else getString(R.string.driveMaintenanceDescription)
+        }
 
-            noDriveActionButton.apply {
-                if (isTechnicalMaintenance) {
-                    visibility = GONE
-                } else {
-                    noDriveActionButton.text = getString(R.string.buttonRenew)
-                }
+        noDriveActionButton.apply {
+            if (isTechnicalMaintenance) {
+                visibility = GONE
+            } else {
+                noDriveActionButton.text = getString(R.string.buttonRenew)
+                setOnClickListener { } // TODO - Awaiting invoice data from API
             }
+        }
 
-            anotherProfileButton.setOnClickListener {
-                startActivity(Intent(this@MaintenanceActivity, SwitchUserActivity::class.java))
-            }
+        anotherProfileButton.setOnClickListener {
+            startActivity(Intent(this@MaintenanceActivity, SwitchUserActivity::class.java))
         }
     }
 
