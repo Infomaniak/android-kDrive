@@ -48,12 +48,12 @@ class MaintenanceActivity : AppCompatActivity() {
                 this.firstOrNull()?.name
             )
             noDriveDescription.text = if (isTechnicalMaintenance) {
-                resources.getQuantityString(
-                    R.plurals.driveBlockedDescription,
-                    this.size,
-                    this.firstOrNull()?.name
-                )
-            } else getString(R.string.driveMaintenanceDescription)
+                getString(R.string.driveMaintenanceDescription)
+            } else resources.getQuantityString(
+                R.plurals.driveBlockedDescription,
+                this.size,
+                "todo" // TODO - Get drive expiration date
+            )
         }
 
         noDriveActionButton.apply {
