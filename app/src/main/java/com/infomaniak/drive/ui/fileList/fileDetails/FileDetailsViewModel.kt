@@ -22,17 +22,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import com.infomaniak.drive.data.api.ApiRepository
-import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileActivity
 import com.infomaniak.drive.data.models.FileComment
+import com.infomaniak.drive.data.models.Share
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 
 class FileDetailsViewModel : ViewModel() {
     val currentFile = MutableLiveData<File>()
-    val currentFileUsers = MutableLiveData<ArrayList<DriveUser>>()
+    val currentFileShare = MutableLiveData<Share>()
     private var getFileCommentsJob = Job()
     private var getFileActivitiesJob = Job()
 

@@ -38,6 +38,7 @@ import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
 import kotlinx.android.synthetic.main.fragment_file_details.*
+import kotlinx.android.synthetic.main.fragment_file_details_infos.*
 import kotlinx.android.synthetic.main.view_subtitle_toolbar.view.*
 
 class FileDetailsFragment : FileDetailsSubFragment() {
@@ -64,6 +65,12 @@ class FileDetailsFragment : FileDetailsSubFragment() {
                     setFile(file)
                 }
             }
+
+        mainViewModel.getFileShare(navigationArgs.fileId).observe(viewLifecycleOwner) { shareResponse ->
+            shareResponse.data?.let { share ->
+                fileDetailsViewModel.currentFileShare.value = share
+            }
+        }
     }
 
     private fun setFile(file: File) {
@@ -71,7 +78,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         subtitleToolbar.title.text = file.name
         subtitleToolbar.subTitle.text = file.getLastModifiedAt().format(getString(R.string.allLastModifiedFilePattern))
         setBannerThumbnail(file)
-        setupTabLayout(file)
+        setupTabLayout(file.isFolder())
     }
 
     private fun setBannerThumbnail(file: File) {
@@ -93,37 +100,39 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         }
     }
 
-    private fun setupTabLayout(file: File) {
-        val tabs = arrayListOf(
-            FileDetailsTab(0, FileDetailsInfosFragment(), R.string.fileDetailsInfosTitle, R.id.fileInfo),
-            FileDetailsTab(1, FileDetailsActivitiesFragment(), R.string.fileDetailsActivitiesTitle, R.id.fileActivities),
-        )
-
-        if (!file.isFolder()) {
-            fileComments.visibility = VISIBLE
-            tabs.add(
-                FileDetailsTab(
-                    position = 2,
-                    fragment = FileDetailsCommentsFragment(),
-                    title = R.string.fileDetailsCommentsTitle,
-                    button = R.id.fileComments
-                )
+    private fun setupTabLayout(isFolder: Boolean) {
+        if (tabsViewPager.adapter == null) {
+            val tabs = arrayListOf(
+                FileDetailsTab(0, FileDetailsInfosFragment(), R.string.fileDetailsInfosTitle, R.id.fileInfo),
+                FileDetailsTab(1, FileDetailsActivitiesFragment(), R.string.fileDetailsActivitiesTitle, R.id.fileActivities),
             )
-        }
 
-        tabsViewPager.apply {
-            adapter = FileDetailsPagerAdapter(childFragmentManager, lifecycle, tabs)
-            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                override fun onPageSelected(position: Int) {
-                    super.onPageSelected(position)
-                    tabsGroup.check(tabs[position].button)
+            if (!isFolder) {
+                fileComments.visibility = VISIBLE
+                tabs.add(
+                    FileDetailsTab(
+                        position = 2,
+                        fragment = FileDetailsCommentsFragment(),
+                        title = R.string.fileDetailsCommentsTitle,
+                        button = R.id.fileComments
+                    )
+                )
+            }
+
+            tabsViewPager.apply {
+                adapter = FileDetailsPagerAdapter(childFragmentManager, lifecycle, tabs)
+                registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                    override fun onPageSelected(position: Int) {
+                        super.onPageSelected(position)
+                        tabsGroup.check(tabs[position].button)
+                    }
+                })
+            }
+
+            tabsGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+                if (isChecked) {
+                    tabsViewPager.setCurrentItem(tabs.find { it.button == checkedId }!!.position, true)
                 }
-            })
-        }
-
-        tabsGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (isChecked) {
-                tabsViewPager.setCurrentItem(tabs.find { it.button == checkedId }!!.position, true)
             }
         }
     }

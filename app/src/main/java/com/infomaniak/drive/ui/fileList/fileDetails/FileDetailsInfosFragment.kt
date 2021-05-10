@@ -48,9 +48,8 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         super.onActivityCreated(savedInstanceState)
 
         fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) { currentFile ->
-            setupShareLinkContainer(currentFile, null)
+            setupShareLinkContainer(currentFile, fileDetailsViewModel.currentFileShare.value)
             displayUsersAvatars(currentFile)
-            getShareDetails(currentFile)
             setupShareButton(currentFile)
 
             if (currentFile.createdAt.isPositive()) {
@@ -80,6 +79,11 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
             }
         }
 
+        fileDetailsViewModel.currentFileShare.observe(viewLifecycleOwner) { share ->
+            pathValue.text = share.path
+            setupShareLinkContainer(fileDetailsViewModel.currentFile.value, share)
+        }
+
         getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.SELECT_PERMISSION_NAV_KEY) { bundle ->
             val permission = bundle.getParcelable<Permission>(SelectPermissionBottomSheetDialog.PERMISSION_BUNDLE_KEY)
             shareLinkContainer.officePermission = permission as ShareLink.OfficePermission
@@ -103,8 +107,8 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         }
     }
 
-    private fun setupShareLinkContainer(currentFile: File, share: Share?) {
-        if (currentFile.rights?.share == true) {
+    private fun setupShareLinkContainer(currentFile: File?, share: Share?) {
+        if (currentFile?.rights?.share == true) {
             shareLinkContainer.visibility = VISIBLE
             shareDivider.visibility = VISIBLE
             shareLinkContainer.setup(shareLink = share?.link, file = currentFile, onSwitchClicked = { isEnabled ->
@@ -113,8 +117,7 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
                         createShareLink(currentFile) {
                             shareLinkContainer.toggleSwitchingApproval(true)
                         }
-                    }
-                    else {
+                    } else {
                         deleteShareLink(currentFile) {
                             shareLinkContainer.toggleSwitchingApproval(true)
                         }
@@ -152,17 +155,6 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
             owner.visibility = VISIBLE
             ownerAvatar.loadUrlWithoutToken(requireContext(), getUserAvatar(), R.drawable.ic_placeholder_avatar)
             ownerValue.text = displayName
-        }
-    }
-
-    private fun getShareDetails(currentFile: File) {
-        mainViewModel.getFileShare(currentFile.id).observe(viewLifecycleOwner) { shareResponse ->
-            shareResponse.data?.let { share ->
-                pathValue.text = share.path
-                if (currentFile.rights?.share == true) {
-                    setupShareLinkContainer(currentFile, share)
-                }
-            }
         }
     }
 
