@@ -31,7 +31,7 @@ class PicturesViewModel : ViewModel() {
     fun getAllPicturesFiles(
         driveId: Int,
         ignoreCloud: Boolean = false
-    ): LiveData<Pair<ArrayList<File>, Boolean>> {
+    ): LiveData<Pair<ArrayList<File>, Boolean>?> {
         getPicturesJob.cancel()
         getPicturesJob = Job()
         return liveData(Dispatchers.IO + getPicturesJob) {

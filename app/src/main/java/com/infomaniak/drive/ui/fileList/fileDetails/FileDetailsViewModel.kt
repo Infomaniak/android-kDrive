@@ -36,7 +36,7 @@ class FileDetailsViewModel : ViewModel() {
     private var getFileCommentsJob = Job()
     private var getFileActivitiesJob = Job()
 
-    fun getFileActivities(file: File): LiveData<ApiResponse<ArrayList<FileActivity>>> {
+    fun getFileActivities(file: File): LiveData<ApiResponse<ArrayList<FileActivity>>?> {
         getFileActivitiesJob.cancel()
         getFileActivitiesJob = Job()
 
@@ -58,7 +58,7 @@ class FileDetailsViewModel : ViewModel() {
         }
     }
 
-    fun getFileComments(file: File): LiveData<ApiResponse<ArrayList<FileComment>>> {
+    fun getFileComments(file: File): LiveData<ApiResponse<ArrayList<FileComment>>?> {
         getFileCommentsJob.cancel()
         getFileCommentsJob = Job()
 

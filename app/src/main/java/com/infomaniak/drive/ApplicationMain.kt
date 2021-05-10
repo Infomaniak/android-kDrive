@@ -67,7 +67,7 @@ class ApplicationMain : Application(), ImageLoaderFactory {
 
         SentryAndroid.init(this) { options: SentryAndroidOptions ->
             // register the callback as an option
-            options.beforeSend = SentryOptions.BeforeSendCallback { event: SentryEvent?, hint: Any? ->
+            options.beforeSend = SentryOptions.BeforeSendCallback { event: SentryEvent?, _: Any? ->
                 //if the application is in debug mode discard the events
                 if (BuildConfig.DEBUG) null else event
             }

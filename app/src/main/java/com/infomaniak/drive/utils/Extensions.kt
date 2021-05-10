@@ -387,7 +387,7 @@ fun <T> Fragment.getBackNavigationResult(key: String, onResult: (result: T) -> U
  */
 fun Activity.getScreenSizeInDp(): Point {
     val displayMetrics = DisplayMetrics()
-    if (Build.VERSION.SDK_INT >= 30) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
         display?.apply {
             getRealMetrics(displayMetrics)
         }

@@ -102,12 +102,12 @@ class AvailableShareableItemsAdapter(
     override fun getFilter(): Filter {
         return object : Filter() {
             override fun performFiltering(constraint: CharSequence?): FilterResults {
-                val searchTerm = constraint.toString().toLowerCase(Locale.ROOT)
+                val searchTerm = constraint.toString().lowercase(Locale.ROOT)
 
                 val finalUserList: ArrayList<Shareable> = ArrayList(
                     initialList.filter { item ->
-                        item.getFilterValue().toLowerCase(Locale.ROOT).contains(searchTerm) ||
-                                ((item is DriveUser) && item.email.toLowerCase(Locale.ROOT).contains(searchTerm))
+                        item.getFilterValue().lowercase(Locale.ROOT).contains(searchTerm) ||
+                                ((item is DriveUser) && item.email.lowercase(Locale.ROOT).contains(searchTerm))
                     }
                 )
                 return FilterResults().apply {

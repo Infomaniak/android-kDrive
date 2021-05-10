@@ -91,7 +91,7 @@ class FileListViewModel : ViewModel() {
         }
     }
 
-    fun getFavoriteFiles(order: File.SortType): LiveData<Pair<ArrayList<File>, Boolean>> {
+    fun getFavoriteFiles(order: File.SortType): LiveData<Pair<ArrayList<File>, Boolean>?> {
         getFilesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
@@ -102,11 +102,11 @@ class FileListViewModel : ViewModel() {
                         apiResponse.data.isNullOrEmpty() -> emit(null)
                         apiResponse.data!!.size < ApiRepository.PER_PAGE -> {
                             FileController.saveFavoritesFiles(apiResponse.data!!, page == 1)
-                            emit(apiResponse.data to true)
+                            emit(apiResponse.data!! to true)
                         }
                         else -> {
                             apiResponse.data?.let { FileController.saveFavoritesFiles(it, page == 1) }
-                            emit(apiResponse.data to false)
+                            emit(apiResponse.data!! to false)
                             recursive(page + 1)
                         }
                     }

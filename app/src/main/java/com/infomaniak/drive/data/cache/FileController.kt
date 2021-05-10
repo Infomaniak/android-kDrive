@@ -544,8 +544,8 @@ object FileController {
         val children = localChildren ?: localFolder?.children
         return children?.where()?.let { realmQuery ->
             val results = realmQuery.getSortQueryByOrder(order).findAll()
-            val isTeamSpaceName = File.VisibilityType.IS_TEAM_SPACE.name.toLowerCase(Locale.ROOT)
-            val isSharedSpaceName = File.VisibilityType.IS_SHARED_SPACE.name.toLowerCase(Locale.ROOT)
+            val isTeamSpaceName = File.VisibilityType.IS_TEAM_SPACE.name.lowercase(Locale.ROOT)
+            val isSharedSpaceName = File.VisibilityType.IS_SHARED_SPACE.name.lowercase(Locale.ROOT)
             val teamSpaces = results.where().equalTo(File::visibility.name, isTeamSpaceName).findAll()
             val sharedSpaces = results.where().equalTo(File::visibility.name, isSharedSpaceName).findAll()
             val dirs = results.where().equalTo(File::type.name, File.Type.FOLDER.value)

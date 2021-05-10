@@ -131,7 +131,7 @@ class SearchFragment : FileListFragment() {
         convertedTypeIcon.setImageDrawable(fileListViewModel.currentConvertedTypeDrawable)
         convertedTypeLayout.visibility = VISIBLE
         fileListViewModel.currentPage = 1
-        fileListViewModel.currentConvertedType = type.name.toLowerCase(Locale.ROOT)
+        fileListViewModel.currentConvertedType = type.name.lowercase(Locale.ROOT)
         downloadFiles(true)
     }
 

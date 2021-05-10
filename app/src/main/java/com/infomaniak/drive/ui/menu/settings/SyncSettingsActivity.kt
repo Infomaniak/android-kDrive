@@ -140,7 +140,7 @@ class SyncSettingsActivity : BaseActivity() {
 
         syncSettingsViewModel.saveOldPictures.observe(this) {
             syncDateValue.text = if (it == true) {
-                getString(R.string.syncSettingsSaveDateAllPictureValue).toLowerCase(Locale.ROOT)
+                getString(R.string.syncSettingsSaveDateAllPictureValue).lowercase(Locale.ROOT)
             } else {
                 getString(R.string.syncSettingsSaveDateNowValue)
             }

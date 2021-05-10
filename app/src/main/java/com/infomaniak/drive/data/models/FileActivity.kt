@@ -178,6 +178,6 @@ open class FileActivity(
 
     fun getAction(): FileActivityType {
         return if (action == "file_move") FileActivityType.FILE_MOVE_IN
-        else FileActivityType.valueOf(action.toUpperCase(Locale.ROOT))
+        else FileActivityType.valueOf(action.uppercase(Locale.ROOT))
     }
 }

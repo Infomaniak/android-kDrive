@@ -33,7 +33,7 @@ class TrashViewModel : ViewModel() {
     val removeFileId = SingleLiveEvent<Int>()
     private var getDeletedFilesJob: Job = Job()
 
-    fun getTrashFile(file: File, order: File.SortType): LiveData<Pair<File, Boolean>> {
+    fun getTrashFile(file: File, order: File.SortType): LiveData<Pair<File, Boolean>?> {
         getDeletedFilesJob.cancel()
         getDeletedFilesJob = Job()
         return liveData(Dispatchers.IO + getDeletedFilesJob) {
@@ -64,9 +64,9 @@ class TrashViewModel : ViewModel() {
                 if (apiResponse.isSuccess()) {
                     when {
                         apiResponse.data.isNullOrEmpty() -> emit(null)
-                        apiResponse.data!!.size < ApiRepository.PER_PAGE -> emit(apiResponse.data to true)
+                        apiResponse.data!!.size < ApiRepository.PER_PAGE -> emit(apiResponse.data!! to true)
                         else -> {
-                            emit(apiResponse.data to false)
+                            emit(apiResponse.data!! to false)
                             recursive(page + 1)
                         }
                     }

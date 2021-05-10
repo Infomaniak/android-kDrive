@@ -38,7 +38,6 @@ import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
 import kotlinx.android.synthetic.main.fragment_file_details.*
-import kotlinx.android.synthetic.main.fragment_file_details_infos.*
 import kotlinx.android.synthetic.main.view_subtitle_toolbar.view.*
 
 class FileDetailsFragment : FileDetailsSubFragment() {
