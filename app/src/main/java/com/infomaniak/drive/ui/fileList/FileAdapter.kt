@@ -173,7 +173,7 @@ open class FileAdapter(
         if (itemViewType == VIEW_TYPE_NORMAL) {
             itemViewType = when (viewHolderType) {
                 DisplayType.LIST -> DisplayType.LIST.layout
-                else -> if (itemList[position].isFolder()) DisplayType.GRID_FOLDER.layout else DisplayType.GRID.layout
+                else -> if (itemList[position].isFolder() || itemList[position].isDrive()) DisplayType.GRID_FOLDER.layout else DisplayType.GRID.layout
             }
         }
         return itemViewType
@@ -215,7 +215,8 @@ open class FileAdapter(
 
                 val isInProgress = (position == 0 && importContainsProgress)
                 menuButton?.visibility = when {
-                    file.isDrive() || isInProgress || file.isTrashed() ||
+                    uploadInProgress || isInProgress ||
+                            file.isDrive() || file.isTrashed() ||
                             file.isFromActivities || file.isFromSearch ||
                             (offlineMode && !file.isOffline) -> GONE
                     else -> VISIBLE

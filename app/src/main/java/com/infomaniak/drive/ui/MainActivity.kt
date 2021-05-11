@@ -136,7 +136,15 @@ class MainActivity : BaseActivity() {
             }
 
             when (destination.id) {
-                R.id.fileDetailsFragment, R.id.fileShareLinkSettingsFragment, R.id.fileListFragment -> {
+                R.id.fileDetailsFragment,
+                R.id.fileShareLinkSettingsFragment,
+                R.id.favoritesFragment,
+                R.id.fileListFragment,
+                R.id.mySharesFragment,
+                R.id.offlineFileFragment,
+                R.id.sharedWithMeFragment,
+                R.id.trashFragment,
+                R.id.uploadInProgressFragment -> {
                     setColorStatusBar(destination.id == R.id.fileShareLinkSettingsFragment)
                     setColorNavigationBar(true)
                 }

@@ -83,7 +83,7 @@
         <item name="collapsedTitleGravity">center</item>
         <item name="collapsedTitleTextAppearance">@style/Title</item>
         <item name="expandedTitleGravity">bottom</item>
-        <item name="expandedTitleMarginBottom">@dimen/marginStandardMedium</item>
+        <item name="expandedTitleMarginBottom">@dimen/marginStandard</item>
         <item name="expandedTitleMarginStart">@dimen/marginStandard</item>
         <item name="expandedTitleTextAppearance">@style/BoldTitle</item>
         <item name="maxLines">2</item>

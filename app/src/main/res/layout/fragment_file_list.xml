@@ -162,8 +162,8 @@
                 style="@style/CardViewInfomaniak"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginVertical="@dimen/marginStandardMedium"
                 android:layout_marginStart="@dimen/marginStandard"
-                android:layout_marginTop="@dimen/marginStandard"
                 android:visibility="gone"
                 tools:visibility="visible">
 
@@ -209,7 +209,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/marginStandard"
-                android:layout_marginVertical="@dimen/marginStandardSmall"
+                android:layout_marginBottom="@dimen/marginStandardSmall"
                 android:drawablePadding="10dp"
                 android:gravity="center"
                 android:text="@string/allNoNetwork"
@@ -224,6 +224,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/marginStandard"
+                android:layout_marginBottom="@dimen/marginStandardSmall"
                 android:visibility="gone"
                 tools:ignore="UseCompoundDrawables"
                 tools:visibility="visible">
@@ -244,16 +245,9 @@
                     tools:text="Zarela Reed a importé 16 nouveaux fichiers" />
             </LinearLayout>
 
-            <include
-                android:id="@+id/uploadFileInProgress"
-                layout="@layout/cardview_file_list"
-                android:visibility="gone"
-                tools:visibility="visible" />
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="@dimen/marginStandardMedium"
                 android:background="@drawable/background_file_list"
                 android:orientation="vertical">
 
@@ -293,6 +287,15 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <include
+                    android:id="@+id/uploadFileInProgress"
+                    layout="@layout/cardview_file_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/marginStandardSmall"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/fileRecyclerView"
