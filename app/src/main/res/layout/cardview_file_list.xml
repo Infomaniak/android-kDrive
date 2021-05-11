@@ -24,69 +24,11 @@
     app:cardCornerRadius="0dp"
     app:cardElevation="0dp">
 
-    <LinearLayout
+    <include
+        android:id="@+id/itemviewFile"
+        layout="@layout/item_file"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
-
-        <include
-            android:id="@+id/itemviewFile"
-            layout="@layout/item_file" />
-
-        <FrameLayout
-            android:id="@+id/fileMenu"
-            android:layout_width="500dp"
-            android:layout_height="match_parent">
-
-            <FrameLayout
-                android:id="@+id/shareButton"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/primary">
-
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:layout_width="60dp"
-                    android:layout_height="match_parent"
-                    android:background="?selectableItemBackground"
-                    android:paddingVertical="@dimen/marginStandardMedium"
-                    android:src="@drawable/ic_share"
-                    app:tint="@android:color/white" />
-            </FrameLayout>
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/primaryDark">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/menuButton"
-                    style="@style/IconButton"
-                    android:layout_width="60dp"
-                    android:layout_height="match_parent"
-                    android:contentDescription="@string/buttonMenu"
-                    android:paddingVertical="@dimen/marginStandardMedium"
-                    app:backgroundTint="@color/primaryDark"
-                    app:cornerRadius="0dp"
-                    app:icon="@drawable/ic_menu"
-                    app:iconTint="@android:color/white" />
-            </FrameLayout>
-
-            <FrameLayout
-                android:id="@+id/deleteButton"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/red_error">
-
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:layout_width="60dp"
-                    android:layout_height="match_parent"
-                    android:background="?selectableItemBackground"
-                    android:paddingVertical="@dimen/marginStandardMedium"
-                    android:src="@drawable/ic_delete"
-                    app:tint="@android:color/white" />
-            </FrameLayout>
-        </FrameLayout>
-    </LinearLayout>
+        android:layout_height="match_parent" />
 
     <View
         android:id="@+id/disabled"

@@ -22,10 +22,8 @@ import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.safeNavigate
-import com.infomaniak.drive.utils.showSnackbar
 import kotlinx.android.synthetic.main.fragment_file_list.*
 
 class TrashFragment : FileSubTypeListFragment() {
@@ -57,25 +55,7 @@ class TrashFragment : FileSubTypeListFragment() {
                 )
                 else showTrashedFileActions(file)
             }
-            onMenuClicked = { view, file, _ ->
-                when (view.id) {
-                    R.id.menuButton -> showTrashedFileActions(file)
-                    R.id.deleteButton -> {
-                        Utils.confirmFileDeletion(requireContext(), fileName = file.name, fromTrash = true) { dialog ->
-                            trashViewModel.deleteTrashFile(file).observe(viewLifecycleOwner) { apiResponse ->
-                                dialog.dismiss()
-                                if (apiResponse.isSuccess()) {
-                                    val title = resources.getQuantityString(R.plurals.snackbarDeleteConfirmation, 1, file.name)
-                                    requireActivity().showSnackbar(title)
-                                    removeFileFromAdapter(file.id)
-                                } else {
-                                    requireActivity().showSnackbar(R.string.errorDelete)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            onMenuClicked = { file -> showTrashedFileActions(file) }
         }
 
         trashViewModel.removeFileId.observe(viewLifecycleOwner) { fileToRemove ->

@@ -78,7 +78,6 @@ class SelectFolderFragment : FileListFragment() {
             onBackPressed()
         }
 
-        fileRecyclerView.isItemDraggable = false
         fileAdapter.selectFolder = true
         fileAdapter.onFileClicked = { file ->
             when {

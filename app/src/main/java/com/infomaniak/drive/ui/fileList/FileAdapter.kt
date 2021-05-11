@@ -22,7 +22,6 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
-import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.setFileItem
@@ -41,7 +40,7 @@ open class FileAdapter(
     var importContainsProgress: Boolean = false
 
     var onFileClicked: ((file: File) -> Unit)? = null
-    var onMenuClicked: ((view: View, selectedFile: File, position: Int) -> Unit)? = null
+    var onMenuClicked: ((selectedFile: File) -> Unit)? = null
     var onStopUploadButtonClicked: ((fileName: String) -> Unit)? = null
     var openMultiSelectMode: (() -> Unit)? = null
     var updateMultiSelectMode: (() -> Unit)? = null
@@ -202,14 +201,11 @@ open class FileAdapter(
                     uploadInProgress -> {
                         stopUploadButton.setOnClickListener { onStopUploadButtonClicked?.invoke(file.name) }
                         stopUploadButton.visibility = VISIBLE
-                        endIconLayout.visibility = VISIBLE
-                        imageRow.visibility = GONE
                     }
                     multiSelectMode -> {
                         fileChecked.isChecked = isSelectedFile(file)
                         fileChecked.visibility = VISIBLE
                         filePreview.visibility = if (isGrid) VISIBLE else GONE
-                        imageRow?.visibility = GONE
                     }
                     else -> {
                         filePreview.visibility = VISIBLE
@@ -218,22 +214,14 @@ open class FileAdapter(
                 }
 
                 val isInProgress = (position == 0 && importContainsProgress)
-
-                val menuButtonVisibility = when {
+                menuButton?.visibility = when {
                     file.isDrive() || isInProgress || file.isTrashed() ||
                             file.isFromActivities || file.isFromSearch ||
                             (offlineMode && !file.isOffline) -> GONE
                     else -> VISIBLE
                 }
-                fileMenu?.visibility = menuButtonVisibility
-                menuButton?.visibility = menuButtonVisibility
+                menuButton?.setOnClickListener { onMenuClicked?.invoke(file) }
 
-                shareButton?.visibility = if (file.rights?.share == true) VISIBLE else GONE
-                deleteButton?.visibility = if (file.rights?.delete == true) VISIBLE else GONE
-
-                shareButton?.setOnClickListener { onMenuClicked?.invoke(it, file, position) }
-                menuButton?.setOnClickListener { onMenuClicked?.invoke(it, file, position) }
-                deleteButton?.setOnClickListener { onMenuClicked?.invoke(it, file, position) }
                 fileChecked.setOnClickListener {
                     onSelectedFile(file, fileChecked.isChecked)
                 }

@@ -68,14 +68,11 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/menuButton"
                 style="@style/IconButton"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
                 android:layout_marginTop="@dimen/marginStandardSmall"
                 android:layout_marginEnd="@dimen/marginStandardSmall"
                 android:contentDescription="@string/buttonMenu"
                 app:backgroundTint="#45000000"
                 app:icon="@drawable/ic_menu"
-                app:iconSize="18dp"
                 app:iconTint="@android:color/white"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

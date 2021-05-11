@@ -57,6 +57,18 @@
             tools:text="@tools:sample/full_names" />
 
         <TextView
+            android:id="@+id/userEmail"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/marginStandard"
+            android:layout_marginEnd="@dimen/marginStandard"
+            android:gravity="center"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/userName"
+            tools:text="thiago@silva.com" />
+
+        <TextView
             android:id="@+id/driveName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -68,18 +80,19 @@
             app:drawableStartCompat="@drawable/ic_drive"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/userName"
+            app:layout_constraintTop_toBottomOf="@+id/userEmail"
             tools:text="Westworld" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/driveIcon"
             style="@style/IconButton"
-            android:layout_width="34dp"
-            android:layout_height="34dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:layout_marginStart="2dp"
             android:contentDescription="@string/buttonSwitchDrive"
             app:icon="@drawable/ic_switch_drive"
-            app:iconTint="@color/actionColor"
+            app:iconSize="18dp"
+            app:iconTint="@color/primaryText"
             app:layout_constraintBottom_toBottomOf="@id/driveName"
             app:layout_constraintStart_toEndOf="@id/driveName"
             app:layout_constraintTop_toTopOf="@id/driveName" />
@@ -88,7 +101,7 @@
             android:id="@+id/driveStorageProgress"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="@dimen/marginStandardSmall"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
