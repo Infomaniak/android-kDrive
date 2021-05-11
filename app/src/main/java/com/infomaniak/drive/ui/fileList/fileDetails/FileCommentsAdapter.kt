@@ -23,7 +23,7 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.TooltipCompat
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.FileComment
-import com.infomaniak.drive.utils.loadUrlWithoutToken
+import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.drive.views.PaginationAdapter
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_file_comment.view.*
@@ -62,7 +62,7 @@ class FileCommentsAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val currentComment = itemList[position]
         holder.itemView.apply {
-            commentUserAvatar.loadUrlWithoutToken(context, currentComment.user.avatar, R.drawable.ic_placeholder_avatar)
+            commentUserAvatar.loadAvatar(currentComment.user)
             commentUserName.text = currentComment.user.displayName
             commentValue.text = currentComment.body
             commentDateValue.text = getRelativeDateTimeString(

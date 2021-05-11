@@ -28,13 +28,13 @@ import androidx.core.graphics.drawable.DrawableCompat.wrap
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.FragmentNavigatorExtras
-import coil.load
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.utils.*
-import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
-import com.infomaniak.lib.core.utils.toDp
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.FormatterFileSize
+import com.infomaniak.drive.utils.loadAvatar
+import com.infomaniak.drive.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_menu.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -74,16 +74,7 @@ class MenuFragment : Fragment() {
                 }
             }
 
-            if (currentUser.avatar == null) {
-                userImage.load(
-                    Utils.generateAvatarBitmap(
-                        size = userImage.layoutParams.width.toDp(),
-                        initials = "${currentUser.firstname.first()}${currentUser.lastname.first()}",
-                        background = requireContext().getBackgroundColorBasedOnId(AccountUtils.currentUserId)
-                    )
-                )
-            } else userImage.loadUrlWithoutToken(requireContext(), currentUser.avatar, R.drawable.ic_placeholder_avatar)
-
+            userImage.loadAvatar(currentUser)
 
             driveIcon.setOnClickListener {
                 safeNavigate(

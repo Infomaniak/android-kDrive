@@ -28,7 +28,7 @@ import android.widget.Filterable
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.Shareable
-import com.infomaniak.drive.utils.loadUrlWithoutToken
+import com.infomaniak.drive.utils.loadAvatar
 import kotlinx.android.synthetic.main.item_user.view.*
 import java.util.*
 import kotlin.collections.ArrayList
@@ -82,7 +82,7 @@ class AvailableShareableItemsAdapter(
         return (convertView ?: inflater.inflate(R.layout.item_user, parent, false)).apply {
             when (item) {
                 is DriveUser -> {
-                    userAvatar.loadUrlWithoutToken(context, item.avatar, R.drawable.ic_placeholder_avatar)
+                    userAvatar.loadAvatar(item)
                     userName.text = item.displayName
                     userEmail.text = item.email
                     chevron.visibility = GONE

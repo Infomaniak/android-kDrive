@@ -25,7 +25,7 @@ import androidx.core.content.ContextCompat
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.utils.isPositive
-import com.infomaniak.drive.utils.loadUrlWithoutToken
+import com.infomaniak.drive.utils.loadAvatar
 import kotlinx.android.synthetic.main.item_user_avatar.view.*
 
 class UserAvatarView @JvmOverloads constructor(
@@ -48,7 +48,7 @@ class UserAvatarView @JvmOverloads constructor(
                     R.color.backgroundCardview
                 )
             ) // in case of transparent pics
-            avatarImageView.loadUrlWithoutToken(context, user.getUserAvatar(), R.drawable.ic_placeholder_avatar)
+            avatarImageView.loadAvatar(user)
             TooltipCompat.setTooltipText(this, user.displayName)
         } ?: run {
             this.visibility = GONE

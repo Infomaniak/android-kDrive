@@ -30,8 +30,8 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileActivity
+import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.drive.utils.loadUrl
-import com.infomaniak.drive.utils.loadUrlWithoutToken
 import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.LoaderCardView
 import com.infomaniak.lib.core.views.ViewHolder
@@ -65,7 +65,7 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
         val fileActivityName: CharSequence = fileActivity.file?.name ?: fileActivity.path.substringAfterLast("/")
         val sizeMergedFile = fileActivity.mergedFileActivities.size
         actionValue.text = resources.getQuantityString(fileActivity.homeTranslation, sizeMergedFile + 1, sizeMergedFile + 1)
-        userAvatar.loadUrlWithoutToken(context, user.avatar, R.drawable.ic_placeholder_avatar)
+        userAvatar.loadAvatar(user)
         userName.text = user.displayName
         dateValue.text = getRelativeDateTimeString(
             context,

@@ -22,6 +22,7 @@ import android.app.Dialog
 import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.*
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.CountDownTimer
 import android.view.View
@@ -324,7 +325,7 @@ object Utils {
         } else false
     }
 
-    fun generateAvatarBitmap(size: Int, initials: String, background: Drawable): Bitmap? {
+    fun Context.generateInitialsAvatarDrawable(size: Int = 350, initials: String, background: Drawable): Drawable {
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         background.setBounds(canvas.clipBounds.left, canvas.clipBounds.top, canvas.clipBounds.right, canvas.clipBounds.bottom)
@@ -339,6 +340,6 @@ object Utils {
             val yPos = (canvas.height / 2 - (descent() + ascent()) / 2)
             canvas.drawText(initials, xPos.toFloat(), yPos, this)
         }
-        return bitmap
+        return BitmapDrawable(this.resources, bitmap)
     }
 }
