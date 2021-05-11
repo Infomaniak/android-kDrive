@@ -85,11 +85,10 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomShe
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.models.User
-import com.infomaniak.lib.core.utils.format
-import com.infomaniak.lib.core.utils.hasPermissions
-import com.infomaniak.lib.core.utils.requestPermissionsIsPossible
-import com.infomaniak.lib.core.utils.startAppSettingsConfig
+import com.infomaniak.lib.core.utils.*
+import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import kotlinx.android.synthetic.main.cardview_file_grid.view.*
+import kotlinx.android.synthetic.main.fragment_menu.*
 import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.android.synthetic.main.item_file.view.fileFavorite
 import kotlinx.android.synthetic.main.item_file.view.fileName
@@ -315,7 +314,18 @@ fun View.setFileItem(
 fun View.setUserView(user: User, showChevron: Boolean = true, onItemClicked: (user: User) -> Unit) {
     userName.text = user.displayName
     userEmail.text = user.email
-    userAvatar.loadUrlWithoutToken(userName.context, user.avatar, R.drawable.ic_placeholder_avatar)
+    if (user.avatar == null) {
+        userAvatar.load(
+            Utils.generateAvatarBitmap(
+                size = userAvatar.layoutParams.width.toDp(),
+                initials = "${user.firstname.first()}${user.lastname.first()}",
+                background = userAvatar.context.getBackgroundColorBasedOnId(user.id)
+            )
+        )
+    } else {
+        userAvatar.loadUrlWithoutToken(userName.context, user.avatar, R.drawable.ic_placeholder_avatar)
+
+    }
     chevron.visibility = if (showChevron) VISIBLE else GONE
     setOnClickListener { onItemClicked(user) }
 }

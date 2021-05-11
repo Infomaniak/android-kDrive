@@ -21,6 +21,8 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.*
 import android.content.pm.PackageManager
+import android.graphics.*
+import android.graphics.drawable.Drawable
 import android.os.CountDownTimer
 import android.view.View
 import android.view.View.VISIBLE
@@ -320,5 +322,23 @@ object Utils {
         return if (requestCode == SyncUtils.REQUEST_WRITE_STORAGE_PERMISSION) {
             grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
         } else false
+    }
+
+    fun generateAvatarBitmap(size: Int, initials: String, background: Drawable): Bitmap? {
+        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        background.setBounds(canvas.clipBounds.left, canvas.clipBounds.top, canvas.clipBounds.right, canvas.clipBounds.bottom)
+        background.draw(canvas)
+        Paint().apply {
+            isAntiAlias = true
+            textAlign = Paint.Align.CENTER
+            color = Color.WHITE
+            textSize = (size / 2).toFloat()
+
+            val xPos = canvas.width / 2
+            val yPos = (canvas.height / 2 - (descent() + ascent()) / 2)
+            canvas.drawText(initials, xPos.toFloat(), yPos, this)
+        }
+        return bitmap
     }
 }
