@@ -21,6 +21,7 @@
     android:id="@+id/homeCoordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/appBar"
     tools:context=".ui.home.HomeFragment">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -31,6 +32,7 @@
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/appBar"
             app:layout_scrollFlags="scroll|snap">
 
             <LinearLayout
@@ -185,7 +187,7 @@
             android:layout_height="0dp"
             android:clipToPadding="false"
             android:overScrollMode="never"
-            android:paddingHorizontal="20dp"
+            android:paddingHorizontal="@dimen/marginStandard"
             android:paddingTop="@dimen/marginStandardSmall"
             android:paddingBottom="@dimen/recyclerViewPaddingBottom"
             app:layout_constraintBottom_toBottomOf="parent"

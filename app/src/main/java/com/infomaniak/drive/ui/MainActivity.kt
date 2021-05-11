@@ -115,14 +115,14 @@ class MainActivity : BaseActivity() {
             }
             mainFab.visibility = visibility
             bottomNavigation.visibility = visibility
-            bottomNavigationBackgroundView.visibility = when (destination.id) {
-                R.id.homeFragment,
+            bottomNavigationBackgroundViewOld.visibility = when (destination.id) {
                 R.id.menuFragment -> VISIBLE
                 else -> GONE
             }
-            bottomNavigationBackgroundView2.visibility = when (destination.id) {
+            bottomNavigationBackgroundView.visibility = when (destination.id) {
                 R.id.favoritesFragment,
-                R.id.fileListFragment -> VISIBLE
+                R.id.fileListFragment,
+                R.id.homeFragment -> VISIBLE
                 else -> GONE
             }
 
@@ -140,12 +140,13 @@ class MainActivity : BaseActivity() {
                 R.id.fileShareLinkSettingsFragment,
                 R.id.favoritesFragment,
                 R.id.fileListFragment,
+                R.id.homeFragment,
                 R.id.mySharesFragment,
                 R.id.offlineFileFragment,
                 R.id.sharedWithMeFragment,
                 R.id.trashFragment,
                 R.id.uploadInProgressFragment -> {
-                    setColorStatusBar(destination.id == R.id.fileShareLinkSettingsFragment)
+                    setColorStatusBar(destination.id == R.id.fileShareLinkSettingsFragment || destination.id == R.id.homeFragment)
                     setColorNavigationBar(true)
                 }
                 R.id.downloadProgressDialog, R.id.previewSliderFragment -> Unit

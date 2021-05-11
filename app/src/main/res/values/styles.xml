@@ -339,6 +339,11 @@
         <item name="cornerSizeBottomRight">@dimen/radius</item>
     </style>
 
+    <style name="ShapeAppearanceLikeCardview">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/cardViewRadius</item>
+    </style>
+
     <style name="CircleImageView">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>

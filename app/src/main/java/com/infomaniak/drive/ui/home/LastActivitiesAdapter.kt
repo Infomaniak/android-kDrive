@@ -33,7 +33,6 @@ import com.infomaniak.drive.data.models.FileActivity
 import com.infomaniak.drive.utils.loadUrl
 import com.infomaniak.drive.utils.loadUrlWithoutToken
 import com.infomaniak.lib.core.views.LoaderAdapter
-import com.infomaniak.lib.core.views.LoaderCardView
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_home_file_activity.view.*
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
@@ -51,10 +50,15 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.itemView.apply {
+            divider.visibility = if (position == 0) GONE else VISIBLE
             if (getItemViewType(position) == VIEW_TYPE_LOADING) {
-                (this as LoaderCardView).startLoading()
+                cardFilePreview1.startLoading()
+                cardFilePreview2.startLoading()
+                cardFilePreview3.startLoading()
             } else {
-                (this as LoaderCardView).stopLoading()
+                cardFilePreview1.stopLoading()
+                cardFilePreview2.stopLoading()
+                cardFilePreview3.stopLoading()
                 val fileActivity = itemList[position]
                 fileActivity.user?.let { user -> this.createActivity(fileActivity, user) }
             }

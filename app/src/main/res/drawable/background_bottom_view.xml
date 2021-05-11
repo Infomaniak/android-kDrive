@@ -19,7 +19,7 @@
     android:shape="rectangle">
     <gradient
         android:angle="270"
-        android:endColor="@color/background"
+        android:endColor="@color/backgroundCardview"
         android:startColor="#00000000"
         android:type="linear" />
 </shape>
