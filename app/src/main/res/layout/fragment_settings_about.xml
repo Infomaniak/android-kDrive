@@ -69,7 +69,7 @@
 
                     <TextView
                         android:id="@+id/privacyTitle"
-                        style="@style/SmallTitle"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="@string/aboutPrivacyTitle"
@@ -105,7 +105,7 @@
 
                     <TextView
                         android:id="@+id/sourceCodeTitle"
-                        style="@style/SmallTitle"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="@string/aboutSourceCodeTitle"
@@ -141,7 +141,7 @@
 
                     <TextView
                         android:id="@+id/licenseTitle"
-                        style="@style/SmallTitle"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="@string/aboutLicenseTitle"
@@ -188,7 +188,7 @@
 
                     <TextView
                         android:id="@+id/appVersionTitle"
-                        style="@style/SmallTitle"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="@string/aboutAppVersionTitle"

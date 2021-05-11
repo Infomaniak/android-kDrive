@@ -70,7 +70,7 @@
 
                 <TextView
                     android:id="@+id/restoreFileInText"
-                    style="@style/MediumTitle"
+                    style="@style/Subtitle1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/marginStandardMedium"
@@ -102,7 +102,7 @@
 
                 <TextView
                     android:id="@+id/restoreFileToOriginalPlaceText"
-                    style="@style/MediumTitle"
+                    style="@style/Subtitle1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/marginStandardMedium"
@@ -134,7 +134,7 @@
 
                 <TextView
                     android:id="@+id/deleteText"
-                    style="@style/MediumTitle"
+                    style="@style/Subtitle1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/marginStandardMedium"

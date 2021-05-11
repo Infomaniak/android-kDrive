@@ -57,7 +57,7 @@
 
             <TextView
                 android:id="@+id/rightsTitle"
-                style="@style/SmallTitle"
+                style="@style/Subtitle2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/marginStandard"
@@ -89,7 +89,7 @@
 
                     <TextView
                         android:id="@+id/rightsValue"
-                        style="@style/SmallTitle"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="@dimen/marginStandardMedium"
@@ -157,7 +157,7 @@
 
                 <TextView
                     android:id="@+id/addExpirationDateTitle"
-                    style="@style/SmallTitle"
+                    style="@style/Subtitle2"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@string/allAddExpirationDateTitle"
@@ -214,7 +214,7 @@
 
                 <TextView
                     android:id="@+id/allowDownloadTitle"
-                    style="@style/SmallTitle"
+                    style="@style/Subtitle2"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@string/shareLinkSettingsAllowDownloadTitle"
@@ -251,7 +251,7 @@
 
                 <TextView
                     android:id="@+id/blockUsersConsultTitle"
-                    style="@style/SmallTitle"
+                    style="@style/Subtitle2"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@string/shareLinkSettingsBlockUsersConsultTitle"
@@ -288,7 +288,7 @@
 
                 <TextView
                     android:id="@+id/blockCommentsTitle"
-                    style="@style/SmallTitle"
+                    style="@style/Subtitle2"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@string/shareLinkSettingsBlockCommentsTitle"

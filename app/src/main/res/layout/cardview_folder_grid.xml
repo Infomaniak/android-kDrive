@@ -123,7 +123,7 @@
 
                 <TextView
                     android:id="@+id/fileName"
-                    style="@style/SmallTitle"
+                    style="@style/Subtitle2"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:ellipsize="end"

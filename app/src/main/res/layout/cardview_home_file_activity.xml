@@ -44,7 +44,7 @@
 
     <com.infomaniak.lib.core.views.LoaderTextView
         android:id="@+id/userName"
-        style="@style/SmallTitle"
+        style="@style/Subtitle2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/marginStandardSmall"

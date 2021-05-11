@@ -43,7 +43,7 @@
 
         <TextView
             android:id="@+id/userName"
-            style="@style/Title"
+            style="@style/H2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandard"
@@ -122,7 +122,7 @@
 
             <TextView
                 android:id="@+id/textDriveQuota"
-                style="@style/SmallTitle"
+                style="@style/Subtitle2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:text="60 Go / 1 To" />

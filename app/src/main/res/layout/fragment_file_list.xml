@@ -80,7 +80,7 @@
 
             <TextView
                 android:id="@+id/titleMultiSelect"
-                style="@style/BoldTitle"
+                style="@style/H1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/marginStandard"
@@ -185,7 +185,7 @@
 
                     <TextView
                         android:id="@+id/convertedType"
-                        style="@style/MediumTitle"
+                        style="@style/Subtitle1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"

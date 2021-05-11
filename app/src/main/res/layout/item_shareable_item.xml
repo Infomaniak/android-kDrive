@@ -36,7 +36,7 @@
 
     <TextView
         android:id="@+id/name"
-        style="@style/SmallTitle"
+        style="@style/Subtitle2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="10dp"
@@ -67,7 +67,7 @@
 
     <TextView
         android:id="@+id/rightsValue"
-        style="@style/SmallTitle"
+        style="@style/Subtitle2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="10dp"

@@ -49,7 +49,7 @@
 
     <TextView
         android:id="@+id/textView"
-        style="@style/Title"
+        style="@style/H2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/marginStandard"

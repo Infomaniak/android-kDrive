@@ -66,7 +66,7 @@
 
                     <TextView
                         android:id="@+id/syncPictureTitle"
-                        style="@style/SmallTitle"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="@string/syncSettingsTitle"
@@ -101,7 +101,7 @@
 
                     <TextView
                         android:id="@+id/notificationsTitle"
-                        style="@style/SmallTitle"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="@string/notificationTitle"
@@ -138,7 +138,7 @@
 
                     <TextView
                         android:id="@+id/appSecurityTitle"
-                        style="@style/SmallTitle"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="@string/appSecurityTitle"
@@ -172,7 +172,7 @@
 
                     <TextView
                         android:id="@+id/onlyWifiSyncTitle"
-                        style="@style/SmallTitle"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="@string/settingsOnlyWifiSyncTitle"
@@ -217,7 +217,7 @@
 
                     <TextView
                         android:id="@+id/aboutTitle"
-                        style="@style/SmallTitle"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="@string/aboutTitle"

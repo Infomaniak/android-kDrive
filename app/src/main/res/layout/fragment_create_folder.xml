@@ -85,7 +85,7 @@
 
             <TextView
                 android:id="@+id/accessPermissionTitle"
-                style="@style/MediumTitle"
+                style="@style/Subtitle1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/marginStandard"
@@ -124,7 +124,7 @@
 
                         <TextView
                             android:id="@+id/advancedSettingsTitle"
-                            style="@style/MediumTitle"
+                            style="@style/Subtitle1"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/marginStandard"
@@ -165,7 +165,7 @@
 
             <TextView
                 android:id="@+id/pathTitle"
-                style="@style/MediumTitle"
+                style="@style/Subtitle1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/marginStandard"
