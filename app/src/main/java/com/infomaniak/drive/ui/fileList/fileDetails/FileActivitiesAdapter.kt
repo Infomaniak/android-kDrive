@@ -24,7 +24,7 @@ import android.view.ViewGroup
 import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.FileActivity
-import com.infomaniak.drive.utils.loadUrlWithoutToken
+import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.drive.views.PaginationAdapter
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_file_activity.view.*
@@ -46,9 +46,9 @@ class FileActivitiesAdapter(
             activityAction.setText(currentFileActivity.translation(isFolder))
             activityHour.text = currentFileActivity.getHour()
 
-            currentFileActivity.user?.let {
-                activityUserName.text = it.displayName
-                activityUserAvatar.loadUrlWithoutToken(context, it.avatar, R.drawable.ic_placeholder_avatar)
+            currentFileActivity.user?.let { driveUser ->
+                activityUserName.text = driveUser.displayName
+                activityUserAvatar.loadAvatar(driveUser)
             } ?: run {
                 activityUserName.setText(R.string.allUserAnonymous)
                 activityUserAvatar.load(R.drawable.ic_placeholder_avatar)

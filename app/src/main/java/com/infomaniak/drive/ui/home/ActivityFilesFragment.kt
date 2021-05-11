@@ -26,7 +26,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.loadUrlWithoutToken
+import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.drive.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.fragment_pictures.collapsingToolbarLayout
@@ -48,7 +48,7 @@ class ActivityFilesFragment : FileListFragment() {
 
     private fun initActivity() {
         currentActivity.visibility = VISIBLE
-        currentActivityAvatar.loadUrlWithoutToken(requireContext(), navigationArgs.activityUser?.getUserAvatar())
+        navigationArgs.activityUser?.let { user -> currentActivityAvatar.loadAvatar(user) }
         currentActivityContent.text =
             String.format("%s %s", navigationArgs.activityUser?.displayName, navigationArgs.activityTranslation)
     }

@@ -84,9 +84,11 @@ import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialog.Companion.FILE_ID
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.drive.utils.Utils.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.models.User
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
+import com.infomaniak.lib.core.utils.UtilsUi.getInitials
 import kotlinx.android.synthetic.main.cardview_file_grid.view.*
 import kotlinx.android.synthetic.main.fragment_menu.*
 import kotlinx.android.synthetic.main.item_file.view.*
@@ -96,6 +98,7 @@ import kotlinx.android.synthetic.main.item_file.view.fileOffline
 import kotlinx.android.synthetic.main.item_file.view.fileOfflineProgression
 import kotlinx.android.synthetic.main.item_file.view.filePreview
 import kotlinx.android.synthetic.main.item_file.view.progressLayout
+import kotlinx.android.synthetic.main.item_pdfview.view.*
 import kotlinx.android.synthetic.main.item_user.view.*
 import java.util.*
 import kotlin.math.abs
@@ -136,6 +139,22 @@ fun ImageView.loadUrlWithoutToken(
     return load(uri, imageLoader) {
         error(placeholder)
         fallback(placeholder)
+        placeholder(R.drawable.placeholder)
+    }
+}
+
+fun ImageView.loadAvatar(driveUser: DriveUser): Disposable =
+    loadAvatar(driveUser.id, driveUser.getUserAvatar(), driveUser.displayName.getInitials())
+
+fun ImageView.loadAvatar(user: User): Disposable = loadAvatar(user.id, user.avatar, user.getInitials())
+
+fun ImageView.loadAvatar(id: Int, avatarUrl: String?, initials: String): Disposable {
+    val imageLoader = ImageLoader.Builder(context).build()
+    val fallback =
+        context.generateInitialsAvatarDrawable(initials = initials, background = context.getBackgroundColorBasedOnId(id))
+    return load(avatarUrl, imageLoader) {
+        error(fallback)
+        fallback(fallback)
         placeholder(R.drawable.placeholder)
     }
 }
@@ -314,18 +333,7 @@ fun View.setFileItem(
 fun View.setUserView(user: User, showChevron: Boolean = true, onItemClicked: (user: User) -> Unit) {
     userName.text = user.displayName
     userEmail.text = user.email
-    if (user.avatar == null) {
-        userAvatar.load(
-            Utils.generateAvatarBitmap(
-                size = userAvatar.layoutParams.width.toDp(),
-                initials = "${user.firstname.first()}${user.lastname.first()}",
-                background = userAvatar.context.getBackgroundColorBasedOnId(user.id)
-            )
-        )
-    } else {
-        userAvatar.loadUrlWithoutToken(userName.context, user.avatar, R.drawable.ic_placeholder_avatar)
-
-    }
+    userAvatar.loadAvatar(user)
     chevron.visibility = if (showChevron) VISIBLE else GONE
     setOnClickListener { onItemClicked(user) }
 }

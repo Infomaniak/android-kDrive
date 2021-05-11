@@ -153,7 +153,7 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         val userList = DriveInfosController.getUsers(arrayListOf(file.createdBy))
         userList.firstOrNull()?.apply {
             owner.visibility = VISIBLE
-            ownerAvatar.loadUrlWithoutToken(requireContext(), getUserAvatar(), R.drawable.ic_placeholder_avatar)
+            ownerAvatar.loadAvatar(this)
             ownerValue.text = displayName
         }
     }

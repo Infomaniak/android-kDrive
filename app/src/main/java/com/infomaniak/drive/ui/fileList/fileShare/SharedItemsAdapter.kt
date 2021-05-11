@@ -28,10 +28,11 @@ import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.drive.utils.loadUrl
-import com.infomaniak.drive.utils.loadUrlWithoutToken
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_shareable_item.view.*
+import kotlinx.android.synthetic.main.item_user_avatar.view.*
 
 class SharedItemsAdapter(
     private val file: File,
@@ -69,7 +70,7 @@ class SharedItemsAdapter(
     private fun View.bindDriveUser(driveUser: DriveUser) {
         name.text = driveUser.displayName
         infos.text = driveUser.email
-        avatar.loadUrlWithoutToken(context, driveUser.getUserAvatar(), R.drawable.ic_placeholder_avatar)
+        avatar.loadAvatar(driveUser)
 
         rightsValue.setText(driveUser.getFilePermission().translation)
         if (file.createdBy == driveUser.id) {
