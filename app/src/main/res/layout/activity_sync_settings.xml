@@ -75,7 +75,7 @@
 
                     <TextView
                         android:id="@+id/activateSyncTitle"
-                        style="@style/SmallTitle"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandard"
@@ -99,7 +99,7 @@
 
             <TextView
                 android:id="@+id/saveSettingsTitle"
-                style="@style/SmallTitle"
+                style="@style/Subtitle2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/marginStandard"
@@ -141,7 +141,7 @@
 
                         <TextView
                             android:id="@+id/driveName"
-                            style="@style/SmallTitle"
+                            style="@style/Subtitle2"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/marginStandardMedium"
@@ -195,7 +195,7 @@
 
                         <TextView
                             android:id="@+id/pathName"
-                            style="@style/SmallTitle"
+                            style="@style/Subtitle2"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/marginStandardMedium"
@@ -224,7 +224,7 @@
 
             <TextView
                 android:id="@+id/syncSettingsTitle"
-                style="@style/SmallTitle"
+                style="@style/Subtitle2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/marginStandard"
@@ -256,7 +256,7 @@
 
                         <TextView
                             android:id="@+id/syncPictureTitle"
-                            style="@style/SmallTitle"
+                            style="@style/Subtitle2"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/marginStandard"
@@ -288,7 +288,7 @@
 
                         <TextView
                             android:id="@+id/syncVideoTitle"
-                            style="@style/SmallTitle"
+                            style="@style/Subtitle2"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/marginStandard"
@@ -320,7 +320,7 @@
 
                         <TextView
                             android:id="@+id/syncScreenshotTitle"
-                            style="@style/SmallTitle"
+                            style="@style/Subtitle2"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/marginStandard"
@@ -354,7 +354,7 @@
 
                         <TextView
                             android:id="@+id/syncDateTitle"
-                            style="@style/SmallTitle"
+                            style="@style/Subtitle2"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:text="@string/syncSettingsButtonSaveDate"
@@ -388,7 +388,7 @@
 
                         <TextView
                             android:id="@+id/syncPeriodicityTitle"
-                            style="@style/SmallTitle"
+                            style="@style/Subtitle2"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:text="@string/syncSettingsButtonSyncPeriodicity"

@@ -41,6 +41,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <View
+        android:id="@+id/bottomNavigationBackgroundViewOld"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="@drawable/background_bottom_view_old"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <com.infomaniak.drive.views.FabBottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="0dp"

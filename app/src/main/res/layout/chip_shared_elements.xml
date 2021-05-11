@@ -27,7 +27,7 @@
     app:chipMinHeight="45dp"
     app:closeIcon="@drawable/ic_remove"
     app:closeIconEndPadding="@dimen/marginStandardVerySmall"
-    app:closeIconTint="@color/actionColor"
+    app:closeIconTint="@color/primaryText"
     app:closeIconVisible="true"
     app:iconStartPadding="@dimen/marginStandardVerySmall"
     tools:text="@tools:sample/full_names" />

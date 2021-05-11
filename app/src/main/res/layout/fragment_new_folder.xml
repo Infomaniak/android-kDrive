@@ -76,7 +76,7 @@
 
                     <TextView
                         android:id="@+id/privateFolderTitle"
-                        style="@style/SmallTitle"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="@dimen/marginStandardMedium"
@@ -126,7 +126,7 @@
 
                     <TextView
                         android:id="@+id/commonFolderTitle"
-                        style="@style/SmallTitle"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="@dimen/marginStandardMedium"
@@ -175,7 +175,7 @@
 
                     <TextView
                         android:id="@+id/dropBoxTitle"
-                        style="@style/SmallTitle"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="@dimen/marginStandardMedium"

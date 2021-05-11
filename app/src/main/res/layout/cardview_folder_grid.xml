@@ -27,7 +27,6 @@
         style="@style/CardViewInfomaniak"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="?android:attr/selectableItemBackground"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="4:3"
         app:layout_constraintEnd_toEndOf="parent"
@@ -63,7 +62,7 @@
                 android:layout_marginEnd="@dimen/marginStandardSmall"
                 android:contentDescription="@string/buttonMenu"
                 app:icon="@drawable/ic_menu"
-                app:iconSize="18dp"
+                app:iconTint="@color/primaryText"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -124,7 +123,7 @@
 
                 <TextView
                     android:id="@+id/fileName"
-                    style="@style/SmallTitle"
+                    style="@style/Subtitle2"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:ellipsize="end"

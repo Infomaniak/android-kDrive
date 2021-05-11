@@ -48,7 +48,7 @@
 
         <TextView
             android:id="@+id/addFavoritesText"
-            style="@style/MediumTitle"
+            style="@style/Subtitle1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardMedium"
@@ -101,7 +101,7 @@
 
         <TextView
             android:id="@+id/availableOfflineText"
-            style="@style/MediumTitle"
+            style="@style/Subtitle1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardMedium"
@@ -142,7 +142,7 @@
 
         <TextView
             android:id="@+id/downloadFileText"
-            style="@style/MediumTitle"
+            style="@style/Subtitle1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardMedium"
@@ -174,7 +174,7 @@
 
         <TextView
             android:id="@+id/duplicateFileText"
-            style="@style/MediumTitle"
+            style="@style/Subtitle1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardMedium"

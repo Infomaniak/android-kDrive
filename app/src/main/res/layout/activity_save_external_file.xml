@@ -43,7 +43,7 @@
 
         <TextView
             android:id="@+id/title"
-            style="@style/BoldTitle"
+            style="@style/H1"
             android:layout_width="0dp"
             android:layout_height="@dimen/appBarHeight"
             android:gravity="bottom"
@@ -88,7 +88,7 @@
 
         <TextView
             android:id="@+id/kDriveTitle"
-            style="@style/SmallTitle"
+            style="@style/Subtitle2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/marginStandard"
@@ -124,7 +124,7 @@
 
                 <TextView
                     android:id="@+id/driveName"
-                    style="@style/SmallTitle"
+                    style="@style/Subtitle2"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/marginStandardMedium"
@@ -154,7 +154,7 @@
 
         <TextView
             android:id="@+id/pathTitle"
-            style="@style/SmallTitle"
+            style="@style/Subtitle2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/marginStandard"
@@ -194,7 +194,7 @@
 
                 <TextView
                     android:id="@+id/pathName"
-                    style="@style/SmallTitle"
+                    style="@style/Subtitle2"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/marginStandardMedium"

@@ -16,6 +16,5 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 <resources>
-    <color name="actionColor">#AFB8BE</color>
     <color name="iconColor">#88969F</color>
 </resources>

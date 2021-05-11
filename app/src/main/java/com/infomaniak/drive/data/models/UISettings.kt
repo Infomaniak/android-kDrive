@@ -69,15 +69,6 @@ class UISettings(val context: Context) {
             }
         }
 
-    var showTutorial: Boolean
-        get() = getUISettings().getBoolean("showTutorial", true)
-        set(value) {
-            with(getUISettings().edit()) {
-                putBoolean("showTutorial", value)
-                apply()
-            }
-        }
-
     var sortType: File.SortType
         get() {
             return when (getUISettings().getString("sortType", File.SortType.NAME_AZ.name)) {

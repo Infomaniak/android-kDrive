@@ -38,7 +38,7 @@
 
             <TextView
                 android:id="@+id/sharedUsersTitle"
-                style="@style/SmallTitle"
+                style="@style/Subtitle2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/suisseintl_medium"
@@ -140,7 +140,7 @@
 
             <TextView
                 android:id="@+id/ownerTitle"
-                style="@style/SmallTitle"
+                style="@style/Subtitle2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/fileDetailsInfosOwnerTitle"
@@ -183,7 +183,7 @@
 
             <TextView
                 android:id="@+id/creationDateTitle"
-                style="@style/SmallTitle"
+                style="@style/Subtitle2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/fileDetailsInfosCreationDateTitle"
@@ -215,7 +215,7 @@
 
             <TextView
                 android:id="@+id/addedDateTitle"
-                style="@style/SmallTitle"
+                style="@style/Subtitle2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/fileDetailsInfosAddedDateTitle"
@@ -247,7 +247,7 @@
 
             <TextView
                 android:id="@+id/pathTitle"
-                style="@style/SmallTitle"
+                style="@style/Subtitle2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/allPathTitle"
@@ -291,7 +291,7 @@
 
             <TextView
                 android:id="@+id/originalSizeTitle"
-                style="@style/SmallTitle"
+                style="@style/Subtitle2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/fileDetailsInfosOriginalSize"
@@ -321,7 +321,7 @@
 
             <TextView
                 android:id="@+id/totalSizeTitle"
-                style="@style/SmallTitle"
+                style="@style/Subtitle2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/fileDetailsInfosTotalSizeTitle"

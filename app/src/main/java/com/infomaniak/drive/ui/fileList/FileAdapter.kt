@@ -22,7 +22,6 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
-import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.setFileItem
@@ -41,7 +40,7 @@ open class FileAdapter(
     var importContainsProgress: Boolean = false
 
     var onFileClicked: ((file: File) -> Unit)? = null
-    var onMenuClicked: ((view: View, selectedFile: File, position: Int) -> Unit)? = null
+    var onMenuClicked: ((selectedFile: File) -> Unit)? = null
     var onStopUploadButtonClicked: ((fileName: String) -> Unit)? = null
     var openMultiSelectMode: (() -> Unit)? = null
     var updateMultiSelectMode: (() -> Unit)? = null
@@ -174,7 +173,7 @@ open class FileAdapter(
         if (itemViewType == VIEW_TYPE_NORMAL) {
             itemViewType = when (viewHolderType) {
                 DisplayType.LIST -> DisplayType.LIST.layout
-                else -> if (itemList[position].isFolder()) DisplayType.GRID_FOLDER.layout else DisplayType.GRID.layout
+                else -> if (itemList[position].isFolder() || itemList[position].isDrive()) DisplayType.GRID_FOLDER.layout else DisplayType.GRID.layout
             }
         }
         return itemViewType
@@ -194,21 +193,6 @@ open class FileAdapter(
             holder.itemView.apply {
                 val isGrid = viewHolderType == DisplayType.GRID
 
-                if (!isGrid) {
-                    var topCornerRadius = 0F
-                    var bottomCornerRadius = 0F
-                    if (position == 0) topCornerRadius = context.resources.getDimension(R.dimen.radius)
-                    if (position == itemCount - 1) bottomCornerRadius = context.resources.getDimension(R.dimen.radius)
-
-                    fileCardView.shapeAppearanceModel = fileCardView.shapeAppearanceModel
-                        .toBuilder()
-                        .setTopLeftCorner(CornerFamily.ROUNDED, topCornerRadius)
-                        .setTopRightCorner(CornerFamily.ROUNDED, topCornerRadius)
-                        .setBottomLeftCorner(CornerFamily.ROUNDED, bottomCornerRadius)
-                        .setBottomRightCorner(CornerFamily.ROUNDED, bottomCornerRadius)
-                        .build()
-                }
-
                 setFileItem(file, isGrid, true)
 
                 checkIfEnablefile(file, position)
@@ -217,14 +201,11 @@ open class FileAdapter(
                     uploadInProgress -> {
                         stopUploadButton.setOnClickListener { onStopUploadButtonClicked?.invoke(file.name) }
                         stopUploadButton.visibility = VISIBLE
-                        endIconLayout.visibility = VISIBLE
-                        imageRow.visibility = GONE
                     }
                     multiSelectMode -> {
                         fileChecked.isChecked = isSelectedFile(file)
                         fileChecked.visibility = VISIBLE
                         filePreview.visibility = if (isGrid) VISIBLE else GONE
-                        imageRow?.visibility = GONE
                     }
                     else -> {
                         filePreview.visibility = VISIBLE
@@ -233,22 +214,15 @@ open class FileAdapter(
                 }
 
                 val isInProgress = (position == 0 && importContainsProgress)
-
-                val menuButtonVisibility = when {
-                    file.isDrive() || isInProgress || file.isTrashed() ||
+                menuButton?.visibility = when {
+                    uploadInProgress || isInProgress ||
+                            file.isDrive() || file.isTrashed() ||
                             file.isFromActivities || file.isFromSearch ||
                             (offlineMode && !file.isOffline) -> GONE
                     else -> VISIBLE
                 }
-                fileMenu?.visibility = menuButtonVisibility
-                menuButton?.visibility = menuButtonVisibility
+                menuButton?.setOnClickListener { onMenuClicked?.invoke(file) }
 
-                shareButton?.visibility = if (file.rights?.share == true) VISIBLE else GONE
-                deleteButton?.visibility = if (file.rights?.delete == true) VISIBLE else GONE
-
-                shareButton?.setOnClickListener { onMenuClicked?.invoke(it, file, position) }
-                menuButton?.setOnClickListener { onMenuClicked?.invoke(it, file, position) }
-                deleteButton?.setOnClickListener { onMenuClicked?.invoke(it, file, position) }
                 fileChecked.setOnClickListener {
                     onSelectedFile(file, fileChecked.isChecked)
                 }

@@ -50,6 +50,7 @@ class MenuFragment : Fragment() {
 
         AccountUtils.currentUser?.let { currentUser ->
             userName.text = currentUser.displayName
+            userEmail.text = currentUser.email
 
             AccountUtils.getCurrentDrive()?.let { currentDrive ->
                 driveName.text = currentDrive.name

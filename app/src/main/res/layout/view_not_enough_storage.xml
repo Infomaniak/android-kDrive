@@ -23,7 +23,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="@dimen/marginStandard"
-    android:layout_marginVertical="@dimen/marginStandardSmall">
+    android:layout_marginVertical="@dimen/marginStandardSmall"
+    app:cardBackgroundColor="@color/background">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -44,11 +45,10 @@
 
         <TextView
             android:id="@+id/title"
-            style="@style/BoldTitle"
+            style="@style/H2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/marginStandardSmall"
-            android:textSize="@dimen/title"
             app:layout_constrainedWidth="true"
             app:layout_constraintBottom_toBottomOf="@+id/progressIndicator"
             app:layout_constraintEnd_toStartOf="@id/subtitle"

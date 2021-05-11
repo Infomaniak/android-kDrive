@@ -75,7 +75,7 @@
 
                     <TextView
                         android:id="@+id/imagefilter"
-                        style="@style/MediumTitle"
+                        style="@style/Subtitle1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandardMedium"
@@ -106,7 +106,7 @@
 
                     <TextView
                         android:id="@+id/videoFilter"
-                        style="@style/MediumTitle"
+                        style="@style/Subtitle1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandardMedium"
@@ -137,7 +137,7 @@
 
                     <TextView
                         android:id="@+id/audioFilter"
-                        style="@style/MediumTitle"
+                        style="@style/Subtitle1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandardMedium"
@@ -168,7 +168,7 @@
 
                     <TextView
                         android:id="@+id/pdfFilter"
-                        style="@style/MediumTitle"
+                        style="@style/Subtitle1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandardMedium"
@@ -199,7 +199,7 @@
 
                     <TextView
                         android:id="@+id/docsFilter"
-                        style="@style/MediumTitle"
+                        style="@style/Subtitle1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandardMedium"
@@ -230,7 +230,7 @@
 
                     <TextView
                         android:id="@+id/gridsFilter"
-                        style="@style/MediumTitle"
+                        style="@style/Subtitle1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandardMedium"
@@ -261,7 +261,7 @@
 
                     <TextView
                         android:id="@+id/pointsfilter"
-                        style="@style/MediumTitle"
+                        style="@style/Subtitle1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandardMedium"
@@ -292,7 +292,7 @@
 
                     <TextView
                         android:id="@+id/folderFilter"
-                        style="@style/MediumTitle"
+                        style="@style/Subtitle1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandardMedium"
@@ -323,7 +323,7 @@
 
                     <TextView
                         android:id="@+id/archiveFilter"
-                        style="@style/MediumTitle"
+                        style="@style/Subtitle1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandardMedium"
@@ -354,7 +354,7 @@
 
                     <TextView
                         android:id="@+id/codeFilter"
-                        style="@style/MediumTitle"
+                        style="@style/Subtitle1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandardMedium"

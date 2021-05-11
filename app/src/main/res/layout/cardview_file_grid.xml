@@ -27,7 +27,6 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="@dimen/marginStandardSmall"
-        android:background="?android:attr/selectableItemBackground"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="4:3"
         app:layout_constraintEnd_toEndOf="parent"
@@ -38,15 +37,17 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/filePreview"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
+                android:background="@color/background"
                 android:scaleType="centerCrop"
                 app:layout_constraintBottom_toTopOf="@id/bottomLayout"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceLikeCardview"
                 tools:ignore="ContentDescription"
                 tools:src="@drawable/ic_file_pdf" />
 
@@ -75,7 +76,6 @@
                 android:contentDescription="@string/buttonMenu"
                 app:backgroundTint="#45000000"
                 app:icon="@drawable/ic_menu"
-                app:iconSize="18dp"
                 app:iconTint="@android:color/white"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -84,7 +84,6 @@
                 android:id="@+id/bottomLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:background="@color/backgroundCardview"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
@@ -93,7 +92,7 @@
                     android:id="@+id/filePreview2"
                     android:layout_width="18dp"
                     android:layout_height="18dp"
-                    android:layout_margin="@dimen/marginStandardSmall"
+                    android:layout_marginVertical="@dimen/marginStandardSmall"
                     android:src="@drawable/placeholder"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -142,7 +141,7 @@
 
                     <com.infomaniak.lib.core.views.LoaderTextView
                         android:id="@+id/fileName"
-                        style="@style/SmallTitle"
+                        style="@style/Subtitle2"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:ellipsize="middle"
@@ -154,7 +153,6 @@
                     android:id="@+id/fileFavorite"
                     android:layout_width="12dp"
                     android:layout_height="12dp"
-                    android:layout_marginEnd="@dimen/marginStandardSmall"
                     android:contentDescription="@string/favoritesTitle"
                     android:src="@drawable/ic_star_filled"
                     android:visibility="gone"

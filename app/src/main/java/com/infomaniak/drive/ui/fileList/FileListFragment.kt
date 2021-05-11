@@ -33,8 +33,6 @@ import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
@@ -363,55 +361,12 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         fileAdapter.updateMultiSelectMode = { onUpdateMultiSelect() }
 
-        fileAdapter.onMenuClicked = { view, file, _ ->
-            when (view.id) {
-                R.id.shareButton -> {
-                    val navOptions = NavOptions.Builder()
-                        .setEnterAnim(R.anim.fragment_open_enter)
-                        .setExitAnim(R.anim.fragment_open_exit)
-                        .build()
-                    val bundle = bundleOf("fileId" to file.id, "fileName" to file.name, "fileType" to file.type)
-                    safeNavigate(R.id.fileShareDetailsFragment, bundle, navOptions)
-                }
-                R.id.menuButton -> {
-                    val bundle = bundleOf(
-                        "fileId" to file.id,
-                        "userDrive" to UserDrive(driveId = file.driveId, sharedWithMe = fileListViewModel.isSharedWithMe)
-                    )
-                    safeNavigate(R.id.fileInfoActionsBottomSheetDialog, bundle)
-                }
-                R.id.deleteButton -> {
-                    Utils.confirmFileDeletion(requireContext(), fileName = file.name) { dialog ->
-                        mainViewModel.deleteFile(requireContext(), file).observe(viewLifecycleOwner) { apiResponse ->
-                            dialog.dismiss()
-                            if (apiResponse.isSuccess()) {
-                                apiResponse?.data?.let { cancellableAction ->
-                                    cancellableAction.driveId = file.driveId
-                                    fileAdapter.deleteAt(fileAdapter.indexOf(file.id))
-                                    refreshActivities()
-
-                                    val title = resources.getQuantityString(
-                                        R.plurals.snackbarMoveTrashConfirmation,
-                                        1,
-                                        file.name
-                                    )
-                                    requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab) {
-                                        GlobalScope.launch(Dispatchers.IO) {
-                                            if (ApiRepository.cancelAction(cancellableAction).data == true && isResumed) {
-                                                withContext(Dispatchers.Main) {
-                                                    refreshActivities()
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            } else {
-                                requireActivity().showSnackbar(R.string.errorDelete, requireActivity().mainFab)
-                            }
-                        }
-                    }
-                }
-            }
+        fileAdapter.onMenuClicked = { file ->
+            val bundle = bundleOf(
+                "fileId" to file.id,
+                "userDrive" to UserDrive(driveId = file.driveId, sharedWithMe = fileListViewModel.isSharedWithMe)
+            )
+            safeNavigate(R.id.fileInfoActionsBottomSheetDialog, bundle)
         }
 
         onBackNavigationResult()
@@ -590,7 +545,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     )
                     filePreview.visibility = GONE
                     fileProgression.visibility = VISIBLE
-                    imageRow.visibility = VISIBLE
                     visibility = VISIBLE
 
                     setOnClickListener {
@@ -610,25 +564,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 getString(R.string.uploadInProgressTitle)
             )
         )
-    }
-
-    private fun showTutorial() {
-        if (UISettings(requireContext()).showTutorial && folderID == ROOT_ID && fileAdapter.itemCount.isPositive()) {
-            fileRecyclerView.postDelayed({
-                lifecycleScope.launchWhenResumed {
-                    val position = when (fileAdapter.itemCount) {
-                        1 -> 0
-                        2 -> 1
-                        else -> 2
-                    }
-                    fileRecyclerView.openItemAtPosition(position)
-                    fileRecyclerView.postDelayed({
-                        lifecycleScope.launchWhenResumed { fileRecyclerView.releaseItemView() }
-                    }, 1200L)
-                }
-                UISettings(requireContext()).showTutorial = false
-            }, 1000L)
-        }
     }
 
     private fun setupDisplayMode(isListMode: Boolean) {
@@ -722,7 +657,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             getFolderFiles(ignoreCache, onFinish = {
                 it?.let { result ->
                     if (fileAdapter.itemCount == 0 || result.page == 1) {
-                        showTutorial()
                         currentFolder = if (result.parentFolder.id == ROOT_ID) {
                             AccountUtils.getCurrentDrive()?.convertToFile(Utils.getRootName(requireContext()))
                         } else result.parentFolder
@@ -776,7 +710,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             toolbar?.menu?.findItem(R.id.searchItem)?.isVisible = !hideFileList && isFileListDestination
             requireActivity().apply {
                 bottomNavigation?.visibility = navBarVisibility
-                bottomNavigationBackgroundView?.visibility = navBarVisibility
+                bottomNavigationBackgroundViewOld?.visibility = navBarVisibility
                 mainFab?.visibility = navBarVisibility
             }
         }

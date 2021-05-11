@@ -44,13 +44,13 @@ class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(
     private val collapsedSubTitleColor = ContextCompat.getColor(context, R.color.secondaryText)
     private val collapsedTitleFont = ResourcesCompat.getFont(context, R.font.suisseintl_medium)
     private val collapsedTitleMarginStart = 34.toPx()
-    private val collapsedTitleSize = context.resources.getDimensionPixelSize(R.dimen.title).toFloat()
+    private val collapsedTitleSize = context.resources.getDimensionPixelSize(R.dimen.h3).toFloat()
     private var expandedTitleColor = Color.WHITE
     private var expandedSubTitleColor = Color.WHITE
     private val expandedTitleFont = ResourcesCompat.getFont(context, R.font.suisseintl_bold)
     private val expandedTitleMarginBottom: Int = context.resources.getDimensionPixelOffset(R.dimen.marginStandardMedium)
     private val expandedTitleMarginStart: Int = context.resources.getDimensionPixelOffset(R.dimen.marginStandard)
-    private val expandedTitleSize = context.resources.getDimensionPixelSize(R.dimen.expandedTitle).toFloat()
+    private val expandedTitleSize = context.resources.getDimensionPixelSize(R.dimen.h1).toFloat()
 
     private var isExpandedTitleColor = true
 

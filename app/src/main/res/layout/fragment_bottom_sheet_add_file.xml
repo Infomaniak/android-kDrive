@@ -63,7 +63,7 @@
 
         <TextView
             android:id="@+id/openCameraText"
-            style="@style/MediumTitle"
+            style="@style/Subtitle1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardMedium"
@@ -95,7 +95,7 @@
 
         <TextView
             android:id="@+id/documentUploadText"
-            style="@style/MediumTitle"
+            style="@style/Subtitle1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardMedium"
@@ -128,7 +128,7 @@
 
         <TextView
             android:id="@+id/documentScanningText"
-            style="@style/MediumTitle"
+            style="@style/Subtitle1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardMedium"
@@ -161,7 +161,7 @@
 
         <TextView
             android:id="@+id/folderCreateText"
-            style="@style/MediumTitle"
+            style="@style/Subtitle1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardMedium"
@@ -198,7 +198,7 @@
 
         <TextView
             android:id="@+id/docsCreateText"
-            style="@style/MediumTitle"
+            style="@style/Subtitle1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardMedium"
@@ -230,7 +230,7 @@
 
         <TextView
             android:id="@+id/gridsCreateText"
-            style="@style/MediumTitle"
+            style="@style/Subtitle1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardMedium"
@@ -262,7 +262,7 @@
 
         <TextView
             android:id="@+id/pointsCreateText"
-            style="@style/MediumTitle"
+            style="@style/Subtitle1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardMedium"
@@ -295,7 +295,7 @@
 
         <TextView
             android:id="@+id/noteCreateText"
-            style="@style/MediumTitle"
+            style="@style/Subtitle1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardMedium"

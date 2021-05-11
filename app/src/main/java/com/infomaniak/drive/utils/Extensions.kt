@@ -243,7 +243,6 @@ fun Window.lightNavigationBar(enabled: Boolean) {
 fun View.setFileItem(
     file: File,
     isGrid: Boolean = false,
-    showRow: Boolean = false,
     showProgress: Boolean = true
 ) {
     fileName.text = file.name
@@ -263,58 +262,53 @@ fun View.setFileItem(
     progressLayout.visibility = GONE
 
     filePreview.scaleType = ImageView.ScaleType.CENTER
-    if (file.isFolder()) {
-        when (file.getVisibilityType()) {
-            File.VisibilityType.IS_TEAM_SPACE -> filePreview.load(R.drawable.ic_folder_common_documents)
-            File.VisibilityType.IS_SHARED_SPACE -> filePreview.load(R.drawable.ic_folder_shared)
-            File.VisibilityType.IS_COLLABORATIVE_FOLDER -> filePreview.load(R.drawable.ic_folder_dropbox)
-            else -> {
-                if (file.isDisabled()) {
-                    filePreview.load(R.drawable.ic_folder_disable)
-                } else {
-                    filePreview.load(R.drawable.ic_folder_filled)
+    when {
+        file.isFolder() -> {
+            when (file.getVisibilityType()) {
+                File.VisibilityType.IS_TEAM_SPACE -> filePreview.load(R.drawable.ic_folder_common_documents)
+                File.VisibilityType.IS_SHARED_SPACE -> filePreview.load(R.drawable.ic_folder_shared)
+                File.VisibilityType.IS_COLLABORATIVE_FOLDER -> filePreview.load(R.drawable.ic_folder_dropbox)
+                else -> {
+                    if (file.isDisabled()) {
+                        filePreview.load(R.drawable.ic_folder_disable)
+                    } else {
+                        filePreview.load(R.drawable.ic_folder_filled)
+                    }
                 }
             }
         }
-        if (showRow) {
-            imageRow?.visibility = VISIBLE
-            endIconLayout?.visibility = VISIBLE
+        file.isDrive() -> {
+            filePreview.load(R.drawable.ic_drive)
+            filePreview.setColorFilter(Color.parseColor(file.driveColor))
         }
-    } else if (file.isDrive()) {
-        filePreview.load(R.drawable.ic_drive)
-        filePreview.setColorFilter(Color.parseColor(file.driveColor))
-        if (showRow) {
-            imageRow?.visibility = VISIBLE
-            endIconLayout?.visibility = VISIBLE
-        }
-    } else {
-        when {
-            file.hasThumbnail && (isGrid || file.getFileType() == File.ConvertedType.IMAGE
-                    || file.getFileType() == File.ConvertedType.VIDEO) -> {
-                filePreview.scaleType = ImageView.ScaleType.CENTER_CROP
-                filePreview.loadUrl(file.thumbnail(), file.getFileType().icon)
+        else -> {
+            when {
+                file.hasThumbnail && (isGrid || file.getFileType() == File.ConvertedType.IMAGE
+                        || file.getFileType() == File.ConvertedType.VIDEO) -> {
+                    filePreview.scaleType = ImageView.ScaleType.CENTER_CROP
+                    filePreview.loadUrl(file.thumbnail(), file.getFileType().icon)
+                }
+                else -> {
+                    filePreview.load(file.getFileType().icon)
+                }
             }
-            else -> {
-                filePreview.load(file.getFileType().icon)
-            }
-        }
-        filePreview2?.load(file.getFileType().icon)
+            filePreview2?.load(file.getFileType().icon)
 
-        when {
-            file.isOffline && file.currentProgress !in 1..99 -> {
-                progressLayout.visibility = VISIBLE
-                fileOffline.visibility = VISIBLE
-                fileOfflineProgression.visibility = GONE
-            }
-            file.currentProgress > 0 && showProgress -> {
-                progressLayout.visibility = VISIBLE
-                fileOffline.visibility = GONE
-                fileOfflineProgression.visibility = VISIBLE
+            when {
+                file.isOffline && file.currentProgress !in 1..99 -> {
+                    progressLayout.visibility = VISIBLE
+                    fileOffline.visibility = VISIBLE
+                    fileOfflineProgression.visibility = GONE
+                }
+                file.currentProgress > 0 && showProgress -> {
+                    progressLayout.visibility = VISIBLE
+                    fileOffline.visibility = GONE
+                    fileOfflineProgression.visibility = VISIBLE
 
-                fileOfflineProgression.progress = file.currentProgress
+                    fileOfflineProgression.progress = file.currentProgress
+                }
             }
         }
-        if (showRow) endIconLayout?.visibility = GONE
     }
 }
 

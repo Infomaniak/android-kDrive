@@ -15,11 +15,11 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle">
-    <gradient
-        android:angle="270"
-        android:endColor="@color/backgroundCardview"
-        android:startColor="#00000000"
-        android:type="linear" />
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <solid android:color="@color/backgroundCardview" />
+
+    <corners
+        android:topLeftRadius="20dp"
+        android:topRightRadius="20dp" />
 </shape>

@@ -31,7 +31,7 @@
         android:background="@drawable/background_bottom_sheet_anchor" />
 
     <TextView
-        style="@style/MediumTitle"
+        style="@style/Subtitle1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/marginStandardMedium"
@@ -50,7 +50,7 @@
 
         <TextView
             android:id="@+id/sortAzText"
-            style="@style/MediumTitle"
+            style="@style/Subtitle1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardMedium"
@@ -84,7 +84,7 @@
 
         <TextView
             android:id="@+id/sortZaText"
-            style="@style/MediumTitle"
+            style="@style/Subtitle1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardMedium"
@@ -117,7 +117,7 @@
 
         <TextView
             android:id="@+id/sortMostRecentText"
-            style="@style/MediumTitle"
+            style="@style/Subtitle1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardMedium"
@@ -150,7 +150,7 @@
 
         <TextView
             android:id="@+id/sortOlderText"
-            style="@style/MediumTitle"
+            style="@style/Subtitle1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardMedium"
@@ -183,7 +183,7 @@
 
         <TextView
             android:id="@+id/sortBiggerText"
-            style="@style/MediumTitle"
+            style="@style/Subtitle1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardMedium"
@@ -216,7 +216,7 @@
 
         <TextView
             android:id="@+id/sortSmallerText"
-            style="@style/MediumTitle"
+            style="@style/Subtitle1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardMedium"
@@ -252,7 +252,7 @@
 
         <TextView
             android:id="@+id/sortExtensionText"
-            style="@style/MediumTitle"
+            style="@style/Subtitle1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardMedium"

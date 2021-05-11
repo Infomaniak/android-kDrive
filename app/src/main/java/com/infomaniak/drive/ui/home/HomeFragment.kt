@@ -17,8 +17,6 @@
  */
 package com.infomaniak.drive.ui.home
 
-import android.content.res.ColorStateList
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -47,7 +45,6 @@ import com.infomaniak.lib.core.utils.setPagination
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_home.*
-import kotlinx.android.synthetic.main.item_search_view.*
 
 class HomeFragment : Fragment() {
     private lateinit var mainViewModel: MainViewModel
@@ -99,24 +96,21 @@ class HomeFragment : Fragment() {
             }
         }
 
-        driveInfos.setOnClickListener {
+        driveName.setOnClickListener {
             findNavController().navigate(R.id.switchDriveDialog)
         }
 
-        searchView.visibility = GONE
-        searchViewText.visibility = VISIBLE
         ViewCompat.requestApplyInsets(homeCoordinator)
 
-        searchViewCard.setOnClickListener {
-            //TODO transition
+        searchButton.setOnClickListener {
             safeNavigate(HomeFragmentDirections.actionHomeFragmentToSearchFragment())
         }
 
         if (arguments.forceDriveSelection && savedInstanceState == null) {
-            driveInfos.isPressed = true
-            driveInfos.performClick()
+            driveName.isPressed = true
+            driveName.performClick()
             Utils.createRefreshTimer(300) {
-                driveInfos.isPressed = false
+                driveName.isPressed = false
             }
         }
     }
@@ -198,7 +192,6 @@ class HomeFragment : Fragment() {
     private fun updateDriveInfos(forceClear: Boolean = false) {
         AccountUtils.getCurrentDrive()?.let { currentDrive ->
             driveName.text = currentDrive.name
-            driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(currentDrive.preferences.color))
             getLastPicturesOrActivities(currentDrive.id, isProOrTeam, forceClear)
             getLastEditedFiles()
             notEnoughStorage.setup(currentDrive)
