@@ -32,7 +32,6 @@ import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.drive.utils.loadUrl
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_shareable_item.view.*
-import kotlinx.android.synthetic.main.item_user_avatar.view.*
 
 class SharedItemsAdapter(
     private val file: File,

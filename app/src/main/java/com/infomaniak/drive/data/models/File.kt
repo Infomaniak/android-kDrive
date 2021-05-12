@@ -324,7 +324,7 @@ open class File(
         override val description: Int
     ) : Permission {
         ONLY_ME(
-            R.drawable.ic_placeholder_avatar,
+            R.drawable.ic_account,
             R.string.createFolderMeOnly,
             R.string.createFolderMeOnly
         ),

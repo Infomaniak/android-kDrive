@@ -36,7 +36,10 @@ import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.Utils.generateInitialsAvatarDrawable
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
+import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
+import com.infomaniak.lib.core.utils.UtilsUi.getInitials
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress
@@ -174,11 +177,17 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
             is DriveUser -> {
                 chip.text = item.displayName
                 lifecycleScope.launch(Dispatchers.IO) {
+                    val fallback = requireContext().generateInitialsAvatarDrawable(
+                        initials = item.displayName.getInitials(),
+                        background = requireContext().getBackgroundColorBasedOnId(item.id)
+                    )
                     val imageLoader = ImageLoader.Builder(requireContext()).build()
                     val request = ImageRequest.Builder(requireContext())
                         .data(item.avatar)
                         .transformations(CircleCropTransformation())
-                        .fallback(R.drawable.ic_account)
+                        .fallback(fallback)
+                        .error(fallback)
+                        .placeholder(R.drawable.ic_account)
                         .build()
                     imageLoader.execute(request).drawable?.let {
                         withContext(Dispatchers.Main) {
