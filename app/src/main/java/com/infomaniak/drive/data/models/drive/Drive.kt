@@ -48,7 +48,7 @@ open class Drive(
      * Drive data
      */
     @SerializedName("account_id")
-    var accountID: Int = -1,
+    var accountId: Int = -1,
     @SerializedName("created_at")
     var createdAt: Long = 0,
     @SerializedName("updated_at")
