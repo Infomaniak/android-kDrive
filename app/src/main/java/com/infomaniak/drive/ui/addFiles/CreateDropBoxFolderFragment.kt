@@ -53,7 +53,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
         adapter.apply {
             addItem(currentPermission)
             getShare {
-                setAvatars(it.users.map { user -> user.avatar })
+                setUsers(it.users)
                 addItem(if (canInherit(it.users, it.tags)) INHERIT else SPECIFIC_USERS)
             }
         }
