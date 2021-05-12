@@ -94,7 +94,7 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         if (currentFile.rights?.share == true) {
             shareButton.visibility = VISIBLE
             shareButton.setOnClickListener {
-                safeNavigate(
+                parentFragment?.safeNavigate(
                     FileDetailsFragmentDirections.actionFileDetailsFragmentToFileShareDetailsFragment(
                         fileId = currentFile.id,
                         fileName = currentFile.name,
