@@ -88,7 +88,7 @@ open class CreateFolderFragment : Fragment() {
     }
 
     private fun setupAdapter(onPermissionSelected: (permission: FolderPermission) -> Unit) {
-        adapter = PermissionsAdapter(currentUserAvatar = AccountUtils.currentUser?.avatar, showSelectionCheckIcon = false) {
+        adapter = PermissionsAdapter(currentUser = AccountUtils.currentUser, showSelectionCheckIcon = false) {
             onPermissionSelected(it as FolderPermission)
         }
         permissionsRecyclerView.adapter = adapter
