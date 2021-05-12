@@ -51,7 +51,7 @@ class FileActivitiesAdapter(
                 activityUserAvatar.loadAvatar(driveUser)
             } ?: run {
                 activityUserName.setText(R.string.allUserAnonymous)
-                activityUserAvatar.load(R.drawable.ic_placeholder_avatar)
+                activityUserAvatar.load(R.drawable.ic_account)
             }
 
             if (position == 0 || !isSameDay(currentFileActivity.createdAt, itemList[position - 1].createdAt)) {

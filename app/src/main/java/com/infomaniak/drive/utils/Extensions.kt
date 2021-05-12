@@ -130,19 +130,6 @@ fun ImageView.loadUrl(
     }
 }
 
-fun ImageView.loadUrlWithoutToken(
-    context: Context,
-    uri: String?,
-    @DrawableRes placeholder: Int = R.drawable.ic_file_image
-): Disposable {
-    val imageLoader = ImageLoader.Builder(context).build()
-    return load(uri, imageLoader) {
-        error(placeholder)
-        fallback(placeholder)
-        placeholder(R.drawable.placeholder)
-    }
-}
-
 fun ImageView.loadAvatar(driveUser: DriveUser): Disposable =
     loadAvatar(driveUser.id, driveUser.getUserAvatar(), driveUser.displayName.getInitials())
 

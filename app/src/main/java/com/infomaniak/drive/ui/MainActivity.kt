@@ -59,7 +59,9 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.checkSyncPermissionsResult
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
+import com.infomaniak.drive.utils.Utils.generateInitialsAvatarDrawable
 import com.infomaniak.drive.utils.Utils.getRootName
+import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.coroutines.Dispatchers
@@ -209,28 +211,39 @@ class MainActivity : BaseActivity() {
 
     @SuppressLint("RestrictedApi")
     private fun setBottomNavigationUserAvatar(context: Context) {
-        lifecycleScope.launch(Dispatchers.IO) {
-            val menuItemView = (bottomNavigation.getChildAt(0) as BottomNavigationMenuView)[4] as NavigationBarItemView
-            val imageLoader = ImageLoader.Builder(this@MainActivity).build()
-            val request = ImageRequest.Builder(context)
-                .data(AccountUtils.currentUser?.avatar)
-                .crossfade(true)
-                .transformations(CircleCropTransformation())
-                .fallback(R.drawable.ic_account)
-                .listener { _, _ ->
-                    menuItemView.setIconTintList(null)
-                }.build()
-            val userAvatar = imageLoader.execute(request).drawable
+        AccountUtils.currentUser?.apply {
+            lifecycleScope.launch(Dispatchers.IO) {
+                val fallback =
+                    context.generateInitialsAvatarDrawable(
+                        initials = getInitials(),
+                        background = context.getBackgroundColorBasedOnId(id)
+                    )
+                val menuItemView = (bottomNavigation.getChildAt(0) as BottomNavigationMenuView)[4] as NavigationBarItemView
+                val imageLoader = ImageLoader.Builder(this@MainActivity).build()
+                val request = ImageRequest.Builder(context)
+                    .data(avatar)
+                    .crossfade(true)
+                    .transformations(CircleCropTransformation())
+                    .fallback(fallback)
+                    .error(fallback)
+                    .placeholder(R.drawable.ic_account)
+                    .build()
+                val userAvatar = imageLoader.execute(request).drawable
 
-            userAvatar?.let {
-                val selectedAvatar = generateSelectedAvatar(userAvatar)
-                val stateListDrawable = StateListDrawable()
-                stateListDrawable.addState(intArrayOf(android.R.attr.state_checked), BitmapDrawable(resources, selectedAvatar))
-                stateListDrawable.addState(intArrayOf(), userAvatar)
+                userAvatar?.let {
+                    val selectedAvatar = generateSelectedAvatar(userAvatar)
+                    val stateListDrawable = StateListDrawable()
+                    stateListDrawable.addState(
+                        intArrayOf(android.R.attr.state_checked),
+                        BitmapDrawable(resources, selectedAvatar)
+                    )
+                    stateListDrawable.addState(intArrayOf(), userAvatar)
 
-                withContext(Dispatchers.Main) {
-                    menuItemView.setIcon(stateListDrawable)
-                    bottomNavigation.menu.findItem(R.id.menuFragment).icon = stateListDrawable
+                    withContext(Dispatchers.Main) {
+                        menuItemView.setIconTintList(null)
+                        menuItemView.setIcon(stateListDrawable)
+                        bottomNavigation.menu.findItem(R.id.menuFragment).icon = stateListDrawable
+                    }
                 }
             }
         }
