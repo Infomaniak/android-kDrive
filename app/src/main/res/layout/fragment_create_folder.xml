@@ -71,13 +71,10 @@
                 android:layout_margin="@dimen/marginStandard"
                 android:hint="@string/hintInputDirName">
 
-                <!-- Remove sans-serif after material lib fix it-->
-
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/folderNameValueInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif"
                     android:imeOptions="actionDone"
                     android:inputType="text" />
 

@@ -155,7 +155,6 @@
                     android:id="@+id/shareMessage"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif"
                     android:gravity="top"
                     android:lines="6"
                     android:textSize="16sp" />

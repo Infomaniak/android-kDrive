@@ -130,7 +130,6 @@
                 android:id="@+id/passwordTextInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
                 android:inputType="textPassword" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -261,7 +260,6 @@
                 android:id="@+id/limiteStorageValue"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif"
                 android:inputType="number|none" />
 
         </com.google.android.material.textfield.TextInputLayout>

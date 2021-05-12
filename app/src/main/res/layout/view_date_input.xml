@@ -35,7 +35,6 @@
             android:id="@+id/dateValueInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif"
             android:inputType="date"
             tools:text="24.12.2020" />
 

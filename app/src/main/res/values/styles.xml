@@ -354,8 +354,6 @@
         <item name="cornerSize">50%</item>
     </style>
 
-    <!-- TODO wait: https://github.com/material-components/material-components-android/issues/2135 -->
-
     <style name="TextInputLayout.OutlinedBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <item name="android:textColorHint">@color/secondaryText</item>
         <item name="boxBackgroundColor">@color/backgroundCardview</item>
