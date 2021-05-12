@@ -15,305 +15,305 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.infomaniak.lib.core.views.LoaderCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    style="@style/CardViewInfomaniak"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="@dimen/marginStandardMedium">
+    android:layout_marginHorizontal="@dimen/marginStandardVerySmall"
+    android:layout_marginVertical="@dimen/marginStandardSmall">
 
-    <View
-        android:id="@+id/divider"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/divider"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/userAvatar"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
+        android:layout_height="match_parent"
+        android:layout_marginHorizontal="@dimen/marginStandardMedium"
         android:layout_marginTop="@dimen/marginStandardMedium"
-        android:src="@drawable/placeholder"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/divider"
-        app:shapeAppearanceOverlay="@style/CircleImageView"
-        tools:src="@tools:sample/avatars" />
+        android:layout_marginBottom="@dimen/marginStandardSmall">
 
-    <com.infomaniak.lib.core.views.LoaderTextView
-        android:id="@+id/userName"
-        style="@style/Subtitle2"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/marginStandardSmall"
-        android:ellipsize="end"
-        android:maxLines="1"
-        app:layout_constraintBottom_toTopOf="@id/actionValue"
-        app:layout_constraintEnd_toStartOf="@+id/dateContainer"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toEndOf="@id/userAvatar"
-        app:layout_constraintTop_toTopOf="@id/userAvatar"
-        app:use_dark_color="true"
-        tools:text="@tools:sample/full_names" />
-
-    <com.infomaniak.lib.core.views.LoaderTextView
-        android:id="@+id/actionValue"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/marginStandardSmall"
-        app:layout_constraintBottom_toBottomOf="@id/userAvatar"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/userAvatar"
-        app:layout_constraintTop_toBottomOf="@+id/userName"
-        tools:text="A commenté le fichier" />
-
-    <LinearLayout
-        android:id="@+id/dateContainer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/userName">
-
-        <ImageView
-            android:id="@+id/dateIcon"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
-            android:layout_marginEnd="@dimen/marginStandardVerySmall"
-            android:src="@drawable/ic_clock"
-            tools:ignore="ContentDescription" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/userAvatar"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/placeholder"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearanceOverlay="@style/CircleImageView"
+            tools:src="@tools:sample/avatars" />
 
         <com.infomaniak.lib.core.views.LoaderTextView
-            android:id="@+id/dateValue"
+            android:id="@+id/userName"
+            style="@style/Subtitle2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/marginStandardSmall"
+            android:ellipsize="end"
+            android:maxLines="1"
+            app:layout_constraintBottom_toTopOf="@id/actionValue"
+            app:layout_constraintEnd_toStartOf="@+id/dateContainer"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toEndOf="@id/userAvatar"
+            app:layout_constraintTop_toTopOf="parent"
+            app:use_dark_color="true"
+            tools:text="@tools:sample/full_names" />
+
+        <com.infomaniak.lib.core.views.LoaderTextView
+            android:id="@+id/actionValue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/marginStandardSmall"
+            app:layout_constraintBottom_toBottomOf="@id/userAvatar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/userAvatar"
+            app:layout_constraintTop_toBottomOf="@+id/userName"
+            tools:text="A commenté le fichier" />
+
+        <LinearLayout
+            android:id="@+id/dateContainer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="@dimen/marginStandard"
-            android:textSize="12sp"
-            tools:text="15 min" />
-    </LinearLayout>
-
-    <com.infomaniak.lib.core.views.LoaderCardView
-        android:id="@+id/cardFilePreview1"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="@dimen/marginStandardMedium"
-        app:cardBackgroundColor="@color/background"
-        app:cardCornerRadius="@dimen/cardViewRadius"
-        app:cardElevation="0dp"
-        app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintEnd_toStartOf="@id/cardFilePreview2"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/actionValue">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
-                android:id="@+id/filePreview1"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:adjustViewBounds="true"
-                android:scaleType="centerCrop"
-                android:src="@drawable/placeholder"
+                android:id="@+id/dateIcon"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:layout_marginEnd="@dimen/marginStandardVerySmall"
+                android:src="@drawable/ic_clock"
                 tools:ignore="ContentDescription" />
 
-            <include
-                android:id="@+id/filePreviewIcon1"
-                layout="@layout/empty_icon_layout"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintDimensionRatio="1:1"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHeight_percent="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:visibility="visible" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            <com.infomaniak.lib.core.views.LoaderTextView
+                android:id="@+id/dateValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="@dimen/marginStandard"
+                android:textSize="12sp"
+                tools:text="15 min" />
+        </LinearLayout>
 
-    </com.infomaniak.lib.core.views.LoaderCardView>
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardFilePreview1"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/marginStandardMedium"
+            app:cardBackgroundColor="@color/background"
+            app:cardCornerRadius="@dimen/cardViewRadius"
+            app:cardElevation="0dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toStartOf="@id/cardFilePreview2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/actionValue">
 
-    <com.infomaniak.lib.core.views.LoaderCardView
-        android:id="@+id/cardFilePreview2"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="@dimen/marginStandardSmall"
-        android:layout_marginTop="@dimen/marginStandardMedium"
-        app:cardBackgroundColor="@color/background"
-        app:cardCornerRadius="@dimen/cardViewRadius"
-        app:cardElevation="0dp"
-        app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintEnd_toStartOf="@id/cardFilePreview3"
-        app:layout_constraintStart_toEndOf="@id/cardFilePreview1"
-        app:layout_constraintTop_toBottomOf="@id/actionValue">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <ImageView
-                android:id="@+id/filePreview2"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:adjustViewBounds="true"
-                android:scaleType="centerCrop"
-                android:src="@drawable/placeholder"
-                tools:ignore="ContentDescription" />
+                android:layout_height="match_parent">
 
-            <include
-                android:id="@+id/filePreviewIcon2"
-                layout="@layout/empty_icon_layout"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintDimensionRatio="1:1"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHeight_percent="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:visibility="visible" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.infomaniak.lib.core.views.LoaderCardView>
+                <ImageView
+                    android:id="@+id/filePreview1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:adjustViewBounds="true"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/placeholder"
+                    tools:ignore="ContentDescription" />
 
-    <com.infomaniak.lib.core.views.LoaderCardView
-        android:id="@+id/cardFilePreview3"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="@dimen/marginStandardSmall"
-        android:layout_marginTop="@dimen/marginStandardMedium"
-        app:cardBackgroundColor="@color/background"
-        app:cardCornerRadius="@dimen/cardViewRadius"
-        app:cardElevation="0dp"
-        app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/cardFilePreview2"
-        app:layout_constraintTop_toBottomOf="@id/actionValue">
+                <include
+                    android:id="@+id/filePreviewIcon1"
+                    layout="@layout/empty_icon_layout"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="1:1"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHeight_percent="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:visibility="visible" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+        </com.google.android.material.card.MaterialCardView>
 
-            <ImageView
-                android:id="@+id/filePreview3"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardFilePreview2"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="@dimen/marginStandardSmall"
+            android:layout_marginTop="@dimen/marginStandardMedium"
+            app:cardBackgroundColor="@color/background"
+            app:cardCornerRadius="@dimen/cardViewRadius"
+            app:cardElevation="0dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toStartOf="@id/cardFilePreview3"
+            app:layout_constraintStart_toEndOf="@id/cardFilePreview1"
+            app:layout_constraintTop_toBottomOf="@id/actionValue">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:adjustViewBounds="true"
-                android:scaleType="centerCrop"
-                android:src="@drawable/placeholder"
-                tools:ignore="ContentDescription" />
+                android:layout_height="match_parent">
 
-            <include
-                android:id="@+id/filePreviewIcon3"
-                layout="@layout/empty_icon_layout"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintDimensionRatio="1:1"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHeight_percent="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:visibility="visible" />
+                <ImageView
+                    android:id="@+id/filePreview2"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:adjustViewBounds="true"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/placeholder"
+                    tools:ignore="ContentDescription" />
 
-            <TextView
-                android:id="@+id/moreFile"
+                <include
+                    android:id="@+id/filePreviewIcon2"
+                    layout="@layout/empty_icon_layout"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="1:1"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHeight_percent="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:visibility="visible" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardFilePreview3"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="@dimen/marginStandardSmall"
+            android:layout_marginTop="@dimen/marginStandardMedium"
+            app:cardBackgroundColor="@color/background"
+            app:cardCornerRadius="@dimen/cardViewRadius"
+            app:cardElevation="0dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/cardFilePreview2"
+            app:layout_constraintTop_toBottomOf="@id/actionValue">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="#80000000"
-                android:fontFamily="@font/suisseintl_medium"
-                android:gravity="center"
-                android:textColor="@android:color/white"
-                android:textSize="24sp"
-                android:visibility="gone"
-                tools:text="+14"
-                tools:visibility="visible" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                android:layout_height="match_parent">
 
-    </com.infomaniak.lib.core.views.LoaderCardView>
+                <ImageView
+                    android:id="@+id/filePreview3"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:adjustViewBounds="true"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/placeholder"
+                    tools:ignore="ContentDescription" />
 
-    <ImageView
-        android:id="@+id/fileIcon"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:src="@drawable/placeholder"
-        app:layout_constraintBottom_toBottomOf="@id/fileName1"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/fileName1"
-        tools:ignore="ContentDescription" />
+                <include
+                    android:id="@+id/filePreviewIcon3"
+                    layout="@layout/empty_icon_layout"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="1:1"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHeight_percent="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:visibility="visible" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/fileName1"
-        style="@style/HomeFileTextButton"
-        android:layout_width="wrap_content"
-        android:layout_height="36dp"
-        android:layout_marginTop="@dimen/marginStandardSmall"
-        app:layout_constrainedWidth="true"
-        app:layout_constraintBottom_toTopOf="@id/fileName2"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@id/fileIcon"
-        app:layout_constraintTop_toBottomOf="@id/cardFilePreview1"
-        tools:text="Fichier.pdf" />
+                <TextView
+                    android:id="@+id/moreFile"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#80000000"
+                    android:fontFamily="@font/suisseintl_medium"
+                    android:gravity="center"
+                    android:textColor="@android:color/white"
+                    android:textSize="24sp"
+                    android:visibility="gone"
+                    tools:text="+14"
+                    tools:visibility="visible" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <ImageView
-        android:id="@+id/fileIcon2"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:src="@drawable/placeholder"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/fileName2"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/fileName2"
-        tools:ignore="ContentDescription"
-        tools:visibility="visible" />
+        </com.google.android.material.card.MaterialCardView>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/fileName2"
-        style="@style/HomeFileTextButton"
-        android:layout_width="wrap_content"
-        android:layout_height="36dp"
-        android:visibility="gone"
-        app:layout_constrainedWidth="true"
-        app:layout_constraintBottom_toTopOf="@id/fileName3"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@id/fileIcon2"
-        app:layout_constraintTop_toBottomOf="@id/fileName1"
-        tools:text="@tools:sample/lorem"
-        tools:visibility="visible" />
+        <ImageView
+            android:id="@+id/fileIcon"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/placeholder"
+            app:layout_constraintBottom_toBottomOf="@id/fileName1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/fileName1"
+            tools:ignore="ContentDescription" />
 
-    <ImageView
-        android:id="@+id/fileIcon3"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:src="@drawable/placeholder"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/fileName3"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/fileName3"
-        tools:ignore="ContentDescription"
-        tools:visibility="visible" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/fileName1"
+            style="@style/HomeFileTextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginTop="@dimen/marginStandardSmall"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintBottom_toTopOf="@id/fileName2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@id/fileIcon"
+            app:layout_constraintTop_toBottomOf="@id/cardFilePreview1"
+            tools:text="Fichier.pdf" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/fileName3"
-        style="@style/HomeFileTextButton"
-        android:layout_width="wrap_content"
-        android:layout_height="36dp"
-        android:visibility="gone"
-        app:layout_constrainedWidth="true"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@id/fileIcon3"
-        app:layout_constraintTop_toBottomOf="@id/fileName2"
-        tools:text="@tools:sample/lorem/random"
-        tools:visibility="visible" />
+        <ImageView
+            android:id="@+id/fileIcon2"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/placeholder"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/fileName2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/fileName2"
+            tools:ignore="ContentDescription"
+            tools:visibility="visible" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/fileName2"
+            style="@style/HomeFileTextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:visibility="gone"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintBottom_toTopOf="@id/fileName3"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@id/fileIcon2"
+            app:layout_constraintTop_toBottomOf="@id/fileName1"
+            tools:text="@tools:sample/lorem"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/fileIcon3"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/placeholder"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/fileName3"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/fileName3"
+            tools:ignore="ContentDescription"
+            tools:visibility="visible" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/fileName3"
+            style="@style/HomeFileTextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:visibility="gone"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@id/fileIcon3"
+            app:layout_constraintTop_toBottomOf="@id/fileName2"
+            tools:text="@tools:sample/lorem/random"
+            tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.infomaniak.lib.core.views.LoaderCardView>

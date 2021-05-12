@@ -83,7 +83,7 @@
         <item name="collapsedTitleGravity">center</item>
         <item name="collapsedTitleTextAppearance">@style/H3</item>
         <item name="expandedTitleGravity">bottom</item>
-        <item name="expandedTitleMarginBottom">@dimen/marginStandard</item>
+        <item name="expandedTitleMarginBottom">@dimen/marginStandardSmall</item>
         <item name="expandedTitleMarginStart">@dimen/marginStandard</item>
         <item name="expandedTitleTextAppearance">@style/H1</item>
         <item name="maxLines">2</item>
@@ -347,11 +347,6 @@
     <style name="ShapeAppearanceOnlyBottomCornersRounded">
         <item name="cornerSizeBottomLeft">@dimen/radius</item>
         <item name="cornerSizeBottomRight">@dimen/radius</item>
-    </style>
-
-    <style name="ShapeAppearanceLikeCardview">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">@dimen/cardViewRadius</item>
     </style>
 
     <style name="CircleImageView">

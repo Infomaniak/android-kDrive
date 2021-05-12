@@ -37,17 +37,15 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <com.google.android.material.imageview.ShapeableImageView
+            <ImageView
                 android:id="@+id/filePreview"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:background="@color/background"
                 android:scaleType="centerCrop"
                 app:layout_constraintBottom_toTopOf="@id/bottomLayout"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:shapeAppearanceOverlay="@style/ShapeAppearanceLikeCardview"
                 tools:ignore="ContentDescription"
                 tools:src="@drawable/ic_file_pdf" />
 
@@ -92,7 +90,7 @@
                     android:id="@+id/filePreview2"
                     android:layout_width="18dp"
                     android:layout_height="18dp"
-                    android:layout_marginVertical="@dimen/marginStandardSmall"
+                    android:layout_margin="@dimen/marginStandardSmall"
                     android:src="@drawable/placeholder"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -153,6 +151,7 @@
                     android:id="@+id/fileFavorite"
                     android:layout_width="12dp"
                     android:layout_height="12dp"
+                    android:layout_marginEnd="@dimen/marginStandardSmall"
                     android:contentDescription="@string/favoritesTitle"
                     android:src="@drawable/ic_star_filled"
                     android:visibility="gone"

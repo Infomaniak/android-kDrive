@@ -710,7 +710,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             toolbar?.menu?.findItem(R.id.searchItem)?.isVisible = !hideFileList && isFileListDestination
             requireActivity().apply {
                 bottomNavigation?.visibility = navBarVisibility
-                bottomNavigationBackgroundViewOld?.visibility = navBarVisibility
+                bottomNavigationBackgroundView?.visibility = navBarVisibility
                 mainFab?.visibility = navBarVisibility
             }
         }

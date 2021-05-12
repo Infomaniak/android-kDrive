@@ -157,6 +157,11 @@
                 android:visibility="gone"
                 tools:visibility="visible" />
 
+            <include
+                android:id="@+id/uploadFileInProgress"
+                layout="@layout/cardview_file_list"
+                android:visibility="gone" />
+
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/convertedTypeLayout"
                 style="@style/CardViewInfomaniak"
@@ -245,78 +250,60 @@
                     tools:text="Zarela Reed a importé 16 nouveaux fichiers" />
             </LinearLayout>
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/sortLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandardMedium">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/sortButton"
+                    style="@style/TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="0dp"
+                    android:textAllCaps="false"
+                    android:textColor="@color/primaryText"
+                    android:textSize="12sp"
+                    app:icon="@drawable/ic_keyboard_arrow_down"
+                    app:iconGravity="textEnd"
+                    app:iconSize="14dp"
+                    app:iconTint="@color/primaryText"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="@string/sortNameAZ" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/toggleDisplayButton"
+                    style="@style/IconButton"
+                    android:contentDescription="@string/buttonToggleDisplay"
+                    app:icon="@drawable/ic_list"
+                    app:iconTint="@color/primaryText"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fileRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@drawable/background_file_list"
-                android:orientation="vertical">
+                android:clipToPadding="false"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/marginStandardSmall"
+                android:paddingTop="@dimen/marginStandardSmall"
+                android:paddingBottom="@dimen/recyclerViewPaddingBottom"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="7"
+                tools:listitem="@layout/cardview_file_list" />
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/sortLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/marginStandardMedium"
-                    android:layout_marginTop="@dimen/marginStandardSmall">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/sortButton"
-                        style="@style/TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:minWidth="0dp"
-                        android:textAllCaps="false"
-                        android:textColor="@color/primaryText"
-                        android:textSize="12sp"
-                        app:icon="@drawable/ic_keyboard_arrow_down"
-                        app:iconGravity="textEnd"
-                        app:iconSize="14dp"
-                        app:iconTint="@color/primaryText"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:text="@string/sortNameAZ" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/toggleDisplayButton"
-                        style="@style/IconButton"
-                        android:contentDescription="@string/buttonToggleDisplay"
-                        app:icon="@drawable/ic_list"
-                        app:iconTint="@color/primaryText"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <include
-                    android:id="@+id/uploadFileInProgress"
-                    layout="@layout/cardview_file_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/marginStandardSmall"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/fileRecyclerView"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:clipToPadding="false"
-                    android:orientation="vertical"
-                    android:paddingHorizontal="@dimen/marginStandardSmall"
-                    android:paddingTop="@dimen/marginStandardSmall"
-                    android:paddingBottom="@dimen/recyclerViewPaddingBottom"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    tools:itemCount="7"
-                    tools:listitem="@layout/cardview_file_list" />
-
-                <com.infomaniak.drive.views.NoItemsLayoutView
-                    android:id="@+id/noFilesLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:visibility="gone" />
-
-            </LinearLayout>
+            <com.infomaniak.drive.views.NoItemsLayoutView
+                android:id="@+id/noFilesLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
 
         </LinearLayout>
 
