@@ -8,7 +8,7 @@ apply plugin: 'realm-android'
 def versionMajor = 4
 def versionMinor = 0
 def versionPatch = 0
-def versionBuild = 19
+def versionBuild = 20
 
 android {
     compileSdkVersion 30
