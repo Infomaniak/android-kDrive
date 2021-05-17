@@ -209,13 +209,13 @@
     </style>
 
     <style name="H2">
-        <item name="android:fontFamily">@font/suisseintl_bold</item>
+        <item name="android:fontFamily">@font/suisseintl_semibold</item>
         <item name="android:textColor">@color/title</item>
         <item name="android:textSize">18sp</item>
     </style>
 
     <style name="H3">
-        <item name="android:fontFamily">@font/suisseintl_bold</item>
+        <item name="android:fontFamily">@font/suisseintl_semibold</item>
         <item name="android:textColor">@color/title</item>
         <item name="android:textSize">@dimen/h3</item>
     </style>
