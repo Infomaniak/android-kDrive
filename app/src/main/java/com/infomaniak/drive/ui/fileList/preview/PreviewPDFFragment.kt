@@ -41,7 +41,7 @@ import kotlinx.android.synthetic.main.fragment_preview_pdf.*
 import kotlinx.android.synthetic.main.fragment_preview_pdf.container
 import kotlinx.coroutines.*
 
-class PreviewPDFFragment(file: File) : PreviewFragment(file) {
+class PreviewPDFFragment : PreviewFragment {
 
     private var previewPDFAdapter: PreviewPDFAdapter? = null
     private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
@@ -49,6 +49,9 @@ class PreviewPDFFragment(file: File) : PreviewFragment(file) {
 
     private var pdfCore: PdfCore? = null
     private var isDownloading = false
+
+    constructor() : super()
+    constructor(file: File) : super(file)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_preview_pdf, container, false)

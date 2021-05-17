@@ -36,7 +36,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class PreviewPictureFragment(file: File) : PreviewFragment(file) {
+class PreviewPictureFragment : PreviewFragment {
+    constructor() : super()
+    constructor(file: File) : super(file)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_preview_picture, container, false)
