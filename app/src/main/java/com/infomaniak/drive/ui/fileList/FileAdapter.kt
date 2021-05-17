@@ -215,8 +215,8 @@ open class FileAdapter(
 
                 when {
                     uploadInProgress -> {
-                        stopUploadButton.setOnClickListener { onStopUploadButtonClicked?.invoke(file.name) }
-                        stopUploadButton.visibility = VISIBLE
+                        stopUploadButton?.setOnClickListener { onStopUploadButtonClicked?.invoke(file.name) }
+                        stopUploadButton?.visibility = VISIBLE
                     }
                     multiSelectMode -> {
                         fileChecked.isChecked = isSelectedFile(file)
