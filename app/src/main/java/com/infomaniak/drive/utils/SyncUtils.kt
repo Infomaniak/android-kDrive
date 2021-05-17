@@ -189,8 +189,12 @@ object SyncUtils {
         val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val networkCapabilities = connectivityManager.activeNetwork ?: return false
-            val activeNetwork = connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
-            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+            try { //TODO https://issuetracker.google.com/issues/175055271
+                val activeNetwork = connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
+                activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+            } catch (exception: Exception) {
+                return false
+            }
         } else {
             connectivityManager.activeNetworkInfo?.type == ConnectivityManager.TYPE_WIFI
         }
