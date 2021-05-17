@@ -109,7 +109,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 currentPreviewFile = previewSliderAdapter.getFile(position)
-                // TODO Animation
                 editButton.visibility = if (currentPreviewFile.isOnlyOfficePreview()) VISIBLE else GONE
                 openWithButton.visibility = if (!currentPreviewFile.isOnlyOfficePreview()) VISIBLE else GONE
                 bottomSheetFileInfos.openWith.visibility = VISIBLE
@@ -324,7 +323,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 apiResponse.data?.let { file ->
                     mainViewModel.currentFileList.value?.add(file)
                     previewSliderAdapter.addFile(file)
-                    // TODO cancelable snackbar
                     requireActivity().showSnackbar(getString(R.string.allFileDuplicate, currentPreviewFile.name))
                     toggleBottomSheet(true)
                 }
@@ -359,7 +357,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 } else {
                     toggleBottomSheet(true)
                 }
-                // TODO - cancelable snackbar
                 val title = resources.getQuantityString(
                     R.plurals.snackbarMoveTrashConfirmation,
                     1,
@@ -393,7 +390,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             .observe(viewLifecycleOwner) { apiResponse ->
                 if (apiResponse.isSuccess()) {
                     mainViewModel.refreshActivities.value = true
-                    // TODO - cancellable snackbar
                     requireActivity().showSnackbar(
                         getString(
                             R.string.allFileMove,

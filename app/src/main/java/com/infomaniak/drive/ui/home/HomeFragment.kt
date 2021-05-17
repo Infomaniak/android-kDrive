@@ -108,7 +108,6 @@ class HomeFragment : Fragment() {
         ViewCompat.requestApplyInsets(homeCoordinator)
 
         searchViewCard.setOnClickListener {
-            //TODO transition
             safeNavigate(HomeFragmentDirections.actionHomeFragmentToSearchFragment())
         }
 

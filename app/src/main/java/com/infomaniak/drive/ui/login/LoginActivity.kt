@@ -67,7 +67,6 @@ class LoginActivity : AppCompatActivity() {
         introViewpager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                // TODO Better animation needed
                 val showConnectButton = position == 2
                 nextButton.visibility = if (showConnectButton) INVISIBLE else VISIBLE
                 connectButton.visibility = if (showConnectButton) VISIBLE else INVISIBLE

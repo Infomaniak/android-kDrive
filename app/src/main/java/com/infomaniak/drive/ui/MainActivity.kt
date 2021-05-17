@@ -249,17 +249,16 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    // TODO Better implementation needed
     private fun generateSelectedAvatar(userAvatar: Drawable): Bitmap {
         val bitmap = userAvatar.toBitmap(100, 100)
         val canvas = Canvas(bitmap)
-
-        val paint = Paint()
-        paint.color = ContextCompat.getColor(this@MainActivity, R.color.primary)
-        paint.strokeWidth = 8F
-        paint.style = Paint.Style.STROKE
-        paint.isAntiAlias = true
-        paint.isDither = true
+        val paint = Paint().apply {
+            color = ContextCompat.getColor(this@MainActivity, R.color.primary)
+            strokeWidth = 8F
+            style = Paint.Style.STROKE
+            isAntiAlias = true
+            isDither = true
+        }
 
         canvas.drawCircle(50F, 50F, 46F, paint)
         return bitmap

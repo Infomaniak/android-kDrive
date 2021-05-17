@@ -51,11 +51,6 @@ import java.io.Serializable
 import java.util.*
 import kotlin.collections.ArrayList
 
-/**
- * TODOS - This feature
- * TODO - TF - 1 Base on response value, if an error occured - show it
- */
-
 class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
     private lateinit var availableUsersAdapter: AvailableShareableItemsAdapter
     private val fileShareViewModel: FileShareViewModel by navGraphViewModels(R.id.fileShareDetailsFragment)
