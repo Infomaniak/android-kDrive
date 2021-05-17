@@ -258,7 +258,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         val fileName = "${timeStamp}.jpg"
         val directory = getString(R.string.app_name)
 
-        val relativePath = Environment.DIRECTORY_PICTURES + java.io.File.separator + directory
         val values = ContentValues().apply {
             put(MediaStore.Images.Media.TITLE, fileName)
             put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
@@ -266,6 +265,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             put(MediaStore.Images.Media.DATE_MODIFIED, date.time / 1000)
             put(DATE_TAKEN, date.time)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val relativePath = Environment.DIRECTORY_PICTURES + java.io.File.separator + directory
                 put(MediaStore.Images.Media.RELATIVE_PATH, relativePath)
             } else {
                 val pathname = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
