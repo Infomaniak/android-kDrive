@@ -24,14 +24,19 @@ import androidx.lifecycle.ViewModel
 import com.infomaniak.drive.data.models.File
 
 
-open class PreviewFragment(private val file: File) : Fragment() {
+open class PreviewFragment() : Fragment() {
 
+    private var file: File? = null
     protected lateinit var offlineFile: java.io.File
     protected val previewViewModel: PreviewViewModel by viewModels()
 
+    constructor(file: File) : this() {
+        this.file = file
+    }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        previewViewModel.currentFile = file
+        file?.let { previewViewModel.currentFile = it }
         offlineFile = previewViewModel.currentFile.localPath(requireContext(), File.LocalType.OFFLINE)
     }
 

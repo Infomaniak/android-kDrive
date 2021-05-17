@@ -19,4 +19,7 @@ package com.infomaniak.drive.ui.fileList.preview
 
 import com.infomaniak.drive.data.models.File
 
-class PreviewMusicFragment(file: File) : PreviewVideoFragment(file)
+class PreviewMusicFragment : PreviewVideoFragment {
+    constructor() : super()
+    constructor(file: File) : super(file)
+}

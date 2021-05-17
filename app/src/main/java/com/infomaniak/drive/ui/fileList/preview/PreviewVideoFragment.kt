@@ -47,9 +47,12 @@ import kotlinx.android.synthetic.main.fragment_preview_video.*
 import kotlinx.android.synthetic.main.fragment_preview_video.container
 
 
-open class PreviewVideoFragment(file: File) : PreviewFragment(file) {
+open class PreviewVideoFragment : PreviewFragment {
 
     private lateinit var simpleExoPlayer: SimpleExoPlayer
+
+    constructor() : super()
+    constructor(file: File) : super(file)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_preview_video, container, false)

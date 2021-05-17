@@ -25,7 +25,10 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import kotlinx.android.synthetic.main.fragment_preview_others.*
 
-class PreviewOtherFragment(file: File) : PreviewFragment(file) {
+class PreviewOtherFragment : PreviewFragment {
+
+    constructor() : super()
+    constructor(file: File) : super(file)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_preview_others, container, false)
