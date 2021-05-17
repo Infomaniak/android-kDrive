@@ -59,8 +59,8 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.checkSyncPermissionsResult
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
-import com.infomaniak.drive.utils.Utils.generateInitialsAvatarDrawable
 import com.infomaniak.drive.utils.Utils.getRootName
+import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_file_list.*
