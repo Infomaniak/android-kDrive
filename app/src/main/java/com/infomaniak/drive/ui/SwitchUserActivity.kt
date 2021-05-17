@@ -44,6 +44,7 @@ class SwitchUserActivity : AppCompatActivity() {
         AccountUtils.getAllUsers().observe(this) { users ->
             usersRecyclerView.adapter = UserAdapter(users as ArrayList<User>) { user ->
                 AccountUtils.currentUser = user
+                AccountUtils.currentDriveId = -1
                 AccountUtils.reloadApp?.invoke()
             }
         }
