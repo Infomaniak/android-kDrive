@@ -35,6 +35,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.api.UploadTask.FolderNotFoundException
+import com.infomaniak.drive.data.api.UploadTask.QuotaExceededException
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
@@ -55,7 +56,6 @@ import com.infomaniak.drive.utils.uri
 import io.sentry.Sentry
 import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.*
-import java.net.UnknownHostException
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -99,30 +99,29 @@ class UploadAdapter @JvmOverloads constructor(
             // Restart if there is any data left
             checkIfNeedReSync(startSyncFiles(syncFiles, syncResult, extras))
 
-        } catch (exception: UnknownHostException) {
-            networkErrorNotification()
-            restartSyncErrorWithDelay(syncResult)
-
         } catch (exception: FolderNotFoundException) {
-            folderNotFoundException()
-            restartSyncErrorWithDelay(syncResult)
+            folderNotFoundNotification()
+            syncResult?.restartSyncErrorWithDelay()
+
+        } catch (exception: QuotaExceededException) {
+            quotaExceededNotification()
 
         } catch (exception: InterruptedException) {
             interruptedNotification()
-            restartSyncErrorWithDelay(syncResult)
+            syncResult?.restartSyncErrorWithDelay()
 
         } catch (exception: OutOfMemoryError) {
             outOfMemoryNotification()
-            restartSyncErrorWithDelay(syncResult)
+            syncResult?.restartSyncErrorWithDelay()
 
         } catch (exception: CancellationException) {
             exceptionNotification()
-            restartSyncErrorWithDelay(syncResult)
+            syncResult?.restartSyncErrorWithDelay()
 
         } catch (exception: Exception) {
             if (exception.isNetworkException()) {
                 networkErrorNotification()
-                restartSyncErrorWithDelay(syncResult)
+                syncResult?.restartSyncErrorWithDelay()
             } else {
                 exception.printStackTrace()
                 exceptionNotification()
@@ -245,7 +244,7 @@ class UploadAdapter @JvmOverloads constructor(
         )
     }
 
-    private fun folderNotFoundException() {
+    private fun folderNotFoundNotification() {
         cancelSync()
         currentUploadFile?.let { UploadFile.deleteAllByFolderId(it.remoteFolder) }
         val isSyncFile = currentUploadFile?.type == UploadFile.Type.SYNC.name
@@ -262,6 +261,17 @@ class UploadAdapter @JvmOverloads constructor(
             description = context.getString(R.string.uploadFolderNotFoundError),
             notificationId = UPLOAD_STATUS_ID,
             contentIntent = contentIntent
+        )
+    }
+
+    private fun quotaExceededNotification() {
+        cancelSync()
+        showNotification(
+            context = context,
+            title = context.getString(R.string.uploadInterruptedErrorTitle),
+            description = context.getString(R.string.notEnoughStorageDescription1),
+            notificationId = UPLOAD_STATUS_ID,
+            contentIntent = progressPendingIntent()
         )
     }
 
@@ -330,9 +340,9 @@ class UploadAdapter @JvmOverloads constructor(
         )
     }
 
-    private fun restartSyncErrorWithDelay(syncResult: SyncResult?) {
-        syncResult?.delayUntil = (System.currentTimeMillis() / 1000) + 3 // restart in 3s but only it's possible else wait
-        syncResult?.stats?.numIoExceptions = syncResult?.stats?.numIoExceptions?.plus(1) ?: 1
+    private fun SyncResult.restartSyncErrorWithDelay() {
+        delayUntil = (System.currentTimeMillis() / 1000) + 3 // restart in 3s but only it's possible else wait
+        stats?.numIoExceptions = stats?.numIoExceptions?.plus(1) ?: 1
     }
 
     private fun checkIfNeedCancel(uploadFiles: ArrayList<UploadFile>, extras: Bundle?, syncResult: SyncResult?): Boolean {

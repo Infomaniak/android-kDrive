@@ -179,6 +179,9 @@ class UploadTask(
                 apiResponse.error?.code.equals("object_not_found") -> {
                     throw FolderNotFoundException()
                 }
+                apiResponse.error?.code.equals("quota_exceeded_error") -> {
+                    throw QuotaExceededException()
+                }
                 apiResponse.error?.code.equals("file_already_exists_error") -> Unit
                 else -> throw Exception(bodyResponse)
             }
@@ -255,6 +258,7 @@ class UploadTask(
     }
 
     class FolderNotFoundException : Exception()
+    class QuotaExceededException : Exception()
 
     companion object {
         var chunkSize: Int = 1 * 1024 * 1024 // Chunk 1 Mo
