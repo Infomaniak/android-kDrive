@@ -28,7 +28,6 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
@@ -65,8 +64,7 @@ class SettingsFragment : Fragment() {
                 appSecuritySeparator.visibility = VISIBLE
                 visibility = VISIBLE
                 setOnClickListener {
-                    val appSecurityExtra = FragmentNavigatorExtras(this to this.transitionName)
-                    safeNavigate(R.id.appSecurityActivity, null, null, appSecurityExtra)
+                    safeNavigate(R.id.appSecurityActivity, null, null)
                 }
             } else {
                 appSecuritySeparator.visibility = GONE
