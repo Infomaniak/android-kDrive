@@ -21,55 +21,26 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
+import androidx.appcompat.app.AppCompatActivity
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.ui.LockActivity
 import com.infomaniak.drive.ui.LockActivity.Companion.FACE_ID_LOG_TAG
 import com.infomaniak.drive.utils.requestCredentials
 import com.infomaniak.drive.utils.silentClick
-import com.infomaniak.lib.core.utils.UtilsUi
 import kotlinx.android.synthetic.main.view_switch_settings.*
 
-class AppSecuritySettingsFragment : Fragment() {
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.view_switch_settings, container, false)
-    }
+class AppSecuritySettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        UtilsUi.setupSharedElementTransition(this, R.id.appSecurity, R.id.nestedScrollView)
-    }
-
-    private fun onCredentialsSuccessful() {
-        Log.i(FACE_ID_LOG_TAG, "success")
-        enableFaceIdSwitch.silentClick() // Click that doesn't pass in listener
-        AppSettings.appSecurityLock = enableFaceIdSwitch.isChecked
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == LockActivity.REQUEST_CODE_SECURITY) {
-            if (resultCode == Activity.RESULT_OK) {
-                onCredentialsSuccessful()
-            } else {
-                Log.i(FACE_ID_LOG_TAG, "error")
-            }
-        }
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+        setContentView(R.layout.view_switch_settings)
         toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
+            onBackPressed()
         }
 
-        title.text = getString(R.string.appSecurityTitle)
+        switchSettingsTitle.text = getString(R.string.appSecurityTitle)
         description.text = getString(R.string.appSecurityDescription)
         image.setImageResource(R.drawable.ic_face_id_edit)
         enableFaceId.visibility = View.VISIBLE
@@ -82,10 +53,27 @@ class AppSecuritySettingsFragment : Fragment() {
             // Reverse switch (before official parameter changed) by silent click
             if (enableFaceIdSwitch.tag == null) {
                 enableFaceIdSwitch.silentClick()
-                requireContext().requestCredentials {
+                requestCredentials {
                     onCredentialsSuccessful()
                 }
             }
         }
+    }
+
+    private fun onCredentialsSuccessful() {
+        Log.i(FACE_ID_LOG_TAG, "success")
+        enableFaceIdSwitch.silentClick() // Click that doesn't pass in listener
+        AppSettings.appSecurityLock = enableFaceIdSwitch.isChecked
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == LockActivity.REQUEST_CODE_SECURITY) {
+            if (resultCode == Activity.RESULT_OK) {
+                onCredentialsSuccessful()
+            } else {
+                Log.i(FACE_ID_LOG_TAG, "error")
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data)
     }
 }

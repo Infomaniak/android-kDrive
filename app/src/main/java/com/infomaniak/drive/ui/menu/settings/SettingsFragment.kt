@@ -64,14 +64,9 @@ class SettingsFragment : Fragment() {
             if (requireContext().isKeyguardSecure()) {
                 appSecuritySeparator.visibility = VISIBLE
                 visibility = VISIBLE
-                if (AppSettings.appSecurityLock) {
-                    appSecurityValue.setText(R.string.allActivated)
-                } else {
-                    appSecurityValue.setText(R.string.allDisabled)
-                }
                 setOnClickListener {
                     val appSecurityExtra = FragmentNavigatorExtras(this to this.transitionName)
-                    safeNavigate(R.id.appSecurityFragment, null, null, appSecurityExtra)
+                    safeNavigate(R.id.appSecurityActivity, null, null, appSecurityExtra)
                 }
             } else {
                 appSecuritySeparator.visibility = GONE
@@ -89,6 +84,7 @@ class SettingsFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         syncPictureValue.setText(if (AccountUtils.isEnableAppSync()) R.string.allActivated else R.string.allDisabled)
+        appSecurityValue.setText(if (AppSettings.appSecurityLock) R.string.allActivated else R.string.allDisabled)
     }
 
     private fun openAppNotificationSettings() {

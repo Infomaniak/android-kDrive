@@ -377,16 +377,13 @@
         android:label="SettingsFragment"
         tools:layout="@layout/fragment_settings">
         <action
-            android:id="@+id/action_settingsFragment_to_appSecurityFragment"
-            app:destination="@id/appSecurityFragment" />
-        <action
             android:id="@+id/action_settingsFragment_to_aboutSettingsFragment"
             app:destination="@id/aboutSettingsFragment" />
     </fragment>
-    <fragment
-        android:id="@+id/appSecurityFragment"
-        android:name="com.infomaniak.drive.ui.menu.settings.AppSecuritySettingsFragment"
-        android:label="AppSecurityFragment"
+    <activity
+        android:id="@+id/appSecurityActivity"
+        android:name="com.infomaniak.drive.ui.menu.settings.AppSecuritySettingsActivity"
+        android:label="AppSecurityActivity"
         tools:layout="@layout/view_switch_settings" />
     <fragment
         android:id="@+id/aboutSettingsFragment"

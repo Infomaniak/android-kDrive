@@ -46,7 +46,7 @@
             tools:ignore="ContentDescription" />
 
         <TextView
-            android:id="@+id/title"
+            android:id="@+id/switchSettingsTitle"
             style="@style/H2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

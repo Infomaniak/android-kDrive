@@ -77,6 +77,8 @@
 
         <activity android:name=".ui.SwitchUserActivity" />
 
+        <activity android:name=".ui.menu.settings.AppSecuritySettingsActivity" />
+
         <activity
             android:name=".ui.fileList.SelectFolderActivity"
             android:label="@string/selectFolderTitle" />
