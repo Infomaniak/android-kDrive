@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.data.api
 
+import android.R
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -74,7 +75,7 @@ class UploadTask(
         }
 
         try {
-            uploadTask(context, uploadFile, onProgress)
+            uploadTask(this)
         } catch (exception: Exception) {
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
             throw exception
@@ -82,22 +83,18 @@ class UploadTask(
     }
 
     @Throws(Exception::class)
-    private fun CoroutineScope.uploadTask(
-        context: Context,
-        uploadFile: UploadFile,
-        onProgress: ((progress: Int) -> Unit)? = null,
-    ) {
+    private suspend fun uploadTask(coroutineScope: CoroutineScope) = withContext(Dispatchers.IO) {
         val uri = uploadFile.uri.toUri()
         val fileInputStream = context.contentResolver.openInputStream(uri)
 
-        sendSyncProgress(context, UploadAdapter.ProgressStatus.STARTED, uploadFile, 0)
+        sendSyncProgress(UploadAdapter.ProgressStatus.STARTED, 0)
         initChunkSize(uploadFile.fileSize)
         BufferedInputStream(fileInputStream, chunkSize).use { input ->
             val waitingCoroutines = arrayListOf<Job>()
             val requestSemaphore = Semaphore(limitParallelRequest)
             val totalChunks = ceil(uploadFile.fileSize.toDouble() / chunkSize).toInt()
 
-            checkLimitParallelRequest(context)
+            checkLimitParallelRequest()
 
             val uploadedChunks =
                 ApiRepository.getValidChunks(uploadFile.driveId, uploadFile.remoteFolder, uploadFile.identifier).data
@@ -107,64 +104,61 @@ class UploadTask(
             previousChunkBytesWritten.set(uploadedChunks?.uploadedSize ?: 0)
 
             for (chunkNumber in 1..totalChunks) {
-
-                val coroutineRequest = launch(Dispatchers.Main) {
-                    requestSemaphore.withPermit {
-                        if (uploadedChunks?.validChunks?.contains(chunkNumber) == true) {
-                            Log.d("kDrive", "chunk $chunkNumber ignored")
-                            input.read(ByteArray(chunkSize))
-                            return@withPermit
-                        }
-
-                        Log.i("kDrive", "Upload > ${uploadFile.fileName} chunk:$chunkNumber has permission")
-                        var data = ByteArray(chunkSize)
-                        val count = input.read(data)
-                        if (count == -1) return@withPermit
-
-                        data = if (count == chunkSize) data else data.copyOf(count)
-
-                        withContext(Dispatchers.IO) {
-                            val url = uploadUrl(
-                                chunkNumber = chunkNumber,
-                                currentChunkSize = count,
-                                totalChunks = totalChunks,
-                                uploadFile = uploadFile,
-                            )
-                            Log.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url")
-
-                            val uploadRequestBody = ProgressRequestBody(data.toRequestBody()) { currentBytes, _, _ ->
-                                ensureActive()
-                                this@uploadTask.updateProgress(context, currentBytes, uploadFile, onProgress)
-                            }
-
-                            val request = Request.Builder().url(url)
-                                .headers(HttpUtils.getHeaders(contentType = null))
-                                .put(uploadRequestBody).build()
-
-                            val response = KDriveHttpClient.getHttpClient(uploadFile.userId, 120).newCall(request).execute()
-                            manageApiResponse(response)
-                        }
+                requestSemaphore.withPermit {
+                    if (uploadedChunks?.validChunks?.contains(chunkNumber) == true) {
+                        Log.d("kDrive", "chunk $chunkNumber ignored")
+                        input.read(ByteArray(chunkSize))
+                        return@withPermit
                     }
+
+                    Log.i("kDrive", "Upload > ${uploadFile.fileName} chunk:$chunkNumber has permission")
+                    var data = ByteArray(chunkSize)
+                    val count = input.read(data)
+                    if (count == -1) return@withPermit
+
+                    data = if (count == chunkSize) data else data.copyOf(count)
+
+                    val url = this@UploadTask.uploadUrl(
+                        chunkNumber = chunkNumber,
+                        currentChunkSize = count,
+                        totalChunks = totalChunks
+                    )
+                    Log.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url")
+
+                    waitingCoroutines.add(coroutineScope.uploadChunkRequest(data, url))
                 }
-                waitingCoroutines.add(coroutineRequest)
             }
-            runBlocking { waitingCoroutines.joinAll() }
+            waitingCoroutines.joinAll()
         }
 
-        ensureActive()
+        coroutineScope.ensureActive()
         uploadNotification?.apply {
             setOngoing(false)
             setContentText("100%")
-            setSmallIcon(android.R.drawable.stat_sys_upload_done)
+            setSmallIcon(R.drawable.stat_sys_upload_done)
             setProgress(0, 0, false)
             notificationManagerCompat.notify(CURRENT_UPLOAD_ID, build())
         }
         notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
         UploadFile.uploadFinished(uri)
-        runBlocking {
-            delay(150)
-            sendSyncProgress(context, UploadAdapter.ProgressStatus.FINISHED, uploadFile, 100)
+
+        // TODO fix this
+        delay(150)
+        sendSyncProgress(UploadAdapter.ProgressStatus.FINISHED, 100)
+    }
+
+    private fun CoroutineScope.uploadChunkRequest(data: ByteArray, url: String) = launch(Dispatchers.IO) {
+        val uploadRequestBody = ProgressRequestBody(data.toRequestBody()) { currentBytes, _, _ ->
+            this.ensureActive()
+            updateProgress(currentBytes)
         }
+
+        val request = Request.Builder().url(url)
+            .headers(HttpUtils.getHeaders(contentType = null))
+            .put(uploadRequestBody).build()
+
+        val response = KDriveHttpClient.getHttpClient(uploadFile.userId, 120).newCall(request).execute()
+        this.manageApiResponse(response)
     }
 
     private fun initChunkSize(fileSize: Long) {
@@ -193,12 +187,7 @@ class UploadTask(
 
     @Synchronized
     @Throws(Exception::class)
-    private fun CoroutineScope.updateProgress(
-        context: Context,
-        currentBytes: Int,
-        uploadFile: UploadFile,
-        onProgress: ((progress: Int) -> Unit)?,
-    ) {
+    private fun CoroutineScope.updateProgress(currentBytes: Int) {
         val totalBytesWritten = currentBytes + previousChunkBytesWritten.get()
         val progress = ((totalBytesWritten.toDouble() / uploadFile.fileSize.toDouble()) * 100).toInt()
         currentProgress.set(progress)
@@ -222,7 +211,7 @@ class UploadTask(
         }
 
         if (progress in 1..100) {
-            sendSyncProgress(context, UploadAdapter.ProgressStatus.RUNNING, uploadFile, progress)
+            sendSyncProgress(UploadAdapter.ProgressStatus.RUNNING)
         }
 
         Log.i(
@@ -231,12 +220,7 @@ class UploadTask(
         )
     }
 
-    private fun sendSyncProgress(
-        context: Context,
-        status: UploadAdapter.ProgressStatus,
-        uploadFile: UploadFile,
-        progress: Int = 0
-    ) {
+    private fun sendSyncProgress(status: UploadAdapter.ProgressStatus, progress: Int = 0) {
         Intent().apply {
             val fileInProgress = FileInProgress(uploadFile.remoteFolder, uploadFile.fileName, uploadFile.uri, progress, status)
             Log.d("SyncReceiver", "broadcast")
@@ -246,7 +230,7 @@ class UploadTask(
         }
     }
 
-    private fun checkLimitParallelRequest(context: Context) {
+    private fun checkLimitParallelRequest() {
         val availableMemory = context.getAvailableMemory().availMem
         if (chunkSize * limitParallelRequest >= availableMemory) {
             limitParallelRequest = (availableMemory / limitParallelRequest).toInt()
@@ -256,8 +240,7 @@ class UploadTask(
     private fun uploadUrl(
         chunkNumber: Int,
         currentChunkSize: Int,
-        totalChunks: Int,
-        uploadFile: UploadFile
+        totalChunks: Int
     ): String {
         return "${ApiRoutes.uploadFile(uploadFile.driveId, uploadFile.remoteFolder)}?chunk_number=$chunkNumber" +
                 "&chunk_size=${chunkSize}" +
