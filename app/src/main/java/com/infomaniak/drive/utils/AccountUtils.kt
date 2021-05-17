@@ -52,6 +52,7 @@ object AccountUtils : CredentialManager {
 
     fun init(context: Context) {
         userDatabase = UserDatabase.getDatabase(context)
+        Sentry.setUser(io.sentry.protocol.User().apply { id = currentUserId.toString() })
     }
 
     var currentUserId: Int
@@ -75,7 +76,10 @@ object AccountUtils : CredentialManager {
             field = user
             currentUserId = user?.id ?: -1
             getCurrentDrive()
-            Sentry.setUser(io.sentry.protocol.User().apply { email = user?.email })
+            Sentry.setUser(io.sentry.protocol.User().apply {
+                id = currentUserId.toString()
+                email = user?.email
+            })
             InfomaniakCore.bearerToken = user?.apiToken?.accessToken.toString()
         }
 
