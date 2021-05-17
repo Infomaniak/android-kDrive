@@ -49,7 +49,6 @@ import com.infomaniak.drive.utils.showSnackbar
 import kotlinx.android.synthetic.main.activity_save_external_file.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import java.io.File
 import java.util.*
 
 
@@ -105,11 +104,17 @@ class SaveExternalFilesActivity : BaseActivity() {
         }
 
         saveExternalFilesViewModel.folderId.observe(this) { folderId ->
-            val userDrive = UserDrive(
-                userId = selectDriveViewModel.selectedUserId.value!!,
-                driveId = selectDriveViewModel.selectedDrive.value?.id!!
-            )
-            FileController.getFileById(folderId, userDrive)?.let { folder ->
+            val folder = if (selectDriveViewModel.selectedUserId.value == null || selectDriveViewModel.selectedDrive.value?.id == null) {
+                null
+            } else {
+                val userDrive = UserDrive(
+                    userId = selectDriveViewModel.selectedUserId.value!!,
+                    driveId = selectDriveViewModel.selectedDrive.value!!.id
+                )
+                FileController.getFileById(folderId, userDrive)
+            }
+
+            folder?.let {
                 val folderName = if (folder.isRoot()) {
                     getString(R.string.allRootName, selectDriveViewModel.selectedDrive.value?.name)
                 } else {
@@ -231,14 +236,14 @@ class SaveExternalFilesActivity : BaseActivity() {
     }
 
     private fun store(uri: Uri, name: String? = null, userId: Int, driveId: Int, folderId: Int): Boolean {
-        val folder = File(cacheDir, SHARED_FILE_FOLDER).apply { if (!exists()) mkdirs() }
+        val folder = java.io.File(cacheDir, SHARED_FILE_FOLDER).apply { if (!exists()) mkdirs() }
 
         contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             cursor.moveToFirst()
             val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
             val fileSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
             val fileName = name ?: SyncUtils.getFileName(cursor)
-            val outputFile = File(folder, fileName).also { if (it.exists()) it.delete() }
+            val outputFile = java.io.File(folder, fileName).also { if (it.exists()) it.delete() }
 
             try {
                 if (outputFile.createNewFile()) {
