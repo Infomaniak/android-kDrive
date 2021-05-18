@@ -70,13 +70,13 @@
 
         <TextView
             android:id="@+id/driveName"
+            style="@style/Subtitle1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/marginStandardSmall"
             android:drawablePadding="6dp"
             android:gravity="center"
             android:textColor="@color/title"
-            style="@style/Subtitle1"
             app:drawableStartCompat="@drawable/ic_drive"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -164,12 +164,12 @@
 
                     <TextView
                         android:id="@+id/sharedWithMeFilesText"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandardMedium"
                         android:layout_marginEnd="@dimen/marginStandard"
                         android:text="@string/sharedWithMeTitle"
-                        style="@style/Subtitle2"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/sharedWithMeFilesEndIcon"
                         app:layout_constraintStart_toEndOf="@id/sharedWithMeFilesIcon"
@@ -214,12 +214,12 @@
 
                     <TextView
                         android:id="@+id/lastEditsText"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandardMedium"
                         android:layout_marginEnd="@dimen/marginStandard"
                         android:text="@string/lastEditsTitle"
-                        style="@style/Subtitle2"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/lastEditsEndIcon"
                         app:layout_constraintStart_toEndOf="@id/lastEditsIcon"
@@ -261,12 +261,12 @@
 
                     <TextView
                         android:id="@+id/picturesText"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandardMedium"
                         android:layout_marginEnd="@dimen/marginStandard"
                         android:text="@string/allPictures"
-                        style="@style/Subtitle2"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/picturesEndIcon"
                         app:layout_constraintStart_toEndOf="@id/picturesIcon"
@@ -308,12 +308,12 @@
 
                     <TextView
                         android:id="@+id/offlineFileText"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandardMedium"
                         android:layout_marginEnd="@dimen/marginStandard"
                         android:text="@string/offlineFileTitle"
-                        style="@style/Subtitle2"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/offlineFileEndIcon"
                         app:layout_constraintStart_toEndOf="@id/offlineFileIcon"
@@ -355,12 +355,12 @@
 
                     <TextView
                         android:id="@+id/mySharesText"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandardMedium"
                         android:layout_marginEnd="@dimen/marginStandard"
                         android:text="@string/mySharesTitle"
-                        style="@style/Subtitle2"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/mySharesEndIcon"
                         app:layout_constraintStart_toEndOf="@id/mySharesIcon"
@@ -403,12 +403,12 @@
 
                     <TextView
                         android:id="@+id/trashbinText"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandardMedium"
                         android:layout_marginEnd="@dimen/marginStandard"
                         android:text="@string/trashTitle"
-                        style="@style/Subtitle2"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/trashbinEndIcon"
                         app:layout_constraintStart_toEndOf="@id/trashbinIcon"
@@ -468,12 +468,12 @@
 
                     <TextView
                         android:id="@+id/changeUserText"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandardMedium"
                         android:layout_marginEnd="@dimen/marginStandard"
                         android:text="@string/switchUserTitle"
-                        style="@style/Subtitle2"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/changeUserEndIcon"
                         app:layout_constraintStart_toEndOf="@id/changeUserIcon"
@@ -515,12 +515,12 @@
 
                     <TextView
                         android:id="@+id/settingsText"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandardMedium"
                         android:layout_marginEnd="@dimen/marginStandard"
                         android:text="@string/settingsTitle"
-                        style="@style/Subtitle2"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/settingsEndIcon"
                         app:layout_constraintStart_toEndOf="@id/settingsIcon"
@@ -562,12 +562,12 @@
 
                     <TextView
                         android:id="@+id/logoutText"
+                        style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandardMedium"
                         android:layout_marginEnd="@dimen/marginStandard"
                         android:text="@string/buttonLogout"
-                        style="@style/Subtitle2"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/logoutEndIcon"
                         app:layout_constraintStart_toEndOf="@id/logoutIcon"

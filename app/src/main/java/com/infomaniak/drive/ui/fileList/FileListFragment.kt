@@ -527,7 +527,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         if (!showPendingFiles) return
         uploadFileInProgress.apply {
             fileListViewModel.getPendingFilesCount(folderID).observe(viewLifecycleOwner) { pendingFilesCount ->
-                val radius = resources.getDimension(R.dimen.radius)
+                val radius = resources.getDimension(R.dimen.cardViewRadius)
 
                 if (pendingFilesCount > 0L) {
                     (this as MaterialCardView).shapeAppearanceModel = shapeAppearanceModel.toBuilder()

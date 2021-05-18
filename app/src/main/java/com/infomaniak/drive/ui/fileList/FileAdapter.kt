@@ -197,8 +197,8 @@ open class FileAdapter(
                 if (!isGrid) {
                     var topCornerRadius = 0F
                     var bottomCornerRadius = 0F
-                    if (position == 0) topCornerRadius = context.resources.getDimension(R.dimen.radius)
-                    if (position == itemCount - 1) bottomCornerRadius = context.resources.getDimension(R.dimen.radius)
+                    if (position == 0) topCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
+                    if (position == itemCount - 1) bottomCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
 
                     fileCardView.shapeAppearanceModel = fileCardView.shapeAppearanceModel
                         .toBuilder()
