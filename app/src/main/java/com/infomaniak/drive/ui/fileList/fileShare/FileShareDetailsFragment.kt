@@ -121,7 +121,7 @@ class FileShareDetailsFragment : Fragment() {
 
         getBackNavigationResult<ShareableItems>(SHARE_SELECTION_KEY) { (users, _, tags, invitations) ->
             sharedItemsAdapter.putAll(ArrayList(users + tags + invitations))
-            availableShareableItemsAdapter.removeUserList(users.map { it.id })
+            availableShareableItemsAdapter.removeItemList(users.map { it.id })
         }
 
         toolbar.setNavigationOnClickListener {

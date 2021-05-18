@@ -54,21 +54,16 @@ class AvailableShareableItemsAdapter(
         notifyDataSetChanged()
     }
 
-    fun removeUserList(itemIdList: Iterable<Int>) {
-        itemList.removeAll {
-            itemIdList.contains(it.id)
-        }
-        notifyDataSetChanged()
-    }
-
     fun addItem(item: Shareable) {
         itemList.add(item)
         notifyDataSetChanged()
     }
 
-    override fun notifyDataSetChanged() {
-        cleanItemList()
-        super.notifyDataSetChanged()
+    fun removeItemList(itemIdList: Iterable<Int>) {
+        itemList.removeAll {
+            itemIdList.contains(it.id)
+        }
+        notifyDataSetChanged()
     }
 
     private fun cleanItemList() {
@@ -76,6 +71,11 @@ class AvailableShareableItemsAdapter(
             .sortedBy { it.getFilterValue() }
             .distinct()
         )
+    }
+
+    override fun notifyDataSetChanged() {
+        cleanItemList()
+        super.notifyDataSetChanged()
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -112,7 +112,6 @@ class AvailableShareableItemsAdapter(
         return object : Filter() {
             override fun performFiltering(constraint: CharSequence?): FilterResults {
                 val searchTerm = constraint.toString().lowercase(Locale.ROOT)
-
                 val finalUserList: ArrayList<Shareable> = ArrayList(
                     initialList.filter { item ->
                         item.getFilterValue().lowercase(Locale.ROOT).contains(searchTerm) ||

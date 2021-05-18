@@ -88,11 +88,8 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
         }
 
         collapsingToolbarLayout.title = getString(
-            if (fileShareViewModel.currentFile.value?.isFolder() == true) {
-                R.string.fileShareFolderTitle
-            } else {
-                R.string.fileShareFileTitle
-            }
+            if (fileShareViewModel.currentFile.value?.isFolder() == true) R.string.fileShareFolderTitle
+            else R.string.fileShareFileTitle
         )
 
         when {
@@ -104,7 +101,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                 addToSharedElementList(user)
             }
             navigationArgs.sharedTagId != -1 -> {
-                // Not supported for now
+                // Not supported for now - Awaiting new tags/groups feature from backend
             }
         }
 
