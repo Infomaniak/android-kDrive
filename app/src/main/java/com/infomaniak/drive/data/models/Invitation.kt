@@ -23,15 +23,15 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class Invitation(
-    override val id: Int,
-    val role: String,
-    val type: String,
-    val email: String,
-    val status: String,
-    val avatar: String,
-    override var permission: String,
-    @SerializedName("user_id") val userId: Int,
-    @SerializedName("invit_drive") val invitDrive: Boolean,
-    @SerializedName("display_name") val displayName: String?,
-    @SerializedName("invit_drive_id") val invitDriveId: Int,
+    override val id: Int = -1,
+    val role: String = "",
+    val type: String = "",
+    val email: String = "",
+    val status: String = "",
+    val avatar: String = "",
+    override var permission: String = "",
+    @SerializedName("user_id") val userId: Int = -1,
+    @SerializedName("invit_drive") val invitDrive: Boolean = false,
+    @SerializedName("display_name") val displayName: String? = null,
+    @SerializedName("invit_drive_id") val invitDriveId: Int = -1,
 ) : Parcelable, Shareable
