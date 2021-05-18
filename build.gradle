@@ -7,7 +7,7 @@ buildscript {
         google()
         jcenter()
         maven {
-            url 'http://oss.jfrog.org/artifactory/oss-snapshot-local'
+            url 'https://oss.jfrog.org/artifactory/oss-snapshot-local'
         }
     }
     dependencies {
@@ -23,7 +23,7 @@ allprojects {
         jcenter()
         google()
         maven {
-            url 'http://oss.jfrog.org/artifactory/oss-snapshot-local'
+            url 'https://oss.jfrog.org/artifactory/oss-snapshot-local'
         }
         maven { url "https://jitpack.io" }
     }
