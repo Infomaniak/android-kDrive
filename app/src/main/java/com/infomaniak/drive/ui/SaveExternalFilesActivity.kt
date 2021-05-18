@@ -104,15 +104,16 @@ class SaveExternalFilesActivity : BaseActivity() {
         }
 
         saveExternalFilesViewModel.folderId.observe(this) { folderId ->
-            val folder = if (selectDriveViewModel.selectedUserId.value == null || selectDriveViewModel.selectedDrive.value?.id == null) {
-                null
-            } else {
-                val userDrive = UserDrive(
-                    userId = selectDriveViewModel.selectedUserId.value!!,
-                    driveId = selectDriveViewModel.selectedDrive.value!!.id
-                )
-                FileController.getFileById(folderId, userDrive)
-            }
+            val folder =
+                if (selectDriveViewModel.selectedUserId.value == null || selectDriveViewModel.selectedDrive.value?.id == null) {
+                    null
+                } else {
+                    val userDrive = UserDrive(
+                        userId = selectDriveViewModel.selectedUserId.value!!,
+                        driveId = selectDriveViewModel.selectedDrive.value!!.id
+                    )
+                    FileController.getFileById(folderId, userDrive)
+                }
 
             folder?.let {
                 val folderName = if (folder.isRoot()) {
