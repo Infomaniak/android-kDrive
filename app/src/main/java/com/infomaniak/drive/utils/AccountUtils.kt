@@ -37,6 +37,7 @@ import com.infomaniak.lib.core.auth.TokenInterceptor
 import com.infomaniak.lib.core.auth.TokenInterceptorListener
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.User
+import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.room.UserDatabase
 import com.infomaniak.lib.login.ApiToken
 import io.sentry.Sentry
@@ -99,14 +100,16 @@ object AccountUtils : CredentialManager {
         userDatabase.userDao().insert(user)
     }
 
-    suspend fun updateCurrentUserAndDrives(context: Context, fromMaintenance: Boolean = false) = withContext(Dispatchers.IO) {
-        val userProfile = ApiRepository.getUserProfile()
+    suspend fun updateCurrentUserAndDrives(
+        context: Context,
+        fromMaintenance: Boolean = false,
+        okHttpClient: OkHttpClient = HttpClient.okHttpClient
+    ) = withContext(Dispatchers.IO) {
+        val userProfile = ApiRepository.getUserProfile(okHttpClient)
 
         if (userProfile.result != ApiResponse.Status.ERROR) {
-            val user: User? = userProfile.data
-
-            user?.let {
-                ApiRepository.getAllDrivesData().apply {
+            userProfile.data?.let { user ->
+                ApiRepository.getAllDrivesData(okHttpClient).apply {
                     if (result != ApiResponse.Status.ERROR) {
                         data?.let {
                             val driveRemovedList = DriveInfosController.storeDriveInfos(user.id, it)
@@ -137,19 +140,21 @@ object AccountUtils : CredentialManager {
                                 }
                             }
 
-                            user.apply {
-                                organizations = arrayListOf()
-                                TokenAuthenticator.mutex.withLock {
-                                    requestCurrentUser()?.let { user ->
-                                        setUserToken(this, user.apiToken)
-                                        currentUser = this
+                            TokenAuthenticator.mutex.withLock {
+                                if (currentUserId == user.id) {
+                                    user.apply {
+                                        organizations = arrayListOf()
+                                        requestCurrentUser()?.let { user ->
+                                            setUserToken(this, user.apiToken)
+                                            currentUser = this
+                                        }
                                     }
                                 }
                             }
                             CloudStorageProvider.notifyRootsChanged(context)
                         }
                     } else if (error?.code?.equals("no_drive") == true) {
-                        removeUser(context, it)
+                        removeUser(context, user)
                     }
                 }
             }

@@ -167,7 +167,7 @@ class LoginActivity : AppCompatActivity() {
                 return getErrorResponse(R.string.errorUserAlreadyPresent)
             } ?: run {
                 InfomaniakCore.bearerToken = apiToken.accessToken
-                val userProfileResponse = ApiRepository.getUserProfile(true)
+                val userProfileResponse = ApiRepository.getUserProfile(HttpClient.okHttpClientNoInterceptor)
                 if (userProfileResponse.result == ApiResponse.Status.ERROR) {
                     return userProfileResponse
                 } else {
@@ -177,7 +177,7 @@ class LoginActivity : AppCompatActivity() {
                     }
 
                     user?.let {
-                        val allDrivesDataResponse = ApiRepository.getAllDrivesData(true)
+                        val allDrivesDataResponse = ApiRepository.getAllDrivesData(HttpClient.okHttpClientNoInterceptor)
 
                         when {
                             allDrivesDataResponse.result == ApiResponse.Status.ERROR -> {

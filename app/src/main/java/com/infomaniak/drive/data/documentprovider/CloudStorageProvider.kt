@@ -68,6 +68,12 @@ class CloudStorageProvider : DocumentsProvider() {
 
         AccountUtils.getAllUsersSync().forEach { user ->
             cursor.addRoot(user.id.toString(), user.id.toString(), user.email)
+            GlobalScope.launch(Dispatchers.IO) {
+                context?.let {
+                    val okHttpClient = KDriveHttpClient.getHttpClient(user.id)
+                    AccountUtils.updateCurrentUserAndDrives(it, okHttpClient = okHttpClient)
+                }
+            }
         }
 
         return cursor
@@ -321,7 +327,6 @@ class CloudStorageProvider : DocumentsProvider() {
 
     private fun MatrixCursor.addRootDrives(userId: Int, shareFolderID: Int? = null, shareWithMe: Boolean = false) {
         runBlocking {
-            // TODO call update drive list
             DriveInfosController.getDrives(userId, sharedWithMe = shareWithMe).forEach { drive ->
                 val driveDocument = "${drive.name}$DRIVE_SEPARATOR${drive.id}"
                 val documentId =

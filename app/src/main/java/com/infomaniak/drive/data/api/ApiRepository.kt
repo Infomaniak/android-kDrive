@@ -25,21 +25,24 @@ import com.infomaniak.lib.core.models.User
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.ApiController.ApiMethod.*
 import com.infomaniak.lib.core.utils.ApiController.callApi
-import com.infomaniak.lib.core.utils.ApiController.callApiNoInterceptor
 import okhttp3.OkHttpClient
 
 object ApiRepository {
 
     var PER_PAGE = 200
 
-    fun getAllDrivesData(noInterceptor: Boolean = false): ApiResponse<DriveInfo> {
+    fun getAllDrivesData(
+        okHttpClient: OkHttpClient
+    ): ApiResponse<DriveInfo> {
         val url = ApiRoutes.getAllDrivesData()
-        return if (noInterceptor) callApiNoInterceptor(url, GET) else callApi(url, GET)
+        return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
-    fun getUserProfile(noInterceptor: Boolean = false): ApiResponse<User> {
+    fun getUserProfile(
+        okHttpClient: OkHttpClient
+    ): ApiResponse<User> {
         val url = "${ApiRoutes.getUserProfile()}?with=avatar,phones,emails"
-        return if (noInterceptor) callApiNoInterceptor(url, GET) else callApi(url, GET)
+        return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
     fun getFavoriteFiles(driveId: Int, order: File.SortType, page: Int = 1): ApiResponse<ArrayList<File>> {
