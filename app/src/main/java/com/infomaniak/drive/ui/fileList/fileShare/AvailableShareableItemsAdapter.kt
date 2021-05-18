@@ -25,9 +25,12 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Filter
 import android.widget.Filterable
+import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
+import com.infomaniak.drive.data.models.Invitation
 import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.utils.isEmail
 import com.infomaniak.drive.utils.loadAvatar
 import kotlinx.android.synthetic.main.item_user.view.*
 import java.util.*
@@ -36,7 +39,7 @@ import kotlin.collections.ArrayList
 class AvailableShareableItemsAdapter(
     context: Context,
     private var itemList: ArrayList<Shareable>,
-    private val onUserClick: (user: DriveUser) -> Unit,
+    private val onItemClick: (item: Any) -> Unit,
 ) : ArrayAdapter<Shareable>(context, R.layout.item_user, itemList), Filterable {
     private var initialList: ArrayList<Shareable> = ArrayList()
 
@@ -86,11 +89,17 @@ class AvailableShareableItemsAdapter(
                     userName.text = item.displayName
                     userEmail.text = item.email
                     chevron.visibility = GONE
-
-                    setOnClickListener {
-                        onUserClick(item)
-                    }
                 }
+                is Invitation -> {
+                    userAvatar.load(R.drawable.ic_account)
+                    userName.text = item.email
+                    userEmail.text = context.getString(R.string.userInviteByEmail)
+                    chevron.visibility = GONE
+                }
+            }
+
+            setOnClickListener {
+                onItemClick(item)
             }
         }
     }
@@ -121,7 +130,14 @@ class AvailableShareableItemsAdapter(
                     itemList = initialList
                     notifyDataSetInvalidated()
                 } else {
-                    itemList = results.values as ArrayList<Shareable>
+                    itemList = if (constraint.toString().isEmail()) {
+                        arrayListOf(
+                            Invitation(
+                                email = constraint.toString(),
+                                status = context.getString(R.string.userInviteByEmail)
+                            )
+                        )
+                    } else results.values as ArrayList<Shareable>
                     notifyDataSetChanged()
                 }
             }

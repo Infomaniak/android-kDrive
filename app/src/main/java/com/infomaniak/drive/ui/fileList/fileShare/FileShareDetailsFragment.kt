@@ -192,10 +192,17 @@ class FileShareDetailsFragment : Fragment() {
     }
 
     private fun openAddUserDialog(element: Any) {
+        var sharedEmail: String? = null
+        var sharedUserId: Int = -1
+        when (element) {
+            is String -> sharedEmail = element
+            is Invitation -> sharedEmail = element.email
+            is DriveUser -> sharedUserId = element.id
+        }
         safeNavigate(
             FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToFileShareAddUserDialog(
-                sharedEmail = if (element is String) element else null,
-                sharedUserId = if (element is DriveUser) element.id else 0,
+                sharedEmail = sharedEmail,
+                sharedUserId = sharedUserId
             )
         )
     }
