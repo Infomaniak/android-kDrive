@@ -36,6 +36,11 @@ import kotlinx.android.synthetic.main.item_user.view.*
 import java.util.*
 import kotlin.collections.ArrayList
 
+/**
+ * Note :
+ * itemList property is the list used by adapter to display data
+ * initialList is the list used to store the default state of the itemlist (in case of item removal, list-filtering, etc.)
+ */
 class AvailableShareableItemsAdapter(
     context: Context,
     private var itemList: ArrayList<Shareable>,
@@ -56,6 +61,11 @@ class AvailableShareableItemsAdapter(
 
     fun addItem(item: Shareable) {
         itemList.add(item)
+        notifyDataSetChanged()
+    }
+
+    fun removeItem(itemId: Int) {
+        initialList.remove(initialList.find { item -> item.id == itemId })
         notifyDataSetChanged()
     }
 
