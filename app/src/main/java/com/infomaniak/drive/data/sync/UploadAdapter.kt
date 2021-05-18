@@ -176,31 +176,33 @@ class UploadAdapter @JvmOverloads constructor(
 
     @Synchronized
     @Throws(Exception::class)
-    private suspend fun initUploadFile(uploadFile: UploadFile, syncResult: SyncResult?, pendingCount: Int) {
-        val uri = uploadFile.uri.toUri()
-        currentUploadFile = uploadFile
-        context.cancelNotification(CURRENT_UPLOAD_ID)
-        setupCurrentUploadNotification(pendingCount)
+    private suspend fun initUploadFile(uploadFile: UploadFile, syncResult: SyncResult?, pendingCount: Int) =
+        withContext(Dispatchers.IO) {
+            val uri = uploadFile.uri.toUri()
+            currentUploadFile = uploadFile
+            context.cancelNotification(CURRENT_UPLOAD_ID)
+            setupCurrentUploadNotification(pendingCount)
 
-        try {
-            if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
-                val cacheFile = uri.toFile()
-                startUploadFile(uploadFile, cacheFile.length(), syncResult)
-                UploadFile.deleteIfExists(uri)
-                cacheFile.delete()
-            } else {
-                contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                    if (cursor.moveToFirst()) {
-                        val size = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
-                        startUploadFile(uploadFile, size, syncResult)
-                    } else UploadFile.deleteIfExists(uri)
+            try {
+                if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
+                    val cacheFile = uri.toFile()
+                    startUploadFile(uploadFile, cacheFile.length(), syncResult)
+                    UploadFile.deleteIfExists(uri)
+                    cacheFile.delete()
+                } else {
+                    val fileSize = contentResolver.openFileDescriptor(uri, "r")?.statSize
+                    contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                        if (cursor.moveToFirst()) {
+                            val mediaSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
+                            startUploadFile(uploadFile, fileSize ?: mediaSize, syncResult)
+                        } else UploadFile.deleteIfExists(uri)
+                    }
                 }
+            } catch (e: SecurityException) {
+                e.printStackTrace()
+                UploadFile.deleteIfExists(uri)
             }
-        } catch (e: SecurityException) {
-            e.printStackTrace()
-            UploadFile.deleteIfExists(uri)
         }
-    }
 
     @Throws(Exception::class)
     private suspend fun startUploadFile(uploadFile: UploadFile, size: Long, syncResult: SyncResult?) {
