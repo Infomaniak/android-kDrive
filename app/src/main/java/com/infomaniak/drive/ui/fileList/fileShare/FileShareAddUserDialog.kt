@@ -143,6 +143,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                 is DriveUser -> {
                     if (!users.any { it.id == element.id }) {
                         users.add(element)
+                        availableUsersAdapter.removeItem(element.id)
                         createChip(element).setOnClickListener {
                             users.remove(element)
                             availableUsersAdapter.setAll(getAvailableShareableElements())
