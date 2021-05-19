@@ -22,7 +22,10 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ActivityManager
 import android.app.KeyguardManager
-import android.content.*
+import android.content.ContentUris
+import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
 import android.content.res.Configuration
 import android.database.Cursor
 import android.graphics.Bitmap
@@ -36,7 +39,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.CancellationSignal
 import android.provider.MediaStore
-import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.DisplayMetrics
@@ -85,12 +87,14 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomShe
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.models.User
-import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.UtilsUi.getInitials
+import com.infomaniak.lib.core.utils.format
+import com.infomaniak.lib.core.utils.hasPermissions
+import com.infomaniak.lib.core.utils.requestPermissionsIsPossible
+import com.infomaniak.lib.core.utils.startAppSettingsConfig
 import kotlinx.android.synthetic.main.cardview_file_grid.view.*
-import kotlinx.android.synthetic.main.fragment_menu.*
 import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.android.synthetic.main.item_file.view.fileFavorite
 import kotlinx.android.synthetic.main.item_file.view.fileName
@@ -98,7 +102,6 @@ import kotlinx.android.synthetic.main.item_file.view.fileOffline
 import kotlinx.android.synthetic.main.item_file.view.fileOfflineProgression
 import kotlinx.android.synthetic.main.item_file.view.filePreview
 import kotlinx.android.synthetic.main.item_file.view.progressLayout
-import kotlinx.android.synthetic.main.item_pdfview.view.*
 import kotlinx.android.synthetic.main.item_user.view.*
 import java.util.*
 import kotlin.math.abs
@@ -164,18 +167,6 @@ fun Uri.getBitmap(context: Context): Bitmap {
     } else {
         MediaStore.Images.Media.getBitmap(context.contentResolver, this)
     }
-}
-
-fun Bitmap.saveAsPhoto(context: Context, uri: Uri) {
-    val contentResolver = context.contentResolver
-    val outputStream = contentResolver.openOutputStream(uri, "w")
-    val values = ContentValues().apply {
-        put(OpenableColumns.SIZE, this@saveAsPhoto.byteCount)
-    }
-    contentResolver.update(uri, values, null, null)
-    compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
-    outputStream?.flush()
-    outputStream?.close()
 }
 
 fun Number.isPositive(): Boolean {

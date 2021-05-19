@@ -186,6 +186,16 @@
             android:syncable="true" />
 
         <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="@string/FILE_AUTHORITY"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/exposed_files_path" />
+        </provider>
+
+        <provider
             android:name=".data.documentprovider.CloudStorageProvider"
             android:authorities="@string/CLOUD_STORAGE_AUTHORITY"
             android:enabled="true"

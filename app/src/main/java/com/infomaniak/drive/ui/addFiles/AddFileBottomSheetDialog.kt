@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.addFiles
 
 import android.app.Activity
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
@@ -27,6 +28,7 @@ import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -56,7 +58,11 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private lateinit var mainViewModel: MainViewModel
     private lateinit var currentFolderFile: File
+    private lateinit var appContext: Context
+
     private var currentPhotoUri: Uri? = null
+    private var mediaPhotoPath = ""
+    private var mediaVideoPath = ""
 
     companion object {
         const val SELECT_FILES_REQ = 2
@@ -70,7 +76,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
+        appContext = requireContext().applicationContext
         mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
         val file = mainViewModel.currentFolderOpenAddFileBottom.value ?: mainViewModel.currentFolder.value
         file?.let {
@@ -101,7 +107,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                 SELECT_FILES_REQ -> onSelectFilesResult(data)
                 CAPTURE_MEDIA_REQ -> onCaptureMediaResult(data)
             }
-        } else if (requestCode == CAPTURE_MEDIA_REQ) deleteTempPhoto()
+        }
         dismiss()
     }
 
@@ -115,7 +121,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                 openCamera()
             }
             Utils.checkWriteStoragePermissionResult(requestCode, grantResults) -> {
-                createPhotoFile()
+                openCamera()
             }
         }
     }
@@ -123,12 +129,14 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private fun openCamera() {
         if (checkWriteStoragePermission() && checkSyncPermissions(CAPTURE_MEDIA_REQ)) {
             openCamera.isEnabled = false
-            currentPhotoUri = createPhotoFile()
             try {
                 val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                    currentPhotoUri = createMediaFile(false)
                     putExtra(MediaStore.EXTRA_OUTPUT, currentPhotoUri)
                 }
-                val takeVideoIntent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
+                val takeVideoIntent = Intent(MediaStore.ACTION_VIDEO_CAPTURE).apply {
+                    putExtra(MediaStore.EXTRA_OUTPUT, createMediaFile(true))
+                }
                 val chooserIntent = Intent.createChooser(takePictureIntent, getString(R.string.buttonTakePhotoOrVideo))
                 chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(takeVideoIntent))
                 startActivityForResult(chooserIntent, CAPTURE_MEDIA_REQ)
@@ -214,16 +222,33 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private fun onCaptureMediaResult(data: Intent?) {
         try {
             if (data?.data == null) {
-                currentPhotoUri?.let { uri ->
-                    val bitmap = uri.getBitmap(requireContext())
-                    bitmap.saveAsPhoto(requireContext(), uri)
-                    initUpload(uri)
+                val isPhotoMedia = java.io.File(mediaPhotoPath).length() != 0L
+                val file =
+                    if (isPhotoMedia) java.io.File(mediaPhotoPath)
+                    else java.io.File(mediaVideoPath)
+
+                val fileModifiedAt = Date(file.lastModified())
+                val fileSize = file.length()
+                val cacheUri = Utils.copyDataToUploadCache(requireContext(), file.toUri(), fileModifiedAt)
+                lifecycleScope.launch(Dispatchers.IO) {
+                    UploadFile(
+                        uri = cacheUri.toString(),
+                        driveId = currentDriveId,
+                        fileCreatedAt = Date(file.lastModified()),
+                        fileModifiedAt = fileModifiedAt,
+                        fileName = file.name,
+                        fileSize = fileSize,
+                        remoteFolder = currentFolderFile.id,
+                        type = UploadFile.Type.UPLOAD.name,
+                        userId = currentUserId,
+                    ).store()
+                    appContext.syncImmediately()
+                    file.delete()
                 }
-            } else {
-                deleteTempPhoto()
-                data.data?.let { videoUri -> initUpload(videoUri) }
+
             }
         } catch (exception: Exception) {
+            exception.printStackTrace()
             // TODO exception can be a low memory : improve error text
             requireActivity().showSnackbar(R.string.anErrorHasOccurred)
         }
@@ -244,7 +269,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                 if (isLowMemory) {
                     requireActivity().showSnackbar(R.string.anErrorHasOccurred)
                 } else {
-                    val appContext = requireContext().applicationContext
                     val cacheUri = Utils.copyDataToUploadCache(requireContext(), uri, fileModifiedAt)
                     lifecycleScope.launch(Dispatchers.IO) {
                         UploadFile(
@@ -266,41 +290,29 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun createPhotoFile(): Uri? {
+    private fun createMediaFile(isVideo: Boolean): Uri {
         val date = Date()
-        val contentResolver = requireContext().contentResolver
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH).format(date)
-        val fileName = "${timeStamp}.jpg"
-        val directory = getString(R.string.app_name)
+        val fileName = "${timeStamp}.${if (isVideo) "mp4" else "jpg"}"
 
-        val values = ContentValues().apply {
-            put(MediaStore.Images.Media.TITLE, fileName)
-            put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
-            put(MediaStore.Images.Media.DATE_ADDED, date.time / 1000)
-            put(MediaStore.Images.Media.DATE_MODIFIED, date.time / 1000)
-            put(DATE_TAKEN, date.time)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                val relativePath = Environment.DIRECTORY_PICTURES + java.io.File.separator + directory
-                put(MediaStore.Images.Media.RELATIVE_PATH, relativePath)
-            } else {
-                val pathname = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                    .toString() + java.io.File.separator + directory
-                val fileDirectory = java.io.File(pathname)
-                if (!fileDirectory.exists()) fileDirectory.mkdirs()
-                put(MediaStore.Images.Media.DATA, java.io.File(fileDirectory, fileName).toString())
-            }
+        val directory = getString(R.string.EXPOSED_UPLOAD_DIR)
+        val dir = java.io.File(requireContext().cacheDir, directory).apply { if (!exists()) mkdirs() }
+        val fileData = java.io.File(dir, fileName).apply {
+            if (exists()) delete()
+            createNewFile()
+            setLastModified(date.time)
         }
-        return contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-    }
 
-    private fun deleteTempPhoto() {
-        currentPhotoUri?.let { uri ->
-            requireContext().contentResolver.delete(uri, null, null)
-        }
+        if (isVideo) mediaVideoPath = fileData.path else mediaPhotoPath = fileData.path
+        return FileProvider.getUriForFile(requireContext(), getString(R.string.FILE_AUTHORITY), fileData)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         if (findNavController().currentDestination?.id == R.id.addFileBottomSheetDialog) findNavController().popBackStack()
+
+        java.io.File(requireContext().cacheDir, getString(R.string.EXPOSED_UPLOAD_DIR)).apply {
+            if (exists()) deleteRecursively()
+        }
     }
 }

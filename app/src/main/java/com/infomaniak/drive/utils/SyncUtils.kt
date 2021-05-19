@@ -159,7 +159,7 @@ object SyncUtils {
         }
     }
 
-    private fun Context.cancelContentObserver() {
+    fun Context.cancelContentObserver() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             FileObserveServiceApi24.cancelJob(applicationContext)
         } else {

@@ -19,6 +19,8 @@ package com.infomaniak.drive.data.models
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.net.toFile
+import androidx.core.net.toUri
 import com.infomaniak.drive.data.sync.UploadMigration
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
@@ -164,6 +166,7 @@ open class UploadFile(
                     uploadFiles.forEach {
                         syncFileByUriQuery(realm, it.uri).findFirst()?.let { syncFile ->
                             syncFile.deletedAt = Date()
+                            syncFile.uri.toUri().toFile().apply { if (exists()) delete() }
                         }
                     }
                 }

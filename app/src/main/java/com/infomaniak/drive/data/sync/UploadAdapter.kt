@@ -183,17 +183,13 @@ class UploadAdapter @JvmOverloads constructor(
             try {
                 if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
                     val cacheFile = uri.toFile()
+                    if (!cacheFile.exists()) {
+                        UploadFile.deleteIfExists(uri)
+                        return@withContext
+                    }
                     startUploadFile(uploadFile, cacheFile.length(), syncResult)
                     if (!uploadFile.isSync()) UploadFile.deleteIfExists(uri)
                     cacheFile.delete()
-                } else {
-                    val fileSize = contentResolver.openFileDescriptor(uri, "r")?.statSize
-                    contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                        if (cursor.moveToFirst()) {
-                            val mediaSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
-                            startUploadFile(uploadFile, fileSize ?: mediaSize, syncResult)
-                        } else UploadFile.deleteIfExists(uri)
-                    }
                 }
             } catch (e: SecurityException) {
                 e.printStackTrace()
