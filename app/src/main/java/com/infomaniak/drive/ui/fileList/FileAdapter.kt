@@ -231,7 +231,7 @@ open class FileAdapter(
 
                 val isInProgress = (position == 0 && importContainsProgress)
                 menuButton?.visibility = when {
-                    uploadInProgress || isInProgress ||
+                    uploadInProgress || isInProgress || selectFolder ||
                             file.isDrive() || file.isTrashed() ||
                             file.isFromActivities || file.isFromSearch ||
                             (offlineMode && !file.isOffline) -> GONE
