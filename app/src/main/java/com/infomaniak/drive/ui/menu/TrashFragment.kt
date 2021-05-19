@@ -69,9 +69,8 @@ class TrashFragment : FileSubTypeListFragment() {
     }
 
     private fun removeFileFromAdapter(fileId: Int) {
-        val trashedFileList = fileAdapter.getItems()
-        fileAdapter.deleteAt(trashedFileList.indexOf(trashedFileList.find { it.id == fileId }))
-        noFilesLayout.toggleVisibility(trashedFileList.isEmpty())
+        fileAdapter.deleteByFileId(fileId)
+        noFilesLayout.toggleVisibility(fileAdapter.getItems().isEmpty())
     }
 
     private inner class DownloadFiles() : (Boolean) -> Unit {

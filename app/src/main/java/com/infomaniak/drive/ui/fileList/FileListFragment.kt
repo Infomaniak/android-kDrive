@@ -144,7 +144,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
                     if (bundle.containsKey(DELETE_NOT_UPDATE_ACTION)) {
                         if (bundle.getBoolean(DELETE_NOT_UPDATE_ACTION)) {
-                            fileAdapter.deleteAt(fileAdapter.indexOf(fileID))
+                            fileAdapter.deleteByFileId(fileID)
                         } else fileAdapter.notifyFileChanged(fileID)
                     }
 
@@ -169,7 +169,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         getBackNavigationResult<Int>(REFRESH_FAVORITE_FILE) { fileID ->
             if (findNavController().currentDestination?.id == R.id.favoritesFragment) {
-                fileAdapter.deleteAt(fileAdapter.indexOf(fileID))
+                fileAdapter.deleteByFileId(fileID)
             } else {
                 fileAdapter.notifyFileChanged(fileID) { file ->
                     file.isFavorite = !file.isFavorite
@@ -258,7 +258,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
                 selectedFiles.forEach { file ->
                     val onSuccess: (Int) -> Unit = { fileID ->
-                        runBlocking(Dispatchers.Main) { fileAdapter.deleteAt(fileAdapter.indexOf(fileID)) }
+                        runBlocking(Dispatchers.Main) { fileAdapter.deleteByFileId(fileID) }
                     }
                     mediator.addSource(
                         mainViewModel.deleteFile(requireContext(), file, onSuccess),
@@ -461,7 +461,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 fileAdapter.itemSelected.forEach { file ->
                     val newParent = File(id = folderID, driveId = AccountUtils.currentDriveId)
                     val moveFile = mainViewModel.moveFile(requireContext(), file, newParent) { fileID ->
-                        runBlocking(Dispatchers.Main) { fileAdapter.deleteAt(fileAdapter.indexOf(fileID)) }
+                        runBlocking(Dispatchers.Main) { fileAdapter.deleteByFileId(fileID) }
                     }
                     mediator.addSource(moveFile, mainViewModel.updateMultiSelectMediator(mediator))
                 }
