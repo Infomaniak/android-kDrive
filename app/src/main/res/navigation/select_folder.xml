@@ -70,13 +70,13 @@
             app:argType="com.infomaniak.drive.data.models.UserDrive"
             app:nullable="true" />
         <action
-            android:id="@+id/action_newFolderFragment_to_CreatePrivateFolderFragment"
+            android:id="@+id/action_newFolderFragment_to_createPrivateFolderFragment"
             app:destination="@id/createPrivateFolderFragment" />
         <action
-            android:id="@+id/action_newFolderFragment_to_createDropBoxFolderFragment2"
+            android:id="@+id/action_newFolderFragment_to_createDropBoxFolderFragment"
             app:destination="@id/createDropBoxFolderFragment" />
         <action
-            android:id="@+id/action_newFolderFragment_to_createCommonFolderFragment2"
+            android:id="@+id/action_newFolderFragment_to_createCommonFolderFragment"
             app:destination="@id/createCommonFolderFragment" />
     </fragment>
 
@@ -110,7 +110,11 @@
         android:id="@+id/createDropBoxFolderFragment"
         android:name="com.infomaniak.drive.ui.addFiles.CreateDropBoxFolderFragment"
         android:label="CreateDropBoxFolderFragment"
-        tools:layout="@layout/fragment_create_folder" />
+        tools:layout="@layout/fragment_create_folder">
+        <action
+            android:id="@+id/action_createDropBoxFolderFragment_to_fileShareDetailsFragment"
+            app:destination="@id/fileShareDetailsFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/fileShareDetailsFragment"
