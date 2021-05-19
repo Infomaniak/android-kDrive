@@ -22,6 +22,7 @@ import android.app.Dialog
 import android.content.*
 import android.content.pm.PackageManager
 import android.graphics.*
+import android.net.Uri
 import android.os.CountDownTimer
 import android.view.View
 import android.view.View.VISIBLE
@@ -29,6 +30,7 @@ import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
@@ -44,6 +46,7 @@ import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
+import com.infomaniak.drive.data.sync.UploadAdapter
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment
@@ -321,5 +324,19 @@ object Utils {
         return if (requestCode == SyncUtils.REQUEST_WRITE_STORAGE_PERMISSION) {
             grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
         } else false
+    }
+
+    fun copyDataToUploadCache(context: Context, uri: Uri, fileModifiedAt: Date): Uri {
+        val folder = java.io.File(context.cacheDir, UploadAdapter.UPLOAD_FOLDER).apply { if (!exists()) mkdirs() }
+        val outputFile = java.io.File(folder, uri.hashCode().toString()).also { if (it.exists()) it.delete() }
+        if (outputFile.createNewFile()) {
+            outputFile.setLastModified(fileModifiedAt.time)
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                outputFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+        }
+        return outputFile.toUri()
     }
 }

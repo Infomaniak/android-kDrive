@@ -19,6 +19,7 @@ package com.infomaniak.drive.data.models
 
 import android.content.Context
 import android.net.Uri
+import com.infomaniak.drive.data.sync.UploadMigration
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
 import io.realm.Realm
@@ -39,6 +40,7 @@ open class UploadFile(
     var fileName: String = "",
     var fileSize: Long = 0L,
     var identifier: String = UUID.randomUUID().toString(),
+    var originalLocalUri: String = "",
     var remoteFolder: Int = -1,
     var type: String = Type.SYNC.name,
     var uploadAt: Date? = null,
@@ -55,6 +57,8 @@ open class UploadFile(
         }
     }
 
+    fun isSync() = type == Type.SYNC.toString()
+
     enum class Type {
         SYNC, UPLOAD, SHARED_FILE
     }
@@ -63,7 +67,9 @@ open class UploadFile(
         private const val DB_NAME = "Sync.realm"
         private const val ONE_DAY = 24 * 60 * 60 * 1000
         private var realmConfiguration: RealmConfiguration = RealmConfiguration.Builder().name(DB_NAME)
+            .schemaVersion(1) // Must be bumped when the schema changes
             .modules(RealmModules.SyncFilesModule())
+            .migration(UploadMigration())
             .build()
 
         private fun getRealmInstance() = Realm.getInstance(realmConfiguration)
@@ -134,9 +140,9 @@ open class UploadFile(
             }
         }
 
-        fun notExists(uri: Uri, lastModified: Date): Boolean {
+        fun canUpload(localUri: Uri, lastModified: Date): Boolean {
             return getRealmInstance().use { realm ->
-                syncFileByUriQuery(realm, uri.toString())
+                realm.where(UploadFile::class.java).equalTo(UploadFile::originalLocalUri.name, localUri.toString())
                     .equalTo(UploadFile::fileModifiedAt.name, lastModified)
                     .findFirst() == null
             }

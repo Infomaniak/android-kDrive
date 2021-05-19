@@ -18,18 +18,16 @@
 package com.infomaniak.drive.ui.addFiles
 
 import android.app.Activity
-import android.content.ContentValues
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -43,7 +41,6 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentDriveId
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
-import com.infomaniak.drive.utils.SyncUtils.DATE_TAKEN
 import com.infomaniak.drive.utils.SyncUtils.checkSyncPermissions
 import com.infomaniak.drive.utils.SyncUtils.checkSyncPermissionsResult
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
@@ -195,28 +192,44 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private fun onSelectFilesResult(data: Intent?) {
         val clipData = data?.clipData
         val uri = data?.data
+        var launchSync = false
 
-        if (clipData != null) {
-            val count = clipData.itemCount
-            for (i in 0 until count) initUpload(clipData.getItemAt(i).uri)
-        } else if (uri != null) {
-            initUpload(uri)
+        try {
+            if (clipData != null) {
+                val count = clipData.itemCount
+                for (i in 0 until count) {
+                    initUpload(clipData.getItemAt(i).uri)
+                    launchSync = true
+                }
+            } else if (uri != null) {
+                initUpload(uri)
+            }
+        } catch (exception: Exception) {
+            // TODO exception can be a low memory : improve error text
+            requireActivity().showSnackbar(R.string.anErrorHasOccurred)
+            if (launchSync) requireContext().applicationContext.syncImmediately()
         }
     }
 
     private fun onCaptureMediaResult(data: Intent?) {
-        if (data?.data == null) {
-            currentPhotoUri?.let { uri ->
-                val bitmap = uri.getBitmap(requireContext())
-                bitmap.saveAsPhoto(requireContext(), uri)
-                initUpload(uri)
+        try {
+            if (data?.data == null) {
+                currentPhotoUri?.let { uri ->
+                    val bitmap = uri.getBitmap(requireContext())
+                    bitmap.saveAsPhoto(requireContext(), uri)
+                    initUpload(uri)
+                }
+            } else {
+                deleteTempPhoto()
+                data.data?.let { videoUri -> initUpload(videoUri) }
             }
-        } else {
-            deleteTempPhoto()
-            data.data?.let { videoUri -> initUpload(videoUri) }
+        } catch (exception: Exception) {
+            // TODO exception can be a low memory : improve error text
+            requireActivity().showSnackbar(R.string.anErrorHasOccurred)
         }
     }
 
+    @Throws(Exception::class)
     private fun initUpload(uri: Uri) {
         uri.let { returnUri ->
             requireContext().contentResolver.query(returnUri, null, null, null, null)
@@ -232,17 +245,19 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                     requireActivity().showSnackbar(R.string.anErrorHasOccurred)
                 } else {
                     val appContext = requireContext().applicationContext
+                    val cacheUri = Utils.copyDataToUploadCache(requireContext(), uri, fileModifiedAt)
                     lifecycleScope.launch(Dispatchers.IO) {
                         UploadFile(
-                            uri = uri.toString(),
-                            userId = currentUserId,
+                            uri = cacheUri.toString(),
                             driveId = currentDriveId,
-                            remoteFolder = currentFolderFile.id,
-                            type = UploadFile.Type.UPLOAD.name,
+                            fileCreatedAt = fileCreatedAt,
+                            fileModifiedAt = fileModifiedAt,
                             fileName = fileName,
                             fileSize = fileSize,
-                            fileCreatedAt = fileCreatedAt,
-                            fileModifiedAt = fileModifiedAt
+                            originalLocalUri = uri.toString(),
+                            remoteFolder = currentFolderFile.id,
+                            type = UploadFile.Type.UPLOAD.name,
+                            userId = currentUserId,
                         ).store()
                         appContext.syncImmediately()
                     }
