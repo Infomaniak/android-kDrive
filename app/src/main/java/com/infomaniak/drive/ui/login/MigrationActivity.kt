@@ -215,9 +215,7 @@ class MigrationActivity : AppCompatActivity() {
             for (currentAccount in accountManager.getAccountsByType(getString(R.string.ACCOUNT_TYPE))) {
                 val email = getUserEmail(currentAccount.name)
                 val password = accountManager.getPassword(currentAccount)
-                email?.let {
-                    oldUserList[email] = password
-                }
+                if (email != null && password != null) oldUserList[email] = password
             }
 
             return oldUserList
