@@ -22,7 +22,8 @@ import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.RealmObject
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 open class AppSettings(
     var _appLaunchesCount: Int = 0,
@@ -75,7 +76,7 @@ open class AppSettings(
         var appLaunches: Int
             get() = getAppSettings()._appLaunchesCount
             set(value) {
-                runBlocking(Dispatchers.IO) {
+                GlobalScope.launch(Dispatchers.IO) {
                     updateAppSettings { appSettings -> appSettings._appLaunchesCount = value }
                 }
             }
@@ -83,7 +84,7 @@ open class AppSettings(
         var appSecurityLock: Boolean
             get() = getAppSettings()._appSecurityEnabled
             set(value) {
-                runBlocking(Dispatchers.IO) {
+                GlobalScope.launch(Dispatchers.IO) {
                     updateAppSettings { appSettings -> appSettings._appSecurityEnabled = value }
                 }
             }
@@ -91,7 +92,7 @@ open class AppSettings(
         var migrated: Boolean
             get() = getAppSettings()._migrated
             set(value) {
-                runBlocking(Dispatchers.IO) {
+                GlobalScope.launch(Dispatchers.IO) {
                     updateAppSettings { appSettings -> appSettings._migrated = value }
                 }
             }
@@ -99,7 +100,7 @@ open class AppSettings(
         var onlyWifiSync: Boolean
             get() = getAppSettings()._onlyWifiSync
             set(value) {
-                runBlocking(Dispatchers.IO) {
+                GlobalScope.launch(Dispatchers.IO) {
                     updateAppSettings { appSettings -> appSettings._onlyWifiSync = value }
                 }
             }

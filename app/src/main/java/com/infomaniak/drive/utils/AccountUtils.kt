@@ -59,7 +59,7 @@ object AccountUtils : CredentialManager {
     var currentUserId: Int
         get() = AppSettings.getAppSettings()._currentUserId
         set(userId) {
-            runBlocking(Dispatchers.IO) {
+            GlobalScope.launch(Dispatchers.IO) {
                 AppSettings.updateAppSettings { appSettings -> appSettings._currentUserId = userId }
             }
         }
@@ -67,7 +67,7 @@ object AccountUtils : CredentialManager {
     var currentDriveId: Int
         get() = AppSettings.getAppSettings()._currentDriveId
         set(driveId) {
-            runBlocking(Dispatchers.IO) {
+            GlobalScope.launch(Dispatchers.IO) {
                 AppSettings.updateAppSettings { appSettings -> appSettings._currentDriveId = driveId }
             }
         }
