@@ -165,6 +165,9 @@
             android:name="sharedTagId"
             android:defaultValue="-1"
             app:argType="integer" />
+        <action
+            android:id="@+id/action_fileShareAddUserDialog_to_selectPermissionBottomSheetDialog"
+            app:destination="@id/selectPermissionBottomSheetDialog" />
     </dialog>
 
     <dialog
@@ -232,4 +235,16 @@
             android:name="permissionsGroup"
             app:argType="com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog$PermissionsGroup" />
     </dialog>
+
+    <dialog
+        android:id="@+id/dropBoxBottomSheetDialog"
+        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.DropBoxBottomSheetDialog"
+        android:label="DropBoxBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_information" />
+
+    <dialog
+        android:id="@+id/secureLinkShareBottomSheetDialog"
+        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SecureLinkShareBottomSheetDialog"
+        android:label="SecureLinkShareBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_information" />
 </navigation>
