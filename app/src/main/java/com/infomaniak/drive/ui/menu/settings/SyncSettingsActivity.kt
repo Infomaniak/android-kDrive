@@ -125,15 +125,14 @@ class SyncSettingsActivity : BaseActivity() {
         }
 
         syncSettingsViewModel.syncFolder.observe(this) { syncFolder ->
-            syncFolder?.let {
-                FileController.getFileById(
-                    syncFolder,
-                    UserDrive(selectDriveViewModel.selectedUserId.value!!, selectDriveViewModel.selectedDrive.value?.id!!)
-                )?.let {
+            val selectedUserId = selectDriveViewModel.selectedUserId.value
+            val selectedDriveId = selectDriveViewModel.selectedDrive.value?.id
+            if (syncFolder != null && selectedUserId != null && selectedDriveId != null) {
+                FileController.getFileById(syncFolder, UserDrive(selectedUserId, selectedDriveId))?.let {
                     pathName.text = it.name
                     changeSaveButtonStatus()
                 }
-            } ?: run {
+            } else {
                 pathName.setText(R.string.selectFolderTitle)
             }
         }
