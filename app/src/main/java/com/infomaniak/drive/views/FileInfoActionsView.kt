@@ -311,6 +311,12 @@ class FileInfoActionsView @JvmOverloads constructor(
                 }
             }
         }
+
+        mainViewModel.fileCancelledFromDownload.observe(lifecycleOwner) { fileId ->
+            availableOfflineSwitch.isEnabled = true
+            currentFile.isOffline = false
+            refreshBottomSheetUi(currentFile)
+        }
     }
 
     fun refreshBottomSheetUi(file: File, offlineProgress: Int? = null) {

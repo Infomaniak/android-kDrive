@@ -54,6 +54,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.UISettings
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.data.sync.UploadProgressReceiver
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.checkSyncPermissionsResult
@@ -73,6 +74,8 @@ class MainActivity : BaseActivity() {
 
     private lateinit var mainViewModel: MainViewModel
     private lateinit var uploadProgressReceiver: UploadProgressReceiver
+    private lateinit var downloadReceiver: DownloadReceiver
+
     private var lastCloseApp = Date()
     private var updateAvailableShow = false
 
@@ -81,6 +84,7 @@ class MainActivity : BaseActivity() {
         setContentView(R.layout.activity_main)
         mainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
         uploadProgressReceiver = UploadProgressReceiver(mainViewModel)
+        downloadReceiver = DownloadReceiver(mainViewModel)
         FileController.switchDriveDB(UserDrive())
 
         val navController = findNavController(R.id.hostFragment)
@@ -167,6 +171,8 @@ class MainActivity : BaseActivity() {
         lifecycleScope.launch {
             mainViewModel.syncOfflineFiles(applicationContext)
         }
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
     }
 
     override fun onResume() {
@@ -200,6 +206,11 @@ class MainActivity : BaseActivity() {
     override fun onStop() {
         super.onStop()
         UISettings(this).bottomNavigationSelectedItem = bottomNavigation.selectedItemId
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(downloadReceiver)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
