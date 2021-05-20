@@ -120,4 +120,13 @@
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/closeButton"
+        style="@style/ButtonInfomaniak"
+        android:layout_width="match_parent"
+        android:layout_gravity="bottom"
+        android:layout_margin="@dimen/marginStandard"
+        android:text="@string/buttonClose" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
