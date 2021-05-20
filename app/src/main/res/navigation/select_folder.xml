@@ -232,6 +232,10 @@
             android:name="currentPermission"
             app:argType="com.infomaniak.drive.data.models.Permission" />
         <argument
+            android:name="isExternalUser"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
             android:name="permissionsGroup"
             app:argType="com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog$PermissionsGroup" />
     </dialog>

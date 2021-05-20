@@ -180,16 +180,17 @@ class FileShareDetailsFragment : Fragment() {
     }
 
     private fun openSelectPermissionDialog(shareable: Shareable) {
-        val permissionsGroup = when {
-            (shareable as? DriveUser)?.isExternalUser() == true -> SelectPermissionBottomSheetDialog.PermissionsGroup.EXTERNAL_USERS_RIGHTS
-            else -> SelectPermissionBottomSheetDialog.PermissionsGroup.USERS_RIGHTS
-        }
+        val isExternalUser = shareable is Invitation || (shareable is DriveUser && shareable.isExternalUser())
+        val permissionGroup = if (isExternalUser) SelectPermissionBottomSheetDialog.PermissionsGroup.EXTERNAL_USERS_RIGHTS
+        else SelectPermissionBottomSheetDialog.PermissionsGroup.USERS_RIGHTS
+
         safeNavigate(
             FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToSelectPermissionBottomSheetDialog(
                 currentShareable = shareable,
                 currentFileId = fileShareViewModel.currentFile.value?.id!!,
                 currentPermission = shareable.getFilePermission(),
-                permissionsGroup = permissionsGroup
+                isExternalUser = isExternalUser,
+                permissionsGroup = permissionGroup
             )
         )
     }
