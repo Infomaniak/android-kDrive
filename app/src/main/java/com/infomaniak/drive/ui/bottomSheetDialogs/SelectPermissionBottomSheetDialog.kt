@@ -72,7 +72,8 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         }
 
         permissionsGroup = navigationArgs.permissionsGroup
-        adapter = PermissionsAdapter(isExternalUser = permissionsGroup == PermissionsGroup.EXTERNAL_USERS_RIGHTS,
+        adapter = PermissionsAdapter(
+            isExternalUser = navigationArgs.isExternalUser,
             onUpgradeOfferClicked = {
                 safeNavigate(R.id.secureLinkShareBottomSheetDialog)
             },
