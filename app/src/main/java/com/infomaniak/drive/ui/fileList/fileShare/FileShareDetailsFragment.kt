@@ -130,6 +130,9 @@ class FileShareDetailsFragment : Fragment() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             onBackPressed()
         }
+        closeButton.setOnClickListener {
+            onBackPressed()
+        }
     }
 
     private fun onBackPressed() {
