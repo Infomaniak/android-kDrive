@@ -142,7 +142,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 UISettings(this).setSaveExternalFilesPref(userId, driveId, folderId)
                 runBlocking(Dispatchers.IO) {
                     if (storeFiles(userId, driveId, folderId)) {
-                        applicationContext.syncImmediately()
+                        syncImmediately()
                         finish()
                     } else {
                         showSnackbar(R.string.errorSave)

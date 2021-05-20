@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.addFiles
 
 import android.app.Activity
-import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
@@ -58,7 +57,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private lateinit var mainViewModel: MainViewModel
     private lateinit var currentFolderFile: File
-    private lateinit var appContext: Context
 
     private var currentPhotoUri: Uri? = null
     private var mediaPhotoPath = ""
@@ -76,7 +74,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        appContext = requireContext().applicationContext
         mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
         val file = mainViewModel.currentFolderOpenAddFileBottom.value ?: mainViewModel.currentFolder.value
         file?.let {
@@ -211,11 +208,12 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                 }
             } else if (uri != null) {
                 initUpload(uri)
+                launchSync = true
             }
         } catch (exception: Exception) {
-            // TODO exception can be a low memory : improve error text
-            requireActivity().showSnackbar(R.string.anErrorHasOccurred)
-            if (launchSync) requireContext().applicationContext.syncImmediately()
+            requireActivity().showSnackbar(R.string.errorDeviceStorage)
+        } finally {
+            if (launchSync) requireContext().syncImmediately()
         }
     }
 
@@ -242,15 +240,14 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                         type = UploadFile.Type.UPLOAD.name,
                         userId = currentUserId,
                     ).store()
-                    appContext.syncImmediately()
+                    requireContext().syncImmediately()
                     file.delete()
                 }
 
             }
         } catch (exception: Exception) {
             exception.printStackTrace()
-            // TODO exception can be a low memory : improve error text
-            requireActivity().showSnackbar(R.string.anErrorHasOccurred)
+            requireActivity().showSnackbar(R.string.errorDeviceStorage)
         }
     }
 
@@ -283,7 +280,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                             type = UploadFile.Type.UPLOAD.name,
                             userId = currentUserId,
                         ).store()
-                        appContext.syncImmediately()
                     }
                 }
             }

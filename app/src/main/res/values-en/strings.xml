@@ -202,6 +202,7 @@
     <string name="errorConnection">Connection error</string>
     <string name="errorDelete">Deletion error</string>
     <string name="errorDestinationAlreadyExists">Destination already exists</string>
+    <string name="errorDeviceStorage">Insufficient phone storage</string>
     <string name="errorDownload">Download error</string>
     <string name="errorDuplicate">Duplication error</string>
     <string name="errorFileCreate">Error when creating file. Check the name of the file and your rights to the folder.</string>

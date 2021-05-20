@@ -202,6 +202,7 @@
     <string name="errorConnection">Error de conexión</string>
     <string name="errorDelete">Error al eliminar</string>
     <string name="errorDestinationAlreadyExists">El destino ya existe</string>
+    <string name="errorDeviceStorage">Insuficiente almacenamiento telefónico disponible</string>
     <string name="errorDownload">Error al descargar</string>
     <string name="errorDuplicate">Error al duplicar</string>
     <string name="errorFileCreate">Error al crear el archivo. Comprueba el nombre del archivo y tus derechos sobre la carpeta.</string>

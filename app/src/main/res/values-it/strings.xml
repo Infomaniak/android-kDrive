@@ -202,6 +202,7 @@
     <string name="errorConnection">Errore di connessione</string>
     <string name="errorDelete">Errore durante l’eliminazione</string>
     <string name="errorDestinationAlreadyExists">La destinazione è già esistente</string>
+    <string name="errorDeviceStorage">Insufficiente memoria telefonica disponibile</string>
     <string name="errorDownload">Errore durante il download</string>
     <string name="errorDuplicate">Errore durante la duplicazione</string>
     <string name="errorFileCreate">Errore durante la creazione del file. Verifica il nome del file e i tuoi diritti sulla cartella.</string>
