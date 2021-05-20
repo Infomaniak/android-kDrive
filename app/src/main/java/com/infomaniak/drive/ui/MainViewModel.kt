@@ -50,6 +50,8 @@ class MainViewModel : ViewModel() {
     val updateOfflineFile = SingleLiveEvent<Pair<Int, Boolean>>()
     val fileInProgress = SingleLiveEvent<FileInProgress>()
 
+    val fileCancelledFromDownload = MutableLiveData<Int>()
+
     private var getFileDetailsJob = Job()
 
     fun createMultiSelectMediator(): MediatorLiveData<Pair<Int, Int>> {

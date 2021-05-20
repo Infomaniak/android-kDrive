@@ -18,9 +18,11 @@
 package com.infomaniak.drive.data.services
 
 import android.content.Context
+import android.content.Intent
 import android.os.ParcelFileDescriptor.AutoCloseOutputStream
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.work.*
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -33,9 +35,7 @@ import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.NotificationUtils.downloadProgressNotification
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -46,14 +46,27 @@ import java.io.BufferedInputStream
 class DownloadWorker(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
 
-    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+    override suspend fun doWork(): Result {
         val fileID = inputData.getInt(FILE_ID, 0)
+        return coroutineScope {
+            val job = async { initDownload(fileID) }
+            job.invokeOnCompletion { exception ->
+                when (exception) {
+                    is CancellationException -> notifyDownloadCancelled(fileID)
+                    else -> exception?.printStackTrace()
+                }
+            }
+            job.await()
+        }
+    }
+
+    private suspend fun initDownload(fileID: Int): Result = withContext(Dispatchers.IO) {
         val userID = inputData.getInt(USER_ID, AccountUtils.currentUserId)
         val driveID = inputData.getInt(DRIVE_ID, AccountUtils.currentDriveId)
         val userDrive = UserDrive(userID, driveID)
 
-        FileController.getFileById(fileID, userDrive)?.let { file ->
-            if (file.isOffline && !file.isOldData(context, userDrive)) return@withContext Result.success()
+        return@withContext FileController.getFileById(fileID, userDrive)?.let { file ->
+            if (file.isOffline && !file.isOldData(context, userDrive)) return@let Result.success()
             val outputDataFile = file.localPath(context, File.LocalType.OFFLINE, userDrive)
             val cacheDataFile = file.localPath(context, File.LocalType.CLOUD_STORAGE, userDrive)
             val firstUpdate = workDataOf(PROGRESS to 0, FILE_ID to fileID)
@@ -111,6 +124,14 @@ class DownloadWorker(private val context: Context, workerParams: WorkerParameter
             FileController.updateFile(file.id) { it.isWaitingOffline = false }
             e.printStackTrace()
             Result.failure()
+        }
+    }
+
+    private fun notifyDownloadCancelled(fileID: Int) {
+        Intent().apply {
+            action = DownloadReceiver.TAG
+            putExtra(DownloadReceiver.CANCELLED_FILE_ID, fileID)
+            LocalBroadcastManager.getInstance(context).sendBroadcast(this)
         }
     }
 

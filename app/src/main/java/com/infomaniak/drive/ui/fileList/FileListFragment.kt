@@ -516,6 +516,13 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     Log.i("kDrive", "progress from fragment $progress% for file $fileId")
                 }
             }
+
+        mainViewModel.fileCancelledFromDownload.observe(viewLifecycleOwner) { fileId ->
+            fileAdapter.updateFileProgress(fileId, 100) { file ->
+                file.isOffline = false
+                file.currentProgress = 0
+            }
+        }
     }
 
     override fun onRefresh() {
