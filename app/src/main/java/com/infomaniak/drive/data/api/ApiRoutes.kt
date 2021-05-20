@@ -43,7 +43,7 @@ object ApiRoutes {
     fun updateFileSharedTag(file: File, tag: Tag) = "${fileURL(file)}/share/tag/${tag.id}"
 
     fun updateFileSharedInvitation(file: File, invitation: Invitation) =
-        "${DRIVE_API}${file.driveId}/user/invitation/${invitation.id}"
+        "${DRIVE_API}${file.driveId}/file/invitation/${invitation.id}"
 
     fun getFileShare(file: File) = "${fileURL(file)}/share?$withAll"
 
