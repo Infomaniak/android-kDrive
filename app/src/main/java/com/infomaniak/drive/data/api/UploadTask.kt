@@ -176,13 +176,13 @@ class UploadTask(
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
             val apiResponse = ApiController.gson.fromJson(bodyResponse, ApiResponse::class.java)
             when {
-                apiResponse.error?.code.equals("object_not_found") -> {
+                apiResponse?.error?.code.equals("object_not_found") -> {
                     throw FolderNotFoundException()
                 }
-                apiResponse.error?.code.equals("quota_exceeded_error") -> {
+                apiResponse?.error?.code.equals("quota_exceeded_error") -> {
                     throw QuotaExceededException()
                 }
-                apiResponse.error?.code.equals("file_already_exists_error") -> Unit
+                apiResponse?.error?.code.equals("file_already_exists_error") -> Unit
                 else -> throw Exception(bodyResponse)
             }
         }
