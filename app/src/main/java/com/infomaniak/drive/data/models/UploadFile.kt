@@ -173,7 +173,7 @@ open class UploadFile(
                     uploadFiles.forEach {
                         syncFileByUriQuery(realm, it.uri).findFirst()?.let { syncFile ->
                             syncFile.deletedAt = Date()
-                            syncFile.uri.toUri().toFile().apply { if (exists()) delete() }
+                            if (!syncFile.isSync()) syncFile.uri.toUri().toFile().apply { if (exists()) delete() }
                         }
                     }
                 }

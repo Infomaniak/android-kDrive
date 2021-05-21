@@ -171,7 +171,7 @@ class UploadTask(
     }
 
     private fun needToResetUpload(uploadedChunks: ValidChunks): Boolean {
-        if (uploadedChunks.uploadedChunkCount > 0 && uploadedChunks.sizeToUpload != uploadFile.fileSize) {
+        if (uploadedChunks.sizeToUpload != uploadFile.fileSize) {
             uploadFile.refreshIdentifier()
             return true
         }
