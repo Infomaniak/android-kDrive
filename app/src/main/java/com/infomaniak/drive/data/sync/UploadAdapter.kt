@@ -429,8 +429,7 @@ class UploadAdapter @JvmOverloads constructor(
                     val fileSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
                     val uri = cursor.uri(contentUri)
 
-                    val canUpload = UploadFile.canUpload(uri, fileModifiedAt)
-                    if (canUpload) {
+                    if (UploadFile.canUpload(uri, fileModifiedAt)) {
                         val cacheUri = Utils.copyDataToUploadCache(context, uri, fileModifiedAt)
 
                         syncSettings?.let {
