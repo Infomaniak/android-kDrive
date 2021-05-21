@@ -45,15 +45,15 @@ import coil.transform.CircleCropTransformation
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.navigation.NavigationBarItemView
 import com.infomaniak.drive.BuildConfig
-import com.infomaniak.drive.Gplay.checkUpdateIsAvailable
-import com.infomaniak.drive.Gplay.launchInAppReview
 import com.infomaniak.drive.R
+import com.infomaniak.drive.checkUpdateIsAvailable
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.UISettings
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.data.sync.UploadProgressReceiver
+import com.infomaniak.drive.launchInAppReview
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.checkSyncPermissionsResult
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
