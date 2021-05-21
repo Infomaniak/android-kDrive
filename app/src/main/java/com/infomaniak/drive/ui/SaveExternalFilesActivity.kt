@@ -46,8 +46,13 @@ import com.infomaniak.drive.utils.SyncUtils.checkSyncPermissions
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.showOrHideEmptyError
 import com.infomaniak.drive.utils.showSnackbar
+import com.infomaniak.lib.core.utils.hideProgress
+import com.infomaniak.lib.core.utils.initProgress
+import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.android.synthetic.main.activity_save_external_file.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.*
 
@@ -133,18 +138,21 @@ class SaveExternalFilesActivity : BaseActivity() {
             fileNameEdit.showOrHideEmptyError()
         }
 
+        saveButton.initProgress(this)
         saveButton.setOnClickListener {
+            saveButton.showProgress()
             if (checkSyncPermissions()) {
                 val userId = selectDriveViewModel.selectedUserId.value!!
                 val driveId = selectDriveViewModel.selectedDrive.value?.id!!
                 val folderId = saveExternalFilesViewModel.folderId.value!!
 
                 UISettings(this).setSaveExternalFilesPref(userId, driveId, folderId)
-                runBlocking(Dispatchers.IO) {
+                GlobalScope.launch(Dispatchers.IO) {
                     if (storeFiles(userId, driveId, folderId)) {
                         applicationContext.syncImmediately()
                         finish()
                     } else {
+                        saveButton.hideProgress(R.string.buttonSave)
                         showSnackbar(R.string.errorSave)
                     }
                 }
