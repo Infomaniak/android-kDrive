@@ -276,7 +276,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                             fileModifiedAt = fileModifiedAt,
                             fileName = fileName,
                             fileSize = fileSize,
-                            originalLocalUri = uri.toString(),
                             remoteFolder = currentFolderFile.id,
                             type = UploadFile.Type.UPLOAD.name,
                             userId = currentUserId,

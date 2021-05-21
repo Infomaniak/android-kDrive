@@ -17,9 +17,7 @@
  */
 package com.infomaniak.drive.data.sync
 
-import com.infomaniak.drive.data.models.UploadFile
 import io.realm.DynamicRealm
-import io.realm.FieldAttribute
 import io.realm.RealmMigration
 
 @Suppress("UNUSED_CHANGED_VALUE")
@@ -30,11 +28,11 @@ class UploadMigration : RealmMigration {
         // DynamicRealm exposes an editable schema
         val schema = realm.schema
 
-        // Migrate to version 1: Add original local uri for sync files
-        if (oldVersionTemp == 0L) {
-            schema.get(UploadFile::class.java.simpleName)!!
-                .addField(UploadFile::originalLocalUri.name, String::class.java, FieldAttribute.REQUIRED)
-            oldVersionTemp++
-        }
+        // Example Migrate to version 1:
+//        if (oldVersionTemp == 0L) {
+//            schema.get(UploadFile::class.java.simpleName)!!
+//                .addField(UploadFile::originalLocalUri.name, String::class.java, FieldAttribute.REQUIRED)
+//            oldVersionTemp++
+//        }
     }
 }

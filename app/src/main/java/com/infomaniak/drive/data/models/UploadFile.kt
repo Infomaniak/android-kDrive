@@ -42,7 +42,6 @@ open class UploadFile(
     var fileName: String = "",
     var fileSize: Long = 0L,
     var identifier: String = UUID.randomUUID().toString(),
-    var originalLocalUri: String = "",
     var remoteFolder: Int = -1,
     var type: String = Type.SYNC.name,
     var uploadAt: Date? = null,
@@ -59,6 +58,14 @@ open class UploadFile(
         }
     }
 
+    fun refreshIdentifier() {
+        getRealmInstance().use { realm ->
+            syncFileByUriQuery(realm, uri).findFirst()?.apply {
+                realm.executeTransaction { identifier = UUID.randomUUID().toString() }
+            }
+        }
+    }
+
     fun isSync() = type == Type.SYNC.toString()
 
     enum class Type {
@@ -69,7 +76,7 @@ open class UploadFile(
         private const val DB_NAME = "Sync.realm"
         private const val ONE_DAY = 24 * 60 * 60 * 1000
         private var realmConfiguration: RealmConfiguration = RealmConfiguration.Builder().name(DB_NAME)
-            .schemaVersion(1) // Must be bumped when the schema changes
+            .schemaVersion(0) // Must be bumped when the schema changes
             .modules(RealmModules.SyncFilesModule())
             .migration(UploadMigration())
             .build()
@@ -142,9 +149,9 @@ open class UploadFile(
             }
         }
 
-        fun canUpload(localUri: Uri, lastModified: Date): Boolean {
+        fun canUpload(uri: Uri, lastModified: Date): Boolean {
             return getRealmInstance().use { realm ->
-                realm.where(UploadFile::class.java).equalTo(UploadFile::originalLocalUri.name, localUri.toString())
+                syncFileByUriQuery(realm, uri.toString())
                     .equalTo(UploadFile::fileModifiedAt.name, lastModified)
                     .findFirst() == null
             }

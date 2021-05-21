@@ -28,6 +28,7 @@ import androidx.core.net.toUri
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.infomaniak.drive.data.models.FileInProgress
 import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.models.ValidChunks
 import com.infomaniak.drive.data.sync.UploadAdapter
 import com.infomaniak.drive.data.sync.UploadProgressReceiver
 import com.infomaniak.drive.ui.MainActivity
@@ -98,6 +99,7 @@ class UploadTask(
 
             val uploadedChunks =
                 ApiRepository.getValidChunks(uploadFile.driveId, uploadFile.remoteFolder, uploadFile.identifier).data
+            val restartUpload = uploadedChunks?.let { needToResetUpload(it) } ?: false
 
             Log.d("kDrive", " upload task started with total chunk: $totalChunks, valid: $uploadedChunks")
 
@@ -105,8 +107,8 @@ class UploadTask(
 
             for (chunkNumber in 1..totalChunks) {
                 requestSemaphore.withPermit {
-                    if (uploadedChunks?.validChunks?.contains(chunkNumber) == true) {
-                        Log.d("kDrive", "chunk $chunkNumber ignored")
+                    if (uploadedChunks?.validChunks?.contains(chunkNumber) == true && !restartUpload) {
+                        Log.d("kDrive", "chunk:$chunkNumber ignored")
                         input.read(ByteArray(chunkSize))
                         return@withPermit
                     }
@@ -166,6 +168,14 @@ class UploadTask(
         if (fileChunkSize > chunkSize) {
             chunkSize = fileChunkSize
         }
+    }
+
+    private fun needToResetUpload(uploadedChunks: ValidChunks): Boolean {
+        if (uploadedChunks.uploadedChunkCount > 0 && uploadedChunks.sizeToUpload != uploadFile.fileSize) {
+            uploadFile.refreshIdentifier()
+            return true
+        }
+        return false
     }
 
     @Throws(Exception::class)
