@@ -42,17 +42,14 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.menu.settings.SyncSettingsActivity
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.MediaStoreUtils
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.UPLOAD_STATUS_ID
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.NotificationUtils.uploadNotification
-import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.SyncUtils.isWifiConnection
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.drive.utils.uri
 import io.sentry.Sentry
 import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.*
@@ -186,6 +183,10 @@ class UploadAdapter @JvmOverloads constructor(
             try {
                 if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
                     val cacheFile = uri.toFile()
+                    if (!cacheFile.exists()) {
+                        UploadFile.deleteIfExists(uri)
+                        return@withContext
+                    }
                     startUploadFile(uploadFile, cacheFile.length(), syncResult)
                     UploadFile.deleteIfExists(uri)
                     cacheFile.delete()
@@ -207,7 +208,7 @@ class UploadAdapter @JvmOverloads constructor(
     @Throws(Exception::class)
     private suspend fun startUploadFile(uploadFile: UploadFile, size: Long, syncResult: SyncResult?) {
         if (size != 0L) {
-            if (uploadFile.fileSize < size) {
+            if (uploadFile.fileSize != size) {
                 UploadFile.update(uploadFile.uri) { it.fileSize = size }
             }
 
@@ -436,8 +437,10 @@ class UploadAdapter @JvmOverloads constructor(
                     val fileSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
                     val uri = cursor.uri(contentUri)
 
-                    if (UploadFile.notExists(uri, fileModifiedAt)) {
+                    if (UploadFile.canUpload(uri, fileModifiedAt)) {
+
                         syncSettings?.let {
+                            UploadFile.deleteIfExists(uri)
                             UploadFile(
                                 uri = uri.toString(),
                                 driveId = it.driveId,
@@ -479,6 +482,7 @@ class UploadAdapter @JvmOverloads constructor(
         const val CANCELLED_BY_USER = "cancelled_by_user"
         const val OPERATION_STATUS = "progress_status"
         const val IMPORT_IN_PROGRESS = "import_in_progress"
+        const val UPLOAD_FOLDER = "upload_folder"
         private const val LAST_UPLOADED_COUNT = "last_uploaded_count"
     }
 }

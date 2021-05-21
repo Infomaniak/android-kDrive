@@ -149,7 +149,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 UISettings(this).setSaveExternalFilesPref(userId, driveId, folderId)
                 GlobalScope.launch(Dispatchers.IO) {
                     if (storeFiles(userId, driveId, folderId)) {
-                        applicationContext.syncImmediately()
+                        syncImmediately()
                         finish()
                     } else {
                         saveButton.hideProgress(R.string.buttonSave)

@@ -19,6 +19,9 @@ package com.infomaniak.drive.data.models
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.net.toFile
+import androidx.core.net.toUri
+import com.infomaniak.drive.data.sync.UploadMigration
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
 import io.realm.Realm
@@ -55,6 +58,16 @@ open class UploadFile(
         }
     }
 
+    fun refreshIdentifier() {
+        getRealmInstance().use { realm ->
+            syncFileByUriQuery(realm, uri).findFirst()?.apply {
+                realm.executeTransaction { identifier = UUID.randomUUID().toString() }
+            }
+        }
+    }
+
+    fun isSync() = type == Type.SYNC.toString()
+
     enum class Type {
         SYNC, UPLOAD, SHARED_FILE
     }
@@ -63,7 +76,9 @@ open class UploadFile(
         private const val DB_NAME = "Sync.realm"
         private const val ONE_DAY = 24 * 60 * 60 * 1000
         private var realmConfiguration: RealmConfiguration = RealmConfiguration.Builder().name(DB_NAME)
+            .schemaVersion(0) // Must be bumped when the schema changes
             .modules(RealmModules.SyncFilesModule())
+            .migration(UploadMigration())
             .build()
 
         private fun getRealmInstance() = Realm.getInstance(realmConfiguration)
@@ -134,7 +149,7 @@ open class UploadFile(
             }
         }
 
-        fun notExists(uri: Uri, lastModified: Date): Boolean {
+        fun canUpload(uri: Uri, lastModified: Date): Boolean {
             return getRealmInstance().use { realm ->
                 syncFileByUriQuery(realm, uri.toString())
                     .equalTo(UploadFile::fileModifiedAt.name, lastModified)
@@ -158,6 +173,7 @@ open class UploadFile(
                     uploadFiles.forEach {
                         syncFileByUriQuery(realm, it.uri).findFirst()?.let { syncFile ->
                             syncFile.deletedAt = Date()
+                            if (!syncFile.isSync()) syncFile.uri.toUri().toFile().apply { if (exists()) delete() }
                         }
                     }
                 }
