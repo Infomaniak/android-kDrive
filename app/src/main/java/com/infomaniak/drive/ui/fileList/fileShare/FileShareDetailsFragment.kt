@@ -136,6 +136,7 @@ class FileShareDetailsFragment : Fragment() {
     }
 
     private fun onBackPressed() {
+        view?.hideKeyboard()
         Utils.ignoreCreateFolderBackStack(findNavController(), navigationArgs.ignoreCreateFolderStack)
     }
 
