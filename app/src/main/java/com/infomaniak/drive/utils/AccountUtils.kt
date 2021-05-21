@@ -98,8 +98,8 @@ object AccountUtils : CredentialManager {
     }
 
     suspend fun addUser(user: User) {
-        currentUser = user
         currentDriveId = -1
+        currentUser = user
         userDatabase.userDao().insert(user)
     }
 
