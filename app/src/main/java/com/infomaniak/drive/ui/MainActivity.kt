@@ -44,11 +44,9 @@ import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.navigation.NavigationBarItemView
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
-import com.google.android.play.core.install.model.AppUpdateType
-import com.google.android.play.core.install.model.UpdateAvailability
-import com.google.android.play.core.review.ReviewManagerFactory
 import com.infomaniak.drive.BuildConfig
+import com.infomaniak.drive.Gplay.checkUpdateIsAvailable
+import com.infomaniak.drive.Gplay.launchInAppReview
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.AppSettings
@@ -156,11 +154,7 @@ class MainActivity : BaseActivity() {
             if (AppSettings.appLaunches == 20 || (AppSettings.appLaunches != 0 && AppSettings.appLaunches % 100 == 0)) launchInAppReview()
 
         if (!UISettings(this).updateLater || AppSettings.appLaunches % 10 == 0) {
-            // Will never be successful on emulator (update check is not functional on AVD)
-            AppUpdateManagerFactory.create(this).appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
-                val updateIsAvailable = appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
-                        appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)
-
+            checkUpdateIsAvailable { updateIsAvailable ->
                 if (!updateAvailableShow && updateIsAvailable) {
                     findNavController(R.id.hostFragment).navigate(R.id.updateAvailableBottomSheetDialog)
                     updateAvailableShow = true
@@ -273,15 +267,6 @@ class MainActivity : BaseActivity() {
 
         canvas.drawCircle(50F, 50F, 46F, paint)
         return bitmap
-    }
-
-    private fun launchInAppReview() {
-        ReviewManagerFactory.create(this).apply {
-            val requestReviewFlow = requestReviewFlow()
-            requestReviewFlow.addOnCompleteListener { request ->
-                if (request.isSuccessful) launchReviewFlow(this@MainActivity, request.result)
-            }
-        }
     }
 
     companion object {
