@@ -20,12 +20,9 @@ package com.infomaniak.drive
 import android.app.Activity
 import android.content.Context
 
-object Gplay {
+fun Context.checkUpdateIsAvailable(onResult: (updateIsAvailable: Boolean) -> Unit) {
+    onResult(false)
+}
 
-    fun Context.checkUpdateIsAvailable(onResult: (updateIsAvailable: Boolean) -> Unit) {
-        onResult(false)
-    }
-
-    fun Activity.launchInAppReview() {
-    }
+fun Activity.launchInAppReview() {
 }
