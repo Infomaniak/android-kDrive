@@ -188,7 +188,7 @@ class UploadAdapter @JvmOverloads constructor(
                         return@withContext
                     }
                     startUploadFile(uploadFile, cacheFile.length(), syncResult)
-                    if (!uploadFile.isSync()) UploadFile.deleteIfExists(uri)
+                    UploadFile.deleteIfExists(uri)
                     cacheFile.delete()
                 } else {
                     val fileSize = contentResolver.openFileDescriptor(uri, "r")?.statSize
