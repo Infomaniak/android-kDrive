@@ -70,6 +70,12 @@ object FileController {
         return realm?.let(block) ?: getRealmInstance(userDrive).use(block)
     }
 
+    fun getFileProxyById(fileId: Int, userDrive: UserDrive? = null): File? {
+        return getRealmInstance(userDrive).use { realm ->
+            realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst()
+        }
+    }
+
     fun getFileById(fileId: Int, userDrive: UserDrive? = null): File? {
         return getRealmInstance(userDrive).use { realm ->
             realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst()?.let {
@@ -245,7 +251,7 @@ object FileController {
             val apiResponse = ApiRepository.getFileDetails(File(id = fileId, driveId = userDrive.driveId))
             if (apiResponse.isSuccess()) {
                 apiResponse.data?.let { remoteFile ->
-                    insertOrUpdateFile(realm, remoteFile, getFileById(fileId, userDrive))
+                    insertOrUpdateFile(realm, remoteFile, getFileProxyById(fileId, userDrive))
                     remoteFile
                 }
             } else {
@@ -679,7 +685,7 @@ object FileController {
             getFileById(realm, fileActivity.fileId)?.deleteCaches(Realm.getApplicationContext()!!)
         }
 
-        realm.where(File::class.java).equalTo(File::id.name, fileActivity.fileId).findFirst()?.let { file ->
+        getFileProxyById(fileActivity.fileId)?.let { file ->
             insertOrUpdateFile(realm, fileActivity.file!!, file)
         } ?: also {
             returnResponse[fileActivity.fileId] = File.LocalFileActivity.IS_NEW
