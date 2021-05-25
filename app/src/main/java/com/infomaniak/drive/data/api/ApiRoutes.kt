@@ -51,7 +51,7 @@ object ApiRoutes {
 
     fun createFolder(driveId: Int, parentId: Int) = "${DRIVE_API}$driveId/file/folder/$parentId?$with"
 
-    fun createOfficeFile(driveId: Int, folderId: Int) = "${DRIVE_API}$driveId/file/file/${folderId}?with=mobile"
+    fun createOfficeFile(driveId: Int, folderId: Int) = "${DRIVE_API}$driveId/file/file/${folderId}?$with"
 
     fun createTeamFolder(driveId: Int) = "${DRIVE_API}$driveId/file/folder/team/?$with"
 
