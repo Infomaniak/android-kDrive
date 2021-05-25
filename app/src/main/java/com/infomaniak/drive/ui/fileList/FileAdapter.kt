@@ -147,7 +147,7 @@ open class FileAdapter(
 
     fun deleteByFileId(fileId: Int) {
         val position = indexOf(fileId)
-        if (position > 0) deleteAt(position)
+        if (position >= 0) deleteAt(position)
     }
 
     private fun indexOf(fileId: Int) = itemList.indexOfFirst { it.id == fileId }

@@ -33,6 +33,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
@@ -145,6 +146,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     if (bundle.containsKey(DELETE_NOT_UPDATE_ACTION)) {
                         if (bundle.getBoolean(DELETE_NOT_UPDATE_ACTION)) {
                             fileAdapter.deleteByFileId(fileID)
+                            checkIfNoFiles()
                         } else fileAdapter.notifyFileChanged(fileID)
                     }
 
@@ -229,7 +231,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         mainViewModel.refreshActivities.observe(viewLifecycleOwner) {
             it?.let {
                 showPendingFiles()
-                when (findNavController().currentDestination?.id) {
+                val destination = findNavController().currentDestination
+                when (destination?.id) {
                     R.id.searchFragment -> Unit
                     R.id.sharedWithMeFragment -> onRefresh()
                     else -> refreshActivities()
@@ -461,7 +464,10 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 fileAdapter.itemSelected.forEach { file ->
                     val newParent = File(id = folderID, driveId = AccountUtils.currentDriveId)
                     val moveFile = mainViewModel.moveFile(requireContext(), file, newParent) { fileID ->
-                        runBlocking(Dispatchers.Main) { fileAdapter.deleteByFileId(fileID) }
+                        lifecycleScope.launchWhenResumed {
+                            fileAdapter.deleteByFileId(fileID)
+                            checkIfNoFiles()
+                        }
                     }
                     mediator.addSource(moveFile, mainViewModel.updateMultiSelectMediator(mediator))
                 }
@@ -486,8 +492,16 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
+    private fun checkIfNoFiles() {
+        changeNoFilesLayoutVisibility(
+            hideFileList = fileAdapter.itemCount == 0,
+            changeControlsVisibility = folderID != ROOT_ID && folderID > 0,
+            ignoreOffline = true
+        )
+    }
+
     private fun refreshActivities() {
-        if (isLoadingActivities) return
+        if (isLoadingActivities || folderID < 0) return
         isLoadingActivities = true
         mainViewModel.currentFolder.value?.let { currentFolder ->
             FileController.getFileById(currentFolder.id)?.let { updatedFolder ->

@@ -26,6 +26,7 @@ class OfflineFileFragment : FileSubTypeListFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         downloadFiles = DownloadFiles()
+        folderID = -1
         super.onActivityCreated(savedInstanceState)
 
         sortButton.visibility = VISIBLE
