@@ -30,7 +30,8 @@ class MySharesFragment : FileSubTypeListFragment() {
     override var hideBackButtonWhenRoot: Boolean = false
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
-        if (folderID == ROOT_ID) downloadFiles = DownloadFiles()
+        if (folderID == ROOT_ID) folderID = Utils.OTHER_ROOT_ID
+        if (folderID == Utils.OTHER_ROOT_ID) downloadFiles = DownloadFiles()
         super.onActivityCreated(savedInstanceState)
 
         collapsingToolbarLayout.title = getString(R.string.mySharesTitle)
