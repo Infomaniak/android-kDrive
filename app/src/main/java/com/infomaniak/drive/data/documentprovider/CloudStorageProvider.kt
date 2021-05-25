@@ -68,6 +68,12 @@ class CloudStorageProvider : DocumentsProvider() {
 
         AccountUtils.getAllUsersSync().forEach { user ->
             cursor.addRoot(user.id.toString(), user.id.toString(), user.email)
+            GlobalScope.launch(Dispatchers.IO) {
+                context?.let {
+                    val okHttpClient = KDriveHttpClient.getHttpClient(user.id)
+                    AccountUtils.updateCurrentUserAndDrives(it, fromCloudStorage = true, okHttpClient = okHttpClient)
+                }
+            }
         }
 
         return cursor
@@ -149,13 +155,6 @@ class CloudStorageProvider : DocumentsProvider() {
 
         when {
             isRootFolder -> {
-                GlobalScope.launch(Dispatchers.IO) {
-                    context?.let {
-                        val okHttpClient = KDriveHttpClient.getHttpClient(userId)
-                        AccountUtils.updateCurrentUserAndDrives(it, okHttpClient = okHttpClient)
-                    }
-                }
-
                 cursor.addRootDrives(userId)
 
                 var documentId = parentDocumentId + SEPARATOR + MY_SHARES_FOLDER_ID
