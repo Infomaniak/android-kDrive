@@ -87,7 +87,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                     if (userId == selectDriveViewModel.selectedUserId.value && driveId == it.id) {
                         saveExternalFilesViewModel.folderId.value = folderId
                     } else {
-                        saveExternalFilesViewModel.folderId.value = -1
+                        saveExternalFilesViewModel.folderId.value = null
                     }
                 }
 
@@ -163,7 +163,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == SelectFolderActivity.SELECT_FOLDER_REQUEST && resultCode == RESULT_OK) {
-            val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG) ?: -1
+            val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
             saveExternalFilesViewModel.folderId.value = folderId
         }
     }
@@ -292,7 +292,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     }
 
     class SaveExternalFilesViewModel : ViewModel() {
-        val folderId = MutableLiveData(-1)
+        val folderId = MutableLiveData<Int>()
     }
 
     companion object {

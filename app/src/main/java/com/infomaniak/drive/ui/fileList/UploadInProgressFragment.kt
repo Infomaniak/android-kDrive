@@ -38,7 +38,6 @@ import com.infomaniak.drive.utils.showSnackbar
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 class UploadInProgressFragment : FileListFragment() {
@@ -131,12 +130,16 @@ class UploadInProgressFragment : FileListFragment() {
     }
 
     private fun closeItemClicked(pendingFiles: ArrayList<UploadFile>) {
-        runBlocking(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.IO) {
             fileListViewModel.cancelUploadingFiles(pendingFiles)
+            withContext(Dispatchers.Main) {
+                lifecycleScope.launchWhenResumed {
+                    val bundle = bundleOf(UploadAdapter.CANCELLED_BY_USER to true)
+                    requireContext().syncImmediately(bundle)
+                    popBackStack()
+                }
+            }
         }
-        val bundle = bundleOf(UploadAdapter.CANCELLED_BY_USER to true)
-        requireContext().syncImmediately(bundle)
-        popBackStack()
     }
 
     private fun popBackStack() {

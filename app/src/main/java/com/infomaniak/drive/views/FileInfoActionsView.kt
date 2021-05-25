@@ -230,7 +230,8 @@ class FileInfoActionsView @JvmOverloads constructor(
     fun downloadFile(owner: Fragment, onSuccess: () -> Unit) {
         if (owner.checkWriteStoragePermission()) {
             val downloadURL = Uri.parse(ApiRoutes.downloadFile(currentFile))
-            context.startDownloadFile(downloadURL, "${currentFile.name}.zip")
+            val fileName = if (currentFile.isFolder()) "${currentFile.name}.zip" else currentFile.name
+            context.startDownloadFile(downloadURL, fileName)
             onSuccess()
         }
     }
