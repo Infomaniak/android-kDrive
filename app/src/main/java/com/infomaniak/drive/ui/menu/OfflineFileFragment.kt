@@ -20,13 +20,14 @@ package com.infomaniak.drive.ui.menu
 import android.os.Bundle
 import android.view.View.VISIBLE
 import com.infomaniak.drive.R
+import com.infomaniak.drive.utils.Utils
 import kotlinx.android.synthetic.main.fragment_file_list.*
 
 class OfflineFileFragment : FileSubTypeListFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         downloadFiles = DownloadFiles()
-        folderID = -1
+        folderID = Utils.OTHER_ROOT_ID
         super.onActivityCreated(savedInstanceState)
 
         sortButton.visibility = VISIBLE

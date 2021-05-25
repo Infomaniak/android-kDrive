@@ -145,8 +145,10 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
                     if (bundle.containsKey(DELETE_NOT_UPDATE_ACTION)) {
                         if (bundle.getBoolean(DELETE_NOT_UPDATE_ACTION)) {
-                            fileAdapter.deleteByFileId(fileID)
-                            checkIfNoFiles()
+                            if (findNavController().currentDestination?.id != R.id.favoritesFragment) {
+                                fileAdapter.deleteByFileId(fileID)
+                                checkIfNoFiles()
+                            }
                         } else fileAdapter.notifyFileChanged(fileID)
                     }
 

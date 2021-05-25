@@ -60,6 +60,7 @@ import kotlin.math.pow
 object Utils {
 
     const val ROOT_ID = 1
+    const val OTHER_ROOT_ID = -1
 
     fun confirmFileDeletion(
         context: Context,
