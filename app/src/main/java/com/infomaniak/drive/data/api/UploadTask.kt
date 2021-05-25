@@ -184,7 +184,11 @@ class UploadTask(
         val bodyResponse = response.body?.string()
         if (!response.isSuccessful) {
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
-            val apiResponse = ApiController.gson.fromJson(bodyResponse, ApiResponse::class.java)
+            val apiResponse = try {
+                ApiController.gson.fromJson(bodyResponse, ApiResponse::class.java)
+            } catch (e:Exception){
+                null
+            }
             when {
                 apiResponse?.error?.code.equals("object_not_found") -> {
                     throw FolderNotFoundException()

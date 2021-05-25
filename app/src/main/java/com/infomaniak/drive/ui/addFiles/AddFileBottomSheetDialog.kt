@@ -31,6 +31,7 @@ import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.whenResumed
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
@@ -76,10 +77,8 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         super.onActivityCreated(savedInstanceState)
         mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
         val file = mainViewModel.currentFolderOpenAddFileBottom.value ?: mainViewModel.currentFolder.value
-        file?.let {
-            currentFolderFile = it
-            currentFolder.setFileItem(it)
-        }
+        currentFolderFile = file!!
+        currentFolder.setFileItem(currentFolderFile)
 
         openCamera.setOnClickListener { openCamera() }
         documentUpload.setOnClickListener { uploadFiles() }
@@ -241,7 +240,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                         type = UploadFile.Type.UPLOAD.name,
                         userId = currentUserId,
                     ).store()
-                    requireContext().syncImmediately()
+                    whenResumed { requireContext().syncImmediately() }
                     file.delete()
                 }
 

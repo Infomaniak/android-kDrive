@@ -50,10 +50,7 @@ import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.android.synthetic.main.activity_save_external_file.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import java.util.*
 
 
@@ -152,8 +149,10 @@ class SaveExternalFilesActivity : BaseActivity() {
                         syncImmediately()
                         finish()
                     } else {
-                        saveButton.hideProgress(R.string.buttonSave)
-                        showSnackbar(R.string.errorSave)
+                        withContext(Dispatchers.Main) {
+                            saveButton.hideProgress(R.string.buttonSave)
+                            showSnackbar(R.string.errorSave)
+                        }
                     }
                 }
             }
