@@ -20,6 +20,9 @@ package com.infomaniak.drive
 import android.app.Application
 import android.app.PendingIntent
 import android.content.Intent
+import android.os.Build
+import android.os.StrictMode
+import android.os.StrictMode.VmPolicy
 import androidx.core.app.NotificationManagerCompat
 import coil.ImageLoader
 import coil.ImageLoaderFactory
@@ -57,12 +60,27 @@ import java.lang.reflect.Type
 import java.util.*
 import kotlin.collections.ArrayList
 
+
 class ApplicationMain : Application(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
         if (BuildConfig.DEBUG) {
             Stetho.initializeWithDefaults(this)
+            StrictMode.setVmPolicy(
+                VmPolicy.Builder().apply {
+                    detectActivityLeaks()
+                    detectLeakedClosableObjects()
+                    detectLeakedRegistrationObjects()
+                    detectFileUriExposure()
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        detectContentUriWithoutPermission()
+                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        detectCredentialProtectedWhileLocked()
+                    }
+                }.build()
+            )
         }
 
         SentryAndroid.init(this) { options: SentryAndroidOptions ->
