@@ -188,7 +188,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) {
-        val folderId = mainViewModel.currentFolder.value?.id
+        val folderId = FileController.getParentFile(currentFile.id)?.id
         mainViewModel.duplicateFile(currentFile, folderId, result).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 apiResponse.data?.let {
