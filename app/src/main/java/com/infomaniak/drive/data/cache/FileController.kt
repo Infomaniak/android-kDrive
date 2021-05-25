@@ -58,15 +58,16 @@ object FileController {
 
     private fun getFileById(realm: Realm, fileId: Int) = realm.where(File::class.java).equalTo("id", fileId).findFirst()
 
-    fun getParentFile(fileId: Int, userDrive: UserDrive? = null): File? {
-        return getRealmInstance(userDrive).use { realm ->
-            getFileById(realm, fileId)?.localParent?.let { parents ->
+    fun getParentFile(fileId: Int, userDrive: UserDrive? = null, realm: Realm? = null): File? {
+        val block: (Realm) -> File? = { currentRealm ->
+            getFileById(currentRealm, fileId)?.localParent?.let { parents ->
                 if (parents.count() == 1) parents.firstOrNull()
                 else parents.firstOrNull { it.id > 0 }
             }?.let { parent ->
-                realm.copyFromRealm(parent, 0)
+                currentRealm.copyFromRealm(parent, 0)
             }
         }
+        return realm?.let(block) ?: getRealmInstance(userDrive).use(block)
     }
 
     fun getFileById(fileId: Int, userDrive: UserDrive? = null): File? {
@@ -600,19 +601,16 @@ object FileController {
     private fun FileActivity.applyFileActivity(
         realm: Realm,
         returnResponse: ArrayMap<Int, File.LocalFileActivity>,
-        folder: File
+        currentFolder: File
     ) {
         val fileId = this.fileId
-
         when (this.getAction()) {
             FileActivity.FileActivityType.FILE_DELETE,
             FileActivity.FileActivityType.FILE_MOVE_OUT,
             FileActivity.FileActivityType.FILE_TRASH -> {
                 if (returnResponse[this.fileId] == null) {
-                    getFileById(fileId)?.let { localFile ->
-                        val localFolder = localFile.localParent?.find { it.id == folder.id }
-                        val existsInFolder = localFolder != null
-                        if (existsInFolder) {
+                    getParentFile(fileId = fileId, realm = realm)?.let { parent ->
+                        if (parent.id == currentFolder.id) {
                             removeFileCascade(fileId, realm = realm)
                         }
                     }
@@ -623,7 +621,7 @@ object FileController {
             FileActivity.FileActivityType.FILE_RESTORE,
             FileActivity.FileActivityType.FILE_CREATE -> {
                 if (returnResponse[this.fileId] == null) {
-                    realm.where(File::class.java).equalTo(File::id.name, folder.id).findFirst()?.let { currentFolder ->
+                    realm.where(File::class.java).equalTo(File::id.name, currentFolder.id).findFirst()?.let { currentFolder ->
                         if (this.file != null && !currentFolder.children.contains(this.file)) {
                             addChild(realm, currentFolder, this.file!!)
                             returnResponse[this.fileId] = File.LocalFileActivity.IS_NEW
@@ -639,7 +637,7 @@ object FileController {
             FileActivity.FileActivityType.FILE_SHARE_UPDATE,
             FileActivity.FileActivityType.FILE_SHARE_DELETE -> {
                 if (returnResponse[this.fileId] == null) {
-                    updateFileFromActivity(realm, returnResponse, this, folder.id)
+                    updateFileFromActivity(realm, returnResponse, this, currentFolder.id)
                 }
             }
             else -> Unit
