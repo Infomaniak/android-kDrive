@@ -443,6 +443,8 @@
     <string name="secureLinkShareTitle">Sichere Freigabelinks</string>
     <string name="selectDriveTitle">kDrive auswählen</string>
     <string name="selectFolderTitle">Ordner auswählen</string>
+    <string name="selectMediaFoldersDescription">Wählen Sie die Ordner auf Ihrem Gerät aus, die automatisch auf Ihrem kDrive gesichert werden sollen.</string>
+    <string name="selectMediaFoldersTitle">Zu speichernde Dateien</string>
     <string name="settingsOnlyWifiSyncDescription">Die automatische Sicherung von Fotos/Videos und die Aktualisierung von Offline-Dateien wird nur bei einer Wifi-Verbindung durchgeführt.</string>
     <string name="settingsOnlyWifiSyncTitle">Übertragung nur im WLAN</string>
     <string name="settingsTitle">Einstellungen</string>

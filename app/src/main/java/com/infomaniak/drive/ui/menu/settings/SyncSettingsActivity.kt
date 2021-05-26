@@ -151,9 +151,7 @@ class SyncSettingsActivity : BaseActivity() {
         }
 
         val defaultValue = true
-        syncPictureSwitch.isChecked = oldSyncSettings?.syncPicture ?: defaultValue
         syncVideoSwitch.isChecked = oldSyncSettings?.syncVideo ?: defaultValue
-        syncScreenshotSwitch.isChecked = oldSyncSettings?.syncScreenshot ?: defaultValue
 
         activateSync.setOnClickListener { activateSyncSwitch.isChecked = !activateSyncSwitch.isChecked }
         activateSyncSwitch.setOnCheckedChangeListener { _, isChecked ->
@@ -162,16 +160,13 @@ class SyncSettingsActivity : BaseActivity() {
             if (isChecked) checkSyncPermissions()
             changeSaveButtonStatus()
         }
-        syncPictureSwitch.setOnCheckedChangeListener { _, isChecked ->
-            if (oldSyncSettings?.syncPicture ?: defaultValue == isChecked) editNumber-- else editNumber++
-            changeSaveButtonStatus()
+
+        mediaFolders.setOnClickListener {
+            SelectMediaFoldersDialog().show(supportFragmentManager, "SyncSettingsSelectMediaFoldersDialog")
         }
+
         syncVideoSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (oldSyncSettings?.syncVideo ?: defaultValue == isChecked) editNumber-- else editNumber++
-            changeSaveButtonStatus()
-        }
-        syncScreenshotSwitch.setOnCheckedChangeListener { _, isChecked ->
-            if (oldSyncSettings?.syncScreenshot ?: defaultValue == isChecked) editNumber-- else editNumber++
             changeSaveButtonStatus()
         }
 
@@ -196,11 +191,11 @@ class SyncSettingsActivity : BaseActivity() {
 
         syncPeriodicity.setOnClickListener {
             var syncIntervalType = syncSettingsViewModel.syncIntervalType.value!!
-            val choiseItems: ArrayList<String> = arrayListOf()
+            val choiceItems: ArrayList<String> = arrayListOf()
             val intervalTypeList: ArrayList<SyncSettings.IntervalType> = arrayListOf()
             for (intervalType in SyncSettings.IntervalType.values()) {
                 if (Build.VERSION.SDK_INT >= intervalType.minAndroidSdk) {
-                    choiseItems.add(getString(intervalType.title))
+                    choiceItems.add(getString(intervalType.title))
                     intervalTypeList.add(intervalType)
                 }
             }
@@ -208,7 +203,7 @@ class SyncSettingsActivity : BaseActivity() {
 
             MaterialAlertDialogBuilder(this, R.style.DialogStyle)
                 .setTitle(getString(R.string.syncSettingsButtonSyncPeriodicity))
-                .setSingleChoiceItems(choiseItems.toTypedArray(), checkedItem) { _, position ->
+                .setSingleChoiceItems(choiceItems.toTypedArray(), checkedItem) { _, position ->
                     syncIntervalType = intervalTypeList[position]
                 }
                 .setPositiveButton(R.string.buttonConfirm) { _, _ ->
@@ -272,8 +267,8 @@ class SyncSettingsActivity : BaseActivity() {
                     driveId = selectDriveViewModel.selectedDrive.value!!.id,
                     lastSync = if (saveOldPictures) Date(0) else Date(),
                     syncFolder = syncSettingsViewModel.syncFolder.value!!,
-                    syncPicture = syncPictureSwitch.isChecked,
-                    syncScreenshot = syncScreenshotSwitch.isChecked,
+                    syncPicture = true, // Temp value before view change
+                    syncScreenshot = true, // Temp value before view change
                     syncVideo = syncVideoSwitch.isChecked
                 )
                 syncSettings.setIntervalType(syncSettingsViewModel.syncIntervalType.value!!)

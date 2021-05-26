@@ -452,6 +452,8 @@
     <string name="secureLinkShareTitle">Liens de partage sécurisés</string>
     <string name="selectDriveTitle">Sélectionner un kDrive</string>
     <string name="selectFolderTitle">Sélectionner un dossier</string>
+    <string name="selectMediaFoldersDescription">Sélectionnez les dossiers de votre appareil qui doivent être sauvegardés automatiquement dans votre kDrive.</string>
+    <string name="selectMediaFoldersTitle">Dossiers à sauvegarder</string>
     <string name="settingsOnlyWifiSyncDescription">La sauvegarde automatique des photos/vidéos et la mise à jour des fichiers hors ligne seront uniquement effectuées avec une connexion Wifi.</string>
     <string name="settingsOnlyWifiSyncTitle">Transfert uniquement en Wi-Fi</string>
     <string name="settingsTitle">Paramètres</string>

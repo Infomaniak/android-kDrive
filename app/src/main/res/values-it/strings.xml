@@ -443,6 +443,8 @@
     <string name="secureLinkShareTitle">Link di condivisione protetti</string>
     <string name="selectDriveTitle">Selezionare un kDrive</string>
     <string name="selectFolderTitle">Selezionare una cartella</string>
+    <string name="selectMediaFoldersDescription">Seleziona le cartelle sul tuo dispositivo che devono essere automaticamente salvate sul tuo kDrive.</string>
+    <string name="selectMediaFoldersTitle">File da salvare</string>
     <string name="settingsOnlyWifiSyncDescription">Il backup automatico delle foto/video e l\'aggiornamento dei file offline saranno effettuati solo con una connessione Wifi.</string>
     <string name="settingsOnlyWifiSyncTitle">Trasferimento solo tramite Wi-Fi</string>
     <string name="settingsTitle">Impostazioni</string>
