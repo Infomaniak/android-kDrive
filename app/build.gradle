@@ -5,11 +5,6 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'androidx.navigation.safeargs.kotlin'
 apply plugin: 'realm-android'
 
-def versionMajor = 4
-def versionMinor = 0
-def versionPatch = 2
-def versionBuild = 1
-
 android {
     compileSdkVersion 30
 
@@ -17,8 +12,8 @@ android {
         applicationId "com.infomaniak.drive"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode versionMajor * 10000000 + versionMinor * 10000 + versionPatch * 100 + versionBuild
-        versionName versionMajor + "." + versionMinor + "." + versionPatch
+        versionCode 40000301
+        versionName "4.0.3"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField 'String', 'CLIENT_ID', '"9473D73C-C20F-4971-9E10-D957C563FA68"'
@@ -26,7 +21,7 @@ android {
         buildConfigField 'String', 'INFOMANIAK_API', '"https://api.infomaniak.com/1/"'
         buildConfigField 'String', 'OFFICE_URL', '"https://drive.infomaniak.com/app/office/"'
         buildConfigField 'String', 'SHOP_URL', '"https://shop.infomaniak.com/order/"'
-        buildConfigField 'Boolean', 'BETA', 'true'
+        buildConfigField 'Boolean', 'BETA', 'true' // Todo
 
         resValue 'string', 'ACCOUNT_TYPE', 'com.infomaniak.drive'
         resValue 'string', 'CLOUD_STORAGE_AUTHORITY', 'com.infomaniak.drive.documents'
