@@ -267,9 +267,10 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             .observe(viewLifecycleOwner) { apiResponse ->
                 if (apiResponse.isSuccess()) {
                     mainViewModel.refreshActivities.value = true
+                    val isFavoriteFolder = findNavController().previousBackStackEntry?.destination?.id == R.id.favoritesFragment
                     transmitActionAndPopBack(
                         getString(R.string.allFileMove, currentFile.name, destinationFolder.name),
-                        apiResponse.data?.setDriveAndReturn(currentFile.driveId), true
+                        apiResponse.data?.setDriveAndReturn(currentFile.driveId), !isFavoriteFolder
                     )
                 } else {
                     transmitActionAndPopBack(getString(R.string.errorMove))
