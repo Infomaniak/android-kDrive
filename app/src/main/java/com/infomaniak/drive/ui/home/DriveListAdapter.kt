@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui.home
 
-import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.view.LayoutInflater
@@ -36,8 +35,6 @@ class DriveListAdapter(
     private val onItemClicked: (drive: Drive) -> Unit
 ) : RecyclerView.Adapter<ViewHolder>() {
 
-    private lateinit var context: Context
-
     fun setDrives(driveList: ArrayList<Drive>) {
         val max = this.driveList.size
         this.driveList = driveList
@@ -45,10 +42,7 @@ class DriveListAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        context = parent.context
-        return ViewHolder(
-            LayoutInflater.from(parent.context).inflate(R.layout.cardview_drive, parent, false)
-        )
+        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cardview_drive, parent, false))
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
