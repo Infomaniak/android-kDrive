@@ -41,7 +41,6 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="@dimen/marginStandardMedium"
         android:backgroundTint="#80111C28"
-        android:gravity="center_horizontal"
         android:textColor="@color/white"
         android:visibility="gone"
         tools:text="102 sur 250"
@@ -52,6 +51,7 @@
         layout="@layout/fragment_preview_others"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerInParent="true" />
+        android:layout_centerInParent="true"
+        tools:visibility="gone" />
 
 </RelativeLayout>
