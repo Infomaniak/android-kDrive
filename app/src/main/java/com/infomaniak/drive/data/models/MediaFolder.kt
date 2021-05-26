@@ -15,24 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.data.sync
+package com.infomaniak.drive.data.models
 
-import com.infomaniak.drive.data.models.MediaFolder
-import io.realm.DynamicRealm
-import io.realm.RealmMigration
+import io.realm.RealmObject
+import io.realm.annotations.PrimaryKey
 
-@Suppress("UNUSED_CHANGED_VALUE")
-class UploadMigration : RealmMigration {
-    override fun migrate(realm: DynamicRealm, oldVersion: Long, newVersion: Long) {
-        var oldVersionTemp = oldVersion
-
-        // DynamicRealm exposes an editable schema
-        val schema = realm.schema
-
-        // Example Migrate to version 1: Create table MediaFolder
-        if (oldVersionTemp == 0L) {
-            schema.create(MediaFolder::class.java.simpleName)
-            oldVersionTemp++
-        }
-    }
+open class MediaFolder(
+    @PrimaryKey var id: Long = 0L,
+    var name: String = "",
+    var isSynced: Boolean = false
+) : RealmObject() {
 }
