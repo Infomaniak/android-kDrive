@@ -154,7 +154,7 @@ open class FileAdapter(
 
     fun notifyFileChanged(fileId: Int, onChange: ((file: File) -> Unit)? = null) {
         val fileIndex = indexOf(fileId)
-        if (fileIndex > 0) {
+        if (fileIndex >= 0) {
             onChange?.invoke(itemList[fileIndex])
             notifyItemChanged(fileIndex)
         }

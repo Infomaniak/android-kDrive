@@ -54,6 +54,7 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDi
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog.Companion.SELECT_DIALOG_ACTION
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog.SelectDialogAction
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.setPagination
@@ -233,8 +234,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         mainViewModel.refreshActivities.observe(viewLifecycleOwner) {
             it?.let {
                 showPendingFiles()
-                val destination = findNavController().currentDestination
-                when (destination?.id) {
+                when (findNavController().currentDestination?.id) {
                     R.id.searchFragment -> Unit
                     R.id.sharedWithMeFragment -> onRefresh()
                     else -> refreshActivities()
@@ -497,13 +497,13 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun checkIfNoFiles() {
         changeNoFilesLayoutVisibility(
             hideFileList = fileAdapter.itemCount == 0,
-            changeControlsVisibility = folderID != ROOT_ID && folderID > 0,
+            changeControlsVisibility = folderID != ROOT_ID && folderID != OTHER_ROOT_ID,
             ignoreOffline = true
         )
     }
 
     private fun refreshActivities() {
-        if (isLoadingActivities || folderID < 0) return
+        if (isLoadingActivities || folderID == OTHER_ROOT_ID) return
         isLoadingActivities = true
         mainViewModel.currentFolder.value?.let { currentFolder ->
             FileController.getFileById(currentFolder.id)?.let { updatedFolder ->

@@ -21,6 +21,7 @@ import android.os.Bundle
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_file_list.*
@@ -30,8 +31,10 @@ class MySharesFragment : FileSubTypeListFragment() {
     override var hideBackButtonWhenRoot: Boolean = false
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
-        if (folderID == ROOT_ID) folderID = Utils.OTHER_ROOT_ID
-        if (folderID == Utils.OTHER_ROOT_ID) downloadFiles = DownloadFiles()
+        if (folderID == ROOT_ID) {
+            downloadFiles = DownloadFiles()
+            folderID = OTHER_ROOT_ID
+        }
         super.onActivityCreated(savedInstanceState)
 
         collapsingToolbarLayout.title = getString(R.string.mySharesTitle)
