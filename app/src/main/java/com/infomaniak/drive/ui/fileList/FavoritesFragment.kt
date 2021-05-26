@@ -31,8 +31,10 @@ class FavoritesFragment : FileListFragment() {
     override var enabledMultiSelectMode: Boolean = false
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
-        if (folderID == ROOT_ID) folderID = OTHER_ROOT_ID
-        if (folderID == OTHER_ROOT_ID) downloadFiles = DownloadFiles()
+        if (folderID == ROOT_ID) {
+            downloadFiles = DownloadFiles()
+            folderID = OTHER_ROOT_ID
+        }
         super.onActivityCreated(savedInstanceState)
 
         noFilesLayout.setup(
