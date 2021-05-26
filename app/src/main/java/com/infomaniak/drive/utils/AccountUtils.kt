@@ -106,6 +106,7 @@ object AccountUtils : CredentialManager {
     suspend fun updateCurrentUserAndDrives(
         context: Context,
         fromMaintenance: Boolean = false,
+        fromCloudStorage: Boolean = false,
         okHttpClient: OkHttpClient = HttpClient.okHttpClient
     ) = withContext(Dispatchers.IO) {
         val userProfile = ApiRepository.getUserProfile(okHttpClient)
@@ -154,7 +155,9 @@ object AccountUtils : CredentialManager {
                                     }
                                 }
                             }
-                            CloudStorageProvider.notifyRootsChanged(context)
+                            if (!fromCloudStorage) {
+                                CloudStorageProvider.notifyRootsChanged(context)
+                            }
                         }
                     } else if (error?.code?.equals("no_drive") == true) {
                         removeUser(context, user)

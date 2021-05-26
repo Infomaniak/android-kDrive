@@ -192,7 +192,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     fun toggleBottomSheet(show: Boolean? = null) {
         val mustShow = show ?: (bottomSheetBehavior.state == BottomSheetBehavior.STATE_HIDDEN)
-        bottomSheetFileInfos.scrollToTop()
+        bottomSheetFileInfos?.scrollToTop()
         bottomSheetBehavior.state = if (mustShow) {
             BottomSheetBehavior.STATE_COLLAPSED
         } else {

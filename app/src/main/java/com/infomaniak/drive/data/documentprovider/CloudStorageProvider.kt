@@ -71,7 +71,7 @@ class CloudStorageProvider : DocumentsProvider() {
             GlobalScope.launch(Dispatchers.IO) {
                 context?.let {
                     val okHttpClient = KDriveHttpClient.getHttpClient(user.id)
-                    AccountUtils.updateCurrentUserAndDrives(it, okHttpClient = okHttpClient)
+                    AccountUtils.updateCurrentUserAndDrives(it, fromCloudStorage = true, okHttpClient = okHttpClient)
                 }
             }
         }

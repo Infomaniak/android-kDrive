@@ -25,6 +25,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Env
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.models.User
+import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.login.ApiToken
 import io.realm.RealmConfiguration
 import kotlinx.coroutines.Dispatchers
@@ -48,7 +49,7 @@ open class KDriveTest {
             } else {
                 InfomaniakCore.bearerToken = Env.TOKEN
 
-                val apiResponse = ApiRepository.getUserProfile(true)
+                val apiResponse = ApiRepository.getUserProfile(HttpClient.okHttpClientNoInterceptor)
                 user = apiResponse.data!!
                 userDrive = UserDrive(user.id, Env.DRIVE_ID)
                 runBlocking {
