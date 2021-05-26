@@ -23,9 +23,11 @@ import android.view.View
 import android.view.ViewGroup
 import com.infomaniak.drive.R
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_drive.*
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_media_folders.*
 
 class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
+
+    private lateinit var mediaFoldersAdapter: MediaFoldersAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_bottom_sheet_select_media_folders, container, false)
@@ -38,6 +40,9 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
             dismiss()
         }
 
-        // Get all media folders - Awaiting MediaFolder model to display
+        mediaFoldersAdapter = MediaFoldersAdapter { mediaFolder, isChecked ->
+            // Media folder check change
+        }
+        mediaFolderList.adapter = mediaFoldersAdapter
     }
 }
