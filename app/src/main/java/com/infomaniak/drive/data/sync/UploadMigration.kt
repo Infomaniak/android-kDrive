@@ -19,6 +19,7 @@ package com.infomaniak.drive.data.sync
 
 import com.infomaniak.drive.data.models.MediaFolder
 import io.realm.DynamicRealm
+import io.realm.FieldAttribute
 import io.realm.RealmMigration
 
 @Suppress("UNUSED_CHANGED_VALUE")
@@ -31,7 +32,10 @@ class UploadMigration : RealmMigration {
 
         // Example Migrate to version 1: Create table MediaFolder
         if (oldVersionTemp == 0L) {
-            schema.create(MediaFolder::class.java.simpleName)
+            schema.create(MediaFolder::class.java.simpleName)!!
+                .addField(MediaFolder::id.name, Long::class.java, FieldAttribute.PRIMARY_KEY)
+                .addField(MediaFolder::name.name, String::class.java, FieldAttribute.REQUIRED)
+                .addField(MediaFolder::isSynced.name, Boolean::class.java, FieldAttribute.REQUIRED)
             oldVersionTemp++
         }
     }
