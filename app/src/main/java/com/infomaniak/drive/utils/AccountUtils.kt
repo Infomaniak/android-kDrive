@@ -59,17 +59,17 @@ object AccountUtils : CredentialManager {
         Sentry.setUser(io.sentry.protocol.User().apply { id = currentUserId.toString() })
     }
 
-    var currentUserId: Int
-        get() = AppSettings.getAppSettings()._currentUserId
+    var currentUserId: Int = AppSettings.getAppSettings()._currentUserId
         set(userId) {
+            field = userId
             GlobalScope.launch(Dispatchers.IO) {
                 AppSettings.updateAppSettings { appSettings -> appSettings._currentUserId = userId }
             }
         }
 
-    var currentDriveId: Int
-        get() = AppSettings.getAppSettings()._currentDriveId
+    var currentDriveId: Int = AppSettings.getAppSettings()._currentDriveId
         set(driveId) {
+            field = driveId
             GlobalScope.launch(Dispatchers.IO) {
                 AppSettings.updateAppSettings { appSettings -> appSettings._currentDriveId = driveId }
             }

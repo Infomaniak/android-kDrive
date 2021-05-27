@@ -73,33 +73,33 @@ open class AppSettings(
             }
         }
 
-        var appLaunches: Int
-            get() = getAppSettings()._appLaunchesCount
+        var appLaunches: Int = getAppSettings()._appLaunchesCount
             set(value) {
+                field = value
                 GlobalScope.launch(Dispatchers.IO) {
                     updateAppSettings { appSettings -> appSettings._appLaunchesCount = value }
                 }
             }
 
-        var appSecurityLock: Boolean
-            get() = getAppSettings()._appSecurityEnabled
+        var appSecurityLock: Boolean = getAppSettings()._appSecurityEnabled
             set(value) {
+                field = value
                 GlobalScope.launch(Dispatchers.IO) {
                     updateAppSettings { appSettings -> appSettings._appSecurityEnabled = value }
                 }
             }
 
-        var migrated: Boolean
-            get() = getAppSettings()._migrated
+        var migrated: Boolean = getAppSettings()._migrated
             set(value) {
+                field = value
                 GlobalScope.launch(Dispatchers.IO) {
                     updateAppSettings { appSettings -> appSettings._migrated = value }
                 }
             }
 
-        var onlyWifiSync: Boolean
-            get() = getAppSettings()._onlyWifiSync
+        var onlyWifiSync: Boolean = getAppSettings()._onlyWifiSync
             set(value) {
+                field = value
                 GlobalScope.launch(Dispatchers.IO) {
                     updateAppSettings { appSettings -> appSettings._onlyWifiSync = value }
                 }
