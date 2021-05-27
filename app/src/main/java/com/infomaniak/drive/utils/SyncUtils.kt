@@ -226,7 +226,7 @@ object SyncUtils {
             return if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 true
             } else {
-                if (!requestPermissionsIsPossible(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE))) {
+                if (!requestPermissionsIsPossible(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE))) {
                     MaterialAlertDialogBuilder(this, R.style.DialogStyle)
                         .setTitle(R.string.androidPermissionTitle)
                         .setMessage(R.string.allPermissionNeeded)
