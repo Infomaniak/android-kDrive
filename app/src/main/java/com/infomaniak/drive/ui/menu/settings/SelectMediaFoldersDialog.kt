@@ -31,7 +31,7 @@ import androidx.lifecycle.liveData
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.utils.MediaFoldersProvider
-import com.infomaniak.drive.utils.checkWriteStoragePermission
+import com.infomaniak.drive.utils.SyncUtils.checkWriteStoragePermission
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_media_folders.*
 import kotlinx.coroutines.Dispatchers

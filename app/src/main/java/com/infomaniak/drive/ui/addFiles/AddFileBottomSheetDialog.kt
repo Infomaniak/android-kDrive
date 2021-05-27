@@ -123,7 +123,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun openCamera() {
-        if (checkWriteStoragePermission() && checkSyncPermissions(CAPTURE_MEDIA_REQ)) {
+        if (checkSyncPermissions(CAPTURE_MEDIA_REQ)) {
             openCamera.isEnabled = false
             try {
                 val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {

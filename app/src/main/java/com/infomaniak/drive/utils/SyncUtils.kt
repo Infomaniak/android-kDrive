@@ -59,9 +59,8 @@ import java.util.*
 
 object SyncUtils {
 
-    private const val REQUEST_READ_STORAGE_PERMISSION = 1
-    private const val REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 2
-    const val REQUEST_WRITE_STORAGE_PERMISSION = 3
+    private const val REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 1
+    const val REQUEST_WRITE_STORAGE_PERMISSION = 2
 
     val DIRECTORY_SCREENSHOTS: String =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) Environment.DIRECTORY_SCREENSHOTS
@@ -201,16 +200,16 @@ object SyncUtils {
     }
 
     /**
-     * Check if the sync has all permissions to work, we can receive the permission result in [SyncUtils.REQUEST_READ_STORAGE_PERMISSION]
+     * Check if the sync has all permissions to work, we can receive the permission result in [SyncUtils.REQUEST_WRITE_STORAGE_PERMISSION]
      * @return [Boolean] true if the sync has all permissions or false
      */
-    fun Fragment.checkSyncPermissions(requestCode: Int = REQUEST_READ_STORAGE_PERMISSION): Boolean {
+    fun Fragment.checkSyncPermissions(requestCode: Int = REQUEST_WRITE_STORAGE_PERMISSION): Boolean {
         requireContext().batteryLifePermission()
-        return checkReadStoragePermission(requestCode)
+        return checkWriteStoragePermission(requestCode)
     }
 
     /**
-     * Check if the sync has all permissions to work, we can receive the permission result in [SyncUtils.REQUEST_READ_STORAGE_PERMISSION]
+     * Check if the sync has all permissions to work, we can receive the permission result in [SyncUtils.REQUEST_WRITE_STORAGE_PERMISSION]
      * @return [Boolean] true if the sync has all permissions or false
      */
     fun Activity.checkSyncPermissions(): Boolean {
@@ -221,7 +220,7 @@ object SyncUtils {
     fun Activity.checkSyncPermissionsResult(
         requestCode: Int,
         grantResults: IntArray,
-        customRequestCode: Int = REQUEST_READ_STORAGE_PERMISSION
+        customRequestCode: Int = REQUEST_WRITE_STORAGE_PERMISSION
     ): Boolean {
         if (requestCode == customRequestCode) {
             return if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -230,7 +229,7 @@ object SyncUtils {
                 if (!requestPermissionsIsPossible(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE))) {
                     MaterialAlertDialogBuilder(this, R.style.DialogStyle)
                         .setTitle(R.string.androidPermissionTitle)
-                        .setMessage(R.string.allReadPermissionNeeded)
+                        .setMessage(R.string.allPermissionNeeded)
                         .setPositiveButton(R.string.buttonAuthorize) { _: DialogInterface?, _: Int ->
                             startAppSettingsConfig()
                         }
@@ -243,32 +242,54 @@ object SyncUtils {
     }
 
     /**
-     * Checks if the user has already confirmed read permission
+     * Checks if the user has already confirmed write permission
      */
     @SuppressLint("NewApi")
-    private fun Fragment.checkReadStoragePermission(requestCode: Int): Boolean {
-        val readPermission = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+    fun Fragment.checkWriteStoragePermission(requestCode: Int = REQUEST_WRITE_STORAGE_PERMISSION): Boolean {
+        val writePermission = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        val activity = requireActivity()
         return when {
             Build.VERSION.SDK_INT < Build.VERSION_CODES.M -> true
-            requireContext().hasPermissions(readPermission) -> true
+            requireContext().hasPermissions(writePermission) -> true
+            activity.requestPermissionsIsPossible(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)) -> {
+                requestPermissions(writePermission, requestCode)
+                false
+            }
             else -> {
-                requestPermissions(readPermission, requestCode)
+                MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
+                    .setTitle(R.string.androidPermissionTitle)
+                    .setMessage(R.string.allPermissionNeeded)
+                    .setPositiveButton(R.string.buttonAuthorize) { _: DialogInterface?, _: Int ->
+                        activity.startAppSettingsConfig()
+                    }
+                    .show()
                 false
             }
         }
     }
 
     /**
-     * Checks if the user has already confirmed read permission
+     * Checks if the user has already confirmed write permission
      */
     @SuppressLint("NewApi")
-    private fun Activity.checkReadStoragePermission(requestCode: Int): Boolean {
-        val readPermission = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+    fun Activity.checkWriteStoragePermission(requestCode: Int = REQUEST_WRITE_STORAGE_PERMISSION): Boolean {
+        val writePermission = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         return when {
             Build.VERSION.SDK_INT < Build.VERSION_CODES.M -> true
-            hasPermissions(readPermission) -> true
+            hasPermissions(writePermission) -> true
+            requestPermissionsIsPossible(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)) -> {
+                requestPermissions(writePermission, requestCode)
+                false
+            }
             else -> {
-                requestPermissions(readPermission, requestCode)
+                //TODO a better text message here: example, Additional permissions required to upload and download files.
+                MaterialAlertDialogBuilder(this, R.style.DialogStyle)
+                    .setTitle(R.string.androidPermissionTitle)
+                    .setMessage(R.string.allPermissionNeeded)
+                    .setPositiveButton(R.string.buttonAuthorize) { _: DialogInterface?, _: Int ->
+                        startAppSettingsConfig()
+                    }
+                    .show()
                 false
             }
         }

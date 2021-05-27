@@ -34,7 +34,11 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController.startDownloadFile
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.SyncUtils.checkWriteStoragePermission
+import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.setBackNavigationResult
+import com.infomaniak.drive.utils.showSnackbar
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_action_multi_select.*
 import kotlinx.coroutines.Dispatchers
 
@@ -58,7 +62,7 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
         availableOffline.setOnClickListener { onActionSelected(SelectDialogAction.OFFLINE) }
         duplicateFile.setOnClickListener { onActionSelected(SelectDialogAction.DUPLICATE) }
         downloadFile.setOnClickListener {
-            if (this.checkWriteStoragePermission()) {
+            if (checkWriteStoragePermission()) {
                 downloadFileArchive()
             }
         }
