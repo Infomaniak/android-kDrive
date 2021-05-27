@@ -107,7 +107,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
         saveExternalFilesViewModel.folderId.observe(this) { folderId ->
             val folder =
-                if (selectDriveViewModel.selectedUserId.value == null || selectDriveViewModel.selectedDrive.value?.id == null) {
+                if (selectDriveViewModel.selectedUserId.value == null || selectDriveViewModel.selectedDrive.value?.id == null || folderId == null) {
                     null
                 } else {
                     val userDrive = UserDrive(
@@ -292,7 +292,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     }
 
     class SaveExternalFilesViewModel : ViewModel() {
-        val folderId = MutableLiveData<Int>()
+        val folderId = MutableLiveData<Int?>()
     }
 
     companion object {
