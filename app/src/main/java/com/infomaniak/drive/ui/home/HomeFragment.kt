@@ -87,6 +87,10 @@ class HomeFragment : Fragment() {
             adapter = lastFilesAdapter
         }
 
+        AccountUtils.getCurrentDrive()?.let { currentDrive ->
+            setDriveHeader(currentDrive)
+        }
+
         mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
             noNetworkCard.visibility = if (isInternetAvailable) GONE else VISIBLE
         }
@@ -196,12 +200,16 @@ class HomeFragment : Fragment() {
 
     private fun updateDriveInfos(forceClear: Boolean = false) {
         AccountUtils.getCurrentDrive()?.let { currentDrive ->
-            driveName.text = currentDrive.name
-            driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(currentDrive.preferences.color))
+            setDriveHeader(currentDrive)
             getLastPicturesOrActivities(currentDrive.id, isProOrTeam, forceClear)
             getLastEditedFiles()
             notEnoughStorage.setup(currentDrive)
         }
+    }
+
+    private fun setDriveHeader(currentDrive: Drive) {
+        driveName.text = currentDrive.name
+        driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(currentDrive.preferences.color))
     }
 
     private fun setupLastElementsTitle(isProOrTeam: Boolean) {
