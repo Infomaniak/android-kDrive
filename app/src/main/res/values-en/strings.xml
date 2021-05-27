@@ -59,8 +59,8 @@
     <string name="allPasswordHint">Set a password</string>
     <string name="allPathTitle">Location</string>
     <string name="allPdf">PDF</string>
+    <string name="allPermissionNeeded">You must allow access to your files to be able to upload and save them</string>
     <string name="allPictures">Images</string>
-    <string name="allReadPermissionNeeded">You must allow access to your files to be able to upload them</string>
     <string name="allRootName">kDrive %s root</string>
     <string name="allToday">Today</string>
     <string name="allTrashActionCancelled">Deletion cancelled</string>
@@ -71,7 +71,6 @@
     <string name="allUploadFinishedTitle">Upload finished</string>
     <string name="allUserAnonymous">Anonymous</string>
     <string name="allVideo">Videos</string>
-    <string name="allWritePermissionNeeded">You need write access to be able to take pictures and download files</string>
     <string name="allYesterday">Yesterday</string>
     <string name="appSecurityDescription">Protect access to your app by enabling your phone lock.</string>
     <string name="appSecurityTitle">App lock</string>

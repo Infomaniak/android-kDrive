@@ -59,8 +59,8 @@
     <string name="allPasswordHint">Definire una password</string>
     <string name="allPathTitle">Ubicazione</string>
     <string name="allPdf">PDF</string>
+    <string name="allPermissionNeeded">Per poterli importare e salvarli, occorre autorizzare l’accesso ai tuoi file</string>
     <string name="allPictures">Immagini</string>
-    <string name="allReadPermissionNeeded">Per poterli importare, occorre autorizzare l’accesso ai tuoi file</string>
     <string name="allRootName">Root del kDrive %s</string>
     <string name="allToday">Oggi</string>
     <string name="allTrashActionCancelled">Eliminazione annullata</string>
@@ -71,7 +71,6 @@
     <string name="allUploadFinishedTitle">Importazione conclusa</string>
     <string name="allUserAnonymous">Anonimo</string>
     <string name="allVideo">Video</string>
-    <string name="allWritePermissionNeeded">È necessario consentire l’accesso in scrittura per scattare foto e scaricare file</string>
     <string name="allYesterday">Qui</string>
     <string name="appSecurityDescription">Proteggi l’accesso alla tua applicazione attivando il blocco del tuo telefono.</string>
     <string name="appSecurityTitle">Blocco dell’applicazione</string>

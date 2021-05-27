@@ -59,8 +59,8 @@
     <string name="allPasswordHint">Passwort festlegen</string>
     <string name="allPathTitle">Speicherort</string>
     <string name="allPdf">PDF</string>
+    <string name="allPermissionNeeded">Sie müssen den Zugriff auf Ihre Dateien erlauben, um den Import und zu speichern durchführen zu können</string>
     <string name="allPictures">Bilder</string>
-    <string name="allReadPermissionNeeded">Sie müssen den Zugriff auf Ihre Dateien erlauben, um den Import durchführen zu können</string>
     <string name="allRootName">Root des kDrive %s</string>
     <string name="allToday">Heute</string>
     <string name="allTrashActionCancelled">Löschen abgebrochen</string>
@@ -71,7 +71,6 @@
     <string name="allUploadFinishedTitle">Import abgeschlossen</string>
     <string name="allUserAnonymous">Anonym</string>
     <string name="allVideo">Videos</string>
-    <string name="allWritePermissionNeeded">Sie müssen Schreibzugriff erlauben, um Bilder aufzunehmen und Dateien herunterzuladen</string>
     <string name="allYesterday">Gestern</string>
     <string name="appSecurityDescription">Schützen Sie den Zugang zu Ihrer Anwendung, indem Sie die Sperre Ihres Telefons aktivieren.</string>
     <string name="appSecurityTitle">Sperrung der Anwendung</string>
