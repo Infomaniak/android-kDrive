@@ -33,6 +33,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
@@ -228,6 +229,10 @@ class SyncSettingsActivity : BaseActivity() {
         }
     }
 
+    fun onDialogDismissed() {
+        changeSaveButtonStatus()
+    }
+
     private fun activeSelectDrive() {
         switchDrive.visibility = VISIBLE
         selectDrive.setOnClickListener {
@@ -254,6 +259,7 @@ class SyncSettingsActivity : BaseActivity() {
         saveButton.isEnabled = isEdited && (selectDriveViewModel.selectedUserId.value != null)
                 && (selectDriveViewModel.selectedDrive.value != null)
                 && (syncSettingsViewModel.syncFolder.value != null)
+                && MediaFolder.getAllSyncedFoldersCount() > 0
     }
 
     private fun saveSettings() {

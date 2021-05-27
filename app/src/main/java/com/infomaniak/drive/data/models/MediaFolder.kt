@@ -49,7 +49,7 @@ open class MediaFolder(
     fun enableSync(enable: Boolean) {
         getRealmInstance().use {
             findByIdQuery(it, id)?.let { mediaFolder ->
-                it.executeTransaction { realm ->
+                it.executeTransaction {
                     mediaFolder.isSynced = enable
                 }
             }
@@ -84,6 +84,12 @@ open class MediaFolder(
                 realm.where(MediaFolder::class.java).equalTo(MediaFolder::isSynced.name, true).findAll()?.let { results ->
                     ArrayList(realm.copyFromRealm(results, 0))
                 } ?: arrayListOf()
+            }
+        }
+
+        fun getAllSyncedFoldersCount(): Long {
+            return getRealmInstance().use { realm ->
+                realm.where(MediaFolder::class.java).equalTo(MediaFolder::isSynced.name, true).count()
             }
         }
     }

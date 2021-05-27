@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.menu.settings
 
 import android.Manifest
 import android.content.ContentResolver
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -77,6 +78,12 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
                 mediaFoldersAdapter.setMediaFolders(mediaFolders)
             }
         }
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        (requireActivity() as SyncSettingsActivity).onDialogDismissed()
+
     }
 
     class MediaViewModel : ViewModel() {
