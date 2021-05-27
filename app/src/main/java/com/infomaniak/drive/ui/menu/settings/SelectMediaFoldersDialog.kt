@@ -20,7 +20,6 @@ package com.infomaniak.drive.ui.menu.settings
 import android.Manifest
 import android.content.ContentResolver
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -71,10 +70,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
     fun loadFolders() {
         if (checkWriteStoragePermission()) {
             mediaViewModel.getAllMediaFolders(requireActivity().contentResolver).observe(viewLifecycleOwner) { mediaFolders ->
-                //TODO add medias to adapter
-                mediaFolders.forEach {
-                    Log.i("kiki", "folder_name: ${it.name}")
-                }
+                mediaFoldersAdapter.setMediaFolders(mediaFolders)
             }
         }
     }
@@ -90,7 +86,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
                     cache.delete()
                 }
             }
-            emit(localMediaFolders as ArrayList<MediaFolder>)
+            emit(ArrayList(localMediaFolders))
         }
     }
 }

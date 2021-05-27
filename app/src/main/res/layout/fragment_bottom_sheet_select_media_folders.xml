@@ -57,16 +57,23 @@
             android:layout_marginTop="@dimen/marginStandardMedium"
             android:text="@string/selectMediaFoldersDescription" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/mediaFolderList"
+        <com.google.android.material.card.MaterialCardView
+            style="@style/CardViewInfomaniak"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="@dimen/marginStandard"
-            android:orientation="vertical"
-            android:overScrollMode="never"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:itemCount="5"
-            tools:listitem="@layout/cardview_media_folder" />
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/marginStandard">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/mediaFolderList"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:overScrollMode="never"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="5"
+                tools:listitem="@layout/item_media_folder" />
+
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 
