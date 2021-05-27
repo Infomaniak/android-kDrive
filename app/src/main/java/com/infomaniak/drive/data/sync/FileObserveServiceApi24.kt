@@ -87,14 +87,6 @@ class FileObserveServiceApi24 : JobService() {
                 return
             }
 
-            if (syncSetting.syncPicture || syncSetting.syncScreenshot) {
-                builder.addTriggerContentUri(
-                    TriggerContentUri(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS)
-                ).addTriggerContentUri(
-                    TriggerContentUri(MediaStore.Images.Media.INTERNAL_CONTENT_URI, TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS)
-                )
-            }
-
             if (syncSetting.syncVideo) {
                 builder.addTriggerContentUri(
                     TriggerContentUri(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS)
@@ -102,6 +94,12 @@ class FileObserveServiceApi24 : JobService() {
                     TriggerContentUri(MediaStore.Video.Media.INTERNAL_CONTENT_URI, TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS)
                 )
             }
+
+            builder.addTriggerContentUri(
+                TriggerContentUri(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS)
+            ).addTriggerContentUri(
+                TriggerContentUri(MediaStore.Images.Media.INTERNAL_CONTENT_URI, TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS)
+            )
 
             jobScheduler.schedule(builder.build())
             Log.d("MediaContentJob", "JOB SCHEDULED!")

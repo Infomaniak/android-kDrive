@@ -26,6 +26,7 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.liveData
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.MediaFolder
@@ -34,6 +35,7 @@ import com.infomaniak.drive.utils.SyncUtils.checkWriteStoragePermission
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_media_folders.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
 
@@ -53,7 +55,9 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
         }
 
         mediaFoldersAdapter = MediaFoldersAdapter { mediaFolder, isChecked ->
-            // Media folder check change
+            lifecycleScope.launch(Dispatchers.IO) {
+                mediaFolder.enableSync(isChecked)
+            }
         }
         mediaFolderList.adapter = mediaFoldersAdapter
 

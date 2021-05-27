@@ -30,8 +30,6 @@ open class SyncSettings(
     var syncImmediately: Boolean = false,
     var syncInterval: Long = 0,
     var syncFolder: Int = -1,
-    var syncPicture: Boolean = false,
-    var syncScreenshot: Boolean = false,
     var syncVideo: Boolean = false
 ) : RealmObject() {
 

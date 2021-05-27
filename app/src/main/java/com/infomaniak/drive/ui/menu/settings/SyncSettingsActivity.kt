@@ -267,8 +267,6 @@ class SyncSettingsActivity : BaseActivity() {
                     driveId = selectDriveViewModel.selectedDrive.value!!.id,
                     lastSync = if (saveOldPictures) Date(0) else Date(),
                     syncFolder = syncSettingsViewModel.syncFolder.value!!,
-                    syncPicture = true, // Temp value before view change
-                    syncScreenshot = true, // Temp value before view change
                     syncVideo = syncVideoSwitch.isChecked
                 )
                 syncSettings.setIntervalType(syncSettingsViewModel.syncIntervalType.value!!)

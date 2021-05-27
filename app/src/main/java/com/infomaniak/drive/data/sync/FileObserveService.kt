@@ -48,19 +48,17 @@ class FileObserveService : Service() {
         tableObserver = TableObserver(null)
         val syncSetting = UploadFile.getAppSyncSettings()!!
 
-        if (syncSetting.syncPicture || syncSetting.syncScreenshot) {
-            val externalContentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-            val internalContentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-            contentResolver.registerContentObserver(externalContentUri, true, tableObserver)
-            contentResolver.registerContentObserver(internalContentUri, true, tableObserver)
-        }
-
         if (syncSetting.syncVideo) {
             val externalContentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
             val internalContentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
             contentResolver.registerContentObserver(externalContentUri, true, tableObserver)
             contentResolver.registerContentObserver(internalContentUri, true, tableObserver)
         }
+
+        val externalContentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        val internalContentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        contentResolver.registerContentObserver(externalContentUri, true, tableObserver)
+        contentResolver.registerContentObserver(internalContentUri, true, tableObserver)
     }
 
     override fun onDestroy() {

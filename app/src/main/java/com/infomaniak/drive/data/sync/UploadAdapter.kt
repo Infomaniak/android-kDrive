@@ -22,7 +22,6 @@ import android.app.PendingIntent
 import android.content.*
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.os.Parcelable
 import android.provider.MediaStore
 import android.provider.OpenableColumns
@@ -37,6 +36,7 @@ import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.api.UploadTask.FolderNotFoundException
 import com.infomaniak.drive.data.api.UploadTask.QuotaExceededException
 import com.infomaniak.drive.data.models.AppSettings
+import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.ui.LaunchActivity
@@ -388,38 +388,21 @@ class UploadAdapter @JvmOverloads constructor(
         val deferreds = arrayListOf<Deferred<Any?>>()
 
         syncSettings?.let { syncSettings ->
-            if (syncSettings.syncPicture || syncSettings.syncScreenshot) {
-                when {
-                    syncSettings.syncPicture && !syncSettings.syncScreenshot -> {
-                        customSelection = selection +
-                                " AND ${MediaStoreUtils.mediaPathColumn} like ?" +
-                                " AND ${MediaStoreUtils.mediaPathColumn} not like ?"
-                        customArgs = args + arrayOf("%${Environment.DIRECTORY_DCIM}%", "%${SyncUtils.DIRECTORY_SCREENSHOTS}%")
-                    }
-
-                    !syncSettings.syncPicture && syncSettings.syncScreenshot -> {
-                        customSelection = selection + " AND ${MediaStoreUtils.mediaPathColumn} like ?"
-                        customArgs = args + "%${SyncUtils.DIRECTORY_SCREENSHOTS}%"
-                    }
-
-                    else -> {
-                        customSelection = selection +
-                                " AND (${MediaStoreUtils.mediaPathColumn} like ?" +
-                                " OR ${MediaStoreUtils.mediaPathColumn} like ?)"
-                        customArgs = args + arrayOf("%${Environment.DIRECTORY_DCIM}%", "%${SyncUtils.DIRECTORY_SCREENSHOTS}%")
-                    }
-                }
-
+            MediaFolder.getAllSyncedFolders().forEach { mediaFolder ->
+                customSelection = selection + " AND ${MediaStore.Images.Media.BUCKET_ID} = ?"
+                customArgs = args + mediaFolder.id.toString()
                 deferreds.add(getLocalLastPhotosAsync(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, customSelection, customArgs))
                 deferreds.add(getLocalLastPhotosAsync(MediaStore.Images.Media.INTERNAL_CONTENT_URI, customSelection, customArgs))
-            }
 
-            if (syncSettings.syncVideo) {
-                customSelection = selection + " AND ${MediaStoreUtils.mediaPathColumn} like ?"
-                customArgs = args + "%${Environment.DIRECTORY_DCIM}%"
-
-                deferreds.add(getLocalLastPhotosAsync(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, customSelection, customArgs))
-                deferreds.add(getLocalLastPhotosAsync(MediaStore.Video.Media.INTERNAL_CONTENT_URI, customSelection, customArgs))
+                if (syncSettings.syncVideo) {
+                    customSelection = selection + " AND ${MediaStore.Video.Media.BUCKET_ID} = ?"
+                    deferreds.add(
+                        getLocalLastPhotosAsync(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, customSelection, customArgs)
+                    )
+                    deferreds.add(
+                        getLocalLastPhotosAsync(MediaStore.Video.Media.INTERNAL_CONTENT_URI, customSelection, customArgs)
+                    )
+                }
             }
             runBlocking { deferreds.joinAll() }
         }

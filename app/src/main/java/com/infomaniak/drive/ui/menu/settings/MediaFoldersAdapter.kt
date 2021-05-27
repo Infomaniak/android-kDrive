@@ -50,6 +50,7 @@ class MediaFoldersAdapter(
                 mediaFolderDivider.visibility = if (position == mediaFolderList.size - 1) GONE else VISIBLE
                 mediaFolderSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
                     onSwitchChanged(mediaFolder, isChecked)
+                    mediaFolderList[position].isSynced = true
                 }
             }
         }

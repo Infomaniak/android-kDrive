@@ -47,10 +47,10 @@ open class MediaFolder(
     }
 
     fun enableSync(enable: Boolean) {
-        createRealm().use {
+        getRealmInstance().use {
             findByIdQuery(it, id)?.let { mediaFolder ->
                 it.executeTransaction { realm ->
-                    isSynced = enable
+                    mediaFolder.isSynced = enable
                 }
             }
         }
@@ -58,12 +58,13 @@ open class MediaFolder(
 
     companion object {
 
-        private fun createRealm() = UploadFile.getRealmInstance()
+        private fun getRealmInstance() = UploadFile.getRealmInstance()
+
         private fun findByIdQuery(realm: Realm, id: Long) =
             realm.where(MediaFolder::class.java).equalTo(MediaFolder::id.name, id).findFirst()
 
         fun findById(id: Long): MediaFolder? {
-            return createRealm().use { realm ->
+            return getRealmInstance().use { realm ->
                 findByIdQuery(realm, id)?.let { mediaFolder ->
                     realm.copyFromRealm(mediaFolder, 0)
                 }
@@ -71,7 +72,7 @@ open class MediaFolder(
         }
 
         fun getAll(): ArrayList<MediaFolder> {
-            return createRealm().use { realm ->
+            return getRealmInstance().use { realm ->
                 realm.where(MediaFolder::class.java).findAll()?.let { results ->
                     ArrayList(realm.copyFromRealm(results, 0))
                 } ?: arrayListOf()
@@ -79,7 +80,7 @@ open class MediaFolder(
         }
 
         fun getAllSyncedFolders(): ArrayList<MediaFolder> {
-            return createRealm().use { realm ->
+            return getRealmInstance().use { realm ->
                 realm.where(MediaFolder::class.java).equalTo(MediaFolder::isSynced.name, true).findAll()?.let { results ->
                     ArrayList(realm.copyFromRealm(results, 0))
                 } ?: arrayListOf()
