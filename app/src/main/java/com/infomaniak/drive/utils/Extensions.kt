@@ -536,7 +536,7 @@ fun Fragment.checkWriteStoragePermission(): Boolean {
     val writePermission = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     val activity = requireActivity()
     return when {
-        Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> true
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.M -> true
         requireContext().hasPermissions(writePermission) -> true
         activity.requestPermissionsIsPossible(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)) -> {
             requestPermissions(writePermission, SyncUtils.REQUEST_WRITE_STORAGE_PERMISSION)
@@ -548,6 +548,30 @@ fun Fragment.checkWriteStoragePermission(): Boolean {
                 .setMessage(R.string.allWritePermissionNeeded)
                 .setPositiveButton(R.string.buttonAuthorize) { _: DialogInterface?, _: Int ->
                     activity.startAppSettingsConfig()
+                }
+                .show()
+            false
+        }
+    }
+}
+
+@SuppressLint("NewApi")
+fun Activity.checkWriteStoragePermission(): Boolean {
+    val writePermission = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    return when {
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.M -> true
+        hasPermissions(writePermission) -> true
+        requestPermissionsIsPossible(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)) -> {
+            requestPermissions(writePermission, SyncUtils.REQUEST_WRITE_STORAGE_PERMISSION)
+            false
+        }
+        else -> {
+            //TODO a better text message here: example, Additional permissions required to upload and download files.
+            MaterialAlertDialogBuilder(this, R.style.DialogStyle)
+                .setTitle(R.string.androidPermissionTitle)
+                .setMessage(R.string.allWritePermissionNeeded)
+                .setPositiveButton(R.string.buttonAuthorize) { _: DialogInterface?, _: Int ->
+                    startAppSettingsConfig()
                 }
                 .show()
             false

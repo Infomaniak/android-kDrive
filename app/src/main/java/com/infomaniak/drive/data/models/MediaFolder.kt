@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.data.models
 
+import io.realm.Realm
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
 
@@ -25,4 +26,53 @@ open class MediaFolder(
     var name: String = "",
     var isSynced: Boolean = false
 ) : RealmObject() {
+
+    fun storeOrUpdate() {
+        return UploadFile.getRealmInstance().use {
+            it.executeTransaction { realm ->
+                findByIdQuery(realm, id)?.let { queryMedia ->
+                    isSynced = queryMedia.isSynced
+                }
+                realm.insertOrUpdate(this)
+            }
+        }
+    }
+
+    fun delete() {
+        UploadFile.getRealmInstance().use {
+            it.executeTransaction { realm ->
+                realm.where(MediaFolder::class.java).equalTo(MediaFolder::id.name, id).findFirst()?.deleteFromRealm()
+            }
+        }
+    }
+
+    companion object {
+
+        private fun findByIdQuery(realm: Realm, id: Long) =
+            realm.where(MediaFolder::class.java).equalTo(MediaFolder::id.name, id).findFirst()
+
+        fun findById(id: Long): MediaFolder? {
+            return UploadFile.getRealmInstance().use { realm ->
+                findByIdQuery(realm, id)?.let { mediaFolder ->
+                    realm.copyFromRealm(mediaFolder, 0)
+                }
+            }
+        }
+
+        fun getAll(): ArrayList<MediaFolder> {
+            return UploadFile.getRealmInstance().use { realm ->
+                realm.where(MediaFolder::class.java).findAll()?.let { results ->
+                    ArrayList(realm.copyFromRealm(results, 0))
+                } ?: arrayListOf()
+            }
+        }
+
+        fun getAllSyncedFolders(): ArrayList<MediaFolder> {
+            return UploadFile.getRealmInstance().use { realm ->
+                realm.where(MediaFolder::class.java).equalTo(MediaFolder::isSynced.name, true).findAll()?.let { results ->
+                    ArrayList(realm.copyFromRealm(results, 0))
+                } ?: arrayListOf()
+            }
+        }
+    }
 }

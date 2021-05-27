@@ -17,16 +17,26 @@
  */
 package com.infomaniak.drive.ui.menu.settings
 
+import android.content.ContentResolver
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.liveData
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.MediaFolder
+import com.infomaniak.drive.utils.MediaFoldersProvider
+import com.infomaniak.drive.utils.checkWriteStoragePermission
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_media_folders.*
+import kotlinx.coroutines.Dispatchers
 
 class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
 
+    private lateinit var mediaViewModel: MediaViewModel
     private lateinit var mediaFoldersAdapter: MediaFoldersAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -34,6 +44,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        mediaViewModel = ViewModelProvider(this)[MediaViewModel::class.java]
         super.onViewCreated(view, savedInstanceState)
 
         toolbar.setNavigationOnClickListener {
@@ -44,5 +55,32 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
             // Media folder check change
         }
         mediaFolderList.adapter = mediaFoldersAdapter
+        loadFolders()
+    }
+
+    fun loadFolders() {
+        if (checkWriteStoragePermission()) {
+            mediaViewModel.getAllMediaFolders(requireActivity().contentResolver).observe(viewLifecycleOwner) { mediaFolders ->
+                //TODO add medias to adapter
+                mediaFolders.forEach {
+                    Log.i("kiki", "folder_name: ${it.name}")
+                }
+            }
+        }
+    }
+
+    class MediaViewModel : ViewModel() {
+        fun getAllMediaFolders(contentResolver: ContentResolver) = liveData(Dispatchers.IO) {
+            val localMediaFolders = MediaFoldersProvider.getAllMediaFolders(contentResolver)
+            val cacheMediaFolders = MediaFolder.getAll()
+
+            cacheMediaFolders.forEach { cache ->
+                val exist = localMediaFolders.any { cache.id == it.id }
+                if (!exist) {
+                    cache.delete()
+                }
+            }
+            emit(localMediaFolders as ArrayList<MediaFolder>)
+        }
     }
 }

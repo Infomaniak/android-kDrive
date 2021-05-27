@@ -213,9 +213,9 @@ object SyncUtils {
      * Check if the sync has all permissions to work, we can receive the permission result in [SyncUtils.REQUEST_READ_STORAGE_PERMISSION]
      * @return [Boolean] true if the sync has all permissions or false
      */
-    fun Activity.checkSyncPermissions(requestCode: Int = REQUEST_READ_STORAGE_PERMISSION): Boolean {
+    fun Activity.checkSyncPermissions(): Boolean {
         batteryLifePermission()
-        return checkReadStoragePermission(requestCode)
+        return checkWriteStoragePermission()
     }
 
     fun Activity.checkSyncPermissionsResult(
