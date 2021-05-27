@@ -104,7 +104,7 @@ class HomeFragment : Fragment() {
         }
 
         driveInfos.setOnClickListener {
-            findNavController().navigate(R.id.switchDriveDialog)
+            safeNavigate(R.id.switchDriveDialog)
         }
 
         searchView.visibility = GONE
@@ -116,11 +116,7 @@ class HomeFragment : Fragment() {
         }
 
         if (arguments.forceDriveSelection && savedInstanceState == null) {
-            driveInfos.isPressed = true
             driveInfos.performClick()
-            Utils.createRefreshTimer(300) {
-                driveInfos.isPressed = false
-            }
         }
     }
 
