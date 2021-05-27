@@ -19,6 +19,7 @@ package com.infomaniak.drive.utils
 
 import android.content.ContentResolver
 import android.provider.MediaStore
+import android.util.Log
 import androidx.collection.ArrayMap
 import androidx.collection.arrayMapOf
 import androidx.fragment.app.Fragment
@@ -35,7 +36,7 @@ object MediaFoldersProvider {
         MediaStore.Images.Media.BUCKET_ID
     )
 
-    val videosUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+    val videosUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
     private val videosSortOrder = MediaStore.Video.Media.BUCKET_DISPLAY_NAME + " ASC"
     private val videosProjection = arrayOf(
         MediaStore.Video.Media.BUCKET_DISPLAY_NAME,
