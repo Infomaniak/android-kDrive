@@ -43,6 +43,8 @@ import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.menu.settings.SyncSettingsActivity
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.MediaFoldersProvider.IMAGES_BUCKET_ID
+import com.infomaniak.drive.utils.MediaFoldersProvider.VIDEO_BUCKET_ID
 import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.UPLOAD_STATUS_ID
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
@@ -389,13 +391,13 @@ class UploadAdapter @JvmOverloads constructor(
 
         syncSettings?.let { syncSettings ->
             MediaFolder.getAllSyncedFolders().forEach { mediaFolder ->
-                customSelection = selection + " AND ${MediaStore.Images.Media.BUCKET_ID} = ?"
+                customSelection = "$selection AND $IMAGES_BUCKET_ID = ?"
                 customArgs = args + mediaFolder.id.toString()
                 deferreds.add(getLocalLastPhotosAsync(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, customSelection, customArgs))
                 deferreds.add(getLocalLastPhotosAsync(MediaStore.Images.Media.INTERNAL_CONTENT_URI, customSelection, customArgs))
 
                 if (syncSettings.syncVideo) {
-                    customSelection = selection + " AND ${MediaStore.Video.Media.BUCKET_ID} = ?"
+                    customSelection = "$selection AND $VIDEO_BUCKET_ID = ?"
                     deferreds.add(
                         getLocalLastPhotosAsync(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, customSelection, customArgs)
                     )
