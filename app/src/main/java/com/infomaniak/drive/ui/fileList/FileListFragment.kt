@@ -580,9 +580,9 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun goToUploadInProgress(folderId: Int) {
         safeNavigate(
-            FileListFragmentDirections.actionFileListFragmentToUploadInProgress(
-                folderId,
-                getString(R.string.uploadInProgressTitle)
+            R.id.uploadInProgressFragment, bundleOf(
+                "folderID" to folderId,
+                "folderName" to getString(R.string.uploadInProgressTitle)
             )
         )
     }
