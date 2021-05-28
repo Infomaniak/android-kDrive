@@ -47,8 +47,8 @@
     <View
         android:id="@+id/mediaFolderDivider"
         android:layout_width="match_parent"
-        app:layout_constraintBottom_toBottomOf="parent"
         android:layout_height="1dp"
-        android:background="@color/divider" />
+        android:background="@color/divider"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

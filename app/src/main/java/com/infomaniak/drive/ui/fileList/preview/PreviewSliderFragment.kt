@@ -59,12 +59,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListener {
-    private lateinit var previewSliderAdapter: PreviewSliderAdapter
-    private lateinit var mainViewModel: MainViewModel
-    private lateinit var fileListViewModel: FileListViewModel
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
-    private val previewSliderViewModel: PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
     private lateinit var currentPreviewFile: File
+    private lateinit var drivePermissions: DrivePermissions
+    private lateinit var fileListViewModel: FileListViewModel
+    private lateinit var mainViewModel: MainViewModel
+    private lateinit var previewSliderAdapter: PreviewSliderAdapter
+    private val previewSliderViewModel: PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
     private var hideActions: Boolean = false
 
     private lateinit var userDrive: UserDrive
@@ -95,6 +96,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         getBackNavigationResult<Boolean>(DownloadProgressDialog.OPEN_WITH) {
             requireContext().openWith(currentPreviewFile, userDrive)
         }
+
+        drivePermissions = DrivePermissions()
+        drivePermissions.registerPermissions(this) { autorized -> if (autorized) downloadFileClicked() }
 
         previewSliderAdapter = PreviewSliderAdapter(childFragmentManager, lifecycle)
         viewPager.adapter = previewSliderAdapter
@@ -149,11 +153,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
 
         configureBottomSheetFileInfo()
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (Utils.checkWriteStoragePermissionResult(requestCode, grantResults)) downloadFileClicked()
     }
 
     private fun configureBottomSheetFileInfo() {
@@ -311,7 +310,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun downloadFileClicked() {
-        bottomSheetFileInfos.downloadFile(this) {
+        bottomSheetFileInfos.downloadFile(drivePermissions) {
             toggleBottomSheet(true)
         }
     }

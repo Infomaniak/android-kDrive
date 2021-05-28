@@ -55,9 +55,9 @@ import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.data.sync.UploadProgressReceiver
 import com.infomaniak.drive.launchInAppReview
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.SyncUtils.checkSyncPermissionsResult
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
+import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils.getRootName
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
@@ -148,7 +148,9 @@ class MainActivity : BaseActivity() {
             mainFab.isEnabled = file?.rights?.newFile == true
         }
 
-        launchAllUpload()
+        val drivePermissions = DrivePermissions()
+        drivePermissions.registerPermissions(this) { autorized -> if (autorized) syncImmediately() }
+        launchAllUpload(drivePermissions)
 
         if (!BuildConfig.BETA)
             if (AppSettings.appLaunches == 20 || (AppSettings.appLaunches != 0 && AppSettings.appLaunches % 100 == 0)) launchInAppReview()
@@ -205,13 +207,6 @@ class MainActivity : BaseActivity() {
     override fun onDestroy() {
         super.onDestroy()
         LocalBroadcastManager.getInstance(this).unregisterReceiver(downloadReceiver)
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (checkSyncPermissionsResult(requestCode, grantResults)) {
-            launchAllUpload()
-        }
     }
 
     @SuppressLint("RestrictedApi")

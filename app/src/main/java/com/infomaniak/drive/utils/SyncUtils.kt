@@ -17,39 +17,28 @@
  */
 package com.infomaniak.drive.utils
 
-import android.Manifest
 import android.accounts.Account
 import android.accounts.AccountManager
-import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.Service
 import android.content.ContentResolver
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.provider.OpenableColumns
-import android.provider.Settings
 import android.util.Log
 import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import androidx.fragment.app.FragmentActivity
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.sync.FileObserveService
 import com.infomaniak.drive.data.sync.FileObserveServiceApi24
-import com.infomaniak.lib.core.utils.hasPermissions
-import com.infomaniak.lib.core.utils.requestPermissionsIsPossible
-import com.infomaniak.lib.core.utils.startAppSettingsConfig
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -58,8 +47,6 @@ import java.util.*
 
 object SyncUtils {
 
-    private const val REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 1
-    const val REQUEST_WRITE_STORAGE_PERMISSION = 2
 
     val DATE_TAKEN: String =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.MediaColumns.DATE_TAKEN
@@ -103,8 +90,8 @@ object SyncUtils {
         ContentResolver.cancelSync(createSyncAccount(), getString(R.string.SYNC_AUTHORITY))
     }
 
-    fun Activity.launchAllUpload() {
-        if (UploadFile.getNotSyncFiles().isNotEmpty() && checkSyncPermissions()) {
+    fun FragmentActivity.launchAllUpload(drivePermissions: DrivePermissions) {
+        if (UploadFile.getNotSyncFiles().isNotEmpty() && drivePermissions.checkSyncPermissions()) {
             syncImmediately()
         }
     }
@@ -194,113 +181,4 @@ object SyncUtils {
         }
     }
 
-    /**
-     * Check if the sync has all permissions to work, we can receive the permission result in [SyncUtils.REQUEST_WRITE_STORAGE_PERMISSION]
-     * @return [Boolean] true if the sync has all permissions or false
-     */
-    fun Fragment.checkSyncPermissions(requestCode: Int = REQUEST_WRITE_STORAGE_PERMISSION): Boolean {
-        requireContext().batteryLifePermission()
-        return checkWriteStoragePermission(requestCode)
-    }
-
-    /**
-     * Check if the sync has all permissions to work, we can receive the permission result in [SyncUtils.REQUEST_WRITE_STORAGE_PERMISSION]
-     * @return [Boolean] true if the sync has all permissions or false
-     */
-    fun Activity.checkSyncPermissions(): Boolean {
-        batteryLifePermission()
-        return checkWriteStoragePermission()
-    }
-
-    fun Activity.checkSyncPermissionsResult(
-        requestCode: Int,
-        grantResults: IntArray,
-        customRequestCode: Int = REQUEST_WRITE_STORAGE_PERMISSION
-    ): Boolean {
-        if (requestCode == customRequestCode) {
-            return if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                true
-            } else {
-                if (!requestPermissionsIsPossible(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE))) {
-                    MaterialAlertDialogBuilder(this, R.style.DialogStyle)
-                        .setTitle(R.string.androidPermissionTitle)
-                        .setMessage(R.string.allPermissionNeeded)
-                        .setPositiveButton(R.string.buttonAuthorize) { _: DialogInterface?, _: Int ->
-                            startAppSettingsConfig()
-                        }
-                        .show()
-                }
-                false
-            }
-        }
-        return false
-    }
-
-    /**
-     * Checks if the user has already confirmed write permission
-     */
-    @SuppressLint("NewApi")
-    fun Fragment.checkWriteStoragePermission(requestCode: Int = REQUEST_WRITE_STORAGE_PERMISSION): Boolean {
-        val writePermission = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        val activity = requireActivity()
-        return when {
-            Build.VERSION.SDK_INT < Build.VERSION_CODES.M -> true
-            requireContext().hasPermissions(writePermission) -> true
-            activity.requestPermissionsIsPossible(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)) -> {
-                requestPermissions(writePermission, requestCode)
-                false
-            }
-            else -> {
-                MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
-                    .setTitle(R.string.androidPermissionTitle)
-                    .setMessage(R.string.allPermissionNeeded)
-                    .setPositiveButton(R.string.buttonAuthorize) { _: DialogInterface?, _: Int ->
-                        activity.startAppSettingsConfig()
-                    }
-                    .show()
-                false
-            }
-        }
-    }
-
-    /**
-     * Checks if the user has already confirmed write permission
-     */
-    @SuppressLint("NewApi")
-    fun Activity.checkWriteStoragePermission(requestCode: Int = REQUEST_WRITE_STORAGE_PERMISSION): Boolean {
-        val writePermission = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        return when {
-            Build.VERSION.SDK_INT < Build.VERSION_CODES.M -> true
-            hasPermissions(writePermission) -> true
-            requestPermissionsIsPossible(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)) -> {
-                requestPermissions(writePermission, requestCode)
-                false
-            }
-            else -> {
-                //TODO a better text message here: example, Additional permissions required to upload and download files.
-                MaterialAlertDialogBuilder(this, R.style.DialogStyle)
-                    .setTitle(R.string.androidPermissionTitle)
-                    .setMessage(R.string.allPermissionNeeded)
-                    .setPositiveButton(R.string.buttonAuthorize) { _: DialogInterface?, _: Int ->
-                        startAppSettingsConfig()
-                    }
-                    .show()
-                false
-            }
-        }
-    }
-
-    @SuppressLint("BatteryLife")
-    private fun Context.batteryLifePermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val intent = Intent(
-                Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                Uri.parse("package:$packageName")
-            )
-            when (this) {
-                is Fragment -> startActivityForResult(intent, REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                is Activity -> startActivityForResult(intent, REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-            }
-        }
-    }
 }

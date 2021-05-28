@@ -17,22 +17,20 @@
  */
 package com.infomaniak.drive.ui.menu.settings
 
-import android.Manifest
 import android.content.ContentResolver
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.liveData
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.MediaFolder
+import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.MediaFoldersProvider
-import com.infomaniak.drive.utils.SyncUtils.checkWriteStoragePermission
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_media_folders.*
 import kotlinx.coroutines.Dispatchers
@@ -62,21 +60,14 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
         }
         mediaFolderList.adapter = mediaFoldersAdapter
 
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { writePermissionAutorized ->
-            if (writePermissionAutorized) {
-                loadFolders()
-            } else {
-                checkWriteStoragePermission()
-                dismiss()
-            }
-        }.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        val drivePermissions = DrivePermissions()
+        drivePermissions.registerPermissions(this) { autorized -> if (autorized) loadFolders() else dismiss() }
+        if (drivePermissions.checkWriteStoragePermission()) loadFolders()
     }
 
     fun loadFolders() {
-        if (checkWriteStoragePermission()) {
-            mediaViewModel.getAllMediaFolders(requireActivity().contentResolver).observe(viewLifecycleOwner) { mediaFolders ->
-                mediaFoldersAdapter.setMediaFolders(mediaFolders)
-            }
+        mediaViewModel.getAllMediaFolders(requireActivity().contentResolver).observe(viewLifecycleOwner) { mediaFolders ->
+            mediaFoldersAdapter.setMediaFolders(mediaFolders)
         }
     }
 

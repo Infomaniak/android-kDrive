@@ -42,7 +42,6 @@ import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.SyncUtils.checkWriteStoragePermission
 import kotlinx.android.synthetic.main.fragment_file_details.view.*
 import kotlinx.android.synthetic.main.fragment_preview_slider.*
 import kotlinx.android.synthetic.main.fragment_preview_slider.view.*
@@ -228,8 +227,8 @@ class FileInfoActionsView @JvmOverloads constructor(
         } else Utils.downloadAsOfflineFile(context, currentFile)
     }
 
-    fun downloadFile(owner: Fragment, onSuccess: () -> Unit) {
-        if (owner.checkWriteStoragePermission()) {
+    fun downloadFile(drivePermissions: DrivePermissions, onSuccess: () -> Unit) {
+        if (drivePermissions.checkWriteStoragePermission()) {
             val downloadURL = Uri.parse(ApiRoutes.downloadFile(currentFile))
             val fileName = if (currentFile.isFolder()) "${currentFile.name}.zip" else currentFile.name
             context.startDownloadFile(downloadURL, fileName)

@@ -56,8 +56,9 @@ import kotlinx.coroutines.withContext
 class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoActionsView.OnItemClickListener {
 
     private val navigationArgs: FileInfoActionsBottomSheetDialogArgs by navArgs()
-    private lateinit var mainViewModel: MainViewModel
     private lateinit var currentFile: File
+    private lateinit var drivePermissions: DrivePermissions
+    private lateinit var mainViewModel: MainViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -68,6 +69,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         super.onActivityCreated(savedInstanceState)
         currentFile = FileController.getFileById(navigationArgs.fileId, navigationArgs.userDrive)!!
         mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
+
+        drivePermissions = DrivePermissions()
+        drivePermissions.registerPermissions(this) { autorized -> if (autorized) downloadFileClicked() }
 
         fileInfoActionsView.init(this, this, navigationArgs.userDrive.sharedWithMe)
         fileInfoActionsView.updateCurrentFile(currentFile)
@@ -81,11 +85,6 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         onSelectFolderResult(requestCode, resultCode, data)
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (Utils.checkWriteStoragePermissionResult(requestCode, grantResults)) downloadFileClicked()
     }
 
     override fun editDocumentClicked(ownerFragment: Fragment, currentFile: File) {
@@ -145,7 +144,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun downloadFileClicked() {
-        fileInfoActionsView.downloadFile(this) {
+        fileInfoActionsView.downloadFile(drivePermissions) {
             findNavController().popBackStack()
         }
     }

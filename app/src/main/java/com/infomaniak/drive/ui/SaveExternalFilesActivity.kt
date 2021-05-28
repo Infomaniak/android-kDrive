@@ -40,12 +40,8 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.menu.settings.SelectDriveDialog
 import com.infomaniak.drive.ui.menu.settings.SelectDriveViewModel
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.SyncUtils
-import com.infomaniak.drive.utils.SyncUtils.checkSyncPermissions
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.drive.utils.showOrHideEmptyError
-import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress
@@ -135,10 +131,13 @@ class SaveExternalFilesActivity : BaseActivity() {
             fileNameEdit.showOrHideEmptyError()
         }
 
+        val drivePermissions = DrivePermissions()
+        drivePermissions.registerPermissions(this)
+
         saveButton.initProgress(this)
         saveButton.setOnClickListener {
             saveButton.showProgress()
-            if (checkSyncPermissions()) {
+            if (drivePermissions.checkSyncPermissions()) {
                 val userId = selectDriveViewModel.selectedUserId.value!!
                 val driveId = selectDriveViewModel.selectedDrive.value?.id!!
                 val folderId = saveExternalFilesViewModel.folderId.value!!
@@ -157,7 +156,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 }
             }
         }
-        checkSyncPermissions()
+        drivePermissions.checkSyncPermissions()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

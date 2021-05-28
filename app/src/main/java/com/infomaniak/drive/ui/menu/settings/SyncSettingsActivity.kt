@@ -40,8 +40,8 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
-import com.infomaniak.drive.utils.SyncUtils.checkSyncPermissions
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.initProgress
@@ -68,6 +68,9 @@ class SyncSettingsActivity : BaseActivity() {
         toolbar.setNavigationOnClickListener {
             onBackPressed()
         }
+
+        val permission = DrivePermissions()
+        permission.registerPermissions(this)
 
         activateSyncSwitch.isChecked = AccountUtils.isEnableAppSync()
         showSettings(activateSyncSwitch.isChecked)
@@ -158,7 +161,7 @@ class SyncSettingsActivity : BaseActivity() {
         activateSyncSwitch.setOnCheckedChangeListener { _, isChecked ->
             showSettings(isChecked)
             if (AccountUtils.isEnableAppSync() == isChecked) editNumber-- else editNumber++
-            if (isChecked) checkSyncPermissions()
+            if (isChecked) permission.checkSyncPermissions()
             changeSaveButtonStatus()
         }
 
@@ -218,7 +221,7 @@ class SyncSettingsActivity : BaseActivity() {
 
         saveButton.initProgress(this)
         saveButton.setOnClickListener {
-            if (checkSyncPermissions()) saveSettings()
+            if (permission.checkSyncPermissions()) saveSettings()
         }
     }
 
