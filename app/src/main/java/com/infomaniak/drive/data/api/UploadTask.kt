@@ -41,7 +41,6 @@ import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.ApiController
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withPermit
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
@@ -106,29 +105,28 @@ class UploadTask(
             previousChunkBytesWritten.set(uploadedChunks?.uploadedSize ?: 0)
 
             for (chunkNumber in 1..totalChunks) {
-                requestSemaphore.withPermit {
-                    if (uploadedChunks?.validChunks?.contains(chunkNumber) == true && !restartUpload) {
-                        Log.d("kDrive", "chunk:$chunkNumber ignored")
-                        input.read(ByteArray(chunkSize))
-                        return@withPermit
-                    }
-
-                    Log.i("kDrive", "Upload > ${uploadFile.fileName} chunk:$chunkNumber has permission")
-                    var data = ByteArray(chunkSize)
-                    val count = input.read(data)
-                    if (count == -1) return@withPermit
-
-                    data = if (count == chunkSize) data else data.copyOf(count)
-
-                    val url = this@UploadTask.uploadUrl(
-                        chunkNumber = chunkNumber,
-                        currentChunkSize = count,
-                        totalChunks = totalChunks
-                    )
-                    Log.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url")
-
-                    waitingCoroutines.add(coroutineScope.uploadChunkRequest(data, url))
+                requestSemaphore.acquire()
+                if (uploadedChunks?.validChunks?.contains(chunkNumber) == true && !restartUpload) {
+                    Log.d("kDrive", "chunk:$chunkNumber ignored")
+                    input.read(ByteArray(chunkSize))
+                    continue
                 }
+
+                Log.i("kDrive", "Upload > ${uploadFile.fileName} chunk:$chunkNumber has permission")
+                var data = ByteArray(chunkSize)
+                val count = input.read(data)
+                if (count == -1) continue
+
+                data = if (count == chunkSize) data else data.copyOf(count)
+
+                val url = this@UploadTask.uploadUrl(
+                    chunkNumber = chunkNumber,
+                    currentChunkSize = count,
+                    totalChunks = totalChunks
+                )
+                Log.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url")
+
+                waitingCoroutines.add(coroutineScope.uploadChunkRequest(requestSemaphore, data, url))
             }
             waitingCoroutines.joinAll()
         }
@@ -149,7 +147,11 @@ class UploadTask(
         sendSyncProgress(UploadAdapter.ProgressStatus.FINISHED, 100)
     }
 
-    private fun CoroutineScope.uploadChunkRequest(data: ByteArray, url: String) = launch(Dispatchers.IO) {
+    private fun CoroutineScope.uploadChunkRequest(
+        requestSemaphore: Semaphore,
+        data: ByteArray,
+        url: String
+    ) = launch(Dispatchers.IO) {
         val uploadRequestBody = ProgressRequestBody(data.toRequestBody()) { currentBytes, _, _ ->
             this.ensureActive()
             updateProgress(currentBytes)
@@ -161,6 +163,7 @@ class UploadTask(
 
         val response = KDriveHttpClient.getHttpClient(uploadFile.userId, 120).newCall(request).execute()
         this.manageApiResponse(response)
+        requestSemaphore.release()
     }
 
     private fun initChunkSize(fileSize: Long) {
@@ -186,7 +189,7 @@ class UploadTask(
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
             val apiResponse = try {
                 ApiController.gson.fromJson(bodyResponse, ApiResponse::class.java)
-            } catch (e:Exception){
+            } catch (e: Exception) {
                 null
             }
             when {
