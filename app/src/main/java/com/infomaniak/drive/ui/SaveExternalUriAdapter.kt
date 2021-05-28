@@ -38,7 +38,7 @@ class SaveExternalUriAdapter(val uris: ArrayList<Uri>) : RecyclerView.Adapter<Vi
             val uri = uris[position]
             context?.contentResolver?.query(uri, null, null, null, null)?.use { cursor ->
                 cursor.moveToFirst()
-                name.text = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+                name.text = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)) ?: ""
             }
         }
     }
