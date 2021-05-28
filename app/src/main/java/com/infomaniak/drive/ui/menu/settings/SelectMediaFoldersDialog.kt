@@ -66,8 +66,15 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
     }
 
     fun loadFolders() {
-        mediaViewModel.getAllMediaFolders(requireActivity().contentResolver).observe(viewLifecycleOwner) { mediaFolders ->
-            mediaFoldersAdapter.setMediaFolders(mediaFolders)
+        mediaFoldersAdapter.showLoading()
+        val cachedMediaFolders = MediaFolder.getAll()
+        if (cachedMediaFolders.isEmpty()) {
+            mediaViewModel.getAllMediaFolders(requireActivity().contentResolver).observe(viewLifecycleOwner) { mediaFolders ->
+                mediaFoldersAdapter.addAll(mediaFolders)
+            }
+        } else {
+            mediaFoldersAdapter.addAll(cachedMediaFolders)
+            // Fetch from provider then filter not-intersected items with cache
         }
     }
 
