@@ -72,7 +72,7 @@ object SyncUtils {
         else "datetaken"
 
     fun getFileName(cursor: Cursor): String {
-        return cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+        return cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)) ?: ""
     }
 
     fun getFileDates(cursor: Cursor): Pair<Date?, Date> {
