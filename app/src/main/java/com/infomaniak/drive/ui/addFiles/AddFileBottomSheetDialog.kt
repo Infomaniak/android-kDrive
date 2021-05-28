@@ -267,9 +267,8 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                     requireActivity().showSnackbar(R.string.uploadOutOfMemoryError)
                 } else {
                     lifecycleScope.launch(Dispatchers.IO) {
-                        val cacheUri = Utils.copyDataToUploadCache(requireContext(), uri, fileModifiedAt)
                         UploadFile(
-                            uri = cacheUri.toString(),
+                            uri = uri.toString(),
                             driveId = currentDriveId,
                             fileCreatedAt = fileCreatedAt,
                             fileModifiedAt = fileModifiedAt,
