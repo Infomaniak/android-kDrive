@@ -34,7 +34,6 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.provider.OpenableColumns
@@ -61,10 +60,6 @@ object SyncUtils {
 
     private const val REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 1
     const val REQUEST_WRITE_STORAGE_PERMISSION = 2
-
-    val DIRECTORY_SCREENSHOTS: String =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) Environment.DIRECTORY_SCREENSHOTS
-        else "Screenshots"
 
     val DATE_TAKEN: String =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.MediaColumns.DATE_TAKEN
