@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import android.os.Bundle
+import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.navigation.fragment.navArgs
@@ -29,8 +30,8 @@ class DropBoxResultBottomSheetDialog : InformationBottomSheetDialog() {
 
     val arguments: DropBoxResultBottomSheetDialogArgs by navArgs()
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         title.text = getString(R.string.dropBoxResultTitle, arguments.name)
         description.setText(R.string.dropBoxResultDescription)
 

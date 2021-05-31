@@ -74,8 +74,8 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View = inflater.inflate(R.layout.fragment_bottom_sheet_add_file, container, false)
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
         val file = mainViewModel.currentFolderOpenAddFileBottom.value ?: mainViewModel.currentFolder.value
         currentFolderFile = file!!

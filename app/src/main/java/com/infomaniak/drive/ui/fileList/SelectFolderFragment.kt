@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.fileList
 
 import android.os.Bundle
+import android.view.View
 import androidx.activity.addCallback
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -40,10 +41,10 @@ class SelectFolderFragment : FileListFragment() {
     override var hideBackButtonWhenRoot: Boolean = false
     override var showPendingFiles: Boolean = false
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         saveExternalViewModel = ViewModelProvider(requireActivity())[SaveExternalViewModel::class.java]
         userDrive = saveExternalViewModel.userDrive
-        super.onActivityCreated(savedInstanceState)
+        super.onViewCreated(view, savedInstanceState)
 
         folderName = if (folderID == ROOT_ID) saveExternalViewModel.currentDrive?.name ?: "/" else navigationArgs.folderName
 

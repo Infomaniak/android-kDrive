@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.home
 
 import android.os.Bundle
+import android.view.View
 import android.view.View.VISIBLE
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -38,9 +39,9 @@ class ActivityFilesFragment : FileListFragment() {
     override var enabledMultiSelectMode: Boolean = false
     override var hideBackButtonWhenRoot: Boolean = false
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         downloadFiles = DownloadFiles(navigationArgs.fileIdList)
-        super.onActivityCreated(savedInstanceState)
+        super.onViewCreated(view, savedInstanceState)
         swipeRefreshLayout.isEnabled = false
         swipeRefreshLayout.isRefreshing = false
         initActivity()

@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import android.os.Bundle
+import android.view.View
 import android.view.View.GONE
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
@@ -44,8 +45,8 @@ class AccessDeniedBottomSheetDialog : InformationBottomSheetDialog() {
     private val informationBottomSheetViewModel: InformationBottomSheetViewModel by navGraphViewModels(R.id.accessDeniedBottomSheetFragment)
     private val navigationArgs: AccessDeniedBottomSheetDialogArgs by navArgs()
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         illu.setImageResource(R.drawable.ic_stop)
         title.setText(R.string.accessDeniedTitle)

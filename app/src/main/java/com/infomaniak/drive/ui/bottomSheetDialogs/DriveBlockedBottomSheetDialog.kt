@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import android.os.Bundle
+import android.view.View
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -29,8 +30,8 @@ class DriveBlockedBottomSheetDialog : InformationBottomSheetDialog() {
 
     val navigationArgs: DriveMaintenanceBottomSheetDialogArgs by navArgs()
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         illu.apply {
             layoutParams.height = 70.toPx()

@@ -77,8 +77,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         if (fileListViewModel.currentPreview == null) {
             currentPreviewFile = arguments?.getInt(PREVIEW_FILE_TAG)?.let { fileId ->

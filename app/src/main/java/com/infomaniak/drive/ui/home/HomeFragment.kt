@@ -71,8 +71,8 @@ class HomeFragment : Fragment() {
         const val MAX_PICTURES_COLUMN = 2
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
 
         lastFilesRecyclerView.apply {

@@ -62,9 +62,9 @@ open class ManageDropboxFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_manage_dropbox, container, false)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
-        super.onActivityCreated(savedInstanceState)
+        super.onViewCreated(view, savedInstanceState)
 
         toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()

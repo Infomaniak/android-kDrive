@@ -52,8 +52,8 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View = inflater.inflate(R.layout.fragment_bottom_sheet_action_multi_select, container, false)
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
         addFavorites.setOnClickListener { onActionSelected(SelectDialogAction.ADD_FAVORITES) }
 

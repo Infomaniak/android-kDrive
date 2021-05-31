@@ -57,9 +57,9 @@ open class CreateFolderFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         inflater.inflate(R.layout.fragment_create_folder, container, false)
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
-        super.onActivityCreated(savedInstanceState)
+        super.onViewCreated(view, savedInstanceState)
 
         createFolderButton.initProgress(viewLifecycleOwner)
         setupAdapter { selectedPermission ->

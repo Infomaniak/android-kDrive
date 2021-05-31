@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.os.Bundle
+import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
@@ -34,8 +35,8 @@ open class PreviewFragment() : Fragment() {
         this.file = file
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         file?.let { previewViewModel.currentFile = it }
         offlineFile = previewViewModel.currentFile.localPath(requireContext(), File.LocalType.OFFLINE)
     }

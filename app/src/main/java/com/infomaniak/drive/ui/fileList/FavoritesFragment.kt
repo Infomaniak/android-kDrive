@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.fileList
 
 import android.os.Bundle
+import android.view.View
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.Utils
@@ -30,12 +31,12 @@ class FavoritesFragment : FileListFragment() {
 
     override var enabledMultiSelectMode: Boolean = false
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         if (folderID == ROOT_ID) {
             downloadFiles = DownloadFiles()
             folderID = OTHER_ROOT_ID
         }
-        super.onActivityCreated(savedInstanceState)
+        super.onViewCreated(view, savedInstanceState)
 
         noFilesLayout.setup(
             icon = R.drawable.ic_star_filled,

@@ -50,8 +50,8 @@ class FileShareLinkSettingsFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_file_share_link_settings, container, false)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         shareLink = navigationArgs.shareLink
 

@@ -39,8 +39,8 @@ import okhttp3.internal.toLongOrDefault
 class CreateDropBoxFolderFragment : CreateFolderFragment() {
     var showAdvancedSettings = false
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         advancedSettings.visibility = VISIBLE
         createFolderButton.setText(R.string.createDropBoxTitle)

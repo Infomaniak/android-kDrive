@@ -65,8 +65,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         savedInstanceState: Bundle?
     ): View = inflater.inflate(R.layout.fragment_bottom_sheet_file_info_actions, container, false)
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         currentFile = FileController.getFileById(navigationArgs.fileId, navigationArgs.userDrive)!!
         mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
 

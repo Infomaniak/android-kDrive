@@ -67,8 +67,8 @@ class DownloadProgressDialog : DialogFragment() {
 
     override fun getView() = dialogView
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         isCancelable = false
 
         FileController.getFileById(navigationArgs.fileID, navigationArgs.userDrive)?.let { file ->
