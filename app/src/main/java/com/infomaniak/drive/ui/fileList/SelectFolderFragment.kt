@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.addCallback
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
@@ -96,13 +97,15 @@ class SelectFolderFragment : FileListFragment() {
                 }
             }
         }
-        val selectFolderActivity = requireActivity() as SelectFolderActivity
-        selectFolderActivity.showSaveButton()
+        lifecycleScope.launchWhenResumed {
+            val selectFolderActivity = requireActivity() as SelectFolderActivity
+            selectFolderActivity.showSaveButton()
 
-        val currentFolder = FileController.getFileById(folderID, userDrive)
-        val enable = folderID != saveExternalViewModel.disableSelectedFolder &&
-                (currentFolder?.rights?.moveInto != false || currentFolder.rights?.newFile != false)
-        selectFolderActivity.enableSaveButton(enable)
+            val currentFolder = FileController.getFileById(folderID, userDrive)
+            val enable = folderID != saveExternalViewModel.disableSelectedFolder &&
+                    (currentFolder?.rights?.moveInto != false || currentFolder.rights?.newFile != false)
+            selectFolderActivity.enableSaveButton(enable)
+        }
     }
 
     private fun onBackPressed() {
