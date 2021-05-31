@@ -69,7 +69,6 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
 
     fun loadFolders() {
         mediaFoldersAdapter.apply {
-            showLoading()
             mediaViewModel.elementsToRemove.observe(viewLifecycleOwner) { elementsToRemove ->
                 mediaFolderList.post {
                     removeItemsById(elementsToRemove)

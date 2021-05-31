@@ -21,20 +21,22 @@ import android.view.LayoutInflater
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
-import androidx.constraintlayout.widget.ConstraintSet
+import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.MediaFolder
-import com.infomaniak.lib.core.utils.toPx
-import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_media_folder.view.*
 
 class MediaFoldersAdapter(
     private val onSwitchChanged: (mediaFolder: MediaFolder, isChecked: Boolean) -> Unit
-) : LoaderAdapter<MediaFolder>() {
+) : RecyclerView.Adapter<ViewHolder>() {
 
-    init {
-        numberItemLoader = 9
+    private var itemList: ArrayList<MediaFolder> = arrayListOf()
+
+    fun addAll(newItemList: ArrayList<MediaFolder>) {
+        val beforeItemCount = itemCount
+        itemList.addAll(newItemList)
+        notifyItemRangeInserted(beforeItemCount, itemCount)
     }
 
     fun removeItemsById(idList: ArrayList<Long>) {
@@ -54,27 +56,22 @@ class MediaFoldersAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.itemView.apply {
-            if (getItemViewType(position) == VIEW_TYPE_LOADING) {
-                mediaFolderCardView.startLoading()
-                mediaFolderNameLayout.layoutParams.width = 80.toPx()
-            } else {
-                itemList[position].let { mediaFolder ->
-                    mediaFolderCardView.stopLoading()
-                    mediaFolderTitle.text = mediaFolder.name
-                    mediaFolderNameLayout.layoutParams.width = ConstraintSet.WRAP_CONTENT
-                    mediaFolderDivider.visibility = if (position == itemCount - 1) GONE else VISIBLE
-                    mediaFolderSwitch.apply {
-                        isChecked = mediaFolder.isSynced
-                        visibility = VISIBLE
-                        setOnCheckedChangeListener { _, isChecked ->
-                            if (mediaFolderSwitch.isPressed) {
-                                onSwitchChanged(mediaFolder, isChecked)
-                                mediaFolder.isSynced = isChecked
-                            }
+            itemList[position].let { mediaFolder ->
+                mediaFolderTitle.text = mediaFolder.name
+                mediaFolderDivider.visibility = if (position == itemCount - 1) GONE else VISIBLE
+                mediaFolderSwitch.apply {
+                    isChecked = mediaFolder.isSynced
+                    visibility = VISIBLE
+                    setOnCheckedChangeListener { _, isChecked ->
+                        if (mediaFolderSwitch.isPressed) {
+                            onSwitchChanged(mediaFolder, isChecked)
+                            mediaFolder.isSynced = isChecked
                         }
                     }
                 }
             }
         }
     }
+
+    override fun getItemCount(): Int = itemList.size
 }

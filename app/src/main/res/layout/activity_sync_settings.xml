@@ -179,6 +179,7 @@
                         android:id="@+id/selectPath"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/buttonHeight"
+                        android:background="?selectableItemBackground"
                         android:visibility="gone"
                         tools:visibility="visible">
 
@@ -253,6 +254,7 @@
                         android:id="@+id/mediaFolders"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/buttonHeight"
+                        android:background="?selectableItemBackground"
                         tools:visibility="visible">
 
                         <TextView
