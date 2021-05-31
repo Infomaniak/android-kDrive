@@ -345,7 +345,7 @@ class CloudStorageProvider : DocumentsProvider() {
         val fileExtension = file?.name?.substringAfterLast(".")
         val mimetype =
             if (file == null || file.isFolder()) DocumentsContract.Document.MIME_TYPE_DIR
-            else MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension)
+            else (MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension) ?: "*/*")
 
         if (file?.isFolder() == false && file.hasThumbnail) {
             flags = flags or DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL
