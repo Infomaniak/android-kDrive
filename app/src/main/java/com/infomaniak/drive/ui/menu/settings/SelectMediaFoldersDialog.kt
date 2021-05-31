@@ -23,6 +23,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -35,6 +36,7 @@ import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_media_folders.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
 
@@ -61,41 +63,62 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
         mediaFolderList.adapter = mediaFoldersAdapter
 
         val drivePermissions = DrivePermissions()
-        drivePermissions.registerPermissions(this) { autorized -> if (autorized) loadFolders() else dismiss() }
+        drivePermissions.registerPermissions(this) { authorized -> if (authorized) loadFolders() else dismiss() }
         if (drivePermissions.checkWriteStoragePermission()) loadFolders()
     }
 
     fun loadFolders() {
-        mediaFoldersAdapter.showLoading()
-        val cachedMediaFolders = MediaFolder.getAll()
-        if (cachedMediaFolders.isEmpty()) {
-            mediaViewModel.getAllMediaFolders(requireActivity().contentResolver).observe(viewLifecycleOwner) { mediaFolders ->
-                mediaFoldersAdapter.addAll(mediaFolders)
+        mediaFoldersAdapter.apply {
+            showLoading()
+            mediaViewModel.elementsToRemove.observe(viewLifecycleOwner) { elementsToRemove ->
+                mediaFolderList.post {
+                    removeItemsById(elementsToRemove)
+                }
             }
-        } else {
-            mediaFoldersAdapter.addAll(cachedMediaFolders)
-            // Fetch from provider then filter not-intersected items with cache
+            mediaViewModel.getAllMediaFolders(requireActivity().contentResolver).observe(viewLifecycleOwner) { mediaFolders ->
+                mediaFolderList.post {
+                    addAll(mediaFolders)
+                }
+            }
         }
     }
 
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
         (requireActivity() as SyncSettingsActivity).onDialogDismissed()
-
     }
 
     class MediaViewModel : ViewModel() {
-        fun getAllMediaFolders(contentResolver: ContentResolver) = liveData(Dispatchers.IO) {
-            val localMediaFolders = MediaFoldersProvider.getAllMediaFolders(contentResolver)
-            val cacheMediaFolders = MediaFolder.getAll()
 
-            cacheMediaFolders.forEach { cache ->
-                val exist = localMediaFolders.any { cache.id == it.id }
-                if (!exist) {
-                    cache.delete()
-                }
-            }
-            emit(ArrayList(localMediaFolders))
+        val elementsToRemove = MutableLiveData<ArrayList<Long>>()
+
+        fun getAllMediaFolders(contentResolver: ContentResolver) = liveData(Dispatchers.IO) {
+            val cacheMediaFolders = MediaFolder.getAll()
+            if (cacheMediaFolders.isNotEmpty()) emit(cacheMediaFolders)
+
+            val localMediaFolders = ArrayList(MediaFoldersProvider.getAllMediaFolders(contentResolver))
+            cacheMediaFolders.removeObsoleteMediaFolders(localMediaFolders)
+
+            emit(localMediaFolders.removeDuplicatedMediaFolders(cacheMediaFolders))
         }
+
+        private fun ArrayList<MediaFolder>.removeDuplicatedMediaFolders(cachedMediaFolders: ArrayList<MediaFolder>): ArrayList<MediaFolder> {
+            return filterNot { mediaFolder ->
+                cachedMediaFolders.any { cache -> cache.id == mediaFolder.id }
+            } as ArrayList<MediaFolder>
+        }
+
+        private suspend fun ArrayList<MediaFolder>.removeObsoleteMediaFolders(upToDateMedias: ArrayList<MediaFolder>) =
+            withContext(Dispatchers.IO) {
+                val deletedMediaFolderList = arrayListOf<Long>()
+                forEach { cachedFile ->
+                    val exist = upToDateMedias.any { cachedFile.id == it.id }
+                    if (!exist) {
+                        cachedFile.delete()
+                        deletedMediaFolderList.add(cachedFile.id)
+                    }
+                }
+                elementsToRemove.postValue(deletedMediaFolderList)
+            }
     }
 }

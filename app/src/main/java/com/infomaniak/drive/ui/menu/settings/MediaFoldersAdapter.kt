@@ -21,6 +21,7 @@ import android.view.LayoutInflater
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.constraintlayout.widget.ConstraintSet
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.lib.core.utils.toPx
@@ -36,6 +37,17 @@ class MediaFoldersAdapter(
         numberItemLoader = 9
     }
 
+    fun removeItemsById(idList: ArrayList<Long>) {
+        idList.forEach { id ->
+            itemList.indexOfFirst { it.id == id }.let { index ->
+                if (index != -1) {
+                    itemList.removeAt(index)
+                    notifyItemRemoved(index)
+                }
+            }
+        }
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(
         LayoutInflater.from(parent.context).inflate(R.layout.item_media_folder, parent, false)
     )
@@ -48,14 +60,17 @@ class MediaFoldersAdapter(
             } else {
                 itemList[position].let { mediaFolder ->
                     mediaFolderCardView.stopLoading()
-                    mediaFolderSwitch.visibility = VISIBLE
                     mediaFolderTitle.text = mediaFolder.name
-                    mediaFolderSwitch.isChecked = mediaFolder.isSynced
+                    mediaFolderNameLayout.layoutParams.width = ConstraintSet.WRAP_CONTENT
                     mediaFolderDivider.visibility = if (position == itemCount - 1) GONE else VISIBLE
-                    mediaFolderSwitch.setOnCheckedChangeListener { _, isChecked ->
-                        if (mediaFolderSwitch.isPressed) {
-                            onSwitchChanged(mediaFolder, isChecked)
-                            mediaFolder.isSynced = isChecked
+                    mediaFolderSwitch.apply {
+                        isChecked = mediaFolder.isSynced
+                        visibility = VISIBLE
+                        setOnCheckedChangeListener { _, isChecked ->
+                            if (mediaFolderSwitch.isPressed) {
+                                onSwitchChanged(mediaFolder, isChecked)
+                                mediaFolder.isSynced = isChecked
+                            }
                         }
                     }
                 }
