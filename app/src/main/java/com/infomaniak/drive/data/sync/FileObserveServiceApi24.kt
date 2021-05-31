@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.data.sync
 
+import android.app.PendingIntent
 import android.app.job.JobInfo
 import android.app.job.JobInfo.TriggerContentUri
 import android.app.job.JobParameters
@@ -24,13 +25,19 @@ import android.app.job.JobScheduler
 import android.app.job.JobService
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.core.app.NotificationManagerCompat
+import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.ui.menu.settings.SyncSettingsActivity
+import com.infomaniak.drive.utils.NotificationUtils
+import com.infomaniak.drive.utils.NotificationUtils.uploadNotification
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
@@ -54,7 +61,10 @@ class FileObserveServiceApi24 : JobService() {
         runningParams = params
         params.triggeredContentAuthorities?.let { _ ->
             if (!applicationContext.isSyncActive()) {
-                syncImmediately()
+                when {
+                    MediaFolder.getAllSyncedFoldersCount() > 0 -> syncImmediately()
+                    else -> showSyncConfigNotification(baseContext)
+                }
             }
         } ?: Log.d("MediaContentJob", "$TAG> no content")
         handler.post(worker)
@@ -103,6 +113,21 @@ class FileObserveServiceApi24 : JobService() {
 
             jobScheduler.schedule(builder.build())
             Log.d("MediaContentJob", "JOB SCHEDULED!")
+        }
+
+        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+        fun showSyncConfigNotification(context: Context) {
+            val pendingIntent = PendingIntent.getActivity(
+                context, 0,
+                Intent(context, SyncSettingsActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT
+            )
+            context.uploadNotification().apply {
+                setContentTitle("Aucun dossier n'a été séléctionner")
+                setContentText("Cliquez-ici pour configurer les dossiers à synchroniser")
+                setContentIntent(pendingIntent)
+                NotificationManagerCompat.from(context)
+                    .notify(NotificationUtils.FILE_OBSERVE_ID, this.build())
+            }
         }
 
         fun cancelJob(context: Context) {

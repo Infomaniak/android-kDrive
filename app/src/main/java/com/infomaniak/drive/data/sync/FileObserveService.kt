@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.data.sync
 
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.database.ContentObserver
@@ -25,9 +26,12 @@ import android.os.Handler
 import android.os.IBinder
 import android.provider.MediaStore
 import android.util.Log
+import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.ui.menu.settings.SyncSettingsActivity
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.SyncUtils.syncDelayJob
+import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import kotlinx.coroutines.Job
 
 
@@ -82,8 +86,13 @@ class FileObserveService : Service() {
 
             uri?.let {
                 if (!applicationContext.isSyncActive()) {
-                    syncJob?.cancel()
-                    syncJob = applicationContext.syncDelayJob()
+                    when {
+                        MediaFolder.getAllSyncedFoldersCount() > 0 ->{
+                            syncJob?.cancel()
+                            syncJob = applicationContext.syncDelayJob()
+                        }
+                        else -> FileObserveServiceApi24.showSyncConfigNotification(baseContext)
+                    }
                 }
             }
         }
