@@ -23,19 +23,46 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.loadUrl
 import com.infomaniak.drive.views.PaginationAdapter
+import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_picture.view.*
+import kotlinx.android.synthetic.main.title_recycler_section.view.*
 
 class PicturesAdapter(
-    override var itemList: ArrayList<File> = arrayListOf(),
-    val isSquare: Boolean = false,
+    override var itemList: ArrayList<Any> = arrayListOf(),
     private val onItemClick: (file: File) -> Unit
-) :
-    PaginationAdapter<File>() {
+) : PaginationAdapter<Any>() {
+
+    var lastSectionTitle: String = ""
+    var pictureList: ArrayList<File> = arrayListOf()
+
+    fun formatList(newPictureList: ArrayList<File>): ArrayList<Any> {
+        pictureList.addAll(newPictureList)
+        val addItemList: ArrayList<Any> = arrayListOf()
+
+        for (picture in newPictureList) {
+            val month = picture.getLastModifiedAt().format("MMMM yyyy")
+
+            if (lastSectionTitle != month) {
+                addItemList.add(month)
+                lastSectionTitle = month
+            }
+            addItemList.add(picture)
+        }
+
+        return addItemList
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return if (itemList[position] is File) {
+            DisplayType.PICTURE.layout
+        } else {
+            DisplayType.TITLE.layout
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val layout = if (isSquare) R.layout.cardview_square_picture else R.layout.cardview_picture
-        return ViewHolder(LayoutInflater.from(parent.context).inflate(layout, parent, false))
+        return ViewHolder(LayoutInflater.from(parent.context).inflate(viewType, parent, false))
     }
 
     override fun getItemCount(): Int {
@@ -44,19 +71,35 @@ class PicturesAdapter(
 
     fun clearPictures() {
         itemList.clear()
+        pictureList.clear()
         notifyDataSetChanged()
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val file = itemList[position]
+        val item = itemList[position]
+        when (getItemViewType(position)) {
+            DisplayType.TITLE.layout -> {
+                holder.itemView.apply {
+                    title.text = (item as String)
+                }
+            }
+            DisplayType.PICTURE.layout -> {
+                val file = (item as File)
 
-        holder.itemView.apply {
-            picture.loadUrl(file.thumbnail())
-            picture.contentDescription = file.name
+                holder.itemView.apply {
+                    picture.loadUrl(file.thumbnail())
+                    picture.contentDescription = file.name
 
-            setOnClickListener {
-                onItemClick(file)
+                    setOnClickListener {
+                        onItemClick(file)
+                    }
+                }
             }
         }
+    }
+
+    enum class DisplayType(val layout: Int) {
+        TITLE(R.layout.title_recycler_section),
+        PICTURE(R.layout.cardview_square_picture)
     }
 }

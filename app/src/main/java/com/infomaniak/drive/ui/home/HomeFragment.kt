@@ -38,7 +38,6 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.ui.menu.PicturesAdapter
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.safeNavigate
@@ -134,8 +133,8 @@ class HomeFragment : Fragment() {
                 homeViewModel.lastPicturesPage = 1
                 paginationListener?.let { removeOnScrollListener(it) }
                 isProOrTeam = currentDrive.pack == Drive.DrivePack.PRO.value || currentDrive.pack == Drive.DrivePack.TEAM.value
-                lastElementsAdapter = if (isProOrTeam) LastActivitiesAdapter() else PicturesAdapter { file ->
-                    val pictures = (lastElementsAdapter as PicturesAdapter).getItems()
+                lastElementsAdapter = if (isProOrTeam) LastActivitiesAdapter() else HomePicturesAdapter { file ->
+                    val pictures = (lastElementsAdapter as HomePicturesAdapter).getItems()
                     Utils.displayFile(mainViewModel, findNavController(), file, pictures)
                 }
                 lastElementsAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT
@@ -180,7 +179,7 @@ class HomeFragment : Fragment() {
                 } else {
                     paginationListener = setPagination(
                         whenLoadMoreIsPossible = {
-                            val picturesAdapter = lastElementsAdapter as PicturesAdapter
+                            val picturesAdapter = lastElementsAdapter as HomePicturesAdapter
                             if (!picturesAdapter.isComplete && !isDownloadingPictures) {
                                 getLastPicturesOrActivities(currentDrive.id, isProOrTeam, false)
                             }
@@ -244,7 +243,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun getPictures(driveId: Int, forceClear: Boolean) {
-        val picturesAdapter = (lastElementsAdapter as PicturesAdapter)
+        val picturesAdapter = (lastElementsAdapter as HomePicturesAdapter)
         picturesAdapter.isComplete = false
         isDownloadingPictures = true
         homeViewModel.getLastPictures(driveId).observe(viewLifecycleOwner) {
