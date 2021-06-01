@@ -21,8 +21,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import androidx.activity.viewModels
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.UserDrive
@@ -34,7 +34,7 @@ import java.util.*
 
 class SelectFolderActivity : BaseActivity() {
 
-    private lateinit var saveExternalViewModel: SaveExternalViewModel
+    private val saveExternalViewModel: SaveExternalViewModel by viewModels()
 
     companion object {
         const val SELECT_FOLDER_REQUEST = 42
@@ -46,15 +46,14 @@ class SelectFolderActivity : BaseActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_select_folder)
-        saveExternalViewModel = ViewModelProvider(this)[SaveExternalViewModel::class.java]
-
         val userID = intent.extras?.getInt(USER_ID_TAG) ?: throw MissingFormatArgumentException(USER_ID_TAG)
         val driveID = intent.extras?.getInt(USER_DRIVE_ID_TAG) ?: throw MissingFormatArgumentException(USER_DRIVE_ID_TAG)
         saveExternalViewModel.userDrive = UserDrive(userID, driveID)
         saveExternalViewModel.currentDrive = DriveInfosController.getDrives(userID, driveID).firstOrNull()
         saveExternalViewModel.disableSelectedFolder = intent.extras?.getInt(DISABLE_SELECTED_FOLDER)
+
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_select_folder)
 
         saveButton.setOnClickListener {
             val currentFragment = hostFragment.childFragmentManager.fragments.first() as SelectFolderFragment

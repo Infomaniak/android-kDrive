@@ -20,7 +20,7 @@ package com.infomaniak.drive.ui.fileList
 import android.os.Bundle
 import android.view.View
 import androidx.activity.addCallback
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -35,7 +35,7 @@ import kotlinx.android.synthetic.main.fragment_file_list.*
 
 class SelectFolderFragment : FileListFragment() {
 
-    private lateinit var saveExternalViewModel: SaveExternalViewModel
+    private val saveExternalViewModel: SaveExternalViewModel by activityViewModels()
     private val navigationArgs: SelectFolderFragmentArgs by navArgs()
 
     override var enabledMultiSelectMode: Boolean = false
@@ -43,7 +43,6 @@ class SelectFolderFragment : FileListFragment() {
     override var showPendingFiles: Boolean = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        saveExternalViewModel = ViewModelProvider(requireActivity())[SaveExternalViewModel::class.java]
         userDrive = saveExternalViewModel.userDrive
         super.onViewCreated(view, savedInstanceState)
 
