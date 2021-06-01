@@ -48,6 +48,7 @@ import com.infomaniak.drive.utils.MediaFoldersProvider.VIDEO_BUCKET_ID
 import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.UPLOAD_STATUS_ID
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
+import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.uploadNotification
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.SyncUtils.isWifiConnection
@@ -469,5 +470,18 @@ class UploadAdapter @JvmOverloads constructor(
         const val IMPORT_IN_PROGRESS = "import_in_progress"
         const val UPLOAD_FOLDER = "upload_folder"
         private const val LAST_UPLOADED_COUNT = "last_uploaded_count"
+
+
+        fun showSyncConfigNotification(context: Context) {
+            val pendingIntent = PendingIntent.getActivity(
+                context, 0,
+                Intent(context, SyncSettingsActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT
+            )
+            context.showGeneralNotification("Nouvelle version de kDrive").apply {
+                setContentText("Cliquez-ici pour configurer les dossiers à synchroniser")
+                setContentIntent(pendingIntent)
+                NotificationManagerCompat.from(context).notify(NotificationUtils.FILE_OBSERVE_ID, this.build())
+            }
+        }
     }
 }
