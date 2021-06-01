@@ -23,11 +23,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.liveData
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.utils.DrivePermissions
@@ -35,10 +37,11 @@ import com.infomaniak.drive.utils.MediaFoldersProvider
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_media_folders.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
+class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), SwipeRefreshLayout.OnRefreshListener {
 
     private lateinit var mediaViewModel: MediaViewModel
     private lateinit var mediaFoldersAdapter: MediaFoldersAdapter
@@ -54,6 +57,9 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
         toolbar.setNavigationOnClickListener {
             dismiss()
         }
+
+        swipeRefreshLayout.setOnRefreshListener(this)
+        swipeRefreshLayout.isRefreshing = true
 
         mediaFoldersAdapter = MediaFoldersAdapter { mediaFolder, isChecked ->
             lifecycleScope.launch(Dispatchers.IO) {
@@ -77,6 +83,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
             mediaViewModel.getAllMediaFolders(requireActivity().contentResolver).observe(viewLifecycleOwner) { mediaFolders ->
                 mediaFolderList.post {
                     addAll(mediaFolders)
+                    swipeRefreshLayout.isRefreshing = false
                 }
             }
         }
@@ -89,16 +96,21 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
 
     class MediaViewModel : ViewModel() {
 
+        var getMediaFilesJob: Job = Job()
         val elementsToRemove = MutableLiveData<ArrayList<Long>>()
 
-        fun getAllMediaFolders(contentResolver: ContentResolver) = liveData(Dispatchers.IO) {
-            val cacheMediaFolders = MediaFolder.getAll()
-            if (cacheMediaFolders.isNotEmpty()) emit(cacheMediaFolders)
+        fun getAllMediaFolders(contentResolver: ContentResolver): LiveData<ArrayList<MediaFolder>> {
+            getMediaFilesJob.cancel()
+            getMediaFilesJob = Job()
+            return liveData(Dispatchers.IO + getMediaFilesJob) {
+                val cacheMediaFolders = MediaFolder.getAll()
+                if (cacheMediaFolders.isNotEmpty()) emit(cacheMediaFolders)
 
-            val localMediaFolders = ArrayList(MediaFoldersProvider.getAllMediaFolders(contentResolver))
-            cacheMediaFolders.removeObsoleteMediaFolders(localMediaFolders)
+                val localMediaFolders = ArrayList(MediaFoldersProvider.getAllMediaFolders(contentResolver))
+                cacheMediaFolders.removeObsoleteMediaFolders(localMediaFolders)
 
-            emit(localMediaFolders.removeDuplicatedMediaFolders(cacheMediaFolders))
+                emit(localMediaFolders.removeDuplicatedMediaFolders(cacheMediaFolders))
+            }
         }
 
         private fun ArrayList<MediaFolder>.removeDuplicatedMediaFolders(cachedMediaFolders: ArrayList<MediaFolder>): ArrayList<MediaFolder> {
@@ -119,5 +131,9 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
                 }
                 elementsToRemove.postValue(deletedMediaFolderList)
             }
+    }
+
+    override fun onRefresh() {
+        loadFolders()
     }
 }
