@@ -395,15 +395,11 @@ class UploadAdapter @JvmOverloads constructor(
                 customSelection = "$selection AND $IMAGES_BUCKET_ID = ?"
                 customArgs = args + mediaFolder.id.toString()
                 deferreds.add(getLocalLastPhotosAsync(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, customSelection, customArgs))
-                deferreds.add(getLocalLastPhotosAsync(MediaStore.Images.Media.INTERNAL_CONTENT_URI, customSelection, customArgs))
 
                 if (syncSettings.syncVideo) {
                     customSelection = "$selection AND $VIDEO_BUCKET_ID = ?"
                     deferreds.add(
                         getLocalLastPhotosAsync(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, customSelection, customArgs)
-                    )
-                    deferreds.add(
-                        getLocalLastPhotosAsync(MediaStore.Video.Media.INTERNAL_CONTENT_URI, customSelection, customArgs)
                     )
                 }
             }

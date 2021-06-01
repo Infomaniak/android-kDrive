@@ -95,15 +95,11 @@ class FileObserveServiceApi24 : JobService() {
             if (syncSetting.syncVideo) {
                 builder.addTriggerContentUri(
                     TriggerContentUri(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS)
-                ).addTriggerContentUri(
-                    TriggerContentUri(MediaStore.Video.Media.INTERNAL_CONTENT_URI, TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS)
                 )
             }
 
             builder.addTriggerContentUri(
                 TriggerContentUri(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS)
-            ).addTriggerContentUri(
-                TriggerContentUri(MediaStore.Images.Media.INTERNAL_CONTENT_URI, TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS)
             )
 
             jobScheduler.schedule(builder.build())

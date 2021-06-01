@@ -47,8 +47,6 @@ object MediaFoldersProvider {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.MediaColumns.RELATIVE_PATH
         else MediaStore.MediaColumns.DATA
 
-
-    private val imagesUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
     private const val imagesSortOrder = "$IMAGES_BUCKET_DISPLAY_NAME ASC"
     private val imagesProjection = arrayOf(
         IMAGES_BUCKET_DISPLAY_NAME,
@@ -56,7 +54,6 @@ object MediaFoldersProvider {
         MEDIA_PATH_COLUMN
     )
 
-    private val videosUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
     private const val videosSortOrder = "$VIDEO_BUCKET_DISPLAY_NAME ASC"
     private val videosProjection = arrayOf(
         VIDEO_BUCKET_DISPLAY_NAME,
@@ -75,27 +72,29 @@ object MediaFoldersProvider {
 
     private fun getImageFolders(contentResolver: ContentResolver): ArrayMap<Long, MediaFolder> {
         val folders = arrayMapOf<Long, MediaFolder>()
-        contentResolver.query(imagesUri, imagesProjection, null, null, imagesSortOrder)?.use { cursor ->
-            while (cursor.moveToNext()) {
-                val folderName = cursor.getString(cursor.getColumnIndexOrThrow(IMAGES_BUCKET_DISPLAY_NAME)) ?: ""
-                val folderId = cursor.getLong(cursor.getColumnIndexOrThrow(IMAGES_BUCKET_ID))
-                val path = cursor.getString(cursor.getColumnIndexOrThrow(MEDIA_PATH_COLUMN))
-                folders[folderId] = getLocalMediaFolder(folderId, folderName, path)
+        contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, imagesProjection, null, null, imagesSortOrder)
+            ?.use { cursor ->
+                while (cursor.moveToNext()) {
+                    val folderName = cursor.getString(cursor.getColumnIndexOrThrow(IMAGES_BUCKET_DISPLAY_NAME)) ?: ""
+                    val folderId = cursor.getLong(cursor.getColumnIndexOrThrow(IMAGES_BUCKET_ID))
+                    val path = cursor.getString(cursor.getColumnIndexOrThrow(MEDIA_PATH_COLUMN))
+                    folders[folderId] = getLocalMediaFolder(folderId, folderName, path)
+                }
             }
-        }
         return folders
     }
 
     private fun getVideoFolders(contentResolver: ContentResolver): ArrayMap<Long, MediaFolder> {
         val folders = arrayMapOf<Long, MediaFolder>()
-        contentResolver.query(videosUri, videosProjection, null, null, videosSortOrder)?.use { cursor ->
-            while (cursor.moveToNext()) {
-                val folderName = cursor.getString(cursor.getColumnIndexOrThrow(VIDEO_BUCKET_DISPLAY_NAME)) ?: ""
-                val folderId = cursor.getLong(cursor.getColumnIndexOrThrow(VIDEO_BUCKET_ID))
-                val path = cursor.getString(cursor.getColumnIndexOrThrow(MEDIA_PATH_COLUMN))
-                folders[folderId] = getLocalMediaFolder(folderId, folderName, path)
+        contentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, videosProjection, null, null, videosSortOrder)
+            ?.use { cursor ->
+                while (cursor.moveToNext()) {
+                    val folderName = cursor.getString(cursor.getColumnIndexOrThrow(VIDEO_BUCKET_DISPLAY_NAME)) ?: ""
+                    val folderId = cursor.getLong(cursor.getColumnIndexOrThrow(VIDEO_BUCKET_ID))
+                    val path = cursor.getString(cursor.getColumnIndexOrThrow(MEDIA_PATH_COLUMN))
+                    folders[folderId] = getLocalMediaFolder(folderId, folderName, path)
+                }
             }
-        }
         return folders
     }
 

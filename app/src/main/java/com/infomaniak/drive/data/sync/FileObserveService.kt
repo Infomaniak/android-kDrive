@@ -55,11 +55,9 @@ class FileObserveService : Service() {
 
         if (syncSetting.syncVideo) {
             contentResolver.registerContentObserver(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, true, tableObserver)
-            contentResolver.registerContentObserver(MediaStore.Video.Media.INTERNAL_CONTENT_URI, true, tableObserver)
         }
 
         contentResolver.registerContentObserver(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, true, tableObserver)
-        contentResolver.registerContentObserver(MediaStore.Images.Media.INTERNAL_CONTENT_URI, true, tableObserver)
     }
 
     override fun onDestroy() {
