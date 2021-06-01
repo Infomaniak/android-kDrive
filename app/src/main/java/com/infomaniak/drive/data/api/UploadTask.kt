@@ -109,13 +109,17 @@ class UploadTask(
                 if (uploadedChunks?.validChunks?.contains(chunkNumber) == true && !restartUpload) {
                     Log.d("kDrive", "chunk:$chunkNumber ignored")
                     input.read(ByteArray(chunkSize))
+                    requestSemaphore.release()
                     continue
                 }
 
                 Log.i("kDrive", "Upload > ${uploadFile.fileName} chunk:$chunkNumber has permission")
                 var data = ByteArray(chunkSize)
                 val count = input.read(data)
-                if (count == -1) continue
+                if (count == -1) {
+                    requestSemaphore.release()
+                    continue
+                }
 
                 data = if (count == chunkSize) data else data.copyOf(count)
 
