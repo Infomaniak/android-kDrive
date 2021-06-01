@@ -68,9 +68,8 @@ object MediaFoldersProvider {
      * Need Write permission if is called from [Fragment] or [Activity]
      */
     suspend fun getAllMediaFolders(contentResolver: ContentResolver): List<MediaFolder> = withContext(Dispatchers.IO) {
-        val mediaFolders = getImageFolders(contentResolver).apply {
-            putAll(getVideoFolders(contentResolver) as Map<Long, MediaFolder>)
-        }
+        val mediaFolders = getImageFolders(contentResolver)
+        mediaFolders.putAll(getVideoFolders(contentResolver) as Map<Long, MediaFolder>)
         mediaFolders.values.toList()
     }
 

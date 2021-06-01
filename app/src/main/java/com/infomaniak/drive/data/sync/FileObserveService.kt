@@ -29,8 +29,11 @@ import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.sync.UploadAdapter.Companion.showSyncConfigNotification
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
-import com.infomaniak.drive.utils.SyncUtils.syncDelayJob
+import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 class FileObserveService : Service() {
@@ -83,9 +86,12 @@ class FileObserveService : Service() {
                     when {
                         MediaFolder.getAllSyncedFoldersCount() > 0 -> {
                             syncJob?.cancel()
-                            syncJob = applicationContext.syncDelayJob()
+                            syncJob = GlobalScope.launch {
+                                delay(1000)
+                                syncImmediately()
+                            }
                         }
-                        else -> showSyncConfigNotification(baseContext)
+                        else -> baseContext.showSyncConfigNotification()
                     }
                 }
             }

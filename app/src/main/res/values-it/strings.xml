@@ -399,6 +399,8 @@
     <string name="noDriveTitle">Non hai ancora kDrive!</string>
     <string name="noFilesDescription">La cartella è vuota. Selezionare il pulsante + per aggiungere file.</string>
     <string name="noFilesDescriptionNoNetwork">Impossibile recuperare le informazioni della cartella. Verificare la connessione di rete o riprovare più tardi.</string>
+    <string name="noSyncFolderNotificationDescription">Clicca qui per configurare le cartelle da sincronizzare</string>
+    <string name="noSyncFolderNotificationTitle">Nessuna cartella selezionata per il backup automatico</string>
     <string name="notEnoughStorageDescription1">Lo spazio di archiviazione del kDrive è quasi esaurito. Fai evolvere la tua offerta e sblocca nuove funzionalità.</string>
     <string name="notEnoughStorageDescription2">Lo spazio di archiviazione del kDrive è quasi esaurito. Contatta il tuo amministratore per fare evolvere la tua offerta.</string>
     <string name="notEnoughStorageUsed">utilizzati</string>
@@ -421,6 +423,8 @@
     <string name="onBoardingTitle1">Accedi ai tuoi file su tutti i tuoi dispositivi</string>
     <string name="onBoardingTitle2">Collabora su una stessa punto e accresci la tua efficienza</string>
     <string name="onBoardingTitle3">Salva i tuoi ricordi in modo sicuro</string>
+    <!-- Displayed in a photo list some languages may need to display the date before the month -->
+    <string name="photosHeaderDateFormat">MMMM YYYY</string>
     <string name="picturesNoFile">Al momento non ci sono foto</string>
     <string name="previewDownloadIndication">Modifica in corso, attendere prego…</string>
     <string name="previewLoadError">Impossibile caricare l’anteprima</string>
@@ -512,6 +516,11 @@
     <string name="syncSettingsSyncPeriodicityOneHourValue">Ogni ora</string>
     <string name="syncSettingsSyncPeriodicityOneQuarterValue">Ogni 15 minuti</string>
     <string name="syncSettingsTitle">Backup foto</string>
+    <string name="themeSettingsDarkLabel">Oscuro</string>
+    <string name="themeSettingsLightLabel">Claro</string>
+    <string name="themeSettingsSystemDefaultLabel">Predeterminado del sisteme</string>
+    <string name="themeSettingsSystemLabel">Sistema</string>
+    <string name="themeSettingsTitle">Thema</string>
     <string name="trashActionDelete">Elimina definitivamente</string>
     <string name="trashActionRestoreFileIn">Ripristina in</string>
     <string name="trashActionRestoreFileOriginalPlace">Ripristina nell’ubicazione di origine</string>

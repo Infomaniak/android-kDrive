@@ -472,15 +472,16 @@ class UploadAdapter @JvmOverloads constructor(
         private const val LAST_UPLOADED_COUNT = "last_uploaded_count"
 
 
-        fun showSyncConfigNotification(context: Context) {
+        fun Context.showSyncConfigNotification() {
             val pendingIntent = PendingIntent.getActivity(
-                context, 0,
-                Intent(context, SyncSettingsActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT
+                this, 0,
+                Intent(this, SyncSettingsActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT
             )
-            context.showGeneralNotification("Nouvelle version de kDrive").apply {
-                setContentText("Cliquez-ici pour configurer les dossiers à synchroniser")
+            val notificationManagerCompat = NotificationManagerCompat.from(this)
+            this.showGeneralNotification(getString(R.string.noSyncFolderNotificationTitle)).apply {
+                setContentText(getString(R.string.noSyncFolderNotificationDescription))
                 setContentIntent(pendingIntent)
-                NotificationManagerCompat.from(context).notify(NotificationUtils.FILE_OBSERVE_ID, this.build())
+                notificationManagerCompat.notify(NotificationUtils.FILE_OBSERVE_ID, this.build())
             }
         }
     }

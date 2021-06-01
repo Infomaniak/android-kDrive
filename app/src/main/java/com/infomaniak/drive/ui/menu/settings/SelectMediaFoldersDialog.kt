@@ -96,7 +96,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), SwipeRefreshLayo
 
     class MediaViewModel : ViewModel() {
 
-        var getMediaFilesJob: Job = Job()
+        private var getMediaFilesJob: Job = Job()
         val elementsToRemove = MutableLiveData<ArrayList<Long>>()
 
         fun getAllMediaFolders(contentResolver: ContentResolver): LiveData<ArrayList<MediaFolder>> {

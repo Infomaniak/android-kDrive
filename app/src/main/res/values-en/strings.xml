@@ -399,6 +399,8 @@
     <string name="noDriveTitle">You don’t have a kDrive yet!</string>
     <string name="noFilesDescription">This folder is empty. Click the + button to add files here.</string>
     <string name="noFilesDescriptionNoNetwork">Unable to retrieve information from the folder. Please check your network connection or try again later.</string>
+    <string name="noSyncFolderNotificationDescription">Click here to configure the folders to synchronize</string>
+    <string name="noSyncFolderNotificationTitle">No folder selected for automatic backup</string>
     <string name="notEnoughStorageDescription1">Your kDrive storage space is almost full. Upgrade your plan and unlock new features.</string>
     <string name="notEnoughStorageDescription2">Your kDrive storage space is almost full. Contact your administrator so they can upgrade your plan.</string>
     <string name="notEnoughStorageUsed">used</string>
@@ -421,6 +423,8 @@
     <string name="onBoardingTitle1">Access your files on all your devices</string>
     <string name="onBoardingTitle2">Work together in one place and become more efficient</string>
     <string name="onBoardingTitle3">Save your memories securely</string>
+    <!-- Displayed in a photo list some languages may need to display the date before the month -->
+    <string name="photosHeaderDateFormat">MMMM YYYY</string>
     <string name="picturesNoFile">No photo at this time</string>
     <string name="previewDownloadIndication">Loading in progress, please wait…</string>
     <string name="previewLoadError">Unable to load preview</string>
@@ -512,6 +516,11 @@
     <string name="syncSettingsSyncPeriodicityOneHourValue">Every hour</string>
     <string name="syncSettingsSyncPeriodicityOneQuarterValue">Every 15 minutes</string>
     <string name="syncSettingsTitle">Saving photos</string>
+    <string name="themeSettingsDarkLabel">Dark</string>
+    <string name="themeSettingsLightLabel">Light</string>
+    <string name="themeSettingsSystemDefaultLabel">System default</string>
+    <string name="themeSettingsSystemLabel">System</string>
+    <string name="themeSettingsTitle">Theme</string>
     <string name="trashActionDelete">Delete permanently</string>
     <string name="trashActionRestoreFileIn">Recover in</string>
     <string name="trashActionRestoreFileOriginalPlace">Recover to the original location</string>

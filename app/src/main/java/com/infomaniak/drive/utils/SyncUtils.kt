@@ -39,10 +39,6 @@ import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.sync.FileObserveService
 import com.infomaniak.drive.data.sync.FileObserveServiceApi24
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.util.*
 
 object SyncUtils {
@@ -101,13 +97,6 @@ object SyncUtils {
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true)
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true)
         ContentResolver.requestSync(createSyncAccount(), getString(R.string.SYNC_AUTHORITY), bundle)
-    }
-
-    fun Context.syncDelayJob(): Job {
-        return GlobalScope.launch {
-            delay(8 * 1000)
-            syncImmediately()
-        }
     }
 
     fun Context.isSyncActive(): Boolean {

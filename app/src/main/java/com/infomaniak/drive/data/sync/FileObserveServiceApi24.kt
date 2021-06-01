@@ -58,7 +58,7 @@ class FileObserveServiceApi24 : JobService() {
             if (!applicationContext.isSyncActive()) {
                 when {
                     MediaFolder.getAllSyncedFoldersCount() > 0 -> syncImmediately()
-                    else -> showSyncConfigNotification(baseContext)
+                    else -> baseContext.showSyncConfigNotification()
                 }
             }
         } ?: Log.d("MediaContentJob", "$TAG> no content")
