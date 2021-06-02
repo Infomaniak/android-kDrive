@@ -23,7 +23,7 @@ import android.view.View
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.PopupWindow
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.ui.home.DriveListAdapter
@@ -37,7 +37,7 @@ import kotlinx.android.synthetic.main.popup_select_user.view.*
 
 class SelectDriveDialog : FullScreenBottomSheetDialog() {
 
-    private lateinit var selectDriveViewModel: SelectDriveViewModel
+    private val selectDriveViewModel: SelectDriveViewModel by activityViewModels()
     private lateinit var popupLayout: View
     private lateinit var selectedUser: User
     private lateinit var popupWindow: PopupWindow
@@ -49,7 +49,6 @@ class SelectDriveDialog : FullScreenBottomSheetDialog() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        selectDriveViewModel = ViewModelProvider(requireActivity())[SelectDriveViewModel::class.java]
         selectedUser = AccountUtils.currentUser!!
 
         toolbar.setNavigationOnClickListener {

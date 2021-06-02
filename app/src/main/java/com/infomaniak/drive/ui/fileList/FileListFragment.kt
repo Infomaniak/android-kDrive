@@ -32,7 +32,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -72,8 +73,8 @@ import kotlinx.coroutines.*
 open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     protected lateinit var fileAdapter: FileAdapter
-    protected lateinit var mainViewModel: MainViewModel
-    protected open lateinit var fileListViewModel: FileListViewModel
+    protected val fileListViewModel: FileListViewModel by viewModels()
+    protected val mainViewModel: MainViewModel by activityViewModels()
 
     private val navigationArgs: FileListFragmentArgs by navArgs()
 
@@ -106,8 +107,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
-        fileListViewModel = ViewModelProvider(this)[FileListViewModel::class.java]
         sortType = UISettings(requireContext()).sortType
     }
 

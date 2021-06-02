@@ -31,10 +31,10 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.get
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.findNavController
@@ -70,7 +70,7 @@ import java.util.*
 
 class MainActivity : BaseActivity() {
 
-    private lateinit var mainViewModel: MainViewModel
+    private val mainViewModel: MainViewModel by viewModels()
     private lateinit var uploadProgressReceiver: UploadProgressReceiver
     private lateinit var downloadReceiver: DownloadReceiver
 
@@ -80,7 +80,6 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        mainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
         uploadProgressReceiver = UploadProgressReceiver(mainViewModel)
         downloadReceiver = DownloadReceiver(mainViewModel)
         FileController.switchDriveDB(UserDrive())

@@ -19,7 +19,7 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import android.os.Bundle
 import android.view.View
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.FileController
@@ -34,9 +34,10 @@ import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 
 class NotSupportedExtensionBottomSheetDialog : InformationBottomSheetDialog() {
 
+    val mainViewModel: MainViewModel by activityViewModels()
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
         FileController.getFileById(requireArguments().getInt(FILE_ID))?.let { currentFile ->
 
             title.text = getString(R.string.notSupportedExtensionTitle, currentFile.getFileExtension())

@@ -24,9 +24,9 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
@@ -44,7 +44,7 @@ class FileShareLinkSettingsFragment : Fragment() {
     private lateinit var shareLink: ShareLink
     private val navigationArgs: FileShareLinkSettingsFragmentArgs by navArgs()
     private var defaultCalendarTimestamp: Date = Date()
-    private val shareViewModel: FileShareViewModel by navGraphViewModels(R.id.fileShareLinkSettingsFragment)
+    private val shareViewModel: FileShareViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_file_share_link_settings, container, false)

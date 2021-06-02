@@ -29,7 +29,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenResumed
 import androidx.navigation.fragment.findNavController
@@ -55,7 +55,7 @@ import java.util.*
 class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private lateinit var currentFolderFile: File
-    private lateinit var mainViewModel: MainViewModel
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     private lateinit var openCameraPermissions: DrivePermissions
     private lateinit var uploadFilesPermissions: DrivePermissions
@@ -76,7 +76,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
         val file = mainViewModel.currentFolderOpenAddFileBottom.value ?: mainViewModel.currentFolder.value
         currentFolderFile = file!!
         currentFolder.setFileItem(currentFolderFile)

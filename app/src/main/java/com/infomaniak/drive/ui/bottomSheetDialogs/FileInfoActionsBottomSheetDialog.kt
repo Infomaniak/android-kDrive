@@ -24,8 +24,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -55,10 +55,10 @@ import kotlinx.coroutines.withContext
 
 class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoActionsView.OnItemClickListener {
 
-    private val navigationArgs: FileInfoActionsBottomSheetDialogArgs by navArgs()
     private lateinit var currentFile: File
     private lateinit var drivePermissions: DrivePermissions
-    private lateinit var mainViewModel: MainViewModel
+    private val mainViewModel: MainViewModel by activityViewModels()
+    private val navigationArgs: FileInfoActionsBottomSheetDialogArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -68,7 +68,6 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         currentFile = FileController.getFileById(navigationArgs.fileId, navigationArgs.userDrive)!!
-        mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
 
         drivePermissions = DrivePermissions()
         drivePermissions.registerPermissions(this) { autorized -> if (autorized) downloadFileClicked() }

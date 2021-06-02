@@ -23,10 +23,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.liveData
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -43,7 +43,7 @@ import kotlinx.coroutines.withContext
 
 class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), SwipeRefreshLayout.OnRefreshListener {
 
-    private lateinit var mediaViewModel: MediaViewModel
+    private val mediaViewModel: MediaViewModel by viewModels()
     private lateinit var mediaFoldersAdapter: MediaFoldersAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -51,7 +51,6 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), SwipeRefreshLayo
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        mediaViewModel = ViewModelProvider(this)[MediaViewModel::class.java]
         super.onViewCreated(view, savedInstanceState)
 
         toolbar.setNavigationOnClickListener {

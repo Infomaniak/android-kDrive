@@ -17,10 +17,8 @@
  */
 package com.infomaniak.drive.ui.fileList.fileDetails
 
-import android.os.Bundle
-import android.view.View
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.MainViewModel
@@ -28,10 +26,6 @@ import com.infomaniak.drive.ui.MainViewModel
 open class FileDetailsSubFragment : Fragment() {
 
     val fileDetailsViewModel: FileDetailsViewModel by navGraphViewModels(R.id.fileDetailsFragment)
-    lateinit var mainViewModel: MainViewModel
+    val mainViewModel: MainViewModel by activityViewModels()
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
-    }
 }

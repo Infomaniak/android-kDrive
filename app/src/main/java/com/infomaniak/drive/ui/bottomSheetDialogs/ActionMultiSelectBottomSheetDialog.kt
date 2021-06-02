@@ -25,7 +25,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.liveData
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -33,7 +32,6 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController.startDownloadFile
-import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.setBackNavigationResult
@@ -44,7 +42,6 @@ import kotlinx.coroutines.Dispatchers
 class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
 
     private val actionMultiSelectModel by viewModels<ActionMultiSelectModel>()
-    private lateinit var mainViewModel: MainViewModel
     private val navigationArgs: ActionMultiSelectBottomSheetDialogArgs by navArgs()
 
     override fun onCreateView(
@@ -54,7 +51,6 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
         addFavorites.setOnClickListener { onActionSelected(SelectDialogAction.ADD_FAVORITES) }
 
         availableOfflineSwitch.setOnCheckedChangeListener { _, _ -> onActionSelected(SelectDialogAction.OFFLINE) }

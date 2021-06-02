@@ -25,12 +25,12 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.provider.OpenableColumns
 import android.view.View.VISIBLE
+import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
@@ -52,8 +52,8 @@ import java.util.*
 
 class SaveExternalFilesActivity : BaseActivity() {
 
-    private lateinit var selectDriveViewModel: SelectDriveViewModel
-    private lateinit var saveExternalFilesViewModel: SaveExternalFilesViewModel
+    private val selectDriveViewModel: SelectDriveViewModel by viewModels()
+    private val saveExternalFilesViewModel: SaveExternalFilesViewModel by viewModels()
 
     private var currentUri: Uri? = null
     private var isMultiple = false
@@ -62,8 +62,6 @@ class SaveExternalFilesActivity : BaseActivity() {
         runBlocking { AccountUtils.requestCurrentUser() }
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_save_external_file)
-        selectDriveViewModel = ViewModelProvider(this)[SelectDriveViewModel::class.java]
-        saveExternalFilesViewModel = ViewModelProvider(this)[SaveExternalFilesViewModel::class.java]
 
         if (!isAuth()) return
 

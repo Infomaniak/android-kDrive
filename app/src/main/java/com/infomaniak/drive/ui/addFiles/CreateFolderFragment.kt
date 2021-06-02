@@ -23,7 +23,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
@@ -50,7 +50,7 @@ import kotlinx.coroutines.runBlocking
 
 open class CreateFolderFragment : Fragment() {
     protected val newFolderViewModel: NewFolderViewModel by navGraphViewModels(R.id.newFolderFragment)
-    protected lateinit var mainViewModel: MainViewModel
+    protected val mainViewModel: MainViewModel by activityViewModels()
     protected lateinit var adapter: PermissionsAdapter
     protected lateinit var currentPermission: FolderPermission
 
@@ -58,7 +58,6 @@ open class CreateFolderFragment : Fragment() {
         inflater.inflate(R.layout.fragment_create_folder, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
         super.onViewCreated(view, savedInstanceState)
 
         createFolderButton.initProgress(viewLifecycleOwner)

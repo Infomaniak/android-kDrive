@@ -24,10 +24,10 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
@@ -54,16 +54,14 @@ import java.util.*
 
 class SyncSettingsActivity : BaseActivity() {
 
-    private lateinit var syncSettingsViewModel: SyncSettingsViewModel
-    private lateinit var selectDriveViewModel: SelectDriveViewModel
+    private val syncSettingsViewModel: SyncSettingsViewModel by viewModels()
+    private val selectDriveViewModel: SelectDriveViewModel by viewModels()
     private var oldSyncSettings: SyncSettings? = null
     private var editNumber = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sync_settings)
-        syncSettingsViewModel = ViewModelProvider(this)[SyncSettingsViewModel::class.java]
-        selectDriveViewModel = ViewModelProvider(this)[SelectDriveViewModel::class.java]
 
         toolbar.setNavigationOnClickListener {
             onBackPressed()
