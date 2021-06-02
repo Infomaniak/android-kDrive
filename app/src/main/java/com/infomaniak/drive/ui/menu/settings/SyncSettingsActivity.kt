@@ -252,17 +252,19 @@ class SyncSettingsActivity : BaseActivity() {
     }
 
     private fun changeSaveButtonStatus() {
+        val allSyncedFoldersCount = MediaFolder.getAllSyncedFoldersCount()
         val isEdited = (editNumber > 0)
                 || (selectDriveViewModel.selectedUserId.value != oldSyncSettings?.userId)
                 || (selectDriveViewModel.selectedDrive.value?.id != oldSyncSettings?.driveId)
                 || (syncSettingsViewModel.syncFolder.value != oldSyncSettings?.syncFolder)
                 || (syncSettingsViewModel.saveOldPictures.value != null)
+                || allSyncedFoldersCount > 0
         saveButton.visibility = if (isEdited) VISIBLE else GONE
 
         saveButton.isEnabled = isEdited && (selectDriveViewModel.selectedUserId.value != null)
                 && (selectDriveViewModel.selectedDrive.value != null)
                 && (syncSettingsViewModel.syncFolder.value != null)
-                && MediaFolder.getAllSyncedFoldersCount() > 0
+                && allSyncedFoldersCount > 0
     }
 
     private fun saveSettings() {
