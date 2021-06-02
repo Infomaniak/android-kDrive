@@ -40,7 +40,7 @@ import kotlin.math.min
 class PicturesFragment : Fragment() {
 
     private lateinit var mainViewModel: MainViewModel
-    private lateinit var homePicturesAdapter: PicturesAdapter
+    private lateinit var picturesAdapter: PicturesAdapter
     private val picturesViewModel: PicturesViewModel by navGraphViewModels(R.id.picturesFragment)
 
     private lateinit var timer: CountDownTimer
@@ -67,13 +67,13 @@ class PicturesFragment : Fragment() {
         )
 
         swipeRefreshLayout.setOnRefreshListener {
-            homePicturesAdapter.clearPictures()
+            picturesAdapter.clearPictures()
             getPictures()
         }
 
         mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
-        homePicturesAdapter = PicturesAdapter { file ->
-            Utils.displayFile(mainViewModel, findNavController(), file, homePicturesAdapter.pictureList)
+        picturesAdapter = PicturesAdapter { file ->
+            Utils.displayFile(mainViewModel, findNavController(), file, picturesAdapter.pictureList)
         }
 
         timer.start()
@@ -81,15 +81,15 @@ class PicturesFragment : Fragment() {
         gridLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
                 return when {
-                    homePicturesAdapter.getItems()[position] is String -> 12
+                    picturesAdapter.getItems()[position] is String -> 12
                     else -> 4
                 }
             }
         }
         picturesRecyclerView.layoutManager = gridLayoutManager
-        picturesRecyclerView.adapter = homePicturesAdapter
+        picturesRecyclerView.adapter = picturesAdapter
 
-        homePicturesAdapter.isComplete = false
+        picturesAdapter.isComplete = false
 
         getPictures()
     }
@@ -100,12 +100,12 @@ class PicturesFragment : Fragment() {
         picturesViewModel.getAllPicturesFiles(AccountUtils.currentDriveId, ignoreCloud).observe(viewLifecycleOwner) {
             it?.let { (pictures, isComplete) ->
                 noPicturesLayout.toggleVisibility(pictures.isEmpty())
-                val pictureList = homePicturesAdapter.formatList(pictures)
-                if (homePicturesAdapter.itemCount == 0) homePicturesAdapter.setList(pictureList)
-                else picturesRecyclerView.post { homePicturesAdapter.addAll(pictureList) }
-                homePicturesAdapter.isComplete = isComplete
+                val pictureList = picturesAdapter.formatList(pictures)
+                if (picturesAdapter.itemCount == 0) picturesAdapter.setList(pictureList)
+                else picturesRecyclerView.post { picturesAdapter.addAll(pictureList) }
+                picturesAdapter.isComplete = isComplete
             } ?: run {
-                homePicturesAdapter.isComplete = true
+                picturesAdapter.isComplete = true
                 noPicturesLayout.toggleVisibility(
                     noNetwork = ignoreCloud,
                     isVisible = true,
