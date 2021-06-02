@@ -71,13 +71,22 @@ class PicturesFragment : Fragment() {
             getPictures()
         }
 
-        picturesAdapter = PicturesAdapter(isSquare = true) { file ->
-            Utils.displayFile(mainViewModel, findNavController(), file, picturesAdapter.getItems())
+        picturesAdapter = PicturesAdapter { file ->
+            Utils.displayFile(mainViewModel, findNavController(), file, picturesAdapter.pictureList)
         }
 
         timer.start()
-
-        picturesRecyclerView.layoutManager = GridLayoutManager(requireContext(), getNumPicturesColumns())
+        val numPicturesColumns = getNumPicturesColumns()
+        val gridLayoutManager = GridLayoutManager(requireContext(), numPicturesColumns)
+        gridLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+            override fun getSpanSize(position: Int): Int {
+                return when {
+                    picturesAdapter.getItems()[position] is String -> numPicturesColumns
+                    else -> 1
+                }
+            }
+        }
+        picturesRecyclerView.layoutManager = gridLayoutManager
         picturesRecyclerView.adapter = picturesAdapter
 
         picturesAdapter.isComplete = false
@@ -91,8 +100,9 @@ class PicturesFragment : Fragment() {
         picturesViewModel.getAllPicturesFiles(AccountUtils.currentDriveId, ignoreCloud).observe(viewLifecycleOwner) {
             it?.let { (pictures, isComplete) ->
                 noPicturesLayout.toggleVisibility(pictures.isEmpty())
-                if (picturesAdapter.itemCount == 0) picturesAdapter.setList(pictures)
-                else picturesRecyclerView.post { picturesAdapter.addAll(pictures) }
+                val pictureList = picturesAdapter.formatList(pictures)
+                if (picturesAdapter.itemCount == 0) picturesAdapter.setList(pictureList)
+                else picturesRecyclerView.post { picturesAdapter.addAll(pictureList) }
                 picturesAdapter.isComplete = isComplete
             } ?: run {
                 picturesAdapter.isComplete = true
