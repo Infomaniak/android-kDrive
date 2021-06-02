@@ -33,7 +33,7 @@ class PicturesAdapter(
     private val onItemClick: (file: File) -> Unit
 ) : PaginationAdapter<Any>() {
 
-    var lastSectionTitle: String = ""
+    private var lastSectionTitle: String = ""
     var pictureList: ArrayList<File> = arrayListOf()
 
     fun formatList(newPictureList: ArrayList<File>): ArrayList<Any> {
