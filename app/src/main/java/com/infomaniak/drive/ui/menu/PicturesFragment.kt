@@ -76,12 +76,13 @@ class PicturesFragment : Fragment() {
         }
 
         timer.start()
-        val gridLayoutManager = GridLayoutManager(requireContext(), 12)
+        val numPicturesColumns = getNumPicturesColumns()
+        val gridLayoutManager = GridLayoutManager(requireContext(), numPicturesColumns)
         gridLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
                 return when {
-                    picturesAdapter.getItems()[position] is String -> 12
-                    else -> 4
+                    picturesAdapter.getItems()[position] is String -> numPicturesColumns
+                    else -> 1
                 }
             }
         }
