@@ -20,7 +20,6 @@ package com.infomaniak.drive.utils
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.*
-import android.content.pm.PackageManager
 import android.graphics.*
 import android.net.Uri
 import android.os.CountDownTimer
@@ -316,15 +315,6 @@ object Utils {
         onActionClicked: (() -> Unit)? = null
     ) {
         showSnackbar(view, view.context.getString(title), anchorView, actionButtonTitle, onActionClicked)
-    }
-
-    fun checkWriteStoragePermissionResult(
-        requestCode: Int,
-        grantResults: IntArray
-    ): Boolean {
-        return if (requestCode == SyncUtils.REQUEST_WRITE_STORAGE_PERMISSION) {
-            grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
-        } else false
     }
 
     fun copyDataToUploadCache(context: Context, uri: Uri, fileModifiedAt: Date): Uri {

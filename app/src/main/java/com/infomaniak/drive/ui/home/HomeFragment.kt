@@ -27,7 +27,7 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
@@ -50,12 +50,12 @@ import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.item_search_view.*
 
 class HomeFragment : Fragment() {
-    private lateinit var mainViewModel: MainViewModel
-    private lateinit var lastFilesAdapter: LastFilesAdapter
     private lateinit var lastElementsAdapter: RecyclerView.Adapter<ViewHolder>
-    private var isProOrTeam: Boolean = false
-    private val homeViewModel: HomeViewModel by navGraphViewModels(R.id.homeFragment)
+    private lateinit var lastFilesAdapter: LastFilesAdapter
     private val arguments: HomeFragmentArgs by navArgs()
+    private val homeViewModel: HomeViewModel by navGraphViewModels(R.id.homeFragment)
+    private val mainViewModel: MainViewModel by activityViewModels()
+    private var isProOrTeam: Boolean = false
 
     private var isDownloadingActivities = false
     private var isDownloadingPictures = false
@@ -71,9 +71,8 @@ class HomeFragment : Fragment() {
         const val MAX_PICTURES_COLUMN = 2
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         lastFilesRecyclerView.apply {
             layoutManager = object : LinearLayoutManager(requireContext(), HORIZONTAL, false) {

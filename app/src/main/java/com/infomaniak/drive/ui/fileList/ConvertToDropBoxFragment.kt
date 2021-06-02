@@ -37,8 +37,8 @@ class ConvertToDropBoxFragment : ManageDropboxFragment() {
     private val navigationArgs: ManageDropboxFragmentArgs by navArgs()
     override var isManageDropBox = false
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         fileShareCollapsingToolbarLayout.title = getString(R.string.convertToDropboxTitle, navigationArgs.fileName)
 

@@ -27,8 +27,8 @@ import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 
 class SecureLinkShareBottomSheetDialog : InformationBottomSheetDialog() {
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         title.setText(R.string.secureLinkShareTitle)
         description.setText(R.string.secureLinkShareDescription)
         illu.setAnimation(R.raw.illu_upgrade)

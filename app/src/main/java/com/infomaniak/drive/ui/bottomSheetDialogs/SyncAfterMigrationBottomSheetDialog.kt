@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import android.os.Bundle
+import android.view.View
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.safeNavigate
 import com.infomaniak.lib.core.utils.toPx
@@ -25,8 +26,8 @@ import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 
 class SyncAfterMigrationBottomSheetDialog : InformationBottomSheetDialog() {
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         title.setText(R.string.migratePhotoSyncSettingsTitle)
         description.setText(R.string.migratePhotoSyncSettingsDescription)
 

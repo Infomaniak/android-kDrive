@@ -24,12 +24,12 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveDataScope
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.navigation.navGraphViewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -47,7 +47,7 @@ import okhttp3.Response
 class DownloadProgressDialog : DialogFragment() {
 
     private val navigationArgs: DownloadProgressDialogArgs by navArgs()
-    private val downloadViewModel: DownloadViewModel by navGraphViewModels(R.id.downloadProgressDialog)
+    private val downloadViewModel: DownloadViewModel by viewModels()
 
     private lateinit var dialogView: View
 
@@ -67,8 +67,8 @@ class DownloadProgressDialog : DialogFragment() {
 
     override fun getView() = dialogView
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         isCancelable = false
 
         FileController.getFileById(navigationArgs.fileID, navigationArgs.userDrive)?.let { file ->

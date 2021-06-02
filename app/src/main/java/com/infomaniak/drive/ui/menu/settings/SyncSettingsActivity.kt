@@ -24,23 +24,24 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
-import com.infomaniak.drive.utils.SyncUtils.checkSyncPermissions
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.initProgress
@@ -53,20 +54,21 @@ import java.util.*
 
 class SyncSettingsActivity : BaseActivity() {
 
-    private lateinit var syncSettingsViewModel: SyncSettingsViewModel
-    private lateinit var selectDriveViewModel: SelectDriveViewModel
+    private val syncSettingsViewModel: SyncSettingsViewModel by viewModels()
+    private val selectDriveViewModel: SelectDriveViewModel by viewModels()
     private var oldSyncSettings: SyncSettings? = null
     private var editNumber = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sync_settings)
-        syncSettingsViewModel = ViewModelProvider(this)[SyncSettingsViewModel::class.java]
-        selectDriveViewModel = ViewModelProvider(this)[SelectDriveViewModel::class.java]
 
         toolbar.setNavigationOnClickListener {
             onBackPressed()
         }
+
+        val permission = DrivePermissions()
+        permission.registerPermissions(this)
 
         activateSyncSwitch.isChecked = AccountUtils.isEnableAppSync()
         showSettings(activateSyncSwitch.isChecked)
@@ -151,27 +153,22 @@ class SyncSettingsActivity : BaseActivity() {
         }
 
         val defaultValue = true
-        syncPictureSwitch.isChecked = oldSyncSettings?.syncPicture ?: defaultValue
         syncVideoSwitch.isChecked = oldSyncSettings?.syncVideo ?: defaultValue
-        syncScreenshotSwitch.isChecked = oldSyncSettings?.syncScreenshot ?: defaultValue
 
         activateSync.setOnClickListener { activateSyncSwitch.isChecked = !activateSyncSwitch.isChecked }
         activateSyncSwitch.setOnCheckedChangeListener { _, isChecked ->
             showSettings(isChecked)
             if (AccountUtils.isEnableAppSync() == isChecked) editNumber-- else editNumber++
-            if (isChecked) checkSyncPermissions()
+            if (isChecked) permission.checkSyncPermissions()
             changeSaveButtonStatus()
         }
-        syncPictureSwitch.setOnCheckedChangeListener { _, isChecked ->
-            if (oldSyncSettings?.syncPicture ?: defaultValue == isChecked) editNumber-- else editNumber++
-            changeSaveButtonStatus()
+
+        mediaFolders.setOnClickListener {
+            SelectMediaFoldersDialog().show(supportFragmentManager, "SyncSettingsSelectMediaFoldersDialog")
         }
+
         syncVideoSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (oldSyncSettings?.syncVideo ?: defaultValue == isChecked) editNumber-- else editNumber++
-            changeSaveButtonStatus()
-        }
-        syncScreenshotSwitch.setOnCheckedChangeListener { _, isChecked ->
-            if (oldSyncSettings?.syncScreenshot ?: defaultValue == isChecked) editNumber-- else editNumber++
             changeSaveButtonStatus()
         }
 
@@ -196,11 +193,11 @@ class SyncSettingsActivity : BaseActivity() {
 
         syncPeriodicity.setOnClickListener {
             var syncIntervalType = syncSettingsViewModel.syncIntervalType.value!!
-            val choiseItems: ArrayList<String> = arrayListOf()
+            val choiceItems: ArrayList<String> = arrayListOf()
             val intervalTypeList: ArrayList<SyncSettings.IntervalType> = arrayListOf()
             for (intervalType in SyncSettings.IntervalType.values()) {
                 if (Build.VERSION.SDK_INT >= intervalType.minAndroidSdk) {
-                    choiseItems.add(getString(intervalType.title))
+                    choiceItems.add(getString(intervalType.title))
                     intervalTypeList.add(intervalType)
                 }
             }
@@ -208,7 +205,7 @@ class SyncSettingsActivity : BaseActivity() {
 
             MaterialAlertDialogBuilder(this, R.style.DialogStyle)
                 .setTitle(getString(R.string.syncSettingsButtonSyncPeriodicity))
-                .setSingleChoiceItems(choiseItems.toTypedArray(), checkedItem) { _, position ->
+                .setSingleChoiceItems(choiceItems.toTypedArray(), checkedItem) { _, position ->
                     syncIntervalType = intervalTypeList[position]
                 }
                 .setPositiveButton(R.string.buttonConfirm) { _, _ ->
@@ -222,7 +219,7 @@ class SyncSettingsActivity : BaseActivity() {
 
         saveButton.initProgress(this)
         saveButton.setOnClickListener {
-            if (checkSyncPermissions()) saveSettings()
+            if (permission.checkSyncPermissions()) saveSettings()
         }
     }
 
@@ -231,6 +228,10 @@ class SyncSettingsActivity : BaseActivity() {
         if (requestCode == SelectFolderActivity.SELECT_FOLDER_REQUEST && resultCode == RESULT_OK) {
             syncSettingsViewModel.syncFolder.value = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
         }
+    }
+
+    fun onDialogDismissed() {
+        changeSaveButtonStatus()
     }
 
     private fun activeSelectDrive() {
@@ -249,16 +250,19 @@ class SyncSettingsActivity : BaseActivity() {
     }
 
     private fun changeSaveButtonStatus() {
+        val allSyncedFoldersCount = MediaFolder.getAllSyncedFoldersCount()
         val isEdited = (editNumber > 0)
                 || (selectDriveViewModel.selectedUserId.value != oldSyncSettings?.userId)
                 || (selectDriveViewModel.selectedDrive.value?.id != oldSyncSettings?.driveId)
                 || (syncSettingsViewModel.syncFolder.value != oldSyncSettings?.syncFolder)
                 || (syncSettingsViewModel.saveOldPictures.value != null)
+                || allSyncedFoldersCount > 0
         saveButton.visibility = if (isEdited) VISIBLE else GONE
 
         saveButton.isEnabled = isEdited && (selectDriveViewModel.selectedUserId.value != null)
                 && (selectDriveViewModel.selectedDrive.value != null)
                 && (syncSettingsViewModel.syncFolder.value != null)
+                && allSyncedFoldersCount > 0
     }
 
     private fun saveSettings() {
@@ -272,8 +276,6 @@ class SyncSettingsActivity : BaseActivity() {
                     driveId = selectDriveViewModel.selectedDrive.value!!.id,
                     lastSync = if (saveOldPictures) Date(0) else Date(),
                     syncFolder = syncSettingsViewModel.syncFolder.value!!,
-                    syncPicture = syncPictureSwitch.isChecked,
-                    syncScreenshot = syncScreenshotSwitch.isChecked,
                     syncVideo = syncVideoSwitch.isChecked
                 )
                 syncSettings.setIntervalType(syncSettingsViewModel.syncIntervalType.value!!)

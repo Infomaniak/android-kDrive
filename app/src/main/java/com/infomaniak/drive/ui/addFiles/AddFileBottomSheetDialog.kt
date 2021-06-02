@@ -29,7 +29,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenResumed
 import androidx.navigation.fragment.findNavController
@@ -43,8 +43,6 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentDriveId
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
-import com.infomaniak.drive.utils.SyncUtils.checkSyncPermissions
-import com.infomaniak.drive.utils.SyncUtils.checkSyncPermissionsResult
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_add_file.*
 import kotlinx.coroutines.Dispatchers
@@ -56,8 +54,11 @@ import java.util.*
 
 class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
-    private lateinit var mainViewModel: MainViewModel
     private lateinit var currentFolderFile: File
+    private val mainViewModel: MainViewModel by activityViewModels()
+
+    private lateinit var openCameraPermissions: DrivePermissions
+    private lateinit var uploadFilesPermissions: DrivePermissions
 
     private var currentPhotoUri: Uri? = null
     private var mediaPhotoPath = ""
@@ -73,12 +74,20 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View = inflater.inflate(R.layout.fragment_bottom_sheet_add_file, container, false)
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         val file = mainViewModel.currentFolderOpenAddFileBottom.value ?: mainViewModel.currentFolder.value
         currentFolderFile = file!!
         currentFolder.setFileItem(currentFolderFile)
+
+        openCameraPermissions = DrivePermissions()
+        openCameraPermissions.registerPermissions(this) { autorized ->
+            if (autorized) openCamera()
+        }
+        uploadFilesPermissions = DrivePermissions()
+        uploadFilesPermissions.registerPermissions(this) { autorized ->
+            if (autorized) uploadFiles()
+        }
 
         openCamera.setOnClickListener { openCamera() }
         documentUpload.setOnClickListener { uploadFiles() }
@@ -107,23 +116,8 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         dismiss()
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when {
-            requireActivity().checkSyncPermissionsResult(requestCode, grantResults, SELECT_FILES_REQ) -> {
-                uploadFiles()
-            }
-            requireActivity().checkSyncPermissionsResult(requestCode, grantResults, CAPTURE_MEDIA_REQ) -> {
-                openCamera()
-            }
-            Utils.checkWriteStoragePermissionResult(requestCode, grantResults) -> {
-                openCamera()
-            }
-        }
-    }
-
     private fun openCamera() {
-        if (checkWriteStoragePermission() && checkSyncPermissions(CAPTURE_MEDIA_REQ)) {
+        if (openCameraPermissions.checkSyncPermissions()) {
             openCamera.isEnabled = false
             try {
                 val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
@@ -143,7 +137,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun uploadFiles() {
-        if (checkSyncPermissions(SELECT_FILES_REQ)) {
+        if (uploadFilesPermissions.checkSyncPermissions()) {
             documentUpload.isEnabled = false
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 type = "*/*"

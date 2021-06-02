@@ -31,10 +31,10 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.get
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.findNavController
@@ -55,9 +55,9 @@ import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.data.sync.UploadProgressReceiver
 import com.infomaniak.drive.launchInAppReview
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.SyncUtils.checkSyncPermissionsResult
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
+import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils.getRootName
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
@@ -70,7 +70,7 @@ import java.util.*
 
 class MainActivity : BaseActivity() {
 
-    private lateinit var mainViewModel: MainViewModel
+    private val mainViewModel: MainViewModel by viewModels()
     private lateinit var uploadProgressReceiver: UploadProgressReceiver
     private lateinit var downloadReceiver: DownloadReceiver
 
@@ -80,7 +80,6 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        mainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
         uploadProgressReceiver = UploadProgressReceiver(mainViewModel)
         downloadReceiver = DownloadReceiver(mainViewModel)
         FileController.switchDriveDB(UserDrive())
@@ -148,7 +147,9 @@ class MainActivity : BaseActivity() {
             mainFab.isEnabled = file?.rights?.newFile == true
         }
 
-        launchAllUpload()
+        val drivePermissions = DrivePermissions()
+        drivePermissions.registerPermissions(this) { autorized -> if (autorized) syncImmediately() }
+        launchAllUpload(drivePermissions)
 
         if (!BuildConfig.BETA)
             if (AppSettings.appLaunches == 20 || (AppSettings.appLaunches != 0 && AppSettings.appLaunches % 100 == 0)) launchInAppReview()
@@ -205,13 +206,6 @@ class MainActivity : BaseActivity() {
     override fun onDestroy() {
         super.onDestroy()
         LocalBroadcastManager.getInstance(this).unregisterReceiver(downloadReceiver)
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (checkSyncPermissionsResult(requestCode, grantResults)) {
-            launchAllUpload()
-        }
     }
 
     @SuppressLint("RestrictedApi")

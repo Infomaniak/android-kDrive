@@ -41,8 +41,8 @@ class NewFolderFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View = inflater.inflate(R.layout.fragment_new_folder, container, false)
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         newFolderViewModel.currentFolderId.value = arguments.parentFolderId
         newFolderViewModel.userDrive = arguments.userDrive
 

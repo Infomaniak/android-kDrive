@@ -59,8 +59,8 @@
     <string name="allPasswordHint">Set a password</string>
     <string name="allPathTitle">Location</string>
     <string name="allPdf">PDF</string>
+    <string name="allPermissionNeeded">You must allow access to your files to be able to upload and save them</string>
     <string name="allPictures">Images</string>
-    <string name="allReadPermissionNeeded">You must allow access to your files to be able to upload them</string>
     <string name="allRootName">kDrive %s root</string>
     <string name="allToday">Today</string>
     <string name="allTrashActionCancelled">Deletion cancelled</string>
@@ -71,7 +71,6 @@
     <string name="allUploadFinishedTitle">Upload finished</string>
     <string name="allUserAnonymous">Anonymous</string>
     <string name="allVideo">Videos</string>
-    <string name="allWritePermissionNeeded">You need write access to be able to take pictures and download files</string>
     <string name="allYesterday">Yesterday</string>
     <string name="appSecurityDescription">Protect access to your app by enabling your phone lock.</string>
     <string name="appSecurityTitle">App lock</string>
@@ -400,6 +399,8 @@
     <string name="noDriveTitle">You don’t have a kDrive yet!</string>
     <string name="noFilesDescription">This folder is empty. Click the + button to add files here.</string>
     <string name="noFilesDescriptionNoNetwork">Unable to retrieve information from the folder. Please check your network connection or try again later.</string>
+    <string name="noSyncFolderNotificationDescription">Click here to configure the folders to synchronize</string>
+    <string name="noSyncFolderNotificationTitle">No folder selected for automatic backup</string>
     <string name="notEnoughStorageDescription1">Your kDrive storage space is almost full. Upgrade your plan and unlock new features.</string>
     <string name="notEnoughStorageDescription2">Your kDrive storage space is almost full. Contact your administrator so they can upgrade your plan.</string>
     <string name="notEnoughStorageUsed">used</string>
@@ -422,6 +423,8 @@
     <string name="onBoardingTitle1">Access your files on all your devices</string>
     <string name="onBoardingTitle2">Work together in one place and become more efficient</string>
     <string name="onBoardingTitle3">Save your memories securely</string>
+    <!-- Displayed in a photo list some languages may need to display the date before the month -->
+    <string name="photosHeaderDateFormat">MMMM YYYY</string>
     <string name="picturesNoFile">No photo at this time</string>
     <string name="previewDownloadIndication">Loading in progress, please wait…</string>
     <string name="previewLoadError">Unable to load preview</string>
@@ -443,6 +446,8 @@
     <string name="secureLinkShareTitle">Secure sharing links</string>
     <string name="selectDriveTitle">Select a kDrive</string>
     <string name="selectFolderTitle">Select a folder</string>
+    <string name="selectMediaFoldersDescription">Select the folders on your device that should be automatically saved to your kDrive.</string>
+    <string name="selectMediaFoldersTitle">Folders to save</string>
     <string name="settingsOnlyWifiSyncDescription">Automatic backup of photos/videos and updating of offline files will only be done with a Wi-Fi connection.</string>
     <string name="settingsOnlyWifiSyncTitle">WiFi-only transfer</string>
     <string name="settingsTitle">Settings</string>
@@ -511,6 +516,11 @@
     <string name="syncSettingsSyncPeriodicityOneHourValue">Every hour</string>
     <string name="syncSettingsSyncPeriodicityOneQuarterValue">Every 15 minutes</string>
     <string name="syncSettingsTitle">Saving photos</string>
+    <string name="themeSettingsDarkLabel">Dark</string>
+    <string name="themeSettingsLightLabel">Light</string>
+    <string name="themeSettingsSystemDefaultLabel">System default</string>
+    <string name="themeSettingsSystemLabel">System</string>
+    <string name="themeSettingsTitle">Theme</string>
     <string name="trashActionDelete">Delete permanently</string>
     <string name="trashActionRestoreFileIn">Recover in</string>
     <string name="trashActionRestoreFileOriginalPlace">Recover to the original location</string>

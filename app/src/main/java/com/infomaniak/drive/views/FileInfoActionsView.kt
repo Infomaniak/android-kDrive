@@ -227,8 +227,8 @@ class FileInfoActionsView @JvmOverloads constructor(
         } else Utils.downloadAsOfflineFile(context, currentFile)
     }
 
-    fun downloadFile(owner: Fragment, onSuccess: () -> Unit) {
-        if (owner.checkWriteStoragePermission()) {
+    fun downloadFile(drivePermissions: DrivePermissions, onSuccess: () -> Unit) {
+        if (drivePermissions.checkWriteStoragePermission()) {
             val downloadURL = Uri.parse(ApiRoutes.downloadFile(currentFile))
             val fileName = if (currentFile.isFolder()) "${currentFile.name}.zip" else currentFile.name
             context.startDownloadFile(downloadURL, fileName)

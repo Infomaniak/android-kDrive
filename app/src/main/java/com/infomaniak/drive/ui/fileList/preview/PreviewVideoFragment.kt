@@ -58,8 +58,8 @@ open class PreviewVideoFragment : PreviewFragment {
         return inflater.inflate(R.layout.fragment_preview_video, container, false)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         fileIcon.setImageResource(previewViewModel.currentFile.getFileType().icon)
         container?.layoutTransition?.setAnimateParentHierarchy(false)
         fileName.text = previewViewModel.currentFile.name

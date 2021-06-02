@@ -25,7 +25,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.liveData
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -33,15 +32,16 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController.startDownloadFile
-import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.setBackNavigationResult
+import com.infomaniak.drive.utils.showSnackbar
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_action_multi_select.*
 import kotlinx.coroutines.Dispatchers
 
 class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
 
     private val actionMultiSelectModel by viewModels<ActionMultiSelectModel>()
-    private lateinit var mainViewModel: MainViewModel
     private val navigationArgs: ActionMultiSelectBottomSheetDialogArgs by navArgs()
 
     override fun onCreateView(
@@ -49,24 +49,19 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View = inflater.inflate(R.layout.fragment_bottom_sheet_action_multi_select, container, false)
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         addFavorites.setOnClickListener { onActionSelected(SelectDialogAction.ADD_FAVORITES) }
 
         availableOfflineSwitch.setOnCheckedChangeListener { _, _ -> onActionSelected(SelectDialogAction.OFFLINE) }
         availableOffline.setOnClickListener { onActionSelected(SelectDialogAction.OFFLINE) }
         duplicateFile.setOnClickListener { onActionSelected(SelectDialogAction.DUPLICATE) }
-        downloadFile.setOnClickListener {
-            if (this.checkWriteStoragePermission()) {
-                downloadFileArchive()
-            }
-        }
-    }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (Utils.checkWriteStoragePermissionResult(requestCode, grantResults)) downloadFileArchive()
+        val drivePermissions = DrivePermissions()
+        drivePermissions.registerPermissions(this) { autorized -> if (autorized) downloadFileArchive() }
+        downloadFile.setOnClickListener {
+            if (drivePermissions.checkWriteStoragePermission()) downloadFileArchive()
+        }
     }
 
     private fun downloadFileArchive() {

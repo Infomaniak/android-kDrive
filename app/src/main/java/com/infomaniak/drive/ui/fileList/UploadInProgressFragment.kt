@@ -49,9 +49,9 @@ class UploadInProgressFragment : FileListFragment() {
 
     private var pendingFiles = arrayListOf<UploadFile>()
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         downloadFiles = DownloadFiles()
-        super.onActivityCreated(savedInstanceState)
+        super.onViewCreated(view, savedInstanceState)
         fileAdapter.onFileClicked = null
         fileAdapter.uploadInProgress = true
         toolbar.menu.findItem(R.id.restartItem).isVisible = true

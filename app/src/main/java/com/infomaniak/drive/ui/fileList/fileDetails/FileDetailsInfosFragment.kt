@@ -44,8 +44,8 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         inflater.inflate(R.layout.fragment_file_details_infos, container, false)
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) { currentFile ->
             setupShareLinkContainer(currentFile, fileDetailsViewModel.currentFileShare.value)

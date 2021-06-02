@@ -29,7 +29,7 @@ object RealmModules {
     @RealmModule(classes = [File::class, Rights::class, FileActivity::class])
     class LocalFilesModule
 
-    @RealmModule(classes = [UploadFile::class, SyncSettings::class])
+    @RealmModule(classes = [UploadFile::class, SyncSettings::class, MediaFolder::class])
     class SyncFilesModule
 
     @RealmModule(classes = [AppSettings::class])

@@ -34,8 +34,8 @@ class PreviewOtherFragment : PreviewFragment {
         return inflater.inflate(R.layout.fragment_preview_others, container, false)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         container?.layoutTransition?.setAnimateParentHierarchy(false)
 
         fileIcon.setImageResource(previewViewModel.currentFile.getFileType().icon)

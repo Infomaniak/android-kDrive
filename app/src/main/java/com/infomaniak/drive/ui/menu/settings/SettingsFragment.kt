@@ -32,7 +32,9 @@ import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
+import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.isKeyguardSecure
 import com.infomaniak.drive.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_settings.*
@@ -43,17 +45,19 @@ class SettingsFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_settings, container, false)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
 
+        val drivePermissions = DrivePermissions()
+        drivePermissions.registerPermissions(this) { autorized -> if (autorized) requireActivity().syncImmediately() }
         onlyWifiSyncValue.isChecked = AppSettings.onlyWifiSync
         onlyWifiSyncValue.setOnCheckedChangeListener { _, isChecked ->
             AppSettings.onlyWifiSync = isChecked
-            requireActivity().launchAllUpload()
+            requireActivity().launchAllUpload(drivePermissions)
         }
 
         syncPicture.setOnClickListener {

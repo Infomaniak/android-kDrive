@@ -179,6 +179,7 @@
                         android:id="@+id/selectPath"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/buttonHeight"
+                        android:background="?selectableItemBackground"
                         android:visibility="gone"
                         tools:visibility="visible">
 
@@ -250,30 +251,35 @@
                     android:orientation="vertical">
 
                     <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/syncPicture"
+                        android:id="@+id/mediaFolders"
                         android:layout_width="match_parent"
-                        android:layout_height="@dimen/buttonHeight">
+                        android:layout_height="@dimen/buttonHeight"
+                        android:background="?selectableItemBackground"
+                        tools:visibility="visible">
 
                         <TextView
-                            android:id="@+id/syncPictureTitle"
+                            android:id="@+id/mediaFoldersTitle"
                             style="@style/Subtitle2"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/marginStandard"
-                            android:text="@string/syncSettingsButtonSyncPicture"
+                            android:text="@string/selectMediaFoldersTitle"
                             app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toStartOf="@id/syncPictureSwitch"
+                            app:layout_constraintEnd_toStartOf="@id/mediaFoldersChevron"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent" />
 
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/syncPictureSwitch"
+                        <ImageView
+                            android:id="@+id/mediaFoldersChevron"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="@dimen/marginStandardMedium"
+                            android:src="@drawable/ic_chevron_right"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:ignore="ContentDescription" />
+
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
                     <View
@@ -300,38 +306,6 @@
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
                             android:id="@+id/syncVideoSwitch"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="@dimen/marginStandardMedium"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/divider" />
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/syncScreenshot"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/buttonHeight">
-
-                        <TextView
-                            android:id="@+id/syncScreenshotTitle"
-                            style="@style/Subtitle2"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/marginStandard"
-                            android:text="@string/syncSettingsButtonSyncScreenshot"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toStartOf="@id/syncScreenshotSwitch"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/syncScreenshotSwitch"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="@dimen/marginStandardMedium"

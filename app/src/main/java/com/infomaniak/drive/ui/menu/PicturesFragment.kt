@@ -23,9 +23,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.MainViewModel
@@ -39,9 +39,9 @@ import kotlin.math.min
 
 class PicturesFragment : Fragment() {
 
-    private lateinit var mainViewModel: MainViewModel
+    private val mainViewModel: MainViewModel by activityViewModels()
     private lateinit var picturesAdapter: PicturesAdapter
-    private val picturesViewModel: PicturesViewModel by navGraphViewModels(R.id.picturesFragment)
+    private val picturesViewModel: PicturesViewModel by viewModels()
 
     private lateinit var timer: CountDownTimer
 
@@ -49,8 +49,8 @@ class PicturesFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_pictures, container, false)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         timer = Utils.createRefreshTimer {
             swipeRefreshLayout?.isRefreshing = true
@@ -71,7 +71,6 @@ class PicturesFragment : Fragment() {
             getPictures()
         }
 
-        mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
         picturesAdapter = PicturesAdapter(isSquare = true) { file ->
             Utils.displayFile(mainViewModel, findNavController(), file, picturesAdapter.getItems())
         }

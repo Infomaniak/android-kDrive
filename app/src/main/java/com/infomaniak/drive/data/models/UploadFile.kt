@@ -76,12 +76,12 @@ open class UploadFile(
         private const val DB_NAME = "Sync.realm"
         private const val ONE_DAY = 24 * 60 * 60 * 1000
         private var realmConfiguration: RealmConfiguration = RealmConfiguration.Builder().name(DB_NAME)
-            .schemaVersion(0) // Must be bumped when the schema changes
+            .schemaVersion(1) // Must be bumped when the schema changes
             .modules(RealmModules.SyncFilesModule())
             .migration(UploadMigration())
             .build()
 
-        private fun getRealmInstance() = Realm.getInstance(realmConfiguration)
+        fun getRealmInstance(): Realm = Realm.getInstance(realmConfiguration)
 
         private fun syncFileByUriQuery(realm: Realm, uri: String): RealmQuery<UploadFile> {
             return realm.where(UploadFile::class.java).equalTo(UploadFile::uri.name, uri)
@@ -168,7 +168,7 @@ open class UploadFile(
         }
 
         fun deleteAll(uploadFiles: ArrayList<UploadFile>) {
-            getRealmInstance()?.use { realm ->
+            getRealmInstance().use { realm ->
                 realm.executeTransaction {
                     uploadFiles.forEach {
                         syncFileByUriQuery(realm, it.uri).findFirst()?.let { syncFile ->
@@ -181,7 +181,7 @@ open class UploadFile(
         }
 
         fun deleteAllByFolderId(folderID: Int) {
-            getRealmInstance()?.use { realm ->
+            getRealmInstance().use { realm ->
                 realm.executeTransaction {
                     it.where(UploadFile::class.java).equalTo(UploadFile::remoteFolder.name, folderID).findAll()
                         ?.deleteAllFromRealm()

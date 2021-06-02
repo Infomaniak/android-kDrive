@@ -17,14 +17,12 @@
  */
 package com.infomaniak.drive.utils
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ActivityManager
 import android.app.KeyguardManager
 import android.content.ContentUris
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.res.Configuration
 import android.database.Cursor
@@ -72,7 +70,6 @@ import androidx.navigation.fragment.findNavController
 import coil.ImageLoader
 import coil.load
 import coil.request.Disposable
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
@@ -91,9 +88,6 @@ import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.UtilsUi.getInitials
 import com.infomaniak.lib.core.utils.format
-import com.infomaniak.lib.core.utils.hasPermissions
-import com.infomaniak.lib.core.utils.requestPermissionsIsPossible
-import com.infomaniak.lib.core.utils.startAppSettingsConfig
 import kotlinx.android.synthetic.main.cardview_file_grid.view.*
 import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.android.synthetic.main.item_file.view.fileFavorite
@@ -527,30 +521,6 @@ fun Context.requestCredentials(onSuccess: () -> Unit) {
             } else {
                 Log.i(FACE_ID_LOG_TAG, "Keyguard manager is null")
             }
-        }
-    }
-}
-
-@SuppressLint("NewApi")
-fun Fragment.checkWriteStoragePermission(): Boolean {
-    val writePermission = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    val activity = requireActivity()
-    return when {
-        Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> true
-        requireContext().hasPermissions(writePermission) -> true
-        activity.requestPermissionsIsPossible(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)) -> {
-            requestPermissions(writePermission, SyncUtils.REQUEST_WRITE_STORAGE_PERMISSION)
-            false
-        }
-        else -> {
-            MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
-                .setTitle(R.string.androidPermissionTitle)
-                .setMessage(R.string.allWritePermissionNeeded)
-                .setPositiveButton(R.string.buttonAuthorize) { _: DialogInterface?, _: Int ->
-                    activity.startAppSettingsConfig()
-                }
-                .show()
-            false
         }
     }
 }
