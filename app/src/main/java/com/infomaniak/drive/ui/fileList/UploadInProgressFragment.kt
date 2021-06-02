@@ -32,6 +32,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileInProgress
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.sync.UploadAdapter
+import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
@@ -43,6 +44,7 @@ import kotlinx.coroutines.withContext
 
 class UploadInProgressFragment : FileListFragment() {
 
+    private lateinit var drivePermissions: DrivePermissions
     override var enabledMultiSelectMode: Boolean = false
     override var hideBackButtonWhenRoot: Boolean = false
     override var showPendingFiles = false
@@ -51,6 +53,12 @@ class UploadInProgressFragment : FileListFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         downloadFiles = DownloadFiles()
+        drivePermissions = DrivePermissions()
+        drivePermissions.registerPermissions(this) { autorized ->
+            if (!autorized) {
+                findNavController().popBackStack()
+            }
+        }
         super.onViewCreated(view, savedInstanceState)
         fileAdapter.onFileClicked = null
         fileAdapter.uploadInProgress = true
@@ -150,6 +158,7 @@ class UploadInProgressFragment : FileListFragment() {
 
     private inner class DownloadFiles : (Boolean) -> Unit {
         override fun invoke(ignoreCache: Boolean) {
+            if (!drivePermissions.checkWriteStoragePermission()) return
             if (ignoreCache) fileAdapter.setList(arrayListOf())
 
             timer.start()
