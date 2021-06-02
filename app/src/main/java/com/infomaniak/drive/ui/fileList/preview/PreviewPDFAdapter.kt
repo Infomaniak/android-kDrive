@@ -17,6 +17,9 @@
  */
 package com.infomaniak.drive.ui.fileList.preview
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -34,10 +37,21 @@ class PreviewPDFAdapter(private val pdfCore: PdfCore) : RecyclerView.Adapter<Vie
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.itemView.apply {
+            imageView.setImageBitmap(createWhiteBitmap())
             pdfCore.renderPage(position) { bitmap ->
                 imageView.setImageBitmap(bitmap)
             }
         }
+    }
+
+    private fun createWhiteBitmap(): Bitmap? {
+        val bitmap = Bitmap.createBitmap(
+            pdfCore.bitmapWidth, pdfCore.bitmapHeight, Bitmap.Config.ARGB_8888
+        )
+
+        val canvas = Canvas(bitmap)
+        canvas.drawColor(Color.WHITE)
+        return bitmap
     }
 
     override fun getItemCount() = pdfCore.getPdfPages()

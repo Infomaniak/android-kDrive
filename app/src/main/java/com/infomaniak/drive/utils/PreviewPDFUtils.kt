@@ -49,7 +49,7 @@ object PreviewPDFUtils {
                 externalOutputFile.setLastModified(file.getLastModifiedInMilliSecond())
             }
 
-            val data = if (offlineFile.exists()) PdfCore(offlineFile) else PdfCore(cacheFile)
+            val data = if (offlineFile.exists()) PdfCore(context, offlineFile) else PdfCore(context, cacheFile)
 
             ApiResponse(ApiResponse.Status.SUCCESS, data)
         } catch (e: Exception) {
