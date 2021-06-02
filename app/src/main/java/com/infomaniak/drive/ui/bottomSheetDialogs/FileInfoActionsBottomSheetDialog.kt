@@ -261,7 +261,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun onMoveFile(destinationFolder: File) {
-        mainViewModel.moveFile(requireContext(), currentFile, destinationFolder)
+        mainViewModel.moveFile(currentFile, destinationFolder)
             .observe(viewLifecycleOwner) { apiResponse ->
                 if (apiResponse.isSuccess()) {
                     mainViewModel.refreshActivities.value = true

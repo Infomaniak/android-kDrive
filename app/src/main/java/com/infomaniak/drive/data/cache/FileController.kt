@@ -84,16 +84,19 @@ object FileController {
         }
     }
 
-    private fun removeFileCascade(
+    fun removeFile(
         fileId: Int,
         keepFileCaches: ArrayList<Int> = arrayListOf(),
         keepFiles: ArrayList<Int> = arrayListOf(),
-        realm: Realm? = null
+        realm: Realm? = null,
+        recursive: Boolean = true,
     ) {
         val block: (Realm) -> Unit = { currentRealm ->
             getFileById(currentRealm, fileId)?.let { file ->
-                file.children.createSnapshot().forEach {
-                    if (!keepFiles.contains(it.id)) removeFileCascade(it.id, keepFileCaches, keepFiles, realm)
+                if (recursive) {
+                    file.children.createSnapshot().forEach {
+                        if (!keepFiles.contains(it.id)) removeFile(it.id, keepFileCaches, keepFiles, realm)
+                    }
                 }
                 if (!keepFileCaches.contains(fileId)) file.deleteCaches(Realm.getApplicationContext()!!)
                 if (!keepFiles.contains(fileId) && file.isValid) currentRealm.executeTransaction { file.deleteFromRealm() }
@@ -172,7 +175,7 @@ object FileController {
                 } else cacheFile.delete()
             }
 
-            if (replaceOldData) removeFileCascade(MY_SHARES_FILE_ID, keepCaches, keepFiles, realm)
+            if (replaceOldData) removeFile(MY_SHARES_FILE_ID, keepCaches, keepFiles, realm)
             saveFiles(MY_SHARES_FILE, files, replaceOldData, realm)
         }
     }
@@ -617,7 +620,7 @@ object FileController {
                 if (returnResponse[this.fileId] == null) {
                     getParentFile(fileId = fileId, realm = realm)?.let { parent ->
                         if (parent.id == currentFolder.id) {
-                            removeFileCascade(fileId, realm = realm)
+                            removeFile(fileId, realm = realm, recursive = false)
                         }
                     }
                     returnResponse[this.fileId] = File.LocalFileActivity.IS_DELETE
@@ -626,11 +629,13 @@ object FileController {
             FileActivity.FileActivityType.FILE_MOVE_IN,
             FileActivity.FileActivityType.FILE_RESTORE,
             FileActivity.FileActivityType.FILE_CREATE -> {
-                if (returnResponse[this.fileId] == null) {
-                    realm.where(File::class.java).equalTo(File::id.name, currentFolder.id).findFirst()?.let { currentFolder ->
-                        if (this.file != null && !currentFolder.children.contains(this.file)) {
-                            addChild(realm, currentFolder, this.file!!)
+                if (returnResponse[this.fileId] == null && this.file != null) {
+                    realm.where(File::class.java).equalTo(File::id.name, currentFolder.id).findFirst()?.let { realmFolder ->
+                        if (!realmFolder.children.contains(this.file)) {
+                            addChild(realm, realmFolder, this.file!!)
                             returnResponse[this.fileId] = File.LocalFileActivity.IS_NEW
+                        } else {
+                            updateFileFromActivity(realm, returnResponse, this, realmFolder.id)
                         }
                     }
                 }

@@ -381,7 +381,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun onMoveFile(destinationFolder: File) {
-        mainViewModel.moveFile(requireContext(), currentPreviewFile, destinationFolder)
+        mainViewModel.moveFile(currentPreviewFile, destinationFolder)
             .observe(viewLifecycleOwner) { apiResponse ->
                 if (apiResponse.isSuccess()) {
                     mainViewModel.refreshActivities.value = true

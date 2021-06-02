@@ -164,16 +164,13 @@ class MainViewModel : ViewModel() {
     }
 
     fun moveFile(
-        context: Context, file: File, newParent: File,
+        file: File,
+        newParent: File,
         onSuccess: ((fileID: Int) -> Unit)? = null
     ) = liveData(Dispatchers.IO) {
         val apiResponse = ApiRepository.moveFile(file, newParent)
         if (apiResponse.isSuccess()) {
-            file.deleteCaches(context)
-
-            FileController.updateFile(file.id) { localFile ->
-                localFile.deleteFromRealm()
-            }
+            FileController.removeFile(file.id, recursive = false)
 
             FileController.updateFile(newParent.id) { localFolder ->
                 file.isOffline = false
