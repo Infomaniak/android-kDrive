@@ -29,6 +29,13 @@ import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_pdfview.view.*
 
 class PreviewPDFAdapter(private val pdfCore: PdfCore) : RecyclerView.Adapter<ViewHolder>() {
+
+    private var whiteBitmap: Bitmap
+
+    init {
+        whiteBitmap = createWhiteBitmap()
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             LayoutInflater.from(parent.context).inflate(R.layout.item_pdfview, parent, false)
@@ -37,14 +44,14 @@ class PreviewPDFAdapter(private val pdfCore: PdfCore) : RecyclerView.Adapter<Vie
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.itemView.apply {
-            imageView.setImageBitmap(createWhiteBitmap())
+            imageView.setImageBitmap(whiteBitmap)
             pdfCore.renderPage(position) { bitmap ->
                 imageView.setImageBitmap(bitmap)
             }
         }
     }
 
-    private fun createWhiteBitmap(): Bitmap? {
+    private fun createWhiteBitmap(): Bitmap {
         val bitmap = Bitmap.createBitmap(
             pdfCore.bitmapWidth, pdfCore.bitmapHeight, Bitmap.Config.ARGB_8888
         )
