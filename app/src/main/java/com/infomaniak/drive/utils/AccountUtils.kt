@@ -120,6 +120,7 @@ object AccountUtils : CredentialManager {
                             val appSyncSettings = UploadFile.getAppSyncSettings()
                             for (driveRemoved in driveRemovedList) {
                                 if (appSyncSettings?.userId == user.id && appSyncSettings.driveId == driveRemoved.id) {
+                                    Sentry.captureMessage("AccountUtils: disableAutoSync")
                                     context.disableAutoSync()
                                 }
                                 if (currentDriveId == driveRemoved.id) {
@@ -172,6 +173,7 @@ object AccountUtils : CredentialManager {
         FileController.deleteUserDriveFiles(userRemoved.id)
 
         if (UploadFile.getAppSyncSettings()?.userId == userRemoved.id) {
+            Sentry.captureMessage("AccountUtils: disableAutoSync")
             context.disableAutoSync()
         }
 
@@ -262,6 +264,7 @@ object AccountUtils : CredentialManager {
             AppSettings.removeAppSettings()
             UISettings(context).removeUiSettings()
             if (isEnableAppSync()) {
+                Sentry.captureMessage("AccountUtils: disableAutoSync")
                 context.disableAutoSync()
             }
         }

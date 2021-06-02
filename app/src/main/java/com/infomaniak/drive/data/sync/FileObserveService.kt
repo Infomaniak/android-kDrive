@@ -28,12 +28,11 @@ import android.util.Log
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.sync.UploadAdapter.Companion.showSyncConfigNotification
+import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import io.sentry.Sentry
+import kotlinx.coroutines.*
 
 
 class FileObserveService : Service() {
@@ -51,7 +50,13 @@ class FileObserveService : Service() {
 
     private fun initial() {
         tableObserver = TableObserver(null)
-        val syncSetting = UploadFile.getAppSyncSettings()!!
+        val syncSetting = UploadFile.getAppSyncSettings()
+
+        if (syncSetting == null) {
+            Sentry.captureMessage("FileObserveService: disableAutoSync")
+            runBlocking(Dispatchers.IO) { disableAutoSync() }
+            return
+        }
 
         if (syncSetting.syncVideo) {
             contentResolver.registerContentObserver(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, true, tableObserver)

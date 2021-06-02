@@ -254,7 +254,10 @@ class UploadAdapter @JvmOverloads constructor(
         cancelSync()
         currentUploadFile?.let { UploadFile.deleteAllByFolderId(it.remoteFolder) }
         val isSyncFile = currentUploadFile?.type == UploadFile.Type.SYNC.name
-        if (isSyncFile) context?.disableAutoSync()
+        if (isSyncFile) {
+            Sentry.captureMessage("FolderNotFoundNotification: disableAutoSync")
+            context?.disableAutoSync()
+        }
 
         val contentIntent = if (isSyncFile) PendingIntent.getActivity(
             context, 0,
