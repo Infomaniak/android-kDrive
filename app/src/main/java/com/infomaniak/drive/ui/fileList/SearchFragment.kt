@@ -47,11 +47,11 @@ class SearchFragment : FileListFragment() {
     private lateinit var filterLayoutView: View
     private var isDownloading = false
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         sortType = File.SortType.RECENT
         downloadFiles = DownloadFiles()
         filterLayoutView = layoutInflater.inflate(R.layout.search_filter, null)
-        super.onActivityCreated(savedInstanceState)
+        super.onViewCreated(view, savedInstanceState)
 
         noFilesLayout.setup(
             icon = R.drawable.ic_search_grey,

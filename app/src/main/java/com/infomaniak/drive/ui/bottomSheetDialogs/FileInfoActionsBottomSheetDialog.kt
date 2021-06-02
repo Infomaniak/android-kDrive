@@ -24,8 +24,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -55,19 +55,22 @@ import kotlinx.coroutines.withContext
 
 class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoActionsView.OnItemClickListener {
 
-    private val navigationArgs: FileInfoActionsBottomSheetDialogArgs by navArgs()
-    private lateinit var mainViewModel: MainViewModel
     private lateinit var currentFile: File
+    private lateinit var drivePermissions: DrivePermissions
+    private val mainViewModel: MainViewModel by activityViewModels()
+    private val navigationArgs: FileInfoActionsBottomSheetDialogArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View = inflater.inflate(R.layout.fragment_bottom_sheet_file_info_actions, container, false)
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         currentFile = FileController.getFileById(navigationArgs.fileId, navigationArgs.userDrive)!!
-        mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
+
+        drivePermissions = DrivePermissions()
+        drivePermissions.registerPermissions(this) { autorized -> if (autorized) downloadFileClicked() }
 
         fileInfoActionsView.init(this, this, navigationArgs.userDrive.sharedWithMe)
         fileInfoActionsView.updateCurrentFile(currentFile)
@@ -81,11 +84,6 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         onSelectFolderResult(requestCode, resultCode, data)
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (Utils.checkWriteStoragePermissionResult(requestCode, grantResults)) downloadFileClicked()
     }
 
     override fun editDocumentClicked(ownerFragment: Fragment, currentFile: File) {
@@ -145,7 +143,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun downloadFileClicked() {
-        fileInfoActionsView.downloadFile(this) {
+        fileInfoActionsView.downloadFile(drivePermissions) {
             findNavController().popBackStack()
         }
     }

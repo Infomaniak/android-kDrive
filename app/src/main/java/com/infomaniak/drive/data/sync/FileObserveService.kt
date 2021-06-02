@@ -25,10 +25,14 @@ import android.os.Handler
 import android.os.IBinder
 import android.provider.MediaStore
 import android.util.Log
+import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.sync.UploadAdapter.Companion.showSyncConfigNotification
+import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
-import com.infomaniak.drive.utils.SyncUtils.syncDelayJob
-import kotlinx.coroutines.Job
+import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import io.sentry.Sentry
+import kotlinx.coroutines.*
 
 
 class FileObserveService : Service() {
@@ -46,21 +50,19 @@ class FileObserveService : Service() {
 
     private fun initial() {
         tableObserver = TableObserver(null)
-        val syncSetting = UploadFile.getAppSyncSettings()!!
+        val syncSetting = UploadFile.getAppSyncSettings()
 
-        if (syncSetting.syncPicture || syncSetting.syncScreenshot) {
-            val externalContentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-            val internalContentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-            contentResolver.registerContentObserver(externalContentUri, true, tableObserver)
-            contentResolver.registerContentObserver(internalContentUri, true, tableObserver)
+        if (syncSetting == null) {
+            Sentry.captureMessage("FileObserveService: disableAutoSync")
+            runBlocking(Dispatchers.IO) { disableAutoSync() }
+            return
         }
 
         if (syncSetting.syncVideo) {
-            val externalContentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-            val internalContentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-            contentResolver.registerContentObserver(externalContentUri, true, tableObserver)
-            contentResolver.registerContentObserver(internalContentUri, true, tableObserver)
+            contentResolver.registerContentObserver(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, true, tableObserver)
         }
+
+        contentResolver.registerContentObserver(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, true, tableObserver)
     }
 
     override fun onDestroy() {
@@ -84,8 +86,16 @@ class FileObserveService : Service() {
 
             uri?.let {
                 if (!applicationContext.isSyncActive()) {
-                    syncJob?.cancel()
-                    syncJob = applicationContext.syncDelayJob()
+                    when {
+                        MediaFolder.getAllSyncedFoldersCount() > 0 -> {
+                            syncJob?.cancel()
+                            syncJob = GlobalScope.launch {
+                                delay(1000)
+                                syncImmediately()
+                            }
+                        }
+                        else -> baseContext.showSyncConfigNotification()
+                    }
                 }
             }
         }

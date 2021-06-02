@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
+import android.view.View
 import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
@@ -30,7 +31,7 @@ class TrashFragment : FileSubTypeListFragment() {
 
     val trashViewModel: TrashViewModel by navGraphViewModels(R.id.trashFragment)
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         sortType = File.SortType.RECENT_TRASHED
         downloadFiles =
             DownloadFiles(
@@ -38,7 +39,7 @@ class TrashFragment : FileSubTypeListFragment() {
                 else null
             )
 
-        super.onActivityCreated(savedInstanceState)
+        super.onViewCreated(view, savedInstanceState)
 
         if (folderID == ROOT_ID) collapsingToolbarLayout.title = getString(R.string.trashTitle)
         noFilesLayout.setup(icon = R.drawable.ic_delete, title = R.string.trashNoFile, initialListView = fileRecyclerView)

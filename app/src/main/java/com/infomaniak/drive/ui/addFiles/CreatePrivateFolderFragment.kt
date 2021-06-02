@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.addFiles
 
 import android.os.Bundle
+import android.view.View
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File.FolderPermission.*
 import com.infomaniak.drive.utils.safeNavigate
@@ -27,8 +28,8 @@ import kotlinx.android.synthetic.main.fragment_create_folder.*
 
 class CreatePrivateFolderFragment : CreateFolderFragment() {
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         currentPermission = ONLY_ME
         adapter.apply {

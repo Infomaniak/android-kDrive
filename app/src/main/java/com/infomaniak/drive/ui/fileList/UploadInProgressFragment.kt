@@ -22,6 +22,7 @@ import android.os.Bundle
 import android.provider.OpenableColumns
 import android.util.Log
 import android.view.View
+import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
@@ -48,9 +49,9 @@ class UploadInProgressFragment : FileListFragment() {
 
     private var pendingFiles = arrayListOf<UploadFile>()
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         downloadFiles = DownloadFiles()
-        super.onActivityCreated(savedInstanceState)
+        super.onViewCreated(view, savedInstanceState)
         fileAdapter.onFileClicked = null
         fileAdapter.uploadInProgress = true
         toolbar.menu.findItem(R.id.restartItem).isVisible = true
@@ -166,6 +167,8 @@ class UploadInProgressFragment : FileListFragment() {
                                     files.add(File(id = 0, name = it.fileName, size = size, path = it.uri))
                                 }
                             }
+                        } else {
+                            files.add(File(id = 0, name = it.fileName, size = uri.toFile().length(), path = it.uri))
                         }
                     }
                     pendingFiles = syncFiles

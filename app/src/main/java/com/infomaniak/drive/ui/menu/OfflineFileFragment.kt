@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
+import android.view.View
 import android.view.View.VISIBLE
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.Utils
@@ -25,10 +26,10 @@ import kotlinx.android.synthetic.main.fragment_file_list.*
 
 class OfflineFileFragment : FileSubTypeListFragment() {
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         downloadFiles = DownloadFiles()
         folderID = Utils.OTHER_ROOT_ID
-        super.onActivityCreated(savedInstanceState)
+        super.onViewCreated(view, savedInstanceState)
 
         sortButton.visibility = VISIBLE
         collapsingToolbarLayout.title = getString(R.string.offlineFileTitle)

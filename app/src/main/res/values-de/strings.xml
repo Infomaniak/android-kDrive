@@ -59,8 +59,8 @@
     <string name="allPasswordHint">Passwort festlegen</string>
     <string name="allPathTitle">Speicherort</string>
     <string name="allPdf">PDF</string>
+    <string name="allPermissionNeeded">Sie müssen den Zugriff auf Ihre Dateien erlauben, um den Import und zu speichern durchführen zu können</string>
     <string name="allPictures">Bilder</string>
-    <string name="allReadPermissionNeeded">Sie müssen den Zugriff auf Ihre Dateien erlauben, um den Import durchführen zu können</string>
     <string name="allRootName">Root des kDrive %s</string>
     <string name="allToday">Heute</string>
     <string name="allTrashActionCancelled">Löschen abgebrochen</string>
@@ -71,7 +71,6 @@
     <string name="allUploadFinishedTitle">Import abgeschlossen</string>
     <string name="allUserAnonymous">Anonym</string>
     <string name="allVideo">Videos</string>
-    <string name="allWritePermissionNeeded">Sie müssen Schreibzugriff erlauben, um Bilder aufzunehmen und Dateien herunterzuladen</string>
     <string name="allYesterday">Gestern</string>
     <string name="appSecurityDescription">Schützen Sie den Zugang zu Ihrer Anwendung, indem Sie die Sperre Ihres Telefons aktivieren.</string>
     <string name="appSecurityTitle">Sperrung der Anwendung</string>
@@ -400,6 +399,8 @@
     <string name="noDriveTitle">Sie haben kDrive noch nicht!</string>
     <string name="noFilesDescription">Dieser Ordner ist leer. Klicken Sie auf den +Button, um hier Dateien hinzuzufügen.</string>
     <string name="noFilesDescriptionNoNetwork">Die Informationen des Ordners können nicht wiederhergestellt werden. Bitte überprüfen Sie Ihre Netzwerkverbindung oder versuchen Sie es später noch einmal.</string>
+    <string name="noSyncFolderNotificationDescription">Klicken Sie hier, um die zu synchronisierenden Ordner zu konfigurieren</string>
+    <string name="noSyncFolderNotificationTitle">Keine Ordner für die automatische Sicherung ausgewählt</string>
     <string name="notEnoughStorageDescription1">Der Speicherplatz Ihres kDrive ist fast voll. Erweitern Sie Ihr Angebot und schalten Sie neue Funktionen frei.</string>
     <string name="notEnoughStorageDescription2">Der Speicherplatz Ihres kDrive ist fast voll. Wenden Sie sich an Ihren Administrator, damit er Ihr Angebot erweitern kann.</string>
     <string name="notEnoughStorageUsed">verwendet</string>
@@ -422,6 +423,8 @@
     <string name="onBoardingTitle1">Greifen Sie über alle Ihre Geräte auf Ihre Dateien zu</string>
     <string name="onBoardingTitle2">Arbeiten Sie am selben Ort zusammen und werden Sie effizienter</string>
     <string name="onBoardingTitle3">Speichern Sie Ihre Erinnerungen völlig sicher</string>
+    <!-- Displayed in a photo list some languages may need to display the date before the month -->
+    <string name="photosHeaderDateFormat">MMMM YYYY</string>
     <string name="picturesNoFile">Derzeit kein Foto</string>
     <string name="previewDownloadIndication">Wird geladen, bitte warten…</string>
     <string name="previewLoadError">Vorschau kann nicht geladen werden</string>
@@ -443,6 +446,8 @@
     <string name="secureLinkShareTitle">Sichere Freigabelinks</string>
     <string name="selectDriveTitle">kDrive auswählen</string>
     <string name="selectFolderTitle">Ordner auswählen</string>
+    <string name="selectMediaFoldersDescription">Wählen Sie die Ordner auf Ihrem Gerät aus, die automatisch auf Ihrem kDrive gesichert werden sollen.</string>
+    <string name="selectMediaFoldersTitle">Zu speichernde Dateien</string>
     <string name="settingsOnlyWifiSyncDescription">Die automatische Sicherung von Fotos/Videos und die Aktualisierung von Offline-Dateien wird nur bei einer Wifi-Verbindung durchgeführt.</string>
     <string name="settingsOnlyWifiSyncTitle">Übertragung nur im WLAN</string>
     <string name="settingsTitle">Einstellungen</string>
@@ -511,6 +516,11 @@
     <string name="syncSettingsSyncPeriodicityOneHourValue">Stündlich</string>
     <string name="syncSettingsSyncPeriodicityOneQuarterValue">Alle 15 Minuten</string>
     <string name="syncSettingsTitle">Speicherung der Fotos</string>
+    <string name="themeSettingsDarkLabel">Dunkel</string>
+    <string name="themeSettingsLightLabel">Hell</string>
+    <string name="themeSettingsSystemDefaultLabel">Systemstandard</string>
+    <string name="themeSettingsSystemLabel">System</string>
+    <string name="themeSettingsTitle">Design</string>
     <string name="trashActionDelete">Endgültig löschen</string>
     <string name="trashActionRestoreFileIn">Wiederherstellen in</string>
     <string name="trashActionRestoreFileOriginalPlace">Am ursprünglichen Ort wiederherstellen</string>

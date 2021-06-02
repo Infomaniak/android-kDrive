@@ -31,8 +31,8 @@ class IntroFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_intro, container, false)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         when (arguments?.getInt(POSITION_KEY)) {
             1 -> {
                 waveBackground.setImageResource(R.drawable.ic_back_wave_2)

@@ -28,10 +28,10 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
@@ -44,7 +44,6 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
-import com.infomaniak.drive.ui.fileList.FileListViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntent
@@ -59,48 +58,49 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListener {
-    private lateinit var previewSliderAdapter: PreviewSliderAdapter
-    private lateinit var mainViewModel: MainViewModel
-    private lateinit var fileListViewModel: FileListViewModel
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
-    private val previewSliderViewModel: PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
     private lateinit var currentPreviewFile: File
+    private lateinit var drivePermissions: DrivePermissions
+    private lateinit var previewSliderAdapter: PreviewSliderAdapter
+    private val mainViewModel: MainViewModel by activityViewModels()
+    private val previewSliderViewModel: PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
     private var hideActions: Boolean = false
 
     private lateinit var userDrive: UserDrive
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
-        fileListViewModel = ViewModelProvider(this)[FileListViewModel::class.java]
         return inflater.inflate(R.layout.fragment_preview_slider, container, false)
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        if (fileListViewModel.currentPreview == null) {
+        if (previewSliderViewModel.currentPreview == null) {
             currentPreviewFile = arguments?.getInt(PREVIEW_FILE_TAG)?.let { fileId ->
                 FileController.getFileById(fileId) ?: mainViewModel.currentFileList.value?.first { it.id == fileId }
             } ?: throw Exception("No current preview found")
-            fileListViewModel.isSharedWithMe = arguments?.getBoolean(PREVIEW_IS_SHARED_WITH_ME, false) ?: false
-            fileListViewModel.currentPreview = currentPreviewFile
+            previewSliderViewModel.isSharedWithMe = arguments?.getBoolean(PREVIEW_IS_SHARED_WITH_ME, false) ?: false
+            previewSliderViewModel.currentPreview = currentPreviewFile
             hideActions = arguments?.getBoolean(PREVIEW_HIDE_ACTIONS, false) ?: false
         } else {
-            fileListViewModel.currentPreview?.let { currentPreviewFile = it }
+            previewSliderViewModel.currentPreview?.let { currentPreviewFile = it }
         }
 
-        userDrive = UserDrive(driveId = currentPreviewFile.driveId, sharedWithMe = fileListViewModel.isSharedWithMe)
+        userDrive = UserDrive(driveId = currentPreviewFile.driveId, sharedWithMe = previewSliderViewModel.isSharedWithMe)
 
         getBackNavigationResult<Boolean>(DownloadProgressDialog.OPEN_WITH) {
             requireContext().openWith(currentPreviewFile, userDrive)
         }
 
+        drivePermissions = DrivePermissions()
+        drivePermissions.registerPermissions(this) { autorized -> if (autorized) downloadFileClicked() }
+
         previewSliderAdapter = PreviewSliderAdapter(childFragmentManager, lifecycle)
         viewPager.adapter = previewSliderAdapter
         viewPager.offscreenPageLimit = 3
 
-        bottomSheetFileInfos.init(this, this, fileListViewModel.isSharedWithMe)
+        bottomSheetFileInfos.init(this, this, previewSliderViewModel.isSharedWithMe)
         bottomSheetFileInfos.updateCurrentFile(currentPreviewFile)
         bottomSheetFileInfos.setOnTouchListener { _, _ ->
             true
@@ -149,11 +149,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
 
         configureBottomSheetFileInfo()
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (Utils.checkWriteStoragePermissionResult(requestCode, grantResults)) downloadFileClicked()
     }
 
     private fun configureBottomSheetFileInfo() {
@@ -209,7 +204,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     override fun onPause() {
         super.onPause()
-        fileListViewModel.currentPreview = currentPreviewFile
+        previewSliderViewModel.currentPreview = currentPreviewFile
     }
 
     override fun onDestroy() {
@@ -311,7 +306,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun downloadFileClicked() {
-        bottomSheetFileInfos.downloadFile(this) {
+        bottomSheetFileInfos.downloadFile(drivePermissions) {
             toggleBottomSheet(true)
         }
     }
@@ -405,6 +400,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     class PreviewSliderViewModel : ViewModel() {
         val pdfIsDownloading = MutableLiveData<Boolean>()
+        var currentPreview: File? = null
+        var isSharedWithMe = false
     }
 
     companion object {

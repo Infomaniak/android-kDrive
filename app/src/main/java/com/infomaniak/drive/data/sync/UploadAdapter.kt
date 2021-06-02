@@ -22,7 +22,6 @@ import android.app.PendingIntent
 import android.content.*
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.os.Parcelable
 import android.provider.MediaStore
 import android.provider.OpenableColumns
@@ -37,15 +36,19 @@ import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.api.UploadTask.FolderNotFoundException
 import com.infomaniak.drive.data.api.UploadTask.QuotaExceededException
 import com.infomaniak.drive.data.models.AppSettings
+import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.menu.settings.SyncSettingsActivity
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.MediaFoldersProvider.IMAGES_BUCKET_ID
+import com.infomaniak.drive.utils.MediaFoldersProvider.VIDEO_BUCKET_ID
 import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.UPLOAD_STATUS_ID
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
+import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.uploadNotification
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.SyncUtils.isWifiConnection
@@ -251,7 +254,10 @@ class UploadAdapter @JvmOverloads constructor(
         cancelSync()
         currentUploadFile?.let { UploadFile.deleteAllByFolderId(it.remoteFolder) }
         val isSyncFile = currentUploadFile?.type == UploadFile.Type.SYNC.name
-        if (isSyncFile) context?.disableAutoSync()
+        if (isSyncFile) {
+            Sentry.captureMessage("FolderNotFoundNotification: disableAutoSync")
+            context?.disableAutoSync()
+        }
 
         val contentIntent = if (isSyncFile) PendingIntent.getActivity(
             context, 0,
@@ -388,38 +394,17 @@ class UploadAdapter @JvmOverloads constructor(
         val deferreds = arrayListOf<Deferred<Any?>>()
 
         syncSettings?.let { syncSettings ->
-            if (syncSettings.syncPicture || syncSettings.syncScreenshot) {
-                when {
-                    syncSettings.syncPicture && !syncSettings.syncScreenshot -> {
-                        customSelection = selection +
-                                " AND ${MediaStoreUtils.mediaPathColumn} like ?" +
-                                " AND ${MediaStoreUtils.mediaPathColumn} not like ?"
-                        customArgs = args + arrayOf("%${Environment.DIRECTORY_DCIM}%", "%${SyncUtils.DIRECTORY_SCREENSHOTS}%")
-                    }
-
-                    !syncSettings.syncPicture && syncSettings.syncScreenshot -> {
-                        customSelection = selection + " AND ${MediaStoreUtils.mediaPathColumn} like ?"
-                        customArgs = args + "%${SyncUtils.DIRECTORY_SCREENSHOTS}%"
-                    }
-
-                    else -> {
-                        customSelection = selection +
-                                " AND (${MediaStoreUtils.mediaPathColumn} like ?" +
-                                " OR ${MediaStoreUtils.mediaPathColumn} like ?)"
-                        customArgs = args + arrayOf("%${Environment.DIRECTORY_DCIM}%", "%${SyncUtils.DIRECTORY_SCREENSHOTS}%")
-                    }
-                }
-
+            MediaFolder.getAllSyncedFolders().forEach { mediaFolder ->
+                customSelection = "$selection AND $IMAGES_BUCKET_ID = ?"
+                customArgs = args + mediaFolder.id.toString()
                 deferreds.add(getLocalLastPhotosAsync(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, customSelection, customArgs))
-                deferreds.add(getLocalLastPhotosAsync(MediaStore.Images.Media.INTERNAL_CONTENT_URI, customSelection, customArgs))
-            }
 
-            if (syncSettings.syncVideo) {
-                customSelection = selection + " AND ${MediaStoreUtils.mediaPathColumn} like ?"
-                customArgs = args + "%${Environment.DIRECTORY_DCIM}%"
-
-                deferreds.add(getLocalLastPhotosAsync(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, customSelection, customArgs))
-                deferreds.add(getLocalLastPhotosAsync(MediaStore.Video.Media.INTERNAL_CONTENT_URI, customSelection, customArgs))
+                if (syncSettings.syncVideo) {
+                    customSelection = "$selection AND $VIDEO_BUCKET_ID = ?"
+                    deferreds.add(
+                        getLocalLastPhotosAsync(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, customSelection, customArgs)
+                    )
+                }
             }
             runBlocking { deferreds.joinAll() }
         }
@@ -484,5 +469,19 @@ class UploadAdapter @JvmOverloads constructor(
         const val IMPORT_IN_PROGRESS = "import_in_progress"
         const val UPLOAD_FOLDER = "upload_folder"
         private const val LAST_UPLOADED_COUNT = "last_uploaded_count"
+
+
+        fun Context.showSyncConfigNotification() {
+            val pendingIntent = PendingIntent.getActivity(
+                this, 0,
+                Intent(this, SyncSettingsActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT
+            )
+            val notificationManagerCompat = NotificationManagerCompat.from(this)
+            this.showGeneralNotification(getString(R.string.noSyncFolderNotificationTitle)).apply {
+                setContentText(getString(R.string.noSyncFolderNotificationDescription))
+                setContentIntent(pendingIntent)
+                notificationManagerCompat.notify(NotificationUtils.FILE_OBSERVE_ID, this.build())
+            }
+        }
     }
 }

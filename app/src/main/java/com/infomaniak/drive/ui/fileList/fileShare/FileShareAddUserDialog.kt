@@ -72,8 +72,8 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
         return inflater.inflate(R.layout.fragment_bottom_sheet_file_share, container, false)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()

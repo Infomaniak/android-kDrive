@@ -68,8 +68,8 @@
     <string name="allPasswordHint">Définir un mot de passe</string>
     <string name="allPathTitle">Emplacement</string>
     <string name="allPdf">PDF</string>
+    <string name="allPermissionNeeded">Vous devez autorisez l’accès à vos fichiers pour pouvoir les importer et les enregistrer</string>
     <string name="allPictures">Images</string>
-    <string name="allReadPermissionNeeded">Vous devez autorisez l’accès à vos fichiers pour pouvoir les importer</string>
     <string name="allRootName">Racine du kDrive %s</string>
     <string name="allToday">Aujourd’hui</string>
     <string name="allTrashActionCancelled">Suppression annulée</string>
@@ -80,7 +80,6 @@
     <string name="allUploadFinishedTitle">Importation terminée</string>
     <string name="allUserAnonymous">Anonyme</string>
     <string name="allVideo">Vidéos</string>
-    <string name="allWritePermissionNeeded">Vous devez autorisez l’accès à l’écriture pour pouvoir prendre des photos et télécharger des fichiers</string>
     <string name="allYesterday">Hier</string>
     <string name="appSecurityDescription">Protégez l’accès à votre application en activant le verrouillage de votre téléphone.</string>
     <string name="appSecurityTitle">Verrouillage de l’application</string>
@@ -409,6 +408,8 @@
     <string name="noDriveTitle">Vous n’avez pas encore de kDrive !</string>
     <string name="noFilesDescription">Ce dossier est vide. Appuyez sur le bouton + pour ajouter des fichiers ici.</string>
     <string name="noFilesDescriptionNoNetwork">Impossible de récupérer les informations du dossier. Veuillez vérifier votre connexion réseau ou réessayez ultérieurement.</string>
+    <string name="noSyncFolderNotificationDescription">Cliquez-ici pour configurer les dossiers à synchroniser</string>
+    <string name="noSyncFolderNotificationTitle">Aucun dossier sélectionné pour la sauvegarde automatique</string>
     <string name="notEnoughStorageDescription1">L’espace de stockage de votre kDrive est presque plein. Faites évoluer votre offre et débloquez de nouvelles fonctionnalités.</string>
     <string name="notEnoughStorageDescription2">L’espace de stockage de votre kDrive est presque plein. Contactez votre administrateur pour qu’il puisse faire évoluer votre offre.</string>
     <string name="notEnoughStorageUsed">utilisés</string>
@@ -431,6 +432,8 @@
     <string name="onBoardingTitle1">Accédez à vos fichiers sur tous vos appareils</string>
     <string name="onBoardingTitle2">Travaillez ensemble au même endroit et gagnez en efficacité</string>
     <string name="onBoardingTitle3">Sauvegardez vos souvenirs en sécurité</string>
+    <!-- Displayed in a photo list some languages may need to display the date before the month -->
+    <string name="photosHeaderDateFormat">MMMM YYYY</string>
     <string name="picturesNoFile">Aucune photo pour le moment</string>
     <string name="previewDownloadIndication">Chargement en cours, merci de patienter…</string>
     <string name="previewLoadError">Impossible de charger l’aperçu</string>
@@ -452,6 +455,8 @@
     <string name="secureLinkShareTitle">Liens de partage sécurisés</string>
     <string name="selectDriveTitle">Sélectionner un kDrive</string>
     <string name="selectFolderTitle">Sélectionner un dossier</string>
+    <string name="selectMediaFoldersDescription">Sélectionnez les dossiers de votre appareil qui doivent être sauvegardés automatiquement dans votre kDrive.</string>
+    <string name="selectMediaFoldersTitle">Dossiers à sauvegarder</string>
     <string name="settingsOnlyWifiSyncDescription">La sauvegarde automatique des photos/vidéos et la mise à jour des fichiers hors ligne seront uniquement effectuées avec une connexion Wifi.</string>
     <string name="settingsOnlyWifiSyncTitle">Transfert uniquement en Wi-Fi</string>
     <string name="settingsTitle">Paramètres</string>
@@ -520,6 +525,11 @@
     <string name="syncSettingsSyncPeriodicityOneHourValue">Toutes les heures</string>
     <string name="syncSettingsSyncPeriodicityOneQuarterValue">Toutes les 15 minutes</string>
     <string name="syncSettingsTitle">Sauvegarde des photos</string>
+    <string name="themeSettingsDarkLabel">Sombre</string>
+    <string name="themeSettingsLightLabel">Clair</string>
+    <string name="themeSettingsSystemDefaultLabel">Valeur par défaut du système</string>
+    <string name="themeSettingsSystemLabel">Système</string>
+    <string name="themeSettingsTitle">Thème</string>
     <string name="trashActionDelete">Supprimer définitivement</string>
     <string name="trashActionRestoreFileIn">Restaurer dans</string>
     <string name="trashActionRestoreFileOriginalPlace">Restaurer à l’emplacement d’origine</string>

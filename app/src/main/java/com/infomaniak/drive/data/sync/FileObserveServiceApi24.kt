@@ -30,10 +30,13 @@ import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.sync.UploadAdapter.Companion.showSyncConfigNotification
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import io.sentry.Sentry
 import kotlinx.coroutines.*
 import java.lang.Runnable
 
@@ -54,7 +57,10 @@ class FileObserveServiceApi24 : JobService() {
         runningParams = params
         params.triggeredContentAuthorities?.let { _ ->
             if (!applicationContext.isSyncActive()) {
-                syncImmediately()
+                when {
+                    MediaFolder.getAllSyncedFoldersCount() > 0 -> syncImmediately()
+                    else -> baseContext.showSyncConfigNotification()
+                }
             }
         } ?: Log.d("MediaContentJob", "$TAG> no content")
         handler.post(worker)
@@ -83,25 +89,20 @@ class FileObserveServiceApi24 : JobService() {
                 .setTriggerContentUpdateDelay(1000) // Waiting time when a new change is detected while this job is scheduled
 
             if (syncSetting == null) {
+                Sentry.captureMessage("FileObserveServiceApi24: disableAutoSync")
                 runBlocking(Dispatchers.IO) { context.disableAutoSync() }
                 return
-            }
-
-            if (syncSetting.syncPicture || syncSetting.syncScreenshot) {
-                builder.addTriggerContentUri(
-                    TriggerContentUri(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS)
-                ).addTriggerContentUri(
-                    TriggerContentUri(MediaStore.Images.Media.INTERNAL_CONTENT_URI, TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS)
-                )
             }
 
             if (syncSetting.syncVideo) {
                 builder.addTriggerContentUri(
                     TriggerContentUri(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS)
-                ).addTriggerContentUri(
-                    TriggerContentUri(MediaStore.Video.Media.INTERNAL_CONTENT_URI, TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS)
                 )
             }
+
+            builder.addTriggerContentUri(
+                TriggerContentUri(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS)
+            )
 
             jobScheduler.schedule(builder.build())
             Log.d("MediaContentJob", "JOB SCHEDULED!")

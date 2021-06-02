@@ -41,8 +41,8 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
         return inflater.inflate(R.layout.fragment_file_details_comments, container, false)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) {
             currentFile = it

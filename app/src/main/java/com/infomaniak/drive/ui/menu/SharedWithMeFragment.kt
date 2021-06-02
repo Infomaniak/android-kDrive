@@ -38,7 +38,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
 
     override var hideBackButtonWhenRoot: Boolean = false
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val inDriveList = folderID == ROOT_ID && !navigationArgs.driveID.isPositive()
         val inDriveRoot = folderID == ROOT_ID && navigationArgs.driveID.isPositive()
         downloadFiles = DownloadFiles(
@@ -50,7 +50,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
         )
 
         fileListViewModel.isSharedWithMe = true
-        super.onActivityCreated(savedInstanceState)
+        super.onViewCreated(view, savedInstanceState)
 
         collapsingToolbarLayout.title = if (inDriveList) getString(R.string.sharedWithMeTitle) else navigationArgs.folderName
         noFilesLayout.setup(

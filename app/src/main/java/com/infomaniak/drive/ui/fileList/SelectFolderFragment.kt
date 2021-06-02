@@ -18,8 +18,10 @@
 package com.infomaniak.drive.ui.fileList
 
 import android.os.Bundle
+import android.view.View
 import androidx.activity.addCallback
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
@@ -33,17 +35,16 @@ import kotlinx.android.synthetic.main.fragment_file_list.*
 
 class SelectFolderFragment : FileListFragment() {
 
-    private lateinit var saveExternalViewModel: SaveExternalViewModel
+    private val saveExternalViewModel: SaveExternalViewModel by activityViewModels()
     private val navigationArgs: SelectFolderFragmentArgs by navArgs()
 
     override var enabledMultiSelectMode: Boolean = false
     override var hideBackButtonWhenRoot: Boolean = false
     override var showPendingFiles: Boolean = false
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        saveExternalViewModel = ViewModelProvider(requireActivity())[SaveExternalViewModel::class.java]
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         userDrive = saveExternalViewModel.userDrive
-        super.onActivityCreated(savedInstanceState)
+        super.onViewCreated(view, savedInstanceState)
 
         folderName = if (folderID == ROOT_ID) saveExternalViewModel.currentDrive?.name ?: "/" else navigationArgs.folderName
 
@@ -95,13 +96,15 @@ class SelectFolderFragment : FileListFragment() {
                 }
             }
         }
-        val selectFolderActivity = requireActivity() as SelectFolderActivity
-        selectFolderActivity.showSaveButton()
+        lifecycleScope.launchWhenResumed {
+            val selectFolderActivity = requireActivity() as SelectFolderActivity
+            selectFolderActivity.showSaveButton()
 
-        val currentFolder = FileController.getFileById(folderID, userDrive)
-        val enable = folderID != saveExternalViewModel.disableSelectedFolder &&
-                (currentFolder?.rights?.moveInto != false || currentFolder.rights?.newFile != false)
-        selectFolderActivity.enableSaveButton(enable)
+            val currentFolder = FileController.getFileById(folderID, userDrive)
+            val enable = folderID != saveExternalViewModel.disableSelectedFolder &&
+                    (currentFolder?.rights?.moveInto != false || currentFolder.rights?.newFile != false)
+            selectFolderActivity.enableSaveButton(enable)
+        }
     }
 
     private fun onBackPressed() {

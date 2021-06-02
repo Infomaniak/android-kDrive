@@ -25,7 +25,7 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
@@ -44,18 +44,17 @@ import com.infomaniak.drive.utils.*
 import kotlinx.android.synthetic.main.fragment_file_share_details.*
 
 class FileShareDetailsFragment : Fragment() {
-    private lateinit var mainViewModel: MainViewModel
-    private lateinit var sharedItemsAdapter: SharedItemsAdapter
     private lateinit var availableShareableItemsAdapter: AvailableShareableItemsAdapter
-    private val navigationArgs: FileShareDetailsFragmentArgs by navArgs()
+    private lateinit var sharedItemsAdapter: SharedItemsAdapter
     private val fileShareViewModel: FileShareViewModel by navGraphViewModels(R.id.fileShareDetailsFragment)
+    private val mainViewModel: MainViewModel by activityViewModels()
+    private val navigationArgs: FileShareDetailsFragmentArgs by navArgs()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         inflater.inflate(R.layout.fragment_file_share_details, container, false)
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         val allUserList = ArrayList(AccountUtils.getCurrentDrive()?.users?.let { categories ->
             DriveInfosController.getUsers(ArrayList(categories.drive + categories.account))

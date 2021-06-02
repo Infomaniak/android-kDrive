@@ -20,7 +20,6 @@ package com.infomaniak.drive.ui
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.menu.UserAdapter
@@ -30,8 +29,6 @@ import kotlinx.android.synthetic.main.view_switch_settings.*
 
 class SwitchUserActivity : AppCompatActivity() {
 
-    private lateinit var mainViewModel: MainViewModel
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.view_switch_settings)
@@ -40,7 +37,6 @@ class SwitchUserActivity : AppCompatActivity() {
             onBackPressed()
         }
 
-        mainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
         AccountUtils.getAllUsers().observe(this) { users ->
             usersRecyclerView.adapter = UserAdapter(users as ArrayList<User>) { user ->
                 AccountUtils.currentUser = user

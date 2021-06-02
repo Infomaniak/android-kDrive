@@ -59,8 +59,8 @@
     <string name="allPasswordHint">Establecer una contraseña</string>
     <string name="allPathTitle">Emplazamiento</string>
     <string name="allPdf">PDF</string>
+    <string name="allPermissionNeeded">Debes autorizar el acceso a tus archivos para poder importarlos y guardarlos</string>
     <string name="allPictures">Imágenes</string>
-    <string name="allReadPermissionNeeded">Debes autorizar el acceso a tus archivos para poder importarlos</string>
     <string name="allRootName">Raíz del kDrive %s</string>
     <string name="allToday">Hoy</string>
     <string name="allTrashActionCancelled">Eliminación anulada</string>
@@ -71,7 +71,6 @@
     <string name="allUploadFinishedTitle">Importación terminada</string>
     <string name="allUserAnonymous">Anónimo</string>
     <string name="allVideo">Vídeos</string>
-    <string name="allWritePermissionNeeded">Debes permitir el acceso de escritura para tomar fotos y descargar archivos</string>
     <string name="allYesterday">Ayer</string>
     <string name="appSecurityDescription">Protege el acceso a tu aplicación activando el bloqueo en el teléfono.</string>
     <string name="appSecurityTitle">Bloqueo de la aplicación</string>
@@ -400,6 +399,8 @@
     <string name="noDriveTitle">¡Todavía no tienes kDrive!</string>
     <string name="noFilesDescription">Esta carpeta está vacía. Pulsa la tecla + para agregar archivos aquí.</string>
     <string name="noFilesDescriptionNoNetwork">No se puede recuperar la información de la carpeta. Comprueba tu conexión de red o vuelve a intentarlo más tarde.</string>
+    <string name="noSyncFolderNotificationDescription">Pulse aquí para configurar las carpetas a sincronizar</string>
+    <string name="noSyncFolderNotificationTitle">No hay carpetas seleccionadas para la copia de seguridad automática</string>
     <string name="notEnoughStorageDescription1">Casi todo el espacio de almacenamiento de tu kDrive está ocupado. Mejora tu oferta y desbloquea nuevas funciones.</string>
     <string name="notEnoughStorageDescription2">Casi todo el espacio de almacenamiento de tu kDrive está ocupado. Ponte en contacto con tu administrador para que mejore tu oferta.</string>
     <string name="notEnoughStorageUsed">utilizados</string>
@@ -422,6 +423,8 @@
     <string name="onBoardingTitle1">Accede a tus archivos en todos tus dispositivos</string>
     <string name="onBoardingTitle2">Trabaja en grupo en un mismo lugar y gana en eficacia</string>
     <string name="onBoardingTitle3">Haz copia de seguridad de tus recuerdos</string>
+    <!-- Displayed in a photo list some languages may need to display the date before the month -->
+    <string name="photosHeaderDateFormat">MMMM YYYY</string>
     <string name="picturesNoFile">Todavía no hay fotos</string>
     <string name="previewDownloadIndication">Cambio en curso, espera...</string>
     <string name="previewLoadError">No se puede cargar la vista previa</string>
@@ -443,6 +446,8 @@
     <string name="secureLinkShareTitle">Enlaces de uso compartido seguros</string>
     <string name="selectDriveTitle">Seleccionar un kDrive</string>
     <string name="selectFolderTitle">Seleccionar una carpeta</string>
+    <string name="selectMediaFoldersDescription">Selecciona las carpetas de tu dispositivo de las que debe hacerse una copia de seguridad automática en tu kDrive.</string>
+    <string name="selectMediaFoldersTitle">Archivos a guardar</string>
     <string name="settingsOnlyWifiSyncDescription">La copia de seguridad automática de las fotos/vídeos y la actualización de los archivos sin conexión sólo se realizará con una conexión Wifi.</string>
     <string name="settingsOnlyWifiSyncTitle">Transferencia sólo con WiFi</string>
     <string name="settingsTitle">Parámetros</string>
@@ -511,6 +516,11 @@
     <string name="syncSettingsSyncPeriodicityOneHourValue">Cada hora</string>
     <string name="syncSettingsSyncPeriodicityOneQuarterValue">Cada 15 minutos</string>
     <string name="syncSettingsTitle">Copia de seguridad de las fotos</string>
+    <string name="themeSettingsDarkLabel">Scuro</string>
+    <string name="themeSettingsLightLabel">Chiaro</string>
+    <string name="themeSettingsSystemDefaultLabel">Impostazione predefinita del sistema</string>
+    <string name="themeSettingsSystemLabel">Sistema</string>
+    <string name="themeSettingsTitle">Tema</string>
     <string name="trashActionDelete">Eliminar definitivamente</string>
     <string name="trashActionRestoreFileIn">Restaurar en</string>
     <string name="trashActionRestoreFileOriginalPlace">Restaurar en el emplazamiento original</string>

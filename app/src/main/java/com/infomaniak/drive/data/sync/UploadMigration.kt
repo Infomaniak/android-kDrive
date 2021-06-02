@@ -17,7 +17,10 @@
  */
 package com.infomaniak.drive.data.sync
 
+import com.infomaniak.drive.data.models.MediaFolder
+import com.infomaniak.drive.data.models.SyncSettings
 import io.realm.DynamicRealm
+import io.realm.FieldAttribute
 import io.realm.RealmMigration
 
 @Suppress("UNUSED_CHANGED_VALUE")
@@ -28,11 +31,18 @@ class UploadMigration : RealmMigration {
         // DynamicRealm exposes an editable schema
         val schema = realm.schema
 
-        // Example Migrate to version 1:
-//        if (oldVersionTemp == 0L) {
-//            schema.get(UploadFile::class.java.simpleName)!!
-//                .addField(UploadFile::originalLocalUri.name, String::class.java, FieldAttribute.REQUIRED)
-//            oldVersionTemp++
-//        }
+        // Example Migrate to version 1: Create table MediaFolder and remove some fields
+        if (oldVersionTemp == 0L) {
+            // Add MediaFolder table
+            schema.create(MediaFolder::class.java.simpleName)!!
+                .addField(MediaFolder::id.name, Long::class.java, FieldAttribute.PRIMARY_KEY)
+                .addField(MediaFolder::name.name, String::class.java, FieldAttribute.REQUIRED)
+                .addField(MediaFolder::isSynced.name, Boolean::class.java, FieldAttribute.REQUIRED)
+            // Remove some fields in SyncSettings
+            schema.get(SyncSettings::class.java.simpleName)!!
+                .removeField("syncPicture")
+                .removeField("syncScreenshot")
+            oldVersionTemp++
+        }
     }
 }

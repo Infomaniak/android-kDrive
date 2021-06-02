@@ -25,12 +25,12 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.provider.OpenableColumns
 import android.view.View.VISIBLE
+import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
@@ -40,12 +40,8 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.menu.settings.SelectDriveDialog
 import com.infomaniak.drive.ui.menu.settings.SelectDriveViewModel
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.SyncUtils
-import com.infomaniak.drive.utils.SyncUtils.checkSyncPermissions
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.drive.utils.showOrHideEmptyError
-import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress
@@ -56,8 +52,8 @@ import java.util.*
 
 class SaveExternalFilesActivity : BaseActivity() {
 
-    private lateinit var selectDriveViewModel: SelectDriveViewModel
-    private lateinit var saveExternalFilesViewModel: SaveExternalFilesViewModel
+    private val selectDriveViewModel: SelectDriveViewModel by viewModels()
+    private val saveExternalFilesViewModel: SaveExternalFilesViewModel by viewModels()
 
     private var currentUri: Uri? = null
     private var isMultiple = false
@@ -66,8 +62,6 @@ class SaveExternalFilesActivity : BaseActivity() {
         runBlocking { AccountUtils.requestCurrentUser() }
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_save_external_file)
-        selectDriveViewModel = ViewModelProvider(this)[SelectDriveViewModel::class.java]
-        saveExternalFilesViewModel = ViewModelProvider(this)[SaveExternalFilesViewModel::class.java]
 
         if (!isAuth()) return
 
@@ -135,10 +129,13 @@ class SaveExternalFilesActivity : BaseActivity() {
             fileNameEdit.showOrHideEmptyError()
         }
 
+        val drivePermissions = DrivePermissions()
+        drivePermissions.registerPermissions(this)
+
         saveButton.initProgress(this)
         saveButton.setOnClickListener {
             saveButton.showProgress()
-            if (checkSyncPermissions()) {
+            if (drivePermissions.checkSyncPermissions()) {
                 val userId = selectDriveViewModel.selectedUserId.value!!
                 val driveId = selectDriveViewModel.selectedDrive.value?.id!!
                 val folderId = saveExternalFilesViewModel.folderId.value!!
@@ -157,7 +154,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 }
             }
         }
-        checkSyncPermissions()
+        drivePermissions.checkSyncPermissions()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

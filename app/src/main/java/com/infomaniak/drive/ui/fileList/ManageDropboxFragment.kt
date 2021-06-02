@@ -25,7 +25,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
@@ -49,8 +49,8 @@ import java.util.*
 open class ManageDropboxFragment : Fragment() {
 
     private val navigationArgs: ManageDropboxFragmentArgs by navArgs()
-    protected lateinit var mainViewModel: MainViewModel
     private var currentDropBox: DropBox? = null
+    protected val mainViewModel: MainViewModel by activityViewModels()
 
     private var validationCount = 0
     private var hasErrors = false
@@ -62,9 +62,8 @@ open class ManageDropboxFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_manage_dropbox, container, false)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()

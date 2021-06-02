@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import android.os.Bundle
+import android.view.View
 import android.view.View.VISIBLE
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -27,8 +28,8 @@ import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 
 class DropBoxBottomSheetDialog : InformationBottomSheetDialog() {
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         title.setText(R.string.dropBoxTitle)
         description.setText(R.string.dropBoxDescription)
 

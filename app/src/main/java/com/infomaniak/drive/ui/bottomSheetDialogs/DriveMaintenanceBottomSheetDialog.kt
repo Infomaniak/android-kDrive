@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import android.os.Bundle
+import android.view.View
 import android.view.View.GONE
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
@@ -27,8 +28,8 @@ import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 class DriveMaintenanceBottomSheetDialog : InformationBottomSheetDialog() {
     val navigationArgs: DriveMaintenanceBottomSheetDialogArgs by navArgs()
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         illu.apply {
             layoutParams.height = 70.toPx()

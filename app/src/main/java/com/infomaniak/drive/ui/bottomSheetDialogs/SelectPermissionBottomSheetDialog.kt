@@ -23,12 +23,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
@@ -53,14 +53,14 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
     private lateinit var adapter: PermissionsAdapter
     private lateinit var permissionsGroup: PermissionsGroup
     private val navigationArgs: SelectPermissionBottomSheetDialogArgs by navArgs()
-    private val selectPermissionViewModel: SelectPermissionViewModel by navGraphViewModels(R.id.selectPermissionBottomSheetDialog)
+    private val selectPermissionViewModel: SelectPermissionViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_select_permission, container, false)
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()

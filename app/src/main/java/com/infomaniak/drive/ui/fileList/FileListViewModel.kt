@@ -46,7 +46,6 @@ class FileListViewModel : ViewModel() {
     var currentConvertedTypeDrawable: Drawable? = null
     var currentConvertedTypeText: String? = null
 
-    var currentPreview: File? = null
     var isSharedWithMe = false
 
     var currentPage = 1
