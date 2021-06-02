@@ -462,7 +462,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
                 fileAdapter.itemSelected.forEach { file ->
                     val newParent = File(id = folderID, driveId = AccountUtils.currentDriveId)
-                    val moveFile = mainViewModel.moveFile(requireContext(), file, newParent) { fileID ->
+                    val moveFile = mainViewModel.moveFile(file, newParent) { fileID ->
                         lifecycleScope.launchWhenResumed {
                             fileAdapter.deleteByFileId(fileID)
                             checkIfNoFiles()
