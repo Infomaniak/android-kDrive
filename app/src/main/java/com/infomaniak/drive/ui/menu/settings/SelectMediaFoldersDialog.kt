@@ -29,19 +29,19 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.liveData
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.MediaFoldersProvider
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
+import io.realm.Realm
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_media_folders.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), SwipeRefreshLayout.OnRefreshListener {
+class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
 
     private val mediaViewModel: MediaViewModel by viewModels()
     private lateinit var mediaFoldersAdapter: MediaFoldersAdapter
@@ -57,8 +57,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), SwipeRefreshLayo
             dismiss()
         }
 
-        swipeRefreshLayout.setOnRefreshListener(this)
-        swipeRefreshLayout.isRefreshing = true
+        swipeRefreshLayout.isEnabled = false
 
         mediaFoldersAdapter = MediaFoldersAdapter { mediaFolder, isChecked ->
             lifecycleScope.launch(Dispatchers.IO) {
@@ -73,6 +72,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), SwipeRefreshLayo
     }
 
     fun loadFolders() {
+        swipeRefreshLayout.isRefreshing = true
         mediaFoldersAdapter.apply {
             mediaViewModel.elementsToRemove.observe(viewLifecycleOwner) { elementsToRemove ->
                 mediaFolderList.post {
@@ -81,8 +81,10 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), SwipeRefreshLayo
             }
             mediaViewModel.getAllMediaFolders(requireActivity().contentResolver).observe(viewLifecycleOwner) { mediaFolders ->
                 mediaFolderList.post {
-                    addAll(mediaFolders)
-                    swipeRefreshLayout.isRefreshing = false
+                    addAll(mediaFolders.second)
+                    if (mediaFolders.first) {
+                        swipeRefreshLayout.isRefreshing = false
+                    }
                 }
             }
         }
@@ -98,17 +100,19 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), SwipeRefreshLayo
         private var getMediaFilesJob: Job = Job()
         val elementsToRemove = MutableLiveData<ArrayList<Long>>()
 
-        fun getAllMediaFolders(contentResolver: ContentResolver): LiveData<ArrayList<MediaFolder>> {
+        fun getAllMediaFolders(contentResolver: ContentResolver): LiveData<Pair<Boolean, ArrayList<MediaFolder>>> {
             getMediaFilesJob.cancel()
             getMediaFilesJob = Job()
             return liveData(Dispatchers.IO + getMediaFilesJob) {
-                val cacheMediaFolders = MediaFolder.getAll()
-                if (cacheMediaFolders.isNotEmpty()) emit(cacheMediaFolders)
+                MediaFolder.getRealmInstance().use { realm ->
+                    val cacheMediaFolders = MediaFolder.getAll(realm)
+                    if (cacheMediaFolders.isNotEmpty()) emit(false to cacheMediaFolders)
 
-                val localMediaFolders = ArrayList(MediaFoldersProvider.getAllMediaFolders(contentResolver))
-                cacheMediaFolders.removeObsoleteMediaFolders(localMediaFolders)
+                    val localMediaFolders = ArrayList(MediaFoldersProvider.getAllMediaFolders(realm, contentResolver))
+                    cacheMediaFolders.removeObsoleteMediaFolders(realm, localMediaFolders)
 
-                emit(localMediaFolders.removeDuplicatedMediaFolders(cacheMediaFolders))
+                    emit(true to localMediaFolders.removeDuplicatedMediaFolders(cacheMediaFolders))
+                }
             }
         }
 
@@ -118,21 +122,22 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), SwipeRefreshLayo
             } as ArrayList<MediaFolder>
         }
 
-        private suspend fun ArrayList<MediaFolder>.removeObsoleteMediaFolders(upToDateMedias: ArrayList<MediaFolder>) =
-            withContext(Dispatchers.IO) {
-                val deletedMediaFolderList = arrayListOf<Long>()
-                forEach { cachedFile ->
-                    val exist = upToDateMedias.any { cachedFile.id == it.id }
-                    if (!exist) {
-                        cachedFile.delete()
-                        deletedMediaFolderList.add(cachedFile.id)
+        private suspend fun ArrayList<MediaFolder>.removeObsoleteMediaFolders(
+            realm: Realm,
+            upToDateMedias: ArrayList<MediaFolder>
+        ) = withContext(Dispatchers.IO) {
+            val deletedMediaFolderList = arrayListOf<Long>()
+            forEach { cachedFile ->
+                val exist = upToDateMedias.any { cachedFile.id == it.id }
+                if (!exist) {
+                    realm.executeTransaction { realm ->
+                        realm.where(MediaFolder::class.java).equalTo(MediaFolder::id.name, cachedFile.id).findFirst()
+                            ?.deleteFromRealm()
                     }
+                    deletedMediaFolderList.add(cachedFile.id)
                 }
-                elementsToRemove.postValue(deletedMediaFolderList)
             }
-    }
-
-    override fun onRefresh() {
-        loadFolders()
+            elementsToRemove.postValue(deletedMediaFolderList)
+        }
     }
 }

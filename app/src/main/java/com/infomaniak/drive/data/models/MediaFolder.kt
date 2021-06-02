@@ -19,6 +19,7 @@ package com.infomaniak.drive.data.models
 
 import io.realm.Realm
 import io.realm.RealmObject
+import io.realm.Sort
 import io.realm.annotations.PrimaryKey
 
 open class MediaFolder(
@@ -38,14 +39,6 @@ open class MediaFolder(
         }
     }
 
-    fun delete() {
-        UploadFile.getRealmInstance().use {
-            it.executeTransaction { realm ->
-                realm.where(MediaFolder::class.java).equalTo(MediaFolder::id.name, id).findFirst()?.deleteFromRealm()
-            }
-        }
-    }
-
     fun enableSync(enable: Boolean) {
         getRealmInstance().use {
             findByIdQuery(it, id)?.let { mediaFolder ->
@@ -58,25 +51,22 @@ open class MediaFolder(
 
     companion object {
 
-        private fun getRealmInstance() = UploadFile.getRealmInstance()
+        fun getRealmInstance() = UploadFile.getRealmInstance()
 
         private fun findByIdQuery(realm: Realm, id: Long) =
             realm.where(MediaFolder::class.java).equalTo(MediaFolder::id.name, id).findFirst()
 
-        fun findById(id: Long): MediaFolder? {
-            return getRealmInstance().use { realm ->
-                findByIdQuery(realm, id)?.let { mediaFolder ->
-                    realm.copyFromRealm(mediaFolder, 0)
-                }
+        fun findById(realm: Realm, id: Long): MediaFolder? {
+            return findByIdQuery(realm, id)?.let { mediaFolder ->
+                realm.copyFromRealm(mediaFolder, 0)
             }
         }
 
-        fun getAll(): ArrayList<MediaFolder> {
-            return getRealmInstance().use { realm ->
-                realm.where(MediaFolder::class.java).findAll()?.let { results ->
+        fun getAll(realm: Realm): ArrayList<MediaFolder> {
+            return realm.where(MediaFolder::class.java)
+                .sort(MediaFolder::name.name, Sort.ASCENDING).findAll()?.let { results ->
                     ArrayList(realm.copyFromRealm(results, 0))
                 } ?: arrayListOf()
-            }
         }
 
         fun getAllSyncedFolders(): ArrayList<MediaFolder> {
