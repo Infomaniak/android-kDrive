@@ -17,23 +17,32 @@
  */
 package com.infomaniak.drive.utils
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
+import android.util.DisplayMetrics
 import kotlinx.coroutines.*
 import java.io.File
 import kotlin.coroutines.CoroutineContext
 
-class PdfCore(private var file: File) : CoroutineScope {
+class PdfCore(private val context: Context, private var file: File) : CoroutineScope {
     private lateinit var pdfRenderer: PdfRenderer
 
+    var bitmapWidth: Int = 0
+    var bitmapHeight: Int = 0
+
     private val job = SupervisorJob()
-    override val coroutineContext: CoroutineContext get() = job + Dispatchers.Main
+    override val coroutineContext: CoroutineContext get() = job + Dispatchers.IO
 
     init {
         openPdfFile()
+        bitmapWidth = getDisplayWidth()
+        pdfRenderer.openPage(1).use {
+            bitmapHeight = (bitmapWidth.toFloat() / it.width * it.height).toInt()
+        }
     }
 
     fun refreshFile(newFile: File) {
@@ -52,12 +61,13 @@ class PdfCore(private var file: File) : CoroutineScope {
 
     fun getPdfPages() = pdfRenderer.pageCount
 
-    fun renderPage(page: Int, ready: ((bitmap: Bitmap?) -> Unit)? = null) {
-        if (page >= getPdfPages()) return
-        buildBitmap(page) {
-            launch {
-                synchronized(this@PdfCore) {
-                    ready?.invoke(it)
+    fun renderPage(page: Int, ready: ((bitmap: Bitmap?) -> Unit)) = launch(coroutineContext) {
+        if (page < getPdfPages()) {
+            synchronized(this@PdfCore) {
+                buildBitmap(page) {
+                    launch(Dispatchers.Main) {
+                        ready.invoke(it)
+                    }
                 }
             }
         }
@@ -69,7 +79,7 @@ class PdfCore(private var file: File) : CoroutineScope {
             .onFailure { it.printStackTrace() }
     }
 
-    private fun buildBitmap(page: Int, onBitmap: (Bitmap?) -> Unit) = launch {
+    private fun buildBitmap(page: Int, onBitmap: (Bitmap?) -> Unit) {
         val bitmap = pdfRenderer.openPage(page).renderBitmap()
         onBitmap(bitmap)
     }
@@ -82,7 +92,7 @@ class PdfCore(private var file: File) : CoroutineScope {
 
     private fun PdfRenderer.Page.createBitmap(): Bitmap {
         val bitmap = Bitmap.createBitmap(
-            width * 2, height * 2, Bitmap.Config.ARGB_8888
+            bitmapWidth, (bitmapWidth.toFloat() / width * height).toInt(), Bitmap.Config.ARGB_8888
         )
 
         val canvas = Canvas(bitmap)
@@ -90,4 +100,10 @@ class PdfCore(private var file: File) : CoroutineScope {
         canvas.drawBitmap(bitmap, 0f, 0f, null)
         return bitmap
     }
+
+    private fun getDisplayWidth(): Int {
+        val displayMetrics: DisplayMetrics = context.resources.displayMetrics
+        return displayMetrics.widthPixels
+    }
+
 }
