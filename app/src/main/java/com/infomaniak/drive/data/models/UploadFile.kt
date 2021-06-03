@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.data.models
 
+import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import androidx.core.net.toFile
@@ -173,7 +174,10 @@ open class UploadFile(
                     uploadFiles.forEach {
                         syncFileByUriQuery(realm, it.uri).findFirst()?.let { syncFile ->
                             syncFile.deletedAt = Date()
-                            if (!syncFile.isSync()) syncFile.uri.toUri().toFile().apply { if (exists()) delete() }
+                            val uri = syncFile.uri.toUri()
+                            if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
+                                uri.toFile().apply { if (exists()) delete() }
+                            }
                         }
                     }
                 }
