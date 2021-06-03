@@ -36,10 +36,6 @@
         <action
             android:id="@+id/action_homeFragment_to_activityFilesFragment"
             app:destination="@id/activityFilesFragment" />
-        <argument
-            android:name="forceDriveSelection"
-            android:defaultValue="false"
-            app:argType="boolean" />
     </fragment>
 
     <fragment

@@ -42,13 +42,14 @@ class MainViewModel : ViewModel() {
     val currentFileList = MutableLiveData<ArrayList<File>>()
     val isInternetAvailable = MutableLiveData(true)
 
-    val createDropbBoxSuccess = SingleLiveEvent<DropBox>()
+    val createDropBoxSuccess = SingleLiveEvent<DropBox>()
 
     val intentShowProgressByFolderId = SingleLiveEvent<Int>()
 
     val refreshActivities = SingleLiveEvent<Boolean>()
     val updateOfflineFile = SingleLiveEvent<Pair<Int, Boolean>>()
     val fileInProgress = SingleLiveEvent<FileInProgress>()
+    val forcedDriveSelection = SingleLiveEvent<Boolean>()
 
     val fileCancelledFromDownload = MutableLiveData<Int>()
 

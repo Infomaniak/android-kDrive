@@ -29,7 +29,6 @@ import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -51,7 +50,6 @@ import kotlinx.android.synthetic.main.item_search_view.*
 class HomeFragment : Fragment() {
     private lateinit var lastElementsAdapter: RecyclerView.Adapter<ViewHolder>
     private lateinit var lastFilesAdapter: LastFilesAdapter
-    private val arguments: HomeFragmentArgs by navArgs()
     private val homeViewModel: HomeViewModel by navGraphViewModels(R.id.homeFragment)
     private val mainViewModel: MainViewModel by activityViewModels()
     private var isProOrTeam: Boolean = false
@@ -113,7 +111,7 @@ class HomeFragment : Fragment() {
             safeNavigate(HomeFragmentDirections.actionHomeFragmentToSearchFragment())
         }
 
-        if (arguments.forceDriveSelection && savedInstanceState == null) {
+        mainViewModel.forcedDriveSelection.observe(viewLifecycleOwner) {
             driveInfos.performClick()
         }
     }

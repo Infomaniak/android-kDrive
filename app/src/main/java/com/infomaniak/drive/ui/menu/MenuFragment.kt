@@ -26,11 +26,13 @@ import android.view.ViewGroup
 import androidx.core.graphics.drawable.DrawableCompat.setTint
 import androidx.core.graphics.drawable.DrawableCompat.wrap
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FormatterFileSize
 import com.infomaniak.drive.utils.loadAvatar
@@ -40,6 +42,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class MenuFragment : Fragment() {
+
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_menu, container, false)
@@ -77,9 +81,8 @@ class MenuFragment : Fragment() {
             userImage.loadAvatar(currentUser)
 
             driveIcon.setOnClickListener {
-                safeNavigate(
-                    MenuFragmentDirections.actionMenuFragmentToHomeFragment(true)
-                )
+                mainViewModel.forcedDriveSelection.value = true
+                safeNavigate(MenuFragmentDirections.actionMenuFragmentToHomeFragment())
             }
 
             sharedWithMeFiles.visibility =

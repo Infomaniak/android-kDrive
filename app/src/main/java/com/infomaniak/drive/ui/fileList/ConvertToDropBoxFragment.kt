@@ -64,7 +64,7 @@ class ConvertToDropBoxFragment : ManageDropboxFragment() {
                     validUntil = if (expirationDateSwitch.isChecked) expirationDateInput.getCurrentTimestampValue() else null
                 ).observe(viewLifecycleOwner) { apiResponse ->
                     if (apiResponse.isSuccess()) {
-                        mainViewModel.createDropbBoxSuccess.value = apiResponse.data
+                        mainViewModel.createDropBoxSuccess.value = apiResponse.data
                         findNavController().popBackStack()
                     } else {
                         requireActivity().showSnackbar(apiResponse.translateError())

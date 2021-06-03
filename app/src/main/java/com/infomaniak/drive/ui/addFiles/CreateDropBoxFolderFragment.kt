@@ -65,7 +65,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
 
         createFolderButton.setOnClickListener {
             createDropBox(onDropBoxCreated = { file, dropBox ->
-                mainViewModel.createDropbBoxSuccess.value = dropBox
+                mainViewModel.createDropBoxSuccess.value = dropBox
                 if (currentPermission == ONLY_ME) {
                     findNavController().popBackStack(R.id.newFolderFragment, true)
                 } else {

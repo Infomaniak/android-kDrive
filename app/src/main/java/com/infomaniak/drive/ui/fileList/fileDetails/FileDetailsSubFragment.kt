@@ -24,8 +24,6 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.MainViewModel
 
 open class FileDetailsSubFragment : Fragment() {
-
     val fileDetailsViewModel: FileDetailsViewModel by navGraphViewModels(R.id.fileDetailsFragment)
     val mainViewModel: MainViewModel by activityViewModels()
-
 }

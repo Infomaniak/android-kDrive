@@ -179,7 +179,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
         }
 
-        mainViewModel.createDropbBoxSuccess.observe(viewLifecycleOwner) { dropBox ->
+        mainViewModel.createDropBoxSuccess.observe(viewLifecycleOwner) { dropBox ->
             onRefresh()
             safeNavigate(
                 FileListFragmentDirections.actionFileListFragmentToDropBoxResultBottomSheetDialog(
