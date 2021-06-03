@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.menu
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.infomaniak.drive.R
@@ -36,12 +37,12 @@ class PicturesAdapter(
     private var lastSectionTitle: String = ""
     var pictureList: ArrayList<File> = arrayListOf()
 
-    fun formatList(newPictureList: ArrayList<File>): ArrayList<Any> {
+    fun formatList(context: Context, newPictureList: ArrayList<File>): ArrayList<Any> {
         pictureList.addAll(newPictureList)
         val addItemList: ArrayList<Any> = arrayListOf()
 
         for (picture in newPictureList) {
-            val month = picture.getLastModifiedAt().format("MMMM yyyy")
+            val month = picture.getLastModifiedAt().format(context.getString(R.string.photosHeaderDateFormat))
 
             if (lastSectionTitle != month) {
                 addItemList.add(month)

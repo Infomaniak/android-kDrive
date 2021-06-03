@@ -100,7 +100,7 @@ class PicturesFragment : Fragment() {
         picturesViewModel.getAllPicturesFiles(AccountUtils.currentDriveId, ignoreCloud).observe(viewLifecycleOwner) {
             it?.let { (pictures, isComplete) ->
                 noPicturesLayout.toggleVisibility(pictures.isEmpty())
-                val pictureList = picturesAdapter.formatList(pictures)
+                val pictureList = picturesAdapter.formatList(requireContext(), pictures)
                 if (picturesAdapter.itemCount == 0) picturesAdapter.setList(pictureList)
                 else picturesRecyclerView.post { picturesAdapter.addAll(pictureList) }
                 picturesAdapter.isComplete = isComplete
