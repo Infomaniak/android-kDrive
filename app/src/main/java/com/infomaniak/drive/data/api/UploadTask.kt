@@ -275,6 +275,7 @@ class UploadTask(
                 "&file_name=${uploadFile.encodedName()}" +
                 "&last_modified_at=${uploadFile.fileModifiedAt.time / 1000}" +
                 "&conflict=replace" +
+                "&relative_path=${uploadFile.remoteSubFolder}/${uploadFile.encodedName()}" +
                 if (uploadFile.fileCreatedAt == null) "" else "&file_created_at=${uploadFile.fileCreatedAt!!.time / 1000}"
     }
 

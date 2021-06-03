@@ -395,15 +395,15 @@ class UploadAdapter @JvmOverloads constructor(
 
         syncSettings?.let { syncSettings ->
             MediaFolder.getAllSyncedFolders().forEach { mediaFolder ->
+                var contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
                 customSelection = "$selection AND $IMAGES_BUCKET_ID = ?"
                 customArgs = args + mediaFolder.id.toString()
-                deferreds.add(getLocalLastPhotosAsync(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, customSelection, customArgs))
+                deferreds.add(getLocalLastPhotosAsync(contentUri, customSelection, customArgs, mediaFolder))
 
                 if (syncSettings.syncVideo) {
+                    contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
                     customSelection = "$selection AND $VIDEO_BUCKET_ID = ?"
-                    deferreds.add(
-                        getLocalLastPhotosAsync(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, customSelection, customArgs)
-                    )
+                    deferreds.add(getLocalLastPhotosAsync(contentUri, customSelection, customArgs, mediaFolder))
                 }
             }
             runBlocking { deferreds.joinAll() }
@@ -412,39 +412,41 @@ class UploadAdapter @JvmOverloads constructor(
     }
 
     @Throws(Exception::class)
-    private fun getLocalLastPhotosAsync(contentUri: Uri, selection: String, args: Array<String>) = GlobalScope.async {
-        val sortOrder = SyncUtils.DATE_TAKEN + " ASC, " + MediaStore.MediaColumns.DATE_ADDED + " ASC"
-        contentResolver.query(contentUri, null, selection, args, sortOrder)
-            ?.use { cursor ->
-                while (cursor.moveToNext()) {
-                    val fileName = SyncUtils.getFileName(cursor)
-                    val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
-                    val fileSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
-                    val uri = cursor.uri(contentUri)
+    private fun getLocalLastPhotosAsync(contentUri: Uri, selection: String, args: Array<String>, mediaFolder: MediaFolder) =
+        GlobalScope.async {
+            val sortOrder = SyncUtils.DATE_TAKEN + " ASC, " + MediaStore.MediaColumns.DATE_ADDED + " ASC"
+            contentResolver.query(contentUri, null, selection, args, sortOrder)
+                ?.use { cursor ->
+                    while (cursor.moveToNext()) {
+                        val fileName = SyncUtils.getFileName(cursor)
+                        val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
+                        val fileSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
+                        val uri = cursor.uri(contentUri)
 
-                    if (UploadFile.canUpload(uri, fileModifiedAt)) {
+                        if (UploadFile.canUpload(uri, fileModifiedAt)) {
 
-                        syncSettings?.let {
-                            UploadFile.deleteIfExists(uri)
-                            UploadFile(
-                                uri = uri.toString(),
-                                driveId = it.driveId,
-                                fileCreatedAt = fileCreatedAt,
-                                fileModifiedAt = fileModifiedAt,
-                                fileName = fileName,
-                                fileSize = fileSize,
-                                remoteFolder = it.syncFolder,
-                                userId = it.userId
-                            ).store()
-                            syncSettings?.let { syncSettings ->
-                                UploadFile.setAppSyncSettings(syncSettings.apply { lastSync = fileModifiedAt })
+                            syncSettings?.let {
+                                UploadFile.deleteIfExists(uri)
+                                UploadFile(
+                                    uri = uri.toString(),
+                                    driveId = it.driveId,
+                                    fileCreatedAt = fileCreatedAt,
+                                    fileModifiedAt = fileModifiedAt,
+                                    fileName = fileName,
+                                    fileSize = fileSize,
+                                    remoteFolder = it.syncFolder,
+                                    remoteSubFolder = mediaFolder.name,
+                                    userId = it.userId
+                                ).store()
+                                syncSettings?.let { syncSettings ->
+                                    UploadFile.setAppSyncSettings(syncSettings.apply { lastSync = fileModifiedAt })
+                                }
+                                if (!hasUpdate.get()) hasUpdate.set(true)
                             }
-                            if (!hasUpdate.get()) hasUpdate.set(true)
                         }
                     }
                 }
-            }
-    }
+        }
 
     private fun cancelSync() {
         uploadSupervisorJob.cancelChildren()

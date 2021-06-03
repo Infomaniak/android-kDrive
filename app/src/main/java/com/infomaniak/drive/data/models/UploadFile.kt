@@ -44,6 +44,7 @@ open class UploadFile(
     var fileSize: Long = 0L,
     var identifier: String = UUID.randomUUID().toString(),
     var remoteFolder: Int = -1,
+    var remoteSubFolder: String = "",
     var type: String = Type.SYNC.name,
     var uploadAt: Date? = null,
     var userId: Int = -1
@@ -77,7 +78,7 @@ open class UploadFile(
         private const val DB_NAME = "Sync.realm"
         private const val ONE_DAY = 24 * 60 * 60 * 1000
         private var realmConfiguration: RealmConfiguration = RealmConfiguration.Builder().name(DB_NAME)
-            .schemaVersion(1) // Must be bumped when the schema changes
+            .schemaVersion(2) // Must be bumped when the schema changes
             .modules(RealmModules.SyncFilesModule())
             .migration(UploadMigration())
             .build()

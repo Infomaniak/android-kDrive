@@ -19,6 +19,7 @@ package com.infomaniak.drive.data.sync
 
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
+import com.infomaniak.drive.data.models.UploadFile
 import io.realm.DynamicRealm
 import io.realm.FieldAttribute
 import io.realm.RealmMigration
@@ -31,7 +32,7 @@ class UploadMigration : RealmMigration {
         // DynamicRealm exposes an editable schema
         val schema = realm.schema
 
-        // Example Migrate to version 1: Create table MediaFolder and remove some fields
+        // Migrate to version 1: Create table MediaFolder and remove some fields
         if (oldVersionTemp == 0L) {
             // Add MediaFolder table
             schema.create(MediaFolder::class.java.simpleName)!!
@@ -42,6 +43,13 @@ class UploadMigration : RealmMigration {
             schema.get(SyncSettings::class.java.simpleName)!!
                 .removeField("syncPicture")
                 .removeField("syncScreenshot")
+            oldVersionTemp++
+        }
+
+        // Migrate to version 2: Add new field in UploadFile table
+        if (oldVersionTemp == 1L) {
+            schema.get(UploadFile::class.java.simpleName)!!
+                .addField(UploadFile::remoteSubFolder.name, String::class.java, FieldAttribute.REQUIRED)
             oldVersionTemp++
         }
     }
