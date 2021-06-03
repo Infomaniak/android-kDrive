@@ -147,7 +147,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                         finish()
                     } else {
                         withContext(Dispatchers.Main) {
-                            saveButton.hideProgress(R.string.buttonSave)
+                            saveButton?.hideProgress(R.string.buttonSave)
                             showSnackbar(R.string.errorSave)
                         }
                     }
