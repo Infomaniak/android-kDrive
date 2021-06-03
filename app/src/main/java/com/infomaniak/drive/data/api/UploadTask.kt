@@ -93,6 +93,7 @@ class UploadTask(
             val waitingCoroutines = arrayListOf<Job>()
             val requestSemaphore = Semaphore(limitParallelRequest)
             val totalChunks = ceil(uploadFile.fileSize.toDouble() / chunkSize).toInt()
+            val relativePath = createRelativePath()
 
             checkLimitParallelRequest()
 
@@ -126,7 +127,8 @@ class UploadTask(
                 val url = uploadUrl(
                     chunkNumber = chunkNumber,
                     currentChunkSize = count,
-                    totalChunks = totalChunks
+                    totalChunks = totalChunks,
+                    relativePath = relativePath
                 )
                 Log.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url")
 
@@ -261,20 +263,24 @@ class UploadTask(
         }
     }
 
-    private fun uploadUrl(
-        chunkNumber: Int,
-        currentChunkSize: Int,
-        totalChunks: Int
-    ): String {
+    private fun createRelativePath(): String {
         val date = uploadFile.fileModifiedAt.format(context.getString(R.string.photosHeaderDateFormat))
         val needToCreateDatedSubFolder = UploadFile.getAppSyncSettings()?.createDatedSubFolders == true
         val withLocalSubFolder = uploadFile.remoteSubFolder.isNotEmpty()
-        val relativePath = when {
+        return when {
             needToCreateDatedSubFolder && withLocalSubFolder -> "${uploadFile.remoteSubFolder}/$date/${uploadFile.encodedName()}"
             needToCreateDatedSubFolder -> "$date/${uploadFile.encodedName()}"
             withLocalSubFolder -> "${uploadFile.remoteSubFolder}/${uploadFile.encodedName()}"
             else -> ""
         }
+    }
+
+    private fun uploadUrl(
+        chunkNumber: Int,
+        currentChunkSize: Int,
+        totalChunks: Int,
+        relativePath: String
+    ): String {
         return "${ApiRoutes.uploadFile(uploadFile.driveId, uploadFile.remoteFolder)}?chunk_number=$chunkNumber" +
                 "&chunk_size=${chunkSize}" +
                 "&current_chunk_size=$currentChunkSize" +
