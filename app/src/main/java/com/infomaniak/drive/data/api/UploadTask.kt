@@ -38,6 +38,7 @@ import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.ApiController
+import io.sentry.Sentry
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Semaphore
 import okhttp3.Request
@@ -58,6 +59,7 @@ class UploadTask(
     private var limitParallelRequest = 4
     private var previousChunkBytesWritten = AtomicLong(0)
     private var currentProgress = AtomicInteger(0)
+    private var uploadedChunks: ValidChunks? = null
 
     private var uploadNotification: NotificationCompat.Builder? = null
     private lateinit var notificationManagerCompat: NotificationManagerCompat
@@ -94,7 +96,7 @@ class UploadTask(
 
             checkLimitParallelRequest()
 
-            val uploadedChunks =
+            uploadedChunks =
                 ApiRepository.getValidChunks(uploadFile.driveId, uploadFile.remoteFolder, uploadFile.identifier).data
             val restartUpload = uploadedChunks?.let { needToResetUpload(it) } ?: false
 
@@ -214,6 +216,12 @@ class UploadTask(
         val progress = ((totalBytesWritten.toDouble() / uploadFile.fileSize.toDouble()) * 100).toInt()
         currentProgress.set(progress)
         previousChunkBytesWritten.addAndGet(currentBytes.toLong())
+
+        if (previousChunkBytesWritten.get() > uploadFile.fileSize) {
+            uploadFile.refreshIdentifier()
+            Sentry.captureMessage("Chunk total size exceed fileSize 😢, uri:${uploadFile.uri}, $uploadedChunks")
+            throw CancellationException()
+        }
 
         onProgress?.invoke(progress)
 
