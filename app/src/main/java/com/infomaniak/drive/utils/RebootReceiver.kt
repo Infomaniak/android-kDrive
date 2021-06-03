@@ -23,11 +23,15 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationManagerCompat
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.login.MigrationActivity.Companion.getOldkDriveUser
 import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.*
 
 
@@ -42,6 +46,14 @@ class RebootReceiver : BroadcastReceiver() {
                     setContentText(getString(R.string.migrateNotificationDescription))
                     setContentIntent(pendingIntent)
                     notificationManagerCompat.notify(UUID.randomUUID().hashCode(), build())
+                }
+            }
+
+            GlobalScope.launch(Dispatchers.IO) {
+                MediaFolder.getRealmInstance().use { realm ->
+                    if (MediaFolder.getAllCount(realm) == 0L) {
+                        ArrayList(MediaFoldersProvider.getAllMediaFolders(realm, contentResolver))
+                    }
                 }
             }
 

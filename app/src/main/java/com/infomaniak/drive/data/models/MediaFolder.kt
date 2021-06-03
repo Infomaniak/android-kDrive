@@ -82,5 +82,10 @@ open class MediaFolder(
                 realm.where(MediaFolder::class.java).equalTo(MediaFolder::isSynced.name, true).count()
             }
         }
+
+        fun getAllCount(realm: Realm): Long {
+            return realm.where(MediaFolder::class.java).count()
+
+        }
     }
 }
