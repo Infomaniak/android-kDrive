@@ -68,8 +68,6 @@ open class UploadFile(
         }
     }
 
-    fun isSync() = type == Type.SYNC.toString()
-
     enum class Type {
         SYNC, UPLOAD, SHARED_FILE
     }

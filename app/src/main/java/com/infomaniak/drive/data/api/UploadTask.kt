@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.api
 
-import android.R
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -26,6 +25,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.FileInProgress
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.ValidChunks
@@ -39,13 +39,13 @@ import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.ApiController
+import com.infomaniak.lib.core.utils.format
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Semaphore
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.io.BufferedInputStream
-import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.ceil
@@ -123,7 +123,7 @@ class UploadTask(
 
                 data = if (count == chunkSize) data else data.copyOf(count)
 
-                val url = this@UploadTask.uploadUrl(
+                val url = uploadUrl(
                     chunkNumber = chunkNumber,
                     currentChunkSize = count,
                     totalChunks = totalChunks
@@ -139,7 +139,7 @@ class UploadTask(
         uploadNotification?.apply {
             setOngoing(false)
             setContentText("100%")
-            setSmallIcon(R.drawable.stat_sys_upload_done)
+            setSmallIcon(android.R.drawable.stat_sys_upload_done)
             setProgress(0, 0, false)
             notificationManagerCompat.notify(CURRENT_UPLOAD_ID, build())
         }
@@ -266,6 +266,15 @@ class UploadTask(
         currentChunkSize: Int,
         totalChunks: Int
     ): String {
+        val date = uploadFile.fileModifiedAt.format(context.getString(R.string.photosHeaderDateFormat))
+        val needToCreateDatedSubFolder = UploadFile.getAppSyncSettings()?.createDatedSubFolders == true
+        val withLocalSubFolder = uploadFile.remoteSubFolder.isNotEmpty()
+        val relativePath = when {
+            needToCreateDatedSubFolder && withLocalSubFolder -> "${uploadFile.remoteSubFolder}/$date/${uploadFile.encodedName()}"
+            needToCreateDatedSubFolder -> "$date/${uploadFile.encodedName()}"
+            withLocalSubFolder -> "${uploadFile.remoteSubFolder}/${uploadFile.encodedName()}"
+            else -> ""
+        }
         return "${ApiRoutes.uploadFile(uploadFile.driveId, uploadFile.remoteFolder)}?chunk_number=$chunkNumber" +
                 "&chunk_size=${chunkSize}" +
                 "&current_chunk_size=$currentChunkSize" +
@@ -275,7 +284,7 @@ class UploadTask(
                 "&file_name=${uploadFile.encodedName()}" +
                 "&last_modified_at=${uploadFile.fileModifiedAt.time / 1000}" +
                 "&conflict=replace" +
-                "&relative_path=${uploadFile.remoteSubFolder}/${uploadFile.encodedName()}" +
+                "&relative_path=$relativePath" +
                 if (uploadFile.fileCreatedAt == null) "" else "&file_created_at=${uploadFile.fileCreatedAt!!.time / 1000}"
     }
 
