@@ -194,7 +194,7 @@ class UploadAdapter @JvmOverloads constructor(
                     UploadFile.deleteIfExists(uri)
                     cacheFile.delete()
                 } else {
-                    val fileSize = contentResolver.openFileDescriptor(uri, "r")?.statSize
+                    val fileSize = contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize }
                     contentResolver.query(uri, null, null, null, null)?.use { cursor ->
                         if (cursor.moveToFirst()) {
                             val mediaSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
