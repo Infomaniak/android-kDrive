@@ -27,8 +27,6 @@ import androidx.collection.arrayMapOf
 import androidx.fragment.app.Fragment
 import com.infomaniak.drive.data.models.MediaFolder
 import io.realm.Realm
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 object MediaFoldersProvider {
 
@@ -65,12 +63,11 @@ object MediaFoldersProvider {
     /**
      * Need Write permission if is called from [Fragment] or [Activity]
      */
-    suspend fun getAllMediaFolders(realm: Realm, contentResolver: ContentResolver): List<MediaFolder> =
-        withContext(Dispatchers.IO) {
-            val mediaFolders = getImageFolders(realm, contentResolver)
-            mediaFolders.putAll(getVideoFolders(realm, contentResolver) as Map<Long, MediaFolder>)
-            mediaFolders.values.sortedBy { it.name }
-        }
+    fun getAllMediaFolders(realm: Realm, contentResolver: ContentResolver): List<MediaFolder> {
+        val mediaFolders = getImageFolders(realm, contentResolver)
+        mediaFolders.putAll(getVideoFolders(realm, contentResolver) as Map<Long, MediaFolder>)
+        return mediaFolders.values.sortedBy { it.name }
+    }
 
     private fun getImageFolders(realm: Realm, contentResolver: ContentResolver): ArrayMap<Long, MediaFolder> {
         val folders = arrayMapOf<Long, MediaFolder>()
