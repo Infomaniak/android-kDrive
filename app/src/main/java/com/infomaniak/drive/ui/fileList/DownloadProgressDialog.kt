@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui.fileList
 
-
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
@@ -40,6 +39,7 @@ import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.utils.setBackNavigationResult
 import com.infomaniak.drive.utils.showSnackbar
 import kotlinx.android.synthetic.main.dialog_download_progress.*
+import kotlinx.android.synthetic.main.dialog_download_progress.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import okhttp3.Response
@@ -53,27 +53,10 @@ class DownloadProgressDialog : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         dialogView = View.inflate(context, R.layout.dialog_download_progress, null)
-        return MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
-            .setTitle(navigationArgs.fileName)
-            .setView(dialogView)
-            .setOnKeyListener { _, keyCode, event ->
-                if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_DOWN) {
-                    findNavController().popBackStack()
-                    true
-                } else false
-            }
-            .create()
-    }
 
-    override fun getView() = dialogView
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         isCancelable = false
-
         FileController.getFileById(navigationArgs.fileID, navigationArgs.userDrive)?.let { file ->
-            icon.setImageResource(file.getFileType().icon)
-
+            dialogView.icon.setImageResource(file.getFileType().icon)
             downloadViewModel.downloadFile(requireContext(), file, navigationArgs.userDrive).observe(this) {
                 it?.let { (progress, isComplete) ->
                     if (isComplete) {
@@ -87,7 +70,20 @@ class DownloadProgressDialog : DialogFragment() {
                 }
             }
         }
+
+        return MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
+            .setTitle(navigationArgs.fileName)
+            .setView(dialogView)
+            .setOnKeyListener { _, keyCode, event ->
+                if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_DOWN) {
+                    findNavController().popBackStack()
+                    true
+                } else false
+            }
+            .create()
     }
+
+    override fun getView() = dialogView
 
     class DownloadViewModel : ViewModel() {
 
