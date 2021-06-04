@@ -178,6 +178,10 @@
         <argument
             android:name="fileIds"
             app:argType="integer[]" />
+        <argument
+            android:name="onlyFolders"
+            android:defaultValue="false"
+            app:argType="boolean" />
     </dialog>
 
     <dialog

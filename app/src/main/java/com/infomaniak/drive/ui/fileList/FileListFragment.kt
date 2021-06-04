@@ -290,11 +290,10 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         moveButtonMultiSelect.setOnClickListener { Utils.moveFileClicked(this, folderID) }
         menuButtonMultiSelect.setOnClickListener {
-            val fileIds: ArrayList<Int> = ArrayList()
-            fileIds.apply { fileAdapter.itemSelected.forEach { add(it.id) } }
             safeNavigate(
                 FileListFragmentDirections.actionFileListFragmentToActionMultiSelectBottomSheetDialog(
-                    fileIds.toIntArray()
+                    fileIds = fileAdapter.itemSelected.map { it.id }.toIntArray(),
+                    onlyFolders = fileAdapter.itemSelected.all { it.isFolder() }
                 )
             )
         }
@@ -437,18 +436,19 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun addSelectedFilesToOffline(file: File) {
-        if (!file.isOffline && !file.isOldData(requireContext()) && !file.isFolder()) {
-            val cacheFile = file.localPath(requireContext(), File.LocalType.CLOUD_STORAGE)
-            val offlineFile = file.localPath(requireContext(), File.LocalType.OFFLINE)
-            Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
-            runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
+        if (!file.isOffline && !file.isFolder()) {
+            if (!file.isOldData(requireContext())) {
+                val cacheFile = file.localPath(requireContext(), File.LocalType.CLOUD_STORAGE)
+                val offlineFile = file.localPath(requireContext(), File.LocalType.OFFLINE)
+                Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
+                runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
 
-            fileAdapter.updateFileProgress(file.id, 100) { currentFile ->
-                currentFile.isOffline = true
-                currentFile.currentProgress = 0
-            }
-
-        } else if (file.isOldData(requireContext())) Utils.downloadAsOfflineFile(requireContext(), file)
+                fileAdapter.updateFileProgress(file.id, 100) { currentFile ->
+                    currentFile.isOffline = true
+                    currentFile.currentProgress = 0
+                }
+            } else Utils.downloadAsOfflineFile(requireContext(), file)
+        }
     }
 
     private fun onSelectFolderResult(requestCode: Int, resultCode: Int, data: Intent?) {

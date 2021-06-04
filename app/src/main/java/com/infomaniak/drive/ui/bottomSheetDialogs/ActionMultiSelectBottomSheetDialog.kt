@@ -22,6 +22,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.AndroidViewModel
@@ -57,8 +59,10 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
         availableOffline.setOnClickListener { onActionSelected(SelectDialogAction.OFFLINE) }
         duplicateFile.setOnClickListener { onActionSelected(SelectDialogAction.DUPLICATE) }
 
+        disabledAvailableOffline.visibility = if (navigationArgs.onlyFolders) VISIBLE else GONE
+
         val drivePermissions = DrivePermissions()
-        drivePermissions.registerPermissions(this) { autorized -> if (autorized) downloadFileArchive() }
+        drivePermissions.registerPermissions(this) { authorized -> if (authorized) downloadFileArchive() }
         downloadFile.setOnClickListener {
             if (drivePermissions.checkWriteStoragePermission()) downloadFileArchive()
         }
@@ -85,7 +89,6 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     class ActionMultiSelectModel(app: Application) : AndroidViewModel(app) {
-
         fun downloadArchive(fileIds: IntArray) = liveData(Dispatchers.IO) {
             emit(ApiRepository.getUUIDArchiveFiles(AccountUtils.currentDriveId, fileIds))
         }
