@@ -657,10 +657,13 @@ object FileController {
 
     fun getOfflineFiles(order: File.SortType?, userDrive: UserDrive = UserDrive(), customRealm: Realm? = null): ArrayList<File> {
         val block: (Realm) -> ArrayList<File> = { realm ->
-            realm.where(File::class.java).equalTo(File::isOffline.name, true).findAll()?.let { files ->
-                if (order == null) realm.copyFromRealm(files) as ArrayList
-                else getLocalSortedFolderFiles(null, order, realm, files)
-            } ?: arrayListOf()
+            realm.where(File::class.java)
+                .equalTo(File::isOffline.name, true)
+                .notEqualTo(File::type.name, File.Type.FOLDER.value)
+                .findAll()?.let { files ->
+                    if (order == null) realm.copyFromRealm(files) as ArrayList
+                    else getLocalSortedFolderFiles(null, order, realm, files)
+                } ?: arrayListOf()
         }
         return customRealm?.let(block) ?: getRealmInstance(userDrive).use(block)
     }
