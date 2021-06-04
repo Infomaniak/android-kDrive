@@ -28,6 +28,7 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.collection.arrayMapOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -95,20 +96,17 @@ class SettingsFragment : Fragment() {
             getString(R.string.themeSettingsDarkLabel),
             getString(R.string.themeSettingsSystemDefaultLabel)
         )
+        val nightMode = arrayMapOf(
+            Pair(0, AppCompatDelegate.MODE_NIGHT_NO),
+            Pair(1, AppCompatDelegate.MODE_NIGHT_YES),
+            Pair(2, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        )
         var defaultNightMode = AppCompatDelegate.getDefaultNightMode()
-        val themeTextValue = when (defaultNightMode) {
-            AppCompatDelegate.MODE_NIGHT_NO -> 0
-            AppCompatDelegate.MODE_NIGHT_YES -> 1
-            else -> 2
-        }
+        val startSelectItemPosition = nightMode.filter { it.value == defaultNightMode }.keys.first()
         MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
             .setTitle(getString(R.string.syncSettingsButtonSaveDate))
-            .setSingleChoiceItems(items, themeTextValue) { _, which ->
-                defaultNightMode = when (which) {
-                    0 -> AppCompatDelegate.MODE_NIGHT_NO
-                    1 -> AppCompatDelegate.MODE_NIGHT_YES
-                    else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                }
+            .setSingleChoiceItems(items, startSelectItemPosition) { _, which ->
+                defaultNightMode = nightMode[which]!!
             }
             .setPositiveButton(R.string.buttonConfirm) { _, _ ->
                 UISettings(requireContext()).nightMode = defaultNightMode

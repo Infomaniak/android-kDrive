@@ -67,6 +67,9 @@ class ApplicationMain : Application(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
+
+        AppCompatDelegate.setDefaultNightMode(UISettings(this).nightMode)
+
         if (BuildConfig.DEBUG) {
             Stetho.initializeWithDefaults(this)
             StrictMode.setVmPolicy(
@@ -92,8 +95,6 @@ class ApplicationMain : Application(), ImageLoaderFactory {
                 if (BuildConfig.DEBUG) null else event
             }
         }
-
-        AppCompatDelegate.setDefaultNightMode(UISettings(this).nightMode)
 
         AccountUtils.init(this)
         AccountUtils.reloadApp = {
