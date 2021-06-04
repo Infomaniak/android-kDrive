@@ -220,7 +220,7 @@ class UploadTask(
         if (previousChunkBytesWritten.get() > uploadFile.fileSize) {
             uploadFile.refreshIdentifier()
             Sentry.captureMessage("Chunk total size exceed fileSize 😢, uri:${uploadFile.uri}, $uploadedChunks")
-            throw CancellationException()
+            throw ChunksSizeExceededException()
         }
 
         onProgress?.invoke(progress)
@@ -288,6 +288,7 @@ class UploadTask(
 
     class FolderNotFoundException : Exception()
     class QuotaExceededException : Exception()
+    class ChunksSizeExceededException : Exception()
 
     companion object {
         var chunkSize: Int = 1 * 1024 * 1024 // Chunk 1 Mo
