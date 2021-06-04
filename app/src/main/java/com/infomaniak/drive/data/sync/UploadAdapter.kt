@@ -33,8 +33,7 @@ import androidx.core.os.bundleOf
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.UploadTask
-import com.infomaniak.drive.data.api.UploadTask.FolderNotFoundException
-import com.infomaniak.drive.data.api.UploadTask.QuotaExceededException
+import com.infomaniak.drive.data.api.UploadTask.*
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
@@ -116,6 +115,9 @@ class UploadAdapter @JvmOverloads constructor(
 
         } catch (exception: CancellationException) {
             exceptionNotification()
+            syncResult?.restartSyncErrorWithDelay()
+
+        } catch (exception: ChunksSizeExceededException) {
             syncResult?.restartSyncErrorWithDelay()
 
         } catch (exception: Exception) {

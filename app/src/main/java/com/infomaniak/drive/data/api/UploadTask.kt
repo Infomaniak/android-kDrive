@@ -38,6 +38,8 @@ import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.ApiController
+import com.infomaniak.lib.core.utils.ApiController.gson
+import io.sentry.Sentry
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Semaphore
 import okhttp3.Request
@@ -215,6 +217,15 @@ class UploadTask(
         currentProgress.set(progress)
         previousChunkBytesWritten.addAndGet(currentBytes.toLong())
 
+        if (previousChunkBytesWritten.get() > uploadFile.fileSize) {
+            uploadFile.refreshIdentifier()
+            Sentry.withScope { scope ->
+                scope.setExtra("data", gson.toJson(uploadFile))
+                Sentry.captureMessage("Chunk total size exceed fileSize 😢")
+            }
+            throw ChunksSizeExceededException()
+        }
+
         onProgress?.invoke(progress)
 
         ensureActive()
@@ -280,6 +291,7 @@ class UploadTask(
 
     class FolderNotFoundException : Exception()
     class QuotaExceededException : Exception()
+    class ChunksSizeExceededException : Exception()
 
     companion object {
         var chunkSize: Int = 1 * 1024 * 1024 // Chunk 1 Mo
