@@ -437,7 +437,7 @@ class UploadAdapter @JvmOverloads constructor(
                                     remoteFolder = it.syncFolder,
                                     userId = it.userId
                                 ).apply {
-                                    createSubFolder(context, mediaFolder.name, it.createDatedSubFolders)
+                                    createSubFolder(mediaFolder.name, it.createDatedSubFolders)
                                     store()
                                 }
                                 syncSettings?.let { syncSettings ->

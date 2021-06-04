@@ -22,7 +22,6 @@ import android.content.Context
 import android.net.Uri
 import androidx.core.net.toFile
 import androidx.core.net.toUri
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.sync.UploadMigration
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
@@ -54,11 +53,11 @@ open class UploadFile(
 
     fun encodedName(): String = URLEncoder.encode(fileName, "UTF-8")
 
-    fun createSubFolder(context: Context, parent: String, createDatedSubFolders: Boolean) {
+    fun createSubFolder(parent: String, createDatedSubFolders: Boolean) {
         remoteSubFolder = when {
             createDatedSubFolders -> {
-                val date = fileModifiedAt.format(context.getString(R.string.photosHeaderDateFormat))
-                "$parent/$date/${encodedName()}"
+                val date = fileModifiedAt.format("yyyy/MM/")
+                "$parent/$date${encodedName()}"
             }
             else -> "$parent/${encodedName()}"
         }
