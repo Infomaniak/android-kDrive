@@ -320,6 +320,52 @@
                         android:background="@color/divider" />
 
                     <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?selectableItemBackground"
+                        android:paddingVertical="@dimen/marginStandardMedium">
+
+                        <TextView
+                            android:id="@+id/createDatedSubFoldersTitle"
+                            style="@style/Subtitle2"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/marginStandard"
+                            android:text="Créer un dossier par mois"
+                            app:layout_constraintBottom_toBottomOf="@id/createDatedSubFoldersSwitch"
+                            app:layout_constraintEnd_toStartOf="@id/createDatedSubFoldersSwitch"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="@id/createDatedSubFoldersSwitch" />
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/createDatedSubFoldersSwitch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/marginStandardMedium"
+                            app:layout_constraintBottom_toTopOf="@id/createDatedSubFoldersDescription"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/createDatedSubFoldersDescription"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="@dimen/marginStandard"
+                            android:text="Créer automatiquement des sous dossiers avec le mois et l'année de la photo"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/createDatedSubFoldersSwitch"
+                            app:layout_constraintVertical_chainStyle="packed" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/divider" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/syncDate"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

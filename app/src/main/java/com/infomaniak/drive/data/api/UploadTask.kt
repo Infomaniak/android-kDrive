@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.api
 
-import android.R
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -45,7 +44,6 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.io.BufferedInputStream
-import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.ceil
@@ -123,7 +121,7 @@ class UploadTask(
 
                 data = if (count == chunkSize) data else data.copyOf(count)
 
-                val url = this@UploadTask.uploadUrl(
+                val url = uploadUrl(
                     chunkNumber = chunkNumber,
                     currentChunkSize = count,
                     totalChunks = totalChunks
@@ -139,7 +137,7 @@ class UploadTask(
         uploadNotification?.apply {
             setOngoing(false)
             setContentText("100%")
-            setSmallIcon(R.drawable.stat_sys_upload_done)
+            setSmallIcon(android.R.drawable.stat_sys_upload_done)
             setProgress(0, 0, false)
             notificationManagerCompat.notify(CURRENT_UPLOAD_ID, build())
         }
@@ -266,6 +264,7 @@ class UploadTask(
         currentChunkSize: Int,
         totalChunks: Int
     ): String {
+        val relativePath = if (uploadFile.remoteSubFolder == null) "" else "&relative_path=${uploadFile.remoteSubFolder}"
         return "${ApiRoutes.uploadFile(uploadFile.driveId, uploadFile.remoteFolder)}?chunk_number=$chunkNumber" +
                 "&chunk_size=${chunkSize}" +
                 "&current_chunk_size=$currentChunkSize" +
@@ -275,6 +274,7 @@ class UploadTask(
                 "&file_name=${uploadFile.encodedName()}" +
                 "&last_modified_at=${uploadFile.fileModifiedAt.time / 1000}" +
                 "&conflict=replace" +
+                relativePath +
                 if (uploadFile.fileCreatedAt == null) "" else "&file_created_at=${uploadFile.fileCreatedAt!!.time / 1000}"
     }
 

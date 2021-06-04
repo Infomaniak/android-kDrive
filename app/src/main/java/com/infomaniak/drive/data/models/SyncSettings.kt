@@ -25,11 +25,12 @@ import java.util.*
 
 open class SyncSettings(
     @PrimaryKey var userId: Int = -1,
+    var createDatedSubFolders: Boolean = false,
     var driveId: Int = -1,
     var lastSync: Date = Date(),
+    var syncFolder: Int = -1,
     var syncImmediately: Boolean = false,
     var syncInterval: Long = 0,
-    var syncFolder: Int = -1,
     var syncVideo: Boolean = false
 ) : RealmObject() {
 

@@ -25,6 +25,7 @@ import androidx.core.net.toUri
 import com.infomaniak.drive.data.sync.UploadMigration
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
+import com.infomaniak.lib.core.utils.format
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.RealmObject
@@ -44,12 +45,23 @@ open class UploadFile(
     var fileSize: Long = 0L,
     var identifier: String = UUID.randomUUID().toString(),
     var remoteFolder: Int = -1,
+    var remoteSubFolder: String? = null,
     var type: String = Type.SYNC.name,
     var uploadAt: Date? = null,
     var userId: Int = -1
 ) : RealmObject() {
 
     fun encodedName(): String = URLEncoder.encode(fileName, "UTF-8")
+
+    fun createSubFolder(parent: String, createDatedSubFolders: Boolean) {
+        remoteSubFolder = when {
+            createDatedSubFolders -> {
+                val date = fileModifiedAt.format("yyyy/MM/")
+                "$parent/$date${encodedName()}"
+            }
+            else -> "$parent/${encodedName()}"
+        }
+    }
 
     fun store() {
         getRealmInstance().use {
@@ -67,8 +79,6 @@ open class UploadFile(
         }
     }
 
-    fun isSync() = type == Type.SYNC.toString()
-
     enum class Type {
         SYNC, UPLOAD, SHARED_FILE
     }
@@ -77,7 +87,7 @@ open class UploadFile(
         private const val DB_NAME = "Sync.realm"
         private const val ONE_DAY = 24 * 60 * 60 * 1000
         private var realmConfiguration: RealmConfiguration = RealmConfiguration.Builder().name(DB_NAME)
-            .schemaVersion(1) // Must be bumped when the schema changes
+            .schemaVersion(2) // Must be bumped when the schema changes
             .modules(RealmModules.SyncFilesModule())
             .migration(UploadMigration())
             .build()

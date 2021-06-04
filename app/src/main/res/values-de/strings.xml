@@ -156,6 +156,8 @@
     <string name="createCommonFolderDescription">Mit wem möchten Sie diesen gemeinsamen Ordner teilen?</string>
     <string name="createCommonFolderSucces">Gemeinsamer Ordner erfolgreich angelegt</string>
     <string name="createCommonFolderTitle">Gemeinsamen Ordner erstellen</string>
+    <string name="createDatedSubFoldersDescription">Automatisches Erstellen von Unterordnern mit dem Monat und Jahr des Fotos</string>
+    <string name="createDatedSubFoldersTitle">Einen Ordner pro Monat erstellen</string>
     <string name="createDropBoxHint">Name des Briefkastens</string>
     <string name="createDropBoxLimiteFileSizeError">Muss höher sein als 0</string>
     <string name="createDropBoxTitle">Briefkasten anlegen</string>

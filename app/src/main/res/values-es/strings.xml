@@ -156,6 +156,8 @@
     <string name="createCommonFolderDescription">¿Con quién deseas compartir esta carpeta común?</string>
     <string name="createCommonFolderSucces">Carpeta común creada correctamente</string>
     <string name="createCommonFolderTitle">Crear una carpeta común</string>
+    <string name="createDatedSubFoldersDescription">Crear automáticamente subcarpetas con el mes y el año de la foto</string>
+    <string name="createDatedSubFoldersTitle">Crear una carpeta por mes</string>
     <string name="createDropBoxHint">Nombre del buzón de depósito</string>
     <string name="createDropBoxLimiteFileSizeError">Debe ser superior a 0</string>
     <string name="createDropBoxTitle">Crear un buzón de depósito</string>
