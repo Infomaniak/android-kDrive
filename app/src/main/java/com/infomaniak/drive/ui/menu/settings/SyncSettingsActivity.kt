@@ -152,8 +152,10 @@ class SyncSettingsActivity : BaseActivity() {
             syncPeriodicityValue.setText(it.title)
         }
 
-        val defaultValue = true
-        syncVideoSwitch.isChecked = oldSyncSettings?.syncVideo ?: defaultValue
+        val syncVideoDefaultValue = true
+        syncVideoSwitch.isChecked = oldSyncSettings?.syncVideo ?: syncVideoDefaultValue
+        val createDatedSubFoldersDefaultValue = false
+        createDatedSubFoldersSwitch.isChecked = oldSyncSettings?.createDatedSubFolders ?: createDatedSubFoldersDefaultValue
 
         activateSync.setOnClickListener { activateSyncSwitch.isChecked = !activateSyncSwitch.isChecked }
         activateSyncSwitch.setOnCheckedChangeListener { _, isChecked ->
@@ -168,7 +170,12 @@ class SyncSettingsActivity : BaseActivity() {
         }
 
         syncVideoSwitch.setOnCheckedChangeListener { _, isChecked ->
-            if (oldSyncSettings?.syncVideo ?: defaultValue == isChecked) editNumber-- else editNumber++
+            if (oldSyncSettings?.syncVideo ?: syncVideoDefaultValue == isChecked) editNumber-- else editNumber++
+            changeSaveButtonStatus()
+        }
+
+        createDatedSubFoldersSwitch.setOnCheckedChangeListener { _, isChecked ->
+            if (oldSyncSettings?.createDatedSubFolders ?: createDatedSubFoldersDefaultValue == isChecked) editNumber-- else editNumber++
             changeSaveButtonStatus()
         }
 
@@ -276,7 +283,8 @@ class SyncSettingsActivity : BaseActivity() {
                     driveId = selectDriveViewModel.selectedDrive.value!!.id,
                     lastSync = if (saveOldPictures) Date(0) else Date(),
                     syncFolder = syncSettingsViewModel.syncFolder.value!!,
-                    syncVideo = syncVideoSwitch.isChecked
+                    syncVideo = syncVideoSwitch.isChecked,
+                    createDatedSubFolders = createDatedSubFoldersSwitch.isChecked
                 )
                 syncSettings.setIntervalType(syncSettingsViewModel.syncIntervalType.value!!)
                 activateAutoSync(syncSettings)

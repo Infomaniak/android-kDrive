@@ -49,7 +49,7 @@ class UploadMigration : RealmMigration {
         // Migrate to version 2: Add new fields in UploadFile and SyncSettings tables
         if (oldVersionTemp == 1L) {
             schema.get(UploadFile::class.java.simpleName)!!
-                .addField(UploadFile::remoteSubFolder.name, String::class.java, FieldAttribute.REQUIRED)
+                .addField(UploadFile::remoteSubFolder.name, String::class.java)
             schema.get(SyncSettings::class.java.simpleName)!!
                 .addField(SyncSettings::createDatedSubFolders.name, Boolean::class.java, FieldAttribute.REQUIRED)
             oldVersionTemp++

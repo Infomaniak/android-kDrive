@@ -435,9 +435,11 @@ class UploadAdapter @JvmOverloads constructor(
                                     fileName = fileName,
                                     fileSize = fileSize,
                                     remoteFolder = it.syncFolder,
-                                    remoteSubFolder = mediaFolder.name,
                                     userId = it.userId
-                                ).store()
+                                ).apply {
+                                    createSubFolder(context, mediaFolder.name, it.createDatedSubFolders)
+                                    store()
+                                }
                                 syncSettings?.let { syncSettings ->
                                     UploadFile.setAppSyncSettings(syncSettings.apply { lastSync = fileModifiedAt })
                                 }

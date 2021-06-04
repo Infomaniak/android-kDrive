@@ -165,6 +165,8 @@
     <string name="createCommonFolderDescription">Avec qui souhaitez-vous partager ce dossier commun ?</string>
     <string name="createCommonFolderSucces">Dossier commun créé avec succès</string>
     <string name="createCommonFolderTitle">Créer un dossier commun</string>
+    <string name="createDatedSubFoldersDescription">Créer automatiquement des sous dossiers avec le mois et l’année de la photo</string>
+    <string name="createDatedSubFoldersTitle">Créer un dossier par mois</string>
     <string name="createDropBoxHint">Nom de la boîte de dépôt</string>
     <string name="createDropBoxLimiteFileSizeError">Doit être supérieur à 0</string>
     <string name="createDropBoxTitle">Créer une boîte de dépôt</string>

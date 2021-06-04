@@ -22,9 +22,11 @@ import android.content.Context
 import android.net.Uri
 import androidx.core.net.toFile
 import androidx.core.net.toUri
+import com.infomaniak.drive.R
 import com.infomaniak.drive.data.sync.UploadMigration
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
+import com.infomaniak.lib.core.utils.format
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.RealmObject
@@ -44,13 +46,23 @@ open class UploadFile(
     var fileSize: Long = 0L,
     var identifier: String = UUID.randomUUID().toString(),
     var remoteFolder: Int = -1,
-    var remoteSubFolder: String = "",
+    var remoteSubFolder: String? = null,
     var type: String = Type.SYNC.name,
     var uploadAt: Date? = null,
     var userId: Int = -1
 ) : RealmObject() {
 
     fun encodedName(): String = URLEncoder.encode(fileName, "UTF-8")
+
+    fun createSubFolder(context: Context, parent: String, createDatedSubFolders: Boolean) {
+        remoteSubFolder = when {
+            createDatedSubFolders -> {
+                val date = fileModifiedAt.format(context.getString(R.string.photosHeaderDateFormat))
+                "$parent/$date/${encodedName()}"
+            }
+            else -> "$parent/${encodedName()}"
+        }
+    }
 
     fun store() {
         getRealmInstance().use {

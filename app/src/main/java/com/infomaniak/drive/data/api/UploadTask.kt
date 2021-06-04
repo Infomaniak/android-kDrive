@@ -25,7 +25,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.FileInProgress
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.ValidChunks
@@ -39,7 +38,6 @@ import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.ApiController
-import com.infomaniak.lib.core.utils.format
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Semaphore
 import okhttp3.Request
@@ -93,7 +91,6 @@ class UploadTask(
             val waitingCoroutines = arrayListOf<Job>()
             val requestSemaphore = Semaphore(limitParallelRequest)
             val totalChunks = ceil(uploadFile.fileSize.toDouble() / chunkSize).toInt()
-            val relativePath = createRelativePath()
 
             checkLimitParallelRequest()
 
@@ -127,8 +124,7 @@ class UploadTask(
                 val url = uploadUrl(
                     chunkNumber = chunkNumber,
                     currentChunkSize = count,
-                    totalChunks = totalChunks,
-                    relativePath = relativePath
+                    totalChunks = totalChunks
                 )
                 Log.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url")
 
@@ -263,24 +259,12 @@ class UploadTask(
         }
     }
 
-    private fun createRelativePath(): String {
-        val date = uploadFile.fileModifiedAt.format(context.getString(R.string.photosHeaderDateFormat))
-        val needToCreateDatedSubFolder = UploadFile.getAppSyncSettings()?.createDatedSubFolders == true
-        val withLocalSubFolder = uploadFile.remoteSubFolder.isNotEmpty()
-        return when {
-            needToCreateDatedSubFolder && withLocalSubFolder -> "${uploadFile.remoteSubFolder}/$date/${uploadFile.encodedName()}"
-            needToCreateDatedSubFolder -> "$date/${uploadFile.encodedName()}"
-            withLocalSubFolder -> "${uploadFile.remoteSubFolder}/${uploadFile.encodedName()}"
-            else -> ""
-        }
-    }
-
     private fun uploadUrl(
         chunkNumber: Int,
         currentChunkSize: Int,
-        totalChunks: Int,
-        relativePath: String
+        totalChunks: Int
     ): String {
+        val relativePath = if (uploadFile.remoteSubFolder == null) "" else "&relative_path=${uploadFile.remoteSubFolder}"
         return "${ApiRoutes.uploadFile(uploadFile.driveId, uploadFile.remoteFolder)}?chunk_number=$chunkNumber" +
                 "&chunk_size=${chunkSize}" +
                 "&current_chunk_size=$currentChunkSize" +
@@ -290,7 +274,7 @@ class UploadTask(
                 "&file_name=${uploadFile.encodedName()}" +
                 "&last_modified_at=${uploadFile.fileModifiedAt.time / 1000}" +
                 "&conflict=replace" +
-                "&relative_path=$relativePath" +
+                relativePath +
                 if (uploadFile.fileCreatedAt == null) "" else "&file_created_at=${uploadFile.fileCreatedAt!!.time / 1000}"
     }
 

@@ -156,6 +156,8 @@
     <string name="createCommonFolderDescription">Con chi vuoi condividere questa cartella comune?</string>
     <string name="createCommonFolderSucces">Cartella condivisa creata con successo</string>
     <string name="createCommonFolderTitle">Crea una cartella condivisa</string>
+    <string name="createDatedSubFoldersDescription">Crea automaticamente sottocartelle con il mese e l’anno della foto</string>
+    <string name="createDatedSubFoldersTitle">Creare una cartella al mese</string>
     <string name="createDropBoxHint">Nome del deposito file</string>
     <string name="createDropBoxLimiteFileSizeError">Deve essere maggiore di 0</string>
     <string name="createDropBoxTitle">Crea un deposito file</string>
@@ -448,7 +450,7 @@
     <string name="selectFolderTitle">Selezionare una cartella</string>
     <string name="selectMediaFoldersDescription">Seleziona le cartelle sul tuo dispositivo che devono essere automaticamente salvate sul tuo kDrive.</string>
     <string name="selectMediaFoldersTitle">File da salvare</string>
-    <string name="settingsOnlyWifiSyncDescription">Il backup automatico delle foto/video e l\'aggiornamento dei file offline saranno effettuati solo con una connessione Wifi.</string>
+    <string name="settingsOnlyWifiSyncDescription">Il backup automatico delle foto/video e l’aggiornamento dei file offline saranno effettuati solo con una connessione Wifi.</string>
     <string name="settingsOnlyWifiSyncTitle">Trasferimento solo tramite Wi-Fi</string>
     <string name="settingsTitle">Impostazioni</string>
     <string name="shareFileInputUserAndEmail">Invita un utente o un indirizzo e-mail…</string>
