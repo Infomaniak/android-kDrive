@@ -92,6 +92,40 @@
                     android:background="@color/divider" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/themeSettings"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?selectableItemBackground"
+                    android:padding="@dimen/marginStandard">
+
+                    <TextView
+                        android:id="@+id/themeSettingsTitle"
+                        style="@style/Subtitle2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/themeSettingsTitle"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/themeSettingsValue"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/themeSettingsValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/themeSettingsSystemLabel"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/divider" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/notifications"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

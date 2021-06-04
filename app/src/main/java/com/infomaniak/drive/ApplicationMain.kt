@@ -23,6 +23,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationManagerCompat
 import coil.ImageLoader
 import coil.ImageLoaderFactory
@@ -32,6 +33,7 @@ import com.facebook.stetho.okhttp3.StethoInterceptor
 import com.infomaniak.drive.BuildConfig.DRIVE_API
 import com.infomaniak.drive.BuildConfig.INFOMANIAK_API
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.UISettings
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.utils.*
@@ -90,6 +92,8 @@ class ApplicationMain : Application(), ImageLoaderFactory {
                 if (BuildConfig.DEBUG) null else event
             }
         }
+
+        AppCompatDelegate.setDefaultNightMode(UISettings(this).nightMode)
 
         AccountUtils.init(this)
         AccountUtils.reloadApp = {

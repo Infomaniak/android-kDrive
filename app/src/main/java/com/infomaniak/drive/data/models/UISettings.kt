@@ -19,6 +19,7 @@ package com.infomaniak.drive.data.models
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.appcompat.app.AppCompatDelegate
 import com.infomaniak.drive.R
 
 class UISettings(val context: Context) {
@@ -65,6 +66,15 @@ class UISettings(val context: Context) {
         set(value) {
             with(getUISettings().edit()) {
                 putBoolean("listMode", value)
+                apply()
+            }
+        }
+
+    var nightMode: Int
+        get() = getUISettings().getInt("nightMode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        set(value) {
+            with(getUISettings().edit()) {
+                putInt("nightMode", value)
                 apply()
             }
         }
