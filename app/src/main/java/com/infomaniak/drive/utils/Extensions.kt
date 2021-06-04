@@ -118,7 +118,7 @@ fun Context.isKeyguardSecure(): Boolean {
 
 fun ImageView.loadUrl(
     uri: String?,
-    @DrawableRes placeholder: Int = R.drawable.ic_file_image
+    @DrawableRes placeholder: Int = R.drawable.failback_image
 ): Disposable {
     return load(uri) {
         error(placeholder)

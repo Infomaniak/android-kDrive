@@ -28,6 +28,7 @@ import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_picture.view.*
 import kotlinx.android.synthetic.main.title_recycler_section.view.*
+import java.util.*
 
 class PicturesAdapter(
     override var itemList: ArrayList<Any> = arrayListOf(),
@@ -42,7 +43,9 @@ class PicturesAdapter(
         val addItemList: ArrayList<Any> = arrayListOf()
 
         for (picture in newPictureList) {
-            val month = picture.getLastModifiedAt().format(context.getString(R.string.photosHeaderDateFormat))
+            val month = picture.getLastModifiedAt()
+                .format(context.getString(R.string.photosHeaderDateFormat))
+                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
 
             if (lastSectionTitle != month) {
                 addItemList.add(month)
