@@ -27,10 +27,14 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.collection.arrayMapOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
+import com.infomaniak.drive.data.models.UISettings
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
@@ -63,6 +67,12 @@ class SettingsFragment : Fragment() {
         syncPicture.setOnClickListener {
             safeNavigate(R.id.syncSettingsActivity)
         }
+        themeSettings.setOnClickListener {
+            openThemeSettings()
+        }
+        notifications.setOnClickListener {
+            openAppNotificationSettings()
+        }
         appSecurity.apply {
             if (requireContext().isKeyguardSecure()) {
                 appSecuritySeparator.visibility = VISIBLE
@@ -75,18 +85,52 @@ class SettingsFragment : Fragment() {
                 visibility = GONE
             }
         }
-        notifications.setOnClickListener {
-            openAppNotificationSettings()
-        }
         about.setOnClickListener {
             safeNavigate(R.id.aboutSettingsFragment)
         }
+    }
+
+    private fun openThemeSettings() {
+        val items = arrayOf(
+            getString(R.string.themeSettingsLightLabel),
+            getString(R.string.themeSettingsDarkLabel),
+            getString(R.string.themeSettingsSystemDefaultLabel)
+        )
+        val nightMode = arrayMapOf(
+            Pair(0, AppCompatDelegate.MODE_NIGHT_NO),
+            Pair(1, AppCompatDelegate.MODE_NIGHT_YES),
+            Pair(2, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        )
+        var defaultNightMode = AppCompatDelegate.getDefaultNightMode()
+        val startSelectItemPosition = nightMode.filter { it.value == defaultNightMode }.keys.first()
+        MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
+            .setTitle(getString(R.string.syncSettingsButtonSaveDate))
+            .setSingleChoiceItems(items, startSelectItemPosition) { _, which ->
+                defaultNightMode = nightMode[which]!!
+            }
+            .setPositiveButton(R.string.buttonConfirm) { _, _ ->
+                UISettings(requireContext()).nightMode = defaultNightMode
+                AppCompatDelegate.setDefaultNightMode(defaultNightMode)
+                setThemeSettingsVelue()
+            }
+            .setNegativeButton(R.string.buttonCancel) { _, _ -> }
+            .setCancelable(false).show()
     }
 
     override fun onResume() {
         super.onResume()
         syncPictureValue.setText(if (AccountUtils.isEnableAppSync()) R.string.allActivated else R.string.allDisabled)
         appSecurityValue.setText(if (AppSettings.appSecurityLock) R.string.allActivated else R.string.allDisabled)
+        setThemeSettingsVelue()
+    }
+
+    private fun setThemeSettingsVelue() {
+        val themeTextValue = when (AppCompatDelegate.getDefaultNightMode()) {
+            AppCompatDelegate.MODE_NIGHT_NO -> R.string.themeSettingsLightLabel
+            AppCompatDelegate.MODE_NIGHT_YES -> R.string.themeSettingsDarkLabel
+            else -> R.string.themeSettingsSystemLabel
+        }
+        themeSettingsValue.setText(themeTextValue)
     }
 
     private fun openAppNotificationSettings() {
