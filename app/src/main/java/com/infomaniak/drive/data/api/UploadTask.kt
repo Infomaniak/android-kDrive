@@ -38,6 +38,7 @@ import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.ApiController
+import com.infomaniak.lib.core.utils.ApiController.gson
 import io.sentry.Sentry
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Semaphore
@@ -218,7 +219,10 @@ class UploadTask(
 
         if (previousChunkBytesWritten.get() > uploadFile.fileSize) {
             uploadFile.refreshIdentifier()
-            Sentry.captureMessage("Chunk total size exceed fileSize 😢, \nfile:$uploadFile")
+            Sentry.withScope { scope ->
+                scope.setExtra("data", gson.toJson(uploadFile))
+                Sentry.captureMessage("Chunk total size exceed fileSize 😢")
+            }
             throw ChunksSizeExceededException()
         }
 
