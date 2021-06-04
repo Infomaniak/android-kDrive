@@ -59,7 +59,6 @@ class UploadTask(
     private var limitParallelRequest = 4
     private var previousChunkBytesWritten = AtomicLong(0)
     private var currentProgress = AtomicInteger(0)
-    private var uploadedChunks: ValidChunks? = null
 
     private var uploadNotification: NotificationCompat.Builder? = null
     private lateinit var notificationManagerCompat: NotificationManagerCompat
@@ -96,7 +95,7 @@ class UploadTask(
 
             checkLimitParallelRequest()
 
-            uploadedChunks =
+            val uploadedChunks =
                 ApiRepository.getValidChunks(uploadFile.driveId, uploadFile.remoteFolder, uploadFile.identifier).data
             val restartUpload = uploadedChunks?.let { needToResetUpload(it) } ?: false
 
@@ -219,7 +218,7 @@ class UploadTask(
 
         if (previousChunkBytesWritten.get() > uploadFile.fileSize) {
             uploadFile.refreshIdentifier()
-            Sentry.captureMessage("Chunk total size exceed fileSize 😢, uri:${uploadFile.uri}, $uploadedChunks")
+            Sentry.captureMessage("Chunk total size exceed fileSize 😢, \nfile:$uploadFile")
             throw ChunksSizeExceededException()
         }
 
