@@ -86,6 +86,10 @@ class TrashViewModel : ViewModel() {
             emit(ApiRepository.postRestoreTrashFile(file, body))
         }
 
+    fun emptyTrash(driveId: Int) = liveData(Dispatchers.IO) {
+        emit(ApiRepository.emptyTrash(driveId))
+    }
+
     fun cancelTrashFileJob() {
         getDeletedFilesJob.cancel()
     }

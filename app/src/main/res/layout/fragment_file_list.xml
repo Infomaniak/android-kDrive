@@ -42,7 +42,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
-                app:menu="@menu/file_list_menu" />
+                app:menu="@menu/file_list_menu">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/emptyTrash"
+                    style="@style/TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="@dimen/marginStandardSmall"
+                    android:text="@string/buttonEmptyTrash"
+                    android:visibility="gone" />
+            </com.google.android.material.appbar.MaterialToolbar>
+
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout

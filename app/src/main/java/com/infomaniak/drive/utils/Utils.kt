@@ -108,9 +108,11 @@ object Utils {
         title: String,
         message: String? = null,
         autoDismiss: Boolean = true,
+        isDeletion: Boolean = false,
         onConfirmation: (dialog: Dialog) -> Unit
     ) {
-        val dialog = MaterialAlertDialogBuilder(context, R.style.DialogStyle)
+        val style = if (isDeletion) R.style.DeleteDialogStyle else R.style.DialogStyle
+        val dialog = MaterialAlertDialogBuilder(context, style)
             .setTitle(title)
             .setMessage(message)
             .setPositiveButton(R.string.buttonConfirm) { _, _ -> }
