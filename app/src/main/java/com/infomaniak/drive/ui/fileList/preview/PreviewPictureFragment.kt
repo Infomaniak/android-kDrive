@@ -18,19 +18,22 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
-import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import coil.Coil
-import coil.load
 import coil.request.ImageRequest
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.lib.core.networking.HttpUtils
+import kotlinx.android.synthetic.main.fragment_preview_others.*
 import kotlinx.android.synthetic.main.fragment_preview_picture.*
+import kotlinx.android.synthetic.main.fragment_preview_picture.container
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -45,15 +48,31 @@ class PreviewPictureFragment : PreviewFragment {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        lifecycleScope.launch(Dispatchers.IO) {
+            val imageLoader = Coil.imageLoader(requireContext())
+            val request = ImageRequest.Builder(requireContext())
+                .headers(HttpUtils.getHeaders())
+                .data(previewViewModel.currentFile.imagePreview())
+                .listener(
+                    onError = { _, _ ->
+                        Log.e("CoilPreviewError", "Coil cannot load this file : ${previewViewModel.currentFile.name}")
+                        noThumbnailLayout.visibility = VISIBLE
+                        fileIcon.setImageResource(previewViewModel.currentFile.getFileType().icon)
+                    },
+                    onSuccess = { _, _ ->
+                        noThumbnailLayout.visibility = GONE
+                    }
+                )
+                .build()
 
-        val imageViewDisposable = imageView.load(previewViewModel.currentFile.thumbnail()) {
-            error(R.drawable.ic_images)
-            fallback(R.drawable.ic_images)
-            placeholder(R.drawable.ic_images)
+            imageLoader.execute(request).drawable?.let { drawable ->
+                withContext(Dispatchers.Main) {
+                    imageView?.setImageDrawable(drawable)
+                }
+            }
         }
 
         container?.layoutTransition?.setAnimateParentHierarchy(false)
-
         imageView.apply {
             setOnTouchListener { view, event ->
                 var result = true
@@ -76,27 +95,8 @@ class PreviewPictureFragment : PreviewFragment {
                         else -> true
                     }
                 }
+                performClick()
                 result
-            }
-        }
-
-        if (previewViewModel.currentFile.isOffline && !previewViewModel.currentFile.isOldData(requireContext())) {
-            if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
-            if (offlineFile.exists()) imageView?.setImageURI(offlineFile.toUri())
-        } else {
-            lifecycleScope.launch(Dispatchers.IO) {
-                val imageLoader = Coil.imageLoader(requireContext())
-                val request = ImageRequest.Builder(requireContext())
-                    .headers(HttpUtils.getHeaders())
-                    .data(previewViewModel.currentFile.imagePreview())
-                    .build()
-
-                imageLoader.execute(request).drawable?.let { drawable ->
-                    if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
-                    withContext(Dispatchers.Main) {
-                        imageView?.setImageDrawable(drawable)
-                    }
-                }
             }
         }
     }

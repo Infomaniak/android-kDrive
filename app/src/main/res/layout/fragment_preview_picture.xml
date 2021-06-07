@@ -29,4 +29,12 @@
         android:layout_centerInParent="true"
         tools:src="@drawable/ic_images" />
 
+    <include
+        android:id="@+id/noThumbnailLayout"
+        layout="@layout/fragment_preview_others"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
+
 </RelativeLayout>
