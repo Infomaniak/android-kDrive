@@ -44,6 +44,7 @@ class TrashFragment : FileSubTypeListFragment() {
             )
 
         super.onViewCreated(view, savedInstanceState)
+        toolbar.setContentInsetsRelative(0, 0)
         emptyTrash.apply {
             visibility = VISIBLE
             setOnClickListener {
