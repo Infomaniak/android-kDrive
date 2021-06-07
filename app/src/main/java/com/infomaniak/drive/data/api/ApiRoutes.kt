@@ -127,6 +127,8 @@ object ApiRoutes {
 
     fun deleteTrashFile(file: File) = trashURL(file)
 
+    fun emptyTrash(driveId: Int) = "${DRIVE_API}${driveId}/file/trash"
+
     fun getMySharedFiles(driveId: Int): String = "${DRIVE_API}$driveId/file/my_shared?$with"
 
     fun getUUIDArchiveFiles(driveId: Int): String = "${DRIVE_API}$driveId/file/archive"

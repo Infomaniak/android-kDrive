@@ -287,6 +287,9 @@ object ApiRepository {
     fun postRestoreTrashFile(file: File, body: Map<String, Int>?): ApiResponse<Any> =
         callApi(ApiRoutes.restoreTrashFile(file), POST, body)
 
+    fun emptyTrash(driveId: Int): ApiResponse<Boolean> =
+        callApi(ApiRoutes.emptyTrash(driveId), DELETE)
+
     fun deleteTrashFile(file: File): ApiResponse<Any> = callApi(ApiRoutes.deleteTrashFile(file), DELETE)
 
     fun getMySharedFiles(

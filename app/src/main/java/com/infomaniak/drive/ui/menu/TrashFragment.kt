@@ -19,12 +19,16 @@ package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
 import android.view.View
+import android.view.View.VISIBLE
 import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.safeNavigate
+import com.infomaniak.drive.utils.showSnackbar
 import kotlinx.android.synthetic.main.fragment_file_list.*
 
 class TrashFragment : FileSubTypeListFragment() {
@@ -40,6 +44,26 @@ class TrashFragment : FileSubTypeListFragment() {
             )
 
         super.onViewCreated(view, savedInstanceState)
+        emptyTrash.apply {
+            visibility = VISIBLE
+            setOnClickListener {
+                Utils.createConfirmation(
+                    context = requireContext(),
+                    title = getString(R.string.buttonEmptyTrash),
+                    message = getString(R.string.modalEmptyTrashDescription),
+                    isDeletion = true,
+                    autoDismiss = false
+                ) { dialog ->
+                    trashViewModel.emptyTrash(AccountUtils.currentDriveId).observe(viewLifecycleOwner) { apiResponse ->
+                        dialog.dismiss()
+                        if (apiResponse.data == true) {
+                            Utils.showSnackbar(requireView(), R.string.snackbarEmptyTrashConfirmation)
+                            onRefresh()
+                        } else requireActivity().showSnackbar(apiResponse.translateError())
+                    }
+                }
+            }
+        }
 
         if (folderID == ROOT_ID) collapsingToolbarLayout.title = getString(R.string.trashTitle)
         noFilesLayout.setup(icon = R.drawable.ic_delete, title = R.string.trashNoFile, initialListView = fileRecyclerView)
