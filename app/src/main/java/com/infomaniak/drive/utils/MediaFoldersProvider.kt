@@ -76,8 +76,9 @@ object MediaFoldersProvider {
                 while (cursor.moveToNext()) {
                     val folderName = cursor.getString(cursor.getColumnIndexOrThrow(IMAGES_BUCKET_DISPLAY_NAME)) ?: ""
                     val folderId = cursor.getLong(cursor.getColumnIndexOrThrow(IMAGES_BUCKET_ID))
-                    val path = cursor.getString(cursor.getColumnIndexOrThrow(MEDIA_PATH_COLUMN))
-                    folders[folderId] = getLocalMediaFolder(realm, folderId, folderName, path)
+                    cursor.getString(cursor.getColumnIndexOrThrow(MEDIA_PATH_COLUMN))?.let { path ->
+                        folders[folderId] = getLocalMediaFolder(realm, folderId, folderName, path)
+                    }
                 }
             }
         return folders
@@ -90,8 +91,9 @@ object MediaFoldersProvider {
                 while (cursor.moveToNext()) {
                     val folderName = cursor.getString(cursor.getColumnIndexOrThrow(VIDEO_BUCKET_DISPLAY_NAME)) ?: ""
                     val folderId = cursor.getLong(cursor.getColumnIndexOrThrow(VIDEO_BUCKET_ID))
-                    val path = cursor.getString(cursor.getColumnIndexOrThrow(MEDIA_PATH_COLUMN))
-                    folders[folderId] = getLocalMediaFolder(realm, folderId, folderName, path)
+                    cursor.getString(cursor.getColumnIndexOrThrow(MEDIA_PATH_COLUMN))?.let { path ->
+                        folders[folderId] = getLocalMediaFolder(realm, folderId, folderName, path)
+                    }
                 }
             }
         return folders
