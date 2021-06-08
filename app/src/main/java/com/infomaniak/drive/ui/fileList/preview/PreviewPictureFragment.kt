@@ -18,15 +18,16 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import coil.Coil
+import coil.load
 import coil.request.ImageRequest
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
@@ -48,26 +49,34 @@ class PreviewPictureFragment : PreviewFragment {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        lifecycleScope.launch(Dispatchers.IO) {
-            val imageLoader = Coil.imageLoader(requireContext())
-            val request = ImageRequest.Builder(requireContext())
-                .headers(HttpUtils.getHeaders())
-                .data(previewViewModel.currentFile.imagePreview())
-                .listener(
-                    onError = { _, _ ->
-                        Log.e("CoilPreviewError", "Coil cannot load this file : ${previewViewModel.currentFile.name}")
-                        noThumbnailLayout.visibility = VISIBLE
-                        fileIcon.setImageResource(previewViewModel.currentFile.getFileType().icon)
-                    },
-                    onSuccess = { _, _ ->
-                        noThumbnailLayout.visibility = GONE
-                    }
-                )
-                .build()
 
-            imageLoader.execute(request).drawable?.let { drawable ->
-                withContext(Dispatchers.Main) {
-                    imageView?.setImageDrawable(drawable)
+        previewDescription.visibility = GONE
+        fileIcon.setImageResource(previewViewModel.currentFile.getFileType().icon)
+
+        val imageViewDisposable = imageView.load(previewViewModel.currentFile.thumbnail()) {
+            placeholder(R.drawable.coil_hack)
+        }
+
+        val imageLoader = Coil.imageLoader(requireContext())
+        val previewRequest = ImageRequest.Builder(requireContext())
+            .headers(HttpUtils.getHeaders())
+            .data(previewViewModel.currentFile.imagePreview())
+            .listener(
+                onError = { _, _ -> previewDescription.visibility = VISIBLE },
+                onSuccess = { _, _ -> noThumbnailLayout.visibility = GONE }
+            )
+            .build()
+
+        if (previewViewModel.currentFile.isOffline && !previewViewModel.currentFile.isOldData(requireContext())) {
+            if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
+            if (offlineFile.exists()) imageView?.setImageURI(offlineFile.toUri())
+        } else {
+            lifecycleScope.launch(Dispatchers.IO) {
+                imageLoader.execute(previewRequest).drawable?.let { drawable ->
+                    if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
+                    withContext(Dispatchers.Main) {
+                        imageView?.setImageDrawable(drawable)
+                    }
                 }
             }
         }
