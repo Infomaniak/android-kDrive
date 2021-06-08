@@ -22,11 +22,13 @@ import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.AccountUtils
@@ -60,6 +62,8 @@ class PicturesFragment : Fragment() {
             findNavController().popBackStack()
         }
 
+        ViewCompat.requestApplyInsets(pictureListCoordinator)
+
         noPicturesLayout.setup(
             icon = R.drawable.ic_images,
             title = R.string.picturesNoFile,
@@ -74,6 +78,7 @@ class PicturesFragment : Fragment() {
         picturesAdapter = PicturesAdapter { file ->
             Utils.displayFile(mainViewModel, findNavController(), file, picturesAdapter.pictureList)
         }
+        picturesAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
 
         timer.start()
         val numPicturesColumns = getNumPicturesColumns()

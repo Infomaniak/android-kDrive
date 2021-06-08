@@ -22,11 +22,19 @@
     android:layout_height="match_parent"
     tools:context=".ui.fileList.preview.PreviewPictureFragment">
 
+    <include
+        android:id="@+id/noThumbnailLayout"
+        layout="@layout/fragment_preview_others"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
+
     <com.ortiz.touchview.TouchImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
-        tools:src="@drawable/ic_images" />
+        tools:src="@tools:sample/backgrounds/scenic" />
 
 </RelativeLayout>

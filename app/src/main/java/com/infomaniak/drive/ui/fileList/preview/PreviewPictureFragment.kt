@@ -21,6 +21,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
@@ -29,8 +31,11 @@ import coil.load
 import coil.request.ImageRequest
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.networking.HttpUtils
+import kotlinx.android.synthetic.main.fragment_preview_others.*
 import kotlinx.android.synthetic.main.fragment_preview_picture.*
+import kotlinx.android.synthetic.main.fragment_preview_picture.container
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -46,14 +51,44 @@ class PreviewPictureFragment : PreviewFragment {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val timer = Utils.createRefreshTimer(milliseconds = 400) {
+            noThumbnailLayout?.visibility = VISIBLE
+        }.start()
+        previewDescription.visibility = GONE
+        fileIcon.setImageResource(previewViewModel.currentFile.getFileType().icon)
+
         val imageViewDisposable = imageView.load(previewViewModel.currentFile.thumbnail()) {
-            error(R.drawable.ic_images)
-            fallback(R.drawable.ic_images)
-            placeholder(R.drawable.ic_images)
+            placeholder(R.drawable.coil_hack)
+        }
+
+        val imageLoader = Coil.imageLoader(requireContext())
+        val previewRequest = ImageRequest.Builder(requireContext())
+            .headers(HttpUtils.getHeaders())
+            .data(previewViewModel.currentFile.imagePreview())
+            .listener(
+                onError = { _, _ -> previewDescription.visibility = VISIBLE },
+                onSuccess = { _, _ ->
+                    timer.cancel()
+                    noThumbnailLayout.visibility = GONE
+                }
+            )
+            .build()
+
+        if (previewViewModel.currentFile.isOffline && !previewViewModel.currentFile.isOldData(requireContext())) {
+            if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
+            if (offlineFile.exists()) imageView?.setImageURI(offlineFile.toUri())
+        } else {
+            lifecycleScope.launch(Dispatchers.IO) {
+                imageLoader.execute(previewRequest).drawable?.let { drawable ->
+                    if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
+                    withContext(Dispatchers.Main) {
+                        imageView?.setImageDrawable(drawable)
+                    }
+                }
+            }
         }
 
         container?.layoutTransition?.setAnimateParentHierarchy(false)
-
         imageView.apply {
             setOnTouchListener { view, event ->
                 var result = true
@@ -76,27 +111,8 @@ class PreviewPictureFragment : PreviewFragment {
                         else -> true
                     }
                 }
+                performClick()
                 result
-            }
-        }
-
-        if (previewViewModel.currentFile.isOffline && !previewViewModel.currentFile.isOldData(requireContext())) {
-            if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
-            if (offlineFile.exists()) imageView?.setImageURI(offlineFile.toUri())
-        } else {
-            lifecycleScope.launch(Dispatchers.IO) {
-                val imageLoader = Coil.imageLoader(requireContext())
-                val request = ImageRequest.Builder(requireContext())
-                    .headers(HttpUtils.getHeaders())
-                    .data(previewViewModel.currentFile.imagePreview())
-                    .build()
-
-                imageLoader.execute(request).drawable?.let { drawable ->
-                    if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
-                    withContext(Dispatchers.Main) {
-                        imageView?.setImageDrawable(drawable)
-                    }
-                }
             }
         }
     }
