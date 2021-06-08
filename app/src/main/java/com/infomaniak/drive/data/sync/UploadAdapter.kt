@@ -21,6 +21,7 @@ import android.accounts.Account
 import android.app.PendingIntent
 import android.content.*
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.provider.MediaStore
@@ -52,6 +53,7 @@ import com.infomaniak.drive.utils.NotificationUtils.uploadNotification
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.SyncUtils.isWifiConnection
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import com.infomaniak.lib.core.utils.ApiController.gson
 import io.sentry.Sentry
 import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.*
@@ -207,6 +209,12 @@ class UploadAdapter @JvmOverloads constructor(
             } catch (e: SecurityException) {
                 e.printStackTrace()
                 UploadFile.deleteIfExists(uri)
+            } catch (exception: IllegalStateException) {
+                Sentry.withScope { scope ->
+                    scope.setExtra("data", gson.toJson(uploadFile))
+                    UploadFile.deleteIfExists(uri)
+                    Sentry.captureMessage("The file is either partially downloaded or corrupted")
+                }
             }
         }
 
@@ -389,8 +397,9 @@ class UploadAdapter @JvmOverloads constructor(
     @Throws(Exception::class)
     private fun checkLocalLastPhotos(): Boolean {
         val lastUploadDate = UploadFile.getLastDate(context).time
-        val selection = "(" + SyncUtils.DATE_TAKEN + " >= ? OR " + MediaStore.MediaColumns.DATE_ADDED + " >= ? )"
-        val args = arrayOf(lastUploadDate.toString(), (lastUploadDate / 1000).toString())
+        val selection = "(" + SyncUtils.DATE_TAKEN + " >= ? OR " + MediaStore.MediaColumns.DATE_ADDED + " >= ? " +
+                "OR ${MediaStore.MediaColumns.DATE_MODIFIED} = ? )"
+        val args = arrayOf(lastUploadDate.toString(), (lastUploadDate / 1000).toString(), (lastUploadDate / 1000).toString())
         var customSelection: String
         var customArgs: Array<String>
         val deferreds = arrayListOf<Deferred<Any?>>()
@@ -398,13 +407,17 @@ class UploadAdapter @JvmOverloads constructor(
         syncSettings?.let { syncSettings ->
             MediaFolder.getAllSyncedFolders().forEach { mediaFolder ->
                 var contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                customSelection = "$selection AND $IMAGES_BUCKET_ID = ?"
+                var isNotPending =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Images.Media.IS_PENDING}=0" else ""
+                customSelection = "$selection AND $IMAGES_BUCKET_ID = ? $isNotPending"
                 customArgs = args + mediaFolder.id.toString()
                 deferreds.add(getLocalLastPhotosAsync(contentUri, customSelection, customArgs, mediaFolder))
 
                 if (syncSettings.syncVideo) {
+                    isNotPending =
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Video.Media.IS_PENDING}=0" else ""
                     contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-                    customSelection = "$selection AND $VIDEO_BUCKET_ID = ?"
+                    customSelection = "$selection AND $VIDEO_BUCKET_ID = ? $isNotPending"
                     deferreds.add(getLocalLastPhotosAsync(contentUri, customSelection, customArgs, mediaFolder))
                 }
             }
@@ -416,7 +429,8 @@ class UploadAdapter @JvmOverloads constructor(
     @Throws(Exception::class)
     private fun getLocalLastPhotosAsync(contentUri: Uri, selection: String, args: Array<String>, mediaFolder: MediaFolder) =
         GlobalScope.async {
-            val sortOrder = SyncUtils.DATE_TAKEN + " ASC, " + MediaStore.MediaColumns.DATE_ADDED + " ASC"
+            val sortOrder = SyncUtils.DATE_TAKEN + " ASC, " + MediaStore.MediaColumns.DATE_ADDED + " ASC, " +
+                    MediaStore.MediaColumns.DATE_MODIFIED + " ASC"
             contentResolver.query(contentUri, null, selection, args, sortOrder)
                 ?.use { cursor ->
                     while (cursor.moveToNext()) {
