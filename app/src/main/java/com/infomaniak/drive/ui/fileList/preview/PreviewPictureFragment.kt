@@ -31,6 +31,7 @@ import coil.load
 import coil.request.ImageRequest
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.networking.HttpUtils
 import kotlinx.android.synthetic.main.fragment_preview_others.*
 import kotlinx.android.synthetic.main.fragment_preview_picture.*
@@ -50,6 +51,9 @@ class PreviewPictureFragment : PreviewFragment {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val timer = Utils.createRefreshTimer(milliseconds = 400) {
+            noThumbnailLayout?.visibility = VISIBLE
+        }.start()
         previewDescription.visibility = GONE
         fileIcon.setImageResource(previewViewModel.currentFile.getFileType().icon)
 
@@ -63,7 +67,10 @@ class PreviewPictureFragment : PreviewFragment {
             .data(previewViewModel.currentFile.imagePreview())
             .listener(
                 onError = { _, _ -> previewDescription.visibility = VISIBLE },
-                onSuccess = { _, _ -> noThumbnailLayout.visibility = GONE }
+                onSuccess = { _, _ ->
+                    timer.cancel()
+                    noThumbnailLayout.visibility = GONE
+                }
             )
             .build()
 

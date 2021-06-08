@@ -98,13 +98,11 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
         previewSliderAdapter = PreviewSliderAdapter(childFragmentManager, lifecycle)
         viewPager.adapter = previewSliderAdapter
-        viewPager.offscreenPageLimit = 3
+        viewPager.offscreenPageLimit = 1
 
         bottomSheetFileInfos.init(this, this, previewSliderViewModel.isSharedWithMe)
         bottomSheetFileInfos.updateCurrentFile(currentPreviewFile)
-        bottomSheetFileInfos.setOnTouchListener { _, _ ->
-            true
-        }
+        bottomSheetFileInfos.setOnTouchListener { _, _ -> true }
 
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
