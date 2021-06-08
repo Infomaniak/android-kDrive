@@ -408,15 +408,15 @@ class UploadAdapter @JvmOverloads constructor(
             MediaFolder.getAllSyncedFolders().forEach { mediaFolder ->
                 var contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
                 var isNotPending =
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Images.Media.IS_PENDING}=0" else ""
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Images.Media.IS_PENDING} = 0" else ""
                 customSelection = "$selection AND $IMAGES_BUCKET_ID = ? $isNotPending"
                 customArgs = args + mediaFolder.id.toString()
                 deferreds.add(getLocalLastPhotosAsync(contentUri, customSelection, customArgs, mediaFolder))
 
                 if (syncSettings.syncVideo) {
-                    isNotPending =
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Video.Media.IS_PENDING}=0" else ""
                     contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                    isNotPending =
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Video.Media.IS_PENDING} = 0" else ""
                     customSelection = "$selection AND $VIDEO_BUCKET_ID = ? $isNotPending"
                     deferreds.add(getLocalLastPhotosAsync(contentUri, customSelection, customArgs, mediaFolder))
                 }
