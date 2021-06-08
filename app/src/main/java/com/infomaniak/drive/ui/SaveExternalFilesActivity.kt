@@ -31,6 +31,7 @@ import androidx.core.net.toUri
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
@@ -141,7 +142,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 val folderId = saveExternalFilesViewModel.folderId.value!!
 
                 UISettings(this).setSaveExternalFilesPref(userId, driveId, folderId)
-                GlobalScope.launch(Dispatchers.IO) {
+                lifecycleScope.launch(Dispatchers.IO) {
                     if (storeFiles(userId, driveId, folderId)) {
                         syncImmediately()
                         finish()
@@ -213,7 +214,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 (currentUri != null || isMultiple) &&
                 selectDriveViewModel.selectedUserId.value != null &&
                 selectDriveViewModel.selectedDrive.value != null &&
-                saveExternalFilesViewModel.folderId.value != -1
+                saveExternalFilesViewModel.folderId.value != null
     }
 
     private fun showSelectDrive() {
