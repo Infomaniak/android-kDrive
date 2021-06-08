@@ -648,7 +648,12 @@ object FileController {
             FileActivity.FileActivityType.FILE_SHARE_UPDATE,
             FileActivity.FileActivityType.FILE_SHARE_DELETE -> {
                 if (returnResponse[this.fileId] == null) {
-                    updateFileFromActivity(realm, returnResponse, this, currentFolder.id)
+                    if (this.file == null) {
+                        removeFile(fileId, realm = realm, recursive = false)
+                        returnResponse[this.fileId] = File.LocalFileActivity.IS_DELETE
+                    } else {
+                        updateFileFromActivity(realm, returnResponse, this, currentFolder.id)
+                    }
                 }
             }
             else -> Unit
