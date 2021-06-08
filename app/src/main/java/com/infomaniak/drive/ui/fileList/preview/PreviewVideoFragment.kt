@@ -94,7 +94,7 @@ open class PreviewVideoFragment : PreviewFragment {
 
     override fun onDestroy() {
         super.onDestroy()
-        simpleExoPlayer.release()
+        if (this::simpleExoPlayer.isInitialized) simpleExoPlayer.release()
     }
 
     private fun initializePlayer() {
