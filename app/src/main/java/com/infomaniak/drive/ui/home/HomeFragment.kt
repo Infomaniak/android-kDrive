@@ -36,6 +36,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.drive.Drive
+import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
@@ -93,9 +94,11 @@ class HomeFragment : Fragment() {
 
         homeViewModel.driveSelectionDialogDismissed.observe(viewLifecycleOwner) { newDriveIsSelected ->
             if (newDriveIsSelected == true) {
-                homeViewModel.clearDownloadTimes()
-                initLastElementsAdapter() // Re-init the adapters if Drive type has changed between two Drives
-                updateDriveInfos(newDriveIsSelected)
+                (activity as? MainActivity)?.saveLastNavigationItemSelected()
+                AccountUtils.reloadApp?.invoke() // TODO Hack
+//                homeViewModel.clearDownloadTimes()
+//                initLastElementsAdapter() // Re-init the adapters if Drive type has changed between two Drives
+//                updateDriveInfos(newDriveIsSelected)
             }
         }
 

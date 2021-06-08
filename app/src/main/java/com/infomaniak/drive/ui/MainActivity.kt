@@ -200,6 +200,10 @@ class MainActivity : BaseActivity() {
 
     override fun onStop() {
         super.onStop()
+        saveLastNavigationItemSelected()
+    }
+
+    fun saveLastNavigationItemSelected() {
         UISettings(this).bottomNavigationSelectedItem = bottomNavigation.selectedItemId
     }
 
