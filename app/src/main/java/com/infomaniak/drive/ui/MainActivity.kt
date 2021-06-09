@@ -91,7 +91,7 @@ class MainActivity : BaseActivity() {
 
         intent?.getIntExtra(INTENT_SHOW_PROGRESS, 0)?.let { folderId ->
             if (folderId > 0) {
-                bottomNavigation.selectedItemId = R.id.fileListFragment
+                navController.navigate(R.id.fileListFragment)
                 mainViewModel.intentShowProgressByFolderId.value = folderId
             }
         }
