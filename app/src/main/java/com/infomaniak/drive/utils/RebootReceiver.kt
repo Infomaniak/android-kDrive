@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.utils
 
+import android.Manifest
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -29,6 +30,7 @@ import com.infomaniak.drive.ui.login.MigrationActivity.Companion.getOldkDriveUse
 import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import com.infomaniak.lib.core.utils.hasPermissions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -51,7 +53,9 @@ class RebootReceiver : BroadcastReceiver() {
 
             GlobalScope.launch(Dispatchers.IO) {
                 MediaFolder.getRealmInstance().use { realm ->
-                    if (MediaFolder.getAllCount(realm) == 0L) {
+                    if (context.hasPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)) &&
+                        MediaFolder.getAllCount(realm) == 0L
+                    ) {
                         ArrayList(MediaFoldersProvider.getAllMediaFolders(realm, contentResolver))
                     }
                 }
