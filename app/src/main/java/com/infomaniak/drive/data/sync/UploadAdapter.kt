@@ -198,6 +198,7 @@ class UploadAdapter @JvmOverloads constructor(
                     UploadFile.deleteIfExists(uri)
                     cacheFile.delete()
                 } else {
+                    contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     val fileSize = contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize }
                     contentResolver.query(uri, null, null, null, null)?.use { cursor ->
                         if (cursor.moveToFirst()) {

@@ -55,6 +55,7 @@ import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.data.sync.UploadProgressReceiver
 import com.infomaniak.drive.launchInAppReview
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
@@ -148,7 +149,7 @@ class MainActivity : BaseActivity() {
         }
 
         val drivePermissions = DrivePermissions()
-        drivePermissions.registerPermissions(this) { autorized -> if (autorized) syncImmediately() }
+        drivePermissions.registerPermissions(this) { autorized -> if (autorized && !isSyncActive()) syncImmediately() }
         launchAllUpload(drivePermissions)
 
         if (!BuildConfig.BETA)

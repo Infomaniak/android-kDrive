@@ -141,6 +141,8 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             documentUpload.isEnabled = false
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 type = "*/*"
+                flags = (Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
                 putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
             }
             startActivityForResult(Intent.createChooser(intent, getString(R.string.addFileSelectUploadFile)), SELECT_FILES_REQ)
