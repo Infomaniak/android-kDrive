@@ -146,7 +146,7 @@ class PreviewPDFFragment : PreviewFragment {
             pdfJob = Job()
             return liveData(Dispatchers.IO + pdfJob) {
                 val pdfCore = PreviewPDFUtils.convertPdfFileToPdfCore(context, file) {
-                    GlobalScope.launch(Dispatchers.Main) {
+                    viewModelScope.launch(Dispatchers.Main) {
                         downloadProgress.value = it
                     }
                 }

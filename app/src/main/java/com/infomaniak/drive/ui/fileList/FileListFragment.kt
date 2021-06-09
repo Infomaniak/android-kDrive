@@ -151,7 +151,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     }
 
                     requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab) {
-                        GlobalScope.launch(Dispatchers.IO) {
+                        lifecycleScope.launch(Dispatchers.IO) {
                             if (ApiRepository.cancelAction(action).data == true && isResumed) {
                                 withContext(Dispatchers.Main) {
                                     refreshActivities()

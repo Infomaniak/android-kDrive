@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.ui.login.LoginActivity
@@ -33,7 +34,7 @@ import kotlinx.coroutines.launch
 class LaunchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        GlobalScope.launch {
+        lifecycleScope.launch {
             when {
                 AccountUtils.requestCurrentUser() == null -> {
                     if (getOldkDriveUser().isEmpty) {
