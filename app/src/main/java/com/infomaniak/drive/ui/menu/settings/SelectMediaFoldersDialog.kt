@@ -66,6 +66,11 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
         }
         mediaFolderList.adapter = mediaFoldersAdapter
 
+        noMediaFolderLayout.setup(
+            title = R.string.noMediaFolderTitle,
+            initialListView = mediaFolderList,
+        )
+
         val drivePermissions = DrivePermissions()
         drivePermissions.registerPermissions(this) { authorized -> if (authorized) loadFolders() else dismiss() }
         if (drivePermissions.checkWriteStoragePermission()) loadFolders()
@@ -79,14 +84,20 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
                     removeItemsById(elementsToRemove)
                 }
             }
-            mediaViewModel.getAllMediaFolders(requireActivity().contentResolver).observe(viewLifecycleOwner) { mediaFolders ->
-                mediaFolderList.post {
-                    addAll(mediaFolders.second)
-                    if (mediaFolders.first) {
-                        swipeRefreshLayout.isRefreshing = false
+            mediaViewModel.getAllMediaFolders(requireActivity().contentResolver)
+                .observe(viewLifecycleOwner) { (isComplete, mediaFolders) ->
+                    mediaFolderList.post {
+                        addAll(mediaFolders)
+                        noMediaFolderLayout.toggleVisibility(
+                            isVisible = itemList.isEmpty(),
+                            noNetwork = false,
+                            showRefreshButton = false
+                        )
+                        if (isComplete) {
+                            swipeRefreshLayout.isRefreshing = false
+                        }
                     }
                 }
-            }
         }
     }
 
