@@ -66,10 +66,10 @@ class PreviewPictureFragment : PreviewFragment {
             .headers(HttpUtils.getHeaders())
             .data(previewViewModel.currentFile.imagePreview())
             .listener(
-                onError = { _, _ -> previewDescription.visibility = VISIBLE },
+                onError = { _, _ -> previewDescription?.visibility = VISIBLE },
                 onSuccess = { _, _ ->
                     timer.cancel()
-                    noThumbnailLayout.visibility = GONE
+                    noThumbnailLayout?.visibility = GONE
                 }
             )
             .build()
