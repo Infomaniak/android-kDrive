@@ -140,7 +140,7 @@ class UploadAdapter @JvmOverloads constructor(
     private fun Exception.isNetworkException() =
         this.javaClass.name.contains("java.net.", ignoreCase = true) ||
                 this.javaClass.name.contains("javax.net.", ignoreCase = true) ||
-                this.javaClass.name.contains("java.io.", ignoreCase = true)
+                this is java.io.InterruptedIOException
 
     @Throws(Exception::class)
     private fun startSyncFiles(uploadFiles: ArrayList<UploadFile>, syncResult: SyncResult?, extras: Bundle?): Int {
