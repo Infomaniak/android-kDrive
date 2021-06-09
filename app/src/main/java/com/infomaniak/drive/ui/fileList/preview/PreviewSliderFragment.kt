@@ -197,7 +197,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         super.onResume()
         activity?.window?.statusBarColor = ContextCompat.getColor(requireContext(), R.color.previewBackground)
         activity?.window?.lightStatusBar(false)
-        toggleBottomSheet(currentPreviewFile.getFileType() != File.ConvertedType.VIDEO)
+        toggleBottomSheet(!(currentPreviewFile.getFileType() == File.ConvertedType.VIDEO || currentPreviewFile.getFileType() == File.ConvertedType.AUDIO))
     }
 
     override fun onPause() {

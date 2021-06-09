@@ -46,7 +46,6 @@ import kotlinx.android.synthetic.main.fragment_preview_others.*
 import kotlinx.android.synthetic.main.fragment_preview_video.*
 import kotlinx.android.synthetic.main.fragment_preview_video.container
 
-
 open class PreviewVideoFragment : PreviewFragment {
 
     private lateinit var simpleExoPlayer: SimpleExoPlayer
