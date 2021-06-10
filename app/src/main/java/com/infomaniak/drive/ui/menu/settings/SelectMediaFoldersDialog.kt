@@ -24,11 +24,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.liveData
+import androidx.lifecycle.*
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.utils.DrivePermissions
@@ -88,7 +84,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
                 mediaFolderList.post {
                     mediaFoldersAdapter.addAll(mediaFolders)
                     noMediaFolderLayout.toggleVisibility(
-                        isVisible = mediaFolders.isEmpty(),
+                        isVisible = mediaFoldersAdapter.itemCount == 0,
                         noNetwork = false,
                         showRefreshButton = false
                     )
@@ -110,19 +106,29 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
         val elementsToRemove = MutableLiveData<ArrayList<Long>>()
 
         fun getAllMediaFolders(contentResolver: ContentResolver): LiveData<Pair<Boolean, ArrayList<MediaFolder>>> {
-            getMediaFilesJob.cancel()
             getMediaFilesJob = Job()
             return liveData(Dispatchers.IO + getMediaFilesJob) {
                 MediaFolder.getRealmInstance().use { realm ->
                     val cacheMediaFolders = MediaFolder.getAll(realm)
                     if (cacheMediaFolders.isNotEmpty()) emit(false to cacheMediaFolders)
 
-                    val localMediaFolders = ArrayList(MediaFoldersProvider.getAllMediaFolders(realm, contentResolver))
+                    val localMediaFolders = ArrayList(
+                        MediaFoldersProvider.getAllMediaFolders(
+                            realm = realm,
+                            contentResolver = contentResolver,
+                            coroutineScope = getMediaFilesJob
+                        )
+                    )
                     cacheMediaFolders.removeObsoleteMediaFolders(realm, localMediaFolders)
 
                     emit(true to localMediaFolders.removeDuplicatedMediaFolders(cacheMediaFolders))
                 }
             }
+        }
+
+        override fun onCleared() {
+            getMediaFilesJob.cancel()
+            super.onCleared()
         }
 
         private fun ArrayList<MediaFolder>.removeDuplicatedMediaFolders(cachedMediaFolders: ArrayList<MediaFolder>): ArrayList<MediaFolder> {
