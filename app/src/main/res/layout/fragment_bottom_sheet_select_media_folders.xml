@@ -51,9 +51,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:animateLayoutChanges="true"
-            android:orientation="vertical"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/mediaFolderDescription"
@@ -80,6 +78,12 @@
                     tools:listitem="@layout/item_media_folder" />
 
             </com.google.android.material.card.MaterialCardView>
+
+            <com.infomaniak.drive.views.NoItemsLayoutView
+                android:id="@+id/noMediaFolderLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
 
         </LinearLayout>
 

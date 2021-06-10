@@ -401,6 +401,7 @@
     <string name="noDriveTitle">You don’t have a kDrive yet!</string>
     <string name="noFilesDescription">This folder is empty. Click the + button to add files here.</string>
     <string name="noFilesDescriptionNoNetwork">Unable to retrieve information from the folder. Please check your network connection or try again later.</string>
+    <string name="noMediaFolderTitle">No media folders available</string>
     <string name="noSyncFolderNotificationDescription">Click here to configure the folders to synchronize</string>
     <string name="noSyncFolderNotificationTitle">No folder selected for automatic backup</string>
     <string name="notEnoughStorageDescription1">Your kDrive storage space is almost full. Upgrade your plan and unlock new features.</string>
@@ -426,7 +427,7 @@
     <string name="onBoardingTitle2">Work together in one place and become more efficient</string>
     <string name="onBoardingTitle3">Save your memories securely</string>
     <!-- Displayed in a photo list some languages may need to display the date before the month -->
-    <string name="photosHeaderDateFormat">MMMM YYYY</string>
+    <string name="photosHeaderDateFormat">MMMM yyyy</string>
     <string name="picturesNoFile">No photo at this time</string>
     <string name="previewDownloadIndication">Loading in progress, please wait…</string>
     <string name="previewLoadError">Unable to load preview</string>
@@ -490,13 +491,16 @@
         <item quantity="other">%d items moved to the trash</item>
     </plurals>
     <string name="sortBigger">Larger</string>
+    <string name="sortDay">Per day</string>
     <string name="sortExtension">Extension</string>
+    <string name="sortMonth">Per month</string>
     <string name="sortNameAZ">Name: from A to Z</string>
     <string name="sortNameZA">Name: from Z to A</string>
     <string name="sortOlder">Older</string>
     <string name="sortRecent">Newer</string>
     <string name="sortSmaller">Smaller</string>
     <string name="sortTitle">Sort</string>
+    <string name="sortYear">Per year</string>
     <string name="switchDriveSearchViewHint">Search a kDrive</string>
     <string name="switchUserDescription">View the kDrives of your other Infomaniak profiles. You can add as many user profiles as you like.</string>
     <string name="switchUserTitle">Change user</string>
