@@ -28,7 +28,6 @@ import com.infomaniak.drive.ui.login.MigrationActivity
 import com.infomaniak.drive.ui.login.MigrationActivity.Companion.getOldkDriveUser
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.isKeyguardSecure
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class LaunchActivity : AppCompatActivity() {

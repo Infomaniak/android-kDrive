@@ -47,7 +47,10 @@ import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.android.synthetic.main.activity_save_external_file.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.util.*
 
 

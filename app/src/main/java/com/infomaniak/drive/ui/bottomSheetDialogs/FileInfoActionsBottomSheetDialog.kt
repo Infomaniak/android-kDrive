@@ -50,7 +50,6 @@ import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_file_info_actions.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 

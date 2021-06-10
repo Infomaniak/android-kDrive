@@ -27,6 +27,8 @@ import androidx.collection.arrayMapOf
 import androidx.fragment.app.Fragment
 import com.infomaniak.drive.data.models.MediaFolder
 import io.realm.Realm
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 
 object MediaFoldersProvider {
 
@@ -63,43 +65,60 @@ object MediaFoldersProvider {
     /**
      * Need Write permission if is called from [Fragment] or [Activity]
      */
-    fun getAllMediaFolders(realm: Realm, contentResolver: ContentResolver): List<MediaFolder> {
-        val mediaFolders = getImageFolders(realm, contentResolver)
-        mediaFolders.putAll(getVideoFolders(realm, contentResolver) as Map<Long, MediaFolder>)
+    fun getAllMediaFolders(realm: Realm, contentResolver: ContentResolver, coroutineScope: Job? = null): List<MediaFolder> {
+        val mediaFolders = getImageFolders(realm, contentResolver, coroutineScope)
+        mediaFolders.putAll(getVideoFolders(realm, contentResolver, coroutineScope) as Map<Long, MediaFolder>)
         return mediaFolders.values.sortedBy { it.name }
     }
 
-    private fun getImageFolders(realm: Realm, contentResolver: ContentResolver): ArrayMap<Long, MediaFolder> {
+    private fun getImageFolders(
+        realm: Realm,
+        contentResolver: ContentResolver,
+        coroutineScope: Job?
+    ): ArrayMap<Long, MediaFolder> {
         val folders = arrayMapOf<Long, MediaFolder>()
         contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, imagesProjection, null, null, imagesSortOrder)
             ?.use { cursor ->
                 while (cursor.moveToNext()) {
+                    coroutineScope?.ensureActive()
                     val folderName = cursor.getString(cursor.getColumnIndexOrThrow(IMAGES_BUCKET_DISPLAY_NAME)) ?: ""
                     val folderId = cursor.getLong(cursor.getColumnIndexOrThrow(IMAGES_BUCKET_ID))
                     cursor.getString(cursor.getColumnIndexOrThrow(MEDIA_PATH_COLUMN))?.let { path ->
-                        folders[folderId] = getLocalMediaFolder(realm, folderId, folderName, path)
+                        folders[folderId] = getLocalMediaFolder(realm, folderId, folderName, path, coroutineScope)
                     }
                 }
             }
         return folders
     }
 
-    private fun getVideoFolders(realm: Realm, contentResolver: ContentResolver): ArrayMap<Long, MediaFolder> {
+    private fun getVideoFolders(
+        realm: Realm,
+        contentResolver: ContentResolver,
+        coroutineScope: Job?
+    ): ArrayMap<Long, MediaFolder> {
         val folders = arrayMapOf<Long, MediaFolder>()
         contentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, videosProjection, null, null, videosSortOrder)
             ?.use { cursor ->
                 while (cursor.moveToNext()) {
+                    coroutineScope?.ensureActive()
                     val folderName = cursor.getString(cursor.getColumnIndexOrThrow(VIDEO_BUCKET_DISPLAY_NAME)) ?: ""
                     val folderId = cursor.getLong(cursor.getColumnIndexOrThrow(VIDEO_BUCKET_ID))
                     cursor.getString(cursor.getColumnIndexOrThrow(MEDIA_PATH_COLUMN))?.let { path ->
-                        folders[folderId] = getLocalMediaFolder(realm, folderId, folderName, path)
+                        folders[folderId] = getLocalMediaFolder(realm, folderId, folderName, path, coroutineScope)
                     }
                 }
             }
         return folders
     }
 
-    private fun getLocalMediaFolder(realm: Realm, folderId: Long, folderName: String, path: String): MediaFolder {
+    private fun getLocalMediaFolder(
+        realm: Realm,
+        folderId: Long,
+        folderName: String,
+        path: String,
+        coroutineScope: Job?
+    ): MediaFolder {
+        coroutineScope?.ensureActive()
         return MediaFolder.findById(realm, folderId)?.let { mediaFolder ->
             mediaFolder.apply { if (mediaFolder.name != folderName) mediaFolder.storeOrUpdate() }
         } ?: let {
