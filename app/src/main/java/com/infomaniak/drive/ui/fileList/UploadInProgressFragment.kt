@@ -33,7 +33,6 @@ import com.infomaniak.drive.data.models.FileInProgress
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.sync.UploadAdapter
 import com.infomaniak.drive.utils.DrivePermissions
-import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.showSnackbar
@@ -124,7 +123,7 @@ class UploadInProgressFragment : FileListFragment() {
         val title = getString(R.string.uploadInProgressRestartUploadTitle)
         val context = requireContext()
         Utils.createConfirmation(context, title) {
-            if (!context.isSyncActive() || fileAdapter.importContainsProgress) {
+            if (fileAdapter.importContainsProgress) {
                 context.syncImmediately()
             }
         }

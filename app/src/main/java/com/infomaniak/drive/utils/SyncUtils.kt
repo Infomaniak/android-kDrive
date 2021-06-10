@@ -93,10 +93,12 @@ object SyncUtils {
     }
 
     fun Context.syncImmediately(bundle: Bundle = Bundle()) {
-        cancelSync()
-        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true)
-        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true)
-        ContentResolver.requestSync(createSyncAccount(), getString(R.string.SYNC_AUTHORITY), bundle)
+        if (!isSyncActive()) {
+            cancelSync()
+            bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true)
+            bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true)
+            ContentResolver.requestSync(createSyncAccount(), getString(R.string.SYNC_AUTHORITY), bundle)
+        }
     }
 
     fun Context.isSyncActive(): Boolean {
