@@ -31,7 +31,7 @@ class MediaFoldersAdapter(
     private val onSwitchChanged: (mediaFolder: MediaFolder, isChecked: Boolean) -> Unit
 ) : RecyclerView.Adapter<ViewHolder>() {
 
-    var itemList: ArrayList<MediaFolder> = arrayListOf()
+    private var itemList: ArrayList<MediaFolder> = arrayListOf()
 
     fun addAll(newItemList: ArrayList<MediaFolder>) {
         if (newItemList.size != itemCount) {

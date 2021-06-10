@@ -78,27 +78,25 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
 
     fun loadFolders() {
         swipeRefreshLayout.isRefreshing = true
-        mediaFoldersAdapter.apply {
-            mediaViewModel.elementsToRemove.observe(viewLifecycleOwner) { elementsToRemove ->
-                mediaFolderList.post {
-                    removeItemsById(elementsToRemove)
-                }
+        mediaViewModel.elementsToRemove.observe(viewLifecycleOwner) { elementsToRemove ->
+            mediaFolderList.post {
+                mediaFoldersAdapter.removeItemsById(elementsToRemove)
             }
-            mediaViewModel.getAllMediaFolders(requireActivity().contentResolver)
-                .observe(viewLifecycleOwner) { (isComplete, mediaFolders) ->
-                    mediaFolderList.post {
-                        addAll(mediaFolders)
-                        noMediaFolderLayout.toggleVisibility(
-                            isVisible = itemList.isEmpty(),
-                            noNetwork = false,
-                            showRefreshButton = false
-                        )
-                        if (isComplete) {
-                            swipeRefreshLayout.isRefreshing = false
-                        }
+        }
+        mediaViewModel.getAllMediaFolders(requireActivity().contentResolver)
+            .observe(viewLifecycleOwner) { (isComplete, mediaFolders) ->
+                mediaFolderList.post {
+                    mediaFoldersAdapter.addAll(mediaFolders)
+                    noMediaFolderLayout.toggleVisibility(
+                        isVisible = mediaFolders.isEmpty(),
+                        noNetwork = false,
+                        showRefreshButton = false
+                    )
+                    if (isComplete) {
+                        swipeRefreshLayout.isRefreshing = false
                     }
                 }
-        }
+            }
     }
 
     override fun onDismiss(dialog: DialogInterface) {
