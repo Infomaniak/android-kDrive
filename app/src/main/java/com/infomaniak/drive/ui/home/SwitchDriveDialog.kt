@@ -77,7 +77,6 @@ class SwitchDriveDialog : DialogFragment() {
                 )
             } else {
                 AccountUtils.currentDriveId = drive.id
-                FileController.switchDriveDB(UserDrive())
                 homeViewModel.driveSelectionDialogDismissed.value = true
             }
         }
