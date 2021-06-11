@@ -129,7 +129,7 @@ open class FileAdapter(
 
     private fun updateAt(position: Int, newFile: File) {
         itemList[position] = newFile
-        notifyItemChanged(position)
+        notifyItemChanged(position, Unit)
     }
 
     fun deleteAt(position: Int) {
@@ -165,7 +165,7 @@ open class FileAdapter(
         if (fileIndex >= 0) {
             itemList[fileIndex].currentProgress = progress
             importContainsProgress = uploadInProgress && progress <= 100
-            notifyItemChanged(fileIndex)
+            notifyItemChanged(fileIndex, progress)
 
             if (progress == 100) {
                 onComplete(itemList[fileIndex])
@@ -192,6 +192,28 @@ open class FileAdapter(
         }
     }
 
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: List<Any>) {
+        if (payloads.isEmpty()) {
+            super.onBindViewHolder(holder, position, payloads)
+        } else {
+            val file = itemList[position]
+            val progress = payloads.first() as Int
+            holder.itemView.apply {
+                if (file.isOffline && file.currentProgress !in 1..99) {
+                    progressLayout.visibility = VISIBLE
+                    fileOffline.visibility = VISIBLE
+                    fileOfflineProgression.visibility = GONE
+                } else {
+                    progressLayout.visibility = VISIBLE
+                    fileOffline.visibility = GONE
+                    fileOfflineProgression.visibility = VISIBLE
+                    fileOfflineProgression.progress = progress
+                }
+            }
+        }
+    }
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         if (getItemViewType(position) != VIEW_TYPE_LOADING) {
             val file = itemList[position]
@@ -214,7 +236,7 @@ open class FileAdapter(
                         .build()
                 }
 
-                setFileItem(file, isGrid, true)
+                setFileItem(file, isGrid)
 
                 checkIfEnablefile(file, position)
 

@@ -172,11 +172,11 @@ class UploadInProgressFragment : FileListFragment() {
                             context?.contentResolver?.query(uri, null, null, null, null)?.use { cursor ->
                                 if (cursor.moveToFirst()) {
                                     val size = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
-                                    files.add(File(id = 0, name = it.fileName, size = size, path = it.uri))
+                                    files.add(File(id = 0, name = it.fileName, size = size, path = it.uri, isFromUploads = true))
                                 }
                             }
                         } else {
-                            files.add(File(id = 0, name = it.fileName, size = uri.toFile().length(), path = it.uri))
+                            files.add(File(id = 0, name = it.fileName, size = uri.toFile().length(), path = it.uri, isFromUploads = true))
                         }
                     }
                     pendingFiles = syncFiles

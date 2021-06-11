@@ -97,6 +97,7 @@ open class File(
     var isWaitingOffline: Boolean = false,
     var isFromActivities: Boolean = false,
     var isFromSearch: Boolean = false,
+    var isFromUploads: Boolean = false,
 ) : RealmObject() {
 
     @LinkingObjects("children")

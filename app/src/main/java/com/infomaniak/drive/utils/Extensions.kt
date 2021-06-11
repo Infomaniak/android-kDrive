@@ -41,6 +41,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.DisplayMetrics
 import android.util.Log
+import android.util.Size
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -56,6 +57,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -232,8 +234,7 @@ fun Window.lightNavigationBar(enabled: Boolean) {
 
 fun View.setFileItem(
     file: File,
-    isGrid: Boolean = false,
-    showProgress: Boolean = true
+    isGrid: Boolean = false
 ) {
     fileName.text = file.name
     fileFavorite.visibility = if (file.isFavorite) VISIBLE else GONE
@@ -278,25 +279,19 @@ fun View.setFileItem(
                     filePreview.scaleType = ImageView.ScaleType.CENTER_CROP
                     filePreview.loadUrl(file.thumbnail(), file.getFileType().icon)
                 }
+                file.isFromUploads && (file.getFileType() == File.ConvertedType.IMAGE || file.getFileType() == File.ConvertedType.VIDEO) -> {
+                    filePreview.scaleType = ImageView.ScaleType.CENTER_CROP
+                    filePreview.load(context.getLocalThumbnail(file))
+                }
                 else -> {
                     filePreview.load(file.getFileType().icon)
                 }
             }
             filePreview2?.load(file.getFileType().icon)
-
-            when {
-                file.isOffline && file.currentProgress !in 1..99 -> {
-                    progressLayout.visibility = VISIBLE
-                    fileOffline.visibility = VISIBLE
-                    fileOfflineProgression.visibility = GONE
-                }
-                file.currentProgress > 0 && showProgress -> {
-                    progressLayout.visibility = VISIBLE
-                    fileOffline.visibility = GONE
-                    fileOfflineProgression.visibility = VISIBLE
-
-                    fileOfflineProgression.progress = file.currentProgress
-                }
+            if (file.isOffline && file.currentProgress !in 1..99) {
+                progressLayout.visibility = VISIBLE
+                fileOffline.visibility = VISIBLE
+                fileOfflineProgression.visibility = GONE
             }
         }
     }
@@ -564,4 +559,17 @@ fun Fragment.safeNavigate(
     navigatorExtras: Navigator.Extras? = null
 ) {
     if (canNavigate()) findNavController().navigate(resId, args, navOptions, navigatorExtras)
+}
+
+fun Context.getLocalThumbnail(file: File): Bitmap? {
+    val uri = file.path.toUri()
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        contentResolver.loadThumbnail(
+            uri,
+            Size(100, 100),
+            null
+        )
+    } else {
+        MediaStore.Images.Media.getBitmap(contentResolver, uri)
+    }
 }
