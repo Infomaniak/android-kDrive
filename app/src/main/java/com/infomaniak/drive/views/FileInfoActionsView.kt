@@ -324,6 +324,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         apply {
             fileView.setFileItem(file, showProgress = false)
             if (availableOfflineSwitch.isEnabled) availableOfflineSwitch.isChecked = file.isOffline
+            addFavorites.isEnabled = true
             addFavoritesIcon.isEnabled = file.isFavorite
             addFavoritesText.setText(if (file.isFavorite) R.string.buttonRemoveFavorites else R.string.buttonAddFavorites)
             copyPublicLinkText.setText(if (file.shareLink == null) R.string.buttonCreatePublicLink else R.string.buttonCopyPublicLink)
