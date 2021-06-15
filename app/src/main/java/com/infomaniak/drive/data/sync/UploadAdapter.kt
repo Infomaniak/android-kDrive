@@ -219,9 +219,9 @@ class UploadAdapter @JvmOverloads constructor(
                 e.printStackTrace()
                 UploadFile.deleteIfExists(uri)
             } catch (exception: IllegalStateException) {
+                UploadFile.deleteIfExists(uri)
                 Sentry.withScope { scope ->
                     scope.setExtra("data", gson.toJson(uploadFile))
-                    UploadFile.deleteIfExists(uri)
                     Sentry.captureMessage("The file is either partially downloaded or corrupted")
                 }
             }
@@ -243,11 +243,11 @@ class UploadAdapter @JvmOverloads constructor(
             Log.d("kDrive", "$TAG > end upload ${uploadFile.fileName}")
         } else {
             syncResult?.stats?.numSkippedEntries = syncResult?.stats?.numSkippedEntries?.plus(1)
+            UploadFile.deleteIfExists(uploadFile.uri.toUri())
+            Log.d("kDrive", "$TAG > ${uploadFile.fileName} deleted size:$size")
             Sentry.withScope { scope ->
                 scope.setExtra("data", gson.toJson(uploadFile))
                 Sentry.captureMessage("${uploadFile.fileName} deleted size:$size")
-                UploadFile.deleteIfExists(uploadFile.uri.toUri())
-                Log.d("kDrive", "$TAG > ${uploadFile.fileName} deleted size:$size")
             }
         }
     }
