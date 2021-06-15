@@ -102,7 +102,7 @@ object FileController {
                 if (!keepFiles.contains(fileId) && file.isValid) currentRealm.executeTransaction { file.deleteFromRealm() }
             }
         }
-        realm?.let(block) ?: Realm.getDefaultInstance()?.use(block)
+        realm?.let(block) ?: getRealmInstance().use(block)
     }
 
     fun updateFile(fileId: Int, realm: Realm? = null, userDrive: UserDrive = UserDrive(), transaction: (file: File) -> Unit) {
@@ -157,7 +157,7 @@ object FileController {
     private fun saveMySharesFiles(files: ArrayList<File>, replaceOldData: Boolean) {
         val keepCaches = arrayListOf<Int>()
         val keepFiles = arrayListOf<Int>()
-        Realm.getDefaultInstance()?.use { realm ->
+        getRealmInstance().use { realm ->
             files.forEachIndexed { index, file ->
                 val cacheFile = file.localPath(Realm.getApplicationContext()!!, File.LocalType.OFFLINE)
                 val lastModified = cacheFile.lastModified() / 1000
@@ -197,11 +197,7 @@ object FileController {
             }
         }
 
-        realm?.let(block) ?: Realm.getDefaultInstance()?.use(block)
-    }
-
-    fun switchDriveDB(userDrive: UserDrive) {
-        Realm.setDefaultConfiguration(getRealmConfiguration(getDriveFileName(userDrive)))
+        realm?.let(block) ?: getRealmInstance().use(block)
     }
 
     private fun getDriveFileName(userDrive: UserDrive): String {
@@ -209,10 +205,8 @@ object FileController {
         return realmDb.format(userDrive.userId, userDrive.driveId)
     }
 
-    private fun getRealmInstance(userDrive: UserDrive?): Realm {
-        return userDrive?.let {
-            Realm.getInstance(getRealmConfiguration(getDriveFileName(userDrive)))
-        } ?: Realm.getDefaultInstance()
+    private fun getRealmInstance(userDrive: UserDrive? = null): Realm {
+        return Realm.getInstance(getRealmConfiguration(getDriveFileName(userDrive ?: UserDrive())))
     }
 
     private fun getRealmConfiguration(dbName: String): RealmConfiguration {
@@ -346,7 +340,7 @@ object FileController {
 
     fun getActivities(): ArrayList<FileActivity> {
         val activityResults = arrayListOf<FileActivity>()
-        Realm.getDefaultInstance().use { realm ->
+        getRealmInstance().use { realm ->
             realm.where(FileActivity::class.java)
                 .sort(FileActivity::createdAt.name, Sort.DESCENDING)
                 .findAll()?.forEach { fileActivity ->
@@ -366,11 +360,11 @@ object FileController {
                 realm.copyFromRealm(picturesFolder.children, 0) as ArrayList<File>
             } ?: arrayListOf()
         }
-        return customRealm?.let(operation) ?: Realm.getDefaultInstance().use(operation)
+        return customRealm?.let(operation) ?: getRealmInstance().use(operation)
     }
 
     fun storeFileActivities(fileActivities: ArrayList<FileActivity>) {
-        Realm.getDefaultInstance()?.use { realm ->
+        getRealmInstance().use { realm ->
             fileActivities.forEach { fileActivity ->
                 fileActivity.userId = fileActivity.user?.id
                 fileActivity.file?.let { file ->
@@ -394,11 +388,11 @@ object FileController {
                 picturesFolder.children.addAll(pictures)
             }
         }
-        customRealm?.let(block) ?: Realm.getDefaultInstance().use(block)
+        customRealm?.let(block) ?: getRealmInstance().use(block)
     }
 
     fun removeFileActivities() {
-        Realm.getDefaultInstance()?.use { realm ->
+        getRealmInstance().use { realm ->
             realm.executeTransaction {
                 realm.where(FileActivity::class.java).findAll().deleteAllFromRealm()
                 realm.where(File::class.java)
@@ -442,7 +436,7 @@ object FileController {
     }
 
     fun getFilesFromIdList(idList: Array<Int>, order: File.SortType = File.SortType.NAME_AZ): ArrayList<File> {
-        return Realm.getDefaultInstance().use { realm ->
+        return getRealmInstance().use { realm ->
             realm
                 .where(File::class.java)
                 .`in`(File::id.name, idList)

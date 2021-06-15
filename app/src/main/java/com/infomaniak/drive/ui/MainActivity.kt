@@ -82,7 +82,6 @@ class MainActivity : BaseActivity() {
         setContentView(R.layout.activity_main)
         uploadProgressReceiver = UploadProgressReceiver(mainViewModel)
         downloadReceiver = DownloadReceiver(mainViewModel)
-        FileController.switchDriveDB(UserDrive())
 
         val navController = findNavController(R.id.hostFragment)
         bottomNavigation.setupWithNavController(navController)
