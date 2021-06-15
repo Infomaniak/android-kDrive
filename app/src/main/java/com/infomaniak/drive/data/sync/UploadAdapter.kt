@@ -58,6 +58,7 @@ import com.infomaniak.lib.core.utils.ApiController.gson
 import io.sentry.Sentry
 import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.*
+import java.io.FileNotFoundException
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -203,7 +204,11 @@ class UploadAdapter @JvmOverloads constructor(
                     if (DocumentsContract.isDocumentUri(context, uri)) {
                         contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     }
-                    val fileSize = contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize }
+                    val fileSize = try {
+                        contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize }
+                    } catch (exception: FileNotFoundException) {
+                        null
+                    }
                     contentResolver.query(uri, null, null, null, null)?.use { cursor ->
                         if (cursor.moveToFirst()) {
                             val mediaSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
@@ -215,9 +220,9 @@ class UploadAdapter @JvmOverloads constructor(
                 e.printStackTrace()
                 UploadFile.deleteIfExists(uri)
             } catch (exception: IllegalStateException) {
+                UploadFile.deleteIfExists(uri)
                 Sentry.withScope { scope ->
                     scope.setExtra("data", gson.toJson(uploadFile))
-                    UploadFile.deleteIfExists(uri)
                     Sentry.captureMessage("The file is either partially downloaded or corrupted")
                 }
             }
@@ -241,6 +246,10 @@ class UploadAdapter @JvmOverloads constructor(
             syncResult?.stats?.numSkippedEntries = syncResult?.stats?.numSkippedEntries?.plus(1)
             UploadFile.deleteIfExists(uploadFile.uri.toUri())
             Log.d("kDrive", "$TAG > ${uploadFile.fileName} deleted size:$size")
+            Sentry.withScope { scope ->
+                scope.setExtra("data", gson.toJson(uploadFile))
+                Sentry.captureMessage("${uploadFile.fileName} deleted size:$size")
+            }
         }
     }
 
