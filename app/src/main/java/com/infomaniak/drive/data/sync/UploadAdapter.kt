@@ -58,8 +58,8 @@ import com.infomaniak.lib.core.utils.ApiController.gson
 import io.sentry.Sentry
 import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.*
-import java.io.IOException
 import java.io.FileNotFoundException
+import java.io.IOException
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -126,25 +126,28 @@ class UploadAdapter @JvmOverloads constructor(
         } catch (exception: ChunksSizeExceededException) {
             syncResult?.restartSyncErrorWithDelay()
 
-        } catch (exception: IOException) {
-            syncResult?.restartSyncErrorWithDelay()
-            Sentry.withScope { scope ->
-                scope.setExtra("data", gson.toJson(currentUploadTask ?: ""))
-                scope.setExtra("debug", "lastProgress: ${currentUploadTask?.lastProgress()}")
-                Sentry.captureMessage(exception.message ?: "IOException occurred")
-            }
-
         } catch (exception: Exception) {
-            if (exception.isNetworkException()) {
-                networkErrorNotification()
-                syncResult?.restartSyncErrorWithDelay()
-            } else {
-                exception.printStackTrace()
-                exceptionNotification()
-                Sentry.captureException(exception)
-                syncResult?.tooManyRetries = true // Don't retry the sync
-                syncResult?.stats?.numIoExceptions = syncResult?.stats?.numIoExceptions?.plus(1)
-                context.cancelNotification(CURRENT_UPLOAD_ID)
+            when {
+                exception.isNetworkException() -> {
+                    networkErrorNotification()
+                    syncResult?.restartSyncErrorWithDelay()
+                }
+                exception is IOException -> {
+                    syncResult?.restartSyncErrorWithDelay()
+                    Sentry.withScope { scope ->
+                        scope.setExtra("data", gson.toJson(currentUploadTask ?: ""))
+                        scope.setExtra("debug", "lastProgress: ${currentUploadTask?.lastProgress()}")
+                        Sentry.captureMessage(exception.message ?: "IOException occurred")
+                    }
+                }
+                else -> {
+                    exception.printStackTrace()
+                    exceptionNotification()
+                    Sentry.captureException(exception)
+                    syncResult?.tooManyRetries = true // Don't retry the sync
+                    syncResult?.stats?.numIoExceptions = syncResult?.stats?.numIoExceptions?.plus(1)
+                    context.cancelNotification(CURRENT_UPLOAD_ID)
+                }
             }
         }
     }

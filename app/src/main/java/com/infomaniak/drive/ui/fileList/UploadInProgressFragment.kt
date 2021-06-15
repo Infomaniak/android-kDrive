@@ -143,7 +143,7 @@ class UploadInProgressFragment : FileListFragment() {
             withContext(Dispatchers.Main) {
                 lifecycleScope.launchWhenResumed {
                     val bundle = bundleOf(UploadAdapter.CANCELLED_BY_USER to true)
-                    requireContext().syncImmediately(bundle)
+                    requireContext().syncImmediately(bundle, true)
                     popBackStack()
                 }
             }
