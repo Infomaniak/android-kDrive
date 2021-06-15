@@ -58,6 +58,7 @@ import com.infomaniak.lib.core.utils.ApiController.gson
 import io.sentry.Sentry
 import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.*
+import java.io.IOException
 import java.io.FileNotFoundException
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
@@ -78,6 +79,7 @@ class UploadAdapter @JvmOverloads constructor(
     private val hasUpdate = AtomicBoolean(false)
     private var syncSettings: SyncSettings? = null
     private var currentUploadFile: UploadFile? = null
+    private var currentUploadTask: UploadTask? = null
 
     override fun onPerformSync(
         account: Account?,
@@ -109,7 +111,7 @@ class UploadAdapter @JvmOverloads constructor(
         } catch (exception: QuotaExceededException) {
             quotaExceededNotification()
 
-        } catch (exception: InterruptedException) {
+        } catch (exception: InterruptedException) { // from system
             interruptedNotification()
             syncResult?.restartSyncErrorWithDelay()
 
@@ -117,12 +119,20 @@ class UploadAdapter @JvmOverloads constructor(
             outOfMemoryNotification()
             syncResult?.restartSyncErrorWithDelay()
 
-        } catch (exception: CancellationException) {
+        } catch (exception: CancellationException) { // uploadSupervisorJob cancelled
             exceptionNotification()
             syncResult?.restartSyncErrorWithDelay()
 
         } catch (exception: ChunksSizeExceededException) {
             syncResult?.restartSyncErrorWithDelay()
+
+        } catch (exception: IOException) {
+            syncResult?.restartSyncErrorWithDelay()
+            Sentry.withScope { scope ->
+                scope.setExtra("data", gson.toJson(currentUploadTask ?: ""))
+                scope.setExtra("debug", "lastProgress: ${currentUploadTask?.lastProgress()}")
+                Sentry.captureMessage(exception.message ?: "IOException occurred")
+            }
 
         } catch (exception: Exception) {
             if (exception.isNetworkException()) {
@@ -235,11 +245,11 @@ class UploadAdapter @JvmOverloads constructor(
                 UploadFile.update(uploadFile.uri) { it.fileSize = size }
             }
 
-            UploadTask(
+            currentUploadTask = UploadTask(
                 context = context.applicationContext,
                 uploadFile = uploadFile,
                 supervisor = uploadSupervisorJob
-            ).start()
+            ).apply { start() }
             syncResult?.stats?.numInserts = syncResult?.stats?.numInserts?.plus(1)
             Log.d("kDrive", "$TAG > end upload ${uploadFile.fileName}")
         } else {

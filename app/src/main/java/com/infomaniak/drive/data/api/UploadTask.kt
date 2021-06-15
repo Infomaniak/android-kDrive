@@ -289,6 +289,8 @@ class UploadTask(
                 if (uploadFile.fileCreatedAt == null) "" else "&file_created_at=${uploadFile.fileCreatedAt!!.time / 1000}"
     }
 
+    fun lastProgress() = currentProgress.get()
+
     class FolderNotFoundException : Exception()
     class QuotaExceededException : Exception()
     class ChunksSizeExceededException : Exception()
