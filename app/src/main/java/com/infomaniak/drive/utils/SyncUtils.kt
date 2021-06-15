@@ -92,8 +92,8 @@ object SyncUtils {
         }
     }
 
-    fun Context.syncImmediately(bundle: Bundle = Bundle()) {
-        if (!isSyncActive()) {
+    fun Context.syncImmediately(bundle: Bundle = Bundle(), force: Boolean = false) {
+        if (!isSyncActive() || force) {
             cancelSync()
             bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true)
             bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true)

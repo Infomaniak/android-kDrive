@@ -47,10 +47,8 @@ import com.google.android.material.navigation.NavigationBarItemView
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.R
 import com.infomaniak.drive.checkUpdateIsAvailable
-import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.UISettings
-import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.data.sync.UploadProgressReceiver
 import com.infomaniak.drive.launchInAppReview
