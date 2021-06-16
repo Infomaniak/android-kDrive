@@ -24,7 +24,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.liveData
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.utils.DrivePermissions

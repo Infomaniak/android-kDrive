@@ -322,7 +322,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     fun refreshBottomSheetUi(file: File, offlineProgress: Int? = null) {
         apply {
-            fileView.setFileItem(file, showProgress = false)
+            fileView.setFileItem(file)
             if (availableOfflineSwitch.isEnabled) availableOfflineSwitch.isChecked = file.isOffline
             addFavorites.isEnabled = true
             addFavoritesIcon.isEnabled = file.isFavorite

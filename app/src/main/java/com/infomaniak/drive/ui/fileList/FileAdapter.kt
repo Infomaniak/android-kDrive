@@ -26,6 +26,7 @@ import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.setFileItem
+import com.infomaniak.drive.utils.setupFileProgress
 import com.infomaniak.drive.views.PaginationAdapter
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_file_list.view.*
@@ -165,7 +166,7 @@ open class FileAdapter(
         if (fileIndex >= 0) {
             itemList[fileIndex].currentProgress = progress
             importContainsProgress = uploadInProgress && progress <= 100
-            notifyItemChanged(fileIndex)
+            notifyItemChanged(fileIndex, progress)
 
             if (progress == 100) {
                 onComplete(itemList[fileIndex])
@@ -192,6 +193,16 @@ open class FileAdapter(
         }
     }
 
+    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: List<Any>) {
+        if (payloads.firstOrNull() is Int) {
+            val file = itemList[position]
+            val progress = payloads.first() as Int
+            holder.itemView.setupFileProgress(file, progress)
+        } else {
+            super.onBindViewHolder(holder, position, payloads)
+        }
+    }
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         if (getItemViewType(position) != VIEW_TYPE_LOADING) {
             val file = itemList[position]
@@ -214,7 +225,7 @@ open class FileAdapter(
                         .build()
                 }
 
-                setFileItem(file, isGrid, true)
+                setFileItem(file, isGrid)
 
                 checkIfEnablefile(file, position)
 

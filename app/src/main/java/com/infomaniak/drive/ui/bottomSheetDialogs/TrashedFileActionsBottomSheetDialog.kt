@@ -54,7 +54,7 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
         currentTrashedFile = trashViewModel.selectedFile.value ?: File()
 
-        currentFile.setFileItem(currentTrashedFile, showProgress = false)
+        currentFile.setFileItem(currentTrashedFile)
         restoreFileIn.setOnClickListener {
             val intent = Intent(requireContext(), SelectFolderActivity::class.java).apply {
                 putExtra(SelectFolderActivity.USER_ID_TAG, AccountUtils.currentUserId)
