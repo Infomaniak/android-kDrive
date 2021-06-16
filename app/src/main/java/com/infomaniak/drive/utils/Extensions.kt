@@ -284,11 +284,26 @@ fun View.setFileItem(
                 }
             }
             filePreview2?.load(file.getFileType().icon)
-            if (file.isOffline && file.currentProgress !in 1..99) {
-                progressLayout.visibility = VISIBLE
-                fileOffline.visibility = VISIBLE
-                fileOfflineProgression.visibility = GONE
-            }
+            setupFileProgress(file, file.currentProgress)
+        }
+    }
+}
+
+fun View.setupFileProgress(file: File, progress: Int) {
+    when {
+        file.isOffline -> {
+            progressLayout.visibility = VISIBLE
+            fileOffline.visibility = VISIBLE
+            fileOfflineProgression.visibility = GONE
+        }
+        progress in 0..99 -> {
+            progressLayout.visibility = VISIBLE
+            fileOffline.visibility = GONE
+            fileOfflineProgression.visibility = VISIBLE
+            fileOfflineProgression.progress = progress
+        }
+        else -> {
+            progressLayout.visibility = GONE
         }
     }
 }
