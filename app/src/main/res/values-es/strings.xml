@@ -524,7 +524,7 @@
     <string name="syncSettingsTitle">Copia de seguridad de las fotos</string>
     <string name="themeSettingsDarkLabel">Scuro</string>
     <string name="themeSettingsLightLabel">Chiaro</string>
-    <string name="themeSettingsSystemDefaultLabel">Impostazione predefinita del sistema</string>
+    <string name="themeSettingsSystemDefaultLabel">Predeterminado del sisteme</string>
     <string name="themeSettingsSystemLabel">Sistema</string>
     <string name="themeSettingsTitle">Tema</string>
     <string name="trashActionDelete">Eliminar definitivamente</string>
