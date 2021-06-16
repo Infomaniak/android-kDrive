@@ -31,7 +31,6 @@ import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.whenResumed
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
@@ -224,6 +223,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
                 val fileModifiedAt = Date(file.lastModified())
                 val fileSize = file.length()
+                val applicationContext = context?.applicationContext
                 lifecycleScope.launch(Dispatchers.IO) {
                     val cacheUri = Utils.copyDataToUploadCache(requireContext(), file.toUri(), fileModifiedAt)
                     UploadFile(
@@ -237,7 +237,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                         type = UploadFile.Type.UPLOAD.name,
                         userId = currentUserId,
                     ).store()
-                    whenResumed { requireContext().syncImmediately() }
+                    applicationContext?.syncImmediately()
                     file.delete()
                 }
 

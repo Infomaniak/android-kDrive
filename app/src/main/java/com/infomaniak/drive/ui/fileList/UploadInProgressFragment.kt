@@ -176,7 +176,15 @@ class UploadInProgressFragment : FileListFragment() {
                                 }
                             }
                         } else {
-                            files.add(File(id = 0, name = it.fileName, size = uri.toFile().length(), path = it.uri, isFromUploads = true))
+                            files.add(
+                                File(
+                                    id = 0,
+                                    name = it.fileName,
+                                    size = uri.toFile().length(),
+                                    path = it.uri,
+                                    isFromUploads = true
+                                )
+                            )
                         }
                     }
                     pendingFiles = syncFiles

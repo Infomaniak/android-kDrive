@@ -21,17 +21,19 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ActivityManager
 import android.app.KeyguardManager
+import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.database.Cursor
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.ImageDecoder
 import android.graphics.Point
 import android.hardware.biometrics.BiometricManager
 import android.hardware.biometrics.BiometricPrompt
+import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -57,6 +59,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.ContextCompat
+import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -154,15 +157,6 @@ fun TextInputEditText.showOrHideEmptyError(): Boolean {
 
 fun Cursor.uri(contentUri: Uri): Uri {
     return ContentUris.withAppendedId(contentUri, getLong(getColumnIndex(MediaStore.MediaColumns._ID)))
-}
-
-fun Uri.getBitmap(context: Context): Bitmap {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-        val source = ImageDecoder.createSource(context.contentResolver, this)
-        ImageDecoder.decodeBitmap(source)
-    } else {
-        MediaStore.Images.Media.getBitmap(context.contentResolver, this)
-    }
 }
 
 fun Number.isPositive(): Boolean {
@@ -279,9 +273,11 @@ fun View.setFileItem(
                     filePreview.scaleType = ImageView.ScaleType.CENTER_CROP
                     filePreview.loadUrl(file.thumbnail(), file.getFileType().icon)
                 }
-                file.isFromUploads && (file.getFileType() == File.ConvertedType.IMAGE || file.getFileType() == File.ConvertedType.VIDEO) -> {
+                file.isFromUploads && (file.getMimeType().contains("image") || file.getMimeType().contains("video")) -> {
                     filePreview.scaleType = ImageView.ScaleType.CENTER_CROP
-                    filePreview.load(context.getLocalThumbnail(file))
+                    filePreview.load(context.getLocalThumbnail(file)) {
+                        fallback(file.getFileType().icon)
+                    }
                 }
                 else -> {
                     filePreview.load(file.getFileType().icon)
@@ -562,14 +558,55 @@ fun Fragment.safeNavigate(
 }
 
 fun Context.getLocalThumbnail(file: File): Bitmap? {
-    val uri = file.path.toUri()
+    val fileUri = file.path.toUri()
+    val thumbnailSize = 100
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        contentResolver.loadThumbnail(
-            uri,
-            Size(100, 100),
-            null
-        )
+        val size = Size(thumbnailSize, thumbnailSize)
+        if (fileUri.scheme.equals(ContentResolver.SCHEME_FILE)) {
+            if (file.getMimeType().contains("video")) {
+                ThumbnailUtils.createVideoThumbnail(fileUri.toFile(), size, null)
+            } else {
+                ThumbnailUtils.createImageThumbnail(fileUri.toFile(), size, null)
+            }
+        } else {
+            contentResolver.loadThumbnail(fileUri, size, null)
+        }
     } else {
-        MediaStore.Images.Media.getBitmap(contentResolver, uri)
+        if (fileUri.scheme.equals(ContentResolver.SCHEME_FILE)) {
+            fileUri.path?.let { path ->
+                if (file.getMimeType().contains("video")) {
+                    ThumbnailUtils.createVideoThumbnail(path, MediaStore.Video.Thumbnails.MICRO_KIND)
+                } else {
+                    ThumbnailUtils.createImageThumbnail(path, MediaStore.Images.Thumbnails.MICRO_KIND)
+                }
+            }
+        } else {
+            val fileId = try {
+                ContentUris.parseId(fileUri)
+            } catch (e: Exception) {
+                fileUri.lastPathSegment?.split(":")?.let {
+                    it.getOrNull(1)?.toLong()
+                } ?: -1
+            }
+            val options = BitmapFactory.Options().apply {
+                outWidth = thumbnailSize
+                outHeight = thumbnailSize
+            }
+            if (contentResolver.getType(fileUri)?.contains("video") == true) {
+                MediaStore.Video.Thumbnails.getThumbnail(
+                    contentResolver,
+                    fileId,
+                    MediaStore.Video.Thumbnails.MICRO_KIND,
+                    options
+                )
+            } else {
+                MediaStore.Images.Thumbnails.getThumbnail(
+                    contentResolver,
+                    fileId,
+                    MediaStore.Images.Thumbnails.MICRO_KIND,
+                    options
+                )
+            }
+        }
     }
 }

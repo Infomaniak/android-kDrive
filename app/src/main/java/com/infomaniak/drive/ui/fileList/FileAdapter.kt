@@ -129,7 +129,7 @@ open class FileAdapter(
 
     private fun updateAt(position: Int, newFile: File) {
         itemList[position] = newFile
-        notifyItemChanged(position, Unit)
+        notifyItemChanged(position)
     }
 
     fun deleteAt(position: Int) {
@@ -194,9 +194,7 @@ open class FileAdapter(
 
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: List<Any>) {
-        if (payloads.isEmpty()) {
-            super.onBindViewHolder(holder, position, payloads)
-        } else {
+        if (payloads.firstOrNull() is Int) {
             val file = itemList[position]
             val progress = payloads.first() as Int
             holder.itemView.apply {
@@ -211,6 +209,8 @@ open class FileAdapter(
                     fileOfflineProgression.progress = progress
                 }
             }
+        } else {
+            super.onBindViewHolder(holder, position, payloads)
         }
     }
 

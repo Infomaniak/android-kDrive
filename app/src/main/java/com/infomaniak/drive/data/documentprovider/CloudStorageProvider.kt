@@ -28,7 +28,6 @@ import android.os.ParcelFileDescriptor
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
 import android.util.Log
-import android.webkit.MimeTypeMap
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import com.infomaniak.drive.R
@@ -342,10 +341,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
         if (file?.isFolder() == true) flags = flags or DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE
 
-        val fileExtension = file?.name?.substringAfterLast(".")
-        val mimetype =
-            if (file == null || file.isFolder()) DocumentsContract.Document.MIME_TYPE_DIR
-            else (MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension) ?: "*/*")
+        val mimetype = if (file == null || file.isFolder()) DocumentsContract.Document.MIME_TYPE_DIR else file.getMimeType()
 
         if (file?.isFolder() == false && file.hasThumbnail) {
             flags = flags or DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL

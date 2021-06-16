@@ -18,6 +18,7 @@
 package com.infomaniak.drive.data.models
 
 import android.content.Context
+import android.webkit.MimeTypeMap
 import androidx.annotation.DrawableRes
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
@@ -72,7 +73,7 @@ open class File(
     var onlyoffice: Boolean = false,
     @SerializedName("onlyoffice_convert_extension")
     var onlyofficeConvertExtension: String? = null,
-    var path: String = "",
+    var path: String = "", // Uri
     var rights: Rights? = null,
     @SerializedName("share_link")
     var shareLink: String? = null,
@@ -233,6 +234,11 @@ open class File(
 
     fun isRoot(): Boolean {
         return id == ROOT_ID
+    }
+
+    fun getMimeType(): String {
+        val fileExtension = name.substringAfterLast(".")
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension) ?: "*/*"
     }
 
     enum class Type(val value: String) {
