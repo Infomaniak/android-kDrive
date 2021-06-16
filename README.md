@@ -34,6 +34,19 @@ We use [Realm.io](https://realm.io/) on both platforms (iOS and Android) to stor
 ### Structure
 The structure of the app, its algorithms and the general functioning are common with the iOS app. 
 
+### Permissions
+| Permission key | Usage
+|---|---
+| `GET_ACCOUNTS`, `AUTHENTICATE_ACCOUNTS`, `MANAGE_ACCOUNTS`, `USE_CREDENTIALS` | Used to access and manage AccountManager.
+| `com.infomaniak.permission.ASK_CREDENTIAL`, `com.infomaniak.permission.RECEIVE_CREDENTIAL` | (*Unused for the moment*) Allow kDrive to communicate (get and give) credentials to other Infomaniak apps (in order to authenticate user without asking them to login).
+| `INTERNET`, `ACCESS_NETWORK_STATE` | Used to determine if device has access to Internet in order to update UI and to restrict some features when offline.
+| `READ_EXTERNAL_STORAGE`, `WRITE_EXTERNAL_STORAGE` | **READ** is used to access files on device to upload them on kDrive. **WRITE** is used to download files from kDrive on device and to use MediaStore.
+| `READ_SYNC_SETTINGS`, `WRITE_SYNC_SETTINGS`, `READ_SYNC_STATS` | Used to manage automatic synchronization (e.g. determine if sync is enabled, enable it, etc.)
+| `RECEIVE_BOOT_COMPLETED` | Determine when device is booted to restart sync service if needed.
+| `FOREGROUND_SERVICE` | Used by Download Worker (for offline files) and Sync Service.
+| `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` | Allow to download files in background.
+| `USE_BIOMETRIC` | Used to (un)lock the app.
+| `REQUEST_INSTALL_PACKAGES` | Allow users to execute an APK from kDrive app.
 
 
 ## Tests
