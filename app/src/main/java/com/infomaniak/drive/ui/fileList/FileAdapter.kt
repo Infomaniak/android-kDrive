@@ -192,21 +192,26 @@ open class FileAdapter(
         }
     }
 
-
     override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: List<Any>) {
         if (payloads.firstOrNull() is Int) {
             val file = itemList[position]
             val progress = payloads.first() as Int
             holder.itemView.apply {
-                if (file.isOffline && file.currentProgress !in 1..99) {
-                    progressLayout.visibility = VISIBLE
-                    fileOffline.visibility = VISIBLE
-                    fileOfflineProgression.visibility = GONE
-                } else {
-                    progressLayout.visibility = VISIBLE
-                    fileOffline.visibility = GONE
-                    fileOfflineProgression.visibility = VISIBLE
-                    fileOfflineProgression.progress = progress
+                when {
+                    file.isOffline -> {
+                        progressLayout.visibility = VISIBLE
+                        fileOffline.visibility = VISIBLE
+                        fileOfflineProgression.visibility = GONE
+                    }
+                    file.currentProgress in 0..99 -> {
+                        progressLayout.visibility = VISIBLE
+                        fileOffline.visibility = GONE
+                        fileOfflineProgression.visibility = VISIBLE
+                        fileOfflineProgression.progress = progress
+                    }
+                    else -> {
+                        progressLayout.visibility = GONE
+                    }
                 }
             }
         } else {
