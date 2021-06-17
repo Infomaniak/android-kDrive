@@ -70,6 +70,24 @@ object FileController {
         return realm?.let(block) ?: getRealmInstance(userDrive).use(block)
     }
 
+    fun generateAndSavePath(fileId: Int, userDrive: UserDrive): String {
+        return getRealmInstance(userDrive).use { realm ->
+            getFileById(realm, fileId)!!.let { file ->
+                realm.executeTransaction { file.path = generatePath(file, userDrive) }
+                file.path
+            }
+        }
+    }
+
+    private fun generatePath(file: File, userDrive: UserDrive): String {
+        return file.localParent!!.first { it.id > 0 }.let { parent -> // id > 0 for exclude other root parents
+            when (parent.id) {
+                Utils.ROOT_ID -> "/${file.name}"
+                else -> generatePath(parent, userDrive) + "/${file.name}"
+            }
+        }
+    }
+
     fun getFileProxyById(fileId: Int, userDrive: UserDrive? = null): File? {
         return getRealmInstance(userDrive).use { realm ->
             realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst()

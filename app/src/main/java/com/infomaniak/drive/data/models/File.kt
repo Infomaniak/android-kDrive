@@ -25,6 +25,7 @@ import androidx.work.WorkManager
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.BuildConfig
 import io.realm.RealmList
@@ -34,6 +35,8 @@ import io.realm.annotations.Ignore
 import io.realm.annotations.LinkingObjects
 import io.realm.annotations.PrimaryKey
 import kotlinx.android.parcel.Parcelize
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -213,6 +216,9 @@ open class File(
     fun getOfflineFile(context: Context, userDrive: UserDrive = UserDrive()): java.io.File {
         val mediaFolder = context.externalMediaDirs?.firstOrNull() ?: context.filesDir
         val rootFolder = java.io.File(mediaFolder, "offline_storage/${userDrive.userId}/${userDrive.driveId}")
+        val path =
+            if (this.path.isEmpty()) runBlocking(Dispatchers.IO) { FileController.generateAndSavePath(id, userDrive) }
+            else this.path
         val folder = java.io.File(rootFolder, path.substringBeforeLast("/"))
 
         if (!folder.exists()) folder.mkdirs()

@@ -50,10 +50,7 @@ import kotlinx.android.synthetic.main.item_file_name.view.*
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.android.synthetic.main.view_share_link_container.view.*
 import kotlinx.android.synthetic.main.view_url_display.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 
 class FileInfoActionsView @JvmOverloads constructor(
     context: Context,
@@ -216,10 +213,10 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     fun downloadAsOfflineFile() {
-        val localFile = currentFile.getCacheFile(context)
-        if (localFile.exists()) {
+        val cacheFile = currentFile.getCacheFile(context)
+        if (cacheFile.exists()) {
             val offlineFile = currentFile.getOfflineFile(context)
-            Utils.moveCacheFileToOffline(currentFile, localFile, offlineFile)
+            Utils.moveCacheFileToOffline(currentFile, cacheFile, offlineFile)
             runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(currentFile.id, true) }
             currentFile.isOffline = true
             onItemClickListener.onCacheAddedToOffline()
