@@ -88,8 +88,8 @@ class DownloadProgressDialog : DialogFragment() {
     class DownloadViewModel : ViewModel() {
 
         fun downloadFile(context: Context, file: File, userDrive: UserDrive) = liveData(Dispatchers.IO) {
-            val offlineFile = file.localPath(context, File.LocalType.OFFLINE, userDrive)
-            val cacheFile = file.localPath(context, File.LocalType.CLOUD_STORAGE, userDrive)
+            val offlineFile = file.getOfflineFile(context, userDrive)
+            val cacheFile = file.getCacheFile(context, userDrive)
 
             if (file.isOldData(context, userDrive) || file.isIncompleteFile(offlineFile, cacheFile)) {
                 try {

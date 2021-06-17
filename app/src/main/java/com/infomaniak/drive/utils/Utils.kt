@@ -270,7 +270,7 @@ object Utils {
         val inputData = workDataOf(
             DownloadWorker.FILE_ID to file.id,
             DownloadWorker.USER_ID to userDrive.userId,
-            DownloadWorker.DRIVE_ID to userDrive.driveId
+            DownloadWorker.DRIVE_ID to userDrive.driveId,
         )
         val networkType = if (AppSettings.onlyWifiSync) NetworkType.UNMETERED else NetworkType.CONNECTED
         val constraints = Constraints.Builder()
@@ -278,6 +278,7 @@ object Utils {
             .setRequiresStorageNotLow(true)
             .build()
         val downloadRequest = OneTimeWorkRequestBuilder<DownloadWorker>()
+            .addTag(file.getWorkerTag())
             .setInputData(inputData)
             .setConstraints(constraints)
             .build()
@@ -287,6 +288,7 @@ object Utils {
                 it.isWaitingOffline = true
             }
         }
+
         WorkManager.getInstance(context)
             .enqueueUniqueWork(DownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
     }

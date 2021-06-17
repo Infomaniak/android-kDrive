@@ -21,8 +21,6 @@ import android.content.Context
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.File.LocalType.CLOUD_STORAGE
-import com.infomaniak.drive.data.models.File.LocalType.OFFLINE
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
@@ -40,8 +38,8 @@ object PreviewPDFUtils {
         onProgress: (progress: Int) -> Unit
     ): ApiResponse<PdfCore> {
         return try {
-            val offlineFile = file.localPath(context, OFFLINE)
-            val cacheFile = file.localPath(context, CLOUD_STORAGE)
+            val offlineFile = file.getOfflineFile(context)
+            val cacheFile = file.getCacheFile(context)
 
             if (file.isOldData(context) || file.isIncompleteFile(offlineFile, cacheFile)) {
                 val externalOutputFile = if (file.isOffline) offlineFile else cacheFile

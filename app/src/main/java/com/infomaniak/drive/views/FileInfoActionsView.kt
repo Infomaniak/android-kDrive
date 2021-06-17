@@ -216,9 +216,9 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     fun downloadAsOfflineFile() {
-        val localFile = currentFile.localPath(context, File.LocalType.CLOUD_STORAGE)
+        val localFile = currentFile.getCacheFile(context)
         if (localFile.exists()) {
-            val offlineFile = currentFile.localPath(context, File.LocalType.OFFLINE)
+            val offlineFile = currentFile.getOfflineFile(context)
             Utils.moveCacheFileToOffline(currentFile, localFile, offlineFile)
             runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(currentFile.id, true) }
             currentFile.isOffline = true
@@ -394,8 +394,8 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         fun availableOfflineSwitched(fileInfoActionsView: FileInfoActionsView, currentFile: File, isChecked: Boolean) {
-            val offlineLocalPath = currentFile.localPath(fileInfoActionsView.context, File.LocalType.OFFLINE)
-            val cacheFile = currentFile.localPath(fileInfoActionsView.context, File.LocalType.CLOUD_STORAGE)
+            val offlineLocalPath = currentFile.getOfflineFile(fileInfoActionsView.context)
+            val cacheFile = currentFile.getCacheFile(fileInfoActionsView.context)
             when {
                 currentFile.isOffline && isChecked -> Unit
                 isChecked -> fileInfoActionsView.downloadAsOfflineFile()

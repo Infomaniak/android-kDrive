@@ -450,8 +450,8 @@ class CloudStorageProvider : DocumentsProvider() {
             userDrive: UserDrive,
             accessMode: Int
         ): ParcelFileDescriptor? {
-            val cacheFile = file.localPath(context, File.LocalType.CLOUD_STORAGE, userDrive)
-            val offlineFile = file.localPath(context, File.LocalType.OFFLINE, userDrive)
+            val cacheFile = file.getCacheFile(context, userDrive)
+            val offlineFile = file.getOfflineFile(context, userDrive)
 
             try {
                 val isNotOldData = !file.isOldData(context, userDrive)

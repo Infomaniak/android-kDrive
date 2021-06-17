@@ -88,21 +88,18 @@ object FileController {
         fileId: Int,
         keepFileCaches: ArrayList<Int> = arrayListOf(),
         keepFiles: ArrayList<Int> = arrayListOf(),
-        realm: Realm? = null,
+        realm: Realm = getRealmInstance(),
         recursive: Boolean = true,
     ) {
-        val block: (Realm) -> Unit = { currentRealm ->
-            getFileById(currentRealm, fileId)?.let { file ->
-                if (recursive) {
-                    file.children.createSnapshot().forEach {
-                        if (!keepFiles.contains(it.id)) removeFile(it.id, keepFileCaches, keepFiles, realm)
-                    }
+        getFileById(realm, fileId)?.let { file ->
+            if (recursive) {
+                file.children.createSnapshot().forEach {
+                    if (!keepFiles.contains(it.id)) removeFile(it.id, keepFileCaches, keepFiles, realm)
                 }
-                if (!keepFileCaches.contains(fileId)) file.deleteCaches(Realm.getApplicationContext()!!)
-                if (!keepFiles.contains(fileId) && file.isValid) currentRealm.executeTransaction { file.deleteFromRealm() }
             }
+            if (!keepFileCaches.contains(fileId)) file.deleteCaches(Realm.getApplicationContext()!!)
+            if (!keepFiles.contains(fileId) && file.isValid) realm.executeTransaction { file.deleteFromRealm() }
         }
-        realm?.let(block) ?: getRealmInstance().use(block)
     }
 
     fun updateFile(fileId: Int, realm: Realm? = null, userDrive: UserDrive = UserDrive(), transaction: (file: File) -> Unit) {
@@ -159,8 +156,8 @@ object FileController {
         val keepFiles = arrayListOf<Int>()
         getRealmInstance().use { realm ->
             files.forEachIndexed { index, file ->
-                val cacheFile = file.localPath(Realm.getApplicationContext()!!, File.LocalType.OFFLINE)
-                val lastModified = cacheFile.lastModified() / 1000
+                val offlineFile = file.getOfflineFile(Realm.getApplicationContext()!!)
+                val lastModified = offlineFile.lastModified() / 1000
 
                 realm.where(File::class.java).equalTo(File::id.name, file.id).findFirst()?.let { oldFile ->
                     realm.executeTransaction {
@@ -169,10 +166,10 @@ object FileController {
                     }
                 }
 
-                if (cacheFile.exists() && lastModified == file.lastModifiedAt) {
+                if (offlineFile.exists() && lastModified == file.lastModifiedAt) {
                     files[index].isOffline = true
                     keepCaches.add(file.id)
-                } else cacheFile.delete()
+                } else offlineFile.delete()
             }
 
             if (replaceOldData) removeFile(MY_SHARES_FILE_ID, keepCaches, keepFiles, realm)

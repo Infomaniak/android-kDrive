@@ -38,7 +38,7 @@ open class PreviewFragment() : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         file?.let { previewViewModel.currentFile = it }
-        offlineFile = previewViewModel.currentFile.localPath(requireContext(), File.LocalType.OFFLINE)
+        offlineFile = previewViewModel.currentFile.getOfflineFile(requireContext())
     }
 
     protected class PreviewViewModel : ViewModel() {
