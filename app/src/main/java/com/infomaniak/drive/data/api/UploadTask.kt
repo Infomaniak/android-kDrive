@@ -37,7 +37,6 @@ import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
 import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpUtils
-import com.infomaniak.lib.core.utils.ApiController
 import com.infomaniak.lib.core.utils.ApiController.gson
 import io.sentry.Sentry
 import kotlinx.coroutines.*
@@ -192,7 +191,7 @@ class UploadTask(
         if (!response.isSuccessful) {
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
             val apiResponse = try {
-                ApiController.gson.fromJson(bodyResponse, ApiResponse::class.java)
+                gson.fromJson(bodyResponse, ApiResponse::class.java)
             } catch (e: Exception) {
                 null
             }
@@ -207,6 +206,7 @@ class UploadTask(
                 else -> throw Exception(bodyResponse)
             }
         }
+        response.close()
     }
 
     @Synchronized

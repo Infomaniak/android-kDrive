@@ -77,6 +77,7 @@ object PreviewPDFUtils {
             "application/pdf" -> createTempPdfFile(response, externalOutputFile)
             else -> throw UnsupportedOperationException("File not supported")
         }
+        response.close()
     }
 
     @Throws(Exception::class)
