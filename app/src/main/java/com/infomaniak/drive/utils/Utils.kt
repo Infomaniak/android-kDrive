@@ -39,7 +39,6 @@ import androidx.work.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
@@ -50,8 +49,6 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment
 import kotlinx.android.synthetic.main.dialog_name_prompt.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import java.util.*
 import kotlin.math.pow
 
@@ -267,6 +264,7 @@ object Utils {
     }
 
     fun downloadAsOfflineFile(context: Context, file: File, userDrive: UserDrive = UserDrive()) {
+        if (file.isPendingOffline(context)) return
         val inputData = workDataOf(
             DownloadWorker.FILE_ID to file.id,
             DownloadWorker.USER_ID to userDrive.userId,
