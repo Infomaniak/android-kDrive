@@ -33,6 +33,7 @@ import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
 
 class MainViewModel : ViewModel() {
@@ -55,6 +56,7 @@ class MainViewModel : ViewModel() {
     val fileCancelledFromDownload = MutableLiveData<Int>()
 
     private var getFileDetailsJob = Job()
+    private var syncOfflineFilesJob = Job()
 
     fun createMultiSelectMediator(): MediatorLiveData<Pair<Int, Int>> {
         return MediatorLiveData<Pair<Int, Int>>().apply { value = /*success*/0 to /*total*/0 }
@@ -224,21 +226,37 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    suspend fun syncOfflineFiles(appContext: Context) = withContext(Dispatchers.IO) {
-        DriveInfosController.getDrives(AccountUtils.currentUserId).forEach { drive ->
-            val userDrive = UserDrive(driveId = drive.id)
+    suspend fun syncOfflineFiles(appContext: Context) {
+        syncOfflineFilesJob.cancel()
+        syncOfflineFilesJob = Job()
+        runInterruptible(Dispatchers.IO + syncOfflineFilesJob) {
+            DriveInfosController.getDrives(AccountUtils.currentUserId).forEach { drive ->
+                val userDrive = UserDrive(driveId = drive.id)
 
-            FileController.getOfflineFiles(null, userDrive).forEach { file ->
-                val apiResponse = ApiRepository.getFileDetails(file)
-                apiResponse.data?.let { remoteFile ->
-                    val isOldData = remoteFile.isOldData(appContext, userDrive)
-                    if (apiResponse.isSuccess() && isOldData && !file.isWaitingOffline) {
-                        Utils.downloadAsOfflineFile(appContext, file, userDrive)
-                    } else {
-                        FileController.updateFile(file.id) { it.isWaitingOffline = false }
+                FileController.getOfflineFiles(null, userDrive).forEach { file ->
+                    val apiResponse = ApiRepository.getFileDetails(file)
+                    val offlineFile = file.getOfflineFile(appContext, userDrive)
+                    apiResponse.data?.let { remoteFile ->
+                        file.lastModifiedAt = remoteFile.lastModifiedAt
+                        val remoteOfflineFile = remoteFile.getOfflineFile(appContext, userDrive)
+                        val isOldData = file.isOldData(appContext, userDrive)
+                        val incompleteFile = file.isIncompleteFile(offlineFile)
+                        val pathChanged = !offlineFile.path.equals(remoteOfflineFile.path)
+                        if (pathChanged) offlineFile.delete()
+
+                        if (!file.isPendingOffline(appContext) && (isOldData || incompleteFile || pathChanged)) {
+                            FileController.updateFile(file.id) {
+                                it.name = remoteFile.name
+                                it.path = remoteFile.path
+                                it.size = remoteFile.size
+                                it.lastModifiedAt = remoteFile.lastModifiedAt
+                            }
+                            Utils.downloadAsOfflineFile(appContext, remoteFile, userDrive)
+                        }
+                    } ?: let {
+                        if (apiResponse.error?.code?.equals("object_not_found") == true) offlineFile.delete()
                     }
                 }
-
             }
         }
     }

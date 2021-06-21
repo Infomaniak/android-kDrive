@@ -38,18 +38,14 @@ object PreviewPDFUtils {
         onProgress: (progress: Int) -> Unit
     ): ApiResponse<PdfCore> {
         return try {
-            val offlineFile = file.getOfflineFile(context)
-            val cacheFile = file.getCacheFile(context)
+            val outputFile = if (file.isOffline) file.getOfflineFile(context) else file.getCacheFile(context)
 
-            if (file.isOldData(context) || file.isIncompleteFile(offlineFile, cacheFile)) {
-                val externalOutputFile = if (file.isOffline) offlineFile else cacheFile
-                downloadFile(externalOutputFile, file, onProgress)
-                externalOutputFile.setLastModified(file.getLastModifiedInMilliSecond())
+            if (file.isOldData(context) || file.isIncompleteFile(outputFile)) {
+                downloadFile(outputFile, file, onProgress)
+                outputFile.setLastModified(file.getLastModifiedInMilliSecond())
             }
 
-            val data = if (offlineFile.exists()) PdfCore(context, offlineFile) else PdfCore(context, cacheFile)
-
-            ApiResponse(ApiResponse.Status.SUCCESS, data)
+            ApiResponse(ApiResponse.Status.SUCCESS, PdfCore(context, outputFile))
         } catch (e: Exception) {
             e.printStackTrace()
             ApiResponse(ApiResponse.Status.ERROR, null, translatedError = R.string.anErrorHasOccurred)

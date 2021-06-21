@@ -38,7 +38,6 @@ import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 open class File(
     @PrimaryKey var id: Int = 0,
@@ -208,9 +207,8 @@ open class File(
         }
     }
 
-    fun isIncompleteFile(offlineFile: java.io.File, cacheFile: java.io.File): Boolean {
-        return (isOffline && offlineFile.length() != size)
-                || (!isOffline && cacheFile.length() != size)
+    fun isIncompleteFile(file: java.io.File): Boolean {
+        return file.length() != size
     }
 
     fun getOfflineFile(context: Context, userDrive: UserDrive = UserDrive()): java.io.File {
@@ -247,8 +245,8 @@ open class File(
     fun getWorkerTag() = "$id"
 
     fun isPendingOffline(context: Context): Boolean {
-        val get = WorkManager.getInstance(context).getWorkInfosByTag(getWorkerTag()).get(0, TimeUnit.MILLISECONDS)
-        return get.firstOrNull { it.state == WorkInfo.State.ENQUEUED } != null
+        val get = WorkManager.getInstance(context).getWorkInfosByTag(getWorkerTag()).get()
+        return get.firstOrNull { it.state == WorkInfo.State.ENQUEUED || it.state == WorkInfo.State.RUNNING } != null
     }
 
     fun getMimeType(): String {

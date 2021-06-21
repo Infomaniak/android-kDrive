@@ -113,13 +113,11 @@ class DownloadWorker(private val context: Context, workerParams: WorkerParameter
                 outputDataFile.setLastModified(file.getLastModifiedInMilliSecond())
             }
 
-            FileController.updateFile(file.id) { it.isWaitingOffline = false }
             if (response.isSuccessful) Result.success()
             else Result.failure()
 
         } catch (e: Exception) {
             if (outputDataFile.exists()) outputDataFile.delete()
-            FileController.updateFile(file.id) { it.isWaitingOffline = false }
             e.printStackTrace()
             Result.failure()
         }

@@ -88,16 +88,17 @@ class DownloadProgressDialog : DialogFragment() {
     class DownloadViewModel : ViewModel() {
 
         fun downloadFile(context: Context, file: File, userDrive: UserDrive) = liveData(Dispatchers.IO) {
-            val offlineFile = file.getOfflineFile(context, userDrive)
-            val cacheFile = file.getCacheFile(context, userDrive)
+            val outputFile =
+                if (file.isOffline) file.getOfflineFile(context, userDrive)
+                else file.getCacheFile(context, userDrive)
 
-            if (file.isOldData(context, userDrive) || file.isIncompleteFile(offlineFile, cacheFile)) {
+            if (file.isOldData(context, userDrive) || file.isIncompleteFile(outputFile)) {
                 try {
                     val response = DownloadWorker.downloadFileResponse(ApiRoutes.downloadFile(file)) { progress ->
                         runBlocking { emit(progress to false) }
                     }
                     if (response.isSuccessful) {
-                        saveData(file, offlineFile, cacheFile, response)
+                        saveData(file, outputFile, response)
                     } else emit(null)
                 } catch (exception: Exception) {
                     exception.printStackTrace()
@@ -111,11 +112,9 @@ class DownloadProgressDialog : DialogFragment() {
         @Throws(Exception::class)
         private fun LiveDataScope<Pair<Int, Boolean>?>.saveData(
             file: File,
-            offlineFile: java.io.File,
-            cacheFile: java.io.File,
+            outputFile: java.io.File,
             response: Response
         ) {
-            val outputFile = if (file.isOffline) offlineFile else cacheFile
             if (outputFile.exists()) outputFile.delete()
             DownloadWorker.saveRemoteData(response, outputFile) {
                 runBlocking { emit(100 to true) }

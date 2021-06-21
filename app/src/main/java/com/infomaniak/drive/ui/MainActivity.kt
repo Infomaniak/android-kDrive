@@ -174,10 +174,6 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        lifecycleScope.launch {
-            mainViewModel.syncOfflineFiles(applicationContext)
-        }
-
         LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
     }
 
@@ -190,6 +186,10 @@ class MainActivity : BaseActivity() {
             if (now.after(lastCloseAppWithTolerance)) {
                 startActivity(Intent(this, LockActivity::class.java))
             }
+        }
+
+        lifecycleScope.launch {
+            mainViewModel.syncOfflineFiles(applicationContext)
         }
 
         AppSettings.appLaunches++

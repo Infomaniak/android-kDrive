@@ -73,8 +73,10 @@ object FileController {
     fun generateAndSavePath(fileId: Int, userDrive: UserDrive): String {
         return getRealmInstance(userDrive).use { realm ->
             getFileById(realm, fileId)!!.let { file ->
-                realm.executeTransaction { file.path = generatePath(file, userDrive) }
-                file.path
+                if (file.path.isEmpty()) {
+                    realm.executeTransaction { file.path = generatePath(file, userDrive) }
+                    file.path
+                } else file.path
             }
         }
     }

@@ -283,12 +283,6 @@ object Utils {
             .setConstraints(constraints)
             .build()
 
-        runBlocking(Dispatchers.IO) {
-            FileController.updateFile(file.id, userDrive = userDrive) {
-                it.isWaitingOffline = true
-            }
-        }
-
         WorkManager.getInstance(context)
             .enqueueUniqueWork(DownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
     }
