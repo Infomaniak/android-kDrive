@@ -65,11 +65,11 @@ dependencies {
     def work_version = '2.5.0'
     implementation "androidx.work:work-runtime-ktx:$work_version"
 
-    implementation 'androidx.recyclerview:recyclerview:1.2.0'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.viewpager2:viewpager2:1.1.0-alpha01'
 
-    def exoplayer_version = '2.14.0'
+    def exoplayer_version = '2.14.1'
     implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer-ui:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
@@ -79,11 +79,11 @@ dependencies {
     implementation 'com.github.MikeOrtiz:TouchImageView:3.1.0'
     implementation 'com.github.rubensousa:gravitysnaphelper:2.2.1'
     implementation 'com.tbuonomo.andrui:viewpagerdotsindicator:4.1.2'
-    implementation 'io.coil-kt:coil:1.2.1'
+    implementation 'io.coil-kt:coil:1.2.2'
 
     standardImplementation 'com.google.android.play:core:1.10.0'
 
-    implementation 'io.sentry:sentry-android:5.0.0-beta.3'
+    implementation 'io.sentry:sentry-android:5.0.1'
 
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.1'
     testImplementation 'io.github.serpro69:kotlin-faker:1.6.0'
