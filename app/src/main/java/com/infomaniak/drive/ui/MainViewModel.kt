@@ -27,6 +27,8 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.KDriveHttpClient
+import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
+import com.infomaniak.drive.utils.MediaUtils.isMedia
 import com.infomaniak.drive.utils.SingleLiveEvent
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.models.ApiResponse
@@ -242,7 +244,10 @@ class MainViewModel : ViewModel() {
                         val isOldData = file.isOldData(appContext, userDrive)
                         val incompleteFile = file.isIncompleteFile(offlineFile)
                         val pathChanged = !offlineFile.path.equals(remoteOfflineFile.path)
-                        if (pathChanged) offlineFile.delete()
+                        if (pathChanged) {
+                            if (file.isMedia()) file.deleteInMediaScan(appContext, userDrive)
+                            offlineFile.delete()
+                        }
 
                         if (!file.isPendingOffline(appContext) && (isOldData || incompleteFile || pathChanged)) {
                             FileController.updateFile(file.id) {

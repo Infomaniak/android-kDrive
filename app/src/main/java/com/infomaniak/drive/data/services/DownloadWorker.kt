@@ -32,6 +32,8 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.KDriveHttpClient
+import com.infomaniak.drive.utils.MediaUtils.isMedia
+import com.infomaniak.drive.utils.MediaUtils.triggerMediaScan
 import com.infomaniak.drive.utils.NotificationUtils.downloadProgressNotification
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
@@ -111,6 +113,7 @@ class DownloadWorker(private val context: Context, workerParams: WorkerParameter
                 runBlocking(Dispatchers.Main) { setProgress(lastUpdate) }
                 FileController.updateOfflineStatus(file.id, true)
                 outputDataFile.setLastModified(file.getLastModifiedInMilliSecond())
+                if (file.isMedia()) file.triggerMediaScan(context, outputDataFile)
             }
 
             if (response.isSuccessful) Result.success()

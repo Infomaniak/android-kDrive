@@ -19,4 +19,7 @@
     <cache-path
         name="@string/EXPOSED_UPLOAD_DIR"
         path="upload_media/" />
+    <external-media-path
+        name="offline_storage"
+        path="offline_storage/" />
 </paths>
