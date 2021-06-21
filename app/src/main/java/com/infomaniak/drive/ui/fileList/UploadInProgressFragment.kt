@@ -33,6 +33,7 @@ import com.infomaniak.drive.data.models.FileInProgress
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.sync.UploadAdapter
 import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.showSnackbar
@@ -169,6 +170,7 @@ class UploadInProgressFragment : FileListFragment() {
                         val uri = it.uri.toUri()
 
                         if (uri.scheme.equals(ContentResolver.SCHEME_CONTENT)) {
+                            SyncUtils.checkDocumentProviderPermissions(context, uri)
                             context?.contentResolver?.query(uri, null, null, null, null)?.use { cursor ->
                                 if (cursor.moveToFirst()) {
                                     val size = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))

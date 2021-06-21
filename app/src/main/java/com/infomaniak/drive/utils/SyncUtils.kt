@@ -26,6 +26,7 @@ import android.content.Intent
 import android.database.Cursor
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.DocumentsContract
@@ -171,5 +172,12 @@ object SyncUtils {
             connectivityManager.activeNetworkInfo?.type == ConnectivityManager.TYPE_WIFI
         }
     }
+
+    fun checkDocumentProviderPermissions(context: Context?, uri: Uri) {
+        if (DocumentsContract.isDocumentUri(context, uri)) {
+            context?.contentResolver?.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+    }
+
 
 }

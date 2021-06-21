@@ -24,7 +24,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
-import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
@@ -214,9 +213,7 @@ class UploadAdapter @JvmOverloads constructor(
                     UploadFile.deleteIfExists(uri)
                     cacheFile.delete()
                 } else {
-                    if (DocumentsContract.isDocumentUri(context, uri)) {
-                        contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    }
+                    SyncUtils.checkDocumentProviderPermissions(context, uri)
                     val fileSize = try {
                         contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize }
                     } catch (exception: FileNotFoundException) {
