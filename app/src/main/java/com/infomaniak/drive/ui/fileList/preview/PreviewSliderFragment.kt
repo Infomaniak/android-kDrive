@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.fileList.preview
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -35,8 +36,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
+import androidx.transition.Slide
+import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.ViewPager2
-import androidx.viewpager2.widget.ViewPager2.ScrollState
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
@@ -116,10 +118,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                     }
                 }
             }
-
-            override fun onPageScrollStateChanged(@ScrollState state: Int) {
-                toggleBottomSheet(currentPreviewFile.getFileType() != File.ConvertedType.VIDEO)
-            }
         })
 
         previewSliderViewModel.pdfIsDownloading.observe(viewLifecycleOwner) { isDownloading ->
@@ -146,6 +144,17 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
 
         configureBottomSheetFileInfo()
+    }
+
+    private var showUI = false
+    fun toggleFullscreen() {
+        val transition = Slide(Gravity.TOP)
+        transition.duration = 200
+        transition.addTarget(R.id.header)
+        TransitionManager.beginDelayedTransition(previewSliderParent, transition)
+        header.visibility = if (showUI) VISIBLE else GONE
+        toggleBottomSheet(showUI)
+        showUI = !showUI
     }
 
     private fun configureBottomSheetFileInfo() {
@@ -196,7 +205,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         super.onResume()
         activity?.window?.statusBarColor = ContextCompat.getColor(requireContext(), R.color.previewBackground)
         activity?.window?.lightStatusBar(false)
-        toggleBottomSheet(!(currentPreviewFile.getFileType() == File.ConvertedType.VIDEO || currentPreviewFile.getFileType() == File.ConvertedType.AUDIO))
     }
 
     override fun onPause() {

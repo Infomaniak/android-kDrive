@@ -40,5 +40,9 @@ class PreviewOtherFragment : PreviewFragment {
 
         fileIcon.setImageResource(previewViewModel.currentFile.getFileType().icon)
         fileName.text = previewViewModel.currentFile.name
+
+        container?.setOnClickListener {
+            (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+        }
     }
 }

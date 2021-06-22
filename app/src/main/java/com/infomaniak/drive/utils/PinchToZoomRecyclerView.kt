@@ -33,7 +33,11 @@ import kotlin.math.absoluteValue
  * @see [AndroidPdfReader](https://github.com/aditya09tyagi/AndroidPdfReader/blob/master/app/src/main/java/com/personal/android/androidpdfreader/util/PinchToZoomRecyclerView.kt)
  */
 @SuppressLint("ClickableViewAccessibility")
-class PinchToZoomRecyclerView : RecyclerView {
+class PinchToZoomRecyclerView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : RecyclerView(context, attrs, defStyleAttr) {
     private var activePointerId = INVALID_POINTER_ID
     private var scaleDetector: ScaleGestureDetector? = null
     private var scaleFactor = 1f
@@ -48,24 +52,11 @@ class PinchToZoomRecyclerView : RecyclerView {
     private var minScale = 1f
     private var maxScale = 1.5f
     private var gestureDetector: GestureDetector? = null
-
     private var disallowParentInterceptTouch: Boolean = false
 
-    constructor(context: Context?) : super(context!!) {
-        if (!isInEditMode) {
-            scaleDetector = ScaleGestureDetector(getContext(), ScaleListener())
-            gestureDetector = GestureDetector(getContext(), GestureListener())
-        }
-    }
+    var onClicked: (() -> Unit)? = null
 
-    constructor(context: Context?, attrs: AttributeSet?) : super(context!!, attrs) {
-        if (!isInEditMode) {
-            scaleDetector = ScaleGestureDetector(getContext(), ScaleListener())
-            gestureDetector = GestureDetector(getContext(), GestureListener())
-        }
-    }
-
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context!!, attrs, defStyleAttr) {
+    init {
         if (!isInEditMode) {
             scaleDetector = ScaleGestureDetector(getContext(), ScaleListener())
             gestureDetector = GestureDetector(getContext(), GestureListener())
@@ -194,6 +185,12 @@ class PinchToZoomRecyclerView : RecyclerView {
     }
 
     private inner class GestureListener : GestureDetector.SimpleOnGestureListener() {
+
+        override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
+            onClicked?.invoke()
+            return super.onSingleTapConfirmed(e)
+        }
+
         override fun onDoubleTap(e: MotionEvent?): Boolean {
             scaleFactor = if (scaleFactor == maxScale) minScale else maxScale
             disallowParentInterceptTouch = scaleFactor != MIN_SCALE

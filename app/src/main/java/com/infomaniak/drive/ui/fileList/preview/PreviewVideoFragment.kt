@@ -62,6 +62,13 @@ open class PreviewVideoFragment : PreviewFragment {
         fileIcon.setImageResource(previewViewModel.currentFile.getFileType().icon)
         container?.layoutTransition?.setAnimateParentHierarchy(false)
         fileName.text = previewViewModel.currentFile.name
+        playerView.setOnClickListener {
+            if (playerView.isControllerFullyVisible)
+                (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+        }
+        errorLayout.setOnClickListener {
+            (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+        }
     }
 
     override fun onStart() {
@@ -71,6 +78,12 @@ open class PreviewVideoFragment : PreviewFragment {
             initializePlayer()
 
             simpleExoPlayer.addListener(object : Player.EventListener {
+
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    super.onIsPlayingChanged(isPlaying)
+                    if (isPlaying) (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+                }
+
                 override fun onPlayerError(error: ExoPlaybackException) {
                     error.printStackTrace()
                     when (error.message) {
@@ -119,6 +132,8 @@ open class PreviewVideoFragment : PreviewFragment {
 
             playerView.player = this
             playerView.setControlDispatcher(DefaultControlDispatcher())
+            playerView.controllerShowTimeoutMs = 1000
+            playerView.controllerHideOnTouch = false
 
             if (previewViewModel.currentFile.isOffline && !previewViewModel.currentFile.isOldData(requireContext())) {
                 setMediaItem(MediaItem.fromUri(offlineFile.toUri()))

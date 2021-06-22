@@ -76,6 +76,13 @@ class PreviewPDFFragment : PreviewFragment {
             if (progress >= 100 && previewPDFViewModel.pdfJob.isCancelled) downloadPdf()
             downloadProgress.progress = progress
         })
+
+        pdfViewRecycler.onClicked = {
+            (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+        }
+        downloadLayout.setOnClickListener {
+            (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+        }
     }
 
     override fun setMenuVisibility(menuVisible: Boolean) {
