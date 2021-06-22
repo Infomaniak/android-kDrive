@@ -253,7 +253,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         deleteButtonMultiSelect.setOnClickListener {
             val selectedFiles = fileAdapter.itemSelected
 
-            Utils.confirmFileDeletion(requireContext(), fileName = null, deletionCount = selectedFiles.count()) { dialog ->
+            val fileName = if (selectedFiles.size == 1) fileAdapter.itemSelected.first().getFileName() else null
+            Utils.confirmFileDeletion(requireContext(), fileName = fileName, deletionCount = selectedFiles.size) { dialog ->
                 val mediator = mainViewModel.createMultiSelectMediator()
                 val selectedCount = selectedFiles.count()
                 enableButtonMultiSelect(false)
