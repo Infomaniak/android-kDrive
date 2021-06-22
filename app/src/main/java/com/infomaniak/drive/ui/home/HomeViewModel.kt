@@ -40,6 +40,7 @@ class HomeViewModel : ViewModel() {
 
     var lastActivityPage = 1
     var lastPicturesPage = 1
+    var forceDownload: Boolean = false
 
     private var lastActivityLastPage = 1
     private var lastActivitiesTime: Long = 0
@@ -56,9 +57,9 @@ class HomeViewModel : ViewModel() {
     fun getLastModifiedFiles(driveId: Int): LiveData<ApiResponse<ArrayList<File>>> {
         lastModifiedJob.cancel()
         lastModifiedJob = Job()
-
+        val ignoreDownload = lastModifiedTime != 0L && (Date().time - lastModifiedTime) < DOWNLOAD_INTERVAL && !forceDownload
         return liveData(Dispatchers.IO + lastModifiedJob) {
-            if (lastModifiedTime != 0 && (Date().time - lastModifiedTime) < DOWNLOAD_INTERVAL) {
+            if (ignoreDownload) {
                 emit(lastModified)
                 return@liveData
             }
@@ -108,8 +109,10 @@ class HomeViewModel : ViewModel() {
         lastActivityJob.cancel()
         lastActivityJob = Job()
 
+        val ignoreDownload =
+            lastActivityPage == 1 && lastActivitiesTime != 0L && (Date().time - lastActivitiesTime) < DOWNLOAD_INTERVAL && !forceDownload
         return liveData(Dispatchers.IO + lastActivityJob) {
-            if (lastActivityPage == 1 && lastActivitiesTime != 0L && (Date().time - lastActivitiesTime) < DOWNLOAD_INTERVAL) {
+            if (ignoreDownload) {
                 lastActivityPage = lastActivityLastPage
                 emit(ApiResponse(SUCCESS, lastActivities, page = 1) to lastMergedActivities)
                 return@liveData

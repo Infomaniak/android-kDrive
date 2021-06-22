@@ -355,6 +355,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                     currentPreviewFile.name
                 )
                 requireActivity().showSnackbar(title)
+                mainViewModel.deleteFileFromHome.value = true
             } else {
                 requireActivity().showSnackbar(getString(R.string.errorDelete))
             }
