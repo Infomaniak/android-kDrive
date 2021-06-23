@@ -50,6 +50,7 @@ class MainViewModel : ViewModel() {
     val updateOfflineFile = SingleLiveEvent<Pair<Int, Boolean>>()
     val fileInProgress = SingleLiveEvent<FileInProgress>()
     val forcedDriveSelection = SingleLiveEvent<Boolean>()
+    val deleteFileFromHome = SingleLiveEvent<Boolean>()
 
     val fileCancelledFromDownload = MutableLiveData<Int>()
 

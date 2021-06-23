@@ -117,12 +117,17 @@ class HomeFragment : Fragment() {
         mainViewModel.forcedDriveSelection.observe(viewLifecycleOwner) {
             driveInfos.performClick()
         }
+
+        mainViewModel.deleteFileFromHome.observe(viewLifecycleOwner) { fileDeleted ->
+            homeViewModel.forceDownload = fileDeleted
+        }
     }
 
     override fun onResume() {
         super.onResume()
         if (lastElementsRecyclerView.adapter == null) initLastElementsAdapter()
         updateDriveInfos()
+        homeViewModel.forceDownload = false
     }
 
     // TODO - Use same fragment with PicturesAdapter and LastPictures
@@ -197,7 +202,7 @@ class HomeFragment : Fragment() {
         AccountUtils.getCurrentDrive()?.let { currentDrive ->
             setDriveHeader(currentDrive)
             getLastPicturesOrActivities(currentDrive.id, isProOrTeam, forceClear)
-            getLastEditedFiles()
+            getLastModifiedFiles()
             notEnoughStorage.setup(currentDrive)
         }
     }
@@ -257,7 +262,7 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun getLastEditedFiles() {
+    private fun getLastModifiedFiles() {
         lastFilesAdapter.clean()
         lastFilesAdapter.showLoading()
 
