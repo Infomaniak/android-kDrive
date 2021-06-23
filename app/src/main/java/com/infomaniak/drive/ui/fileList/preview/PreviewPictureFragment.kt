@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.fileList.preview
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -48,6 +49,7 @@ class PreviewPictureFragment : PreviewFragment {
         return inflater.inflate(R.layout.fragment_preview_picture, container, false)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -111,8 +113,10 @@ class PreviewPictureFragment : PreviewFragment {
                         else -> true
                     }
                 }
-                performClick()
                 result
+            }
+            setOnClickListener {
+                (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
             }
         }
     }
