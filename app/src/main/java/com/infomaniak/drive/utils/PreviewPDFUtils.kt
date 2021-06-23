@@ -72,10 +72,12 @@ object PreviewPDFUtils {
             .addNetworkInterceptor(DownloadWorker.downloadProgressInterceptor(onProgress)).build()
             .newCall(request).execute()
 
-        if (!response.isSuccessful) throw Exception("Download error ")
-        when (response.body?.contentType()?.toString()) {
-            "application/pdf" -> createTempPdfFile(response, externalOutputFile)
-            else -> throw UnsupportedOperationException("File not supported")
+        response.use {
+            if (!it.isSuccessful) throw Exception("Download error ")
+            when (it.body?.contentType()?.toString()) {
+                "application/pdf" -> createTempPdfFile(it, externalOutputFile)
+                else -> throw UnsupportedOperationException("File not supported")
+            }
         }
     }
 

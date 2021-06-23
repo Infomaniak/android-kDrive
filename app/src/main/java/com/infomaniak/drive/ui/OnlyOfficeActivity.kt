@@ -70,6 +70,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
     override fun onBackPressed() {
         if (webView.canGoBack()) webView.goBack()
         else finish()
+        super.onBackPressed()
     }
 
     private fun popBackIfNeeded(url: String) {
