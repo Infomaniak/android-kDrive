@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
 import android.view.View
+import android.view.View.VISIBLE
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.Utils
@@ -40,6 +41,7 @@ class MySharesFragment : FileSubTypeListFragment() {
 
         collapsingToolbarLayout.title = getString(R.string.mySharesTitle)
         noFilesLayout.setup(icon = R.drawable.ic_share, title = R.string.mySharesNoFile, initialListView = fileRecyclerView)
+        sortButton.visibility = VISIBLE
 
         fileAdapter.onFileClicked = { file ->
             fileListViewModel.cancelDownloadFiles()
@@ -59,7 +61,7 @@ class MySharesFragment : FileSubTypeListFragment() {
             fileAdapter.isComplete = false
 
             fileListViewModel.getMySharedFiles(sortType).observe(viewLifecycleOwner) {
-                populateFileList(it?.first ?: ArrayList(), true)
+                populateFileList(files = it?.first ?: ArrayList(), isComplete = true, forceClean = true)
             }
         }
     }
