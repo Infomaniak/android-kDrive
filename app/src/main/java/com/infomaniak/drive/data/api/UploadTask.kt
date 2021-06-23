@@ -187,26 +187,27 @@ class UploadTask(
     @Throws(Exception::class)
     private fun CoroutineScope.manageApiResponse(response: Response) {
         ensureActive()
-        val bodyResponse = response.body?.string()
-        if (!response.isSuccessful) {
-            notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
-            val apiResponse = try {
-                gson.fromJson(bodyResponse, ApiResponse::class.java)
-            } catch (e: Exception) {
-                null
-            }
-            when {
-                apiResponse?.error?.code.equals("object_not_found") -> {
-                    throw FolderNotFoundException()
+        response.use {
+            val bodyResponse = it.body?.string()
+            if (!it.isSuccessful) {
+                notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
+                val apiResponse = try {
+                    gson.fromJson(bodyResponse, ApiResponse::class.java)
+                } catch (e: Exception) {
+                    null
                 }
-                apiResponse?.error?.code.equals("quota_exceeded_error") -> {
-                    throw QuotaExceededException()
+                when {
+                    apiResponse?.error?.code.equals("object_not_found") -> {
+                        throw FolderNotFoundException()
+                    }
+                    apiResponse?.error?.code.equals("quota_exceeded_error") -> {
+                        throw QuotaExceededException()
+                    }
+                    apiResponse?.error?.code.equals("file_already_exists_error") -> Unit
+                    else -> throw Exception(bodyResponse)
                 }
-                apiResponse?.error?.code.equals("file_already_exists_error") -> Unit
-                else -> throw Exception(bodyResponse)
             }
         }
-        response.close()
     }
 
     @Synchronized
