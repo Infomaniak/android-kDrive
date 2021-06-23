@@ -59,6 +59,9 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils.getRootName
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
+import io.sentry.Breadcrumb
+import io.sentry.Sentry
+import io.sentry.SentryLevel
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.coroutines.Dispatchers
@@ -95,6 +98,11 @@ class MainActivity : BaseActivity() {
 
         LiveDataNetworkStatus(this).observe(this, { isAvailable ->
             Log.d("Internet availability", if (isAvailable) "Available" else "Unavailable")
+            Sentry.addBreadcrumb(Breadcrumb().apply {
+                category = "Network"
+                message = "Internet access is available : $isAvailable"
+                level = if (isAvailable) SentryLevel.INFO else SentryLevel.WARNING
+            })
             mainViewModel.isInternetAvailable.value = isAvailable
             if (isAvailable) {
                 lifecycleScope.launch {
@@ -104,6 +112,12 @@ class MainActivity : BaseActivity() {
         })
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
+            Sentry.addBreadcrumb(Breadcrumb().apply {
+                category = "Navigation"
+                message = "Accessed to destination : ${destination.displayName}"
+                level = SentryLevel.INFO
+            })
+
             val visibility = when (destination.id) {
                 R.id.addFileBottomSheetDialog,
                 R.id.favoritesFragment,
