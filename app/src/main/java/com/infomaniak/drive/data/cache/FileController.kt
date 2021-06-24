@@ -235,11 +235,18 @@ object FileController {
         }
     }
 
-    fun getFilesFromCache(folderID: Int, userDrive: UserDrive? = null): ArrayList<File> {
+    fun getFilesFromCache(
+        folderID: Int,
+        userDrive: UserDrive? = null,
+        order: File.SortType = File.SortType.NAME_AZ
+    ): ArrayList<File> {
         return getRealmInstance(userDrive).use { currentRealm ->
-            currentRealm.where(File::class.java).equalTo(File::id.name, folderID).findFirst()?.let { folder ->
-                ArrayList(currentRealm.copyFromRealm(folder.children, 0))
-            }
+            currentRealm
+                .where(File::class.java)
+                .equalTo(File::id.name, folderID)
+                .findFirst()?.children?.where()?.getSortQueryByOrder(order)?.findAll()?.let { children ->
+                    ArrayList(currentRealm.copyFromRealm(children, 0))
+                }
         } ?: ArrayList()
     }
 
@@ -284,7 +291,7 @@ object FileController {
         transaction: (files: ArrayList<File>, isComplete: Boolean) -> Unit
     ) {
         if (ignoreCloud) {
-            transaction(getFilesFromCache(MY_SHARES_FILE_ID, userDrive), true)
+            transaction(getFilesFromCache(MY_SHARES_FILE_ID, userDrive, sortType), true)
         } else {
             val apiResponse = ApiRepository.getMySharedFiles(
                 KDriveHttpClient.getHttpClient(userDrive.userId), userDrive.driveId, sortType.order, sortType.orderBy, page
@@ -303,7 +310,7 @@ object FileController {
                         getMySharedFiles(userDrive, sortType, page + 1, false, transaction)
                     }
                 }
-            } else if (page == 1) transaction(getFilesFromCache(MY_SHARES_FILE_ID, userDrive), true)
+            } else if (page == 1) transaction(getFilesFromCache(MY_SHARES_FILE_ID, userDrive, sortType), true)
         }
     }
 

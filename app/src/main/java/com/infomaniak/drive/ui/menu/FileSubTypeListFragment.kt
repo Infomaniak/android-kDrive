@@ -36,8 +36,8 @@ open class FileSubTypeListFragment : FileListFragment() {
         sortButton.visibility = View.GONE
     }
 
-    protected fun populateFileList(files: ArrayList<File>, isComplete: Boolean, ignoreOffline: Boolean = false) {
-        if (fileAdapter.itemCount == 0) fileAdapter.setList(files)
+    protected fun populateFileList(files: ArrayList<File>, isComplete: Boolean, ignoreOffline: Boolean = false, forceClean: Boolean = false) {
+        if (fileAdapter.itemCount == 0 || forceClean) fileAdapter.setList(files)
         else fileRecyclerView.post { fileAdapter.addFileList(files) }
         fileAdapter.isComplete = isComplete
         timer.cancel()
