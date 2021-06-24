@@ -48,6 +48,7 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
+import com.infomaniak.drive.utils.MediaUtils.isMedia
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntent
 import com.infomaniak.drive.views.FileInfoActionsView
@@ -283,7 +284,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     override fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File) {
         lifecycleScope.launch {
-            currentPreviewFile.deleteInMediaScan(requireContext(), userDrive)
+            if (currentPreviewFile.isMedia()) currentPreviewFile.deleteInMediaScan(requireContext(), userDrive)
             mainViewModel.removeOfflineFile(currentPreviewFile.id, offlineLocalPath, cacheFile)
             previewSliderAdapter.updateFile(currentPreviewFile.id) { file -> file.isOffline = false }
 

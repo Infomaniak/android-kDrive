@@ -45,6 +45,7 @@ import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.FILE_ID
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.REFRESH_FAVORITE_FILE
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
+import com.infomaniak.drive.utils.MediaUtils.isMedia
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntent
 import com.infomaniak.drive.views.FileInfoActionsView
@@ -173,7 +174,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File) {
         lifecycleScope.launch {
-            currentFile.deleteInMediaScan(requireContext(), UserDrive())
+            if (currentFile.isMedia()) currentFile.deleteInMediaScan(requireContext(), UserDrive())
             mainViewModel.removeOfflineFile(currentFile.id, offlineLocalPath, cacheFile)
 
             withContext(Dispatchers.Main) {
