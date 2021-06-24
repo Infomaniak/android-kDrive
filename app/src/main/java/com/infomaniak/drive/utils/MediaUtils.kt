@@ -17,10 +17,10 @@
  */
 package com.infomaniak.drive.utils
 
-import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.ACTION_MEDIA_SCANNER_SCAN_FILE
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
@@ -36,27 +36,12 @@ object MediaUtils {
                 || fileType == File.ConvertedType.AUDIO
     }
 
-    fun File.triggerMediaScan(context: Context, offlineFile: java.io.File) {
+    fun triggerMediaScan(context: Context, file: java.io.File) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val values = ContentValues().apply {
-                put(MediaStore.MediaColumns.DISPLAY_NAME, name)
-                put(MediaStore.MediaColumns.MIME_TYPE, getMimeType())
-                put(MediaStore.MediaColumns.TITLE, name)
-                put(MediaStore.MediaColumns.DATE_ADDED, lastModifiedAt)
-                put(MediaStore.MediaColumns.DATE_MODIFIED, lastModifiedAt)
-                put(MediaStore.MediaColumns.IS_PENDING, 0)
-                put(MediaStore.MediaColumns.RELATIVE_PATH, offlineFile.path)
-            }
-            val uri = when (getFileType()) {
-                File.ConvertedType.IMAGE -> MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
-                File.ConvertedType.VIDEO -> MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
-                File.ConvertedType.AUDIO -> MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
-                else -> throw UnsupportedOperationException("Accept only media files")
-            }
-            context.contentResolver.insert(uri, values)
+            MediaScannerConnection.scanFile(context, arrayOf(file.path), null, null)
         } else {
             Intent(ACTION_MEDIA_SCANNER_SCAN_FILE).apply {
-                data = Uri.fromFile(offlineFile)
+                data = Uri.fromFile(file)
                 context.sendBroadcast(this)
             }
         }
