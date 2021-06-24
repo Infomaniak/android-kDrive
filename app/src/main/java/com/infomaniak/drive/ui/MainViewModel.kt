@@ -219,14 +219,22 @@ class MainViewModel : ViewModel() {
         emit(ApiRepository.convertFile(file))
     }
 
-    suspend fun removeOfflineFile(fileId: Int, offlineFile: java.io.File, cacheFile: java.io.File) = withContext(Dispatchers.IO) {
-        FileController.updateOfflineStatus(fileId, false)
-        if (cacheFile.exists()) cacheFile.delete()
-        if (offlineFile.exists()) {
-            offlineFile.copyTo(cacheFile)
-            offlineFile.delete()
+    suspend fun removeOfflineFile(
+        context: Context,
+        file: File,
+        offlineFile: java.io.File,
+        cacheFile: java.io.File,
+        userDrive: UserDrive = UserDrive()
+    ) =
+        withContext(Dispatchers.IO) {
+            FileController.updateOfflineStatus(file.id, false)
+            if (file.isMedia()) file.deleteInMediaScan(context, userDrive)
+            if (cacheFile.exists()) cacheFile.delete()
+            if (offlineFile.exists()) {
+                offlineFile.copyTo(cacheFile)
+                offlineFile.delete()
+            }
         }
-    }
 
     suspend fun syncOfflineFiles(appContext: Context) {
         syncOfflineFilesJob.cancel()

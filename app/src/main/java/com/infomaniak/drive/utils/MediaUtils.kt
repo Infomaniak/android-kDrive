@@ -62,7 +62,7 @@ object MediaUtils {
         }
     }
 
-    fun File.deleteInMediaScan(context: Context, userDrive: UserDrive) {
+    fun File.deleteInMediaScan(context: Context, userDrive: UserDrive = UserDrive()) {
         val uri = when (getFileType()) {
             File.ConvertedType.IMAGE -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
             File.ConvertedType.VIDEO -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI
