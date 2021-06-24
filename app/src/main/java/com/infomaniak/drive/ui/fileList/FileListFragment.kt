@@ -678,16 +678,17 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             getFolderFiles(ignoreCache, onFinish = {
                 it?.let { result ->
                     if (fileAdapter.itemCount == 0 || result.page == 1) {
-                        currentFolder = if (result.parentFolder.id == ROOT_ID) {
+                        currentFolder = if (result.parentFolder?.id == ROOT_ID) {
                             AccountUtils.getCurrentDrive()?.convertToFile(Utils.getRootName(requireContext()))
                         } else result.parentFolder
                         mainViewModel.currentFolder.value = currentFolder
                         changeNoFilesLayoutVisibility(
                             hideFileList = result.files.isEmpty(),
-                            changeControlsVisibility = !result.parentFolder.isRoot()
+                            changeControlsVisibility = result.parentFolder?.isRoot() == false
                         )
                         fileAdapter.setList(result.files)
-                        downloadFolderActivities(result.parentFolder)
+                        result.parentFolder?.let { parent -> downloadFolderActivities(parent) }
+
                     } else fileRecyclerView.post { fileAdapter.addFileList(result.files) }
                     fileAdapter.isComplete = result.isComplete
                 } ?: run {
@@ -704,7 +705,12 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
-    data class FolderFilesResult(val parentFolder: File, val files: ArrayList<File>, val isComplete: Boolean, val page: Int)
+    data class FolderFilesResult(
+        val parentFolder: File? = null,
+        val files: ArrayList<File>,
+        val isComplete: Boolean,
+        val page: Int
+    )
 
     /**
      * Will change the noFilesLayout visility

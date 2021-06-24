@@ -58,12 +58,12 @@ class FavoritesFragment : FileListFragment() {
             timer.start()
             fileAdapter.isComplete = false
             fileListViewModel.getFavoriteFiles(sortType).observe(viewLifecycleOwner) {
-                it?.let { (files, isComplete) ->
-                    if (fileAdapter.itemCount == 0) {
-                        changeNoFilesLayoutVisibility(files.isEmpty(), false)
-                        fileAdapter.setList(files)
-                    } else fileRecyclerView.post { fileAdapter.addFileList(files) }
-                    fileAdapter.isComplete = isComplete
+                it?.let { result ->
+                    if (fileAdapter.itemCount == 0 || result.page == 1) {
+                        changeNoFilesLayoutVisibility(result.files.isEmpty(), false)
+                        fileAdapter.setList(result.files)
+                    } else fileRecyclerView.post { fileAdapter.addFileList(result.files) }
+                    fileAdapter.isComplete = result.isComplete
                 } ?: run {
                     changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, false)
                     fileAdapter.isComplete = true
