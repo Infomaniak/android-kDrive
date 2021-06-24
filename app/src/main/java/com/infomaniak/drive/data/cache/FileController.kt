@@ -241,10 +241,12 @@ object FileController {
         order: File.SortType = File.SortType.NAME_AZ
     ): ArrayList<File> {
         return getRealmInstance(userDrive).use { currentRealm ->
-            currentRealm.where(File::class.java).equalTo(File::id.name, folderID).findFirst()?.children?.where()?.let { query ->
-                val children = query.getSortQueryByOrder(order).findAll()
-                ArrayList(currentRealm.copyFromRealm(children, 0))
-            }
+            currentRealm
+                .where(File::class.java)
+                .equalTo(File::id.name, folderID)
+                .findFirst()?.children?.where()?.getSortQueryByOrder(order)?.findAll()?.let { children ->
+                    ArrayList(currentRealm.copyFromRealm(children, 0))
+                }
         } ?: ArrayList()
     }
 
