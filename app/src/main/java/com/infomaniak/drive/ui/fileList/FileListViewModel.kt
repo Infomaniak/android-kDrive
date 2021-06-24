@@ -85,12 +85,11 @@ class FileListViewModel : ViewModel() {
                     }
                 }
             }
-
             recursiveDownload(parentId, page)
         }
     }
 
-    fun getFavoriteFiles(order: File.SortType): LiveData<Pair<ArrayList<File>, Boolean>?> {
+    fun getFavoriteFiles(order: File.SortType): LiveData<FolderFilesResult?> {
         getFilesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
@@ -101,15 +100,21 @@ class FileListViewModel : ViewModel() {
                         apiResponse.data.isNullOrEmpty() -> emit(null)
                         apiResponse.data!!.size < ApiRepository.PER_PAGE -> {
                             FileController.saveFavoritesFiles(apiResponse.data!!, page == 1)
-                            emit(apiResponse.data!! to true)
+                            emit(FolderFilesResult(files = apiResponse.data!!, isComplete = true, page = apiResponse.page))
                         }
                         else -> {
                             apiResponse.data?.let { FileController.saveFavoritesFiles(it, page == 1) }
-                            emit(apiResponse.data!! to false)
+                            emit(FolderFilesResult(files = apiResponse.data!!, isComplete = false, page = apiResponse.page))
                             recursive(page + 1)
                         }
                     }
-                } else emit(FileController.getFilesFromCache(FileController.FAVORITES_FILE_ID) to true)
+                } else emit(
+                    FolderFilesResult(
+                        files = FileController.getFilesFromCache(FileController.FAVORITES_FILE_ID),
+                        isComplete = true,
+                        page = 1
+                    )
+                )
             }
             recursive(1)
         }
