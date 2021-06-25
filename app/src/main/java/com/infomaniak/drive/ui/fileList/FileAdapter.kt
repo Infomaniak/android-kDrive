@@ -285,7 +285,6 @@ open class FileAdapter(
     private fun View.checkIfEnablefile(file: File, position: Int) = when {
         uploadInProgress -> {
             val enable = position == 0 && importContainsProgress
-            enabledFile(enable)
             fileDate?.setText(if (enable) R.string.uploadInProgressTitle else R.string.uploadInProgressPending)
         }
         else -> {
