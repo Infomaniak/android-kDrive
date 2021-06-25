@@ -48,15 +48,12 @@ object MediaUtils {
     }
 
     fun File.deleteInMediaScan(context: Context, userDrive: UserDrive = UserDrive()) {
-        val uri = when (getFileType()) {
-            File.ConvertedType.IMAGE -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-            File.ConvertedType.VIDEO -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-            File.ConvertedType.AUDIO -> MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        val (uri, column) = when (getFileType()) {
+            File.ConvertedType.IMAGE -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI to MediaStore.Images.Media.DATA
+            File.ConvertedType.VIDEO -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI to MediaStore.Video.Media.DATA
+            File.ConvertedType.AUDIO -> MediaStore.Audio.Media.EXTERNAL_CONTENT_URI to MediaStore.Audio.Media.DATA
             else -> throw UnsupportedOperationException("Accept only media files")
         }
-        val column =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.MediaColumns.RELATIVE_PATH
-            else MediaStore.Images.Media.DATA
         val path = getOfflineFile(context, userDrive).path
         context.contentResolver.delete(uri, "$column=?", arrayOf(path))
     }
