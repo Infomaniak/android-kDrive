@@ -36,7 +36,7 @@ object MediaUtils {
                 || fileType == File.ConvertedType.AUDIO
     }
 
-    fun triggerMediaScan(context: Context, file: java.io.File) {
+    fun scanFile(context: Context, file: java.io.File) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             MediaScannerConnection.scanFile(context, arrayOf(file.path), null, null)
         } else {

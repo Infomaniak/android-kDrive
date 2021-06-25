@@ -113,7 +113,7 @@ class DownloadWorker(private val context: Context, workerParams: WorkerParameter
                 runBlocking(Dispatchers.Main) { setProgress(lastUpdate) }
                 FileController.updateOfflineStatus(file.id, true)
                 outputDataFile.setLastModified(file.getLastModifiedInMilliSecond())
-                if (file.isMedia()) MediaUtils.triggerMediaScan(context, outputDataFile)
+                if (file.isMedia()) MediaUtils.scanFile(context, outputDataFile)
             }
 
             if (response.isSuccessful) Result.success()
