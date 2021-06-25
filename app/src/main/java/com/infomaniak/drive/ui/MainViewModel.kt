@@ -252,7 +252,8 @@ class MainViewModel : ViewModel() {
 
                 FileController.getOfflineFiles(null, userDrive).forEach { file ->
                     val offlineFile = file.getOfflineFile(context, userDrive)
-                    if (offlineFile.lastModified() > file.lastModifiedAt) uploadFile(context, file, offlineFile, userDrive)
+                    val localLastModified = offlineFile.lastModified() / 1000
+                    if (localLastModified > file.lastModifiedAt) uploadFile(context, file, offlineFile, userDrive)
                     else downloadFile(file, context, offlineFile, userDrive)
                 }
             }
@@ -266,7 +267,6 @@ class MainViewModel : ViewModel() {
             UploadFile(
                 uri = uri.toString(),
                 driveId = userDrive.driveId,
-                fileCreatedAt = file.getCreatedAt(),
                 fileModifiedAt = fileModifiedAt,
                 fileName = file.name,
                 fileSize = offlineFile.length(),
