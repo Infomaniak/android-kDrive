@@ -78,6 +78,8 @@ class MainActivity : BaseActivity() {
     private var lastCloseApp = Date()
     private var updateAvailableShow = false
 
+    private lateinit var drivePermissions: DrivePermissions
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -158,8 +160,13 @@ class MainActivity : BaseActivity() {
             mainFab.isEnabled = file?.rights?.newFile == true
         }
 
-        val drivePermissions = DrivePermissions()
-        drivePermissions.registerPermissions(this) { autorized -> if (autorized) syncImmediately() }
+        drivePermissions = DrivePermissions()
+        drivePermissions.registerPermissions(this) { autorized ->
+            if (autorized) {
+                syncImmediately()
+                launchSyncOffline()
+            }
+        }
         launchAllUpload(drivePermissions)
 
         if (!BuildConfig.BETA)
@@ -188,9 +195,7 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        lifecycleScope.launch {
-            mainViewModel.syncOfflineFiles(applicationContext)
-        }
+        if (drivePermissions.checkWriteStoragePermission()) launchSyncOffline()
 
         AppSettings.appLaunches++
         if (!AccountUtils.isEnableAppSync() && AppSettings.appLaunches == 1) {
@@ -202,6 +207,12 @@ class MainActivity : BaseActivity() {
         startContentObserverService()
 
         LocalBroadcastManager.getInstance(this).registerReceiver(uploadProgressReceiver, IntentFilter(UploadProgressReceiver.TAG))
+    }
+
+    private fun launchSyncOffline() {
+        lifecycleScope.launch {
+            mainViewModel.syncOfflineFiles(applicationContext)
+        }
     }
 
     override fun onPause() {
