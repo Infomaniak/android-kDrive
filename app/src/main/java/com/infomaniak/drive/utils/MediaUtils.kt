@@ -18,11 +18,7 @@
 package com.infomaniak.drive.utils
 
 import android.content.Context
-import android.content.Intent
-import android.content.Intent.ACTION_MEDIA_SCANNER_SCAN_FILE
 import android.media.MediaScannerConnection
-import android.net.Uri
-import android.os.Build
 import android.provider.MediaStore
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
@@ -37,14 +33,7 @@ object MediaUtils {
     }
 
     fun scanFile(context: Context, file: java.io.File) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            MediaScannerConnection.scanFile(context, arrayOf(file.path), null, null)
-        } else {
-            Intent(ACTION_MEDIA_SCANNER_SCAN_FILE).apply {
-                data = Uri.fromFile(file)
-                context.sendBroadcast(this)
-            }
-        }
+        MediaScannerConnection.scanFile(context, arrayOf(file.path), null, null)
     }
 
     fun File.deleteInMediaScan(context: Context, userDrive: UserDrive = UserDrive()) {
