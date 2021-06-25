@@ -260,18 +260,22 @@ class MainViewModel : ViewModel() {
     }
 
     private fun uploadFile(context: Context, file: File, offlineFile: java.io.File, userDrive: UserDrive) {
-        UploadFile(
-            uri = Uri.fromFile(offlineFile).toString(),
-            driveId = userDrive.driveId,
-            fileCreatedAt = file.getCreatedAt(),
-            fileModifiedAt = Date(offlineFile.lastModified()),
-            fileName = file.name,
-            fileSize = offlineFile.length(),
-            remoteFolder = FileController.getParentFile(file.id, userDrive)!!.id,
-            type = UploadFile.Type.UPLOAD.name,
-            userId = userDrive.userId,
-        ).store()
-        context.syncImmediately()
+        val uri = Uri.fromFile(offlineFile)
+        val fileModifiedAt = Date(offlineFile.lastModified())
+        if (UploadFile.canUpload(uri, fileModifiedAt)) {
+            UploadFile(
+                uri = uri.toString(),
+                driveId = userDrive.driveId,
+                fileCreatedAt = file.getCreatedAt(),
+                fileModifiedAt = fileModifiedAt,
+                fileName = file.name,
+                fileSize = offlineFile.length(),
+                remoteFolder = FileController.getParentFile(file.id, userDrive)!!.id,
+                type = UploadFile.Type.UPLOAD.name,
+                userId = userDrive.userId,
+            ).store()
+            context.syncImmediately()
+        }
     }
 
     private fun downloadFile(file: File, appContext: Context, offlineFile: java.io.File, userDrive: UserDrive) {
