@@ -235,6 +235,11 @@ class MainViewModel : ViewModel() {
         }
     }
 
+    private fun migrateOfflineIfNeeded(context: Context, file: File, offlineFile: java.io.File, userDrive: UserDrive) {
+        val oldPath = java.io.File(context.filesDir, "offline_storage/${userDrive.userId}/${userDrive.driveId}/${file.id}")
+        if (oldPath.exists()) oldPath.renameTo(offlineFile)
+    }
+
     suspend fun syncOfflineFiles(appContext: Context) {
         syncOfflineFilesJob.cancel()
         syncOfflineFilesJob = Job()
@@ -245,6 +250,8 @@ class MainViewModel : ViewModel() {
                 FileController.getOfflineFiles(null, userDrive).forEach { file ->
                     val apiResponse = ApiRepository.getFileDetails(file)
                     val offlineFile = file.getOfflineFile(appContext, userDrive)
+                    migrateOfflineIfNeeded(appContext, file, offlineFile, userDrive)
+
                     apiResponse.data?.let { remoteFile ->
                         file.lastModifiedAt = remoteFile.lastModifiedAt
                         val remoteOfflineFile = remoteFile.getOfflineFile(appContext, userDrive)
