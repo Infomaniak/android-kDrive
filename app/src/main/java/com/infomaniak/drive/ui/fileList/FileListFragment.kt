@@ -88,6 +88,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     protected lateinit var timer: CountDownTimer
     protected open var downloadFiles: (ignoreCache: Boolean) -> Unit = DownloadFiles()
+    protected open var sortFiles: () -> Unit = SortFiles()
     protected open var enabledMultiSelectMode = true
     protected open var hideBackButtonWhenRoot: Boolean = true
     protected open var showPendingFiles = true
@@ -223,6 +224,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         if (enabledMultiSelectMode) setupMultiSelect()
 
+        sortFiles()
         setupDisplay()
 
         if (!isDownloading) downloadFiles(false)
@@ -252,7 +254,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         closeButtonMultiSelect.setOnClickListener { closeMultiSelect() }
         deleteButtonMultiSelect.setOnClickListener {
             val selectedFiles = fileAdapter.itemSelected
-
             val fileName = if (selectedFiles.size == 1) fileAdapter.itemSelected.first().getFileName() else null
             Utils.confirmFileDeletion(requireContext(), fileName = fileName, deletionCount = selectedFiles.size) { dialog ->
                 val mediator = mainViewModel.createMultiSelectMediator()
@@ -316,12 +317,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
         fileListViewModel.isListMode.value = UISettings(requireContext()).listMode
 
-        getBackNavigationResult<File.SortType>(SORT_TYPE_OPTION_KEY) {
-            sortType = it
-            sortButton.setText(sortType.translation)
-            downloadFiles(fileListViewModel.isSharedWithMe)
-            UISettings(requireContext()).sortType = it
-        }
         sortButton.setText(sortType.translation)
         sortButton.setOnClickListener {
             safeNavigate(R.id.sortFilesBottomSheetDialog, bundleOf("sortType" to sortType))
@@ -666,6 +661,17 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             userDrive = userDrive
         ).observe(viewLifecycleOwner) {
             onFinish?.invoke(it)
+        }
+    }
+
+    private inner class SortFiles : () -> Unit {
+        override fun invoke() {
+            getBackNavigationResult<File.SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
+                sortType = newSortType
+                sortButton.setText(sortType.translation)
+                downloadFiles(fileListViewModel.isSharedWithMe)
+                UISettings(requireContext()).sortType = newSortType
+            }
         }
     }
 

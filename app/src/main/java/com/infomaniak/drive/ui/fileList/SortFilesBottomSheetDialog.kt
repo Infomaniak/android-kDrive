@@ -77,7 +77,9 @@ class SortFilesBottomSheetDialog : BottomSheetDialogFragment() {
             File.SortType.NAME_AZ to sortAzActiveIcon,
             File.SortType.NAME_ZA to sortZaActiveIcon,
             File.SortType.RECENT to sortMostRecentActiveIcon,
+            File.SortType.RECENT_TRASHED to sortMostRecentActiveIcon,
             File.SortType.OLDER to sortOlderActiveIcon,
+            File.SortType.OLDER_TRASHED to sortOlderActiveIcon,
             File.SortType.BIGGER to sortBiggerActiveIcon,
             File.SortType.SMALLER to sortSmallerActiveIcon,
             File.SortType.EXTENSION to sortExtensionActiveIcon
@@ -88,5 +90,4 @@ class SortFilesBottomSheetDialog : BottomSheetDialogFragment() {
             else it.second.visibility = GONE
         }
     }
-
 }

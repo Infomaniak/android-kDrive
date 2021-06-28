@@ -33,7 +33,6 @@ open class FileSubTypeListFragment : FileListFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        sortButton.visibility = View.GONE
     }
 
     protected fun populateFileList(files: ArrayList<File>, isComplete: Boolean, ignoreOffline: Boolean = false, forceClean: Boolean = false) {

@@ -41,7 +41,6 @@ class MySharesFragment : FileSubTypeListFragment() {
 
         collapsingToolbarLayout.title = getString(R.string.mySharesTitle)
         noFilesLayout.setup(icon = R.drawable.ic_share, title = R.string.mySharesNoFile, initialListView = fileRecyclerView)
-        sortButton.visibility = VISIBLE
 
         fileAdapter.onFileClicked = { file ->
             fileListViewModel.cancelDownloadFiles()

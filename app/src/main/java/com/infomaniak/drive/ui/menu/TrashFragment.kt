@@ -24,11 +24,8 @@ import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.drive.utils.safeNavigate
-import com.infomaniak.drive.utils.showSnackbar
 import kotlinx.android.synthetic.main.fragment_file_list.*
 
 class TrashFragment : FileSubTypeListFragment() {
@@ -37,6 +34,7 @@ class TrashFragment : FileSubTypeListFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         sortType = File.SortType.RECENT_TRASHED
+        sortFiles = SortFiles()
         downloadFiles =
             DownloadFiles(
                 if (folderID != ROOT_ID) File(id = folderID, name = folderName, driveId = AccountUtils.currentDriveId)
@@ -99,6 +97,20 @@ class TrashFragment : FileSubTypeListFragment() {
         noFilesLayout.toggleVisibility(fileAdapter.getItems().isEmpty())
     }
 
+    private inner class SortFiles : () -> Unit {
+        override fun invoke() {
+            getBackNavigationResult<File.SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
+                sortType = when (newSortType) {
+                    File.SortType.OLDER -> File.SortType.OLDER_TRASHED
+                    File.SortType.RECENT -> File.SortType.RECENT_TRASHED
+                    else -> newSortType
+                }
+                sortButton.setText(sortType.translation)
+                downloadFiles(true)
+            }
+        }
+    }
+
     private inner class DownloadFiles() : (Boolean) -> Unit {
         private var folder: File? = null
 
@@ -112,16 +124,22 @@ class TrashFragment : FileSubTypeListFragment() {
             fileAdapter.isComplete = false
 
             folder?.let { folder ->
-                trashViewModel.getTrashFile(folder, sortType).observe(viewLifecycleOwner) { pairResponse ->
-                    val files = ArrayList(pairResponse?.first?.children ?: ArrayList())
-                    populateFileList(files = files, isComplete = pairResponse?.second ?: true)
+                trashViewModel.getTrashFile(folder, sortType).observe(viewLifecycleOwner) { result ->
+                    result?.apply {
+                        populateFileList(
+                            files = result.files,
+                            isComplete = isComplete,
+                            forceClean = fileAdapter.itemCount == 0 || result.page == 1
+                        )
+                    }
                 }
             } ?: run {
                 trashViewModel.getDriveTrash(AccountUtils.currentDriveId, sortType)
-                    .observe(viewLifecycleOwner) { pairResponse ->
+                    .observe(viewLifecycleOwner) { result ->
                         populateFileList(
-                            files = pairResponse?.first ?: ArrayList(),
-                            isComplete = pairResponse?.second ?: true
+                            files = result?.files ?: ArrayList(),
+                            isComplete = result?.isComplete ?: true,
+                            forceClean = fileAdapter.itemCount == 0 || result?.page == 1
                         )
                     }
             }
