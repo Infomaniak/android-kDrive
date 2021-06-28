@@ -170,11 +170,21 @@ class UploadInProgressFragment : FileListFragment() {
                         val uri = it.uri.toUri()
 
                         if (uri.scheme.equals(ContentResolver.SCHEME_CONTENT)) {
-                            SyncUtils.checkDocumentProviderPermissions(context, uri)
-                            context?.contentResolver?.query(uri, null, null, null, null)?.use { cursor ->
-                                if (cursor.moveToFirst()) {
-                                    val size = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
-                                    files.add(File(id = 0, name = it.fileName, size = size, path = it.uri, isFromUploads = true))
+                            context?.apply {
+                                SyncUtils.checkDocumentProviderPermissions(this, uri)
+                                contentResolver?.query(uri, null, null, null, null)?.use { cursor ->
+                                    if (cursor.moveToFirst()) {
+                                        val size = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
+                                        files.add(
+                                            File(
+                                                id = 0,
+                                                name = it.fileName,
+                                                size = size,
+                                                path = it.uri,
+                                                isFromUploads = true
+                                            )
+                                        )
+                                    }
                                 }
                             }
                         } else {

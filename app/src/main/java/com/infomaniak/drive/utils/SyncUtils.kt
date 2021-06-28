@@ -173,9 +173,9 @@ object SyncUtils {
         }
     }
 
-    fun checkDocumentProviderPermissions(context: Context?, uri: Uri) {
+    fun checkDocumentProviderPermissions(context: Context, uri: Uri) {
         if (DocumentsContract.isDocumentUri(context, uri)) {
-            context?.contentResolver?.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            context.contentResolver?.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
     }
 
