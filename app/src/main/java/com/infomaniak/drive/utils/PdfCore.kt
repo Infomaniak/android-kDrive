@@ -40,7 +40,7 @@ class PdfCore(private val context: Context, private var file: File) : CoroutineS
     init {
         openPdfFile()
         bitmapWidth = getDisplayWidth()
-        pdfRenderer.openPage(1).use {
+        pdfRenderer.openPage(0).use {
             bitmapHeight = (bitmapWidth.toFloat() / it.width * it.height).toInt()
         }
     }
