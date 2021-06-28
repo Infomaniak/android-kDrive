@@ -248,46 +248,46 @@ class SaveExternalFilesActivity : BaseActivity() {
         val folder = java.io.File(cacheDir, SHARED_FILE_FOLDER).apply { if (!exists()) mkdirs() }
 
         contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-            cursor.moveToFirst()
-            val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
-            val fileSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
-            val fileName = name ?: SyncUtils.getFileName(cursor)
-            val outputFile = java.io.File(folder, fileName).also { if (it.exists()) it.delete() }
+            if (cursor.moveToFirst()) {
+                val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
+                val fileSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
+                val fileName = name ?: SyncUtils.getFileName(cursor)
+                val outputFile = java.io.File(folder, fileName).also { if (it.exists()) it.delete() }
 
-            try {
-                if (outputFile.createNewFile()) {
-                    outputFile.setLastModified(fileModifiedAt.time)
-                    contentResolver.openInputStream(uri)?.use { input ->
-                        outputFile.outputStream().use { output ->
-                            input.copyTo(output)
+                try {
+                    if (outputFile.createNewFile()) {
+                        outputFile.setLastModified(fileModifiedAt.time)
+                        contentResolver.openInputStream(uri)?.use { input ->
+                            outputFile.outputStream().use { output ->
+                                input.copyTo(output)
+                            }
                         }
-                    }
 
-                    UploadFile(
-                        uri = outputFile.toUri().toString(),
-                        userId = userId,
-                        driveId = driveId,
-                        remoteFolder = folderId,
-                        type = UploadFile.Type.SHARED_FILE.name,
-                        fileSize = fileSize,
-                        fileName = fileName,
-                        fileCreatedAt = fileCreatedAt,
-                        fileModifiedAt = fileModifiedAt
-                    ).store()
-                    return true
+                        UploadFile(
+                            uri = outputFile.toUri().toString(),
+                            userId = userId,
+                            driveId = driveId,
+                            remoteFolder = folderId,
+                            type = UploadFile.Type.SHARED_FILE.name,
+                            fileSize = fileSize,
+                            fileName = fileName,
+                            fileCreatedAt = fileCreatedAt,
+                            fileModifiedAt = fileModifiedAt
+                        ).store()
+                        return true
+                    }
+                } catch (exception: Exception) {
+                    exception.printStackTrace()
+                    return false
                 }
-            } catch (exception: Exception) {
-                exception.printStackTrace()
-                return false
-            }
+            } else return false
         }
         return false
     }
 
     private fun Uri.fileName(): String {
         contentResolver.query(this, null, null, null, null)?.use { cursor ->
-            cursor.moveToFirst()
-            return SyncUtils.getFileName(cursor)
+            if (cursor.moveToFirst()) SyncUtils.getFileName(cursor) else ""
         }
         return ""
     }
