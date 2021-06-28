@@ -26,6 +26,7 @@ import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.BuildConfig
 import io.realm.RealmList
@@ -209,6 +210,15 @@ open class File(
 
     fun isIncompleteFile(file: java.io.File): Boolean {
         return file.length() != size
+    }
+
+    fun getConvertedPdfCache(context: Context): java.io.File {
+        val userId = AccountUtils.currentUserId
+        val userDriveId = AccountUtils.currentDriveId
+
+        val folder = java.io.File(context.cacheDir, "converted_pdf/$userId/$userDriveId")
+        if (!folder.exists()) folder.mkdirs()
+        return java.io.File(folder, id.toString())
     }
 
     fun getOfflineFile(context: Context, userDrive: UserDrive = UserDrive()): java.io.File {

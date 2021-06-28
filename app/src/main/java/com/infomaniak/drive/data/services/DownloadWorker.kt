@@ -94,10 +94,12 @@ class DownloadWorker(private val context: Context, workerParams: WorkerParameter
         userDrive: UserDrive
     ): Result {
         return try {
-            val fileUrl = ApiRoutes.downloadFile(file) + if (file.isOnlyOfficePreview()) "?as=pdf" else ""
             val lastUpdate = workDataOf(PROGRESS to 100, FILE_ID to file.id)
             val okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(userDrive.userId, null) }
-            val response = downloadFileResponse(fileUrl, okHttpClient) { progress ->
+            val response = downloadFileResponse(
+                fileUrl = ApiRoutes.downloadFile(file),
+                okHttpClient = okHttpClient
+            ) { progress ->
                 runBlocking(Dispatchers.Main) {
                     setProgress(workDataOf(PROGRESS to progress, FILE_ID to file.id))
                 }

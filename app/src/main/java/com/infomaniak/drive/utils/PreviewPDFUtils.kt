@@ -38,9 +38,15 @@ object PreviewPDFUtils {
         onProgress: (progress: Int) -> Unit
     ): ApiResponse<PdfCore> {
         return try {
-            val outputFile = if (file.isOffline) file.getOfflineFile(context) else file.getCacheFile(context)
+            val outputFile = when {
+                file.isOnlyOfficePreview() -> file.getConvertedPdfCache(context)
+                file.isOffline -> file.getOfflineFile(context)
+                else -> file.getCacheFile(context)
+            }
 
-            if (file.isOldData(context) || file.isIncompleteFile(outputFile)) {
+            val officePdfNeedDownload = file.isOnlyOfficePreview() && (outputFile.lastModified() / 1000) < file.lastModifiedAt
+            val pdfNeedDownload = !file.isOnlyOfficePreview() && (file.isOldData(context) || file.isIncompleteFile(outputFile))
+            if (officePdfNeedDownload || pdfNeedDownload) {
                 downloadFile(outputFile, file, onProgress)
                 outputFile.setLastModified(file.getLastModifiedInMilliSecond())
             }
