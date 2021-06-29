@@ -17,8 +17,6 @@
  */
 package com.infomaniak.drive.ui.menu
 
-import android.os.Bundle
-import android.view.View
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import kotlinx.android.synthetic.main.fragment_file_list.*
@@ -31,12 +29,12 @@ open class FileSubTypeListFragment : FileListFragment() {
     override var enabledMultiSelectMode: Boolean = false
     override var hideBackButtonWhenRoot: Boolean = false
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        sortButton.visibility = View.GONE
-    }
-
-    protected fun populateFileList(files: ArrayList<File>, isComplete: Boolean, ignoreOffline: Boolean = false, forceClean: Boolean = false) {
+    protected fun populateFileList(
+        files: ArrayList<File>,
+        isComplete: Boolean,
+        ignoreOffline: Boolean = false,
+        forceClean: Boolean = false
+    ) {
         if (fileAdapter.itemCount == 0 || forceClean) fileAdapter.setList(files)
         else fileRecyclerView.post { fileAdapter.addFileList(files) }
         fileAdapter.isComplete = isComplete

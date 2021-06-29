@@ -72,21 +72,24 @@ class SortFilesBottomSheetDialog : BottomSheetDialogFragment() {
         setBackNavigationResult(FileListFragment.SORT_TYPE_OPTION_KEY, sortType, true)
     }
 
-    private fun updateCurrentSortTypeIcon(sortType: File.SortType) {
+    private fun updateCurrentSortTypeIcon(currentSortType: File.SortType) {
         val itemList = arrayListOf(
             File.SortType.NAME_AZ to sortAzActiveIcon,
             File.SortType.NAME_ZA to sortZaActiveIcon,
             File.SortType.RECENT to sortMostRecentActiveIcon,
+            File.SortType.RECENT_TRASHED to sortMostRecentActiveIcon,
             File.SortType.OLDER to sortOlderActiveIcon,
+            File.SortType.OLDER_TRASHED to sortOlderActiveIcon,
             File.SortType.BIGGER to sortBiggerActiveIcon,
             File.SortType.SMALLER to sortSmallerActiveIcon,
             File.SortType.EXTENSION to sortExtensionActiveIcon
         )
 
-        itemList.forEach {
-            if (it.first == sortType) it.second.visibility = VISIBLE
-            else it.second.visibility = GONE
+        itemList.forEach { (sortType, checkIconView) ->
+            if (sortType == currentSortType) {
+                checkIconView.visibility = VISIBLE
+                return
+            } else checkIconView.visibility = GONE
         }
     }
-
 }

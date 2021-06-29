@@ -321,7 +321,7 @@ open class File(
         RECENT_TRASHED("desc", "deleted_at", R.string.sortRecent),
         SMALLER("asc", "files.size", R.string.sortSmaller),
         BIGGER("desc", "files.size", R.string.sortBigger),
-        EXTENSION("asc", "last_modified_at", R.string.sortExtension);
+        EXTENSION("asc", "extension", R.string.sortExtension); // TODO : Awaiting API
     }
 
     @Parcelize

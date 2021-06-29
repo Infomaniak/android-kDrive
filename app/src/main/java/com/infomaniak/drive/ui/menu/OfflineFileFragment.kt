@@ -31,7 +31,6 @@ class OfflineFileFragment : FileSubTypeListFragment() {
         folderID = Utils.OTHER_ROOT_ID
         super.onViewCreated(view, savedInstanceState)
 
-        sortButton.visibility = VISIBLE
         collapsingToolbarLayout.title = getString(R.string.offlineFileTitle)
         noFilesLayout.setup(
             icon = R.drawable.ic_offline,

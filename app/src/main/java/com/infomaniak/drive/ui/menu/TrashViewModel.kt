@@ -23,6 +23,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.utils.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -33,7 +34,7 @@ class TrashViewModel : ViewModel() {
     val removeFileId = SingleLiveEvent<Int>()
     private var getDeletedFilesJob: Job = Job()
 
-    fun getTrashFile(file: File, order: File.SortType): LiveData<Pair<File, Boolean>?> {
+    fun getTrashFile(file: File, order: File.SortType): LiveData<FileListFragment.FolderFilesResult?> {
         getDeletedFilesJob.cancel()
         getDeletedFilesJob = Job()
         return liveData(Dispatchers.IO + getDeletedFilesJob) {
@@ -43,9 +44,23 @@ class TrashViewModel : ViewModel() {
                     val data = apiResponse.data
                     when {
                         data == null -> Unit
-                        data.children.size < ApiRepository.PER_PAGE -> emit(data to true)
+                        data.children.size < ApiRepository.PER_PAGE -> emit(
+                            FileListFragment.FolderFilesResult(
+                                parentFolder = file,
+                                files = ArrayList(data.children),
+                                isComplete = true,
+                                page = page
+                            )
+                        )
                         else -> {
-                            emit(data to false)
+                            emit(
+                                FileListFragment.FolderFilesResult(
+                                    parentFolder = file,
+                                    files = ArrayList(data.children),
+                                    isComplete = false,
+                                    page = page
+                                )
+                            )
                             recursive(page + 1)
                         }
                     }
@@ -55,7 +70,7 @@ class TrashViewModel : ViewModel() {
         }
     }
 
-    fun getDriveTrash(driveId: Int, order: File.SortType): LiveData<Pair<ArrayList<File>, Boolean>?> {
+    fun getDriveTrash(driveId: Int, order: File.SortType): LiveData<FileListFragment.FolderFilesResult?> {
         getDeletedFilesJob.cancel()
         getDeletedFilesJob = Job()
         return liveData(Dispatchers.IO + getDeletedFilesJob) {
@@ -64,9 +79,21 @@ class TrashViewModel : ViewModel() {
                 if (apiResponse.isSuccess()) {
                     when {
                         apiResponse.data.isNullOrEmpty() -> emit(null)
-                        apiResponse.data!!.size < ApiRepository.PER_PAGE -> emit(apiResponse.data!! to true)
+                        apiResponse.data!!.size < ApiRepository.PER_PAGE -> emit(
+                            FileListFragment.FolderFilesResult(
+                                files = apiResponse.data!!,
+                                isComplete = true,
+                                page = page
+                            )
+                        )
                         else -> {
-                            emit(apiResponse.data!! to false)
+                            emit(
+                                FileListFragment.FolderFilesResult(
+                                    files = apiResponse.data!!,
+                                    isComplete = false,
+                                    page = page
+                                )
+                            )
                             recursive(page + 1)
                         }
                     }
