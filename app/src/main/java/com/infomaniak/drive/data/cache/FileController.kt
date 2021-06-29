@@ -372,18 +372,20 @@ object FileController {
 
     fun storeFileActivities(fileActivities: ArrayList<FileActivity>) {
         getRealmInstance().use { realm ->
+            realm.beginTransaction()
             fileActivities.forEach { fileActivity ->
                 fileActivity.userId = fileActivity.user?.id
                 fileActivity.file?.let { file ->
                     realm.where(File::class.java).equalTo(File::id.name, file.id).findFirst()
-                }?.let { file ->
-                    fileActivity.file?.collaborativeFolder = file.collaborativeFolder
-                    fileActivity.file?.children = file.children
-                    fileActivity.file?.isComplete = file.isComplete
-                    fileActivity.file?.isOffline = file.isOffline
+                }?.let { localFile ->
+                    fileActivity.file?.collaborativeFolder = localFile.collaborativeFolder
+                    fileActivity.file?.children = localFile.children
+                    fileActivity.file?.isComplete = localFile.isComplete
+                    fileActivity.file?.isOffline = localFile.isOffline
                 }
-                realm.executeTransaction { it.insertOrUpdate(fileActivity) }
+                realm.insertOrUpdate(fileActivity)
             }
+            realm.commitTransaction()
         }
     }
 
