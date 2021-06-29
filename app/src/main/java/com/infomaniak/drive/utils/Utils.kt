@@ -216,7 +216,7 @@ object Utils {
             .setExitAnim(R.anim.fragment_open_exit)
             .build()
         val bundle = bundleOf(
-            PreviewSliderFragment.PREVIEW_FILE_TAG to selectedFile.id,
+            PreviewSliderFragment.PREVIEW_FILE_ID_TAG to selectedFile.id,
             PreviewSliderFragment.PREVIEW_IS_SHARED_WITH_ME to isSharedWithMe,
             PreviewSliderFragment.PREVIEW_HIDE_ACTIONS to selectedFile.isFromActivities
         )

@@ -78,8 +78,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         super.onViewCreated(view, savedInstanceState)
 
         if (previewSliderViewModel.currentPreview == null) {
-            currentPreviewFile = arguments?.getInt(PREVIEW_FILE_TAG)?.let { fileId ->
-                FileController.getFileById(fileId) ?: mainViewModel.currentFileList.value?.first { it.id == fileId }
+            val fileId = arguments?.getInt(PREVIEW_FILE_ID_TAG) ?: savedInstanceState?.getInt(PREVIEW_FILE_ID_TAG)
+            currentPreviewFile = fileId?.let {
+                FileController.getFileById(it) ?: mainViewModel.currentFileList.value?.first { file -> file.id == it }
             } ?: throw Exception("No current preview found")
             previewSliderViewModel.isSharedWithMe = arguments?.getBoolean(PREVIEW_IS_SHARED_WITH_ME, false) ?: false
             previewSliderViewModel.currentPreview = currentPreviewFile
@@ -212,11 +213,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         previewSliderViewModel.currentPreview = currentPreviewFile
     }
 
-    override fun onDestroy() {
-        if (this.isVisible) {
-            arguments?.putString(PREVIEW_FILE_TAG, gson.toJson(currentPreviewFile, File::class.java))
-        }
-        super.onDestroy()
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(PREVIEW_FILE_ID_TAG, currentPreviewFile.id)
     }
 
     override fun displayInfoClicked() {
@@ -411,7 +410,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     companion object {
-        const val PREVIEW_FILE_TAG = "previewFile"
+        const val PREVIEW_FILE_ID_TAG = "previewFileId"
         const val PREVIEW_IS_SHARED_WITH_ME = "isSharedWithMe"
         const val PREVIEW_HIDE_ACTIONS = "hideActions"
     }
