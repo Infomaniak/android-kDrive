@@ -36,10 +36,7 @@ import com.infomaniak.drive.utils.MediaFoldersProvider
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import io.realm.Realm
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_media_folders.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 
 class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
 
@@ -111,22 +108,24 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
 
         fun getAllMediaFolders(contentResolver: ContentResolver): LiveData<Pair<Boolean, ArrayList<MediaFolder>>> {
             getMediaFilesJob = Job()
-            return liveData(Dispatchers.IO + getMediaFilesJob) {
-                MediaFolder.getRealmInstance().use { realm ->
-                    val cacheMediaFolders = MediaFolder.getAll(realm)
-                    if (cacheMediaFolders.isNotEmpty()) emit(false to cacheMediaFolders)
+            return liveData {
+                emit(runInterruptible(Dispatchers.IO + getMediaFilesJob) {
+                    MediaFolder.getRealmInstance().use { realm ->
+                        val cacheMediaFolders = MediaFolder.getAll(realm)
+                        if (cacheMediaFolders.isNotEmpty()) return@runInterruptible (false to cacheMediaFolders)
 
-                    val localMediaFolders = ArrayList(
-                        MediaFoldersProvider.getAllMediaFolders(
-                            realm = realm,
-                            contentResolver = contentResolver,
-                            coroutineScope = getMediaFilesJob
+                        val localMediaFolders = ArrayList(
+                            MediaFoldersProvider.getAllMediaFolders(
+                                realm = realm,
+                                contentResolver = contentResolver,
+                                coroutineScope = getMediaFilesJob
+                            )
                         )
-                    )
-                    cacheMediaFolders.removeObsoleteMediaFolders(realm, localMediaFolders)
+                        cacheMediaFolders.removeObsoleteMediaFolders(realm, localMediaFolders)
 
-                    emit(true to localMediaFolders.removeDuplicatedMediaFolders(cacheMediaFolders))
-                }
+                        return@runInterruptible (true to localMediaFolders.removeDuplicatedMediaFolders(cacheMediaFolders))
+                    }
+                })
             }
         }
 
@@ -141,10 +140,10 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
             } as ArrayList<MediaFolder>
         }
 
-        private suspend fun ArrayList<MediaFolder>.removeObsoleteMediaFolders(
+        private fun ArrayList<MediaFolder>.removeObsoleteMediaFolders(
             realm: Realm,
             upToDateMedias: ArrayList<MediaFolder>
-        ) = withContext(Dispatchers.IO) {
+        ) {
             val deletedMediaFolderList = arrayListOf<Long>()
             forEach { cachedFile ->
                 val exist = upToDateMedias.any { cachedFile.id == it.id }
