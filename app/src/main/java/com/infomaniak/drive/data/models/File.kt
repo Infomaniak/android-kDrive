@@ -36,8 +36,6 @@ import io.realm.annotations.Ignore
 import io.realm.annotations.LinkingObjects
 import io.realm.annotations.PrimaryKey
 import kotlinx.android.parcel.Parcelize
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import java.util.*
 
 open class File(
@@ -225,7 +223,7 @@ open class File(
         val mediaFolder = context.externalMediaDirs?.firstOrNull() ?: context.filesDir
         val rootFolder = java.io.File(mediaFolder, "offline_storage/${userDrive.userId}/${userDrive.driveId}")
         val path =
-            if (this.path.isEmpty()) runBlocking(Dispatchers.IO) { FileController.generateAndSavePath(id, userDrive) }
+            if (this.path.isEmpty()) FileController.generateAndSavePath(id, userDrive)
             else this.path
         val folder = java.io.File(rootFolder, path.substringBeforeLast("/"))
 

@@ -74,7 +74,9 @@ object FileController {
         return getRealmInstance(userDrive).use { realm ->
             getFileById(realm, fileId)!!.let { file ->
                 if (file.path.isEmpty()) {
-                    realm.executeTransaction { file.path = generatePath(file, userDrive) }
+                    realm.beginTransaction()
+                    file.path = generatePath(file, userDrive)
+                    realm.commitTransaction()
                     file.path
                 } else file.path
             }
