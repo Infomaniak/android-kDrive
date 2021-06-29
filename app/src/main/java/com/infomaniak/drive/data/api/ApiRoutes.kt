@@ -26,7 +26,6 @@ import com.infomaniak.drive.data.models.Tag
 object ApiRoutes {
 
     private const val with = "with=children,rights,collaborative_folder,favorite,mobile,share_link"
-    private const val withAll = "with=all"
 
     private fun fileURL(file: File) = "${DRIVE_API}${file.driveId}/file/${file.id}"
 
@@ -45,7 +44,7 @@ object ApiRoutes {
     fun updateFileSharedInvitation(file: File, invitation: Invitation) =
         "${DRIVE_API}${file.driveId}/file/invitation/${invitation.id}"
 
-    fun getFileShare(file: File) = "${fileURL(file)}/share?$withAll"
+    fun getFileShare(file: File) = "${fileURL(file)}/share?with=invitation,link,tag"
 
     fun postFileShare(file: File) = "${fileURL(file)}/share"
 
@@ -59,10 +58,10 @@ object ApiRoutes {
         "${DRIVE_API}$driveId/file/$parentId?$with&order=${order.order}&order_by=${order.orderBy}"
 
     fun getDriveFileTrashedListForFolder(driveId: Int, order: File.SortType) =
-        "${DRIVE_API}${driveId}/file/trash?$withAll&order=${order.order}&order_by=${order.orderBy}"
+        "${DRIVE_API}${driveId}/file/trash?with=children,parent,extras&order=${order.order}&order_by=${order.orderBy}"
 
     fun getFileTrashedListForFolder(file: File, order: File.SortType) =
-        "${trashURL(file)}?$withAll&order=${order.order}&order_by=${order.orderBy}"
+        "${trashURL(file)}?with=children,parent,extras&order=${order.order}&order_by=${order.orderBy}"
 
     fun getFavoriteFiles(driveId: Int, order: File.SortType) =
         "${DRIVE_API}$driveId/file/favorite?$with&order=${order.order}&order_by=${order.orderBy}"
@@ -82,7 +81,8 @@ object ApiRoutes {
 
     fun unLikeCommentFile(file: File, commentId: Int) = "${fileURL(file)}/comment/$commentId/unlike"
 
-    fun getFileDetails(file: File) = "${fileURL(file)}?$withAll"
+    fun getFileDetails(file: File) =
+        "${fileURL(file)}?with=user,tag,children,parent,rights,favorite,version,extras,share_link,collaborative_folder,mobile,conversion"
 
     fun moveFile(file: File, newParentId: Int) = "${fileURL(file)}/move/$newParentId"
 
