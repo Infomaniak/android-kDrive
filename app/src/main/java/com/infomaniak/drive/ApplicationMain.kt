@@ -96,12 +96,12 @@ class ApplicationMain : Application(), ImageLoaderFactory {
             }
         }
 
+        Realm.init(this)
+
         AccountUtils.init(this)
         AccountUtils.reloadApp = {
             startActivity(Intent(this, LaunchActivity::class.java).apply { clearStack() })
         }
-
-        Realm.init(this)
 
         val deserializerList: ArrayList<Pair<Type, Any>> = ArrayList()
         deserializerList.add(Pair(Drive::class.java, DriveDeserializer))
