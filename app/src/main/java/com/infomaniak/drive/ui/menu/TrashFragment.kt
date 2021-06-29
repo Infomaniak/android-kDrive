@@ -129,7 +129,7 @@ class TrashFragment : FileSubTypeListFragment() {
                         populateFileList(
                             files = result.files,
                             isComplete = isComplete,
-                            forceClean = fileAdapter.itemCount == 0 || result.page == 1
+                            forceClean = result.page == 1
                         )
                     }
                 }
@@ -139,7 +139,7 @@ class TrashFragment : FileSubTypeListFragment() {
                         populateFileList(
                             files = result?.files ?: ArrayList(),
                             isComplete = result?.isComplete ?: true,
-                            forceClean = fileAdapter.itemCount == 0 || result?.page == 1
+                            forceClean = result?.page == 1
                         )
                     }
             }
