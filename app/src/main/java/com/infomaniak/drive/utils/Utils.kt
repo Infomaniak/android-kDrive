@@ -249,10 +249,14 @@ object Utils {
 
     fun Context.openWithIntent(file: File, userDrive: UserDrive = UserDrive()): Intent {
         return Intent().apply {
-            val uri = CloudStorageProvider.createShareFileUri(this@openWithIntent, file, userDrive)!!
+            val cloudUri = CloudStorageProvider.createShareFileUri(this@openWithIntent, file, userDrive)!!
+            val uri =
+                if (file.isOffline) Uri.fromFile(file.getOfflineFile(this@openWithIntent, userDrive))
+                else cloudUri
+
             action = Intent.ACTION_VIEW
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            setDataAndType(uri, contentResolver.getType(uri))
+            setDataAndType(uri, contentResolver.getType(cloudUri))
         }
     }
 
