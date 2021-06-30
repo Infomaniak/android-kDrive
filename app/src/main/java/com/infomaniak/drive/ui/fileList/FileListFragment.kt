@@ -195,7 +195,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             downloadFiles(false)
         }
 
-        if (folderID == ROOT_ID && hideBackButtonWhenRoot) toolbar.navigationIcon = null
+        if ((folderID == ROOT_ID || folderID == OTHER_ROOT_ID) && hideBackButtonWhenRoot) toolbar.navigationIcon = null
         toolbar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.searchItem -> safeNavigate(FileListFragmentDirections.actionFileListFragmentToSearchFragment())
