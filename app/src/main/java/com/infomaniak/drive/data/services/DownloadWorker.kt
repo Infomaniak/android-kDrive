@@ -87,32 +87,32 @@ class DownloadWorker(private val context: Context, workerParams: WorkerParameter
         } ?: Result.failure()
     }
 
-    private fun startDownload(
+    private suspend fun startDownload(
         file: File,
         downloadNotification: NotificationCompat.Builder,
         outputDataFile: java.io.File,
         userDrive: UserDrive
-    ): Result {
-        return try {
+    ): Result = withContext(Dispatchers.IO) {
+        try {
             val lastUpdate = workDataOf(PROGRESS to 100, FILE_ID to file.id)
-            val okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(userDrive.userId, null) }
+            val okHttpClient = KDriveHttpClient.getHttpClient(userDrive.userId, null)
             val response = downloadFileResponse(
                 fileUrl = ApiRoutes.downloadFile(file),
                 okHttpClient = okHttpClient
             ) { progress ->
-                runBlocking(Dispatchers.Main) {
+                launch(Dispatchers.Main) {
                     setProgress(workDataOf(PROGRESS to progress, FILE_ID to file.id))
                 }
                 Log.d(TAG, "download $progress%")
                 downloadNotification.apply {
                     setContentText("$progress%")
                     setProgress(100, progress, false)
-                    runBlocking { setForeground(ForegroundInfo(file.id, build())) }
+                    launch { setForeground(ForegroundInfo(file.id, build())) }
                 }
             }
 
             saveRemoteData(response, outputDataFile) {
-                runBlocking(Dispatchers.Main) { setProgress(lastUpdate) }
+                launch(Dispatchers.Main) { setProgress(lastUpdate) }
                 FileController.updateOfflineStatus(file.id, true)
                 outputDataFile.setLastModified(file.getLastModifiedInMilliSecond())
                 if (file.isMedia()) MediaUtils.scanFile(context, outputDataFile)
