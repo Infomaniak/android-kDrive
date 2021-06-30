@@ -21,8 +21,6 @@ import android.content.Context
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.File.LocalType.CLOUD_STORAGE
-import com.infomaniak.drive.data.models.File.LocalType.OFFLINE
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
@@ -40,18 +38,20 @@ object PreviewPDFUtils {
         onProgress: (progress: Int) -> Unit
     ): ApiResponse<PdfCore> {
         return try {
-            val offlineFile = file.localPath(context, OFFLINE)
-            val cacheFile = file.localPath(context, CLOUD_STORAGE)
-
-            if (file.isOldData(context) || file.isIncompleteFile(offlineFile, cacheFile)) {
-                val externalOutputFile = if (file.isOffline) offlineFile else cacheFile
-                downloadFile(externalOutputFile, file, onProgress)
-                externalOutputFile.setLastModified(file.getLastModifiedInMilliSecond())
+            val outputFile = when {
+                file.isOnlyOfficePreview() -> file.getConvertedPdfCache(context)
+                file.isOffline -> file.getOfflineFile(context)
+                else -> file.getCacheFile(context)
             }
 
-            val data = if (offlineFile.exists()) PdfCore(context, offlineFile) else PdfCore(context, cacheFile)
+            val officePdfNeedDownload = file.isOnlyOfficePreview() && (outputFile.lastModified() / 1000) < file.lastModifiedAt
+            val pdfNeedDownload = !file.isOnlyOfficePreview() && (file.isOldData(context) || file.isIncompleteFile(outputFile))
+            if (officePdfNeedDownload || pdfNeedDownload) {
+                downloadFile(outputFile, file, onProgress)
+                outputFile.setLastModified(file.getLastModifiedInMilliSecond())
+            }
 
-            ApiResponse(ApiResponse.Status.SUCCESS, data)
+            ApiResponse(ApiResponse.Status.SUCCESS, PdfCore(context, outputFile))
         } catch (e: Exception) {
             e.printStackTrace()
             ApiResponse(ApiResponse.Status.ERROR, null, translatedError = R.string.anErrorHasOccurred)

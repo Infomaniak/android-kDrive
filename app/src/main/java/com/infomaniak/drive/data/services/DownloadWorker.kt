@@ -32,6 +32,8 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.KDriveHttpClient
+import com.infomaniak.drive.utils.MediaUtils
+import com.infomaniak.drive.utils.MediaUtils.isMedia
 import com.infomaniak.drive.utils.NotificationUtils.downloadProgressNotification
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
@@ -67,13 +69,11 @@ class DownloadWorker(private val context: Context, workerParams: WorkerParameter
 
         return@withContext FileController.getFileById(fileID, userDrive)?.let { file ->
             if (file.isOffline && !file.isOldData(context, userDrive)) return@let Result.success()
-            val outputDataFile = file.localPath(context, File.LocalType.OFFLINE, userDrive)
-            val cacheDataFile = file.localPath(context, File.LocalType.CLOUD_STORAGE, userDrive)
+            val offlineFile = file.getOfflineFile(context, userDrive)
             val firstUpdate = workDataOf(PROGRESS to 0, FILE_ID to fileID)
             setProgress(firstUpdate)
 
-            if (outputDataFile.exists()) outputDataFile.delete()
-            if (cacheDataFile.exists()) outputDataFile.delete()
+            if (offlineFile.exists()) offlineFile.delete()
 
             val cancelPendingIntent = WorkManager.getInstance(applicationContext).createCancelPendingIntent(id)
             val cancelAction = NotificationCompat.Action(null, context.getString(R.string.buttonCancel), cancelPendingIntent)
@@ -83,45 +83,46 @@ class DownloadWorker(private val context: Context, workerParams: WorkerParameter
                 addAction(cancelAction)
                 setForeground(ForegroundInfo(fileID, build()))
             }
-            startDownload(file, downloadNotification, outputDataFile, userDrive)
+            startDownload(file, downloadNotification, offlineFile, userDrive)
         } ?: Result.failure()
     }
 
-    private fun startDownload(
+    private suspend fun startDownload(
         file: File,
         downloadNotification: NotificationCompat.Builder,
         outputDataFile: java.io.File,
         userDrive: UserDrive
-    ): Result {
-        return try {
-            val fileUrl = ApiRoutes.downloadFile(file) + if (file.isOnlyOfficePreview()) "?as=pdf" else ""
+    ): Result = withContext(Dispatchers.IO) {
+        try {
             val lastUpdate = workDataOf(PROGRESS to 100, FILE_ID to file.id)
-            val okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(userDrive.userId, null) }
-            val response = downloadFileResponse(fileUrl, okHttpClient) { progress ->
-                runBlocking(Dispatchers.Main) {
+            val okHttpClient = KDriveHttpClient.getHttpClient(userDrive.userId, null)
+            val response = downloadFileResponse(
+                fileUrl = ApiRoutes.downloadFile(file),
+                okHttpClient = okHttpClient
+            ) { progress ->
+                launch(Dispatchers.Main) {
                     setProgress(workDataOf(PROGRESS to progress, FILE_ID to file.id))
                 }
                 Log.d(TAG, "download $progress%")
                 downloadNotification.apply {
                     setContentText("$progress%")
                     setProgress(100, progress, false)
-                    runBlocking { setForeground(ForegroundInfo(file.id, build())) }
+                    launch { setForeground(ForegroundInfo(file.id, build())) }
                 }
             }
 
             saveRemoteData(response, outputDataFile) {
-                runBlocking(Dispatchers.Main) { setProgress(lastUpdate) }
+                launch(Dispatchers.Main) { setProgress(lastUpdate) }
                 FileController.updateOfflineStatus(file.id, true)
                 outputDataFile.setLastModified(file.getLastModifiedInMilliSecond())
+                if (file.isMedia()) MediaUtils.scanFile(context, outputDataFile)
             }
 
-            FileController.updateFile(file.id) { it.isWaitingOffline = false }
             if (response.isSuccessful) Result.success()
             else Result.failure()
 
         } catch (e: Exception) {
             if (outputDataFile.exists()) outputDataFile.delete()
-            FileController.updateFile(file.id) { it.isWaitingOffline = false }
             e.printStackTrace()
             Result.failure()
         }

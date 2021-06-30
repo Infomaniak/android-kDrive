@@ -20,9 +20,13 @@ package com.infomaniak.drive.data.models
 import android.content.Context
 import android.webkit.MimeTypeMap
 import androidx.annotation.DrawableRes
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.BuildConfig
 import io.realm.RealmList
@@ -193,39 +197,49 @@ open class File(
     }
 
     fun isOldData(context: Context, userDrive: UserDrive = UserDrive()): Boolean {
-        val offlineDataFile = localPath(context, LocalType.OFFLINE, userDrive)
-        val cacheDataFile = localPath(context, LocalType.CLOUD_STORAGE, userDrive)
         return if (isOffline) {
+            val offlineDataFile = getOfflineFile(context, userDrive)
             (offlineDataFile.lastModified() / 1000) < lastModifiedAt
         } else {
+            val cacheDataFile = getCacheFile(context, userDrive)
             (cacheDataFile.lastModified() / 1000) < lastModifiedAt
         }
     }
 
-    fun isIncompleteFile(offlineFile: java.io.File, cacheFile: java.io.File): Boolean {
-        return (isOffline && offlineFile.length() != size)
-                || (!isOffline && cacheFile.length() != size)
+    fun isIncompleteFile(file: java.io.File): Boolean {
+        return file.length() != size
     }
 
-    fun localPath(
-        context: Context,
-        localType: LocalType,
-        userDrive: UserDrive = UserDrive()
-    ): java.io.File {
-        val userId = userDrive.userId
-        val userDriveId = userDrive.driveId
+    fun getConvertedPdfCache(context: Context): java.io.File {
+        val userId = AccountUtils.currentUserId
+        val userDriveId = AccountUtils.currentDriveId
 
-        val firstFolder = when (localType) {
-            LocalType.OFFLINE -> java.io.File(context.filesDir, "offline_storage/$userId/$userDriveId")
-            LocalType.CLOUD_STORAGE -> java.io.File(context.cacheDir, "cloud_storage/$userId/${userDriveId}")
-        }
-        if (!firstFolder.exists()) firstFolder.mkdirs()
-        return java.io.File(firstFolder, id.toString())
+        val folder = java.io.File(context.cacheDir, "converted_pdf/$userId/$userDriveId")
+        if (!folder.exists()) folder.mkdirs()
+        return java.io.File(folder, id.toString())
+    }
+
+    fun getOfflineFile(context: Context, userDrive: UserDrive = UserDrive()): java.io.File {
+        val mediaFolder = context.externalMediaDirs?.firstOrNull() ?: context.filesDir
+        val rootFolder = java.io.File(mediaFolder, "offline_storage/${userDrive.userId}/${userDrive.driveId}")
+        val path =
+            if (this.path.isEmpty()) FileController.generateAndSavePath(id, userDrive)
+            else this.path
+        val folder = java.io.File(rootFolder, path.substringBeforeLast("/"))
+
+        if (!folder.exists()) folder.mkdirs()
+        return java.io.File(folder, name)
+    }
+
+    fun getCacheFile(context: Context, userDrive: UserDrive = UserDrive()): java.io.File {
+        val folder = java.io.File(context.cacheDir, "cloud_storage/${userDrive.userId}/${userDrive.driveId}")
+        if (!folder.exists()) folder.mkdirs()
+        return java.io.File(folder, id.toString())
     }
 
     fun deleteCaches(context: Context) {
-        localPath(context, LocalType.OFFLINE).apply { if (exists()) delete() }
-        localPath(context, LocalType.CLOUD_STORAGE).apply { if (exists()) delete() }
+        if (isOffline) getOfflineFile(context).apply { if (exists()) delete() }
+        else getCacheFile(context).apply { if (exists()) delete() }
     }
 
     fun isDisabled(): Boolean {
@@ -234,6 +248,13 @@ open class File(
 
     fun isRoot(): Boolean {
         return id == ROOT_ID
+    }
+
+    fun getWorkerTag() = "$id"
+
+    fun isPendingOffline(context: Context): Boolean {
+        val get = WorkManager.getInstance(context).getWorkInfosByTag(getWorkerTag()).get()
+        return get.firstOrNull { it.state == WorkInfo.State.ENQUEUED || it.state == WorkInfo.State.RUNNING } != null
     }
 
     fun getMimeType(): String {
@@ -269,10 +290,6 @@ open class File(
             return other.id == id
         }
         return super.equals(other)
-    }
-
-    enum class LocalType {
-        CLOUD_STORAGE, OFFLINE
     }
 
     enum class LocalFileActivity {

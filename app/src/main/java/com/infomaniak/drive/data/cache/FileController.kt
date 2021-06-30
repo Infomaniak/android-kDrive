@@ -70,6 +70,28 @@ object FileController {
         return realm?.let(block) ?: getRealmInstance(userDrive).use(block)
     }
 
+    fun generateAndSavePath(fileId: Int, userDrive: UserDrive): String {
+        return getRealmInstance(userDrive).use { realm ->
+            getFileById(realm, fileId)!!.let { file ->
+                if (file.path.isEmpty()) {
+                    realm.beginTransaction()
+                    file.path = generatePath(file, userDrive)
+                    realm.commitTransaction()
+                    file.path
+                } else file.path
+            }
+        }
+    }
+
+    private fun generatePath(file: File, userDrive: UserDrive): String {
+        return file.localParent!!.first { it.id > 0 }.let { parent -> // id > 0 for exclude other root parents
+            when (parent.id) {
+                Utils.ROOT_ID -> "/${file.name}"
+                else -> generatePath(parent, userDrive) + "/${file.name}"
+            }
+        }
+    }
+
     fun getFileProxyById(fileId: Int, userDrive: UserDrive? = null): File? {
         return getRealmInstance(userDrive).use { realm ->
             realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst()
@@ -88,21 +110,18 @@ object FileController {
         fileId: Int,
         keepFileCaches: ArrayList<Int> = arrayListOf(),
         keepFiles: ArrayList<Int> = arrayListOf(),
-        realm: Realm? = null,
+        realm: Realm = getRealmInstance(),
         recursive: Boolean = true,
     ) {
-        val block: (Realm) -> Unit = { currentRealm ->
-            getFileById(currentRealm, fileId)?.let { file ->
-                if (recursive) {
-                    file.children.createSnapshot().forEach {
-                        if (!keepFiles.contains(it.id)) removeFile(it.id, keepFileCaches, keepFiles, realm)
-                    }
+        getFileById(realm, fileId)?.let { file ->
+            if (recursive) {
+                file.children.createSnapshot().forEach {
+                    if (!keepFiles.contains(it.id)) removeFile(it.id, keepFileCaches, keepFiles, realm)
                 }
-                if (!keepFileCaches.contains(fileId)) file.deleteCaches(Realm.getApplicationContext()!!)
-                if (!keepFiles.contains(fileId) && file.isValid) currentRealm.executeTransaction { file.deleteFromRealm() }
             }
+            if (!keepFileCaches.contains(fileId)) file.deleteCaches(Realm.getApplicationContext()!!)
+            if (!keepFiles.contains(fileId) && file.isValid) realm.executeTransaction { file.deleteFromRealm() }
         }
-        realm?.let(block) ?: getRealmInstance().use(block)
     }
 
     fun updateFile(fileId: Int, realm: Realm? = null, userDrive: UserDrive = UserDrive(), transaction: (file: File) -> Unit) {
@@ -118,11 +137,22 @@ object FileController {
         }
     }
 
+    fun updateExistingFile(
+        newFile: File,
+        userDrive: UserDrive
+    ) {
+        getRealmInstance(userDrive).use { realm ->
+            getFileById(realm, newFile.id)?.let { localFile ->
+                insertOrUpdateFile(realm, newFile, localFile)
+            }
+        }
+    }
+
     private fun insertOrUpdateFile(
         realm: Realm,
         newFile: File,
         oldFile: File? = null,
-        moreTransaction: ((realm: Realm) -> Unit)? = null
+        moreTransaction: (() -> Unit)? = null
     ) {
         realm.executeTransaction {
             oldFile?.let { file ->
@@ -131,7 +161,7 @@ object FileController {
                 newFile.responseAt = file.responseAt
                 newFile.isOffline = file.isOffline
             }
-            moreTransaction?.invoke(realm)
+            moreTransaction?.invoke()
             it.insertOrUpdate(newFile)
         }
     }
@@ -159,8 +189,8 @@ object FileController {
         val keepFiles = arrayListOf<Int>()
         getRealmInstance().use { realm ->
             files.forEachIndexed { index, file ->
-                val cacheFile = file.localPath(Realm.getApplicationContext()!!, File.LocalType.OFFLINE)
-                val lastModified = cacheFile.lastModified() / 1000
+                val offlineFile = file.getOfflineFile(Realm.getApplicationContext()!!)
+                val lastModified = offlineFile.lastModified() / 1000
 
                 realm.where(File::class.java).equalTo(File::id.name, file.id).findFirst()?.let { oldFile ->
                     realm.executeTransaction {
@@ -169,10 +199,10 @@ object FileController {
                     }
                 }
 
-                if (cacheFile.exists() && lastModified == file.lastModifiedAt) {
+                if (offlineFile.exists() && lastModified == file.lastModifiedAt) {
                     files[index].isOffline = true
                     keepCaches.add(file.id)
-                } else cacheFile.delete()
+                } else offlineFile.delete()
             }
 
             if (replaceOldData) removeFile(MY_SHARES_FILE_ID, keepCaches, keepFiles, realm)

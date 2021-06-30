@@ -211,7 +211,7 @@ class UploadAdapter @JvmOverloads constructor(
                     }
                     startUploadFile(uploadFile, cacheFile.length(), syncResult)
                     UploadFile.deleteIfExists(uri)
-                    cacheFile.delete()
+                    if (!uploadFile.isSyncOffline()) cacheFile.delete()
                 } else {
                     SyncUtils.checkDocumentProviderPermissions(context, uri)
                     val fileSize = try {

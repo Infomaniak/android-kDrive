@@ -171,7 +171,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File) {
         lifecycleScope.launch {
-            mainViewModel.removeOfflineFile(currentFile.id, offlineLocalPath, cacheFile)
+            mainViewModel.removeOfflineFile(requireContext(), currentFile, offlineLocalPath, cacheFile)
 
             withContext(Dispatchers.Main) {
                 currentFile.isOffline = false
