@@ -137,11 +137,23 @@ object FileController {
         }
     }
 
+    fun updateExistingFile(
+        oldFile: File,
+        newFile: File,
+        userDrive: UserDrive
+    ) {
+        getRealmInstance(userDrive).use { realm ->
+            getFileById(realm, oldFile.id)?.let { localFile ->
+                insertOrUpdateFile(realm, newFile, localFile)
+            }
+        }
+    }
+
     private fun insertOrUpdateFile(
         realm: Realm,
         newFile: File,
         oldFile: File? = null,
-        moreTransaction: ((realm: Realm) -> Unit)? = null
+        moreTransaction: (() -> Unit)? = null
     ) {
         realm.executeTransaction {
             oldFile?.let { file ->
@@ -150,7 +162,7 @@ object FileController {
                 newFile.responseAt = file.responseAt
                 newFile.isOffline = file.isOffline
             }
-            moreTransaction?.invoke(realm)
+            moreTransaction?.invoke()
             it.insertOrUpdate(newFile)
         }
     }

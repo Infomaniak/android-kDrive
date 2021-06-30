@@ -253,17 +253,28 @@ class MainViewModel : ViewModel() {
                 FileController.getOfflineFiles(null, userDrive).forEach { file ->
                     val offlineFile = file.getOfflineFile(context, userDrive)
                     val localLastModified = offlineFile.lastModified() / 1000
-                    if (localLastModified > file.lastModifiedAt) uploadFile(context, file, offlineFile, userDrive)
-                    else downloadFile(file, context, offlineFile, userDrive)
+
+                    migrateOfflineIfNeeded(context, file, offlineFile, userDrive)
+
+                    val apiResponse = ApiRepository.getFileDetails(file)
+                    apiResponse.data?.let { remoteFile ->
+                        if (localLastModified > file.lastModifiedAt) uploadFile(context, file, remoteFile, offlineFile, userDrive)
+                        else downloadFile(context, file, remoteFile, offlineFile, userDrive)
+                    } ?: let {
+                        if (apiResponse.error?.code?.equals("object_not_found") == true) offlineFile.delete()
+                    }
                 }
             }
         }
     }
 
-    private fun uploadFile(context: Context, file: File, offlineFile: java.io.File, userDrive: UserDrive) {
+    private fun uploadFile(context: Context, file: File, remoteFile: File, offlineFile: java.io.File, userDrive: UserDrive) {
         val uri = Uri.fromFile(offlineFile)
         val fileModifiedAt = Date(offlineFile.lastModified())
         if (UploadFile.canUpload(uri, fileModifiedAt)) {
+            remoteFile.lastModifiedAt = offlineFile.lastModified() / 1000
+            remoteFile.size = offlineFile.length()
+            FileController.updateExistingFile(oldFile = file, newFile = remoteFile, userDrive = userDrive)
             UploadFile(
                 uri = uri.toString(),
                 driveId = userDrive.driveId,
@@ -271,39 +282,27 @@ class MainViewModel : ViewModel() {
                 fileName = file.name,
                 fileSize = offlineFile.length(),
                 remoteFolder = FileController.getParentFile(file.id, userDrive)!!.id,
-                type = UploadFile.Type.UPLOAD.name,
+                type = UploadFile.Type.SYNC_OFFLINE.name,
                 userId = userDrive.userId,
             ).store()
             context.syncImmediately()
         }
     }
 
-    private fun downloadFile(file: File, appContext: Context, offlineFile: java.io.File, userDrive: UserDrive) {
-        val apiResponse = ApiRepository.getFileDetails(file)
-        migrateOfflineIfNeeded(appContext, file, offlineFile, userDrive)
+    private fun downloadFile(context: Context, file: File, remoteFile: File, offlineFile: java.io.File, userDrive: UserDrive) {
+        file.lastModifiedAt = remoteFile.lastModifiedAt
+        val remoteOfflineFile = remoteFile.getOfflineFile(context, userDrive)
+        val isOldData = file.isOldData(context, userDrive)
+        val incompleteFile = remoteFile.isIncompleteFile(offlineFile)
+        val pathChanged = !offlineFile.path.equals(remoteOfflineFile.path)
+        if (pathChanged) {
+            if (file.isMedia()) file.deleteInMediaScan(context, userDrive)
+            offlineFile.delete()
+        }
 
-        apiResponse.data?.let { remoteFile ->
-            file.lastModifiedAt = remoteFile.lastModifiedAt
-            val remoteOfflineFile = remoteFile.getOfflineFile(appContext, userDrive)
-            val isOldData = file.isOldData(appContext, userDrive)
-            val incompleteFile = file.isIncompleteFile(offlineFile)
-            val pathChanged = !offlineFile.path.equals(remoteOfflineFile.path)
-            if (pathChanged) {
-                if (file.isMedia()) file.deleteInMediaScan(appContext, userDrive)
-                offlineFile.delete()
-            }
-
-            if (!file.isPendingOffline(appContext) && (isOldData || incompleteFile || pathChanged)) {
-                FileController.updateFile(file.id) {
-                    it.name = remoteFile.name
-                    it.path = remoteFile.path
-                    it.size = remoteFile.size
-                    it.lastModifiedAt = remoteFile.lastModifiedAt
-                }
-                Utils.downloadAsOfflineFile(appContext, remoteFile, userDrive)
-            }
-        } ?: let {
-            if (apiResponse.error?.code?.equals("object_not_found") == true) offlineFile.delete()
+        if (!file.isPendingOffline(context) && (isOldData || incompleteFile || pathChanged)) {
+            FileController.updateExistingFile(oldFile = file, newFile = remoteFile, userDrive = userDrive)
+            Utils.downloadAsOfflineFile(context, remoteFile, userDrive)
         }
     }
 }

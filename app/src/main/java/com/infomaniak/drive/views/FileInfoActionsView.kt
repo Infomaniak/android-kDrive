@@ -217,7 +217,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         if (cacheFile.exists()) {
             val offlineFile = currentFile.getOfflineFile(context)
             Utils.moveCacheFileToOffline(currentFile, cacheFile, offlineFile)
-            runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(currentFile.id, true) }
+            CoroutineScope(Dispatchers.IO).launch { FileController.updateOfflineStatus(currentFile.id, true) }
             currentFile.isOffline = true
             onItemClickListener.onCacheAddedToOffline()
             refreshBottomSheetUi(currentFile)
