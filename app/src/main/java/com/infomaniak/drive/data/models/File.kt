@@ -26,7 +26,6 @@ import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.BuildConfig
 import io.realm.RealmList
@@ -210,11 +209,8 @@ open class File(
         return file.length() != size
     }
 
-    fun getConvertedPdfCache(context: Context): java.io.File {
-        val userId = AccountUtils.currentUserId
-        val userDriveId = AccountUtils.currentDriveId
-
-        val folder = java.io.File(context.cacheDir, "converted_pdf/$userId/$userDriveId")
+    fun getConvertedPdfCache(context: Context, userDrive: UserDrive): java.io.File {
+        val folder = java.io.File(context.cacheDir, "converted_pdf/${userDrive.userId}/${userDrive.driveId}")
         if (!folder.exists()) folder.mkdirs()
         return java.io.File(folder, id.toString())
     }

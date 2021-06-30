@@ -22,6 +22,8 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
+import androidx.navigation.navGraphViewModels
+import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 
 
@@ -30,6 +32,7 @@ open class PreviewFragment() : Fragment() {
     private var file: File? = null
     protected lateinit var offlineFile: java.io.File
     protected val previewViewModel: PreviewViewModel by viewModels()
+    private val previewSliderViewModel: PreviewSliderFragment.PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
 
     constructor(file: File) : this() {
         this.file = file
@@ -38,7 +41,7 @@ open class PreviewFragment() : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         file?.let { previewViewModel.currentFile = it }
-        offlineFile = previewViewModel.currentFile.getOfflineFile(requireContext())
+        offlineFile = previewViewModel.currentFile.getOfflineFile(requireContext(), previewSliderViewModel.userDrive)
     }
 
     protected class PreviewViewModel : ViewModel() {

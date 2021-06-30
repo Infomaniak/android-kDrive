@@ -21,6 +21,7 @@ import android.content.Context
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
@@ -35,17 +36,20 @@ object PreviewPDFUtils {
     fun convertPdfFileToPdfCore(
         context: Context,
         file: File,
+        userDrive: UserDrive,
         onProgress: (progress: Int) -> Unit
     ): ApiResponse<PdfCore> {
         return try {
             val outputFile = when {
-                file.isOnlyOfficePreview() -> file.getConvertedPdfCache(context)
-                file.isOffline -> file.getOfflineFile(context)
-                else -> file.getCacheFile(context)
+                file.isOnlyOfficePreview() -> file.getConvertedPdfCache(context, userDrive)
+                file.isOffline -> file.getOfflineFile(context, userDrive)
+                else -> file.getCacheFile(context, userDrive)
             }
 
             val officePdfNeedDownload = file.isOnlyOfficePreview() && (outputFile.lastModified() / 1000) < file.lastModifiedAt
-            val pdfNeedDownload = !file.isOnlyOfficePreview() && (file.isOldData(context) || file.isIncompleteFile(outputFile))
+            val pdfNeedDownload = !file.isOnlyOfficePreview()
+                    && (file.isOldData(context, userDrive) || file.isIncompleteFile(outputFile))
+
             if (officePdfNeedDownload || pdfNeedDownload) {
                 downloadFile(outputFile, file, onProgress)
                 outputFile.setLastModified(file.getLastModifiedInMilliSecond())

@@ -51,7 +51,6 @@ import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntent
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.utils.ApiController.gson
 import kotlinx.android.synthetic.main.fragment_preview_slider.*
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.Dispatchers
@@ -78,18 +77,22 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         super.onViewCreated(view, savedInstanceState)
 
         if (previewSliderViewModel.currentPreview == null) {
+            val isSharedWithMe = arguments?.getBoolean(PREVIEW_IS_SHARED_WITH_ME, false) ?: false
+            val driveId = arguments?.getInt(PREVIEW_FILE_DRIVE_ID, 0) ?: 0
             val fileId = arguments?.getInt(PREVIEW_FILE_ID_TAG) ?: savedInstanceState?.getInt(PREVIEW_FILE_ID_TAG)
-            currentPreviewFile = fileId?.let {
-                FileController.getFileById(it) ?: mainViewModel.currentFileList.value?.first { file -> file.id == it }
-            } ?: throw Exception("No current preview found")
-            previewSliderViewModel.isSharedWithMe = arguments?.getBoolean(PREVIEW_IS_SHARED_WITH_ME, false) ?: false
-            previewSliderViewModel.currentPreview = currentPreviewFile
+
+            userDrive = UserDrive(driveId = driveId, sharedWithMe = isSharedWithMe)
             hideActions = arguments?.getBoolean(PREVIEW_HIDE_ACTIONS, false) ?: false
+            currentPreviewFile = fileId?.let {
+                FileController.getFileById(it, userDrive) ?: mainViewModel.currentFileList.value?.first { file -> file.id == it }
+            } ?: throw Exception("No current preview found")
+            previewSliderViewModel.currentPreview = currentPreviewFile
+            previewSliderViewModel.userDrive = userDrive
+
         } else {
             previewSliderViewModel.currentPreview?.let { currentPreviewFile = it }
+            userDrive = previewSliderViewModel.userDrive
         }
-
-        userDrive = UserDrive(driveId = currentPreviewFile.driveId, sharedWithMe = previewSliderViewModel.isSharedWithMe)
 
         getBackNavigationResult<Boolean>(DownloadProgressDialog.OPEN_WITH) {
             requireContext().openWith(currentPreviewFile, userDrive)
@@ -102,7 +105,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         viewPager.adapter = previewSliderAdapter
         viewPager.offscreenPageLimit = 1
 
-        bottomSheetFileInfos.init(this, this, previewSliderViewModel.isSharedWithMe)
+        bottomSheetFileInfos.init(this, this, userDrive.sharedWithMe)
         bottomSheetFileInfos.updateCurrentFile(currentPreviewFile)
         bottomSheetFileInfos.setOnTouchListener { _, _ -> true }
 
@@ -406,11 +409,12 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     class PreviewSliderViewModel : ViewModel() {
         val pdfIsDownloading = MutableLiveData<Boolean>()
         var currentPreview: File? = null
-        var isSharedWithMe = false
+        var userDrive = UserDrive()
     }
 
     companion object {
         const val PREVIEW_FILE_ID_TAG = "previewFileId"
+        const val PREVIEW_FILE_DRIVE_ID = "previewFileDriveId"
         const val PREVIEW_IS_SHARED_WITH_ME = "isSharedWithMe"
         const val PREVIEW_HIDE_ACTIONS = "hideActions"
     }

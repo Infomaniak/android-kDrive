@@ -32,6 +32,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.PreviewSliderViewModel
 import com.infomaniak.drive.utils.PdfCore
 import com.infomaniak.drive.utils.PreviewPDFUtils
@@ -132,7 +133,7 @@ class PreviewPDFFragment : PreviewFragment {
         if (previewPDFAdapter == null || previewPDFAdapter?.itemCount == 0) {
             previewSliderViewModel.pdfIsDownloading.value = true
             isDownloading = true
-            previewPDFViewModel.downloadPdfFile(requireContext(), previewViewModel.currentFile)
+            previewPDFViewModel.downloadPdfFile(requireContext(), previewViewModel.currentFile, previewSliderViewModel.userDrive)
                 .observe(viewLifecycleOwner, Observer { apiResponse ->
                     apiResponse.data?.let { pdfCore ->
                         this.pdfCore = pdfCore
@@ -151,11 +152,11 @@ class PreviewPDFFragment : PreviewFragment {
         var pdfJob = Job()
         val downloadProgress = MutableLiveData<Int>()
 
-        fun downloadPdfFile(context: Context, file: File): LiveData<ApiResponse<PdfCore>> {
+        fun downloadPdfFile(context: Context, file: File, userDrive: UserDrive): LiveData<ApiResponse<PdfCore>> {
             pdfJob.cancel()
             pdfJob = Job()
             return liveData(Dispatchers.IO + pdfJob) {
-                val pdfCore = PreviewPDFUtils.convertPdfFileToPdfCore(context, file) {
+                val pdfCore = PreviewPDFUtils.convertPdfFileToPdfCore(context, file, userDrive) {
                     viewModelScope.launch(Dispatchers.Main) {
                         downloadProgress.value = it
                     }
