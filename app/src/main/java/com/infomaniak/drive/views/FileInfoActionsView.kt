@@ -393,12 +393,15 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         fun availableOfflineSwitched(fileInfoActionsView: FileInfoActionsView, currentFile: File, isChecked: Boolean) {
-            val offlineLocalPath = currentFile.getOfflineFile(fileInfoActionsView.context)
-            val cacheFile = currentFile.getCacheFile(fileInfoActionsView.context)
             when {
                 currentFile.isOffline && isChecked -> Unit
+                !currentFile.isOffline && !isChecked -> Unit
                 isChecked -> fileInfoActionsView.downloadAsOfflineFile()
-                else -> removeOfflineFile(offlineLocalPath, cacheFile)
+                else -> {
+                    val offlineLocalPath = currentFile.getOfflineFile(fileInfoActionsView.context)
+                    val cacheFile = currentFile.getCacheFile(fileInfoActionsView.context)
+                    removeOfflineFile(offlineLocalPath, cacheFile)
+                }
             }
         }
 
