@@ -138,12 +138,11 @@ object FileController {
     }
 
     fun updateExistingFile(
-        oldFile: File,
         newFile: File,
         userDrive: UserDrive
     ) {
         getRealmInstance(userDrive).use { realm ->
-            getFileById(realm, oldFile.id)?.let { localFile ->
+            getFileById(realm, newFile.id)?.let { localFile ->
                 insertOrUpdateFile(realm, newFile, localFile)
             }
         }

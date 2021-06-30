@@ -274,7 +274,7 @@ class MainViewModel : ViewModel() {
         if (UploadFile.canUpload(uri, fileModifiedAt)) {
             remoteFile.lastModifiedAt = offlineFile.lastModified() / 1000
             remoteFile.size = offlineFile.length()
-            FileController.updateExistingFile(oldFile = file, newFile = remoteFile, userDrive = userDrive)
+            FileController.updateExistingFile(newFile = remoteFile, userDrive = userDrive)
             UploadFile(
                 uri = uri.toString(),
                 driveId = userDrive.driveId,
@@ -301,7 +301,7 @@ class MainViewModel : ViewModel() {
         }
 
         if (!file.isPendingOffline(context) && (isOldData || incompleteFile || pathChanged)) {
-            FileController.updateExistingFile(oldFile = file, newFile = remoteFile, userDrive = userDrive)
+            FileController.updateExistingFile(newFile = remoteFile, userDrive = userDrive)
             Utils.downloadAsOfflineFile(context, remoteFile, userDrive)
         }
     }

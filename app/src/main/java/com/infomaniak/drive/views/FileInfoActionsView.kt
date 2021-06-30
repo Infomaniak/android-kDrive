@@ -68,7 +68,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     init {
         inflate(context, R.layout.view_file_info_actions, this)
-        setBottomSheetFileInfos()
+        initOnClickListeners()
     }
 
     fun init(ownerFragment: Fragment, onItemClickListener: OnItemClickListener, isSharedWithMe: Boolean = false) {
@@ -76,43 +76,6 @@ class FileInfoActionsView @JvmOverloads constructor(
         this.onItemClickListener = onItemClickListener
         this.isSharedWithMe = isSharedWithMe
         mainViewModel = ViewModelProvider(ownerFragment.requireActivity())[MainViewModel::class.java]
-
-        editDocument.setOnClickListener { onItemClickListener.editDocumentClicked(ownerFragment, currentFile) }
-        displayInfo.setOnClickListener { onItemClickListener.displayInfoClicked() }
-        fileRights.setOnClickListener { onItemClickListener.fileRightsClicked() }
-        sendCopy.setOnClickListener { if (currentFile.isFolder()) openAddFileBottom() else shareFile() }
-        copyPublicLink.setOnClickListener { onItemClickListener.copyPublicLink() }
-        openWith.setOnClickListener { onItemClickListener.openWithClicked() }
-        downloadFile.setOnClickListener { onItemClickListener.downloadFileClicked() }
-        addFavorites.setOnClickListener {
-            addFavorites.isEnabled = false
-            onItemClickListener.addFavoritesClicked()
-        }
-        leaveShare.setOnClickListener { onItemClickListener.leaveShare(context, currentFile) }
-
-        availableOfflineSwitch.setOnCheckedChangeListener { _, isChecked ->
-            onItemClickListener.availableOfflineSwitched(this, currentFile, isChecked)
-        }
-
-        moveFile.setOnClickListener {
-            val currentFolder = FileController.getParentFile(currentFile.id)?.id ?: -42
-            onItemClickListener.moveFileClicked(ownerFragment, currentFolder)
-        }
-        duplicateFile.setOnClickListener {
-            onItemClickListener.duplicateFileClicked(
-                ownerFragment.requireContext(),
-                currentFile
-            )
-        }
-
-        renameFile.setOnClickListener {
-            onItemClickListener.renameFileClicked(
-                ownerFragment.requireContext(),
-                currentFile,
-                this
-            )
-        }
-        deleteFile.setOnClickListener { onItemClickListener.deleteFileClicked(ownerFragment.requireContext(), currentFile) }
     }
 
     fun updateCurrentFile(file: File) {
@@ -206,10 +169,45 @@ class FileInfoActionsView @JvmOverloads constructor(
         ownerFragment.safeNavigate(R.id.addFileBottomSheetDialog)
     }
 
-    private fun setBottomSheetFileInfos() {
+    private fun initOnClickListeners() {
+        editDocument.setOnClickListener { onItemClickListener.editDocumentClicked(ownerFragment, currentFile) }
+        displayInfo.setOnClickListener { onItemClickListener.displayInfoClicked() }
+        fileRights.setOnClickListener { onItemClickListener.fileRightsClicked() }
+        sendCopy.setOnClickListener { if (currentFile.isFolder()) openAddFileBottom() else shareFile() }
+        copyPublicLink.setOnClickListener { onItemClickListener.copyPublicLink() }
+        openWith.setOnClickListener { onItemClickListener.openWithClicked() }
+        downloadFile.setOnClickListener { onItemClickListener.downloadFileClicked() }
+        addFavorites.setOnClickListener {
+            addFavorites.isEnabled = false
+            onItemClickListener.addFavoritesClicked()
+        }
+        leaveShare.setOnClickListener { onItemClickListener.leaveShare(context, currentFile) }
+
+        availableOfflineSwitch.setOnCheckedChangeListener { _, isChecked ->
+            onItemClickListener.availableOfflineSwitched(this, currentFile, isChecked)
+        }
         availableOffline.setOnClickListener {
             availableOfflineSwitch.performClick()
         }
+
+        moveFile.setOnClickListener {
+            val currentFolder = FileController.getParentFile(currentFile.id)?.id ?: -42
+            onItemClickListener.moveFileClicked(ownerFragment, currentFolder)
+        }
+        duplicateFile.setOnClickListener {
+            onItemClickListener.duplicateFileClicked(
+                ownerFragment.requireContext(),
+                currentFile
+            )
+        }
+
+        renameFile.setOnClickListener {
+            onItemClickListener.renameFileClicked(
+                ownerFragment.requireContext(),
+                currentFile
+            )
+        }
+        deleteFile.setOnClickListener { onItemClickListener.deleteFileClicked(ownerFragment.requireContext(), currentFile) }
     }
 
     fun downloadAsOfflineFile() {
@@ -295,22 +293,26 @@ class FileInfoActionsView @JvmOverloads constructor(
 
                 if (currentFile.id == fileId) {
                     if (progress == 100) {
+                        availableOffline.isEnabled = true
                         availableOfflineSwitch.isEnabled = true
                         updateFile(fileId)
                         currentFile.isOffline = true
                         refreshBottomSheetUi(currentFile)
                     } else {
+                        availableOffline.isEnabled = false
                         availableOfflineSwitch.isEnabled = false
                         refreshBottomSheetUi(currentFile, progress)
                     }
                 } else {
                     if (progress == 100) updateFile(fileId)
+                    availableOffline.isEnabled = true
                     availableOfflineSwitch.isEnabled = true
                 }
             }
         }
 
         mainViewModel.fileCancelledFromDownload.observe(lifecycleOwner) { fileId ->
+            availableOffline.isEnabled = true
             availableOfflineSwitch.isEnabled = true
             currentFile.isOffline = false
             refreshBottomSheetUi(currentFile)
@@ -437,7 +439,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             }
         }
 
-        fun renameFileClicked(context: Context, currentFile: File, fileInfoActionsView: FileInfoActionsView) {
+        fun renameFileClicked(context: Context, currentFile: File) {
             currentFile.apply {
                 Utils.createPromptNameDialog(
                     context = context,
