@@ -19,7 +19,6 @@ package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
 import android.view.View
-import android.view.View.VISIBLE
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.Utils
 import kotlinx.android.synthetic.main.fragment_file_list.*
