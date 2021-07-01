@@ -222,6 +222,8 @@ open class File(
         val path =
             if (this.path.isEmpty()) FileController.generateAndSavePath(id, userDrive)
             else this.path
+
+        if (path.isEmpty()) return java.io.File("")
         val folder = java.io.File(rootFolder, path.substringBeforeLast("/"))
 
         if (!folder.exists()) folder.mkdirs()

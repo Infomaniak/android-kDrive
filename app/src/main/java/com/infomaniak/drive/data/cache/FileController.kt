@@ -74,23 +74,24 @@ object FileController {
 
     fun generateAndSavePath(fileId: Int, userDrive: UserDrive): String {
         return getRealmInstance(userDrive).use { realm ->
-            getFileById(realm, fileId)!!.let { file ->
+            getFileById(realm, fileId)?.let { file ->
                 if (file.path.isEmpty()) {
                     realm.beginTransaction()
                     file.path = generatePath(file, userDrive)
                     realm.commitTransaction()
                     file.path
                 } else file.path
-            }
+            } ?: ""
         }
     }
 
     private fun generatePath(file: File, userDrive: UserDrive): String {
-        return file.localParent!!.first { it.id > 0 }.let { parent -> // id > 0 for exclude other root parents
-            when (parent.id) {
-                Utils.ROOT_ID -> "/${file.name}"
-                else -> generatePath(parent, userDrive) + "/${file.name}"
-            }
+        // id > 0 for exclude other root parents, home root has priority
+        val folder = file.localParent!!.firstOrNull { it.id > 0 } ?: file.localParent.firstOrNull()
+        return when {
+            folder == null -> ""
+            folder.id == Utils.ROOT_ID || folder.id < 0 -> "/${file.name}"
+            else -> generatePath(folder, userDrive) + "/${file.name}"
         }
     }
 
