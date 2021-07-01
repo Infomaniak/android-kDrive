@@ -258,7 +258,8 @@ class MainViewModel : ViewModel() {
 
                     val apiResponse = ApiRepository.getFileDetails(file)
                     apiResponse.data?.let { remoteFile ->
-                        if (localLastModified > file.lastModifiedAt) uploadFile(context, file, remoteFile, offlineFile, userDrive)
+                        val isLocalNewerThanRemote = localLastModified > remoteFile.lastModifiedAt
+                        if (isLocalNewerThanRemote) uploadFile(context, file, remoteFile, offlineFile, userDrive)
                         else downloadFile(context, file, remoteFile, offlineFile, userDrive)
                     } ?: let {
                         if (apiResponse.error?.code?.equals("object_not_found") == true) offlineFile.delete()

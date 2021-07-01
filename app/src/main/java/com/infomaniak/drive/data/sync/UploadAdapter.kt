@@ -122,6 +122,10 @@ class UploadAdapter @JvmOverloads constructor(
             exceptionNotification()
             syncResult?.restartSyncErrorWithDelay()
 
+        } catch (exception: LockErrorException) {
+            lockErrorNotification()
+            syncResult?.restartSyncErrorWithDelay()
+
         } catch (exception: ChunksSizeExceededException) {
             syncResult?.restartSyncErrorWithDelay()
 
@@ -336,6 +340,17 @@ class UploadAdapter @JvmOverloads constructor(
             context = context,
             title = context.getString(R.string.uploadInterruptedErrorTitle),
             description = context.getString(R.string.uploadOutOfMemoryError),
+            notificationId = UPLOAD_STATUS_ID,
+            contentIntent = progressPendingIntent()
+        )
+    }
+
+    private fun lockErrorNotification() {
+        cancelSync()
+        showNotification(
+            context = context,
+            title = context.getString(R.string.uploadInterruptedErrorTitle),
+            description = "Le fichier est déjà en cours de modification", // TODO translate
             notificationId = UPLOAD_STATUS_ID,
             contentIntent = progressPendingIntent()
         )

@@ -204,6 +204,7 @@ class UploadTask(
                         throw QuotaExceededException()
                     }
                     apiResponse?.error?.code.equals("file_already_exists_error") -> Unit
+                    apiResponse?.error?.code.equals("lock_error") -> throw LockErrorException()
                     else -> throw Exception(bodyResponse)
                 }
             }
@@ -297,6 +298,7 @@ class UploadTask(
     class FolderNotFoundException : Exception()
     class QuotaExceededException : Exception()
     class ChunksSizeExceededException : Exception()
+    class LockErrorException : Exception("File is being modified from onlyoffice so blocked by it")
 
     companion object {
         var chunkSize: Int = 1 * 1024 * 1024 // Chunk 1 Mo
