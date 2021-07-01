@@ -22,13 +22,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.File
 import kotlinx.android.synthetic.main.fragment_preview_others.*
 
-class PreviewOtherFragment : PreviewFragment {
-
-    constructor() : super()
-    constructor(file: File) : super(file)
+class PreviewOtherFragment : PreviewFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_preview_others, container, false)
@@ -38,8 +34,8 @@ class PreviewOtherFragment : PreviewFragment {
         super.onViewCreated(view, savedInstanceState)
         container?.layoutTransition?.setAnimateParentHierarchy(false)
 
-        fileIcon.setImageResource(previewViewModel.currentFile.getFileType().icon)
-        fileName.text = previewViewModel.currentFile.name
+        fileIcon.setImageResource(file.getFileType().icon)
+        fileName.text = file.name
 
         container?.setOnClickListener {
             (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()

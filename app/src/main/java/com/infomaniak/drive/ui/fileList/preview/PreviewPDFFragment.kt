@@ -45,7 +45,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class PreviewPDFFragment : PreviewFragment {
+class PreviewPDFFragment : PreviewFragment() {
 
     private var previewPDFAdapter: PreviewPDFAdapter? = null
     private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
@@ -53,9 +53,6 @@ class PreviewPDFFragment : PreviewFragment {
 
     private var pdfCore: PdfCore? = null
     private var isDownloading = false
-
-    constructor() : super()
-    constructor(file: File) : super(file)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_preview_pdf, container, false)
@@ -65,8 +62,8 @@ class PreviewPDFFragment : PreviewFragment {
         super.onViewCreated(view, savedInstanceState)
         container?.layoutTransition?.setAnimateParentHierarchy(false)
 
-        fileIcon.setImageResource(previewViewModel.currentFile.getFileType().icon)
-        fileName.text = previewViewModel.currentFile.name
+        fileIcon.setImageResource(file.getFileType().icon)
+        fileName.text = file.name
         downloadProgress.visibility = VISIBLE
         previewDescription.setText(R.string.previewDownloadIndication)
         previewDescription.visibility = VISIBLE
@@ -133,7 +130,7 @@ class PreviewPDFFragment : PreviewFragment {
         if (previewPDFAdapter == null || previewPDFAdapter?.itemCount == 0) {
             previewSliderViewModel.pdfIsDownloading.value = true
             isDownloading = true
-            previewPDFViewModel.downloadPdfFile(requireContext(), previewViewModel.currentFile, previewSliderViewModel.userDrive)
+            previewPDFViewModel.downloadPdfFile(requireContext(), file, previewSliderViewModel.userDrive)
                 .observe(viewLifecycleOwner, Observer { apiResponse ->
                     apiResponse.data?.let { pdfCore ->
                         this.pdfCore = pdfCore

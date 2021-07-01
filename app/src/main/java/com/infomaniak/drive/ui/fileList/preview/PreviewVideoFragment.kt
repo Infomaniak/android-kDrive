@@ -39,19 +39,15 @@ import com.google.android.exoplayer2.util.EventLogger
 import com.google.android.exoplayer2.util.Util
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
-import com.infomaniak.drive.data.models.File
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
 import kotlinx.android.synthetic.main.fragment_preview_others.*
 import kotlinx.android.synthetic.main.fragment_preview_video.*
 import kotlinx.android.synthetic.main.fragment_preview_video.container
 
-open class PreviewVideoFragment : PreviewFragment {
+open class PreviewVideoFragment : PreviewFragment() {
 
     private lateinit var simpleExoPlayer: SimpleExoPlayer
-
-    constructor() : super()
-    constructor(file: File) : super(file)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_preview_video, container, false)
@@ -59,9 +55,9 @@ open class PreviewVideoFragment : PreviewFragment {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        fileIcon.setImageResource(previewViewModel.currentFile.getFileType().icon)
+        fileIcon.setImageResource(file.getFileType().icon)
         container?.layoutTransition?.setAnimateParentHierarchy(false)
-        fileName.text = previewViewModel.currentFile.name
+        fileName.text = file.name
         playerView.setOnClickListener {
             if (playerView.isControllerFullyVisible)
                 (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
@@ -135,10 +131,10 @@ open class PreviewVideoFragment : PreviewFragment {
             playerView.controllerShowTimeoutMs = 1000
             playerView.controllerHideOnTouch = false
 
-            if (previewViewModel.currentFile.isOffline && !previewViewModel.currentFile.isOldData(requireContext())) {
+            if (file.isOffline && !file.isOldData(requireContext())) {
                 setMediaItem(MediaItem.fromUri(offlineFile.toUri()))
             } else {
-                setMediaItem(MediaItem.fromUri(Uri.parse(ApiRoutes.downloadFile(previewViewModel.currentFile))))
+                setMediaItem(MediaItem.fromUri(Uri.parse(ApiRoutes.downloadFile(file))))
             }
 
             prepare()

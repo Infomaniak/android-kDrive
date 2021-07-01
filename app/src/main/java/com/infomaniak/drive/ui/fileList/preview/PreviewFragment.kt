@@ -24,27 +24,34 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 
 
-open class PreviewFragment() : Fragment() {
+open class PreviewFragment : Fragment() {
 
-    private var file: File? = null
+    protected lateinit var file: File
     protected lateinit var offlineFile: java.io.File
     protected val previewViewModel: PreviewViewModel by viewModels()
     private val previewSliderViewModel: PreviewSliderFragment.PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
 
-    constructor(file: File) : this() {
-        this.file = file
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        file?.let { previewViewModel.currentFile = it }
-        offlineFile = previewViewModel.currentFile.getOfflineFile(requireContext(), previewSliderViewModel.userDrive)
+        if (previewViewModel.currentFile == null) {
+            arguments?.let {
+                val fileId = it.getInt(FILE_ID_TAG)
+                previewViewModel.currentFile = FileController.getFileById(fileId, previewSliderViewModel.userDrive)
+            }
+        }
+        previewViewModel.currentFile?.let { file = it }
+        offlineFile = file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive)
     }
 
     protected class PreviewViewModel : ViewModel() {
-        lateinit var currentFile: File
+        var currentFile: File? = null
+    }
+
+    companion object {
+        const val FILE_ID_TAG = "file_id_tag"
     }
 }
