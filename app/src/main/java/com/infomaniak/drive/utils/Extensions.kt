@@ -596,31 +596,32 @@ fun Context.getLocalThumbnail(file: File): Bitmap? {
                 }
             }
         } else {
-            val fileId = try {
+            try {
                 ContentUris.parseId(fileUri)
             } catch (e: Exception) {
                 fileUri.lastPathSegment?.split(":")?.let {
                     it.getOrNull(1)?.toLong()
-                } ?: -1
-            }
-            val options = BitmapFactory.Options().apply {
-                outWidth = thumbnailSize
-                outHeight = thumbnailSize
-            }
-            if (contentResolver.getType(fileUri)?.contains("video") == true) {
-                MediaStore.Video.Thumbnails.getThumbnail(
-                    contentResolver,
-                    fileId,
-                    MediaStore.Video.Thumbnails.MICRO_KIND,
-                    options
-                )
-            } else {
-                MediaStore.Images.Thumbnails.getThumbnail(
-                    contentResolver,
-                    fileId,
-                    MediaStore.Images.Thumbnails.MICRO_KIND,
-                    options
-                )
+                }
+            }?.let { fileId ->
+                val options = BitmapFactory.Options().apply {
+                    outWidth = thumbnailSize
+                    outHeight = thumbnailSize
+                }
+                if (contentResolver.getType(fileUri)?.contains("video") == true) {
+                    MediaStore.Video.Thumbnails.getThumbnail(
+                        contentResolver,
+                        fileId,
+                        MediaStore.Video.Thumbnails.MICRO_KIND,
+                        options
+                    )
+                } else {
+                    MediaStore.Images.Thumbnails.getThumbnail(
+                        contentResolver,
+                        fileId,
+                        MediaStore.Images.Thumbnails.MICRO_KIND,
+                        options
+                    )
+                }
             }
         }
     }
