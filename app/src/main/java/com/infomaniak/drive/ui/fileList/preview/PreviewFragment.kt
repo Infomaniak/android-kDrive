@@ -27,12 +27,11 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 
-
 open class PreviewFragment : Fragment() {
 
     protected lateinit var file: File
     protected lateinit var offlineFile: java.io.File
-    protected val previewViewModel: PreviewViewModel by viewModels()
+    private val previewViewModel: PreviewViewModel by viewModels()
     private val previewSliderViewModel: PreviewSliderFragment.PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

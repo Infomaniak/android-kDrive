@@ -31,7 +31,6 @@ import coil.Coil
 import coil.load
 import coil.request.ImageRequest
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.networking.HttpUtils
 import kotlinx.android.synthetic.main.fragment_preview_others.*
