@@ -134,8 +134,9 @@ class UploadAdapter @JvmOverloads constructor(
                 exception is IOException -> {
                     syncResult?.restartSyncErrorWithDelay()
                     Sentry.withScope { scope ->
-                        scope.setExtra("data", gson.toJson(currentUploadTask ?: "")) // StackOverFlow
-                        scope.setExtra("debug", "lastProgress: ${currentUploadTask?.lastProgress()}")
+                        scope.setExtra("uploadFile", gson.toJson(currentUploadFile ?: ""))
+                        scope.setExtra("previousChunkBytesWritten", "${currentUploadTask?.previousChunkBytesWritten()}")
+                        scope.setExtra("lastProgress", "${currentUploadTask?.lastProgress()}")
                         Sentry.captureMessage(exception.message ?: "IOException occurred")
                     }
                 }
