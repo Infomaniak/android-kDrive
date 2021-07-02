@@ -577,14 +577,18 @@ fun Context.getLocalThumbnail(file: File): Bitmap? {
     val thumbnailSize = 100
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         val size = Size(thumbnailSize, thumbnailSize)
-        if (fileUri.scheme.equals(ContentResolver.SCHEME_FILE)) {
-            if (file.getMimeType().contains("video")) {
-                ThumbnailUtils.createVideoThumbnail(fileUri.toFile(), size, null)
+        try {
+            if (fileUri.scheme.equals(ContentResolver.SCHEME_FILE)) {
+                if (file.getMimeType().contains("video")) {
+                    ThumbnailUtils.createVideoThumbnail(fileUri.toFile(), size, null)
+                } else {
+                    ThumbnailUtils.createImageThumbnail(fileUri.toFile(), size, null)
+                }
             } else {
-                ThumbnailUtils.createImageThumbnail(fileUri.toFile(), size, null)
+                contentResolver.loadThumbnail(fileUri, size, null)
             }
-        } else {
-            contentResolver.loadThumbnail(fileUri, size, null)
+        } catch (e: Exception) {
+            null
         }
     } else {
         if (fileUri.scheme.equals(ContentResolver.SCHEME_FILE)) {
