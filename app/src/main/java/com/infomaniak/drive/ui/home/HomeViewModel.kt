@@ -52,9 +52,9 @@ class HomeViewModel : ViewModel() {
     private var lastPictures = arrayListOf<File>()
 
     private var lastModifiedTime: Long = 0
-    private var lastModified = ApiResponse<ArrayList<File>>()
+    private var lastModified = ArrayList<File>()
 
-    fun getLastModifiedFiles(driveId: Int): LiveData<ApiResponse<ArrayList<File>>> {
+    fun getLastModifiedFiles(driveId: Int): LiveData<ArrayList<File>?> {
         lastModifiedJob.cancel()
         lastModifiedJob = Job()
         val ignoreDownload = lastModifiedTime != 0L && (Date().time - lastModifiedTime) < DOWNLOAD_INTERVAL && !forceDownload
@@ -65,8 +65,13 @@ class HomeViewModel : ViewModel() {
             }
             val apiResponse = ApiRepository.getLastModifiedFiles(driveId)
             lastModifiedTime = Date().time
-            lastModified = apiResponse
-            emit(apiResponse)
+            lastModified = apiResponse.data ?: arrayListOf()
+            if (apiResponse.isSuccess()) {
+                apiResponse.data?.let { FileController.storeRecentChanges(it) }
+                emit(apiResponse.data)
+            } else {
+                emit(FileController.getRecentChanges())
+            }
         }
     }
 

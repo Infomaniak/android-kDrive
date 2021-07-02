@@ -51,10 +51,12 @@ object FileController {
     const val FAVORITES_FILE_ID = -1
     private const val MY_SHARES_FILE_ID = -2
     private const val PICTURES_FILE_ID = -3
+    private const val RECENT_CHANGES_FILE_ID = -4
 
     private val FAVORITES_FILE = File(FAVORITES_FILE_ID, name = "Favoris")
     private val MY_SHARES_FILE = File(MY_SHARES_FILE_ID, name = "My Shares")
     private val PICTURES_FILE = File(PICTURES_FILE_ID, name = "Pictures")
+    private val RECENT_CHANGES_FILE = File(RECENT_CHANGES_FILE_ID, name = "Recent changes")
 
     private fun getFileById(realm: Realm, fileId: Int) = realm.where(File::class.java).equalTo("id", fileId).findFirst()
 
@@ -400,6 +402,30 @@ object FileController {
         return customRealm?.let(operation) ?: getRealmInstance().use(operation)
     }
 
+    fun getRecentChanges(): ArrayList<File> {
+        return getRealmInstance().use { realm ->
+            realm.where(File::class.java).equalTo(File::id.name, RECENT_CHANGES_FILE_ID).findFirst()?.let { folder ->
+                ArrayList(realm.copyFromRealm(folder.children, 0))
+            } ?: arrayListOf()
+        }
+    }
+
+    fun storeRecentChanges(files: ArrayList<File>) {
+        getRealmInstance().use { realm ->
+            realm.beginTransaction()
+            val folder = realm.where(File::class.java).equalTo(File::id.name, RECENT_CHANGES_FILE_ID).findFirst()
+                ?: realm.copyToRealm(RECENT_CHANGES_FILE)
+            folder.children = RealmList()
+            files.forEach { file ->
+                realm.where(File::class.java).equalTo(File::id.name, file.id).findFirst()?.let { realmFile ->
+                    keepOldLocalFilesData(realmFile, file)
+                }
+                folder.children.add(file)
+            }
+            realm.commitTransaction()
+        }
+    }
+
     fun storeFileActivities(fileActivities: ArrayList<FileActivity>) {
         getRealmInstance().use { realm ->
             realm.beginTransaction()
@@ -408,10 +434,7 @@ object FileController {
                 fileActivity.file?.let { file ->
                     realm.where(File::class.java).equalTo(File::id.name, file.id).findFirst()
                 }?.let { localFile ->
-                    fileActivity.file?.collaborativeFolder = localFile.collaborativeFolder
-                    fileActivity.file?.children = localFile.children
-                    fileActivity.file?.isComplete = localFile.isComplete
-                    fileActivity.file?.isOffline = localFile.isOffline
+                    fileActivity.file?.let { keepOldLocalFilesData(localFile, it) }
                 }
                 realm.insertOrUpdate(fileActivity)
             }
@@ -764,6 +787,13 @@ object FileController {
         }
 
         (getSystemService(DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
+    }
+
+    private fun keepOldLocalFilesData(oldFile: File, newFile: File) {
+        newFile.children = oldFile.children
+        newFile.isComplete = oldFile.isComplete
+        newFile.responseAt = oldFile.responseAt
+        newFile.isOffline = oldFile.isOffline
     }
 
     private fun RealmQuery<File>.getSortQueryByOrder(order: File.SortType): RealmQuery<File> {
