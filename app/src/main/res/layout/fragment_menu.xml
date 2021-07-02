@@ -190,16 +190,13 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/divider"
-                    android:visibility="gone" />
+                    android:background="@color/divider" />
 
-                <!--TODO show last edit-->
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/lastEdits"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/buttonHeight"
-                    android:background="?selectableItemBackground"
-                    android:visibility="gone">
+                    android:background="?selectableItemBackground">
 
                     <ImageView
                         android:id="@+id/lastEditsIcon"

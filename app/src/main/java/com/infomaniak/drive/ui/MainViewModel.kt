@@ -26,6 +26,8 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.ui.fileList.FileListFragment
+import com.infomaniak.drive.ui.home.HomeViewModel.Companion.DOWNLOAD_INTERVAL
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
@@ -62,6 +64,10 @@ class MainViewModel : ViewModel() {
 
     private var getFileDetailsJob = Job()
     private var syncOfflineFilesJob = Job()
+    private var getLastModifiedFilesJob = Job()
+
+    private var lastModifiedTime: Long = 0
+    private var lastModified = ApiResponse<ArrayList<File>>()
 
     fun createMultiSelectMediator(): MediatorLiveData<Pair<Int, Int>> {
         return MediatorLiveData<Pair<Int, Int>>().apply { value = /*success*/0 to /*total*/0 }
@@ -309,6 +315,40 @@ class MainViewModel : ViewModel() {
         if (!file.isPendingOffline(context) && (!remoteFile.isOfflineAndIntact(remoteOfflineFile) || pathChanged)) {
             FileController.updateExistingFile(newFile = remoteFile, userDrive = userDrive)
             Utils.downloadAsOfflineFile(context, remoteFile, userDrive)
+        }
+    }
+
+    fun getLastModifiedFiles(driveId: Int, forceDownload: Boolean = false): LiveData<FileListFragment.FolderFilesResult?> {
+        getLastModifiedFilesJob.cancel()
+        getLastModifiedFilesJob = Job()
+
+        val ignoreDownload = lastModifiedTime != 0L && (Date().time - lastModifiedTime) < DOWNLOAD_INTERVAL && !forceDownload
+
+        return liveData(Dispatchers.IO + getLastModifiedFilesJob) {
+            if (ignoreDownload) {
+                emit(FileListFragment.FolderFilesResult(files = lastModified.data!!, isComplete = true, page = 1))
+                return@liveData
+            }
+
+            suspend fun recursive(page: Int) {
+                val apiResponse = ApiRepository.getLastModifiedFiles(driveId, page)
+                if (apiResponse.isSuccess()) {
+                    val data = apiResponse.data
+                    when {
+                        data == null -> Unit
+                        data.size < ApiRepository.PER_PAGE -> emit(
+                            FileListFragment.FolderFilesResult(files = data, isComplete = true, page = page)
+                        )
+                        else -> {
+                            emit(
+                                FileListFragment.FolderFilesResult(files = data, isComplete = false, page = page)
+                            )
+                            recursive(page + 1)
+                        }
+                    }
+                } else emit(null)
+            }
+            recursive(1)
         }
     }
 }

@@ -290,6 +290,14 @@
             app:exitAnim="@anim/fragment_open_exit"
             app:popEnterAnim="@anim/fragment_open_enter"
             app:popExitAnim="@anim/fragment_open_exit" />
+        <action
+            android:id="@+id/action_menuFragment_to_lastEditsFragment"
+            app:destination="@id/lastEditsFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_open_exit" />
+
     </fragment>
 
     <activity
@@ -706,6 +714,11 @@
             android:id="@+id/action_picturesFragment_to_previewSliderFragment"
             app:destination="@id/previewSliderFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/lastEditsFragment"
+        android:name="com.infomaniak.drive.ui.menu.LastEditsFragment"
+        android:label="LastEditsFragment" />
+
     <dialog
         android:id="@+id/selectPermissionBottomSheetDialog"
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog"
