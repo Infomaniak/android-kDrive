@@ -80,7 +80,11 @@ class PdfCore(private val context: Context, private var file: File) : CoroutineS
     }
 
     private fun buildBitmap(page: Int, onBitmap: (Bitmap?) -> Unit) {
-        val bitmap = pdfRenderer.openPage(page).renderBitmap()
+        val bitmap = try {
+            pdfRenderer.openPage(page).renderBitmap()
+        } catch (e: Exception) {
+            null
+        }
         onBitmap(bitmap)
     }
 
