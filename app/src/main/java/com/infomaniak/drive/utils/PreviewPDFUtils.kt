@@ -47,8 +47,7 @@ object PreviewPDFUtils {
             }
 
             val officePdfNeedDownload = file.isOnlyOfficePreview() && (outputFile.lastModified() / 1000) < file.lastModifiedAt
-            val pdfNeedDownload = !file.isOnlyOfficePreview()
-                    && (file.isOldData(context, userDrive) || file.isIncompleteFile(outputFile))
+            val pdfNeedDownload = !file.isOnlyOfficePreview() && !file.isOfflineAndComplete(outputFile)
 
             if (officePdfNeedDownload || pdfNeedDownload) {
                 downloadFile(outputFile, file, onProgress)

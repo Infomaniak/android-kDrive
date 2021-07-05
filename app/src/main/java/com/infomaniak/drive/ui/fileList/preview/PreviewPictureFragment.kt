@@ -27,6 +27,7 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.navGraphViewModels
 import coil.Coil
 import coil.load
 import coil.request.ImageRequest
@@ -41,6 +42,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class PreviewPictureFragment : PreviewFragment() {
+
+    private val previewSliderViewModel: PreviewSliderFragment.PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_preview_picture, container, false)
@@ -73,9 +76,10 @@ class PreviewPictureFragment : PreviewFragment() {
             )
             .build()
 
-        if (file.isOffline && !file.isOldData(requireContext())) {
+        val offlineFile = if (file.isOffline) file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive) else null
+        if (offlineFile != null && file.isOfflineAndComplete(offlineFile)) {
             if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
-            if (offlineFile.exists()) imageView?.setImageURI(offlineFile.toUri())
+            imageView?.setImageURI(offlineFile.toUri())
         } else {
             lifecycleScope.launch(Dispatchers.IO) {
                 imageLoader.execute(previewRequest).drawable?.let { drawable ->

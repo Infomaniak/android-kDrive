@@ -68,8 +68,9 @@ class DownloadWorker(private val context: Context, workerParams: WorkerParameter
         val userDrive = UserDrive(userID, driveID)
 
         return@withContext FileController.getFileById(fileID, userDrive)?.let { file ->
-            if (file.isOffline && !file.isOldData(context, userDrive)) return@let Result.success()
             val offlineFile = file.getOfflineFile(context, userDrive)
+            if (file.isOfflineAndComplete(offlineFile)) return@let Result.success()
+
             val firstUpdate = workDataOf(PROGRESS to 0, FILE_ID to fileID)
             setProgress(firstUpdate)
 

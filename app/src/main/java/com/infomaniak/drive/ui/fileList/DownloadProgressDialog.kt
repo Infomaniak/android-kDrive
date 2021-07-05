@@ -92,7 +92,7 @@ class DownloadProgressDialog : DialogFragment() {
                 if (file.isOffline) file.getOfflineFile(context, userDrive)
                 else file.getCacheFile(context, userDrive)
 
-            if (file.isOldData(context, userDrive) || file.isIncompleteFile(outputFile)) {
+            if (outputFile.length() != file.size || file.isOldData(outputFile)) {
                 try {
                     val response = DownloadWorker.downloadFileResponse(ApiRoutes.downloadFile(file)) { progress ->
                         runBlocking { emit(progress to false) }

@@ -195,18 +195,12 @@ open class File(
         }
     }
 
-    fun isOldData(context: Context, userDrive: UserDrive = UserDrive()): Boolean {
-        return if (isOffline) {
-            val offlineDataFile = getOfflineFile(context, userDrive)
-            (offlineDataFile.lastModified() / 1000) < lastModifiedAt
-        } else {
-            val cacheDataFile = getCacheFile(context, userDrive)
-            (cacheDataFile.lastModified() / 1000) < lastModifiedAt
-        }
+    fun isOldData(dataFile: java.io.File): Boolean {
+        return (dataFile.lastModified() / 1000) < lastModifiedAt
     }
 
-    fun isIncompleteFile(file: java.io.File): Boolean {
-        return file.length() != size
+    fun isOfflineAndComplete(offlineFile: java.io.File): Boolean {
+        return isOffline && ((offlineFile.lastModified() / 1000) == lastModifiedAt && offlineFile.length() == size)
     }
 
     fun getConvertedPdfCache(context: Context, userDrive: UserDrive): java.io.File {
