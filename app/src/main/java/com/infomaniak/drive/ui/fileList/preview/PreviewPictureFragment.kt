@@ -31,7 +31,6 @@ import coil.Coil
 import coil.load
 import coil.request.ImageRequest
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.networking.HttpUtils
 import kotlinx.android.synthetic.main.fragment_preview_others.*
@@ -41,9 +40,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class PreviewPictureFragment : PreviewFragment {
-    constructor() : super()
-    constructor(file: File) : super(file)
+class PreviewPictureFragment : PreviewFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_preview_picture, container, false)
@@ -57,16 +54,16 @@ class PreviewPictureFragment : PreviewFragment {
             noThumbnailLayout?.visibility = VISIBLE
         }.start()
         previewDescription.visibility = GONE
-        fileIcon.setImageResource(previewViewModel.currentFile.getFileType().icon)
+        fileIcon.setImageResource(file.getFileType().icon)
 
-        val imageViewDisposable = imageView.load(previewViewModel.currentFile.thumbnail()) {
+        val imageViewDisposable = imageView.load(file.thumbnail()) {
             placeholder(R.drawable.coil_hack)
         }
 
         val imageLoader = Coil.imageLoader(requireContext())
         val previewRequest = ImageRequest.Builder(requireContext())
             .headers(HttpUtils.getHeaders())
-            .data(previewViewModel.currentFile.imagePreview())
+            .data(file.imagePreview())
             .listener(
                 onError = { _, _ -> previewDescription?.visibility = VISIBLE },
                 onSuccess = { _, _ ->
@@ -76,9 +73,10 @@ class PreviewPictureFragment : PreviewFragment {
             )
             .build()
 
-        if (previewViewModel.currentFile.isOffline && !previewViewModel.currentFile.isOldData(requireContext())) {
+        val offlineFile = if (file.isOffline) file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive) else null
+        if (offlineFile != null && file.isOfflineAndIntact(offlineFile)) {
             if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
-            if (offlineFile.exists()) imageView?.setImageURI(offlineFile.toUri())
+            imageView?.setImageURI(offlineFile.toUri())
         } else {
             lifecycleScope.launch(Dispatchers.IO) {
                 imageLoader.execute(previewRequest).drawable?.let { drawable ->

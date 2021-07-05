@@ -454,9 +454,9 @@ class CloudStorageProvider : DocumentsProvider() {
             val offlineFile = file.getOfflineFile(context, userDrive)
 
             try {
-                val isNotOldData = !file.isOldData(context, userDrive)
-                if (file.isOffline && file.size == offlineFile.length()) return ParcelFileDescriptor.open(offlineFile, accessMode)
-                if (isNotOldData && file.size == cacheFile.length()) return ParcelFileDescriptor.open(cacheFile, accessMode)
+                if (file.isOfflineAndIntact(offlineFile)) return ParcelFileDescriptor.open(offlineFile, accessMode)
+                if (!file.isObsolete(cacheFile) && file.size == cacheFile.length())
+                    return ParcelFileDescriptor.open(cacheFile, accessMode)
 
                 val okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(userDrive.userId) }
                 val response = DownloadWorker.downloadFileResponse(

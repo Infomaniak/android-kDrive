@@ -68,12 +68,15 @@ class DownloadWorker(private val context: Context, workerParams: WorkerParameter
         val userDrive = UserDrive(userID, driveID)
 
         return@withContext FileController.getFileById(fileID, userDrive)?.let { file ->
-            if (file.isOffline && !file.isOldData(context, userDrive)) return@let Result.success()
             val offlineFile = file.getOfflineFile(context, userDrive)
+            val cacheFile = file.getCacheFile(context, userDrive)
+            if (file.isOfflineAndIntact(offlineFile)) return@let Result.success()
+
             val firstUpdate = workDataOf(PROGRESS to 0, FILE_ID to fileID)
             setProgress(firstUpdate)
 
             if (offlineFile.exists()) offlineFile.delete()
+            if (cacheFile.exists()) cacheFile.delete()
 
             val cancelPendingIntent = WorkManager.getInstance(applicationContext).createCancelPendingIntent(id)
             val cancelAction = NotificationCompat.Action(null, context.getString(R.string.buttonCancel), cancelPendingIntent)

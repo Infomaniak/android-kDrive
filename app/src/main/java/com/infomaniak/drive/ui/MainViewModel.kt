@@ -292,15 +292,13 @@ class MainViewModel : ViewModel() {
     private fun downloadFile(context: Context, file: File, remoteFile: File, offlineFile: java.io.File, userDrive: UserDrive) {
         file.lastModifiedAt = remoteFile.lastModifiedAt
         val remoteOfflineFile = remoteFile.getOfflineFile(context, userDrive)
-        val isOldData = file.isOldData(context, userDrive)
-        val incompleteFile = remoteFile.isIncompleteFile(offlineFile)
         val pathChanged = !offlineFile.path.equals(remoteOfflineFile.path)
         if (pathChanged) {
             if (file.isMedia()) file.deleteInMediaScan(context, userDrive)
             offlineFile.delete()
         }
 
-        if (!file.isPendingOffline(context) && (isOldData || incompleteFile || pathChanged)) {
+        if (!file.isPendingOffline(context) && (!remoteFile.isOfflineAndIntact(offlineFile) || pathChanged)) {
             FileController.updateExistingFile(newFile = remoteFile, userDrive = userDrive)
             Utils.downloadAsOfflineFile(context, remoteFile, userDrive)
         }

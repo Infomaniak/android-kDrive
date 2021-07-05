@@ -433,9 +433,10 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun addSelectedFilesToOffline(file: File) {
         if (!file.isOffline && !file.isFolder()) {
-            if (!file.isOldData(requireContext())) {
-                val cacheFile = file.getCacheFile(requireContext())
-                val offlineFile = file.getOfflineFile(requireContext())
+            val cacheFile = file.getCacheFile(requireContext())
+            val offlineFile = file.getOfflineFile(requireContext())
+
+            if (!file.isObsolete(cacheFile) && file.isIntactFile(cacheFile)) {
                 Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
                 runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
 
