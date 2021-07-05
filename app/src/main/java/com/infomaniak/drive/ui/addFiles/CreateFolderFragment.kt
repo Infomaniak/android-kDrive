@@ -39,7 +39,6 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.hideKeyboard
-import com.infomaniak.drive.utils.isPositive
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
@@ -68,8 +67,8 @@ open class CreateFolderFragment : Fragment() {
         toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
-        folderNameValueInput.doOnTextChanged { _, _, _, count ->
-            createFolderButton.isEnabled = count.isPositive()
+        folderNameValueInput.doOnTextChanged { value, _, _, _ ->
+            createFolderButton.isEnabled = !value.isNullOrEmpty()
         }
     }
 
