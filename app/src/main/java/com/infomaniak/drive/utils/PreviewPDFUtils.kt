@@ -44,7 +44,7 @@ object PreviewPDFUtils {
                 file.isOnlyOfficePreview() -> file.getConvertedPdfCache(context, userDrive)
                 file.isOffline -> file.getOfflineFile(context, userDrive)
                 else -> file.getCacheFile(context, userDrive)
-            }
+            } ?: throw java.lang.Exception("io file cannot be null")
 
             val officePdfNeedDownload = file.isOnlyOfficePreview() && (outputFile.lastModified() / 1000) < file.lastModifiedAt
             val pdfNeedDownload = !file.isOnlyOfficePreview() && !file.isOfflineAndIntact(outputFile)

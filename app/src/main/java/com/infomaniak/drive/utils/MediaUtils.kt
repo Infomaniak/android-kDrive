@@ -43,7 +43,8 @@ object MediaUtils {
             File.ConvertedType.AUDIO -> MediaStore.Audio.Media.EXTERNAL_CONTENT_URI to MediaStore.Audio.Media.DATA
             else -> throw UnsupportedOperationException("Accept only media files")
         }
-        val path = getOfflineFile(context, userDrive).path
-        context.contentResolver.delete(uri, "$column=?", arrayOf(path))
+        getOfflineFile(context, userDrive)?.let { offlineFile ->
+            context.contentResolver.delete(uri, "$column=?", arrayOf(offlineFile.path))
+        }
     }
 }

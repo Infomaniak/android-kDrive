@@ -252,16 +252,16 @@ class MainViewModel : ViewModel() {
 
                 FileController.getOfflineFiles(null, userDrive).forEach { file ->
                     val offlineFile = file.getOfflineFile(context, userDrive)
-                    val localLastModified = offlineFile.lastModified() / 1000
 
-                    migrateOfflineIfNeeded(context, file, offlineFile, userDrive)
+                    offlineFile?.let { migrateOfflineIfNeeded(context, file, offlineFile, userDrive) }
 
                     val apiResponse = ApiRepository.getFileDetails(file)
                     apiResponse.data?.let { remoteFile ->
-                        if (localLastModified > file.lastModifiedAt) uploadFile(context, file, remoteFile, offlineFile, userDrive)
-                        else downloadFile(context, file, remoteFile, offlineFile, userDrive)
+                        if (offlineFile != null && offlineFile.lastModified() > file.getLastModifiedInMilliSecond()) {
+                            uploadFile(context, file, remoteFile, offlineFile, userDrive)
+                        } else downloadFile(context, file, remoteFile, offlineFile, userDrive)
                     } ?: let {
-                        if (apiResponse.error?.code?.equals("object_not_found") == true) offlineFile.delete()
+                        if (apiResponse.error?.code?.equals("object_not_found") == true) offlineFile?.delete()
                     }
                 }
             }
@@ -289,16 +289,19 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    private fun downloadFile(context: Context, file: File, remoteFile: File, offlineFile: java.io.File, userDrive: UserDrive) {
+    private fun downloadFile(context: Context, file: File, remoteFile: File, offlineFile: java.io.File?, userDrive: UserDrive) {
         file.lastModifiedAt = remoteFile.lastModifiedAt
         val remoteOfflineFile = remoteFile.getOfflineFile(context, userDrive)
-        val pathChanged = !offlineFile.path.equals(remoteOfflineFile.path)
+        val pathChanged = !offlineFile?.path.equals(remoteOfflineFile?.path)
+
+        if (remoteOfflineFile == null) return
+
         if (pathChanged) {
             if (file.isMedia()) file.deleteInMediaScan(context, userDrive)
-            offlineFile.delete()
+            offlineFile?.delete()
         }
 
-        if (!file.isPendingOffline(context) && (!remoteFile.isOfflineAndIntact(offlineFile) || pathChanged)) {
+        if (!file.isPendingOffline(context) && (!remoteFile.isOfflineAndIntact(remoteOfflineFile) || pathChanged)) {
             FileController.updateExistingFile(newFile = remoteFile, userDrive = userDrive)
             Utils.downloadAsOfflineFile(context, remoteFile, userDrive)
         }

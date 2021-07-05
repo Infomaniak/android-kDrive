@@ -87,10 +87,10 @@ object FileController {
 
     private fun generatePath(file: File, userDrive: UserDrive): String {
         // id > 0 for exclude other root parents, home root has priority
-        val folder = file.localParent!!.firstOrNull { it.id > 0 } ?: file.localParent.firstOrNull()
+        val folder = file.localParent?.firstOrNull { it.id > 0 }
         return when {
             folder == null -> ""
-            folder.id == Utils.ROOT_ID || folder.id < 0 -> "/${file.name}"
+            folder.id == Utils.ROOT_ID -> "/${file.name}"
             else -> generatePath(folder, userDrive) + "/${file.name}"
         }
     }
@@ -193,7 +193,6 @@ object FileController {
         getRealmInstance().use { realm ->
             files.forEachIndexed { index, file ->
                 val offlineFile = file.getOfflineFile(Realm.getApplicationContext()!!)
-                val lastModified = offlineFile.lastModified() / 1000
 
                 realm.where(File::class.java).equalTo(File::id.name, file.id).findFirst()?.let { oldFile ->
                     realm.executeTransaction {
@@ -202,10 +201,10 @@ object FileController {
                     }
                 }
 
-                if (offlineFile.exists() && lastModified == file.lastModifiedAt) {
+                if (offlineFile != null && file.isOfflineAndIntact(offlineFile)) {
                     files[index].isOffline = true
                     keepCaches.add(file.id)
-                } else offlineFile.delete()
+                } else offlineFile?.delete()
             }
 
             if (replaceOldData) removeFile(MY_SHARES_FILE_ID, keepCaches, keepFiles, realm)

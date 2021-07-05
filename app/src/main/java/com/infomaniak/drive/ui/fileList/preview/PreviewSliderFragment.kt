@@ -283,9 +283,11 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
-    override fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File) {
+    override fun removeOfflineFile(offlineLocalPath: java.io.File?, cacheFile: java.io.File) {
         lifecycleScope.launch {
-            mainViewModel.removeOfflineFile(requireContext(), currentPreviewFile, offlineLocalPath, cacheFile, userDrive)
+            offlineLocalPath?.let {
+                mainViewModel.removeOfflineFile(requireContext(), currentPreviewFile, it, cacheFile, userDrive)
+            }
             previewSliderAdapter.updateFile(currentPreviewFile.id) { file -> file.isOffline = false }
 
             withContext(Dispatchers.Main) {

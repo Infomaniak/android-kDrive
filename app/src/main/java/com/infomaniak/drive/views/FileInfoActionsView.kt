@@ -43,6 +43,7 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.*
 import kotlinx.android.synthetic.main.fragment_file_details.view.*
+import kotlinx.android.synthetic.main.fragment_menu.view.*
 import kotlinx.android.synthetic.main.fragment_preview_slider.*
 import kotlinx.android.synthetic.main.fragment_preview_slider.view.*
 import kotlinx.android.synthetic.main.item_file.view.*
@@ -213,12 +214,13 @@ class FileInfoActionsView @JvmOverloads constructor(
     fun downloadAsOfflineFile() {
         val cacheFile = currentFile.getCacheFile(context)
         if (cacheFile.exists()) {
-            val offlineFile = currentFile.getOfflineFile(context)
-            Utils.moveCacheFileToOffline(currentFile, cacheFile, offlineFile)
-            CoroutineScope(Dispatchers.IO).launch { FileController.updateOfflineStatus(currentFile.id, true) }
-            currentFile.isOffline = true
-            onItemClickListener.onCacheAddedToOffline()
-            refreshBottomSheetUi(currentFile)
+            currentFile.getOfflineFile(context)?.let { offlineFile ->
+                Utils.moveCacheFileToOffline(currentFile, cacheFile, offlineFile)
+                CoroutineScope(Dispatchers.IO).launch { FileController.updateOfflineStatus(currentFile.id, true) }
+                currentFile.isOffline = true
+                onItemClickListener.onCacheAddedToOffline()
+                refreshBottomSheetUi(currentFile)
+            }
         } else Utils.downloadAsOfflineFile(context, currentFile)
     }
 
@@ -375,7 +377,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun dropBoxClicked(isDropBox: Boolean) = Unit
         fun onRenameFile(newName: String, onApiResponse: () -> Unit)
         fun onDuplicateFile(result: String, onApiResponse: () -> Unit)
-        fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File)
+        fun removeOfflineFile(offlineLocalPath: java.io.File?, cacheFile: java.io.File)
 
         fun editDocumentClicked(ownerFragment: Fragment, currentFile: File) {
             ownerFragment.apply {
