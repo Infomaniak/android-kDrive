@@ -27,13 +27,11 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
-import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.PreviewSliderViewModel
 import com.infomaniak.drive.utils.PdfCore
 import com.infomaniak.drive.utils.PreviewPDFUtils
 import com.infomaniak.lib.core.models.ApiResponse
@@ -49,7 +47,6 @@ class PreviewPDFFragment : PreviewFragment() {
 
     private var previewPDFAdapter: PreviewPDFAdapter? = null
     private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
-    private val previewSliderViewModel: PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
 
     private var pdfCore: PdfCore? = null
     private var isDownloading = false

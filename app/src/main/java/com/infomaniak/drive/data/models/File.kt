@@ -195,12 +195,19 @@ open class File(
         }
     }
 
-    fun isOldData(dataFile: java.io.File): Boolean {
+    fun isObsolete(dataFile: java.io.File): Boolean {
         return (dataFile.lastModified() / 1000) < lastModifiedAt
     }
 
-    fun isOfflineAndComplete(offlineFile: java.io.File): Boolean {
-        return isOffline && ((offlineFile.lastModified() / 1000) == lastModifiedAt && offlineFile.length() == size)
+    fun isIntactFile(dataFile: java.io.File): Boolean {
+        return dataFile.length() == size
+    }
+
+    /**
+     * File is offline and local file is the same as in the server (same modification date and size)
+     */
+    fun isOfflineAndIntact(offlineFile: java.io.File): Boolean {
+        return isOffline && ((offlineFile.lastModified() / 1000) == lastModifiedAt && isIntactFile(offlineFile))
     }
 
     fun getConvertedPdfCache(context: Context, userDrive: UserDrive): java.io.File {

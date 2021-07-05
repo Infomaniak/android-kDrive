@@ -298,7 +298,7 @@ class MainViewModel : ViewModel() {
             offlineFile.delete()
         }
 
-        if (!file.isPendingOffline(context) && (!remoteFile.isOfflineAndComplete(offlineFile) || pathChanged)) {
+        if (!file.isPendingOffline(context) && (!remoteFile.isOfflineAndIntact(offlineFile) || pathChanged)) {
             FileController.updateExistingFile(newFile = remoteFile, userDrive = userDrive)
             Utils.downloadAsOfflineFile(context, remoteFile, userDrive)
         }

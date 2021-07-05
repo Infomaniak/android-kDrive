@@ -26,7 +26,6 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.core.net.toUri
-import androidx.navigation.navGraphViewModels
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.audio.AudioAttributes
 import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSource
@@ -49,7 +48,6 @@ import kotlinx.android.synthetic.main.fragment_preview_video.container
 open class PreviewVideoFragment : PreviewFragment() {
 
     private lateinit var simpleExoPlayer: SimpleExoPlayer
-    private val previewSliderViewModel: PreviewSliderFragment.PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_preview_video, container, false)
@@ -111,7 +109,7 @@ open class PreviewVideoFragment : PreviewFragment() {
         val context = requireContext()
         val renderersFactory: RenderersFactory = buildRenderersFactory(context)
         val offlineFile = if (file.isOffline) file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive) else null
-        val offlineIsComplete = offlineFile?.let { file.isOfflineAndComplete(offlineFile) } ?: false
+        val offlineIsComplete = offlineFile?.let { file.isOfflineAndIntact(offlineFile) } ?: false
 
         val mediaSourceFactory: MediaSourceFactory =
             if (offlineIsComplete) DefaultMediaSourceFactory(getOfflineDataSourceFactory())
