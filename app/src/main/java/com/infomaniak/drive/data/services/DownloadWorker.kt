@@ -45,13 +45,12 @@ import okhttp3.Response
 import java.io.BufferedInputStream
 
 
-class DownloadWorker(private val context: Context, workerParams: WorkerParameters) :
-    CoroutineWorker(context, workerParams) {
+class DownloadWorker(private val context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result {
         val fileID = inputData.getInt(FILE_ID, 0)
         return coroutineScope {
-            val job = async { initDownload(fileID) }
+            val job = async { initOfflineDownload(fileID) }
             job.invokeOnCompletion { exception ->
                 when (exception) {
                     is CancellationException -> notifyDownloadCancelled(fileID)
@@ -62,7 +61,7 @@ class DownloadWorker(private val context: Context, workerParams: WorkerParameter
         }
     }
 
-    private suspend fun initDownload(fileID: Int): Result = withContext(Dispatchers.IO) {
+    private suspend fun initOfflineDownload(fileID: Int): Result = withContext(Dispatchers.IO) {
         val userID = inputData.getInt(USER_ID, AccountUtils.currentUserId)
         val driveID = inputData.getInt(DRIVE_ID, AccountUtils.currentDriveId)
         val userDrive = UserDrive(userID, driveID)
@@ -88,14 +87,14 @@ class DownloadWorker(private val context: Context, workerParams: WorkerParameter
                 addAction(cancelAction)
                 setForeground(ForegroundInfo(fileID, build()))
             }
-            startDownload(file, downloadNotification, offlineFile, userDrive)
+            startOfflineDownload(file, downloadNotification, offlineFile, userDrive)
         } ?: Result.failure()
     }
 
-    private suspend fun startDownload(
+    private suspend fun startOfflineDownload(
         file: File,
         downloadNotification: NotificationCompat.Builder,
-        outputDataFile: java.io.File,
+        offlineFile: java.io.File,
         userDrive: UserDrive
     ): Result = withContext(Dispatchers.IO) {
         try {
@@ -116,18 +115,18 @@ class DownloadWorker(private val context: Context, workerParams: WorkerParameter
                 }
             }
 
-            saveRemoteData(response, outputDataFile) {
+            saveRemoteData(response, offlineFile) {
                 launch(Dispatchers.Main) { setProgress(lastUpdate) }
                 FileController.updateOfflineStatus(file.id, true)
-                outputDataFile.setLastModified(file.getLastModifiedInMilliSecond())
-                if (file.isMedia()) MediaUtils.scanFile(context, outputDataFile)
+                offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
+                if (file.isMedia()) MediaUtils.scanFile(context, offlineFile)
             }
 
             if (response.isSuccessful) Result.success()
             else Result.failure()
 
         } catch (e: Exception) {
-            if (outputDataFile.exists()) outputDataFile.delete()
+            if (offlineFile.exists()) offlineFile.delete()
             e.printStackTrace()
             Result.failure()
         }

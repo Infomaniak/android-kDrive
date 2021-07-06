@@ -121,7 +121,8 @@ class FileInfoActionsView @JvmOverloads constructor(
                 addFavorites.visibility = if (rights?.canFavorite == true) VISIBLE else GONE
                 editDocument.visibility =
                     if ((currentFile.onlyoffice && rights?.write == true) || currentFile.onlyofficeConvertExtension != null) VISIBLE else GONE
-                availableOffline.visibility = if (isSharedWithMe) GONE else VISIBLE
+                val offlineNotAvailable = currentFile.getOfflineFile(context) == null
+                availableOffline.visibility = if (isSharedWithMe || offlineNotAvailable) GONE else VISIBLE
                 moveFile.visibility = if (rights?.move == true && !isSharedWithMe) VISIBLE else GONE
                 renameFile.visibility = if (rights?.rename == true && !isSharedWithMe) VISIBLE else GONE
                 deleteFile.visibility = if (rights?.delete == true) VISIBLE else GONE
@@ -324,7 +325,9 @@ class FileInfoActionsView @JvmOverloads constructor(
     fun refreshBottomSheetUi(file: File, offlineProgress: Int? = null) {
         apply {
             fileView.setFileItem(file)
-            if (availableOfflineSwitch.isEnabled) availableOfflineSwitch.isChecked = file.isOffline
+            if (availableOfflineSwitch.isEnabled && availableOffline.visibility == VISIBLE) {
+                availableOfflineSwitch.isChecked = file.isOffline
+            }
             addFavorites.isEnabled = true
             addFavoritesIcon.isEnabled = file.isFavorite
             addFavoritesText.setText(if (file.isFavorite) R.string.buttonRemoveFavorites else R.string.buttonAddFavorites)
@@ -377,7 +380,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun dropBoxClicked(isDropBox: Boolean) = Unit
         fun onRenameFile(newName: String, onApiResponse: () -> Unit)
         fun onDuplicateFile(result: String, onApiResponse: () -> Unit)
-        fun removeOfflineFile(offlineLocalPath: java.io.File?, cacheFile: java.io.File)
+        fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File)
 
         fun editDocumentClicked(ownerFragment: Fragment, currentFile: File) {
             ownerFragment.apply {
@@ -402,7 +405,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                 else -> {
                     val offlineLocalPath = currentFile.getOfflineFile(fileInfoActionsView.context)
                     val cacheFile = currentFile.getCacheFile(fileInfoActionsView.context)
-                    removeOfflineFile(offlineLocalPath, cacheFile)
+                    offlineLocalPath?.let { removeOfflineFile(offlineLocalPath, cacheFile) }
                 }
             }
         }

@@ -251,17 +251,19 @@ class MainViewModel : ViewModel() {
                 val userDrive = UserDrive(driveId = drive.id)
 
                 FileController.getOfflineFiles(null, userDrive).forEach { file ->
-                    val offlineFile = file.getOfflineFile(context, userDrive)
 
-                    offlineFile?.let { migrateOfflineIfNeeded(context, file, offlineFile, userDrive) }
+                    file.getOfflineFile(context, userDrive)?.let { offlineFile ->
+                        migrateOfflineIfNeeded(context, file, offlineFile, userDrive)
 
-                    val apiResponse = ApiRepository.getFileDetails(file)
-                    apiResponse.data?.let { remoteFile ->
-                        if (offlineFile != null && offlineFile.lastModified() > file.getLastModifiedInMilliSecond()) {
-                            uploadFile(context, file, remoteFile, offlineFile, userDrive)
-                        } else downloadFile(context, file, remoteFile, offlineFile, userDrive)
-                    } ?: let {
-                        if (apiResponse.error?.code?.equals("object_not_found") == true) offlineFile?.delete()
+                        val apiResponse = ApiRepository.getFileDetails(file)
+                        apiResponse.data?.let { remoteFile ->
+                            remoteFile.isOffline = true
+                            if (offlineFile.lastModified() > file.getLastModifiedInMilliSecond()) {
+                                uploadFile(context, file, remoteFile, offlineFile, userDrive)
+                            } else downloadOfflineFile(context, file, remoteFile, offlineFile, userDrive)
+                        } ?: let {
+                            if (apiResponse.error?.code?.equals("object_not_found") == true) offlineFile.delete()
+                        }
                     }
                 }
             }
@@ -289,16 +291,19 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    private fun downloadFile(context: Context, file: File, remoteFile: File, offlineFile: java.io.File?, userDrive: UserDrive) {
-        file.lastModifiedAt = remoteFile.lastModifiedAt
-        val remoteOfflineFile = remoteFile.getOfflineFile(context, userDrive)
-        val pathChanged = !offlineFile?.path.equals(remoteOfflineFile?.path)
+    private fun downloadOfflineFile(
+        context: Context,
+        file: File,
+        remoteFile: File,
+        offlineFile: java.io.File,
+        userDrive: UserDrive
+    ) {
+        val remoteOfflineFile = remoteFile.getOfflineFile(context, userDrive) ?: return
 
-        if (remoteOfflineFile == null) return
-
+        val pathChanged = offlineFile.path != remoteOfflineFile.path
         if (pathChanged) {
             if (file.isMedia()) file.deleteInMediaScan(context, userDrive)
-            offlineFile?.delete()
+            offlineFile.delete()
         }
 
         if (!file.isPendingOffline(context) && (!remoteFile.isOfflineAndIntact(remoteOfflineFile) || pathChanged)) {
