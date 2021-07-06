@@ -151,8 +151,8 @@ fun ImageView.loadAvatar(id: Int, avatarUrl: String?, initials: String): Disposa
 fun TextInputEditText.showOrHideEmptyError(): Boolean {
     val parentLayout = parent.parent as TextInputLayout
 
-    parentLayout.error = if (text.isNullOrBlank()) context.getString(R.string.allEmptyInputError) else ""
-    return parentLayout.isErrorEnabled
+    parentLayout.error = if (text.isNullOrBlank()) context.getString(R.string.allEmptyInputError) else null
+    return parentLayout.error != null
 }
 
 fun Cursor.uri(contentUri: Uri): Uri {
