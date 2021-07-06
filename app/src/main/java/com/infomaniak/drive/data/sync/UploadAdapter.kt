@@ -27,6 +27,7 @@ import android.os.Parcelable
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toFile
 import androidx.core.net.toUri
@@ -350,7 +351,7 @@ class UploadAdapter @JvmOverloads constructor(
         showNotification(
             context = context,
             title = context.getString(R.string.uploadInterruptedErrorTitle),
-            description = "Le fichier est déjà en cours de modification", // TODO translate
+            description = context.getString(R.string.errorFileLocked),
             notificationId = UPLOAD_STATUS_ID,
             contentIntent = progressPendingIntent()
         )
@@ -379,7 +380,7 @@ class UploadAdapter @JvmOverloads constructor(
             setTicker(title)
             setAutoCancel(true)
             setContentTitle(title)
-            setContentText(description)
+            setStyle(NotificationCompat.BigTextStyle().bigText(description))
             setContentIntent(contentIntent)
             notificationManagerCompat.notify(notificationId, this.build())
         }
