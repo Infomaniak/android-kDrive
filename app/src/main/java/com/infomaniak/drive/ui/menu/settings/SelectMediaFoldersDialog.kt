@@ -24,11 +24,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.liveData
+import androidx.lifecycle.*
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.utils.DrivePermissions
@@ -36,7 +32,10 @@ import com.infomaniak.drive.utils.MediaFoldersProvider
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import io.realm.Realm
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_media_folders.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runInterruptible
 
 class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
 
@@ -109,10 +108,12 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
         fun getAllMediaFolders(contentResolver: ContentResolver): LiveData<Pair<Boolean, ArrayList<MediaFolder>>> {
             getMediaFilesJob = Job()
             return liveData {
-                emit(runInterruptible(Dispatchers.IO + getMediaFilesJob) {
+                runInterruptible(Dispatchers.IO + getMediaFilesJob) {
                     MediaFolder.getRealmInstance().use { realm ->
                         val cacheMediaFolders = MediaFolder.getAll(realm)
-                        if (cacheMediaFolders.isNotEmpty()) return@runInterruptible (false to cacheMediaFolders)
+                        viewModelScope.launch(Dispatchers.Main) {
+                            if (cacheMediaFolders.isNotEmpty()) emit(false to cacheMediaFolders)
+                        }
 
                         val localMediaFolders = ArrayList(
                             MediaFoldersProvider.getAllMediaFolders(
@@ -123,9 +124,11 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
                         )
                         cacheMediaFolders.removeObsoleteMediaFolders(realm, localMediaFolders)
 
-                        return@runInterruptible (true to localMediaFolders.removeDuplicatedMediaFolders(cacheMediaFolders))
+                        viewModelScope.launch(Dispatchers.Main) {
+                            emit(true to localMediaFolders.removeDuplicatedMediaFolders(cacheMediaFolders))
+                        }
                     }
-                })
+                }
             }
         }
 
