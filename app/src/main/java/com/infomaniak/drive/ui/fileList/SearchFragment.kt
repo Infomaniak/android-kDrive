@@ -67,7 +67,7 @@ class SearchFragment : FileListFragment() {
 
         searchView.hint = getString(R.string.searchViewHint)
         searchView.addTextChangedListener(DebouncingTextWatcher(lifecycle) {
-            clearButton.visibility = if (it.isNullOrEmpty()) INVISIBLE else VISIBLE
+            clearButton?.visibility = if (it.isNullOrEmpty()) INVISIBLE else VISIBLE
             fileListViewModel.currentPage = 1
             downloadFiles(true)
         })
