@@ -43,6 +43,7 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.*
 import kotlinx.android.synthetic.main.fragment_file_details.view.*
+import kotlinx.android.synthetic.main.fragment_menu.view.*
 import kotlinx.android.synthetic.main.fragment_preview_slider.*
 import kotlinx.android.synthetic.main.fragment_preview_slider.view.*
 import kotlinx.android.synthetic.main.item_file.view.*
@@ -120,7 +121,8 @@ class FileInfoActionsView @JvmOverloads constructor(
                 addFavorites.visibility = if (rights?.canFavorite == true) VISIBLE else GONE
                 editDocument.visibility =
                     if ((currentFile.onlyoffice && rights?.write == true) || currentFile.onlyofficeConvertExtension != null) VISIBLE else GONE
-                availableOffline.visibility = if (isSharedWithMe) GONE else VISIBLE
+                val offlineNotAvailable = currentFile.getOfflineFile(context) == null
+                availableOffline.visibility = if (isSharedWithMe || offlineNotAvailable) GONE else VISIBLE
                 moveFile.visibility = if (rights?.move == true && !isSharedWithMe) VISIBLE else GONE
                 renameFile.visibility = if (rights?.rename == true && !isSharedWithMe) VISIBLE else GONE
                 deleteFile.visibility = if (rights?.delete == true) VISIBLE else GONE
@@ -213,12 +215,13 @@ class FileInfoActionsView @JvmOverloads constructor(
     fun downloadAsOfflineFile() {
         val cacheFile = currentFile.getCacheFile(context)
         if (cacheFile.exists()) {
-            val offlineFile = currentFile.getOfflineFile(context)
-            Utils.moveCacheFileToOffline(currentFile, cacheFile, offlineFile)
-            CoroutineScope(Dispatchers.IO).launch { FileController.updateOfflineStatus(currentFile.id, true) }
-            currentFile.isOffline = true
-            onItemClickListener.onCacheAddedToOffline()
-            refreshBottomSheetUi(currentFile)
+            currentFile.getOfflineFile(context)?.let { offlineFile ->
+                Utils.moveCacheFileToOffline(currentFile, cacheFile, offlineFile)
+                CoroutineScope(Dispatchers.IO).launch { FileController.updateOfflineStatus(currentFile.id, true) }
+                currentFile.isOffline = true
+                onItemClickListener.onCacheAddedToOffline()
+                refreshBottomSheetUi(currentFile)
+            }
         } else Utils.downloadAsOfflineFile(context, currentFile)
     }
 
@@ -322,7 +325,9 @@ class FileInfoActionsView @JvmOverloads constructor(
     fun refreshBottomSheetUi(file: File, offlineProgress: Int? = null) {
         apply {
             fileView.setFileItem(file)
-            if (availableOfflineSwitch.isEnabled) availableOfflineSwitch.isChecked = file.isOffline
+            if (availableOfflineSwitch.isEnabled && availableOffline.visibility == VISIBLE) {
+                availableOfflineSwitch.isChecked = file.isOffline
+            }
             addFavorites.isEnabled = true
             addFavoritesIcon.isEnabled = file.isFavorite
             addFavoritesText.setText(if (file.isFavorite) R.string.buttonRemoveFavorites else R.string.buttonAddFavorites)
@@ -400,7 +405,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                 else -> {
                     val offlineLocalPath = currentFile.getOfflineFile(fileInfoActionsView.context)
                     val cacheFile = currentFile.getCacheFile(fileInfoActionsView.context)
-                    removeOfflineFile(offlineLocalPath, cacheFile)
+                    offlineLocalPath?.let { removeOfflineFile(offlineLocalPath, cacheFile) }
                 }
             }
         }

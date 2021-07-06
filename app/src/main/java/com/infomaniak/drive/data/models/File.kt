@@ -216,12 +216,14 @@ open class File(
         return java.io.File(folder, id.toString())
     }
 
-    fun getOfflineFile(context: Context, userDrive: UserDrive = UserDrive()): java.io.File {
+    fun getOfflineFile(context: Context, userDrive: UserDrive = UserDrive()): java.io.File? {
         val mediaFolder = context.externalMediaDirs?.firstOrNull() ?: context.filesDir
         val rootFolder = java.io.File(mediaFolder, "offline_storage/${userDrive.userId}/${userDrive.driveId}")
         val path =
             if (this.path.isEmpty()) FileController.generateAndSavePath(id, userDrive)
             else this.path
+
+        if (path.isEmpty()) return null
         val folder = java.io.File(rootFolder, path.substringBeforeLast("/"))
 
         if (!folder.exists()) folder.mkdirs()
@@ -235,7 +237,7 @@ open class File(
     }
 
     fun deleteCaches(context: Context) {
-        if (isOffline) getOfflineFile(context).apply { if (exists()) delete() }
+        if (isOffline) getOfflineFile(context)?.apply { if (exists()) delete() }
         else getCacheFile(context).apply { if (exists()) delete() }
     }
 

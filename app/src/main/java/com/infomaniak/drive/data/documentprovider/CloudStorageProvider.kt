@@ -454,7 +454,8 @@ class CloudStorageProvider : DocumentsProvider() {
             val offlineFile = file.getOfflineFile(context, userDrive)
 
             try {
-                if (file.isOfflineAndIntact(offlineFile)) return ParcelFileDescriptor.open(offlineFile, accessMode)
+                if (offlineFile != null && file.isOfflineAndIntact(offlineFile))
+                    return ParcelFileDescriptor.open(offlineFile, accessMode)
                 if (!file.isObsolete(cacheFile) && file.size == cacheFile.length())
                     return ParcelFileDescriptor.open(cacheFile, accessMode)
 

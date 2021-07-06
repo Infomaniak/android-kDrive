@@ -74,23 +74,24 @@ object FileController {
 
     fun generateAndSavePath(fileId: Int, userDrive: UserDrive): String {
         return getRealmInstance(userDrive).use { realm ->
-            getFileById(realm, fileId)!!.let { file ->
+            getFileById(realm, fileId)?.let { file ->
                 if (file.path.isEmpty()) {
                     realm.beginTransaction()
                     file.path = generatePath(file, userDrive)
                     realm.commitTransaction()
                     file.path
                 } else file.path
-            }
+            } ?: ""
         }
     }
 
     private fun generatePath(file: File, userDrive: UserDrive): String {
-        return file.localParent!!.first { it.id > 0 }.let { parent -> // id > 0 for exclude other root parents
-            when (parent.id) {
-                Utils.ROOT_ID -> "/${file.name}"
-                else -> generatePath(parent, userDrive) + "/${file.name}"
-            }
+        // id > 0 for exclude other root parents, home root has priority
+        val folder = file.localParent?.firstOrNull { it.id > 0 }
+        return when {
+            folder == null -> ""
+            folder.id == Utils.ROOT_ID -> "/${file.name}"
+            else -> generatePath(folder, userDrive) + "/${file.name}"
         }
     }
 
@@ -192,7 +193,6 @@ object FileController {
         getRealmInstance().use { realm ->
             files.forEachIndexed { index, file ->
                 val offlineFile = file.getOfflineFile(Realm.getApplicationContext()!!)
-                val lastModified = offlineFile.lastModified() / 1000
 
                 realm.where(File::class.java).equalTo(File::id.name, file.id).findFirst()?.let { oldFile ->
                     realm.executeTransaction {
@@ -201,10 +201,10 @@ object FileController {
                     }
                 }
 
-                if (offlineFile.exists() && lastModified == file.lastModifiedAt) {
+                if (offlineFile != null && file.isOfflineAndIntact(offlineFile)) {
                     files[index].isOffline = true
                     keepCaches.add(file.id)
-                } else offlineFile.delete()
+                } else offlineFile?.delete()
             }
 
             if (replaceOldData) removeFile(MY_SHARES_FILE_ID, keepCaches, keepFiles, realm)
