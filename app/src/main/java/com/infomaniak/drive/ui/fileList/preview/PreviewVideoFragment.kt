@@ -83,12 +83,12 @@ open class PreviewVideoFragment : PreviewFragment() {
                 override fun onPlayerError(error: ExoPlaybackException) {
                     error.printStackTrace()
                     when (error.message) {
-                        "Source error" -> previewDescription.setText(R.string.previewVideoSourceError)
-                        else -> previewDescription.setText(R.string.previewLoadError)
+                        "Source error" -> previewDescription?.setText(R.string.previewVideoSourceError)
+                        else -> previewDescription?.setText(R.string.previewLoadError)
                     }
-                    playerView.visibility = GONE
-                    previewDescription.visibility = VISIBLE
-                    errorLayout.visibility = VISIBLE
+                    playerView?.visibility = GONE
+                    previewDescription?.visibility = VISIBLE
+                    errorLayout?.visibility = VISIBLE
                 }
             })
         }
