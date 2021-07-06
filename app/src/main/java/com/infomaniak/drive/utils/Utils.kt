@@ -243,8 +243,6 @@ object Utils {
             startActivity(openWithIntent(file, userDrive))
         } catch (e: ActivityNotFoundException) {
             Toast.makeText(this, R.string.allActivityNotFoundError, Toast.LENGTH_LONG).show()
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
     }
 
