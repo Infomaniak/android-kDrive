@@ -287,7 +287,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private fun Uri.fileName(): String {
         contentResolver.query(this, null, null, null, null)?.use { cursor ->
-            if (cursor.moveToFirst()) SyncUtils.getFileName(cursor) else ""
+            return if (cursor.moveToFirst()) SyncUtils.getFileName(cursor) else ""
         }
         return ""
     }
