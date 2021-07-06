@@ -111,7 +111,8 @@ class DownloadWorker(private val context: Context, workerParams: WorkerParameter
                 downloadNotification.apply {
                     setContentText("$progress%")
                     setProgress(100, progress, false)
-                    launch { setForeground(ForegroundInfo(file.id, build())) }
+                    // runBlocking for sync the progress
+                    runBlocking { setForeground(ForegroundInfo(file.id, build())) }
                 }
             }
 

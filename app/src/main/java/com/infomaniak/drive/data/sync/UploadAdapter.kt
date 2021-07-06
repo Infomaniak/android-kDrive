@@ -27,6 +27,7 @@ import android.os.Parcelable
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toFile
 import androidx.core.net.toUri
@@ -120,6 +121,10 @@ class UploadAdapter @JvmOverloads constructor(
 
         } catch (exception: CancellationException) { // uploadSupervisorJob cancelled
             exceptionNotification()
+            syncResult?.restartSyncErrorWithDelay()
+
+        } catch (exception: LockErrorException) {
+            lockErrorNotification()
             syncResult?.restartSyncErrorWithDelay()
 
         } catch (exception: ChunksSizeExceededException) {
@@ -341,6 +346,17 @@ class UploadAdapter @JvmOverloads constructor(
         )
     }
 
+    private fun lockErrorNotification() {
+        cancelSync()
+        showNotification(
+            context = context,
+            title = context.getString(R.string.uploadInterruptedErrorTitle),
+            description = context.getString(R.string.errorFileLocked),
+            notificationId = UPLOAD_STATUS_ID,
+            contentIntent = progressPendingIntent()
+        )
+    }
+
     private fun exceptionNotification() {
         cancelSync()
         showNotification(
@@ -364,7 +380,7 @@ class UploadAdapter @JvmOverloads constructor(
             setTicker(title)
             setAutoCancel(true)
             setContentTitle(title)
-            setContentText(description)
+            setStyle(NotificationCompat.BigTextStyle().bigText(description))
             setContentIntent(contentIntent)
             notificationManagerCompat.notify(notificationId, this.build())
         }
