@@ -197,14 +197,10 @@ class UploadTask(
                     null
                 }
                 when {
-                    apiResponse?.error?.code.equals("object_not_found") -> {
-                        throw FolderNotFoundException()
-                    }
-                    apiResponse?.error?.code.equals("quota_exceeded_error") -> {
-                        throw QuotaExceededException()
-                    }
                     apiResponse?.error?.code.equals("file_already_exists_error") -> Unit
                     apiResponse?.error?.code.equals("lock_error") -> throw LockErrorException()
+                    apiResponse?.error?.code.equals("object_not_found") -> throw FolderNotFoundException()
+                    apiResponse?.error?.code.equals("quota_exceeded_error") -> throw QuotaExceededException()
                     else -> throw Exception(bodyResponse)
                 }
             }
@@ -295,10 +291,10 @@ class UploadTask(
 
     fun lastProgress() = currentProgress.get()
 
-    class FolderNotFoundException : Exception()
-    class QuotaExceededException : Exception()
     class ChunksSizeExceededException : Exception()
-    class LockErrorException : Exception("File is being modified from onlyoffice so blocked by it")
+    class FolderNotFoundException : Exception()
+    class LockErrorException : Exception()
+    class QuotaExceededException : Exception()
 
     companion object {
         var chunkSize: Int = 1 * 1024 * 1024 // Chunk 1 Mo
