@@ -596,7 +596,7 @@ fun Context.getLocalThumbnail(file: File): Bitmap? {
                 if (file.getMimeType().contains("video")) {
                     ThumbnailUtils.createVideoThumbnail(path, MediaStore.Video.Thumbnails.MICRO_KIND)
                 } else {
-                    ThumbnailUtils.createImageThumbnail(path, MediaStore.Images.Thumbnails.MICRO_KIND)
+                    Utils.extractThumbnail(path, thumbnailSize, thumbnailSize)
                 }
             }
         } else {
