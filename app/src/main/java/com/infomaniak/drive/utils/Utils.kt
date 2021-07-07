@@ -50,6 +50,7 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment
 import kotlinx.android.synthetic.main.dialog_name_prompt.view.*
 import java.util.*
+import kotlin.math.min
 import kotlin.math.pow
 
 
@@ -326,5 +327,27 @@ object Utils {
             }
         }
         return outputFile.toUri()
+    }
+
+    /**
+     * From file path
+     */
+    @Deprecated(message = "Only for API 28 and below, otherwise use ThumbnailUtils.createImageThumbnail()")
+    fun extractThumbnail(filePath: String, width: Int, height: Int): Bitmap {
+        val bitmapOptions = BitmapFactory.Options()
+        bitmapOptions.inJustDecodeBounds = true
+        BitmapFactory.decodeFile(filePath, bitmapOptions)
+
+        val widthScale = bitmapOptions.outWidth.toFloat() / width
+        val heightScale = bitmapOptions.outHeight.toFloat() / height
+        val scale = min(widthScale, heightScale)
+        var sampleSize = 1
+        while (sampleSize < scale) {
+            sampleSize *= 2
+        }
+        bitmapOptions.inSampleSize = sampleSize
+        bitmapOptions.inJustDecodeBounds = false
+
+        return BitmapFactory.decodeFile(filePath, bitmapOptions)
     }
 }
