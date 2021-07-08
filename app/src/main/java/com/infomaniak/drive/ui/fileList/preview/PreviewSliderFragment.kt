@@ -285,8 +285,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     override fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File) {
         lifecycleScope.launch {
-            mainViewModel.removeOfflineFile(requireContext(), currentPreviewFile, offlineLocalPath, cacheFile, userDrive)
-
+            mainViewModel.removeOfflineFile(currentPreviewFile, offlineLocalPath, cacheFile, userDrive)
             previewSliderAdapter.updateFile(currentPreviewFile.id) { file -> file.isOffline = false }
 
             withContext(Dispatchers.Main) {
@@ -297,7 +296,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun onLeaveShare(onApiResponse: () -> Unit) {
-        mainViewModel.deleteFile(requireContext(), currentPreviewFile).observe(viewLifecycleOwner) { apiResponse ->
+        mainViewModel.deleteFile(currentPreviewFile).observe(viewLifecycleOwner) { apiResponse ->
             onApiResponse()
             if (apiResponse.isSuccess()) {
                 if (previewSliderAdapter.deleteFile(currentPreviewFile)) {
@@ -351,7 +350,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun onDeleteFile(onApiResponse: () -> Unit) {
-        mainViewModel.deleteFile(requireContext(), currentPreviewFile).observe(viewLifecycleOwner) { apiResponse ->
+        mainViewModel.deleteFile(currentPreviewFile).observe(viewLifecycleOwner) { apiResponse ->
             onApiResponse()
             if (apiResponse.isSuccess()) {
                 mainViewModel.currentFileList.value?.remove(currentPreviewFile)

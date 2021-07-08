@@ -89,7 +89,7 @@ open class UploadFile(
         private const val DB_NAME = "Sync.realm"
         private const val ONE_DAY = 24 * 60 * 60 * 1000
         private var realmConfiguration: RealmConfiguration = RealmConfiguration.Builder().name(DB_NAME)
-            .schemaVersion(2) // Must be bumped when the schema changes
+            .schemaVersion(3) // Must be bumped when the schema changes
             .modules(RealmModules.SyncFilesModule())
             .migration(UploadMigration())
             .build()
@@ -120,6 +120,15 @@ open class UploadFile(
             return getRealmInstance().use { realm ->
                 pendingFilesQuery(realm, folderID).findAll()
                     ?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile> ?: arrayListOf()
+            }
+        }
+
+        fun getUploadedFilesBeforeDate(startDate: Date): ArrayList<UploadFile>? {
+            return getRealmInstance().use { realm ->
+                realm.where(UploadFile::class.java)
+                    .lessThan(UploadFile::uploadAt.name, startDate)
+                    .isNull(UploadFile::deletedAt.name)
+                    .findAll()?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile>
             }
         }
 
@@ -176,6 +185,24 @@ open class UploadFile(
                     realm.beginTransaction()
                     syncFile.deleteFromRealm()
                     realm.commitTransaction()
+                }
+            }
+        }
+
+        fun deleteFileFromDb(uri: Uri, realm: Realm = getRealmInstance()) {
+            realm.executeTransaction {
+                syncFileByUriQuery(realm, uri.toString()).findFirst()?.let { syncFile ->
+                    syncFile.deletedAt = Date()
+                }
+            }
+        }
+
+        fun deleteAllFilesFromDb(files: ArrayList<UploadFile>, realm: Realm = getRealmInstance()) {
+            realm.executeTransaction {
+                files.forEach { file ->
+                    syncFileByUriQuery(realm, file.uri).findFirst()?.let { syncFile ->
+                        syncFile.deletedAt = Date()
+                    }
                 }
             }
         }

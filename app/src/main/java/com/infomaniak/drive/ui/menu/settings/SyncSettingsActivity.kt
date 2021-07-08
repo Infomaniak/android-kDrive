@@ -284,7 +284,8 @@ class SyncSettingsActivity : BaseActivity() {
                     lastSync = if (saveOldPictures) Date(0) else Date(),
                     syncFolder = syncSettingsViewModel.syncFolder.value!!,
                     syncVideo = syncVideoSwitch.isChecked,
-                    createDatedSubFolders = createDatedSubFoldersSwitch.isChecked
+                    createDatedSubFolders = createDatedSubFoldersSwitch.isChecked,
+                    deleteAfterSync = deletePicturesAfterSyncSwitch.isChecked
                 )
                 syncSettings.setIntervalType(syncSettingsViewModel.syncIntervalType.value!!)
                 activateAutoSync(syncSettings)

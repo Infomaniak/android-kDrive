@@ -178,6 +178,8 @@
     <string name="createFolderTitle">Crea una cartella</string>
     <string name="createFolderValidUntilDescription">Dopo tale data, gli utenti non potranno più trasferire i file.</string>
     <string name="createPrivateFolderSucces">Cartella creata con successo</string>
+    <string name="deletePicturesDescription">L\'applicazione ti chiederà regolarmente di cancellare le foto dal tuo dispositivo che sono già sincronizzate sul tuo kDrive. Dovrai autorizzare manualmente la cancellazione</string>
+    <string name="deletePicturesTitle">Cancellare le foto (Beta)</string>
     <plurals name="driveBlockedDescription">
         <item quantity="one">Il prodotto è scaduto dal %s. Rinnovalo per gestirlo e accedere ai suoi dati.</item>
         <item quantity="other">Tutti i tuoi prodotti sono scaduti. Rinnovateli per gestirli e accedere ai loro dati.</item>
@@ -361,6 +363,7 @@
     <string name="homeTitle">Home</string>
     <string name="inputExpirationDate">Data di scadenza</string>
     <string name="lastEditsTitle">Ultime modifiche</string>
+    <string name="locateButton">Localizzare</string>
     <string name="lockAppTitle">Applicazione bloccata</string>
     <string name="manageDropboxTitle">Gestisci il deposito file %s</string>
     <string name="menuTitle">Menu</string>
@@ -380,6 +383,8 @@
         <item quantity="one">Eliminare definitivamente %s?</item>
         <item quantity="other">Eliminare definitivamente %d elementi?</item>
     </plurals>
+    <string name="modalDeletePhotosNumericDescription">Vuoi cancellare %d foto dal tuo dispositivo che sono già state caricate su kDrive?</string>
+    <string name="modalDeletePhotosTitle">Cancellazione automatica delle foto</string>
     <string name="modalDeleteTitle">Elimina definitivamente</string>
     <string name="modalEmptyTrashDescription">Svuotare il cestino?</string>
     <string name="modalEmptyTrashTitle">Svuota il cestino</string>
@@ -402,6 +407,7 @@
     <string name="noDriveTitle">Non hai ancora kDrive!</string>
     <string name="noFilesDescription">La cartella è vuota. Selezionare il pulsante + per aggiungere file.</string>
     <string name="noFilesDescriptionNoNetwork">Impossibile recuperare le informazioni della cartella. Verificare la connessione di rete o riprovare più tardi.</string>
+    <string name="noLastEditsTitle">No recent changes</string>
     <string name="noMediaFolderTitle">Nessuna cartella media disponibile</string>
     <string name="noSyncFolderNotificationDescription">Clicca qui per configurare le cartelle da sincronizzare</string>
     <string name="noSyncFolderNotificationTitle">Nessuna cartella selezionata per il backup automatico</string>

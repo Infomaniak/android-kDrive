@@ -17,31 +17,30 @@
  */
 package com.infomaniak.drive.ui
 
-import android.content.Context
+import android.app.Application
+import android.content.ContentResolver
 import android.net.Uri
+import android.provider.MediaStore
 import androidx.collection.arrayMapOf
+import androidx.core.net.toFile
+import androidx.core.net.toUri
 import androidx.lifecycle.*
 import com.google.gson.JsonObject
+import com.infomaniak.drive.ApplicationMain
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.KDriveHttpClient
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
 import com.infomaniak.drive.utils.MediaUtils.isMedia
-import com.infomaniak.drive.utils.SingleLiveEvent
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.runInterruptible
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.util.*
 
-class MainViewModel : ViewModel() {
+class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     val currentFolder = MutableLiveData<File>()
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
@@ -62,6 +61,8 @@ class MainViewModel : ViewModel() {
 
     private var getFileDetailsJob = Job()
     private var syncOfflineFilesJob = Job()
+
+    private fun getContext() = getApplication<ApplicationMain>()
 
     fun createMultiSelectMediator(): MediatorLiveData<Pair<Int, Int>> {
         return MediatorLiveData<Pair<Int, Int>>().apply { value = /*success*/0 to /*total*/0 }
@@ -201,10 +202,10 @@ class MainViewModel : ViewModel() {
         emit(apiResponse)
     }
 
-    fun deleteFile(context: Context, file: File, onSuccess: ((fileID: Int) -> Unit)? = null) = liveData(Dispatchers.IO) {
+    fun deleteFile(file: File, onSuccess: ((fileID: Int) -> Unit)? = null) = liveData(Dispatchers.IO) {
         val apiResponse = ApiRepository.deleteFile(file)
         if (apiResponse.isSuccess()) {
-            file.deleteCaches(context)
+            file.deleteCaches(getContext())
 
             FileController.updateFile(file.id) { localFile ->
                 localFile.deleteFromRealm()
@@ -223,14 +224,13 @@ class MainViewModel : ViewModel() {
     }
 
     suspend fun removeOfflineFile(
-        context: Context,
         file: File,
         offlineFile: java.io.File,
         cacheFile: java.io.File,
         userDrive: UserDrive = UserDrive()
     ) = withContext(Dispatchers.IO) {
         FileController.updateOfflineStatus(file.id, false)
-        if (file.isMedia()) file.deleteInMediaScan(context, userDrive)
+        if (file.isMedia()) file.deleteInMediaScan(getContext(), userDrive)
         if (cacheFile.exists()) cacheFile.delete()
         if (offlineFile.exists()) {
             offlineFile.copyTo(cacheFile)
@@ -238,12 +238,12 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    private fun migrateOfflineIfNeeded(context: Context, file: File, offlineFile: java.io.File, userDrive: UserDrive) {
-        val oldPath = java.io.File(context.filesDir, "offline_storage/${userDrive.userId}/${userDrive.driveId}/${file.id}")
+    private fun migrateOfflineIfNeeded(file: File, offlineFile: java.io.File, userDrive: UserDrive) {
+        val oldPath = java.io.File(getContext().filesDir, "offline_storage/${userDrive.userId}/${userDrive.driveId}/${file.id}")
         if (oldPath.exists()) oldPath.renameTo(offlineFile)
     }
 
-    suspend fun syncOfflineFiles(context: Context) {
+    suspend fun syncOfflineFiles() {
         syncOfflineFilesJob.cancel()
         syncOfflineFilesJob = Job()
         runInterruptible(Dispatchers.IO + syncOfflineFilesJob) {
@@ -252,15 +252,15 @@ class MainViewModel : ViewModel() {
 
                 FileController.getOfflineFiles(null, userDrive).forEach { file ->
 
-                    file.getOfflineFile(context, userDrive)?.let { offlineFile ->
-                        migrateOfflineIfNeeded(context, file, offlineFile, userDrive)
+                    file.getOfflineFile(getContext(), userDrive)?.let { offlineFile ->
+                        migrateOfflineIfNeeded(file, offlineFile, userDrive)
 
                         val apiResponse = ApiRepository.getFileDetails(file)
                         apiResponse.data?.let { remoteFile ->
                             remoteFile.isOffline = true
                             if (offlineFile.lastModified() > file.getLastModifiedInMilliSecond()) {
-                                uploadFile(context, file, remoteFile, offlineFile, userDrive)
-                            } else downloadOfflineFile(context, file, remoteFile, offlineFile, userDrive)
+                                uploadFile(file, remoteFile, offlineFile, userDrive)
+                            } else downloadOfflineFile(file, remoteFile, offlineFile, userDrive)
                         } ?: let {
                             if (apiResponse.error?.code?.equals("object_not_found") == true) offlineFile.delete()
                         }
@@ -270,7 +270,7 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    private fun uploadFile(context: Context, file: File, remoteFile: File, offlineFile: java.io.File, userDrive: UserDrive) {
+    private fun uploadFile(file: File, remoteFile: File, offlineFile: java.io.File, userDrive: UserDrive) {
         val uri = Uri.fromFile(offlineFile)
         val fileModifiedAt = Date(offlineFile.lastModified())
         if (UploadFile.canUpload(uri, fileModifiedAt)) {
@@ -287,28 +287,50 @@ class MainViewModel : ViewModel() {
                 type = UploadFile.Type.SYNC_OFFLINE.name,
                 userId = userDrive.userId,
             ).store()
-            context.syncImmediately()
+            getContext().syncImmediately()
         }
     }
 
     private fun downloadOfflineFile(
-        context: Context,
         file: File,
         remoteFile: File,
         offlineFile: java.io.File,
         userDrive: UserDrive
     ) {
-        val remoteOfflineFile = remoteFile.getOfflineFile(context, userDrive) ?: return
+        val remoteOfflineFile = remoteFile.getOfflineFile(getContext(), userDrive) ?: return
 
         val pathChanged = offlineFile.path != remoteOfflineFile.path
         if (pathChanged) {
-            if (file.isMedia()) file.deleteInMediaScan(context, userDrive)
+            if (file.isMedia()) file.deleteInMediaScan(getContext(), userDrive)
             offlineFile.delete()
         }
 
-        if (!file.isPendingOffline(context) && (!remoteFile.isOfflineAndIntact(remoteOfflineFile) || pathChanged)) {
+        if (!file.isPendingOffline(getContext()) && (!remoteFile.isOfflineAndIntact(remoteOfflineFile) || pathChanged)) {
             FileController.updateExistingFile(newFile = remoteFile, userDrive = userDrive)
-            Utils.downloadAsOfflineFile(context, remoteFile, userDrive)
+            Utils.downloadAsOfflineFile(getContext(), remoteFile, userDrive)
+        }
+    }
+
+    fun deleteSynchronizedFilesOnDevice(filesToDelete: ArrayList<UploadFile>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            filesToDelete.forEach { uploadFile ->
+                val uri = uploadFile.uri.toUri()
+                if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
+                    uri.toFile().delete()
+                } else {
+                    SyncUtils.checkDocumentProviderPermissions(getContext(), uri)
+                    getContext().contentResolver.query(
+                        uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null
+                    )?.use { cursor ->
+                        if (cursor.moveToFirst()) {
+                            val columnIndex: Int = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+                            java.io.File(cursor.getString(columnIndex)).delete()
+                            getContext().contentResolver.delete(uri, null, null)
+                            UploadFile.deleteFileFromDb(uri)
+                        }
+                    }
+                }
+            }
         }
     }
 }

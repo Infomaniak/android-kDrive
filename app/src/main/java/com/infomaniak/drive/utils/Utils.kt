@@ -113,7 +113,7 @@ object Utils {
         val dialog = MaterialAlertDialogBuilder(context, style)
             .setTitle(title)
             .setMessage(message)
-            .setPositiveButton(R.string.buttonConfirm) { _, _ -> }
+            .setPositiveButton(if (isDeletion) R.string.buttonDelete else R.string.buttonConfirm) { _, _ -> }
             .setNegativeButton(R.string.buttonCancel) { _, _ -> }
             .setCancelable(false)
             .show()

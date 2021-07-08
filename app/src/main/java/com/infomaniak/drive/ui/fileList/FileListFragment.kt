@@ -265,7 +265,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                         runBlocking(Dispatchers.Main) { fileAdapter.deleteByFileId(fileID) }
                     }
                     mediator.addSource(
-                        mainViewModel.deleteFile(requireContext(), file, onSuccess),
+                        mainViewModel.deleteFile(file, onSuccess),
                         mainViewModel.updateMultiSelectMediator(mediator)
                     )
                 }

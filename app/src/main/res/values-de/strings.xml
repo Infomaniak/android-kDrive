@@ -178,6 +178,8 @@
     <string name="createFolderTitle">Ordner erstellen</string>
     <string name="createFolderValidUntilDescription">Nach Verstreichen dieses Datums können die Benutzer keine Dateien mehr übertragen.</string>
     <string name="createPrivateFolderSucces">Ordner erfolgreich angelegt</string>
+    <string name="deletePicturesDescription">Die Anwendung wird Sie regelmässig auffordern Fotos von Ihrem Gerät zu löschen, die bereits auf Ihrem kDrive synchronisiert sind. Sie müssen die Löschung jeweils manuell autorisieren\n</string>
+    <string name="deletePicturesTitle">Fotos löschen (Beta)</string>
     <plurals name="driveBlockedDescription">
         <item quantity="one">Das Produkt ist seit dem %s abgelaufen. Bitte erneuern Sie ihn, um ihn zu verwalten und auf seine Daten zuzugreifen.</item>
         <item quantity="other">Alle Ihre Produkte sind abgelaufen. Bitte erneuern Sie diese, um sie zu verwalten und auf ihre Daten zuzugreifen.</item>
@@ -361,6 +363,7 @@
     <string name="homeTitle">Start</string>
     <string name="inputExpirationDate">Ablaufdatum</string>
     <string name="lastEditsTitle">Letzte Änderungen</string>
+    <string name="locateButton">Finden Sie</string>
     <string name="lockAppTitle">Anwendung gesperrt</string>
     <string name="manageDropboxTitle">Briefkasten %s verwalten</string>
     <string name="menuTitle">Menü</string>
@@ -380,6 +383,8 @@
         <item quantity="one">Wollen Sie %s wirklich endgültig löschen?</item>
         <item quantity="other">Wollen Sie %d Elemente wirklich endgültig löschen?</item>
     </plurals>
+    <string name="modalDeletePhotosNumericDescription">Möchten Sie %d Fotos von Ihrem Gerät löschen, die bereits auf kDrive hochgeladen wurden?</string>
+    <string name="modalDeletePhotosTitle">Automatisches Löschen von Fotos</string>
     <string name="modalDeleteTitle">Endgültig löschen</string>
     <string name="modalEmptyTrashDescription">Möchten Sie den Papierkorb wirklich leeren?</string>
     <string name="modalEmptyTrashTitle">Papierkorb leeren</string>
@@ -402,6 +407,7 @@
     <string name="noDriveTitle">Sie haben kDrive noch nicht!</string>
     <string name="noFilesDescription">Dieser Ordner ist leer. Klicken Sie auf den +Button, um hier Dateien hinzuzufügen.</string>
     <string name="noFilesDescriptionNoNetwork">Die Informationen des Ordners können nicht wiederhergestellt werden. Bitte überprüfen Sie Ihre Netzwerkverbindung oder versuchen Sie es später noch einmal.</string>
+    <string name="noLastEditsTitle">No recent changes</string>
     <string name="noMediaFolderTitle">Keine Medienordner vorhanden</string>
     <string name="noSyncFolderNotificationDescription">Klicken Sie hier, um die zu synchronisierenden Ordner zu konfigurieren</string>
     <string name="noSyncFolderNotificationTitle">Keine Ordner für die automatische Sicherung ausgewählt</string>
