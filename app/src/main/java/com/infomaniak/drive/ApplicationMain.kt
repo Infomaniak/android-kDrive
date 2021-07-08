@@ -32,6 +32,7 @@ import com.facebook.stetho.Stetho
 import com.facebook.stetho.okhttp3.StethoInterceptor
 import com.infomaniak.drive.BuildConfig.DRIVE_API
 import com.infomaniak.drive.BuildConfig.INFOMANIAK_API
+import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UISettings
 import com.infomaniak.drive.data.models.drive.Drive
@@ -49,6 +50,7 @@ import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.ApiController
 import com.infomaniak.lib.login.ApiToken
 import io.realm.Realm
+import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryOptions
 import io.sentry.android.core.SentryAndroid
@@ -56,6 +58,8 @@ import io.sentry.android.core.SentryAndroidOptions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.withLock
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import java.lang.reflect.Type
@@ -96,9 +100,18 @@ class ApplicationMain : Application(), ImageLoaderFactory {
             }
         }
 
-        Realm.init(this)
+        runBlocking {
+            CloudStorageProvider.mutex.withLock {
+                try {
+                    Realm.getDefaultInstance()
+                } catch (exception: Exception) {
+                    Sentry.captureMessage("Realm.init in ApplicationMain")
+                    Realm.init(this@ApplicationMain)
+                    AccountUtils.init(this@ApplicationMain)
+                }
+            }
+        }
 
-        AccountUtils.init(this)
         AccountUtils.reloadApp = {
             startActivity(Intent(this, LaunchActivity::class.java).apply { clearStack() })
         }

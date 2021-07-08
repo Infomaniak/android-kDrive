@@ -41,10 +41,13 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.Utils
 import io.realm.Realm
+import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import okhttp3.OkHttpClient
 import java.net.URLEncoder
 
@@ -52,13 +55,22 @@ class CloudStorageProvider : DocumentsProvider() {
 
     override fun onCreate(): Boolean {
         Log.d(TAG, "onCreate")
-        if (context == null) return false
-
-        context?.let {
-            Realm.init(it)
-            AccountUtils.init(it)
+        var result = false
+        runBlocking {
+            mutex.withLock {
+                context?.let {
+                    try {
+                        Realm.getDefaultInstance()
+                    } catch (exception: Exception) {
+                        Sentry.captureMessage("Realm.init in CloudStorageProvider")
+                        Realm.init(it)
+                        AccountUtils.init(it)
+                    }
+                    result = true
+                }
+            }
         }
-        return true
+        return result
     }
 
     override fun queryRoots(projection: Array<out String>?): Cursor {
@@ -381,6 +393,8 @@ class CloudStorageProvider : DocumentsProvider() {
     private data class DriveDocument(val name: String, val id: Int)
 
     companion object {
+
+        val mutex = Mutex()
 
         private const val TAG = "CloudStorageProvider"
         private const val SEPARATOR = "/"
