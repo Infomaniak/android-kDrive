@@ -59,6 +59,8 @@ object Utils {
     const val ROOT_ID = 1
     const val OTHER_ROOT_ID = -1
 
+    const val DEFAULT_PROGRESS = -1
+
     fun confirmFileDeletion(
         context: Context,
         fileName: String?,

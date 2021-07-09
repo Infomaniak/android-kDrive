@@ -25,6 +25,7 @@ import android.view.ViewGroup
 import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.utils.setupFileProgress
 import com.infomaniak.drive.views.PaginationAdapter
@@ -197,7 +198,10 @@ open class FileAdapter(
         if (payloads.firstOrNull() is Int) {
             val file = itemList[position]
             val progress = payloads.first() as Int
-            holder.itemView.setupFileProgress(file, progress)
+            when {
+                progress != Utils.DEFAULT_PROGRESS -> holder.itemView.setupFileProgress(file, progress)
+                !file.isPendingOffline(holder.itemView.context) -> holder.itemView.setupFileProgress(file, progress)
+            }
         } else {
             super.onBindViewHolder(holder, position, payloads)
         }

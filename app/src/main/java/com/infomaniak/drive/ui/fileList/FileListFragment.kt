@@ -252,6 +252,12 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         onSelectFolderResult(requestCode, resultCode, data)
     }
 
+    override fun onResume() {
+        super.onResume()
+        updateVisibleProgresses()
+        Log.d("isPendingOffline", "fileListFragment resume")
+    }
+
     private fun setupMultiSelect() {
         fileAdapter.enabledMultiSelectMode = true
         closeButtonMultiSelect.setOnClickListener { closeMultiSelect() }
@@ -522,24 +528,18 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 100)
                 fileAdapter.updateFileProgress(fileId, progress) { file ->
                     file.isOffline = true
-                    file.currentProgress = -1
+                    file.currentProgress = Utils.DEFAULT_PROGRESS
                 }
                 Log.i("isPendingOffline", "progress from fragment $progress% for file $fileId, state:${workInfo.state}")
             }
         }
 
         mainViewModel.fileCancelledFromDownload.observe(viewLifecycleOwner) { fileId ->
-            val layoutManager = fileRecyclerView.layoutManager
             fileAdapter.updateFileProgress(fileId, -1) { file ->
                 file.isOffline = false
                 file.currentProgress = 0
             }
-
-            if (layoutManager is LinearLayoutManager) {
-                val first = layoutManager.findFirstVisibleItemPosition()
-                val count = layoutManager.findLastVisibleItemPosition() - first + 1
-                fileAdapter.notifyItemRangeChanged(first, count)
-            }
+            updateVisibleProgresses()
         }
     }
 
@@ -670,6 +670,15 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             userDrive = userDrive
         ).observe(viewLifecycleOwner) {
             onFinish?.invoke(it)
+        }
+    }
+
+    private fun updateVisibleProgresses() {
+        val layoutManager = fileRecyclerView.layoutManager
+        if (layoutManager is LinearLayoutManager) {
+            val first = layoutManager.findFirstVisibleItemPosition()
+            val count = layoutManager.findFirstVisibleItemPosition() - first + 1
+            fileAdapter.notifyItemRangeChanged(first, count, -1)
         }
     }
 

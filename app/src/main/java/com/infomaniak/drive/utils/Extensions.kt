@@ -294,7 +294,7 @@ fun View.setFileItem(
 
 fun View.setupFileProgress(file: File, progress: Int) {
     when {
-        progress in 0..99 -> {
+        file.isPendingOffline(context) && progress in 0..99 -> {
             progressLayout.visibility = VISIBLE
             fileOffline.visibility = GONE
             if (fileOfflineProgression.isIndeterminate) {
