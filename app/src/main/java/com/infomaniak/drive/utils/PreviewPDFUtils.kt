@@ -42,7 +42,7 @@ object PreviewPDFUtils {
         return try {
             val outputFile = when {
                 file.isOnlyOfficePreview() -> file.getConvertedPdfCache(context, userDrive)
-                file.isOffline -> file.getOfflineFile(context, userDrive)!!
+                file.isOffline -> file.getOfflineFile(context, userDrive.userId)!!
                 else -> file.getCacheFile(context, userDrive)
             }
 

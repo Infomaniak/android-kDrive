@@ -26,6 +26,7 @@ import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils.DEFAULT_PROGRESS
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.BuildConfig
@@ -204,6 +205,10 @@ open class File(
         return dataFile.length() == size
     }
 
+    fun isOfflineFile(context: Context, userId: Int = AccountUtils.currentUserId): Boolean {
+        return isOffline || getOfflineFile(context, userId)?.exists() == true
+    }
+
     /**
      * File is offline and local file is the same as in the server (same modification date and size)
      */
@@ -217,9 +222,10 @@ open class File(
         return java.io.File(folder, id.toString())
     }
 
-    fun getOfflineFile(context: Context, userDrive: UserDrive = UserDrive()): java.io.File? {
+    fun getOfflineFile(context: Context, userId: Int = AccountUtils.currentUserId): java.io.File? {
+        val userDrive = UserDrive(userId, driveId)
         val mediaFolder = context.externalMediaDirs?.firstOrNull() ?: context.filesDir
-        val rootFolder = java.io.File(mediaFolder, "offline_storage/${userDrive.userId}/${userDrive.driveId}")
+        val rootFolder = java.io.File(mediaFolder, "offline_storage/${userId}/$driveId")
         val path =
             if (this.path.isEmpty()) FileController.generateAndSavePath(id, userDrive)
             else this.path

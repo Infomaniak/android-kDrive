@@ -73,7 +73,7 @@ class PreviewPictureFragment : PreviewFragment() {
             )
             .build()
 
-        val offlineFile = if (file.isOffline) file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive) else null
+        val offlineFile = if (file.isOffline) file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive.userId) else null
         if (offlineFile != null && file.isOfflineAndIntact(offlineFile)) {
             if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
             imageView?.setImageURI(offlineFile.toUri())

@@ -260,7 +260,7 @@ class MainViewModel : ViewModel() {
 
                 FileController.getOfflineFiles(null, userDrive).forEach { file ->
 
-                    file.getOfflineFile(context, userDrive)?.let { offlineFile ->
+                    file.getOfflineFile(context, userDrive.userId)?.let { offlineFile ->
                         migrateOfflineIfNeeded(context, file, offlineFile, userDrive)
 
                         val apiResponse = ApiRepository.getFileDetails(file)
@@ -306,7 +306,7 @@ class MainViewModel : ViewModel() {
         offlineFile: java.io.File,
         userDrive: UserDrive
     ) {
-        val remoteOfflineFile = remoteFile.getOfflineFile(context, userDrive) ?: return
+        val remoteOfflineFile = remoteFile.getOfflineFile(context, userDrive.userId) ?: return
 
         val pathChanged = offlineFile.path != remoteOfflineFile.path
         if (pathChanged) {
