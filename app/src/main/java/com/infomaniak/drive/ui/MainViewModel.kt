@@ -21,18 +21,19 @@ import android.content.Context
 import android.net.Uri
 import androidx.collection.arrayMapOf
 import androidx.lifecycle.*
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import androidx.work.WorkQuery
 import com.google.gson.JsonObject
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.KDriveHttpClient
+import com.infomaniak.drive.data.services.DownloadWorker
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
 import com.infomaniak.drive.utils.MediaUtils.isMedia
-import com.infomaniak.drive.utils.SingleLiveEvent
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import kotlinx.coroutines.Dispatchers
@@ -53,12 +54,12 @@ class MainViewModel : ViewModel() {
     val intentShowProgressByFolderId = SingleLiveEvent<Int>()
 
     val refreshActivities = SingleLiveEvent<Boolean>()
-    val updateOfflineFile = SingleLiveEvent<Pair<Int, Boolean>>()
+    val updateOfflineFile = SingleLiveEvent<Pair<FileId, IsOffline>>()
     val fileInProgress = SingleLiveEvent<FileInProgress>()
     val forcedDriveSelection = SingleLiveEvent<Boolean>()
     val deleteFileFromHome = SingleLiveEvent<Boolean>()
 
-    val fileCancelledFromDownload = MutableLiveData<Int>()
+    val fileCancelledFromDownload = MutableLiveData<FileId>() // TODO observe it in actionView
 
     private var getFileDetailsJob = Job()
     private var syncOfflineFilesJob = Job()
@@ -221,6 +222,13 @@ class MainViewModel : ViewModel() {
     fun convertFile(file: File) = liveData(Dispatchers.IO) {
         emit(ApiRepository.convertFile(file))
     }
+
+    fun observeDownloadOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(
+        WorkQuery.Builder
+            .fromUniqueWorkNames(arrayListOf(DownloadWorker.TAG))
+            .addStates(arrayListOf(WorkInfo.State.RUNNING))
+            .build()
+    )
 
     suspend fun removeOfflineFile(
         context: Context,

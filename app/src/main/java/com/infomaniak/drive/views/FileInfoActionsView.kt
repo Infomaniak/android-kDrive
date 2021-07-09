@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
@@ -61,7 +62,6 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     private lateinit var currentFile: File
     private lateinit var mainViewModel: MainViewModel
-    private var workManager: WorkManager = WorkManager.getInstance(context)
 
     private lateinit var ownerFragment: Fragment
     private lateinit var onItemClickListener: OnItemClickListener
@@ -265,7 +265,7 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     private fun updateFilePublicLink(url: String) {
-        GlobalScope.launch(Dispatchers.IO) {
+        CoroutineScope(Dispatchers.IO).launch {
             FileController.updateFile(currentFile.id) { it.shareLink = url }
         }
         copyPublicLink(url)
@@ -284,40 +284,34 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     fun observeOfflineProgression(lifecycleOwner: LifecycleOwner, updateFile: (fileId: Int) -> Unit) {
-        workManager.getWorkInfosForUniqueWorkLiveData(DownloadWorker.TAG).observe(lifecycleOwner) { workInfoList ->
+        mainViewModel.observeDownloadOffline(context.applicationContext).observe(lifecycleOwner) { workInfoList ->
             if (workInfoList.isEmpty()) return@observe
-            val workInfo = workInfoList.firstOrNull {
-                it.state == WorkInfo.State.RUNNING || it.state == WorkInfo.State.ENQUEUED
-            } ?: workInfoList.first()
+            val workInfo = workInfoList.firstOrNull() ?: return@observe
 
-            if (!workInfo.state.isFinished) {
-                val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 0)
-                val fileId = workInfo.progress.getInt(DownloadWorker.FILE_ID, 0)
+            val fileId: Int = workInfo.progress.getInt(DownloadWorker.FILE_ID, 0)
+            val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 0)
+            Log.w("isPendingOffline", "progress from FileActionView $progress% for file $fileId, state:${workInfo.state}")
 
-                if (currentFile.id == fileId) {
-                    if (progress == 100) {
-                        availableOffline.isEnabled = true
-                        availableOfflineSwitch.isEnabled = true
-                        updateFile(fileId)
-                        currentFile.isOffline = true
-                        refreshBottomSheetUi(currentFile)
-                    } else {
-                        availableOffline.isEnabled = false
-                        availableOfflineSwitch.isEnabled = false
-                        refreshBottomSheetUi(currentFile, progress)
-                    }
-                } else {
-                    if (progress == 100) updateFile(fileId)
+            if (currentFile.id == fileId) {
+                currentFile.currentProgress = progress
+                if (progress == 100) {
                     availableOffline.isEnabled = true
                     availableOfflineSwitch.isEnabled = true
+                    updateFile(fileId)
+                    currentFile.isOffline = true
+                    refreshBottomSheetUi(currentFile)
+                } else {
+                    availableOffline.isEnabled = false
+                    availableOfflineSwitch.isEnabled = false
+                    refreshBottomSheetUi(currentFile, progress)
                 }
             }
         }
 
         mainViewModel.fileCancelledFromDownload.observe(lifecycleOwner) { fileId ->
+            currentFile.currentProgress = -1
             availableOffline.isEnabled = true
             availableOfflineSwitch.isEnabled = true
-            currentFile.isOffline = false
             refreshBottomSheetUi(currentFile)
         }
     }

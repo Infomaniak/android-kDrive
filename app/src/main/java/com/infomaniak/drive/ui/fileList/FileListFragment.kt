@@ -42,7 +42,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.WorkInfo
-import androidx.work.WorkManager
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
@@ -512,29 +511,34 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun observeOfflineDownloadProgress() {
-        WorkManager
-            .getInstance(requireContext().applicationContext)
-            .getWorkInfosForUniqueWorkLiveData(DownloadWorker.TAG).observe(viewLifecycleOwner) { workInfoList ->
-                if (workInfoList.isEmpty()) return@observe
-                val workInfo =
-                    workInfoList.firstOrNull { it.state == WorkInfo.State.RUNNING || it.state == WorkInfo.State.ENQUEUED }
-                        ?: workInfoList.first()
+        mainViewModel.observeDownloadOffline(requireContext().applicationContext).observe(viewLifecycleOwner) { workInfoList ->
+            if (workInfoList.isEmpty()) return@observe
+            val workInfo = workInfoList.firstOrNull() ?: return@observe
 
-                if (!workInfo.state.isFinished) {
-                    val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 0)
-                    val fileId = workInfo.progress.getInt(DownloadWorker.FILE_ID, 0)
-                    fileAdapter.updateFileProgress(fileId, progress) { file ->
-                        file.isOffline = true
-                        file.currentProgress = 0
-                    }
-                    Log.i("kDrive", "progress from fragment $progress% for file $fileId")
+            val fileId: Int = workInfo.progress.getInt(DownloadWorker.FILE_ID, 0)
+            if (fileId == 0) return@observe
+
+            if (workInfo.state == WorkInfo.State.RUNNING) {
+                val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 100)
+                fileAdapter.updateFileProgress(fileId, progress) { file ->
+                    file.isOffline = true
+                    file.currentProgress = -1
                 }
+                Log.i("isPendingOffline", "progress from fragment $progress% for file $fileId, state:${workInfo.state}")
             }
+        }
 
         mainViewModel.fileCancelledFromDownload.observe(viewLifecycleOwner) { fileId ->
+            val layoutManager = fileRecyclerView.layoutManager
             fileAdapter.updateFileProgress(fileId, -1) { file ->
                 file.isOffline = false
                 file.currentProgress = 0
+            }
+
+            if (layoutManager is LinearLayoutManager) {
+                val first = layoutManager.findFirstVisibleItemPosition()
+                val count = layoutManager.findLastVisibleItemPosition() - first + 1
+                fileAdapter.notifyItemRangeChanged(first, count)
             }
         }
     }
