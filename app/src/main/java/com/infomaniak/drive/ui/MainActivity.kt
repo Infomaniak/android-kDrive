@@ -205,6 +205,7 @@ class MainActivity : BaseActivity() {
                         context = this,
                         title = getString(R.string.modalDeletePhotosTitle),
                         message = getString(R.string.modalDeletePhotosNumericDescription, filesUploadedRecently.size),
+                        mainButtonText = getString(R.string.buttonDelete),
                         isDeletion = true
                     ) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
