@@ -270,7 +270,7 @@ class HomeFragment : Fragment() {
         lastFilesAdapter.onFileClicked = { file ->
             Utils.displayFile(mainViewModel, findNavController(), file, lastFilesAdapter.itemList)
         }
-        mainViewModel.getLastModifiedFiles(AccountUtils.currentDriveId, forceDownload).observe(viewLifecycleOwner) { result ->
+        mainViewModel.getRecentChanges(AccountUtils.currentDriveId, forceDownload).observe(viewLifecycleOwner) { result ->
             result?.apply {
                 lastFilesRecyclerView.visibility = if (files.isNullOrEmpty()) GONE else VISIBLE
                 lastFilesTitle.visibility = if (files.isNullOrEmpty()) GONE else VISIBLE

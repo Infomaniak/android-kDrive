@@ -93,7 +93,7 @@ class MenuFragment : Fragment() {
                 safeNavigate(MenuFragmentDirections.actionMenuFragmentToSharedWithMeFragment())
             }
 
-            lastEdits.setOnClickListener {
+            recentChanges.setOnClickListener {
                 safeNavigate(MenuFragmentDirections.actionMenuFragmentToLastEditsFragment())
             }
 

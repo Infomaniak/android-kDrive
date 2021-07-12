@@ -64,10 +64,10 @@ class MainViewModel : ViewModel() {
 
     private var getFileDetailsJob = Job()
     private var syncOfflineFilesJob = Job()
-    private var getLastModifiedFilesJob = Job()
+    private var getRecentChangesJob = Job()
 
     private var lastModifiedTime: Long = 0
-    private var lastModified = ApiResponse<ArrayList<File>>()
+    private var recentlyChangedFiles = ApiResponse<ArrayList<File>>()
 
     fun createMultiSelectMediator(): MediatorLiveData<Pair<Int, Int>> {
         return MediatorLiveData<Pair<Int, Int>>().apply { value = /*success*/0 to /*total*/0 }
@@ -318,15 +318,15 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun getLastModifiedFiles(driveId: Int, forceDownload: Boolean = false): LiveData<FileListFragment.FolderFilesResult?> {
-        getLastModifiedFilesJob.cancel()
-        getLastModifiedFilesJob = Job()
+    fun getRecentChanges(driveId: Int, forceDownload: Boolean = false): LiveData<FileListFragment.FolderFilesResult?> {
+        getRecentChangesJob.cancel()
+        getRecentChangesJob = Job()
 
         val ignoreDownload = lastModifiedTime != 0L && (Date().time - lastModifiedTime) < DOWNLOAD_INTERVAL && !forceDownload
 
-        return liveData(Dispatchers.IO + getLastModifiedFilesJob) {
+        return liveData(Dispatchers.IO + getRecentChangesJob) {
             if (ignoreDownload) {
-                emit(FileListFragment.FolderFilesResult(files = lastModified.data!!, isComplete = true, page = 1))
+                emit(FileListFragment.FolderFilesResult(files = recentlyChangedFiles.data!!, isComplete = true, page = 1))
                 return@liveData
             }
 
@@ -346,7 +346,13 @@ class MainViewModel : ViewModel() {
                             recursive(page + 1)
                         }
                     }
-                } else emit(null)
+                } else emit(
+                    FileListFragment.FolderFilesResult(
+                        files = FileController.getRecentChanges(),
+                        isComplete = true,
+                        page = 1
+                    )
+                )
             }
             recursive(1)
         }

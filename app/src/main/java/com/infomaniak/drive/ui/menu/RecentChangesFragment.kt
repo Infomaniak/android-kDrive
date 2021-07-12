@@ -21,11 +21,12 @@ import android.os.Bundle
 import android.view.View
 import android.view.View.GONE
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import kotlinx.android.synthetic.main.fragment_file_list.*
 
-class LastEditsFragment : FileSubTypeListFragment() {
+class RecentChangesFragment : FileSubTypeListFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         downloadFiles = DownloadFiles()
@@ -45,7 +46,8 @@ class LastEditsFragment : FileSubTypeListFragment() {
     private inner class DownloadFiles : (Boolean) -> Unit {
         override fun invoke(ignoreCache: Boolean) {
             fileAdapter.setList(arrayListOf())
-            mainViewModel.getLastModifiedFiles(AccountUtils.currentDriveId).observe(viewLifecycleOwner) { result ->
+            mainViewModel.getRecentChanges(AccountUtils.currentDriveId).observe(viewLifecycleOwner) { result ->
+                result?.files?.let { files -> FileController.storeRecentChanges(files) } // TODO - Unfinished process, review !
                 populateFileList(result?.files ?: ArrayList(), isComplete = result?.isComplete ?: true, ignoreOffline = true)
             }
         }

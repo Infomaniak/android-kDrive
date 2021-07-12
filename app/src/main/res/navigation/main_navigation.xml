@@ -716,7 +716,7 @@
     </fragment>
     <fragment
         android:id="@+id/lastEditsFragment"
-        android:name="com.infomaniak.drive.ui.menu.LastEditsFragment"
+        android:name="com.infomaniak.drive.ui.menu.RecentChangesFragment"
         android:label="LastEditsFragment" />
 
     <dialog
