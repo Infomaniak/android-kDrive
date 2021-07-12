@@ -677,7 +677,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         val layoutManager = fileRecyclerView.layoutManager
         if (layoutManager is LinearLayoutManager) {
             val first = layoutManager.findFirstVisibleItemPosition()
-            val count = layoutManager.findFirstVisibleItemPosition() - first + 1
+            val count = layoutManager.findLastVisibleItemPosition() - first + 1
             fileAdapter.notifyItemRangeChanged(first, count, -1)
         }
     }
