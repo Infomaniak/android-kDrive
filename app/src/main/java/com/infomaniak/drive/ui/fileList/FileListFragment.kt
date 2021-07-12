@@ -139,47 +139,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
         }
 
-        getBackNavigationResult<Bundle>(CANCELLABLE_MAIN_KEY) { bundle ->
-            bundle.getString(CANCELLABLE_TITLE_KEY)?.let { title ->
-                bundle.getParcelable<CancellableAction>(CANCELLABLE_ACTION_KEY)?.let { action ->
-                    val fileID = bundle.getInt(FILE_ID)
-
-                    if (bundle.containsKey(DELETE_NOT_UPDATE_ACTION)) {
-                        if (bundle.getBoolean(DELETE_NOT_UPDATE_ACTION)) {
-                            fileAdapter.deleteByFileId(fileID)
-                            checkIfNoFiles()
-                        } else fileAdapter.notifyFileChanged(fileID)
-                    }
-
-                    requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab) {
-                        lifecycleScope.launch(Dispatchers.IO) {
-                            if (ApiRepository.cancelAction(action).data == true && isResumed) {
-                                withContext(Dispatchers.Main) {
-                                    refreshActivities()
-                                }
-                            }
-                        }
-                    }
-                } ?: also {
-                    requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
-                }
-            }
-        }
-
-        getBackNavigationResult<ApiResponse.Status>(ManageDropboxFragment.MANAGE_DROPBOX_SUCCESS) { result ->
-            if (result == ApiResponse.Status.SUCCESS) onRefresh()
-        }
-
-        getBackNavigationResult<Int>(REFRESH_FAVORITE_FILE) { fileID ->
-            if (findNavController().currentDestination?.id == R.id.favoritesFragment) {
-                fileAdapter.deleteByFileId(fileID)
-            } else {
-                fileAdapter.notifyFileChanged(fileID) { file ->
-                    file.isFavorite = !file.isFavorite
-                }
-            }
-        }
-
         mainViewModel.createDropBoxSuccess.observe(viewLifecycleOwner) { dropBox ->
             onRefresh()
             safeNavigate(
@@ -242,6 +201,51 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         toolbar?.menu?.findItem(R.id.searchItem)?.isVisible = findNavController().currentDestination?.id == R.id.fileListFragment
+
+        setGetBackResult()
+    }
+
+    private fun setGetBackResult() {
+        getBackNavigationResult<Bundle>(CANCELLABLE_MAIN_KEY) { bundle ->
+            bundle.getString(CANCELLABLE_TITLE_KEY)?.let { title ->
+                bundle.getParcelable<CancellableAction>(CANCELLABLE_ACTION_KEY)?.let { action ->
+                    val fileID = bundle.getInt(FILE_ID)
+
+                    if (bundle.containsKey(DELETE_NOT_UPDATE_ACTION)) {
+                        if (bundle.getBoolean(DELETE_NOT_UPDATE_ACTION)) {
+                            fileAdapter.deleteByFileId(fileID)
+                            checkIfNoFiles()
+                        } else fileAdapter.notifyFileChanged(fileID)
+                    }
+
+                    requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab) {
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            if (ApiRepository.cancelAction(action).data == true && isResumed) {
+                                withContext(Dispatchers.Main) {
+                                    refreshActivities()
+                                }
+                            }
+                        }
+                    }
+                } ?: also {
+                    requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
+                }
+            }
+        }
+
+        getBackNavigationResult<ApiResponse.Status>(ManageDropboxFragment.MANAGE_DROPBOX_SUCCESS) { result ->
+            if (result == ApiResponse.Status.SUCCESS) onRefresh()
+        }
+
+        getBackNavigationResult<Int>(REFRESH_FAVORITE_FILE) { fileID ->
+            if (findNavController().currentDestination?.id == R.id.favoritesFragment) {
+                fileAdapter.deleteByFileId(fileID)
+            } else {
+                fileAdapter.notifyFileChanged(fileID) { file ->
+                    file.isFavorite = !file.isFavorite
+                }
+            }
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
