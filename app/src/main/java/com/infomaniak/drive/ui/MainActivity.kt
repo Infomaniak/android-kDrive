@@ -33,6 +33,7 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -84,6 +85,7 @@ class MainActivity : BaseActivity() {
     private var uploadedFilesToDelete = arrayListOf<UploadFile>()
 
     private lateinit var drivePermissions: DrivePermissions
+    private var filesDeletionResult: ActivityResultLauncher<IntentSenderRequest>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -103,7 +105,7 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        val filesDeletionResult = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+        filesDeletionResult = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 lifecycleScope.launch(Dispatchers.IO) {
                     UploadFile.deleteAllFilesFromDb(uploadedFilesToDelete)
@@ -195,32 +197,6 @@ class MainActivity : BaseActivity() {
         }
 
         LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
-
-        if (UploadFile.getAppSyncSettings()?.deleteAfterSync == true) {
-            val uploadedFilesDelay = Date(Date().time - ONE_MONTH_MS)
-            UploadFile.getUploadedFilesBeforeDate(uploadedFilesDelay)?.let { filesUploadedRecently ->
-                if (filesUploadedRecently.size > MIN_FILES_DELETION_DIALOG) {
-                    uploadedFilesToDelete = filesUploadedRecently
-                    Utils.createConfirmation(
-                        context = this,
-                        title = getString(R.string.modalDeletePhotosTitle),
-                        message = getString(R.string.modalDeletePhotosNumericDescription, filesUploadedRecently.size),
-                        mainButtonText = getString(R.string.buttonDelete),
-                        isDeletion = true
-                    ) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                            val filesDeletionRequest =
-                                MediaStore.createDeleteRequest(contentResolver, filesUploadedRecently.map { it.uri.toUri() })
-                            filesDeletionResult.launch(
-                                IntentSenderRequest.Builder(filesDeletionRequest.intentSender).build()
-                            )
-                        } else {
-                            mainViewModel.deleteSynchronizedFilesOnDevice(uploadedFilesToDelete)
-                        }
-                    }
-                }
-            }
-        }
     }
 
     override fun onResume() {
@@ -237,7 +213,7 @@ class MainActivity : BaseActivity() {
         if (drivePermissions.checkWriteStoragePermission()) launchSyncOffline()
 
         AppSettings.appLaunches++
-        if (!AccountUtils.isEnableAppSync() && AppSettings.appLaunches == 1) {
+        if (!AccountUtils.isEnableAppSync() && AppSettings.appLaunches == SYNC_DIALOG_LAUNCHES) {
             val id =
                 if (AppSettings.migrated) R.id.syncAfterMigrationBottomSheetDialog else R.id.syncConfigureBottomSheetDialog
             findNavController(R.id.hostFragment).navigate(id)
@@ -248,6 +224,29 @@ class MainActivity : BaseActivity() {
 
         LocalBroadcastManager.getInstance(this)
             .registerReceiver(uploadProgressReceiver, IntentFilter(UploadProgressReceiver.TAG))
+
+        if (UploadFile.getAppSyncSettings()?.deleteAfterSync == true) {
+            UploadFile.getUploadedFiles()?.let { filesUploadedRecently ->
+                if (filesUploadedRecently.size >= SYNCED_FILES_DELETION_FILES_AMOUNT && AppSettings.appLaunches % SYNCED_FILES_DELETION_LAUNCHES == 0) {
+                    uploadedFilesToDelete = filesUploadedRecently
+                    Utils.createConfirmation(
+                        context = this,
+                        title = getString(R.string.modalDeletePhotosTitle),
+                        message = getString(R.string.modalDeletePhotosNumericDescription, filesUploadedRecently.size),
+                        mainButtonText = getString(R.string.buttonDelete),
+                        isDeletion = true
+                    ) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            val filesDeletionRequest =
+                                MediaStore.createDeleteRequest(contentResolver, filesUploadedRecently.map { it.uri.toUri() })
+                            filesDeletionResult?.launch(IntentSenderRequest.Builder(filesDeletionRequest.intentSender).build())
+                        } else {
+                            mainViewModel.deleteSynchronizedFilesOnDevice(uploadedFilesToDelete)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun launchSyncOffline() {
@@ -331,9 +330,11 @@ class MainActivity : BaseActivity() {
     }
 
     companion object {
+        private const val SYNC_DIALOG_LAUNCHES = 1
+        private const val SYNCED_FILES_DELETION_LAUNCHES = 10
+        private const val SYNCED_FILES_DELETION_FILES_AMOUNT = 10
+
         private const val SECURITY_APP_TOLERANCE = 1 * 60 * 1000 // 1min (ms)
-        private const val ONE_MONTH_MS = 2592000000
-        private const val MIN_FILES_DELETION_DIALOG = 50
         const val INTENT_SHOW_PROGRESS = "intent_folder_id_progress"
     }
 }

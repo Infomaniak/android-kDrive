@@ -123,13 +123,10 @@ open class UploadFile(
             }
         }
 
-        fun getUploadedFilesBeforeDate(startDate: Date): ArrayList<UploadFile>? {
-            return getRealmInstance().use { realm ->
-                realm.where(UploadFile::class.java)
-                    .lessThan(UploadFile::uploadAt.name, startDate)
-                    .isNull(UploadFile::deletedAt.name)
-                    .findAll()?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile>
-            }
+        fun getUploadedFiles(): ArrayList<UploadFile>? = getRealmInstance().use { realm ->
+            realm.where(UploadFile::class.java)
+                .isNull(UploadFile::deletedAt.name)
+                .findAll()?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile>
         }
 
         fun getPendingFilesCount(folderID: Int): Int {
