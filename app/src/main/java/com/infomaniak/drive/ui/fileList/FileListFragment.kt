@@ -526,9 +526,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
             if (workInfo.state == WorkInfo.State.RUNNING) {
                 val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 100)
-                fileAdapter.updateFileProgress(fileId, progress) { file ->
-                    file.isOffline = true
-                    file.currentProgress = Utils.DEFAULT_PROGRESS
+                fileRecyclerView.post {
+                    fileAdapter.updateFileProgress(fileId, progress) { file ->
+                        file.isOffline = true
+                        file.currentProgress = Utils.DEFAULT_PROGRESS
+                    }
                 }
                 Log.i("isPendingOffline", "progress from fragment $progress% for file $fileId, state:${workInfo.state}")
             }
