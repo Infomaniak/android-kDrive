@@ -334,6 +334,7 @@ class MainViewModel : ViewModel() {
                 val apiResponse = ApiRepository.getLastModifiedFiles(driveId, page)
                 if (apiResponse.isSuccess()) {
                     val data = apiResponse.data
+                    data?.let { FileController.storeRecentChanges(it) }
                     when {
                         data == null -> Unit
                         data.size < ApiRepository.PER_PAGE -> emit(
