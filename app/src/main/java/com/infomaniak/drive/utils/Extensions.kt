@@ -293,9 +293,9 @@ fun View.setFileItem(
 }
 
 fun View.setupFileProgress(file: File, progress: Int) {
+    val isPendingOffline = file.isPendingOffline(context)
     when {
-        file.isPendingOffline(context) && progress in 0..99 -> {
-            progressLayout.visibility = VISIBLE
+        isPendingOffline && progress in 0..99 -> {
             fileOffline.visibility = GONE
             if (fileOfflineProgression.isIndeterminate) {
                 fileOfflineProgression.visibility = GONE
@@ -303,18 +303,19 @@ fun View.setupFileProgress(file: File, progress: Int) {
             }
             fileOfflineProgression.visibility = VISIBLE
             fileOfflineProgression.progress = progress
-        }
-        file.isPendingOffline(context) && progress != 100 -> {
             progressLayout.visibility = VISIBLE
+        }
+        isPendingOffline && progress != 100 -> {
             fileOffline.visibility = GONE
             fileOfflineProgression.visibility = GONE
             fileOfflineProgression.isIndeterminate = true
             fileOfflineProgression.visibility = VISIBLE
+            progressLayout.visibility = VISIBLE
         }
         file.isOfflineFile(context) -> {
-            progressLayout.visibility = VISIBLE
-            fileOffline.visibility = VISIBLE
             fileOfflineProgression.visibility = GONE
+            progressLayout.visibility = GONE
+            fileOffline.visibility = VISIBLE
         }
         else -> {
             progressLayout.visibility = GONE

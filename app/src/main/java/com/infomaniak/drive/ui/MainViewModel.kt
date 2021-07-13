@@ -59,7 +59,7 @@ class MainViewModel : ViewModel() {
     val forcedDriveSelection = SingleLiveEvent<Boolean>()
     val deleteFileFromHome = SingleLiveEvent<Boolean>()
 
-    val fileCancelledFromDownload = MutableLiveData<FileId>() // TODO observe it in actionView
+    val fileCancelledFromDownload = MutableLiveData<FileId>()
 
     private var getFileDetailsJob = Job()
     private var syncOfflineFilesJob = Job()
@@ -241,7 +241,6 @@ class MainViewModel : ViewModel() {
         if (file.isMedia()) file.deleteInMediaScan(context, userDrive)
         if (cacheFile.exists()) cacheFile.delete()
         if (offlineFile.exists()) {
-            offlineFile.copyTo(cacheFile)
             offlineFile.delete()
         }
     }
@@ -258,7 +257,8 @@ class MainViewModel : ViewModel() {
             DriveInfosController.getDrives(AccountUtils.currentUserId).forEach { drive ->
                 val userDrive = UserDrive(driveId = drive.id)
 
-                FileController.getOfflineFiles(null, userDrive).forEach { file ->
+                FileController.getOfflineFiles(null, userDrive).forEach loopFiles@{ file ->
+                    if (file.isPendingOffline(context)) return@loopFiles
 
                     file.getOfflineFile(context, userDrive.userId)?.let { offlineFile ->
                         migrateOfflineIfNeeded(context, file, offlineFile, userDrive)

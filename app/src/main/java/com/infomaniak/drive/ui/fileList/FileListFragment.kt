@@ -529,7 +529,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 fileRecyclerView.post {
                     fileAdapter.updateFileProgress(fileId, progress) { file ->
                         file.isOffline = true
-                        file.currentProgress = Utils.DEFAULT_PROGRESS
+                        file.currentProgress = Utils.INDETERMINATE_PROGRESS
                     }
                 }
                 Log.i("isPendingOffline", "progress from fragment $progress% for file $fileId, state:${workInfo.state}")

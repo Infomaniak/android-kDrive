@@ -200,9 +200,8 @@ open class FileAdapter(
             val file = itemList[position]
             val progress = payloads.first() as Int
             FileController.getFileById(file.id)
-            when {
-                progress != Utils.DEFAULT_PROGRESS -> holder.itemView.setupFileProgress(file, progress)
-                !file.isPendingOffline(holder.itemView.context) -> holder.itemView.setupFileProgress(file, progress)
+            if (progress != Utils.INDETERMINATE_PROGRESS || !file.isPendingOffline(holder.itemView.context)) {
+                holder.itemView.setupFileProgress(file, progress)
             }
         } else {
             super.onBindViewHolder(holder, position, payloads)

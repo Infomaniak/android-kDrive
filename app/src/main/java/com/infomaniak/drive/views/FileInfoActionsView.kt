@@ -93,7 +93,6 @@ class FileInfoActionsView @JvmOverloads constructor(
         } else {
             quickActionsLayout.visibility = VISIBLE
             quickActionsLayout.visibility = VISIBLE
-            availableOfflineSwitch.isEnabled = true
 
             val isOnline = mainViewModel.isInternetAvailable.value == true
             val isCommonDocumentOrSharedSpace =
@@ -224,9 +223,9 @@ class FileInfoActionsView @JvmOverloads constructor(
                 CoroutineScope(Dispatchers.IO).launch { FileController.updateOfflineStatus(currentFile.id, true) }
                 currentFile.isOffline = true
                 onItemClickListener.onCacheAddedToOffline()
-                refreshBottomSheetUi(currentFile)
             }
         } else Utils.downloadAsOfflineFile(context, currentFile)
+        refreshBottomSheetUi(currentFile)
     }
 
     fun downloadFile(drivePermissions: DrivePermissions, onSuccess: () -> Unit) {
@@ -294,7 +293,6 @@ class FileInfoActionsView @JvmOverloads constructor(
     fun updateAvailableOfflineItem() {
         if (!availableOffline.isEnabled && !currentFile.isPendingOffline(context)) {
             currentFile.isOffline = true
-            enableAvailableOffline(true)
             refreshBottomSheetUi(currentFile)
         }
     }
@@ -317,12 +315,10 @@ class FileInfoActionsView @JvmOverloads constructor(
             if (currentFile.id == fileId) {
                 currentFile.currentProgress = progress
                 if (progress == 100) {
-                    enableAvailableOffline(true)
                     updateFile(fileId)
                     currentFile.isOffline = true
                     refreshBottomSheetUi(currentFile)
                 } else {
-                    enableAvailableOffline(false)
                     refreshBottomSheetUi(currentFile, progress)
                 }
             }
@@ -330,7 +326,6 @@ class FileInfoActionsView @JvmOverloads constructor(
 
         mainViewModel.fileCancelledFromDownload.observe(lifecycleOwner) { fileId ->
             currentFile.currentProgress = -1
-            enableAvailableOffline(true)
             refreshBottomSheetUi(currentFile)
         }
     }
@@ -340,23 +335,34 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     fun refreshBottomSheetUi(file: File, offlineProgress: Int? = null) {
-        apply {
-            fileView.setFileItem(file)
-            if (availableOfflineSwitch.isEnabled && availableOffline.visibility == VISIBLE) {
-                availableOfflineSwitch.isChecked = file.isOfflineFile(context)
-            }
-            addFavorites.isEnabled = true
-            addFavoritesIcon.isEnabled = file.isFavorite
-            addFavoritesText.setText(if (file.isFavorite) R.string.buttonRemoveFavorites else R.string.buttonAddFavorites)
-            copyPublicLinkText.setText(if (file.shareLink == null) R.string.buttonCreatePublicLink else R.string.buttonCopyPublicLink)
+        val isPendingOffline = file.isPendingOffline(context)
+        val isOfflineFile = file.isOfflineFile(context)
+        enableAvailableOffline(!isPendingOffline)
+        fileView.setFileItem(file)
+        if (availableOfflineSwitch.isEnabled && availableOffline.visibility == VISIBLE) {
+            availableOfflineSwitch.isChecked = isOfflineFile
+        }
+        addFavorites.isEnabled = true
+        addFavoritesIcon.isEnabled = file.isFavorite
+        addFavoritesText.setText(if (file.isFavorite) R.string.buttonRemoveFavorites else R.string.buttonAddFavorites)
+        copyPublicLinkText.setText(if (file.shareLink == null) R.string.buttonCreatePublicLink else R.string.buttonCopyPublicLink)
 
-            if (offlineProgress == null) {
+        when {
+            offlineProgress == null && !isPendingOffline -> {
                 availableOfflineProgress.visibility = GONE
-                availableOfflineComplete.visibility = if (file.isOfflineFile(context)) VISIBLE else GONE
-                availableOfflineIcon.visibility = if (file.isOfflineFile(context)) GONE else VISIBLE
-            } else if (file.isPendingOffline(context)) {
+                availableOfflineComplete.visibility = if (isOfflineFile) VISIBLE else GONE
+                availableOfflineIcon.visibility = if (isOfflineFile) GONE else VISIBLE
+            }
+            offlineProgress == null -> {
                 availableOfflineComplete.visibility = GONE
                 availableOfflineIcon.visibility = GONE
+                availableOfflineProgress.isIndeterminate = true
+                availableOfflineProgress.visibility = VISIBLE
+            }
+            isPendingOffline -> {
+                availableOfflineComplete.visibility = GONE
+                availableOfflineIcon.visibility = GONE
+                availableOfflineProgress.isIndeterminate = false
                 availableOfflineProgress.visibility = VISIBLE
                 availableOfflineProgress.progress = offlineProgress
             }

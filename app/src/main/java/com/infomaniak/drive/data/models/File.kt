@@ -27,7 +27,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.Utils.DEFAULT_PROGRESS
+import com.infomaniak.drive.utils.Utils.INDETERMINATE_PROGRESS
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.BuildConfig
 import io.realm.RealmList
@@ -113,7 +113,7 @@ open class File(
     var driveColor: String = "#5C89F7"
 
     @Ignore
-    var currentProgress: Int = DEFAULT_PROGRESS
+    var currentProgress: Int = INDETERMINATE_PROGRESS
 
     fun isFolder(): Boolean {
         return type == "dir"
