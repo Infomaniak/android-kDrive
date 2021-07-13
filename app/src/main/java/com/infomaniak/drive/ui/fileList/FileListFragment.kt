@@ -536,11 +536,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
         }
 
-        mainViewModel.fileCancelledFromDownload.observe(viewLifecycleOwner) { fileId ->
-            fileAdapter.updateFileProgress(fileId, -1) { file ->
-                file.isOffline = false
-                file.currentProgress = 0
-            }
+        mainViewModel.updateVisibleFiles.observe(viewLifecycleOwner) {
             updateVisibleProgresses()
         }
     }

@@ -53,13 +53,12 @@ class MainViewModel : ViewModel() {
 
     val intentShowProgressByFolderId = SingleLiveEvent<Int>()
 
-    val refreshActivities = SingleLiveEvent<Boolean>()
-    val updateOfflineFile = SingleLiveEvent<Pair<FileId, IsOffline>>()
+    val deleteFileFromHome = SingleLiveEvent<Boolean>()
     val fileInProgress = SingleLiveEvent<FileInProgress>()
     val forcedDriveSelection = SingleLiveEvent<Boolean>()
-    val deleteFileFromHome = SingleLiveEvent<Boolean>()
-
-    val fileCancelledFromDownload = MutableLiveData<FileId>()
+    val refreshActivities = SingleLiveEvent<Boolean>()
+    val updateOfflineFile = SingleLiveEvent<Pair<FileId, IsOffline>>()
+    val updateVisibleFiles = MutableLiveData<Boolean>()
 
     private var getFileDetailsJob = Job()
     private var syncOfflineFilesJob = Job()

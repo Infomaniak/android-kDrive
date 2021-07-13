@@ -301,8 +301,8 @@ fun View.setupFileProgress(file: File, progress: Int) {
                 fileOfflineProgression.visibility = GONE
                 fileOfflineProgression.isIndeterminate = false
             }
-            fileOfflineProgression.visibility = VISIBLE
             fileOfflineProgression.progress = progress
+            fileOfflineProgression.visibility = VISIBLE
             progressLayout.visibility = VISIBLE
         }
         isPendingOffline && progress == Utils.INDETERMINATE_PROGRESS -> {
@@ -313,13 +313,11 @@ fun View.setupFileProgress(file: File, progress: Int) {
             progressLayout.visibility = VISIBLE
         }
         file.isOfflineFile(context) -> {
-            fileOfflineProgression.visibility = GONE
-            progressLayout.visibility = GONE
             fileOffline.visibility = VISIBLE
+            fileOfflineProgression.visibility = GONE
+            progressLayout.visibility = VISIBLE
         }
-        else -> {
-            progressLayout.visibility = GONE
-        }
+        else -> progressLayout.visibility = GONE
     }
 }
 

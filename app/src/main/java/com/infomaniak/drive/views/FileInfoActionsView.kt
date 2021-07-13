@@ -224,7 +224,10 @@ class FileInfoActionsView @JvmOverloads constructor(
                 currentFile.isOffline = true
                 onItemClickListener.onCacheAddedToOffline()
             }
-        } else Utils.downloadAsOfflineFile(context, currentFile)
+        } else {
+            Utils.downloadAsOfflineFile(context, currentFile)
+            if (currentFile.isPendingOffline(context)) mainViewModel.updateOfflineFile.value = currentFile.id to false
+        }
         refreshBottomSheetUi(currentFile)
     }
 
@@ -324,8 +327,8 @@ class FileInfoActionsView @JvmOverloads constructor(
             }
         }
 
-        mainViewModel.fileCancelledFromDownload.observe(lifecycleOwner) { fileId ->
-            currentFile.currentProgress = -1
+        mainViewModel.updateVisibleFiles.observe(lifecycleOwner) {
+            currentFile.currentProgress = Utils.INDETERMINATE_PROGRESS
             refreshBottomSheetUi(currentFile)
         }
     }
