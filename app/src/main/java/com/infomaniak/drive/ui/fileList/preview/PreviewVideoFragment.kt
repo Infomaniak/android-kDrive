@@ -108,7 +108,10 @@ open class PreviewVideoFragment : PreviewFragment() {
     private fun initializePlayer() {
         val context = requireContext()
         val renderersFactory: RenderersFactory = buildRenderersFactory(context)
-        val offlineFile = if (file.isOffline) file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive) else null
+        val offlineFile = if (file.isOffline) {
+            val userId = previewSliderViewModel.userDrive.userId
+            file.getOfflineFile(requireContext(), userId)
+        } else null
         val offlineIsComplete = offlineFile?.let { file.isOfflineAndIntact(offlineFile) } ?: false
 
         val mediaSourceFactory: MediaSourceFactory =

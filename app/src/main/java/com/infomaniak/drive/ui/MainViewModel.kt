@@ -21,18 +21,19 @@ import android.content.Context
 import android.net.Uri
 import androidx.collection.arrayMapOf
 import androidx.lifecycle.*
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import androidx.work.WorkQuery
 import com.google.gson.JsonObject
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.KDriveHttpClient
+import com.infomaniak.drive.data.services.DownloadWorker
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
 import com.infomaniak.drive.utils.MediaUtils.isMedia
-import com.infomaniak.drive.utils.SingleLiveEvent
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import kotlinx.coroutines.Dispatchers
@@ -52,13 +53,12 @@ class MainViewModel : ViewModel() {
 
     val intentShowProgressByFolderId = SingleLiveEvent<Int>()
 
-    val refreshActivities = SingleLiveEvent<Boolean>()
-    val updateOfflineFile = SingleLiveEvent<Pair<Int, Boolean>>()
+    val deleteFileFromHome = SingleLiveEvent<Boolean>()
     val fileInProgress = SingleLiveEvent<FileInProgress>()
     val forcedDriveSelection = SingleLiveEvent<Boolean>()
-    val deleteFileFromHome = SingleLiveEvent<Boolean>()
-
-    val fileCancelledFromDownload = MutableLiveData<Int>()
+    val refreshActivities = SingleLiveEvent<Boolean>()
+    val updateOfflineFile = SingleLiveEvent<Pair<FileId, IsOffline>>()
+    val updateVisibleFiles = MutableLiveData<Boolean>()
 
     private var getFileDetailsJob = Job()
     private var syncOfflineFilesJob = Job()
@@ -222,6 +222,13 @@ class MainViewModel : ViewModel() {
         emit(ApiRepository.convertFile(file))
     }
 
+    fun observeDownloadOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(
+        WorkQuery.Builder
+            .fromUniqueWorkNames(arrayListOf(DownloadWorker.TAG))
+            .addStates(arrayListOf(WorkInfo.State.RUNNING))
+            .build()
+    )
+
     suspend fun removeOfflineFile(
         context: Context,
         file: File,
@@ -233,7 +240,6 @@ class MainViewModel : ViewModel() {
         if (file.isMedia()) file.deleteInMediaScan(context, userDrive)
         if (cacheFile.exists()) cacheFile.delete()
         if (offlineFile.exists()) {
-            offlineFile.copyTo(cacheFile)
             offlineFile.delete()
         }
     }
@@ -250,9 +256,10 @@ class MainViewModel : ViewModel() {
             DriveInfosController.getDrives(AccountUtils.currentUserId).forEach { drive ->
                 val userDrive = UserDrive(driveId = drive.id)
 
-                FileController.getOfflineFiles(null, userDrive).forEach { file ->
+                FileController.getOfflineFiles(null, userDrive).forEach loopFiles@{ file ->
+                    if (file.isPendingOffline(context)) return@loopFiles
 
-                    file.getOfflineFile(context, userDrive)?.let { offlineFile ->
+                    file.getOfflineFile(context, userDrive.userId)?.let { offlineFile ->
                         migrateOfflineIfNeeded(context, file, offlineFile, userDrive)
 
                         val apiResponse = ApiRepository.getFileDetails(file)
@@ -298,7 +305,7 @@ class MainViewModel : ViewModel() {
         offlineFile: java.io.File,
         userDrive: UserDrive
     ) {
-        val remoteOfflineFile = remoteFile.getOfflineFile(context, userDrive) ?: return
+        val remoteOfflineFile = remoteFile.getOfflineFile(context, userDrive.userId) ?: return
 
         val pathChanged = offlineFile.path != remoteOfflineFile.path
         if (pathChanged) {

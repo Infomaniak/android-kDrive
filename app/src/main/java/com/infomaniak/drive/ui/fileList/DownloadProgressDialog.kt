@@ -89,7 +89,7 @@ class DownloadProgressDialog : DialogFragment() {
 
         fun downloadFile(context: Context, file: File, userDrive: UserDrive) = liveData(Dispatchers.IO) {
             val outputFile =
-                if (file.isOffline) file.getOfflineFile(context, userDrive)
+                if (file.isOffline) file.getOfflineFile(context, userDrive.userId)
                 else file.getCacheFile(context, userDrive)
             if (outputFile == null) {
                 emit(null)

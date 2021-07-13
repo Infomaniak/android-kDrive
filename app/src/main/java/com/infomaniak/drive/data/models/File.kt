@@ -26,6 +26,8 @@ import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.Utils.INDETERMINATE_PROGRESS
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.BuildConfig
 import io.realm.RealmList
@@ -111,7 +113,7 @@ open class File(
     var driveColor: String = "#5C89F7"
 
     @Ignore
-    var currentProgress: Int = -1
+    var currentProgress: Int = INDETERMINATE_PROGRESS
 
     fun isFolder(): Boolean {
         return type == "dir"
@@ -203,6 +205,10 @@ open class File(
         return dataFile.length() == size
     }
 
+    fun isOfflineFile(context: Context, userId: Int = AccountUtils.currentUserId): Boolean {
+        return isOffline || getOfflineFile(context, userId)?.exists() == true
+    }
+
     /**
      * File is offline and local file is the same as in the server (same modification date and size)
      */
@@ -216,9 +222,10 @@ open class File(
         return java.io.File(folder, id.toString())
     }
 
-    fun getOfflineFile(context: Context, userDrive: UserDrive = UserDrive()): java.io.File? {
+    fun getOfflineFile(context: Context, userId: Int = AccountUtils.currentUserId): java.io.File? {
+        val userDrive = UserDrive(userId, driveId)
         val mediaFolder = context.externalMediaDirs?.firstOrNull() ?: context.filesDir
-        val rootFolder = java.io.File(mediaFolder, "offline_storage/${userDrive.userId}/${userDrive.driveId}")
+        val rootFolder = java.io.File(mediaFolder, "offline_storage/${userId}/$driveId")
         val path =
             if (this.path.isEmpty()) FileController.generateAndSavePath(id, userDrive)
             else this.path
@@ -253,7 +260,11 @@ open class File(
 
     fun isPendingOffline(context: Context): Boolean {
         val get = WorkManager.getInstance(context).getWorkInfosByTag(getWorkerTag()).get()
-        return get.firstOrNull { it.state == WorkInfo.State.ENQUEUED || it.state == WorkInfo.State.RUNNING } != null
+        return get.firstOrNull {
+            it.state == WorkInfo.State.ENQUEUED
+                    || it.state == WorkInfo.State.RUNNING
+                    || it.state == WorkInfo.State.BLOCKED
+        } != null
     }
 
     fun getMimeType(): String {

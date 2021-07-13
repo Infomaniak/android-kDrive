@@ -465,7 +465,7 @@ class CloudStorageProvider : DocumentsProvider() {
             accessMode: Int
         ): ParcelFileDescriptor? {
             val cacheFile = file.getCacheFile(context, userDrive)
-            val offlineFile = file.getOfflineFile(context, userDrive)
+            val offlineFile = file.getOfflineFile(context, userDrive.userId)
 
             try {
                 if (offlineFile != null && file.isOfflineAndIntact(offlineFile))
