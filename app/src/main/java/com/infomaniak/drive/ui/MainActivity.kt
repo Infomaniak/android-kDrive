@@ -85,7 +85,7 @@ class MainActivity : BaseActivity() {
     private var uploadedFilesToDelete = arrayListOf<UploadFile>()
 
     private lateinit var drivePermissions: DrivePermissions
-    private var filesDeletionResult: ActivityResultLauncher<IntentSenderRequest>? = null
+    private lateinit var filesDeletionResult: ActivityResultLauncher<IntentSenderRequest>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -240,7 +240,7 @@ class MainActivity : BaseActivity() {
                                 contentResolver,
                                 filesUploadedRecently.map { it.uri.toUri() }
                             )
-                            filesDeletionResult?.launch(IntentSenderRequest.Builder(filesDeletionRequest.intentSender).build())
+                            filesDeletionResult.launch(IntentSenderRequest.Builder(filesDeletionRequest.intentSender).build())
                         } else {
                             mainViewModel.deleteSynchronizedFilesOnDevice(uploadedFilesToDelete)
                         }
