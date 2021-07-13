@@ -236,8 +236,10 @@ class MainActivity : BaseActivity() {
                         isDeletion = true
                     ) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                            val filesDeletionRequest =
-                                MediaStore.createDeleteRequest(contentResolver, filesUploadedRecently.map { it.uri.toUri() })
+                            val filesDeletionRequest = MediaStore.createDeleteRequest(
+                                contentResolver,
+                                filesUploadedRecently.map { it.uri.toUri() }
+                            )
                             filesDeletionResult?.launch(IntentSenderRequest.Builder(filesDeletionRequest.intentSender).build())
                         } else {
                             mainViewModel.deleteSynchronizedFilesOnDevice(uploadedFilesToDelete)
