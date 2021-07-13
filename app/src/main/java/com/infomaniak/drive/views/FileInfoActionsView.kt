@@ -354,6 +354,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             isPendingOffline -> {
                 availableOfflineComplete.visibility = GONE
                 availableOfflineIcon.visibility = GONE
+                availableOfflineProgress.visibility = GONE
                 if (offlineProgress == null) {
                     availableOfflineProgress.isIndeterminate = true
                 } else {
