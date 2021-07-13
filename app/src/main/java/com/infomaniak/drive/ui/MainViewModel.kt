@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui
 
 import android.app.Application
 import android.content.ContentResolver
+import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.collection.arrayMapOf
@@ -259,9 +260,9 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
                 val userDrive = UserDrive(driveId = drive.id)
 
                 FileController.getOfflineFiles(null, userDrive).forEach loopFiles@{ file ->
-                    if (file.isPendingOffline(context)) return@loopFiles
+                    if (file.isPendingOffline(getContext())) return@loopFiles
 
-                    file.getOfflineFile(getContext(), userDrive)?.let { offlineFile ->
+                    file.getOfflineFile(getContext(), userDrive.userId)?.let { offlineFile ->
                         migrateOfflineIfNeeded(file, offlineFile, userDrive)
 
                         val apiResponse = ApiRepository.getFileDetails(file)
@@ -306,7 +307,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         offlineFile: java.io.File,
         userDrive: UserDrive
     ) {
-        val remoteOfflineFile = remoteFile.getOfflineFile(getContext(), userDrive) ?: return
+        val remoteOfflineFile = remoteFile.getOfflineFile(getContext(), userDrive.userId) ?: return
 
         val pathChanged = offlineFile.path != remoteOfflineFile.path
         if (pathChanged) {
