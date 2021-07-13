@@ -181,7 +181,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File) {
         lifecycleScope.launch {
-            mainViewModel.removeOfflineFile(requireContext(), currentFile, offlineLocalPath, cacheFile)
+            mainViewModel.removeOfflineFile(currentFile, offlineLocalPath, cacheFile)
 
             withContext(Dispatchers.Main) {
                 currentFile.isOffline = false
@@ -226,7 +226,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun onDeleteFile(onApiResponse: () -> Unit) {
-        mainViewModel.deleteFile(requireContext(), currentFile).observe(viewLifecycleOwner) { apiResponse ->
+        mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { apiResponse ->
             onApiResponse()
             if (apiResponse.isSuccess()) {
                 mainViewModel.refreshActivities.value = true
@@ -259,7 +259,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun onLeaveShare(onApiResponse: () -> Unit) {
-        mainViewModel.deleteFile(requireContext(), currentFile).observe(viewLifecycleOwner) { apiResponse ->
+        mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { apiResponse ->
             onApiResponse()
             if (apiResponse.isSuccess()) {
                 transmitActionAndPopBack(getString(R.string.snackbarLeaveShareConfirmation))

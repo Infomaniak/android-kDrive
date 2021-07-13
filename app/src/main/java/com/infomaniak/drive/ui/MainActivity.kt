@@ -27,13 +27,19 @@ import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.StateListDrawable
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.net.toUri
 import androidx.core.view.get
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -49,6 +55,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.checkUpdateIsAvailable
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.UISettings
+import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.data.sync.UploadProgressReceiver
 import com.infomaniak.drive.launchInAppReview
@@ -64,9 +71,7 @@ import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_file_list.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.util.*
 
 class MainActivity : BaseActivity() {
@@ -77,8 +82,10 @@ class MainActivity : BaseActivity() {
 
     private var lastCloseApp = Date()
     private var updateAvailableShow = false
+    private var uploadedFilesToDelete = arrayListOf<UploadFile>()
 
     private lateinit var drivePermissions: DrivePermissions
+    private lateinit var filesDeletionResult: ActivityResultLauncher<IntentSenderRequest>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,6 +102,14 @@ class MainActivity : BaseActivity() {
             if (folderId > 0) {
                 navController.navigate(R.id.fileListFragment)
                 mainViewModel.intentShowProgressByFolderId.value = folderId
+            }
+        }
+
+        filesDeletionResult = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                lifecycleScope.launch(Dispatchers.IO) {
+                    UploadFile.deleteAll(uploadedFilesToDelete)
+                }
             }
         }
 
@@ -198,7 +213,7 @@ class MainActivity : BaseActivity() {
         if (drivePermissions.checkWriteStoragePermission()) launchSyncOffline()
 
         AppSettings.appLaunches++
-        if (!AccountUtils.isEnableAppSync() && AppSettings.appLaunches == 1) {
+        if (!AccountUtils.isEnableAppSync() && AppSettings.appLaunches == SYNC_DIALOG_LAUNCHES) {
             val id = if (AppSettings.migrated) R.id.syncAfterMigrationBottomSheetDialog else R.id.syncConfigureBottomSheetDialog
             findNavController(R.id.hostFragment).navigate(id)
         }
@@ -206,12 +221,38 @@ class MainActivity : BaseActivity() {
         setBottomNavigationUserAvatar(this)
         startContentObserverService()
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(uploadProgressReceiver, IntentFilter(UploadProgressReceiver.TAG))
+        LocalBroadcastManager.getInstance(this)
+            .registerReceiver(uploadProgressReceiver, IntentFilter(UploadProgressReceiver.TAG))
+
+        if (UploadFile.getAppSyncSettings()?.deleteAfterSync == true && UploadFile.getPendingFilesCount() == 0) {
+            UploadFile.getUploadedFiles()?.let { filesUploadedRecently ->
+                if (filesUploadedRecently.size >= SYNCED_FILES_DELETION_FILES_AMOUNT) {
+                    uploadedFilesToDelete = filesUploadedRecently
+                    Utils.createConfirmation(
+                        context = this,
+                        title = getString(R.string.modalDeletePhotosTitle),
+                        message = getString(R.string.modalDeletePhotosNumericDescription, filesUploadedRecently.size),
+                        mainButtonText = getString(R.string.buttonDelete),
+                        isDeletion = true
+                    ) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            val filesDeletionRequest = MediaStore.createDeleteRequest(
+                                contentResolver,
+                                filesUploadedRecently.map { it.uri.toUri() }
+                            )
+                            filesDeletionResult.launch(IntentSenderRequest.Builder(filesDeletionRequest.intentSender).build())
+                        } else {
+                            mainViewModel.deleteSynchronizedFilesOnDevice(uploadedFilesToDelete)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun launchSyncOffline() {
         lifecycleScope.launch {
-            mainViewModel.syncOfflineFiles(applicationContext)
+            mainViewModel.syncOfflineFiles()
         }
     }
 
@@ -290,6 +331,9 @@ class MainActivity : BaseActivity() {
     }
 
     companion object {
+        private const val SYNC_DIALOG_LAUNCHES = 1
+        private const val SYNCED_FILES_DELETION_FILES_AMOUNT = 10
+
         private const val SECURITY_APP_TOLERANCE = 1 * 60 * 1000 // 1min (ms)
         const val INTENT_SHOW_PROGRESS = "intent_folder_id_progress"
     }

@@ -107,6 +107,7 @@ object Utils {
         context: Context,
         title: String,
         message: String? = null,
+        mainButtonText: String? = null,
         autoDismiss: Boolean = true,
         isDeletion: Boolean = false,
         onConfirmation: (dialog: Dialog) -> Unit
@@ -115,7 +116,7 @@ object Utils {
         val dialog = MaterialAlertDialogBuilder(context, style)
             .setTitle(title)
             .setMessage(message)
-            .setPositiveButton(R.string.buttonConfirm) { _, _ -> }
+            .setPositiveButton(mainButtonText ?: context.getString(R.string.buttonConfirm)) { _, _ -> }
             .setNegativeButton(R.string.buttonCancel) { _, _ -> }
             .setCancelable(false)
             .show()

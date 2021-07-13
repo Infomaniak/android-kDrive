@@ -187,6 +187,8 @@
     <string name="createFolderTitle">Create folder</string>
     <string name="createFolderValidUntilDescription">Once the date has passed, users will no longer be able to transfer files.</string>
     <string name="createPrivateFolderSucces">Folder created successfully</string>
+    <string name="deletePicturesDescription">The application will regularly ask you to delete photos from your device that are already synchronized on your kDrive. You always have to manually authorize the deletion\n</string>
+    <string name="deletePicturesTitle">Delete photos (Beta)</string>
     <plurals name="driveBlockedDescription">
         <item quantity="one">The product has expired since %s. Please renew it to manage it and access its data.</item>
         <item quantity="other">All your products have expired. Please renew them to manage them and access their data.</item>
@@ -370,6 +372,7 @@
     <string name="homeTitle">Welcome</string>
     <string name="inputExpirationDate">Expiry date</string>
     <string name="lastEditsTitle">Most recent changes</string>
+    <string name="locateButton">Locate</string>
     <string name="lockAppTitle">Application locked</string>
     <string name="manageDropboxTitle">Manage the drop box %s</string>
     <string name="menuTitle">Menu</string>
@@ -389,6 +392,8 @@
         <item quantity="one">Do you really want to permanently delete %s?</item>
         <item quantity="other">Do you really want to permanently delete %d items?</item>
     </plurals>
+    <string name="modalDeletePhotosNumericDescription">Would you like to delete %d photos uploaded to kDrive from your device?</string>
+    <string name="modalDeletePhotosTitle">Automatic photo deletion</string>
     <string name="modalDeleteTitle">Delete permanently</string>
     <string name="modalEmptyTrashDescription">Do you really want to empty the recycle bin?</string>
     <string name="modalEmptyTrashTitle">Empty recycle bin</string>
@@ -411,6 +416,7 @@
     <string name="noDriveTitle">You don’t have a kDrive yet!</string>
     <string name="noFilesDescription">This folder is empty. Click the + button to add files here.</string>
     <string name="noFilesDescriptionNoNetwork">Unable to retrieve information from the folder. Please check your network connection or try again later.</string>
+    <string name="noLastEditsTitle">No recent changes</string>
     <string name="noMediaFolderTitle">No media folders available</string>
     <string name="noSyncFolderNotificationDescription">Click here to configure the folders to synchronize</string>
     <string name="noSyncFolderNotificationTitle">No folder selected for automatic backup</string>
@@ -531,7 +537,7 @@
     <string name="syncSettingsSyncPeriodicityInstantValue">Instant</string>
     <string name="syncSettingsSyncPeriodicityOneHourValue">Every hour</string>
     <string name="syncSettingsSyncPeriodicityOneQuarterValue">Every 15 minutes</string>
-    <string name="syncSettingsTitle">Saving photos</string>
+    <string name="syncSettingsTitle">Photo backup</string>
     <string name="themeSettingsDarkLabel">Dark</string>
     <string name="themeSettingsLightLabel">Light</string>
     <string name="themeSettingsSystemDefaultLabel">System default</string>

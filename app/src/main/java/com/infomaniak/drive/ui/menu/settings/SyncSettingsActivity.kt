@@ -154,8 +154,10 @@ class SyncSettingsActivity : BaseActivity() {
 
         val syncVideoDefaultValue = true
         syncVideoSwitch.isChecked = oldSyncSettings?.syncVideo ?: syncVideoDefaultValue
-        val createDatedSubFoldersDefaultValue = false
-        createDatedSubFoldersSwitch.isChecked = oldSyncSettings?.createDatedSubFolders ?: createDatedSubFoldersDefaultValue
+        val syncAdvancedOptionsDefaultValue = false
+        createDatedSubFoldersSwitch.isChecked = oldSyncSettings?.createDatedSubFolders ?: syncAdvancedOptionsDefaultValue
+        deletePicturesAfterSyncSwitch.isChecked = oldSyncSettings?.deleteAfterSync ?: syncAdvancedOptionsDefaultValue
+
 
         activateSync.setOnClickListener { activateSyncSwitch.isChecked = !activateSyncSwitch.isChecked }
         activateSyncSwitch.setOnCheckedChangeListener { _, isChecked ->
@@ -175,7 +177,12 @@ class SyncSettingsActivity : BaseActivity() {
         }
 
         createDatedSubFoldersSwitch.setOnCheckedChangeListener { _, isChecked ->
-            if (oldSyncSettings?.createDatedSubFolders ?: createDatedSubFoldersDefaultValue == isChecked) editNumber-- else editNumber++
+            if (oldSyncSettings?.createDatedSubFolders ?: syncAdvancedOptionsDefaultValue == isChecked) editNumber-- else editNumber++
+            changeSaveButtonStatus()
+        }
+
+        deletePicturesAfterSyncSwitch.setOnCheckedChangeListener { _, isChecked ->
+            if (oldSyncSettings?.deleteAfterSync ?: syncAdvancedOptionsDefaultValue == isChecked) editNumber-- else editNumber++
             changeSaveButtonStatus()
         }
 
@@ -284,7 +291,8 @@ class SyncSettingsActivity : BaseActivity() {
                     lastSync = if (saveOldPictures) Date(0) else Date(),
                     syncFolder = syncSettingsViewModel.syncFolder.value!!,
                     syncVideo = syncVideoSwitch.isChecked,
-                    createDatedSubFolders = createDatedSubFoldersSwitch.isChecked
+                    createDatedSubFolders = createDatedSubFoldersSwitch.isChecked,
+                    deleteAfterSync = deletePicturesAfterSyncSwitch.isChecked
                 )
                 syncSettings.setIntervalType(syncSettingsViewModel.syncIntervalType.value!!)
                 activateAutoSync(syncSettings)

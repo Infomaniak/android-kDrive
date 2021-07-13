@@ -178,6 +178,8 @@
     <string name="createFolderTitle">Créer un dossier</string>
     <string name="createFolderValidUntilDescription">Une fois la date passée, les utilisateurs ne pourront plus transférer de fichiers.</string>
     <string name="createPrivateFolderSucces">Dossier créé avec succès</string>
+    <string name="deletePicturesDescription">L’application vous proposera régulièrement de supprimer les photos de votre appareil déjà synchronisées sur votre kDrive. Vous devrez systématiquement autoriser manuellement la suppression</string>
+    <string name="deletePicturesTitle">Supprimer les photos (Beta)</string>
     <plurals name="driveBlockedDescription">
         <item quantity="one">Le produit a expiré depuis le %s. Veuillez le renouveler pour le gérer et accéder à ses données.</item>
         <item quantity="other">Tous vos produits ont expiré. Veuillez les renouveler pour les gérer et accéder à leurs données.</item>
@@ -361,6 +363,7 @@
     <string name="homeTitle">Accueil</string>
     <string name="inputExpirationDate">Date d’expiration</string>
     <string name="lastEditsTitle">Dernières modifications</string>
+    <string name="locateButton">Localiser</string>
     <string name="lockAppTitle">Application verrouillée</string>
     <string name="manageDropboxTitle">Gérer la boîte de dépôt %s</string>
     <string name="menuTitle">Menu</string>
@@ -380,6 +383,8 @@
         <item quantity="one">Souhaitez-vous vraiment supprimer définitivement %s ?</item>
         <item quantity="other">Souhaitez-vous vraiment supprimer définitivement %d éléments ?</item>
     </plurals>
+    <string name="modalDeletePhotosNumericDescription">Souhaitez-vous supprimer de votre appareil %d photos déjà transférées dans kDrive ?</string>
+    <string name="modalDeletePhotosTitle">Suppression automatique des photos</string>
     <string name="modalDeleteTitle">Supprimer définitivement</string>
     <string name="modalEmptyTrashDescription">Souhaitez-vous vraiment vider la corbeille ?</string>
     <string name="modalEmptyTrashTitle">Vider la corbeille</string>
@@ -402,6 +407,7 @@
     <string name="noDriveTitle">Vous n’avez pas encore de kDrive !</string>
     <string name="noFilesDescription">Ce dossier est vide. Appuyez sur le bouton + pour ajouter des fichiers ici.</string>
     <string name="noFilesDescriptionNoNetwork">Impossible de récupérer les informations du dossier. Veuillez vérifier votre connexion réseau ou réessayez ultérieurement.</string>
+    <string name="noLastEditsTitle">Pas de dernières modifications</string>
     <string name="noMediaFolderTitle">Aucun dossier de médias disponible</string>
     <string name="noSyncFolderNotificationDescription">Cliquez-ici pour configurer les dossiers à synchroniser</string>
     <string name="noSyncFolderNotificationTitle">Aucun dossier sélectionné pour la sauvegarde automatique</string>
