@@ -106,6 +106,9 @@ import java.util.*
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
+typealias FileId = Int
+typealias IsOffline = Boolean
+
 fun Intent.clearStack() {
     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
 }
@@ -290,21 +293,31 @@ fun View.setFileItem(
 }
 
 fun View.setupFileProgress(file: File, progress: Int) {
+    val isPendingOffline = file.isPendingOffline(context)
     when {
-        file.isOffline -> {
+        isPendingOffline && progress in 0..99 -> {
+            fileOffline.visibility = GONE
+            if (fileOfflineProgression.isIndeterminate) {
+                fileOfflineProgression.visibility = GONE
+                fileOfflineProgression.isIndeterminate = false
+            }
+            fileOfflineProgression.progress = progress
+            fileOfflineProgression.visibility = VISIBLE
             progressLayout.visibility = VISIBLE
+        }
+        isPendingOffline && progress == Utils.INDETERMINATE_PROGRESS -> {
+            fileOffline.visibility = GONE
+            fileOfflineProgression.visibility = GONE
+            fileOfflineProgression.isIndeterminate = true
+            fileOfflineProgression.visibility = VISIBLE
+            progressLayout.visibility = VISIBLE
+        }
+        file.isOfflineFile(context) -> {
             fileOffline.visibility = VISIBLE
             fileOfflineProgression.visibility = GONE
-        }
-        progress in 0..99 -> {
             progressLayout.visibility = VISIBLE
-            fileOffline.visibility = GONE
-            fileOfflineProgression.visibility = VISIBLE
-            fileOfflineProgression.progress = progress
         }
-        else -> {
-            progressLayout.visibility = GONE
-        }
+        else -> progressLayout.visibility = GONE
     }
 }
 

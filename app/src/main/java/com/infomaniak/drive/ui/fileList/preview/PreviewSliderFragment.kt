@@ -184,10 +184,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 override fun onSlide(bottomSheet: View, slideOffset: Float) = Unit
             })
         }
-
-        bottomSheetFileInfos.observeOfflineProgression(this) { fileId ->
-            previewSliderAdapter.updateFile(fileId) { file -> file.isOffline = true }
-        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -209,11 +205,16 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         super.onResume()
         activity?.window?.statusBarColor = ContextCompat.getColor(requireContext(), R.color.previewBackground)
         activity?.window?.lightStatusBar(false)
+        bottomSheetFileInfos.updateAvailableOfflineItem()
+        bottomSheetFileInfos.observeOfflineProgression(this) { fileId ->
+            previewSliderAdapter.updateFile(fileId) { file -> file.isOffline = true }
+        }
     }
 
     override fun onPause() {
         super.onPause()
         previewSliderViewModel.currentPreview = currentPreviewFile
+        bottomSheetFileInfos.removeOfflineObservations(this)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

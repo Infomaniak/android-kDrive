@@ -48,12 +48,23 @@ import java.io.BufferedInputStream
 class DownloadWorker(private val context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result {
-        val fileID = inputData.getInt(FILE_ID, 0)
+        val fileId = inputData.getInt(FILE_ID, 0)
+        val userId = inputData.getInt(USER_ID, AccountUtils.currentUserId)
+        val driveID = inputData.getInt(DRIVE_ID, AccountUtils.currentDriveId)
+        val userDrive = UserDrive(userId, driveID)
+        val file = FileController.getFileById(fileId, userDrive)
+        val offlineFile = file?.getOfflineFile(context, userId)
+
         return coroutineScope {
-            val job = async { initOfflineDownload(fileID) }
+            val job = async {
+                if (file != null && offlineFile != null) initOfflineDownload(file, offlineFile, userDrive) else Result.failure()
+            }
             job.invokeOnCompletion { exception ->
                 when (exception) {
-                    is CancellationException -> notifyDownloadCancelled(fileID)
+                    is CancellationException -> {
+                        if (offlineFile != null && offlineFile.exists() && !file.isOffline) offlineFile.delete()
+                        notifyDownloadCancelled(fileId)
+                    }
                     else -> exception?.printStackTrace()
                 }
             }
@@ -61,19 +72,13 @@ class DownloadWorker(private val context: Context, workerParams: WorkerParameter
         }
     }
 
-    private suspend fun initOfflineDownload(fileID: Int): Result = withContext(Dispatchers.IO) {
-        val userID = inputData.getInt(USER_ID, AccountUtils.currentUserId)
-        val driveID = inputData.getInt(DRIVE_ID, AccountUtils.currentDriveId)
-        val userDrive = UserDrive(userID, driveID)
-
-        return@withContext FileController.getFileById(fileID, userDrive)?.let { file ->
-            val offlineFile = file.getOfflineFile(context, userDrive)
+    private suspend fun initOfflineDownload(file: File, offlineFile: java.io.File, userDrive: UserDrive): Result =
+        withContext(Dispatchers.IO) {
             val cacheFile = file.getCacheFile(context, userDrive)
 
-            if (offlineFile == null) return@let Result.failure()
             if (file.isOfflineAndIntact(offlineFile)) return@withContext Result.success()
 
-            val firstUpdate = workDataOf(PROGRESS to 0, FILE_ID to fileID)
+            val firstUpdate = workDataOf(PROGRESS to 0, FILE_ID to file.id)
             setProgress(firstUpdate)
 
             if (offlineFile.exists()) offlineFile.delete()
@@ -85,11 +90,10 @@ class DownloadWorker(private val context: Context, workerParams: WorkerParameter
                 setOngoing(true)
                 setContentTitle(file.name)
                 addAction(cancelAction)
-                setForeground(ForegroundInfo(fileID, build()))
+                setForeground(ForegroundInfo(file.id, build()))
             }
             startOfflineDownload(file, downloadNotification, offlineFile, userDrive)
-        } ?: Result.failure()
-    }
+        }
 
     private suspend fun startOfflineDownload(
         file: File,

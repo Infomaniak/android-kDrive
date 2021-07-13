@@ -21,11 +21,14 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.work.*
@@ -42,6 +45,7 @@ import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.*
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_file_info_actions.*
 import kotlinx.android.synthetic.main.fragment_file_details.view.*
 import kotlinx.android.synthetic.main.fragment_menu.view.*
 import kotlinx.android.synthetic.main.fragment_preview_slider.*
@@ -59,9 +63,9 @@ class FileInfoActionsView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
+    private var observeDownloadOffline: LiveData<MutableList<WorkInfo>>? = null
     private lateinit var currentFile: File
     private lateinit var mainViewModel: MainViewModel
-    private var workManager: WorkManager = WorkManager.getInstance(context)
 
     private lateinit var ownerFragment: Fragment
     private lateinit var onItemClickListener: OnItemClickListener
@@ -89,7 +93,6 @@ class FileInfoActionsView @JvmOverloads constructor(
         } else {
             quickActionsLayout.visibility = VISIBLE
             quickActionsLayout.visibility = VISIBLE
-            availableOfflineSwitch.isEnabled = true
 
             val isOnline = mainViewModel.isInternetAvailable.value == true
             val isCommonDocumentOrSharedSpace =
@@ -220,9 +223,12 @@ class FileInfoActionsView @JvmOverloads constructor(
                 CoroutineScope(Dispatchers.IO).launch { FileController.updateOfflineStatus(currentFile.id, true) }
                 currentFile.isOffline = true
                 onItemClickListener.onCacheAddedToOffline()
-                refreshBottomSheetUi(currentFile)
             }
-        } else Utils.downloadAsOfflineFile(context, currentFile)
+        } else {
+            Utils.downloadAsOfflineFile(context, currentFile)
+            if (currentFile.isPendingOffline(context)) mainViewModel.updateOfflineFile.value = currentFile.id to false
+        }
+        refreshBottomSheetUi(currentFile)
     }
 
     fun downloadFile(drivePermissions: DrivePermissions, onSuccess: () -> Unit) {
@@ -265,7 +271,7 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     private fun updateFilePublicLink(url: String) {
-        GlobalScope.launch(Dispatchers.IO) {
+        CoroutineScope(Dispatchers.IO).launch {
             FileController.updateFile(currentFile.id) { it.shareLink = url }
         }
         copyPublicLink(url)
@@ -283,65 +289,83 @@ class FileInfoActionsView @JvmOverloads constructor(
         Utils.copyToClipboard(context, url)
     }
 
-    fun observeOfflineProgression(lifecycleOwner: LifecycleOwner, updateFile: (fileId: Int) -> Unit) {
-        workManager.getWorkInfosForUniqueWorkLiveData(DownloadWorker.TAG).observe(lifecycleOwner) { workInfoList ->
-            if (workInfoList.isEmpty()) return@observe
-            val workInfo = workInfoList.firstOrNull {
-                it.state == WorkInfo.State.RUNNING || it.state == WorkInfo.State.ENQUEUED
-            } ?: workInfoList.first()
-
-            if (!workInfo.state.isFinished) {
-                val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 0)
-                val fileId = workInfo.progress.getInt(DownloadWorker.FILE_ID, 0)
-
-                if (currentFile.id == fileId) {
-                    if (progress == 100) {
-                        availableOffline.isEnabled = true
-                        availableOfflineSwitch.isEnabled = true
-                        updateFile(fileId)
-                        currentFile.isOffline = true
-                        refreshBottomSheetUi(currentFile)
-                    } else {
-                        availableOffline.isEnabled = false
-                        availableOfflineSwitch.isEnabled = false
-                        refreshBottomSheetUi(currentFile, progress)
-                    }
-                } else {
-                    if (progress == 100) updateFile(fileId)
-                    availableOffline.isEnabled = true
-                    availableOfflineSwitch.isEnabled = true
-                }
-            }
-        }
-
-        mainViewModel.fileCancelledFromDownload.observe(lifecycleOwner) { fileId ->
-            availableOffline.isEnabled = true
-            availableOfflineSwitch.isEnabled = true
-            currentFile.isOffline = false
+    /**
+     * This allows you to update when necessary, each time you return to the application.
+     * To be called only in the [Lifecycle.Event.ON_RESUME].
+     */
+    fun updateAvailableOfflineItem() {
+        if (!availableOffline.isEnabled && !currentFile.isPendingOffline(context)) {
+            currentFile.isOffline = true
             refreshBottomSheetUi(currentFile)
         }
     }
 
-    fun refreshBottomSheetUi(file: File, offlineProgress: Int? = null) {
-        apply {
-            fileView.setFileItem(file)
-            if (availableOfflineSwitch.isEnabled && availableOffline.visibility == VISIBLE) {
-                availableOfflineSwitch.isChecked = file.isOffline
-            }
-            addFavorites.isEnabled = true
-            addFavoritesIcon.isEnabled = file.isFavorite
-            addFavoritesText.setText(if (file.isFavorite) R.string.buttonRemoveFavorites else R.string.buttonAddFavorites)
-            copyPublicLinkText.setText(if (file.shareLink == null) R.string.buttonCreatePublicLink else R.string.buttonCopyPublicLink)
+    fun enableAvailableOffline(isEnabled: Boolean) {
+        availableOfflineSwitch.isEnabled = isEnabled
+        availableOffline.isEnabled = isEnabled
+    }
 
-            if (offlineProgress == null) {
-                availableOfflineProgress.visibility = GONE
-                availableOfflineComplete.visibility = if (file.isOffline) VISIBLE else GONE
-                availableOfflineIcon.visibility = if (file.isOffline) GONE else VISIBLE
-            } else {
+    fun observeOfflineProgression(lifecycleOwner: LifecycleOwner, updateFile: (fileId: Int) -> Unit) {
+        observeDownloadOffline = mainViewModel.observeDownloadOffline(context.applicationContext)
+        observeDownloadOffline?.observe(lifecycleOwner) { workInfoList ->
+            if (workInfoList.isEmpty()) return@observe
+            val workInfo = workInfoList.firstOrNull() ?: return@observe
+
+            val fileId: Int = workInfo.progress.getInt(DownloadWorker.FILE_ID, 0)
+            val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 0)
+            Log.w("isPendingOffline", "progress from FileActionView $progress% for file $fileId, state:${workInfo.state}")
+
+            if (currentFile.id == fileId) {
+                currentFile.currentProgress = progress
+                if (progress == 100) {
+                    updateFile(fileId)
+                    currentFile.isOffline = true
+                    refreshBottomSheetUi(currentFile)
+                } else {
+                    refreshBottomSheetUi(currentFile, progress)
+                }
+            }
+        }
+
+        mainViewModel.updateVisibleFiles.observe(lifecycleOwner) {
+            currentFile.currentProgress = Utils.INDETERMINATE_PROGRESS
+            refreshBottomSheetUi(currentFile)
+        }
+    }
+
+    fun removeOfflineObservations(lifecycleOwner: LifecycleOwner) {
+        observeDownloadOffline?.removeObservers(lifecycleOwner)
+    }
+
+    fun refreshBottomSheetUi(file: File, offlineProgress: Int? = null) {
+        val isPendingOffline = file.isPendingOffline(context)
+        val isOfflineFile = file.isOfflineFile(context)
+        enableAvailableOffline(!isPendingOffline)
+        fileView.setFileItem(file)
+        if (availableOfflineSwitch.isEnabled && availableOffline.visibility == VISIBLE) {
+            availableOfflineSwitch.isChecked = isOfflineFile
+        }
+        addFavorites.isEnabled = true
+        addFavoritesIcon.isEnabled = file.isFavorite
+        addFavoritesText.setText(if (file.isFavorite) R.string.buttonRemoveFavorites else R.string.buttonAddFavorites)
+        copyPublicLinkText.setText(if (file.shareLink == null) R.string.buttonCreatePublicLink else R.string.buttonCopyPublicLink)
+
+        when {
+            isPendingOffline -> {
                 availableOfflineComplete.visibility = GONE
                 availableOfflineIcon.visibility = GONE
+                if (offlineProgress == null) {
+                    availableOfflineProgress.isIndeterminate = true
+                } else {
+                    availableOfflineProgress.isIndeterminate = false
+                    availableOfflineProgress.progress = offlineProgress
+                }
                 availableOfflineProgress.visibility = VISIBLE
-                availableOfflineProgress.progress = offlineProgress
+            }
+            offlineProgress == null -> {
+                availableOfflineProgress.visibility = GONE
+                availableOfflineComplete.visibility = if (isOfflineFile) VISIBLE else GONE
+                availableOfflineIcon.visibility = if (isOfflineFile) GONE else VISIBLE
             }
         }
     }
