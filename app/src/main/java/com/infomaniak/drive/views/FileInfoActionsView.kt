@@ -354,7 +354,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             isPendingOffline -> {
                 availableOfflineComplete.visibility = GONE
                 availableOfflineIcon.visibility = GONE
-                availableOfflineProgress.visibility = GONE
+                availableOfflineProgress.visibility = GONE // Before changing the type of progression it must first be gone
                 if (offlineProgress == null) {
                     availableOfflineProgress.isIndeterminate = true
                 } else {
