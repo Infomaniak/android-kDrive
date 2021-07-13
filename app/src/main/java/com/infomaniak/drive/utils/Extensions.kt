@@ -296,7 +296,7 @@ fun View.setupFileProgress(file: File, progress: Int) {
     val isPendingOffline = file.isPendingOffline(context)
     when {
         isPendingOffline && progress in 0..99 -> {
-            fileOffline.visibility = GONE
+            fileOffline.visibility = GONE // Before changing the type of progression it must first be gone
             if (fileOfflineProgression.isIndeterminate) {
                 fileOfflineProgression.visibility = GONE
                 fileOfflineProgression.isIndeterminate = false
