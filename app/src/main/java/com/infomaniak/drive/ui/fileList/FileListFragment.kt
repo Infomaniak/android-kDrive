@@ -255,7 +255,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onResume() {
         super.onResume()
         updateVisibleProgresses()
-        Log.d("isPendingOffline", "fileListFragment resume")
     }
 
     private fun setupMultiSelect() {
