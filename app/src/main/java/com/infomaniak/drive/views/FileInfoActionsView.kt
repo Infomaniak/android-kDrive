@@ -351,23 +351,21 @@ class FileInfoActionsView @JvmOverloads constructor(
         copyPublicLinkText.setText(if (file.shareLink == null) R.string.buttonCreatePublicLink else R.string.buttonCopyPublicLink)
 
         when {
-            offlineProgress == null && !isPendingOffline -> {
-                availableOfflineProgress.visibility = GONE
-                availableOfflineComplete.visibility = if (isOfflineFile) VISIBLE else GONE
-                availableOfflineIcon.visibility = if (isOfflineFile) GONE else VISIBLE
-            }
-            offlineProgress == null -> {
-                availableOfflineComplete.visibility = GONE
-                availableOfflineIcon.visibility = GONE
-                availableOfflineProgress.isIndeterminate = true
-                availableOfflineProgress.visibility = VISIBLE
-            }
             isPendingOffline -> {
                 availableOfflineComplete.visibility = GONE
                 availableOfflineIcon.visibility = GONE
-                availableOfflineProgress.isIndeterminate = false
+                if (offlineProgress == null) {
+                    availableOfflineProgress.isIndeterminate = true
+                } else {
+                    availableOfflineProgress.isIndeterminate = false
+                    availableOfflineProgress.progress = offlineProgress
+                }
                 availableOfflineProgress.visibility = VISIBLE
-                availableOfflineProgress.progress = offlineProgress
+            }
+            offlineProgress == null -> {
+                availableOfflineProgress.visibility = GONE
+                availableOfflineComplete.visibility = if (isOfflineFile) VISIBLE else GONE
+                availableOfflineIcon.visibility = if (isOfflineFile) GONE else VISIBLE
             }
         }
     }
