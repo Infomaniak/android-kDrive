@@ -108,7 +108,7 @@ class MainActivity : BaseActivity() {
         filesDeletionResult = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 lifecycleScope.launch(Dispatchers.IO) {
-                    UploadFile.deleteAllFilesFromDb(uploadedFilesToDelete)
+                    UploadFile.deleteAll(uploadedFilesToDelete)
                 }
             }
         }
@@ -214,8 +214,7 @@ class MainActivity : BaseActivity() {
 
         AppSettings.appLaunches++
         if (!AccountUtils.isEnableAppSync() && AppSettings.appLaunches == SYNC_DIALOG_LAUNCHES) {
-            val id =
-                if (AppSettings.migrated) R.id.syncAfterMigrationBottomSheetDialog else R.id.syncConfigureBottomSheetDialog
+            val id = if (AppSettings.migrated) R.id.syncAfterMigrationBottomSheetDialog else R.id.syncConfigureBottomSheetDialog
             findNavController(R.id.hostFragment).navigate(id)
         }
 
@@ -225,9 +224,9 @@ class MainActivity : BaseActivity() {
         LocalBroadcastManager.getInstance(this)
             .registerReceiver(uploadProgressReceiver, IntentFilter(UploadProgressReceiver.TAG))
 
-        if (UploadFile.getAppSyncSettings()?.deleteAfterSync == true) {
+        if (UploadFile.getAppSyncSettings()?.deleteAfterSync == true && UploadFile.getPendingFilesCount() == 0) {
             UploadFile.getUploadedFiles()?.let { filesUploadedRecently ->
-                if (filesUploadedRecently.size >= SYNCED_FILES_DELETION_FILES_AMOUNT && AppSettings.appLaunches % SYNCED_FILES_DELETION_LAUNCHES == 0) {
+                if (filesUploadedRecently.size >= SYNCED_FILES_DELETION_FILES_AMOUNT) {
                     uploadedFilesToDelete = filesUploadedRecently
                     Utils.createConfirmation(
                         context = this,
@@ -331,8 +330,7 @@ class MainActivity : BaseActivity() {
 
     companion object {
         private const val SYNC_DIALOG_LAUNCHES = 1
-        private const val SYNCED_FILES_DELETION_LAUNCHES = 10
-        private const val SYNCED_FILES_DELETION_FILES_AMOUNT = 50
+        private const val SYNCED_FILES_DELETION_FILES_AMOUNT = 10
 
         private const val SECURITY_APP_TOLERANCE = 1 * 60 * 1000 // 1min (ms)
         const val INTENT_SHOW_PROGRESS = "intent_folder_id_progress"

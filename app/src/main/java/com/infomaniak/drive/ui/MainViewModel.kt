@@ -22,7 +22,6 @@ import android.content.ContentResolver
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.collection.arrayMapOf
-import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.lifecycle.*
 import com.google.gson.JsonObject
@@ -313,11 +312,10 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     fun deleteSynchronizedFilesOnDevice(filesToDelete: ArrayList<UploadFile>) {
         viewModelScope.launch(Dispatchers.IO) {
+            val fileDeleted = arrayListOf<UploadFile>()
             filesToDelete.forEach { uploadFile ->
                 val uri = uploadFile.uri.toUri()
-                if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
-                    uri.toFile().delete()
-                } else {
+                if (!uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
                     SyncUtils.checkDocumentProviderPermissions(getContext(), uri)
                     getContext().contentResolver.query(
                         uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null
@@ -326,11 +324,12 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
                             val columnIndex: Int = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
                             java.io.File(cursor.getString(columnIndex)).delete()
                             getContext().contentResolver.delete(uri, null, null)
-                            UploadFile.deleteFileFromDb(uri)
+                            fileDeleted.add(uploadFile)
                         }
                     }
                 }
             }
+            UploadFile.deleteAll(fileDeleted)
         }
     }
 }

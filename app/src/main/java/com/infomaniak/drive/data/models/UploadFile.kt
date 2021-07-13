@@ -100,13 +100,14 @@ open class UploadFile(
             return realm.where(UploadFile::class.java).equalTo(UploadFile::uri.name, uri)
         }
 
-        private fun pendingFilesQuery(realm: Realm, folderID: Int): RealmQuery<UploadFile> {
-            return realm.where(UploadFile::class.java)
-                .equalTo(UploadFile::remoteFolder.name, folderID)
-                .equalTo(UploadFile::userId.name, AccountUtils.currentUserId)
-                .equalTo(UploadFile::driveId.name, AccountUtils.currentDriveId)
-                .isNull(UploadFile::uploadAt.name)
-                .isNull(UploadFile::deletedAt.name)
+        private fun pendingFilesQuery(realm: Realm, folderId: Int? = null): RealmQuery<UploadFile> {
+            return realm.where(UploadFile::class.java).apply {
+                folderId?.let { equalTo(UploadFile::remoteFolder.name, it) }
+                equalTo(UploadFile::userId.name, AccountUtils.currentUserId)
+                equalTo(UploadFile::driveId.name, AccountUtils.currentDriveId)
+                isNull(UploadFile::uploadAt.name)
+                isNull(UploadFile::deletedAt.name)
+            }
         }
 
         fun getNotSyncFiles(): ArrayList<UploadFile> {
@@ -116,9 +117,9 @@ open class UploadFile(
             }
         }
 
-        fun getPendingFiles(folderID: Int): ArrayList<UploadFile> {
+        fun getPendingFiles(folderId: Int): ArrayList<UploadFile> {
             return getRealmInstance().use { realm ->
-                pendingFilesQuery(realm, folderID).findAll()
+                pendingFilesQuery(realm, folderId).findAll()
                     ?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile> ?: arrayListOf()
             }
         }
@@ -126,12 +127,13 @@ open class UploadFile(
         fun getUploadedFiles(): ArrayList<UploadFile>? = getRealmInstance().use { realm ->
             realm.where(UploadFile::class.java)
                 .isNull(UploadFile::deletedAt.name)
+                .isNotNull(UploadFile::uploadAt.name)
                 .findAll()?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile>
         }
 
-        fun getPendingFilesCount(folderID: Int): Int {
+        fun getPendingFilesCount(folderId: Int? = null): Int {
             return getRealmInstance().use { realm ->
-                pendingFilesQuery(realm, folderID).count().toInt()
+                pendingFilesQuery(realm, folderId).count().toInt()
             }
         }
 
@@ -186,33 +188,15 @@ open class UploadFile(
             }
         }
 
-        fun deleteFileFromDb(uri: Uri, realm: Realm = getRealmInstance()) {
-            realm.executeTransaction {
-                syncFileByUriQuery(realm, uri.toString()).findFirst()?.let { syncFile ->
-                    syncFile.deletedAt = Date()
-                }
-            }
-        }
-
-        fun deleteAllFilesFromDb(files: ArrayList<UploadFile>, realm: Realm = getRealmInstance()) {
-            realm.executeTransaction {
-                files.forEach { file ->
-                    syncFileByUriQuery(realm, file.uri).findFirst()?.let { syncFile ->
-                        syncFile.deletedAt = Date()
-                    }
-                }
-            }
-        }
-
         fun deleteAll(uploadFiles: ArrayList<UploadFile>) {
             getRealmInstance().use { realm ->
                 realm.executeTransaction {
-                    uploadFiles.forEach {
-                        syncFileByUriQuery(realm, it.uri).findFirst()?.let { syncFile ->
+                    uploadFiles.forEach { uploadFile ->
+                        syncFileByUriQuery(realm, uploadFile.uri).findFirst()?.let { syncFile ->
                             syncFile.deletedAt = Date()
                             val uri = syncFile.uri.toUri()
                             if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
-                                uri.toFile().apply { if (exists()) delete() }
+                                if (!uploadFile.isSyncOffline()) uri.toFile().apply { if (exists()) delete() }
                             }
                         }
                     }
