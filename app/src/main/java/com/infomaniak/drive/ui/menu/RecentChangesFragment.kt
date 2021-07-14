@@ -44,7 +44,10 @@ class RecentChangesFragment : FileSubTypeListFragment() {
 
     private inner class DownloadFiles : (Boolean) -> Unit {
         override fun invoke(ignoreCache: Boolean) {
-            fileAdapter.setList(arrayListOf())
+            if (ignoreCache) fileAdapter.setList(arrayListOf())
+            timer.start()
+            fileAdapter.isComplete = false
+
             mainViewModel.getRecentChanges(AccountUtils.currentDriveId).observe(viewLifecycleOwner) { result ->
                 populateFileList(result?.files ?: ArrayList(), isComplete = result?.isComplete ?: true, ignoreOffline = true)
             }

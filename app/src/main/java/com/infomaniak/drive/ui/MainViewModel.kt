@@ -326,7 +326,13 @@ class MainViewModel : ViewModel() {
 
         return liveData(Dispatchers.IO + getRecentChangesJob) {
             if (ignoreDownload) {
-                emit(FileListFragment.FolderFilesResult(files = recentlyChangedFiles.data!!, isComplete = true, page = 1))
+                emit(
+                    FileListFragment.FolderFilesResult(
+                        files = recentlyChangedFiles.data ?: arrayListOf(),
+                        isComplete = true,
+                        page = 1
+                    )
+                )
                 return@liveData
             }
 
@@ -349,7 +355,7 @@ class MainViewModel : ViewModel() {
                     }
                 } else emit(
                     FileListFragment.FolderFilesResult(
-                        files = FileController.getRecentChanges(),
+                        files = recentlyChangedFiles.data ?: FileController.getRecentChanges(),
                         isComplete = true,
                         page = 1
                     )
