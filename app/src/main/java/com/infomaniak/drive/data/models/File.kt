@@ -206,7 +206,7 @@ open class File(
     }
 
     fun isOfflineFile(context: Context, userId: Int = AccountUtils.currentUserId): Boolean {
-        return isOffline || getOfflineFile(context, userId)?.exists() == true
+        return isOffline || getOfflineFile(context, userId)?.exists() == true && !isFolder()
     }
 
     /**
