@@ -520,18 +520,6 @@
                       </LayoutPositions>
                     </value>
                   </entry>
-                  <entry key="lastEditsFragment">
-                    <value>
-                      <LayoutPositions>
-                        <option name="myPosition">
-                          <Point>
-                            <option name="x" value="2726" />
-                            <option name="y" value="2688" />
-                          </Point>
-                        </option>
-                      </LayoutPositions>
-                    </value>
-                  </entry>
                   <entry key="mainActivity">
                     <value>
                       <LayoutPositions>
@@ -572,11 +560,6 @@
                                 <LayoutPositions />
                               </value>
                             </entry>
-                            <entry key="action_menuFragment_to_lastEditsFragment">
-                              <value>
-                                <LayoutPositions />
-                              </value>
-                            </entry>
                             <entry key="action_menuFragment_to_mySharesFragment">
                               <value>
                                 <LayoutPositions />
@@ -588,6 +571,11 @@
                               </value>
                             </entry>
                             <entry key="action_menuFragment_to_picturesFragment">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
+                            <entry key="action_menuFragment_to_recentChangesFragment">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -772,6 +760,18 @@
                               </value>
                             </entry>
                           </map>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
+                  <entry key="recentChangesFragment">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="2726" />
+                            <option name="y" value="2688" />
+                          </Point>
                         </option>
                       </LayoutPositions>
                     </value>
