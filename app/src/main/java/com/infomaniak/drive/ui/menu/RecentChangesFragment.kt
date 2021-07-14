@@ -36,8 +36,7 @@ class RecentChangesFragment : FileSubTypeListFragment() {
         collapsingToolbarLayout.title = getString(R.string.lastEditsTitle)
         noFilesLayout.setup(
             icon = R.drawable.ic_clock,
-            title = R.string.noFilesDescriptionNoNetwork, // TODO - Translate
-            description = R.string.offlineFileNoFileDescription, // TODO - Translate
+            title = R.string.noFilesDescriptionNoNetwork,
             initialListView = fileRecyclerView
         )
     }

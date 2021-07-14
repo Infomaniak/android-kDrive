@@ -291,8 +291,8 @@
             app:popEnterAnim="@anim/fragment_open_enter"
             app:popExitAnim="@anim/fragment_open_exit" />
         <action
-            android:id="@+id/action_menuFragment_to_lastEditsFragment"
-            app:destination="@id/lastEditsFragment"
+            android:id="@+id/action_menuFragment_to_recentChangesFragment"
+            app:destination="@id/recentChangesFragment"
             app:enterAnim="@anim/fragment_open_enter"
             app:exitAnim="@anim/fragment_open_exit"
             app:popEnterAnim="@anim/fragment_open_enter"
@@ -715,9 +715,9 @@
             app:destination="@id/previewSliderFragment" />
     </fragment>
     <fragment
-        android:id="@+id/lastEditsFragment"
+        android:id="@+id/recentChangesFragment"
         android:name="com.infomaniak.drive.ui.menu.RecentChangesFragment"
-        android:label="LastEditsFragment" />
+        android:label="RecentChangesFragment" />
 
     <dialog
         android:id="@+id/selectPermissionBottomSheetDialog"

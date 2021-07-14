@@ -94,7 +94,7 @@ class MenuFragment : Fragment() {
             }
 
             recentChanges.setOnClickListener {
-                safeNavigate(MenuFragmentDirections.actionMenuFragmentToLastEditsFragment())
+                safeNavigate(MenuFragmentDirections.actionMenuFragmentToRecentChangesFragment())
             }
 
             offlineFile.setOnClickListener {
