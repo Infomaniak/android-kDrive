@@ -74,7 +74,6 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
         fileInfoActionsView.init(this, this, navigationArgs.userDrive.sharedWithMe)
         fileInfoActionsView.updateCurrentFile(currentFile)
-        fileInfoActionsView.observeOfflineProgression(this) {}
 
         getBackNavigationResult<Boolean>(DownloadProgressDialog.OPEN_WITH) {
             requireContext().openWith(currentFile)
@@ -84,6 +83,17 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         onSelectFolderResult(requestCode, resultCode, data)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        fileInfoActionsView.updateAvailableOfflineItem()
+        fileInfoActionsView.observeOfflineProgression(this) {}
+    }
+
+    override fun onPause() {
+        super.onPause()
+        fileInfoActionsView.removeOfflineObservations(this)
     }
 
     override fun editDocumentClicked(ownerFragment: Fragment, currentFile: File) {
@@ -171,7 +181,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File) {
         lifecycleScope.launch {
-            mainViewModel.removeOfflineFile(requireContext(), currentFile, offlineLocalPath, cacheFile)
+            mainViewModel.removeOfflineFile(currentFile, offlineLocalPath, cacheFile)
 
             withContext(Dispatchers.Main) {
                 currentFile.isOffline = false
@@ -216,7 +226,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun onDeleteFile(onApiResponse: () -> Unit) {
-        mainViewModel.deleteFile(requireContext(), currentFile).observe(viewLifecycleOwner) { apiResponse ->
+        mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { apiResponse ->
             onApiResponse()
             if (apiResponse.isSuccess()) {
                 mainViewModel.refreshActivities.value = true
@@ -249,7 +259,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun onLeaveShare(onApiResponse: () -> Unit) {
-        mainViewModel.deleteFile(requireContext(), currentFile).observe(viewLifecycleOwner) { apiResponse ->
+        mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { apiResponse ->
             onApiResponse()
             if (apiResponse.isSuccess()) {
                 transmitActionAndPopBack(getString(R.string.snackbarLeaveShareConfirmation))

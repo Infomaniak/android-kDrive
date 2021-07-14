@@ -178,6 +178,8 @@
     <string name="createFolderTitle">Crear una carpeta</string>
     <string name="createFolderValidUntilDescription">Una vez transcurrida la fecha, los usuarios ya no podrán transferir archivos.</string>
     <string name="createPrivateFolderSucces">Carpeta creada correctamente</string>
+    <string name="deletePicturesDescription">La aplicación te pedirá regularmente que borres las fotos de tu dispositivo que ya están sincronizadas en tu kDrive. Tendrás que autorizar manualmente la supresión</string>
+    <string name="deletePicturesTitle">Borrar fotos (Beta)</string>
     <plurals name="driveBlockedDescription">
         <item quantity="one">El producto ha caducado desde el %s. Por favor, renuévelo para gestionarlo y acceder a sus datos.</item>
         <item quantity="other">Todos sus productos han caducado. Por favor, renuévelos para gestionarlos y acceder a sus datos.</item>
@@ -361,6 +363,7 @@
     <string name="homeTitle">Recepción</string>
     <string name="inputExpirationDate">Fecha de caducidad</string>
     <string name="lastEditsTitle">Últimas modificaciones</string>
+    <string name="locateButton">Localizar</string>
     <string name="lockAppTitle">Aplicación bloqueada</string>
     <string name="manageDropboxTitle">Gestionar el buzón de depósito %s</string>
     <string name="menuTitle">Menú</string>
@@ -380,6 +383,8 @@
         <item quantity="one">¿Estás seguro de que deseas eliminar definitivamente %s?</item>
         <item quantity="other">¿Estás seguro de que deseas eliminar definitivamente %d elementos?</item>
     </plurals>
+    <string name="modalDeletePhotosNumericDescription">¿Quieres eliminar %d fotos de tu dispositivo que ya han sido cargadas en kDrive?</string>
+    <string name="modalDeletePhotosTitle">Supresión automática de las fotos</string>
     <string name="modalDeleteTitle">Eliminar definitivamente</string>
     <string name="modalEmptyTrashDescription">¿Estás seguro de que deseas vaciar la papelera?</string>
     <string name="modalEmptyTrashTitle">Vaciar la papelera</string>
@@ -402,6 +407,7 @@
     <string name="noDriveTitle">¡Todavía no tienes kDrive!</string>
     <string name="noFilesDescription">Esta carpeta está vacía. Pulsa la tecla + para agregar archivos aquí.</string>
     <string name="noFilesDescriptionNoNetwork">No se puede recuperar la información de la carpeta. Comprueba tu conexión de red o vuelve a intentarlo más tarde.</string>
+    <string name="noLastEditsTitle">No recent changes</string>
     <string name="noMediaFolderTitle">No hay carpetas de medios disponibles</string>
     <string name="noSyncFolderNotificationDescription">Pulse aquí para configurar las carpetas a sincronizar</string>
     <string name="noSyncFolderNotificationTitle">No hay carpetas seleccionadas para la copia de seguridad automática</string>
@@ -430,7 +436,7 @@
     <!-- Displayed in a photo list some languages may need to display the date before the month -->
     <string name="photosHeaderDateFormat">MMMM yyyy</string>
     <string name="picturesNoFile">Todavía no hay fotos</string>
-    <string name="previewDownloadIndication">Cambio en curso, espera...</string>
+    <string name="previewDownloadIndication">Cambio en curso, espera…</string>
     <string name="previewLoadError">No se puede cargar la vista previa</string>
     <string name="previewNoPreview">Parece que este archivo no tiene vista previa.</string>
     <string name="previewPdfPages">%1$d de %2$d</string>
@@ -445,7 +451,7 @@
     <string name="searchLastTitle">Últimas búsquedas</string>
     <string name="searchNoFile">Ningún resultado. Cambia los criterios de búsqueda</string>
     <string name="searchTitle">Buscar</string>
-    <string name="searchViewHint">Buscar un archivo...</string>
+    <string name="searchViewHint">Buscar un archivo…</string>
     <string name="secureLinkShareDescription">Protege tus usos compartidos con una contraseña y establece un plazo de validez de los enlaces para aún mayor seguridad.</string>
     <string name="secureLinkShareTitle">Enlaces de uso compartido seguros</string>
     <string name="selectDriveTitle">Seleccionar un kDrive</string>

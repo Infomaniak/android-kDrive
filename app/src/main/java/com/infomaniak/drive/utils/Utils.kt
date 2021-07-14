@@ -59,6 +59,8 @@ object Utils {
     const val ROOT_ID = 1
     const val OTHER_ROOT_ID = -1
 
+    const val INDETERMINATE_PROGRESS = -1
+
     fun confirmFileDeletion(
         context: Context,
         fileName: String?,
@@ -105,6 +107,7 @@ object Utils {
         context: Context,
         title: String,
         message: String? = null,
+        mainButtonText: String? = null,
         autoDismiss: Boolean = true,
         isDeletion: Boolean = false,
         onConfirmation: (dialog: Dialog) -> Unit
@@ -113,7 +116,7 @@ object Utils {
         val dialog = MaterialAlertDialogBuilder(context, style)
             .setTitle(title)
             .setMessage(message)
-            .setPositiveButton(R.string.buttonConfirm) { _, _ -> }
+            .setPositiveButton(mainButtonText ?: context.getString(R.string.buttonConfirm)) { _, _ -> }
             .setNegativeButton(R.string.buttonCancel) { _, _ -> }
             .setCancelable(false)
             .show()
@@ -250,7 +253,7 @@ object Utils {
     fun Context.openWithIntent(file: File, userDrive: UserDrive = UserDrive()): Intent {
         return Intent().apply {
             val cloudUri = CloudStorageProvider.createShareFileUri(this@openWithIntent, file, userDrive)!!
-            val uri = if (file.isOffline) Uri.fromFile(file.getOfflineFile(this@openWithIntent, userDrive)) else cloudUri
+            val uri = if (file.isOffline) Uri.fromFile(file.getOfflineFile(this@openWithIntent, userDrive.userId)) else cloudUri
 
             action = Intent.ACTION_VIEW
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)

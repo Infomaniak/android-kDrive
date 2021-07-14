@@ -26,7 +26,7 @@ class DownloadReceiver(private val mainViewModel: MainViewModel) : BroadcastRece
     override fun onReceive(context: Context?, intent: Intent) {
         val fileId = intent.getIntExtra(CANCELLED_FILE_ID, 0)
         if (fileId > 0) {
-            mainViewModel.fileCancelledFromDownload.value = fileId
+            mainViewModel.updateVisibleFiles.value = true
         }
     }
 

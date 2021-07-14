@@ -366,6 +366,52 @@
                         android:background="@color/divider" />
 
                     <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?selectableItemBackground"
+                        android:paddingVertical="@dimen/marginStandardMedium">
+
+                        <TextView
+                            android:id="@+id/deletePicturesAfterSyncTitle"
+                            style="@style/Subtitle2"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/marginStandard"
+                            android:text="@string/deletePicturesTitle"
+                            app:layout_constraintBottom_toBottomOf="@id/deletePicturesAfterSyncSwitch"
+                            app:layout_constraintEnd_toStartOf="@id/deletePicturesAfterSyncSwitch"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="@id/deletePicturesAfterSyncSwitch" />
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/deletePicturesAfterSyncSwitch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/marginStandardMedium"
+                            app:layout_constraintBottom_toTopOf="@id/deletePicturesAfterSyncDescription"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/deletePicturesAfterSyncDescription"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="@dimen/marginStandard"
+                            android:text="@string/deletePicturesDescription"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/deletePicturesAfterSyncSwitch"
+                            app:layout_constraintVertical_chainStyle="packed" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/divider" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/syncDate"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

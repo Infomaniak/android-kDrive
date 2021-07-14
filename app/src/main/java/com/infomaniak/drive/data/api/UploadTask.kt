@@ -76,6 +76,7 @@ class UploadTask(
         try {
             uploadTask(this)
         } catch (exception: Exception) {
+            exception.printStackTrace()
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
             throw exception
         }
@@ -107,14 +108,14 @@ class UploadTask(
                 requestSemaphore.acquire()
                 if (uploadedChunks?.validChunks?.contains(chunkNumber) == true && !restartUpload) {
                     Log.d("kDrive", "chunk:$chunkNumber ignored")
-                    input.read(ByteArray(chunkSize))
+                    input.read(ByteArray(chunkSize), 0, chunkSize)
                     requestSemaphore.release()
                     continue
                 }
 
                 Log.i("kDrive", "Upload > ${uploadFile.fileName} chunk:$chunkNumber has permission")
                 var data = ByteArray(chunkSize)
-                val count = input.read(data)
+                val count = input.read(data, 0, chunkSize)
                 if (count == -1) {
                     requestSemaphore.release()
                     continue

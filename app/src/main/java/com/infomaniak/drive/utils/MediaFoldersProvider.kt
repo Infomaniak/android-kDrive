@@ -25,6 +25,7 @@ import android.provider.MediaStore
 import androidx.collection.ArrayMap
 import androidx.collection.arrayMapOf
 import androidx.fragment.app.Fragment
+import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.models.MediaFolder
 import io.realm.Realm
 import kotlinx.coroutines.Job
@@ -84,7 +85,7 @@ object MediaFoldersProvider {
                     val folderName = cursor.getString(cursor.getColumnIndexOrThrow(IMAGES_BUCKET_DISPLAY_NAME)) ?: ""
                     val folderId = cursor.getLong(cursor.getColumnIndexOrThrow(IMAGES_BUCKET_ID))
                     cursor.getString(cursor.getColumnIndexOrThrow(MEDIA_PATH_COLUMN))?.let { path ->
-                        folders[folderId] = getLocalMediaFolder(realm, folderId, folderName, path, coroutineScope)
+                        getLocalMediaFolder(realm, folderId, folderName, path, coroutineScope)?.let { folders[folderId] = it }
                     }
                 }
             }
@@ -104,7 +105,7 @@ object MediaFoldersProvider {
                     val folderName = cursor.getString(cursor.getColumnIndexOrThrow(VIDEO_BUCKET_DISPLAY_NAME)) ?: ""
                     val folderId = cursor.getLong(cursor.getColumnIndexOrThrow(VIDEO_BUCKET_ID))
                     cursor.getString(cursor.getColumnIndexOrThrow(MEDIA_PATH_COLUMN))?.let { path ->
-                        folders[folderId] = getLocalMediaFolder(realm, folderId, folderName, path, coroutineScope)
+                        getLocalMediaFolder(realm, folderId, folderName, path, coroutineScope)?.let { folders[folderId] = it }
                     }
                 }
             }
@@ -117,8 +118,9 @@ object MediaFoldersProvider {
         folderName: String,
         path: String,
         coroutineScope: Job?
-    ): MediaFolder {
+    ): MediaFolder? {
         coroutineScope?.ensureActive()
+        if (path.startsWith("Android/media/${BuildConfig.APPLICATION_ID}")) return null
         return MediaFolder.findById(realm, folderId)?.let { mediaFolder ->
             mediaFolder.apply { if (mediaFolder.name != folderName) mediaFolder.storeOrUpdate() }
         } ?: let {

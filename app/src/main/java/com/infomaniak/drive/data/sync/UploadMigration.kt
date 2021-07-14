@@ -24,7 +24,6 @@ import io.realm.DynamicRealm
 import io.realm.FieldAttribute
 import io.realm.RealmMigration
 
-@Suppress("UNUSED_CHANGED_VALUE")
 class UploadMigration : RealmMigration {
     override fun migrate(realm: DynamicRealm, oldVersion: Long, newVersion: Long) {
         var oldVersionTemp = oldVersion
@@ -52,6 +51,12 @@ class UploadMigration : RealmMigration {
                 .addField(UploadFile::remoteSubFolder.name, String::class.java)
             schema.get(SyncSettings::class.java.simpleName)!!
                 .addField(SyncSettings::createDatedSubFolders.name, Boolean::class.java, FieldAttribute.REQUIRED)
+            oldVersionTemp++
+        }
+
+        if (oldVersionTemp == 2L) {
+            schema.get(SyncSettings::class.java.simpleName)!!
+                .addField(SyncSettings::deleteAfterSync.name, Boolean::class.java, FieldAttribute.REQUIRED)
             oldVersionTemp++
         }
     }

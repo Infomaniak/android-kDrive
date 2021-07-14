@@ -31,7 +31,8 @@ open class SyncSettings(
     var syncFolder: Int = -1,
     var syncImmediately: Boolean = false,
     var syncInterval: Long = 0,
-    var syncVideo: Boolean = false
+    var syncVideo: Boolean = false,
+    var deleteAfterSync: Boolean = false
 ) : RealmObject() {
 
     fun setIntervalType(intervalType: IntervalType) {
