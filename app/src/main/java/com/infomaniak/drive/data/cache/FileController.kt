@@ -750,9 +750,6 @@ object FileController {
         folderId: Int
     ) {
         returnResponse[fileActivity.fileId] = File.LocalFileActivity.IS_UPDATE
-        if (fileActivity.getAction() == FileActivity.FileActivityType.FILE_UPDATE) {
-            getFileById(realm, fileActivity.fileId)?.deleteCaches(Realm.getApplicationContext()!!)
-        }
 
         getFileProxyById(fileActivity.fileId)?.let { file ->
             insertOrUpdateFile(realm, fileActivity.file!!, file)
