@@ -97,8 +97,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun editDocumentClicked(ownerFragment: Fragment, currentFile: File) {
-        super.editDocumentClicked(ownerFragment, currentFile)
         findNavController().popBackStack()
+        super.editDocumentClicked(ownerFragment, currentFile)
     }
 
     override fun displayInfoClicked() {
@@ -185,8 +185,12 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
             withContext(Dispatchers.Main) {
                 currentFile.isOffline = false
+                if (findNavController().previousBackStackEntry?.destination?.id == R.id.offlineFileFragment) {
+                    findNavController().popBackStack()
+                } else {
+                    fileInfoActionsView.refreshBottomSheetUi(currentFile)
+                }
                 mainViewModel.updateOfflineFile.value = currentFile.id to false
-                fileInfoActionsView.refreshBottomSheetUi(currentFile)
             }
         }
     }

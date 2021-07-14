@@ -22,6 +22,7 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
@@ -41,7 +42,7 @@ open class PreviewFragment : Fragment() {
                 previewViewModel.currentFile = FileController.getFileById(fileId, previewSliderViewModel.userDrive)
             }
         }
-        previewViewModel.currentFile?.let { file = it }
+        previewViewModel.currentFile?.let { file = it } ?: run { findNavController().popBackStack() } // TODO Temporary fix
     }
 
     protected class PreviewViewModel : ViewModel() {

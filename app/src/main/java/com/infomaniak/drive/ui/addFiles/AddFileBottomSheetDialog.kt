@@ -75,8 +75,9 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val file = mainViewModel.currentFolderOpenAddFileBottom.value ?: mainViewModel.currentFolder.value
-        currentFolderFile = file!!
+        (mainViewModel.currentFolderOpenAddFileBottom.value ?: mainViewModel.currentFolder.value)?.let {
+            currentFolderFile = it
+        } ?: run { findNavController().popBackStack() } // TODO Temporary fix
         currentFolder.setFileItem(currentFolderFile)
 
         openCameraPermissions = DrivePermissions()

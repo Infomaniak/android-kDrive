@@ -22,7 +22,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.View.VISIBLE
 import android.view.ViewGroup
-import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileComment
@@ -60,9 +59,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
                 secondaryBackground = true
             )
             noCommentsLayout.toggleVisibility(isVisible = true)
-            onClickAddCommentButton = {
-                requireContext().openOnlyOfficeDocument(findNavController(), currentFile)
-            }
+            onClickAddCommentButton = { openOnlyOfficeDocument(currentFile) }
         } else {
             setCommentsAdapter()
             noCommentsLayout.setup(

@@ -381,7 +381,13 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         })
 
         mainViewModel.updateOfflineFile.observe(viewLifecycleOwner) {
-            it?.let { (fileId, isOffline) -> fileAdapter.notifyFileChanged(fileId) { file -> file.isOffline = isOffline } }
+            it?.let { (fileId, isOffline) ->
+                fileAdapter.notifyFileChanged(fileId) { file -> file.isOffline = isOffline }
+                if (findNavController().currentDestination?.id == R.id.offlineFileFragment) {
+                    fileAdapter.deleteByFileId(fileId)
+                    checkIfNoFiles()
+                }
+            }
         }
     }
 

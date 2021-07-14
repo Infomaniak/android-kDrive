@@ -30,7 +30,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
 import androidx.work.*
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -392,25 +391,23 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     interface OnItemClickListener {
+        fun addFavoritesClicked()
         fun copyPublicLink()
-        fun openWithClicked()
-        fun fileRightsClicked()
         fun displayInfoClicked()
         fun downloadFileClicked()
-        fun addFavoritesClicked()
-        fun onCacheAddedToOffline() = Unit
-        fun onMoveFile(destinationFolder: File)
-        fun onDeleteFile(onApiResponse: () -> Unit)
-        fun onLeaveShare(onApiResponse: () -> Unit)
         fun dropBoxClicked(isDropBox: Boolean) = Unit
-        fun onRenameFile(newName: String, onApiResponse: () -> Unit)
+        fun fileRightsClicked()
+        fun onCacheAddedToOffline() = Unit
+        fun onDeleteFile(onApiResponse: () -> Unit)
         fun onDuplicateFile(result: String, onApiResponse: () -> Unit)
+        fun onLeaveShare(onApiResponse: () -> Unit)
+        fun onMoveFile(destinationFolder: File)
+        fun onRenameFile(newName: String, onApiResponse: () -> Unit)
+        fun openWithClicked()
         fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File)
 
         fun editDocumentClicked(ownerFragment: Fragment, currentFile: File) {
-            ownerFragment.apply {
-                requireContext().openOnlyOfficeDocument(findNavController(), currentFile)
-            }
+            ownerFragment.openOnlyOfficeDocument(currentFile)
         }
 
         fun onSelectFolderResult(requestCode: Int, resultCode: Int, data: Intent?) {
