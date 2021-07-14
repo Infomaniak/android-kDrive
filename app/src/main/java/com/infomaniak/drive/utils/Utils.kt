@@ -20,7 +20,8 @@ package com.infomaniak.drive.utils
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.*
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.CountDownTimer
 import android.view.View
@@ -29,6 +30,7 @@ import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.core.widget.doOnTextChanged
@@ -251,12 +253,18 @@ object Utils {
     }
 
     fun Context.openWithIntent(file: File, userDrive: UserDrive = UserDrive()): Intent {
+        val cloudUri = CloudStorageProvider.createShareFileUri(this, file, userDrive)!!
+        val offlineFile = file.getOfflineFile(this, userDrive.userId)
+        val uri = if (file.isOffline && offlineFile != null) {
+            FileProvider.getUriForFile(this, getString(R.string.FILE_AUTHORITY), offlineFile)
+        } else cloudUri
         return Intent().apply {
-            val cloudUri = CloudStorageProvider.createShareFileUri(this@openWithIntent, file, userDrive)!!
-            val uri = if (file.isOffline) Uri.fromFile(file.getOfflineFile(this@openWithIntent, userDrive.userId)) else cloudUri
-
             action = Intent.ACTION_VIEW
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            addFlags(
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
+                        Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+            )
             setDataAndType(uri, contentResolver.getType(cloudUri))
         }
     }
