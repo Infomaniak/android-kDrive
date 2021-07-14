@@ -62,9 +62,9 @@ class CloudStorageProvider : DocumentsProvider() {
                     try {
                         Realm.getDefaultInstance()
                     } catch (exception: Exception) {
-                        Sentry.captureMessage("Realm.init in CloudStorageProvider")
                         Realm.init(it)
                         AccountUtils.init(it)
+                        Sentry.captureMessage("Realm.init in CloudStorageProvider")
                     }
                     result = true
                 }

@@ -105,9 +105,9 @@ class ApplicationMain : Application(), ImageLoaderFactory {
                 try {
                     Realm.getDefaultInstance()
                 } catch (exception: Exception) {
-                    Sentry.captureMessage("Realm.init in ApplicationMain")
                     Realm.init(this@ApplicationMain)
                     AccountUtils.init(this@ApplicationMain)
+                    Sentry.captureMessage("Realm.init in ApplicationMain")
                 }
             }
         }
