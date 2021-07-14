@@ -30,7 +30,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
 import androidx.work.*
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -408,9 +407,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File)
 
         fun editDocumentClicked(ownerFragment: Fragment, currentFile: File) {
-            ownerFragment.apply {
-                requireContext().openOnlyOfficeDocument(findNavController(), currentFile)
-            }
+            ownerFragment.openOnlyOfficeDocument(currentFile)
         }
 
         fun onSelectFolderResult(requestCode: Int, resultCode: Int, data: Intent?) {

@@ -65,7 +65,6 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigator
@@ -549,11 +548,11 @@ fun View.hideKeyboard() {
         .hideSoftInputFromWindow(this.windowToken, 0)
 }
 
-fun Context.openOnlyOfficeDocument(navController: NavController, file: File) {
-    if (!file.onlyofficeConvertExtension.isNullOrEmpty()) {
-        navController.navigate(R.id.notSupportedExtensionBottomSheetDialog, bundleOf(FILE_ID to file.id))
+fun Fragment.openOnlyOfficeDocument(file: File) {
+    if (file.onlyofficeConvertExtension?.isNotBlank() == true) {
+        safeNavigate(R.id.notSupportedExtensionBottomSheetDialog, bundleOf(FILE_ID to file.id))
     } else {
-        openOnlyOfficeActivity(file)
+        requireContext().openOnlyOfficeActivity(file)
     }
 }
 

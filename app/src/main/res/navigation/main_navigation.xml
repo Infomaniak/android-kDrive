@@ -108,9 +108,6 @@
             android:id="@+id/action_previewSliderFragment_to_fileShareDetailsFragment"
             app:destination="@id/fileShareDetailsFragment" />
         <action
-            android:id="@+id/action_previewSliderFragment_to_notSupportedExtensionBottomSheetDialog"
-            app:destination="@id/notSupportedExtensionBottomSheetDialog" />
-        <action
             android:id="@+id/action_previewSliderFragment_to_downloadProgressDialog"
             app:destination="@id/downloadProgressDialog" />
     </fragment>

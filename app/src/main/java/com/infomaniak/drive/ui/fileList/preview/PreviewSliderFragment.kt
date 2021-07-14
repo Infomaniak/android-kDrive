@@ -133,7 +133,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
 
         editButton.setOnClickListener {
-            requireContext().openOnlyOfficeDocument(findNavController(), currentPreviewFile)
+            openOnlyOfficeDocument(currentPreviewFile)
         }
 
         openWithButton.setOnClickListener { openWithClicked() }
