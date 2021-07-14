@@ -550,7 +550,7 @@ fun View.hideKeyboard() {
 
 fun Fragment.openOnlyOfficeDocument(file: File) {
     if (file.onlyofficeConvertExtension?.isNotBlank() == true) {
-        safeNavigate(R.id.notSupportedExtensionBottomSheetDialog, bundleOf(FILE_ID to file.id))
+        findNavController().navigate(R.id.notSupportedExtensionBottomSheetDialog, bundleOf(FILE_ID to file.id))
     } else {
         requireContext().openOnlyOfficeActivity(file)
     }

@@ -97,8 +97,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun editDocumentClicked(ownerFragment: Fragment, currentFile: File) {
-        super.editDocumentClicked(ownerFragment, currentFile)
         findNavController().popBackStack()
+        super.editDocumentClicked(ownerFragment, currentFile)
     }
 
     override fun displayInfoClicked() {
