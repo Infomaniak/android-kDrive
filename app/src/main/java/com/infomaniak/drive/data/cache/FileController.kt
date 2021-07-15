@@ -410,12 +410,14 @@ object FileController {
         }
     }
 
-    fun storeRecentChanges(files: ArrayList<File>) {
+    fun storeRecentChanges(files: ArrayList<File>, isFirstPage: Boolean = false) {
         getRealmInstance().use { realm ->
             realm.beginTransaction()
             val folder = realm.where(File::class.java).equalTo(File::id.name, RECENT_CHANGES_FILE_ID).findFirst()
                 ?: realm.copyToRealm(RECENT_CHANGES_FILE)
-            folder.children = RealmList()
+            if (isFirstPage) {
+                folder.children = RealmList()
+            }
             files.forEach { file ->
                 realm.where(File::class.java).equalTo(File::id.name, file.id).findFirst()?.let { realmFile ->
                     keepOldLocalFilesData(realmFile, file)

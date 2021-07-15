@@ -69,7 +69,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     private var getRecentChangesJob = Job()
 
     private var lastModifiedTime: Long = 0
-    private var recentlyChangedFiles = ApiResponse<ArrayList<File>>()
 
     private fun getContext() = getApplication<ApplicationMain>()
 
@@ -360,7 +359,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             if (ignoreDownload) {
                 emit(
                     FileListFragment.FolderFilesResult(
-                        files = recentlyChangedFiles.data ?: arrayListOf(),
+                        files = FileController.getRecentChanges(),
                         isComplete = true,
                         page = 1
                     )
@@ -369,10 +368,11 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             }
 
             suspend fun recursive(page: Int) {
+                val isFirstPage = page == 1
                 val apiResponse = ApiRepository.getLastModifiedFiles(driveId, page)
                 if (apiResponse.isSuccess()) {
                     val data = apiResponse.data
-                    data?.let { FileController.storeRecentChanges(it) }
+                    data?.let { FileController.storeRecentChanges(it, isFirstPage) }
                     when {
                         data == null -> Unit
                         data.size < ApiRepository.PER_PAGE -> emit(
@@ -385,13 +385,17 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
                             recursive(page + 1)
                         }
                     }
-                } else emit(
-                    FileListFragment.FolderFilesResult(
-                        files = recentlyChangedFiles.data ?: FileController.getRecentChanges(),
-                        isComplete = true,
-                        page = 1
-                    )
-                )
+                } else {
+                    if (isFirstPage) {
+                        emit(
+                            FileListFragment.FolderFilesResult(
+                                files = FileController.getRecentChanges(),
+                                isComplete = true,
+                                page = 1
+                            )
+                        )
+                    } else emit(null)
+                }
             }
             recursive(1)
         }
