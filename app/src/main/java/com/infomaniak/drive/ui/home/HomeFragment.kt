@@ -54,6 +54,7 @@ class HomeFragment : Fragment() {
     private val homeViewModel: HomeViewModel by navGraphViewModels(R.id.homeFragment)
     private val mainViewModel: MainViewModel by activityViewModels()
     private var isProOrTeam: Boolean = false
+    private var forceDownload: Boolean = false
 
     private var isDownloadingActivities = false
     private var isDownloadingPictures = false
@@ -119,7 +120,7 @@ class HomeFragment : Fragment() {
         }
 
         mainViewModel.deleteFileFromHome.observe(viewLifecycleOwner) { fileDeleted ->
-            homeViewModel.forceDownload = fileDeleted
+            forceDownload = fileDeleted
         }
     }
 
@@ -127,7 +128,7 @@ class HomeFragment : Fragment() {
         super.onResume()
         if (lastElementsRecyclerView.adapter == null) initLastElementsAdapter()
         updateDriveInfos()
-        homeViewModel.forceDownload = false
+        forceDownload = false
     }
 
     // TODO - Use same fragment with PicturesAdapter and LastPictures
@@ -232,7 +233,7 @@ class HomeFragment : Fragment() {
         (lastElementsAdapter as LastActivitiesAdapter).apply {
             isComplete = false
             isDownloadingActivities = true
-            homeViewModel.getLastActivities(driveId).observe(viewLifecycleOwner) {
+            homeViewModel.getLastActivities(driveId, forceDownload).observe(viewLifecycleOwner) {
                 lastElementsAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
                 it?.let { (apiResponse, mergedActivities) ->
                     if (forceClear && apiResponse.page == 1 || apiResponse.page == 1) clean()
@@ -269,10 +270,12 @@ class HomeFragment : Fragment() {
         lastFilesAdapter.onFileClicked = { file ->
             Utils.displayFile(mainViewModel, findNavController(), file, lastFilesAdapter.itemList)
         }
-        homeViewModel.getLastModifiedFiles(AccountUtils.currentDriveId).observe(viewLifecycleOwner) { files ->
-            lastFilesRecyclerView.visibility = if (files.isNullOrEmpty()) GONE else VISIBLE
-            lastFilesTitle.visibility = if (files.isNullOrEmpty()) GONE else VISIBLE
-            lastFilesAdapter.addAll(files ?: arrayListOf())
+        mainViewModel.getRecentChanges(AccountUtils.currentDriveId, forceDownload).observe(viewLifecycleOwner) { result ->
+            result?.apply {
+                lastFilesRecyclerView.visibility = if (files.isNullOrEmpty()) GONE else VISIBLE
+                lastFilesTitle.visibility = if (files.isNullOrEmpty()) GONE else VISIBLE
+                lastFilesAdapter.addAll(files)
+            }
         }
     }
 }

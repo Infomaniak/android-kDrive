@@ -190,19 +190,16 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/divider"
-                    android:visibility="gone" />
+                    android:background="@color/divider" />
 
-                <!--TODO show last edit-->
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/lastEdits"
+                    android:id="@+id/recentChanges"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/buttonHeight"
-                    android:background="?selectableItemBackground"
-                    android:visibility="gone">
+                    android:background="?selectableItemBackground">
 
                     <ImageView
-                        android:id="@+id/lastEditsIcon"
+                        android:id="@+id/recentChangesIcon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandard"
@@ -213,7 +210,7 @@
                         tools:ignore="ContentDescription" />
 
                     <TextView
-                        android:id="@+id/lastEditsText"
+                        android:id="@+id/recentChangesText"
                         style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -221,12 +218,12 @@
                         android:layout_marginEnd="@dimen/marginStandard"
                         android:text="@string/lastEditsTitle"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/lastEditsEndIcon"
-                        app:layout_constraintStart_toEndOf="@id/lastEditsIcon"
+                        app:layout_constraintEnd_toStartOf="@id/recentChangesEndIcon"
+                        app:layout_constraintStart_toEndOf="@id/recentChangesIcon"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ImageView
-                        android:id="@+id/lastEditsEndIcon"
+                        android:id="@+id/recentChangesEndIcon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/marginStandard"

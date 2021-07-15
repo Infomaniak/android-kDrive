@@ -40,7 +40,6 @@ class HomeViewModel : ViewModel() {
 
     var lastActivityPage = 1
     var lastPicturesPage = 1
-    var forceDownload: Boolean = false
 
     private var lastActivityLastPage = 1
     private var lastActivitiesTime: Long = 0
@@ -50,30 +49,6 @@ class HomeViewModel : ViewModel() {
     private var lastPicturesLastPage = 1
     private var lastPicturesTime: Long = 0
     private var lastPictures = arrayListOf<File>()
-
-    private var lastModifiedTime: Long = 0
-    private var lastModified = ArrayList<File>()
-
-    fun getLastModifiedFiles(driveId: Int): LiveData<ArrayList<File>?> {
-        lastModifiedJob.cancel()
-        lastModifiedJob = Job()
-        val ignoreDownload = lastModifiedTime != 0L && (Date().time - lastModifiedTime) < DOWNLOAD_INTERVAL && !forceDownload
-        return liveData(Dispatchers.IO + lastModifiedJob) {
-            if (ignoreDownload) {
-                emit(lastModified)
-                return@liveData
-            }
-            val apiResponse = ApiRepository.getLastModifiedFiles(driveId)
-            lastModifiedTime = Date().time
-            lastModified = apiResponse.data ?: arrayListOf()
-            if (apiResponse.isSuccess()) {
-                apiResponse.data?.let { FileController.storeRecentChanges(it) }
-                emit(apiResponse.data)
-            } else {
-                emit(FileController.getRecentChanges())
-            }
-        }
-    }
 
     fun getLastPictures(driveId: Int): LiveData<ApiResponse<ArrayList<File>>?> {
         lastActivityJob.cancel()
@@ -110,7 +85,7 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    fun getLastActivities(driveId: Int): LiveData<Pair<ApiResponse<ArrayList<FileActivity>>, ArrayList<FileActivity>>?> {
+    fun getLastActivities(driveId: Int, forceDownload: Boolean = false): LiveData<Pair<ApiResponse<ArrayList<FileActivity>>, ArrayList<FileActivity>>?> {
         lastActivityJob.cancel()
         lastActivityJob = Job()
 
@@ -201,7 +176,6 @@ class HomeViewModel : ViewModel() {
     fun clearDownloadTimes() {
         lastActivityJob.cancel()
         lastModifiedJob.cancel()
-        lastModifiedTime = 0
         lastPicturesTime = 0
         lastActivitiesTime = 0
     }
@@ -213,6 +187,6 @@ class HomeViewModel : ViewModel() {
     }
 
     companion object {
-        private const val DOWNLOAD_INTERVAL: Long = 1 * 60 * 1000 // 1min (ms)
+        const val DOWNLOAD_INTERVAL: Long = 1 * 60 * 1000 // 1min (ms)
     }
 }

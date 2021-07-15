@@ -93,6 +93,10 @@ class MenuFragment : Fragment() {
                 safeNavigate(MenuFragmentDirections.actionMenuFragmentToSharedWithMeFragment())
             }
 
+            recentChanges.setOnClickListener {
+                safeNavigate(MenuFragmentDirections.actionMenuFragmentToRecentChangesFragment())
+            }
+
             offlineFile.setOnClickListener {
                 safeNavigate(MenuFragmentDirections.actionMenuFragmentToOfflineFileFragment())
             }

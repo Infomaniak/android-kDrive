@@ -50,7 +50,6 @@ class FileListViewModel : ViewModel() {
 
     var currentPage = 1
     var oldList: ArrayList<File>? = null
-
     val isListMode = SingleLiveEvent<Boolean>()
 
     fun getFiles(
