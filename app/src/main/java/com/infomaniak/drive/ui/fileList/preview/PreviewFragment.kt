@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.os.Bundle
-import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
@@ -34,15 +33,17 @@ open class PreviewFragment : Fragment() {
     private val previewViewModel: PreviewViewModel by viewModels()
     protected val previewSliderViewModel: PreviewSliderFragment.PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
         if (previewViewModel.currentFile == null) {
             arguments?.let {
                 val fileId = it.getInt(FILE_ID_TAG)
                 previewViewModel.currentFile = FileController.getFileById(fileId, previewSliderViewModel.userDrive)
             }
         }
-        previewViewModel.currentFile?.let { file = it } ?: run { findNavController().popBackStack() } // TODO Temporary fix
+        previewViewModel.currentFile?.let {
+            file = it
+            super.onCreate(savedInstanceState)
+        } ?: run { findNavController().popBackStack() }
     }
 
     protected class PreviewViewModel : ViewModel() {
