@@ -84,6 +84,8 @@ object ApiRoutes {
     fun getFileDetails(file: File) =
         "${fileURL(file)}?with=user,tag,children,parent,rights,favorite,version,extras,share_link,collaborative_folder,mobile,conversion"
 
+    fun getFileCount(file: File) = "${fileURL(file)}/count"
+
     fun moveFile(file: File, newParentId: Int) = "${fileURL(file)}/move/$newParentId"
 
     fun renameFile(file: File) = "${fileURL(file)}/rename"

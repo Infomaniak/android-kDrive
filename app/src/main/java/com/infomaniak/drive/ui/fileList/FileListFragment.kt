@@ -308,7 +308,21 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 )
             )
         }
-        selectAllButton.setOnClickListener { /*TODO in future version*/ }
+        selectAllButton.setOnClickListener {
+            fileAdapter.allSelected = true
+            fileAdapter.notifyDataSetChanged()
+            enableButtonMultiSelect(false)
+
+            fileListViewModel.getFileCount(currentFolder!!).observe(viewLifecycleOwner) { apiResponse ->
+                val fileCount = apiResponse.data?.count ?: fileAdapter.itemSelected.size
+                enableButtonMultiSelect(true)
+                titleMultiSelect.text = resources.getQuantityString(
+                    R.plurals.fileListMultiSelectedTitle,
+                    fileCount,
+                    fileCount
+                )
+            }
+        }
 
         getBackNavigationResult<Boolean>(ActionMultiSelectBottomSheetDialog.DISABLE_SELECT_MODE) {
             if (it) closeMultiSelect()
@@ -611,6 +625,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         fileAdapter.notifyItemRangeChanged(0, fileAdapter.itemCount)
         collapsingToolbarLayout.visibility = GONE
         multiSelectLayout.visibility = VISIBLE
+        selectAllButton.visibility = VISIBLE
     }
 
     private fun onUpdateMultiSelect() {
@@ -632,15 +647,19 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         deleteButtonMultiSelect.isEnabled = isEnabled
         moveButtonMultiSelect.isEnabled = isEnabled
         menuButtonMultiSelect.isEnabled = isEnabled
-        selectAllButton.isEnabled = isEnabled
     }
 
     private fun closeMultiSelect() {
-        fileAdapter.itemSelected.clear()
-        fileAdapter.multiSelectMode = false
-        fileAdapter.notifyItemRangeChanged(0, fileAdapter.itemCount)
+        fileAdapter.apply {
+            itemSelected.clear()
+            multiSelectMode = false
+            allSelected = false
+            notifyItemRangeChanged(0, itemCount)
+        }
+
         collapsingToolbarLayout.visibility = VISIBLE
         multiSelectLayout.visibility = GONE
+        selectAllButton.visibility = GONE
     }
 
     private fun downloadFolderActivities(currentFolder: File) {

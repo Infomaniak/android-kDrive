@@ -55,6 +55,7 @@ open class FileAdapter(
     var selectFolder: Boolean = false
     var showShareFileButton: Boolean = true
     var uploadInProgress: Boolean = false
+    var allSelected = false
     var viewHolderType: DisplayType = DisplayType.LIST
 
     fun addActivities(newFileList: ArrayList<File>, activities: Map<out Int, File.LocalFileActivity>) {
@@ -240,7 +241,7 @@ open class FileAdapter(
                         stopUploadButton?.visibility = VISIBLE
                     }
                     multiSelectMode -> {
-                        fileChecked.isChecked = isSelectedFile(file)
+                        fileChecked.isChecked = isSelectedFile(file) || allSelected
                         fileChecked.visibility = VISIBLE
                         filePreview.visibility = if (isGrid) VISIBLE else GONE
                     }
@@ -304,10 +305,19 @@ open class FileAdapter(
     }
 
     private fun onSelectedFile(file: File, isSelected: Boolean) {
-        if (isSelected) {
-            addSelectedFile(file)
-        } else {
-            removeSelectedFile(file)
+        when {
+            allSelected -> { // if all selected, unselect everything and only select the clicked one (like web-app)
+                allSelected = false
+                itemSelected.clear()
+                notifyDataSetChanged()
+                addSelectedFile(file)
+            }
+            isSelected -> {
+                addSelectedFile(file)
+            }
+            else -> {
+                removeSelectedFile(file)
+            }
         }
         updateMultiSelectMode?.invoke()
     }

@@ -180,6 +180,10 @@ object ApiRepository {
         return callApi(ApiRoutes.getFileDetails(file), GET)
     }
 
+    fun getFileCount(file: File): ApiResponse<FileCount> {
+        return callApi(ApiRoutes.getFileCount(file), GET)
+    }
+
     fun getFileActivities(file: File, page: Int): ApiResponse<ArrayList<FileActivity>> {
         val url = "${ApiRoutes.getFileActivities(file)}?with=user&${pagination(page, 25)}"
         return callApi(url, GET)
