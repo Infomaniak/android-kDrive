@@ -188,11 +188,12 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     ) = liveData(Dispatchers.IO) {
         val apiResponse = ApiRepository.moveFile(file, newParent)
         if (apiResponse.isSuccess()) {
-            FileController.removeFile(file.id, recursive = false)
-
-            FileController.updateFile(newParent.id) { localFolder ->
-                file.isOffline = false
-                localFolder.children.add(file)
+            FileController.getRealmInstance().use { realm ->
+                FileController.removeFile(file.id, recursive = false, customRealm = realm)
+                FileController.updateFile(newParent.id, realm) { localFolder ->
+                    file.isOffline = false
+                    localFolder.children.add(file)
+                }
             }
 
             onSuccess?.invoke(file.id)

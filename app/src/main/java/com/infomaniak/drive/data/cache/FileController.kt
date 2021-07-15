@@ -113,18 +113,21 @@ object FileController {
         fileId: Int,
         keepFileCaches: ArrayList<Int> = arrayListOf(),
         keepFiles: ArrayList<Int> = arrayListOf(),
-        realm: Realm = getRealmInstance(),
+        customRealm: Realm? = null,
         recursive: Boolean = true,
     ) {
-        getFileById(realm, fileId)?.let { file ->
-            if (recursive) {
-                file.children.createSnapshot().forEach {
-                    if (!keepFiles.contains(it.id)) removeFile(it.id, keepFileCaches, keepFiles, realm)
+        val block: (Realm) -> Unit? = { realm ->
+            getFileById(realm, fileId)?.let { file ->
+                if (recursive) {
+                    file.children.createSnapshot().forEach {
+                        if (!keepFiles.contains(it.id)) removeFile(it.id, keepFileCaches, keepFiles, realm)
+                    }
                 }
+                if (!keepFileCaches.contains(fileId)) file.deleteCaches(Realm.getApplicationContext()!!)
+                if (!keepFiles.contains(fileId) && file.isValid) realm.executeTransaction { file.deleteFromRealm() }
             }
-            if (!keepFileCaches.contains(fileId)) file.deleteCaches(Realm.getApplicationContext()!!)
-            if (!keepFiles.contains(fileId) && file.isValid) realm.executeTransaction { file.deleteFromRealm() }
         }
+        customRealm?.let(block) ?: getRealmInstance().use(block)
     }
 
     fun updateFile(fileId: Int, realm: Realm? = null, userDrive: UserDrive = UserDrive(), transaction: (file: File) -> Unit) {
@@ -237,7 +240,7 @@ object FileController {
         return realmDb.format(userDrive.userId, userDrive.driveId)
     }
 
-    private fun getRealmInstance(userDrive: UserDrive? = null): Realm {
+    fun getRealmInstance(userDrive: UserDrive? = null): Realm {
         return Realm.getInstance(getRealmConfiguration(getDriveFileName(userDrive ?: UserDrive())))
     }
 
@@ -678,7 +681,7 @@ object FileController {
                 if (returnResponse[this.fileId] == null) {
                     getParentFile(fileId = fileId, realm = realm)?.let { parent ->
                         if (parent.id == currentFolder.id) {
-                            removeFile(fileId, realm = realm, recursive = false)
+                            removeFile(fileId, customRealm = realm, recursive = false)
                         }
                     }
                     returnResponse[this.fileId] = File.LocalFileActivity.IS_DELETE
@@ -707,7 +710,7 @@ object FileController {
             FileActivity.FileActivityType.FILE_SHARE_DELETE -> {
                 if (returnResponse[this.fileId] == null) {
                     if (this.file == null) {
-                        removeFile(fileId, realm = realm, recursive = false)
+                        removeFile(fileId, customRealm = realm, recursive = false)
                         returnResponse[this.fileId] = File.LocalFileActivity.IS_DELETE
                     } else {
                         updateFileFromActivity(realm, returnResponse, this, currentFolder.id)
