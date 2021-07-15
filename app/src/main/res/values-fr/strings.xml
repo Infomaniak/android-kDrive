@@ -366,6 +366,10 @@
     <string name="locateButton">Localiser</string>
     <string name="lockAppTitle">Application verrouillée</string>
     <string name="manageDropboxTitle">Gérer la boîte de dépôt %s</string>
+    <plurals name="mediaFoldersSelected">
+        <item quantity="one">Un dossier sélectionné</item>
+        <item quantity="other">%d dossiers sélectionnés</item>
+    </plurals>
     <string name="menuTitle">Menu</string>
     <string name="migrateNotificationDescription">Veuillez lancer l’app kDrive pour terminer la mise à jour</string>
     <string name="migrateNotificationTitle">Important : Une action est requise</string>
@@ -407,8 +411,8 @@
     <string name="noDriveTitle">Vous n’avez pas encore de kDrive !</string>
     <string name="noFilesDescription">Ce dossier est vide. Appuyez sur le bouton + pour ajouter des fichiers ici.</string>
     <string name="noFilesDescriptionNoNetwork">Impossible de récupérer les informations du dossier. Veuillez vérifier votre connexion réseau ou réessayez ultérieurement.</string>
-    <string name="noLastEditsTitle">Pas de dernières modifications</string>
     <string name="noMediaFolderTitle">Aucun dossier de médias disponible</string>
+    <string name="noSelectMediaFolders">Aucun dossier sélectionné</string>
     <string name="noSyncFolderNotificationDescription">Cliquez-ici pour configurer les dossiers à synchroniser</string>
     <string name="noSyncFolderNotificationTitle">Aucun dossier sélectionné pour la sauvegarde automatique</string>
     <string name="notEnoughStorageDescription1">L’espace de stockage de votre kDrive est presque plein. Faites évoluer votre offre et débloquez de nouvelles fonctionnalités.</string>

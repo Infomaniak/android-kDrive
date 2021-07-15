@@ -85,7 +85,10 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    fun getLastActivities(driveId: Int, forceDownload: Boolean = false): LiveData<Pair<ApiResponse<ArrayList<FileActivity>>, ArrayList<FileActivity>>?> {
+    fun getLastActivities(
+        driveId: Int,
+        forceDownload: Boolean = false
+    ): LiveData<Pair<ApiResponse<ArrayList<FileActivity>>, ArrayList<FileActivity>>?> {
         lastActivityJob.cancel()
         lastActivityJob = Job()
 
