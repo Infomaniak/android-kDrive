@@ -22,7 +22,6 @@ import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
-import android.util.Log
 import androidx.collection.arrayMapOf
 import androidx.core.net.toUri
 import androidx.lifecycle.*
