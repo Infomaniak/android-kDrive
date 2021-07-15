@@ -375,6 +375,10 @@
     <string name="locateButton">Locate</string>
     <string name="lockAppTitle">Application locked</string>
     <string name="manageDropboxTitle">Manage the drop box %s</string>
+    <plurals name="mediaFoldersSelected">
+        <item quantity="one">One folder selected</item>
+        <item quantity="other">%d folders selected</item>
+    </plurals>
     <string name="menuTitle">Menu</string>
     <string name="migrateNotificationDescription">Please launch the kDrive app to complete the update</string>
     <string name="migrateNotificationTitle">Important: action is required</string>
@@ -416,8 +420,8 @@
     <string name="noDriveTitle">You don’t have a kDrive yet!</string>
     <string name="noFilesDescription">This folder is empty. Click the + button to add files here.</string>
     <string name="noFilesDescriptionNoNetwork">Unable to retrieve information from the folder. Please check your network connection or try again later.</string>
-    <string name="noLastEditsTitle">No recent changes</string>
     <string name="noMediaFolderTitle">No media folders available</string>
+    <string name="noSelectMediaFolders">No folder selected</string>
     <string name="noSyncFolderNotificationDescription">Click here to configure the folders to synchronize</string>
     <string name="noSyncFolderNotificationTitle">No folder selected for automatic backup</string>
     <string name="notEnoughStorageDescription1">Your kDrive storage space is almost full. Upgrade your plan and unlock new features.</string>

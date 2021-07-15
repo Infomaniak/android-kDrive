@@ -71,7 +71,7 @@ class SyncSettingsActivity : BaseActivity() {
         permission.registerPermissions(this)
 
         activateSyncSwitch.isChecked = AccountUtils.isEnableAppSync()
-        showSettings(activateSyncSwitch.isChecked)
+        saveSettingVisibility(activateSyncSwitch.isChecked)
 
         oldSyncSettings = UploadFile.getAppSyncSettings()
 
@@ -137,6 +137,7 @@ class SyncSettingsActivity : BaseActivity() {
             } else {
                 pathName.setText(R.string.selectFolderTitle)
             }
+            mediaFoldersSettingsVisibility(syncFolder != null)
         }
 
         syncSettingsViewModel.saveOldPictures.observe(this) {
@@ -161,7 +162,7 @@ class SyncSettingsActivity : BaseActivity() {
 
         activateSync.setOnClickListener { activateSyncSwitch.isChecked = !activateSyncSwitch.isChecked }
         activateSyncSwitch.setOnCheckedChangeListener { _, isChecked ->
-            showSettings(isChecked)
+            saveSettingVisibility(isChecked)
             if (AccountUtils.isEnableAppSync() == isChecked) editNumber-- else editNumber++
             if (isChecked) permission.checkSyncPermissions()
             changeSaveButtonStatus()
@@ -245,6 +246,7 @@ class SyncSettingsActivity : BaseActivity() {
     }
 
     fun onDialogDismissed() {
+        syncSettingsVisibility(MediaFolder.getAllSyncedFoldersCount() > 0)
         changeSaveButtonStatus()
     }
 
@@ -255,16 +257,38 @@ class SyncSettingsActivity : BaseActivity() {
         }
     }
 
-    private fun showSettings(isChecked: Boolean) {
-        val visibility = if (isChecked) VISIBLE else GONE
+    private fun saveSettingVisibility(isVisibility: Boolean) {
+        val visibility = if (isVisibility) {
+            mediaFoldersSettingsVisibility(syncSettingsViewModel.syncFolder.value != null)
+            VISIBLE
+        } else {
+            mediaFoldersSettingsVisibility(false)
+            GONE
+        }
         saveSettingsTitle.visibility = visibility
         saveSettingsLayout.visibility = visibility
+    }
+
+    private fun mediaFoldersSettingsVisibility(isVisibility: Boolean) {
+        val visibility = if (isVisibility) {
+            syncSettingsVisibility(MediaFolder.getAllSyncedFoldersCount() > 0)
+            VISIBLE
+        } else {
+            syncSettingsVisibility(false)
+            GONE
+        }
+        mediaFoldersSettingsTitle.visibility = visibility
+        mediaFoldersSettingsLayout.visibility = visibility
+    }
+
+    private fun syncSettingsVisibility(isVisibility: Boolean) {
+        val visibility = if (isVisibility) VISIBLE else GONE
         syncSettingsTitle.visibility = visibility
         syncSettingsLayout.visibility = visibility
     }
 
     private fun changeSaveButtonStatus() {
-        val allSyncedFoldersCount = MediaFolder.getAllSyncedFoldersCount()
+        val allSyncedFoldersCount = MediaFolder.getAllSyncedFoldersCount().toInt()
         val isEdited = (editNumber > 0)
                 || (selectDriveViewModel.selectedUserId.value != oldSyncSettings?.userId)
                 || (selectDriveViewModel.selectedDrive.value?.id != oldSyncSettings?.driveId)
@@ -272,6 +296,9 @@ class SyncSettingsActivity : BaseActivity() {
                 || (syncSettingsViewModel.saveOldPictures.value != null)
                 || allSyncedFoldersCount > 0
         saveButton.visibility = if (isEdited) VISIBLE else GONE
+
+        mediaFoldersTitle.text = if (allSyncedFoldersCount == 0) getString(R.string.noSelectMediaFolders)
+        else resources.getQuantityString(R.plurals.mediaFoldersSelected, allSyncedFoldersCount, allSyncedFoldersCount)
 
         saveButton.isEnabled = isEdited && (selectDriveViewModel.selectedUserId.value != null)
                 && (selectDriveViewModel.selectedDrive.value != null)

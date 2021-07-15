@@ -114,6 +114,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/marginStandard"
                 android:layout_marginTop="@dimen/marginStandardSmall"
+                android:layout_marginBottom="@dimen/marginStandard"
                 android:visibility="gone"
                 tools:visibility="visible">
 
@@ -224,12 +225,66 @@
             </com.google.android.material.card.MaterialCardView>
 
             <TextView
+                android:id="@+id/mediaFoldersSettingsTitle"
+                style="@style/Subtitle2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandard"
+                android:text="@string/selectMediaFoldersTitle"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/mediaFoldersSettingsLayout"
+                style="@style/CardViewInfomaniak"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandard"
+                android:layout_marginTop="@dimen/marginStandardSmall"
+                android:layout_marginBottom="@dimen/marginStandard"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/mediaFolders"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/buttonHeight"
+                    android:background="?selectableItemBackground"
+                    tools:visibility="visible">
+
+                    <TextView
+                        android:id="@+id/mediaFoldersTitle"
+                        style="@style/Subtitle2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/marginStandard"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/mediaFoldersChevron"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:text="@string/noSelectMediaFolders" />
+
+                    <ImageView
+                        android:id="@+id/mediaFoldersChevron"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/marginStandardMedium"
+                        android:src="@drawable/ic_chevron_right"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="ContentDescription" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
                 android:id="@+id/syncSettingsTitle"
                 style="@style/Subtitle2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/marginStandard"
-                android:layout_marginTop="@dimen/marginStandard"
                 android:text="@string/settingsTitle"
                 android:visibility="gone"
                 tools:visibility="visible" />
@@ -249,43 +304,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/mediaFolders"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/buttonHeight"
-                        android:background="?selectableItemBackground"
-                        tools:visibility="visible">
-
-                        <TextView
-                            android:id="@+id/mediaFoldersTitle"
-                            style="@style/Subtitle2"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/marginStandard"
-                            android:text="@string/selectMediaFoldersTitle"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toStartOf="@id/mediaFoldersChevron"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <ImageView
-                            android:id="@+id/mediaFoldersChevron"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="@dimen/marginStandardMedium"
-                            android:src="@drawable/ic_chevron_right"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:ignore="ContentDescription" />
-
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/divider" />
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/syncVideo"
