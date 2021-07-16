@@ -350,7 +350,11 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    fun getRecentChanges(driveId: Int, forceDownload: Boolean = false): LiveData<FileListFragment.FolderFilesResult?> {
+    fun getRecentChanges(
+        driveId: Int,
+        onlyFirstPage: Boolean,
+        forceDownload: Boolean = false
+    ): LiveData<FileListFragment.FolderFilesResult?> {
         getRecentChangesJob.cancel()
         getRecentChangesJob = Job()
 
@@ -383,7 +387,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
                             emit(
                                 FileListFragment.FolderFilesResult(files = data, isComplete = false, page = page)
                             )
-                            recursive(page + 1)
+                            if (!onlyFirstPage) recursive(page + 1)
                         }
                     }
                 } else {

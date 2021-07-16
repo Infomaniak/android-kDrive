@@ -47,7 +47,7 @@ class RecentChangesFragment : FileSubTypeListFragment() {
             timer.start()
             fileAdapter.isComplete = false
 
-            mainViewModel.getRecentChanges(AccountUtils.currentDriveId).observe(viewLifecycleOwner) { result ->
+            mainViewModel.getRecentChanges(AccountUtils.currentDriveId, false).observe(viewLifecycleOwner) { result ->
                 populateFileList(result?.files ?: ArrayList(), isComplete = result?.isComplete ?: true, ignoreOffline = true)
             }
         }
