@@ -53,7 +53,7 @@ class SwitchDriveDialog : DialogFragment() {
         layoutParams?.flags = layoutParams?.flags?.or(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
         dialog?.window?.attributes = layoutParams
         dialog?.window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
-        view?.setOnClickListener { _ ->
+        view.setOnClickListener {
             findNavController().popBackStack()
         }
 
