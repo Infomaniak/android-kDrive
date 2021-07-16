@@ -23,6 +23,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
+import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_file_name.view.*
 
@@ -37,8 +38,7 @@ class SaveExternalUriAdapter(val uris: ArrayList<Uri>) : RecyclerView.Adapter<Vi
         with(holder.itemView) {
             val uri = uris[position]
             context?.contentResolver?.query(uri, null, null, null, null)?.use { cursor ->
-                cursor.moveToFirst()
-                name.text = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)) ?: ""
+                if (cursor.moveToFirst()) name.text = SyncUtils.getFileName(cursor)
             }
         }
     }
