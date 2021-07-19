@@ -55,7 +55,8 @@ class HomeViewModel : ViewModel() {
         lastActivityJob = Job()
 
         return liveData(Dispatchers.IO + lastActivityJob) {
-            if (lastPicturesTime != 0 && Date().time - lastPicturesTime < DOWNLOAD_INTERVAL && lastPicturesPage == 1) {
+            val isFirstPage = lastPicturesPage == 1
+            if (lastPicturesTime != 0 && Date().time - lastPicturesTime < DOWNLOAD_INTERVAL && isFirstPage) {
                 lastPicturesPage = lastPicturesLastPage
                 emit(ApiResponse(SUCCESS, lastPictures, null, 1, 1))
                 return@liveData
@@ -65,15 +66,15 @@ class HomeViewModel : ViewModel() {
             lastPicturesTime = Date().time
 
             if (apiResponse.isSuccess()) {
-                if (lastPicturesPage == 1) {
-                    FileController.removeFileActivities()
+                if (isFirstPage) {
+                    FileController.removeOrphanFiles()
                     lastPictures = arrayListOf()
                 }
 
                 if (apiResponse.data?.isNullOrEmpty() == true) emit(null)
                 else {
                     apiResponse.data?.let {
-                        FileController.storeDriveSoloPictures(it)
+                        FileController.storeDriveSoloPictures(it, isFirstPage)
                         lastPictures.addAll(it)
                     }
                     emit(apiResponse)
@@ -107,7 +108,7 @@ class HomeViewModel : ViewModel() {
             if (apiRepository.isSuccess() || (lastActivityPage == 1 && data != null)) {
 
                 if (lastActivityPage == 1) {
-                    FileController.removeFileActivities()
+                    FileController.removeOrphanAndActivityFiles()
                     lastActivities = arrayListOf()
                     lastMergedActivities = arrayListOf()
                 }

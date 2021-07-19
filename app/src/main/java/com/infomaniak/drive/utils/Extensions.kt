@@ -107,6 +107,7 @@ import kotlin.math.roundToInt
 
 typealias FileId = Int
 typealias IsOffline = Boolean
+typealias IsComplete = Boolean
 
 fun Intent.clearStack() {
     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
