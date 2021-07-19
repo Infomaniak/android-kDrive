@@ -34,11 +34,9 @@ class MediaFoldersAdapter(
     private var itemList: ArrayList<MediaFolder> = arrayListOf()
 
     fun addAll(newItemList: ArrayList<MediaFolder>) {
-        if (newItemList.size != itemCount) {
-            val beforeItemCount = itemCount
-            itemList.addAll(newItemList)
-            notifyItemRangeInserted(beforeItemCount, itemCount)
-        }
+        val beforeItemCount = itemCount
+        itemList.addAll(newItemList)
+        notifyItemRangeInserted(beforeItemCount, newItemList.size)
     }
 
     fun removeItemsById(idList: ArrayList<Long>) {

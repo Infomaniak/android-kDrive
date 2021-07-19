@@ -33,6 +33,7 @@ import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.IsComplete
 import com.infomaniak.drive.utils.MediaFoldersProvider
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import io.realm.Realm
@@ -87,12 +88,14 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
         mediaViewModel.getAllMediaFolders(requireActivity().contentResolver)
             .observe(viewLifecycleOwner) { (isComplete, mediaFolders) ->
                 mediaFolderList.post {
-                    mediaFoldersAdapter.addAll(mediaFolders)
-                    noMediaFolderLayout.toggleVisibility(
-                        isVisible = mediaFoldersAdapter.itemCount == 0,
-                        noNetwork = false,
-                        showRefreshButton = false
-                    )
+                    if (!isComplete || mediaFolders.isNotEmpty() && isComplete) {
+                        mediaFoldersAdapter.addAll(mediaFolders)
+                        noMediaFolderLayout.toggleVisibility(
+                            isVisible = mediaFoldersAdapter.itemCount == 0,
+                            noNetwork = false,
+                            showRefreshButton = false
+                        )
+                    }
                     if (isComplete) {
                         swipeRefreshLayout.isRefreshing = false
                     }
@@ -110,7 +113,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
         private var getMediaFilesJob: Job = Job()
         val elementsToRemove = MutableLiveData<ArrayList<Long>>()
 
-        fun getAllMediaFolders(contentResolver: ContentResolver): LiveData<Pair<Boolean, ArrayList<MediaFolder>>> {
+        fun getAllMediaFolders(contentResolver: ContentResolver): LiveData<Pair<IsComplete, ArrayList<MediaFolder>>> {
             getMediaFilesJob = Job()
             return liveData {
                 runInterruptible(Dispatchers.IO + getMediaFilesJob) {
@@ -130,7 +133,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
                         cacheMediaFolders.removeObsoleteMediaFolders(realm, localMediaFolders)
 
                         viewModelScope.launch(Dispatchers.Main) {
-                            emit(true to localMediaFolders.removeDuplicatedMediaFolders(cacheMediaFolders))
+                            emit(true to localMediaFolders.newMediaFolders(cacheMediaFolders))
                         }
                     }
                 }
@@ -142,7 +145,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
             super.onCleared()
         }
 
-        private fun ArrayList<MediaFolder>.removeDuplicatedMediaFolders(cachedMediaFolders: ArrayList<MediaFolder>): ArrayList<MediaFolder> {
+        private fun ArrayList<MediaFolder>.newMediaFolders(cachedMediaFolders: ArrayList<MediaFolder>): ArrayList<MediaFolder> {
             return filterNot { mediaFolder ->
                 cachedMediaFolders.any { cache -> cache.id == mediaFolder.id }
             } as ArrayList<MediaFolder>
@@ -153,14 +156,14 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
             upToDateMedias: ArrayList<MediaFolder>
         ) {
             val deletedMediaFolderList = arrayListOf<Long>()
-            forEach { cachedFile ->
-                val exist = upToDateMedias.any { cachedFile.id == it.id }
-                if (!exist) {
-                    realm.executeTransaction { realm ->
-                        realm.where(MediaFolder::class.java).equalTo(MediaFolder::id.name, cachedFile.id).findFirst()
+            realm.executeTransaction { currentRealm ->
+                forEach { cachedFile ->
+                    val exist = upToDateMedias.any { cachedFile.id == it.id }
+                    if (!exist) {
+                        currentRealm.where(MediaFolder::class.java).equalTo(MediaFolder::id.name, cachedFile.id).findFirst()
                             ?.deleteFromRealm()
+                        deletedMediaFolderList.add(cachedFile.id)
                     }
-                    deletedMediaFolderList.add(cachedFile.id)
                 }
             }
             elementsToRemove.postValue(deletedMediaFolderList)
