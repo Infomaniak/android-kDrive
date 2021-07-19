@@ -76,9 +76,12 @@ object FileController {
         return getRealmInstance(userDrive).use { realm ->
             getFileById(realm, fileId)?.let { file ->
                 if (file.path.isEmpty()) {
-                    realm.beginTransaction()
-                    file.path = generatePath(file, userDrive)
-                    realm.commitTransaction()
+                    val generatedPath = generatePath(file, userDrive)
+                    if (generatedPath.isNotBlank()) {
+                        realm.beginTransaction()
+                        file.path = generatedPath
+                        realm.commitTransaction()
+                    }
                     file.path
                 } else file.path
             } ?: ""
@@ -87,7 +90,7 @@ object FileController {
 
     private fun generatePath(file: File, userDrive: UserDrive): String {
         // id > 0 for exclude other root parents, home root has priority
-        val folder = file.localParent?.firstOrNull { it.id > 0 }
+        val folder = file.localParent?.createSnapshot()?.firstOrNull { it.id > 0 }
         return when {
             folder == null -> ""
             folder.id == Utils.ROOT_ID -> "/${file.name}"
