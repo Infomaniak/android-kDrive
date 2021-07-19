@@ -50,7 +50,7 @@ open class PreviewVideoFragment : PreviewFragment() {
     private lateinit var simpleExoPlayer: SimpleExoPlayer
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_preview_video, container, false)
+        return if (noFileFound()) null else inflater.inflate(R.layout.fragment_preview_video, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
