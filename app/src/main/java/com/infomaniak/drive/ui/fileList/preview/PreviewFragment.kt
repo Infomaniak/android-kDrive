@@ -40,11 +40,11 @@ open class PreviewFragment : Fragment() {
                 previewViewModel.currentFile = FileController.getFileById(fileId, previewSliderViewModel.userDrive)
             }
         }
-        previewViewModel.currentFile?.let {
-            file = it
-            super.onCreate(savedInstanceState)
-        } ?: run { findNavController().popBackStack() }
+        previewViewModel.currentFile?.let { file = it } ?: run { findNavController().popBackStack() }
+        super.onCreate(savedInstanceState)
     }
+
+    protected fun noFileFound() = previewViewModel.currentFile == null
 
     protected class PreviewViewModel : ViewModel() {
         var currentFile: File? = null

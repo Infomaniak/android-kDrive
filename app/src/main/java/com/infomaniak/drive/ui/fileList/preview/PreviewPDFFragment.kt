@@ -52,7 +52,7 @@ class PreviewPDFFragment : PreviewFragment() {
     private var isDownloading = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_preview_pdf, container, false)
+        return if (noFileFound()) null else inflater.inflate(R.layout.fragment_preview_pdf, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

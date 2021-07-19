@@ -43,7 +43,7 @@ import kotlinx.coroutines.withContext
 class PreviewPictureFragment : PreviewFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_preview_picture, container, false)
+        return if (noFileFound()) null else inflater.inflate(R.layout.fragment_preview_picture, container, false)
     }
 
     @SuppressLint("ClickableViewAccessibility")
