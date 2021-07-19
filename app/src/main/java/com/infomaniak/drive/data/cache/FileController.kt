@@ -76,10 +76,10 @@ object FileController {
         return getRealmInstance(userDrive).use { realm ->
             getFileById(realm, fileId)?.let { file ->
                 if (file.path.isEmpty()) {
-                    val generatePath = generatePath(file, userDrive)
-                    if (generatePath.isNotBlank()) {
+                    val generatedPath = generatePath(file, userDrive)
+                    if (generatedPath.isNotBlank()) {
                         realm.beginTransaction()
-                        file.path = generatePath
+                        file.path = generatedPath
                         realm.commitTransaction()
                     }
                     file.path
