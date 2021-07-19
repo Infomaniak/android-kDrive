@@ -23,6 +23,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
+import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationManagerCompat
 import coil.ImageLoader
@@ -38,6 +39,7 @@ import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UISettings
 import com.infomaniak.drive.data.models.drive.Drive
+import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.NotificationUtils.initNotificationChannel
@@ -64,6 +66,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.withLock
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import org.eclipse.paho.client.mqttv3.*
 import java.lang.reflect.Type
 import java.util.*
 import kotlin.collections.ArrayList
@@ -131,9 +134,29 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         )
 
         KDriveHttpClient.onRefreshTokenError = refreshTokenError
+        val mqttCallback = object : MqttCallback {
+            override fun connectionLost(cause: Throwable?) {
+                // TODO
+            }
+
+            override fun messageArrived(topic: String?, message: MqttMessage?) {
+                // TODO
+            }
+
+            override fun deliveryComplete(token: IMqttDeliveryToken?) {
+                // TODO
+            }
+        }
 
         initNotificationChannel()
         HttpClient.init(tokenInterceptorListener())
+        MqttClientWrapper.init(
+            context = applicationContext,
+            clientId = "",
+            callback = mqttCallback
+        ) { isSuccess ->
+            Log.i("MQTT connection", isSuccess.toString())
+        }
     }
 
     override fun newImageLoader(): ImageLoader {
