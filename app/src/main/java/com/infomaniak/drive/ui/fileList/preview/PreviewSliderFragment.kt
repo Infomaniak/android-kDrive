@@ -30,9 +30,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
@@ -405,12 +403,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                     requireActivity().showSnackbar(R.string.errorMove)
                 }
             }
-    }
-
-    class PreviewSliderViewModel : ViewModel() {
-        val pdfIsDownloading = MutableLiveData<Boolean>()
-        var currentPreview: File? = null
-        var userDrive = UserDrive()
     }
 
     companion object {

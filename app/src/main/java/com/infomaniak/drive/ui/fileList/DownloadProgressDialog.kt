@@ -57,7 +57,7 @@ class DownloadProgressDialog : DialogFragment() {
         isCancelable = false
         FileController.getFileById(navigationArgs.fileID, navigationArgs.userDrive)?.let { file ->
             dialogView.icon.setImageResource(file.getFileType().icon)
-            downloadViewModel.downloadFile(requireContext(), file, navigationArgs.userDrive).observe(this) {
+            downloadViewModel.downloadFile(requireContext(), file, navigationArgs.userDrive).observe(viewLifecycleOwner) {
                 it?.let { (progress, isComplete) ->
                     if (isComplete) {
                         setBackNavigationResult(OPEN_WITH, true)
