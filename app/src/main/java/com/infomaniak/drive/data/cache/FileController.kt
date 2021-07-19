@@ -447,27 +447,37 @@ object FileController {
         }
     }
 
-    fun storeDriveSoloPictures(pictures: ArrayList<File>, customRealm: Realm? = null) {
+    fun storeDriveSoloPictures(pictures: ArrayList<File>, isFirstPage: Boolean = false, customRealm: Realm? = null) {
         val block: (Realm) -> Unit = {
             it.executeTransaction { realm ->
                 val picturesFolder = realm.where(File::class.java).equalTo(File::id.name, PICTURES_FILE_ID).findFirst()
                     ?: realm.copyToRealm(PICTURES_FILE)
+                if (isFirstPage) picturesFolder.children = RealmList()
                 picturesFolder.children.addAll(pictures)
             }
         }
         customRealm?.let(block) ?: getRealmInstance().use(block)
     }
 
-    fun removeFileActivities() {
+    fun removeOrphanAndActivityFiles() {
         getRealmInstance().use { realm ->
             realm.executeTransaction {
                 realm.where(FileActivity::class.java).findAll().deleteAllFromRealm()
+            }
+            removeOrphanFiles(realm)
+        }
+    }
+
+    fun removeOrphanFiles(customRealm: Realm? = null) {
+        val block: (Realm) -> Unit = { realm ->
+            realm.executeTransaction {
                 realm.where(File::class.java)
                     .greaterThan(File::id.name, Utils.ROOT_ID)
                     .isEmpty(File::localParent.name)
                     .findAll().deleteAllFromRealm()
             }
         }
+        customRealm?.let(block) ?: getRealmInstance().use(block)
     }
 
     fun getFilesFromCacheOrDownload(

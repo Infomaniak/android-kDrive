@@ -21,7 +21,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.utils.IsComplete
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 
@@ -31,7 +33,7 @@ class PicturesViewModel : ViewModel() {
     fun getAllPicturesFiles(
         driveId: Int,
         ignoreCloud: Boolean = false
-    ): LiveData<Pair<ArrayList<File>, Boolean>?> {
+    ): LiveData<Pair<ArrayList<File>, IsComplete>?> {
         getPicturesJob.cancel()
         getPicturesJob = Job()
         return liveData(Dispatchers.IO + getPicturesJob) {
@@ -40,15 +42,21 @@ class PicturesViewModel : ViewModel() {
                     val apiResponse = ApiRepository.getLastPictures(driveId = driveId, page = page)
                     if (apiResponse.isSuccess()) {
                         val data = apiResponse.data
+                        val isFirstPage = page == 1
                         when {
                             data == null -> emit(null)
-                            data.size < ApiRepository.PER_PAGE -> emit(data to true)
+                            data.size < ApiRepository.PER_PAGE -> {
+                                FileController.storeDriveSoloPictures(data, isFirstPage)
+                                emit(data to true)
+                            }
                             else -> {
+                                FileController.storeDriveSoloPictures(data, isFirstPage)
                                 emit(data to false)
                                 recursive(page + 1)
                             }
                         }
-                    } else emit(null)
+                        if (isFirstPage) FileController.removeOrphanFiles()
+                    } else emit(FileController.getDriveSoloPictures() to true)
                 }
             }
             recursive(1)

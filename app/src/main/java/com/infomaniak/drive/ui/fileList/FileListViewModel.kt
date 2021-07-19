@@ -28,6 +28,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.IsComplete
 import com.infomaniak.drive.utils.SingleLiveEvent
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.coroutines.Dispatchers
@@ -152,7 +153,7 @@ class FileListViewModel : ViewModel() {
         UploadFile.deleteAll(files)
     }
 
-    fun getMySharedFiles(sortType: File.SortType): LiveData<Pair<ArrayList<File>, Boolean>?> {
+    fun getMySharedFiles(sortType: File.SortType): LiveData<Pair<ArrayList<File>, IsComplete>?> {
         getFilesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
