@@ -31,7 +31,7 @@ open class PreviewFragment : Fragment() {
 
     protected lateinit var file: File
     private val previewViewModel: PreviewViewModel by viewModels()
-    protected val previewSliderViewModel: PreviewSliderFragment.PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
+    protected val previewSliderViewModel: PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (previewViewModel.currentFile == null) {
