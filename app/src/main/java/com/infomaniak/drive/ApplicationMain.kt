@@ -134,28 +134,13 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         )
 
         KDriveHttpClient.onRefreshTokenError = refreshTokenError
-        val mqttCallback = object : MqttCallback {
-            override fun connectionLost(cause: Throwable?) {
-                // TODO
-            }
-
-            override fun messageArrived(topic: String?, message: MqttMessage?) {
-                // TODO
-            }
-
-            override fun deliveryComplete(token: IMqttDeliveryToken?) {
-                // TODO
-            }
-        }
-
         initNotificationChannel()
         HttpClient.init(tokenInterceptorListener())
         MqttClientWrapper.init(
             context = applicationContext,
             clientId = "",
-            callback = mqttCallback
         ) { isSuccess ->
-            Log.i("MQTT connection", isSuccess.toString())
+            Log.i("MQTT connection", "Success : $isSuccess")
         }
     }
 

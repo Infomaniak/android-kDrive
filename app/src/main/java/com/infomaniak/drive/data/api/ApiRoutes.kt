@@ -31,7 +31,7 @@ object ApiRoutes {
 
     private fun trashURL(file: File) = "${DRIVE_API}${file.driveId}/file/trash/${file.id}"
 
-    fun getAllDrivesData() = "${DRIVE_API}init?with=drives,users"
+    fun getAllDrivesData() = "${DRIVE_API}init?with=drives,users,ips"
 
     fun getUserProfile() = "${INFOMANIAK_API}profile"
 

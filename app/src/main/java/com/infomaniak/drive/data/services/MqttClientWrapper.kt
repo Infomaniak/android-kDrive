@@ -18,13 +18,18 @@
 package com.infomaniak.drive.data.services
 
 import android.content.Context
+import android.util.Log
+import androidx.lifecycle.LiveData
+import com.infomaniak.drive.data.models.IpsToken
 import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
 
-object MqttClientWrapper {
+object MqttClientWrapper : MqttCallback, LiveData<String>() {
 
     private lateinit var appContext: Context
     private lateinit var clientId: String
+    private var currentToken: IpsToken? = null
+    private var isSubscribed: Boolean = false
 
     private const val MQTT_USER = "ips:ips-public"
     private const val MQTT_PASS = "8QC5EwBqpZ2Z"
@@ -34,11 +39,17 @@ object MqttClientWrapper {
         MqttAndroidClient(appContext, MQTT_URI, clientId)
     }
 
-    fun init(context: Context, clientId: String = "", callback: MqttCallback, onClientConnected: (success: Boolean) -> Unit) {
+    private fun topicFor(token: IpsToken) = "drive/${token.uuid}"
+
+    private fun unsubscribe(topic: String) {
+        client.unsubscribe(topic, null, null)
+    }
+
+    fun init(context: Context, clientId: String = "", onClientConnected: (success: Boolean) -> Unit) {
         this.appContext = context
         this.clientId = clientId
 
-        client.setCallback(callback)
+        client.setCallback(this)
         val options = MqttConnectOptions()
         options.userName = MQTT_USER
         options.password = MQTT_PASS.toCharArray()
@@ -60,23 +71,35 @@ object MqttClientWrapper {
         }
     }
 
-    fun subscribe(topic: String, qos: Int = 1, listener: IMqttActionListener) {
-        client.subscribe(topic, qos, null, listener)
+    fun registerForNotifications(token: IpsToken) {
+        currentToken?.let {
+            unsubscribe(topicFor(token))
+        }
+        currentToken = token
+        if (!isSubscribed) {
+            subscribe(topicFor(token))
+        }
     }
 
-    fun unsubscribe(topic: String, listener: IMqttActionListener) {
-        client.unsubscribe(topic, null, listener)
-    }
-
-    fun publish(topic: String, msg: String, qos: Int = 1, retained: Boolean = false, listener: IMqttActionListener) {
-        val message = MqttMessage()
-        message.payload = msg.toByteArray()
-        message.qos = qos
-        message.isRetained = retained
-        client.publish(topic, message, null, listener)
+    fun subscribe(topic: String, qos: Int = 1) {
+        client.subscribe(topic, qos, null, null)
     }
 
     fun disconnect(listener: IMqttActionListener) {
         client.disconnect(null, listener)
+    }
+
+    override fun connectionLost(cause: Throwable?) {
+        Log.e("Connection", "LOST")
+        cause?.printStackTrace()
+    }
+
+    override fun messageArrived(topic: String?, message: MqttMessage?) {
+        postValue(message?.payload.toString())
+        Log.e("Message", "ARRIVED")
+    }
+
+    override fun deliveryComplete(token: IMqttDeliveryToken?) {
+        Log.e("Delivery", "COMPLETE")
     }
 }

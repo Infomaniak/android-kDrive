@@ -29,6 +29,7 @@ import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.UISettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive
+import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.auth.CredentialManager
@@ -144,6 +145,8 @@ object AccountUtils : CredentialManager {
                                     reloadApp?.invoke()
                                 }
                             }
+
+                            MqttClientWrapper.registerForNotifications(it.ipsToken)
 
                             TokenAuthenticator.mutex.withLock {
                                 if (currentUserId == user.id) {
