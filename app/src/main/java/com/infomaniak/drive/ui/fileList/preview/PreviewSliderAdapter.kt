@@ -33,7 +33,7 @@ class PreviewSliderAdapter(manager: FragmentManager, lifecycle: Lifecycle) : Fra
 
     override fun createFragment(position: Int): Fragment {
         val file = getFile(position)
-        val args = bundleOf(PreviewFragment.FILE_ID_TAG to file.id)
+        val args = bundleOf(PreviewFragment.FILE_TAG to file)
         return when (file.getFileType()) {
             File.ConvertedType.IMAGE -> PreviewPictureFragment().apply { arguments = args }
             File.ConvertedType.VIDEO -> PreviewVideoFragment().apply { arguments = args }

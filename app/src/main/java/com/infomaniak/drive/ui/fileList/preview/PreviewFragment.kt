@@ -36,8 +36,9 @@ open class PreviewFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         if (previewViewModel.currentFile == null) {
             arguments?.let {
-                val fileId = it.getInt(FILE_ID_TAG)
-                previewViewModel.currentFile = FileController.getFileById(fileId, previewSliderViewModel.userDrive)
+                it.getParcelable<File>(FILE_TAG)?.let { file ->
+                    previewViewModel.currentFile = FileController.getFileById(file.id, previewSliderViewModel.userDrive) ?: file
+                }
             }
         }
         previewViewModel.currentFile?.let { file = it } ?: run { findNavController().popBackStack() }
@@ -51,6 +52,6 @@ open class PreviewFragment : Fragment() {
     }
 
     companion object {
-        const val FILE_ID_TAG = "file_id_tag"
+        const val FILE_TAG = "file_id_tag"
     }
 }
