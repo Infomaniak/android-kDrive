@@ -92,7 +92,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     protected open var hideBackButtonWhenRoot: Boolean = true
     protected open var showPendingFiles = true
 
-    protected var sortType: File.SortType = File.SortType.NAME_AZ
     protected var userDrive: UserDrive? = null
 
     companion object {
@@ -107,7 +106,9 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        sortType = UISettings(requireContext()).sortType
+        if (!fileListViewModel.sortTypeIsInitialized()) {
+            fileListViewModel.sortType = UISettings(requireContext()).sortType
+        }
     }
 
     override fun onCreateView(
@@ -325,9 +326,9 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
         fileListViewModel.isListMode.value = UISettings(requireContext()).listMode
 
-        sortButton.setText(sortType.translation)
+        sortButton.setText(fileListViewModel.sortType.translation)
         sortButton.setOnClickListener {
-            safeNavigate(R.id.sortFilesBottomSheetDialog, bundleOf("sortType" to sortType))
+            safeNavigate(R.id.sortFilesBottomSheetDialog, bundleOf("sortType" to fileListViewModel.sortType))
         }
     }
 
@@ -669,7 +670,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             folderID,
             ignoreCache = ignoreCache,
             ignoreCloud = mainViewModel.isInternetAvailable.value == false,
-            order = sortType,
+            order = fileListViewModel.sortType,
             userDrive = userDrive
         ).observe(viewLifecycleOwner) {
             onFinish?.invoke(it)
@@ -688,8 +689,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private inner class SortFiles : () -> Unit {
         override fun invoke() {
             getBackNavigationResult<File.SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
-                sortType = newSortType
-                sortButton.setText(sortType.translation)
+                fileListViewModel.sortType = newSortType
+                sortButton.setText(fileListViewModel.sortType.translation)
                 downloadFiles(fileListViewModel.isSharedWithMe)
                 UISettings(requireContext()).sortType = newSortType
             }

@@ -58,7 +58,7 @@ class MySharesFragment : FileSubTypeListFragment() {
             timer.start()
             fileAdapter.isComplete = false
 
-            fileListViewModel.getMySharedFiles(sortType).observe(viewLifecycleOwner) {
+            fileListViewModel.getMySharedFiles(fileListViewModel.sortType).observe(viewLifecycleOwner) {
                 // forceClean because myShares is not paginated
                 populateFileList(files = it?.first ?: ArrayList(), isComplete = true, forceClean = true)
             }

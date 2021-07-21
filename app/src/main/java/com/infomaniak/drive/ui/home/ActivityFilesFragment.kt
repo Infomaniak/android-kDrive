@@ -57,7 +57,7 @@ class ActivityFilesFragment : FileListFragment() {
     private inner class DownloadFiles(private var fileIdList: IntArray) : (Boolean) -> Unit {
         override fun invoke(ignoreCache: Boolean) {
             collapsingToolbarLayout.title = getString(R.string.fileDetailsActivitiesTitle)
-            val fileList = FileController.getFilesFromIdList(fileIdList.toTypedArray(), sortType).apply {
+            val fileList = FileController.getFilesFromIdList(fileIdList.toTypedArray(), fileListViewModel.sortType).apply {
                 map {
                     it.isFromActivities = true
                 }

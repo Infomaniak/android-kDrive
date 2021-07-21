@@ -48,7 +48,7 @@ class SearchFragment : FileListFragment() {
     private var isDownloading = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        sortType = File.SortType.RECENT
+        fileListViewModel.sortType = File.SortType.RECENT
         downloadFiles = DownloadFiles()
         filterLayoutView = layoutInflater.inflate(R.layout.search_filter, null)
         super.onViewCreated(view, savedInstanceState)
@@ -120,6 +120,45 @@ class SearchFragment : FileListFragment() {
         convertedType.text = fileListViewModel.currentConvertedTypeText
         convertedTypeIcon.setImageDrawable(fileListViewModel.currentConvertedTypeDrawable)
         showFilterLayout(true)
+
+        observeSearchResult()
+    }
+
+    private fun observeSearchResult() {
+        fileListViewModel.searchResults.observe(viewLifecycleOwner) {
+            it?.let { apiResponse ->
+                if (apiResponse.isSuccess()) {
+                    val searchList = (apiResponse.data ?: arrayListOf()).apply {
+                        map { file ->
+                            file.isFromSearch = true
+                        }
+                    }
+                    when {
+                        fileListViewModel.currentPage == 1 -> {
+                            fileAdapter.setList(searchList)
+                            changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, false)
+                            fileRecyclerView.scrollTo(0, 0)
+                        }
+                        searchList.isNullOrEmpty() || searchList.size < ApiRepository.PER_PAGE -> {
+                            fileAdapter.addFileList(searchList)
+                            fileAdapter.isComplete = true
+                        }
+                        else -> {
+                            fileAdapter.addFileList(searchList)
+                        }
+                    }
+                } else {
+                    changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, false)
+                    requireActivity().showSnackbar(apiResponse.translateError())
+                }
+            } ?: let {
+                fileAdapter.isComplete = true
+                changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, false)
+            }
+
+            isDownloading = false
+            swipeRefreshLayout.isRefreshing = false
+        }
     }
 
     private fun updateFilter(view: View, type: File.ConvertedType) {
@@ -179,40 +218,7 @@ class SearchFragment : FileListFragment() {
 
             isDownloading = true
             showFilterLayout(false)
-            fileListViewModel.searchFiles(currentQuery, sortType, fileListViewModel.currentPage).observe(viewLifecycleOwner) {
-                it?.let { apiResponse ->
-                    if (apiResponse.isSuccess()) {
-                        val searchList = (apiResponse.data ?: arrayListOf()).apply {
-                            map { file ->
-                                file.isFromSearch = true
-                            }
-                        }
-                        when {
-                            fileListViewModel.currentPage == 1 -> {
-                                fileAdapter.setList(searchList)
-                                changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, false)
-                                fileRecyclerView.scrollTo(0, 0)
-                            }
-                            searchList.isNullOrEmpty() || searchList.size < ApiRepository.PER_PAGE -> {
-                                fileAdapter.addFileList(searchList)
-                                fileAdapter.isComplete = true
-                            }
-                            else -> {
-                                fileAdapter.addFileList(searchList)
-                            }
-                        }
-                    } else {
-                        changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, false)
-                        requireActivity().showSnackbar(apiResponse.translateError())
-                    }
-                } ?: let {
-                    fileAdapter.isComplete = true
-                    changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, false)
-                }
-
-                isDownloading = false
-                swipeRefreshLayout.isRefreshing = false
-            }
+            fileListViewModel.searchFileByName.value = currentQuery
         }
     }
 }

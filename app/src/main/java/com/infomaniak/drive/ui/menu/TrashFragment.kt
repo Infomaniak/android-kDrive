@@ -33,7 +33,7 @@ class TrashFragment : FileSubTypeListFragment() {
     val trashViewModel: TrashViewModel by navGraphViewModels(R.id.trashFragment)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        sortType = File.SortType.RECENT_TRASHED
+        fileListViewModel.sortType = File.SortType.RECENT_TRASHED
         sortFiles = SortFiles()
         downloadFiles =
             DownloadFiles(
@@ -100,12 +100,12 @@ class TrashFragment : FileSubTypeListFragment() {
     private inner class SortFiles : () -> Unit {
         override fun invoke() {
             getBackNavigationResult<File.SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
-                sortType = when (newSortType) {
+                fileListViewModel.sortType = when (newSortType) {
                     File.SortType.OLDER -> File.SortType.OLDER_TRASHED
                     File.SortType.RECENT -> File.SortType.RECENT_TRASHED
                     else -> newSortType
                 }
-                sortButton.setText(sortType.translation)
+                sortButton.setText(fileListViewModel.sortType.translation)
                 downloadFiles(true)
             }
         }
@@ -124,7 +124,7 @@ class TrashFragment : FileSubTypeListFragment() {
             fileAdapter.isComplete = false
 
             folder?.let { folder ->
-                trashViewModel.getTrashFile(folder, sortType).observe(viewLifecycleOwner) { result ->
+                trashViewModel.getTrashFile(folder, fileListViewModel.sortType).observe(viewLifecycleOwner) { result ->
                     result?.apply {
                         populateFileList(
                             files = result.files,
@@ -134,7 +134,7 @@ class TrashFragment : FileSubTypeListFragment() {
                     }
                 }
             } ?: run {
-                trashViewModel.getDriveTrash(AccountUtils.currentDriveId, sortType)
+                trashViewModel.getDriveTrash(AccountUtils.currentDriveId, fileListViewModel.sortType)
                     .observe(viewLifecycleOwner) { result ->
                         populateFileList(
                             files = result?.files ?: ArrayList(),

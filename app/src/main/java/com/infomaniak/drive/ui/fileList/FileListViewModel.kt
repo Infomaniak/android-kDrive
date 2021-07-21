@@ -18,9 +18,7 @@
 package com.infomaniak.drive.ui.fileList
 
 import android.graphics.drawable.Drawable
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
+import androidx.lifecycle.*
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
@@ -43,6 +41,13 @@ class FileListViewModel : ViewModel() {
     private var getFilesJob: Job = Job()
     private var getFolderActivitiesJob: Job = Job()
 
+    lateinit var sortType: File.SortType
+
+    val searchFileByName = MutableLiveData<String>()
+    val searchResults = Transformations.switchMap(searchFileByName) { input ->
+        searchFiles(input, sortType, currentPage)
+    }
+
     var currentConvertedType: String? = null
     var currentConvertedTypeDrawable: Drawable? = null
     var currentConvertedTypeText: String? = null
@@ -52,6 +57,8 @@ class FileListViewModel : ViewModel() {
     var currentPage = 1
     var oldList: ArrayList<File>? = null
     val isListMode = SingleLiveEvent<Boolean>()
+
+    fun sortTypeIsInitialized() = ::sortType.isInitialized
 
     fun getFiles(
         parentId: Int,
