@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui
 
 import android.net.Uri
-import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
