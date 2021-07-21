@@ -106,7 +106,9 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        fileListViewModel.sortType = UISettings(requireContext()).sortType
+        if (!fileListViewModel.sortTypeIsInitialized()) {
+            fileListViewModel.sortType = UISettings(requireContext()).sortType
+        }
     }
 
     override fun onCreateView(

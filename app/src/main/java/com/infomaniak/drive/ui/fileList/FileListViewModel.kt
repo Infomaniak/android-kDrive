@@ -41,7 +41,7 @@ class FileListViewModel : ViewModel() {
     private var getFilesJob: Job = Job()
     private var getFolderActivitiesJob: Job = Job()
 
-    var sortType: File.SortType = File.SortType.NAME_AZ
+    lateinit var sortType: File.SortType
 
     val searchFileByName = MutableLiveData<String>()
     val searchResults = Transformations.switchMap(searchFileByName) { input ->
@@ -57,6 +57,8 @@ class FileListViewModel : ViewModel() {
     var currentPage = 1
     var oldList: ArrayList<File>? = null
     val isListMode = SingleLiveEvent<Boolean>()
+
+    fun sortTypeIsInitialized() = ::sortType.isInitialized
 
     fun getFiles(
         parentId: Int,
