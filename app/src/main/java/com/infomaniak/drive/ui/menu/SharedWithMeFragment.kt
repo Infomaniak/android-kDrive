@@ -110,7 +110,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                 fileListViewModel.getFiles(
                     parentId = if (folder.isDrive()) ROOT_ID else folder.id,
                     ignoreCache = true,
-                    order = sortType,
+                    order = fileListViewModel.sortType,
                     userDrive = UserDrive(driveId = folder.driveId, sharedWithMe = true)
                 ).observe(viewLifecycleOwner) {
                     it?.let { (_, children, isComplete) ->

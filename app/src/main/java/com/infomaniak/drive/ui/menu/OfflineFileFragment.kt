@@ -42,7 +42,7 @@ class OfflineFileFragment : FileSubTypeListFragment() {
     private inner class DownloadFiles : (Boolean) -> Unit {
         override fun invoke(ignoreCache: Boolean) {
             fileAdapter.setList(arrayListOf())
-            fileListViewModel.getOfflineFiles(sortType).observe(viewLifecycleOwner) { files ->
+            fileListViewModel.getOfflineFiles(fileListViewModel.sortType).observe(viewLifecycleOwner) { files ->
                 populateFileList(files, isComplete = true, ignoreOffline = true)
             }
         }

@@ -57,7 +57,7 @@ class FavoritesFragment : FileListFragment() {
             if (ignoreCache) fileAdapter.setList(arrayListOf())
             timer.start()
             fileAdapter.isComplete = false
-            fileListViewModel.getFavoriteFiles(sortType).observe(viewLifecycleOwner) {
+            fileListViewModel.getFavoriteFiles(fileListViewModel.sortType).observe(viewLifecycleOwner) {
                 it?.let { result ->
                     if (fileAdapter.itemCount == 0 || result.page == 1) {
                         changeNoFilesLayoutVisibility(result.files.isEmpty(), false)
