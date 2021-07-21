@@ -17,10 +17,13 @@
  */
 package com.infomaniak.drive.data.models
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
+import kotlinx.android.parcel.Parcelize
 
+@Parcelize
 open class Rights(
     @PrimaryKey var fileId: Int = 0,
     @SerializedName("can_become_collab") var canBecomeCollab: Boolean = false,
@@ -39,7 +42,7 @@ open class Rights(
     var show: Boolean = false,
     @SerializedName("upload_new_file") var uploadNewFile: Boolean = false,
     var write: Boolean = false,
-) : RealmObject() {
+) : RealmObject(), Parcelable {
 
     enum class Right(val value: String) {
         ACCESS_READ("read"),

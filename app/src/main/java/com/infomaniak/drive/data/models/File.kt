@@ -18,6 +18,7 @@
 package com.infomaniak.drive.data.models
 
 import android.content.Context
+import android.os.Parcelable
 import android.webkit.MimeTypeMap
 import androidx.annotation.DrawableRes
 import androidx.work.WorkInfo
@@ -27,6 +28,8 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.RealmListParceler.FileRealmListParceler
+import com.infomaniak.drive.utils.RealmListParceler.IntRealmListParceler
 import com.infomaniak.drive.utils.Utils.INDETERMINATE_PROGRESS
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.BuildConfig
@@ -37,13 +40,15 @@ import io.realm.annotations.Ignore
 import io.realm.annotations.LinkingObjects
 import io.realm.annotations.PrimaryKey
 import kotlinx.android.parcel.Parcelize
+import kotlinx.android.parcel.WriteWith
 import java.util.*
 
+@Parcelize
 open class File(
     @PrimaryKey var id: Int = 0,
     @SerializedName("can_use_tag")
     var canUseTag: Boolean = false,
-    var children: RealmList<File> = RealmList(),
+    var children: @WriteWith<FileRealmListParceler> RealmList<File> = RealmList(),
     @SerializedName("collaborative_folder")
     var collaborativeFolder: String? = null,
     @SerializedName("converted_type")
@@ -86,9 +91,9 @@ open class File(
     @SerializedName("size_with_version")
     var sizeWithVersions: Long? = null,
     var status: String? = null,
-    var tags: RealmList<Int> = RealmList(),
+    var tags: @WriteWith<IntRealmListParceler> RealmList<Int> = RealmList(),
     var type: String = "file",
-    var users: RealmList<Int> = RealmList(),
+    var users: @WriteWith<IntRealmListParceler> RealmList<Int> = RealmList(),
     var visibility: String = "",
 
     var order: String = "",
@@ -104,7 +109,7 @@ open class File(
     var isFromActivities: Boolean = false,
     var isFromSearch: Boolean = false,
     var isFromUploads: Boolean = false,
-) : RealmObject() {
+) : RealmObject(), Parcelable {
 
     @LinkingObjects("children")
     val localParent: RealmResults<File>? = null
