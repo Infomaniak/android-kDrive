@@ -29,7 +29,11 @@ interface RealmListParceler<T> : Parceler<RealmList<T>?> {
     override fun create(parcel: Parcel): RealmList<T>? = parcel.readRealmList(clazz)
 
     override fun RealmList<T>?.write(parcel: Parcel, flags: Int) {
-        parcel.writeRealmList(this)
+        try {
+            parcel.writeRealmList(this)
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+        }
     }
 
     @Suppress("UNCHECKED_CAST")
