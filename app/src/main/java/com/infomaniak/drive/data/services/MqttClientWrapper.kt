@@ -20,11 +20,15 @@ package com.infomaniak.drive.data.services
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LiveData
+import com.google.gson.JsonParser
+import com.infomaniak.drive.data.models.ActionNotification
+import com.infomaniak.drive.data.models.ActionProgressNotification
 import com.infomaniak.drive.data.models.IpsToken
+import com.infomaniak.lib.core.utils.ApiController.gson
 import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
 
-object MqttClientWrapper : MqttCallback, LiveData<String>() {
+object MqttClientWrapper : MqttCallback, LiveData<ActionProgressNotification>() {
 
     private lateinit var appContext: Context
     private lateinit var clientId: String
@@ -43,6 +47,7 @@ object MqttClientWrapper : MqttCallback, LiveData<String>() {
 
     private fun unsubscribe(topic: String) {
         client.unsubscribe(topic, null, null)
+        isSubscribed = false
     }
 
     fun init(context: Context, clientId: String = "", onClientConnected: (success: Boolean) -> Unit) {
@@ -53,6 +58,8 @@ object MqttClientWrapper : MqttCallback, LiveData<String>() {
         val options = MqttConnectOptions()
         options.userName = MQTT_USER
         options.password = MQTT_PASS.toCharArray()
+        options.keepAliveInterval = 30
+        options.isAutomaticReconnect = true
 
         try {
             client.connect(options, null, object : IMqttActionListener {
@@ -72,9 +79,7 @@ object MqttClientWrapper : MqttCallback, LiveData<String>() {
     }
 
     fun registerForNotifications(token: IpsToken) {
-        currentToken?.let {
-            unsubscribe(topicFor(token))
-        }
+        currentToken?.let { unsubscribe(topicFor(token)) }
         currentToken = token
         if (!isSubscribed) {
             subscribe(topicFor(token))
@@ -83,6 +88,7 @@ object MqttClientWrapper : MqttCallback, LiveData<String>() {
 
     fun subscribe(topic: String, qos: Int = 1) {
         client.subscribe(topic, qos, null, null)
+        isSubscribed = true
     }
 
     fun disconnect(listener: IMqttActionListener) {
@@ -90,16 +96,21 @@ object MqttClientWrapper : MqttCallback, LiveData<String>() {
     }
 
     override fun connectionLost(cause: Throwable?) {
-        Log.e("Connection", "LOST")
+        Log.e("MQTT Error", "Connection has been lost. Stacktrace below.")
         cause?.printStackTrace()
     }
 
     override fun messageArrived(topic: String?, message: MqttMessage?) {
-        postValue(message?.payload.toString())
-        Log.e("Message", "ARRIVED")
+        val isProgress = JsonParser.parseString(message.toString()).asJsonObject.has("progress")
+        val notification = gson.fromJson(
+            message.toString(),
+            if (isProgress) ActionProgressNotification::class.java else ActionNotification::class.java
+        )
+
+        if (notification is ActionProgressNotification) {
+            postValue(notification)
+        } // else - we don't use ActionNotification for now
     }
 
-    override fun deliveryComplete(token: IMqttDeliveryToken?) {
-        Log.e("Delivery", "COMPLETE")
-    }
+    override fun deliveryComplete(token: IMqttDeliveryToken?) {}
 }

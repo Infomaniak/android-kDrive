@@ -49,6 +49,7 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.services.DownloadWorker
+import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog.Companion.SELECT_DIALOG_ACTION
@@ -201,6 +202,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         toolbar?.menu?.findItem(R.id.searchItem)?.isVisible = findNavController().currentDestination?.id == R.id.fileListFragment
+
+
+        MqttClientWrapper.observe(viewLifecycleOwner) {
+            // TODO : Refresh activities in order to refresh list of files
+        }
 
         setGetBackResult()
     }
