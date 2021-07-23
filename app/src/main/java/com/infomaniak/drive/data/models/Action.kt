@@ -19,10 +19,16 @@ package com.infomaniak.drive.data.models
 
 import com.google.gson.annotations.SerializedName
 
-data class ActionProgressNotification(
-    val uid: String,
-    val action: Action,
-    val progress: ActionProgress,
-    @SerializedName("drive_id") val driveId: Int,
-    @SerializedName("action_uuid") val actionUuid: String,
-)
+enum class Action {
+    @SerializedName("file_move")
+    FILE_MOVE,
+
+    @SerializedName("file_trash")
+    FILE_TRASH,
+
+    @SerializedName("file_restore")
+    FILE_RESTORE,
+
+    @SerializedName("file_create")
+    FILE_CREATE
+}

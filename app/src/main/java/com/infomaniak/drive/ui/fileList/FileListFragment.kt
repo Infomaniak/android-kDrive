@@ -67,8 +67,10 @@ import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_new_folder.*
 import kotlinx.android.synthetic.main.fragment_new_folder.toolbar
+import kotlinx.android.synthetic.main.item_file.*
 import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.coroutines.*
+import java.util.*
 
 open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
@@ -203,9 +205,18 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         toolbar?.menu?.findItem(R.id.searchItem)?.isVisible = findNavController().currentDestination?.id == R.id.fileListFragment
 
-
-        MqttClientWrapper.observe(viewLifecycleOwner) {
-            // TODO : Refresh activities in order to refresh list of files
+        MqttClientWrapper.observe(viewLifecycleOwner) { notification ->
+            if (notification is ActionNotification) {
+                if (currentFolder?.id == notification.parentId) {
+                    val itemPosition = fileAdapter.indexOf(notification.fileId)
+                    if(itemPosition >= 0) {
+                        when (notification.action) {
+                            Action.FILE_TRASH, Action.FILE_MOVE -> fileAdapter.deleteAt(itemPosition)
+                            // Action.FILE_RESTORE, Action.FILE_CREATE -> // not handled atm
+                        }
+                    }
+                }
+            }
         }
 
         setGetBackResult()

@@ -136,10 +136,7 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         KDriveHttpClient.onRefreshTokenError = refreshTokenError
         initNotificationChannel()
         HttpClient.init(tokenInterceptorListener())
-        MqttClientWrapper.init(
-            context = applicationContext,
-            clientId = "",
-        ) { isSuccess ->
+        MqttClientWrapper.init(context = applicationContext, clientId = "") { isSuccess ->
             Log.i("MQTT connection", "Success : $isSuccess")
         }
     }

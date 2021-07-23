@@ -28,7 +28,7 @@ import com.infomaniak.lib.core.utils.ApiController.gson
 import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
 
-object MqttClientWrapper : MqttCallback, LiveData<ActionProgressNotification>() {
+object MqttClientWrapper : MqttCallback, LiveData<Any>() {
 
     private lateinit var appContext: Context
     private lateinit var clientId: String
@@ -107,9 +107,7 @@ object MqttClientWrapper : MqttCallback, LiveData<ActionProgressNotification>() 
             if (isProgress) ActionProgressNotification::class.java else ActionNotification::class.java
         )
 
-        if (notification is ActionProgressNotification) {
-            postValue(notification)
-        } // else - we don't use ActionNotification for now
+        postValue(notification)
     }
 
     override fun deliveryComplete(token: IMqttDeliveryToken?) {}

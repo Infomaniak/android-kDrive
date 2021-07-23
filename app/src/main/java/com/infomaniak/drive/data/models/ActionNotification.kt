@@ -21,10 +21,9 @@ import com.google.gson.annotations.SerializedName
 
 data class ActionNotification(
     val uid: String,
-    val action: String,
+    val action: Action,
     @SerializedName("file_id") val fileId: Int,
     @SerializedName("drive_id") val driveId: Int,
     @SerializedName("parent_id") val parentId: Int,
     @SerializedName("simple_action") val simpleAction: String
 )
-

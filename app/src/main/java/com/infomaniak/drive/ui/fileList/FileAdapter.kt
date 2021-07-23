@@ -137,14 +137,16 @@ open class FileAdapter(
     }
 
     fun deleteAt(position: Int) {
-        itemList.removeAt(position)
-        notifyItemRemoved(position)
+        if (position < itemList.size) {
+            itemList.removeAt(position)
+            notifyItemRemoved(position)
 
-        if (viewHolderType == DisplayType.LIST) {
-            if (position == 0 && itemList.size > 0) {
-                notifyItemChanged(0)
-            } else if (position == itemList.size && itemList.size > 0) {
-                notifyItemChanged(itemList.size - 1)
+            if (viewHolderType == DisplayType.LIST) {
+                if (position == 0 && itemList.size > 0) {
+                    notifyItemChanged(0)
+                } else if (position == itemList.size && itemList.size > 0) {
+                    notifyItemChanged(itemList.size - 1)
+                }
             }
         }
     }
@@ -154,7 +156,7 @@ open class FileAdapter(
         if (position >= 0) deleteAt(position)
     }
 
-    private fun indexOf(fileId: Int) = itemList.indexOfFirst { it.id == fileId }
+    fun indexOf(fileId: Int) = itemList.indexOfFirst { it.id == fileId }
 
     fun notifyFileChanged(fileId: Int, onChange: ((file: File) -> Unit)? = null) {
         val fileIndex = indexOf(fileId)
