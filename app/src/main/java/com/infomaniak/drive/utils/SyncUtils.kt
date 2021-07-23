@@ -173,6 +173,10 @@ object SyncUtils {
         }
     }
 
+    /**
+     * Check if uri is document and retain persistable uri
+     * @throws SecurityException : Doesn't retain access to the URI if the associated document is moved or deleted
+     */
     fun checkDocumentProviderPermissions(context: Context, uri: Uri) {
         if (DocumentsContract.isDocumentUri(context, uri)) {
             context.contentResolver?.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
