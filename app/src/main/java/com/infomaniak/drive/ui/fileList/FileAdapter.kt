@@ -254,7 +254,7 @@ open class FileAdapter(
                 menuButton?.visibility = when {
                     uploadInProgress || isInProgress || selectFolder ||
                             file.isDrive() || file.isTrashed() ||
-                            file.isFromActivities || file.isFromSearch ||
+                            file.isFromActivities ||
                             (offlineMode && !file.isOffline) -> GONE
                     else -> VISIBLE
                 }
