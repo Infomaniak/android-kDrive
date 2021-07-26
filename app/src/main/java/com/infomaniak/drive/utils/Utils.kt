@@ -57,7 +57,6 @@ import java.util.*
 import kotlin.math.min
 import kotlin.math.pow
 
-
 object Utils {
 
     const val ROOT_ID = 1
@@ -65,53 +64,11 @@ object Utils {
 
     const val INDETERMINATE_PROGRESS = -1
 
-    fun confirmFileDeletion(
-        context: Context,
-        fileName: String?,
-        fromTrash: Boolean = false,
-        deletionCount: Int = 1,
-        onPositiveButtonClicked: (dialog: Dialog) -> Unit
-    ) {
-        val title: Int
-        val message: String
-        val button: Int
-        if (fromTrash) {
-            title = R.string.modalDeleteTitle
-            message = context.resources.getQuantityString(
-                R.plurals.modalDeleteDescription,
-                deletionCount,
-                fileName ?: deletionCount
-            )
-            button = R.string.buttonDelete
-        } else {
-            title = R.string.modalMoveTrashTitle
-            message = context.resources.getQuantityString(
-                R.plurals.modalMoveTrashDescription,
-                deletionCount,
-                fileName ?: deletionCount
-            )
-            button = R.string.buttonMove
-        }
-        val dialog = MaterialAlertDialogBuilder(context, R.style.DeleteDialogStyle)
-            .setTitle(title)
-            .setMessage(message)
-            .setPositiveButton(button) { _, _ -> }
-            .setNegativeButton(R.string.buttonCancel) { _, _ -> }
-            .setCancelable(false)
-            .show()
-
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-            onPositiveButtonClicked(dialog)
-            it.isEnabled = false
-            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).isEnabled = false
-        }
-    }
-
     fun createConfirmation(
         context: Context,
         title: String,
         message: String? = null,
-        mainButtonText: String? = null,
+        buttonText: String? = null,
         autoDismiss: Boolean = true,
         isDeletion: Boolean = false,
         onConfirmation: (dialog: Dialog) -> Unit
@@ -120,20 +77,43 @@ object Utils {
         val dialog = MaterialAlertDialogBuilder(context, style)
             .setTitle(title)
             .setMessage(message)
-            .setPositiveButton(mainButtonText ?: context.getString(R.string.buttonConfirm)) { _, _ -> }
+            .setPositiveButton(buttonText ?: context.getString(R.string.buttonConfirm)) { _, _ -> }
             .setNegativeButton(R.string.buttonCancel) { _, _ -> }
             .setCancelable(false)
             .show()
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             onConfirmation(dialog)
-            if (autoDismiss) {
-                dialog.dismiss()
-            } else {
+            if (autoDismiss) dialog.dismiss()
+            else {
                 it.isEnabled = false
                 dialog.getButton(AlertDialog.BUTTON_NEGATIVE).isEnabled = false
             }
         }
+    }
+
+    fun confirmFileDeletion(
+        context: Context,
+        fileName: String? = null,
+        fileCount: Int = 1,
+        fromTrash: Boolean = false,
+        onConfirmation: (dialog: Dialog) -> Unit
+    ) {
+        val title: Int = if (fromTrash) R.string.modalDeleteTitle else R.string.modalMoveTrashTitle
+        val message: String = context.resources.getQuantityString(
+            if (fromTrash) R.plurals.modalDeleteDescription
+            else R.plurals.modalMoveTrashDescription,
+            fileCount, fileName ?: fileCount
+        )
+        val button: Int = if (fromTrash) R.string.buttonDelete else R.string.buttonMove
+
+        createConfirmation(
+            context = context,
+            title = context.getString(title),
+            message = message,
+            buttonText = context.getString(button),
+            onConfirmation = onConfirmation
+        )
     }
 
     fun getRootName(context: Context): String {

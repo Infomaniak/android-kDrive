@@ -145,4 +145,5 @@ object ApiRoutes {
 
     fun cancelAction(driveId: Int): String = "${DRIVE_API}$driveId/cancel"
 
+    fun bulkAction(folder: File): String = "${DRIVE_API}${folder.driveId}/file/bulk"
 }

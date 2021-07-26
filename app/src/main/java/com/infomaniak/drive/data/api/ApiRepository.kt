@@ -316,6 +316,12 @@ object ApiRepository {
         return callApi(ApiRoutes.cancelAction(action.driveId), POST, mapOf("cancel_id" to action.cancelId))
     }
 
+    fun bulkDelete(folder: File, fileIds: IntArray? = null): ApiResponse<CancellableAction> {
+        var body = mapOf<String, Any>("action" to "trash")
+        body = fileIds?.let { body.plus("file_ids" to fileIds) } ?: body.plus("parent_id" to folder.id)
+        return callApi(ApiRoutes.bulkAction(folder), POST, body)
+    }
+
     fun getUUIDArchiveFiles(driveId: Int, fileIds: IntArray): ApiResponse<ArchiveUUID> {
         return callApi(ApiRoutes.getUUIDArchiveFiles(driveId), POST, mapOf("file_ids" to fileIds))
     }

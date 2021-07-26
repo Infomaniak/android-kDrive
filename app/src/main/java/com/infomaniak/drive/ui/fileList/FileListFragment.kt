@@ -209,7 +209,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             if (notification is ActionNotification) {
                 if (currentFolder?.id == notification.parentId) {
                     val itemPosition = fileAdapter.indexOf(notification.fileId)
-                    if(itemPosition >= 0) {
+                    if (itemPosition >= 0) {
                         when (notification.action) {
                             Action.FILE_TRASH, Action.FILE_MOVE -> fileAdapter.deleteAt(itemPosition)
                             // Action.FILE_RESTORE, Action.FILE_CREATE -> // not handled atm
@@ -281,36 +281,45 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         deleteButtonMultiSelect.setOnClickListener {
             val selectedFiles = fileAdapter.itemSelected
             val fileName = if (selectedFiles.size == 1) fileAdapter.itemSelected.first().getFileName() else null
-            Utils.confirmFileDeletion(requireContext(), fileName = fileName, deletionCount = selectedFiles.size) { dialog ->
-                val mediator = mainViewModel.createMultiSelectMediator()
-                val selectedCount = selectedFiles.count()
-                enableButtonMultiSelect(false)
-
-                selectedFiles.forEach { file ->
-                    val onSuccess: (Int) -> Unit = { fileID ->
-                        runBlocking(Dispatchers.Main) { fileAdapter.deleteByFileId(fileID) }
+            if (fileAdapter.allSelected) {
+                Utils.confirmFileDeletion(requireContext(), fileCount = 0) { dialog -> // TODO - clean that code
+                    enableButtonMultiSelect(false)
+                    fileListViewModel.bulkDeleteFiles(currentFolder!!).observe(viewLifecycleOwner) {
+                        // On result
                     }
-                    mediator.addSource(
-                        mainViewModel.deleteFile(file, onSuccess),
-                        mainViewModel.updateMultiSelectMediator(mediator)
-                    )
                 }
+            } else {
+                Utils.confirmFileDeletion(requireContext(), fileName = fileName, fileCount = selectedFiles.size) { dialog ->
+                    val mediator = mainViewModel.createMultiSelectMediator()
+                    val selectedCount = selectedFiles.count()
+                    enableButtonMultiSelect(false)
 
-                mediator.observe(viewLifecycleOwner) { (success, total) ->
-                    dialog.dismiss()
-                    if (total == selectedCount) {
-                        val title = if (success == 0) {
-                            getString(R.string.anErrorHasOccurred)
-                        } else {
-                            resources.getQuantityString(
-                                R.plurals.snackbarMoveTrashConfirmation,
-                                success,
-                                success
-                            )
+                    selectedFiles.forEach { file ->
+                        val onSuccess: (Int) -> Unit = { fileID ->
+                            runBlocking(Dispatchers.Main) { fileAdapter.deleteByFileId(fileID) }
                         }
-                        requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
-                        refreshActivities()
-                        closeMultiSelect()
+                        mediator.addSource(
+                            mainViewModel.deleteFile(file, onSuccess),
+                            mainViewModel.updateMultiSelectMediator(mediator)
+                        )
+                    }
+
+                    mediator.observe(viewLifecycleOwner) { (success, total) ->
+                        dialog.dismiss()
+                        if (total == selectedCount) {
+                            val title = if (success == 0) {
+                                getString(R.string.anErrorHasOccurred)
+                            } else {
+                                resources.getQuantityString(
+                                    R.plurals.snackbarMoveTrashConfirmation,
+                                    success,
+                                    success
+                                )
+                            }
+                            requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
+                            refreshActivities()
+                            closeMultiSelect()
+                        }
                     }
                 }
             }

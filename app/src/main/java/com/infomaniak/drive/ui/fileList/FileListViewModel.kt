@@ -21,10 +21,7 @@ import android.graphics.drawable.Drawable
 import androidx.lifecycle.*
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.FileCount
-import com.infomaniak.drive.data.models.UploadFile
-import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.SingleLiveEvent
@@ -173,6 +170,11 @@ class FileListViewModel : ViewModel() {
             }
         }
     }
+
+    fun bulkDeleteFiles(currentFolder: File, fileIds: IntArray? = null): LiveData<ApiResponse<CancellableAction>> =
+        liveData(Dispatchers.IO) {
+            emit(ApiRepository.bulkDelete(currentFolder, fileIds))
+        }
 
     @Synchronized
     fun getFolderActivities(folder: File, userDrive: UserDrive? = null): LiveData<Map<out Int, File.LocalFileActivity>> {
