@@ -71,13 +71,18 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View = inflater.inflate(R.layout.fragment_bottom_sheet_add_file, container, false)
+    ): View? {
+        return (mainViewModel.currentFolderOpenAddFileBottom.value ?: mainViewModel.currentFolder.value)?.let {
+            currentFolderFile = it
+            inflater.inflate(R.layout.fragment_bottom_sheet_add_file, container, false)
+        } ?: run {
+            findNavController().popBackStack()
+            null
+        } // TODO Temporary fix
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        (mainViewModel.currentFolderOpenAddFileBottom.value ?: mainViewModel.currentFolder.value)?.let {
-            currentFolderFile = it
-        } ?: run { findNavController().popBackStack() } // TODO Temporary fix
         currentFolder.setFileItem(currentFolderFile)
 
         openCameraPermissions = DrivePermissions()
