@@ -333,16 +333,21 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             filesToDelete.forEach { uploadFile ->
                 val uri = uploadFile.uri.toUri()
                 if (!uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
-                    SyncUtils.checkDocumentProviderPermissions(getContext(), uri)
-                    getContext().contentResolver.query(
-                        uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null
-                    )?.use { cursor ->
-                        if (cursor.moveToFirst()) {
-                            val columnIndex: Int = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-                            java.io.File(cursor.getString(columnIndex)).delete()
-                            getContext().contentResolver.delete(uri, null, null)
-                            fileDeleted.add(uploadFile)
+                    try {
+                        SyncUtils.checkDocumentProviderPermissions(getContext(), uri)
+                        getContext().contentResolver.query(
+                            uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null
+                        )?.use { cursor ->
+                            if (cursor.moveToFirst()) {
+                                val columnIndex: Int = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+                                java.io.File(cursor.getString(columnIndex)).delete()
+                                getContext().contentResolver.delete(uri, null, null)
+                                fileDeleted.add(uploadFile)
+                            }
                         }
+                    } catch (exception: SecurityException) {
+                        exception.printStackTrace()
+                        fileDeleted.add(uploadFile)
                     }
                 }
             }
