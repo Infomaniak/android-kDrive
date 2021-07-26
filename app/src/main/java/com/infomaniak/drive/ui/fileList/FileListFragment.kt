@@ -282,10 +282,12 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             val selectedFiles = fileAdapter.itemSelected
             val fileName = if (selectedFiles.size == 1) fileAdapter.itemSelected.first().getFileName() else null
             if (fileAdapter.allSelected) {
-                Utils.confirmFileDeletion(requireContext(), fileCount = 0) { dialog -> // TODO - clean that code
-                    enableButtonMultiSelect(false)
-                    fileListViewModel.bulkDeleteFiles(currentFolder!!).observe(viewLifecycleOwner) {
-                        // On result
+                fileListViewModel.lastItemCount?.count?.let { it1 ->
+                    Utils.confirmFileDeletion(requireContext(), fileCount = it1) { dialog -> // TODO - clean that code
+                        enableButtonMultiSelect(false)
+                        fileListViewModel.bulkDeleteFiles(currentFolder!!).observe(viewLifecycleOwner) {
+                            // On result
+                        }
                     }
                 }
             } else {
@@ -339,13 +341,12 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             fileAdapter.notifyDataSetChanged()
             enableButtonMultiSelect(false)
 
-            fileListViewModel.getFileCount(currentFolder!!).observe(viewLifecycleOwner) { apiResponse ->
-                val fileCount = apiResponse.data?.count ?: fileAdapter.itemSelected.size
+            fileListViewModel.getFileCount(currentFolder!!).observe(viewLifecycleOwner) { fileCount ->
                 enableButtonMultiSelect(true)
                 titleMultiSelect.text = resources.getQuantityString(
                     R.plurals.fileListMultiSelectedTitle,
-                    fileCount,
-                    fileCount
+                    fileCount.count,
+                    fileCount.count
                 )
             }
         }

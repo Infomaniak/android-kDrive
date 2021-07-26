@@ -55,6 +55,8 @@ class FileListViewModel : ViewModel() {
     var oldList: ArrayList<File>? = null
     val isListMode = SingleLiveEvent<Boolean>()
 
+    var lastItemCount: FileCount? = null
+
     fun sortTypeIsInitialized() = ::sortType.isInitialized
 
     fun getFiles(
@@ -157,8 +159,12 @@ class FileListViewModel : ViewModel() {
         UploadFile.deleteAll(files)
     }
 
-    fun getFileCount(folder: File): LiveData<ApiResponse<FileCount>> = liveData(Dispatchers.IO) {
-        emit(ApiRepository.getFileCount(folder))
+    fun getFileCount(folder: File): LiveData<FileCount> = liveData(Dispatchers.IO) {
+        lastItemCount?.let { emit(it) }
+        ApiRepository.getFileCount(folder).data?.let { fileCount ->
+            lastItemCount = fileCount
+            emit(fileCount)
+        }
     }
 
     fun getMySharedFiles(sortType: File.SortType): LiveData<Pair<ArrayList<File>, Boolean>?> {
