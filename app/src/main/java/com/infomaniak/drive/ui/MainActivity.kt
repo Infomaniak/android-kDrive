@@ -44,6 +44,7 @@ import androidx.core.view.get
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import coil.ImageLoader
 import coil.request.ImageRequest
@@ -93,7 +94,8 @@ class MainActivity : BaseActivity() {
         uploadProgressReceiver = UploadProgressReceiver(mainViewModel)
         downloadReceiver = DownloadReceiver(mainViewModel)
 
-        val navController = findNavController(R.id.hostFragment)
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
+        val navController = navHostFragment.navController
         bottomNavigation.setupWithNavController(navController)
         bottomNavigation.itemIconTintList = ContextCompat.getColorStateList(this, R.color.item_icon_tint_bottom)
         bottomNavigation.selectedItemId = UISettings(this).bottomNavigationSelectedItem
