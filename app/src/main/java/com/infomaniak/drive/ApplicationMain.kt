@@ -27,6 +27,8 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationManagerCompat
 import coil.ImageLoader
 import coil.ImageLoaderFactory
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
 import coil.util.CoilUtils
 import com.facebook.stetho.Stetho
 import com.facebook.stetho.okhttp3.StethoInterceptor
@@ -137,6 +139,9 @@ class ApplicationMain : Application(), ImageLoaderFactory {
     override fun newImageLoader(): ImageLoader {
         return ImageLoader.Builder(applicationContext)
             .crossfade(true)
+            .componentRegistry {
+                add(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) ImageDecoderDecoder(applicationContext) else GifDecoder())
+            }
             .okHttpClient {
                 OkHttpClient.Builder().apply {
                     addInterceptor(Interceptor { chain ->
