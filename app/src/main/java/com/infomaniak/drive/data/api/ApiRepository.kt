@@ -145,7 +145,7 @@ object ApiRepository {
         type: String? = null,
         okHttpClient: OkHttpClient = HttpClient.okHttpClient
     ): ApiResponse<ArrayList<File>> {
-        var url = "${ApiRoutes.searchFiles(driveId)}?order=$order&order_by=$orderBy&${pagination(page)}"
+        var url = "${ApiRoutes.searchFiles(driveId)}&order=$order&order_by=$orderBy&${pagination(page)}"
         if (query != null) url += "&query=$query"
         if (type != null) url += "&converted_type=$type"
 

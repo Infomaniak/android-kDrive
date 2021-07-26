@@ -119,7 +119,7 @@ object ApiRoutes {
     fun getLastPictures(driveId: Int) =
         "${DRIVE_API}$driveId/file/search?order=desc&order_by=last_modified_at&converted_type=image&$with"
 
-    fun searchFiles(driveId: Int) = "${DRIVE_API}$driveId/file/search"
+    fun searchFiles(driveId: Int) = "${DRIVE_API}$driveId/file/search?$with"
 
     fun postFolderAccess(file: File) = "${fileURL(file)}/share/access"
 
