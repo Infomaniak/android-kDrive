@@ -32,7 +32,6 @@ import coil.load
 import coil.request.ImageRequest
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.lib.core.networking.HttpUtils
 import kotlinx.android.synthetic.main.fragment_preview_others.*
 import kotlinx.android.synthetic.main.fragment_preview_picture.*
 import kotlinx.android.synthetic.main.fragment_preview_picture.container
@@ -50,28 +49,11 @@ class PreviewPictureFragment : PreviewFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val timer = Utils.createRefreshTimer(milliseconds = 400) {
-            noThumbnailLayout?.visibility = VISIBLE
-        }.start()
+        val timer = Utils.createRefreshTimer(milliseconds = 400) { noThumbnailLayout?.visibility = VISIBLE }.start()
         previewDescription.visibility = GONE
         fileIcon.setImageResource(file.getFileType().icon)
 
-        val imageViewDisposable = imageView.load(file.thumbnail()) {
-            placeholder(R.drawable.coil_hack)
-        }
-
-        val imageLoader = Coil.imageLoader(requireContext())
-        val previewRequest = ImageRequest.Builder(requireContext())
-            .headers(HttpUtils.getHeaders())
-            .data(file.imagePreview())
-            .listener(
-                onError = { _, _ -> previewDescription?.visibility = VISIBLE },
-                onSuccess = { _, _ ->
-                    timer.cancel()
-                    noThumbnailLayout?.visibility = GONE
-                }
-            )
-            .build()
+        val imageViewDisposable = imageView.load(file.thumbnail()) { placeholder(R.drawable.coil_hack) }
 
         val offlineFile =
             if (file.isOffline) file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive.userId) else null
@@ -79,12 +61,21 @@ class PreviewPictureFragment : PreviewFragment() {
             if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
             imageView?.setImageURI(offlineFile.toUri())
         } else {
+            val imageLoader = Coil.imageLoader(requireContext())
+            val previewRequest = ImageRequest.Builder(requireContext())
+                .data(file.imagePreview())
+                .listener(
+                    onError = { _, _ -> previewDescription?.visibility = VISIBLE },
+                    onSuccess = { _, _ ->
+                        timer.cancel()
+                        noThumbnailLayout?.visibility = GONE
+                    }
+                )
+                .build()
             lifecycleScope.launch(Dispatchers.IO) {
                 imageLoader.execute(previewRequest).drawable?.let { drawable ->
                     if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
-                    withContext(Dispatchers.Main) {
-                        imageView?.setImageDrawable(drawable)
-                    }
+                    withContext(Dispatchers.Main) { imageView.load(drawable) { crossfade(false) } }
                 }
             }
         }
