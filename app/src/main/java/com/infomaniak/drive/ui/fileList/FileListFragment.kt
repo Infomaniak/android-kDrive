@@ -44,6 +44,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.WorkInfo
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.CornerFamily
+import com.google.android.material.snackbar.Snackbar
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
@@ -310,13 +311,16 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     }
                 }
             } else {
-                dialog.dismiss()
-                    fileListViewModel.bulkDeleteFiles(
-                        parentFolder = currentFolder!!,
-                        fileIds = if (!fileAdapter.allSelected) fileAdapter.itemSelected.map { it.id }.toIntArray() else null
-                    ).observe(viewLifecycleOwner) {
-                        closeMultiSelect()
-                        requireActivity().showSnackbar("Suppression en cours...", requireActivity().mainFab) // TODO - Translate / do a permanent snackbar
+                fileListViewModel.bulkDeleteFiles(
+                    parentFolder = currentFolder!!,
+                    fileIds = if (!fileAdapter.allSelected) fileAdapter.itemSelected.map { it.id }.toIntArray() else null
+                ).observe(viewLifecycleOwner) {
+                    dialog.dismiss()
+                    closeMultiSelect()
+                    requireActivity().showSnackbar(
+                        title = "Suppression en cours...",
+                        anchorView = requireActivity().mainFab
+                    ) // TODO - Translate / do a permanent snackbar (or notification)
                 }
             }
         }
@@ -325,10 +329,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun setupMultiSelect() {
         fileAdapter.enabledMultiSelectMode = true
         closeButtonMultiSelect.setOnClickListener { closeMultiSelect() }
-        deleteButtonMultiSelect.setOnClickListener {
-            performBulkDeletion(fileAdapter.itemSelected)
-        }
-
+        deleteButtonMultiSelect.setOnClickListener { performBulkDeletion(fileAdapter.itemSelected) }
         moveButtonMultiSelect.setOnClickListener { Utils.moveFileClicked(this, folderID) }
         menuButtonMultiSelect.setOnClickListener {
             safeNavigate(
