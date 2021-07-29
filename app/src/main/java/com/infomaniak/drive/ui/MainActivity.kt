@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui
 
 import android.annotation.SuppressLint
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -237,10 +238,12 @@ class MainActivity : BaseActivity() {
                         mainButtonText = getString(R.string.buttonDelete),
                         isDeletion = true
                     ) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                             val filesDeletionRequest = MediaStore.createDeleteRequest(
                                 contentResolver,
-                                filesUploadedRecently.map { it.uri.toUri() }
+                                filesUploadedRecently
+                                    .filter { !it.uri.toUri().scheme.equals(ContentResolver.SCHEME_FILE) }
+                                    .map { it.uri.toUri() }
                             )
                             filesDeletionResult.launch(IntentSenderRequest.Builder(filesDeletionRequest.intentSender).build())
                         } else {
