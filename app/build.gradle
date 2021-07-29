@@ -51,6 +51,7 @@ android {
     productFlavors {
         standard {
             dimension "distribution"
+            apply plugin: 'com.google.gms.google-services'
         }
         fdroid {
             dimension "distribution"
@@ -83,6 +84,7 @@ dependencies {
     implementation 'io.coil-kt:coil-gif:1.3.0'
 
     standardImplementation 'com.google.android.play:core:1.10.0'
+    standardImplementation 'com.google.firebase:firebase-messaging-ktx:22.0.0'
 
     implementation 'io.sentry:sentry-android:5.0.1'
 
