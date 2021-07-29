@@ -68,8 +68,8 @@ class UploadInProgressFragment : FileListFragment() {
         collapsingToolbarLayout.title = getString(R.string.uploadInProgressTitle)
 
         mainViewModel.fileInProgress.observe(viewLifecycleOwner) { fileInProgress ->
-            if (fileInProgress != null && fileAdapter.itemCount > 0) {
-                val firstFile = fileAdapter.getItems().first()
+            val firstFile = fileAdapter.getItems().firstOrNull()
+            if (fileInProgress != null && firstFile != null) {
                 if (fileInProgress.parentId == folderID && fileInProgress.name == firstFile.name) {
                     fileAdapter.updateFileProgress(firstFile.id, fileInProgress.progress) {
                         whenAnUploadIsDone(fileInProgress)
