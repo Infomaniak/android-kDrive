@@ -44,7 +44,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.WorkInfo
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.CornerFamily
-import com.google.android.material.snackbar.Snackbar
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
@@ -276,31 +275,45 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         updateVisibleProgresses()
     }
 
-    private fun performBulkDeletion(selectedFiles: ArrayList<File>) {
-        val fileCount = if (fileAdapter.allSelected) fileListViewModel.lastItemCount?.count ?: 0 else selectedFiles.size
-        val fileName = if (fileCount == 1) fileAdapter.itemSelected.first().getFileName() else null
-        Utils.confirmFileDeletion(context = requireContext(), fileName = fileName, fileCount = fileCount) { dialog ->
-            if (fileCount <= 10) {
+    private fun performBulkOperation(selectedFiles: ArrayList<File>, type: BulkOperation, destinationFolder: File? = null) {
+        val fileCount = selectedFiles.size
+        if (fileAdapter.allSelected || fileCount > 10) {
+            when (type) {
+                BulkOperation.DELETE -> performBulkDeletion(selectedFiles)
+                BulkOperation.MOVE -> performBulkMove(selectedFiles, destinationFolder!!)
+            }
+        } else {
                 val mediator = mainViewModel.createMultiSelectMediator()
                 enableButtonMultiSelect(false)
-                fileAdapter.itemSelected.forEach { file ->
+
+            fileAdapter.itemSelected.forEach { file ->
                     val onSuccess: (Int) -> Unit = { fileID ->
                         runBlocking(Dispatchers.Main) { fileAdapter.deleteByFileId(fileID) }
                     }
-                    mediator.addSource(
-                        mainViewModel.deleteFile(file, onSuccess),
-                        mainViewModel.updateMultiSelectMediator(mediator)
-                    )
+
+                    when (type) {
+                        BulkOperation.DELETE -> {
+                            mediator.addSource(
+                                mainViewModel.deleteFile(file, onSuccess),
+                                mainViewModel.updateMultiSelectMediator(mediator)
+                            )
+                        }
+                        BulkOperation.MOVE -> {
+                            mediator.addSource(
+                                mainViewModel.moveFile(file, destinationFolder!!, onSuccess),
+                                mainViewModel.updateMultiSelectMediator(mediator)
+                            )
+                        }
+                    }
                 }
 
                 mediator.observe(viewLifecycleOwner) { (success, total) ->
-                    dialog.dismiss()
                     if (total == fileCount) {
                         val title = if (success == 0) {
                             getString(R.string.anErrorHasOccurred)
                         } else {
                             resources.getQuantityString(
-                                R.plurals.snackbarMoveTrashConfirmation,
+                                type.messageRes,
                                 success,
                                 success
                             )
@@ -308,9 +321,18 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                         requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
                         refreshActivities()
                         closeMultiSelect()
-                    }
                 }
-            } else {
+            }
+        }
+    }
+
+    private fun performBulkMove(selectedFiles: ArrayList<File>, destinationFolder: File) {
+        // TODO : Bulk move files to specified destination
+    }
+
+    private fun performBulkDeletion(selectedFiles: ArrayList<File>) {
+        val fileCount = if (fileAdapter.allSelected) fileListViewModel.lastItemCount?.count ?: 0 else selectedFiles.size
+        Utils.confirmFileDeletion(context = requireContext(), fileCount = fileCount) { dialog ->
                 fileListViewModel.bulkDeleteFiles(
                     parentFolder = currentFolder!!,
                     fileIds = if (!fileAdapter.allSelected) fileAdapter.itemSelected.map { it.id }.toIntArray() else null
@@ -323,7 +345,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     ) // TODO - Translate / do a permanent snackbar (or notification)
                 }
             }
-        }
     }
 
     private fun setupMultiSelect() {
@@ -509,40 +530,15 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun onSelectFolderResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == SelectFolderActivity.SELECT_FOLDER_REQUEST && resultCode == AppCompatActivity.RESULT_OK) {
+
             val folderName = data?.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
+            val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
 
-            data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)?.let { folderID ->
-                val mediator = mainViewModel.createMultiSelectMediator()
-                val selectedCount = fileAdapter.itemSelected.count()
-                enableButtonMultiSelect(false)
-
-                fileAdapter.itemSelected.forEach { file ->
-                    val newParent = File(id = folderID, driveId = AccountUtils.currentDriveId)
-                    val moveFile = mainViewModel.moveFile(file, newParent) { fileID ->
-                        lifecycleScope.launchWhenResumed {
-                            fileAdapter.deleteByFileId(fileID)
-                            checkIfNoFiles()
-                        }
-                    }
-                    mediator.addSource(moveFile, mainViewModel.updateMultiSelectMediator(mediator))
-                }
-
-                mediator.observe(viewLifecycleOwner) { (success, total) ->
-                    if (total == selectedCount) {
-                        val title = if (success == 0) {
-                            getString(R.string.anErrorHasOccurred)
-                        } else {
-                            resources.getQuantityString(
-                                R.plurals.fileListMoveFileConfirmationSnackbar,
-                                success,
-                                success, folderName
-                            )
-                        }
-                        requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
-                        refreshActivities()
-                        closeMultiSelect()
-                    }
-                }
+            folderId?.let { destinationFolderId ->
+                performBulkMove(
+                    selectedFiles = fileAdapter.itemSelected,
+                    destinationFolder = File(id = destinationFolderId, name = folderName, driveId = AccountUtils.currentDriveId)
+                )
             }
         }
     }
@@ -824,6 +820,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             isVisible = hideFileList,
             showRefreshButton = changeControlsVisibility
         )
+    }
+
+    enum class BulkOperation(val messageRes: Int) {
+        MOVE(R.plurals.fileListMoveFileConfirmationSnackbar),
+        DELETE(R.plurals.snackbarMoveTrashConfirmation),
     }
 
     open fun onRestartItemsClicked() = Unit
