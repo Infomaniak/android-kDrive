@@ -20,13 +20,11 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 import android.os.Bundle
 import android.view.View
 import android.view.View.GONE
-import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.utils.toPx
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 
 class DriveMaintenanceBottomSheetDialog : InformationBottomSheetDialog() {
-    val navigationArgs: DriveMaintenanceBottomSheetDialogArgs by navArgs()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -37,15 +35,19 @@ class DriveMaintenanceBottomSheetDialog : InformationBottomSheetDialog() {
             setImageResource(R.drawable.ic_maintenance)
         }
 
-        title.text = resources.getQuantityString(R.plurals.driveMaintenanceTitle, 1, navigationArgs.driveName)
+        val driveName = requireArguments().getString(DRIVE_NAME)
+        title.text = resources.getQuantityString(R.plurals.driveMaintenanceTitle, 1, driveName)
         description.setText(R.string.driveMaintenanceDescription)
         actionButton.apply {
             setText(R.string.buttonClose)
-            setOnClickListener {
-                dismiss()
-            }
+            setOnClickListener { dismiss() }
         }
 
         secondaryActionButton.visibility = GONE
     }
+
+    companion object {
+        const val DRIVE_NAME = "driveName"
+    }
+
 }

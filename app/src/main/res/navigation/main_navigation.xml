@@ -185,11 +185,7 @@
         android:id="@+id/switchDriveDialog"
         android:name="com.infomaniak.drive.ui.home.SwitchDriveDialog"
         android:label="ActionMultiSelectBottomSheetDialog"
-        tools:layout="@layout/dialog_switch_drive">
-        <action
-            android:id="@+id/action_switchDriveDialog_to_driveMaintenanceBottomSheetFragment"
-            app:destination="@id/driveMaintenanceBottomSheetFragment" />
-    </dialog>
+        tools:layout="@layout/dialog_switch_drive" />
 
     <fragment
         android:id="@+id/activityFilesFragment"
@@ -521,12 +517,7 @@
         android:id="@+id/driveMaintenanceBottomSheetFragment"
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialog"
         android:label="driveMaintenanceBottomSheetFragment"
-        tools:layout="@layout/fragment_bottom_sheet_information">
-        <argument
-            android:name="driveName"
-            app:argType="string"
-            app:nullable="false" />
-    </dialog>
+        tools:layout="@layout/fragment_bottom_sheet_information" />
 
     <dialog
         android:id="@+id/driveBlockedBottomSheetFragment"
@@ -679,9 +670,6 @@
         <action
             android:id="@+id/action_sharedWithMeFragment_self"
             app:destination="@id/sharedWithMeFragment" />
-        <action
-            android:id="@+id/action_sharedWithMeFragment_to_driveMaintenanceBottomSheetFragment"
-            app:destination="@id/driveMaintenanceBottomSheetFragment" />
     </fragment>
 
     <fragment
