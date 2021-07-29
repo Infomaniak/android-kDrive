@@ -23,6 +23,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.LinearLayout
+import androidx.core.os.bundleOf
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.navigation.fragment.findNavController
@@ -30,7 +31,9 @@ import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.drive.Drive
+import com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialog
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.safeNavigate
 import kotlinx.android.synthetic.main.dialog_switch_drive.*
 import kotlinx.android.synthetic.main.item_search_view.*
 
@@ -65,13 +68,11 @@ class SwitchDriveDialog : DialogFragment() {
             }
         }
         driveListAdapter = DriveListAdapter(initialDriveList) { drive ->
-            dismiss()
+            findNavController().popBackStack()
             // TODO - Implement drive blocked BottomSheetDialog (for invoice issues) - Awaiting API attributes
-            if (drive.maintenance) {
                 findNavController().navigate(
-                    SwitchDriveDialogDirections.actionSwitchDriveDialogToDriveMaintenanceBottomSheetFragment(
-                        driveName = drive.name
-                    )
+                    R.id.driveMaintenanceBottomSheetFragment,
+                    bundleOf(DriveMaintenanceBottomSheetDialog.DRIVE_NAME to drive.name)
                 )
             } else {
                 AccountUtils.currentDriveId = drive.id

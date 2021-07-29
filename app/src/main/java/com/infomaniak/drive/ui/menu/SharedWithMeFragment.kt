@@ -19,12 +19,14 @@ package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialog
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -78,9 +80,8 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
 
     private fun openMaintenanceDialog(driveName: String) {
         safeNavigate(
-            SharedWithMeFragmentDirections.actionSharedWithMeFragmentToDriveMaintenanceBottomSheetFragment(
-                driveName = driveName
-            )
+            R.id.driveMaintenanceBottomSheetFragment,
+            bundleOf(DriveMaintenanceBottomSheetDialog.DRIVE_NAME to driveName)
         )
     }
 
