@@ -95,9 +95,11 @@ class PdfCore(private val context: Context, private var file: File) : CoroutineS
     }
 
     private fun PdfRenderer.Page.createBitmap(): Bitmap {
-        val bitmap = Bitmap.createBitmap(
-            bitmapWidth, (bitmapWidth.toFloat() / width * height).toInt(), Bitmap.Config.ARGB_8888
-        )
+        val bitmap = try {
+            Bitmap.createBitmap(bitmapWidth, (bitmapWidth.toFloat() / width * height).toInt(), Bitmap.Config.ARGB_8888)
+        } catch (e: OutOfMemoryError) {
+            Bitmap.createBitmap(1000, (1000.toFloat() / width * height).toInt(), Bitmap.Config.ARGB_8888)
+        }
 
         val canvas = Canvas(bitmap)
         canvas.drawColor(Color.WHITE)
