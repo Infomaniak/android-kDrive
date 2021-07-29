@@ -70,6 +70,7 @@ class SwitchDriveDialog : DialogFragment() {
         driveListAdapter = DriveListAdapter(initialDriveList) { drive ->
             findNavController().popBackStack()
             // TODO - Implement drive blocked BottomSheetDialog (for invoice issues) - Awaiting API attributes
+            if (drive.maintenance) {
                 findNavController().navigate(
                     R.id.driveMaintenanceBottomSheetFragment,
                     bundleOf(DriveMaintenanceBottomSheetDialog.DRIVE_NAME to drive.name)
