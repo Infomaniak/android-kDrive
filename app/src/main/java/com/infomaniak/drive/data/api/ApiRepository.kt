@@ -322,6 +322,12 @@ object ApiRepository {
         return callApi(ApiRoutes.bulkAction(folder), POST, body)
     }
 
+    fun bulkMoveFiles(folder: File, fileIds: IntArray? = null, destinationFolderId: Int): ApiResponse<CancellableAction> {
+        var body = mapOf<String, Any>("action" to "move", "destination_directory_id" to destinationFolderId)
+        body = fileIds?.let { body.plus("file_ids" to fileIds) } ?: body.plus("parent_id" to folder.id)
+        return callApi(ApiRoutes.bulkAction(folder), POST, body)
+    }
+
     fun getUUIDArchiveFiles(driveId: Int, fileIds: IntArray): ApiResponse<ArchiveUUID> {
         return callApi(ApiRoutes.getUUIDArchiveFiles(driveId), POST, mapOf("file_ids" to fileIds))
     }
