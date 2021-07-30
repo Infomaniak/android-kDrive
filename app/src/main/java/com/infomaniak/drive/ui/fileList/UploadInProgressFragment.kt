@@ -26,10 +26,12 @@ import androidx.core.net.toFile
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.work.Data
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileInProgress
 import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.UploadAdapter
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils
@@ -143,8 +145,8 @@ class UploadInProgressFragment : FileListFragment() {
             fileListViewModel.cancelUploadingFiles(pendingFiles)
             withContext(Dispatchers.Main) {
                 lifecycleScope.launchWhenResumed {
-                    val bundle = bundleOf(UploadAdapter.CANCELLED_BY_USER to true)
-                    requireContext().syncImmediately(bundle, true)
+                    val data = Data.Builder().putBoolean(UploadWorker.CANCELLED_BY_USER, true).build()
+                    requireContext().syncImmediately(data, true)
                     popBackStack()
                 }
             }

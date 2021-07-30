@@ -1,0 +1,316 @@
+/*
+ * Infomaniak kDrive - Android
+ * Copyright (C) 2021 Infomaniak Network SA
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package com.infomaniak.drive.data.services
+
+import android.content.ContentResolver
+import android.content.Context
+import android.content.Intent
+import android.content.SyncResult
+import android.net.Uri
+import android.os.Build
+import android.os.Bundle
+import android.os.Parcelable
+import android.provider.MediaStore
+import android.provider.OpenableColumns
+import android.util.Log
+import androidx.core.net.toFile
+import androidx.core.net.toUri
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.work.*
+import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.UploadTask
+import com.infomaniak.drive.data.models.AppSettings
+import com.infomaniak.drive.data.models.MediaFolder
+import com.infomaniak.drive.data.models.SyncSettings
+import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.sync.UploadAdapter
+import com.infomaniak.drive.data.sync.UploadNotifications
+import com.infomaniak.drive.data.sync.UploadNotifications.networkErrorNotification
+import com.infomaniak.drive.data.sync.UploadNotifications.setupCurrentUploadNotification
+import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
+import com.infomaniak.drive.data.sync.UploadProgressReceiver
+import com.infomaniak.drive.utils.MediaFoldersProvider
+import com.infomaniak.drive.utils.NotificationUtils
+import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
+import com.infomaniak.drive.utils.NotificationUtils.uploadServiceNotification
+import com.infomaniak.drive.utils.SyncUtils
+import com.infomaniak.drive.utils.SyncUtils.isWifiConnection
+import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import com.infomaniak.drive.utils.uri
+import com.infomaniak.lib.core.utils.ApiController
+import io.sentry.Sentry
+import kotlinx.coroutines.*
+import java.io.FileNotFoundException
+import java.util.*
+
+class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
+    private lateinit var uploadSupervisorJob: CompletableJob
+    private lateinit var contentResolver: ContentResolver
+
+    private var syncSettings: SyncSettings? = null
+    private var currentUploadFile: UploadFile? = null
+    private var currentUploadTask: UploadTask? = null
+    private var uploadedCount = 0
+
+    override suspend fun doWork(): Result {
+        contentResolver = applicationContext.contentResolver
+        syncSettings = UploadFile.getAppSyncSettings()
+        uploadSupervisorJob = SupervisorJob()
+
+        applicationContext.uploadServiceNotification().apply {
+            setContentTitle(applicationContext.getString(R.string.notificationUploadServiceChannelName))
+//            setForeground(ForegroundInfo(NotificationUtils.UPLOAD_SERVICE_ID, build()))
+            setForeground(ForegroundInfo(NotificationUtils.UPLOAD_STATUS_ID, build()))
+        }
+        return coroutineScope {
+            val job = async {
+                // Retrieve the latest media that have not been taken in the sync
+                checkLocalLastPhotos()
+
+                // Check if the user has cancelled the upload and no files to sync
+                val isCancelledByUser = inputData.getBoolean(CANCELLED_BY_USER, false)
+                if (UploadFile.getNotSyncedFilesCount() == 0L && isCancelledByUser) {
+                    UploadNotifications.showCancelledByUserNotification(applicationContext)
+                }
+
+                // Start uploads
+                val result = startSyncFiles()
+                checkIfNeedReSync()
+                result
+            }
+            job.invokeOnCompletion { exception ->
+                exception?.printStackTrace()
+                cancelSync()
+            }
+            job.await()
+        }
+    }
+
+    private fun cancelSync() {
+        uploadSupervisorJob.cancelChildren()
+        uploadSupervisorJob.cancel()
+        applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
+//        applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
+    }
+
+    private suspend fun startSyncFiles(): Result = withContext(Dispatchers.IO) {
+        val syncFiles = UploadFile.getNotSyncFiles()
+        val lastUploadedCount = inputData.getInt(LAST_UPLOADED_COUNT, 0)
+        var pendingCount = syncFiles.size
+
+        syncFiles.forEach { syncFile ->
+            Log.d(TAG, "startSyncFiles: upload $syncFile")
+
+            initUploadFile(syncFile, pendingCount)
+            pendingCount--
+        }
+//        applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
+
+        uploadedCount = syncFiles.size - pendingCount + lastUploadedCount
+        if (uploadedCount > 0) currentUploadFile?.showUploadedFilesNotification(applicationContext, uploadedCount)
+
+        Log.d(TAG, "startSyncFiles: finish with $uploadedCount uploaded")
+
+        //TODO à changer
+        Intent().apply {
+            action = UploadProgressReceiver.TAG
+            putExtra(UploadAdapter.OPERATION_STATUS, UploadAdapter.ProgressStatus.FINISHED as Parcelable)
+            LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(this)
+        }
+
+        Result.success()
+    }
+
+    @Synchronized
+    private suspend fun initUploadFile(uploadFile: UploadFile, pendingCount: Int) =
+        withContext(Dispatchers.IO) {
+            val uri = uploadFile.uri.toUri()
+            currentUploadFile = uploadFile
+            applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
+            uploadFile.setupCurrentUploadNotification(applicationContext, pendingCount)
+
+            try {
+                if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
+                    val cacheFile = uri.toFile()
+                    if (!cacheFile.exists()) {
+                        UploadFile.deleteIfExists(uri)
+                        return@withContext
+                    }
+                    startUploadFile(uploadFile, cacheFile.length())
+                    UploadFile.deleteIfExists(uri)
+                    if (!uploadFile.isSyncOffline()) cacheFile.delete()
+                } else {
+                    SyncUtils.checkDocumentProviderPermissions(applicationContext, uri)
+
+                    val fileSize = try {
+                        contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize }
+                    } catch (exception: FileNotFoundException) {
+                        null
+                    }
+                    contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                        if (cursor.moveToFirst()) {
+                            val mediaSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
+                            val size = fileSize?.let { if (mediaSize > it) mediaSize else it } ?: mediaSize //TODO Temp solution
+                            startUploadFile(uploadFile, size)
+                        } else UploadFile.deleteIfExists(uri)
+                    }
+                }
+            } catch (e: SecurityException) {
+                e.printStackTrace()
+                UploadFile.deleteIfExists(uri)
+            } catch (exception: IllegalStateException) {
+                UploadFile.deleteIfExists(uri)
+                Sentry.withScope { scope ->
+                    scope.setExtra("data", ApiController.gson.toJson(uploadFile))
+                    Sentry.captureMessage("The file is either partially downloaded or corrupted")
+                }
+            }
+        }
+
+    private suspend fun startUploadFile(uploadFile: UploadFile, size: Long) {
+        if (size != 0L) {
+            if (uploadFile.fileSize != size) {
+                UploadFile.update(uploadFile.uri) {
+                    it.fileSize = size
+                    uploadFile.fileSize = size
+                }
+            }
+
+            currentUploadTask = UploadTask(
+                context = applicationContext,
+                uploadFile = uploadFile,
+                supervisor = uploadSupervisorJob
+            ).apply { start() }
+            Log.d("kDrive", "$TAG > end upload ${uploadFile.fileName}")
+        } else {
+            UploadFile.deleteIfExists(uploadFile.uri.toUri())
+            Log.d("kDrive", "$TAG > ${uploadFile.fileName} deleted size:$size")
+            Sentry.withScope { scope ->
+                scope.setExtra("data", ApiController.gson.toJson(uploadFile))
+                Sentry.captureMessage("${uploadFile.fileName} deleted size:$size")
+            }
+        }
+    }
+
+    private suspend fun checkIfNeedReSync() {
+        checkLocalLastPhotos()
+        if (UploadFile.getNotSyncedFilesCount() > 0) {
+            val data = Data.Builder().putInt(LAST_UPLOADED_COUNT, uploadedCount).build()
+            applicationContext.syncImmediately(data, true)
+        }
+    }
+
+    private fun checkIfNeedCancel(uploadFiles: ArrayList<UploadFile>, extras: Bundle?, syncResult: SyncResult?): Boolean {
+        val cancelledByUser = extras?.getBoolean(UploadAdapter.CANCELLED_BY_USER, false) ?: false
+        currentUploadFile = uploadFiles.firstOrNull()
+        if (uploadFiles.isEmpty() && cancelledByUser) {
+            UploadNotifications.showNotification(
+                context = applicationContext,
+                title = applicationContext.getString(R.string.uploadCancelTitle),
+                description = applicationContext.getString(R.string.uploadCancelDescription),
+                notificationId = NotificationUtils.UPLOAD_STATUS_ID
+            )
+            return true
+        } // Ignore sync
+        else if (uploadFiles.isNotEmpty() && AppSettings.onlyWifiSync && !applicationContext.isWifiConnection()) {
+            currentUploadFile?.networkErrorNotification(applicationContext, true)
+            syncResult?.delayUntil = System.currentTimeMillis() / 1000 + 10 //TODO restart in 10s
+            return true
+        } else if (uploadFiles.isEmpty()) return true
+        return false
+    }
+
+    private suspend fun checkLocalLastPhotos() = withContext(Dispatchers.IO) {
+        val lastUploadDate = UploadFile.getLastDate(applicationContext).time
+        val selection = "(" + SyncUtils.DATE_TAKEN + " >= ? OR " + MediaStore.MediaColumns.DATE_ADDED + " >= ? " +
+                "OR ${MediaStore.MediaColumns.DATE_MODIFIED} = ? )"
+        val args = arrayOf(lastUploadDate.toString(), (lastUploadDate / 1000).toString(), (lastUploadDate / 1000).toString())
+        var customSelection: String
+        var customArgs: Array<String>
+        val deferreds = arrayListOf<Deferred<Any?>>()
+
+        syncSettings?.let { syncSettings ->
+            MediaFolder.getAllSyncedFolders().forEach { mediaFolder ->
+                var contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                var isNotPending =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Images.Media.IS_PENDING} = 0" else ""
+                customSelection = "$selection AND ${MediaFoldersProvider.IMAGES_BUCKET_ID} = ? $isNotPending"
+                customArgs = args + mediaFolder.id.toString()
+                deferreds.add(async { getLocalLastPhotosAsync(contentUri, customSelection, customArgs, mediaFolder) })
+
+                if (syncSettings.syncVideo) {
+                    contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                    isNotPending =
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Video.Media.IS_PENDING} = 0" else ""
+                    customSelection = "$selection AND ${MediaFoldersProvider.VIDEO_BUCKET_ID} = ? $isNotPending"
+                    deferreds.add(async { getLocalLastPhotosAsync(contentUri, customSelection, customArgs, mediaFolder) })
+                }
+            }
+            deferreds.joinAll()
+        }
+    }
+
+    private fun getLocalLastPhotosAsync(contentUri: Uri, selection: String, args: Array<String>, mediaFolder: MediaFolder) {
+        val sortOrder = SyncUtils.DATE_TAKEN + " ASC, " + MediaStore.MediaColumns.DATE_ADDED + " ASC, " +
+                MediaStore.MediaColumns.DATE_MODIFIED + " ASC"
+        contentResolver.query(contentUri, null, selection, args, sortOrder)
+            ?.use { cursor ->
+                while (cursor.moveToNext()) {
+                    val fileName = SyncUtils.getFileName(cursor)
+                    val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
+                    val fileSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
+                    val uri = cursor.uri(contentUri)
+
+                    if (UploadFile.canUpload(uri, fileModifiedAt)) {
+
+                        syncSettings?.let {
+                            UploadFile.deleteIfExists(uri)
+                            UploadFile(
+                                uri = uri.toString(),
+                                driveId = it.driveId,
+                                fileCreatedAt = fileCreatedAt,
+                                fileModifiedAt = fileModifiedAt,
+                                fileName = fileName,
+                                fileSize = fileSize,
+                                remoteFolder = it.syncFolder,
+                                userId = it.userId
+                            ).apply {
+                                createSubFolder(mediaFolder.name, it.createDatedSubFolders)
+                                store()
+                            }
+                            syncSettings?.let { syncSettings ->
+                                UploadFile.setAppSyncSettings(syncSettings.apply { lastSync = fileModifiedAt })
+                            }
+                        }
+                    }
+                }
+            }
+    }
+
+    companion object {
+        const val TAG = "UploadWorker"
+        const val PERIODIC_TAG = "UploadWorkerPeriodic"
+        const val CANCELLED_BY_USER = "cancelled_by_user"
+        private const val LAST_UPLOADED_COUNT = "lastUploadedCount"
+
+
+        fun workConstraints() = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+    }
+}

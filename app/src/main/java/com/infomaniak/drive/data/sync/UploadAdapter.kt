@@ -458,7 +458,7 @@ class UploadAdapter @JvmOverloads constructor(
         hasUpdate.set(false)
         if (checkLocalLastPhotos(syncSettings)) {
             val bundle = bundleOf(LAST_UPLOADED_COUNT to lastUploadedCount)
-            context.syncImmediately(bundle)
+//            context.syncImmediately(bundle)
         }
     }
 
