@@ -20,10 +20,10 @@ package com.infomaniak.drive.data.models
 import com.google.gson.annotations.SerializedName
 
 data class ActionNotification(
-    val uid: String,
-    val action: Action,
+    override val uid: String,
+    override val action: Action,
     @SerializedName("file_id") val fileId: Int,
-    @SerializedName("drive_id") val driveId: Int,
+    @SerializedName("drive_id") override val driveId: Int,
     @SerializedName("parent_id") val parentId: Int,
     @SerializedName("simple_action") val simpleAction: String
-)
+) : Notification

@@ -87,6 +87,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private var ignoreCreateFolderStack: Boolean = false
     private var isLoadingActivities = false
     private var isDownloading = false
+    private var lastTimeActivitiesRefreshed: Long = 0
 
     protected lateinit var timer: CountDownTimer
     protected open var downloadFiles: (ignoreCache: Boolean) -> Unit = DownloadFiles()
@@ -105,6 +106,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         const val CANCELLABLE_ACTION_KEY = "cancellable_action"
         const val SORT_TYPE_OPTION_KEY = "sort_type_option"
         const val DELETE_NOT_UPDATE_ACTION = "is_update_not_delete_action"
+        const val ACTIVITIES_REFRESH_DELAY = 5000
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -206,19 +208,27 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         toolbar?.menu?.findItem(R.id.searchItem)?.isVisible = findNavController().currentDestination?.id == R.id.fileListFragment
 
         MqttClientWrapper.observe(viewLifecycleOwner) { notification ->
-            if (notification is ActionNotification) {
-                if (currentFolder?.id == notification.parentId) {
+            currentFolder?.let { parentFolder ->
+                if (notification is ActionNotification) {
                     val itemPosition = fileAdapter.indexOf(notification.fileId)
+                    val canRefresh = Calendar.getInstance().timeInMillis - lastTimeActivitiesRefreshed >= ACTIVITIES_REFRESH_DELAY
                     if (itemPosition >= 0) {
                         when (notification.action) {
-                            Action.FILE_TRASH, Action.FILE_MOVE -> fileAdapter.deleteAt(itemPosition)
-                            // Action.FILE_RESTORE, Action.FILE_CREATE -> // not handled atm
+                            Action.FILE_TRASH -> fileAdapter.deleteAt(itemPosition)
+                            Action.FILE_MOVE -> {
+                                if (notification.parentId == parentFolder.id && canRefresh) refreshActivities()
+                                else fileAdapter.deleteAt(itemPosition)
+                            }
+                            Action.FILE_RESTORE, Action.FILE_CREATE -> {
+                                if (notification.parentId == parentFolder.id && canRefresh) {
+                                    refreshActivities()
+                                }
+                            }
                         }
                     }
                 }
             }
         }
-
         setGetBackResult()
     }
 
@@ -564,6 +574,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun refreshActivities() {
         if (isLoadingActivities || folderID == OTHER_ROOT_ID) return
         isLoadingActivities = true
+        lastTimeActivitiesRefreshed = Calendar.getInstance().timeInMillis
         mainViewModel.currentFolder.value?.let { currentFolder ->
             FileController.getFileById(currentFolder.id)?.let { updatedFolder ->
                 downloadFolderActivities(updatedFolder)

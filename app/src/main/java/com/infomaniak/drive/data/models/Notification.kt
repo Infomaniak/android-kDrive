@@ -17,12 +17,8 @@
  */
 package com.infomaniak.drive.data.models
 
-import com.google.gson.annotations.SerializedName
-
-data class ActionProgressNotification(
-    override val uid: String,
-    override val action: Action,
-    val progress: ActionProgress,
-    @SerializedName("drive_id") override val driveId: Int,
-    @SerializedName("action_uuid") val actionUuid: String,
-) : Notification
+interface Notification {
+    val uid: String
+    val action: Action
+    val driveId: Int
+}

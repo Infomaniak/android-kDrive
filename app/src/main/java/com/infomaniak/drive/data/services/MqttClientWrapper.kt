@@ -24,6 +24,7 @@ import com.google.gson.JsonParser
 import com.infomaniak.drive.data.models.ActionNotification
 import com.infomaniak.drive.data.models.ActionProgressNotification
 import com.infomaniak.drive.data.models.IpsToken
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.utils.ApiController.gson
 import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
@@ -107,7 +108,9 @@ object MqttClientWrapper : MqttCallback, LiveData<Any>() {
             if (isProgress) ActionProgressNotification::class.java else ActionNotification::class.java
         )
 
-        postValue(notification)
+        if (notification.driveId == AccountUtils.currentDriveId) {
+            postValue(notification)
+        }
     }
 
     override fun deliveryComplete(token: IMqttDeliveryToken?) {}
