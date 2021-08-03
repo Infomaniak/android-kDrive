@@ -276,7 +276,7 @@ fun View.setFileItem(
                     filePreview.scaleType = ImageView.ScaleType.CENTER_CROP
                     filePreview.loadUrl(file.thumbnail(), file.getFileType().icon)
                 }
-                file.isFromUploads && (file.getMimeType().contains("image") || file.getMimeType().contains("video")) -> {
+                file.isFromUploads && (file.getMimeType().startsWith("image/") || file.getMimeType().startsWith("video/")) -> {
                     filePreview.scaleType = ImageView.ScaleType.CENTER_CROP
                     filePreview.load(context.getLocalThumbnail(file)) {
                         fallback(file.getFileType().icon)
@@ -604,8 +604,14 @@ fun Context.getLocalThumbnail(file: File): Bitmap? {
             null
         }
     } else {
-        if (fileUri.scheme.equals(ContentResolver.SCHEME_FILE)) {
-            fileUri.path?.let { path ->
+
+        val externalRealPath = if ("com.android.externalstorage.documents" == fileUri.authority) {
+            Utils.getRealPathFromExternalStorage(this, fileUri)
+        } else ""
+
+        if (fileUri.scheme.equals(ContentResolver.SCHEME_FILE) || externalRealPath.isNotBlank()) {
+            val path = if (externalRealPath.isNotBlank()) externalRealPath else fileUri.path
+            path?.let {
                 if (file.getMimeType().contains("video")) {
                     ThumbnailUtils.createVideoThumbnail(path, MediaStore.Video.Thumbnails.MICRO_KIND)
                 } else {

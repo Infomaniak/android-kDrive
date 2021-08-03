@@ -24,6 +24,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.CountDownTimer
+import android.os.Environment
+import android.provider.DocumentsContract
 import android.view.View
 import android.view.View.VISIBLE
 import android.widget.Toast
@@ -360,5 +362,24 @@ object Utils {
         bitmapOptions.inJustDecodeBounds = false
 
         return BitmapFactory.decodeFile(filePath, bitmapOptions)
+    }
+
+    fun getRealPathFromExternalStorage(context: Context, uri: Uri): String {
+        var filePath = ""
+        // ExternalStorageProvider
+        val docId = DocumentsContract.getDocumentId(uri)
+        val split = docId.split(':')
+        val type = split.first()
+
+        return if ("primary".equals(type, true)) {
+            Environment.getExternalStorageDirectory().toString() + "/" + split[1]
+        } else {
+            val external = context.externalMediaDirs
+            if (external.size > 1) {
+                filePath = external[1].absolutePath
+                filePath = filePath.substring(0, filePath.indexOf("Android")) + split[1]
+            }
+            filePath
+        }
     }
 }
