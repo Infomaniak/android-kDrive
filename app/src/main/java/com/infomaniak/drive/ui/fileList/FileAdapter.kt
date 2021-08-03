@@ -38,7 +38,7 @@ open class FileAdapter(
     override val itemList: ArrayList<File> = arrayListOf()
 ) : PaginationAdapter<File>() {
 
-    val itemSelected: ArrayList<File> = arrayListOf()
+    var itemSelected: ArrayList<File> = arrayListOf()
 
     private var currentFileIdProgress: Int? = null
     var importContainsProgress: Boolean = false
