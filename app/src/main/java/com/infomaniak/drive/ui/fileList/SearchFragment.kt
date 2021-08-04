@@ -192,10 +192,10 @@ class SearchFragment : FileListFragment() {
 
     private inner class DownloadFiles : (Boolean) -> Unit {
         override fun invoke(ignoreCache: Boolean) {
-            val currentQuery = searchView.text.toString()
             swipeRefreshLayout.isRefreshing = true
+            val currentQuery = searchView?.text?.toString()
 
-            if (currentQuery.isEmpty() && fileListViewModel.currentConvertedType == null) {
+            if (currentQuery.isNullOrEmpty() && fileListViewModel.currentConvertedType == null) {
                 fileAdapter.setList(arrayListOf())
                 showFilterLayout(true)
                 swipeRefreshLayout.isRefreshing = false
