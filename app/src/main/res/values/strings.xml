@@ -156,6 +156,9 @@
     <string name="buttonUpgradeOffer">Upgrade my plan</string>
     <string name="buttonUpload">Upload from phone</string>
     <string name="buttonValid">Validate</string>
+    <string name="buttonYes">Yes</string>
+    <string name="cancelDownloadDescription">Do you really want to cancel this download?</string>
+    <string name="cancelDownloadTitle">Cancel download</string>
     <string name="cloudStorageSuerySearchImpossibleSelectDrive">No search possible: no drive selected</string>
     <string name="commonFolderDescription">Share this folder with users of kDrive %s</string>
     <string name="commonFolderTitle">Common folder</string>
@@ -223,7 +226,7 @@
     <string name="errorLoadingOfficeEditor">Unable to load the document editor</string>
     <string name="errorModification">Error when modifying</string>
     <string name="errorMove">Move error</string>
-    <string name="errorNetwork">Login problem</string>
+    <string name="errorNetwork">Network error</string>
     <string name="errorNetworkDescription">Results may be incomplete</string>
     <string name="errorPreviewDeleted">This file has been permanently deleted</string>
     <string name="errorPreviewTrash">Previewing a file in the trash is not possible</string>
@@ -521,6 +524,7 @@
     <string name="sortSmaller">Smaller</string>
     <string name="sortTitle">Sort</string>
     <string name="sortYear">Per year</string>
+    <string name="supportTitle">Help &amp; support</string>
     <string name="switchDriveSearchViewHint">Search a kDrive</string>
     <string name="switchUserDescription">View the kDrives of your other Infomaniak profiles. You can add as many user profiles as you like.</string>
     <string name="switchUserTitle">Change user</string>

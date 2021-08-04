@@ -30,6 +30,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.infomaniak.drive.BuildConfig.SUPPORT_URL
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.ui.MainViewModel
@@ -37,6 +38,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FormatterFileSize
 import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.drive.utils.safeNavigate
+import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import kotlinx.android.synthetic.main.fragment_menu.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -115,6 +117,10 @@ class MenuFragment : Fragment() {
 
             settings.setOnClickListener {
                 safeNavigate(MenuFragmentDirections.actionMenuFragmentToSettingsFragment())
+            }
+
+            support.setOnClickListener {
+                requireContext().openUrl(SUPPORT_URL)
             }
 
             changeUser.setOnClickListener {

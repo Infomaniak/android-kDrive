@@ -147,6 +147,9 @@
     <string name="buttonUpgradeOffer">Faire évoluer mon offre</string>
     <string name="buttonUpload">Importer depuis le téléphone</string>
     <string name="buttonValid">Valider</string>
+    <string name="buttonYes">Oui</string>
+    <string name="cancelDownloadDescription">Souhaitez-vous vraiment annuler ce téléchargement ?</string>
+    <string name="cancelDownloadTitle">Annuler le téléchargement</string>
     <string name="cloudStorageSuerySearchImpossibleSelectDrive">Recherche impossible, aucun drive n’a été sélectionné</string>
     <string name="commonFolderDescription">Partagez ce dossier avec des utilisateurs du kDrive %s</string>
     <string name="commonFolderTitle">Dossier commun</string>
@@ -214,7 +217,7 @@
     <string name="errorLoadingOfficeEditor">Impossible de charger l’éditeur de document</string>
     <string name="errorModification">Erreur lors de la modification</string>
     <string name="errorMove">Erreur lors du déplacement</string>
-    <string name="errorNetwork">Problème de connexion</string>
+    <string name="errorNetwork">Problème de réseau</string>
     <string name="errorNetworkDescription">Les résultats peuvent être incomplets</string>
     <string name="errorPreviewDeleted">Ce fichier a été supprimé définitivement</string>
     <string name="errorPreviewTrash">L’aperçu d’un fichier dans la corbeille n’est pas disponible</string>
@@ -512,6 +515,7 @@
     <string name="sortSmaller">Plus petit</string>
     <string name="sortTitle">Trier</string>
     <string name="sortYear">Par année</string>
+    <string name="supportTitle">Aide &amp; support</string>
     <string name="switchDriveSearchViewHint">Rechercher un kDrive</string>
     <string name="switchUserDescription">Consulter les kDrives de vos autres profils Infomaniak. Vous pouvez ajouter autant de profil d’utilisateurs que vous souhaitez.</string>
     <string name="switchUserTitle">Changer d’utilisateur</string>

@@ -147,6 +147,9 @@
     <string name="buttonUpgradeOffer">Mejorar mi oferta</string>
     <string name="buttonUpload">Importar desde el teléfono</string>
     <string name="buttonValid">Validar</string>
+    <string name="buttonYes">Sí</string>
+    <string name="cancelDownloadDescription">¿Realmente quieres cancelar esta descarga?</string>
+    <string name="cancelDownloadTitle">Cancelar la descarga</string>
     <string name="cloudStorageSuerySearchImpossibleSelectDrive">No se puede buscar. No se ha seleccionado ningún drive</string>
     <string name="commonFolderDescription">Comparte esta carpeta con los usuarios del kDrive %s</string>
     <string name="commonFolderTitle">Carpeta común</string>
@@ -512,6 +515,7 @@
     <string name="sortSmaller">Menor tamaño</string>
     <string name="sortTitle">Clasificar</string>
     <string name="sortYear">Por año</string>
+    <string name="supportTitle">Ayuda y asistencia</string>
     <string name="switchDriveSearchViewHint">Buscar un kDrive</string>
     <string name="switchUserDescription">Consultar las kDrives de tus otros perfiles Infomaniak. Puedes añadir tantos perfiles de usuario como desees.</string>
     <string name="switchUserTitle">Cambiar el usuario</string>
