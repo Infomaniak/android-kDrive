@@ -61,6 +61,11 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
 
         disabledAvailableOffline.visibility = if (navigationArgs.onlyFolders) VISIBLE else GONE
 
+        val otherActionsVisibility = if (navigationArgs.fileIds.size in 1..10) VISIBLE else GONE
+        availableOffline.visibility = otherActionsVisibility
+        duplicateFile.visibility = otherActionsVisibility
+        addFavorites.visibility = otherActionsVisibility
+
         val drivePermissions = DrivePermissions()
         drivePermissions.registerPermissions(this) { authorized -> if (authorized) downloadFileArchive() }
         downloadFile.setOnClickListener {

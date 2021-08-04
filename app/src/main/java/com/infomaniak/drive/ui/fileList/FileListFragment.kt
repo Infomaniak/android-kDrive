@@ -396,9 +396,13 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             )
         }
         selectAllButton.setOnClickListener {
-            fileAdapter.allSelected = true
-            enableButtonMultiSelect(false)
+            fileAdapter.apply {
+                allSelected = true
+                fileAdapter.itemSelected.clear()
+                fileAdapter.notifyItemRangeChanged(0, fileAdapter.itemCount - 1)
+            }
 
+            enableButtonMultiSelect(false)
             fileListViewModel.getFileCount(currentFolder!!).observe(viewLifecycleOwner) { fileCount ->
                 val fileNumber = fileCount.count
                 if (fileNumber < 10) fileAdapter.itemSelected = fileAdapter.getItems()
@@ -409,7 +413,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     fileNumber,
                     fileNumber
                 )
-                fileAdapter.notifyDataSetChanged()
             }
         }
 
