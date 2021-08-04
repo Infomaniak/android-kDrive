@@ -228,7 +228,8 @@ class UploadAdapter @JvmOverloads constructor(
                     contentResolver.query(uri, null, null, null, null)?.use { cursor ->
                         if (cursor.moveToFirst()) {
                             val mediaSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
-                            startUploadFile(uploadFile, fileSize ?: mediaSize, syncResult)
+                            val size = fileSize?.let { if (mediaSize > it) mediaSize else it } ?: mediaSize //TODO Temp solution
+                            startUploadFile(uploadFile, size, syncResult)
                         } else UploadFile.deleteIfExists(uri)
                     }
                 }
