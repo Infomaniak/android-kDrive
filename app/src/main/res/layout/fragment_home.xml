@@ -159,41 +159,48 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/lastElementsLayout"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/homeSwipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="@dimen/marginStandardMedium"
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <TextView
-            android:id="@+id/lastElementsTitle"
-            style="@style/H2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="@string/homeMyLastPictures" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/lastElementsRecyclerView"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/lastElementsLayout"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:clipToPadding="false"
-            android:overScrollMode="never"
-            android:paddingHorizontal="20dp"
-            android:paddingTop="@dimen/marginStandardSmall"
-            android:paddingBottom="@dimen/recyclerViewPaddingBottom"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/lastElementsTitle"
-            tools:itemCount="5"
-            tools:listitem="@layout/cardview_home_file_activity" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/lastElementsTitle"
+                style="@style/H2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/marginStandard"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="@string/homeMyLastPictures" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/lastElementsRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:clipToPadding="false"
+                android:overScrollMode="never"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="@dimen/marginStandardSmall"
+                android:paddingBottom="@dimen/recyclerViewPaddingBottom"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/lastElementsTitle"
+                tools:itemCount="5"
+                tools:listitem="@layout/cardview_home_file_activity" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
