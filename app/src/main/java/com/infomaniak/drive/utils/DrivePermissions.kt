@@ -65,9 +65,7 @@ class DrivePermissions {
             MaterialAlertDialogBuilder(activity, R.style.DialogStyle)
                 .setTitle(R.string.androidPermissionTitle)
                 .setMessage(R.string.allPermissionNeeded)
-                .setPositiveButton(R.string.buttonAuthorize) { _: DialogInterface?, _: Int ->
-                    activity.startAppSettingsConfig()
-                }
+                .setPositiveButton(R.string.buttonAuthorize) { _: DialogInterface?, _: Int -> activity.startAppSettingsConfig() }
                 .show()
         }
     }

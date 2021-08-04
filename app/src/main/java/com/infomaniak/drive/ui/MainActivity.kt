@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.Context
@@ -68,6 +69,7 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils.getRootName
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
+import com.infomaniak.lib.core.utils.hasPermissions
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -213,7 +215,7 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        if (drivePermissions.checkWriteStoragePermission()) launchSyncOffline()
+        if (hasPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE))) launchSyncOffline()
 
         AppSettings.appLaunches++
         if (!AccountUtils.isEnableAppSync() && AppSettings.appLaunches == SYNC_DIALOG_LAUNCHES) {

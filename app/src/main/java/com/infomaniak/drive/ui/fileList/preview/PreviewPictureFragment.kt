@@ -75,7 +75,7 @@ class PreviewPictureFragment : PreviewFragment() {
             lifecycleScope.launch(Dispatchers.IO) {
                 imageLoader.execute(previewRequest).drawable?.let { drawable ->
                     if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
-                    withContext(Dispatchers.Main) { imageView.load(drawable) { crossfade(false) } }
+                    withContext(Dispatchers.Main) { imageView?.load(drawable) { crossfade(false) } }
                 }
             }
         }

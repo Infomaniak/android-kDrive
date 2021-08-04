@@ -78,7 +78,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
         if (drivePermissions.checkWriteStoragePermission()) loadFolders()
     }
 
-    fun loadFolders() {
+    private fun loadFolders() {
         swipeRefreshLayout.isRefreshing = true
         mediaViewModel.elementsToRemove.observe(viewLifecycleOwner) { elementsToRemove ->
             mediaFolderList.post {
