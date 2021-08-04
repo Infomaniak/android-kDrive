@@ -43,7 +43,7 @@ object UploadNotifications {
             pendingCount
         )
         val contentIntent = progressPendingIntent(context)
-        showNotification(context, pendingTitle, pendingDescription, NotificationUtils.UPLOAD_STATUS_ID, contentIntent)
+        showNotification(context, pendingTitle, pendingDescription, NotificationUtils.UPLOAD_SERVICE_ID, contentIntent)
     }
 
     fun UploadFile.networkErrorNotification(context: Context, wifiRequired: Boolean = false) {

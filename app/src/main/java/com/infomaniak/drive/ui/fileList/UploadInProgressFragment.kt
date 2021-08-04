@@ -23,6 +23,7 @@ import android.provider.OpenableColumns
 import android.util.Log
 import android.view.View
 import androidx.core.net.toFile
+import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController

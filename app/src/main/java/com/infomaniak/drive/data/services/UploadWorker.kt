@@ -20,10 +20,8 @@ package com.infomaniak.drive.data.services
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
-import android.content.SyncResult
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.os.Parcelable
 import android.provider.MediaStore
 import android.provider.OpenableColumns
@@ -34,13 +32,18 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.work.*
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.UploadTask
-import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.sync.UploadAdapter
 import com.infomaniak.drive.data.sync.UploadNotifications
+import com.infomaniak.drive.data.sync.UploadNotifications.exceptionNotification
+import com.infomaniak.drive.data.sync.UploadNotifications.folderNotFoundNotification
+import com.infomaniak.drive.data.sync.UploadNotifications.interruptedNotification
+import com.infomaniak.drive.data.sync.UploadNotifications.lockErrorNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.networkErrorNotification
+import com.infomaniak.drive.data.sync.UploadNotifications.outOfMemoryNotification
+import com.infomaniak.drive.data.sync.UploadNotifications.quotaExceededNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.setupCurrentUploadNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
 import com.infomaniak.drive.data.sync.UploadProgressReceiver
@@ -49,17 +52,16 @@ import com.infomaniak.drive.utils.NotificationUtils
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.NotificationUtils.uploadServiceNotification
 import com.infomaniak.drive.utils.SyncUtils
-import com.infomaniak.drive.utils.SyncUtils.isWifiConnection
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.uri
 import com.infomaniak.lib.core.utils.ApiController
 import io.sentry.Sentry
 import kotlinx.coroutines.*
 import java.io.FileNotFoundException
+import java.io.IOException
 import java.util.*
 
 class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
-    private lateinit var uploadSupervisorJob: CompletableJob
     private lateinit var contentResolver: ContentResolver
 
     private var syncSettings: SyncSettings? = null
@@ -70,43 +72,87 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     override suspend fun doWork(): Result {
         contentResolver = applicationContext.contentResolver
         syncSettings = UploadFile.getAppSyncSettings()
-        uploadSupervisorJob = SupervisorJob()
 
+        applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
         applicationContext.uploadServiceNotification().apply {
             setContentTitle(applicationContext.getString(R.string.notificationUploadServiceChannelName))
-//            setForeground(ForegroundInfo(NotificationUtils.UPLOAD_SERVICE_ID, build()))
-            setForeground(ForegroundInfo(NotificationUtils.UPLOAD_STATUS_ID, build()))
+            setForeground(ForegroundInfo(NotificationUtils.UPLOAD_SERVICE_ID, build()))
         }
-        return coroutineScope {
-            val job = async {
-                // Retrieve the latest media that have not been taken in the sync
-                checkLocalLastPhotos()
 
-                // Check if the user has cancelled the upload and no files to sync
-                val isCancelledByUser = inputData.getBoolean(CANCELLED_BY_USER, false)
-                if (UploadFile.getNotSyncedFilesCount() == 0L && isCancelledByUser) {
-                    UploadNotifications.showCancelledByUserNotification(applicationContext)
+        return try {
+            // Retrieve the latest media that have not been taken in the sync
+            checkLocalLastPhotos()
+
+            // Check if the user has cancelled the upload and no files to sync
+            val isCancelledByUser = inputData.getBoolean(CANCELLED_BY_USER, false)
+            if (UploadFile.getNotSyncedFilesCount() == 0L && isCancelledByUser) {
+                UploadNotifications.showCancelledByUserNotification(applicationContext)
+                return Result.success()
+            }
+
+            // Start uploads
+            val result = startSyncFiles()
+            checkIfNeedReSync()
+            result
+        } catch (exception: UploadTask.FolderNotFoundException) {
+            currentUploadFile?.folderNotFoundNotification(applicationContext)
+            Result.retry()
+
+        } catch (exception: UploadTask.QuotaExceededException) {
+            currentUploadFile?.quotaExceededNotification(applicationContext)
+            Result.retry()
+
+        } catch (exception: InterruptedException) { // from system
+            currentUploadFile?.interruptedNotification(applicationContext)
+            Result.retry()
+
+        } catch (exception: OutOfMemoryError) {
+            currentUploadFile?.outOfMemoryNotification(applicationContext)
+            Result.retry()
+
+        } catch (exception: CancellationException) { // uploadSupervisorJob cancelled
+            currentUploadFile?.exceptionNotification(applicationContext)
+            Result.retry()
+
+        } catch (exception: UploadTask.LockErrorException) {
+            currentUploadFile?.lockErrorNotification(applicationContext)
+            Result.retry()
+
+        } catch (exception: UploadTask.ChunksSizeExceededException) {
+            Result.retry()
+
+        } catch (exception: Exception) {
+            when {
+                exception.isNetworkException() -> {
+                    currentUploadFile?.networkErrorNotification(applicationContext)
+                    Result.retry()
                 }
-
-                // Start uploads
-                val result = startSyncFiles()
-                checkIfNeedReSync()
-                result
+                exception is IOException -> {
+                    Sentry.withScope { scope ->
+                        scope.setExtra("uploadFile", ApiController.gson.toJson(currentUploadFile ?: ""))
+                        scope.setExtra("previousChunkBytesWritten", "${currentUploadTask?.previousChunkBytesWritten()}")
+                        scope.setExtra("lastProgress", "${currentUploadTask?.lastProgress()}")
+                        Sentry.captureMessage(exception.message ?: "IOException occurred")
+                    }
+                    Result.retry()
+                }
+                else -> {
+                    exception.printStackTrace()
+                    currentUploadFile?.exceptionNotification(applicationContext)
+                    Sentry.captureException(exception)
+                    Result.failure()
+                }
             }
-            job.invokeOnCompletion { exception ->
-                exception?.printStackTrace()
-                cancelSync()
-            }
-            job.await()
+        } finally {
+            applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
         }
     }
 
-    private fun cancelSync() {
-        uploadSupervisorJob.cancelChildren()
-        uploadSupervisorJob.cancel()
-        applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
-//        applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
-    }
+    private fun Exception.isNetworkException() =
+        this.javaClass.name.contains("java.net.", ignoreCase = true) ||
+                this.javaClass.name.contains("javax.net.", ignoreCase = true) ||
+                this is java.io.InterruptedIOException ||
+                (this is java.io.IOException && this.message == "stream closed") // Okhttp3
 
     private suspend fun startSyncFiles(): Result = withContext(Dispatchers.IO) {
         val syncFiles = UploadFile.getNotSyncFiles()
@@ -115,11 +161,9 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         syncFiles.forEach { syncFile ->
             Log.d(TAG, "startSyncFiles: upload $syncFile")
-
             initUploadFile(syncFile, pendingCount)
             pendingCount--
         }
-//        applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
 
         uploadedCount = syncFiles.size - pendingCount + lastUploadedCount
         if (uploadedCount > 0) currentUploadFile?.showUploadedFilesNotification(applicationContext, uploadedCount)
@@ -194,7 +238,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             currentUploadTask = UploadTask(
                 context = applicationContext,
                 uploadFile = uploadFile,
-                supervisor = uploadSupervisorJob
+                worker = this
             ).apply { start() }
             Log.d("kDrive", "$TAG > end upload ${uploadFile.fileName}")
         } else {
@@ -213,26 +257,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             val data = Data.Builder().putInt(LAST_UPLOADED_COUNT, uploadedCount).build()
             applicationContext.syncImmediately(data, true)
         }
-    }
-
-    private fun checkIfNeedCancel(uploadFiles: ArrayList<UploadFile>, extras: Bundle?, syncResult: SyncResult?): Boolean {
-        val cancelledByUser = extras?.getBoolean(UploadAdapter.CANCELLED_BY_USER, false) ?: false
-        currentUploadFile = uploadFiles.firstOrNull()
-        if (uploadFiles.isEmpty() && cancelledByUser) {
-            UploadNotifications.showNotification(
-                context = applicationContext,
-                title = applicationContext.getString(R.string.uploadCancelTitle),
-                description = applicationContext.getString(R.string.uploadCancelDescription),
-                notificationId = NotificationUtils.UPLOAD_STATUS_ID
-            )
-            return true
-        } // Ignore sync
-        else if (uploadFiles.isNotEmpty() && AppSettings.onlyWifiSync && !applicationContext.isWifiConnection()) {
-            currentUploadFile?.networkErrorNotification(applicationContext, true)
-            syncResult?.delayUntil = System.currentTimeMillis() / 1000 + 10 //TODO restart in 10s
-            return true
-        } else if (uploadFiles.isEmpty()) return true
-        return false
     }
 
     private suspend fun checkLocalLastPhotos() = withContext(Dispatchers.IO) {

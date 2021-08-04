@@ -27,6 +27,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.infomaniak.drive.data.models.FileInProgress
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.ValidChunks
+import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.UploadAdapter
 import com.infomaniak.drive.data.sync.UploadProgressReceiver
 import com.infomaniak.drive.ui.MainActivity
@@ -51,8 +52,8 @@ import kotlin.math.ceil
 class UploadTask(
     private val context: Context,
     private val uploadFile: UploadFile,
-    private val onProgress: ((progress: Int) -> Unit)? = null,
-    private val supervisor: CompletableJob = SupervisorJob()
+    private val worker: UploadWorker,
+    private val onProgress: ((progress: Int) -> Unit)? = null
 ) {
 
     private var limitParallelRequest = 4
@@ -62,8 +63,7 @@ class UploadTask(
     private var uploadNotification: NotificationCompat.Builder? = null
     private lateinit var notificationManagerCompat: NotificationManagerCompat
 
-    @Throws(Exception::class)
-    suspend fun start() = withContext(Dispatchers.IO + supervisor) {
+    suspend fun start() = withContext(Dispatchers.IO) {
         notificationManagerCompat = NotificationManagerCompat.from(context)
 
         uploadNotification = context.uploadProgressNotification()
@@ -81,7 +81,6 @@ class UploadTask(
         }
     }
 
-    @Throws(Exception::class)
     private suspend fun uploadTask(coroutineScope: CoroutineScope) = withContext(Dispatchers.IO) {
         val uri = uploadFile.getUriObject()
         val fileInputStream = context.contentResolver.openInputStream(uploadFile.getOriginalUri(context))

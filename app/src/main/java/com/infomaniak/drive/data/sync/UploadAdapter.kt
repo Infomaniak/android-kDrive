@@ -52,7 +52,6 @@ import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.uploadNotification
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.SyncUtils.isWifiConnection
-import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.ApiController.gson
 import com.infomaniak.lib.core.utils.hasPermissions
 import io.sentry.Sentry
@@ -266,11 +265,10 @@ class UploadAdapter @JvmOverloads constructor(
                 }
             }
 
-            currentUploadTask = UploadTask(
+            /*currentUploadTask = UploadTask(
                 context = context.applicationContext,
                 uploadFile = uploadFile,
-                supervisor = uploadSupervisorJob
-            ).apply { start() }
+            ).apply { start() }*/
             syncResult?.stats?.numInserts = syncResult?.stats?.numInserts?.plus(1)
             Log.d("kDrive", "$TAG > end upload ${uploadFile.fileName}")
         } else {

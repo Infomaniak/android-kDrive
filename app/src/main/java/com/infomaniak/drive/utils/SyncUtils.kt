@@ -17,9 +17,6 @@
  */
 package com.infomaniak.drive.utils
 
-import android.accounts.Account
-import android.accounts.AccountManager
-import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
@@ -27,15 +24,12 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
-import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentActivity
 import androidx.work.*
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.UploadWorker
@@ -77,19 +71,6 @@ object SyncUtils {
         return Pair(fileCreatedAt, fileModifiedAt)
     }
 
-    private fun Context.createSyncAccount(): Account {
-        val accountManager = getSystemService(Service.ACCOUNT_SERVICE) as AccountManager
-        val currentAccount = accountManager.getAccountsByType(getString(R.string.ACCOUNT_TYPE)).firstOrNull()
-        val newAccount = Account(getString(R.string.app_name), getString(R.string.ACCOUNT_TYPE))
-        accountManager.addAccountExplicitly(currentAccount ?: newAccount, null, bundleOf())
-        return currentAccount ?: newAccount
-    }
-
-    private fun Context.cancelSync() {
-        //ContentResolver.cancelSync(createSyncAccount(), getString(R.string.SYNC_AUTHORITY))
-        WorkManager.getInstance(this).cancelUniqueWork(UploadWorker.TAG)
-    }
-
     fun FragmentActivity.launchAllUpload(drivePermissions: DrivePermissions) {
         if (AccountUtils.isEnableAppSync() &&
             drivePermissions.checkSyncPermissions() &&
@@ -101,7 +82,6 @@ object SyncUtils {
 
     fun Context.syncImmediately(data: Data = Data.EMPTY, force: Boolean = false) {
         if (!isSyncActive() || force) {
-//            cancelSync()
             val request = OneTimeWorkRequestBuilder<UploadWorker>()
                 .setConstraints(UploadWorker.workConstraints())
                 .setInputData(data)
@@ -130,14 +110,6 @@ object SyncUtils {
     private fun Context.cancelPeriodicSync() {
         WorkManager.getInstance(this).cancelAllWorkByTag(UploadWorker.TAG)
         WorkManager.getInstance(this).cancelAllWorkByTag(UploadWorker.PERIODIC_TAG)
-    }
-
-    private fun Context.removeSyncAccount(account: Account) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            AccountManager.get(this).removeAccount(account, null, null, null)
-        } else {
-            AccountManager.get(this).removeAccount(account, null, null)
-        }
     }
 
     fun Context.startContentObserverService() {
