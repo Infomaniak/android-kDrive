@@ -232,7 +232,6 @@ class MainActivity : BaseActivity() {
         if (UploadFile.getAppSyncSettings()?.deleteAfterSync == true && UploadFile.getPendingFilesCount() == 0) {
             UploadFile.getUploadedFiles()?.let { filesUploadedRecently ->
                 if (filesUploadedRecently.size >= SYNCED_FILES_DELETION_FILES_AMOUNT) {
-                    uploadedFilesToDelete = filesUploadedRecently
                     Utils.createConfirmation(
                         context = this,
                         title = getString(R.string.modalDeletePhotosTitle),
@@ -247,9 +246,10 @@ class MainActivity : BaseActivity() {
                                     .filter { !it.uri.toUri().scheme.equals(ContentResolver.SCHEME_FILE) }
                                     .map { it.uri.toUri() }
                             )
+                            uploadedFilesToDelete = filesUploadedRecently
                             filesDeletionResult.launch(IntentSenderRequest.Builder(filesDeletionRequest.intentSender).build())
                         } else {
-                            mainViewModel.deleteSynchronizedFilesOnDevice(uploadedFilesToDelete)
+                            mainViewModel.deleteSynchronizedFilesOnDevice(filesUploadedRecently)
                         }
                     }
                 }
