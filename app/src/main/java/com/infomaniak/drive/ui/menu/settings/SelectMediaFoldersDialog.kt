@@ -97,7 +97,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
                         )
                     }
                     if (isComplete) {
-                        swipeRefreshLayout.isRefreshing = false
+                        swipeRefreshLayout?.isRefreshing = false
                     }
                 }
             }
