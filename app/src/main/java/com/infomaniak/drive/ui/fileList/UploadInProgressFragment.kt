@@ -23,7 +23,6 @@ import android.provider.OpenableColumns
 import android.util.Log
 import android.view.View
 import androidx.core.net.toFile
-import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -167,7 +166,7 @@ class UploadInProgressFragment : FileListFragment() {
                 lifecycleScope.launch(Dispatchers.IO) {
                     val files = arrayListOf<File>()
                     syncFiles.forEach {
-                        val uri = it.uri.toUri()
+                        val uri = it.getUriObject()
 
                         if (uri.scheme.equals(ContentResolver.SCHEME_CONTENT)) {
                             context?.apply {

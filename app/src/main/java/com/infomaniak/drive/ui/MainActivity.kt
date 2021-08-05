@@ -41,7 +41,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
-import androidx.core.net.toUri
 import androidx.core.view.get
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -243,8 +242,8 @@ class MainActivity : BaseActivity() {
                             val filesDeletionRequest = MediaStore.createDeleteRequest(
                                 contentResolver,
                                 filesUploadedRecently
-                                    .filter { !it.uri.toUri().scheme.equals(ContentResolver.SCHEME_FILE) }
-                                    .map { it.uri.toUri() }
+                                    .filter { !it.getUriObject().scheme.equals(ContentResolver.SCHEME_FILE) }
+                                    .map { it.getUriObject() }
                             )
                             uploadedFilesToDelete = filesUploadedRecently
                             filesDeletionResult.launch(IntentSenderRequest.Builder(filesDeletionRequest.intentSender).build())

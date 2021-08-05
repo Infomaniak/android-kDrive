@@ -30,7 +30,6 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toFile
-import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.infomaniak.drive.R
@@ -203,7 +202,7 @@ class UploadAdapter @JvmOverloads constructor(
     @Throws(Exception::class)
     private suspend fun initUploadFile(uploadFile: UploadFile, syncResult: SyncResult?, pendingCount: Int) =
         withContext(Dispatchers.IO) {
-            val uri = uploadFile.uri.toUri()
+            val uri = uploadFile.getUriObject()
             currentUploadFile = uploadFile
             context.cancelNotification(CURRENT_UPLOAD_ID)
             setupCurrentUploadNotification(pendingCount)
@@ -221,7 +220,7 @@ class UploadAdapter @JvmOverloads constructor(
                 } else {
                     SyncUtils.checkDocumentProviderPermissions(context, uri)
                     val fileSize = try {
-                        contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize }
+                        contentResolver.openFileDescriptor(uploadFile.getOriginalUri(context), "r")?.use { it.statSize }
                     } catch (exception: FileNotFoundException) {
                         null
                     }
@@ -264,7 +263,7 @@ class UploadAdapter @JvmOverloads constructor(
             Log.d("kDrive", "$TAG > end upload ${uploadFile.fileName}")
         } else {
             syncResult?.stats?.numSkippedEntries = syncResult?.stats?.numSkippedEntries?.plus(1)
-            UploadFile.deleteIfExists(uploadFile.uri.toUri())
+            UploadFile.deleteIfExists(uploadFile.getUriObject())
             Log.d("kDrive", "$TAG > ${uploadFile.fileName} deleted size:$size")
             Sentry.withScope { scope ->
                 scope.setExtra("data", gson.toJson(uploadFile))

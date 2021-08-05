@@ -40,28 +40,37 @@ class DrivePermissions {
 
     companion object {
         private const val REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 1
+        private val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_MEDIA_LOCATION)
+        } else {
+            arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
     }
 
-    private lateinit var registerForActivityResult: ActivityResultLauncher<String>
+    private lateinit var registerForActivityResult: ActivityResultLauncher<Array<String>>
     private lateinit var activity: FragmentActivity
 
     fun registerPermissions(activity: FragmentActivity, onPermissionResult: ((autorized: Boolean) -> Unit)? = null) {
         this.activity = activity
-        registerForActivityResult = activity.registerForActivityResult(ActivityResultContracts.RequestPermission()) { autorized ->
-            resultPermissions(onPermissionResult, autorized)
-        }
+        registerForActivityResult =
+            activity.registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+                val autorized = permissions.values.all { it == true }
+                resultPermissions(onPermissionResult, autorized)
+            }
     }
 
     fun registerPermissions(fragment: Fragment, onPermissionResult: ((autorized: Boolean) -> Unit)? = null) {
         this.activity = fragment.requireActivity()
-        registerForActivityResult = fragment.registerForActivityResult(ActivityResultContracts.RequestPermission()) { autorized ->
-            resultPermissions(onPermissionResult, autorized)
-        }
+        registerForActivityResult =
+            fragment.registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+                val autorized = permissions.values.all { it == true }
+                resultPermissions(onPermissionResult, autorized)
+            }
     }
 
     private fun resultPermissions(onPermissionResult: ((autorized: Boolean) -> Unit)?, autorized: Boolean) {
         onPermissionResult?.invoke(autorized)
-        if (!autorized && !activity.requestPermissionsIsPossible(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE))) {
+        if (!autorized && !activity.requestPermissionsIsPossible(permissions)) {
             MaterialAlertDialogBuilder(activity, R.style.DialogStyle)
                 .setTitle(R.string.androidPermissionTitle)
                 .setMessage(R.string.allPermissionNeeded)
@@ -87,9 +96,9 @@ class DrivePermissions {
     fun checkWriteStoragePermission(): Boolean {
         return when {
             Build.VERSION.SDK_INT < Build.VERSION_CODES.M -> true
-            activity.hasPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)) -> true
+            activity.hasPermissions(permissions) -> true
             else -> {
-                registerForActivityResult.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                registerForActivityResult.launch(permissions)
                 false
             }
         }
