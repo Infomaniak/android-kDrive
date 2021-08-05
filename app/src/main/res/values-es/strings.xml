@@ -148,8 +148,6 @@
     <string name="buttonUpload">Importar desde el teléfono</string>
     <string name="buttonValid">Validar</string>
     <string name="buttonYes">Sí</string>
-    <string name="cancelDownloadDescription">¿Realmente quieres cancelar esta descarga?</string>
-    <string name="cancelDownloadTitle">Cancelar la descarga</string>
     <string name="cloudStorageSuerySearchImpossibleSelectDrive">No se puede buscar. No se ha seleccionado ningún drive</string>
     <string name="commonFolderDescription">Comparte esta carpeta con los usuarios del kDrive %s</string>
     <string name="commonFolderTitle">Carpeta común</string>

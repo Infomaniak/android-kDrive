@@ -157,8 +157,6 @@
     <string name="buttonUpload">Upload from phone</string>
     <string name="buttonValid">Validate</string>
     <string name="buttonYes">Yes</string>
-    <string name="cancelDownloadDescription">Do you really want to cancel this download?</string>
-    <string name="cancelDownloadTitle">Cancel download</string>
     <string name="cloudStorageSuerySearchImpossibleSelectDrive">No search possible: no drive selected</string>
     <string name="commonFolderDescription">Share this folder with users of kDrive %s</string>
     <string name="commonFolderTitle">Common folder</string>
