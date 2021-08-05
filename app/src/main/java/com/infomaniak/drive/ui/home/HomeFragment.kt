@@ -157,7 +157,9 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                         val lastActivitiesAdapter = lastElementsAdapter as LastActivitiesAdapter
                         if (!lastActivitiesAdapter.isComplete && !isDownloadingActivities) {
                             lastActivitiesAdapter.showLoading()
-                            getLastPicturesOrActivities(currentDrive.id, isProOrTeam, false)
+                            homeViewModel.lastActivityPage++
+                            homeViewModel.lastActivityLastPage++
+                            getLastPicturesOrActivities(currentDrive.id, isProOrTeam)
                         }
                     })
 
@@ -189,7 +191,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                         whenLoadMoreIsPossible = {
                             val picturesAdapter = lastElementsAdapter as HomePicturesAdapter
                             if (!picturesAdapter.isComplete && !isDownloadingPictures) {
-                                getLastPicturesOrActivities(currentDrive.id, isProOrTeam, false)
+                                getLastPicturesOrActivities(currentDrive.id, isProOrTeam)
                             }
                         }, findFirstVisibleItemPosition = {
                             val positions = IntArray(MAX_PICTURES_COLUMN)
@@ -201,11 +203,11 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
-    private fun updateUi(cleanExistingItems: Boolean = false, forceDownload: Boolean = false) {
+    private fun updateUi(forceDownload: Boolean = false) {
         AccountUtils.getCurrentDrive()?.let { currentDrive ->
             val downloadRequired = forceDownload || mustRefreshUi
             setDriveHeader(currentDrive)
-            getLastPicturesOrActivities(currentDrive.id, isProOrTeam, cleanExistingItems, downloadRequired)
+            getLastPicturesOrActivities(currentDrive.id, isProOrTeam, downloadRequired)
             getLastModifiedFiles(downloadRequired)
             notEnoughStorage.setup(currentDrive)
             mustRefreshUi = false
@@ -227,25 +229,21 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun getLastPicturesOrActivities(
         driveId: Int,
         isProOrTeam: Boolean,
-        cleanExistingItems: Boolean,
         forceDownload: Boolean = false
     ) {
-        if (isProOrTeam) {
-            getLastActivities(driveId, cleanExistingItems, forceDownload)
-        } else {
-            getPictures(driveId, cleanExistingItems)
-        }
+        if (isProOrTeam) getLastActivities(driveId, forceDownload)
+        else getPictures(driveId)
         setupLastElementsTitle(isProOrTeam)
     }
 
-    private fun getLastActivities(driveId: Int, cleanExistingItems: Boolean, forceDownload: Boolean = false) {
+    private fun getLastActivities(driveId: Int, forceDownload: Boolean = false) {
         (lastElementsAdapter as LastActivitiesAdapter).apply {
             isComplete = false
             isDownloadingActivities = true
             homeViewModel.getLastActivities(driveId, forceDownload).observe(viewLifecycleOwner) {
                 lastElementsAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
                 it?.let { (apiResponse, mergedActivities) ->
-                    if (cleanExistingItems && apiResponse.page == 1 || apiResponse.page == 1) clean()
+                    if (apiResponse.page == 1) clean()
                     addAll(mergedActivities)
                     isComplete = (apiResponse.data?.size ?: 0) < ApiRepository.PER_PAGE
                 } ?: also {
@@ -257,14 +255,14 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
-    private fun getPictures(driveId: Int, cleanExistingItems: Boolean) {
+    private fun getPictures(driveId: Int) {
         val picturesAdapter = (lastElementsAdapter as HomePicturesAdapter)
         picturesAdapter.isComplete = false
         isDownloadingPictures = true
-        homeViewModel.getLastPictures(driveId).observe(viewLifecycleOwner) {
+        homeViewModel.getLastPictures(driveId).observe(viewLifecycleOwner) { apiResponse ->
             lastElementsAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
-            it?.data?.let { lastPictures ->
-                if (cleanExistingItems && it.page == 1 || it.page == 1) picturesAdapter.setList(lastPictures)
+            apiResponse?.data?.let { lastPictures ->
+                if (apiResponse.page == 1) picturesAdapter.setList(lastPictures)
                 else picturesAdapter.addAll(lastPictures)
                 picturesAdapter.isComplete = lastPictures.size < ApiRepository.PER_PAGE
             } ?: also { picturesAdapter.isComplete = true }
