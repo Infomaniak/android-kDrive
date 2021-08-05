@@ -23,7 +23,6 @@ import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.collection.arrayMapOf
-import androidx.core.net.toUri
 import androidx.lifecycle.*
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -331,7 +330,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         viewModelScope.launch(Dispatchers.IO) {
             val fileDeleted = arrayListOf<UploadFile>()
             filesToDelete.forEach { uploadFile ->
-                val uri = uploadFile.uri.toUri()
+                val uri = uploadFile.getUriObject()
                 if (!uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
                     try {
                         SyncUtils.checkDocumentProviderPermissions(getContext(), uri)

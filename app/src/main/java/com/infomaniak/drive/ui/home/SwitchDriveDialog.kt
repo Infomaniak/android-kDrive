@@ -33,7 +33,6 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialog
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.safeNavigate
 import kotlinx.android.synthetic.main.dialog_switch_drive.*
 import kotlinx.android.synthetic.main.item_search_view.*
 

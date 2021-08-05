@@ -20,6 +20,9 @@ package com.infomaniak.drive.data.models
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
+import android.os.Build
+import android.provider.DocumentsContract
+import android.provider.MediaStore
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import com.infomaniak.drive.data.sync.UploadMigration
@@ -78,6 +81,17 @@ open class UploadFile(
             syncFileByUriQuery(realm, uri).findFirst()?.apply {
                 realm.executeTransaction { identifier = UUID.randomUUID().toString() }
             }
+        }
+    }
+
+    fun getUriObject() = uri.toUri()
+
+    fun getOriginalUri(context: Context): Uri {
+        val uriObject = getUriObject()
+        return when {
+            DocumentsContract.isDocumentUri(context, uriObject) -> uriObject
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> MediaStore.setRequireOriginal(uriObject)
+            else -> uriObject
         }
     }
 
@@ -194,7 +208,7 @@ open class UploadFile(
                     uploadFiles.forEach { uploadFile ->
                         syncFileByUriQuery(realm, uploadFile.uri).findFirst()?.let { syncFile ->
                             syncFile.deletedAt = Date()
-                            val uri = syncFile.uri.toUri()
+                            val uri = syncFile.getUriObject()
                             if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
                                 if (!uploadFile.isSyncOffline()) uri.toFile().apply { if (exists()) delete() }
                             }

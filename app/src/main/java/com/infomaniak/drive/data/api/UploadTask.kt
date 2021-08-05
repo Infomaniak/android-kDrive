@@ -23,7 +23,6 @@ import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.net.toUri
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.infomaniak.drive.data.models.FileInProgress
 import com.infomaniak.drive.data.models.UploadFile
@@ -84,8 +83,8 @@ class UploadTask(
 
     @Throws(Exception::class)
     private suspend fun uploadTask(coroutineScope: CoroutineScope) = withContext(Dispatchers.IO) {
-        val uri = uploadFile.uri.toUri()
-        val fileInputStream = context.contentResolver.openInputStream(uri)
+        val uri = uploadFile.getUriObject()
+        val fileInputStream = context.contentResolver.openInputStream(uploadFile.getOriginalUri(context))
 
         sendSyncProgress(UploadAdapter.ProgressStatus.STARTED, 0)
         initChunkSize(uploadFile.fileSize)
