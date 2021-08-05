@@ -21,6 +21,7 @@ android {
         buildConfigField 'String', 'INFOMANIAK_API', '"https://api.infomaniak.com/1/"'
         buildConfigField 'String', 'OFFICE_URL', '"https://drive.infomaniak.com/app/office/"'
         buildConfigField 'String', 'SHOP_URL', '"https://shop.infomaniak.com/order/"'
+        buildConfigField 'String', 'SUPPORT_URL', '"https://support.infomaniak.com/"'
         buildConfigField 'Boolean', 'BETA', 'true' // Todo
 
         resValue 'string', 'ACCOUNT_TYPE', 'com.infomaniak.drive'

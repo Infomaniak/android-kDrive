@@ -512,6 +512,7 @@
     <string name="sortSmaller">Kleiner</string>
     <string name="sortTitle">Sortieren</string>
     <string name="sortYear">Pro Jahr</string>
+    <string name="supportTitle">Hilfe und Unterstützung</string>
     <string name="switchDriveSearchViewHint">kDrive suchen</string>
     <string name="switchUserDescription">Sehen Sie die kDrives Ihrer anderen Infomaniak-Profile. Sie können so viele Benutzerprofile hinzufügen wie Sie möchten.</string>
     <string name="switchUserTitle">Benutzer wechseln</string>
