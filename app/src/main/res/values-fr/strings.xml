@@ -147,7 +147,6 @@
     <string name="buttonUpgradeOffer">Faire évoluer mon offre</string>
     <string name="buttonUpload">Importer depuis le téléphone</string>
     <string name="buttonValid">Valider</string>
-    <string name="buttonYes">Oui</string>
     <string name="cloudStorageSuerySearchImpossibleSelectDrive">Recherche impossible, aucun drive n’a été sélectionné</string>
     <string name="commonFolderDescription">Partagez ce dossier avec des utilisateurs du kDrive %s</string>
     <string name="commonFolderTitle">Dossier commun</string>
