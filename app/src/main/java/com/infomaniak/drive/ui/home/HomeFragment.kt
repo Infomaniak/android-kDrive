@@ -210,6 +210,11 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun updateUi(forceDownload: Boolean = false) {
         AccountUtils.getCurrentDrive()?.let { currentDrive ->
             val downloadRequired = forceDownload || mustRefreshUi
+            if (downloadRequired) {
+                homeViewModel.lastActivityPage = 1
+                homeViewModel.lastActivityLastPage = 1
+                homeCoordinator.scrollTo(0, 0)
+            }
             setDriveHeader(currentDrive)
             getLastPicturesOrActivities(currentDrive.id, isProOrTeam, downloadRequired)
             getLastModifiedFiles(downloadRequired)
