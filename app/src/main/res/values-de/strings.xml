@@ -568,6 +568,7 @@
     <string name="uploadNetworkErrorTitle">Import ausgesetzt</string>
     <string name="uploadNetworkErrorWifiRequired">Warten auf WLAN</string>
     <string name="uploadOutOfMemoryError">Unzureichend verfügbarer RAM</string>
+    <string name="uploadPermissionError">Zusätzlich beantragte Genehmigungen</string>
     <string name="userInviteByEmail">Per E-Mail einladen</string>
     <string name="userPermissionManage">Kann verwalten</string>
     <string name="userPermissionManageDescription">Änderung der Datei\nDownload\nHinzufügen eines Kommentars\nHinzufügen und Anlegen einer Datei / eines Ordners\nLöschen der Datei\nFreigabe mit anderen Benutzern</string>

@@ -148,7 +148,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun launchMainActivity() {
-        startActivity(Intent(this, MainActivity::class.java).apply { clearStack() })
+        startActivity(Intent(this, MainActivity::class.java).clearStack())
     }
 
     private fun launchNoDriveActivity() {

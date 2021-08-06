@@ -568,6 +568,7 @@
     <string name="uploadNetworkErrorTitle">Importación suspendida</string>
     <string name="uploadNetworkErrorWifiRequired">A la espera de red WiFi</string>
     <string name="uploadOutOfMemoryError">Insuficiente memoria RAM disponible</string>
+    <string name="uploadPermissionError">Permisos adicionales solicitados</string>
     <string name="userInviteByEmail">Invitar por correo</string>
     <string name="userPermissionManage">Puede gestionar</string>
     <string name="userPermissionManageDescription">Modificar el archivo\nDescargar\nAñadir comentario\nAñadir y crear archivo/carpeta\nEliminar el archivo\nCompartir con otros usuarios</string>

@@ -41,7 +41,7 @@ class RebootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
         context.apply {
             if (!getOldkDriveUser().isEmpty) {
-                val openAppIntent = Intent(this, LaunchActivity::class.java).apply { clearStack() }
+                val openAppIntent = Intent(this, LaunchActivity::class.java).clearStack()
                 val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, openAppIntent, 0)
                 val notificationManagerCompat = NotificationManagerCompat.from(context)
                 showGeneralNotification(getString(R.string.migrateNotificationTitle)).apply {

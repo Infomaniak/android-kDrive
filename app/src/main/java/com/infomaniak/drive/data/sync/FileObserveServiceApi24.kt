@@ -69,7 +69,7 @@ class FileObserveServiceApi24 : JobService() {
 
     override fun onStopJob(params: JobParameters?): Boolean {
         handler.removeCallbacks(worker)
-        Log.e("MediaContentJob", "$TAG > JOB STOPPED")
+        Log.d("MediaContentJob", "$TAG > JOB STOPPED")
         return false
     }
 

@@ -76,7 +76,7 @@ class MigrationActivity : AppCompatActivity() {
 
         loginInManuallyButton.setOnClickListener {
             clearOldUser()
-            startActivity(Intent(this, LoginActivity::class.java).apply { clearStack() })
+            startActivity(Intent(this, LoginActivity::class.java).clearStack())
         }
 
         clearApplicationData()
@@ -154,7 +154,7 @@ class MigrationActivity : AppCompatActivity() {
         startButton.setOnClickListener {
             AppSettings.migrated = true
             clearOldUser()
-            startActivity(Intent(this, MainActivity::class.java).apply { clearStack() })
+            startActivity(Intent(this, MainActivity::class.java).clearStack())
         }
     }
 
