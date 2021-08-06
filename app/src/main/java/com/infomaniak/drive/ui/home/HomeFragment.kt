@@ -247,12 +247,16 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun getLastActivities(driveId: Int, forceDownload: Boolean = false) {
         (lastElementsAdapter as LastActivitiesAdapter).apply {
+            if (forceDownload) {
+                clean()
+                showLoading()
+            }
             isComplete = false
             isDownloadingActivities = true
             homeViewModel.getLastActivities(driveId, forceDownload).observe(viewLifecycleOwner) {
                 lastElementsAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
                 it?.let { (apiResponse, mergedActivities) ->
-                    if (apiResponse.page == 1) clean()
+                    if (apiResponse.page == 1 && itemCount > 0) clean()
                     addAll(mergedActivities)
                     isComplete = (apiResponse.data?.size ?: 0) < ApiRepository.PER_PAGE
                 } ?: also {
