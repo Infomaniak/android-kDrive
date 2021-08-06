@@ -115,7 +115,7 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         }
 
         AccountUtils.reloadApp = {
-            startActivity(Intent(this, LaunchActivity::class.java).apply { clearStack() })
+            startActivity(Intent(this, LaunchActivity::class.java).clearStack())
         }
 
         val deserializerList: ArrayList<Pair<Type, Any>> = ArrayList()
@@ -163,7 +163,7 @@ class ApplicationMain : Application(), ImageLoaderFactory {
     }
 
     private val refreshTokenError: (User) -> Unit = { user ->
-        val openAppIntent = Intent(this, LaunchActivity::class.java).apply { clearStack() }
+        val openAppIntent = Intent(this, LaunchActivity::class.java).clearStack()
         val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, openAppIntent, 0)
         val notificationManagerCompat = NotificationManagerCompat.from(this)
         showGeneralNotification(getString(R.string.refreshTokenError)).apply {

@@ -550,7 +550,7 @@
     <string name="updateAvailableTitle">Mise à jour disponible !</string>
     <string name="uploadCancelDescription">L’importation a été annulée par l’utilisateur</string>
     <string name="uploadCancelTitle">Importation annulée</string>
-    <string name="uploadErrorTitle">Erreur importation</string>
+    <string name="uploadErrorTitle">Erreur d’importation</string>
     <string name="uploadFolderNotFoundError">Dossier supprimé ou inexistant</string>
     <string name="uploadInProgressCancelAllUploadTitle">Annuler les imports</string>
     <string name="uploadInProgressCancelFileUploadTitle">Annuler %s ?</string>
@@ -568,6 +568,7 @@
     <string name="uploadNetworkErrorTitle">Importation suspendue</string>
     <string name="uploadNetworkErrorWifiRequired">En attente de réseau Wi-Fi</string>
     <string name="uploadOutOfMemoryError">Mémoire vive disponible insuffisante</string>
+    <string name="uploadPermissionError">Autorisations supplémentaires demandées</string>
     <string name="userInviteByEmail">Inviter par mail</string>
     <string name="userPermissionManage">Peut gérer</string>
     <string name="userPermissionManageDescription">Modification du fichier\nTéléchargement\nAjout de commentaire\nAjout et création de fichier / dossier\nSuppression du fichier\nPartage avec d’autres utilisateurs</string>

@@ -40,7 +40,7 @@ class DrivePermissions {
 
     companion object {
         private const val REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 1
-        private val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_MEDIA_LOCATION)
         } else {
             arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)

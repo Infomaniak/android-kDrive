@@ -326,6 +326,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
+    @Deprecated(message = "Only for API 29 and below, otherwise use MediaStore.createDeleteRequest()")
     fun deleteSynchronizedFilesOnDevice(filesToDelete: ArrayList<UploadFile>) {
         viewModelScope.launch(Dispatchers.IO) {
             val fileDeleted = arrayListOf<UploadFile>()

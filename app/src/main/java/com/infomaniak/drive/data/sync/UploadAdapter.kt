@@ -54,6 +54,7 @@ import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.SyncUtils.isWifiConnection
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.ApiController.gson
+import com.infomaniak.lib.core.utils.hasPermissions
 import io.sentry.Sentry
 import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.*
@@ -73,10 +74,9 @@ class UploadAdapter @JvmOverloads constructor(
     private val contentResolver: ContentResolver = context.contentResolver
 ) : AbstractThreadedSyncAdapter(context, autoInitialize, allowParallelSyncs) {
 
+    private lateinit var syncSettings: SyncSettings
     private lateinit var uploadSupervisorJob: CompletableJob
-
     private val hasUpdate = AtomicBoolean(false)
-    private var syncSettings: SyncSettings? = null
     private var currentUploadFile: UploadFile? = null
     private var currentUploadTask: UploadTask? = null
 
@@ -88,8 +88,14 @@ class UploadAdapter @JvmOverloads constructor(
         syncResult: SyncResult?
     ) {
         hasUpdate.set(false)
-        syncSettings = UploadFile.getAppSyncSettings()
         uploadSupervisorJob = SupervisorJob()
+
+        syncSettings = UploadFile.getAppSyncSettings() ?: return
+
+        if (!context.hasPermissions(DrivePermissions.permissions)) {
+            permissionErrorNotification()
+            return
+        }
 
         try {
             // Retrieve the latest media that have not been taken in the sync
@@ -282,6 +288,21 @@ class UploadAdapter @JvmOverloads constructor(
         showNotification(context, pendingTitle, pendingDescription, UPLOAD_STATUS_ID, progressPendingIntent())
     }
 
+    private fun permissionErrorNotification() {
+        cancelSync()
+        val mainActivityIntent = PendingIntent.getActivity(
+            context, 0,
+            Intent(context, MainActivity::class.java).clearStack(), PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        showNotification(
+            context = context,
+            title = context.getString(R.string.uploadErrorTitle),
+            description = context.getString(R.string.uploadPermissionError),
+            notificationId = UPLOAD_STATUS_ID,
+            contentIntent = mainActivityIntent
+        )
+    }
+
     private fun networkErrorNotification(wifiRequired: Boolean = false) {
         cancelSync()
         showNotification(
@@ -302,10 +323,7 @@ class UploadAdapter @JvmOverloads constructor(
             context?.disableAutoSync()
         }
 
-        val contentIntent = if (isSyncFile) PendingIntent.getActivity(
-            context, 0,
-            Intent(context, SyncSettingsActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT
-        ) else null
+        val contentIntent = if (isSyncFile) context.syncSettingsActivityPedingIntent() else null
 
         showNotification(
             context = context,
@@ -394,7 +412,7 @@ class UploadAdapter @JvmOverloads constructor(
             null -> LaunchActivity::class.java
             else -> MainActivity::class.java
         }
-        val intent = Intent(context, destination).apply {
+        val intent = Intent(context, destination).clearStack().apply {
             putExtra(MainActivity.INTENT_SHOW_PROGRESS, currentUploadFile?.remoteFolder)
         }
         return PendingIntent.getActivity(
@@ -448,22 +466,20 @@ class UploadAdapter @JvmOverloads constructor(
         var customArgs: Array<String>
         val deferreds = arrayListOf<Deferred<Any?>>()
 
-        syncSettings?.let { syncSettings ->
-            MediaFolder.getAllSyncedFolders().forEach { mediaFolder ->
-                var contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                var isNotPending =
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Images.Media.IS_PENDING} = 0" else ""
-                customSelection = "$selection AND $IMAGES_BUCKET_ID = ? $isNotPending"
-                customArgs = args + mediaFolder.id.toString()
-                deferreds.add(getLocalLastPhotosAsync(contentUri, customSelection, customArgs, mediaFolder))
+        MediaFolder.getAllSyncedFolders().forEach { mediaFolder ->
+            var contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            var isNotPending =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Images.Media.IS_PENDING} = 0" else ""
+            customSelection = "$selection AND $IMAGES_BUCKET_ID = ? $isNotPending"
+            customArgs = args + mediaFolder.id.toString()
+            deferreds.add(getLocalLastPhotosAsync(contentUri, customSelection, customArgs, mediaFolder))
 
-                if (syncSettings.syncVideo) {
-                    contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-                    isNotPending =
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Video.Media.IS_PENDING} = 0" else ""
-                    customSelection = "$selection AND $VIDEO_BUCKET_ID = ? $isNotPending"
-                    deferreds.add(getLocalLastPhotosAsync(contentUri, customSelection, customArgs, mediaFolder))
-                }
+            if (syncSettings.syncVideo) {
+                contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                isNotPending =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Video.Media.IS_PENDING} = 0" else ""
+                customSelection = "$selection AND $VIDEO_BUCKET_ID = ? $isNotPending"
+                deferreds.add(getLocalLastPhotosAsync(contentUri, customSelection, customArgs, mediaFolder))
             }
             runBlocking { deferreds.joinAll() }
         }
@@ -485,26 +501,25 @@ class UploadAdapter @JvmOverloads constructor(
 
                         if (UploadFile.canUpload(uri, fileModifiedAt)) {
 
-                            syncSettings?.let {
-                                UploadFile.deleteIfExists(uri)
-                                UploadFile(
-                                    uri = uri.toString(),
-                                    driveId = it.driveId,
-                                    fileCreatedAt = fileCreatedAt,
-                                    fileModifiedAt = fileModifiedAt,
-                                    fileName = fileName,
-                                    fileSize = fileSize,
-                                    remoteFolder = it.syncFolder,
-                                    userId = it.userId
-                                ).apply {
-                                    createSubFolder(mediaFolder.name, it.createDatedSubFolders)
-                                    store()
-                                }
-                                syncSettings?.let { syncSettings ->
-                                    UploadFile.setAppSyncSettings(syncSettings.apply { lastSync = fileModifiedAt })
-                                }
-                                if (!hasUpdate.get()) hasUpdate.set(true)
+                            UploadFile.deleteIfExists(uri)
+
+                            UploadFile(
+                                uri = uri.toString(),
+                                driveId = syncSettings.driveId,
+                                fileCreatedAt = fileCreatedAt,
+                                fileModifiedAt = fileModifiedAt,
+                                fileName = fileName,
+                                fileSize = fileSize,
+                                remoteFolder = syncSettings.syncFolder,
+                                userId = syncSettings.userId
+                            ).apply {
+                                createSubFolder(mediaFolder.name, syncSettings.createDatedSubFolders)
+                                store()
                             }
+
+                            UploadFile.setAppSyncSettings(syncSettings.apply { lastSync = fileModifiedAt })
+
+                            if (!hasUpdate.get()) hasUpdate.set(true)
                         }
                     }
                 }
@@ -534,12 +549,13 @@ class UploadAdapter @JvmOverloads constructor(
         const val UPLOAD_FOLDER = "upload_folder"
         private const val LAST_UPLOADED_COUNT = "last_uploaded_count"
 
+        private fun Context.syncSettingsActivityPedingIntent() = PendingIntent.getActivity(
+            this, 0,
+            Intent(this, SyncSettingsActivity::class.java).clearStack(), PendingIntent.FLAG_UPDATE_CURRENT
+        )
 
         fun Context.showSyncConfigNotification() {
-            val pendingIntent = PendingIntent.getActivity(
-                this, 0,
-                Intent(this, SyncSettingsActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT
-            )
+            val pendingIntent = syncSettingsActivityPedingIntent()
             val notificationManagerCompat = NotificationManagerCompat.from(this)
             this.showGeneralNotification(getString(R.string.noSyncFolderNotificationTitle)).apply {
                 setContentText(getString(R.string.noSyncFolderNotificationDescription))
