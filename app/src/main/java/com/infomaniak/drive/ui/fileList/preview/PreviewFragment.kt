@@ -26,6 +26,7 @@ import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
+import io.sentry.Sentry
 
 open class PreviewFragment : Fragment() {
 
@@ -35,14 +36,31 @@ open class PreviewFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         if (previewViewModel.currentFile == null) {
+
             arguments?.let {
                 it.getParcelable<File>(FILE_TAG)?.let { file ->
-                    previewViewModel.currentFile = FileController.getFileById(file.id, previewSliderViewModel.userDrive) ?: file
+                    previewViewModel.currentFile = getCurrentFile(file)
                 }
             }
         }
         previewViewModel.currentFile?.let { file = it } ?: run { findNavController().popBackStack() }
         super.onCreate(savedInstanceState)
+    }
+
+    private fun getCurrentFile(file: File) = try {
+        FileController.getFileById(file.id, previewSliderViewModel.userDrive) ?: file
+    } catch (exception: Exception) {
+        exception.printStackTrace()
+        Sentry.withScope { scope ->
+            val backStackEntry = findNavController().currentBackStackEntry
+            val previousName = findNavController().previousBackStackEntry?.destination?.displayName
+            scope.setExtra("destination", "${backStackEntry?.destination?.displayName}")
+            scope.setExtra("destination lifecycle", "${backStackEntry?.lifecycle?.currentState}")
+            scope.setExtra("previous", previousName ?: "")
+            scope.setExtra("exception", exception.stackTraceToString())
+            Sentry.captureMessage("Get file from preview fragment 🤔")
+        }
+        file
     }
 
     protected fun noFileFound() = previewViewModel.currentFile == null
