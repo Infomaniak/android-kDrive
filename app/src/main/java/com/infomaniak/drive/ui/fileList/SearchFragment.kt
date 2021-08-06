@@ -129,6 +129,7 @@ class SearchFragment : FileListFragment() {
             it?.let { apiResponse ->
                 if (apiResponse.isSuccess()) {
                     val searchList = apiResponse.data ?: arrayListOf()
+                    searchList.apply { map { file -> file.isFromSearch = true } }
                     when {
                         fileListViewModel.currentPage == 1 -> {
                             fileAdapter.setList(searchList)

@@ -105,8 +105,8 @@ open class File(
      */
     var isComplete: Boolean = false,
     var isOffline: Boolean = false,
-    var isWaitingOffline: Boolean = false,
     var isFromActivities: Boolean = false,
+    var isFromSearch: Boolean = false,
     var isFromUploads: Boolean = false,
 ) : RealmObject(), Parcelable {
 
