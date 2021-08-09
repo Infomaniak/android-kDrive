@@ -368,9 +368,9 @@ object Utils {
         var filePath = ""
         // ExternalStorageProvider
         val docId = DocumentsContract.getDocumentId(uri)
-        val split = docId.split(":").toTypedArray()
+        val split = docId.split(":").dropLastWhile { it.isEmpty() }.toTypedArray()
         val type = split.first()
-        val relativePath = split[1]
+        val relativePath = split.getOrNull(1) ?: return ""
 
         return if ("primary".equals(type, true)) {
             Environment.getExternalStorageDirectory().toString() + "/" + relativePath

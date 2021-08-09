@@ -604,9 +604,11 @@ fun Context.getLocalThumbnail(file: File): Bitmap? {
         }
     } else {
 
-        val localFile = fileUri.lastPathSegment?.split(":")?.let { java.io.File(it[1]) }
+        val localFile = fileUri.lastPathSegment?.split(":")?.let { list ->
+            list.getOrNull(1)?.let { path -> java.io.File(path) }
+        }
         val isSchemeFile = fileUri.scheme.equals(ContentResolver.SCHEME_FILE)
-        
+
         val externalRealPath = when {
             !isSchemeFile && localFile?.exists() == true -> {
                 Sentry.withScope { scope -> // Get more information in uri with absolute path
