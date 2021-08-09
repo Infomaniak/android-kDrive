@@ -46,17 +46,17 @@ class HomeViewModel : ViewModel() {
     private var lastActivities = arrayListOf<FileActivity>()
     private var lastMergedActivities = arrayListOf<FileActivity>()
 
-    private var lastPicturesLastPage = 1
+    var lastPicturesLastPage = 1
     private var lastPicturesTime: Long = 0
     private var lastPictures = arrayListOf<File>()
 
-    fun getLastPictures(driveId: Int): LiveData<ApiResponse<ArrayList<File>>?> {
+    fun getLastPictures(driveId: Int, forceDownload: Boolean = false): LiveData<ApiResponse<ArrayList<File>>?> {
         lastActivityJob.cancel()
         lastActivityJob = Job()
 
         return liveData(Dispatchers.IO + lastActivityJob) {
-            val isFirstPage = lastPicturesPage == 1
-            if (lastPicturesTime != 0 && Date().time - lastPicturesTime < DOWNLOAD_INTERVAL && isFirstPage) {
+            val isFirstPage = lastPicturesPage == 1 || forceDownload
+            if (lastPicturesTime != 0 && Date().time - lastPicturesTime < DOWNLOAD_INTERVAL && isFirstPage && !forceDownload) {
                 lastPicturesPage = lastPicturesLastPage
                 emit(ApiResponse(SUCCESS, lastPictures, null, 1, 1))
                 return@liveData
@@ -78,7 +78,6 @@ class HomeViewModel : ViewModel() {
                         lastPictures.addAll(it)
                     }
                     emit(apiResponse)
-                    lastPicturesPage++
                 }
             } else {
                 emit(ApiResponse(SUCCESS, FileController.getDriveSoloPictures(), null, 1, 1))

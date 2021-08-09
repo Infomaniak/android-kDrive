@@ -195,6 +195,8 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                         whenLoadMoreIsPossible = {
                             val picturesAdapter = lastElementsAdapter as HomePicturesAdapter
                             if (!picturesAdapter.isComplete && !isDownloadingPictures) {
+                                homeViewModel.lastPicturesPage++
+                                homeViewModel.lastPicturesLastPage++
                                 getLastPicturesOrActivities(currentDrive.id, isProOrTeam)
                             }
                         }, findFirstVisibleItemPosition = {
@@ -210,11 +212,8 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun updateUi(forceDownload: Boolean = false) {
         AccountUtils.getCurrentDrive()?.let { currentDrive ->
             val downloadRequired = forceDownload || mustRefreshUi
-            if (downloadRequired) {
-                homeViewModel.lastActivityPage = 1
-                homeViewModel.lastActivityLastPage = 1
-                homeCoordinator.scrollTo(0, 0)
-            }
+            if (downloadRequired) resetAndScrollToTop()
+
             setDriveHeader(currentDrive)
             getLastPicturesOrActivities(currentDrive.id, isProOrTeam, downloadRequired)
             getLastModifiedFiles(downloadRequired)
@@ -235,13 +234,9 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
-    private fun getLastPicturesOrActivities(
-        driveId: Int,
-        isProOrTeam: Boolean,
-        forceDownload: Boolean = false
-    ) {
+    private fun getLastPicturesOrActivities(driveId: Int, isProOrTeam: Boolean, forceDownload: Boolean = false) {
         if (isProOrTeam) getLastActivities(driveId, forceDownload)
-        else getPictures(driveId)
+        else getPictures(driveId, forceDownload)
         setupLastElementsTitle(isProOrTeam)
     }
 
@@ -268,15 +263,15 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
-    private fun getPictures(driveId: Int) {
+    private fun getPictures(driveId: Int, forceDownload: Boolean = false) {
         val picturesAdapter = (lastElementsAdapter as HomePicturesAdapter)
         picturesAdapter.isComplete = false
+        picturesAdapter.clean()
         isDownloadingPictures = true
-        homeViewModel.getLastPictures(driveId).observe(viewLifecycleOwner) { apiResponse ->
+        homeViewModel.getLastPictures(driveId, forceDownload).observe(viewLifecycleOwner) { apiResponse ->
             lastElementsAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
             apiResponse?.data?.let { lastPictures ->
-                if (apiResponse.page == 1) picturesAdapter.setList(lastPictures)
-                else picturesAdapter.addAll(lastPictures)
+                picturesAdapter.addAll(lastPictures)
                 picturesAdapter.isComplete = lastPictures.size < ApiRepository.PER_PAGE
             } ?: also { picturesAdapter.isComplete = true }
             isDownloadingPictures = false
@@ -297,6 +292,12 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 lastFilesAdapter.addAll(files)
             }
         }
+    }
+
+    private fun resetAndScrollToTop() {
+        homeViewModel.lastActivityPage = 1
+        homeViewModel.lastActivityLastPage = 1
+        homeCoordinator.scrollTo(0, 0)
     }
 
     override fun onRefresh() {

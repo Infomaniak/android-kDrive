@@ -35,8 +35,9 @@ abstract class PaginationAdapter<T> : RecyclerView.Adapter<ViewHolder>() {
     abstract override fun onBindViewHolder(holder: ViewHolder, position: Int)
 
     fun clean() {
+        val itemListSize = itemList.size
         itemList.clear()
-        notifyDataSetChanged()
+        notifyItemRangeRemoved(0, itemListSize)
     }
 
     fun getItems(): ArrayList<T> = itemList
@@ -71,7 +72,7 @@ abstract class PaginationAdapter<T> : RecyclerView.Adapter<ViewHolder>() {
         itemList.clear()
         itemList.addAll(newItemList)
         hideLoading()
-        notifyDataSetChanged()
+        notifyItemRangeInserted(0, newItemList.size)
     }
 
     companion object {
