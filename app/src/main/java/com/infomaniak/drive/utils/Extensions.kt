@@ -92,6 +92,7 @@ import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.UtilsUi.getInitials
 import com.infomaniak.lib.core.utils.format
+import io.sentry.Sentry
 import kotlinx.android.synthetic.main.cardview_file_grid.view.*
 import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.android.synthetic.main.item_file.view.fileFavorite
@@ -603,11 +604,26 @@ fun Context.getLocalThumbnail(file: File): Bitmap? {
         }
     } else {
 
-        val externalRealPath = if ("com.android.externalstorage.documents" == fileUri.authority) {
-            Utils.getRealPathFromExternalStorage(this, fileUri)
-        } else ""
+        val localFile = fileUri.lastPathSegment?.split(":")?.let { list ->
+            list.getOrNull(1)?.let { path -> java.io.File(path) }
+        }
+        val isSchemeFile = fileUri.scheme.equals(ContentResolver.SCHEME_FILE)
 
-        if (fileUri.scheme.equals(ContentResolver.SCHEME_FILE) || externalRealPath.isNotBlank()) {
+        val externalRealPath = when {
+            !isSchemeFile && localFile?.exists() == true -> {
+                Sentry.withScope { scope -> // Get more information in uri with absolute path
+                    scope.setExtra("uri", "$fileUri")
+                    Sentry.captureMessage("Uri contains absolute path")
+                }
+                localFile.absolutePath
+            }
+            "com.android.externalstorage.documents" == fileUri.authority -> {
+                Utils.getRealPathFromExternalStorage(this, fileUri)
+            }
+            else -> ""
+        }
+
+        if (isSchemeFile || externalRealPath.isNotBlank()) {
             val path = if (externalRealPath.isNotBlank()) externalRealPath else fileUri.path
             path?.let {
                 if (file.getMimeType().contains("video")) {

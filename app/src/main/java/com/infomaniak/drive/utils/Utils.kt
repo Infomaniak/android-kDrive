@@ -368,16 +368,17 @@ object Utils {
         var filePath = ""
         // ExternalStorageProvider
         val docId = DocumentsContract.getDocumentId(uri)
-        val split = docId.split(':')
+        val split = docId.split(":").dropLastWhile { it.isEmpty() }.toTypedArray()
         val type = split.first()
+        val relativePath = split.getOrNull(1) ?: return ""
 
         return if ("primary".equals(type, true)) {
-            Environment.getExternalStorageDirectory().toString() + "/" + split[1]
+            Environment.getExternalStorageDirectory().toString() + "/" + relativePath
         } else {
             val external = context.externalMediaDirs
             if (external.size > 1) {
                 filePath = external[1].absolutePath
-                filePath = filePath.substring(0, filePath.indexOf("Android")) + split[1]
+                filePath = filePath.substring(0, filePath.indexOf("Android")) + relativePath
             }
             filePath
         }
