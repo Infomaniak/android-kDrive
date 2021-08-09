@@ -605,9 +605,10 @@ fun Context.getLocalThumbnail(file: File): Bitmap? {
     } else {
 
         val localFile = fileUri.lastPathSegment?.split(":")?.let { java.io.File(it[1]) }
-
+        val isSchemeFile = fileUri.scheme.equals(ContentResolver.SCHEME_FILE)
+        
         val externalRealPath = when {
-            localFile?.exists() == true -> {
+            !isSchemeFile && localFile?.exists() == true -> {
                 Sentry.withScope { scope -> // Get more information in uri with absolute path
                     scope.setExtra("uri", "$fileUri")
                     Sentry.captureMessage("Uri contains absolute path")
@@ -620,7 +621,7 @@ fun Context.getLocalThumbnail(file: File): Bitmap? {
             else -> ""
         }
 
-        if (fileUri.scheme.equals(ContentResolver.SCHEME_FILE) || externalRealPath.isNotBlank()) {
+        if (isSchemeFile || externalRealPath.isNotBlank()) {
             val path = if (externalRealPath.isNotBlank()) externalRealPath else fileUri.path
             path?.let {
                 if (file.getMimeType().contains("video")) {
