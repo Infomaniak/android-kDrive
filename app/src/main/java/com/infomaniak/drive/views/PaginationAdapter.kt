@@ -72,7 +72,7 @@ abstract class PaginationAdapter<T> : RecyclerView.Adapter<ViewHolder>() {
         itemList.clear()
         itemList.addAll(newItemList)
         hideLoading()
-        notifyItemRangeInserted(0, newItemList.size)
+        notifyDataSetChanged()
     }
 
     companion object {
