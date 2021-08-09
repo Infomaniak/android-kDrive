@@ -126,6 +126,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         homeSwipeRefreshLayout.setOnRefreshListener(this)
+        // Hack to disable swipe refresh when not on top of the page
         appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
             homeSwipeRefreshLayout.isEnabled = verticalOffset == 0
         })
@@ -157,15 +158,16 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 adapter = lastElementsAdapter
 
                 if (isProOrTeam) {
-                    paginationListener = setPagination({
-                        val lastActivitiesAdapter = lastElementsAdapter as LastActivitiesAdapter
-                        if (!lastActivitiesAdapter.isComplete && !isDownloadingActivities) {
-                            lastActivitiesAdapter.showLoading()
-                            homeViewModel.lastActivityPage++
-                            homeViewModel.lastActivityLastPage++
-                            getLastPicturesOrActivities(currentDrive.id, isProOrTeam)
-                        }
-                    })
+                    paginationListener = setPagination(
+                        whenLoadMoreIsPossible = {
+                            val lastActivitiesAdapter = lastElementsAdapter as LastActivitiesAdapter
+                            if (!lastActivitiesAdapter.isComplete && !isDownloadingActivities) {
+                                lastActivitiesAdapter.showLoading()
+                                homeViewModel.lastActivityPage++
+                                homeViewModel.lastActivityLastPage++
+                                getLastPicturesOrActivities(currentDrive.id, isProOrTeam)
+                            }
+                        })
 
                     (lastElementsAdapter as LastActivitiesAdapter).apply {
                         onMoreFilesClicked = { fileActivity, validPreviewFiles ->
