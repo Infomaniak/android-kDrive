@@ -346,7 +346,7 @@ object Utils {
      * From file path
      */
     @Deprecated(message = "Only for API 28 and below, otherwise use ThumbnailUtils.createImageThumbnail()")
-    fun extractThumbnail(filePath: String, width: Int, height: Int): Bitmap {
+    fun extractThumbnail(filePath: String, width: Int, height: Int): Bitmap? {
         val bitmapOptions = BitmapFactory.Options()
         bitmapOptions.inJustDecodeBounds = true
         BitmapFactory.decodeFile(filePath, bitmapOptions)

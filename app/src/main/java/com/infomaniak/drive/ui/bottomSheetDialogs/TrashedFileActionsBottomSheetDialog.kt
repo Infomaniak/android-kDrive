@@ -64,14 +64,14 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
         }
 
         restoreFileToOriginalPlace.setOnClickListener {
-            trashViewModel.restoreTrashFile(currentTrashedFile).observe(viewLifecycleOwner) { apiResponse ->
+            trashViewModel.restoreTrashFile(currentTrashedFile).observe(this) { apiResponse ->
                 restoreResult(apiResponse, originalPlace = true)
             }
         }
 
         delete.setOnClickListener {
             Utils.confirmFileDeletion(requireContext(), fileName = currentTrashedFile.name, fromTrash = true) { dialog ->
-                trashViewModel.deleteTrashFile(currentTrashedFile).observe(viewLifecycleOwner) { apiResponse ->
+                trashViewModel.deleteTrashFile(currentTrashedFile).observe(this) { apiResponse ->
                     dialog.dismiss()
                     if (apiResponse.data == true) {
                         val title = resources.getQuantityString(R.plurals.snackbarDeleteConfirmation, 1, currentTrashedFile.name)
@@ -95,7 +95,7 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
                 trashViewModel.restoreTrashFile(
                     currentTrashedFile,
                     File(id = folderId, name = folderName.toString())
-                ).observe(viewLifecycleOwner) { apiResponse ->
+                ).observe(this) { apiResponse ->
                     restoreResult(apiResponse, originalPlace = false, folderName = folderName)
                 }
             }
