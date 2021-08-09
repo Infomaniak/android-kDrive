@@ -95,7 +95,8 @@ class UploadAdapter @JvmOverloads constructor(
         }
 
         try {
-            UploadFile.getAppSyncSettings()?.let {
+            val appSyncSettings = UploadFile.getAppSyncSettings()
+            appSyncSettings?.let {
                 // Retrieve the latest media that have not been taken in the sync
                 checkLocalLastPhotos(it)
             }
@@ -109,7 +110,7 @@ class UploadAdapter @JvmOverloads constructor(
 
             val lastUploadedCount = startSyncFiles(syncFiles, syncResult, extras)
 
-            UploadFile.getAppSyncSettings()?.let {
+            appSyncSettings?.let {
                 // Restart if there is any data left
                 checkIfNeedReSync(it, lastUploadedCount)
             }
