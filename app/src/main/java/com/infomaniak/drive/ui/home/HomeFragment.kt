@@ -296,8 +296,12 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun resetAndScrollToTop() {
-        homeViewModel.lastActivityPage = 1
-        homeViewModel.lastActivityLastPage = 1
+        homeViewModel.apply {
+            lastActivityPage = 1
+            lastActivityLastPage = 1
+            lastPicturesPage = 1
+            lastPicturesLastPage = 1
+        }
         homeCoordinator.scrollTo(0, 0)
     }
 
