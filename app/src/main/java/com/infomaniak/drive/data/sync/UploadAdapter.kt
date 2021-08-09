@@ -74,7 +74,6 @@ class UploadAdapter @JvmOverloads constructor(
     private val contentResolver: ContentResolver = context.contentResolver
 ) : AbstractThreadedSyncAdapter(context, autoInitialize, allowParallelSyncs) {
 
-    private lateinit var syncSettings: SyncSettings
     private lateinit var uploadSupervisorJob: CompletableJob
     private val hasUpdate = AtomicBoolean(false)
     private var currentUploadFile: UploadFile? = null
@@ -90,24 +89,31 @@ class UploadAdapter @JvmOverloads constructor(
         hasUpdate.set(false)
         uploadSupervisorJob = SupervisorJob()
 
-        syncSettings = UploadFile.getAppSyncSettings() ?: return
-
         if (!context.hasPermissions(DrivePermissions.permissions)) {
             permissionErrorNotification()
             return
         }
 
         try {
-            // Retrieve the latest media that have not been taken in the sync
-            checkLocalLastPhotos()
+            val appSyncSettings = UploadFile.getAppSyncSettings()
+            appSyncSettings?.let {
+                // Retrieve the latest media that have not been taken in the sync
+                checkLocalLastPhotos(it)
+            }
+
             // Retrieve the files to sync
             val syncFiles = UploadFile.getNotSyncFiles()
             // Continue or cancel sync
             if (checkIfNeedCancel(syncFiles, extras, syncResult)) return
 
             syncResult?.fullSyncRequested = true // While restart, force the sync
-            // Restart if there is any data left
-            checkIfNeedReSync(startSyncFiles(syncFiles, syncResult, extras))
+
+            val lastUploadedCount = startSyncFiles(syncFiles, syncResult, extras)
+
+            appSyncSettings?.let {
+                // Restart if there is any data left
+                checkIfNeedReSync(it, lastUploadedCount)
+            }
 
         } catch (exception: FolderNotFoundException) {
             folderNotFoundNotification()
@@ -448,16 +454,16 @@ class UploadAdapter @JvmOverloads constructor(
     }
 
     @Throws(Exception::class)
-    private fun checkIfNeedReSync(lastUploadedCount: Int) {
+    private fun checkIfNeedReSync(syncSettings: SyncSettings, lastUploadedCount: Int) {
         hasUpdate.set(false)
-        if (checkLocalLastPhotos()) {
+        if (checkLocalLastPhotos(syncSettings)) {
             val bundle = bundleOf(LAST_UPLOADED_COUNT to lastUploadedCount)
             context.syncImmediately(bundle)
         }
     }
 
     @Throws(Exception::class)
-    private fun checkLocalLastPhotos(): Boolean {
+    private fun checkLocalLastPhotos(syncSettings: SyncSettings): Boolean {
         val lastUploadDate = UploadFile.getLastDate(context).time
         val selection = "(" + SyncUtils.DATE_TAKEN + " >= ? OR " + MediaStore.MediaColumns.DATE_ADDED + " >= ? " +
                 "OR ${MediaStore.MediaColumns.DATE_MODIFIED} = ? )"
@@ -472,14 +478,14 @@ class UploadAdapter @JvmOverloads constructor(
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Images.Media.IS_PENDING} = 0" else ""
             customSelection = "$selection AND $IMAGES_BUCKET_ID = ? $isNotPending"
             customArgs = args + mediaFolder.id.toString()
-            deferreds.add(getLocalLastPhotosAsync(contentUri, customSelection, customArgs, mediaFolder))
+            deferreds.add(getLocalLastPhotosAsync(syncSettings, contentUri, customSelection, customArgs, mediaFolder))
 
             if (syncSettings.syncVideo) {
                 contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
                 isNotPending =
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Video.Media.IS_PENDING} = 0" else ""
                 customSelection = "$selection AND $VIDEO_BUCKET_ID = ? $isNotPending"
-                deferreds.add(getLocalLastPhotosAsync(contentUri, customSelection, customArgs, mediaFolder))
+                deferreds.add(getLocalLastPhotosAsync(syncSettings, contentUri, customSelection, customArgs, mediaFolder))
             }
             runBlocking { deferreds.joinAll() }
         }
@@ -487,43 +493,45 @@ class UploadAdapter @JvmOverloads constructor(
     }
 
     @Throws(Exception::class)
-    private fun getLocalLastPhotosAsync(contentUri: Uri, selection: String, args: Array<String>, mediaFolder: MediaFolder) =
-        GlobalScope.async {
-            val sortOrder = SyncUtils.DATE_TAKEN + " ASC, " + MediaStore.MediaColumns.DATE_ADDED + " ASC, " +
-                    MediaStore.MediaColumns.DATE_MODIFIED + " ASC"
-            contentResolver.query(contentUri, null, selection, args, sortOrder)
-                ?.use { cursor ->
-                    while (cursor.moveToNext()) {
-                        val fileName = SyncUtils.getFileName(cursor)
-                        val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
-                        val fileSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
-                        val uri = cursor.uri(contentUri)
+    private fun getLocalLastPhotosAsync(
+        syncSettings: SyncSettings,
+        contentUri: Uri, selection: String, args: Array<String>, mediaFolder: MediaFolder
+    ) = GlobalScope.async {
+        val sortOrder = SyncUtils.DATE_TAKEN + " ASC, " + MediaStore.MediaColumns.DATE_ADDED + " ASC, " +
+                MediaStore.MediaColumns.DATE_MODIFIED + " ASC"
+        contentResolver.query(contentUri, null, selection, args, sortOrder)
+            ?.use { cursor ->
+                while (cursor.moveToNext()) {
+                    val fileName = SyncUtils.getFileName(cursor)
+                    val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
+                    val fileSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
+                    val uri = cursor.uri(contentUri)
 
-                        if (UploadFile.canUpload(uri, fileModifiedAt)) {
+                    if (UploadFile.canUpload(uri, fileModifiedAt)) {
 
-                            UploadFile.deleteIfExists(uri)
+                        UploadFile.deleteIfExists(uri)
 
-                            UploadFile(
-                                uri = uri.toString(),
-                                driveId = syncSettings.driveId,
-                                fileCreatedAt = fileCreatedAt,
-                                fileModifiedAt = fileModifiedAt,
-                                fileName = fileName,
-                                fileSize = fileSize,
-                                remoteFolder = syncSettings.syncFolder,
-                                userId = syncSettings.userId
-                            ).apply {
-                                createSubFolder(mediaFolder.name, syncSettings.createDatedSubFolders)
-                                store()
-                            }
-
-                            UploadFile.setAppSyncSettings(syncSettings.apply { lastSync = fileModifiedAt })
-
-                            if (!hasUpdate.get()) hasUpdate.set(true)
+                        UploadFile(
+                            uri = uri.toString(),
+                            driveId = syncSettings.driveId,
+                            fileCreatedAt = fileCreatedAt,
+                            fileModifiedAt = fileModifiedAt,
+                            fileName = fileName,
+                            fileSize = fileSize,
+                            remoteFolder = syncSettings.syncFolder,
+                            userId = syncSettings.userId
+                        ).apply {
+                            createSubFolder(mediaFolder.name, syncSettings.createDatedSubFolders)
+                            store()
                         }
+
+                        UploadFile.setAppSyncSettings(syncSettings.apply { lastSync = fileModifiedAt })
+
+                        if (!hasUpdate.get()) hasUpdate.set(true)
                     }
                 }
-        }
+            }
+    }
 
     private fun cancelSync() {
         uploadSupervisorJob.cancelChildren()
