@@ -264,17 +264,18 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun getPictures(driveId: Int, forceDownload: Boolean = false) {
-        val picturesAdapter = (lastElementsAdapter as HomePicturesAdapter)
-        picturesAdapter.isComplete = false
-        picturesAdapter.clean()
-        isDownloadingPictures = true
-        homeViewModel.getLastPictures(driveId, forceDownload).observe(viewLifecycleOwner) { apiResponse ->
-            lastElementsAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
-            apiResponse?.data?.let { lastPictures ->
-                picturesAdapter.addAll(lastPictures)
-                picturesAdapter.isComplete = lastPictures.size < ApiRepository.PER_PAGE
-            } ?: also { picturesAdapter.isComplete = true }
-            isDownloadingPictures = false
+        (lastElementsAdapter as HomePicturesAdapter).apply {
+            isComplete = false
+            isDownloadingPictures = true
+            homeViewModel.getLastPictures(driveId, forceDownload).observe(viewLifecycleOwner) { apiResponse ->
+                lastElementsAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+                apiResponse?.data?.let { lastPictures ->
+                    clean()
+                    addAll(lastPictures)
+                    isComplete = lastPictures.size < ApiRepository.PER_PAGE
+                } ?: also { isComplete = true }
+                isDownloadingPictures = false
+            }
         }
     }
 
