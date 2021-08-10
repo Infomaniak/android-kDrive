@@ -36,6 +36,7 @@ import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.showSnackbar
+import io.sentry.Sentry
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -165,34 +166,44 @@ class UploadInProgressFragment : FileListFragment() {
             fileListViewModel.getPendingFiles(folderID).observe(viewLifecycleOwner) { syncFiles ->
                 lifecycleScope.launch(Dispatchers.IO) {
                     val files = arrayListOf<File>()
-                    syncFiles.forEach {
-                        val uri = it.getUriObject()
+                    syncFiles.forEach { uploadFile ->
+                        val uri = uploadFile.getUriObject()
 
                         if (uri.scheme.equals(ContentResolver.SCHEME_CONTENT)) {
                             context?.apply {
-                                SyncUtils.checkDocumentProviderPermissions(this, uri)
-                                contentResolver?.query(uri, null, null, null, null)?.use { cursor ->
-                                    if (cursor.moveToFirst()) {
-                                        val size = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
-                                        files.add(
-                                            File(
-                                                id = 0,
-                                                name = it.fileName,
-                                                size = size,
-                                                path = it.uri,
-                                                isFromUploads = true
+                                try {
+                                    SyncUtils.checkDocumentProviderPermissions(this, uri)
+                                    contentResolver?.query(uri, null, null, null, null)?.use { cursor ->
+                                        if (cursor.moveToFirst()) {
+                                            val size = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
+                                            files.add(
+                                                File(
+                                                    id = 0,
+                                                    name = uploadFile.fileName,
+                                                    size = size,
+                                                    path = uploadFile.uri,
+                                                    isFromUploads = true
+                                                )
                                             )
-                                        )
+                                        }
                                     }
+                                } catch (exception: Exception) {
+                                    exception.printStackTrace()
+                                    Sentry.withScope { scope ->
+                                        scope.setExtra("data", uploadFile.uri)
+                                        scope.setExtra("stack trace", exception.stackTraceToString())
+                                        exception.message?.let { Sentry.captureMessage(it) }
+                                    }
+                                    return@forEach
                                 }
                             }
                         } else {
                             files.add(
                                 File(
                                     id = 0,
-                                    name = it.fileName,
+                                    name = uploadFile.fileName,
                                     size = uri.toFile().length(),
-                                    path = it.uri,
+                                    path = uploadFile.uri,
                                     isFromUploads = true
                                 )
                             )
