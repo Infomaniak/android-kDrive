@@ -147,8 +147,8 @@
         android:label="FileInfoActionsBottomSheetDialog"
         tools:layout="@layout/fragment_bottom_sheet_file_info_actions">
         <argument
-            android:name="fileId"
-            app:argType="integer" />
+            android:name="file"
+            app:argType="com.infomaniak.drive.data.models.File" />
         <argument
             android:name="userDrive"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />

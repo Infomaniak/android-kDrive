@@ -67,7 +67,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        currentFile = FileController.getFileById(navigationArgs.fileId, navigationArgs.userDrive)!!
+        val file = navigationArgs.file
+        currentFile = FileController.getFileById(file.id, navigationArgs.userDrive) ?: file
 
         drivePermissions = DrivePermissions()
         drivePermissions.registerPermissions(this) { autorized -> if (autorized) downloadFileClicked() }
