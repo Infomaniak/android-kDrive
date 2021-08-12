@@ -29,11 +29,7 @@ interface RealmListParceler<T> : Parceler<RealmList<T>?> {
     override fun create(parcel: Parcel): RealmList<T>? = parcel.readRealmList(clazz)
 
     override fun RealmList<T>?.write(parcel: Parcel, flags: Int) {
-        try {
-            parcel.writeRealmList(this)
-        } catch (exception: Exception) {
-            exception.printStackTrace()
-        }
+        parcel.writeRealmList(this)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -47,6 +43,13 @@ interface RealmListParceler<T> : Parceler<RealmList<T>?> {
     }
 
     private fun <T> Parcel.writeRealmList(realmList: RealmList<T>?) {
+        val size = try {
+            realmList?.size ?: 0
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+            return
+        }
+
         writeInt(
             when (realmList) {
                 null -> 0
@@ -54,7 +57,7 @@ interface RealmListParceler<T> : Parceler<RealmList<T>?> {
             }
         )
         if (realmList != null) {
-            writeInt(realmList.size)
+            writeInt(size)
             for (t in realmList) {
                 writeValue(t)
             }
