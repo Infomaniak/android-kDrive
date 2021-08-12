@@ -38,6 +38,7 @@ import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
 import io.realm.*
+import io.sentry.Sentry
 import kotlinx.android.parcel.RawValue
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
@@ -126,18 +127,34 @@ object FileController {
                         if (!keepFiles.contains(it.id)) removeFile(it.id, keepFileCaches, keepFiles, realm)
                     }
                 }
-                if (!keepFileCaches.contains(fileId)) file.deleteCaches(Realm.getApplicationContext()!!)
-                if (!keepFiles.contains(fileId) && file.isValid) realm.executeTransaction { file.deleteFromRealm() }
+                try {
+                    if (!keepFileCaches.contains(fileId)) file.deleteCaches(Realm.getApplicationContext()!!)
+                    if (!keepFiles.contains(fileId)) realm.executeTransaction { if (file.isValid) file.deleteFromRealm() }
+                } catch (exception: Exception) {
+                    Sentry.withScope { scope ->
+                        scope.setExtra("with custom realm", "${customRealm != null}")
+                        scope.setExtra("recursive", "$recursive")
+                        Sentry.captureException(exception)
+                    }
+                }
             }
         }
         customRealm?.let(block) ?: getRealmInstance().use(block)
     }
 
     fun updateFile(fileId: Int, realm: Realm? = null, userDrive: UserDrive = UserDrive(), transaction: (file: File) -> Unit) {
-        val block: (Realm) -> Unit? = { currentRealm ->
-            getFileById(currentRealm, fileId)?.let { file -> currentRealm.executeTransaction { transaction(file) } }
+        try {
+            val block: (Realm) -> Unit? = { currentRealm ->
+                getFileById(currentRealm, fileId)?.let { file -> currentRealm.executeTransaction { transaction(file) } }
+            }
+            realm?.let(block) ?: getRealmInstance(userDrive).use(block)
+        } catch (exception: Exception) {
+            Sentry.withScope { scope ->
+                scope.setExtra("custom realm", "${realm != null}")
+                Sentry.captureException(exception)
+            }
         }
-        realm?.let(block) ?: getRealmInstance(userDrive).use(block)
+
     }
 
     fun updateOfflineStatus(fileId: Int, isOffline: Boolean) {
