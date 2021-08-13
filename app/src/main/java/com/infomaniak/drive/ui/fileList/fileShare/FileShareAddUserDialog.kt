@@ -81,7 +81,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
 
         availableUsersAdapter = userAutoCompleteTextView.setupAvailableShareableItems(
             requireContext(),
-            getAvailableShareableElements()
+            getAvailableUsers()
         ) { element ->
             userAutoCompleteTextView.setText("")
             addToSharedElementList(if (element is Invitation) element.email else element)
@@ -135,7 +135,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                         emails.add(element)
                         createChip(element).setOnClickListener {
                             emails.remove(element)
-                            availableUsersAdapter.setAll(getAvailableShareableElements())
+                            availableUsersAdapter.setAll(getAvailableUsers())
                             selectedUsersChipGroup.removeView(it)
                         }
                     }
@@ -146,7 +146,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                         availableUsersAdapter.removeItem(element.id)
                         createChip(element).setOnClickListener {
                             users.remove(element)
-                            availableUsersAdapter.setAll(getAvailableShareableElements())
+                            availableUsersAdapter.setAll(getAvailableUsers())
                             selectedUsersChipGroup.removeView(it)
                         }
                     }
@@ -155,7 +155,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                     tags.add(element)
                     createChip(element).setOnClickListener {
                         tags.remove(element)
-                        availableUsersAdapter.setAll(getAvailableShareableElements())
+                        availableUsersAdapter.setAll(getAvailableUsers())
                         selectedUsersChipGroup.removeView(it)
                     }
                 }
@@ -205,14 +205,12 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
         return chip
     }
 
-    private fun getAvailableShareableElements(): ArrayList<Shareable> {
-        return ArrayList(
-            fileShareViewModel.availableUsers.value
-                ?.removeCommonUsers(ArrayList(fileShareViewModel.currentFile.value?.users ?: arrayListOf()))
-                ?.filterNot { availableUser ->
-                    selectedItems.users.any { it.id == availableUser.id }
-                }
-        )
+    private fun getAvailableUsers(): List<Shareable> {
+        return fileShareViewModel.availableUsers.value
+            ?.removeCommonUsers(ArrayList(fileShareViewModel.currentFile.value?.users ?: arrayListOf()))
+            ?.filterNot { availableUser ->
+                selectedItems.users.any { it.id == availableUser.id }
+            } ?: listOf()
     }
 
     private fun createShareAndCloseDialog(file: File, body: MutableMap<String, Serializable>) {

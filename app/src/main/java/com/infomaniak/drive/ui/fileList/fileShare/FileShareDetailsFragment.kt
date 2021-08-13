@@ -56,15 +56,15 @@ class FileShareDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val allUserList = ArrayList(AccountUtils.getCurrentDrive()?.users?.let { categories ->
-            DriveInfosController.getUsers(ArrayList(categories.drive + categories.account))
-        })
+        val allUserList = AccountUtils.getCurrentDrive()?.users?.let { categories ->
+            return@let DriveInfosController.getUsers(ArrayList(categories.drive + categories.account))
+        } ?: listOf()
 
-        fileShareViewModel.availableUsers.value = allUserList // add available tags if in common
+        fileShareViewModel.availableUsers.value = ArrayList(allUserList) // add available tags if in common
         availableShareableItemsAdapter =
             userAutoCompleteTextView.setupAvailableShareableItems(
                 requireContext(),
-                allUserList as ArrayList<Shareable>
+                allUserList
             ) { selectedElement ->
                 userAutoCompleteTextView.setText("")
                 openAddUserDialog(selectedElement)
@@ -82,7 +82,7 @@ class FileShareDetailsFragment : Fragment() {
         mainViewModel.getFileDetails(navigationArgs.fileId, UserDrive()).observe(viewLifecycleOwner) { fileDetails ->
             fileDetails?.let { file ->
                 fileShareViewModel.currentFile.value = file
-                availableShareableItemsAdapter.setAll(allUserList.removeCommonUsers(ArrayList(file.users)) as ArrayList<Shareable>)
+                availableShareableItemsAdapter.setAll(allUserList.removeCommonUsers(ArrayList(file.users)))
                 sharedItemsAdapter = SharedItemsAdapter(file) { shareable ->
                     openSelectPermissionDialog(shareable)
                 }

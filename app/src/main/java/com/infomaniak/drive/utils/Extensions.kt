@@ -428,11 +428,11 @@ fun String.isEmail(): Boolean {
 
 fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
     context: Context,
-    itemList: ArrayList<Shareable>,
+    itemList: List<Shareable>,
     onDataPassed: (t: Any) -> Unit
 ): AvailableShareableItemsAdapter {
     setDropDownBackgroundResource(R.drawable.background_popup)
-    val availableUsersAdapter = AvailableShareableItemsAdapter(context, itemList) { user ->
+    val availableUsersAdapter = AvailableShareableItemsAdapter(context, ArrayList(itemList)) { user ->
         onDataPassed(user)
         dismissDropDown()
     }
@@ -463,7 +463,7 @@ fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
     return availableUsersAdapter
 }
 
-fun ArrayList<DriveUser>.removeCommonUsers(intersectedUsers: ArrayList<Int>): ArrayList<DriveUser> {
+fun Collection<DriveUser>.removeCommonUsers(intersectedUsers: ArrayList<Int>): ArrayList<DriveUser> {
     return this.filterNot { availableUser ->
         intersectedUsers.any { it == availableUser.id }
     } as ArrayList<DriveUser>

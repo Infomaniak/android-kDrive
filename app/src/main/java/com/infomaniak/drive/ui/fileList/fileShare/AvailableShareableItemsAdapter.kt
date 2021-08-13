@@ -53,9 +53,8 @@ class AvailableShareableItemsAdapter(
         initialList = ArrayList(itemList)
     }
 
-    fun setAll(items: ArrayList<Shareable>) {
-        itemList = items
-        initialList = items
+    fun setAll(items: List<Shareable>) {
+        itemList = ArrayList(items)
         notifyDataSetChanged()
     }
 
