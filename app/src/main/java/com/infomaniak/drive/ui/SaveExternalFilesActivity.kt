@@ -46,6 +46,8 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress
+import io.sentry.Sentry
+import io.sentry.SentryLevel
 import kotlinx.android.synthetic.main.activity_save_external_file.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -69,9 +71,34 @@ class SaveExternalFilesActivity : BaseActivity() {
 
         if (!isAuth()) return
 
-        when (intent?.action) {
-            Intent.ACTION_SEND -> handleSendSingle(intent)
-            Intent.ACTION_SEND_MULTIPLE -> handleSendMultiple(intent)
+        val drivePermissions = DrivePermissions()
+        drivePermissions.registerPermissions(this,
+            onPermissionResult = { authorized ->
+                if (authorized) initUi(drivePermissions)
+            }, onDismiss = { authorized ->
+                if (authorized) initUi(drivePermissions)
+                else finish()
+            })
+
+        if (drivePermissions.checkSyncPermissions()) {
+            initUi(drivePermissions)
+        }
+    }
+
+    private fun initUi(drivePermissions: DrivePermissions) {
+        try {
+            when (intent?.action) {
+                Intent.ACTION_SEND -> handleSendSingle(intent)
+                Intent.ACTION_SEND_MULTIPLE -> handleSendMultiple(intent)
+            }
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+            showSnackbar(R.string.anErrorHasOccurred)
+            Sentry.withScope { scope ->
+                scope.level = SentryLevel.WARNING
+                Sentry.captureException(exception)
+            }
+            return
         }
 
         activeDefaultUser()
@@ -133,9 +160,6 @@ class SaveExternalFilesActivity : BaseActivity() {
             fileNameEdit.showOrHideEmptyError()
         }
 
-        val drivePermissions = DrivePermissions()
-        drivePermissions.registerPermissions(this)
-
         saveButton.initProgress(this)
         saveButton.setOnClickListener {
             saveButton.showProgress()
@@ -158,7 +182,6 @@ class SaveExternalFilesActivity : BaseActivity() {
                 }
             }
         }
-        drivePermissions.checkSyncPermissions()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -233,14 +256,24 @@ class SaveExternalFilesActivity : BaseActivity() {
     }
 
     private fun storeFiles(userID: Int, driveID: Int, folderID: Int): Boolean {
-        return if (isMultiple) {
-            val adapter = fileNames.adapter as SaveExternalUriAdapter
-            adapter.uris.forEach { currentUri ->
-                if (!store(uri = currentUri, userId = userID, driveId = driveID, folderId = folderID)) return false
+        return try {
+            if (isMultiple) {
+                val adapter = fileNames.adapter as SaveExternalUriAdapter
+                adapter.uris.forEach { currentUri ->
+                    if (!store(uri = currentUri, userId = userID, driveId = driveID, folderId = folderID)) return false
+                }
+                true
+            } else {
+                store(currentUri!!, fileNameEdit.text.toString(), userID, driveID, folderID)
             }
-            true
-        } else {
-            store(currentUri!!, fileNameEdit.text.toString(), userID, driveID, folderID)
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+            showSnackbar(R.string.anErrorHasOccurred)
+            Sentry.withScope { scope ->
+                scope.level = SentryLevel.WARNING
+                Sentry.captureException(exception)
+            }
+            false
         }
     }
 
