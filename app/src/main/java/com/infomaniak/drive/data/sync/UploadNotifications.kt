@@ -20,6 +20,7 @@ package com.infomaniak.drive.data.sync
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.infomaniak.drive.R
@@ -31,9 +32,16 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.NotificationUtils
 import com.infomaniak.drive.utils.NotificationUtils.uploadNotification
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
+import com.infomaniak.drive.utils.clearStack
 import io.sentry.Sentry
 
 object UploadNotifications {
+
+    private val pendingIntentFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+    } else {
+        PendingIntent.FLAG_UPDATE_CURRENT
+    }
 
     fun UploadFile.setupCurrentUploadNotification(context: Context, pendingCount: Int) {
         val pendingTitle = context.getString(R.string.uploadInProgressTitle)
@@ -64,10 +72,7 @@ object UploadNotifications {
             context.disableAutoSync()
         }
 
-        val contentIntent = if (isSyncFile) PendingIntent.getActivity(
-            context, 0,
-            Intent(context, SyncSettingsActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT
-        ) else null
+        val contentIntent = if (isSyncFile) context.syncSettingsActivityPendingIntent() else null
 
         showNotification(
             context = context,
@@ -115,6 +120,20 @@ object UploadNotifications {
             description = context.getString(R.string.errorFileLocked),
             notificationId = NotificationUtils.UPLOAD_STATUS_ID,
             contentIntent = progressPendingIntent(context)
+        )
+    }
+
+    fun permissionErrorNotification(context: Context) {
+        val mainActivityIntent = PendingIntent.getActivity(
+            context, 0,
+            Intent(context, MainActivity::class.java).clearStack(), PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        showNotification(
+            context = context,
+            title = context.getString(R.string.uploadErrorTitle),
+            description = context.getString(R.string.uploadPermissionError),
+            notificationId = NotificationUtils.UPLOAD_STATUS_ID,
+            contentIntent = mainActivityIntent
         )
     }
 
@@ -174,12 +193,18 @@ object UploadNotifications {
             null -> LaunchActivity::class.java
             else -> MainActivity::class.java
         }
-        val intent = Intent(context, destination).apply {
+        val intent = Intent(context, destination).clearStack().apply {
             putExtra(MainActivity.INTENT_SHOW_PROGRESS, remoteFolder)
         }
+
         return PendingIntent.getActivity(
             context, 0,
-            intent, PendingIntent.FLAG_UPDATE_CURRENT
+            intent, pendingIntentFlags
         )
     }
+
+    fun Context.syncSettingsActivityPendingIntent(): PendingIntent = PendingIntent.getActivity(
+        this, 0,
+        Intent(this, SyncSettingsActivity::class.java).clearStack(), pendingIntentFlags
+    )
 }

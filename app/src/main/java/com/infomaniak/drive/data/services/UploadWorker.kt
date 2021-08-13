@@ -26,8 +26,8 @@ import android.os.Parcelable
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toFile
-import androidx.core.net.toUri
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.work.*
 import com.infomaniak.drive.R
@@ -46,15 +46,17 @@ import com.infomaniak.drive.data.sync.UploadNotifications.outOfMemoryNotificatio
 import com.infomaniak.drive.data.sync.UploadNotifications.quotaExceededNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.setupCurrentUploadNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
+import com.infomaniak.drive.data.sync.UploadNotifications.syncSettingsActivityPendingIntent
 import com.infomaniak.drive.data.sync.UploadProgressReceiver
-import com.infomaniak.drive.utils.MediaFoldersProvider
-import com.infomaniak.drive.utils.NotificationUtils
+import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.MediaFoldersProvider.IMAGES_BUCKET_ID
+import com.infomaniak.drive.utils.MediaFoldersProvider.VIDEO_BUCKET_ID
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
+import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.uploadServiceNotification
-import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.drive.utils.uri
 import com.infomaniak.lib.core.utils.ApiController
+import com.infomaniak.lib.core.utils.hasPermissions
 import io.sentry.Sentry
 import kotlinx.coroutines.*
 import java.io.FileNotFoundException
@@ -64,14 +66,12 @@ import java.util.*
 class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
     private lateinit var contentResolver: ContentResolver
 
-    private var syncSettings: SyncSettings? = null
     private var currentUploadFile: UploadFile? = null
     private var currentUploadTask: UploadTask? = null
     private var uploadedCount = 0
 
     override suspend fun doWork(): Result {
         contentResolver = applicationContext.contentResolver
-        syncSettings = UploadFile.getAppSyncSettings()
 
         applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
         applicationContext.uploadServiceNotification().apply {
@@ -80,8 +80,17 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
 
         return try {
+            // Check if we have the required permissions before continuing
+            if (!applicationContext.hasPermissions(DrivePermissions.permissions)) {
+                UploadNotifications.permissionErrorNotification(applicationContext)
+                return Result.failure()
+            }
+
             // Retrieve the latest media that have not been taken in the sync
-            checkLocalLastPhotos()
+            val appSyncSettings = UploadFile.getAppSyncSettings()
+            appSyncSettings?.let {
+                checkLocalLastMedias(it)
+            }
 
             // Check if the user has cancelled the upload and no files to sync
             val isCancelledByUser = inputData.getBoolean(CANCELLED_BY_USER, false)
@@ -92,7 +101,9 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
             // Start uploads
             val result = startSyncFiles()
-            checkIfNeedReSync()
+            // Check if need to re-sync
+            appSyncSettings?.let { checkIfNeedReSync(it) }
+
             result
         } catch (exception: UploadTask.FolderNotFoundException) {
             currentUploadFile?.folderNotFoundNotification(applicationContext)
@@ -183,7 +194,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     @Synchronized
     private suspend fun initUploadFile(uploadFile: UploadFile, pendingCount: Int) =
         withContext(Dispatchers.IO) {
-            val uri = uploadFile.uri.toUri()
+            val uri = uploadFile.getUriObject()
             currentUploadFile = uploadFile
             applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
             uploadFile.setupCurrentUploadNotification(applicationContext, pendingCount)
@@ -202,7 +213,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                     SyncUtils.checkDocumentProviderPermissions(applicationContext, uri)
 
                     val fileSize = try {
-                        contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize }
+                        val originalUri = uploadFile.getOriginalUri(applicationContext)
+                        contentResolver.openFileDescriptor(originalUri, "r")?.use { it.statSize }
                     } catch (exception: FileNotFoundException) {
                         null
                     }
@@ -242,7 +254,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             ).apply { start() }
             Log.d("kDrive", "$TAG > end upload ${uploadFile.fileName}")
         } else {
-            UploadFile.deleteIfExists(uploadFile.uri.toUri())
+            UploadFile.deleteIfExists(uploadFile.getUriObject())
             Log.d("kDrive", "$TAG > ${uploadFile.fileName} deleted size:$size")
             Sentry.withScope { scope ->
                 scope.setExtra("data", ApiController.gson.toJson(uploadFile))
@@ -251,15 +263,15 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private suspend fun checkIfNeedReSync() {
-        checkLocalLastPhotos()
+    private suspend fun checkIfNeedReSync(syncSettings: SyncSettings) {
+        checkLocalLastMedias(syncSettings)
         if (UploadFile.getNotSyncedFilesCount() > 0) {
             val data = Data.Builder().putInt(LAST_UPLOADED_COUNT, uploadedCount).build()
             applicationContext.syncImmediately(data, true)
         }
     }
 
-    private suspend fun checkLocalLastPhotos() = withContext(Dispatchers.IO) {
+    private suspend fun checkLocalLastMedias(syncSettings: SyncSettings) = withContext(Dispatchers.IO) {
         val lastUploadDate = UploadFile.getLastDate(applicationContext).time
         val selection = "(" + SyncUtils.DATE_TAKEN + " >= ? OR " + MediaStore.MediaColumns.DATE_ADDED + " >= ? " +
                 "OR ${MediaStore.MediaColumns.DATE_MODIFIED} = ? )"
@@ -268,28 +280,37 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         var customArgs: Array<String>
         val deferreds = arrayListOf<Deferred<Any?>>()
 
-        syncSettings?.let { syncSettings ->
-            MediaFolder.getAllSyncedFolders().forEach { mediaFolder ->
-                var contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                var isNotPending =
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Images.Media.IS_PENDING} = 0" else ""
-                customSelection = "$selection AND ${MediaFoldersProvider.IMAGES_BUCKET_ID} = ? $isNotPending"
-                customArgs = args + mediaFolder.id.toString()
-                deferreds.add(async { getLocalLastPhotosAsync(contentUri, customSelection, customArgs, mediaFolder) })
+        MediaFolder.getAllSyncedFolders().forEach { mediaFolder ->
+            var contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            var isNotPending =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Images.Media.IS_PENDING} = 0" else ""
+            customSelection = "$selection AND $IMAGES_BUCKET_ID = ? $isNotPending"
+            customArgs = args + mediaFolder.id.toString()
+            val getLastImagesOperation =
+                async { getLocalLastMediasAsync(syncSettings, contentUri, customSelection, customArgs, mediaFolder) }
+            deferreds.add(getLastImagesOperation)
 
-                if (syncSettings.syncVideo) {
-                    contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-                    isNotPending =
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Video.Media.IS_PENDING} = 0" else ""
-                    customSelection = "$selection AND ${MediaFoldersProvider.VIDEO_BUCKET_ID} = ? $isNotPending"
-                    deferreds.add(async { getLocalLastPhotosAsync(contentUri, customSelection, customArgs, mediaFolder) })
-                }
+            if (syncSettings.syncVideo) {
+                contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                isNotPending =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Video.Media.IS_PENDING} = 0" else ""
+                customSelection = "$selection AND $VIDEO_BUCKET_ID = ? $isNotPending"
+                val getLastVideosOperation =
+                    async { getLocalLastMediasAsync(syncSettings, contentUri, customSelection, customArgs, mediaFolder) }
+                deferreds.add(getLastVideosOperation)
             }
+
             deferreds.joinAll()
         }
     }
 
-    private fun getLocalLastPhotosAsync(contentUri: Uri, selection: String, args: Array<String>, mediaFolder: MediaFolder) {
+    private fun getLocalLastMediasAsync(
+        syncSettings: SyncSettings,
+        contentUri: Uri,
+        selection: String,
+        args: Array<String>,
+        mediaFolder: MediaFolder
+    ) {
         val sortOrder = SyncUtils.DATE_TAKEN + " ASC, " + MediaStore.MediaColumns.DATE_ADDED + " ASC, " +
                 MediaStore.MediaColumns.DATE_MODIFIED + " ASC"
         contentResolver.query(contentUri, null, selection, args, sortOrder)
@@ -301,26 +322,22 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                     val uri = cursor.uri(contentUri)
 
                     if (UploadFile.canUpload(uri, fileModifiedAt)) {
-
-                        syncSettings?.let {
-                            UploadFile.deleteIfExists(uri)
-                            UploadFile(
-                                uri = uri.toString(),
-                                driveId = it.driveId,
-                                fileCreatedAt = fileCreatedAt,
-                                fileModifiedAt = fileModifiedAt,
-                                fileName = fileName,
-                                fileSize = fileSize,
-                                remoteFolder = it.syncFolder,
-                                userId = it.userId
-                            ).apply {
-                                createSubFolder(mediaFolder.name, it.createDatedSubFolders)
-                                store()
-                            }
-                            syncSettings?.let { syncSettings ->
-                                UploadFile.setAppSyncSettings(syncSettings.apply { lastSync = fileModifiedAt })
-                            }
+                        UploadFile.deleteIfExists(uri)
+                        UploadFile(
+                            uri = uri.toString(),
+                            driveId = syncSettings.driveId,
+                            fileCreatedAt = fileCreatedAt,
+                            fileModifiedAt = fileModifiedAt,
+                            fileName = fileName,
+                            fileSize = fileSize,
+                            remoteFolder = syncSettings.syncFolder,
+                            userId = syncSettings.userId
+                        ).apply {
+                            createSubFolder(mediaFolder.name, syncSettings.createDatedSubFolders)
+                            store()
                         }
+
+                        UploadFile.setAppSyncSettings(syncSettings.apply { lastSync = fileModifiedAt })
                     }
                 }
             }
@@ -336,5 +353,15 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         fun workConstraints() = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
+
+        fun Context.showSyncConfigNotification() {
+            val pendingIntent = this.syncSettingsActivityPendingIntent()
+            val notificationManagerCompat = NotificationManagerCompat.from(this)
+            this.showGeneralNotification(getString(R.string.noSyncFolderNotificationTitle)).apply {
+                setContentText(getString(R.string.noSyncFolderNotificationDescription))
+                setContentIntent(pendingIntent)
+                notificationManagerCompat.notify(NotificationUtils.FILE_OBSERVE_ID, this.build())
+            }
+        }
     }
 }
