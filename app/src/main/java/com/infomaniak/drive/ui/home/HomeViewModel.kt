@@ -41,22 +41,22 @@ class HomeViewModel : ViewModel() {
     var lastActivityPage = 1
     var lastPicturesPage = 1
 
-    private var lastActivityLastPage = 1
+    var lastActivityLastPage = 1
     private var lastActivitiesTime: Long = 0
     private var lastActivities = arrayListOf<FileActivity>()
     private var lastMergedActivities = arrayListOf<FileActivity>()
 
-    private var lastPicturesLastPage = 1
+    var lastPicturesLastPage = 1
     private var lastPicturesTime: Long = 0
     private var lastPictures = arrayListOf<File>()
 
-    fun getLastPictures(driveId: Int): LiveData<ApiResponse<ArrayList<File>>?> {
+    fun getLastPictures(driveId: Int, forceDownload: Boolean = false): LiveData<ApiResponse<ArrayList<File>>?> {
         lastActivityJob.cancel()
         lastActivityJob = Job()
 
         return liveData(Dispatchers.IO + lastActivityJob) {
-            val isFirstPage = lastPicturesPage == 1
-            if (lastPicturesTime != 0 && Date().time - lastPicturesTime < DOWNLOAD_INTERVAL && isFirstPage) {
+            val isFirstPage = lastPicturesPage == 1 || forceDownload
+            if (lastPicturesTime != 0 && Date().time - lastPicturesTime < DOWNLOAD_INTERVAL && isFirstPage && !forceDownload) {
                 lastPicturesPage = lastPicturesLastPage
                 emit(ApiResponse(SUCCESS, lastPictures, null, 1, 1))
                 return@liveData
@@ -78,7 +78,6 @@ class HomeViewModel : ViewModel() {
                         lastPictures.addAll(it)
                     }
                     emit(apiResponse)
-                    lastPicturesPage++
                 }
             } else {
                 emit(ApiResponse(SUCCESS, FileController.getDriveSoloPictures(), null, 1, 1))
@@ -106,7 +105,6 @@ class HomeViewModel : ViewModel() {
             val apiRepository = ApiRepository.getLastActivities(driveId, lastActivityPage)
             val data = apiRepository.data
             if (apiRepository.isSuccess() || (lastActivityPage == 1 && data != null)) {
-
                 if (lastActivityPage == 1) {
                     FileController.removeOrphanAndActivityFiles()
                     lastActivities = arrayListOf()
@@ -121,8 +119,6 @@ class HomeViewModel : ViewModel() {
                         lastMergedActivities.addAll(mergeAndCleanActivities)
                         FileController.storeFileActivities(data)
                         emit(apiRepository to mergeAndCleanActivities)
-                        lastActivityPage++
-                        lastActivityLastPage++
                     }
                 }
             } else if (lastActivityPage == 1) {

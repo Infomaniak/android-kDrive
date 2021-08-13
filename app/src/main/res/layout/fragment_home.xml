@@ -15,185 +15,193 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/homeCoordinator"
+    android:id="@+id/homeSwipeRefreshLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.home.HomeFragment">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/homeCoordinator"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
-        <com.google.android.material.appbar.CollapsingToolbarLayout
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBarLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_scrollFlags="scroll|snap">
+            android:layout_height="wrap_content">
 
-            <LinearLayout
+            <com.google.android.material.appbar.CollapsingToolbarLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:animateLayoutChanges="true"
-                android:orientation="vertical">
+                app:layout_scrollFlags="scroll|snap">
 
-                <include
-                    android:id="@+id/noNetworkCard"
-                    layout="@layout/view_network_unavailable_home"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/marginStandard"
-                    android:layout_marginTop="@dimen/marginStandardMedium"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
+                    android:animateLayoutChanges="true"
+                    android:orientation="vertical">
 
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/driveInfos"
-                    style="@style/CardViewInfomaniak"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/marginStandard"
-                    android:layout_marginTop="@dimen/marginStandard"
-                    android:layout_marginBottom="@dimen/marginStandard"
-                    android:clickable="true"
-                    android:contentDescription="@string/buttonSwitchDrive"
-                    android:focusable="true"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/searchForm">
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
+                    <include
+                        android:id="@+id/noNetworkCard"
+                        layout="@layout/view_network_unavailable_home"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/marginStandard"
+                        android:layout_marginTop="@dimen/marginStandardMedium"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
 
-                        <ImageView
-                            android:id="@+id/driveIcon"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="@dimen/marginStandard"
-                            android:src="@drawable/ic_drive"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:ignore="ContentDescription" />
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/driveInfos"
+                        style="@style/CardViewInfomaniak"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/marginStandard"
+                        android:layout_marginTop="@dimen/marginStandard"
+                        android:layout_marginBottom="@dimen/marginStandard"
+                        android:clickable="true"
+                        android:contentDescription="@string/buttonSwitchDrive"
+                        android:focusable="true"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/searchForm">
 
-                        <TextView
-                            android:id="@+id/driveName"
-                            style="@style/H1"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/marginStandardSmall"
-                            android:layout_weight="1"
-                            android:textSize="20sp"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toStartOf="@id/endChevron"
-                            app:layout_constraintStart_toEndOf="@id/driveIcon"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:text="Westworld" />
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
 
-                        <ImageView
-                            android:id="@+id/endChevron"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="@dimen/marginStandardMedium"
-                            android:src="@drawable/ic_chevron_right"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:ignore="ContentDescription" />
+                            <ImageView
+                                android:id="@+id/driveIcon"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="@dimen/marginStandard"
+                                android:src="@drawable/ic_drive"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                tools:ignore="ContentDescription" />
 
-                    </androidx.constraintlayout.widget.ConstraintLayout>
+                            <TextView
+                                android:id="@+id/driveName"
+                                style="@style/H1"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/marginStandardSmall"
+                                android:layout_weight="1"
+                                android:textSize="20sp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toStartOf="@id/endChevron"
+                                app:layout_constraintStart_toEndOf="@id/driveIcon"
+                                app:layout_constraintTop_toTopOf="parent"
+                                tools:text="Westworld" />
 
-                </com.google.android.material.card.MaterialCardView>
+                            <ImageView
+                                android:id="@+id/endChevron"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="@dimen/marginStandardMedium"
+                                android:src="@drawable/ic_chevron_right"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                tools:ignore="ContentDescription" />
 
-                <include
-                    android:id="@+id/searchViewCard"
-                    layout="@layout/item_search_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_marginHorizontal="@dimen/marginStandard"
-                    android:layout_marginBottom="@dimen/marginStandardMedium" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <com.infomaniak.drive.views.NotEnoughStorageView
-                    android:id="@+id/notEnoughStorage"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/marginStandard"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
+                    </com.google.android.material.card.MaterialCardView>
 
-                <TextView
-                    android:id="@+id/lastFilesTitle"
-                    style="@style/H2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/marginStandard"
-                    android:layout_marginTop="@dimen/marginStandardSmall"
-                    android:text="@string/homeLastFilesTitle"
-                    app:layout_constraintTop_toBottomOf="@id/driveInfos" />
+                    <include
+                        android:id="@+id/searchViewCard"
+                        layout="@layout/item_search_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:layout_marginHorizontal="@dimen/marginStandard"
+                        android:layout_marginBottom="@dimen/marginStandardMedium" />
 
-                <com.github.rubensousa.gravitysnaphelper.GravitySnapRecyclerView
-                    android:id="@+id/lastFilesRecyclerView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:clipToPadding="false"
-                    android:nestedScrollingEnabled="false"
-                    android:orientation="horizontal"
-                    android:overScrollMode="never"
-                    android:paddingVertical="@dimen/marginStandardSmall"
-                    android:paddingStart="@dimen/marginStandard"
-                    android:paddingEnd="100dp"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    app:layout_constraintTop_toBottomOf="@id/lastFilesTitle"
-                    app:snapGravity="start"
-                    app:snapToPadding="true"
-                    tools:ignore="RtlSymmetry"
-                    tools:listitem="@layout/cardview_file_grid" />
+                    <com.infomaniak.drive.views.NotEnoughStorageView
+                        android:id="@+id/notEnoughStorage"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/marginStandard"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
 
-            </LinearLayout>
+                    <TextView
+                        android:id="@+id/lastFilesTitle"
+                        style="@style/H2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/marginStandard"
+                        android:layout_marginTop="@dimen/marginStandardSmall"
+                        android:text="@string/homeLastFilesTitle"
+                        app:layout_constraintTop_toBottomOf="@id/driveInfos" />
 
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
+                    <com.github.rubensousa.gravitysnaphelper.GravitySnapRecyclerView
+                        android:id="@+id/lastFilesRecyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clipToPadding="false"
+                        android:nestedScrollingEnabled="false"
+                        android:orientation="horizontal"
+                        android:overScrollMode="never"
+                        android:paddingVertical="@dimen/marginStandardSmall"
+                        android:paddingStart="@dimen/marginStandard"
+                        android:paddingEnd="100dp"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                        app:layout_constraintTop_toBottomOf="@id/lastFilesTitle"
+                        app:snapGravity="start"
+                        app:snapToPadding="true"
+                        tools:ignore="RtlSymmetry"
+                        tools:listitem="@layout/cardview_file_grid" />
 
-    </com.google.android.material.appbar.AppBarLayout>
+                </LinearLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/lastElementsLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/marginStandardMedium"
-        android:orientation="vertical"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
 
-        <TextView
-            android:id="@+id/lastElementsTitle"
-            style="@style/H2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="@string/homeMyLastPictures" />
+        </com.google.android.material.appbar.AppBarLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/lastElementsRecyclerView"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/lastElementsLayout"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:clipToPadding="false"
-            android:overScrollMode="never"
-            android:paddingHorizontal="20dp"
-            android:paddingTop="@dimen/marginStandardSmall"
-            android:paddingBottom="@dimen/recyclerViewPaddingBottom"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/lastElementsTitle"
-            tools:itemCount="5"
-            tools:listitem="@layout/cardview_home_file_activity" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/marginStandardMedium"
+            android:orientation="vertical"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+            <TextView
+                android:id="@+id/lastElementsTitle"
+                style="@style/H2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/marginStandard"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="@string/homeMyLastPictures" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/lastElementsRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:clipToPadding="false"
+                android:overScrollMode="never"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="@dimen/marginStandardSmall"
+                android:paddingBottom="@dimen/recyclerViewPaddingBottom"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/lastElementsTitle"
+                tools:itemCount="5"
+                tools:listitem="@layout/cardview_home_file_activity" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

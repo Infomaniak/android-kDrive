@@ -42,11 +42,9 @@ class HomePicturesAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val file = itemList[position]
-
         holder.itemView.apply {
             picture.loadUrl(file.thumbnail())
             picture.contentDescription = file.name
-
             setOnClickListener {
                 onItemClick(file)
             }
