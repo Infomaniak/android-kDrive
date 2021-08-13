@@ -138,6 +138,7 @@ class AvailableShareableItemsAdapter(
                     itemList = initialList
                     notifyDataSetInvalidated()
                 } else {
+                    val oldListItem = itemList.size
                     itemList = if (constraint.toString().isEmail()) {
                         arrayListOf(
                             Invitation(
@@ -146,7 +147,7 @@ class AvailableShareableItemsAdapter(
                             )
                         )
                     } else results.values as ArrayList<Shareable>
-                    notifyDataSetChanged()
+                    if (itemList.size != oldListItem) notifyDataSetChanged()
                 }
             }
         }
