@@ -178,12 +178,12 @@ object ApiRepository {
     }
 
     fun getFileActivities(file: File, page: Int): ApiResponse<ArrayList<FileActivity>> {
-        val url = "${ApiRoutes.getFileActivities(file)}?${pagination(page)}"
+        val url = "${ApiRoutes.getFileActivities(file)}?with=user&${pagination(page, 25)}"
         return callApi(url, GET)
     }
 
     fun getFileComments(file: File, page: Int): ApiResponse<ArrayList<FileComment>> {
-        val url = "${ApiRoutes.commentFile(file)}?with=*&${pagination(page)}"
+        val url = "${ApiRoutes.commentFile(file)}?with=like,response&${pagination(page)}"
         return callApi(url, GET)
     }
 
@@ -313,5 +313,5 @@ object ApiRepository {
         return callApi(ApiRoutes.getUUIDArchiveFiles(driveId), POST, mapOf("file_ids" to fileIds))
     }
 
-    private fun pagination(page: Int) = "page=$page&per_page=$PER_PAGE"
+    private fun pagination(page: Int, perPage: Int = PER_PAGE) = "page=$page&per_page=$perPage"
 }
