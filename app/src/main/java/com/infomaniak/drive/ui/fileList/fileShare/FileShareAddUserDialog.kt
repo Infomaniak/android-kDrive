@@ -84,7 +84,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
             getAvailableShareableElements()
         ) { element ->
             userAutoCompleteTextView.setText("")
-            addToSharedElementList(element)
+            addToSharedElementList(if (element is Invitation) element.email else element)
         }
 
         collapsingToolbarLayout.title = getString(

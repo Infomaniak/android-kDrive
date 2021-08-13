@@ -44,7 +44,7 @@ import kotlin.collections.ArrayList
 class AvailableShareableItemsAdapter(
     context: Context,
     private var itemList: ArrayList<Shareable>,
-    private val onItemClick: (item: Any) -> Unit,
+    private val onItemClick: (item: Shareable) -> Unit,
 ) : ArrayAdapter<Shareable>(context, R.layout.item_user, itemList), Filterable {
     private var initialList: ArrayList<Shareable> = ArrayList()
 
