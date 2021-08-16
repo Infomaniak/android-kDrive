@@ -134,10 +134,14 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                 is String -> {
                     availableUsersAdapter.initialList.find { user -> user is DriveUser && user.email == element }
                         ?.let { potentialUser ->
-                            if (!availableUsersAdapter.notShareableUsers.contains(potentialUser)) {
+                            if (!availableUsersAdapter.notShareableUsers.any { potentialUser.id == it.id }) {
                                 addToSharedElementList(potentialUser)
                             } else {
-                                // TODO TF show something like "user already shared"
+                                Utils.showSnackbar(
+                                    view = requireView(),
+                                    title = R.string.errorShareAddUser,
+                                    anchorView = shareButton
+                                )
                             }
                         } ?: run {
                         if (!emails.contains(element)) {

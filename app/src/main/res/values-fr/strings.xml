@@ -222,6 +222,7 @@
     <string name="errorRestore">Erreur lors de la restauration</string>
     <string name="errorRightModification">Erreur lors de la modification des droits</string>
     <string name="errorSave">Erreur lors de l’enregistrement</string>
+    <string name="errorShareAddUser">Ce fichier est déjà partagé avec cet utilisateur.</string>
     <string name="errorShareLink">Erreur lors de la création du lien</string>
     <string name="favoritesNoFile">Aucun favori pour le moment</string>
     <string name="favoritesTitle">Favoris</string>

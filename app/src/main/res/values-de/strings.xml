@@ -222,6 +222,7 @@
     <string name="errorRestore">Fehler bei der Wiederherstellung</string>
     <string name="errorRightModification">Fehler bei der Änderung der Rechte</string>
     <string name="errorSave">Fehler bei der Speicherung</string>
+    <string name="errorShareAddUser">Diese Datei ist bereits für diesen Benutzer freigegeben.</string>
     <string name="errorShareLink">Fehler bei der Erstellung des Links</string>
     <string name="favoritesNoFile">Derzeit keine Favoriten</string>
     <string name="favoritesTitle">Favoriten</string>
