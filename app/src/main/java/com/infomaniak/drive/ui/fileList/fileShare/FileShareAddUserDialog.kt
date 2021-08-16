@@ -80,8 +80,9 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
         }
 
         availableUsersAdapter = userAutoCompleteTextView.setupAvailableShareableItems(
-            requireContext(),
-            getAvailableUsers()
+            context = requireContext(),
+            itemList = getAvailableUsers(),
+            notShareableItems = ArrayList(navigationArgs.notShareableUsersIds.map { id -> DriveUser(id = id) })
         ) { element ->
             userAutoCompleteTextView.setText("")
             addToSharedElementList(if (element is Invitation) element.email else element)
@@ -135,7 +136,6 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                         emails.add(element)
                         createChip(element).setOnClickListener {
                             emails.remove(element)
-                            availableUsersAdapter.setAll(getAvailableUsers())
                             selectedUsersChipGroup.removeView(it)
                         }
                     }
@@ -143,10 +143,10 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                 is DriveUser -> {
                     if (!users.any { it.id == element.id }) {
                         users.add(element)
-                        availableUsersAdapter.removeItem(element.id)
+                        availableUsersAdapter.notShareableUsers.add(element)
                         createChip(element).setOnClickListener {
                             users.remove(element)
-                            availableUsersAdapter.setAll(getAvailableUsers())
+                            availableUsersAdapter.notShareableUsers.remove(element)
                             selectedUsersChipGroup.removeView(it)
                         }
                     }
@@ -155,7 +155,6 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                     tags.add(element)
                     createChip(element).setOnClickListener {
                         tags.remove(element)
-                        availableUsersAdapter.setAll(getAvailableUsers())
                         selectedUsersChipGroup.removeView(it)
                     }
                 }

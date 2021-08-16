@@ -44,41 +44,25 @@ import kotlin.collections.ArrayList
 class AvailableShareableItemsAdapter(
     context: Context,
     private var itemList: ArrayList<Shareable>,
+    var notShareableUsers: ArrayList<DriveUser> = arrayListOf(),
     private val onItemClick: (item: Shareable) -> Unit,
 ) : ArrayAdapter<Shareable>(context, R.layout.item_user, itemList), Filterable {
     private var initialList: ArrayList<Shareable> = ArrayList()
 
     init {
         cleanItemList()
-        initialList = ArrayList(itemList)
+        initialList = itemList
     }
 
     fun setAll(items: List<Shareable>) {
         itemList.clear()
         itemList.addAll(items)
-        notifyDataSetChanged()
-    }
-
-    fun addItem(item: Shareable) {
-        itemList.add(item)
-        notifyDataSetChanged()
-    }
-
-    fun removeItem(itemId: Int) {
-        initialList.remove(initialList.find { item -> item.id == itemId })
-        notifyDataSetChanged()
-    }
-
-    fun removeItemList(itemIdList: Iterable<Int>) {
-        itemList.removeAll { shareable -> itemIdList.contains(shareable.id) }
+        initialList = itemList
         notifyDataSetChanged()
     }
 
     private fun cleanItemList() {
-        itemList = ArrayList(itemList
-            .sortedBy { it.getFilterValue() }
-            .distinct()
-        )
+        itemList.sortBy { it.getFilterValue() }
     }
 
     override fun notifyDataSetChanged() {
@@ -120,12 +104,13 @@ class AvailableShareableItemsAdapter(
         return object : Filter() {
             override fun performFiltering(constraint: CharSequence?): FilterResults {
                 val searchTerm = constraint.toString().lowercase(Locale.ROOT)
-                val finalUserList: ArrayList<Shareable> = ArrayList(
-                    initialList.filter { item ->
-                        item.getFilterValue().lowercase(Locale.ROOT).contains(searchTerm) ||
-                                ((item is DriveUser) && item.email.lowercase(Locale.ROOT).contains(searchTerm))
+                val finalUserList = initialList
+                    .filter {
+                        it.getFilterValue().lowercase(Locale.ROOT)
+                            .contains(searchTerm) || ((it is DriveUser) && it.email.lowercase(Locale.ROOT).contains(searchTerm))
+                    }.filterNot { displayedItem ->
+                        notShareableUsers.any { it.id == displayedItem.id }
                     }
-                )
                 return FilterResults().apply {
                     values = finalUserList
                     count = finalUserList.size
@@ -133,20 +118,21 @@ class AvailableShareableItemsAdapter(
             }
 
             override fun publishResults(constraint: CharSequence?, results: FilterResults) {
-                if (constraint.isNullOrBlank()) {
-                    itemList = initialList
-                    notifyDataSetInvalidated()
-                } else {
-                    val oldListCount = itemList.size
-                    itemList = if (constraint.toString().isEmail()) {
-                        arrayListOf(
-                            Invitation(
-                                email = constraint.toString(),
-                                status = context.getString(R.string.userInviteByEmail)
-                            )
+                when {
+                    constraint.isNullOrBlank() -> {
+                        itemList = initialList
+                        notifyDataSetInvalidated()
+                    }
+                    constraint.toString().isEmail() -> {
+                        itemList = arrayListOf(
+                            Invitation(email = constraint.toString(), status = context.getString(R.string.userInviteByEmail))
                         )
-                    } else results.values as ArrayList<Shareable>
-                    if (itemList.size != oldListCount) notifyDataSetChanged()
+                    }
+                    else -> {
+                        val oldListCount = itemList.size
+                        itemList = results.values as ArrayList<Shareable> // Normal warning
+                        if (itemList.size != oldListCount) notifyDataSetChanged()
+                    }
                 }
             }
         }

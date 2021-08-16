@@ -82,7 +82,9 @@ class FileShareDetailsFragment : Fragment() {
         mainViewModel.getFileDetails(navigationArgs.fileId, UserDrive()).observe(viewLifecycleOwner) { fileDetails ->
             fileDetails?.let { file ->
                 fileShareViewModel.currentFile.value = file
-                availableShareableItemsAdapter.setAll(allUserList.removeCommonUsers(ArrayList(file.users)))
+                availableShareableItemsAdapter.setAll(allUserList)
+                availableShareableItemsAdapter.notShareableUsers.addAll(file.users.map { userId -> DriveUser(id = userId) })
+
                 sharedItemsAdapter = SharedItemsAdapter(file) { shareable ->
                     openSelectPermissionDialog(shareable)
                 }
@@ -90,6 +92,8 @@ class FileShareDetailsFragment : Fragment() {
                 mainViewModel.getFileShare(file.id).observe(viewLifecycleOwner) { (_, data) ->
                     data?.let { share ->
                         sharedUsersTitle.visibility = VISIBLE
+                        availableShareableItemsAdapter.notShareableUsers.clear()
+                        availableShareableItemsAdapter.notShareableUsers.addAll(share.users)
                         sharedItemsAdapter.setAll(ArrayList(share.users + share.invitations + share.tags))
                         setupShareLinkContainer(file, share.link)
                     }
@@ -110,7 +114,7 @@ class FileShareDetailsFragment : Fragment() {
                 shareable?.let { shareableItem ->
                     if (permission == Shareable.ShareablePermission.DELETE) {
                         sharedItemsAdapter.removeItem(shareableItem)
-                        availableShareableItemsAdapter.addItem(shareableItem)
+                        if (shareableItem is DriveUser) availableShareableItemsAdapter.notShareableUsers.remove(shareableItem)
                     } else {
                         sharedItemsAdapter.updateItemPermission(shareableItem, permission as Shareable.ShareablePermission)
                     }
@@ -120,7 +124,7 @@ class FileShareDetailsFragment : Fragment() {
 
         getBackNavigationResult<ShareableItems>(SHARE_SELECTION_KEY) { (users, _, tags, invitations) ->
             sharedItemsAdapter.putAll(ArrayList(users + tags + invitations))
-            availableShareableItemsAdapter.removeItemList(users.map { it.id })
+            availableShareableItemsAdapter.notShareableUsers.addAll(users)
         }
 
         toolbar.setNavigationOnClickListener {
@@ -205,7 +209,8 @@ class FileShareDetailsFragment : Fragment() {
         safeNavigate(
             FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToFileShareAddUserDialog(
                 sharedEmail = sharedEmail,
-                sharedUserId = sharedUserId
+                sharedUserId = sharedUserId,
+                notShareableUsersIds = availableShareableItemsAdapter.notShareableUsers.map { it.id }.toIntArray()
             )
         )
     }

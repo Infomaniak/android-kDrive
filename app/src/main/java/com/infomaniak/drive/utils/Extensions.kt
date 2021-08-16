@@ -103,6 +103,7 @@ import kotlinx.android.synthetic.main.item_file.view.filePreview
 import kotlinx.android.synthetic.main.item_file.view.progressLayout
 import kotlinx.android.synthetic.main.item_user.view.*
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -429,10 +430,11 @@ fun String.isEmail(): Boolean {
 fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
     context: Context,
     itemList: List<Shareable>,
+    notShareableItems: ArrayList<DriveUser> = arrayListOf(),
     onDataPassed: (t: Any) -> Unit
 ): AvailableShareableItemsAdapter {
     setDropDownBackgroundResource(R.drawable.background_popup)
-    val availableUsersAdapter = AvailableShareableItemsAdapter(context, ArrayList(itemList)) { user ->
+    val availableUsersAdapter = AvailableShareableItemsAdapter(context, ArrayList(itemList), notShareableItems) { user ->
         onDataPassed(user)
         dismissDropDown()
     }

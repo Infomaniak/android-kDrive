@@ -165,6 +165,9 @@
             android:name="sharedTagId"
             android:defaultValue="-1"
             app:argType="integer" />
+        <argument
+            android:name="notShareableUsersIds"
+            app:argType="integer[]"/>
         <action
             android:id="@+id/action_fileShareAddUserDialog_to_selectPermissionBottomSheetDialog"
             app:destination="@id/selectPermissionBottomSheetDialog" />
