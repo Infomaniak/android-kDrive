@@ -78,9 +78,11 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.LockActivity
 import com.infomaniak.drive.ui.LockActivity.Companion.FACE_ID_LOG_TAG
 import com.infomaniak.drive.ui.OnlyOfficeActivity
@@ -585,6 +587,10 @@ fun Fragment.safeNavigate(
 ) {
     if (canNavigate()) findNavController().navigate(resId, args, navOptions, navigatorExtras)
 }
+
+fun Drive?.getDriveUsers(): List<DriveUser> = this?.users?.let { categories ->
+    return@let DriveInfosController.getUsers(ArrayList(categories.drive + categories.account))
+} ?: listOf()
 
 fun Context.getLocalThumbnail(file: File): Bitmap? {
     val fileUri = file.path.toUri()

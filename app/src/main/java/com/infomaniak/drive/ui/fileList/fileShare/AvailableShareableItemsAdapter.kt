@@ -47,7 +47,7 @@ class AvailableShareableItemsAdapter(
     var notShareableUsers: ArrayList<DriveUser> = arrayListOf(),
     private val onItemClick: (item: Shareable) -> Unit,
 ) : ArrayAdapter<Shareable>(context, R.layout.item_user, itemList), Filterable {
-    private var initialList: ArrayList<Shareable> = ArrayList()
+    var initialList: ArrayList<Shareable> = ArrayList()
 
     init {
         cleanItemList()

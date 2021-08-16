@@ -31,7 +31,6 @@ import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
-import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.ui.MainViewModel
@@ -56,15 +55,13 @@ class FileShareDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val allUserList = AccountUtils.getCurrentDrive()?.users?.let { categories ->
-            return@let DriveInfosController.getUsers(ArrayList(categories.drive + categories.account))
-        } ?: listOf()
+        val allUserList = AccountUtils.getCurrentDrive().getDriveUsers()
 
         fileShareViewModel.availableUsers.value = ArrayList(allUserList) // add available tags if in common
         availableShareableItemsAdapter =
             userAutoCompleteTextView.setupAvailableShareableItems(
-                requireContext(),
-                allUserList
+                context = requireContext(),
+                itemList = allUserList
             ) { selectedElement ->
                 userAutoCompleteTextView.setText("")
                 openAddUserDialog(selectedElement)

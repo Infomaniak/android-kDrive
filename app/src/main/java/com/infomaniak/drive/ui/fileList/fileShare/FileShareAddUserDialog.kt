@@ -81,7 +81,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
 
         availableUsersAdapter = userAutoCompleteTextView.setupAvailableShareableItems(
             context = requireContext(),
-            itemList = getAvailableUsers(),
+            itemList = AccountUtils.getCurrentDrive().getDriveUsers(),
             notShareableItems = ArrayList(navigationArgs.notShareableUsersIds.map { id -> DriveUser(id = id) })
         ) { element ->
             userAutoCompleteTextView.setText("")
@@ -132,11 +132,20 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
         selectedItems.apply {
             when (element) {
                 is String -> {
-                    if (!emails.contains(element) && !users.any { it.email == element }) {
-                        emails.add(element)
-                        createChip(element).setOnClickListener {
-                            emails.remove(element)
-                            selectedUsersChipGroup.removeView(it)
+                    availableUsersAdapter.initialList.find { user -> user is DriveUser && user.email == element }
+                        ?.let { potentialUser ->
+                            if (!availableUsersAdapter.notShareableUsers.contains(potentialUser)) {
+                                addToSharedElementList(potentialUser)
+                            } else {
+                                // TODO TF show something like "user already shared"
+                            }
+                        } ?: run {
+                        if (!emails.contains(element)) {
+                            emails.add(element)
+                            createChip(element).setOnClickListener {
+                                emails.remove(element)
+                                selectedUsersChipGroup.removeView(it)
+                            }
                         }
                     }
                 }
@@ -202,14 +211,6 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
 
         selectedUsersChipGroup.addView(chip)
         return chip
-    }
-
-    private fun getAvailableUsers(): List<Shareable> {
-        return fileShareViewModel.availableUsers.value
-            ?.removeCommonUsers(ArrayList(fileShareViewModel.currentFile.value?.users ?: arrayListOf()))
-            ?.filterNot { availableUser ->
-                selectedItems.users.any { it.id == availableUser.id }
-            } ?: listOf()
     }
 
     private fun createShareAndCloseDialog(file: File, body: MutableMap<String, Serializable>) {
