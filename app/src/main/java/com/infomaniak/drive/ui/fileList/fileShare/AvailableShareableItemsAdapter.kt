@@ -54,7 +54,8 @@ class AvailableShareableItemsAdapter(
     }
 
     fun setAll(items: List<Shareable>) {
-        itemList = ArrayList(items)
+        itemList.clear()
+        itemList.addAll(items)
         notifyDataSetChanged()
     }
 
@@ -69,9 +70,7 @@ class AvailableShareableItemsAdapter(
     }
 
     fun removeItemList(itemIdList: Iterable<Int>) {
-        itemList.removeAll {
-            itemIdList.contains(it.id)
-        }
+        itemList.removeAll { shareable -> itemIdList.contains(shareable.id) }
         notifyDataSetChanged()
     }
 
