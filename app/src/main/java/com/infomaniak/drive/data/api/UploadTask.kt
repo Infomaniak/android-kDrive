@@ -28,7 +28,6 @@ import com.infomaniak.drive.data.models.FileInProgress
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.ValidChunks
 import com.infomaniak.drive.data.services.UploadWorker
-import com.infomaniak.drive.data.sync.UploadAdapter
 import com.infomaniak.drive.data.sync.UploadProgressReceiver
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.KDriveHttpClient
@@ -85,7 +84,7 @@ class UploadTask(
         val uri = uploadFile.getUriObject()
         val fileInputStream = context.contentResolver.openInputStream(uploadFile.getOriginalUri(context))
 
-        sendSyncProgress(UploadAdapter.ProgressStatus.STARTED, 0)
+        sendSyncProgress(UploadWorker.ProgressStatus.STARTED, 0)
         initChunkSize(uploadFile.fileSize)
         BufferedInputStream(fileInputStream, chunkSize).use { input ->
             val waitingCoroutines = arrayListOf<Job>()
@@ -146,7 +145,7 @@ class UploadTask(
 
         // TODO fix this
         delay(150)
-        sendSyncProgress(UploadAdapter.ProgressStatus.FINISHED, 100)
+        sendSyncProgress(UploadWorker.ProgressStatus.FINISHED, 100)
     }
 
     private fun CoroutineScope.uploadChunkRequest(
@@ -241,7 +240,7 @@ class UploadTask(
         }
 
         if (progress in 1..100) {
-            sendSyncProgress(UploadAdapter.ProgressStatus.RUNNING)
+            sendSyncProgress(UploadWorker.ProgressStatus.RUNNING)
         }
 
         Log.i(
@@ -250,12 +249,12 @@ class UploadTask(
         )
     }
 
-    private fun sendSyncProgress(status: UploadAdapter.ProgressStatus, progress: Int = 0) {
+    private fun sendSyncProgress(status: UploadWorker.ProgressStatus, progress: Int = 0) {
         Intent().apply {
             val fileInProgress = FileInProgress(uploadFile.remoteFolder, uploadFile.fileName, uploadFile.uri, progress, status)
             Log.d("SyncReceiver", "broadcast")
             action = UploadProgressReceiver.TAG
-            putExtra(UploadAdapter.IMPORT_IN_PROGRESS, fileInProgress)
+            putExtra(UploadWorker.IMPORT_IN_PROGRESS, fileInProgress)
             LocalBroadcastManager.getInstance(context).sendBroadcast(this)
         }
     }

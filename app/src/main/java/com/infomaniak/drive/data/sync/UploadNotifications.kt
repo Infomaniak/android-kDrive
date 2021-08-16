@@ -170,7 +170,7 @@ object UploadNotifications {
         )
     }
 
-    fun showNotification(
+    private fun showNotification(
         context: Context,
         title: String,
         description: String,

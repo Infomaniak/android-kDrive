@@ -63,6 +63,7 @@ import com.infomaniak.drive.data.sync.UploadProgressReceiver
 import com.infomaniak.drive.launchInAppReview
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
+import com.infomaniak.drive.utils.SyncUtils.migrateSyncToWorkerIfNeeded
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils.getRootName
@@ -200,6 +201,7 @@ class MainActivity : BaseActivity() {
             }
         }
 
+        lifecycleScope.launch { migrateSyncToWorkerIfNeeded() }
         LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
     }
 

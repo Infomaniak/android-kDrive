@@ -21,26 +21,27 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.infomaniak.drive.data.models.FileInProgress
+import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.MainViewModel
 
 class UploadProgressReceiver(private val mainViewModel: MainViewModel) : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
 
-        val fileInProgress = intent.getParcelableExtra<FileInProgress>(UploadAdapter.IMPORT_IN_PROGRESS)
-        val operationStatus = intent.getParcelableExtra<UploadAdapter.ProgressStatus>(UploadAdapter.OPERATION_STATUS)
+        val fileInProgress = intent.getParcelableExtra<FileInProgress>(UploadWorker.IMPORT_IN_PROGRESS)
+        val operationStatus = intent.getParcelableExtra<UploadWorker.ProgressStatus>(UploadWorker.OPERATION_STATUS)
 
         when (fileInProgress?.status) {
-            UploadAdapter.ProgressStatus.RUNNING, UploadAdapter.ProgressStatus.FINISHED -> {
+            UploadWorker.ProgressStatus.RUNNING, UploadWorker.ProgressStatus.FINISHED -> {
                 mainViewModel.fileInProgress.value = fileInProgress
             }
-            UploadAdapter.ProgressStatus.STARTED -> {
+            UploadWorker.ProgressStatus.STARTED -> {
                 mainViewModel.refreshActivities.value = true
             }
             else -> Unit
         }
 
-        if (operationStatus == UploadAdapter.ProgressStatus.FINISHED) mainViewModel.refreshActivities.value = true
+        if (operationStatus == UploadWorker.ProgressStatus.FINISHED) mainViewModel.refreshActivities.value = true
 
     }
 

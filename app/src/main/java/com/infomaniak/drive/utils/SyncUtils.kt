@@ -35,6 +35,8 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.FileObserveService
 import com.infomaniak.drive.data.sync.FileObserveServiceApi24
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -91,12 +93,19 @@ object SyncUtils {
     }
 
     fun Context.isSyncActive(): Boolean {
-        val statuses = WorkManager.getInstance(this).getWorkInfos(
+        return WorkManager.getInstance(this).getWorkInfos(
             WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(UploadWorker.TAG))
                 .addStates(arrayListOf(WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED))
                 .build()
-        ).get()
-        return statuses?.isNotEmpty() == true
+        ).get()?.isNotEmpty() == true
+    }
+
+    private fun Context.isAutoSyncActive(): Boolean {
+        return WorkManager.getInstance(this).getWorkInfos(
+            WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(UploadWorker.PERIODIC_TAG))
+                .addStates(arrayListOf(WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED))
+                .build()
+        ).get()?.isNotEmpty() == true
     }
 
     private fun Context.startPeriodicSync(syncInterval: Long) {
@@ -110,6 +119,15 @@ object SyncUtils {
     private fun Context.cancelPeriodicSync() {
         WorkManager.getInstance(this).cancelAllWorkByTag(UploadWorker.TAG)
         WorkManager.getInstance(this).cancelAllWorkByTag(UploadWorker.PERIODIC_TAG)
+    }
+
+    suspend fun Context.migrateSyncToWorkerIfNeeded() = withContext(Dispatchers.IO) {
+        UploadFile.getAppSyncSettings()?.let { syncSettings ->
+            if (!isAutoSyncActive()) {
+                cancelContentObserver()
+                activateAutoSync(syncSettings)
+            }
+        }
     }
 
     fun Context.startContentObserverService() {

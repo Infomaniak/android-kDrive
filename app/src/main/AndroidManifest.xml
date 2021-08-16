@@ -139,39 +139,6 @@
             android:theme="@style/AppTheme.Login"
             tools:ignore="LockedOrientationActivity" />
 
-        <service
-            android:name=".data.sync.AuthenticatorService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator" />
-            </intent-filter>
-            <meta-data
-                android:name="android.accounts.AccountAuthenticator"
-                android:resource="@xml/authenticator" />
-        </service>
-
-        <!--
-        We don't have any information about this in the doc, and most of the projects don't deal the subject, what about us?
-        Some specific google sources of ignored. (https://code.google.com/p/android/issues/detail?id=37280)
-
-        (ie the service only allows to start the synchronization.)
-        The service must be public, that's a fact, but is used only by the system.
-
-        We don't use android:process=":upload", because the mutex is not shared in android processes. The refresh token is not possible.
-        If use another process remove LocalBroadcastManager
-        -->
-        <service
-            android:name=".data.sync.UploadService"
-            android:exported="true"
-            tools:ignore="ExportedService">
-            <intent-filter>
-                <action android:name="android.content.SyncAdapter" />
-            </intent-filter>
-            <meta-data
-                android:name="android.content.SyncAdapter"
-                android:resource="@xml/syncadapter" />
-        </service>
-
         <service android:name=".data.sync.FileObserveService" />
         <service
             android:name=".data.sync.FileObserveServiceApi24"
@@ -193,12 +160,6 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
-
-        <provider
-            android:name=".data.sync.UploadProvider"
-            android:authorities="@string/SYNC_AUTHORITY"
-            android:exported="false"
-            android:syncable="true" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

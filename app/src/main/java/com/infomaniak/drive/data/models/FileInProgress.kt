@@ -18,7 +18,7 @@
 package com.infomaniak.drive.data.models
 
 import android.os.Parcelable
-import com.infomaniak.drive.data.sync.UploadAdapter
+import com.infomaniak.drive.data.services.UploadWorker
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
@@ -27,5 +27,5 @@ data class FileInProgress(
     val name: String,
     val uri: String,
     val progress: Int,
-    val status: UploadAdapter.ProgressStatus = UploadAdapter.ProgressStatus.PENDING
+    val status: UploadWorker.ProgressStatus = UploadWorker.ProgressStatus.PENDING
 ) : Parcelable

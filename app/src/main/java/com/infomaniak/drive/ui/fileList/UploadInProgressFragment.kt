@@ -31,7 +31,6 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileInProgress
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.UploadWorker
-import com.infomaniak.drive.data.sync.UploadAdapter
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
@@ -110,7 +109,7 @@ class UploadInProgressFragment : FileListFragment() {
 
 
     private fun whenAnUploadIsDone(fileInProgress: FileInProgress) {
-        if (fileInProgress.status == UploadAdapter.ProgressStatus.FINISHED) {
+        if (fileInProgress.status == UploadWorker.ProgressStatus.FINISHED) {
             fileAdapter.deleteAt(0)
 
             if (fileAdapter.getItems().isEmpty()) {

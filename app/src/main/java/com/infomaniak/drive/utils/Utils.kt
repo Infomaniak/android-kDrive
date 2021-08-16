@@ -48,7 +48,7 @@ import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
-import com.infomaniak.drive.data.sync.UploadAdapter
+import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment
@@ -329,7 +329,7 @@ object Utils {
     }
 
     fun copyDataToUploadCache(context: Context, uri: Uri, fileModifiedAt: Date): Uri {
-        val folder = java.io.File(context.cacheDir, UploadAdapter.UPLOAD_FOLDER).apply { if (!exists()) mkdirs() }
+        val folder = java.io.File(context.cacheDir, UploadWorker.UPLOAD_FOLDER).apply { if (!exists()) mkdirs() }
         val outputFile = java.io.File(folder, uri.hashCode().toString()).also { if (it.exists()) it.delete() }
         if (outputFile.createNewFile()) {
             outputFile.setLastModified(fileModifiedAt.time)

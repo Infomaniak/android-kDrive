@@ -78,7 +78,14 @@ object MediaFoldersProvider {
         coroutineScope: Job?
     ): ArrayMap<Long, MediaFolder> {
         val folders = arrayMapOf<Long, MediaFolder>()
-        contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, imagesProjection, null, null, imagesSortOrder)
+        val externalUri =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+            } else {
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            }
+
+        contentResolver.query(externalUri, imagesProjection, null, null, imagesSortOrder)
             ?.use { cursor ->
                 while (cursor.moveToNext()) {
                     coroutineScope?.ensureActive()
@@ -98,7 +105,14 @@ object MediaFoldersProvider {
         coroutineScope: Job?
     ): ArrayMap<Long, MediaFolder> {
         val folders = arrayMapOf<Long, MediaFolder>()
-        contentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, videosProjection, null, null, videosSortOrder)
+        val externalUri =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+            } else {
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+            }
+
+        contentResolver.query(externalUri, videosProjection, null, null, videosSortOrder)
             ?.use { cursor ->
                 while (cursor.moveToNext()) {
                     coroutineScope?.ensureActive()

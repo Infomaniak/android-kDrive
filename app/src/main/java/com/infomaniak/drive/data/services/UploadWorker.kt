@@ -35,7 +35,6 @@ import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
-import com.infomaniak.drive.data.sync.UploadAdapter
 import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.data.sync.UploadNotifications.exceptionNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.folderNotFoundNotification
@@ -58,6 +57,7 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.ApiController
 import com.infomaniak.lib.core.utils.hasPermissions
 import io.sentry.Sentry
+import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.*
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -170,6 +170,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val lastUploadedCount = inputData.getInt(LAST_UPLOADED_COUNT, 0)
         var pendingCount = syncFiles.size
 
+        Log.d(TAG, "startSyncFiles> upload for ${syncFiles.count()}")
+
         syncFiles.forEach { syncFile ->
             Log.d(TAG, "startSyncFiles: upload $syncFile")
             initUploadFile(syncFile, pendingCount)
@@ -184,7 +186,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         //TODO à changer
         Intent().apply {
             action = UploadProgressReceiver.TAG
-            putExtra(UploadAdapter.OPERATION_STATUS, UploadAdapter.ProgressStatus.FINISHED as Parcelable)
+            putExtra(OPERATION_STATUS, ProgressStatus.FINISHED as Parcelable)
             LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(this)
         }
 
@@ -280,7 +282,10 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         var customArgs: Array<String>
         val deferreds = arrayListOf<Deferred<Any?>>()
 
+        Log.d(TAG, "checkLocalLastMedias> started with ${UploadFile.getLastDate(applicationContext)}")
+
         MediaFolder.getAllSyncedFolders().forEach { mediaFolder ->
+            Log.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.name}_${mediaFolder.id}")
             var contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
             var isNotPending =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Images.Media.IS_PENDING} = 0" else ""
@@ -315,11 +320,13 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 MediaStore.MediaColumns.DATE_MODIFIED + " ASC"
         contentResolver.query(contentUri, null, selection, args, sortOrder)
             ?.use { cursor ->
+                Log.d(TAG, "getLocalLastMediasAsync > from ${mediaFolder.name} ${cursor.count} found")
                 while (cursor.moveToNext()) {
                     val fileName = SyncUtils.getFileName(cursor)
                     val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
                     val fileSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
                     val uri = cursor.uri(contentUri)
+                    Log.d(TAG, "getLocalLastMediasAsync > ${mediaFolder.name}/$fileName found")
 
                     if (UploadFile.canUpload(uri, fileModifiedAt)) {
                         UploadFile.deleteIfExists(uri)
@@ -343,10 +350,17 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             }
     }
 
+    @Parcelize
+    enum class ProgressStatus : Parcelable { PENDING, STARTED, RUNNING, FINISHED }
     companion object {
         const val TAG = "UploadWorker"
-        const val PERIODIC_TAG = "UploadWorkerPeriodic"
+
         const val CANCELLED_BY_USER = "cancelled_by_user"
+        const val IMPORT_IN_PROGRESS = "import_in_progress"
+        const val OPERATION_STATUS = "progress_status"
+        const val PERIODIC_TAG = "UploadWorkerPeriodic"
+        const val UPLOAD_FOLDER = "upload_folder"
+
         private const val LAST_UPLOADED_COUNT = "lastUploadedCount"
 
 
