@@ -434,7 +434,7 @@
             app:nullable="true" />
         <argument
             android:name="sharedUserId"
-            android:defaultValue="0"
+            android:defaultValue="-1"
             app:argType="integer" />
         <argument
             android:name="sharedTagId"
