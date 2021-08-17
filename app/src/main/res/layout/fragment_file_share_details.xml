@@ -104,7 +104,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/marginStandard"
                 android:layout_marginTop="@dimen/marginStandardSmall"
-                android:layout_marginBottom="@dimen/marginStandard">
+                android:layout_marginBottom="@dimen/recyclerViewPaddingBottom">
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/sharedUsersRecyclerView"
