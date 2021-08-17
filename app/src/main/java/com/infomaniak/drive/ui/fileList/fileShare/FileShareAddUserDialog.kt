@@ -82,7 +82,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
         availableUsersAdapter = userAutoCompleteTextView.setupAvailableShareableItems(
             context = requireContext(),
             itemList = AccountUtils.getCurrentDrive().getDriveUsers(),
-            notShareableItems = ArrayList(navigationArgs.notShareableUsersIds.map { id -> DriveUser(id = id) })
+            notShareableItems = navigationArgs.notShareableUsersIds.toMutableList() as ArrayList<Int>
         ) { element ->
             userAutoCompleteTextView.setText("")
             addToSharedElementList(if (element is Invitation) element.email else element)
@@ -134,7 +134,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                 is String -> {
                     availableUsersAdapter.initialList.find { user -> user is DriveUser && user.email == element }
                         ?.let { potentialUser ->
-                            if (!availableUsersAdapter.notShareableUsers.any { potentialUser.id == it.id }) {
+                            if (!availableUsersAdapter.notShareableUserIds.any { id == potentialUser.id }) {
                                 addToSharedElementList(potentialUser)
                             } else {
                                 Utils.showSnackbar(
@@ -156,10 +156,10 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                 is DriveUser -> {
                     if (!users.any { it.id == element.id }) {
                         users.add(element)
-                        availableUsersAdapter.notShareableUsers.add(element)
+                        availableUsersAdapter.notShareableUserIds.add(element.id)
                         createChip(element).setOnClickListener {
                             users.remove(element)
-                            availableUsersAdapter.notShareableUsers.remove(element)
+                            availableUsersAdapter.notShareableUserIds.remove(element.id)
                             selectedUsersChipGroup.removeView(it)
                         }
                     }

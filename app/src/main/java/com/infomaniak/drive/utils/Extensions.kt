@@ -432,7 +432,7 @@ fun String.isEmail(): Boolean {
 fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
     context: Context,
     itemList: List<Shareable>,
-    notShareableItems: ArrayList<DriveUser> = arrayListOf(),
+    notShareableItems: ArrayList<Int> = arrayListOf(),
     onDataPassed: (t: Any) -> Unit
 ): AvailableShareableItemsAdapter {
     setDropDownBackgroundResource(R.drawable.background_popup)

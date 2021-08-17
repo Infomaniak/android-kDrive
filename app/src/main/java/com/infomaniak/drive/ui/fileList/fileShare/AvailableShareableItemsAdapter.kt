@@ -44,7 +44,7 @@ import kotlin.collections.ArrayList
 class AvailableShareableItemsAdapter(
     context: Context,
     private var itemList: ArrayList<Shareable>,
-    var notShareableUsers: ArrayList<DriveUser> = arrayListOf(),
+    var notShareableUserIds: ArrayList<Int> = arrayListOf(),
     private val onItemClick: (item: Shareable) -> Unit,
 ) : ArrayAdapter<Shareable>(context, R.layout.item_user, itemList), Filterable {
     var initialList: ArrayList<Shareable> = ArrayList()
@@ -109,7 +109,7 @@ class AvailableShareableItemsAdapter(
                         it.getFilterValue().lowercase(Locale.ROOT)
                             .contains(searchTerm) || ((it is DriveUser) && it.email.lowercase(Locale.ROOT).contains(searchTerm))
                     }.filterNot { displayedItem ->
-                        notShareableUsers.any { it.id == displayedItem.id }
+                        notShareableUserIds.any { it == displayedItem.id }
                     }
                 return FilterResults().apply {
                     values = finalUserList
