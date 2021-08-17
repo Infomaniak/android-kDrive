@@ -231,6 +231,7 @@
     <string name="errorRestore">Recover error</string>
     <string name="errorRightModification">Error when editing rights</string>
     <string name="errorSave">Save error</string>
+    <string name="errorShareAddUser">This file is already shared with this user.</string>
     <string name="errorShareLink">Error when creating link</string>
     <string name="favoritesNoFile">No favorites at this time</string>
     <string name="favoritesTitle">Favorites</string>

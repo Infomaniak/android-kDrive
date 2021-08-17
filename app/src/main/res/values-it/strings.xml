@@ -222,6 +222,7 @@
     <string name="errorRestore">Errore durante il ripristino</string>
     <string name="errorRightModification">Errore durante la modifica dei diritti</string>
     <string name="errorSave">Errore durante il salvataggio</string>
+    <string name="errorShareAddUser">Questo file è già condiviso con questo utente.</string>
     <string name="errorShareLink">Errore durante la creazione del link</string>
     <string name="favoritesNoFile">Al momento non sono disponibili preferiti</string>
     <string name="favoritesTitle">Preferiti</string>

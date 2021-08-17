@@ -222,6 +222,7 @@
     <string name="errorRestore">Error al restaurar</string>
     <string name="errorRightModification">Error al modificar los derechos</string>
     <string name="errorSave">Error al guardar</string>
+    <string name="errorShareAddUser">Este archivo ya está compartido con este usuario.</string>
     <string name="errorShareLink">Error al crear el enlace</string>
     <string name="favoritesNoFile">Todavía no hay favoritos</string>
     <string name="favoritesTitle">Favoritos</string>

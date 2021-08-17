@@ -80,8 +80,9 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
         }
 
         availableUsersAdapter = userAutoCompleteTextView.setupAvailableShareableItems(
-            requireContext(),
-            getAvailableShareableElements()
+            context = requireContext(),
+            itemList = AccountUtils.getCurrentDrive().getDriveUsers(),
+            notShareableItems = navigationArgs.notShareableUsersIds.toMutableList() as ArrayList<Int>
         ) { element ->
             userAutoCompleteTextView.setText("")
             addToSharedElementList(if (element is Invitation) element.email else element)
@@ -131,22 +132,34 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
         selectedItems.apply {
             when (element) {
                 is String -> {
-                    if (!emails.contains(element) && !users.any { it.email == element }) {
-                        emails.add(element)
-                        createChip(element).setOnClickListener {
-                            emails.remove(element)
-                            availableUsersAdapter.setAll(getAvailableShareableElements())
-                            selectedUsersChipGroup.removeView(it)
+                    availableUsersAdapter.initialList.find { user -> user is DriveUser && user.email == element }
+                        ?.let { potentialUser ->
+                            if (!availableUsersAdapter.notShareableUserIds.any { it == potentialUser.id }) {
+                                addToSharedElementList(potentialUser)
+                            } else {
+                                Utils.showSnackbar(
+                                    view = requireView(),
+                                    title = R.string.errorShareAddUser,
+                                    anchorView = shareButton
+                                )
+                            }
+                        } ?: run {
+                        if (!emails.contains(element)) {
+                            emails.add(element)
+                            createChip(element).setOnClickListener {
+                                emails.remove(element)
+                                selectedUsersChipGroup.removeView(it)
+                            }
                         }
                     }
                 }
                 is DriveUser -> {
                     if (!users.any { it.id == element.id }) {
                         users.add(element)
-                        availableUsersAdapter.removeItem(element.id)
+                        availableUsersAdapter.notShareableUserIds.add(element.id)
                         createChip(element).setOnClickListener {
                             users.remove(element)
-                            availableUsersAdapter.setAll(getAvailableShareableElements())
+                            availableUsersAdapter.notShareableUserIds.remove(element.id)
                             selectedUsersChipGroup.removeView(it)
                         }
                     }
@@ -155,7 +168,6 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                     tags.add(element)
                     createChip(element).setOnClickListener {
                         tags.remove(element)
-                        availableUsersAdapter.setAll(getAvailableShareableElements())
                         selectedUsersChipGroup.removeView(it)
                     }
                 }
@@ -203,16 +215,6 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
 
         selectedUsersChipGroup.addView(chip)
         return chip
-    }
-
-    private fun getAvailableShareableElements(): ArrayList<Shareable> {
-        return ArrayList(
-            fileShareViewModel.availableUsers.value
-                ?.removeCommonUsers(ArrayList(fileShareViewModel.currentFile.value?.users ?: arrayListOf()))
-                ?.filterNot { availableUser ->
-                    selectedItems.users.any { it.id == availableUser.id }
-                }
-        )
     }
 
     private fun createShareAndCloseDialog(file: File, body: MutableMap<String, Serializable>) {

@@ -78,9 +78,11 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.LockActivity
 import com.infomaniak.drive.ui.LockActivity.Companion.FACE_ID_LOG_TAG
 import com.infomaniak.drive.ui.OnlyOfficeActivity
@@ -103,6 +105,7 @@ import kotlinx.android.synthetic.main.item_file.view.filePreview
 import kotlinx.android.synthetic.main.item_file.view.progressLayout
 import kotlinx.android.synthetic.main.item_user.view.*
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -428,11 +431,12 @@ fun String.isEmail(): Boolean {
 
 fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
     context: Context,
-    itemList: ArrayList<Shareable>,
+    itemList: List<Shareable>,
+    notShareableItems: ArrayList<Int> = arrayListOf(),
     onDataPassed: (t: Any) -> Unit
 ): AvailableShareableItemsAdapter {
     setDropDownBackgroundResource(R.drawable.background_popup)
-    val availableUsersAdapter = AvailableShareableItemsAdapter(context, itemList) { user ->
+    val availableUsersAdapter = AvailableShareableItemsAdapter(context, ArrayList(itemList), notShareableItems) { user ->
         onDataPassed(user)
         dismissDropDown()
     }
@@ -463,7 +467,7 @@ fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
     return availableUsersAdapter
 }
 
-fun ArrayList<DriveUser>.removeCommonUsers(intersectedUsers: ArrayList<Int>): ArrayList<DriveUser> {
+fun Collection<DriveUser>.removeCommonUsers(intersectedUsers: ArrayList<Int>): ArrayList<DriveUser> {
     return this.filterNot { availableUser ->
         intersectedUsers.any { it == availableUser.id }
     } as ArrayList<DriveUser>
@@ -583,6 +587,10 @@ fun Fragment.safeNavigate(
 ) {
     if (canNavigate()) findNavController().navigate(resId, args, navOptions, navigatorExtras)
 }
+
+fun Drive?.getDriveUsers(): List<DriveUser> = this?.users?.let { categories ->
+    return@let DriveInfosController.getUsers(ArrayList(categories.drive + categories.account))
+} ?: listOf()
 
 fun Context.getLocalThumbnail(file: File): Bitmap? {
     val fileUri = file.path.toUri()

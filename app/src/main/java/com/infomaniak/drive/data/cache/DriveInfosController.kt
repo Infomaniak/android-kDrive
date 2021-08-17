@@ -76,14 +76,14 @@ object DriveInfosController {
         return driveRemoved
     }
 
-    fun getUsers(userIds: ArrayList<Int>? = arrayListOf()): ArrayList<DriveUser> {
+    fun getUsers(userIds: ArrayList<Int>? = arrayListOf()): List<DriveUser> {
         return getRealmInstance().use { realm ->
             val userList = realm.copyFromRealm(realm.where(DriveUser::class.java).apply {
                 if (!userIds.isNullOrEmpty()) {
                     this.oneOf(Drive::id.name, userIds.toTypedArray())
                 }
             }.findAll(), 1)
-            userList?.let { ArrayList(it) } ?: ArrayList()
+            userList?.let { ArrayList(it) } ?: listOf()
         }
     }
 
