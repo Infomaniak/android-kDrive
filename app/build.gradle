@@ -69,9 +69,9 @@ dependencies {
 
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-    implementation 'androidx.viewpager2:viewpager2:1.1.0-alpha01'
+    implementation 'androidx.viewpager2:viewpager2:1.1.0-beta01'
 
-    def exoplayer_version = '2.14.2'
+    def exoplayer_version = '2.15.0'
     implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer-ui:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
@@ -87,7 +87,7 @@ dependencies {
     standardImplementation 'com.google.android.play:core:1.10.0'
     standardImplementation 'com.google.firebase:firebase-messaging-ktx:22.0.0'
 
-    implementation 'io.sentry:sentry-android:5.0.1'
+    implementation 'io.sentry:sentry-android:5.1.0'
 
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.1'
     testImplementation 'io.github.serpro69:kotlin-faker:1.6.0'

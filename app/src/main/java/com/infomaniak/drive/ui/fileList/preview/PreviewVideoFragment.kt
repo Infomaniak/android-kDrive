@@ -73,14 +73,15 @@ open class PreviewVideoFragment : PreviewFragment() {
         if (!::simpleExoPlayer.isInitialized) {
             initializePlayer()
 
-            simpleExoPlayer.addListener(object : Player.EventListener {
+            simpleExoPlayer.addListener(object : Player.Listener {
 
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
                     super.onIsPlayingChanged(isPlaying)
                     if (isPlaying) (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
                 }
 
-                override fun onPlayerError(error: ExoPlaybackException) {
+                override fun onPlayerError(error: PlaybackException) {
+                    super.onPlayerError(error)
                     error.printStackTrace()
                     when (error.message) {
                         "Source error" -> previewDescription?.setText(R.string.previewVideoSourceError)
