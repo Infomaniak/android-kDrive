@@ -134,7 +134,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                 is String -> {
                     availableUsersAdapter.initialList.find { user -> user is DriveUser && user.email == element }
                         ?.let { potentialUser ->
-                            if (!availableUsersAdapter.notShareableUserIds.any { id == potentialUser.id }) {
+                            if (!availableUsersAdapter.notShareableUserIds.any { it == potentialUser.id }) {
                                 addToSharedElementList(potentialUser)
                             } else {
                                 Utils.showSnackbar(
