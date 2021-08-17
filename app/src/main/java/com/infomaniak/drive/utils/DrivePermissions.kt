@@ -50,16 +50,12 @@ class DrivePermissions {
     private lateinit var registerForActivityResult: ActivityResultLauncher<Array<String>>
     private lateinit var activity: FragmentActivity
 
-    fun registerPermissions(
-        activity: FragmentActivity,
-        onPermissionResult: ((authorized: Boolean) -> Unit)? = null,
-        onDismiss: ((authorized: Boolean) -> Unit)? = null
-    ) {
+    fun registerPermissions(activity: FragmentActivity, onPermissionResult: ((authorized: Boolean) -> Unit)? = null) {
         this.activity = activity
         registerForActivityResult =
             activity.registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
                 val authorized = permissions.values.all { it == true }
-                resultPermissions(onPermissionResult, onDismiss, authorized)
+                resultPermissions(onPermissionResult, authorized)
             }
     }
 
@@ -68,24 +64,20 @@ class DrivePermissions {
         registerForActivityResult =
             fragment.registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
                 val authorized = permissions.values.all { it == true }
-                resultPermissions(onPermissionResult, null, authorized)
+                resultPermissions(onPermissionResult, authorized)
             }
     }
 
-    private fun resultPermissions(
-        onPermissionResult: ((authorized: Boolean) -> Unit)?,
-        onDismiss: ((authorized: Boolean) -> Unit)?,
-        authorized: Boolean
-    ) {
+    private fun resultPermissions(onPermissionResult: ((authorized: Boolean) -> Unit)?, authorized: Boolean) {
         onPermissionResult?.invoke(authorized)
         if (!authorized && !activity.requestPermissionsIsPossible(permissions)) {
             MaterialAlertDialogBuilder(activity, R.style.DialogStyle)
                 .setTitle(R.string.androidPermissionTitle)
                 .setMessage(R.string.allPermissionNeeded)
+                .setCancelable(false)
                 .setPositiveButton(R.string.buttonAuthorize) { _: DialogInterface?, _: Int -> activity.startAppSettingsConfig() }
-                .setOnDismissListener { onDismiss?.invoke(activity.hasPermissions(permissions)) }
                 .show()
-        } else onDismiss?.invoke(authorized)
+        }
     }
 
 

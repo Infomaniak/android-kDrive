@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui
 
+import android.Manifest
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -43,6 +44,7 @@ import com.infomaniak.drive.ui.menu.settings.SelectDriveDialog
 import com.infomaniak.drive.ui.menu.settings.SelectDriveViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import com.infomaniak.lib.core.utils.hasPermissions
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress
@@ -61,6 +63,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     private val selectDriveViewModel: SelectDriveViewModel by viewModels()
     private val saveExternalFilesViewModel: SaveExternalFilesViewModel by viewModels()
 
+    private lateinit var drivePermissions: DrivePermissions
     private var currentUri: Uri? = null
     private var isMultiple = false
 
@@ -71,21 +74,22 @@ class SaveExternalFilesActivity : BaseActivity() {
 
         if (!isAuth()) return
 
-        val drivePermissions = DrivePermissions()
+        drivePermissions = DrivePermissions()
         drivePermissions.registerPermissions(this,
             onPermissionResult = { authorized ->
-                if (authorized) initUi(drivePermissions)
-            }, onDismiss = { authorized ->
-                if (authorized) initUi(drivePermissions)
-                else finish()
-            })
+                if (authorized) initUi()
+            }
+        )
 
-        if (drivePermissions.checkSyncPermissions()) {
-            initUi(drivePermissions)
-        }
+        drivePermissions.checkSyncPermissions()
     }
 
-    private fun initUi(drivePermissions: DrivePermissions) {
+    override fun onResume() {
+        super.onResume()
+        if (hasPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE))) initUi()
+    }
+
+    private fun initUi() {
         try {
             when (intent?.action) {
                 Intent.ACTION_SEND -> handleSendSingle(intent)
@@ -98,7 +102,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 scope.level = SentryLevel.WARNING
                 Sentry.captureException(exception)
             }
-            return
+            finish()
         }
 
         activeDefaultUser()
