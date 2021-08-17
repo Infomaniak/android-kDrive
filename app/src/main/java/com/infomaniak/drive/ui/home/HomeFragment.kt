@@ -125,11 +125,12 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             mustRefreshUi = fileDeleted
         }
 
-        homeSwipeRefreshLayout.setOnRefreshListener(this)
-        // Hack to disable swipe refresh when not on top of the page
-        appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
-            homeSwipeRefreshLayout.isEnabled = verticalOffset == 0
-        })
+        homeSwipeRefreshLayout?.apply {
+            setOnRefreshListener(this@HomeFragment)
+            appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
+                isEnabled = verticalOffset == 0
+            })
+        }
     }
 
     override fun onResume() {
