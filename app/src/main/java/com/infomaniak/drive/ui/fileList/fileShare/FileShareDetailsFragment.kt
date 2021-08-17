@@ -88,8 +88,10 @@ class FileShareDetailsFragment : Fragment() {
                 mainViewModel.getFileShare(file.id).observe(viewLifecycleOwner) { (_, data) ->
                     data?.let { share ->
                         sharedUsersTitle.visibility = VISIBLE
-                        availableShareableItemsAdapter.notShareableUserIds.clear()
-                        availableShareableItemsAdapter.notShareableUserIds.addAll(share.users.map { it.id })
+                        availableShareableItemsAdapter.notShareableUserIds =
+                            ArrayList(share.users.map { it.id } + share.invitations.map { it.id })
+                        availableShareableItemsAdapter.notShareableEmails = ArrayList(share.invitations.map { invitation -> invitation.email })
+                            ArrayList(share.invitations.mapNotNull { invitation -> if (invitation.userId != -1) null else invitation.email })
                         sharedItemsAdapter.setAll(ArrayList(share.users + share.invitations + share.tags))
                         setupShareLinkContainer(file, share.link)
                     }
@@ -206,7 +208,8 @@ class FileShareDetailsFragment : Fragment() {
             FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToFileShareAddUserDialog(
                 sharedEmail = sharedEmail,
                 sharedUserId = sharedUserId,
-                notShareableUsersIds = availableShareableItemsAdapter.notShareableUserIds.toIntArray()
+                notShareableUserIds = availableShareableItemsAdapter.notShareableUserIds.toIntArray(),
+                notShareableEmails = availableShareableItemsAdapter.notShareableEmails.toTypedArray()
             )
         )
     }

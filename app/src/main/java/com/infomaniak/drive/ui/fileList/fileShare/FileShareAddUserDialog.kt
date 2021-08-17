@@ -82,7 +82,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
         availableUsersAdapter = userAutoCompleteTextView.setupAvailableShareableItems(
             context = requireContext(),
             itemList = AccountUtils.getCurrentDrive().getDriveUsers(),
-            notShareableItems = navigationArgs.notShareableUsersIds.toMutableList() as ArrayList<Int>
+            notShareableUserIds = navigationArgs.notShareableUserIds.toMutableList() as ArrayList<Int>
         ) { element ->
             userAutoCompleteTextView.setText("")
             addToSharedElementList(if (element is Invitation) element.email else element)

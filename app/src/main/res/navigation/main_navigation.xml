@@ -441,8 +441,11 @@
             android:defaultValue="-1"
             app:argType="integer" />
         <argument
-            android:name="notShareableUsersIds"
-            app:argType="integer[]"/>
+            android:name="notShareableUserIds"
+            app:argType="integer[]" />
+        <argument
+            android:name="notShareableEmails"
+            app:argType="string[]" />
         <action
             android:id="@+id/action_fileShareAddUserDialog_to_selectPermissionBottomSheetDialog"
             app:destination="@id/selectPermissionBottomSheetDialog" />

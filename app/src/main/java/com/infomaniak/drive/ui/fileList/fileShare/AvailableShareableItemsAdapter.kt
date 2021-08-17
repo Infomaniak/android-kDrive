@@ -45,6 +45,7 @@ class AvailableShareableItemsAdapter(
     context: Context,
     private var itemList: ArrayList<Shareable>,
     var notShareableUserIds: ArrayList<Int> = arrayListOf(),
+    var notShareableEmails: ArrayList<String> = arrayListOf(),
     private val onItemClick: (item: Shareable) -> Unit,
 ) : ArrayAdapter<Shareable>(context, R.layout.item_user, itemList), Filterable {
     var initialList: ArrayList<Shareable> = ArrayList()
@@ -59,6 +60,17 @@ class AvailableShareableItemsAdapter(
         itemList.addAll(items)
         initialList = itemList
         notifyDataSetChanged()
+    }
+
+    fun addFirstAvailableItem(): Boolean {
+        var success = false
+        itemList.firstOrNull()?.let { item ->
+            if (item.isShareable()) {
+                onItemClick(item)
+                success = true
+            }
+        }
+        return success
     }
 
     private fun cleanItemList() {
@@ -109,7 +121,7 @@ class AvailableShareableItemsAdapter(
                         it.getFilterValue().lowercase(Locale.ROOT)
                             .contains(searchTerm) || ((it is DriveUser) && it.email.lowercase(Locale.ROOT).contains(searchTerm))
                     }.filterNot { displayedItem ->
-                        notShareableUserIds.any { it == displayedItem.id }
+                        notShareableUserIds.any { it == displayedItem.id } && notShareableEmails.any { it == searchTerm }
                     }
                 return FilterResults().apply {
                     values = finalUserList
@@ -123,18 +135,32 @@ class AvailableShareableItemsAdapter(
                         itemList = initialList
                         notifyDataSetInvalidated()
                     }
-                    constraint.toString().isEmail() -> {
-                        itemList = arrayListOf(
-                            Invitation(email = constraint.toString(), status = context.getString(R.string.userInviteByEmail))
-                        )
+                    constraint.toString().isEmail() && !constraint.toString().existsInAvailableItems() -> {
+                        val email = constraint.toString()
+                        if (!notShareableEmails.contains(email)) {
+                            itemList = arrayListOf(
+                                Invitation(email = email, status = context.getString(R.string.userInviteByEmail))
+                            )
+                            notifyDataSetChanged()
+                        }
                     }
                     else -> {
-                        val oldListCount = itemList.size
                         itemList = results.values as ArrayList<Shareable> // Normal warning
-                        if (itemList.size != oldListCount) notifyDataSetChanged()
+                        notifyDataSetChanged()
                     }
                 }
             }
+        }
+    }
+
+    private fun String.existsInAvailableItems(): Boolean =
+        initialList.any { availableItem -> availableItem is DriveUser && availableItem.email.contains(this) }
+
+    private fun Shareable.isShareable(): Boolean {
+        return when (this) {
+            is DriveUser -> !notShareableUserIds.contains(this.id) && !notShareableEmails.contains(this.email)
+            is Invitation -> !notShareableUserIds.contains(this.userId) && !notShareableEmails.contains(this.email)
+            else -> true
         }
     }
 }
