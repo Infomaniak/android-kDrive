@@ -39,8 +39,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.CancellationSignal
 import android.provider.MediaStore
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
@@ -448,20 +446,6 @@ fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
         if (actionId == EditorInfo.IME_ACTION_DONE) !availableUsersAdapter.addFirstAvailableItem() // if success -> close keyboard (false)
         true
     }
-
-    // Space touch as an enter
-    addTextChangedListener(object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-        override fun afterTextChanged(s: Editable?) {}
-        override fun onTextChanged(text: CharSequence?, start: Int, before: Int, count: Int) {
-            text.toString().let { inputValue ->
-                if (inputValue.lastOrNull()?.isWhitespace() == true && inputValue.trim().isEmail()) {
-                    onDataPassed(inputValue.trim())
-                    dismissDropDown()
-                }
-            }
-        }
-    })
 
     return availableUsersAdapter
 }

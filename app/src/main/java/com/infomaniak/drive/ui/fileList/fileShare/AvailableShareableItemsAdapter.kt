@@ -33,8 +33,6 @@ import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.utils.isEmail
 import com.infomaniak.drive.utils.loadAvatar
 import kotlinx.android.synthetic.main.item_user.view.*
-import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  * Note :
@@ -115,12 +113,11 @@ class AvailableShareableItemsAdapter(
     override fun getFilter(): Filter {
         return object : Filter() {
             override fun performFiltering(constraint: CharSequence?): FilterResults {
-                val searchTerm = constraint.toString().lowercase(Locale.ROOT)
+                val searchTerm = constraint?.standardize() ?: ""
                 val finalUserList = initialList
                     .filter {
-                        it.getFilterValue()
-                            .lowercase(Locale.ROOT)
-                            .contains(searchTerm) || ((it is DriveUser) && it.email.lowercase(Locale.ROOT).contains(searchTerm))
+                        it.getFilterValue().standardize()
+                            .contains(searchTerm) || ((it is DriveUser) && it.email.standardize().contains(searchTerm))
                     }.filterNot { displayedItem ->
                         notShareableUserIds.any { it == displayedItem.id } ||
                                 notShareableEmails.any { displayedItem is DriveUser && it == displayedItem.email }
@@ -137,8 +134,8 @@ class AvailableShareableItemsAdapter(
                         itemList = initialList
                         notifyDataSetInvalidated()
                     }
-                    constraint.toString().isEmail() && !constraint.toString().existsInAvailableItems() -> {
-                        val email = constraint.toString()
+                    constraint.standardize().isEmail() && !constraint.standardize().existsInAvailableItems() -> {
+                        val email = constraint.standardize()
                         itemList = if (!notShareableEmails.contains(email)) {
                             arrayListOf(Invitation(email = email, status = context.getString(R.string.userInviteByEmail)))
                         } else arrayListOf()
@@ -152,6 +149,8 @@ class AvailableShareableItemsAdapter(
             }
         }
     }
+
+    private fun CharSequence.standardize(): String = this.toString().trim().lowercase()
 
     private fun String.existsInAvailableItems(): Boolean =
         initialList.any { availableItem -> availableItem is DriveUser && availableItem.email.lowercase() == this }
