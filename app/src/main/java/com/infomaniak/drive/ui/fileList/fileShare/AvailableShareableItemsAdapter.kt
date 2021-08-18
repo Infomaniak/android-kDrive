@@ -154,7 +154,7 @@ class AvailableShareableItemsAdapter(
     }
 
     private fun String.existsInAvailableItems(): Boolean =
-        initialList.any { availableItem -> availableItem is DriveUser && availableItem.email.contains(this) }
+        initialList.any { availableItem -> availableItem is DriveUser && availableItem.email.lowercase() == this }
 
     private fun Shareable.isShareable(): Boolean {
         return when (this) {
