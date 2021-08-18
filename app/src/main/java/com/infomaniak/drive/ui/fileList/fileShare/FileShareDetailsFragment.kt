@@ -89,9 +89,9 @@ class FileShareDetailsFragment : Fragment() {
                     data?.let { share ->
                         sharedUsersTitle.visibility = VISIBLE
                         availableShareableItemsAdapter.notShareableUserIds =
-                            ArrayList(share.users.map { it.id } + share.invitations.map { it.id })
-                        availableShareableItemsAdapter.notShareableEmails = ArrayList(share.invitations.map { invitation -> invitation.email })
-                            ArrayList(share.invitations.mapNotNull { invitation -> if (invitation.userId != -1) null else invitation.email })
+                            ArrayList(share.users.map { it.id } + share.invitations.map { it.userId })
+                        availableShareableItemsAdapter.notShareableEmails =
+                            ArrayList(share.invitations.map { invitation -> invitation.email })
                         sharedItemsAdapter.setAll(ArrayList(share.users + share.invitations + share.tags))
                         setupShareLinkContainer(file, share.link)
                     }

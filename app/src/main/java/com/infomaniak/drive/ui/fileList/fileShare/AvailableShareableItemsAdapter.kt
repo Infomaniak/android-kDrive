@@ -118,10 +118,12 @@ class AvailableShareableItemsAdapter(
                 val searchTerm = constraint.toString().lowercase(Locale.ROOT)
                 val finalUserList = initialList
                     .filter {
-                        it.getFilterValue().lowercase(Locale.ROOT)
+                        it.getFilterValue()
+                            .lowercase(Locale.ROOT)
                             .contains(searchTerm) || ((it is DriveUser) && it.email.lowercase(Locale.ROOT).contains(searchTerm))
                     }.filterNot { displayedItem ->
-                        notShareableUserIds.any { it == displayedItem.id } && notShareableEmails.any { it == searchTerm }
+                        notShareableUserIds.any { it == displayedItem.id } ||
+                                notShareableEmails.any { displayedItem is DriveUser && it == displayedItem.email }
                     }
                 return FilterResults().apply {
                     values = finalUserList
@@ -137,12 +139,10 @@ class AvailableShareableItemsAdapter(
                     }
                     constraint.toString().isEmail() && !constraint.toString().existsInAvailableItems() -> {
                         val email = constraint.toString()
-                        if (!notShareableEmails.contains(email)) {
-                            itemList = arrayListOf(
-                                Invitation(email = email, status = context.getString(R.string.userInviteByEmail))
-                            )
-                            notifyDataSetChanged()
-                        }
+                        itemList = if (!notShareableEmails.contains(email)) {
+                            arrayListOf(Invitation(email = email, status = context.getString(R.string.userInviteByEmail)))
+                        } else arrayListOf()
+                        notifyDataSetChanged()
                     }
                     else -> {
                         itemList = results.values as ArrayList<Shareable> // Normal warning

@@ -132,36 +132,19 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
         selectedItems.apply {
             when (element) {
                 is String -> {
-                    availableUsersAdapter.initialList.find { user -> user is DriveUser && user.email == element }
-                        ?.let { potentialUser ->
-                            if (!availableUsersAdapter.notShareableUserIds.any { it == potentialUser.id }) {
-                                addToSharedElementList(potentialUser)
-                            } else {
-                                Utils.showSnackbar(
-                                    view = requireView(),
-                                    title = R.string.errorShareAddUser,
-                                    anchorView = shareButton
-                                )
-                            }
-                        } ?: run {
-                        if (!emails.contains(element)) {
-                            emails.add(element)
-                            createChip(element).setOnClickListener {
-                                emails.remove(element)
-                                selectedUsersChipGroup.removeView(it)
-                            }
-                        }
+                    emails.add(element)
+                    createChip(element).setOnClickListener {
+                        emails.remove(element)
+                        selectedUsersChipGroup.removeView(it)
                     }
                 }
                 is DriveUser -> {
-                    if (!users.any { it.id == element.id }) {
-                        users.add(element)
-                        availableUsersAdapter.notShareableUserIds.add(element.id)
-                        createChip(element).setOnClickListener {
-                            users.remove(element)
-                            availableUsersAdapter.notShareableUserIds.remove(element.id)
-                            selectedUsersChipGroup.removeView(it)
-                        }
+                    users.add(element)
+                    availableUsersAdapter.notShareableUserIds.add(element.id)
+                    createChip(element).setOnClickListener {
+                        users.remove(element)
+                        availableUsersAdapter.notShareableUserIds.remove(element.id)
+                        selectedUsersChipGroup.removeView(it)
                     }
                 }
                 is Tag -> {
