@@ -130,21 +130,14 @@ class AvailableShareableItemsAdapter(
 
             override fun publishResults(constraint: CharSequence?, results: FilterResults) {
                 val searchTerm = constraint?.standardize()
-                when {
-                    searchTerm.isNullOrBlank() -> {
-                        itemList = initialList
-                        notifyDataSetInvalidated()
-                    }
-                    searchTerm.isEmail() && !searchTerm.existsInAvailableItems() -> {
-                        itemList = if (!notShareableEmails.contains(searchTerm)) {
-                            arrayListOf(Invitation(email = searchTerm, status = context.getString(R.string.userInviteByEmail)))
-                        } else arrayListOf()
-                        notifyDataSetChanged()
-                    }
-                    else -> {
-                        itemList = results.values as ArrayList<Shareable> // Normal warning
-                        notifyDataSetChanged()
-                    }
+                if (searchTerm?.isEmail() == true && !searchTerm.existsInAvailableItems()) {
+                    itemList = if (!notShareableEmails.contains(searchTerm)) {
+                        arrayListOf(Invitation(email = searchTerm, status = context.getString(R.string.userInviteByEmail)))
+                    } else arrayListOf()
+                    notifyDataSetChanged()
+                } else {
+                    itemList = results.values as ArrayList<Shareable> // Normal warning
+                    notifyDataSetChanged()
                 }
             }
         }
