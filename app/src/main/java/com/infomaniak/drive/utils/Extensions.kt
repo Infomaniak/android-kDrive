@@ -39,8 +39,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.CancellationSignal
 import android.provider.MediaStore
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
@@ -425,44 +423,29 @@ fun Array<Int>.getNearestValue(number: Int): Int {
     return this[finalIndex]
 }
 
-fun String.isEmail(): Boolean {
-    return android.util.Patterns.EMAIL_ADDRESS.matcher(this).matches()
-}
+fun String.isEmail(): Boolean = android.util.Patterns.EMAIL_ADDRESS.matcher(this).matches()
 
 fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
     context: Context,
     itemList: List<Shareable>,
-    notShareableItems: ArrayList<Int> = arrayListOf(),
+    notShareableUserIds: ArrayList<Int> = arrayListOf(),
+    notShareableEmails: ArrayList<String> = arrayListOf(),
     onDataPassed: (t: Any) -> Unit
 ): AvailableShareableItemsAdapter {
     setDropDownBackgroundResource(R.drawable.background_popup)
-    val availableUsersAdapter = AvailableShareableItemsAdapter(context, ArrayList(itemList), notShareableItems) { user ->
+    val availableUsersAdapter = AvailableShareableItemsAdapter(
+        context = context,
+        itemList = ArrayList(itemList),
+        notShareableUserIds = notShareableUserIds,
+        notShareableEmails = notShareableEmails
+    ) { user ->
         onDataPassed(user)
-        dismissDropDown()
     }
     setAdapter(availableUsersAdapter)
     setOnEditorActionListener { _, actionId, _ ->
-        val fieldValue = text.toString()
-        if (actionId == EditorInfo.IME_ACTION_DONE && fieldValue.isEmail()) {
-            onDataPassed(fieldValue)
-            dismissDropDown()
-        }
-        false
+        if (actionId == EditorInfo.IME_ACTION_DONE) !availableUsersAdapter.addFirstAvailableItem() // if success -> close keyboard (false)
+        true
     }
-
-    // Space touch as an enter
-    addTextChangedListener(object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-        override fun afterTextChanged(s: Editable?) {}
-        override fun onTextChanged(text: CharSequence?, start: Int, before: Int, count: Int) {
-            text.toString().let { inputValue ->
-                if (inputValue.lastOrNull()?.isWhitespace() == true && inputValue.trim().isEmail()) {
-                    onDataPassed(inputValue.trim())
-                    dismissDropDown()
-                }
-            }
-        }
-    })
 
     return availableUsersAdapter
 }

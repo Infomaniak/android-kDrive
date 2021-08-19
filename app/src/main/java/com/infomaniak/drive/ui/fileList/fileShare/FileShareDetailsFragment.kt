@@ -54,7 +54,6 @@ class FileShareDetailsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         val allUserList = AccountUtils.getCurrentDrive().getDriveUsers()
 
         fileShareViewModel.availableUsers.value = ArrayList(allUserList) // add available tags if in common
@@ -76,26 +75,8 @@ class FileShareDetailsFragment : Fragment() {
             sharedUsersTitle.visibility = GONE
             setupShareLinkContainer(file, null)
         }
-        mainViewModel.getFileDetails(navigationArgs.fileId, UserDrive()).observe(viewLifecycleOwner) { fileDetails ->
-            fileDetails?.let { file ->
-                fileShareViewModel.currentFile.value = file
-                availableShareableItemsAdapter.setAll(allUserList)
-                availableShareableItemsAdapter.notShareableUserIds.addAll(file.users)
-                sharedItemsAdapter = SharedItemsAdapter(file) { shareable ->
-                    openSelectPermissionDialog(shareable)
-                }
-                sharedUsersRecyclerView.adapter = sharedItemsAdapter
-                mainViewModel.getFileShare(file.id).observe(viewLifecycleOwner) { (_, data) ->
-                    data?.let { share ->
-                        sharedUsersTitle.visibility = VISIBLE
-                        availableShareableItemsAdapter.notShareableUserIds.clear()
-                        availableShareableItemsAdapter.notShareableUserIds.addAll(share.users.map { it.id })
-                        sharedItemsAdapter.setAll(ArrayList(share.users + share.invitations + share.tags))
-                        setupShareLinkContainer(file, share.link)
-                    }
-                }
-            }
-        }
+
+        refreshUi()
 
         getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.SELECT_PERMISSION_NAV_KEY) { bundle ->
             val permission = bundle.getParcelable<Permission>(PERMISSION_BUNDLE_KEY)
@@ -120,7 +101,7 @@ class FileShareDetailsFragment : Fragment() {
 
         getBackNavigationResult<ShareableItems>(SHARE_SELECTION_KEY) { (users, _, tags, invitations) ->
             sharedItemsAdapter.putAll(ArrayList(users + tags + invitations))
-            availableShareableItemsAdapter.notShareableUserIds.addAll(users.map { it.id })
+            refreshUi()
         }
 
         toolbar.setNavigationOnClickListener {
@@ -131,6 +112,30 @@ class FileShareDetailsFragment : Fragment() {
         }
         closeButton.setOnClickListener {
             onBackPressed()
+        }
+    }
+
+    private fun refreshUi() {
+        mainViewModel.getFileDetails(navigationArgs.fileId, UserDrive()).observe(viewLifecycleOwner) { fileDetails ->
+            fileDetails?.let { file ->
+                availableShareableItemsAdapter.apply {
+                    fileShareViewModel.currentFile.value = file
+                    setAll(fileShareViewModel.availableUsers.value ?: listOf())
+                    notShareableUserIds.addAll(file.users)
+                    sharedItemsAdapter = SharedItemsAdapter(file) { shareable -> openSelectPermissionDialog(shareable) }
+                    sharedUsersRecyclerView.adapter = sharedItemsAdapter
+
+                    mainViewModel.getFileShare(file.id).observe(viewLifecycleOwner) { (_, data) ->
+                        data?.let { share ->
+                            sharedUsersTitle.visibility = VISIBLE
+                            notShareableUserIds = ArrayList(share.users.map { it.id } + share.invitations.map { it.userId })
+                            notShareableEmails = ArrayList(share.invitations.map { invitation -> invitation.email })
+                            sharedItemsAdapter.setAll(ArrayList(share.users + share.invitations + share.tags))
+                            setupShareLinkContainer(file, share.link)
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -206,7 +211,8 @@ class FileShareDetailsFragment : Fragment() {
             FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToFileShareAddUserDialog(
                 sharedEmail = sharedEmail,
                 sharedUserId = sharedUserId,
-                notShareableUsersIds = availableShareableItemsAdapter.notShareableUserIds.toIntArray()
+                notShareableUserIds = availableShareableItemsAdapter.notShareableUserIds.toIntArray(),
+                notShareableEmails = availableShareableItemsAdapter.notShareableEmails.toTypedArray()
             )
         )
     }
