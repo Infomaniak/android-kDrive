@@ -125,7 +125,7 @@ class SharedItemsAdapter(
             itemList.add(0, item)
         }
 
-        notifyDataSetChanged()
+        notifyItemRangeInserted(1, newItemList.size - 1)
     }
 
     fun putAll(itemList: ArrayList<Shareable>) {
