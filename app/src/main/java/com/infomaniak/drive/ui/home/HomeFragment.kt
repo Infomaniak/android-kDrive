@@ -75,16 +75,15 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        lastFilesAdapter = LastFilesAdapter()
         lastFilesRecyclerView.apply {
+            adapter = lastFilesAdapter
             layoutManager = object : LinearLayoutManager(requireContext(), HORIZONTAL, false) {
                 override fun checkLayoutParams(layoutParams: RecyclerView.LayoutParams): Boolean {
                     layoutParams.width = (width * 0.4f).toInt()
                     return true
                 }
             }
-
-            lastFilesAdapter = LastFilesAdapter()
-            adapter = lastFilesAdapter
         }
 
         AccountUtils.getCurrentDrive()?.let { currentDrive ->
