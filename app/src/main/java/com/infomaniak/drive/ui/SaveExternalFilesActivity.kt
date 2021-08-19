@@ -77,33 +77,11 @@ class SaveExternalFilesActivity : BaseActivity() {
         drivePermissions = DrivePermissions()
         drivePermissions.registerPermissions(this,
             onPermissionResult = { authorized ->
-                if (authorized) initUi()
+                if (authorized) enabledUi()
             }
         )
 
         drivePermissions.checkSyncPermissions()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (hasPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE))) initUi()
-    }
-
-    private fun initUi() {
-        try {
-            when (intent?.action) {
-                Intent.ACTION_SEND -> handleSendSingle(intent)
-                Intent.ACTION_SEND_MULTIPLE -> handleSendMultiple(intent)
-            }
-        } catch (exception: Exception) {
-            exception.printStackTrace()
-            showSnackbar(R.string.anErrorHasOccurred)
-            Sentry.withScope { scope ->
-                scope.level = SentryLevel.WARNING
-                Sentry.captureException(exception)
-            }
-            finish()
-        }
 
         activeDefaultUser()
 
@@ -157,6 +135,28 @@ class SaveExternalFilesActivity : BaseActivity() {
             } ?: run {
                 pathName.setText(R.string.selectFolderTitle)
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (hasPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE))) enabledUi()
+    }
+
+    private fun enabledUi() {
+        try {
+            when (intent?.action) {
+                Intent.ACTION_SEND -> handleSendSingle(intent)
+                Intent.ACTION_SEND_MULTIPLE -> handleSendMultiple(intent)
+            }
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+            showSnackbar(R.string.anErrorHasOccurred)
+            Sentry.withScope { scope ->
+                scope.level = SentryLevel.WARNING
+                Sentry.captureException(exception)
+            }
+            finish()
         }
 
         fileNameEdit?.addTextChangedListener {
