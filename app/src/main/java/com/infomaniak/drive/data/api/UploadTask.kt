@@ -23,12 +23,11 @@ import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.infomaniak.drive.data.models.FileInProgress
+import androidx.work.workDataOf
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.ValidChunks
 import com.infomaniak.drive.data.services.UploadWorker
-import com.infomaniak.drive.data.sync.UploadProgressReceiver
+import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
@@ -84,7 +83,6 @@ class UploadTask(
         val uri = uploadFile.getUriObject()
         val fileInputStream = context.contentResolver.openInputStream(uploadFile.getOriginalUri(context))
 
-        sendSyncProgress(UploadWorker.ProgressStatus.STARTED, 0)
         initChunkSize(uploadFile.fileSize)
         BufferedInputStream(fileInputStream, chunkSize).use { input ->
             val waitingCoroutines = arrayListOf<Job>()
@@ -142,10 +140,6 @@ class UploadTask(
         }
         notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
         UploadFile.uploadFinished(uri)
-
-        // TODO fix this
-        delay(150)
-        sendSyncProgress(UploadWorker.ProgressStatus.FINISHED, 100)
     }
 
     private fun CoroutineScope.uploadChunkRequest(
@@ -231,7 +225,7 @@ class UploadTask(
             }
             val pendingIntent = PendingIntent.getActivity(
                 context, 0,
-                intent, PendingIntent.FLAG_UPDATE_CURRENT
+                intent, UploadNotifications.pendingIntentFlags
             )
             setContentIntent(pendingIntent)
             setContentText("${currentProgress}%")
@@ -240,7 +234,7 @@ class UploadTask(
         }
 
         if (progress in 1..100) {
-            sendSyncProgress(UploadWorker.ProgressStatus.RUNNING)
+            launch { shareProgress(currentProgress.get()) }
         }
 
         Log.i(
@@ -249,14 +243,14 @@ class UploadTask(
         )
     }
 
-    private fun sendSyncProgress(status: UploadWorker.ProgressStatus, progress: Int = 0) {
-        Intent().apply {
-            val fileInProgress = FileInProgress(uploadFile.remoteFolder, uploadFile.fileName, uploadFile.uri, progress, status)
-            Log.d("SyncReceiver", "broadcast")
-            action = UploadProgressReceiver.TAG
-            putExtra(UploadWorker.IMPORT_IN_PROGRESS, fileInProgress)
-            LocalBroadcastManager.getInstance(context).sendBroadcast(this)
-        }
+    private suspend fun shareProgress(progress: Int = 0) {
+        worker.setProgress(
+            workDataOf(
+                UploadWorker.FILENAME to uploadFile.fileName,
+                UploadWorker.PROGRESS to progress,
+                UploadWorker.REMOTE_FOLDER_ID to uploadFile.remoteFolder
+            )
+        )
     }
 
     private fun checkLimitParallelRequest() {

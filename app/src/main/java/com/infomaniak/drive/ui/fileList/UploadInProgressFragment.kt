@@ -28,9 +28,9 @@ import androidx.navigation.fragment.findNavController
 import androidx.work.Data
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.FileInProgress
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.UploadWorker
+import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
@@ -67,16 +67,20 @@ class UploadInProgressFragment : FileListFragment() {
 
         collapsingToolbarLayout.title = getString(R.string.uploadInProgressTitle)
 
-        mainViewModel.fileInProgress.observe(viewLifecycleOwner) { fileInProgress ->
-            val firstFile = fileAdapter.getItems().firstOrNull()
-            if (fileInProgress != null && firstFile != null) {
-                if (fileInProgress.parentId == folderID && fileInProgress.name == firstFile.name) {
-                    fileAdapter.updateFileProgress(firstFile.id, fileInProgress.progress) {
-                        whenAnUploadIsDone(fileInProgress)
-                    }
+        requireContext().trackUploadWorkerProgress().observe(viewLifecycleOwner) {
+            val workInfo = it.firstOrNull() ?: return@observe
+            val firstFile = fileAdapter.getItems().firstOrNull() ?: return@observe
+            val fileName = workInfo.progress.getString(UploadWorker.FILENAME)
+            val progress = workInfo.progress.getInt(UploadWorker.PROGRESS, 0)
+            val remoteFolderId = workInfo.progress.getInt(UploadWorker.REMOTE_FOLDER_ID, 0)
+
+            if (folderID == remoteFolderId && fileName == firstFile.name) {
+                fileAdapter.updateFileProgress(firstFile.id, progress) {
+                    whenAnUploadIsDone(progress)
                 }
-                Log.i("uploadInProgress", "${fileInProgress.name} ${fileInProgress.status} ${fileInProgress.progress}%")
             }
+
+            Log.d("uploadInProgress", "$fileName $progress%")
         }
 
         mainViewModel.refreshActivities.removeObservers(super.getViewLifecycleOwner())
@@ -108,8 +112,8 @@ class UploadInProgressFragment : FileListFragment() {
     }
 
 
-    private fun whenAnUploadIsDone(fileInProgress: FileInProgress) {
-        if (fileInProgress.status == UploadWorker.ProgressStatus.FINISHED) {
+    private fun whenAnUploadIsDone(progress: Int) {
+        if (progress == 100) {
             fileAdapter.deleteAt(0)
 
             if (fileAdapter.getItems().isEmpty()) {

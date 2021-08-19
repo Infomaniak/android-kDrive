@@ -109,11 +109,13 @@ object SyncUtils {
     }
 
     private fun Context.startPeriodicSync(syncInterval: Long) {
-        val request = PeriodicWorkRequestBuilder<UploadWorker>(syncInterval, TimeUnit.SECONDS)
-            .setConstraints(UploadWorker.workConstraints())
-            .build()
-        WorkManager.getInstance(this)
-            .enqueueUniquePeriodicWork(UploadWorker.PERIODIC_TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
+        if (!isSyncActive()) {
+            val request = PeriodicWorkRequestBuilder<UploadWorker>(syncInterval, TimeUnit.SECONDS)
+                .setConstraints(UploadWorker.workConstraints())
+                .build()
+            WorkManager.getInstance(this)
+                .enqueueUniquePeriodicWork(UploadWorker.PERIODIC_TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
+        }
     }
 
     private fun Context.cancelPeriodicSync() {
@@ -151,7 +153,6 @@ object SyncUtils {
         UploadFile.setAppSyncSettings(syncSettings)
         if (syncSettings.syncImmediately) {
             startContentObserverService()
-            syncImmediately()
         } else {
             cancelContentObserver()
         }
@@ -159,10 +160,10 @@ object SyncUtils {
     }
 
     fun Context.disableAutoSync() {
-        cancelContentObserver()
-        cancelPeriodicSync()
         UploadFile.deleteAllSyncFile()
         UploadFile.removeAppSyncSettings()
+        cancelContentObserver()
+        cancelPeriodicSync()
     }
 
     fun Context.isWifiConnection(): Boolean {

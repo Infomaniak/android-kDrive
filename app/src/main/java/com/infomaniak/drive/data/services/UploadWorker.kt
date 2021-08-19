@@ -19,16 +19,14 @@ package com.infomaniak.drive.data.services
 
 import android.content.ContentResolver
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.os.Parcelable
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toFile
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.lifecycle.LiveData
 import androidx.work.*
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.UploadTask
@@ -46,7 +44,6 @@ import com.infomaniak.drive.data.sync.UploadNotifications.quotaExceededNotificat
 import com.infomaniak.drive.data.sync.UploadNotifications.setupCurrentUploadNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.syncSettingsActivityPendingIntent
-import com.infomaniak.drive.data.sync.UploadProgressReceiver
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaFoldersProvider.IMAGES_BUCKET_ID
 import com.infomaniak.drive.utils.MediaFoldersProvider.VIDEO_BUCKET_ID
@@ -57,7 +54,6 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.ApiController
 import com.infomaniak.lib.core.utils.hasPermissions
 import io.sentry.Sentry
-import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.*
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -72,6 +68,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     override suspend fun doWork(): Result {
         contentResolver = applicationContext.contentResolver
+        Log.d(TAG, "UploadWorker start job !")
 
         applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
         applicationContext.uploadServiceNotification().apply {
@@ -83,12 +80,14 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             // Check if we have the required permissions before continuing
             if (!applicationContext.hasPermissions(DrivePermissions.permissions)) {
                 UploadNotifications.permissionErrorNotification(applicationContext)
+                Log.d(TAG, "UploadWorker no permissions")
                 return Result.failure()
             }
 
             // Retrieve the latest media that have not been taken in the sync
             val appSyncSettings = UploadFile.getAppSyncSettings()
             appSyncSettings?.let {
+                Log.d(TAG, "UploadWorker check locals")
                 checkLocalLastMedias(it)
             }
 
@@ -96,6 +95,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             val isCancelledByUser = inputData.getBoolean(CANCELLED_BY_USER, false)
             if (UploadFile.getNotSyncedFilesCount() == 0L && isCancelledByUser) {
                 UploadNotifications.showCancelledByUserNotification(applicationContext)
+                Log.d(TAG, "UploadWorker cancelled by user")
                 return Result.success()
             }
 
@@ -182,13 +182,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         if (uploadedCount > 0) currentUploadFile?.showUploadedFilesNotification(applicationContext, uploadedCount)
 
         Log.d(TAG, "startSyncFiles: finish with $uploadedCount uploaded")
-
-        //TODO à changer
-        Intent().apply {
-            action = UploadProgressReceiver.TAG
-            putExtra(OPERATION_STATUS, ProgressStatus.FINISHED as Parcelable)
-            LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(this)
-        }
 
         Result.success()
     }
@@ -280,44 +273,45 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val args = arrayOf(lastUploadDate.toString(), (lastUploadDate / 1000).toString(), (lastUploadDate / 1000).toString())
         var customSelection: String
         var customArgs: Array<String>
-        val deferreds = arrayListOf<Deferred<Any?>>()
+        val jobs = arrayListOf<Deferred<Any?>>()
 
         Log.d(TAG, "checkLocalLastMedias> started with ${UploadFile.getLastDate(applicationContext)}")
 
         MediaFolder.getAllSyncedFolders().forEach { mediaFolder ->
             Log.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.name}_${mediaFolder.id}")
-            var contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            var contentUri = MediaFoldersProvider.imagesExternalUri
             var isNotPending =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Images.Media.IS_PENDING} = 0" else ""
             customSelection = "$selection AND $IMAGES_BUCKET_ID = ? $isNotPending"
             customArgs = args + mediaFolder.id.toString()
             val getLastImagesOperation =
-                async { getLocalLastMediasAsync(syncSettings, contentUri, customSelection, customArgs, mediaFolder) }
-            deferreds.add(getLastImagesOperation)
+                getLocalLastMediasAsync(syncSettings, contentUri, customSelection, customArgs, mediaFolder)
+            jobs.add(getLastImagesOperation)
 
             if (syncSettings.syncVideo) {
-                contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                contentUri = MediaFoldersProvider.videosExternalUri
                 isNotPending =
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Video.Media.IS_PENDING} = 0" else ""
                 customSelection = "$selection AND $VIDEO_BUCKET_ID = ? $isNotPending"
                 val getLastVideosOperation =
-                    async { getLocalLastMediasAsync(syncSettings, contentUri, customSelection, customArgs, mediaFolder) }
-                deferreds.add(getLastVideosOperation)
+                    getLocalLastMediasAsync(syncSettings, contentUri, customSelection, customArgs, mediaFolder)
+                jobs.add(getLastVideosOperation)
             }
-
-            deferreds.joinAll()
         }
+
+        jobs.joinAll()
     }
 
-    private fun getLocalLastMediasAsync(
+    private fun CoroutineScope.getLocalLastMediasAsync(
         syncSettings: SyncSettings,
         contentUri: Uri,
         selection: String,
         args: Array<String>,
         mediaFolder: MediaFolder
-    ) {
+    ) = async {
         val sortOrder = SyncUtils.DATE_TAKEN + " ASC, " + MediaStore.MediaColumns.DATE_ADDED + " ASC, " +
                 MediaStore.MediaColumns.DATE_MODIFIED + " ASC"
+
         contentResolver.query(contentUri, null, selection, args, sortOrder)
             ?.use { cursor ->
                 Log.d(TAG, "getLocalLastMediasAsync > from ${mediaFolder.name} ${cursor.count} found")
@@ -350,19 +344,17 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             }
     }
 
-    @Parcelize
-    enum class ProgressStatus : Parcelable { PENDING, STARTED, RUNNING, FINISHED }
     companion object {
-        const val TAG = "UploadWorker"
+        const val TAG = "upload_worker"
+        const val PERIODIC_TAG = "upload_worker_periodic"
 
+        const val FILENAME = "filename"
+        const val PROGRESS = "progress"
+        const val REMOTE_FOLDER_ID = "remote_folder"
         const val CANCELLED_BY_USER = "cancelled_by_user"
-        const val IMPORT_IN_PROGRESS = "import_in_progress"
-        const val OPERATION_STATUS = "progress_status"
-        const val PERIODIC_TAG = "UploadWorkerPeriodic"
         const val UPLOAD_FOLDER = "upload_folder"
 
-        private const val LAST_UPLOADED_COUNT = "lastUploadedCount"
-
+        private const val LAST_UPLOADED_COUNT = "last_uploaded_count"
 
         fun workConstraints() = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -376,6 +368,14 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 setContentIntent(pendingIntent)
                 notificationManagerCompat.notify(NotificationUtils.FILE_OBSERVE_ID, this.build())
             }
+        }
+
+        fun Context.trackUploadWorkerProgress(): LiveData<MutableList<WorkInfo>> {
+            return WorkManager.getInstance(this).getWorkInfosLiveData(
+                WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(TAG))
+                    .addStates(arrayListOf(WorkInfo.State.RUNNING))
+                    .build()
+            )
         }
     }
 }
