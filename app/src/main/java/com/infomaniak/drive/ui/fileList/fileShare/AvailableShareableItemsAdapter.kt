@@ -129,15 +129,15 @@ class AvailableShareableItemsAdapter(
             }
 
             override fun publishResults(constraint: CharSequence?, results: FilterResults) {
+                val searchTerm = constraint?.standardize()
                 when {
-                    constraint.isNullOrBlank() -> {
+                    searchTerm.isNullOrBlank() -> {
                         itemList = initialList
                         notifyDataSetInvalidated()
                     }
-                    constraint.standardize().isEmail() && !constraint.standardize().existsInAvailableItems() -> {
-                        val email = constraint.standardize()
-                        itemList = if (!notShareableEmails.contains(email)) {
-                            arrayListOf(Invitation(email = email, status = context.getString(R.string.userInviteByEmail)))
+                    searchTerm.isEmail() && !searchTerm.existsInAvailableItems() -> {
+                        itemList = if (!notShareableEmails.contains(searchTerm)) {
+                            arrayListOf(Invitation(email = searchTerm, status = context.getString(R.string.userInviteByEmail)))
                         } else arrayListOf()
                         notifyDataSetChanged()
                     }
@@ -153,7 +153,7 @@ class AvailableShareableItemsAdapter(
     private fun CharSequence.standardize(): String = this.toString().trim().lowercase()
 
     private fun String.existsInAvailableItems(): Boolean =
-        initialList.any { availableItem -> availableItem is DriveUser && availableItem.email.lowercase() == this }
+        initialList.any { availableItem -> availableItem is DriveUser && availableItem.email.standardize() == this }
 
     private fun Shareable.isShareable(): Boolean {
         return when (this) {

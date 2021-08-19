@@ -134,6 +134,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
             when (element) {
                 is String -> {
                     emails.add(element)
+                    availableUsersAdapter.notShareableEmails.add(element)
                     createChip(element).setOnClickListener {
                         emails.remove(element)
                         selectedUsersChipGroup.removeView(it)
