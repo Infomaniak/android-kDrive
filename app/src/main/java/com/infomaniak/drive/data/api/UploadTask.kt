@@ -140,6 +140,7 @@ class UploadTask(
         }
         notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
         UploadFile.uploadFinished(uri)
+        shareProgress(100, true)
     }
 
     private fun CoroutineScope.uploadChunkRequest(
@@ -243,11 +244,12 @@ class UploadTask(
         )
     }
 
-    private suspend fun shareProgress(progress: Int = 0) {
+    private suspend fun shareProgress(progress: Int = 0, isUploaded: Boolean = false) {
         worker.setProgress(
             workDataOf(
                 UploadWorker.FILENAME to uploadFile.fileName,
                 UploadWorker.PROGRESS to progress,
+                UploadWorker.IS_UPLOADED to isUploaded,
                 UploadWorker.REMOTE_FOLDER_ID to uploadFile.remoteFolder
             )
         )

@@ -72,11 +72,12 @@ class UploadInProgressFragment : FileListFragment() {
             val firstFile = fileAdapter.getItems().firstOrNull() ?: return@observe
             val fileName = workInfo.progress.getString(UploadWorker.FILENAME)
             val progress = workInfo.progress.getInt(UploadWorker.PROGRESS, 0)
+            val isUploaded = workInfo.progress.getBoolean(UploadWorker.IS_UPLOADED, false)
             val remoteFolderId = workInfo.progress.getInt(UploadWorker.REMOTE_FOLDER_ID, 0)
 
             if (folderID == remoteFolderId && fileName == firstFile.name) {
                 fileAdapter.updateFileProgress(firstFile.id, progress) {
-                    whenAnUploadIsDone(progress)
+                    if (isUploaded) whenAnUploadIsDone()
                 }
             }
 
@@ -112,15 +113,13 @@ class UploadInProgressFragment : FileListFragment() {
     }
 
 
-    private fun whenAnUploadIsDone(progress: Int) {
-        if (progress == 100) {
-            fileAdapter.deleteAt(0)
+    private fun whenAnUploadIsDone() {
+        fileAdapter.deleteAt(0)
 
-            if (fileAdapter.getItems().isEmpty()) {
-                noFilesLayout.toggleVisibility(true)
-                requireActivity().showSnackbar(R.string.allUploadFinishedTitle)
-                popBackStack()
-            }
+        if (fileAdapter.getItems().isEmpty()) {
+            noFilesLayout.toggleVisibility(true)
+            requireActivity().showSnackbar(R.string.allUploadFinishedTitle)
+            popBackStack()
         }
     }
 

@@ -19,6 +19,7 @@ package com.infomaniak.drive.utils
 
 import android.annotation.SuppressLint
 import android.content.ContentResolver
+import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
@@ -45,11 +46,11 @@ object MediaFoldersProvider {
     @SuppressLint("InlinedApi")
     const val VIDEO_BUCKET_DISPLAY_NAME = MediaStore.Video.Media.BUCKET_DISPLAY_NAME
 
-    val imagesExternalUri =
+    val imagesExternalUri: Uri =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
         else MediaStore.Images.Media.EXTERNAL_CONTENT_URI
 
-    val videosExternalUri =
+    val videosExternalUri: Uri =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
         else MediaStore.Video.Media.EXTERNAL_CONTENT_URI
 

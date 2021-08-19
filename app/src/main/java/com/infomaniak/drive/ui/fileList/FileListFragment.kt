@@ -49,6 +49,8 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.services.DownloadWorker
+import com.infomaniak.drive.data.services.UploadWorker
+import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog.Companion.SELECT_DIALOG_ACTION
@@ -189,6 +191,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         if (!isDownloading) downloadFiles(false)
         observeOfflineDownloadProgress()
 
+        requireContext().trackUploadWorkerProgress().observe(viewLifecycleOwner) {
+            val workInfo = it.firstOrNull() ?: return@observe
+            val isUploaded = workInfo.progress.getBoolean(UploadWorker.IS_UPLOADED, false)
+            if (isUploaded) mainViewModel.refreshActivities.value = true
+        }
         mainViewModel.refreshActivities.observe(viewLifecycleOwner) {
             it?.let {
                 showPendingFiles()

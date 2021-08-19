@@ -350,6 +350,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         const val FILENAME = "filename"
         const val PROGRESS = "progress"
+        const val IS_UPLOADED = "is_uploaded"
         const val REMOTE_FOLDER_ID = "remote_folder"
         const val CANCELLED_BY_USER = "cancelled_by_user"
         const val UPLOAD_FOLDER = "upload_folder"
