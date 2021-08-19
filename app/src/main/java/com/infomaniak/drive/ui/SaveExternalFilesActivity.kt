@@ -77,33 +77,11 @@ class SaveExternalFilesActivity : BaseActivity() {
         drivePermissions = DrivePermissions()
         drivePermissions.registerPermissions(this,
             onPermissionResult = { authorized ->
-                if (authorized) initUi()
+                if (authorized) getFiles()
             }
         )
 
         drivePermissions.checkSyncPermissions()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (hasPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE))) initUi()
-    }
-
-    private fun initUi() {
-        try {
-            when (intent?.action) {
-                Intent.ACTION_SEND -> handleSendSingle(intent)
-                Intent.ACTION_SEND_MULTIPLE -> handleSendMultiple(intent)
-            }
-        } catch (exception: Exception) {
-            exception.printStackTrace()
-            showSnackbar(R.string.anErrorHasOccurred)
-            Sentry.withScope { scope ->
-                scope.level = SentryLevel.WARNING
-                Sentry.captureException(exception)
-            }
-            finish()
-        }
 
         activeDefaultUser()
 
@@ -160,8 +138,8 @@ class SaveExternalFilesActivity : BaseActivity() {
         }
 
         fileNameEdit?.addTextChangedListener {
-            saveButton.isEnabled = isValidFields()
             fileNameEdit.showOrHideEmptyError()
+            saveButton.isEnabled = isValidFields()
         }
 
         saveButton.initProgress(this)
@@ -184,6 +162,30 @@ class SaveExternalFilesActivity : BaseActivity() {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (hasPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE))) getFiles()
+    }
+
+    private fun getFiles() {
+        if (currentUri == null && !isMultiple) {
+            try {
+                when (intent?.action) {
+                    Intent.ACTION_SEND -> handleSendSingle(intent)
+                    Intent.ACTION_SEND_MULTIPLE -> handleSendMultiple(intent)
+                }
+            } catch (exception: Exception) {
+                exception.printStackTrace()
+                showSnackbar(R.string.anErrorHasOccurred)
+                Sentry.withScope { scope ->
+                    scope.level = SentryLevel.WARNING
+                    Sentry.captureException(exception)
+                }
+                finish()
             }
         }
     }
