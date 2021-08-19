@@ -369,7 +369,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         fileAdapter.onMenuClicked = { file ->
             val bundle = bundleOf(
-                "fileId" to file.id,
+                "file" to file,
                 "userDrive" to UserDrive(driveId = file.driveId, sharedWithMe = fileListViewModel.isSharedWithMe)
             )
             safeNavigate(R.id.fileInfoActionsBottomSheetDialog, bundle)
