@@ -61,14 +61,14 @@ class AvailableShareableItemsAdapter(
     }
 
     fun addFirstAvailableItem(): Boolean {
-        var success = false
-        itemList.firstOrNull()?.let { item ->
-            if (item.isShareable()) {
+        val item = itemList.firstOrNull()
+        return when {
+            item?.isShareable() == true -> {
                 onItemClick(item)
-                success = true
+                true
             }
+            else -> false
         }
-        return success
     }
 
     private fun cleanItemList() {
