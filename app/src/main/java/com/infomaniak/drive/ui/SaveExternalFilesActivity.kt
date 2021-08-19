@@ -77,7 +77,7 @@ class SaveExternalFilesActivity : BaseActivity() {
         drivePermissions = DrivePermissions()
         drivePermissions.registerPermissions(this,
             onPermissionResult = { authorized ->
-                if (authorized) enabledUi()
+                if (authorized) enableUi()
             }
         )
 
@@ -140,10 +140,10 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (hasPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE))) enabledUi()
+        if (hasPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE))) enableUi()
     }
 
-    private fun enabledUi() {
+    private fun enableUi() {
         try {
             when (intent?.action) {
                 Intent.ACTION_SEND -> handleSendSingle(intent)
