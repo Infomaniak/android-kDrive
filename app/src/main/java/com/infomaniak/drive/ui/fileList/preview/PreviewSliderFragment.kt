@@ -216,8 +216,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
+        if (this::currentPreviewFile.isInitialized) outState.putInt(PREVIEW_FILE_ID_TAG, currentPreviewFile.id)
         super.onSaveInstanceState(outState)
-        outState.putInt(PREVIEW_FILE_ID_TAG, currentPreviewFile.id)
     }
 
     override fun displayInfoClicked() {
