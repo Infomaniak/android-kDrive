@@ -808,10 +808,11 @@ object FileController {
     }
 
     fun Context.startDownloadFile(downloadURL: Uri, fileName: String) {
+        val formattedFileName = fileName.replace(Regex("[\\\\/:*?\"<>|%]"), "_")
         val request = DownloadManager.Request(downloadURL).apply {
-            setTitle(fileName)
+            setTitle(formattedFileName)
             setDescription(getString(R.string.app_name))
-            setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
+            setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, formattedFileName)
             HttpUtils.getHeaders(contentType = null).toMap().forEach { addRequestHeader(it.key, it.value) }
             setAllowedNetworkTypes(DownloadManager.Request.NETWORK_MOBILE or DownloadManager.Request.NETWORK_WIFI)
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) setVisibleInDownloadsUi(true)
