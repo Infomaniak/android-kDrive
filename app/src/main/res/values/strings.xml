@@ -235,6 +235,9 @@
     <string name="errorShareLink">Error when creating link</string>
     <string name="favoritesNoFile">No favorites at this time</string>
     <string name="favoritesTitle">Favorites</string>
+    <string name="fileActivityCollaborativeFolderCreate">created a drop box</string>
+    <string name="fileActivityCollaborativeFolderDelete">deleted a drop box</string>
+    <string name="fileActivityCollaborativeFolderUpdate">updated a drop box</string>
     <plurals name="fileActivityCommentCreate">
         <item quantity="one">commented the following file</item>
         <item quantity="other">commented %d files</item>
