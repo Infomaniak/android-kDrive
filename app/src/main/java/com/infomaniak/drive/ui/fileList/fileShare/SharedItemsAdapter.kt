@@ -72,10 +72,16 @@ class SharedItemsAdapter(
         avatar.loadAvatar(driveUser)
 
         rightsValue.setText(driveUser.getFilePermission().translation)
+        externalUserLabel.apply {
+            if (driveUser.isExternalUser()) {
+                text =
+                    context.getString(if (driveUser.status == "pending") R.string.shareUserNotAccepted else R.string.shareUserExternal)
+                visibility = VISIBLE
+            }
+        }
         if (file.createdBy == driveUser.id) {
             rightsValue.setTextColor(ContextCompat.getColor(context, R.color.secondaryText))
         }
-        pendingInvitation.visibility = if (driveUser.status == "pending") VISIBLE else GONE
     }
 
     private fun View.bindInvitation(invitation: Invitation) {
@@ -93,10 +99,14 @@ class SharedItemsAdapter(
         }
 
         rightsValue.setText(invitation.getFilePermission().translation)
+        externalUserLabel.apply {
+            text = context.getString(R.string.shareUserNotAccepted)
+            visibility = VISIBLE
+        }
+
         if (invitation.id != file.createdBy && file.rights?.share == true) {
             setOnClickListener { onItemClicked(invitation) }
         }
-        pendingInvitation.visibility = VISIBLE
     }
 
     private fun View.bindTag(tag: Tag) {
