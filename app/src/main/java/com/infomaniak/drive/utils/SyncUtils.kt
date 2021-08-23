@@ -95,7 +95,7 @@ object SyncUtils {
     fun Context.isSyncActive(): Boolean {
         return WorkManager.getInstance(this).getWorkInfos(
             WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(UploadWorker.TAG))
-                .addStates(arrayListOf(WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED))
+                .addStates(arrayListOf(WorkInfo.State.RUNNING))
                 .build()
         ).get()?.isNotEmpty() == true
     }
@@ -103,7 +103,7 @@ object SyncUtils {
     private fun Context.isAutoSyncActive(): Boolean {
         return WorkManager.getInstance(this).getWorkInfos(
             WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(UploadWorker.PERIODIC_TAG))
-                .addStates(arrayListOf(WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED))
+                .addStates(arrayListOf(WorkInfo.State.RUNNING))
                 .build()
         ).get()?.isNotEmpty() == true
     }

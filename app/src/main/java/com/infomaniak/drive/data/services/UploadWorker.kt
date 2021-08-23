@@ -36,7 +36,6 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.data.sync.UploadNotifications.exceptionNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.folderNotFoundNotification
-import com.infomaniak.drive.data.sync.UploadNotifications.interruptedNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.lockErrorNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.networkErrorNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.outOfMemoryNotification
@@ -50,6 +49,7 @@ import com.infomaniak.drive.utils.MediaFoldersProvider.VIDEO_BUCKET_ID
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.uploadServiceNotification
+import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.ApiController
 import com.infomaniak.lib.core.utils.hasPermissions
@@ -113,17 +113,14 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             currentUploadFile?.quotaExceededNotification(applicationContext)
             Result.retry()
 
-        } catch (exception: InterruptedException) { // from system
-            currentUploadFile?.interruptedNotification(applicationContext)
-            Result.retry()
-
         } catch (exception: OutOfMemoryError) {
             currentUploadFile?.outOfMemoryNotification(applicationContext)
             Result.retry()
 
-        } catch (exception: CancellationException) { // uploadSupervisorJob cancelled
-            currentUploadFile?.exceptionNotification(applicationContext)
-            Result.retry()
+        } catch (exception: CancellationException) { // Work has been cancelled
+            Log.d(TAG, "UploadWorker > is CancellationException !")
+            if (applicationContext.isSyncActive()) Result.failure()
+            else Result.retry()
 
         } catch (exception: UploadTask.LockErrorException) {
             currentUploadFile?.lockErrorNotification(applicationContext)
