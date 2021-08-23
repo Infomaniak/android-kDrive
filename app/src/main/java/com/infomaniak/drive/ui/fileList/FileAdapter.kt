@@ -196,7 +196,7 @@ open class FileAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: List<Any>) {
-        if (payloads.firstOrNull() is Int) {
+        if (payloads.firstOrNull() is Int && getItemViewType(position) != VIEW_TYPE_LOADING) {
             val file = itemList[position]
             val progress = payloads.first() as Int
             FileController.getFileById(file.id)
