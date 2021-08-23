@@ -74,8 +74,10 @@ class SharedItemsAdapter(
         rightsValue.setText(driveUser.getFilePermission().translation)
         externalUserLabel.apply {
             if (driveUser.isExternalUser()) {
-                text =
-                    context.getString(if (driveUser.status == "pending") R.string.shareUserNotAccepted else R.string.shareUserExternal)
+                text = context.getString(
+                    if (driveUser.status == "pending") R.string.shareUserNotAccepted
+                    else R.string.shareUserExternal
+                )
                 visibility = VISIBLE
             }
         }
