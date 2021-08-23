@@ -133,6 +133,9 @@ open class FileActivity(
         FileActivityType.COMMENT_LIKE -> R.string.fileDetailsActivityFileCommentLike
         FileActivityType.COMMENT_UNLIKE -> R.string.fileDetailsActivityFileCommentUnlike
         FileActivityType.COMMENT_RESOLVE -> R.string.fileDetailsActivityFileCommentUpdate
+        FileActivityType.COLLABORATIVE_FOLDER_CREATE -> R.string.fileActivityCollaborativeFolderCreate
+        FileActivityType.COLLABORATIVE_FOLDER_UPDATE -> R.string.fileActivityCollaborativeFolderUpdate
+        FileActivityType.COLLABORATIVE_FOLDER_DELETE -> R.string.fileActivityCollaborativeFolderDelete
     }
 
     enum class FileActivityType {
@@ -159,7 +162,10 @@ open class FileActivity(
         COMMENT_DELETE,
         COMMENT_LIKE,
         COMMENT_UNLIKE,
-        COMMENT_RESOLVE
+        COMMENT_RESOLVE,
+        COLLABORATIVE_FOLDER_CREATE,
+        COLLABORATIVE_FOLDER_UPDATE,
+        COLLABORATIVE_FOLDER_DELETE,
     }
 
     fun getDay(context: Context): String {

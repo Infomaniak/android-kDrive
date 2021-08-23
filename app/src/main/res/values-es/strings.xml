@@ -226,6 +226,9 @@
     <string name="errorShareLink">Error al crear el enlace</string>
     <string name="favoritesNoFile">Todavía no hay favoritos</string>
     <string name="favoritesTitle">Favoritos</string>
+    <string name="fileActivityCollaborativeFolderCreate">ha creado un buzón de depósito</string>
+    <string name="fileActivityCollaborativeFolderDelete">ha borrado un buzón de depósito</string>
+    <string name="fileActivityCollaborativeFolderUpdate">ha actualizado un buzón de depósito</string>
     <plurals name="fileActivityCommentCreate">
         <item quantity="one">ha comentado el archivo siguiente</item>
         <item quantity="other">ha comentado %d archivos</item>

@@ -83,7 +83,10 @@ object ApiRepository {
                 "&actions[]=file_favorite_remove" +
                 "&actions[]=share_link_create" +
                 "&actions[]=share_link_update" +
-                "&actions[]=share_link_delete"
+                "&actions[]=share_link_delete" +
+                "&actions[]=collaborative_folder_create" +
+                "&actions[]=collaborative_folder_update" +
+                "&actions[]=collaborative_folder_delete"
 
         return callApi(url, GET, okHttpClient = okHttpClient)
     }

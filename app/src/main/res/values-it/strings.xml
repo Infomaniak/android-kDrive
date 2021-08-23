@@ -226,6 +226,9 @@
     <string name="errorShareLink">Errore durante la creazione del link</string>
     <string name="favoritesNoFile">Al momento non sono disponibili preferiti</string>
     <string name="favoritesTitle">Preferiti</string>
+    <string name="fileActivityCollaborativeFolderCreate">ha creato un deposito file</string>
+    <string name="fileActivityCollaborativeFolderDelete">ha cancellato un deposito file</string>
+    <string name="fileActivityCollaborativeFolderUpdate">ha aggiornato un deposito file</string>
     <plurals name="fileActivityCommentCreate">
         <item quantity="one">ha commentato il seguente file</item>
         <item quantity="other">ha commentato %d file</item>
