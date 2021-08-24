@@ -73,7 +73,7 @@
         android:layout_marginHorizontal="10dp"
         android:layout_marginTop="@dimen/marginStandardVerySmall"
         android:text="@string/userPermissionRead"
-        app:layout_constraintBottom_toTopOf="@+id/pendingInvitation"
+        app:layout_constraintBottom_toTopOf="@+id/externalUserLabel"
         app:layout_constraintEnd_toStartOf="@id/chevron"
         app:layout_constraintStart_toEndOf="@id/avatar"
         app:layout_constraintTop_toBottomOf="@id/infos"
@@ -93,17 +93,16 @@
         tools:ignore="ContentDescription" />
 
     <TextView
-        android:id="@+id/pendingInvitation"
+        android:id="@+id/externalUserLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/marginStandardMedium"
-        android:text="@string/shareUserNotAccepted"
         android:textSize="12sp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/rightsValue"
-        tools:visibility="visible" />
+        tools:text="@string/shareUserNotAccepted"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
