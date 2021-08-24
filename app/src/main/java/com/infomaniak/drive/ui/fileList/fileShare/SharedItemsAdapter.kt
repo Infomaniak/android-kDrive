@@ -79,7 +79,7 @@ class SharedItemsAdapter(
                     else R.string.shareUserExternal
                 )
                 visibility = VISIBLE
-            }
+            } else visibility = GONE
         }
         if (file.createdBy == driveUser.id) {
             rightsValue.setTextColor(ContextCompat.getColor(context, R.color.secondaryText))
