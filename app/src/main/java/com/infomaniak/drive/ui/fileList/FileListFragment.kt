@@ -31,6 +31,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -194,7 +195,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         requireContext().trackUploadWorkerProgress().observe(viewLifecycleOwner) {
             val workInfo = it.firstOrNull() ?: return@observe
             val isUploaded = workInfo.progress.getBoolean(UploadWorker.IS_UPLOADED, false)
-            if (isUploaded) mainViewModel.refreshActivities.value = true
+            if (isUploaded || !uploadFileInProgress.isVisible) mainViewModel.refreshActivities.value = true
         }
         mainViewModel.refreshActivities.observe(viewLifecycleOwner) {
             it?.let {
