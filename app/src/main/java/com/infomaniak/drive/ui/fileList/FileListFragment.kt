@@ -690,7 +690,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         override fun invoke() {
             getBackNavigationResult<File.SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
                 fileListViewModel.sortType = newSortType
-                sortButton.setText(fileListViewModel.sortType.translation)
+                sortButton?.setText(fileListViewModel.sortType.translation)
                 downloadFiles(fileListViewModel.isSharedWithMe)
                 UISettings(requireContext()).sortType = newSortType
             }
