@@ -119,8 +119,8 @@ object SyncUtils {
     }
 
     private fun Context.cancelPeriodicSync() {
-        WorkManager.getInstance(this).cancelAllWorkByTag(UploadWorker.TAG)
-        WorkManager.getInstance(this).cancelAllWorkByTag(UploadWorker.PERIODIC_TAG)
+        WorkManager.getInstance(this).cancelUniqueWork(UploadWorker.TAG)
+        WorkManager.getInstance(this).cancelUniqueWork(UploadWorker.PERIODIC_TAG)
     }
 
     suspend fun Context.migrateSyncToWorkerIfNeeded() = withContext(Dispatchers.IO) {

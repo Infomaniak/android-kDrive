@@ -38,13 +38,13 @@ import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.ApiController.gson
 import io.sentry.Sentry
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withLock
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.io.BufferedInputStream
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.ceil
 
 class UploadTask(
@@ -55,8 +55,8 @@ class UploadTask(
 ) {
 
     private var limitParallelRequest = 4
-    private var previousChunkBytesWritten = AtomicLong(0)
-    private var currentProgress = AtomicInteger(0)
+    private var previousChunkBytesWritten = 0L
+    private var currentProgress = 0
 
     private var uploadNotification: NotificationCompat.Builder? = null
     private lateinit var notificationManagerCompat: NotificationManagerCompat
@@ -97,7 +97,7 @@ class UploadTask(
 
             Log.d("kDrive", " upload task started with total chunk: $totalChunks, valid: $uploadedChunks")
 
-            previousChunkBytesWritten.set(uploadedChunks?.uploadedSize ?: 0)
+            previousChunkBytesWritten = uploadedChunks?.uploadedSize ?: 0
 
             for (chunkNumber in 1..totalChunks) {
                 requestSemaphore.acquire()
@@ -123,7 +123,7 @@ class UploadTask(
                     currentChunkSize = count,
                     totalChunks = totalChunks
                 )
-                Log.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url")
+                Log.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url data size:${data.size}")
 
                 waitingCoroutines.add(coroutineScope.uploadChunkRequest(requestSemaphore, data, url))
             }
@@ -150,7 +150,11 @@ class UploadTask(
     ) = launch(Dispatchers.IO) {
         val uploadRequestBody = ProgressRequestBody(data.toRequestBody()) { currentBytes, _, _ ->
             this.ensureActive()
-            updateProgress(currentBytes)
+            launch {
+                progressMutex.withLock {
+                    updateProgress(currentBytes)
+                }
+            }
         }
 
         val request = Request.Builder().url(url)
@@ -200,20 +204,24 @@ class UploadTask(
         }
     }
 
-    @Synchronized
     @Throws(Exception::class)
     private fun CoroutineScope.updateProgress(currentBytes: Int) {
-        val totalBytesWritten = currentBytes + previousChunkBytesWritten.get()
+        Log.d("UploadWorker", "progress start")
+        val totalBytesWritten = currentBytes + previousChunkBytesWritten
         val progress = ((totalBytesWritten.toDouble() / uploadFile.fileSize.toDouble()) * 100).toInt()
-        currentProgress.set(progress)
-        previousChunkBytesWritten.addAndGet(currentBytes.toLong())
+        currentProgress = progress
+        previousChunkBytesWritten += currentBytes
 
-        if (previousChunkBytesWritten.get() > uploadFile.fileSize) {
+        if (previousChunkBytesWritten > uploadFile.fileSize) {
             uploadFile.refreshIdentifier()
             Sentry.withScope { scope ->
                 scope.setExtra("data", gson.toJson(uploadFile))
                 Sentry.captureMessage("Chunk total size exceed fileSize 😢")
             }
+            Log.d(
+                "UploadWorker",
+                "progress >> ${uploadFile.fileName} exceed with ${uploadFile.fileSize}/${previousChunkBytesWritten}"
+            )
             throw ChunksSizeExceededException()
         }
 
@@ -230,12 +238,12 @@ class UploadTask(
             )
             setContentIntent(pendingIntent)
             setContentText("${currentProgress}%")
-            setProgress(100, currentProgress.get(), false)
+            setProgress(100, currentProgress, false)
             notificationManagerCompat.notify(CURRENT_UPLOAD_ID, build())
         }
 
         if (progress in 1..100) {
-            launch { shareProgress(currentProgress.get()) }
+            launch { shareProgress(currentProgress) }
         }
 
         Log.i(
@@ -281,9 +289,9 @@ class UploadTask(
                 if (uploadFile.fileCreatedAt == null) "" else "&file_created_at=${uploadFile.fileCreatedAt!!.time / 1000}"
     }
 
-    fun previousChunkBytesWritten() = previousChunkBytesWritten.get()
+    fun previousChunkBytesWritten() = previousChunkBytesWritten
 
-    fun lastProgress() = currentProgress.get()
+    fun lastProgress() = currentProgress
 
     class ChunksSizeExceededException : Exception()
     class FolderNotFoundException : Exception()
@@ -292,6 +300,7 @@ class UploadTask(
 
     companion object {
         var chunkSize: Int = 1 * 1024 * 1024 // Chunk 1 Mo
+        private val progressMutex = Mutex()
         private const val TOTAL_CHUNKS = 8000
     }
 }
