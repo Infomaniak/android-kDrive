@@ -19,6 +19,7 @@ package com.infomaniak.drive.data.api
 
 import okhttp3.MediaType
 import okhttp3.RequestBody
+import okhttp3.internal.http.CallServerInterceptor
 import okio.BufferedSink
 import okio.buffer
 import okio.sink
@@ -47,9 +48,15 @@ class ProgressRequestBody(
 
     @Throws(IOException::class)
     override fun writeTo(sink: BufferedSink) {
-        val progressOutputStream = ProgressOutputStream(sink.outputStream(), onProgress, contentLength())
-        val progressSink: BufferedSink = progressOutputStream.sink().buffer()
-        requestBody.writeTo(progressSink)
-        progressSink.flush()
+        val isCalledByCallServerInterceptor = Thread.currentThread().stackTrace.any { stackTraceElement ->
+            stackTraceElement.className == CallServerInterceptor::class.java.canonicalName
+        }
+
+        if (isCalledByCallServerInterceptor) {
+            val progressOutputStream = ProgressOutputStream(sink.outputStream(), onProgress, contentLength())
+            val progressSink: BufferedSink = progressOutputStream.sink().buffer()
+            requestBody.writeTo(progressSink)
+            progressSink.flush()
+        }
     }
 }
