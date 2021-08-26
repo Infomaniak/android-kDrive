@@ -94,11 +94,12 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     protected open var enabledMultiSelectMode = true
     protected open var hideBackButtonWhenRoot: Boolean = true
     protected open var showPendingFiles = true
+    protected open var allowCancellation = true
 
     protected var userDrive: UserDrive? = null
 
     companion object {
-        const val FILE_ID = "file_id"
+        const val FILE_KEY = "passed_file"
         const val REFRESH_FAVORITE_FILE = "force_list_refresh"
         const val CANCELLABLE_MAIN_KEY = "cancellable_main"
         const val CANCELLABLE_TITLE_KEY = "cancellable_message"
@@ -209,35 +210,43 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         toolbar?.menu?.findItem(R.id.searchItem)?.isVisible = findNavController().currentDestination?.id == R.id.fileListFragment
-
-        setGetBackResult()
+        setupBackActionHandler()
     }
 
-    private fun setGetBackResult() {
+    private fun setupBackActionHandler() {
         getBackNavigationResult<Bundle>(CANCELLABLE_MAIN_KEY) { bundle ->
             bundle.getString(CANCELLABLE_TITLE_KEY)?.let { title ->
                 bundle.getParcelable<CancellableAction>(CANCELLABLE_ACTION_KEY)?.let { action ->
-                    val fileID = bundle.getInt(FILE_ID)
+                    bundle.getParcelable<File>(FILE_KEY)?.let { file ->
+                        val fileIndex = fileAdapter.indexOf(file.id)
+                        if (bundle.containsKey(DELETE_NOT_UPDATE_ACTION)) {
+                            if (bundle.getBoolean(DELETE_NOT_UPDATE_ACTION)) {
+                                fileAdapter.deleteAt(fileIndex)
+                                checkIfNoFiles()
+                            } else fileAdapter.notifyFileChanged(file.id)
+                        }
 
-                    if (bundle.containsKey(DELETE_NOT_UPDATE_ACTION)) {
-                        if (bundle.getBoolean(DELETE_NOT_UPDATE_ACTION)) {
-                            fileAdapter.deleteByFileId(fileID)
-                            checkIfNoFiles()
-                        } else fileAdapter.notifyFileChanged(fileID)
-                    }
-
-                    requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab) {
-                        lifecycleScope.launch(Dispatchers.IO) {
-                            if (ApiRepository.cancelAction(action).data == true && isResumed) {
-                                withContext(Dispatchers.Main) {
-                                    refreshActivities()
+                        val onCancelActionClicked: (() -> Unit)? = if (allowCancellation) ({
+                            lifecycleScope.launch(Dispatchers.IO) {
+                                if (ApiRepository.cancelAction(action).data == true && isResumed) {
+                                    withContext(Dispatchers.Main) {
+                                        currentFolder?.let {
+                                            refreshActivities()
+                                        } ?: run {
+                                            fileAdapter.addAt(fileIndex, file)
+                                        }
+                                    }
                                 }
                             }
-                        }
+                        }) else null
+
+                        requireActivity().showSnackbar(
+                            title,
+                            anchorView = requireActivity().mainFab,
+                            onActionClicked = onCancelActionClicked
+                        )
                     }
-                } ?: also {
-                    requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
-                }
+                } ?: run { requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab) }
             }
         }
 

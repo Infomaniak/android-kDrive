@@ -40,7 +40,7 @@ import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_A
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_MAIN_KEY
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_TITLE_KEY
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.DELETE_NOT_UPDATE_ACTION
-import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.FILE_ID
+import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.FILE_KEY
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.REFRESH_FAVORITE_FILE
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
@@ -305,13 +305,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     private fun transmitActionAndPopBack(message: String, action: CancellableAction? = null, deleteNotUpdate: Boolean? = null) {
-        val bundle = bundleOf(CANCELLABLE_TITLE_KEY to message, CANCELLABLE_ACTION_KEY to action, FILE_ID to currentFile.id)
-        if (deleteNotUpdate != null) {
-            bundle.putBoolean(DELETE_NOT_UPDATE_ACTION, deleteNotUpdate)
-        }
-        setBackNavigationResult(
-            CANCELLABLE_MAIN_KEY,
-            bundle
-        )
+        val bundle = bundleOf(CANCELLABLE_TITLE_KEY to message, CANCELLABLE_ACTION_KEY to action, FILE_KEY to currentFile)
+        if (deleteNotUpdate != null) bundle.putBoolean(DELETE_NOT_UPDATE_ACTION, deleteNotUpdate)
+
+        setBackNavigationResult(CANCELLABLE_MAIN_KEY, bundle)
     }
 }
