@@ -95,6 +95,7 @@
         <activity
             android:name=".ui.SaveExternalFilesActivity"
             android:excludeFromRecents="true"
+            android:exported="true"
             android:label="@string/saveExternalFileTitle">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
@@ -110,6 +111,7 @@
 
         <activity
             android:name=".ui.LaunchActivity"
+            android:exported="true"
             android:noHistory="true"
             android:theme="@style/AppTheme.Launcher">
             <intent-filter>
@@ -152,7 +154,9 @@
             </intent-filter>
         </service>
 
-        <receiver android:name=".utils.RebootReceiver">
+        <receiver
+            android:name=".utils.RebootReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
