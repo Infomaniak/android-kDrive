@@ -30,6 +30,7 @@ import androidx.lifecycle.LiveData
 import androidx.work.*
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.UploadTask
+import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
@@ -354,9 +355,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         private const val LAST_UPLOADED_COUNT = "last_uploaded_count"
 
-        fun workConstraints() = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
+        fun workConstraints(): Constraints {
+            val networkType = if (AppSettings.onlyWifiSync) NetworkType.UNMETERED else NetworkType.CONNECTED
+            return Constraints.Builder()
+                .setRequiredNetworkType(networkType)
+                .build()
+        }
 
         fun Context.showSyncConfigNotification() {
             val pendingIntent = this.syncSettingsActivityPendingIntent()

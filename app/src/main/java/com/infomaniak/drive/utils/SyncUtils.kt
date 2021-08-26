@@ -35,8 +35,6 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.FileObserveService
 import com.infomaniak.drive.data.sync.FileObserveServiceApi24
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -123,12 +121,9 @@ object SyncUtils {
         WorkManager.getInstance(this).cancelUniqueWork(UploadWorker.PERIODIC_TAG)
     }
 
-    suspend fun Context.migrateSyncToWorkerIfNeeded() = withContext(Dispatchers.IO) {
+    fun Context.activateSyncIfNeeded() {
         UploadFile.getAppSyncSettings()?.let { syncSettings ->
-            if (!isAutoSyncActive()) {
-                cancelContentObserver()
-                activateAutoSync(syncSettings)
-            }
+            if (!isAutoSyncActive()) activateAutoSync(syncSettings)
         }
     }
 
@@ -150,12 +145,8 @@ object SyncUtils {
     }
 
     fun Context.activateAutoSync(syncSettings: SyncSettings) {
-        UploadFile.setAppSyncSettings(syncSettings)
-        if (syncSettings.syncImmediately) {
-            startContentObserverService()
-        } else {
-            cancelContentObserver()
-        }
+        cancelContentObserver()
+        if (syncSettings.syncImmediately) startContentObserverService()
         startPeriodicSync(syncSettings.syncInterval)
     }
 
@@ -164,21 +155,6 @@ object SyncUtils {
         UploadFile.removeAppSyncSettings()
         cancelContentObserver()
         cancelPeriodicSync()
-    }
-
-    fun Context.isWifiConnection(): Boolean {
-        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val networkCapabilities = connectivityManager.activeNetwork ?: return false
-            try { //TODO https://issuetracker.google.com/issues/175055271
-                val activeNetwork = connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
-                activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-            } catch (exception: Exception) {
-                return false
-            }
-        } else {
-            connectivityManager.activeNetworkInfo?.type == ConnectivityManager.TYPE_WIFI
-        }
     }
 
     /**

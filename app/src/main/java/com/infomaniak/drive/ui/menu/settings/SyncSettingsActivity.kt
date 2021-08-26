@@ -322,6 +322,7 @@ class SyncSettingsActivity : BaseActivity() {
                     deleteAfterSync = deletePicturesAfterSyncSwitch.isChecked
                 )
                 syncSettings.setIntervalType(syncSettingsViewModel.syncIntervalType.value!!)
+                UploadFile.setAppSyncSettings(syncSettings)
                 activateAutoSync(syncSettings)
             } else {
                 disableAutoSync()

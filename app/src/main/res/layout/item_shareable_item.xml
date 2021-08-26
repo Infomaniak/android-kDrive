@@ -103,6 +103,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/rightsValue"
-        tools:text="@string/shareUserNotAccepted"/>
+        tools:text="@string/shareUserNotAccepted" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
