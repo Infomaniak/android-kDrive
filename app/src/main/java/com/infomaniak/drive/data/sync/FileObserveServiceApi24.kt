@@ -27,12 +27,12 @@ import android.content.Context
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.provider.MediaStore
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.UploadFile
-import com.infomaniak.drive.data.sync.UploadAdapter.Companion.showSyncConfigNotification
+import com.infomaniak.drive.data.services.UploadWorker.Companion.showSyncConfigNotification
+import com.infomaniak.drive.utils.MediaFoldersProvider
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
@@ -96,12 +96,12 @@ class FileObserveServiceApi24 : JobService() {
 
             if (syncSetting.syncVideo) {
                 builder.addTriggerContentUri(
-                    TriggerContentUri(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS)
+                    TriggerContentUri(MediaFoldersProvider.videosExternalUri, TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS)
                 )
             }
 
             builder.addTriggerContentUri(
-                TriggerContentUri(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS)
+                TriggerContentUri(MediaFoldersProvider.imagesExternalUri, TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS)
             )
 
             jobScheduler.schedule(builder.build())

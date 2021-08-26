@@ -28,6 +28,7 @@ import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.login.MigrationActivity.Companion.getOldkDriveUser
 import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
+import com.infomaniak.drive.utils.SyncUtils.activateSyncIfNeeded
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.hasPermissions
@@ -60,6 +61,8 @@ class RebootReceiver : BroadcastReceiver() {
                     }
                 }
             }
+
+            activateSyncIfNeeded()
 
             startContentObserverService()
             if (intent?.action == Intent.ACTION_BOOT_COMPLETED && AccountUtils.isEnableAppSync()) syncImmediately()

@@ -19,6 +19,7 @@ package com.infomaniak.drive.utils
 
 import android.annotation.SuppressLint
 import android.content.ContentResolver
+import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
@@ -44,6 +45,18 @@ object MediaFoldersProvider {
 
     @SuppressLint("InlinedApi")
     const val VIDEO_BUCKET_DISPLAY_NAME = MediaStore.Video.Media.BUCKET_DISPLAY_NAME
+
+    val imagesExternalUri: Uri =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        else MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+
+    val videosExternalUri: Uri =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        else MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+
+    val audiosExternalUri: Uri =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        else MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
 
     private val MEDIA_PATH_COLUMN =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.MediaColumns.RELATIVE_PATH
@@ -78,7 +91,8 @@ object MediaFoldersProvider {
         coroutineScope: Job?
     ): ArrayMap<Long, MediaFolder> {
         val folders = arrayMapOf<Long, MediaFolder>()
-        contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, imagesProjection, null, null, imagesSortOrder)
+
+        contentResolver.query(imagesExternalUri, imagesProjection, null, null, imagesSortOrder)
             ?.use { cursor ->
                 while (cursor.moveToNext()) {
                     coroutineScope?.ensureActive()
@@ -98,7 +112,8 @@ object MediaFoldersProvider {
         coroutineScope: Job?
     ): ArrayMap<Long, MediaFolder> {
         val folders = arrayMapOf<Long, MediaFolder>()
-        contentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, videosProjection, null, null, videosSortOrder)
+
+        contentResolver.query(videosExternalUri, videosProjection, null, null, videosSortOrder)
             ?.use { cursor ->
                 while (cursor.moveToNext()) {
                     coroutineScope?.ensureActive()

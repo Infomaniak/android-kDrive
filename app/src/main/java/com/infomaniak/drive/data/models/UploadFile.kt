@@ -126,8 +126,18 @@ open class UploadFile(
 
         fun getNotSyncFiles(): ArrayList<UploadFile> {
             return getRealmInstance().use { realm ->
-                realm.where(UploadFile::class.java).isNull(UploadFile::uploadAt.name).isNull(UploadFile::deletedAt.name).findAll()
-                    ?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile> ?: arrayListOf()
+                realm.where(UploadFile::class.java)
+                    .isNull(UploadFile::uploadAt.name)
+                    .isNull(UploadFile::deletedAt.name)
+                    .findAll()?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile> ?: arrayListOf()
+            }
+        }
+
+        fun getNotSyncedFilesCount(): Long {
+            return getRealmInstance().use { realm ->
+                realm.where(UploadFile::class.java)
+                    .isNull(UploadFile::uploadAt.name)
+                    .isNull(UploadFile::deletedAt.name).count()
             }
         }
 

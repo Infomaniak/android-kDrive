@@ -59,7 +59,6 @@ import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.UISettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
-import com.infomaniak.drive.data.sync.UploadProgressReceiver
 import com.infomaniak.drive.launchInAppReview
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
@@ -80,7 +79,6 @@ import java.util.*
 class MainActivity : BaseActivity() {
 
     private val mainViewModel: MainViewModel by viewModels()
-    private lateinit var uploadProgressReceiver: UploadProgressReceiver
     private lateinit var downloadReceiver: DownloadReceiver
 
     private var lastCloseApp = Date()
@@ -93,7 +91,6 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        uploadProgressReceiver = UploadProgressReceiver(mainViewModel)
         downloadReceiver = DownloadReceiver(mainViewModel)
 
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -225,9 +222,6 @@ class MainActivity : BaseActivity() {
         setBottomNavigationUserAvatar(this)
         startContentObserverService()
 
-        LocalBroadcastManager.getInstance(this)
-            .registerReceiver(uploadProgressReceiver, IntentFilter(UploadProgressReceiver.TAG))
-
         if (UploadFile.getAppSyncSettings()?.deleteAfterSync == true && UploadFile.getPendingFilesCount() == 0) {
             UploadFile.getUploadedFiles()?.let { filesUploadedRecently ->
                 if (filesUploadedRecently.size >= SYNCED_FILES_DELETION_FILES_AMOUNT) {
@@ -260,11 +254,6 @@ class MainActivity : BaseActivity() {
         lifecycleScope.launch {
             mainViewModel.syncOfflineFiles()
         }
-    }
-
-    override fun onPause() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(uploadProgressReceiver)
-        super.onPause()
     }
 
     override fun onStop() {

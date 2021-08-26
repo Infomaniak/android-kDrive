@@ -19,16 +19,15 @@ package com.infomaniak.drive.data.api
 
 import java.io.IOException
 import java.io.OutputStream
-import java.util.concurrent.atomic.AtomicLong
 
 internal class ProgressOutputStream(
     private val stream: OutputStream?,
     private val onProgress: (currentBytes: Int, bytesWritten: Long, contentLength: Long) -> Unit,
     private val total: Long
 ) : OutputStream() {
-    private val totalWritten: AtomicLong = AtomicLong(0)
 
-    @Synchronized
+    private var totalWritten = 0L
+
     @Throws(IOException::class)
     override fun write(bytes: ByteArray, off: Int, len: Int) {
         stream?.write(bytes, off, len)
@@ -42,11 +41,10 @@ internal class ProgressOutputStream(
         } else {
             bytes.size.toLong()
         }
-        totalWritten.addAndGet(written)
-        onProgress(written.toInt(), totalWritten.get(), total)
+        totalWritten += written
+        onProgress(written.toInt(), totalWritten, total)
     }
 
-    @Synchronized
     @Throws(IOException::class)
     override fun write(byte: Int) {
         stream?.write(byte)
@@ -54,18 +52,14 @@ internal class ProgressOutputStream(
             onProgress(-1, -1, -1)
             return
         }
-        totalWritten.addAndGet(1)
-        onProgress(byte, totalWritten.get(), total)
+        totalWritten += 1
+        onProgress(byte, totalWritten, total)
     }
 
-    @Synchronized
-    @Throws(IOException::class)
     override fun close() {
         stream?.close()
     }
 
-    @Synchronized
-    @Throws(IOException::class)
     override fun flush() {
         stream?.flush()
     }
