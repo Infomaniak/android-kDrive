@@ -149,7 +149,6 @@ class UploadTask(
         url: String
     ) = launch(Dispatchers.IO) {
         val uploadRequestBody = ProgressRequestBody(data.toRequestBody()) { currentBytes, _, _ ->
-            this.ensureActive()
             launch {
                 progressMutex.withLock {
                     updateProgress(currentBytes)
@@ -181,7 +180,6 @@ class UploadTask(
         return false
     }
 
-    @Throws(Exception::class)
     private fun CoroutineScope.manageApiResponse(response: Response) {
         ensureActive()
         response.use {
@@ -204,7 +202,6 @@ class UploadTask(
         }
     }
 
-    @Throws(Exception::class)
     private fun CoroutineScope.updateProgress(currentBytes: Int) {
         Log.d("UploadWorker", "progress start")
         val totalBytesWritten = currentBytes + previousChunkBytesWritten
@@ -227,7 +224,9 @@ class UploadTask(
 
         onProgress?.invoke(progress)
 
+        if (worker.isStopped) throw CancellationException()
         ensureActive()
+
         uploadNotification?.apply {
             val intent = Intent(context, MainActivity::class.java).apply {
                 putExtra(MainActivity.INTENT_SHOW_PROGRESS, uploadFile.remoteFolder)
