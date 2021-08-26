@@ -25,6 +25,8 @@ import kotlinx.android.synthetic.main.fragment_file_list.*
 
 class OfflineFileFragment : FileSubTypeListFragment() {
 
+    override var allowCancellation: Boolean = false
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         downloadFiles = DownloadFiles()
         folderID = Utils.OTHER_ROOT_ID

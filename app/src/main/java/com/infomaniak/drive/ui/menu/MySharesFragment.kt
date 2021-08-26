@@ -30,6 +30,7 @@ import kotlinx.android.synthetic.main.fragment_file_list.*
 class MySharesFragment : FileSubTypeListFragment() {
 
     override var hideBackButtonWhenRoot: Boolean = false
+    override var allowCancellation: Boolean = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         if (folderID == ROOT_ID) {
