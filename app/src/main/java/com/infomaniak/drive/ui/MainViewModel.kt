@@ -42,6 +42,7 @@ import com.infomaniak.drive.utils.MediaUtils.isMedia
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
+import io.sentry.Sentry
 import kotlinx.coroutines.*
 import java.util.*
 
@@ -338,10 +339,22 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
                             uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null
                         )?.use { cursor ->
                             if (cursor.moveToFirst()) {
-                                val columnIndex: Int = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-                                java.io.File(cursor.getString(columnIndex)).delete()
-                                getContext().contentResolver.delete(uri, null, null)
-                                fileDeleted.add(uploadFile)
+                                var columnIndex: Int? = null
+                                var pathname: String? = null
+                                try {
+                                    columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+                                    pathname = cursor.getString(columnIndex)
+                                    java.io.File(pathname).delete()
+                                    getContext().contentResolver.delete(uri, null, null)
+                                    fileDeleted.add(uploadFile)
+                                } catch (nullPointerException: NullPointerException) {
+                                    Sentry.withScope { scope ->
+                                        scope.setExtra("columnIndex", columnIndex.toString())
+                                        scope.setExtra("pathname", pathname.toString())
+                                        scope.setExtra("uploadFileUri", uploadFile.uri)
+                                        Sentry.captureException(Exception("deleteSynchronizedFilesOnDevice()"))
+                                    }
+                                }
                             }
                         }
                     } catch (exception: SecurityException) {
