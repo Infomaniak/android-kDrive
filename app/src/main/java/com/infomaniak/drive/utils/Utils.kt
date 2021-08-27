@@ -87,7 +87,7 @@ object Utils {
             title = R.string.modalMoveTrashTitle
             message = context.resources.getQuantityString(
                 R.plurals.modalMoveTrashDescription,
-                deletionCount,
+                if (fileName == null) deletionCount else 1,
                 fileName ?: deletionCount
             )
             button = R.string.buttonMove
