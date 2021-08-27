@@ -28,16 +28,11 @@ import kotlinx.android.synthetic.main.cardview_picture.view.*
 
 class HomePicturesAdapter(
     override var itemList: ArrayList<File> = arrayListOf(),
-    val isSquare: Boolean = false,
     private val onItemClick: (file: File) -> Unit
 ) : PaginationAdapter<File>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cardview_picture, parent, false))
-    }
-
-    override fun getItemCount(): Int {
-        return itemList.size
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
