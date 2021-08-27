@@ -31,6 +31,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Build
 import android.os.Bundle
+import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View.GONE
@@ -236,7 +237,10 @@ class MainActivity : BaseActivity() {
                             val filesDeletionRequest = MediaStore.createDeleteRequest(
                                 contentResolver,
                                 filesUploadedRecently
-                                    .filter { !it.getUriObject().scheme.equals(ContentResolver.SCHEME_FILE) }
+                                    .filter {
+                                        !it.getUriObject().scheme.equals(ContentResolver.SCHEME_FILE) &&
+                                                !DocumentsContract.isDocumentUri(this, it.getUriObject())
+                                    }
                                     .map { it.getUriObject() }
                             )
                             uploadedFilesToDelete = filesUploadedRecently
