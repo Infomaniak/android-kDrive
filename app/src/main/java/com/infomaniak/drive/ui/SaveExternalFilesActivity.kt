@@ -227,8 +227,8 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private fun handleSendSingle(intent: Intent) {
         (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let { uri ->
-            fileNameEdit.setText(uri.fileName())
             currentUri = uri
+            fileNameEdit.setText(uri.fileName())
         }
     }
 
