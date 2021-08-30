@@ -54,7 +54,6 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
             pathDriveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(drive.preferences.color))
         }
 
-        currentPermission = ALL_DRIVE_USERS
         adapter.setAll(arrayListOf(ALL_DRIVE_USERS, SPECIFIC_USERS))
 
         createFolderButton.setOnClickListener {

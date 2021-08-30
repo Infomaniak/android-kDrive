@@ -31,9 +31,8 @@ class CreatePrivateFolderFragment : CreateFolderFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        currentPermission = ONLY_ME
         adapter.apply {
-            addItem(currentPermission)
+            addItem(ONLY_ME)
             getShare {
                 setUsers(it.users)
                 addItem(if (canInherit(it.users, it.tags)) INHERIT else SPECIFIC_USERS)
