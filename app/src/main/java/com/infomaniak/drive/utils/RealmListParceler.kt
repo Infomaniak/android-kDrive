@@ -60,16 +60,12 @@ interface RealmListParceler<T> : Parceler<RealmList<T>?> {
             return
         }
 
-        writeInt(
-            when (realmList) {
-                null -> 0
-                else -> 1
-            }
-        )
+        writeInt(if (realmList == null) 0 else 1)
+
         if (realmList != null) {
             writeInt(size)
-            for (t in realmList) {
-                t?.let { writeValue(t) }
+            for (item in realmList) {
+                item?.let { writeValue(item) }
             }
         }
     }
