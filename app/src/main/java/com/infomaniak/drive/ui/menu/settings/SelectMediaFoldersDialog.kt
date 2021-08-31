@@ -69,8 +69,9 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
             }
         }
         mediaFolderList.adapter = mediaFoldersAdapter
-        ContextCompat.getDrawable(requireContext(), R.drawable.divider)
-            ?.let { mediaFolderList.addItemDecoration(DividerItemDecorator(it)) }
+        ContextCompat.getDrawable(requireContext(), R.drawable.divider)?.let {
+            mediaFolderList.addItemDecoration(DividerItemDecorator(it))
+        }
 
         noMediaFolderLayout.setup(
             title = R.string.noMediaFolderTitle,
