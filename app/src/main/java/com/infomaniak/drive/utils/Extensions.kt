@@ -86,6 +86,7 @@ import com.infomaniak.drive.ui.LockActivity.Companion.FACE_ID_LOG_TAG
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialog.Companion.FILE_ID
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
+import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.models.User
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
@@ -294,8 +295,9 @@ fun View.setFileItem(
 
 fun View.setupFileProgress(file: File, progress: Int) {
     val isPendingOffline = file.isPendingOffline(context)
+    val isSyncActive = context.isSyncActive()
     when {
-        isPendingOffline && progress in 0..99 -> {
+        (isPendingOffline || isSyncActive) && progress in 0..99 -> {
             fileOffline.visibility = GONE
             if (fileOfflineProgression.isIndeterminate) {
                 fileOfflineProgression.visibility = GONE
