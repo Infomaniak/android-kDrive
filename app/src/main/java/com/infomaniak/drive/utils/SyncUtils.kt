@@ -71,7 +71,7 @@ object SyncUtils {
 
     fun FragmentActivity.launchAllUpload(drivePermissions: DrivePermissions) {
         if (AccountUtils.isEnableAppSync() &&
-            drivePermissions.checkSyncPermissions() &&
+            drivePermissions.checkSyncPermissions(false) &&
             UploadFile.getNotSyncFiles().isNotEmpty()
         ) {
             syncImmediately()

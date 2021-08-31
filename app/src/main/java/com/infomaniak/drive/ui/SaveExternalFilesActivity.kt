@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui
 
-import android.Manifest
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -44,7 +43,6 @@ import com.infomaniak.drive.ui.menu.settings.SelectDriveDialog
 import com.infomaniak.drive.ui.menu.settings.SelectDriveViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.lib.core.utils.hasPermissions
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress
@@ -168,7 +166,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (hasPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE))) getFiles()
+        if (drivePermissions.checkWriteStoragePermission(false)) getFiles()
     }
 
     private fun getFiles() {
