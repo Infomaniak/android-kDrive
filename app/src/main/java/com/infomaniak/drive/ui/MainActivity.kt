@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.Context
@@ -64,11 +63,9 @@ import com.infomaniak.drive.launchInAppReview
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
-import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils.getRootName
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
-import com.infomaniak.lib.core.utils.hasPermissions
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -178,13 +175,8 @@ class MainActivity : BaseActivity() {
         }
 
         drivePermissions = DrivePermissions()
-        drivePermissions.registerPermissions(this) { autorized ->
-            if (autorized) {
-                syncImmediately()
-                launchSyncOffline()
-            }
-        }
-        launchAllUpload(drivePermissions)
+        drivePermissions.registerPermissions(this)
+        drivePermissions.checkWriteStoragePermission()
 
         if (!BuildConfig.BETA)
             if (AppSettings.appLaunches == 20 || (AppSettings.appLaunches != 0 && AppSettings.appLaunches % 100 == 0)) launchInAppReview()
@@ -212,7 +204,8 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        if (hasPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE))) launchSyncOffline()
+        launchAllUpload(drivePermissions)
+        launchSyncOffline()
 
         AppSettings.appLaunches++
         if (!AccountUtils.isEnableAppSync() && AppSettings.appLaunches == SYNC_DIALOG_LAUNCHES) {
@@ -256,7 +249,7 @@ class MainActivity : BaseActivity() {
 
     private fun launchSyncOffline() {
         lifecycleScope.launch {
-            mainViewModel.syncOfflineFiles()
+            if (drivePermissions.checkWriteStoragePermission(false)) mainViewModel.syncOfflineFiles()
         }
     }
 

@@ -87,21 +87,21 @@ class DrivePermissions {
      * Check if the sync has all permissions to work
      * @return [Boolean] true if the sync has all permissions or false
      */
-    fun checkSyncPermissions(): Boolean {
+    fun checkSyncPermissions(requestPermission: Boolean = true): Boolean {
         activity.batteryLifePermission()
-        return checkWriteStoragePermission()
+        return checkWriteStoragePermission(requestPermission)
     }
 
     /**
      * Checks if the user has already confirmed write permission
      */
     @SuppressLint("NewApi")
-    fun checkWriteStoragePermission(): Boolean {
+    fun checkWriteStoragePermission(requestPermission: Boolean = true): Boolean {
         return when {
             Build.VERSION.SDK_INT < Build.VERSION_CODES.M -> true
             activity.hasPermissions(permissions) -> true
             else -> {
-                registerForActivityResult.launch(permissions)
+                if (requestPermission) registerForActivityResult.launch(permissions)
                 false
             }
         }
