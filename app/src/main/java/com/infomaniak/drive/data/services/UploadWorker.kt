@@ -265,7 +265,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     }
 
     private suspend fun checkLocalLastMedias(syncSettings: SyncSettings) = withContext(Dispatchers.IO) {
-        val lastUploadDate = UploadFile.getLastDate(applicationContext).time
+        val lastUploadDate = UploadFile.getLastDate(applicationContext).time - CHECK_LOCAL_LAST_MEDIAS_DELAY
         val selection = "(" + SyncUtils.DATE_TAKEN + " >= ? OR " + MediaStore.MediaColumns.DATE_ADDED + " >= ? " +
                 "OR ${MediaStore.MediaColumns.DATE_MODIFIED} = ? )"
         val args = arrayOf(lastUploadDate.toString(), (lastUploadDate / 1000).toString(), (lastUploadDate / 1000).toString())
@@ -277,22 +277,32 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         MediaFolder.getAllSyncedFolders().forEach { mediaFolder ->
             Log.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.name}_${mediaFolder.id}")
-            var contentUri = MediaFoldersProvider.imagesExternalUri
-            var isNotPending =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Images.Media.IS_PENDING} = 0" else ""
+            var isNotPending = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                "AND ${MediaStore.Images.Media.IS_PENDING} = 0" else ""
             customSelection = "$selection AND $IMAGES_BUCKET_ID = ? $isNotPending"
             customArgs = args + mediaFolder.id.toString()
-            val getLastImagesOperation =
-                getLocalLastMediasAsync(syncSettings, contentUri, customSelection, customArgs, mediaFolder)
+
+            val getLastImagesOperation = getLocalLastMediasAsync(
+                syncSettings = syncSettings,
+                contentUri = MediaFoldersProvider.imagesExternalUri,
+                selection = customSelection,
+                args = customArgs,
+                mediaFolder = mediaFolder
+            )
             jobs.add(getLastImagesOperation)
 
             if (syncSettings.syncVideo) {
-                contentUri = MediaFoldersProvider.videosExternalUri
-                isNotPending =
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND ${MediaStore.Video.Media.IS_PENDING} = 0" else ""
+                isNotPending = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                    "AND ${MediaStore.Video.Media.IS_PENDING} = 0" else ""
                 customSelection = "$selection AND $VIDEO_BUCKET_ID = ? $isNotPending"
-                val getLastVideosOperation =
-                    getLocalLastMediasAsync(syncSettings, contentUri, customSelection, customArgs, mediaFolder)
+
+                val getLastVideosOperation = getLocalLastMediasAsync(
+                    syncSettings = syncSettings,
+                    contentUri = MediaFoldersProvider.videosExternalUri,
+                    selection = customSelection,
+                    args = customArgs,
+                    mediaFolder = mediaFolder
+                )
                 jobs.add(getLastVideosOperation)
             }
         }
@@ -354,6 +364,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         const val UPLOAD_FOLDER = "upload_folder"
 
         private const val LAST_UPLOADED_COUNT = "last_uploaded_count"
+
+        private const val CHECK_LOCAL_LAST_MEDIAS_DELAY = 10000 // 10s (ms)
 
         fun workConstraints(): Constraints {
             val networkType = if (AppSettings.onlyWifiSync) NetworkType.UNMETERED else NetworkType.CONNECTED
