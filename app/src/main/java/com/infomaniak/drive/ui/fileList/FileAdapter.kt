@@ -201,7 +201,11 @@ open class FileAdapter(
             val progress = payloads.first() as Int
             FileController.getFileById(file.id)
             if (progress != Utils.INDETERMINATE_PROGRESS || !file.isPendingOffline(holder.itemView.context)) {
-                holder.itemView.setupFileProgress(file, progress)
+                holder.itemView.apply {
+                    setupFileProgress(file, progress)
+                    checkIfEnableFile(file, position)
+                }
+
             }
         } else {
             super.onBindViewHolder(holder, position, payloads)
@@ -232,7 +236,7 @@ open class FileAdapter(
 
                 setFileItem(file, isGrid)
 
-                checkIfEnablefile(file, position)
+                checkIfEnableFile(file, position)
 
                 when {
                     uploadInProgress -> {
@@ -287,7 +291,7 @@ open class FileAdapter(
         return itemList.find { it.name == fileName } != null
     }
 
-    private fun View.checkIfEnablefile(file: File, position: Int) = when {
+    private fun View.checkIfEnableFile(file: File, position: Int) = when {
         uploadInProgress -> {
             val enable = position == 0 && importContainsProgress
             fileDate?.setText(if (enable) R.string.uploadInProgressTitle else R.string.uploadInProgressPending)

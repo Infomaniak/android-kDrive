@@ -121,6 +121,7 @@ open class UploadFile(
                 equalTo(UploadFile::driveId.name, AccountUtils.currentDriveId)
                 isNull(UploadFile::uploadAt.name)
                 isNull(UploadFile::deletedAt.name)
+                sort(UploadFile::uri.name)
             }
         }
 

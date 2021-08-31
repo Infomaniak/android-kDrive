@@ -386,7 +386,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         fun Context.trackUploadWorkerProgress(): LiveData<MutableList<WorkInfo>> {
             return WorkManager.getInstance(this).getWorkInfosLiveData(
-                WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(TAG))
+                WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(TAG, PERIODIC_TAG))
                     .addStates(arrayListOf(WorkInfo.State.RUNNING))
                     .build()
             )

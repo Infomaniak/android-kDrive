@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.menu.settings
 
 import android.view.LayoutInflater
-import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
