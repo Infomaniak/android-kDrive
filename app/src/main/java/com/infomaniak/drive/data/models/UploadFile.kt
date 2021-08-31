@@ -40,6 +40,7 @@ import java.util.*
 
 open class UploadFile(
     @PrimaryKey var uri: String = "",
+    var addedAt: Date = Date(),
     var deletedAt: Date? = null,
     var driveId: Int = -1,
     var fileCreatedAt: Date? = null,
@@ -103,7 +104,7 @@ open class UploadFile(
         private const val DB_NAME = "Sync.realm"
         private const val ONE_DAY = 24 * 60 * 60 * 1000
         private var realmConfiguration: RealmConfiguration = RealmConfiguration.Builder().name(DB_NAME)
-            .schemaVersion(3) // Must be bumped when the schema changes
+            .schemaVersion(4) // Must be bumped when the schema changes
             .modules(RealmModules.SyncFilesModule())
             .migration(UploadMigration())
             .build()
@@ -121,6 +122,7 @@ open class UploadFile(
                 equalTo(UploadFile::driveId.name, AccountUtils.currentDriveId)
                 isNull(UploadFile::uploadAt.name)
                 isNull(UploadFile::deletedAt.name)
+                sort(UploadFile::addedAt.name)
             }
         }
 

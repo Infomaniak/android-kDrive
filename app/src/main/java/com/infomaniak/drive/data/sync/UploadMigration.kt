@@ -23,6 +23,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import io.realm.DynamicRealm
 import io.realm.FieldAttribute
 import io.realm.RealmMigration
+import java.util.*
 
 class UploadMigration : RealmMigration {
     override fun migrate(realm: DynamicRealm, oldVersion: Long, newVersion: Long) {
@@ -45,7 +46,7 @@ class UploadMigration : RealmMigration {
             oldVersionTemp++
         }
 
-        // Migrate to version 2: Add new fields in UploadFile and SyncSettings tables
+        // Migrate to version 2: Add new fields in UploadFile and SyncSettings table
         if (oldVersionTemp == 1L) {
             schema.get(UploadFile::class.java.simpleName)!!
                 .addField(UploadFile::remoteSubFolder.name, String::class.java)
@@ -54,9 +55,17 @@ class UploadMigration : RealmMigration {
             oldVersionTemp++
         }
 
+        // Migrate to version 3: Add new field in SyncSetting table
         if (oldVersionTemp == 2L) {
             schema.get(SyncSettings::class.java.simpleName)!!
                 .addField(SyncSettings::deleteAfterSync.name, Boolean::class.java, FieldAttribute.REQUIRED)
+            oldVersionTemp++
+        }
+
+        // Migrate to version 4: Add a date field to have an insertion order in UploadFile table
+        if (oldVersionTemp == 3L) {
+            schema.get(UploadFile::class.java.simpleName)!!
+                .addField(UploadFile::addedAt.name, Date::class.java, FieldAttribute.REQUIRED)
             oldVersionTemp++
         }
     }
