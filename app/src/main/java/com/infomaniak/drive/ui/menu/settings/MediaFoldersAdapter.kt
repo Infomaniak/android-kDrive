@@ -58,7 +58,6 @@ class MediaFoldersAdapter(
         holder.itemView.apply {
             itemList[position].let { mediaFolder ->
                 mediaFolderTitle.text = mediaFolder.name
-                mediaFolderDivider.visibility = if (position == itemCount - 1) GONE else VISIBLE
                 mediaFolderSwitch.apply {
                     isChecked = mediaFolder.isSynced
                     visibility = VISIBLE

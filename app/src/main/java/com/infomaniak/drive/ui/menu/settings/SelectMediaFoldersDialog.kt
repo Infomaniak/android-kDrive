@@ -23,6 +23,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -30,6 +31,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
+import androidx.recyclerview.widget.DividerItemDecoration
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.utils.DrivePermissions
@@ -67,6 +69,14 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
             }
         }
         mediaFolderList.adapter = mediaFoldersAdapter
+        mediaFolderList.addItemDecoration(
+            DividerItemDecoration(
+                context,
+                DividerItemDecoration.VERTICAL
+            ).apply {
+                ContextCompat.getDrawable(requireContext(), R.drawable.divider)?.let { setDrawable(it) }
+            }
+        )
 
         noMediaFolderLayout.setup(
             title = R.string.noMediaFolderTitle,
