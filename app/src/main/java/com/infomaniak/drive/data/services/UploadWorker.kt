@@ -213,7 +213,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                     }
                     contentResolver.query(uri, null, null, null, null)?.use { cursor ->
                         if (cursor.moveToFirst()) {
-                            val mediaSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
+                            val mediaSize = cursor.getLong(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE))
                             val size = fileSize?.let { if (mediaSize > it) mediaSize else it } ?: mediaSize //TODO Temp solution
                             startUploadFile(uploadFile, size)
                         } else UploadFile.deleteIfExists(uri)
@@ -316,7 +316,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 while (cursor.moveToNext()) {
                     val fileName = SyncUtils.getFileName(cursor)
                     val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
-                    val fileSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
+                    val fileSize = cursor.getLong(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE))
                     val uri = cursor.uri(contentUri)
                     Log.d(TAG, "getLocalLastMediasAsync > ${mediaFolder.name}/$fileName found")
 

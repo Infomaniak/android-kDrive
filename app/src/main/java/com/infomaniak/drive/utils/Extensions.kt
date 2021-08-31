@@ -159,7 +159,7 @@ fun TextInputEditText.showOrHideEmptyError(): Boolean {
 }
 
 fun Cursor.uri(contentUri: Uri): Uri {
-    return ContentUris.withAppendedId(contentUri, getLong(getColumnIndex(MediaStore.MediaColumns._ID)))
+    return ContentUris.withAppendedId(contentUri, getLong(getColumnIndexOrThrow(MediaStore.MediaColumns._ID)))
 }
 
 fun Number.isPositive(): Boolean {

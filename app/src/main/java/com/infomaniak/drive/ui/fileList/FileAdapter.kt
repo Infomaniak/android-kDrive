@@ -152,6 +152,7 @@ open class FileAdapter(
         val position = indexOf(fileId)
         if (position >= 0) deleteAt(position)
     }
+
     fun indexOf(fileId: Int) = itemList.indexOfFirst { it.id == fileId }
 
     fun notifyFileChanged(fileId: Int, onChange: ((file: File) -> Unit)? = null) {

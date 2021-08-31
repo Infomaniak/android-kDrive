@@ -289,7 +289,7 @@ class SaveExternalFilesActivity : BaseActivity() {
         contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
-                val fileSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
+                val fileSize = cursor.getLong(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE))
                 val fileName = name ?: SyncUtils.getFileName(cursor)
                 val outputFile = java.io.File(folder, fileName).also { if (it.exists()) it.delete() }
 
