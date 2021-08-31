@@ -20,6 +20,8 @@ package com.infomaniak.drive.utils
 import android.os.Parcel
 import com.infomaniak.drive.data.models.File
 import io.realm.RealmList
+import io.sentry.Sentry
+import io.sentry.SentryLevel
 import kotlinx.android.parcel.Parceler
 
 interface RealmListParceler<T> : Parceler<RealmList<T>?> {
@@ -36,7 +38,15 @@ interface RealmListParceler<T> : Parceler<RealmList<T>?> {
     private fun <T> Parcel.readRealmList(clazz: Class<T>): RealmList<T>? = when {
         readInt() > 0 -> RealmList<T>().also { list ->
             repeat(readInt()) {
-                list.add(readValue(clazz.classLoader) as T)
+                try {
+                    list.add(readValue(clazz.classLoader) as T)
+                } catch (exception: Exception) {
+                    Sentry.withScope { scope ->
+                        scope.level = SentryLevel.WARNING
+                        scope.setExtra("data", list.toString())
+                        Sentry.captureException(exception)
+                    }
+                }
             }
         }
         else -> null
@@ -59,7 +69,7 @@ interface RealmListParceler<T> : Parceler<RealmList<T>?> {
         if (realmList != null) {
             writeInt(size)
             for (t in realmList) {
-                writeValue(t)
+                t?.let { writeValue(t) }
             }
         }
     }
