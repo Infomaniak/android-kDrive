@@ -61,7 +61,7 @@ class SharedItemsAdapter(
             when (item) {
                 is DriveUser -> bindDriveUser(item)
                 is Invitation -> bindInvitation(item)
-                is Tag -> bindTag(item)
+                is Team -> bindTag(item)
             }
         }
     }
@@ -111,15 +111,15 @@ class SharedItemsAdapter(
         }
     }
 
-    private fun View.bindTag(tag: Tag) {
-        if (tag.isAllDriveUsersTag()) {
+    private fun View.bindTag(tag: Team) {
+        if (tag.isAllUsers()) {
             name.setText(R.string.allAllDriveUsers)
             avatar.load(R.drawable.ic_circle_drive)
             avatar.setBackgroundColor(Color.parseColor(AccountUtils.getCurrentDrive()?.preferences?.color))
         } else {
             name.text = tag.name
             avatar.load(R.drawable.ic_circle_tag)
-            avatar.setBackgroundColor(tag.getColor())
+            avatar.setBackgroundColor(tag.color)
         }
 
         infos.visibility = GONE

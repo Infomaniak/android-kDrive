@@ -23,7 +23,7 @@ data class Share(
     val id: Int,
     var link: ShareLink?,
     val path: String,
-    val tags: ArrayList<Tag>,
+    val teams: ArrayList<Team>,
     val users: ArrayList<DriveUser>,
     val invitations: ArrayList<Invitation>,
     @SerializedName("can_use_tag") val canUseTag: Boolean

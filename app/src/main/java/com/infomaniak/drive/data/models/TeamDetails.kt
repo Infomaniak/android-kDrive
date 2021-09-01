@@ -18,12 +18,11 @@
 package com.infomaniak.drive.data.models
 
 import android.os.Parcelable
+import com.google.gson.annotations.SerializedName
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class ShareableItems(
-    val users: ArrayList<DriveUser> = ArrayList(),
-    val emails: ArrayList<String> = ArrayList(),
-    val tags: ArrayList<Team> = ArrayList(),
-    val invitations: ArrayList<Invitation> = ArrayList()
+data class TeamDetails(
+    @SerializedName("drive_id") val driveId: Int,
+    @SerializedName("user_count") var usersCount: Int
 ) : Parcelable

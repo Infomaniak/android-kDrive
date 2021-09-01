@@ -149,7 +149,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                         selectedUsersChipGroup.removeView(it)
                     }
                 }
-                is Tag -> {
+                is Team -> {
                     tags.add(element)
                     createChip(element).setOnClickListener {
                         tags.remove(element)
@@ -192,7 +192,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                 chip.text = item
                 chip.setChipIconResource(R.drawable.ic_circle_send)
             }
-            is Tag -> {
+            is Team -> {
                 chip.text = item.name
                 chip.setChipIconResource(R.drawable.ic_circle_tag)
             }

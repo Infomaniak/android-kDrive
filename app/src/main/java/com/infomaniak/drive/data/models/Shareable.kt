@@ -30,7 +30,7 @@ interface Shareable : Parcelable {
         return when (this) {
             is DriveUser -> displayName
             is Invitation -> email
-            is Tag -> name
+            is Team -> name
             else -> ""
         }
     }
