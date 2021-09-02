@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.api
 
-import java.io.IOException
 import java.io.OutputStream
 
 internal class ProgressOutputStream(
@@ -28,7 +27,6 @@ internal class ProgressOutputStream(
 
     private var totalWritten = 0L
 
-    @Throws(IOException::class)
     override fun write(bytes: ByteArray, off: Int, len: Int) {
         stream?.write(bytes, off, len)
 
@@ -45,14 +43,13 @@ internal class ProgressOutputStream(
         onProgress(written.toInt(), totalWritten, total)
     }
 
-    @Throws(IOException::class)
     override fun write(byte: Int) {
         stream?.write(byte)
         if (total < 0) {
             onProgress(-1, -1, -1)
             return
         }
-        totalWritten += 1
+        totalWritten += byte
         onProgress(byte, totalWritten, total)
     }
 
