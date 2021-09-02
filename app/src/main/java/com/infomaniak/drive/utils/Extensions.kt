@@ -665,7 +665,7 @@ fun Context.startDownloadFile(downloadURL: Uri, fileName: String) {
 
     // fix IllegalArgumentException only on Android 10 if multi dot
     if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
-        formattedFileName = formattedFileName.replace(regex = "\\.+".toRegex(), replacement =  ".")
+        formattedFileName = formattedFileName.replace(regex = "\\.{2,}".toRegex(), replacement =  ".")
     }
     val request = DownloadManager.Request(downloadURL).apply {
         setTitle(formattedFileName)
