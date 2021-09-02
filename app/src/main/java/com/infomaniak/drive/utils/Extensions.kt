@@ -20,6 +20,7 @@ package com.infomaniak.drive.utils
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ActivityManager
+import android.app.DownloadManager
 import android.app.KeyguardManager
 import android.content.ContentResolver
 import android.content.ContentUris
@@ -38,6 +39,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.CancellationSignal
+import android.os.Environment
 import android.provider.MediaStore
 import android.util.DisplayMetrics
 import android.util.Log
@@ -89,6 +91,7 @@ import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.models.User
+import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.UtilsUi.getInitials
@@ -655,4 +658,24 @@ fun Context.getLocalThumbnail(file: File): Bitmap? {
             }
         }
     }
+}
+
+fun Context.startDownloadFile(downloadURL: Uri, fileName: String) {
+    var formattedFileName = fileName.replace(Regex("[\\\\/:*?\"<>|%]"), "_")
+
+    // fix IllegalArgumentException only on Android 10 if multi dot
+    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+        formattedFileName = formattedFileName.replace(regex = "\\.+".toRegex(), replacement =  ".")
+    }
+    val request = DownloadManager.Request(downloadURL).apply {
+        setTitle(formattedFileName)
+        setDescription(getString(R.string.app_name))
+        setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, formattedFileName)
+        HttpUtils.getHeaders(contentType = null).toMap().forEach { addRequestHeader(it.key, it.value) }
+        setAllowedNetworkTypes(DownloadManager.Request.NETWORK_MOBILE or DownloadManager.Request.NETWORK_WIFI)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) setVisibleInDownloadsUi(true)
+        setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+    }
+
+    (getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
 }

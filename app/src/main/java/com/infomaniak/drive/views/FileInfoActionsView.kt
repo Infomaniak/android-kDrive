@@ -35,7 +35,6 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.cache.FileController.startDownloadFile
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
@@ -299,7 +298,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
     }
 
-    fun enableAvailableOffline(isEnabled: Boolean) {
+    private fun enableAvailableOffline(isEnabled: Boolean) {
         availableOfflineSwitch.isEnabled = isEnabled
         availableOffline.isEnabled = isEnabled
     }

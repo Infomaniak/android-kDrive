@@ -17,15 +17,8 @@
  */
 package com.infomaniak.drive.data.cache
 
-import android.app.DownloadManager
-import android.content.Context
-import android.content.Context.DOWNLOAD_SERVICE
-import android.net.Uri
-import android.os.Build
-import android.os.Environment
 import androidx.collection.ArrayMap
 import androidx.collection.arrayMapOf
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileActivity
@@ -36,7 +29,6 @@ import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
-import com.infomaniak.lib.core.networking.HttpUtils
 import io.realm.*
 import io.sentry.Sentry
 import kotlinx.android.parcel.RawValue
@@ -808,21 +800,6 @@ object FileController {
                 }
             }
         }
-    }
-
-    fun Context.startDownloadFile(downloadURL: Uri, fileName: String) {
-        val formattedFileName = fileName.replace(Regex("[\\\\/:*?\"<>|%]"), "_")
-        val request = DownloadManager.Request(downloadURL).apply {
-            setTitle(formattedFileName)
-            setDescription(getString(R.string.app_name))
-            setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, formattedFileName)
-            HttpUtils.getHeaders(contentType = null).toMap().forEach { addRequestHeader(it.key, it.value) }
-            setAllowedNetworkTypes(DownloadManager.Request.NETWORK_MOBILE or DownloadManager.Request.NETWORK_WIFI)
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) setVisibleInDownloadsUi(true)
-            setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-        }
-
-        (getSystemService(DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
     }
 
     private fun keepOldLocalFilesData(oldFile: File, newFile: File) {
