@@ -40,6 +40,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UISettings
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.MqttClientWrapper
+import com.infomaniak.drive.data.sync.UploadNotifications.pendingIntentFlags
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.NotificationUtils.initNotificationChannel
@@ -169,7 +170,7 @@ class ApplicationMain : Application(), ImageLoaderFactory {
 
     private val refreshTokenError: (User) -> Unit = { user ->
         val openAppIntent = Intent(this, LaunchActivity::class.java).clearStack()
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, openAppIntent, 0)
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, openAppIntent, pendingIntentFlags)
         val notificationManagerCompat = NotificationManagerCompat.from(this)
         showGeneralNotification(getString(R.string.refreshTokenError)).apply {
             setContentIntent(pendingIntent)

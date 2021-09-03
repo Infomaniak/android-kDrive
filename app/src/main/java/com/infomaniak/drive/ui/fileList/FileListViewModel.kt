@@ -177,7 +177,11 @@ class FileListViewModel : ViewModel() {
         }
     }
 
-    fun bulkMoveFiles(parentFolder: File, fileIds: IntArray? = null, destinationFolderId: Int): LiveData<ApiResponse<CancellableAction>> =
+    fun bulkMoveFiles(
+        parentFolder: File,
+        fileIds: IntArray? = null,
+        destinationFolderId: Int
+    ): LiveData<ApiResponse<CancellableAction>> =
         liveData(Dispatchers.IO) {
             emit(ApiRepository.bulkMoveFiles(parentFolder, fileIds, destinationFolderId))
         }

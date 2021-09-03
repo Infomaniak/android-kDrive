@@ -23,14 +23,14 @@ import android.provider.OpenableColumns
 import android.util.Log
 import android.view.View
 import androidx.core.net.toFile
-import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.work.Data
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.FileInProgress
 import com.infomaniak.drive.data.models.UploadFile
-import com.infomaniak.drive.data.sync.UploadAdapter
+import com.infomaniak.drive.data.services.UploadWorker
+import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
@@ -67,16 +67,21 @@ class UploadInProgressFragment : FileListFragment() {
 
         collapsingToolbarLayout.title = getString(R.string.uploadInProgressTitle)
 
-        mainViewModel.fileInProgress.observe(viewLifecycleOwner) { fileInProgress ->
-            val firstFile = fileAdapter.getItems().firstOrNull()
-            if (fileInProgress != null && firstFile != null) {
-                if (fileInProgress.parentId == folderID && fileInProgress.name == firstFile.name) {
-                    fileAdapter.updateFileProgress(firstFile.id, fileInProgress.progress) {
-                        whenAnUploadIsDone(fileInProgress)
-                    }
+        requireContext().trackUploadWorkerProgress().observe(viewLifecycleOwner) {
+            val workInfo = it.firstOrNull() ?: return@observe
+            val firstFile = fileAdapter.getItems().firstOrNull() ?: return@observe
+            val fileName = workInfo.progress.getString(UploadWorker.FILENAME)
+            val progress = workInfo.progress.getInt(UploadWorker.PROGRESS, 0)
+            val isUploaded = workInfo.progress.getBoolean(UploadWorker.IS_UPLOADED, false)
+            val remoteFolderId = workInfo.progress.getInt(UploadWorker.REMOTE_FOLDER_ID, 0)
+
+            if (folderID == remoteFolderId && fileName == firstFile.name) {
+                fileAdapter.updateFileProgress(firstFile.id, progress) {
+                    if (isUploaded) whenAnUploadIsDone()
                 }
-                Log.i("uploadInProgress", "${fileInProgress.name} ${fileInProgress.status} ${fileInProgress.progress}%")
             }
+
+            Log.d("uploadInProgress", "$fileName $progress%")
         }
 
         mainViewModel.refreshActivities.removeObservers(super.getViewLifecycleOwner())
@@ -108,15 +113,13 @@ class UploadInProgressFragment : FileListFragment() {
     }
 
 
-    private fun whenAnUploadIsDone(fileInProgress: FileInProgress) {
-        if (fileInProgress.status == UploadAdapter.ProgressStatus.FINISHED) {
-            fileAdapter.deleteAt(0)
+    private fun whenAnUploadIsDone() {
+        fileAdapter.deleteAt(0)
 
-            if (fileAdapter.getItems().isEmpty()) {
-                noFilesLayout.toggleVisibility(true)
-                requireActivity().showSnackbar(R.string.allUploadFinishedTitle)
-                popBackStack()
-            }
+        if (fileAdapter.getItems().isEmpty()) {
+            noFilesLayout.toggleVisibility(true)
+            requireActivity().showSnackbar(R.string.allUploadFinishedTitle)
+            popBackStack()
         }
     }
 
@@ -143,8 +146,8 @@ class UploadInProgressFragment : FileListFragment() {
             fileListViewModel.cancelUploadingFiles(pendingFiles)
             withContext(Dispatchers.Main) {
                 lifecycleScope.launchWhenResumed {
-                    val bundle = bundleOf(UploadAdapter.CANCELLED_BY_USER to true)
-                    requireContext().syncImmediately(bundle, true)
+                    val data = Data.Builder().putBoolean(UploadWorker.CANCELLED_BY_USER, true).build()
+                    requireContext().syncImmediately(data, true)
                     popBackStack()
                 }
             }
@@ -175,7 +178,7 @@ class UploadInProgressFragment : FileListFragment() {
                                     SyncUtils.checkDocumentProviderPermissions(this, uri)
                                     contentResolver?.query(uri, null, null, null, null)?.use { cursor ->
                                         if (cursor.moveToFirst()) {
-                                            val size = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
+                                            val size = cursor.getLong(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE))
                                             files.add(
                                                 File(
                                                     id = 0,

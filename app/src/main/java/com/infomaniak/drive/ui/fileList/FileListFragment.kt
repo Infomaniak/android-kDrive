@@ -32,6 +32,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -51,6 +52,8 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.data.services.MqttClientWrapper
+import com.infomaniak.drive.data.services.UploadWorker
+import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog.Companion.SELECT_DIALOG_ACTION
@@ -96,11 +99,12 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     protected open var enabledMultiSelectMode = true
     protected open var hideBackButtonWhenRoot: Boolean = true
     protected open var showPendingFiles = true
+    protected open var allowCancellation = true
 
     protected var userDrive: UserDrive? = null
 
     companion object {
-        const val FILE_ID = "file_id"
+        const val FILE_KEY = "passed_file"
         const val REFRESH_FAVORITE_FILE = "force_list_refresh"
         const val CANCELLABLE_MAIN_KEY = "cancellable_main"
         const val CANCELLABLE_TITLE_KEY = "cancellable_message"
@@ -195,6 +199,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         if (!isDownloading) downloadFiles(false)
         observeOfflineDownloadProgress()
 
+        requireContext().trackUploadWorkerProgress().observe(viewLifecycleOwner) {
+            val workInfo = it.firstOrNull() ?: return@observe
+            val isUploaded = workInfo.progress.getBoolean(UploadWorker.IS_UPLOADED, false)
+            if (isUploaded || !uploadFileInProgress.isVisible) mainViewModel.refreshActivities.value = true
+        }
         mainViewModel.refreshActivities.observe(viewLifecycleOwner) {
             it?.let {
                 showPendingFiles()
@@ -231,34 +240,44 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 }
             }
         }
-        setGetBackResult()
+
+        setupBackActionHandler()
     }
 
-    private fun setGetBackResult() {
+    private fun setupBackActionHandler() {
         getBackNavigationResult<Bundle>(CANCELLABLE_MAIN_KEY) { bundle ->
             bundle.getString(CANCELLABLE_TITLE_KEY)?.let { title ->
                 bundle.getParcelable<CancellableAction>(CANCELLABLE_ACTION_KEY)?.let { action ->
-                    val fileID = bundle.getInt(FILE_ID)
+                    bundle.getParcelable<File>(FILE_KEY)?.let { file ->
+                        val fileIndex = fileAdapter.indexOf(file.id)
+                        if (bundle.containsKey(DELETE_NOT_UPDATE_ACTION)) {
+                            if (bundle.getBoolean(DELETE_NOT_UPDATE_ACTION)) {
+                                fileAdapter.deleteAt(fileIndex)
+                                checkIfNoFiles()
+                            } else fileAdapter.notifyFileChanged(file.id)
+                        }
 
-                    if (bundle.containsKey(DELETE_NOT_UPDATE_ACTION)) {
-                        if (bundle.getBoolean(DELETE_NOT_UPDATE_ACTION)) {
-                            fileAdapter.deleteByFileId(fileID)
-                            checkIfNoFiles()
-                        } else fileAdapter.notifyFileChanged(fileID)
-                    }
-
-                    requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab) {
-                        lifecycleScope.launch(Dispatchers.IO) {
-                            if (ApiRepository.cancelAction(action).data == true && isResumed) {
-                                withContext(Dispatchers.Main) {
-                                    refreshActivities()
+                        val onCancelActionClicked: (() -> Unit)? = if (allowCancellation) ({
+                            lifecycleScope.launch(Dispatchers.IO) {
+                                if (ApiRepository.cancelAction(action).data == true && isResumed) {
+                                    withContext(Dispatchers.Main) {
+                                        currentFolder?.let {
+                                            refreshActivities()
+                                        } ?: run {
+                                            fileAdapter.addAt(fileIndex, file)
+                                        }
+                                    }
                                 }
                             }
-                        }
+                        }) else null
+
+                        requireActivity().showSnackbar(
+                            title,
+                            anchorView = requireActivity().mainFab,
+                            onActionClicked = onCancelActionClicked
+                        )
                     }
-                } ?: also {
-                    requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
-                }
+                } ?: run { requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab) }
             }
         }
 
@@ -778,7 +797,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         override fun invoke() {
             getBackNavigationResult<File.SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
                 fileListViewModel.sortType = newSortType
-                sortButton.setText(fileListViewModel.sortType.translation)
+                sortButton?.setText(fileListViewModel.sortType.translation)
                 downloadFiles(fileListViewModel.isSharedWithMe)
                 UISettings(requireContext()).sortType = newSortType
             }

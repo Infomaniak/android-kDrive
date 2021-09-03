@@ -33,11 +33,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
-import com.infomaniak.drive.data.cache.FileController.startDownloadFile
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.DrivePermissions
-import com.infomaniak.drive.utils.setBackNavigationResult
-import com.infomaniak.drive.utils.showSnackbar
+import com.infomaniak.drive.utils.*
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_action_multi_select.*
 import kotlinx.coroutines.Dispatchers
 
@@ -77,8 +73,7 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
         actionMultiSelectModel.downloadArchive(navigationArgs.fileIds).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 apiResponse.data?.let {
-                    val downloadURL =
-                        Uri.parse(ApiRoutes.downloadArchiveFiles(AccountUtils.currentDriveId, it.uuid))
+                    val downloadURL = Uri.parse(ApiRoutes.downloadArchiveFiles(AccountUtils.currentDriveId, it.uuid))
                     requireContext().startDownloadFile(downloadURL, "Archive.zip")
                 }
                 onActionSelected()

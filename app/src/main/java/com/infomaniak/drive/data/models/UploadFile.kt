@@ -121,13 +121,24 @@ open class UploadFile(
                 equalTo(UploadFile::driveId.name, AccountUtils.currentDriveId)
                 isNull(UploadFile::uploadAt.name)
                 isNull(UploadFile::deletedAt.name)
+                sort(UploadFile::uri.name)
             }
         }
 
         fun getNotSyncFiles(): ArrayList<UploadFile> {
             return getRealmInstance().use { realm ->
-                realm.where(UploadFile::class.java).isNull(UploadFile::uploadAt.name).isNull(UploadFile::deletedAt.name).findAll()
-                    ?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile> ?: arrayListOf()
+                realm.where(UploadFile::class.java)
+                    .isNull(UploadFile::uploadAt.name)
+                    .isNull(UploadFile::deletedAt.name)
+                    .findAll()?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile> ?: arrayListOf()
+            }
+        }
+
+        fun getNotSyncedFilesCount(): Long {
+            return getRealmInstance().use { realm ->
+                realm.where(UploadFile::class.java)
+                    .isNull(UploadFile::uploadAt.name)
+                    .isNull(UploadFile::deletedAt.name).count()
             }
         }
 
@@ -138,8 +149,9 @@ open class UploadFile(
             }
         }
 
-        fun getUploadedFiles(): ArrayList<UploadFile>? = getRealmInstance().use { realm ->
+        fun getUploadedFiles(type: String = Type.SYNC.name): ArrayList<UploadFile>? = getRealmInstance().use { realm ->
             realm.where(UploadFile::class.java)
+                .equalTo(UploadFile::type.name, type)
                 .isNull(UploadFile::deletedAt.name)
                 .isNotNull(UploadFile::uploadAt.name)
                 .findAll()?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile>

@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.menu.settings
 
 import android.view.LayoutInflater
-import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -58,7 +57,6 @@ class MediaFoldersAdapter(
         holder.itemView.apply {
             itemList[position].let { mediaFolder ->
                 mediaFolderTitle.text = mediaFolder.name
-                mediaFolderDivider.visibility = if (position == itemCount - 1) GONE else VISIBLE
                 mediaFolderSwitch.apply {
                     isChecked = mediaFolder.isSynced
                     visibility = VISIBLE

@@ -487,6 +487,7 @@
     <string name="shareLinkSettingsBlockCommentsTitle">Attiva questa opzione per impedire agli utenti di leggere i commenti</string>
     <string name="shareLinkSettingsBlockUsersConsultDescription">Gli utenti che dispongono dell’accesso ai file non potranno leggere i commenti.</string>
     <string name="shareLinkSettingsBlockUsersConsultTitle">Attiva questa opzione per impedire agli utenti di vedere chi consulta i file</string>
+    <string name="shareUserExternal">kDrive utente esterno</string>
     <string name="shareUserNotAccepted">L’utente non ha ancora accettato la condivisione ed è un utente esterno del kDrive.</string>
     <string name="sharedConflictDescription">L’utente %1$s può già accedere a questa cartella con un diritto di \"%2$s\". Se effettui la condivisione, accederanno alla cartella con un diritto di \"%3$s\"</string>
     <string name="sharedConflictManyUserDescription">Alcuni utenti possono già accedere a questa cartella. Se effettui la condivisione, accederanno alla cartella con un diritto di \"%s\"</string>

@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.Context
@@ -31,6 +30,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Build
 import android.os.Bundle
+import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View.GONE
@@ -59,16 +59,13 @@ import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.UISettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
-import com.infomaniak.drive.data.sync.UploadProgressReceiver
 import com.infomaniak.drive.launchInAppReview
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
-import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils.getRootName
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
-import com.infomaniak.lib.core.utils.hasPermissions
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -80,7 +77,6 @@ import java.util.*
 class MainActivity : BaseActivity() {
 
     private val mainViewModel: MainViewModel by viewModels()
-    private lateinit var uploadProgressReceiver: UploadProgressReceiver
     private lateinit var downloadReceiver: DownloadReceiver
 
     private var lastCloseApp = Date()
@@ -93,7 +89,6 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        uploadProgressReceiver = UploadProgressReceiver(mainViewModel)
         downloadReceiver = DownloadReceiver(mainViewModel)
 
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -180,13 +175,8 @@ class MainActivity : BaseActivity() {
         }
 
         drivePermissions = DrivePermissions()
-        drivePermissions.registerPermissions(this) { autorized ->
-            if (autorized) {
-                syncImmediately()
-                launchSyncOffline()
-            }
-        }
-        launchAllUpload(drivePermissions)
+        drivePermissions.registerPermissions(this)
+        drivePermissions.checkWriteStoragePermission()
 
         if (!BuildConfig.BETA)
             if (AppSettings.appLaunches == 20 || (AppSettings.appLaunches != 0 && AppSettings.appLaunches % 100 == 0)) launchInAppReview()
@@ -214,7 +204,8 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        if (hasPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE))) launchSyncOffline()
+        launchAllUpload(drivePermissions)
+        launchSyncOffline()
 
         AppSettings.appLaunches++
         if (!AccountUtils.isEnableAppSync() && AppSettings.appLaunches == SYNC_DIALOG_LAUNCHES) {
@@ -224,9 +215,6 @@ class MainActivity : BaseActivity() {
 
         setBottomNavigationUserAvatar(this)
         startContentObserverService()
-
-        LocalBroadcastManager.getInstance(this)
-            .registerReceiver(uploadProgressReceiver, IntentFilter(UploadProgressReceiver.TAG))
 
         if (UploadFile.getAppSyncSettings()?.deleteAfterSync == true && UploadFile.getPendingFilesCount() == 0) {
             UploadFile.getUploadedFiles()?.let { filesUploadedRecently ->
@@ -242,7 +230,10 @@ class MainActivity : BaseActivity() {
                             val filesDeletionRequest = MediaStore.createDeleteRequest(
                                 contentResolver,
                                 filesUploadedRecently
-                                    .filter { !it.getUriObject().scheme.equals(ContentResolver.SCHEME_FILE) }
+                                    .filter {
+                                        !it.getUriObject().scheme.equals(ContentResolver.SCHEME_FILE) &&
+                                                !DocumentsContract.isDocumentUri(this, it.getUriObject())
+                                    }
                                     .map { it.getUriObject() }
                             )
                             uploadedFilesToDelete = filesUploadedRecently
@@ -258,13 +249,8 @@ class MainActivity : BaseActivity() {
 
     private fun launchSyncOffline() {
         lifecycleScope.launch {
-            mainViewModel.syncOfflineFiles()
+            if (drivePermissions.checkWriteStoragePermission(false)) mainViewModel.syncOfflineFiles()
         }
-    }
-
-    override fun onPause() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(uploadProgressReceiver)
-        super.onPause()
     }
 
     override fun onStop() {

@@ -487,6 +487,7 @@
     <string name="shareLinkSettingsBlockCommentsTitle">Aktivieren Sie diese Option, wenn Benutzer keine Kommentare lesen sollen</string>
     <string name="shareLinkSettingsBlockUsersConsultDescription">Benutzer, die Zugang zu den Dateien besitzen, können die Kommentare nicht lesen.</string>
     <string name="shareLinkSettingsBlockUsersConsultTitle">Aktivieren Sie diese Option, wenn Benutzer nicht sehen sollen, wer die Dateien abruft</string>
+    <string name="shareUserExternal">kDrive externer Benutzer</string>
     <string name="shareUserNotAccepted">Der Benutzer hat die Freigabe noch nicht angenommen und ist ein externer Benutzer des kDrive.</string>
     <string name="sharedConflictDescription">Der Benutzer %1$s kann mit einem \"%2$s\" Recht bereits auf diesen Ordner zugreifen. Wenn Sie die Freigabe erteilen, greifen sie mit einem \"%3$s\" Recht auf den Ordner zu.</string>
     <string name="sharedConflictManyUserDescription">Bestimmte Benutzer können bereits auf diesen Ordner zugreifen. Wenn Sie die Freigabe erteilen, greifen sie mit einem \"%s\" Recht auf den Ordner zu</string>

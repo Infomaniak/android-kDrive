@@ -27,7 +27,7 @@ import android.provider.MediaStore
 import android.util.Log
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.UploadFile
-import com.infomaniak.drive.data.sync.UploadAdapter.Companion.showSyncConfigNotification
+import com.infomaniak.drive.data.services.UploadWorker.Companion.showSyncConfigNotification
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately

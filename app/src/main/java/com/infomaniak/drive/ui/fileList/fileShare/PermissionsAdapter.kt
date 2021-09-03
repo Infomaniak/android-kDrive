@@ -43,7 +43,7 @@ import kotlinx.android.synthetic.main.cardview_permission.view.*
 import kotlinx.android.synthetic.main.item_user_avatar.view.*
 
 class PermissionsAdapter(
-    var selectionPosition: Int = 0,
+    var selectionPosition: Int? = null,
     private var currentUser: User? = null,
     private var isExternalUser: Boolean = false,
     private var sharedUsers: ArrayList<DriveUser> = ArrayList(),
@@ -63,7 +63,7 @@ class PermissionsAdapter(
 
     fun setAll(newPermissions: ArrayList<Permission>) {
         permissionList = newPermissions
-        notifyDataSetChanged()
+        notifyItemRangeInserted(0, newPermissions.size)
     }
 
     fun setUsers(users: ArrayList<DriveUser>) {

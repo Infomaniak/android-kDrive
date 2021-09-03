@@ -17,30 +17,24 @@
  */
 package com.infomaniak.drive.utils
 
-import android.accounts.Account
-import android.accounts.AccountManager
-import android.app.Service
-import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
-import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentActivity
-import com.infomaniak.drive.R
+import androidx.work.*
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.FileObserveService
 import com.infomaniak.drive.data.sync.FileObserveServiceApi24
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 object SyncUtils {
 
@@ -75,54 +69,59 @@ object SyncUtils {
         return Pair(fileCreatedAt, fileModifiedAt)
     }
 
-    private fun Context.createSyncAccount(): Account {
-        val accountManager = getSystemService(Service.ACCOUNT_SERVICE) as AccountManager
-        val currentAccount = accountManager.getAccountsByType(getString(R.string.ACCOUNT_TYPE)).firstOrNull()
-        val newAccount = Account(getString(R.string.app_name), getString(R.string.ACCOUNT_TYPE))
-        accountManager.addAccountExplicitly(currentAccount ?: newAccount, null, bundleOf())
-        return currentAccount ?: newAccount
-    }
-
-    private fun Context.cancelSync() {
-        ContentResolver.cancelSync(createSyncAccount(), getString(R.string.SYNC_AUTHORITY))
-    }
-
     fun FragmentActivity.launchAllUpload(drivePermissions: DrivePermissions) {
         if (AccountUtils.isEnableAppSync() &&
-            drivePermissions.checkSyncPermissions() &&
+            drivePermissions.checkSyncPermissions(false) &&
             UploadFile.getNotSyncFiles().isNotEmpty()
         ) {
             syncImmediately()
         }
     }
 
-    fun Context.syncImmediately(bundle: Bundle = Bundle(), force: Boolean = false) {
+    fun Context.syncImmediately(data: Data = Data.EMPTY, force: Boolean = false) {
         if (!isSyncActive() || force) {
-            cancelSync()
-            bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true)
-            bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true)
-            ContentResolver.requestSync(createSyncAccount(), getString(R.string.SYNC_AUTHORITY), bundle)
+            val request = OneTimeWorkRequestBuilder<UploadWorker>()
+                .setConstraints(UploadWorker.workConstraints())
+                .setInputData(data)
+                .build()
+            WorkManager.getInstance(this).enqueueUniqueWork(UploadWorker.TAG, ExistingWorkPolicy.REPLACE, request)
         }
     }
 
     fun Context.isSyncActive(): Boolean {
-        return ContentResolver.isSyncActive(createSyncAccount(), getString(R.string.SYNC_AUTHORITY))
+        return WorkManager.getInstance(this).getWorkInfos(
+            WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(UploadWorker.TAG, UploadWorker.PERIODIC_TAG))
+                .addStates(arrayListOf(WorkInfo.State.RUNNING))
+                .build()
+        ).get()?.isNotEmpty() == true
+    }
+
+    private fun Context.isAutoSyncActive(): Boolean {
+        return WorkManager.getInstance(this).getWorkInfos(
+            WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(UploadWorker.PERIODIC_TAG))
+                .addStates(arrayListOf(WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED))
+                .build()
+        ).get()?.isNotEmpty() == true
     }
 
     private fun Context.startPeriodicSync(syncInterval: Long) {
-        val account = createSyncAccount()
-        ContentResolver.setSyncAutomatically(account, getString(R.string.SYNC_AUTHORITY), true)
-        ContentResolver.addPeriodicSync(account, getString(R.string.SYNC_AUTHORITY), Bundle.EMPTY, syncInterval)
+        if (!isSyncActive()) {
+            val request = PeriodicWorkRequestBuilder<UploadWorker>(syncInterval, TimeUnit.SECONDS)
+                .setConstraints(UploadWorker.workConstraints())
+                .build()
+            WorkManager.getInstance(this)
+                .enqueueUniquePeriodicWork(UploadWorker.PERIODIC_TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
+        }
     }
 
     private fun Context.cancelPeriodicSync() {
-        val account = createSyncAccount()
-        ContentResolver.cancelSync(account, getString(R.string.SYNC_AUTHORITY))
-        ContentResolver.removePeriodicSync(account, getString(R.string.SYNC_AUTHORITY), Bundle.EMPTY)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            AccountManager.get(this).removeAccount(account, null, null, null)
-        } else {
-            AccountManager.get(this).removeAccount(account, null, null)
+        WorkManager.getInstance(this).cancelUniqueWork(UploadWorker.TAG)
+        WorkManager.getInstance(this).cancelUniqueWork(UploadWorker.PERIODIC_TAG)
+    }
+
+    fun Context.activateSyncIfNeeded() {
+        UploadFile.getAppSyncSettings()?.let { syncSettings ->
+            if (!isAutoSyncActive()) activateAutoSync(syncSettings)
         }
     }
 
@@ -144,36 +143,16 @@ object SyncUtils {
     }
 
     fun Context.activateAutoSync(syncSettings: SyncSettings) {
-        UploadFile.setAppSyncSettings(syncSettings)
-        if (syncSettings.syncImmediately) {
-            startContentObserverService()
-            syncImmediately()
-        } else {
-            cancelContentObserver()
-        }
+        cancelContentObserver()
+        if (syncSettings.syncImmediately) startContentObserverService()
         startPeriodicSync(syncSettings.syncInterval)
     }
 
     fun Context.disableAutoSync() {
-        cancelContentObserver()
-        cancelPeriodicSync()
         UploadFile.deleteAllSyncFile()
         UploadFile.removeAppSyncSettings()
-    }
-
-    fun Context.isWifiConnection(): Boolean {
-        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val networkCapabilities = connectivityManager.activeNetwork ?: return false
-            try { //TODO https://issuetracker.google.com/issues/175055271
-                val activeNetwork = connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
-                activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-            } catch (exception: Exception) {
-                return false
-            }
-        } else {
-            connectivityManager.activeNetworkInfo?.type == ConnectivityManager.TYPE_WIFI
-        }
+        cancelContentObserver()
+        cancelPeriodicSync()
     }
 
     /**

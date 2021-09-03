@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui
 
-import android.Manifest
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -44,7 +43,6 @@ import com.infomaniak.drive.ui.menu.settings.SelectDriveDialog
 import com.infomaniak.drive.ui.menu.settings.SelectDriveViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.lib.core.utils.hasPermissions
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress
@@ -168,7 +166,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (hasPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE))) getFiles()
+        if (drivePermissions.checkWriteStoragePermission(false)) getFiles()
     }
 
     private fun getFiles() {
@@ -227,8 +225,8 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private fun handleSendSingle(intent: Intent) {
         (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let { uri ->
-            fileNameEdit.setText(uri.fileName())
             currentUri = uri
+            fileNameEdit.setText(uri.fileName())
         }
     }
 
@@ -289,7 +287,7 @@ class SaveExternalFilesActivity : BaseActivity() {
         contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
-                val fileSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
+                val fileSize = cursor.getLong(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE))
                 val fileName = name ?: SyncUtils.getFileName(cursor)
                 val outputFile = java.io.File(folder, fileName).also { if (it.exists()) it.delete() }
 

@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.lib.core.views.ViewHolder
+import io.sentry.Sentry
 import kotlinx.android.synthetic.main.item_file_name.view.*
 
 class SaveExternalUriAdapter(val uris: ArrayList<Uri>) : RecyclerView.Adapter<ViewHolder>() {
@@ -36,8 +37,16 @@ class SaveExternalUriAdapter(val uris: ArrayList<Uri>) : RecyclerView.Adapter<Vi
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         with(holder.itemView) {
             val uri = uris[position]
-            context?.contentResolver?.query(uri, null, null, null, null)?.use { cursor ->
-                if (cursor.moveToFirst()) name.text = SyncUtils.getFileName(cursor)
+            try {
+                context?.contentResolver?.query(uri, null, null, null, null)?.use { cursor ->
+                    if (cursor.moveToFirst()) name.text = SyncUtils.getFileName(cursor)
+                }
+            } catch (nullPointerException: NullPointerException) {
+                name.setText(R.string.anErrorHasOccurred)
+                Sentry.withScope { scope ->
+                    scope.setExtra("uri", uri.toString())
+                    Sentry.captureException(Exception("SaveExternalUriAdapter"))
+                }
             }
         }
     }

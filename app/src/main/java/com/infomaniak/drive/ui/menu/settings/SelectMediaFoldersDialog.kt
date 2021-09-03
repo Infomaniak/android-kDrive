@@ -23,6 +23,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -35,6 +36,7 @@ import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.IsComplete
 import com.infomaniak.drive.utils.MediaFoldersProvider
+import com.infomaniak.drive.views.DividerItemDecorator
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import io.realm.Realm
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_media_folders.*
@@ -67,6 +69,9 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
             }
         }
         mediaFolderList.adapter = mediaFoldersAdapter
+        ContextCompat.getDrawable(requireContext(), R.drawable.divider)?.let {
+            mediaFolderList.addItemDecoration(DividerItemDecorator(it))
+        }
 
         noMediaFolderLayout.setup(
             title = R.string.noMediaFolderTitle,

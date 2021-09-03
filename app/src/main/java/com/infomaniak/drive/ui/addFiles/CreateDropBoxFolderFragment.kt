@@ -49,9 +49,8 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
         folderNameValueLayout.hint = getString(R.string.createDropBoxHint)
         setupAdvancedSettings()
 
-        currentPermission = ONLY_ME
         adapter.apply {
-            addItem(currentPermission)
+            addItem(ONLY_ME)
             getShare {
                 setUsers(it.users)
                 addItem(if (canInherit(it.users, it.tags)) INHERIT else SPECIFIC_USERS)

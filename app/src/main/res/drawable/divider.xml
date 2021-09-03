@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<!--
   ~ Infomaniak kDrive - Android
   ~ Copyright (C) 2021 Infomaniak Network SA
   ~
@@ -15,8 +15,8 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<account-authenticator xmlns:android="http://schemas.android.com/apk/res/android"
-    android:accountType="@string/ACCOUNT_TYPE"
-    android:icon="@mipmap/ic_launcher_round"
-    android:label="@string/app_name"
-    android:smallIcon="@mipmap/ic_launcher_round" />
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/divider" />
+    <size android:height="1dp" />
+</shape>

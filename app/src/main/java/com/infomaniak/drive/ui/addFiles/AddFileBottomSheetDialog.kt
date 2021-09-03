@@ -261,7 +261,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         }?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val fileName = SyncUtils.getFileName(cursor)
-                val fileSize = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))
+                val fileSize = cursor.getLong(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE))
                 val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
                 val memoryInfo = requireContext().getAvailableMemory()
                 val isLowMemory = memoryInfo.lowMemory || memoryInfo.availMem < UploadTask.chunkSize

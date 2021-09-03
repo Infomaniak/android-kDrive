@@ -146,7 +146,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 homeViewModel.lastPicturesPage = 1
                 paginationListener?.let { removeOnScrollListener(it) }
                 isProOrTeam = currentDrive.pack == Drive.DrivePack.PRO.value || currentDrive.pack == Drive.DrivePack.TEAM.value
-                lastElementsAdapter = if (isProOrTeam) LastActivitiesAdapter() else HomePicturesAdapter { file ->
+                lastElementsAdapter = if (isProOrTeam) LastActivitiesAdapter() else HomePicturesAdapter() { file ->
                     val pictures = (lastElementsAdapter as HomePicturesAdapter).getItems()
                     Utils.displayFile(mainViewModel, findNavController(), file, pictures)
                 }
