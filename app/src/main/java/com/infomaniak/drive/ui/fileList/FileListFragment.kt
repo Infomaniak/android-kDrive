@@ -222,7 +222,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 if (notification is ActionNotification) {
                     val itemPosition = fileAdapter.indexOf(notification.fileId)
                     // TODO - Implement throttle algo to guarantee a final refresh after end of the operation
-                    val canRefresh = Calendar.getInstance().timeInMillis - lastTimeActivitiesRefreshed >= ACTIVITIES_REFRESH_DELAY
+                    val canRefresh = Date().time - lastTimeActivitiesRefreshed >= ACTIVITIES_REFRESH_DELAY
                     if (itemPosition >= 0) {
                         when (notification.action) {
                             Action.FILE_TRASH -> fileAdapter.deleteAt(itemPosition)
@@ -615,7 +615,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun refreshActivities() {
         if (isLoadingActivities || folderID == OTHER_ROOT_ID) return
         isLoadingActivities = true
-        lastTimeActivitiesRefreshed = Calendar.getInstance().timeInMillis
+        lastTimeActivitiesRefreshed = Date().time
         mainViewModel.currentFolder.value?.let { currentFolder ->
             FileController.getFileById(currentFolder.id)?.let { updatedFolder ->
                 downloadFolderActivities(updatedFolder)

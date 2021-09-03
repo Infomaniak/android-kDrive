@@ -137,6 +137,7 @@ open class FileAdapter(
     }
 
     fun deleteAt(position: Int) {
+        //TODO Why would the position be wrong?
         if (position < itemList.size) {
             itemList.removeAt(position)
             notifyItemRemoved(position)
