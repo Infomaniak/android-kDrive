@@ -216,8 +216,9 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             file.deleteCaches(getContext())
 
             FileController.updateFile(file.id) { localFile ->
-                localFile.deleteFromRealm()
+                if (localFile.isValid) localFile.deleteFromRealm()
             }
+
             onSuccess?.invoke(file.id)
         }
         emit(apiResponse)
