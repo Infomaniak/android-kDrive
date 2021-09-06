@@ -32,6 +32,9 @@ import com.infomaniak.lib.core.networking.HttpClient
 import io.realm.*
 import io.sentry.Sentry
 import kotlinx.android.parcel.RawValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import java.util.*
@@ -71,13 +74,24 @@ object FileController {
                 if (file.path.isEmpty()) {
                     val generatedPath = generatePath(file, userDrive)
                     if (generatedPath.isNotBlank()) {
-                        realm.beginTransaction()
-                        file.path = generatedPath
-                        realm.commitTransaction()
+                        CoroutineScope(Dispatchers.IO).launch {
+                            savePath(userDrive, fileId, generatedPath)
+                        }
+
                     }
                     file.path
                 } else file.path
             } ?: ""
+        }
+    }
+
+    private fun savePath(userDrive: UserDrive, fileId: Int, generatedPath: String) {
+        getRealmInstance(userDrive).use { realm ->
+            getFileById(realm, fileId)?.let { file ->
+                realm.executeTransaction {
+                    file.path = generatedPath
+                }
+            }
         }
     }
 
