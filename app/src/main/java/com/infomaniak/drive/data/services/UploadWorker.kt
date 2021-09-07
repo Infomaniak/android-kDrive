@@ -371,6 +371,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             val networkType = if (AppSettings.onlyWifiSync) NetworkType.UNMETERED else NetworkType.CONNECTED
             return Constraints.Builder()
                 .setRequiredNetworkType(networkType)
+                .setRequiresStorageNotLow(true)
                 .build()
         }
 
