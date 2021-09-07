@@ -20,17 +20,16 @@ package com.infomaniak.drive.data.models
 import android.graphics.Color
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
-import io.realm.RealmObject
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class Team(
-    override val id: Int,
-    val name: String,
-    val color: Int,
-    val users: List<Int>,
-    val details: List<TeamDetails>,
-    @SerializedName("right") override var permission: String,
+    override val id: Int = -1,
+    val name: String = "",
+    val users: List<Int> = listOf(),
+    val details: List<TeamDetails> = listOf(),
+    @SerializedName("color") val color: Int = -1,
+    @SerializedName("right") override var permission: String = "",
 ) : Parcelable, Shareable {
 
     fun isAllUsers(): Boolean = id == 0
