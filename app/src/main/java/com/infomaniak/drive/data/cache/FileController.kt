@@ -137,7 +137,11 @@ object FileController {
     fun updateFile(fileId: Int, realm: Realm? = null, userDrive: UserDrive = UserDrive(), transaction: (file: File) -> Unit) {
         try {
             val block: (Realm) -> Unit? = { currentRealm ->
-                getFileById(currentRealm, fileId)?.let { file -> currentRealm.executeTransaction { transaction(file) } }
+                getFileById(currentRealm, fileId)?.let { file ->
+                    currentRealm.executeTransaction {
+                        if (file.isValid) transaction(file)
+                    }
+                }
             }
             realm?.let(block) ?: getRealmInstance(userDrive).use(block)
         } catch (exception: Exception) {
