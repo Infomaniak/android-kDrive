@@ -61,7 +61,7 @@ class SharedItemsAdapter(
             when (item) {
                 is DriveUser -> bindDriveUser(item)
                 is Invitation -> bindInvitation(item)
-                is Team -> bindTag(item)
+                is Team -> bindTeam(item)
             }
         }
     }
@@ -111,20 +111,20 @@ class SharedItemsAdapter(
         }
     }
 
-    private fun View.bindTag(tag: Team) {
-        if (tag.isAllUsers()) {
+    private fun View.bindTeam(team: Team) {
+        if (team.isAllUsers()) {
             name.setText(R.string.allAllDriveUsers)
             avatar.load(R.drawable.ic_circle_drive)
             avatar.setBackgroundColor(Color.parseColor(AccountUtils.getCurrentDrive()?.preferences?.color))
         } else {
-            name.text = tag.name
-            avatar.load(R.drawable.ic_circle_tag)
-            avatar.setBackgroundColor(tag.color)
+            name.text = team.name
+            avatar.load(R.drawable.ic_circle_team) // ic_team
+            avatar.setBackgroundColor(team.getParsedColor())
         }
 
         infos.visibility = GONE
-        rightsValue.setText(tag.getFilePermission().translation)
-        if (file.createdBy == tag.id) {
+        rightsValue.setText(team.getFilePermission().translation)
+        if (file.createdBy == team.id) {
             rightsValue.setTextColor(ContextCompat.getColor(context, R.color.secondaryText))
         }
     }

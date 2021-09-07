@@ -35,8 +35,7 @@ data class Team(
 
     fun isAllUsers(): Boolean = id == 0
 
-    @JvmName("getParsedColor")
-    fun getColor(): Int {
+    fun getParsedColor(): Int {
         return Color.parseColor(
             if (isAllUsers()) "#4051b5" else
                 when (this.color) {
