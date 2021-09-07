@@ -196,7 +196,10 @@ class UploadTask(
                     apiResponse?.error?.code.equals("lock_error") -> throw LockErrorException()
                     apiResponse?.error?.code.equals("object_not_found") -> throw FolderNotFoundException()
                     apiResponse?.error?.code.equals("quota_exceeded_error") -> throw QuotaExceededException()
-                    else -> throw Exception(bodyResponse)
+                    else -> {
+                        uploadFile.refreshIdentifier()
+                        throw Exception(bodyResponse)
+                    }
                 }
             }
         }
@@ -213,6 +216,8 @@ class UploadTask(
             uploadFile.refreshIdentifier()
             Sentry.withScope { scope ->
                 scope.setExtra("data", gson.toJson(uploadFile))
+                scope.setExtra("file size", "${uploadFile.fileSize}")
+                scope.setExtra("uploaded size", "$previousChunkBytesWritten")
                 Sentry.captureMessage("Chunk total size exceed fileSize 😢")
             }
             Log.d(
