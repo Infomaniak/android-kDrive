@@ -23,7 +23,7 @@ import com.infomaniak.drive.R
 import kotlinx.android.parcel.Parcelize
 
 interface Shareable : Parcelable {
-    val id: Int
+    var id: Int
     var permission: String
 
     fun getFilterValue(): String {

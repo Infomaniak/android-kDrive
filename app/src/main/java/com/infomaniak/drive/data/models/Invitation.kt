@@ -23,7 +23,7 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class Invitation(
-    override val id: Int = -1,
+    override var id: Int = -1,
     val role: String = "",
     val type: String = "",
     val email: String = "",

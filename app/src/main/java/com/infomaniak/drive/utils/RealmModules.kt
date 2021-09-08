@@ -35,7 +35,7 @@ object RealmModules {
     @RealmModule(classes = [AppSettings::class])
     class AppSettingsModule
 
-    @RealmModule(classes = [Drive::class, DrivePackFunctionality::class, DrivePreferences::class, DriveUsersCategories::class, DriveUser::class])
+    @RealmModule(classes = [Drive::class, DrivePackFunctionality::class, DrivePreferences::class, DriveUsersCategories::class, DriveUser::class, Team::class, TeamDetails::class])
     class DriveFilesModule
 
 }

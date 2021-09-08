@@ -99,8 +99,8 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                 addToSharedElementList(navigationArgs.sharedEmail as String)
             }
             navigationArgs.sharedUserId != -1 -> {
-                val user = fileShareViewModel.availableUsers.value?.find { it.id == navigationArgs.sharedUserId } as DriveUser
-                addToSharedElementList(user)
+                // val user = fileShareViewModel.availableUsers.value?.find { it.id == navigationArgs.sharedUserId } as DriveUser
+                // addToSharedElementList(user)
             }
             navigationArgs.sharedTagId != -1 -> {
                 // Not supported for now - Awaiting new tags/groups feature from backend
@@ -259,14 +259,15 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
 
         val message: String? = when (conflictedUsers.size) {
             1 -> {
-                fileShareViewModel.availableUsers.value?.find { user -> user.id == conflictedUsers.first().userId }?.let { user ->
+/*                fileShareViewModel.availableUsers.value?.find { user -> user.id == conflictedUsers.first().userId }?.let { user ->
                     getString(
                         R.string.sharedConflictDescription,
                         user.displayName,
                         getString(user.getFilePermission().translation),
                         getString(newPermission.translation)
                     )
-                }
+                }*/
+                "TODO : ADJUST THIS" // TODO
             }
             else -> {
                 getString(R.string.sharedConflictManyUserDescription, newPermission.apiValue)

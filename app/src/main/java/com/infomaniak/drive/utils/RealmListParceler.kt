@@ -19,6 +19,7 @@ package com.infomaniak.drive.utils
 
 import android.os.Parcel
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.TeamDetails
 import io.realm.RealmList
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -72,6 +73,10 @@ interface RealmListParceler<T> : Parceler<RealmList<T>?> {
 
     object FileRealmListParceler : RealmListParceler<File> {
         override var clazz: Class<File> = File::class.java
+    }
+
+    object TeamDetailsRealmListParceler : RealmListParceler<TeamDetails> {
+        override var clazz: Class<TeamDetails> = TeamDetails::class.java
     }
 
     object IntRealmListParceler : RealmListParceler<Int> {

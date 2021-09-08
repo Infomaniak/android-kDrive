@@ -31,6 +31,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.ui.MainViewModel
@@ -55,8 +56,9 @@ class FileShareDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val allUserList = AccountUtils.getCurrentDrive().getDriveUsers()
+        val allTeams = DriveInfosController.getAllTeams()
 
-        fileShareViewModel.availableUsers.value = ArrayList(allUserList) // add available tags if in common
+        fileShareViewModel.availableShareableItems.value = ArrayList(allUserList + allTeams)
         availableShareableItemsAdapter =
             userAutoCompleteTextView.setupAvailableShareableItems(
                 context = requireContext(),
@@ -120,7 +122,7 @@ class FileShareDetailsFragment : Fragment() {
             fileDetails?.let { file ->
                 availableShareableItemsAdapter.apply {
                     fileShareViewModel.currentFile.value = file
-                    setAll(fileShareViewModel.availableUsers.value ?: listOf())
+                    fileShareViewModel.availableShareableItems.value?.let { setAll(it) }
                     notShareableUserIds.addAll(file.users)
                     sharedItemsAdapter = SharedItemsAdapter(file) { shareable -> openSelectPermissionDialog(shareable) }
                     sharedUsersRecyclerView.adapter = sharedItemsAdapter
