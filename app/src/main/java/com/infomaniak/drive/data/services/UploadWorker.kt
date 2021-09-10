@@ -71,6 +71,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         contentResolver = applicationContext.contentResolver
         Log.d(TAG, "UploadWorker start job !")
 
+        // Checks if the maximum number of retry allowed is reached
+        if (runAttemptCount >= MAX_RETERY_COUNT) {
+            return Result.failure()
+        }
+
+        // Move the service to foreground
         applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
         applicationContext.uploadServiceNotification().apply {
             setContentTitle(applicationContext.getString(R.string.notificationUploadServiceChannelName))
@@ -365,6 +371,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         private const val LAST_UPLOADED_COUNT = "last_uploaded_count"
 
+        private const val MAX_RETERY_COUNT = 3
         private const val CHECK_LOCAL_LAST_MEDIAS_DELAY = 10000 // 10s (ms)
 
         fun workConstraints(): Constraints {
