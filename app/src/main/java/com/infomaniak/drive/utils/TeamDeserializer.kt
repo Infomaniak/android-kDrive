@@ -15,17 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.data.models
+package com.infomaniak.drive.utils
 
-import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
-import io.realm.RealmObject
-import io.realm.annotations.PrimaryKey
-import kotlinx.android.parcel.Parcelize
+import com.google.gson.*
+import com.infomaniak.drive.data.models.Team
+import com.infomaniak.drive.data.models.drive.Drive
+import com.infomaniak.lib.core.utils.CustomDateTypeAdapter
+import java.lang.reflect.Type
+import java.util.*
 
-@Parcelize
-open class TeamDetails(
-    var teamId: Int = -1,
-    @SerializedName("drive_id") var driveId: Int = -1,
-    @SerializedName("users_count") var usersCount: Int = 0
-) : RealmObject(), Parcelable
+object TeamDeserializer : JsonDeserializer<Team> {
+
+    private var gson: Gson = GsonBuilder()
+        .registerTypeAdapter(Date::class.java, CustomDateTypeAdapter())
+        .create()
+
+    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): Team {
+        val team = gson.fromJson(json, Team::class.java)
+        team.initIds()
+        return team
+    }
+
+}

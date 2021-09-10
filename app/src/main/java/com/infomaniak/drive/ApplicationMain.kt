@@ -36,6 +36,7 @@ import com.infomaniak.drive.BuildConfig.DRIVE_API
 import com.infomaniak.drive.BuildConfig.INFOMANIAK_API
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.Team
 import com.infomaniak.drive.data.models.UISettings
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.sync.UploadNotifications.pendingIntentFlags
@@ -122,6 +123,7 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         val deserializerList = ArrayList<Pair<Type, Any>>().apply {
             add(Pair(Drive::class.java, DriveDeserializer))
             add(Pair(File::class.java, FileDeserializer))
+            add(Pair(Team::class.java, TeamDeserializer))
         }
 
         ApiController.init(deserializerList)
