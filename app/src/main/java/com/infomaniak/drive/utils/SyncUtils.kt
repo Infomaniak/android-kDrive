@@ -30,11 +30,11 @@ import androidx.fragment.app.FragmentActivity
 import androidx.work.*
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.services.PeriodicUploadWorker
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.FileObserveService
 import com.infomaniak.drive.data.sync.FileObserveServiceApi24
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 object SyncUtils {
 
@@ -98,7 +98,7 @@ object SyncUtils {
 
     private fun Context.isAutoSyncActive(): Boolean {
         return WorkManager.getInstance(this).getWorkInfos(
-            WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(UploadWorker.PERIODIC_TAG))
+            WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(PeriodicUploadWorker.TAG))
                 .addStates(arrayListOf(WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED))
                 .build()
         ).get()?.isNotEmpty() == true
@@ -106,22 +106,23 @@ object SyncUtils {
 
     private fun Context.startPeriodicSync(syncInterval: Long) {
         if (!isSyncActive()) {
-            val request = PeriodicWorkRequestBuilder<UploadWorker>(syncInterval, TimeUnit.SECONDS)
-                .setConstraints(UploadWorker.workConstraints())
-                .build()
-            WorkManager.getInstance(this)
-                .enqueueUniquePeriodicWork(UploadWorker.PERIODIC_TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
+            PeriodicUploadWorker.scheduleWork(this, syncInterval)
         }
     }
 
     private fun Context.cancelPeriodicSync() {
         WorkManager.getInstance(this).cancelUniqueWork(UploadWorker.TAG)
-        WorkManager.getInstance(this).cancelUniqueWork(UploadWorker.PERIODIC_TAG)
+        WorkManager.getInstance(this).cancelUniqueWork(PeriodicUploadWorker.TAG)
     }
 
     fun Context.activateSyncIfNeeded() {
         UploadFile.getAppSyncSettings()?.let { syncSettings ->
-            if (!isAutoSyncActive()) activateAutoSync(syncSettings)
+            if (!isAutoSyncActive()) {
+                // Cancel old period periodic worker
+                WorkManager.getInstance(this).cancelUniqueWork(UploadWorker.PERIODIC_TAG)
+                // Enable periodic sync
+                activateAutoSync(syncSettings)
+            }
         }
     }
 
