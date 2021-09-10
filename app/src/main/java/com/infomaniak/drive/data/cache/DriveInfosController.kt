@@ -118,13 +118,15 @@ object DriveInfosController {
         }
     }
 
-    fun getAllTeams(): MutableList<Team> {
-        return getRealmInstance().use { realm ->
-            return@use realm.copyFromRealm(
+    fun getTeams(drive: Drive): List<Team> {
+        val teamList = getRealmInstance().use { realm ->
+            realm.copyFromRealm(
                 realm.where(Team::class.java)
                     .sort(Team::id.name, Sort.ASCENDING)
                     .findAll(), 1
             )
-        } ?: ArrayList()
+        } as ArrayList<Team>? ?: ArrayList()
+
+        return teamList.filter { drive.teams.account.contains(it.id) }
     }
 }

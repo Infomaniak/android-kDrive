@@ -56,13 +56,13 @@ class FileShareDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val allUserList = AccountUtils.getCurrentDrive().getDriveUsers()
-        val allTeams = DriveInfosController.getAllTeams()
+        val allTeams = DriveInfosController.getTeams(AccountUtils.getCurrentDrive()!!)
 
         fileShareViewModel.availableShareableItems.value = ArrayList(allUserList + allTeams)
         availableShareableItemsAdapter =
             userAutoCompleteTextView.setupAvailableShareableItems(
                 context = requireContext(),
-                itemList = allUserList
+                itemList = allUserList + allTeams
             ) { selectedElement ->
                 userAutoCompleteTextView.setText("")
                 openAddUserDialog(selectedElement)

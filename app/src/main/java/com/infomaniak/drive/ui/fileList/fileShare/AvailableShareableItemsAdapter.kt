@@ -30,9 +30,13 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.Invitation
 import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.data.models.Team
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.isEmail
 import com.infomaniak.drive.utils.loadAvatar
+import kotlinx.android.synthetic.main.item_shareable_item.view.*
 import kotlinx.android.synthetic.main.item_user.view.*
+import kotlinx.android.synthetic.main.item_user.view.chevron
 
 /**
  * Note :
@@ -96,6 +100,13 @@ class AvailableShareableItemsAdapter(
                     userAvatar.load(R.drawable.ic_account)
                     userName.text = item.email
                     userEmail.text = context.getString(R.string.userInviteByEmail)
+                    chevron.visibility = GONE
+                }
+                is Team -> {
+                    userAvatar.load(R.drawable.ic_circle_team)
+                    userAvatar.setBackgroundColor(item.getParsedColor())
+                    userName.text = item.name
+                    userEmail.text = "Users : " + item.usersCount(AccountUtils.getCurrentDrive()!!) // TODO - Setup translation
                     chevron.visibility = GONE
                 }
             }

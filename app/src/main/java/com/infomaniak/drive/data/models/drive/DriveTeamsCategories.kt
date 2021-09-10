@@ -15,24 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.utils
+package com.infomaniak.drive.data.models.drive
 
-import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.data.models.drive.*
-import io.realm.annotations.RealmModule
+import io.realm.RealmList
+import io.realm.RealmObject
+import io.realm.annotations.PrimaryKey
 
-object RealmModules {
-
-    @RealmModule(classes = [File::class, Rights::class, FileActivity::class])
-    class LocalFilesModule
-
-    @RealmModule(classes = [UploadFile::class, SyncSettings::class, MediaFolder::class])
-    class SyncFilesModule
-
-    @RealmModule(classes = [AppSettings::class])
-    class AppSettingsModule
-
-    @RealmModule(classes = [Drive::class, DrivePackFunctionality::class, DrivePreferences::class, DriveUsersCategories::class, DriveUser::class, Team::class, TeamDetails::class, DriveTeamsCategories::class])
-    class DriveFilesModule
-
-}
+open class DriveTeamsCategories(
+    @PrimaryKey var driveId: Int = -1,
+    var account: RealmList<Int> = RealmList(),
+    var drive: RealmList<Int> = RealmList(),
+) : RealmObject()

@@ -20,6 +20,7 @@ package com.infomaniak.drive.data.models
 import android.graphics.Color
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.utils.RealmListParceler.IntRealmListParceler
 import com.infomaniak.drive.utils.RealmListParceler.TeamDetailsRealmListParceler
 import io.realm.RealmList
@@ -44,6 +45,11 @@ open class Team(
         details.forEach {
             it.teamId = id
         }
+    }
+
+    fun usersCount(drive: Drive): Int {
+        val detail = details.first { it.driveId == drive.id }
+        return detail?.usersCount ?: users.filter { drive.users.internal.contains(it) }.size
     }
 
     fun getParsedColor(): Int {
