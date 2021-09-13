@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.fileList.fileShare
 
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -87,7 +88,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
             notShareableTeamIds = navigationArgs.notShareableTeamIds.toMutableList() as ArrayList<Int>
         ) { element ->
             userAutoCompleteTextView.setText("")
-            addToSharedElementList(if (element is Invitation) element.email else element)
+            addToSharedElementList(element)
         }
 
         collapsingToolbarLayout.title = getString(
@@ -95,19 +96,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
             else R.string.fileShareFileTitle
         )
 
-        when {
-            navigationArgs.sharedEmail != null -> {
-                addToSharedElementList(navigationArgs.sharedEmail as String)
-            }
-            navigationArgs.sharedUserId != -1 -> {
-                // val user = fileShareViewModel.availableUsers.value?.find { it.id == navigationArgs.sharedUserId } as DriveUser
-                // addToSharedElementList(user)
-            }
-            navigationArgs.sharedTagId != -1 -> {
-                // Not supported for now - Awaiting new tags/groups feature from backend
-            }
-        }
-
+        addToSharedElementList(navigationArgs.sharedItem)
         filePermissions.setOnClickListener {
             safeNavigate(
                 FileShareAddUserDialogDirections.actionFileShareAddUserDialogToSelectPermissionBottomSheetDialog(
@@ -130,15 +119,15 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
         }
     }
 
-    private fun addToSharedElementList(element: Any) {
+    private fun addToSharedElementList(element: Shareable) {
         selectedItems.apply {
             when (element) {
-                is String -> {
-                    emails.add(element)
-                    availableUsersAdapter.notShareableEmails.add(element)
+                is Invitation -> {
+                    invitations.add(element)
+                    availableUsersAdapter.notShareableEmails.add(element.email)
                     createChip(element).setOnClickListener {
-                        emails.remove(element)
-                        selectedUsersChipGroup.removeView(it)
+                        invitations.remove(element)
+                        selectedItemsChipGroup.removeView(it)
                     }
                 }
                 is DriveUser -> {
@@ -147,21 +136,21 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                     createChip(element).setOnClickListener {
                         users.remove(element)
                         availableUsersAdapter.notShareableUserIds.remove(element.id)
-                        selectedUsersChipGroup.removeView(it)
+                        selectedItemsChipGroup.removeView(it)
                     }
                 }
                 is Team -> {
-                    tags.add(element)
+                    teams.add(element)
                     createChip(element).setOnClickListener {
-                        tags.remove(element)
-                        selectedUsersChipGroup.removeView(it)
+                        teams.remove(element)
+                        selectedItemsChipGroup.removeView(it)
                     }
                 }
             }
         }
     }
 
-    private fun createChip(item: Any): Chip {
+    private fun createChip(item: Shareable): Chip {
         val chip = layoutInflater.inflate(R.layout.chip_shared_elements, null) as Chip
 
         when (item) {
@@ -189,17 +178,18 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                     }
                 }
             }
-            is String -> {
-                chip.text = item
+            is Invitation -> {
+                chip.text = item.email
                 chip.setChipIconResource(R.drawable.ic_circle_send)
             }
             is Team -> {
                 chip.text = item.name
-                chip.setChipIconResource(R.drawable.ic_circle_tag)
+                chip.setChipIconResource(R.drawable.ic_circle_team)
+                chip.chipIconTint = ColorStateList.valueOf(item.getParsedColor())
             }
         }
 
-        selectedUsersChipGroup.addView(chip)
+        selectedItemsChipGroup.addView(chip)
         return chip
     }
 
@@ -229,7 +219,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
             val body = mutableMapOf(
                 "emails" to selectedItems.emails,
                 "user_ids" to ArrayList(selectedItems.users.map { user -> user.id }),
-                "tag_ids" to selectedItems.tags,
+                "tag_ids" to selectedItems.teams,
                 "permission" to newPermission
             )
 

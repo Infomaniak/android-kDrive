@@ -199,18 +199,10 @@ class FileShareDetailsFragment : Fragment() {
         )
     }
 
-    private fun openAddUserDialog(element: Any) {
-        var sharedEmail: String? = null
-        var sharedUserId: Int = -1
-        when (element) {
-            is String -> sharedEmail = element
-            is Invitation -> sharedEmail = element.email
-            is DriveUser -> sharedUserId = element.id
-        }
+    private fun openAddUserDialog(element: Shareable) {
         safeNavigate(
             FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToFileShareAddUserDialog(
-                sharedEmail = sharedEmail,
-                sharedUserId = sharedUserId,
+                sharedItem = element,
                 notShareableUserIds = availableShareableItemsAdapter.notShareableUserIds.toIntArray(),
                 notShareableEmails = availableShareableItemsAdapter.notShareableEmails.toTypedArray(),
                 notShareableTeamIds = availableShareableItemsAdapter.notShareableTeamIds.toIntArray()

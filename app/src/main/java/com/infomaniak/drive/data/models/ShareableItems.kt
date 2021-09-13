@@ -24,6 +24,6 @@ import kotlinx.android.parcel.Parcelize
 data class ShareableItems(
     val users: ArrayList<DriveUser> = ArrayList(),
     val emails: ArrayList<String> = ArrayList(),
-    val tags: ArrayList<Team> = ArrayList(),
+    val teams: ArrayList<Team> = ArrayList(),
     val invitations: ArrayList<Invitation> = ArrayList()
 ) : Parcelable

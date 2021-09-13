@@ -420,17 +420,8 @@
         android:label="FileShareAddUserDialog"
         tools:layout="@layout/fragment_bottom_sheet_file_share">
         <argument
-            android:name="sharedEmail"
-            app:argType="string"
-            app:nullable="true" />
-        <argument
-            android:name="sharedUserId"
-            android:defaultValue="-1"
-            app:argType="integer" />
-        <argument
-            android:name="sharedTagId"
-            android:defaultValue="-1"
-            app:argType="integer" />
+            android:name="sharedItem"
+            app:argType="com.infomaniak.drive.data.models.Shareable" />
         <argument
             android:name="notShareableUserIds"
             app:argType="integer[]" />
