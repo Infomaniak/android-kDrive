@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui.fileList.fileShare
 
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -185,7 +184,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
             is Team -> {
                 chip.text = item.name
                 chip.setChipIconResource(R.drawable.ic_circle_team)
-                chip.chipIconTint = ColorStateList.valueOf(item.getParsedColor())
+                chip.chipIcon?.setTint(item.getParsedColor())
             }
         }
 
@@ -219,7 +218,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
             val body = mutableMapOf(
                 "emails" to selectedItems.emails,
                 "user_ids" to ArrayList(selectedItems.users.map { user -> user.id }),
-                "tag_ids" to selectedItems.teams,
+                "team_ids" to ArrayList(selectedItems.teams.map { team -> team.id }),
                 "permission" to newPermission
             )
 
@@ -250,22 +249,22 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
 
         val message: String? = when (conflictedUsers.size) {
             1 -> {
-/*                fileShareViewModel.availableUsers.value?.find { user -> user.id == conflictedUsers.first().userId }?.let { user ->
-                    getString(
-                        R.string.sharedConflictDescription,
-                        user.displayName,
-                        getString(user.getFilePermission().translation),
-                        getString(newPermission.translation)
-                    )
-                }*/
-                "TODO : ADJUST THIS" // TODO
+                fileShareViewModel.availableShareableItems.value?.find { item -> item is DriveUser && item.id == conflictedUsers.first().userId }
+                    ?.let { user ->
+                        getString(
+                            R.string.sharedConflictDescription,
+                            (user as DriveUser).displayName,
+                            getString(user.getFilePermission().translation),
+                            getString(newPermission.translation)
+                        )
+                    }
             }
             else -> {
                 getString(R.string.sharedConflictManyUserDescription, newPermission.apiValue)
             }
         }
 
-        MaterialAlertDialogBuilder(requireContext())
+        MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
             .setTitle(getString(R.string.sharedConflictTitle))
             .setMessage(message)
             .setNegativeButton(R.string.buttonCancel) { _, _ ->
