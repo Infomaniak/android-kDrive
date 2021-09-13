@@ -435,6 +435,7 @@ fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
     itemList: List<Shareable>,
     notShareableUserIds: ArrayList<Int> = arrayListOf(),
     notShareableEmails: ArrayList<String> = arrayListOf(),
+    notShareableTeamIds: ArrayList<Int> = arrayListOf(),
     onDataPassed: (t: Any) -> Unit
 ): AvailableShareableItemsAdapter {
     setDropDownBackgroundResource(R.drawable.background_popup)
@@ -442,7 +443,8 @@ fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
         context = context,
         itemList = ArrayList(itemList),
         notShareableUserIds = notShareableUserIds,
-        notShareableEmails = notShareableEmails
+        notShareableEmails = notShareableEmails,
+        notShareableTeamIds = notShareableTeamIds
     ) { user ->
         onDataPassed(user)
     }

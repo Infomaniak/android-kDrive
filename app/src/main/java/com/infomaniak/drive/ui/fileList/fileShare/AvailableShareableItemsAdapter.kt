@@ -31,6 +31,7 @@ import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.Invitation
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.Team
+import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.isEmail
 import com.infomaniak.drive.utils.loadAvatar
@@ -46,6 +47,7 @@ class AvailableShareableItemsAdapter(
     private var itemList: ArrayList<Shareable>,
     var notShareableUserIds: ArrayList<Int> = arrayListOf(),
     var notShareableEmails: ArrayList<String> = arrayListOf(),
+    var notShareableTeamIds: ArrayList<Int> = arrayListOf(),
     private val onItemClick: (item: Shareable) -> Unit,
 ) : ArrayAdapter<Shareable>(context, R.layout.item_user, itemList), Filterable {
     var initialList: ArrayList<Shareable> = ArrayList()
@@ -60,6 +62,14 @@ class AvailableShareableItemsAdapter(
         itemList.addAll(items)
         initialList = itemList
         notifyDataSetChanged()
+    }
+
+    fun removeFromNotShareables(item: Shareable) {
+        when(item) {
+            is DriveUser -> notShareableUserIds.remove(item.id)
+            is Invitation -> notShareableEmails.remove(item.email)
+            is Team -> notShareableTeamIds.remove(item.id)
+        }
     }
 
     fun addFirstAvailableItem(): Boolean {
@@ -131,7 +141,8 @@ class AvailableShareableItemsAdapter(
                             .contains(searchTerm) || ((it is DriveUser) && it.email.standardize().contains(searchTerm))
                     }.filterNot { displayedItem ->
                         notShareableUserIds.any { it == displayedItem.id } ||
-                                notShareableEmails.any { displayedItem is DriveUser && it == displayedItem.email }
+                                notShareableEmails.any { displayedItem is DriveUser && it == displayedItem.email } ||
+                                notShareableTeamIds.any { it == displayedItem.id }
                     }
                 return FilterResults().apply {
                     values = finalUserList
@@ -163,6 +174,7 @@ class AvailableShareableItemsAdapter(
         return when (this) {
             is DriveUser -> !notShareableUserIds.contains(this.id) && !notShareableEmails.contains(this.email)
             is Invitation -> !notShareableUserIds.contains(this.userId) && !notShareableEmails.contains(this.email)
+            is Team -> !notShareableTeamIds.contains(this.id)
             else -> true
         }
     }

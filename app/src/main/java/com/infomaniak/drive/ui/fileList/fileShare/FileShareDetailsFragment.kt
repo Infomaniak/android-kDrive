@@ -93,7 +93,7 @@ class FileShareDetailsFragment : Fragment() {
                 shareable?.let { shareableItem ->
                     if (permission == Shareable.ShareablePermission.DELETE) {
                         sharedItemsAdapter.removeItem(shareableItem)
-                        if (shareableItem is DriveUser) availableShareableItemsAdapter.notShareableUserIds.remove(shareableItem.id)
+                        availableShareableItemsAdapter.removeFromNotShareables(shareableItem)
                     } else {
                         sharedItemsAdapter.updateItemPermission(shareableItem, permission as Shareable.ShareablePermission)
                     }
@@ -130,6 +130,7 @@ class FileShareDetailsFragment : Fragment() {
                         sharedUsersTitle.visibility = VISIBLE
                         notShareableUserIds = ArrayList(share.users.map { it.id } + share.invitations.map { it.userId })
                         notShareableEmails = ArrayList(share.invitations.map { invitation -> invitation.email })
+                        notShareableTeamIds = ArrayList(share.teams.map { team -> team.id })
                         sharedItemsAdapter.setAll(ArrayList(share.users + share.invitations + share.teams))
                         setupShareLinkContainer(file, share.link)
                     }
@@ -211,7 +212,8 @@ class FileShareDetailsFragment : Fragment() {
                 sharedEmail = sharedEmail,
                 sharedUserId = sharedUserId,
                 notShareableUserIds = availableShareableItemsAdapter.notShareableUserIds.toIntArray(),
-                notShareableEmails = availableShareableItemsAdapter.notShareableEmails.toTypedArray()
+                notShareableEmails = availableShareableItemsAdapter.notShareableEmails.toTypedArray(),
+                notShareableTeamIds = availableShareableItemsAdapter.notShareableTeamIds.toIntArray()
             )
         )
     }
