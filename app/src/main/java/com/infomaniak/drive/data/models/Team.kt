@@ -48,7 +48,7 @@ open class Team(
     }
 
     fun usersCount(drive: Drive): Int {
-        val detail = details.first { it.driveId == drive.id }
+        val detail = details.firstOrNull { it.driveId == drive.id }
         return detail?.usersCount ?: users.filter { drive.users.internal.contains(it) }.size
     }
 
