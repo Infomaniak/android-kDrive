@@ -70,7 +70,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
                 } else {
                     safeNavigate(
                         CreateDropBoxFolderFragmentDirections.actionCreateDropBoxFolderFragmentToFileShareDetailsFragment(
-                            fileId = file.id, fileName = file.name, ignoreCreateFolderStack = true
+                            file = file, ignoreCreateFolderStack = true
                         )
                     )
                 }

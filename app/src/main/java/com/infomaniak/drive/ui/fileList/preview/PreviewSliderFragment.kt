@@ -234,11 +234,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     override fun fileRightsClicked() {
         currentPreviewFile.apply {
             safeNavigate(
-                PreviewSliderFragmentDirections.actionPreviewSliderFragmentToFileShareDetailsFragment(
-                    fileId = id,
-                    fileName = name,
-                    fileType = type
-                )
+                PreviewSliderFragmentDirections.actionPreviewSliderFragmentToFileShareDetailsFragment(file = this)
             )
         }
     }

@@ -119,6 +119,9 @@ open class File(
     @Ignore
     var currentProgress: Int = INDETERMINATE_PROGRESS
 
+    fun isInCommonDocuments(): Boolean =
+        getVisibilityType() == VisibilityType.IS_IN_TEAM_SPACE_FOLDER || getVisibilityType() == VisibilityType.IS_TEAM_SPACE_FOLDER || getVisibilityType() == VisibilityType.IS_TEAM_SPACE
+
     fun isFolder(): Boolean {
         return type == "dir"
     }

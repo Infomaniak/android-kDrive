@@ -32,7 +32,6 @@ import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
@@ -55,29 +54,30 @@ class FileShareDetailsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val currentFile = navigationArgs.file.also { fileShareViewModel.currentFile.value = it }
         val allUserList = AccountUtils.getCurrentDrive().getDriveUsers()
         val allTeams = DriveInfosController.getTeams(AccountUtils.getCurrentDrive()!!)
 
-        fileShareViewModel.availableShareableItems.value = ArrayList(allUserList + allTeams)
+        val itemList = if (currentFile.isInCommonDocuments()) allUserList + allTeams else allUserList
+
+        fileShareViewModel.availableShareableItems.value = ArrayList(itemList)
         availableShareableItemsAdapter =
             userAutoCompleteTextView.setupAvailableShareableItems(
                 context = requireContext(),
-                itemList = allUserList + allTeams
+                itemList = itemList
             ) { selectedElement ->
                 userAutoCompleteTextView.setText("")
                 openAddUserDialog(selectedElement)
             }
 
         fileShareCollapsingToolbarLayout.title = getString(
-            if (navigationArgs.fileType == File.Type.FOLDER.value) R.string.fileShareDetailsFolderTitle else R.string.fileShareDetailsFileTitle,
-            navigationArgs.fileName
+            if (currentFile.type == File.Type.FOLDER.value) R.string.fileShareDetailsFolderTitle else R.string.fileShareDetailsFileTitle,
+            currentFile.name
         )
 
-        FileController.getFileById(navigationArgs.fileId)?.let { file ->
-            sharedUsersTitle.visibility = GONE
-            setupShareLinkContainer(file, null)
-        }
-
+        sharedUsersTitle.visibility = GONE
+        setupShareLinkContainer(currentFile, null)
         refreshUi()
 
         getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.SELECT_PERMISSION_NAV_KEY) { bundle ->
@@ -118,23 +118,20 @@ class FileShareDetailsFragment : Fragment() {
     }
 
     private fun refreshUi() {
-        mainViewModel.getFileDetails(navigationArgs.fileId, UserDrive()).observe(viewLifecycleOwner) { fileDetails ->
-            fileDetails?.let { file ->
-                availableShareableItemsAdapter.apply {
-                    fileShareViewModel.currentFile.value = file
-                    fileShareViewModel.availableShareableItems.value?.let { setAll(it) }
-                    notShareableUserIds.addAll(file.users)
-                    sharedItemsAdapter = SharedItemsAdapter(file) { shareable -> openSelectPermissionDialog(shareable) }
-                    sharedUsersRecyclerView.adapter = sharedItemsAdapter
+        fileShareViewModel.currentFile.value?.let { file ->
+            availableShareableItemsAdapter.apply {
+                fileShareViewModel.availableShareableItems.value?.let { setAll(it) }
+                notShareableUserIds.addAll(file.users)
+                sharedItemsAdapter = SharedItemsAdapter(file) { shareable -> openSelectPermissionDialog(shareable) }
+                sharedUsersRecyclerView.adapter = sharedItemsAdapter
 
-                    mainViewModel.getFileShare(file.id).observe(viewLifecycleOwner) { (_, data) ->
-                        data?.let { share ->
-                            sharedUsersTitle.visibility = VISIBLE
-                            notShareableUserIds = ArrayList(share.users.map { it.id } + share.invitations.map { it.userId })
-                            notShareableEmails = ArrayList(share.invitations.map { invitation -> invitation.email })
-                            sharedItemsAdapter.setAll(ArrayList(share.users + share.invitations + share.teams))
-                            setupShareLinkContainer(file, share.link)
-                        }
+                mainViewModel.getFileShare(file.id).observe(viewLifecycleOwner) { (_, data) ->
+                    data?.let { share ->
+                        sharedUsersTitle.visibility = VISIBLE
+                        notShareableUserIds = ArrayList(share.users.map { it.id } + share.invitations.map { it.userId })
+                        notShareableEmails = ArrayList(share.invitations.map { invitation -> invitation.email })
+                        sharedItemsAdapter.setAll(ArrayList(share.users + share.invitations + share.teams))
+                        setupShareLinkContainer(file, share.link)
                     }
                 }
             }

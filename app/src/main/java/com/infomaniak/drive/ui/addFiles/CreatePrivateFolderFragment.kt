@@ -46,7 +46,7 @@ class CreatePrivateFolderFragment : CreateFolderFragment() {
                     requireActivity().showSnackbar(R.string.createPrivateFolderSucces, anchorView = requireActivity().mainFab)
                     safeNavigate(
                         if (redirectToShareDetails) CreatePrivateFolderFragmentDirections.actionCreatePrivateFolderFragmentToFileShareDetailsFragment(
-                            fileId = file.id, fileName = file.name, ignoreCreateFolderStack = true
+                            file = file, ignoreCreateFolderStack = true
                         )
                         else CreatePrivateFolderFragmentDirections.actionCreatePrivateFolderFragmentToFileListFragment(
                             folderID = file.id, folderName = file.name, ignoreCreateFolderStack = true
