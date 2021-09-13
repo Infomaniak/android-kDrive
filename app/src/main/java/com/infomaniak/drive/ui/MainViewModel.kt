@@ -218,6 +218,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             FileController.updateFile(file.id) { localFile ->
                 localFile.deleteFromRealm()
             }
+
             onSuccess?.invoke(file.id)
         }
         emit(apiResponse)
