@@ -132,12 +132,14 @@ class SharedItemsAdapter(
     fun setAll(newItemList: ArrayList<Shareable>) {
         itemList = newItemList
         // Put file creator in first place
-        itemList.find { it.id == file.createdBy && it is DriveUser }?.let { item ->
-            itemList.removeAt(itemList.indexOf(item))
-            itemList.add(0, item)
+        if (itemList.size > 1) {
+            itemList.find { it.id == file.createdBy && it is DriveUser }?.let { item ->
+                itemList.removeAt(itemList.indexOf(item))
+                itemList.add(0, item)
+            }
         }
 
-        notifyItemRangeInserted(1, newItemList.size - 1)
+        notifyItemRangeInserted(0, newItemList.size)
     }
 
     fun putAll(itemList: ArrayList<Shareable>) {
