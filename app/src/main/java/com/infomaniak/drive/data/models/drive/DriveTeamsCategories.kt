@@ -15,16 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.data.models
+package com.infomaniak.drive.data.models.drive
 
-import com.google.gson.annotations.SerializedName
+import io.realm.RealmList
+import io.realm.RealmObject
+import io.realm.annotations.PrimaryKey
 
-data class Share(
-    val id: Int,
-    var link: ShareLink?,
-    val path: String,
-    val teams: ArrayList<Team>,
-    val users: ArrayList<DriveUser>,
-    val invitations: ArrayList<Invitation>,
-    @SerializedName("can_use_team") val canUseTeam: Boolean
-)
+open class DriveTeamsCategories(
+    @PrimaryKey var driveId: Int = -1,
+    var account: RealmList<Int> = RealmList(),
+    var drive: RealmList<Int> = RealmList(),
+) : RealmObject()

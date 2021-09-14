@@ -17,37 +17,13 @@
  */
 package com.infomaniak.drive.data.models
 
-import android.graphics.Color
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import io.realm.RealmObject
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class Tag(
-    override val id: Int,
-    val name: String,
-    val color: Int,
-    @SerializedName("right") override var permission: String
-) : Parcelable, Shareable {
-
-    fun isAllDriveUsersTag(): Boolean = id == 0
-
-    @JvmName("getParsedColor")
-    fun getColor(): Int {
-        return Color.parseColor(
-            when (color) {
-                0 -> "#4051B5"
-                1 -> "#30ABFF"
-                2 -> "#ED2C6E"
-                3 -> "#FFB11B"
-                4 -> "#029688"
-                5 -> "#7974B4"
-                6 -> "#3CB572"
-                7 -> "#05C2E7"
-                8 -> "#D9283A"
-                9 -> "#3990BB"
-                else -> "#30ABFF"
-            }
-        )
-    }
-}
+open class TeamDetails(
+    @SerializedName("drive_id") var driveId: Int = -1,
+    @SerializedName("users_count") var usersCount: Int = 0
+) : RealmObject(), Parcelable

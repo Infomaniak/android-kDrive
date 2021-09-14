@@ -435,16 +435,18 @@ fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
     itemList: List<Shareable>,
     notShareableUserIds: ArrayList<Int> = arrayListOf(),
     notShareableEmails: ArrayList<String> = arrayListOf(),
-    onDataPassed: (t: Any) -> Unit
+    notShareableTeamIds: ArrayList<Int> = arrayListOf(),
+    onDataPassed: (item: Shareable) -> Unit
 ): AvailableShareableItemsAdapter {
     setDropDownBackgroundResource(R.drawable.background_popup)
     val availableUsersAdapter = AvailableShareableItemsAdapter(
         context = context,
         itemList = ArrayList(itemList),
         notShareableUserIds = notShareableUserIds,
-        notShareableEmails = notShareableEmails
-    ) { user ->
-        onDataPassed(user)
+        notShareableEmails = notShareableEmails,
+        notShareableTeamIds = notShareableTeamIds
+    ) { item ->
+        onDataPassed(item)
     }
     setAdapter(availableUsersAdapter)
     setOnEditorActionListener { _, actionId, _ ->
@@ -665,7 +667,7 @@ fun Context.startDownloadFile(downloadURL: Uri, fileName: String) {
 
     // fix IllegalArgumentException only on Android 10 if multi dot
     if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
-        formattedFileName = formattedFileName.replace(regex = "\\.{2,}".toRegex(), replacement =  ".")
+        formattedFileName = formattedFileName.replace(regex = "\\.{2,}".toRegex(), replacement = ".")
     }
     val request = DownloadManager.Request(downloadURL).apply {
         setTitle(formattedFileName)

@@ -498,6 +498,10 @@
     <string name="shareLinkSettingsBlockUsersConsultTitle">Enable this option to prevent users from seeing who is viewing the files</string>
     <string name="shareUserExternal">kDrive external user</string>
     <string name="shareUserNotAccepted">The user hasn’t yet accepted the share and is an external user of the kDrive.</string>
+    <plurals name="shareUsersCount">
+        <item quantity="one">%d user</item>
+        <item quantity="other">%d users</item>
+    </plurals>
     <string name="sharedConflictDescription">User %1$s can already access this folder with a right to “%2$s”. If you share, they will access the folder with a right to “%3$s”</string>
     <string name="sharedConflictManyUserDescription">Some users can already access this folder. If you share, they will access the folder with a right to \"%s\"</string>
     <string name="sharedConflictTitle">Permissions conflict</string>

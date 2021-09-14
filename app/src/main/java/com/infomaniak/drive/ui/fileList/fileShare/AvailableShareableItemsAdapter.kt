@@ -30,6 +30,8 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.Invitation
 import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.data.models.Team
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.isEmail
 import com.infomaniak.drive.utils.loadAvatar
 import kotlinx.android.synthetic.main.item_user.view.*
@@ -44,6 +46,7 @@ class AvailableShareableItemsAdapter(
     private var itemList: ArrayList<Shareable>,
     var notShareableUserIds: ArrayList<Int> = arrayListOf(),
     var notShareableEmails: ArrayList<String> = arrayListOf(),
+    var notShareableTeamIds: ArrayList<Int> = arrayListOf(),
     private val onItemClick: (item: Shareable) -> Unit,
 ) : ArrayAdapter<Shareable>(context, R.layout.item_user, itemList), Filterable {
     var initialList: ArrayList<Shareable> = ArrayList()
@@ -58,6 +61,14 @@ class AvailableShareableItemsAdapter(
         itemList.addAll(items)
         initialList = itemList
         notifyDataSetChanged()
+    }
+
+    fun removeFromNotShareables(item: Shareable) {
+        when (item) {
+            is DriveUser -> notShareableUserIds.remove(item.id)
+            is Invitation -> notShareableEmails.remove(item.email)
+            is Team -> notShareableTeamIds.remove(item.id)
+        }
     }
 
     fun addFirstAvailableItem(): Boolean {
@@ -98,6 +109,15 @@ class AvailableShareableItemsAdapter(
                     userEmail.text = context.getString(R.string.userInviteByEmail)
                     chevron.visibility = GONE
                 }
+                is Team -> {
+                    val teamUsersCount = item.usersCount(AccountUtils.getCurrentDrive()!!)
+                    userAvatar.load(R.drawable.ic_circle_team)
+                    userAvatar.setBackgroundColor(item.getParsedColor())
+                    userName.text = item.name
+                    userEmail.text =
+                        resources.getQuantityString(R.plurals.shareUsersCount, teamUsersCount, teamUsersCount)
+                    chevron.visibility = GONE
+                }
             }
 
             setOnClickListener {
@@ -120,7 +140,8 @@ class AvailableShareableItemsAdapter(
                             .contains(searchTerm) || ((it is DriveUser) && it.email.standardize().contains(searchTerm))
                     }.filterNot { displayedItem ->
                         notShareableUserIds.any { it == displayedItem.id } ||
-                                notShareableEmails.any { displayedItem is DriveUser && it == displayedItem.email }
+                                notShareableEmails.any { displayedItem is DriveUser && it == displayedItem.email } ||
+                                notShareableTeamIds.any { it == displayedItem.id }
                     }
                 return FilterResults().apply {
                     values = finalUserList
@@ -152,6 +173,7 @@ class AvailableShareableItemsAdapter(
         return when (this) {
             is DriveUser -> !notShareableUserIds.contains(this.id) && !notShareableEmails.contains(this.email)
             is Invitation -> !notShareableUserIds.contains(this.userId) && !notShareableEmails.contains(this.email)
+            is Team -> !notShareableTeamIds.contains(this.id)
             else -> true
         }
     }

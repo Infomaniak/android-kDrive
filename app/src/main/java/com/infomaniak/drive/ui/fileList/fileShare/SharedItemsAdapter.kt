@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui.fileList.fileShare
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.*
@@ -27,7 +26,6 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.drive.utils.loadUrl
 import com.infomaniak.lib.core.views.ViewHolder
@@ -61,7 +59,7 @@ class SharedItemsAdapter(
             when (item) {
                 is DriveUser -> bindDriveUser(item)
                 is Invitation -> bindInvitation(item)
-                is Tag -> bindTag(item)
+                is Team -> bindTeam(item)
             }
         }
     }
@@ -111,20 +109,19 @@ class SharedItemsAdapter(
         }
     }
 
-    private fun View.bindTag(tag: Tag) {
-        if (tag.isAllDriveUsersTag()) {
+    private fun View.bindTeam(team: Team) {
+        if (team.isAllUsers()) {
             name.setText(R.string.allAllDriveUsers)
             avatar.load(R.drawable.ic_circle_drive)
-            avatar.setBackgroundColor(Color.parseColor(AccountUtils.getCurrentDrive()?.preferences?.color))
         } else {
-            name.text = tag.name
-            avatar.load(R.drawable.ic_circle_tag)
-            avatar.setBackgroundColor(tag.getColor())
+            name.text = team.name
+            avatar.load(R.drawable.ic_circle_team)
         }
+        avatar.setBackgroundColor(team.getParsedColor())
 
         infos.visibility = GONE
-        rightsValue.setText(tag.getFilePermission().translation)
-        if (file.createdBy == tag.id) {
+        rightsValue.setText(team.getFilePermission().translation)
+        if (file.createdBy == team.id) {
             rightsValue.setTextColor(ContextCompat.getColor(context, R.color.secondaryText))
         }
     }

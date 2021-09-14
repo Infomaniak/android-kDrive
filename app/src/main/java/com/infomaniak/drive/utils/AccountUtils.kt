@@ -115,8 +115,8 @@ object AccountUtils : CredentialManager {
             userProfile.data?.let { user ->
                 ApiRepository.getAllDrivesData(okHttpClient).apply {
                     if (result != ApiResponse.Status.ERROR) {
-                        data?.let {
-                            val driveRemovedList = DriveInfosController.storeDriveInfos(user.id, it)
+                        data?.let { driveInfo ->
+                            val driveRemovedList = DriveInfosController.storeDriveInfos(user.id, driveInfo)
                             val appSyncSettings = UploadFile.getAppSyncSettings()
                             for (driveRemoved in driveRemovedList) {
                                 if (appSyncSettings?.userId == user.id && appSyncSettings.driveId == driveRemoved.id) {
@@ -133,13 +133,13 @@ object AccountUtils : CredentialManager {
                             }
 
                             if (fromMaintenance) {
-                                if (it.drives.main.any { drive -> !drive.maintenance }) {
+                                if (driveInfo.drives.main.any { drive -> !drive.maintenance }) {
                                     GlobalScope.launch(Dispatchers.Main) {
                                         reloadApp?.invoke()
                                     }
                                 }
-                            } else if (it.drives.main.all { drive -> drive.maintenance } ||
-                                it.drives.main.any { drive -> drive.maintenance && drive.id == currentDriveId }) {
+                            } else if (driveInfo.drives.main.all { drive -> drive.maintenance } ||
+                                driveInfo.drives.main.any { drive -> drive.maintenance && drive.id == currentDriveId }) {
                                 GlobalScope.launch(Dispatchers.Main) {
                                     reloadApp?.invoke()
                                 }

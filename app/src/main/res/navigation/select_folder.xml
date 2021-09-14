@@ -122,17 +122,8 @@
         android:label="FileShareDetailsFragment"
         tools:layout="@layout/fragment_file_share_details">
         <argument
-            android:name="fileId"
-            android:defaultValue="0"
-            app:argType="integer" />
-        <argument
-            android:name="fileName"
-            android:defaultValue=""
-            app:argType="string" />
-        <argument
-            android:name="fileType"
-            android:defaultValue="file"
-            app:argType="string" />
+            android:name="file"
+            app:argType="com.infomaniak.drive.data.models.File" />
         <argument
             android:name="ignoreCreateFolderStack"
             android:defaultValue="false"
@@ -154,23 +145,17 @@
         android:label="FileShareAddUserDialog"
         tools:layout="@layout/fragment_bottom_sheet_file_share">
         <argument
-            android:name="sharedEmail"
-            app:argType="string"
-            app:nullable="true" />
-        <argument
-            android:name="sharedUserId"
-            android:defaultValue="-1"
-            app:argType="integer" />
-        <argument
-            android:name="sharedTagId"
-            android:defaultValue="-1"
-            app:argType="integer" />
+            android:name="sharedItem"
+            app:argType="com.infomaniak.drive.data.models.Shareable" />
         <argument
             android:name="notShareableUserIds"
             app:argType="integer[]" />
         <argument
             android:name="notShareableEmails"
             app:argType="string[]" />
+        <argument
+            android:name="notShareableTeamIds"
+            app:argType="integer[]" />
         <action
             android:id="@+id/action_fileShareAddUserDialog_to_selectPermissionBottomSheetDialog"
             app:destination="@id/selectPermissionBottomSheetDialog" />

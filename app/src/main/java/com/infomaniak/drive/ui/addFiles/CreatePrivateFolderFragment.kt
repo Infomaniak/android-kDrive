@@ -35,7 +35,7 @@ class CreatePrivateFolderFragment : CreateFolderFragment() {
             addItem(ONLY_ME)
             getShare {
                 setUsers(it.users)
-                addItem(if (canInherit(it.users, it.tags)) INHERIT else SPECIFIC_USERS)
+                addItem(if (canInherit(it.users, it.teams)) INHERIT else SPECIFIC_USERS)
             }
         }
 
@@ -46,7 +46,7 @@ class CreatePrivateFolderFragment : CreateFolderFragment() {
                     requireActivity().showSnackbar(R.string.createPrivateFolderSucces, anchorView = requireActivity().mainFab)
                     safeNavigate(
                         if (redirectToShareDetails) CreatePrivateFolderFragmentDirections.actionCreatePrivateFolderFragmentToFileShareDetailsFragment(
-                            fileId = file.id, fileName = file.name, ignoreCreateFolderStack = true
+                            file = file, ignoreCreateFolderStack = true
                         )
                         else CreatePrivateFolderFragmentDirections.actionCreatePrivateFolderFragmentToFileListFragment(
                             folderID = file.id, folderName = file.name, ignoreCreateFolderStack = true

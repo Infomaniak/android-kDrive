@@ -116,8 +116,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         currentFile.apply {
             safeNavigate(
                 FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToFileShareDetailsFragment(
-                    fileId = id,
-                    fileName = name
+                    file = this
                 )
             )
         }

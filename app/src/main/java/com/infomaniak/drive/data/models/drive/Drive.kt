@@ -64,6 +64,8 @@ open class Drive(
     private var _packFunctionality: DrivePackFunctionality? = DrivePackFunctionality(),
     @SerializedName("users")
     private var _users: DriveUsersCategories? = DriveUsersCategories(),
+    @SerializedName("teams")
+    private var _teams: DriveTeamsCategories? = DriveTeamsCategories(),
 ) : RealmObject() {
 
     val packFunctionality: DrivePackFunctionality
@@ -75,10 +77,14 @@ open class Drive(
     val users: DriveUsersCategories
         get() = _users ?: DriveUsersCategories()
 
+    val teams: DriveTeamsCategories
+        get() = _teams ?: DriveTeamsCategories()
+
     fun initIds() {
         _packFunctionality?.let { it.driveId = id }
         _preferences?.let { it.driveId = id }
         _users?.let { it.driveId = id }
+        _teams?.let { it.driveId = id }
     }
 
     fun convertToFile(rootName: String? = null): File {

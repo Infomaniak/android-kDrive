@@ -18,10 +18,7 @@
 package com.infomaniak.drive.utils
 
 import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.data.models.drive.Drive
-import com.infomaniak.drive.data.models.drive.DrivePackFunctionality
-import com.infomaniak.drive.data.models.drive.DrivePreferences
-import com.infomaniak.drive.data.models.drive.DriveUsersCategories
+import com.infomaniak.drive.data.models.drive.*
 import io.realm.annotations.RealmModule
 
 object RealmModules {
@@ -35,7 +32,7 @@ object RealmModules {
     @RealmModule(classes = [AppSettings::class])
     class AppSettingsModule
 
-    @RealmModule(classes = [Drive::class, DrivePackFunctionality::class, DrivePreferences::class, DriveUsersCategories::class, DriveUser::class])
+    @RealmModule(classes = [Drive::class, DrivePackFunctionality::class, DrivePreferences::class, DriveUsersCategories::class, DriveUser::class, Team::class, TeamDetails::class, DriveTeamsCategories::class])
     class DriveFilesModule
 
 }
