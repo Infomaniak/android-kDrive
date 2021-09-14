@@ -37,7 +37,7 @@ open class Team(
     var details: @WriteWith<TeamDetailsRealmListParceler> RealmList<TeamDetails> = RealmList(),
     @SerializedName("color") var color: Int = -1,
     @SerializedName("right") override var permission: String = "",
-) : RealmObject(), Parcelable, Shareable {
+) : RealmObject(), Parcelable, Shareable, Comparable<Team> {
 
     fun isAllUsers(): Boolean = id == 0
 
@@ -70,5 +70,12 @@ open class Team(
                     else -> "#E91E63"
                 }
         )
+    }
+
+    override fun compareTo(other: Team): Int {
+        return when {
+            isAllUsers() -> -1
+            else -> name.compareTo(other.name)
+        }
     }
 }

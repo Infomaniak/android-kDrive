@@ -26,5 +26,5 @@ data class Share(
     val teams: ArrayList<Team>,
     val users: ArrayList<DriveUser>,
     val invitations: ArrayList<Invitation>,
-    @SerializedName("can_use_tag") val canUseTag: Boolean
+    @SerializedName("can_use_team") val canUseTeam: Boolean
 )

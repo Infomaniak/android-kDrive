@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui.fileList.fileShare
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.*
@@ -27,7 +26,6 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.drive.utils.loadUrl
 import com.infomaniak.lib.core.views.ViewHolder
@@ -115,12 +113,11 @@ class SharedItemsAdapter(
         if (team.isAllUsers()) {
             name.setText(R.string.allAllDriveUsers)
             avatar.load(R.drawable.ic_circle_drive)
-            avatar.setBackgroundColor(Color.parseColor(AccountUtils.getCurrentDrive()?.preferences?.color))
         } else {
             name.text = team.name
             avatar.load(R.drawable.ic_circle_team)
-            avatar.setBackgroundColor(team.getParsedColor())
         }
+        avatar.setBackgroundColor(team.getParsedColor())
 
         infos.visibility = GONE
         rightsValue.setText(team.getFilePermission().translation)

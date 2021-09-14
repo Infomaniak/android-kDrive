@@ -46,8 +46,6 @@ import java.util.*
 @Parcelize
 open class File(
     @PrimaryKey var id: Int = 0,
-    @SerializedName("can_use_tag")
-    var canUseTag: Boolean = false,
     var children: @WriteWith<FileRealmListParceler> RealmList<File> = RealmList(),
     @SerializedName("collaborative_folder")
     var collaborativeFolder: String? = null,
@@ -91,7 +89,6 @@ open class File(
     @SerializedName("size_with_version")
     var sizeWithVersions: Long? = null,
     var status: String? = null,
-    var tags: @WriteWith<IntRealmListParceler> RealmList<Int> = RealmList(),
     var type: String = "file",
     var users: @WriteWith<IntRealmListParceler> RealmList<Int> = RealmList(),
     var visibility: String = "",
@@ -119,8 +116,13 @@ open class File(
     @Ignore
     var currentProgress: Int = INDETERMINATE_PROGRESS
 
-    fun isInCommonDocuments(): Boolean =
-        getVisibilityType() == VisibilityType.IS_IN_TEAM_SPACE_FOLDER || getVisibilityType() == VisibilityType.IS_TEAM_SPACE_FOLDER || getVisibilityType() == VisibilityType.IS_TEAM_SPACE
+    fun isInCommonDocuments(): Boolean {
+        return when (getVisibilityType()) {
+            VisibilityType.IS_TEAM_SPACE_FOLDER,
+            VisibilityType.IS_IN_TEAM_SPACE_FOLDER -> true
+            else -> false
+        }
+    }
 
     fun isFolder(): Boolean {
         return type == "dir"

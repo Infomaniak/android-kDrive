@@ -101,8 +101,8 @@ class FileShareDetailsFragment : Fragment() {
             }
         }
 
-        getBackNavigationResult<ShareableItems>(SHARE_SELECTION_KEY) { (users, _, tags, invitations) ->
-            sharedItemsAdapter.putAll(ArrayList(users + tags + invitations))
+        getBackNavigationResult<ShareableItems>(SHARE_SELECTION_KEY) { (users, emails, teams, invitations) ->
+            sharedItemsAdapter.putAll(ArrayList(invitations + teams + users))
             refreshUi()
         }
 
@@ -127,11 +127,12 @@ class FileShareDetailsFragment : Fragment() {
 
                 mainViewModel.getFileShare(file.id).observe(viewLifecycleOwner) { (_, data) ->
                     data?.let { share ->
+                        share.teams.sort()
                         sharedUsersTitle.visibility = VISIBLE
                         notShareableUserIds = ArrayList(share.users.map { it.id } + share.invitations.map { it.userId })
                         notShareableEmails = ArrayList(share.invitations.map { invitation -> invitation.email })
                         notShareableTeamIds = ArrayList(share.teams.map { team -> team.id })
-                        sharedItemsAdapter.setAll(ArrayList(share.users + share.invitations + share.teams))
+                        sharedItemsAdapter.setAll(ArrayList(share.teams + share.users + share.invitations))
                         setupShareLinkContainer(file, share.link)
                     }
                 }
