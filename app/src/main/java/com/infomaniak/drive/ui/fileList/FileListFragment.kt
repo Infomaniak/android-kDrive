@@ -762,30 +762,22 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
      * Will change the noFilesLayout visility
      * @param hideFileList will hide or show the fileList in order to replace (or not) by the `no-files` layout
      * @param changeControlsVisibility will determine if we need to touch the controls visibility based on no-network/no-files
-     * @param hideNavbar will allow to hide or show the nav-bar (in case we can hide it)
      * @param ignoreOffline will allow to ignore if we're offline to show `No Files` instead of `No Connection` in all cases
      */
     internal fun changeNoFilesLayoutVisibility(
         hideFileList: Boolean,
         changeControlsVisibility: Boolean = true,
-        hideNavbar: Boolean = false,
         ignoreOffline: Boolean = false
     ) {
         val isOffline = mainViewModel.isInternetAvailable.value == false
         val hasFilesAndIsOffline = !hideFileList && isOffline
 
         sortLayout?.visibility = if (hideFileList) GONE else VISIBLE
-        val navBarVisibility = if ((hideFileList && isOffline) || hideNavbar) GONE else VISIBLE
 
         if (changeControlsVisibility) {
             val isFileListDestination = findNavController().currentDestination?.id == R.id.fileListFragment
             noNetwork.visibility = if (!hasFilesAndIsOffline) GONE else VISIBLE
             toolbar?.menu?.findItem(R.id.searchItem)?.isVisible = !hideFileList && isFileListDestination
-            requireActivity().apply {
-                bottomNavigation?.visibility = navBarVisibility
-                bottomNavigationBackgroundView?.visibility = navBarVisibility
-                mainFab?.visibility = navBarVisibility
-            }
         }
 
         noFilesLayout.toggleVisibility(

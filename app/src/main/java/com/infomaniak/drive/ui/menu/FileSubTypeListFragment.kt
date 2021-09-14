@@ -43,7 +43,6 @@ open class FileSubTypeListFragment : FileListFragment() {
         changeNoFilesLayoutVisibility(
             files.isEmpty(),
             changeControlsVisibility = true,
-            hideNavbar = true,
             ignoreOffline = ignoreOffline
         )
     }
