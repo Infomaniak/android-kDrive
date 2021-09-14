@@ -272,6 +272,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onResume() {
         super.onResume()
+        showPendingFiles()
         updateVisibleProgresses()
     }
 
