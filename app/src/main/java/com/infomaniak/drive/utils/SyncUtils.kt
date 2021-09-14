@@ -90,7 +90,7 @@ object SyncUtils {
 
     fun Context.isSyncActive(): Boolean {
         return WorkManager.getInstance(this).getWorkInfos(
-            WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(UploadWorker.TAG, UploadWorker.PERIODIC_TAG))
+            WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(UploadWorker.TAG))
                 .addStates(arrayListOf(WorkInfo.State.RUNNING))
                 .build()
         ).get()?.isNotEmpty() == true

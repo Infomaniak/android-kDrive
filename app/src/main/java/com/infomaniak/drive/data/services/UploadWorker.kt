@@ -72,7 +72,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         Log.d(TAG, "UploadWorker start job !")
 
         // Checks if the maximum number of retry allowed is reached
-        if (runAttemptCount >= MAX_RETERY_COUNT) {
+        if (runAttemptCount >= MAX_RETRY_COUNT) {
             return Result.failure()
         }
 
@@ -371,7 +371,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         private const val LAST_UPLOADED_COUNT = "last_uploaded_count"
 
-        private const val MAX_RETERY_COUNT = 3
+        private const val MAX_RETRY_COUNT = 3
         private const val CHECK_LOCAL_LAST_MEDIAS_DELAY = 10000 // 10s (ms)
 
         fun workConstraints(): Constraints {
@@ -393,7 +393,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         fun Context.trackUploadWorkerProgress(): LiveData<MutableList<WorkInfo>> {
             return WorkManager.getInstance(this).getWorkInfosLiveData(
-                WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(TAG, PERIODIC_TAG))
+                WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(TAG))
                     .addStates(arrayListOf(WorkInfo.State.RUNNING))
                     .build()
             )
