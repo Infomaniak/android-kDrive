@@ -17,5 +17,4 @@
  */
 package com.infomaniak.drive.ui.fileList.preview
 
-class PreviewMusicFragment : PreviewVideoFragment() {
-}
+class PreviewMusicFragment : PreviewVideoFragment()
