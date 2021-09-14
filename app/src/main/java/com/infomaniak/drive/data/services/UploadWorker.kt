@@ -108,11 +108,11 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             result
         } catch (exception: UploadTask.FolderNotFoundException) {
             currentUploadFile?.folderNotFoundNotification(applicationContext)
-            Result.retry()
+            Result.failure()
 
         } catch (exception: UploadTask.QuotaExceededException) {
             currentUploadFile?.quotaExceededNotification(applicationContext)
-            Result.retry()
+            Result.failure()
 
         } catch (exception: OutOfMemoryError) {
             currentUploadFile?.outOfMemoryNotification(applicationContext)
