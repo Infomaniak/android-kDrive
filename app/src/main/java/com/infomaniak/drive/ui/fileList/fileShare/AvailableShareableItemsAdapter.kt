@@ -31,7 +31,6 @@ import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.Invitation
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.Team
-import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.isEmail
 import com.infomaniak.drive.utils.loadAvatar
@@ -65,7 +64,7 @@ class AvailableShareableItemsAdapter(
     }
 
     fun removeFromNotShareables(item: Shareable) {
-        when(item) {
+        when (item) {
             is DriveUser -> notShareableUserIds.remove(item.id)
             is Invitation -> notShareableEmails.remove(item.email)
             is Team -> notShareableTeamIds.remove(item.id)

@@ -118,7 +118,7 @@ class SharedItemsAdapter(
             avatar.setBackgroundColor(Color.parseColor(AccountUtils.getCurrentDrive()?.preferences?.color))
         } else {
             name.text = team.name
-            avatar.load(R.drawable.ic_circle_team) // ic_team
+            avatar.load(R.drawable.ic_circle_team)
             avatar.setBackgroundColor(team.getParsedColor())
         }
 

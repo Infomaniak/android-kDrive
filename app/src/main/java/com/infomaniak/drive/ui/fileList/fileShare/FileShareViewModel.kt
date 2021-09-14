@@ -21,7 +21,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import com.infomaniak.drive.data.api.ApiRepository
-import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.ShareLink
+import com.infomaniak.drive.data.models.Shareable
 import kotlinx.coroutines.Dispatchers
 
 class FileShareViewModel : ViewModel() {

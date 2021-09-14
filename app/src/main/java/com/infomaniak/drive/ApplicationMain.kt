@@ -123,7 +123,6 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         val deserializerList = ArrayList<Pair<Type, Any>>().apply {
             add(Pair(Drive::class.java, DriveDeserializer))
             add(Pair(File::class.java, FileDeserializer))
-            add(Pair(Team::class.java, TeamDeserializer))
         }
 
         ApiController.init(deserializerList)

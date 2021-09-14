@@ -41,12 +41,6 @@ open class Team(
 
     fun isAllUsers(): Boolean = id == 0
 
-    fun initIds() {
-        details.forEach {
-            it.teamId = id
-        }
-    }
-
     fun usersCount(drive: Drive): Int {
         val detail = details.firstOrNull { it.driveId == drive.id }
         return detail?.usersCount ?: users.filter { drive.users.internal.contains(it) }.size
