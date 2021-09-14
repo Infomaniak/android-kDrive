@@ -116,14 +116,6 @@ open class File(
     @Ignore
     var currentProgress: Int = INDETERMINATE_PROGRESS
 
-    fun isInCommonDocuments(): Boolean {
-        return when (getVisibilityType()) {
-            VisibilityType.IS_TEAM_SPACE_FOLDER,
-            VisibilityType.IS_IN_TEAM_SPACE_FOLDER -> true
-            else -> false
-        }
-    }
-
     fun isFolder(): Boolean {
         return type == "dir"
     }

@@ -48,6 +48,8 @@ class FileShareDetailsFragment : Fragment() {
     private val fileShareViewModel: FileShareViewModel by navGraphViewModels(R.id.fileShareDetailsFragment)
     private val mainViewModel: MainViewModel by activityViewModels()
     private val navigationArgs: FileShareDetailsFragmentArgs by navArgs()
+    private lateinit var allUserList: List<DriveUser>
+    private lateinit var allTeams: List<Team>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         inflater.inflate(R.layout.fragment_file_share_details, container, false)
@@ -56,20 +58,19 @@ class FileShareDetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val currentFile = navigationArgs.file.also { fileShareViewModel.currentFile.value = it }
-        val allUserList = AccountUtils.getCurrentDrive().getDriveUsers()
-        val allTeams = DriveInfosController.getTeams(AccountUtils.getCurrentDrive()!!)
+        allUserList = AccountUtils.getCurrentDrive().getDriveUsers()
+        allTeams = DriveInfosController.getTeams(AccountUtils.getCurrentDrive()!!)
 
-        val itemList = if (currentFile.isInCommonDocuments()) allUserList + allTeams else allUserList
-
-        fileShareViewModel.availableShareableItems.value = ArrayList(itemList)
+        fileShareViewModel.availableShareableItems.value = ArrayList(allUserList)
         availableShareableItemsAdapter =
             userAutoCompleteTextView.setupAvailableShareableItems(
                 context = requireContext(),
-                itemList = itemList
+                itemList = allUserList
             ) { selectedElement ->
                 userAutoCompleteTextView.setText("")
                 openAddUserDialog(selectedElement)
             }
+        availableShareableItemsAdapter.notShareableUserIds.addAll(currentFile.users)
 
         fileShareCollapsingToolbarLayout.title = getString(
             if (currentFile.type == File.Type.FOLDER.value) R.string.fileShareDetailsFolderTitle else R.string.fileShareDetailsFileTitle,
@@ -119,22 +120,25 @@ class FileShareDetailsFragment : Fragment() {
 
     private fun refreshUi() {
         fileShareViewModel.currentFile.value?.let { file ->
-            availableShareableItemsAdapter.apply {
-                fileShareViewModel.availableShareableItems.value?.let { setAll(it) }
-                notShareableUserIds.addAll(file.users)
-                sharedItemsAdapter = SharedItemsAdapter(file) { shareable -> openSelectPermissionDialog(shareable) }
-                sharedUsersRecyclerView.adapter = sharedItemsAdapter
+            sharedItemsAdapter = SharedItemsAdapter(file) { shareable -> openSelectPermissionDialog(shareable) }
+            sharedUsersRecyclerView.adapter = sharedItemsAdapter
 
-                mainViewModel.getFileShare(file.id).observe(viewLifecycleOwner) { (_, data) ->
-                    data?.let { share ->
-                        share.teams.sort()
-                        sharedUsersTitle.visibility = VISIBLE
+            mainViewModel.getFileShare(file.id).observe(viewLifecycleOwner) { (_, data) ->
+                data?.let { share ->
+                    val itemList = if (share.canUseTeam) allUserList + allTeams else allUserList
+                    fileShareViewModel.availableShareableItems.value = ArrayList(itemList)
+
+                    share.teams.sort()
+                    availableShareableItemsAdapter.apply {
+                        fileShareViewModel.availableShareableItems.value?.let { setAll(it) }
                         notShareableUserIds = ArrayList(share.users.map { it.id } + share.invitations.map { it.userId })
                         notShareableEmails = ArrayList(share.invitations.map { invitation -> invitation.email })
                         notShareableTeamIds = ArrayList(share.teams.map { team -> team.id })
-                        sharedItemsAdapter.setAll(ArrayList(share.teams + share.users + share.invitations))
-                        setupShareLinkContainer(file, share.link)
                     }
+
+                    sharedUsersTitle.visibility = VISIBLE
+                    sharedItemsAdapter.setAll(ArrayList(share.invitations + share.teams + share.users))
+                    setupShareLinkContainer(file, share.link)
                 }
             }
         }

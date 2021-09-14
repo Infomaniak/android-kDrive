@@ -75,6 +75,7 @@ open class Team(
     override fun compareTo(other: Team): Int {
         return when {
             isAllUsers() -> -1
+            other.isAllUsers() -> 1
             else -> name.compareTo(other.name)
         }
     }
