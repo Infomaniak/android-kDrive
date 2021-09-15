@@ -89,8 +89,9 @@ class FileObserveService : Service() {
                     when {
                         MediaFolder.getAllSyncedFoldersCount() > 0 -> {
                             syncJob?.cancel()
-                            syncJob = GlobalScope.launch {
-                                delay(1000)
+
+                            syncJob = CoroutineScope(Dispatchers.Default).launch {
+                                delay(5000)
                                 syncImmediately()
                             }
                         }
