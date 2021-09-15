@@ -110,12 +110,12 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
             shareLinkContainer.setup(shareLink = share?.link, file = currentFile, onSwitchClicked = { isEnabled ->
                 mainViewModel.apply {
                     if (isEnabled) {
-                        createShareLink(currentFile) {
-                            shareLinkContainer.toggleSwitchingApproval(true)
+                        createShareLink(currentFile) { success ->
+                            onShareLinkResult(success, isEnabled)
                         }
                     } else {
-                        deleteShareLink(currentFile) {
-                            shareLinkContainer.toggleSwitchingApproval(true)
+                        deleteShareLink(currentFile) { success ->
+                            onShareLinkResult(success, isEnabled)
                         }
                     }
                 }
@@ -124,6 +124,11 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
             shareLinkContainer.visibility = GONE
             shareDivider.visibility = GONE
         }
+    }
+
+    private fun onShareLinkResult(success: Boolean, isEnabled: Boolean) {
+        val isChecked = if (success) null else !isEnabled
+        shareLinkContainer.toggleSwitchingApproval(true, isChecked)
     }
 
     private fun displayUsersAvatars(file: File) {
@@ -154,9 +159,9 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         }
     }
 
-    private fun createShareLink(currentFile: File, onApiResponse: () -> Unit) {
+    private fun createShareLink(currentFile: File, onApiResponse: (success: Boolean) -> Unit) {
         mainViewModel.postFileShareLink(currentFile).observe(viewLifecycleOwner) { apiResponse ->
-            onApiResponse()
+            onApiResponse(apiResponse.isSuccess())
             if (apiResponse.isSuccess()) {
                 shareLinkContainer.update(apiResponse.data)
             } else {
@@ -165,10 +170,11 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         }
     }
 
-    private fun deleteShareLink(currentFile: File, onApiResponse: () -> Unit) {
-        onApiResponse()
+    private fun deleteShareLink(currentFile: File, onApiResponse: (success: Boolean) -> Unit) {
         mainViewModel.deleteFileShareLink(currentFile).observe(viewLifecycleOwner) { apiResponse ->
-            if (apiResponse.data == true) {
+            val success = apiResponse.data == true
+            onApiResponse(success)
+            if (success) {
                 shareLinkContainer.update(null)
             } else {
                 requireActivity().showSnackbar(apiResponse.translateError())
