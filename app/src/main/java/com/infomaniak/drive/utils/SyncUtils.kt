@@ -34,6 +34,7 @@ import com.infomaniak.drive.data.services.PeriodicUploadWorker
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.FileObserveService
 import com.infomaniak.drive.data.sync.FileObserveServiceApi24
+import io.sentry.Sentry
 import java.util.*
 
 object SyncUtils {
@@ -60,12 +61,26 @@ object SyncUtils {
             else -> null
         }
 
-        val fileModifiedAt = when {
+        var fileModifiedAt = when {
             lastModifiedIndex != -1 -> Date(cursor.getLong(lastModifiedIndex))
             dateModifiedIndex != -1 -> Date(cursor.getLong(dateModifiedIndex) * 1000)
             fileCreatedAt != null -> fileCreatedAt
             else -> Date()
         }
+
+        if (fileModifiedAt.time == 0L) {
+            fileModifiedAt = Date()
+            Sentry.withScope { scope ->
+                if (lastModifiedIndex != -1)
+                    scope.setExtra("lastModifiedIndex", cursor.getLong(lastModifiedIndex).toString())
+                if (dateModifiedIndex != -1)
+                    scope.setExtra("dateModifiedIndex", cursor.getLong(dateModifiedIndex).toString())
+                if (fileCreatedAt != null)
+                    scope.setExtra("fileCreatedAt", fileCreatedAt.time.toString())
+                Sentry.captureMessage("Error fileModifiedAt is null")
+            }
+        }
+
         return Pair(fileCreatedAt, fileModifiedAt)
     }
 
