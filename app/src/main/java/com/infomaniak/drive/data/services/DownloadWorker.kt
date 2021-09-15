@@ -55,20 +55,20 @@ class DownloadWorker(private val context: Context, workerParams: WorkerParameter
         val file = FileController.getFileById(fileId, userDrive)
         val offlineFile = file?.getOfflineFile(context, userId)
 
-        return coroutineScope {
-            val job = async {
-                if (file != null && offlineFile != null) initOfflineDownload(file, offlineFile, userDrive) else Result.failure()
+        return try {
+            if (file != null && offlineFile != null) {
+                initOfflineDownload(file, offlineFile, userDrive)
+            } else {
+                throw Exception("Realm file or offline file not found")
             }
-            job.invokeOnCompletion { exception ->
-                when (exception) {
-                    is CancellationException -> {
-                        if (offlineFile != null && offlineFile.exists() && !file.isOffline) offlineFile.delete()
-                        notifyDownloadCancelled(fileId)
-                    }
-                    else -> exception?.printStackTrace()
-                }
-            }
-            job.await()
+        } catch (exception: CancellationException) {
+            exception.printStackTrace()
+            if (offlineFile != null && offlineFile.exists() && !file.isOffline) offlineFile.delete()
+            notifyDownloadCancelled(fileId)
+            Result.failure()
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+            Result.failure()
         }
     }
 
