@@ -79,7 +79,7 @@ object FileController {
                         }
 
                     }
-                    file.path
+                    generatedPath
                 } else file.path
             } ?: ""
         }
