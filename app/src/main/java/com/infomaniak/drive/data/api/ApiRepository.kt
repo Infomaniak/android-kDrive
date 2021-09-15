@@ -317,16 +317,14 @@ object ApiRepository {
     }
 
     fun bulkDelete(folder: File, fileIds: IntArray? = null): ApiResponse<CancellableAction> {
-        val body = mapOf<String, Any>("action" to "trash").apply {
-            fileIds?.let { plus("file_ids" to fileIds) } ?: plus("parent_id" to folder.id)
-        }
+        var body = mapOf<String, Any>("action" to "trash")
+        fileIds?.let { body = body.plus("file_ids" to fileIds) } ?: run { body = body.plus("parent_id" to folder.id) }
         return callApi(ApiRoutes.bulkAction(folder), POST, body)
     }
 
     fun bulkMoveFiles(folder: File, fileIds: IntArray? = null, destinationFolderId: Int): ApiResponse<CancellableAction> {
-        val body = mapOf<String, Any>("action" to "move", "destination_directory_id" to destinationFolderId).apply {
-            fileIds?.let { plus("file_ids" to fileIds) } ?: plus("parent_id" to folder.id)
-        }
+        var body = mapOf<String, Any>("action" to "move", "destination_directory_id" to destinationFolderId)
+        fileIds?.let { body = body.plus("file_ids" to fileIds) } ?: run { body = body.plus("parent_id" to folder.id) }
         return callApi(ApiRoutes.bulkAction(folder), POST, body)
     }
 

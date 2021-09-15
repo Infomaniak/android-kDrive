@@ -48,6 +48,7 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.services.DownloadWorker
@@ -379,12 +380,16 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             parentFolder = currentFolder!!,
             fileIds = if (!fileAdapter.allSelected) selectedFiles.map { it.id }.toIntArray() else null,
             destinationFolderId = destinationFolder.id
-        ).observe(viewLifecycleOwner) {
+        ).observe(viewLifecycleOwner) { apiResponse ->
+            if (apiResponse.isSuccess()) {
+                apiResponse.data?.let {
+                    requireActivity().showSnackbar(
+                        title = "Déplacement en cours...",
+                        anchorView = requireActivity().mainFab
+                    )
+                }
+            } else requireActivity().showSnackbar(apiResponse.translateError())
             closeMultiSelect()
-            requireActivity().showSnackbar(
-                title = "Déplacement en cours...",
-                anchorView = requireActivity().mainFab
-            )
         }
     }
 
@@ -392,12 +397,16 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         fileListViewModel.bulkDeleteFiles(
             parentFolder = currentFolder!!,
             fileIds = if (!fileAdapter.allSelected) selectedFiles.map { it.id }.toIntArray() else null
-        ).observe(viewLifecycleOwner) {
+        ).observe(viewLifecycleOwner) { apiResponse ->
+            if (apiResponse.isSuccess()) {
+                apiResponse.data?.let {
+                    requireActivity().showSnackbar(
+                        title = "Suppression en cours...",
+                        anchorView = requireActivity().mainFab
+                    ) // TODO - Translate / do a permanent snackbar (or notification)
+                }
+            } else requireActivity().showSnackbar(apiResponse.translateError())
             closeMultiSelect()
-            requireActivity().showSnackbar(
-                title = "Suppression en cours...",
-                anchorView = requireActivity().mainFab
-            ) // TODO - Translate / do a permanent snackbar (or notification)
         }
     }
 
