@@ -93,16 +93,6 @@ object UploadNotifications {
         )
     }
 
-    fun UploadFile.interruptedNotification(context: Context) {
-        showNotification(
-            context = context,
-            title = context.getString(R.string.uploadInterruptedErrorTitle),
-            description = context.getString(R.string.anErrorHasOccurred),
-            notificationId = NotificationUtils.UPLOAD_STATUS_ID,
-            contentIntent = progressPendingIntent(context)
-        )
-    }
-
     fun UploadFile.outOfMemoryNotification(context: Context) {
         showNotification(
             context = context,

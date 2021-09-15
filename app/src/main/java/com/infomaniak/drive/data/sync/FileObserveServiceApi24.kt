@@ -85,8 +85,8 @@ class FileObserveServiceApi24 : JobService() {
             val builder = JobInfo.Builder(
                 MEDIA_CONTENT_JOB,
                 ComponentName(context, FileObserveServiceApi24::class.java)
-            ).setTriggerContentMaxDelay(0)
-                .setTriggerContentUpdateDelay(1000) // Waiting time when a new change is detected while this job is scheduled
+            ).setTriggerContentMaxDelay(5000)
+                .setTriggerContentUpdateDelay(5000) // Waiting time when a new change is detected while this job is scheduled
 
             if (syncSetting == null) {
                 Sentry.captureMessage("FileObserveServiceApi24: disableAutoSync")
