@@ -104,7 +104,7 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
     }
 
     private fun setupShareLinkContainer(currentFile: File?, share: Share?) {
-        if (currentFile?.rights?.share == true) {
+        if (currentFile?.rights?.canBecomeLink == true || currentFile?.shareLink?.isNotBlank() == true) {
             shareLinkContainer.visibility = VISIBLE
             shareDivider.visibility = VISIBLE
             shareLinkContainer.setup(shareLink = share?.link, file = currentFile, onSwitchClicked = { isEnabled ->

@@ -150,9 +150,7 @@ class FileShareDetailsFragment : Fragment() {
     }
 
     private fun setupShareLinkContainer(file: File, shareLink: ShareLink?) {
-        if (file.rights?.share == false) {
-            shareLinkLayout.visibility = GONE
-        } else {
+        if (file.rights?.canBecomeLink == true || file.shareLink?.isNotBlank() == true) {
             shareLinkLayout.visibility = VISIBLE
             shareLinkContainer.setup(shareLink = shareLink,
                 file = file,
@@ -163,6 +161,8 @@ class FileShareDetailsFragment : Fragment() {
                     }
                 }
             )
+        } else {
+            shareLinkLayout.visibility = GONE
         }
     }
 
