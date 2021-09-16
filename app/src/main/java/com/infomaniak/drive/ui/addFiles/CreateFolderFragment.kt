@@ -74,8 +74,8 @@ open class CreateFolderFragment : Fragment() {
         }
     }
 
-    protected fun canInherit(userList: ArrayList<DriveUser>, tagList: ArrayList<Team>): Boolean {
-        return userList.size > 1 || tagList.isNotEmpty()
+    protected fun canInherit(userList: ArrayList<DriveUser>, teamList: ArrayList<Team>): Boolean {
+        return userList.size > 1 || teamList.isNotEmpty()
     }
 
     protected fun saveNewFolder(newFolder: File) {
