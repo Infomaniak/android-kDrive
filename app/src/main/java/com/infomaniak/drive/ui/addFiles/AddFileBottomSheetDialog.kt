@@ -38,6 +38,7 @@ import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.models.CreateFile
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
@@ -163,7 +164,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         safeNavigate(
             AddFileBottomSheetDialogDirections.actionAddFileBottomSheetDialogToNewFolderFragment(
                 parentFolderId = currentFolderFile.id,
-                userDrive = null
+                userDrive = UserDrive(driveId = currentFolderFile.driveId)
             )
         )
         dismiss()
