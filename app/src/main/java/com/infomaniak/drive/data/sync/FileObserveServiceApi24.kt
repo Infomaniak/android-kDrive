@@ -32,6 +32,7 @@ import androidx.annotation.RequiresApi
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.UploadWorker.Companion.showSyncConfigNotification
+import com.infomaniak.drive.data.sync.FileObserveService.Companion.TRIGGER_CONTENT_DELAY
 import com.infomaniak.drive.utils.MediaFoldersProvider
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
@@ -85,8 +86,8 @@ class FileObserveServiceApi24 : JobService() {
             val builder = JobInfo.Builder(
                 MEDIA_CONTENT_JOB,
                 ComponentName(context, FileObserveServiceApi24::class.java)
-            ).setTriggerContentMaxDelay(0)
-                .setTriggerContentUpdateDelay(1000) // Waiting time when a new change is detected while this job is scheduled
+            ).setTriggerContentMaxDelay(TRIGGER_CONTENT_DELAY)
+                .setTriggerContentUpdateDelay(TRIGGER_CONTENT_DELAY) // Waiting time when a new change is detected while this job is scheduled
 
             if (syncSetting == null) {
                 Sentry.captureMessage("FileObserveServiceApi24: disableAutoSync")

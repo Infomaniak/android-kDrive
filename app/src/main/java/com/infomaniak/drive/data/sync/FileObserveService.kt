@@ -89,8 +89,9 @@ class FileObserveService : Service() {
                     when {
                         MediaFolder.getAllSyncedFoldersCount() > 0 -> {
                             syncJob?.cancel()
-                            syncJob = GlobalScope.launch {
-                                delay(1000)
+
+                            syncJob = CoroutineScope(Dispatchers.Default).launch {
+                                delay(TRIGGER_CONTENT_DELAY)
                                 syncImmediately()
                             }
                         }
@@ -103,6 +104,8 @@ class FileObserveService : Service() {
 
     companion object {
         const val TAG = "FileObserveService"
+        const val TRIGGER_CONTENT_DELAY = 5000L
+
         var isRunning = false
     }
 }

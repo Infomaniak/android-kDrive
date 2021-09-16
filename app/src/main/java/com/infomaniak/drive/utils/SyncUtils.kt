@@ -39,7 +39,6 @@ import java.util.*
 
 object SyncUtils {
 
-
     val DATE_TAKEN: String =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.MediaColumns.DATE_TAKEN
         else "datetaken"
