@@ -38,9 +38,9 @@ import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.models.CreateFile
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.AccountUtils.currentDriveId
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_add_file.*
@@ -164,7 +164,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         safeNavigate(
             AddFileBottomSheetDialogDirections.actionAddFileBottomSheetDialogToNewFolderFragment(
                 parentFolderId = currentFolderFile.id,
-                userDrive = null
+                userDrive = UserDrive(driveId = currentFolderFile.driveId)
             )
         )
         dismiss()
@@ -179,7 +179,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             iconRes = office.convertedType.icon
         ) { dialog, name ->
             val createFile = CreateFile(name, office.extension)
-            mainViewModel.createOffice(currentDriveId, currentFolderFile.id, createFile)
+            mainViewModel.createOffice(currentFolderFile.driveId, currentFolderFile.id, createFile)
                 .observe(viewLifecycleOwner) { apiResponse ->
                     if (apiResponse.isSuccess()) {
                         requireActivity().showSnackbar(getString(R.string.modalCreateFileSucces, createFile.name))
@@ -234,7 +234,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                     val cacheUri = Utils.copyDataToUploadCache(requireContext(), file.toUri(), fileModifiedAt)
                     UploadFile(
                         uri = cacheUri.toString(),
-                        driveId = currentDriveId,
+                        driveId = currentFolderFile.driveId,
                         fileCreatedAt = Date(file.lastModified()),
                         fileModifiedAt = fileModifiedAt,
                         fileName = file.name,
@@ -272,7 +272,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                     lifecycleScope.launch(Dispatchers.IO) {
                         UploadFile(
                             uri = uri.toString(),
-                            driveId = currentDriveId,
+                            driveId = currentFolderFile.driveId,
                             fileCreatedAt = fileCreatedAt,
                             fileModifiedAt = fileModifiedAt,
                             fileName = fileName,
