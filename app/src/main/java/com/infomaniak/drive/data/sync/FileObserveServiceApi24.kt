@@ -32,6 +32,7 @@ import androidx.annotation.RequiresApi
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.UploadWorker.Companion.showSyncConfigNotification
+import com.infomaniak.drive.data.sync.FileObserveService.Companion.TRIGGER_CONTENT_DELAY
 import com.infomaniak.drive.utils.MediaFoldersProvider
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
@@ -77,8 +78,6 @@ class FileObserveServiceApi24 : JobService() {
     companion object {
         private const val TAG = "FileObserveServiceApi24"
         private const val MEDIA_CONTENT_JOB = 1
-
-        private const val TRIGGER_CONTENT_DELAY = 5000L
 
         fun scheduleJob(context: Context) {
             Log.d("MediaContentJob", "JOB INIT!")

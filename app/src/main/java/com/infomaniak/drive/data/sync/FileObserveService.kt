@@ -91,7 +91,7 @@ class FileObserveService : Service() {
                             syncJob?.cancel()
 
                             syncJob = CoroutineScope(Dispatchers.Default).launch {
-                                delay(5000)
+                                delay(TRIGGER_CONTENT_DELAY)
                                 syncImmediately()
                             }
                         }
@@ -104,6 +104,8 @@ class FileObserveService : Service() {
 
     companion object {
         const val TAG = "FileObserveService"
+        const val TRIGGER_CONTENT_DELAY = 5000L
+
         var isRunning = false
     }
 }
