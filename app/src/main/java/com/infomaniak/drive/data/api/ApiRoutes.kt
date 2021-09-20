@@ -21,7 +21,7 @@ import com.infomaniak.drive.BuildConfig.*
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Invitation
-import com.infomaniak.drive.data.models.Tag
+import com.infomaniak.drive.data.models.Team
 
 object ApiRoutes {
 
@@ -31,7 +31,7 @@ object ApiRoutes {
 
     private fun trashURL(file: File) = "${DRIVE_API}${file.driveId}/file/trash/${file.id}"
 
-    fun getAllDrivesData() = "${DRIVE_API}init?with=drives,users,ips"
+    fun getAllDrivesData() = "${DRIVE_API}init?with=drives,users,teams, ips"
 
     fun getUserProfile() = "${INFOMANIAK_API}profile"
 
@@ -39,12 +39,12 @@ object ApiRoutes {
 
     fun updateFileSharedUser(file: File, driveUser: DriveUser) = "${fileURL(file)}/share/${driveUser.id}"
 
-    fun updateFileSharedTag(file: File, tag: Tag) = "${fileURL(file)}/share/tag/${tag.id}"
+    fun updateFileSharedTeam(file: File, team: Team) = "${fileURL(file)}/share/team/${team.id}"
 
     fun updateFileSharedInvitation(file: File, invitation: Invitation) =
         "${DRIVE_API}${file.driveId}/file/invitation/${invitation.id}"
 
-    fun getFileShare(file: File) = "${fileURL(file)}/share?with=invitation,link,tag"
+    fun getFileShare(file: File) = "${fileURL(file)}/share?with=invitation,link,teams"
 
     fun postFileShare(file: File) = "${fileURL(file)}/share"
 
@@ -82,7 +82,7 @@ object ApiRoutes {
     fun unLikeCommentFile(file: File, commentId: Int) = "${fileURL(file)}/comment/$commentId/unlike"
 
     fun getFileDetails(file: File) =
-        "${fileURL(file)}?with=user,tag,children,parent,rights,favorite,version,extras,share_link,collaborative_folder,mobile,conversion"
+        "${fileURL(file)}?with=user,teams,children,parent,rights,favorite,version,extras,share_link,collaborative_folder,mobile,conversion"
 
     fun getFileCount(file: File) = "${fileURL(file)}/count"
 

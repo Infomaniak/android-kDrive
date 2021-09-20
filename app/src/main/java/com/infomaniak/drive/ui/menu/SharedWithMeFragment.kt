@@ -43,6 +43,8 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val inDriveList = folderID == ROOT_ID && !navigationArgs.driveID.isPositive()
         val inDriveRoot = folderID == ROOT_ID && navigationArgs.driveID.isPositive()
+        mainViewModel.currentFolder.value = null
+
         downloadFiles = DownloadFiles(
             when {
                 inDriveList -> null
@@ -115,6 +117,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                     userDrive = UserDrive(driveId = folder.driveId, sharedWithMe = true)
                 ).observe(viewLifecycleOwner) {
                     it?.let { (_, children, isComplete) ->
+                        mainViewModel.currentFolder.value = it.parentFolder
                         populateFileList(ArrayList(children), isComplete)
                     }
                 }

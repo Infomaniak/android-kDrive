@@ -81,12 +81,13 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
 
         availableUsersAdapter = userAutoCompleteTextView.setupAvailableShareableItems(
             context = requireContext(),
-            itemList = AccountUtils.getCurrentDrive().getDriveUsers(),
+            itemList = fileShareViewModel.availableShareableItems.value ?: AccountUtils.getCurrentDrive().getDriveUsers(),
             notShareableUserIds = navigationArgs.notShareableUserIds.toMutableList() as ArrayList<Int>,
-            notShareableEmails = navigationArgs.notShareableEmails.toMutableList() as ArrayList<String>
+            notShareableEmails = navigationArgs.notShareableEmails.toMutableList() as ArrayList<String>,
+            notShareableTeamIds = navigationArgs.notShareableTeamIds.toMutableList() as ArrayList<Int>
         ) { element ->
             userAutoCompleteTextView.setText("")
-            addToSharedElementList(if (element is Invitation) element.email else element)
+            addToSharedElementList(element)
         }
 
         collapsingToolbarLayout.title = getString(
@@ -94,19 +95,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
             else R.string.fileShareFileTitle
         )
 
-        when {
-            navigationArgs.sharedEmail != null -> {
-                addToSharedElementList(navigationArgs.sharedEmail as String)
-            }
-            navigationArgs.sharedUserId != -1 -> {
-                val user = fileShareViewModel.availableUsers.value?.find { it.id == navigationArgs.sharedUserId } as DriveUser
-                addToSharedElementList(user)
-            }
-            navigationArgs.sharedTagId != -1 -> {
-                // Not supported for now - Awaiting new tags/groups feature from backend
-            }
-        }
-
+        addToSharedElementList(navigationArgs.sharedItem)
         filePermissions.setOnClickListener {
             safeNavigate(
                 FileShareAddUserDialogDirections.actionFileShareAddUserDialogToSelectPermissionBottomSheetDialog(
@@ -129,15 +118,15 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
         }
     }
 
-    private fun addToSharedElementList(element: Any) {
+    private fun addToSharedElementList(element: Shareable) {
         selectedItems.apply {
             when (element) {
-                is String -> {
-                    emails.add(element)
-                    availableUsersAdapter.notShareableEmails.add(element)
+                is Invitation -> {
+                    invitations.add(element)
+                    availableUsersAdapter.notShareableEmails.add(element.email)
                     createChip(element).setOnClickListener {
-                        emails.remove(element)
-                        selectedUsersChipGroup.removeView(it)
+                        invitations.remove(element)
+                        selectedItemsChipGroup.removeView(it)
                     }
                 }
                 is DriveUser -> {
@@ -146,21 +135,21 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                     createChip(element).setOnClickListener {
                         users.remove(element)
                         availableUsersAdapter.notShareableUserIds.remove(element.id)
-                        selectedUsersChipGroup.removeView(it)
+                        selectedItemsChipGroup.removeView(it)
                     }
                 }
-                is Tag -> {
-                    tags.add(element)
+                is Team -> {
+                    teams.add(element)
                     createChip(element).setOnClickListener {
-                        tags.remove(element)
-                        selectedUsersChipGroup.removeView(it)
+                        teams.remove(element)
+                        selectedItemsChipGroup.removeView(it)
                     }
                 }
             }
         }
     }
 
-    private fun createChip(item: Any): Chip {
+    private fun createChip(item: Shareable): Chip {
         val chip = layoutInflater.inflate(R.layout.chip_shared_elements, null) as Chip
 
         when (item) {
@@ -188,17 +177,18 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                     }
                 }
             }
-            is String -> {
-                chip.text = item
+            is Invitation -> {
+                chip.text = item.email
                 chip.setChipIconResource(R.drawable.ic_circle_send)
             }
-            is Tag -> {
+            is Team -> {
                 chip.text = item.name
-                chip.setChipIconResource(R.drawable.ic_circle_tag)
+                chip.setChipIconResource(R.drawable.ic_circle_team)
+                chip.chipIcon?.setTint(item.getParsedColor())
             }
         }
 
-        selectedUsersChipGroup.addView(chip)
+        selectedItemsChipGroup.addView(chip)
         return chip
     }
 
@@ -228,7 +218,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
             val body = mutableMapOf(
                 "emails" to selectedItems.emails,
                 "user_ids" to ArrayList(selectedItems.users.map { user -> user.id }),
-                "tag_ids" to selectedItems.tags,
+                "team_ids" to ArrayList(selectedItems.teams.map { team -> team.id }),
                 "permission" to newPermission
             )
 
@@ -259,21 +249,22 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
 
         val message: String? = when (conflictedUsers.size) {
             1 -> {
-                fileShareViewModel.availableUsers.value?.find { user -> user.id == conflictedUsers.first().userId }?.let { user ->
-                    getString(
-                        R.string.sharedConflictDescription,
-                        user.displayName,
-                        getString(user.getFilePermission().translation),
-                        getString(newPermission.translation)
-                    )
-                }
+                fileShareViewModel.availableShareableItems.value?.find { item -> item is DriveUser && item.id == conflictedUsers.first().userId }
+                    ?.let { user ->
+                        getString(
+                            R.string.sharedConflictDescription,
+                            (user as DriveUser).displayName,
+                            getString(user.getFilePermission().translation),
+                            getString(newPermission.translation)
+                        )
+                    }
             }
             else -> {
                 getString(R.string.sharedConflictManyUserDescription, newPermission.apiValue)
             }
         }
 
-        MaterialAlertDialogBuilder(requireContext())
+        MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
             .setTitle(getString(R.string.sharedConflictTitle))
             .setMessage(message)
             .setNegativeButton(R.string.buttonCancel) { _, _ ->

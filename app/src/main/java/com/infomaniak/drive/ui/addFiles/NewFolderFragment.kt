@@ -62,10 +62,10 @@ class NewFolderFragment : Fragment() {
     }
 
     private fun initCommonFolder() {
-        var drive = newFolderViewModel.userDrive?.let {
+        val drive = newFolderViewModel.userDrive?.let {
             DriveInfosController.getDrives(it.userId, driveId = it.driveId).firstOrNull()
-        }
-        drive = drive ?: AccountUtils.getCurrentDrive()
+        } ?: AccountUtils.getCurrentDrive()
+
         if (drive?.canCreateTeamFolder == true) {
             commonFolderDescription.text = getString(R.string.commonFolderDescription, drive.name)
             commonFolder.setOnClickListener {

@@ -140,7 +140,8 @@ class MainActivity : BaseActivity() {
                 R.id.fileInfoActionsBottomSheetDialog,
                 R.id.fileListFragment,
                 R.id.homeFragment,
-                R.id.menuFragment -> VISIBLE
+                R.id.menuFragment,
+                R.id.sharedWithMeFragment -> VISIBLE
                 else -> GONE
             }
             mainFab.visibility = visibility

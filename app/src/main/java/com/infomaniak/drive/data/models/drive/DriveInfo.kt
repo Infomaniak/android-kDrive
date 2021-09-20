@@ -20,11 +20,13 @@ package com.infomaniak.drive.data.models.drive
 import androidx.collection.ArrayMap
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.data.models.DriveUser
+import com.infomaniak.drive.data.models.Team
 import com.infomaniak.drive.data.models.IpsToken
 
 data class DriveInfo(
     val drives: DriveList = DriveList(),
     val users: ArrayMap<Int, DriveUser> = ArrayMap(),
+    val teams: ArrayList<Team> = ArrayList()
     @SerializedName("ips_token") val ipsToken: IpsToken
 ) {
     data class DriveList(

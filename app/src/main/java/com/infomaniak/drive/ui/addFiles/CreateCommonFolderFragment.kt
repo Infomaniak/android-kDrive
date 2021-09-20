@@ -63,7 +63,7 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
                     requireActivity().showSnackbar(R.string.createCommonFolderSucces)
                     safeNavigate(
                         if (currentPermission == SPECIFIC_USERS) CreateCommonFolderFragmentDirections.actionCreateCommonFolderFragmentToFileShareDetailsFragment(
-                            fileId = file.id, fileName = file.name, ignoreCreateFolderStack = true
+                            file = file, ignoreCreateFolderStack = true
                         )
                         else CreateCommonFolderFragmentDirections.actionCreateCommonFolderFragmentToFileListFragment(
                             folderID = file.id, folderName = file.name, ignoreCreateFolderStack = true

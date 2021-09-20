@@ -53,7 +53,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
             addItem(ONLY_ME)
             getShare {
                 setUsers(it.users)
-                addItem(if (canInherit(it.users, it.tags)) INHERIT else SPECIFIC_USERS)
+                addItem(if (canInherit(it.users, it.teams)) INHERIT else SPECIFIC_USERS)
             }
         }
 
@@ -70,7 +70,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
                 } else {
                     safeNavigate(
                         CreateDropBoxFolderFragmentDirections.actionCreateDropBoxFolderFragmentToFileShareDetailsFragment(
-                            fileId = file.id, fileName = file.name, ignoreCreateFolderStack = true
+                            file = file, ignoreCreateFolderStack = true
                         )
                     )
                 }

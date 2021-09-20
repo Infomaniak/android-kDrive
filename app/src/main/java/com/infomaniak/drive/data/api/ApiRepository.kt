@@ -233,7 +233,7 @@ object ApiRepository {
     fun deleteFileShare(file: File, shareableItem: Shareable): ApiResponse<Boolean> {
         return callApi(
             when (shareableItem) {
-                is Tag -> ApiRoutes.updateFileSharedTag(file, shareableItem)
+                is Team -> ApiRoutes.updateFileSharedTeam(file, shareableItem)
                 is Invitation -> ApiRoutes.updateFileSharedInvitation(file, shareableItem)
                 else -> ApiRoutes.updateFileSharedUser(file, shareableItem as DriveUser)
             }, DELETE
@@ -243,7 +243,7 @@ object ApiRepository {
     fun putFileShare(file: File, shareableItem: Shareable, body: Map<String, String>): ApiResponse<Boolean> {
         return callApi(
             when (shareableItem) {
-                is Tag -> ApiRoutes.updateFileSharedTag(file, shareableItem)
+                is Team -> ApiRoutes.updateFileSharedTeam(file, shareableItem)
                 is Invitation -> ApiRoutes.updateFileSharedInvitation(file, shareableItem)
                 else -> ApiRoutes.updateFileSharedUser(file, shareableItem as DriveUser)
             }, PUT, body

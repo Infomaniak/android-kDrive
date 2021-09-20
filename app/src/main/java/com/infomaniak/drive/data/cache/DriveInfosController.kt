@@ -18,7 +18,7 @@
 package com.infomaniak.drive.data.cache
 
 import com.infomaniak.drive.data.models.DriveUser
-import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.Team
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.utils.RealmModules
@@ -37,7 +37,6 @@ object DriveInfosController {
         .build()
 
     private fun getRealmInstance() = Realm.getInstance(realmConfiguration)
-
 
     private fun ArrayList<Drive>.initDriveForRealm(
         drive: Drive,
@@ -62,14 +61,18 @@ object DriveInfosController {
         val driveRemoved = getDrives(userId, sharedWithMe = null).filterNot { driveList.contains(it) }
         val driveRemovedID = driveRemoved.map(Drive::objectId)
 
-        getRealmInstance().use { realm ->
-            realm.executeTransaction {
-                it.where(Drive::class.java)
+        getRealmInstance().use {
+            it.executeTransaction { realm ->
+                realm.where(Drive::class.java)
                     .oneOf(Drive::objectId.name, driveRemovedID.toTypedArray())
-                    .findAll().deleteAllFromRealm()
-                it.insertOrUpdate(driveList)
-                it.delete(DriveUser::class.java)
-                it.insertOrUpdate(driveInfo.users.values.toList())
+                    .findAll()
+                    .deleteAllFromRealm()
+
+                realm.insertOrUpdate(driveList)
+                realm.delete(DriveUser::class.java)
+                realm.insertOrUpdate(driveInfo.users.values.toList())
+                realm.delete(Team::class.java)
+                realm.insertOrUpdate(driveInfo.teams.toList())
             }
         }
 
@@ -96,7 +99,7 @@ object DriveInfosController {
         return getRealmInstance().use { realm ->
             val driveList = realm.copyFromRealm(
                 realm.where(Drive::class.java)
-                    .sort(File::id.name, Sort.ASCENDING)
+                    .sort(Drive::id.name, Sort.ASCENDING)
                     .equalTo(Drive::userId.name, userId)
                     .apply {
                         driveId?.let {
@@ -113,5 +116,17 @@ object DriveInfosController {
             )
             driveList?.let { ArrayList(it) } ?: ArrayList()
         }
+    }
+
+    fun getTeams(drive: Drive): List<Team> {
+        val teamList = getRealmInstance().use { realm ->
+            realm.copyFromRealm(
+                realm.where(Team::class.java)
+                    .sort(Team::id.name, Sort.ASCENDING)
+                    .findAll(), 1
+            )
+        } as ArrayList<Team>? ?: ArrayList()
+
+        return teamList.filter { drive.teams.account.contains(it.id) }
     }
 }

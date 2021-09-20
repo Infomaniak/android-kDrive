@@ -23,14 +23,14 @@ import com.infomaniak.drive.R
 import kotlinx.android.parcel.Parcelize
 
 interface Shareable : Parcelable {
-    val id: Int
+    var id: Int
     var permission: String
 
     fun getFilterValue(): String {
         return when (this) {
             is DriveUser -> displayName
             is Invitation -> email
-            is Tag -> name
+            is Team -> name
             else -> ""
         }
     }

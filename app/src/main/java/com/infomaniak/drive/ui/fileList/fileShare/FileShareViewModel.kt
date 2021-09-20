@@ -21,15 +21,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import com.infomaniak.drive.data.api.ApiRepository
-import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
+import com.infomaniak.drive.data.models.Shareable
 import kotlinx.coroutines.Dispatchers
 
 class FileShareViewModel : ViewModel() {
     val currentFile = MutableLiveData<File>()
-    val availableUsers = MutableLiveData<ArrayList<DriveUser>>()
-    // TODO - Implement tags adding support - val availableTags = MutableLiveData<ArrayList<Tag>>()
+    val availableShareableItems = MutableLiveData<List<Shareable>>()
 
     fun postFileShareCheck(file: File, body: Map<String, Any>) = liveData(Dispatchers.IO) {
         emit(ApiRepository.postFileShareCheck(file, body))

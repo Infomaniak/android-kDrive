@@ -122,9 +122,11 @@ class ApplicationMain : Application(), ImageLoaderFactory {
             startActivity(Intent(this, LaunchActivity::class.java).clearStack())
         }
 
-        val deserializerList: ArrayList<Pair<Type, Any>> = ArrayList()
-        deserializerList.add(Pair(Drive::class.java, DriveDeserializer))
-        deserializerList.add(Pair(File::class.java, FileDeserializer))
+        val deserializerList = ArrayList<Pair<Type, Any>>().apply {
+            add(Pair(Drive::class.java, DriveDeserializer))
+            add(Pair(File::class.java, FileDeserializer))
+        }
+
         ApiController.init(deserializerList)
 
         InfomaniakCore.init(

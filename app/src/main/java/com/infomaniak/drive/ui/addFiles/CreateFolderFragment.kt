@@ -34,7 +34,7 @@ import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.FolderPermission
 import com.infomaniak.drive.data.models.Share
-import com.infomaniak.drive.data.models.Tag
+import com.infomaniak.drive.data.models.Team
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter
 import com.infomaniak.drive.utils.AccountUtils
@@ -74,8 +74,8 @@ open class CreateFolderFragment : Fragment() {
         }
     }
 
-    protected fun canInherit(userList: ArrayList<DriveUser>, tagList: ArrayList<Tag>): Boolean {
-        return userList.size > 1 || tagList.isNotEmpty()
+    protected fun canInherit(userList: ArrayList<DriveUser>, teamList: ArrayList<Team>): Boolean {
+        return userList.size > 1 || teamList.isNotEmpty()
     }
 
     protected fun saveNewFolder(newFolder: File) {
