@@ -26,7 +26,7 @@ import com.infomaniak.drive.data.models.IpsToken
 data class DriveInfo(
     val drives: DriveList = DriveList(),
     val users: ArrayMap<Int, DriveUser> = ArrayMap(),
-    val teams: ArrayList<Team> = ArrayList()
+    val teams: ArrayList<Team> = ArrayList(),
     @SerializedName("ips_token") val ipsToken: IpsToken
 ) {
     data class DriveList(
