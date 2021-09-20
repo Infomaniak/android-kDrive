@@ -157,7 +157,7 @@ class FileListViewModel : ViewModel() {
     }
 
     fun cancelUploadingFiles(files: ArrayList<UploadFile> = arrayListOf(), folderId: Int? = null) {
-        if (folderId == null) UploadFile.deleteAll(files) else UploadFile.deleteAllByFolderId(folderId)
+        UploadFile.deleteAll(files, folderId)
     }
 
     fun getMySharedFiles(sortType: File.SortType): LiveData<Pair<ArrayList<File>, IsComplete>?> {
