@@ -96,6 +96,16 @@ class MainActivity : BaseActivity() {
         bottomNavigation.setupWithNavController(navController)
         bottomNavigation.itemIconTintList = ContextCompat.getColorStateList(this, R.color.item_icon_tint_bottom)
         bottomNavigation.selectedItemId = UISettings(this).bottomNavigationSelectedItem
+        bottomNavigation.setOnItemReselectedListener { item ->
+            when (item.itemId) {
+                R.id.fileListFragment,
+                R.id.favoritesFragment -> {
+                    navController.popBackStack(R.id.homeFragment, false)
+                    navController.navigate(item.itemId)
+                }
+                else -> navController.popBackStack(item.itemId, false)
+            }
+        }
 
         intent?.getIntExtra(INTENT_SHOW_PROGRESS, 0)?.let { folderId ->
             if (folderId > 0) {
