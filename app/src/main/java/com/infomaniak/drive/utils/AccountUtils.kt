@@ -147,7 +147,7 @@ object AccountUtils : CredentialManager {
                             }
 
                             // TODO is not initialized when app is launched
-                            MqttClientWrapper.registerForNotifications(it.ipsToken)
+                            MqttClientWrapper.registerForNotifications(driveInfo.ipsToken)
 
                             TokenAuthenticator.mutex.withLock {
                                 if (currentUserId == user.id) {
