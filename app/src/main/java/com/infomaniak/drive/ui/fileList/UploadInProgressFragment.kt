@@ -136,14 +136,14 @@ class UploadInProgressFragment : FileListFragment() {
     override fun onCloseItemsClicked() {
         val title = getString(R.string.uploadInProgressCancelAllUploadTitle)
         Utils.createConfirmation(requireContext(), title) {
-            closeItemClicked(pendingFiles)
+            closeItemClicked(pendingFiles, folderID)
             fileAdapter.setList(arrayListOf())
         }
     }
 
-    private fun closeItemClicked(pendingFiles: ArrayList<UploadFile>) {
+    private fun closeItemClicked(pendingFiles: ArrayList<UploadFile> = arrayListOf(), folderId: Int? = null) {
         lifecycleScope.launch(Dispatchers.IO) {
-            fileListViewModel.cancelUploadingFiles(pendingFiles)
+            fileListViewModel.cancelUploadingFiles(pendingFiles, folderId)
             withContext(Dispatchers.Main) {
                 lifecycleScope.launchWhenResumed {
                     val data = Data.Builder().putBoolean(UploadWorker.CANCELLED_BY_USER, true).build()

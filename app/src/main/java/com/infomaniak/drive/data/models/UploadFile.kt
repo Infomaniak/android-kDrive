@@ -233,6 +233,9 @@ open class UploadFile(
         fun deleteAllByFolderId(folderID: Int) {
             getRealmInstance().use { realm ->
                 realm.executeTransaction {
+                    it.where(UploadFile::class.java).like(UploadFile::uri.name, "file://*").findAll().forEach { syncFile ->
+                        if (!syncFile.isSyncOffline()) syncFile.uri.toUri().toFile().apply { if (exists()) delete() }
+                    }
                     it.where(UploadFile::class.java).equalTo(UploadFile::remoteFolder.name, folderID).findAll()
                         ?.deleteAllFromRealm()
                 }
