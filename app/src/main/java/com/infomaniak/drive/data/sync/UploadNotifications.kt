@@ -65,7 +65,7 @@ object UploadNotifications {
     }
 
     fun UploadFile.folderNotFoundNotification(context: Context) {
-        UploadFile.deleteAllByFolderId(remoteFolder)
+        UploadFile.deleteAll(remoteFolder, permanently = true)
         val isSyncFile = type == UploadFile.Type.SYNC.name
         if (isSyncFile) {
             Sentry.captureMessage("FolderNotFoundNotification: disableAutoSync")

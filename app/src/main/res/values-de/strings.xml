@@ -34,6 +34,7 @@
     <string name="allAllDriveUsers">Alle kDrive-Benutzer</string>
     <string name="allArchive">Archive</string>
     <string name="allAudio">Audiodateien</string>
+    <string name="allCancellationInProgress">Annullierung im Gange ...</string>
     <string name="allCode">Code</string>
     <string name="allDeletedFilePattern">\'Gelöscht am \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Deaktiviert</string>

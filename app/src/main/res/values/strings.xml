@@ -43,6 +43,7 @@
     <string name="allAllDriveUsers">All kDrive users</string>
     <string name="allArchive">Archives</string>
     <string name="allAudio">Audios</string>
+    <string name="allCancellationInProgress">Cancellation in progress …</string>
     <string name="allCode">Code</string>
     <string name="allDeletedFilePattern">\'Deleted on \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Disabled</string>
