@@ -35,6 +35,10 @@ object NotificationUtils {
 
     private const val DEFAULT_SMALL_ICON = R.drawable.ic_logo_notification
 
+    fun Context.moveOperationProgressNotification(): NotificationCompat.Builder {
+        return progressNotification("Starting bulk move", R.drawable.ic_folder_select) // TODO - Replace translation
+    }
+
     fun Context.downloadProgressNotification(): NotificationCompat.Builder {
         return progressNotification(getString(R.string.notificationStartDownloadTicker), android.R.drawable.stat_sys_download)
     }

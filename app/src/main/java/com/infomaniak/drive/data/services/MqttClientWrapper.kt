@@ -24,12 +24,13 @@ import com.google.gson.JsonParser
 import com.infomaniak.drive.data.models.ActionNotification
 import com.infomaniak.drive.data.models.ActionProgressNotification
 import com.infomaniak.drive.data.models.IpsToken
+import com.infomaniak.drive.data.models.Notification
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.utils.ApiController.gson
 import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
 
-object MqttClientWrapper : MqttCallback, LiveData<Any>() {
+object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
 
     private lateinit var appContext: Context
     private lateinit var clientId: String
@@ -87,7 +88,7 @@ object MqttClientWrapper : MqttCallback, LiveData<Any>() {
         }
     }
 
-    fun subscribe(topic: String, qos: Int = 1) {
+    private fun subscribe(topic: String, qos: Int = 1) {
         client.subscribe(topic, qos, null, null)
         isSubscribed = true
     }

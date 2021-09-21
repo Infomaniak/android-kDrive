@@ -43,7 +43,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import androidx.work.WorkInfo
+import androidx.work.*
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
@@ -51,6 +51,7 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.services.BulkOperationWorker
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.data.services.UploadWorker
@@ -316,7 +317,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             if (fileAdapter.allSelected && fileCount > 10) {
                 when (type) {
                     BulkOperation.DELETE -> performBulkDeletion(selectedFiles)
-                    BulkOperation.MOVE -> performBulkMove(selectedFiles, destinationFolder!!)
+                    BulkOperation.MOVE -> performBulkMove(selectedFiles, destinationFolder!!, fileCount = fileCount)
                 }
             } else {
                 val mediator = mainViewModel.createMultiSelectMediator()
@@ -376,7 +377,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
-    private fun performBulkMove(selectedFiles: ArrayList<File>, destinationFolder: File) {
+    private fun performBulkMove(selectedFiles: ArrayList<File>, destinationFolder: File, fileCount: Int? = null) {
         fileListViewModel.bulkMoveFiles(
             parentFolder = currentFolder!!,
             fileIds = if (!fileAdapter.allSelected) selectedFiles.map { it.id }.toIntArray() else null,
@@ -384,6 +385,19 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         ).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 apiResponse.data?.let {
+                    val workerData = workDataOf(
+                        "currentFolderName" to currentFolder!!.name,
+                        "destinationFolderName" to destinationFolder.name,
+                        "fileCount" to fileCount
+                    )
+                    val bulkOperationWorkRequest: OneTimeWorkRequest =
+                        OneTimeWorkRequestBuilder<BulkOperationWorker>().setInputData(workerData).build()
+
+                    WorkManager
+                        .getInstance(requireContext())
+                        .enqueueUniqueWork("MOVE", ExistingWorkPolicy.REPLACE, bulkOperationWorkRequest)
+
+
                     requireActivity().showSnackbar(
                         title = "Déplacement en cours...",
                         anchorView = requireActivity().mainFab
