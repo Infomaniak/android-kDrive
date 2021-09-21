@@ -162,8 +162,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             val observer: Observer<ApiResponse<Boolean>> = Observer { apiResponse ->
                 if (apiResponse.isSuccess()) {
                     isFavorite = !isFavorite
-                    setBackNavigationResult(REFRESH_FAVORITE_FILE, currentFile.id)
                     showFavoritesResultSnackbar()
+                    setBackNavigationResult(REFRESH_FAVORITE_FILE, currentFile.id)
                 } else {
                     requireActivity().showSnackbar(R.string.errorAddFavorite, requireActivity().mainFab)
                     findNavController().popBackStack()
