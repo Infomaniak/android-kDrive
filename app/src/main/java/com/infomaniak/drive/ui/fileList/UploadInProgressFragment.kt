@@ -96,7 +96,7 @@ class UploadInProgressFragment : FileListFragment() {
                 Utils.createConfirmation(requireContext(), title) {
                     val position = fileAdapter.getItems().indexOfFirst { it.name == fileName }
                     if (fileAdapter.contains(syncFile.fileName)) {
-                        closeItemClicked(arrayListOf(syncFile))
+                        closeItemClicked(pendingFiles = arrayListOf(syncFile))
                         fileRecyclerView.post { fileAdapter.deleteAt(position) }
                     }
                 }
@@ -136,14 +136,15 @@ class UploadInProgressFragment : FileListFragment() {
     override fun onCloseItemsClicked() {
         val title = getString(R.string.uploadInProgressCancelAllUploadTitle)
         Utils.createConfirmation(requireContext(), title) {
-            closeItemClicked(pendingFiles, folderID)
+            closeItemClicked(folderId = folderID)
             fileAdapter.setList(arrayListOf())
         }
     }
 
-    private fun closeItemClicked(pendingFiles: ArrayList<UploadFile> = arrayListOf(), folderId: Int? = null) {
+    private fun closeItemClicked(pendingFiles: ArrayList<UploadFile>? = null, folderId: Int? = null) {
         lifecycleScope.launch(Dispatchers.IO) {
-            fileListViewModel.cancelUploadingFiles(pendingFiles, folderId)
+            pendingFiles?.let { UploadFile.deleteAll(pendingFiles) }
+            folderId?.let { UploadFile.deleteAll(folderId) }
             withContext(Dispatchers.Main) {
                 lifecycleScope.launchWhenResumed {
                     val data = Data.Builder().putBoolean(UploadWorker.CANCELLED_BY_USER, true).build()

@@ -156,10 +156,6 @@ class FileListViewModel : ViewModel() {
         emit(UploadFile.getPendingFilesCount(folderID))
     }
 
-    fun cancelUploadingFiles(files: ArrayList<UploadFile> = arrayListOf(), folderId: Int? = null) {
-        UploadFile.deleteAll(files, folderId)
-    }
-
     fun getMySharedFiles(sortType: File.SortType): LiveData<Pair<ArrayList<File>, IsComplete>?> {
         getFilesJob.cancel()
         getFilesJob = Job()

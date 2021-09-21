@@ -214,45 +214,48 @@ open class UploadFile(
             }
         }
 
-        fun deleteAll(uploadFiles: ArrayList<UploadFile> = arrayListOf(), folderId: Int? = null) {
+        fun deleteAll(uploadFiles: ArrayList<UploadFile>) {
             getRealmInstance().use { realm ->
                 realm.executeTransaction {
+                    uploadFiles.forEach { uploadFile ->
+                        syncFileByUriQuery(realm, uploadFile.uri).findFirst()?.let { uploadFileRealm ->
+                            // Don't delete definitively if it's a sync
+                            if (uploadFileRealm.type == Type.SYNC.name) {
+                                uploadFileRealm.deletedAt = Date()
 
-                    if (folderId == null) {
-                        uploadFiles.forEach { uploadFile ->
-                            syncFileByUriQuery(realm, uploadFile.uri).findFirst()?.let { uploadFileRealm ->
-                                // Don't delete definitively if it's a sync
-                                if (uploadFileRealm.type == Type.SYNC.name) {
-                                    uploadFileRealm.deletedAt = Date()
-
-                                } else {
-                                    // Delete definitively
-                                    val uri = uploadFileRealm.getUriObject()
-                                    if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
-                                        if (!uploadFile.isSyncOffline()) uri.toFile().apply { if (exists()) delete() }
-                                    }
-                                    uploadFileRealm.deleteFromRealm()
+                            } else {
+                                // Delete definitively
+                                val uri = uploadFileRealm.getUriObject()
+                                if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
+                                    if (!uploadFile.isSyncOffline()) uri.toFile().apply { if (exists()) delete() }
                                 }
+                                uploadFileRealm.deleteFromRealm()
                             }
                         }
-                    } else {
-                        // Delete all uploads with type SYNC
-                        realm.where(UploadFile::class.java).equalTo(UploadFile::remoteFolder.name, folderId)
-                            .equalTo(UploadFile::type.name, Type.SYNC.name)
-                            .findAll().forEach { it.deletedAt = Date() }
-
-                        // Delete all data files for all uploads with scheme FILE
-                        realm.where(UploadFile::class.java).equalTo(UploadFile::remoteFolder.name, folderId)
-                            .beginsWith(UploadFile::uri.name, ContentResolver.SCHEME_FILE)
-                            .findAll().forEach {
-                                if (!it.isSyncOffline()) it.getUriObject().toFile().apply { if (exists()) delete() }
-                            }
-
-                        // Delete all uploads without type SYNC
-                        realm.where(UploadFile::class.java).equalTo(UploadFile::remoteFolder.name, folderId)
-                            .notEqualTo(UploadFile::type.name, Type.SYNC.name)
-                            .findAll().deleteAllFromRealm()
                     }
+                }
+            }
+        }
+
+        fun deleteAll(folderId: Int) {
+            getRealmInstance().use { realm ->
+                realm.executeTransaction {
+                    // Delete all uploads with type SYNC
+                    realm.where(UploadFile::class.java).equalTo(UploadFile::remoteFolder.name, folderId)
+                        .equalTo(UploadFile::type.name, Type.SYNC.name)
+                        .findAll().forEach { it.deletedAt = Date() }
+
+                    // Delete all data files for all uploads with scheme FILE
+                    realm.where(UploadFile::class.java).equalTo(UploadFile::remoteFolder.name, folderId)
+                        .beginsWith(UploadFile::uri.name, ContentResolver.SCHEME_FILE)
+                        .findAll().forEach {
+                            if (!it.isSyncOffline()) it.getUriObject().toFile().apply { if (exists()) delete() }
+                        }
+
+                    // Delete all uploads without type SYNC
+                    realm.where(UploadFile::class.java).equalTo(UploadFile::remoteFolder.name, folderId)
+                        .notEqualTo(UploadFile::type.name, Type.SYNC.name)
+                        .findAll().deleteAllFromRealm()
                 }
             }
         }
