@@ -100,7 +100,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
             // Check if the user has cancelled the upload and no files to sync
             val isCancelledByUser = inputData.getBoolean(CANCELLED_BY_USER, false)
-            if (UploadFile.getNotSyncedFilesCount() == 0L && isCancelledByUser) {
+            if (UploadFile.getPendingUploadsCount() == 0L && isCancelledByUser) {
                 UploadNotifications.showCancelledByUserNotification(applicationContext)
                 Log.d(TAG, "UploadWorker cancelled by user")
                 return Result.success()
@@ -170,7 +170,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 (this is java.io.IOException && this.message == "stream closed") // Okhttp3
 
     private suspend fun startSyncFiles(): Result = withContext(Dispatchers.IO) {
-        val syncFiles = UploadFile.getNotSyncFiles()
+        val syncFiles = UploadFile.getPendingUploads()
         val lastUploadedCount = inputData.getInt(LAST_UPLOADED_COUNT, 0)
         var pendingCount = syncFiles.size
 
@@ -264,7 +264,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private suspend fun checkIfNeedReSync(syncSettings: SyncSettings) {
         checkLocalLastMedias(syncSettings)
-        if (UploadFile.getNotSyncedFilesCount() > 0) {
+        if (UploadFile.getPendingUploadsCount() > 0) {
             val data = Data.Builder().putInt(LAST_UPLOADED_COUNT, uploadedCount).build()
             applicationContext.syncImmediately(data, true)
         }

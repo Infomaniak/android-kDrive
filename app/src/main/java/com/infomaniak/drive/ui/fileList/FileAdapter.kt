@@ -40,7 +40,6 @@ open class FileAdapter(
 
     val itemSelected: ArrayList<File> = arrayListOf()
 
-    private var currentFileIdProgress: Int? = null
     var importContainsProgress: Boolean = false
 
     var onFileClicked: ((file: File) -> Unit)? = null
@@ -156,6 +155,7 @@ open class FileAdapter(
     }
 
     fun indexOf(fileId: Int) = itemList.indexOfFirst { it.id == fileId }
+    fun indexOf(fileName: String) = itemList.indexOfFirst { it.name == fileName }
 
     fun notifyFileChanged(fileId: Int, onChange: ((file: File) -> Unit)? = null) {
         val fileIndex = indexOf(fileId)
@@ -165,18 +165,20 @@ open class FileAdapter(
         }
     }
 
-    open fun updateFileProgress(fileId: Int, progress: Int, onComplete: (file: File) -> Unit) {
-        val fileIndex = indexOf(fileId)
-        if (fileIndex >= 0) {
-            getFile(fileIndex).currentProgress = progress
+    fun updateFileProgressByFileId(fileId: Int, progress: Int, onComplete: ((position: Int, file: File) -> Unit)? = null) {
+        updateFileProgress(indexOf(fileId), progress, onComplete)
+    }
+
+    fun updateFileProgress(position: Int, progress: Int, onComplete: ((position: Int, file: File) -> Unit)? = null) {
+        if (position >= 0) {
+            itemList[position].currentProgress = progress
             importContainsProgress = uploadInProgress && progress <= 100
-            notifyItemChanged(fileIndex, progress)
+            notifyItemChanged(position, progress)
 
             if (progress == 100) {
-                onComplete(getFile(fileIndex))
+                onComplete?.invoke(position, itemList[position])
             }
         }
-        currentFileIdProgress = fileId
     }
 
     override fun getItemViewType(position: Int): Int {

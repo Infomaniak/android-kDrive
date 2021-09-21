@@ -149,11 +149,11 @@ class FileListViewModel : ViewModel() {
     }
 
     fun getPendingFiles(folderID: Int) = liveData(Dispatchers.IO) {
-        emit(UploadFile.getPendingFiles(folderID))
+        emit(UploadFile.getPendingUploadsByFolderId(folderID))
     }
 
     fun getPendingFilesCount(folderID: Int) = liveData(Dispatchers.IO) {
-        emit(UploadFile.getPendingFilesCount(folderID))
+        emit(UploadFile.getPendingFilesCountByFolderId(folderID))
     }
 
     fun getMySharedFiles(sortType: File.SortType): LiveData<Pair<ArrayList<File>, IsComplete>?> {

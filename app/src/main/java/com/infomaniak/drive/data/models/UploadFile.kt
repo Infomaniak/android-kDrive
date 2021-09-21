@@ -114,7 +114,7 @@ open class UploadFile(
             return realm.where(UploadFile::class.java).equalTo(UploadFile::uri.name, uri)
         }
 
-        private fun pendingFilesQuery(realm: Realm, folderId: Int? = null): RealmQuery<UploadFile> {
+        private fun pendingUploadsByFolderIdQuery(realm: Realm, folderId: Int? = null): RealmQuery<UploadFile> {
             return realm.where(UploadFile::class.java).apply {
                 folderId?.let { equalTo(UploadFile::remoteFolder.name, it) }
                 equalTo(UploadFile::userId.name, AccountUtils.currentUserId)
@@ -125,16 +125,17 @@ open class UploadFile(
             }
         }
 
-        fun getNotSyncFiles(): ArrayList<UploadFile> {
+        fun getPendingUploads(): ArrayList<UploadFile> {
             return getRealmInstance().use { realm ->
                 realm.where(UploadFile::class.java)
                     .isNull(UploadFile::uploadAt.name)
                     .isNull(UploadFile::deletedAt.name)
+                    .sort(UploadFile::uri.name)
                     .findAll()?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile> ?: arrayListOf()
             }
         }
 
-        fun getNotSyncedFilesCount(): Long {
+        fun getPendingUploadsCount(): Long {
             return getRealmInstance().use { realm ->
                 realm.where(UploadFile::class.java)
                     .isNull(UploadFile::uploadAt.name)
@@ -142,9 +143,9 @@ open class UploadFile(
             }
         }
 
-        fun getPendingFiles(folderId: Int): ArrayList<UploadFile> {
+        fun getPendingUploadsByFolderId(folderId: Int): ArrayList<UploadFile> {
             return getRealmInstance().use { realm ->
-                pendingFilesQuery(realm, folderId).findAll()
+                pendingUploadsByFolderIdQuery(realm, folderId).findAll()
                     ?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile> ?: arrayListOf()
             }
         }
@@ -157,9 +158,9 @@ open class UploadFile(
                 .findAll()?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile>
         }
 
-        fun getPendingFilesCount(folderId: Int? = null): Int {
+        fun getPendingFilesCountByFolderId(folderId: Int? = null): Int {
             return getRealmInstance().use { realm ->
-                pendingFilesQuery(realm, folderId).count().toInt()
+                pendingUploadsByFolderIdQuery(realm, folderId).count().toInt()
             }
         }
 

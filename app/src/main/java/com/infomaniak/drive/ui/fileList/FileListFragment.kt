@@ -196,7 +196,9 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         requireContext().trackUploadWorkerProgress().observe(viewLifecycleOwner) {
             val workInfo = it.firstOrNull() ?: return@observe
             val isUploaded = workInfo.progress.getBoolean(UploadWorker.IS_UPLOADED, false)
-            if (isUploaded || !uploadFileInProgress.isVisible) mainViewModel.refreshActivities.value = true
+            val notIsUploadView = findNavController().currentDestination?.id != R.id.uploadInProgressFragment
+
+            if (isUploaded || notIsUploadView && !uploadFileInProgress.isVisible) mainViewModel.refreshActivities.value = true
         }
         mainViewModel.refreshActivities.observe(viewLifecycleOwner) {
             it?.let {
@@ -471,7 +473,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
                 runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
 
-                fileAdapter.updateFileProgress(file.id, 100) { currentFile ->
+                fileAdapter.updateFileProgressByFileId(file.id, 100) { _, currentFile ->
                     currentFile.isOffline = true
                     currentFile.currentProgress = 0
                 }
@@ -549,7 +551,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             if (workInfo.state == WorkInfo.State.RUNNING) {
                 val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 100)
                 fileRecyclerView.post {
-                    fileAdapter.updateFileProgress(fileId, progress) { file ->
+                    fileAdapter.updateFileProgressByFileId(fileId, progress) { _, file ->
                         file.isOffline = true
                         file.currentProgress = Utils.INDETERMINATE_PROGRESS
                     }
