@@ -112,7 +112,6 @@ class UploadInProgressFragment : FileListFragment() {
 
 
     private fun whenAnUploadIsDone(position: Int) {
-        Log.d("sisi", "done position = $position")
         fileAdapter.deleteAt(position)
 
         if (fileAdapter.getItems().isEmpty()) {

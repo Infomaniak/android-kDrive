@@ -33,7 +33,6 @@ import com.infomaniak.drive.views.PaginationAdapter
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_file_list.view.*
 import kotlinx.android.synthetic.main.item_file.view.*
-import org.apache.commons.cli.MissingArgumentException
 
 open class FileAdapter(
     override val itemList: ArrayList<File> = arrayListOf()
@@ -166,22 +165,18 @@ open class FileAdapter(
         }
     }
 
-    open fun updateFileProgress(
-        fileId: Int? = null,
-        progress: Int,
-        position: Int? = null,
-        onComplete: ((position: Int, file: File) -> Unit)? = null
-    ) {
-        val filePosition =
-            position ?: fileId?.let { indexOf(fileId) } ?: throw MissingArgumentException("Missing fileId or position argument")
+    fun updateFileProgressByFileId(fileId: Int, progress: Int, onComplete: ((position: Int, file: File) -> Unit)? = null) {
+        updateFileProgress(indexOf(fileId), progress, onComplete)
+    }
 
-        if (filePosition >= 0) {
-            itemList[filePosition].currentProgress = progress
+    fun updateFileProgress(position: Int, progress: Int, onComplete: ((position: Int, file: File) -> Unit)? = null) {
+        if (position >= 0) {
+            itemList[position].currentProgress = progress
             importContainsProgress = uploadInProgress && progress <= 100
-            notifyItemChanged(filePosition, progress)
+            notifyItemChanged(position, progress)
 
             if (progress == 100) {
-                onComplete?.invoke(filePosition, itemList[filePosition])
+                onComplete?.invoke(position, itemList[position])
             }
         }
     }
