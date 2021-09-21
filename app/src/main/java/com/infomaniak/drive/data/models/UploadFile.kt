@@ -243,7 +243,7 @@ open class UploadFile(
 
                         // Delete all data files for all uploads with scheme FILE
                         realm.where(UploadFile::class.java).equalTo(UploadFile::remoteFolder.name, folderId)
-                            .beginsWith(UploadFile::uri.name, "file://")
+                            .beginsWith(UploadFile::uri.name, ContentResolver.SCHEME_FILE)
                             .findAll().forEach {
                                 if (!it.isSyncOffline()) it.getUriObject().toFile().apply { if (exists()) delete() }
                             }
@@ -261,9 +261,10 @@ open class UploadFile(
         fun deleteAllByFolderId(folderID: Int) {
             getRealmInstance().use { realm ->
                 realm.executeTransaction {
-                    it.where(UploadFile::class.java).beginsWith(UploadFile::uri.name, "file://").findAll().forEach { uploadFile ->
-                        if (!uploadFile.isSyncOffline()) uploadFile.getUriObject().toFile().apply { if (exists()) delete() }
-                    }
+                    it.where(UploadFile::class.java).beginsWith(UploadFile::uri.name, ContentResolver.SCHEME_FILE)
+                        .findAll().forEach { uploadFile ->
+                            if (!uploadFile.isSyncOffline()) uploadFile.getUriObject().toFile().apply { if (exists()) delete() }
+                        }
                     it.where(UploadFile::class.java).equalTo(UploadFile::remoteFolder.name, folderID).findAll()
                         ?.deleteAllFromRealm()
                 }
