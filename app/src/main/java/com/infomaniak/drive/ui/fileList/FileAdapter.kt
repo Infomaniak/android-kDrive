@@ -33,6 +33,7 @@ import com.infomaniak.drive.views.PaginationAdapter
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_file_list.view.*
 import kotlinx.android.synthetic.main.item_file.view.*
+import org.apache.commons.cli.MissingArgumentException
 
 open class FileAdapter(
     override val itemList: ArrayList<File> = arrayListOf()
@@ -40,7 +41,6 @@ open class FileAdapter(
 
     val itemSelected: ArrayList<File> = arrayListOf()
 
-    private var currentFileIdProgress: Int? = null
     var importContainsProgress: Boolean = false
 
     var onFileClicked: ((file: File) -> Unit)? = null
@@ -156,6 +156,7 @@ open class FileAdapter(
     }
 
     fun indexOf(fileId: Int) = itemList.indexOfFirst { it.id == fileId }
+    fun indexOf(fileName: String) = itemList.indexOfFirst { it.name == fileName }
 
     fun notifyFileChanged(fileId: Int, onChange: ((file: File) -> Unit)? = null) {
         val fileIndex = indexOf(fileId)
@@ -165,18 +166,24 @@ open class FileAdapter(
         }
     }
 
-    open fun updateFileProgress(fileId: Int, progress: Int, onComplete: (file: File) -> Unit) {
-        val fileIndex = indexOf(fileId)
-        if (fileIndex >= 0) {
-            getFile(fileIndex).currentProgress = progress
+    open fun updateFileProgress(
+        fileId: Int? = null,
+        progress: Int,
+        position: Int? = null,
+        onComplete: ((position: Int, file: File) -> Unit)? = null
+    ) {
+        val filePosition =
+            position ?: fileId?.let { indexOf(fileId) } ?: throw MissingArgumentException("Missing fileId or position argument")
+
+        if (filePosition >= 0) {
+            itemList[filePosition].currentProgress = progress
             importContainsProgress = uploadInProgress && progress <= 100
-            notifyItemChanged(fileIndex, progress)
+            notifyItemChanged(filePosition, progress)
 
             if (progress == 100) {
-                onComplete(getFile(fileIndex))
+                onComplete?.invoke(filePosition, itemList[filePosition])
             }
         }
-        currentFileIdProgress = fileId
     }
 
     override fun getItemViewType(position: Int): Int {
