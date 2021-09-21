@@ -254,13 +254,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             if (result == ApiResponse.Status.SUCCESS) onRefresh()
         }
 
-        getBackNavigationResult<Int>(REFRESH_FAVORITE_FILE) { fileID ->
+        getBackNavigationResult<Int>(REFRESH_FAVORITE_FILE) { fileId ->
             if (findNavController().currentDestination?.id == R.id.favoritesFragment) {
-                fileAdapter.deleteByFileId(fileID)
+                fileAdapter.deleteByFileId(fileId)
             } else {
-                fileAdapter.notifyFileChanged(fileID) { file ->
-                    file.isFavorite = !file.isFavorite
-                }
+                fileAdapter.notifyFileChanged(fileId)
             }
         }
     }
