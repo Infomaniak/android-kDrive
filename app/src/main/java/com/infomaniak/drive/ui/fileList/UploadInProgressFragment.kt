@@ -103,6 +103,10 @@ class UploadInProgressFragment : FileListFragment() {
             title = R.string.uploadInProgressNoFile,
             initialListView = fileRecyclerView
         )
+    }
+
+    override fun onResume() {
+        super.onResume()
         downloadFiles(true)
     }
 
