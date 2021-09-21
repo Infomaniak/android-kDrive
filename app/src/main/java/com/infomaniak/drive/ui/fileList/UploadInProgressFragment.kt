@@ -37,10 +37,12 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.showSnackbar
 import io.sentry.Sentry
+import kotlinx.android.synthetic.main.dialog_download_progress.view.*
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
 
 class UploadInProgressFragment : FileListFragment() {
 
@@ -96,7 +98,7 @@ class UploadInProgressFragment : FileListFragment() {
                 Utils.createConfirmation(requireContext(), title) {
                     val position = fileAdapter.getItems().indexOfFirst { it.name == fileName }
                     if (fileAdapter.contains(syncFile.fileName)) {
-                        closeItemClicked(pendingFiles = arrayListOf(syncFile))
+                        closeItemClicked(uploadFiles = arrayListOf(syncFile))
                         fileRecyclerView.post { fileAdapter.deleteAt(position) }
                     }
                 }
@@ -141,12 +143,16 @@ class UploadInProgressFragment : FileListFragment() {
         }
     }
 
-    private fun closeItemClicked(pendingFiles: ArrayList<UploadFile>? = null, folderId: Int? = null) {
+    private fun closeItemClicked(uploadFiles: ArrayList<UploadFile>? = null, folderId: Int? = null) {
+
+        val progressDialog = Utils.createProgressDialog(requireContext(), R.string.allCancellationInProgress)
+
         lifecycleScope.launch(Dispatchers.IO) {
-            pendingFiles?.let { UploadFile.deleteAll(pendingFiles) }
+            uploadFiles?.let { UploadFile.deleteAll(uploadFiles) }
             folderId?.let { UploadFile.deleteAll(folderId) }
             withContext(Dispatchers.Main) {
                 lifecycleScope.launchWhenResumed {
+                    progressDialog.dismiss()
                     val data = Data.Builder().putBoolean(UploadWorker.CANCELLED_BY_USER, true).build()
                     requireContext().syncImmediately(data, true)
                     popBackStack()

@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.utils
 
-import android.app.AlertDialog
 import android.app.Dialog
 import android.content.*
 import android.graphics.Bitmap
@@ -31,6 +30,7 @@ import android.view.View.VISIBLE
 import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
@@ -52,7 +52,9 @@ import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment
+import kotlinx.android.synthetic.main.dialog_download_progress.view.*
 import kotlinx.android.synthetic.main.dialog_name_prompt.view.*
+import kotlinx.android.synthetic.main.dialog_name_prompt.view.icon
 import java.util.*
 import kotlin.math.min
 import kotlin.math.pow
@@ -382,5 +384,17 @@ object Utils {
             }
             filePath
         }
+    }
+
+    fun createProgressDialog(context: Context, title: Int): AlertDialog {
+        return MaterialAlertDialogBuilder(context, R.style.DialogStyle).apply {
+            setTitle(title)
+            setCancelable(false)
+            View.inflate(context, R.layout.dialog_download_progress, null).apply {
+                icon.visibility = View.GONE
+                downloadProgress.isIndeterminate = true
+                setView(this)
+            }
+        }.show()
     }
 }
