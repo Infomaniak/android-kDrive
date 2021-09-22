@@ -56,7 +56,7 @@ open class FileAdapter(
     var uploadInProgress: Boolean = false
     var viewHolderType: DisplayType = DisplayType.LIST
 
-    fun getFile(position: Int) = itemList[position]
+    private fun getFile(position: Int) = itemList[position]
 
     fun addActivities(newFileList: ArrayList<File>, activities: Map<out Int, File.LocalFileActivity>) {
         var currentIndex = 0
@@ -171,12 +171,13 @@ open class FileAdapter(
 
     fun updateFileProgress(position: Int, progress: Int, onComplete: ((position: Int, file: File) -> Unit)? = null) {
         if (position >= 0) {
-            itemList[position].currentProgress = progress
+            val file = getFile(position)
+            file.currentProgress = progress
             importContainsProgress = uploadInProgress && progress <= 100
             notifyItemChanged(position, progress)
 
             if (progress == 100) {
-                onComplete?.invoke(position, itemList[position])
+                onComplete?.invoke(position, file)
             }
         }
     }
@@ -203,10 +204,9 @@ open class FileAdapter(
         if (payloads.firstOrNull() is Int && getItemViewType(position) != VIEW_TYPE_LOADING) {
             val file = getFile(position)
             val progress = payloads.first() as Int
-            FileController.getFileById(file.id)
             if (progress != Utils.INDETERMINATE_PROGRESS || !file.isPendingOffline(holder.itemView.context)) {
                 holder.itemView.apply {
-                    setupFileProgress(file, progress)
+                    setupFileProgress(file)
                     checkIfEnableFile(file, position)
                 }
 

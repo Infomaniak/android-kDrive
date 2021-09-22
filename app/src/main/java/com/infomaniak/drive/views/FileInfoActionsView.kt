@@ -320,7 +320,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                     currentFile.isOffline = true
                     refreshBottomSheetUi(currentFile)
                 } else {
-                    refreshBottomSheetUi(currentFile, progress)
+                    refreshBottomSheetUi(currentFile, true)
                 }
             }
         }
@@ -335,11 +335,11 @@ class FileInfoActionsView @JvmOverloads constructor(
         observeDownloadOffline?.removeObservers(lifecycleOwner)
     }
 
-    fun refreshBottomSheetUi(file: File, offlineProgress: Int? = null) {
+    fun refreshBottomSheetUi(file: File, isOfflineProgress: Boolean = false) {
         val isPendingOffline = file.isPendingOffline(context)
         val isOfflineFile = file.isOfflineFile(context)
         enableAvailableOffline(!isPendingOffline)
-        fileView.setFileItem(file)
+        if (isOfflineProgress) setupFileProgress(file) else fileView.setFileItem(file)
         if (availableOfflineSwitch.isEnabled && availableOffline.visibility == VISIBLE) {
             availableOfflineSwitch.isChecked = isOfflineFile
         }
@@ -353,15 +353,15 @@ class FileInfoActionsView @JvmOverloads constructor(
                 availableOfflineComplete.visibility = GONE
                 availableOfflineIcon.visibility = GONE
                 availableOfflineProgress.visibility = GONE // Before changing the type of progression it must first be gone
-                if (offlineProgress == null) {
-                    availableOfflineProgress.isIndeterminate = true
-                } else {
+                if (isOfflineProgress) {
                     availableOfflineProgress.isIndeterminate = false
-                    availableOfflineProgress.progress = offlineProgress
+                    availableOfflineProgress.progress = file.currentProgress
+                } else {
+                    availableOfflineProgress.isIndeterminate = true
                 }
                 availableOfflineProgress.visibility = VISIBLE
             }
-            offlineProgress == null -> {
+            !isOfflineProgress  -> {
                 availableOfflineProgress.visibility = GONE
                 availableOfflineComplete.visibility = if (isOfflineFile) VISIBLE else GONE
                 availableOfflineIcon.visibility = if (isOfflineFile) GONE else VISIBLE
