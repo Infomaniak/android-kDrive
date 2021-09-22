@@ -67,6 +67,7 @@ class UploadTask(
         uploadNotification = context.uploadProgressNotification()
         uploadNotification?.apply {
             setContentTitle(uploadFile.fileName)
+            setProgress(100, 0, true)
             notificationManagerCompat.notify(CURRENT_UPLOAD_ID, build())
         }
 
@@ -177,6 +178,7 @@ class UploadTask(
             uploadFile.refreshIdentifier()
             return true
         }
+
         return false
     }
 
