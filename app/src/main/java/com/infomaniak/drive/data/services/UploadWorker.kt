@@ -136,6 +136,9 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         } catch (exception: UploadTask.ChunksSizeExceededException) {
             Result.retry()
 
+        } catch (exception: UploadTask.UploadErrorException) {
+            Result.retry()
+
         } catch (exception: Exception) {
             when {
                 exception.isNetworkException() -> {

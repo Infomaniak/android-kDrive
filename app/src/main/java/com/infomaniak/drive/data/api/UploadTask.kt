@@ -177,6 +177,7 @@ class UploadTask(
             uploadFile.refreshIdentifier()
             return true
         }
+
         return false
     }
 
@@ -196,10 +197,11 @@ class UploadTask(
                     apiResponse?.error?.code.equals("lock_error") -> throw LockErrorException()
                     apiResponse?.error?.code.equals("object_not_found") -> throw FolderNotFoundException()
                     apiResponse?.error?.code.equals("quota_exceeded_error") -> throw QuotaExceededException()
-                    else -> {
+                    apiResponse?.error?.code.equals("upload_error") -> {
                         uploadFile.refreshIdentifier()
-                        throw Exception(bodyResponse)
+                        throw UploadErrorException()
                     }
+                    else -> throw Exception(bodyResponse)
                 }
             }
         }
@@ -301,6 +303,7 @@ class UploadTask(
     class FolderNotFoundException : Exception()
     class LockErrorException : Exception()
     class QuotaExceededException : Exception()
+    class UploadErrorException : Exception()
 
     companion object {
         var chunkSize: Int = 1 * 1024 * 1024 // Chunk 1 Mo
