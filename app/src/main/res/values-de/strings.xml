@@ -34,6 +34,7 @@
     <string name="allAllDriveUsers">Alle kDrive-Benutzer</string>
     <string name="allArchive">Archive</string>
     <string name="allAudio">Audiodateien</string>
+    <string name="allCancellationInProgress">Annullierung im Gange ...</string>
     <string name="allCode">Code</string>
     <string name="allDeletedFilePattern">\'Gelöscht am \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Deaktiviert</string>
@@ -43,6 +44,7 @@
     <string name="allFileAddRightError">Sie haben nicht die Berechtigungen, um diesem Ordner Dateien hinzuzufügen.</string>
     <string name="allFileDeleteFavoris">%s von den Favoriten gelöscht</string>
     <string name="allFileDuplicate">%s erfolgreich kopiert</string>
+    <string name="allFileDuplicateCancelled">Kopie abgebrochen</string>
     <string name="allFileMove">%1$s erfolgreich in %2$s verschoben</string>
     <string name="allFileMoveCancelled">Verschieben abgebrochen</string>
     <string name="allFileRename">%s erfolgreich umbenannt</string>
@@ -96,6 +98,7 @@
     <string name="buttonCreateOnlyOfficeCopy">Eine .%s-Kopie erstellen</string>
     <string name="buttonCreatePublicLink">Öffentlichen Link erstellen</string>
     <string name="buttonDelete">Löschen</string>
+    <string name="buttonDeselectAll">Gesamte Auswahl aufheben</string>
     <string name="buttonDisableDropBox">Briefkasten deaktivieren</string>
     <string name="buttonDocumentScanning">Dokument digitalisieren</string>
     <string name="buttonDownload">Herunterladen</string>
@@ -329,14 +332,23 @@
         <item quantity="one">Datei offline verfügbar</item>
         <item quantity="other">%d Dateien offline verfügbar</item>
     </plurals>
+    <string name="fileListCopyDoneSnackbar">Kopian erfolgreich abgeschlossen</string>
+    <string name="fileListCopyInProgressSnackbar">Kopian werden ausgeführt: %1$d/%2$d</string>
+    <string name="fileListCopyStartedSnackbar">Beginn der Kopien</string>
+    <string name="fileListDeletionDoneSnackbar">Löschungen erfolgreich abgeschlossen</string>
+    <string name="fileListDeletionInProgressSnackbar">Löschungen werden ausgeführt: %1$d/%2$d</string>
+    <string name="fileListDeletionStartedSnackbar">Beginn der Löschungen</string>
     <plurals name="fileListDuplicationConfirmationSnackbar">
         <item quantity="one">Datei erfolgreich dupliziert</item>
         <item quantity="other">%d Dateien erfolgreich dupliziert</item>
     </plurals>
+    <string name="fileListMoveDoneSnackbar">Verschiebungen erfolgreich abgeschlossen</string>
     <plurals name="fileListMoveFileConfirmationSnackbar">
         <item quantity="one">Datei in %2$s verschoben</item>
         <item quantity="other">%1$d Dateien verschoben in %2$s</item>
     </plurals>
+    <string name="fileListMoveInProgressSnackbar">Verschiebungen werden ausgeführt: %1$d/%2$d</string>
+    <string name="fileListMoveStartedSnackbar">Beginn der Verschiebungen</string>
     <plurals name="fileListMultiSelectedTitle">
         <item quantity="one">%d ausgewählt</item>
         <item quantity="other">%d ausgewählt</item>

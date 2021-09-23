@@ -51,7 +51,6 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.data.services.BulkOperationWorker
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.data.services.UploadWorker
@@ -61,6 +60,8 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDi
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog.Companion.SELECT_DIALOG_ACTION
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog.SelectDialogAction
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.BulkOperationsUtils.generateWorkerData
+import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.models.ApiResponse
@@ -311,7 +312,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun performBulkOperation(selectedFiles: ArrayList<File>, type: BulkOperation, destinationFolder: File? = null) {
         val fileCount =
-            if (!fileAdapter.allSelected) selectedFiles.size else fileListViewModel.lastItemCount?.count ?: selectedFiles.size
+            if (fileAdapter.allSelected) fileListViewModel.lastItemCount?.count ?: fileAdapter.itemCount else selectedFiles.size
 
         val onActionApproved: (dialog: Dialog?) -> Unit = {
             if (fileAdapter.allSelected && fileCount > 10) {
@@ -377,31 +378,15 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
-    private fun performBulkMove(selectedFiles: ArrayList<File>, destinationFolder: File, fileCount: Int? = null) {
+    private fun performBulkMove(selectedFiles: ArrayList<File>, destinationFolder: File, fileCount: Int = 0) {
         fileListViewModel.bulkMoveFiles(
             parentFolder = currentFolder!!,
             fileIds = if (!fileAdapter.allSelected) selectedFiles.map { it.id }.toIntArray() else null,
             destinationFolderId = destinationFolder.id
         ).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
-                apiResponse.data?.let {
-                    val workerData = workDataOf(
-                        "currentFolderName" to currentFolder!!.name,
-                        "destinationFolderName" to destinationFolder.name,
-                        "fileCount" to fileCount
-                    )
-                    val bulkOperationWorkRequest: OneTimeWorkRequest =
-                        OneTimeWorkRequestBuilder<BulkOperationWorker>().setInputData(workerData).build()
-
-                    WorkManager
-                        .getInstance(requireContext())
-                        .enqueueUniqueWork("MOVE", ExistingWorkPolicy.REPLACE, bulkOperationWorkRequest)
-
-
-                    requireActivity().showSnackbar(
-                        title = "Déplacement en cours...",
-                        anchorView = requireActivity().mainFab
-                    )
+                apiResponse.data?.let { action ->
+                    requireContext().launchBulkOperationWorker(generateWorkerData(action.cancelId, fileCount, BulkOperationType.MOVE))
                 }
             } else requireActivity().showSnackbar(apiResponse.translateError())
             closeMultiSelect()

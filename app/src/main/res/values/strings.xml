@@ -43,6 +43,7 @@
     <string name="allAllDriveUsers">All kDrive users</string>
     <string name="allArchive">Archives</string>
     <string name="allAudio">Audios</string>
+    <string name="allCancellationInProgress">Cancellation in progress …</string>
     <string name="allCode">Code</string>
     <string name="allDeletedFilePattern">\'Deleted on \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Disabled</string>
@@ -52,6 +53,7 @@
     <string name="allFileAddRightError">You’re not authorised to add files to this folder.</string>
     <string name="allFileDeleteFavoris">%s deleted from favorites</string>
     <string name="allFileDuplicate">%s copied successfully</string>
+    <string name="allFileDuplicateCancelled">Copy cancelled</string>
     <string name="allFileMove">%1$s moved to %2$s successfully</string>
     <string name="allFileMoveCancelled">Move cancelled</string>
     <string name="allFileRename">%s renamed successfully</string>
@@ -105,6 +107,7 @@
     <string name="buttonCreateOnlyOfficeCopy">Create a .%s copy</string>
     <string name="buttonCreatePublicLink">Create a public link</string>
     <string name="buttonDelete">Delete</string>
+    <string name="buttonDeselectAll">Deselect all</string>
     <string name="buttonDisableDropBox">Disable the drop box</string>
     <string name="buttonDocumentScanning">Scan a document</string>
     <string name="buttonDownload">Download</string>
@@ -338,14 +341,23 @@
         <item quantity="one">One file available offline</item>
         <item quantity="other">%d files available offline</item>
     </plurals>
+    <string name="fileListCopyDoneSnackbar">Copies completed successfully</string>
+    <string name="fileListCopyInProgressSnackbar">Copies in progress: %1$d/%2$d</string>
+    <string name="fileListCopyStartedSnackbar">Copies started</string>
+    <string name="fileListDeletionDoneSnackbar">Deletions completed successfully</string>
+    <string name="fileListDeletionInProgressSnackbar">Deletions in progress: %1$d/%2$d</string>
+    <string name="fileListDeletionStartedSnackbar">Deletions started</string>
     <plurals name="fileListDuplicationConfirmationSnackbar">
         <item quantity="one">One file duplicated successfully</item>
         <item quantity="other">%d files duplicated successfully</item>
     </plurals>
+    <string name="fileListMoveDoneSnackbar">Moves completed successfully</string>
     <plurals name="fileListMoveFileConfirmationSnackbar">
         <item quantity="one">One file was moved to %2$s</item>
         <item quantity="other">%1$d files were moved to %2$s</item>
     </plurals>
+    <string name="fileListMoveInProgressSnackbar">Moves in progress: %1$d/%2$d</string>
+    <string name="fileListMoveStartedSnackbar">Moves started</string>
     <plurals name="fileListMultiSelectedTitle">
         <item quantity="one">%d selected</item>
         <item quantity="other">%d selected</item>

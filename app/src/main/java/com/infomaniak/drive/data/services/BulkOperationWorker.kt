@@ -25,29 +25,48 @@ import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
 import com.google.common.util.concurrent.ListenableFuture
 import com.infomaniak.drive.data.models.ActionProgressNotification
+import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.Notification
-import com.infomaniak.drive.utils.NotificationUtils.moveOperationProgressNotification
 
 class BulkOperationWorker(private val context: Context, workerParams: WorkerParameters) :
     ListenableWorker(context, workerParams) {
 
-    private lateinit var currentFolder: String
-    private lateinit var destinationFolder: String
+    private lateinit var actionUuid: String
+    private lateinit var bulkOperationType: BulkOperationType
+    private var totalFiles: Int = 0
+    private var notificationId: Int = 0
     private lateinit var mqttNotificationsObserver: Observer<Notification>
-    private var fileCount = 0
 
-    private fun launchObserver(callback: Callback) {
+    override fun startWork(): ListenableFuture<Result> {
+        actionUuid = inputData.getString(ACTION_UUID).toString()
+        notificationId = actionUuid.hashCode()
+        totalFiles = inputData.getInt(TOTAL_FILES_KEY, 0)
+        bulkOperationType = BulkOperationType.valueOf(inputData.getString(OPERATION_TYPE_KEY)!!)
+
+        val futureCallback = CallbackToFutureAdapter.getFuture<Result> { completer ->
+            launchObserver {
+                MqttClientWrapper.removeObserver(mqttNotificationsObserver)
+                completer.set(Result.success())
+            }
+        }
+
+        createForegroundInfo(notificationId, 0, 0, totalFiles)
+        return futureCallback
+    }
+
+
+    private fun launchObserver(onOperationFinished: (isSuccess: Boolean) -> Unit) {
         mqttNotificationsObserver = Observer<Notification> { notification ->
-            if (notification is ActionProgressNotification) {
+            if (notification is ActionProgressNotification && notification.actionUuid == actionUuid) {
                 if (notification.progress.percent == 100) {
-                    callback.onSuccess()
+                    onOperationFinished(true)
                 } else {
                     setForegroundAsync(
                         createForegroundInfo(
-                            currentFolder,
-                            destinationFolder,
-                            fileCount,
-                            notification.progress.percent
+                            notificationId,
+                            notification.progress.percent,
+                            notification.progress.success,
+                            totalFiles
                         )
                     )
                 }
@@ -57,51 +76,19 @@ class BulkOperationWorker(private val context: Context, workerParams: WorkerPara
         MqttClientWrapper.observeForever(mqttNotificationsObserver)
     }
 
-    private fun createForegroundInfo(
-        currentFolder: String,
-        destinationFolder: String,
-        fileCount: Int,
-        progress: Int
-    ): ForegroundInfo {
-        val notificationBuilder = context.moveOperationProgressNotification().apply {
-            setContentTitle("Déplacement en cours")
-            setContentText("De $currentFolder vers $destinationFolder")
-            setSubText("$fileCount fichiers à déplacer")
-            setProgress(100, progress, progress == 0)
+    private fun createForegroundInfo(operationId: Int, percentage: Int, doneFiles: Int, totalFiles: Int): ForegroundInfo {
+        val notificationBuilder = bulkOperationType.getNotificationBuilder(context).apply {
+            setContentTitle(context.getString(bulkOperationType.title, doneFiles, totalFiles))
+            setProgress(100, percentage, percentage == 0)
+            setContentText("$percentage%")
         }
-
-        return ForegroundInfo(5, notificationBuilder.build())
+        return ForegroundInfo(operationId, notificationBuilder.build())
     }
 
-    override fun startWork(): ListenableFuture<Result> {
-        currentFolder = inputData.getString("currentFolderName").toString()
-        destinationFolder = inputData.getString("destinationFolderName").toString()
-        fileCount = inputData.getInt("fileCount", 0)
-
-        setForegroundAsync(createForegroundInfo(currentFolder, destinationFolder, fileCount, 0))
-
-        val futureCallback = CallbackToFutureAdapter.getFuture<Result> { completer ->
-            val callback: Callback = object : Callback {
-                override fun onFailure() {
-                    MqttClientWrapper.removeObserver(mqttNotificationsObserver)
-                    completer.set(Result.failure())
-                }
-
-                override fun onSuccess() {
-                    MqttClientWrapper.removeObserver(mqttNotificationsObserver)
-                    completer.set(Result.success())
-                }
-            }
-            launchObserver(callback)
-            callback
-        }
-
-
-        return futureCallback
-    }
-
-    interface Callback {
-        fun onFailure()
-        fun onSuccess()
+    companion object {
+        const val TAG = "BulkOperationWorker"
+        const val ACTION_UUID = "action_uuid"
+        const val TOTAL_FILES_KEY = "total_files"
+        const val OPERATION_TYPE_KEY = "operation_type_key"
     }
 }

@@ -34,6 +34,7 @@
     <string name="allAllDriveUsers">Tutti gli utenti del kDrive</string>
     <string name="allArchive">Archivi</string>
     <string name="allAudio">Audio</string>
+    <string name="allCancellationInProgress">Cancellazione in corso ...</string>
     <string name="allCode">Codice</string>
     <string name="allDeletedFilePattern">\'Cancellato il \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Disattivato</string>
@@ -43,6 +44,7 @@
     <string name="allFileAddRightError">Non si dispone dei diritti necessari per aggiungere file a questa cartella.</string>
     <string name="allFileDeleteFavoris">%s eliminato dai preferiti</string>
     <string name="allFileDuplicate">%s copiato con successo</string>
+    <string name="allFileDuplicateCancelled">Copia annullata</string>
     <string name="allFileMove">%1$s spostato in %2$s con successo</string>
     <string name="allFileMoveCancelled">Spostamento annullato</string>
     <string name="allFileRename">%s rinominato con successo</string>
@@ -96,6 +98,7 @@
     <string name="buttonCreateOnlyOfficeCopy">Creare una copia .%s</string>
     <string name="buttonCreatePublicLink">Crea un link pubblico</string>
     <string name="buttonDelete">Elimina</string>
+    <string name="buttonDeselectAll">Deseleziona tutto</string>
     <string name="buttonDisableDropBox">Disattiva il deposito file</string>
     <string name="buttonDocumentScanning">Digitalizza documento</string>
     <string name="buttonDownload">Scarica</string>
@@ -329,14 +332,23 @@
         <item quantity="one">Un file è disponibile offline</item>
         <item quantity="other">%d file sono disponibili offline</item>
     </plurals>
+    <string name="fileListCopyDoneSnackbar">Copie concluse con successo</string>
+    <string name="fileListCopyInProgressSnackbar">Copie in corso: %1$d/%2$d</string>
+    <string name="fileListCopyStartedSnackbar">Inizio delle copie</string>
+    <string name="fileListDeletionDoneSnackbar">Cancellazioni concluse con successo</string>
+    <string name="fileListDeletionInProgressSnackbar">Cancellazioni in corso: %1$d/%2$d</string>
+    <string name="fileListDeletionStartedSnackbar">Inizio delle cancellazioni</string>
     <plurals name="fileListDuplicationConfirmationSnackbar">
         <item quantity="one">File duplicato con successo</item>
         <item quantity="other">%d file duplicati con successo</item>
     </plurals>
+    <string name="fileListMoveDoneSnackbar">Spostamenti conclusi con successo</string>
     <plurals name="fileListMoveFileConfirmationSnackbar">
         <item quantity="one">Un file è stato spostato correttamente in %2$s</item>
         <item quantity="other">%1$d file sono stati spostati correttamente in %2$s</item>
     </plurals>
+    <string name="fileListMoveInProgressSnackbar">Spostamenti in corso: %1$d/%2$d</string>
+    <string name="fileListMoveStartedSnackbar">Inizio degli spostamenti</string>
     <plurals name="fileListMultiSelectedTitle">
         <item quantity="one">%d selezionato</item>
         <item quantity="other">%d selezionati</item>

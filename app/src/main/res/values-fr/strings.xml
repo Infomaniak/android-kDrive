@@ -34,6 +34,7 @@
     <string name="allAllDriveUsers">Tous les utilisateurs du kDrive</string>
     <string name="allArchive">Archives</string>
     <string name="allAudio">Audios</string>
+    <string name="allCancellationInProgress">Annulation en cours …</string>
     <string name="allCode">Code</string>
     <string name="allDeletedFilePattern">\'Supprimé le \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Désactivé</string>
@@ -43,6 +44,7 @@
     <string name="allFileAddRightError">Vous n’avez pas les droits d’ajouter des fichiers dans ce dossier.</string>
     <string name="allFileDeleteFavoris">%s supprimé des favoris</string>
     <string name="allFileDuplicate">%s copié avec succès</string>
+    <string name="allFileDuplicateCancelled">Copie annulée</string>
     <string name="allFileMove">%1$s déplacé dans %2$s avec succès</string>
     <string name="allFileMoveCancelled">Déplacement annulé</string>
     <string name="allFileRename">%s renommé avec succès</string>
@@ -96,6 +98,7 @@
     <string name="buttonCreateOnlyOfficeCopy">Créer une copie .%s</string>
     <string name="buttonCreatePublicLink">Créer un lien public</string>
     <string name="buttonDelete">Supprimer</string>
+    <string name="buttonDeselectAll">Tout désélectionner</string>
     <string name="buttonDisableDropBox">Désactiver la boîte de dépôt</string>
     <string name="buttonDocumentScanning">Numériser un document</string>
     <string name="buttonDownload">Télécharger</string>
@@ -329,14 +332,23 @@
         <item quantity="one">Un fichier disponible hors ligne</item>
         <item quantity="other">%d fichiers disponibles hors ligne</item>
     </plurals>
+    <string name="fileListCopyDoneSnackbar">Copies terminées avec succès</string>
+    <string name="fileListCopyInProgressSnackbar">Copies en cours : %1$d/%2$d</string>
+    <string name="fileListCopyStartedSnackbar">Début des copies</string>
+    <string name="fileListDeletionDoneSnackbar">Suppressions terminées avec succès</string>
+    <string name="fileListDeletionInProgressSnackbar">Suppressions en cours : %1$d/%2$d</string>
+    <string name="fileListDeletionStartedSnackbar">Début des suppressions</string>
     <plurals name="fileListDuplicationConfirmationSnackbar">
         <item quantity="one">Un fichier dupliqué avec succès</item>
         <item quantity="other">%d fichiers dupliqués avec succès</item>
     </plurals>
+    <string name="fileListMoveDoneSnackbar">Déplacements terminés avec succès</string>
     <plurals name="fileListMoveFileConfirmationSnackbar">
         <item quantity="one">Un fichier a bien été déplacé dans %2$s</item>
         <item quantity="other">%1$d fichiers ont bien été déplacés dans %2$s</item>
     </plurals>
+    <string name="fileListMoveInProgressSnackbar">Déplacements en cours : %1$d/%2$d</string>
+    <string name="fileListMoveStartedSnackbar">Début des déplacements</string>
     <plurals name="fileListMultiSelectedTitle">
         <item quantity="one">%d sélectionné</item>
         <item quantity="other">%d sélectionnés</item>
