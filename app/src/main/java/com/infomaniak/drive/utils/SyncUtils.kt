@@ -68,7 +68,7 @@ object SyncUtils {
         }
 
         if (fileModifiedAt.time == 0L) {
-            fileModifiedAt = Date()
+            fileModifiedAt = fileCreatedAt ?: Date()
             Sentry.withScope { scope ->
                 if (lastModifiedIndex != -1)
                     scope.setExtra("lastModifiedIndex", cursor.getLong(lastModifiedIndex).toString())
