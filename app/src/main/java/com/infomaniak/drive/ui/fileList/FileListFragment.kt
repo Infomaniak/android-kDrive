@@ -200,6 +200,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
             if (isUploaded || notIsUploadView && !uploadFileInProgress.isVisible) mainViewModel.refreshActivities.value = true
         }
+
         mainViewModel.refreshActivities.observe(viewLifecycleOwner) {
             it?.let {
                 showPendingFiles()
@@ -352,7 +353,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun setupFileAdapter() {
         mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
-            fileAdapter.toggleOfflineMode(!isInternetAvailable)
+            fileAdapter.toggleOfflineMode(requireContext(), !isInternetAvailable)
             noNetwork.visibility = if (isInternetAvailable) GONE else VISIBLE
         }
 
@@ -572,8 +573,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun showPendingFiles() {
         if (!showPendingFiles) return
-        uploadFileInProgress.apply {
-            fileListViewModel.getPendingFilesCount(folderID).observe(viewLifecycleOwner) { pendingFilesCount ->
+        fileListViewModel.getPendingFilesCount(folderID).observe(viewLifecycleOwner) { pendingFilesCount ->
+            uploadFileInProgress.apply {
                 val radius = resources.getDimension(R.dimen.cardViewRadius)
 
                 if (pendingFilesCount > 0L) {

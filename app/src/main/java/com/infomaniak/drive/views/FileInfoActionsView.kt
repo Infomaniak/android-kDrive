@@ -361,7 +361,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                 }
                 availableOfflineProgress.visibility = VISIBLE
             }
-            !isOfflineProgress  -> {
+            !isOfflineProgress -> {
                 availableOfflineProgress.visibility = GONE
                 availableOfflineComplete.visibility = if (isOfflineFile) VISIBLE else GONE
                 availableOfflineIcon.visibility = if (isOfflineFile) GONE else VISIBLE
