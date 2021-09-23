@@ -55,6 +55,7 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.ApiController
 import com.infomaniak.lib.core.utils.hasPermissions
 import io.sentry.Sentry
+import io.sentry.SentryLevel
 import kotlinx.coroutines.*
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -147,10 +148,11 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 }
                 exception is IOException -> {
                     Sentry.withScope { scope ->
+                        scope.level = SentryLevel.WARNING
                         scope.setExtra("uploadFile", ApiController.gson.toJson(currentUploadFile ?: ""))
                         scope.setExtra("previousChunkBytesWritten", "${currentUploadTask?.previousChunkBytesWritten()}")
                         scope.setExtra("lastProgress", "${currentUploadTask?.lastProgress()}")
-                        Sentry.captureMessage(exception.message ?: "IOException occurred")
+                        Sentry.captureException(exception)
                     }
                     Result.retry()
                 }
