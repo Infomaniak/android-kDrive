@@ -210,7 +210,6 @@ open class FileAdapter(
                     setupFileProgress(file)
                     checkIfEnableFile(file)
                 }
-
             }
         } else {
             super.onBindViewHolder(holder, position, payloads)
@@ -297,7 +296,7 @@ open class FileAdapter(
 
     private fun View.checkIfEnableFile(file: File) = when {
         uploadInProgress -> {
-            val enable = file.currentProgress > 0
+            val enable = file.currentProgress > 0 && context.isSyncActive()
             val title = when {
                 enable -> R.string.uploadInProgressTitle
                 pendingWifiConnection -> R.string.uploadNetworkErrorWifiRequired
