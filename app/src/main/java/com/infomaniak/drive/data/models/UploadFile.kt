@@ -26,7 +26,6 @@ import android.provider.MediaStore
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import com.infomaniak.drive.data.sync.UploadMigration
-import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.lib.core.utils.format
 import io.realm.Realm
@@ -114,54 +113,55 @@ open class UploadFile(
             return realm.where(UploadFile::class.java).equalTo(UploadFile::uri.name, uri)
         }
 
-        private fun pendingUploadsByFolderIdQuery(realm: Realm, folderId: Int? = null): RealmQuery<UploadFile> {
+        private fun pendingUploadsQuery(
+            realm: Realm,
+            folderId: Int? = null,
+            userDrive: UserDrive? = null
+        ): RealmQuery<UploadFile> {
             return realm.where(UploadFile::class.java).apply {
                 folderId?.let { equalTo(UploadFile::remoteFolder.name, it) }
-                equalTo(UploadFile::userId.name, AccountUtils.currentUserId)
-                equalTo(UploadFile::driveId.name, AccountUtils.currentDriveId)
+                userDrive?.let {
+                    equalTo(UploadFile::userId.name, userDrive.userId)
+                    equalTo(UploadFile::driveId.name, userDrive.driveId)
+                }
                 isNull(UploadFile::uploadAt.name)
                 isNull(UploadFile::deletedAt.name)
                 sort(UploadFile::uri.name)
             }
         }
 
-        fun getPendingUploads(): ArrayList<UploadFile> {
+        fun getAllPendingUploads(): ArrayList<UploadFile> {
             return getRealmInstance().use { realm ->
-                realm.where(UploadFile::class.java)
-                    .isNull(UploadFile::uploadAt.name)
-                    .isNull(UploadFile::deletedAt.name)
-                    .sort(UploadFile::uri.name)
+                pendingUploadsQuery(realm)
                     .findAll()?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile> ?: arrayListOf()
             }
         }
 
-        fun getPendingUploadsCount(): Long {
+        fun getCurrentUserPendingUploads(folderId: Int): ArrayList<UploadFile> {
             return getRealmInstance().use { realm ->
-                realm.where(UploadFile::class.java)
-                    .isNull(UploadFile::uploadAt.name)
-                    .isNull(UploadFile::deletedAt.name).count()
+                pendingUploadsQuery(realm, folderId, UserDrive())
+                    .findAll()?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile> ?: arrayListOf()
             }
         }
 
-        fun getPendingUploadsByFolderId(folderId: Int): ArrayList<UploadFile> {
+        fun getAllPendingUploadsCount(): Int {
             return getRealmInstance().use { realm ->
-                pendingUploadsByFolderIdQuery(realm, folderId).findAll()
-                    ?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile> ?: arrayListOf()
+                pendingUploadsQuery(realm).count().toInt()
             }
         }
 
-        fun getUploadedFiles(type: String = Type.SYNC.name): ArrayList<UploadFile>? = getRealmInstance().use { realm ->
+        fun getCurrentUserPendingUploadsCount(folderId: Int? = null): Int {
+            return getRealmInstance().use { realm ->
+                pendingUploadsQuery(realm, folderId, UserDrive()).count().toInt()
+            }
+        }
+
+        fun getAllUploadedFiles(type: String = Type.SYNC.name): ArrayList<UploadFile>? = getRealmInstance().use { realm ->
             realm.where(UploadFile::class.java)
                 .equalTo(UploadFile::type.name, type)
                 .isNull(UploadFile::deletedAt.name)
                 .isNotNull(UploadFile::uploadAt.name)
                 .findAll()?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile>
-        }
-
-        fun getPendingFilesCountByFolderId(folderId: Int? = null): Int {
-            return getRealmInstance().use { realm ->
-                pendingUploadsByFolderIdQuery(realm, folderId).count().toInt()
-            }
         }
 
         fun uploadFinished(uri: Uri) {
