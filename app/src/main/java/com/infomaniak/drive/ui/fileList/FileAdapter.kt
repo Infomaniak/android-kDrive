@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.fileList
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -24,8 +25,9 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.utils.setupFileProgress
@@ -40,9 +42,6 @@ open class FileAdapter(
 
     var itemSelected: ArrayList<File> = arrayListOf()
 
-    private var currentFileIdProgress: Int? = null
-    var importContainsProgress: Boolean = false
-
     var onFileClicked: ((file: File) -> Unit)? = null
     var onMenuClicked: ((selectedFile: File) -> Unit)? = null
     var onStopUploadButtonClicked: ((fileName: String) -> Unit)? = null
@@ -54,9 +53,12 @@ open class FileAdapter(
     var offlineMode: Boolean = false
     var selectFolder: Boolean = false
     var showShareFileButton: Boolean = true
-    var uploadInProgress: Boolean = false
-    var allSelected = false
     var viewHolderType: DisplayType = DisplayType.LIST
+
+    var pendingWifiConnection: Boolean = false
+    var uploadInProgress: Boolean = false
+
+    private fun getFile(position: Int) = itemList[position]
 
     fun addActivities(newFileList: ArrayList<File>, activities: Map<out Int, File.LocalFileActivity>) {
         var currentIndex = 0
@@ -64,7 +66,7 @@ open class FileAdapter(
         while (fileIndex in 0 until newFileList.size) {
             val file = newFileList[fileIndex]
             if (currentIndex <= itemList.lastIndex) {
-                val currentAdapterFile = itemList[currentIndex]
+                val currentAdapterFile = getFile(currentIndex)
 
                 when {
                     activities[currentAdapterFile.id] == File.LocalFileActivity.IS_DELETE -> {
@@ -158,27 +160,30 @@ open class FileAdapter(
     }
 
     fun indexOf(fileId: Int) = itemList.indexOfFirst { it.id == fileId }
+    fun indexOf(fileName: String) = itemList.indexOfFirst { it.name == fileName }
 
     fun notifyFileChanged(fileId: Int, onChange: ((file: File) -> Unit)? = null) {
         val fileIndex = indexOf(fileId)
         if (fileIndex >= 0) {
-            onChange?.invoke(itemList[fileIndex])
+            onChange?.invoke(getFile(fileIndex))
             notifyItemChanged(fileIndex)
         }
     }
 
-    open fun updateFileProgress(fileId: Int, progress: Int, onComplete: (file: File) -> Unit) {
-        val fileIndex = indexOf(fileId)
-        if (fileIndex >= 0) {
-            itemList[fileIndex].currentProgress = progress
-            importContainsProgress = uploadInProgress && progress <= 100
-            notifyItemChanged(fileIndex, progress)
+    fun updateFileProgressByFileId(fileId: Int, progress: Int, onComplete: ((position: Int, file: File) -> Unit)? = null) {
+        updateFileProgress(indexOf(fileId), progress, onComplete)
+    }
+
+    fun updateFileProgress(position: Int, progress: Int, onComplete: ((position: Int, file: File) -> Unit)? = null) {
+        if (position >= 0) {
+            val file = getFile(position)
+            file.currentProgress = progress
+            notifyItemChanged(position, progress)
 
             if (progress == 100) {
-                onComplete(itemList[fileIndex])
+                onComplete?.invoke(position, file)
             }
         }
-        currentFileIdProgress = fileId
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -186,7 +191,7 @@ open class FileAdapter(
         if (itemViewType == VIEW_TYPE_NORMAL) {
             itemViewType = when (viewHolderType) {
                 DisplayType.LIST -> DisplayType.LIST.layout
-                else -> if (itemList[position].isFolder() || itemList[position].isDrive()) DisplayType.GRID_FOLDER.layout else DisplayType.GRID.layout
+                else -> if (getFile(position).isFolder() || getFile(position).isDrive()) DisplayType.GRID_FOLDER.layout else DisplayType.GRID.layout
             }
         }
         return itemViewType
@@ -201,15 +206,13 @@ open class FileAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: List<Any>) {
         if (payloads.firstOrNull() is Int && getItemViewType(position) != VIEW_TYPE_LOADING) {
-            val file = itemList[position]
+            val file = getFile(position)
             val progress = payloads.first() as Int
-            FileController.getFileById(file.id)
             if (progress != Utils.INDETERMINATE_PROGRESS || !file.isPendingOffline(holder.itemView.context)) {
                 holder.itemView.apply {
-                    setupFileProgress(file, progress)
-                    checkIfEnableFile(file, position)
+                    setupFileProgress(file)
+                    checkIfEnableFile(file)
                 }
-
             }
         } else {
             super.onBindViewHolder(holder, position, payloads)
@@ -218,7 +221,7 @@ open class FileAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         if (getItemViewType(position) != VIEW_TYPE_LOADING) {
-            val file = itemList[position]
+            val file = getFile(position)
 
             holder.itemView.apply {
                 val isGrid = viewHolderType == DisplayType.GRID
@@ -240,7 +243,7 @@ open class FileAdapter(
 
                 setFileItem(file, isGrid)
 
-                checkIfEnableFile(file, position)
+                checkIfEnableFile(file)
 
                 when {
                     uploadInProgress -> {
@@ -258,9 +261,8 @@ open class FileAdapter(
                     }
                 }
 
-                val isInProgress = (position == 0 && importContainsProgress)
                 menuButton?.visibility = when {
-                    uploadInProgress || isInProgress || selectFolder ||
+                    uploadInProgress || uploadInProgress || selectFolder ||
                             file.isDrive() || file.isTrashed() ||
                             file.isFromActivities || file.isFromSearch ||
                             (offlineMode && !file.isOffline) -> GONE
@@ -295,10 +297,15 @@ open class FileAdapter(
         return itemList.find { it.name == fileName } != null
     }
 
-    private fun View.checkIfEnableFile(file: File, position: Int) = when {
+    private fun View.checkIfEnableFile(file: File) = when {
         uploadInProgress -> {
-            val enable = position == 0 && importContainsProgress
-            fileDate?.setText(if (enable) R.string.uploadInProgressTitle else R.string.uploadInProgressPending)
+            val enable = file.currentProgress > 0 && context.isSyncActive()
+            val title = when {
+                enable -> R.string.uploadInProgressTitle
+                pendingWifiConnection -> R.string.uploadNetworkErrorWifiRequired
+                else -> R.string.uploadInProgressPending
+            }
+            fileDate?.setText(title)
         }
         else -> {
             if (selectFolder || offlineMode) enabledFile(file.isFolder() || file.isDrive() || (offlineMode && file.isOffline))
@@ -337,14 +344,22 @@ open class FileAdapter(
         itemSelected.remove(file)
     }
 
-    fun isSelectedFile(file: File): Boolean {
+    private fun isSelectedFile(file: File): Boolean {
         return itemSelected.find { it.id == file.id } != null
     }
 
-    fun toggleOfflineMode(isOffline: Boolean) {
+    fun toggleOfflineMode(context: Context, isOffline: Boolean) {
         if (offlineMode != isOffline) {
             offlineMode = isOffline
             notifyItemRangeChanged(0, itemCount)
+        }
+
+        checkIsPendingWifi(context)
+    }
+
+    fun checkIsPendingWifi(context: Context) {
+        if (uploadInProgress && AppSettings.onlyWifiSync) {
+            pendingWifiConnection = context.isSyncActive(false)
         }
     }
 

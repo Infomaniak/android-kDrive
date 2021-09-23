@@ -68,7 +68,7 @@ object SyncUtils {
         }
 
         if (fileModifiedAt.time == 0L) {
-            fileModifiedAt = Date()
+            fileModifiedAt = fileCreatedAt ?: Date()
             Sentry.withScope { scope ->
                 if (lastModifiedIndex != -1)
                     scope.setExtra("lastModifiedIndex", cursor.getLong(lastModifiedIndex).toString())
@@ -86,7 +86,7 @@ object SyncUtils {
     fun FragmentActivity.launchAllUpload(drivePermissions: DrivePermissions) {
         if (AccountUtils.isEnableAppSync() &&
             drivePermissions.checkSyncPermissions(false) &&
-            UploadFile.getNotSyncFiles().isNotEmpty()
+            UploadFile.getAllPendingUploads().isNotEmpty()
         ) {
             syncImmediately()
         }
@@ -102,10 +102,10 @@ object SyncUtils {
         }
     }
 
-    fun Context.isSyncActive(): Boolean {
+    fun Context.isSyncActive(isRunning: Boolean = true): Boolean {
         return WorkManager.getInstance(this).getWorkInfos(
             WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(UploadWorker.TAG))
-                .addStates(arrayListOf(WorkInfo.State.RUNNING))
+                .addStates(arrayListOf(if (isRunning) WorkInfo.State.RUNNING else WorkInfo.State.ENQUEUED))
                 .build()
         ).get()?.isNotEmpty() == true
     }

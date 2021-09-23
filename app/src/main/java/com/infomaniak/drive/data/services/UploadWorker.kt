@@ -55,6 +55,7 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.ApiController
 import com.infomaniak.lib.core.utils.hasPermissions
 import io.sentry.Sentry
+import io.sentry.SentryLevel
 import kotlinx.coroutines.*
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -100,7 +101,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
             // Check if the user has cancelled the upload and no files to sync
             val isCancelledByUser = inputData.getBoolean(CANCELLED_BY_USER, false)
-            if (UploadFile.getNotSyncedFilesCount() == 0L && isCancelledByUser) {
+            if (UploadFile.getAllPendingUploadsCount() == 0 && isCancelledByUser) {
                 UploadNotifications.showCancelledByUserNotification(applicationContext)
                 Log.d(TAG, "UploadWorker cancelled by user")
                 return Result.success()
@@ -136,6 +137,9 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         } catch (exception: UploadTask.ChunksSizeExceededException) {
             Result.retry()
 
+        } catch (exception: UploadTask.UploadErrorException) {
+            Result.retry()
+
         } catch (exception: Exception) {
             when {
                 exception.isNetworkException() -> {
@@ -144,10 +148,11 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 }
                 exception is IOException -> {
                     Sentry.withScope { scope ->
+                        scope.level = SentryLevel.WARNING
                         scope.setExtra("uploadFile", ApiController.gson.toJson(currentUploadFile ?: ""))
                         scope.setExtra("previousChunkBytesWritten", "${currentUploadTask?.previousChunkBytesWritten()}")
                         scope.setExtra("lastProgress", "${currentUploadTask?.lastProgress()}")
-                        Sentry.captureMessage(exception.message ?: "IOException occurred")
+                        Sentry.captureException(exception)
                     }
                     Result.retry()
                 }
@@ -170,7 +175,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 (this is java.io.IOException && this.message == "stream closed") // Okhttp3
 
     private suspend fun startSyncFiles(): Result = withContext(Dispatchers.IO) {
-        val syncFiles = UploadFile.getNotSyncFiles()
+        val syncFiles = UploadFile.getAllPendingUploads()
         val lastUploadedCount = inputData.getInt(LAST_UPLOADED_COUNT, 0)
         var pendingCount = syncFiles.size
 
@@ -211,16 +216,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 } else {
                     SyncUtils.checkDocumentProviderPermissions(applicationContext, uri)
 
-                    val fileSize = try {
-                        val originalUri = uploadFile.getOriginalUri(applicationContext)
-                        contentResolver.openFileDescriptor(originalUri, "r")?.use { it.statSize }
-                    } catch (exception: FileNotFoundException) {
-                        null
-                    }
                     contentResolver.query(uri, null, null, null, null)?.use { cursor ->
                         if (cursor.moveToFirst()) {
                             val mediaSize = cursor.getLong(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE))
-                            val size = fileSize?.let { if (mediaSize > it) mediaSize else it } ?: mediaSize //TODO Temp solution
+                            val descriptorSize = fileDescriptorSize(uploadFile.getOriginalUri(applicationContext))
+                            val size = descriptorSize?.let { if (mediaSize > it) mediaSize else it }
+                                ?: mediaSize //TODO Temp solution
                             startUploadFile(uploadFile, size)
                         } else UploadFile.deleteIfExists(uri)
                     }
@@ -264,9 +265,17 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private suspend fun checkIfNeedReSync(syncSettings: SyncSettings) {
         checkLocalLastMedias(syncSettings)
-        if (UploadFile.getNotSyncedFilesCount() > 0) {
+        if (UploadFile.getAllPendingUploadsCount() > 0) {
             val data = Data.Builder().putInt(LAST_UPLOADED_COUNT, uploadedCount).build()
             applicationContext.syncImmediately(data, true)
+        }
+    }
+
+    private fun fileDescriptorSize(uri: Uri): Long? {
+        return try {
+            contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize }
+        } catch (exception: FileNotFoundException) {
+            null
         }
     }
 
@@ -332,11 +341,11 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 while (cursor.moveToNext()) {
                     val fileName = SyncUtils.getFileName(cursor)
                     val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
-                    val fileSize = cursor.getLong(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE))
                     val uri = cursor.uri(contentUri)
+                    val fileSize = fileDescriptorSize(uri) ?: cursor.getLong(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE))
                     Log.d(TAG, "getLocalLastMediasAsync > ${mediaFolder.name}/$fileName found")
 
-                    if (UploadFile.canUpload(uri, fileModifiedAt)) {
+                    if (UploadFile.canUpload(uri, fileModifiedAt) && fileSize > 0) {
                         UploadFile.deleteIfExists(uri)
                         UploadFile(
                             uri = uri.toString(),
@@ -352,7 +361,9 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                             store()
                         }
 
-                        UploadFile.setAppSyncSettings(syncSettings.apply { lastSync = fileModifiedAt })
+                        UploadFile.setAppSyncSettings(syncSettings.apply {
+                            if (fileModifiedAt > lastSync) lastSync = fileModifiedAt
+                        })
                     }
                 }
             }

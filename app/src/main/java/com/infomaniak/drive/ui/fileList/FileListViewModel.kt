@@ -148,15 +148,11 @@ class FileListViewModel : ViewModel() {
     }
 
     fun getPendingFiles(folderID: Int) = liveData(Dispatchers.IO) {
-        emit(UploadFile.getPendingFiles(folderID))
+        emit(UploadFile.getCurrentUserPendingUploads(folderID))
     }
 
     fun getPendingFilesCount(folderID: Int) = liveData(Dispatchers.IO) {
-        emit(UploadFile.getPendingFilesCount(folderID))
-    }
-
-    fun cancelUploadingFiles(files: ArrayList<UploadFile>) {
-        UploadFile.deleteAll(files)
+        emit(UploadFile.getCurrentUserPendingUploadsCount(folderID))
     }
 
     fun getFileCount(folder: File): LiveData<FileCount> = liveData(Dispatchers.IO) {

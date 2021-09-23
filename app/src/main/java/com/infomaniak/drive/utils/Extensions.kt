@@ -291,12 +291,13 @@ fun View.setFileItem(
                 }
             }
             filePreview2?.load(file.getFileType().icon)
-            setupFileProgress(file, file.currentProgress)
+            setupFileProgress(file)
         }
     }
 }
 
-fun View.setupFileProgress(file: File, progress: Int) {
+fun View.setupFileProgress(file: File) {
+    val progress = file.currentProgress
     val isPendingOffline = file.isPendingOffline(context)
     val isSyncActive = context.isSyncActive()
     when {

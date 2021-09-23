@@ -31,16 +31,15 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
-import com.infomaniak.drive.utils.DrivePermissions
-import com.infomaniak.drive.utils.SyncUtils
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.showSnackbar
 import io.sentry.Sentry
+import kotlinx.android.synthetic.main.dialog_download_progress.view.*
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
 
 class UploadInProgressFragment : FileListFragment() {
 
@@ -62,41 +61,35 @@ class UploadInProgressFragment : FileListFragment() {
         super.onViewCreated(view, savedInstanceState)
         fileAdapter.onFileClicked = null
         fileAdapter.uploadInProgress = true
-        toolbar.menu.findItem(R.id.restartItem).isVisible = true
-        toolbar.menu.findItem(R.id.closeItem).isVisible = true
+        fileAdapter.checkIsPendingWifi(requireContext())
 
         collapsingToolbarLayout.title = getString(R.string.uploadInProgressTitle)
 
         requireContext().trackUploadWorkerProgress().observe(viewLifecycleOwner) {
             val workInfo = it.firstOrNull() ?: return@observe
-            val firstFile = fileAdapter.getItems().firstOrNull() ?: return@observe
-            val fileName = workInfo.progress.getString(UploadWorker.FILENAME)
+            val fileName = workInfo.progress.getString(UploadWorker.FILENAME) ?: return@observe
             val progress = workInfo.progress.getInt(UploadWorker.PROGRESS, 0)
             val isUploaded = workInfo.progress.getBoolean(UploadWorker.IS_UPLOADED, false)
             val remoteFolderId = workInfo.progress.getInt(UploadWorker.REMOTE_FOLDER_ID, 0)
+            val position = fileAdapter.indexOf(fileName)
 
-            if (folderID == remoteFolderId && fileName == firstFile.name) {
-                fileAdapter.updateFileProgress(firstFile.id, progress) {
-                    if (isUploaded) whenAnUploadIsDone()
-                }
+            if (folderID == remoteFolderId && position >= 0) {
+                if (isUploaded) whenAnUploadIsDone(position)
+                else fileAdapter.updateFileProgress(position = position, progress = progress)
             }
 
             Log.d("uploadInProgress", "$fileName $progress%")
         }
 
         mainViewModel.refreshActivities.removeObservers(super.getViewLifecycleOwner())
-        mainViewModel.refreshActivities.observe(viewLifecycleOwner) {
-            fileListViewModel.getPendingFilesCount(folderID).observe(viewLifecycleOwner) { count ->
-                if (count != fileAdapter.itemCount) downloadFiles(true)
-            }
-        }
+
         fileAdapter.onStopUploadButtonClicked = { fileName ->
             pendingFiles.find { it.fileName == fileName }?.let { syncFile ->
                 val title = getString(R.string.uploadInProgressCancelFileUploadTitle, syncFile.fileName)
                 Utils.createConfirmation(requireContext(), title) {
                     val position = fileAdapter.getItems().indexOfFirst { it.name == fileName }
                     if (fileAdapter.contains(syncFile.fileName)) {
-                        closeItemClicked(arrayListOf(syncFile))
+                        closeItemClicked(uploadFiles = arrayListOf(syncFile))
                         fileRecyclerView.post { fileAdapter.deleteAt(position) }
                     }
                 }
@@ -109,12 +102,16 @@ class UploadInProgressFragment : FileListFragment() {
             title = R.string.uploadInProgressNoFile,
             initialListView = fileRecyclerView
         )
+    }
+
+    override fun onResume() {
+        super.onResume()
         downloadFiles(true)
     }
 
 
-    private fun whenAnUploadIsDone() {
-        fileAdapter.deleteAt(0)
+    private fun whenAnUploadIsDone(position: Int) {
+        fileAdapter.deleteAt(position)
 
         if (fileAdapter.getItems().isEmpty()) {
             noFilesLayout.toggleVisibility(true)
@@ -127,7 +124,7 @@ class UploadInProgressFragment : FileListFragment() {
         val title = getString(R.string.uploadInProgressRestartUploadTitle)
         val context = requireContext()
         Utils.createConfirmation(context, title) {
-            if (fileAdapter.importContainsProgress) {
+            if (fileAdapter.getItems().isNotEmpty()) {
                 context.syncImmediately()
             }
         }
@@ -136,16 +133,21 @@ class UploadInProgressFragment : FileListFragment() {
     override fun onCloseItemsClicked() {
         val title = getString(R.string.uploadInProgressCancelAllUploadTitle)
         Utils.createConfirmation(requireContext(), title) {
-            closeItemClicked(pendingFiles)
+            closeItemClicked(folderId = folderID)
             fileAdapter.setList(arrayListOf())
         }
     }
 
-    private fun closeItemClicked(pendingFiles: ArrayList<UploadFile>) {
+    private fun closeItemClicked(uploadFiles: ArrayList<UploadFile>? = null, folderId: Int? = null) {
+
+        val progressDialog = Utils.createProgressDialog(requireContext(), R.string.allCancellationInProgress)
+
         lifecycleScope.launch(Dispatchers.IO) {
-            fileListViewModel.cancelUploadingFiles(pendingFiles)
+            uploadFiles?.let { UploadFile.deleteAll(uploadFiles) }
+            folderId?.let { UploadFile.deleteAll(folderId) }
             withContext(Dispatchers.Main) {
                 lifecycleScope.launchWhenResumed {
+                    progressDialog.dismiss()
                     val data = Data.Builder().putBoolean(UploadWorker.CANCELLED_BY_USER, true).build()
                     requireContext().syncImmediately(data, true)
                     popBackStack()
@@ -212,8 +214,11 @@ class UploadInProgressFragment : FileListFragment() {
                             )
                         }
                     }
+
                     pendingFiles = syncFiles
                     withContext(Dispatchers.Main) {
+                        toolbar.menu.findItem(R.id.restartItem).isVisible = true
+                        toolbar.menu.findItem(R.id.closeItem).isVisible = true
                         fileAdapter.setList(files)
                         fileAdapter.isComplete = true
                         timer.cancel()

@@ -26,7 +26,6 @@ import android.provider.MediaStore
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import com.infomaniak.drive.data.sync.UploadMigration
-import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.lib.core.utils.format
 import io.realm.Realm
@@ -114,53 +113,55 @@ open class UploadFile(
             return realm.where(UploadFile::class.java).equalTo(UploadFile::uri.name, uri)
         }
 
-        private fun pendingFilesQuery(realm: Realm, folderId: Int? = null): RealmQuery<UploadFile> {
+        private fun pendingUploadsQuery(
+            realm: Realm,
+            folderId: Int? = null,
+            userDrive: UserDrive? = null
+        ): RealmQuery<UploadFile> {
             return realm.where(UploadFile::class.java).apply {
                 folderId?.let { equalTo(UploadFile::remoteFolder.name, it) }
-                equalTo(UploadFile::userId.name, AccountUtils.currentUserId)
-                equalTo(UploadFile::driveId.name, AccountUtils.currentDriveId)
+                userDrive?.let {
+                    equalTo(UploadFile::userId.name, userDrive.userId)
+                    equalTo(UploadFile::driveId.name, userDrive.driveId)
+                }
                 isNull(UploadFile::uploadAt.name)
                 isNull(UploadFile::deletedAt.name)
                 sort(UploadFile::uri.name)
             }
         }
 
-        fun getNotSyncFiles(): ArrayList<UploadFile> {
+        fun getAllPendingUploads(): ArrayList<UploadFile> {
             return getRealmInstance().use { realm ->
-                realm.where(UploadFile::class.java)
-                    .isNull(UploadFile::uploadAt.name)
-                    .isNull(UploadFile::deletedAt.name)
+                pendingUploadsQuery(realm)
                     .findAll()?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile> ?: arrayListOf()
             }
         }
 
-        fun getNotSyncedFilesCount(): Long {
+        fun getCurrentUserPendingUploads(folderId: Int): ArrayList<UploadFile> {
             return getRealmInstance().use { realm ->
-                realm.where(UploadFile::class.java)
-                    .isNull(UploadFile::uploadAt.name)
-                    .isNull(UploadFile::deletedAt.name).count()
+                pendingUploadsQuery(realm, folderId, UserDrive())
+                    .findAll()?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile> ?: arrayListOf()
             }
         }
 
-        fun getPendingFiles(folderId: Int): ArrayList<UploadFile> {
+        fun getAllPendingUploadsCount(): Int {
             return getRealmInstance().use { realm ->
-                pendingFilesQuery(realm, folderId).findAll()
-                    ?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile> ?: arrayListOf()
+                pendingUploadsQuery(realm).count().toInt()
             }
         }
 
-        fun getUploadedFiles(type: String = Type.SYNC.name): ArrayList<UploadFile>? = getRealmInstance().use { realm ->
+        fun getCurrentUserPendingUploadsCount(folderId: Int? = null): Int {
+            return getRealmInstance().use { realm ->
+                pendingUploadsQuery(realm, folderId, UserDrive()).count().toInt()
+            }
+        }
+
+        fun getAllUploadedFiles(type: String = Type.SYNC.name): ArrayList<UploadFile>? = getRealmInstance().use { realm ->
             realm.where(UploadFile::class.java)
                 .equalTo(UploadFile::type.name, type)
                 .isNull(UploadFile::deletedAt.name)
                 .isNotNull(UploadFile::uploadAt.name)
                 .findAll()?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile>
-        }
-
-        fun getPendingFilesCount(folderId: Int? = null): Int {
-            return getRealmInstance().use { realm ->
-                pendingFilesQuery(realm, folderId).count().toInt()
-            }
         }
 
         fun uploadFinished(uri: Uri) {
@@ -215,14 +216,20 @@ open class UploadFile(
         }
 
         fun deleteAll(uploadFiles: ArrayList<UploadFile>) {
-            getRealmInstance().use { realm ->
-                realm.executeTransaction {
+            getRealmInstance().use {
+                it.executeTransaction { realm ->
                     uploadFiles.forEach { uploadFile ->
-                        syncFileByUriQuery(realm, uploadFile.uri).findFirst()?.let { syncFile ->
-                            syncFile.deletedAt = Date()
-                            val uri = syncFile.getUriObject()
-                            if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
-                                if (!uploadFile.isSyncOffline()) uri.toFile().apply { if (exists()) delete() }
+                        syncFileByUriQuery(realm, uploadFile.uri).findFirst()?.let { uploadFileRealm ->
+                            // Don't delete definitively if it's a sync
+                            if (uploadFileRealm.type == Type.SYNC.name) {
+                                uploadFileRealm.deletedAt = Date()
+                            } else {
+                                // Delete definitively
+                                val uri = uploadFileRealm.getUriObject()
+                                if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
+                                    if (!uploadFile.isSyncOffline()) uri.toFile().apply { if (exists()) delete() }
+                                }
+                                uploadFileRealm.deleteFromRealm()
                             }
                         }
                     }
@@ -230,11 +237,30 @@ open class UploadFile(
             }
         }
 
-        fun deleteAllByFolderId(folderID: Int) {
-            getRealmInstance().use { realm ->
-                realm.executeTransaction {
-                    it.where(UploadFile::class.java).equalTo(UploadFile::remoteFolder.name, folderID).findAll()
-                        ?.deleteAllFromRealm()
+        fun deleteAll(folderId: Int, permanently: Boolean = false) {
+            getRealmInstance().use {
+                it.executeTransaction { realm ->
+                    // Delete all data files for all uploads with scheme FILE
+                    realm.where(UploadFile::class.java).equalTo(UploadFile::remoteFolder.name, folderId)
+                        .beginsWith(UploadFile::uri.name, ContentResolver.SCHEME_FILE)
+                        .findAll().forEach { uploadFile ->
+                            if (!uploadFile.isSyncOffline()) uploadFile.getUriObject().toFile().apply { if (exists()) delete() }
+                        }
+
+                    if (permanently) {
+                        realm.where(UploadFile::class.java).equalTo(UploadFile::remoteFolder.name, folderId)
+                            .findAll().deleteAllFromRealm()
+                    } else {
+                        // Delete all uploads with type SYNC
+                        realm.where(UploadFile::class.java).equalTo(UploadFile::remoteFolder.name, folderId)
+                            .equalTo(UploadFile::type.name, Type.SYNC.name)
+                            .findAll().forEach { uploadFile -> uploadFile.deletedAt = Date() }
+
+                        // Delete all uploads without type SYNC
+                        realm.where(UploadFile::class.java).equalTo(UploadFile::remoteFolder.name, folderId)
+                            .notEqualTo(UploadFile::type.name, Type.SYNC.name)
+                            .findAll().deleteAllFromRealm()
+                    }
                 }
             }
         }

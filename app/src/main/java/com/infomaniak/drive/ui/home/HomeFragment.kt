@@ -146,7 +146,9 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 homeViewModel.lastPicturesPage = 1
                 paginationListener?.let { removeOnScrollListener(it) }
                 isProOrTeam = currentDrive.pack == Drive.DrivePack.PRO.value || currentDrive.pack == Drive.DrivePack.TEAM.value
-                lastElementsAdapter = if (isProOrTeam) LastActivitiesAdapter() else HomePicturesAdapter { file ->
+                // Don't remove unnecessary parentheses from function call with lambda,
+                // else "kotlin.UninitializedPropertyAccessException: lateinit property lastElementsAdapter has not been initialized"
+                lastElementsAdapter = if (isProOrTeam) LastActivitiesAdapter() else HomePicturesAdapter() { file ->
                     val pictures = (lastElementsAdapter as HomePicturesAdapter).getItems()
                     Utils.displayFile(mainViewModel, findNavController(), file, pictures)
                 }
