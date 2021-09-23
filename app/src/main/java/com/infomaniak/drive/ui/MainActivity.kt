@@ -227,8 +227,8 @@ class MainActivity : BaseActivity() {
         setBottomNavigationUserAvatar(this)
         startContentObserverService()
 
-        if (UploadFile.getAppSyncSettings()?.deleteAfterSync == true && UploadFile.getPendingFilesCountByFolderId() == 0) {
-            UploadFile.getUploadedFiles()?.let { filesUploadedRecently ->
+        if (UploadFile.getAppSyncSettings()?.deleteAfterSync == true && UploadFile.getCurrentUserPendingUploadsCount() == 0) {
+            UploadFile.getAllUploadedFiles()?.let { filesUploadedRecently ->
                 if (filesUploadedRecently.size >= SYNCED_FILES_DELETION_FILES_AMOUNT) {
                     Utils.createConfirmation(
                         context = this,
