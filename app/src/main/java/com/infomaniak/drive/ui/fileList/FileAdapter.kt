@@ -57,6 +57,7 @@ open class FileAdapter(
 
     var pendingWifiConnection: Boolean = false
     var uploadInProgress: Boolean = false
+    var allSelected = false
 
     private fun getFile(position: Int) = itemList[position]
 
