@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.fileList
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
@@ -24,8 +25,9 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.utils.setupFileProgress
@@ -40,8 +42,6 @@ open class FileAdapter(
 
     val itemSelected: ArrayList<File> = arrayListOf()
 
-    var importContainsProgress: Boolean = false
-
     var onFileClicked: ((file: File) -> Unit)? = null
     var onMenuClicked: ((selectedFile: File) -> Unit)? = null
     var onStopUploadButtonClicked: ((fileName: String) -> Unit)? = null
@@ -53,8 +53,10 @@ open class FileAdapter(
     var offlineMode: Boolean = false
     var selectFolder: Boolean = false
     var showShareFileButton: Boolean = true
-    var uploadInProgress: Boolean = false
     var viewHolderType: DisplayType = DisplayType.LIST
+
+    var pendingWifiConnection: Boolean = false
+    var uploadInProgress: Boolean = false
 
     private fun getFile(position: Int) = itemList[position]
 
@@ -173,7 +175,6 @@ open class FileAdapter(
         if (position >= 0) {
             val file = getFile(position)
             file.currentProgress = progress
-            importContainsProgress = uploadInProgress && progress <= 100
             notifyItemChanged(position, progress)
 
             if (progress == 100) {
@@ -207,7 +208,7 @@ open class FileAdapter(
             if (progress != Utils.INDETERMINATE_PROGRESS || !file.isPendingOffline(holder.itemView.context)) {
                 holder.itemView.apply {
                     setupFileProgress(file)
-                    checkIfEnableFile(file, position)
+                    checkIfEnableFile(file)
                 }
 
             }
@@ -240,7 +241,7 @@ open class FileAdapter(
 
                 setFileItem(file, isGrid)
 
-                checkIfEnableFile(file, position)
+                checkIfEnableFile(file)
 
                 when {
                     uploadInProgress -> {
@@ -258,9 +259,8 @@ open class FileAdapter(
                     }
                 }
 
-                val isInProgress = (position == 0 && importContainsProgress)
                 menuButton?.visibility = when {
-                    uploadInProgress || isInProgress || selectFolder ||
+                    uploadInProgress || uploadInProgress || selectFolder ||
                             file.isDrive() || file.isTrashed() ||
                             file.isFromActivities || file.isFromSearch ||
                             (offlineMode && !file.isOffline) -> GONE
@@ -295,10 +295,15 @@ open class FileAdapter(
         return itemList.find { it.name == fileName } != null
     }
 
-    private fun View.checkIfEnableFile(file: File, position: Int) = when {
+    private fun View.checkIfEnableFile(file: File) = when {
         uploadInProgress -> {
-            val enable = position == 0 && importContainsProgress
-            fileDate?.setText(if (enable) R.string.uploadInProgressTitle else R.string.uploadInProgressPending)
+            val enable = file.currentProgress > 0
+            val title = when {
+                enable -> R.string.uploadInProgressTitle
+                pendingWifiConnection -> R.string.uploadNetworkErrorWifiRequired
+                else -> R.string.uploadInProgressPending
+            }
+            fileDate?.setText(title)
         }
         else -> {
             if (selectFolder || offlineMode) enabledFile(file.isFolder() || file.isDrive() || (offlineMode && file.isOffline))
@@ -328,14 +333,22 @@ open class FileAdapter(
         itemSelected.remove(file)
     }
 
-    fun isSelectedFile(file: File): Boolean {
+    private fun isSelectedFile(file: File): Boolean {
         return itemSelected.find { it.id == file.id } != null
     }
 
-    fun toggleOfflineMode(isOffline: Boolean) {
+    fun toggleOfflineMode(context: Context, isOffline: Boolean) {
         if (offlineMode != isOffline) {
             offlineMode = isOffline
             notifyItemRangeChanged(0, itemCount)
+        }
+
+        checkIsPendingWifi(context)
+    }
+
+    fun checkIsPendingWifi(context: Context) {
+        if (uploadInProgress && AppSettings.onlyWifiSync) {
+            pendingWifiConnection = context.isSyncActive(false)
         }
     }
 

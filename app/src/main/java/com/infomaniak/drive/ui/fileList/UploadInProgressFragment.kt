@@ -61,8 +61,7 @@ class UploadInProgressFragment : FileListFragment() {
         super.onViewCreated(view, savedInstanceState)
         fileAdapter.onFileClicked = null
         fileAdapter.uploadInProgress = true
-        toolbar.menu.findItem(R.id.restartItem).isVisible = true
-        toolbar.menu.findItem(R.id.closeItem).isVisible = true
+        fileAdapter.checkIsPendingWifi(requireContext())
 
         collapsingToolbarLayout.title = getString(R.string.uploadInProgressTitle)
 
@@ -125,7 +124,7 @@ class UploadInProgressFragment : FileListFragment() {
         val title = getString(R.string.uploadInProgressRestartUploadTitle)
         val context = requireContext()
         Utils.createConfirmation(context, title) {
-            if (fileAdapter.importContainsProgress) {
+            if (fileAdapter.getItems().isNotEmpty()) {
                 context.syncImmediately()
             }
         }
@@ -215,8 +214,11 @@ class UploadInProgressFragment : FileListFragment() {
                             )
                         }
                     }
+
                     pendingFiles = syncFiles
                     withContext(Dispatchers.Main) {
+                        toolbar.menu.findItem(R.id.restartItem).isVisible = true
+                        toolbar.menu.findItem(R.id.closeItem).isVisible = true
                         fileAdapter.setList(files)
                         fileAdapter.isComplete = true
                         timer.cancel()

@@ -102,10 +102,10 @@ object SyncUtils {
         }
     }
 
-    fun Context.isSyncActive(): Boolean {
+    fun Context.isSyncActive(isRunning: Boolean = true): Boolean {
         return WorkManager.getInstance(this).getWorkInfos(
             WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(UploadWorker.TAG))
-                .addStates(arrayListOf(WorkInfo.State.RUNNING))
+                .addStates(arrayListOf(if (isRunning) WorkInfo.State.RUNNING else WorkInfo.State.ENQUEUED))
                 .build()
         ).get()?.isNotEmpty() == true
     }

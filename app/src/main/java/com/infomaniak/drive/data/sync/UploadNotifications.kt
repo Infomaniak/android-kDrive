@@ -54,11 +54,11 @@ object UploadNotifications {
         showNotification(context, pendingTitle, pendingDescription, NotificationUtils.UPLOAD_SERVICE_ID, contentIntent)
     }
 
-    fun UploadFile.networkErrorNotification(context: Context, wifiRequired: Boolean = false) {
+    fun UploadFile.networkErrorNotification(context: Context) {
         showNotification(
             context = context,
             title = context.getString(R.string.uploadNetworkErrorTitle),
-            description = if (wifiRequired) context.getString(R.string.uploadNetworkErrorWifiRequired) else context.getString(R.string.uploadNetworkErrorDescription),
+            description = context.getString(R.string.uploadNetworkErrorDescription),
             notificationId = NotificationUtils.UPLOAD_STATUS_ID,
             contentIntent = progressPendingIntent(context)
         )
