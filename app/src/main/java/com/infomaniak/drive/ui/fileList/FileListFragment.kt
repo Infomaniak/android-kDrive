@@ -316,15 +316,16 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         updateVisibleProgresses()
     }
 
-    private fun performBulkOperation(selectedFiles: ArrayList<File>, type: BulkOperation, destinationFolder: File? = null) {
+    private fun performBulkOperation(selectedFiles: ArrayList<File>, type: BulkOperationType, destinationFolder: File? = null) {
         val fileCount =
             if (fileAdapter.allSelected) fileListViewModel.lastItemCount?.count ?: fileAdapter.itemCount else selectedFiles.size
 
         val onActionApproved: (dialog: Dialog?) -> Unit = {
             if (fileAdapter.allSelected && fileCount > 10) {
                 when (type) {
-                    BulkOperation.DELETE -> performBulkDeletion(selectedFiles)
-                    BulkOperation.MOVE -> performBulkMove(selectedFiles, destinationFolder!!, fileCount = fileCount)
+                    BulkOperationType.DELETE -> performBulkDeletion(selectedFiles)
+                    BulkOperationType.MOVE -> performBulkMove(selectedFiles, destinationFolder!!, fileCount = fileCount)
+                    BulkOperationType.COPY -> TODO()
                 }
             } else {
                 val mediator = mainViewModel.createMultiSelectMediator()
@@ -336,18 +337,19 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     }
 
                     when (type) {
-                        BulkOperation.DELETE -> {
+                        BulkOperationType.DELETE -> {
                             mediator.addSource(
                                 mainViewModel.deleteFile(file, onSuccess),
                                 mainViewModel.updateMultiSelectMediator(mediator)
                             )
                         }
-                        BulkOperation.MOVE -> {
+                        BulkOperationType.MOVE -> {
                             mediator.addSource(
                                 mainViewModel.moveFile(file, destinationFolder!!, onSuccess),
                                 mainViewModel.updateMultiSelectMediator(mediator)
                             )
                         }
+                        BulkOperationType.COPY -> TODO()
                     }
                 }
 
@@ -357,7 +359,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                             getString(R.string.anErrorHasOccurred)
                         } else {
                             resources.getQuantityString(
-                                type.messageRes,
+                                type.successMessage,
                                 success,
                                 success,
                                 destinationFolder?.name + "/"
@@ -371,7 +373,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
         }
 
-        if (type == BulkOperation.DELETE) {
+        if (type == BulkOperationType.DELETE) {
             Utils.createConfirmation(
                 context = requireContext(),
                 title = getString(R.string.modalMoveTrashTitle),
@@ -419,7 +421,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun setupMultiSelect() {
         fileAdapter.enabledMultiSelectMode = true
         closeButtonMultiSelect.setOnClickListener { closeMultiSelect() }
-        deleteButtonMultiSelect.setOnClickListener { performBulkOperation(fileAdapter.itemSelected, BulkOperation.DELETE) }
+        deleteButtonMultiSelect.setOnClickListener { performBulkOperation(fileAdapter.itemSelected, BulkOperationType.DELETE) }
         moveButtonMultiSelect.setOnClickListener { Utils.moveFileClicked(this, folderID) }
         menuButtonMultiSelect.setOnClickListener {
             safeNavigate(
@@ -612,7 +614,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             folderId?.let { destinationFolderId ->
                 performBulkOperation(
                     selectedFiles = fileAdapter.itemSelected,
-                    type = BulkOperation.MOVE,
+                    type = BulkOperationType.MOVE,
                     destinationFolder = File(id = destinationFolderId, name = folderName, driveId = AccountUtils.currentDriveId)
                 )
             }
@@ -889,11 +891,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             isVisible = hideFileList,
             showRefreshButton = changeControlsVisibility
         )
-    }
-
-    enum class BulkOperation(val messageRes: Int) {
-        MOVE(R.plurals.fileListMoveFileConfirmationSnackbar),
-        DELETE(R.plurals.snackbarMoveTrashConfirmation),
     }
 
     open fun onRestartItemsClicked() = Unit
