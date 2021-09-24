@@ -50,6 +50,7 @@ open class FileAdapter(
 
     var enabledMultiSelectMode: Boolean = false
     var multiSelectMode: Boolean = false
+    var allSelected = false
     var offlineMode: Boolean = false
     var selectFolder: Boolean = false
     var showShareFileButton: Boolean = true
@@ -57,7 +58,6 @@ open class FileAdapter(
 
     var pendingWifiConnection: Boolean = false
     var uploadInProgress: Boolean = false
-    var allSelected = false
 
     private fun getFile(position: Int) = itemList[position]
 

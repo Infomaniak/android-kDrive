@@ -49,7 +49,7 @@ object NotificationUtils {
         )
     }
 
-    fun Context.deletionOperationProgressNotification(): NotificationCompat.Builder {
+    fun Context.trashOperationProgressNotification(): NotificationCompat.Builder {
         return progressNotification(
             getString(R.string.fileListDeletionStartedSnackbar),
             R.drawable.ic_delete

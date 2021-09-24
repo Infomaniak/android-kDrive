@@ -23,18 +23,18 @@ import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.NotificationUtils.copyOperationProgressNotification
-import com.infomaniak.drive.utils.NotificationUtils.deletionOperationProgressNotification
 import com.infomaniak.drive.utils.NotificationUtils.moveOperationProgressNotification
+import com.infomaniak.drive.utils.NotificationUtils.trashOperationProgressNotification
 
-enum class BulkOperationType(@StringRes val title: Int, @PluralsRes val successMessage: Int) {
-    DELETE(R.string.fileListDeletionInProgressSnackbar, R.plurals.snackbarMoveTrashConfirmation),
+enum class BulkOperationType(@StringRes val title: Int, @PluralsRes val successMessage: Int, val isCancellable: Boolean = true) {
+    TRASH(R.string.fileListDeletionInProgressSnackbar, R.plurals.snackbarMoveTrashConfirmation),
     MOVE(R.string.fileListMoveInProgressSnackbar, R.plurals.fileListMoveFileConfirmationSnackbar),
-    COPY(R.string.fileListCopyInProgressSnackbar, R.plurals.fileListDuplicationConfirmationSnackbar);
+    COPY(R.string.fileListCopyInProgressSnackbar, R.plurals.fileListDuplicationConfirmationSnackbar, false);
 
     fun getNotificationBuilder(context: Context): NotificationCompat.Builder {
         return when (this) {
             MOVE -> context.moveOperationProgressNotification()
-            DELETE -> context.deletionOperationProgressNotification()
+            TRASH -> context.trashOperationProgressNotification()
             COPY -> context.copyOperationProgressNotification()
         }
     }

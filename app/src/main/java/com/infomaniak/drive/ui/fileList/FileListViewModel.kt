@@ -173,19 +173,17 @@ class FileListViewModel : ViewModel() {
         }
     }
 
-    fun bulkMoveFiles(
-        parentFolder: File,
-        fileIds: IntArray? = null,
-        destinationFolderId: Int
-    ): LiveData<ApiResponse<CancellableAction>> =
-        liveData(Dispatchers.IO) {
-            emit(ApiRepository.bulkMoveFiles(parentFolder, fileIds, destinationFolderId))
+    fun performCancellableBulkOperation(bulkOperation: BulkOperation): LiveData<ApiResponse<CancellableAction>> {
+        return liveData(Dispatchers.IO) {
+            emit(ApiRepository.performCancellableBulkOperation(bulkOperation))
         }
+    }
 
-    fun bulkDeleteFiles(parentFolder: File, fileIds: IntArray? = null): LiveData<ApiResponse<CancellableAction>> =
-        liveData(Dispatchers.IO) {
-            emit(ApiRepository.bulkDelete(parentFolder, fileIds))
+    fun performCopyBulkOperation(bulkOperation: BulkOperation): LiveData<ApiResponse<File>> {
+        return liveData(Dispatchers.IO) {
+            emit(ApiRepository.performCopyBulkOperation(bulkOperation))
         }
+    }
 
     @Synchronized
     fun getFolderActivities(folder: File, userDrive: UserDrive? = null): LiveData<Map<out Int, File.LocalFileActivity>> {

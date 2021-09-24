@@ -36,6 +36,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -322,11 +323,15 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         val onActionApproved: (dialog: Dialog?) -> Unit = {
             if (fileAdapter.allSelected && fileCount > 10) {
-                when (type) {
-                    BulkOperationType.DELETE -> performBulkDeletion(selectedFiles, fileCount)
-                    BulkOperationType.MOVE -> performBulkMove(selectedFiles, destinationFolder!!, fileCount = fileCount)
-                    BulkOperationType.COPY -> TODO()
-                }
+                sendBulkAction(
+                    fileCount,
+                    BulkOperation(
+                        action = type,
+                        fileIds = if (!fileAdapter.allSelected) selectedFiles.map { it.id } else null,
+                        parent = currentFolder!!,
+                        destinationFolderId = destinationFolder?.id
+                    )
+                )
             } else {
                 val mediator = mainViewModel.createMultiSelectMediator()
                 enableButtonMultiSelect(false)
@@ -337,7 +342,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     }
 
                     when (type) {
-                        BulkOperationType.DELETE -> {
+                        BulkOperationType.TRASH -> {
                             mediator.addSource(
                                 mainViewModel.deleteFile(file, onSuccess),
                                 mainViewModel.updateMultiSelectMediator(mediator)
@@ -349,7 +354,16 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                                 mainViewModel.updateMultiSelectMediator(mediator)
                             )
                         }
-                        BulkOperationType.COPY -> TODO()
+                        BulkOperationType.COPY -> {
+                            mediator.addSource(
+                                mainViewModel.duplicateFile(
+                                    file,
+                                    destinationFolder!!.id,
+                                    requireContext().getString(R.string.allDuplicateFileName, fileName, file.getFileExtension())
+                                ),
+                                mainViewModel.updateMultiSelectMediator(mediator)
+                            )
+                        }
                     }
                 }
 
@@ -373,7 +387,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
         }
 
-        if (type == BulkOperationType.DELETE) {
+        if (type == BulkOperationType.TRASH) {
             Utils.createConfirmation(
                 context = requireContext(),
                 title = getString(R.string.modalMoveTrashTitle),
@@ -386,40 +400,36 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
-    private fun performBulkMove(selectedFiles: ArrayList<File>, destinationFolder: File, fileCount: Int = 0) {
-        fileListViewModel.bulkMoveFiles(
-            parentFolder = currentFolder!!,
-            fileIds = if (!fileAdapter.allSelected) selectedFiles.map { it.id }.toIntArray() else null,
-            destinationFolderId = destinationFolder.id
-        ).observe(viewLifecycleOwner) { apiResponse ->
+    private fun sendBulkAction(fileCount: Int = 0, bulkOperation: BulkOperation) {
+        val observer: Observer<ApiResponse<*>> = Observer { apiResponse ->
             if (apiResponse.isSuccess()) {
-                apiResponse.data?.let { action ->
-                    requireContext().launchBulkOperationWorker(generateWorkerData(action.cancelId, fileCount, BulkOperationType.MOVE))
+                apiResponse.data?.let { data ->
+                    val notificationId = when (data) {
+                        is CancellableAction -> data.cancelId
+                        is File -> data.id.hashCode().toString()
+                        else -> data.hashCode().toString()
+                    }
+
+                    requireContext().launchBulkOperationWorker(
+                        generateWorkerData(notificationId, fileCount, bulkOperation.action)
+                    )
                 }
             } else requireActivity().showSnackbar(apiResponse.translateError())
             closeMultiSelect()
         }
-    }
 
-    private fun performBulkDeletion(selectedFiles: ArrayList<File>, fileCount: Int = 0) {
-        fileListViewModel.bulkDeleteFiles(
-            parentFolder = currentFolder!!,
-            fileIds = if (!fileAdapter.allSelected) selectedFiles.map { it.id }.toIntArray() else null
-        ).observe(viewLifecycleOwner) { apiResponse ->
-            if (apiResponse.isSuccess()) {
-                apiResponse.data?.let { action ->
-                    requireContext().launchBulkOperationWorker(generateWorkerData(action.cancelId, fileCount, BulkOperationType.DELETE))
-
-                }
-            } else requireActivity().showSnackbar(apiResponse.translateError())
-            closeMultiSelect()
+        fileListViewModel.apply {
+            if (bulkOperation.action.isCancellable)
+                performCancellableBulkOperation(bulkOperation).observe(viewLifecycleOwner, observer)
+           else
+                performCopyBulkOperation(bulkOperation).observe(viewLifecycleOwner, observer)
         }
     }
 
     private fun setupMultiSelect() {
         fileAdapter.enabledMultiSelectMode = true
         closeButtonMultiSelect.setOnClickListener { closeMultiSelect() }
-        deleteButtonMultiSelect.setOnClickListener { performBulkOperation(fileAdapter.itemSelected, BulkOperationType.DELETE) }
+        deleteButtonMultiSelect.setOnClickListener { performBulkOperation(fileAdapter.itemSelected, BulkOperationType.TRASH) }
         moveButtonMultiSelect.setOnClickListener { Utils.moveFileClicked(this, folderID) }
         menuButtonMultiSelect.setOnClickListener {
             safeNavigate(
