@@ -18,6 +18,7 @@
 package com.infomaniak.drive.utils
 
 import android.content.Context
+import androidx.lifecycle.LiveData
 import androidx.work.*
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.services.BulkOperationWorker
@@ -42,5 +43,16 @@ object BulkOperationsUtils {
         WorkManager
             .getInstance(this)
             .enqueue(bulkOperationWorkRequest)
+    }
+
+    fun Context.trackBulkOperation(): LiveData<MutableList<WorkInfo>> {
+        return WorkManager
+            .getInstance(this)
+            .getWorkInfosLiveData(
+                WorkQuery.Builder
+                    .fromTags(listOf(BulkOperationWorker.TAG))
+                    .addStates(listOf(WorkInfo.State.SUCCEEDED))
+                    .build()
+            )
     }
 }

@@ -62,6 +62,7 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDi
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.generateWorkerData
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
+import com.infomaniak.drive.utils.BulkOperationsUtils.trackBulkOperation
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.models.ApiResponse
@@ -223,11 +224,15 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         toolbar?.menu?.findItem(R.id.searchItem)?.isVisible = findNavController().currentDestination?.id == R.id.fileListFragment
 
+
+        requireContext().trackBulkOperation().observe(viewLifecycleOwner) {
+            onRefresh()
+        }
+
         MqttClientWrapper.observe(viewLifecycleOwner) { notification ->
             currentFolder?.let { parentFolder ->
                 if (notification is ActionNotification) {
                     val itemPosition = fileAdapter.indexOf(notification.fileId)
-                    // TODO - Implement throttle algo to guarantee a final refresh after end of the operation
                     val canRefresh = Date().time - lastTimeActivitiesRefreshed >= ACTIVITIES_REFRESH_DELAY
                     if (itemPosition >= 0) {
                         when (notification.action) {
