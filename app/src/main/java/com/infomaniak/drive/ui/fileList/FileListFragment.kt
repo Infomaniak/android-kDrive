@@ -323,7 +323,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         val onActionApproved: (dialog: Dialog?) -> Unit = {
             if (fileAdapter.allSelected && fileCount > 10) {
                 when (type) {
-                    BulkOperationType.DELETE -> performBulkDeletion(selectedFiles)
+                    BulkOperationType.DELETE -> performBulkDeletion(selectedFiles, fileCount)
                     BulkOperationType.MOVE -> performBulkMove(selectedFiles, destinationFolder!!, fileCount = fileCount)
                     BulkOperationType.COPY -> TODO()
                 }
@@ -401,17 +401,15 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
-    private fun performBulkDeletion(selectedFiles: ArrayList<File>) {
+    private fun performBulkDeletion(selectedFiles: ArrayList<File>, fileCount: Int = 0) {
         fileListViewModel.bulkDeleteFiles(
             parentFolder = currentFolder!!,
             fileIds = if (!fileAdapter.allSelected) selectedFiles.map { it.id }.toIntArray() else null
         ).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
-                apiResponse.data?.let {
-                    requireActivity().showSnackbar(
-                        title = "Suppression en cours...",
-                        anchorView = requireActivity().mainFab
-                    ) // TODO - Translate / do a permanent snackbar (or notification)
+                apiResponse.data?.let { action ->
+                    requireContext().launchBulkOperationWorker(generateWorkerData(action.cancelId, fileCount, BulkOperationType.DELETE))
+
                 }
             } else requireActivity().showSnackbar(apiResponse.translateError())
             closeMultiSelect()

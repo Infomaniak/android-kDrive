@@ -43,17 +43,14 @@ class BulkOperationWorker(private val context: Context, workerParams: WorkerPara
         totalFiles = inputData.getInt(TOTAL_FILES_KEY, 0)
         bulkOperationType = BulkOperationType.valueOf(inputData.getString(OPERATION_TYPE_KEY)!!)
 
-        val futureCallback = CallbackToFutureAdapter.getFuture<Result> { completer ->
+        createForegroundInfo(notificationId, 0, 0, totalFiles)
+        return CallbackToFutureAdapter.getFuture { completer ->
             launchObserver {
                 MqttClientWrapper.removeObserver(mqttNotificationsObserver)
                 completer.set(Result.success())
             }
         }
-
-        createForegroundInfo(notificationId, 0, 0, totalFiles)
-        return futureCallback
     }
-
 
     private fun launchObserver(onOperationFinished: (isSuccess: Boolean) -> Unit) {
         mqttNotificationsObserver = Observer<Notification> { notification ->
@@ -79,7 +76,7 @@ class BulkOperationWorker(private val context: Context, workerParams: WorkerPara
     private fun createForegroundInfo(operationId: Int, percentage: Int, doneFiles: Int, totalFiles: Int): ForegroundInfo {
         val notificationBuilder = bulkOperationType.getNotificationBuilder(context).apply {
             setContentTitle(context.getString(bulkOperationType.title, doneFiles, totalFiles))
-            setProgress(100, percentage, percentage == 0)
+            setProgress(100, percentage, doneFiles == 0)
             setContentText("$percentage%")
         }
         return ForegroundInfo(operationId, notificationBuilder.build())
