@@ -47,6 +47,7 @@ import com.infomaniak.drive.data.sync.UploadNotifications.syncSettingsActivityPe
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaFoldersProvider.IMAGES_BUCKET_ID
 import com.infomaniak.drive.utils.MediaFoldersProvider.VIDEO_BUCKET_ID
+import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.uploadServiceNotification
@@ -67,6 +68,9 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     private var currentUploadFile: UploadFile? = null
     private var currentUploadTask: UploadTask? = null
     private var uploadedCount = 0
+
+    private var notificationStartTime = 0L
+    private var notificationElapsedTime = ELAPSED_TIME
 
     override suspend fun doWork(): Result {
         contentResolver = applicationContext.contentResolver
@@ -201,7 +205,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             val uri = uploadFile.getUriObject()
             currentUploadFile = uploadFile
             applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
-            uploadFile.setupCurrentUploadNotification(applicationContext, pendingCount)
+
+            if (notificationElapsedTime >= ELAPSED_TIME) {
+                uploadFile.setupCurrentUploadNotification(applicationContext, pendingCount)
+                notificationStartTime = Date().time
+                notificationElapsedTime = 0L
+            } else notificationElapsedTime = Date().time - notificationStartTime
 
             try {
                 if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {

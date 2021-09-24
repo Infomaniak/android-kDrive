@@ -33,6 +33,8 @@ object NotificationUtils {
     const val CURRENT_UPLOAD_ID = 3
     const val FILE_OBSERVE_ID = 4
 
+    const val ELAPSED_TIME = 500L
+
     private const val DEFAULT_SMALL_ICON = R.drawable.ic_logo_notification
 
     fun Context.downloadProgressNotification(): NotificationCompat.Builder {
