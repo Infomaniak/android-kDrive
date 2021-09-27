@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.data.api
 
+import android.util.Log
 import java.io.OutputStream
 
 internal class ProgressOutputStream(
@@ -40,6 +41,7 @@ internal class ProgressOutputStream(
             bytes.size.toLong()
         }
         totalWritten += written
+        Log.d("ProgressOutputStream", "write > totalWritten:$totalWritten written:$written")
         onProgress(written.toInt(), totalWritten, total)
     }
 
@@ -50,6 +52,7 @@ internal class ProgressOutputStream(
             return
         }
         totalWritten += byte
+        Log.d("ProgressOutputStream", "write > totalWritten:$totalWritten byte:$byte")
         onProgress(byte, totalWritten, total)
     }
 

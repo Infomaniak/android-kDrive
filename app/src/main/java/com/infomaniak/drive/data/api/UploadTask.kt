@@ -37,7 +37,9 @@ import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.ApiController.gson
+import io.sentry.Breadcrumb
 import io.sentry.Sentry
+import io.sentry.SentryLevel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
@@ -152,10 +154,17 @@ class UploadTask(
         data: ByteArray,
         url: String
     ) = launch(Dispatchers.IO) {
-        val uploadRequestBody = ProgressRequestBody(data.toRequestBody()) { currentBytes, _, _ ->
+        val uploadRequestBody = ProgressRequestBody(data.toRequestBody()) { currentBytes, bytesWritten, contentLength ->
             launch {
                 progressMutex.withLock {
-                    updateProgress(currentBytes)
+                    if (bytesWritten == contentLength) {
+                        Sentry.addBreadcrumb(Breadcrumb().apply {
+                            category = "Upload"
+                            message = "$bytesWritten bytes were written"
+                            level = SentryLevel.INFO
+                        })
+                    }
+                    updateProgress(currentBytes, bytesWritten, contentLength)
                 }
             }
         }
@@ -211,8 +220,7 @@ class UploadTask(
         }
     }
 
-    private fun CoroutineScope.updateProgress(currentBytes: Int) {
-        Log.d("UploadWorker", "progress start")
+    private fun CoroutineScope.updateProgress(currentBytes: Int, bytesWritten: Long, contentLength: Long) {
         val totalBytesWritten = currentBytes + previousChunkBytesWritten
         val progress = ((totalBytesWritten.toDouble() / uploadFile.fileSize.toDouble()) * 100).toInt()
         currentProgress = progress
@@ -224,6 +232,8 @@ class UploadTask(
                 scope.setExtra("data", gson.toJson(uploadFile))
                 scope.setExtra("file size", "${uploadFile.fileSize}")
                 scope.setExtra("uploaded size", "$previousChunkBytesWritten")
+                scope.setExtra("bytesWritten", "$bytesWritten")
+                scope.setExtra("contentLength", "$contentLength")
                 Sentry.captureMessage("Chunk total size exceed fileSize 😢")
             }
             Log.d(
