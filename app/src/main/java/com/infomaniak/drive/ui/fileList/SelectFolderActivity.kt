@@ -42,8 +42,8 @@ class SelectFolderActivity : BaseActivity() {
         const val USER_DRIVE_ID_TAG = "userDriveID"
         const val FOLDER_ID_TAG = "folderID"
         const val FOLDER_NAME_TAG = "folderNAME"
-        const val DISABLE_SELECTED_FOLDER = "disableSelectedFolder"
-        const val CUSTOM_ARGS_TAG = "disableSelectedFolder"
+        const val DISABLE_SELECTED_FOLDER_TAG = "disableSelectedFolder"
+        const val CUSTOM_ARGS_TAG = "customArgs"
 
         const val BULK_OPERATION_CUSTOM_TAG = "bulk_operation_type"
     }
@@ -54,7 +54,7 @@ class SelectFolderActivity : BaseActivity() {
         val customArgs = intent.extras?.getBundle(CUSTOM_ARGS_TAG)
         saveExternalViewModel.userDrive = UserDrive(userID, driveID)
         saveExternalViewModel.currentDrive = DriveInfosController.getDrives(userID, driveID).firstOrNull()
-        saveExternalViewModel.disableSelectedFolder = intent.extras?.getInt(DISABLE_SELECTED_FOLDER)
+        saveExternalViewModel.disableSelectedFolder = intent.extras?.getInt(DISABLE_SELECTED_FOLDER_TAG)
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_select_folder)

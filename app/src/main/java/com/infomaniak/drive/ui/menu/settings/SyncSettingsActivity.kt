@@ -121,7 +121,7 @@ class SyncSettingsActivity : BaseActivity() {
             val intent = Intent(this, SelectFolderActivity::class.java).apply {
                 putExtra(SelectFolderActivity.USER_ID_TAG, selectDriveViewModel.selectedUserId.value)
                 putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, selectDriveViewModel.selectedDrive.value?.id)
-                putExtra(SelectFolderActivity.DISABLE_SELECTED_FOLDER, Utils.ROOT_ID)
+                putExtra(SelectFolderActivity.DISABLE_SELECTED_FOLDER_TAG, Utils.ROOT_ID)
             }
             startActivityForResult(intent, SelectFolderActivity.SELECT_FOLDER_REQUEST)
         }

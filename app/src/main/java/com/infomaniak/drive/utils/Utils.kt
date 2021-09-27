@@ -227,7 +227,7 @@ object Utils {
         val intent = Intent(ownerFragment.context, SelectFolderActivity::class.java).apply {
             putExtra(SelectFolderActivity.USER_ID_TAG, AccountUtils.currentUserId)
             putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
-            putExtra(SelectFolderActivity.DISABLE_SELECTED_FOLDER, currentFolder)
+            putExtra(SelectFolderActivity.DISABLE_SELECTED_FOLDER_TAG, currentFolder)
             putExtra(
                 SelectFolderActivity.CUSTOM_ARGS_TAG,
                 bundleOf(SelectFolderActivity.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE)
