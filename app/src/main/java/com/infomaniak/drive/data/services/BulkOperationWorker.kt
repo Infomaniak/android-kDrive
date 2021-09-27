@@ -74,8 +74,8 @@ class BulkOperationWorker(private val context: Context, workerParams: WorkerPara
     }
 
     private fun createForegroundInfo(operationId: Int, percentage: Int, doneFiles: Int, totalFiles: Int): ForegroundInfo {
-        val notificationBuilder = bulkOperationType.getNotificationBuilder(context).apply {
-            setContentTitle(context.getString(bulkOperationType.title, doneFiles, totalFiles))
+        val notificationBuilder = bulkOperationType.getNotificationBuilder(context)!!.apply {
+            setContentTitle(context.getString(bulkOperationType.title!!, doneFiles, totalFiles))
             setProgress(100, percentage, doneFiles == 0)
             setContentText("$percentage%")
         }

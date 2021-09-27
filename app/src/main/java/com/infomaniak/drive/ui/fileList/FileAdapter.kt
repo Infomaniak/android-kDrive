@@ -324,7 +324,7 @@ open class FileAdapter(
             allSelected -> { // if all selected, unselect everything and only select the clicked one (like web-app)
                 allSelected = false
                 itemSelected.clear()
-                notifyItemRangeChanged(0, itemCount - 1)
+                notifyItemRangeChanged(0, itemCount)
                 addSelectedFile(file)
             }
             isSelected -> {

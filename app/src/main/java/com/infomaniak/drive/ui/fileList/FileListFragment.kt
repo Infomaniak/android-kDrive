@@ -116,7 +116,9 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         const val CANCELLABLE_ACTION_KEY = "cancellable_action"
         const val SORT_TYPE_OPTION_KEY = "sort_type_option"
         const val DELETE_NOT_UPDATE_ACTION = "is_update_not_delete_action"
+
         const val ACTIVITIES_REFRESH_DELAY = 5000
+        const val MAX_FILES_BEFORE_BULK = 10
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -323,7 +325,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             if (fileAdapter.allSelected) fileListViewModel.lastItemCount?.count ?: fileAdapter.itemCount else selectedFiles.size
 
         val onActionApproved: (dialog: Dialog?) -> Unit = {
-            if (fileAdapter.allSelected && fileCount > 10) {
+            if (fileAdapter.allSelected && fileCount > MAX_FILES_BEFORE_BULK || selectedFiles.size > MAX_FILES_BEFORE_BULK) {
                 sendBulkAction(
                     fileCount,
                     BulkOperation(
@@ -365,6 +367,14 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                                 mainViewModel.updateMultiSelectMediator(mediator)
                             )
                         }
+                        BulkOperationType.SET_OFFLINE -> {
+                            addSelectedFilesToOffline(file)
+                        }
+                        BulkOperationType.ADD_FAVORITES -> {
+                            mediator.addSource(mainViewModel.addFileToFavorites(file) {
+                                runBlocking(Dispatchers.Main) { fileAdapter.notifyFileChanged(file.id) { it.isFavorite = true } }
+                            }, mainViewModel.updateMultiSelectMediator(mediator))
+                        }
                     }
                 }
 
@@ -373,14 +383,18 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                         val title = if (success == 0) {
                             getString(R.string.anErrorHasOccurred)
                         } else {
-                            resources.getQuantityString(
-                                type.successMessage,
-                                success,
-                                success,
-                                destinationFolder?.name + "/"
-                            )
+                            type.successMessage?.let { message ->
+                                resources.getQuantityString(
+                                    message,
+                                    success,
+                                    success,
+                                    destinationFolder?.name + "/"
+                                )
+                            }
                         }
-                        requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
+                        if (title != null) {
+                            requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
+                        }
                         refreshActivities()
                         closeMultiSelect()
                     }
@@ -431,7 +445,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             fileAdapter.apply {
                 allSelected = true
                 fileAdapter.itemSelected.clear()
-                fileAdapter.notifyItemRangeChanged(0, fileAdapter.itemCount - 1)
+                fileAdapter.notifyItemRangeChanged(0, fileAdapter.itemCount)
             }
 
             enableButtonMultiSelect(false)
@@ -531,69 +545,20 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun onBackNavigationResult() {
-        getBackNavigationResult<SelectDialogAction>(SELECT_DIALOG_ACTION) { type ->
-            if (fileAdapter.allSelected || fileAdapter.itemSelected.size > 10) {
-                if (type == SelectDialogAction.DUPLICATE) {
-                    val intent = Intent(requireContext(), SelectFolderActivity::class.java).apply {
-                        putExtra(SelectFolderActivity.USER_ID_TAG, AccountUtils.currentUserId)
-                        putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
-                        putExtra(
-                            SelectFolderActivity.CUSTOM_ARGS_TAG,
-                            bundleOf(BULK_OPERATION_CUSTOM_TAG to BulkOperationType.COPY)
-                        )
-                    }
-                    startActivityForResult(intent, SelectFolderActivity.SELECT_FOLDER_REQUEST)
+        // TODO - 2 - Implement download for multiselection !
+        getBackNavigationResult<BulkOperationType>(SELECT_DIALOG_ACTION) { type ->
+            if(type == BulkOperationType.COPY) {
+                val intent = Intent(requireContext(), SelectFolderActivity::class.java).apply {
+                    putExtra(SelectFolderActivity.USER_ID_TAG, AccountUtils.currentUserId)
+                    putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
+                    putExtra(
+                        SelectFolderActivity.CUSTOM_ARGS_TAG,
+                        bundleOf(BULK_OPERATION_CUSTOM_TAG to BulkOperationType.COPY)
+                    )
                 }
+                startActivityForResult(intent, SelectFolderActivity.SELECT_FOLDER_REQUEST)
             } else {
-                val mediator = mainViewModel.createMultiSelectMediator()
-                val itemSelectedCount = fileAdapter.itemSelected.count()
-                enableButtonMultiSelect(false)
-
-                fileAdapter.itemSelected.forEach { file ->
-                    val observer: (apiResponse: ApiResponse<*>) -> Unit =
-                        mainViewModel.updateMultiSelectMediator(mediator)
-
-                    when (type) {
-                        SelectDialogAction.ADD_FAVORITES -> {
-                            mediator.addSource(mainViewModel.addFileToFavorites(file) {
-                                runBlocking(Dispatchers.Main) { fileAdapter.notifyFileChanged(file.id) { it.isFavorite = true } }
-                            }, observer)
-                        }
-                        SelectDialogAction.OFFLINE -> {
-                            addSelectedFilesToOffline(file)
-                        }
-                        SelectDialogAction.DUPLICATE -> {
-                            val duplicateFile = mainViewModel.duplicateFile(file, mainViewModel.currentFolder.value?.id, null)
-                            mediator.addSource(duplicateFile, observer)
-                        }
-                    }
-                }
-
-                if (type == SelectDialogAction.OFFLINE) {
-                    closeMultiSelect()
-                }
-
-                mediator.observe(viewLifecycleOwner) { (success, total) ->
-                    if (total == itemSelectedCount) {
-                        val message = when (type) {
-                            SelectDialogAction.ADD_FAVORITES -> R.plurals.fileListAddFavorisConfirmationSnackbar
-                            SelectDialogAction.OFFLINE -> R.plurals.fileListAddOfflineConfirmationSnackbar
-                            SelectDialogAction.DUPLICATE -> R.plurals.fileListDuplicationConfirmationSnackbar
-                        }
-                        val title = resources.getQuantityString(
-                            message,
-                            success,
-                            success
-                        )
-                        if (success == 0) {
-                            requireActivity().showSnackbar(getString(R.string.anErrorHasOccurred), requireActivity().mainFab)
-                        } else {
-                            requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
-                        }
-                        refreshActivities()
-                        closeMultiSelect()
-                    }
-                }
+                performBulkOperation(type)
             }
         }
     }

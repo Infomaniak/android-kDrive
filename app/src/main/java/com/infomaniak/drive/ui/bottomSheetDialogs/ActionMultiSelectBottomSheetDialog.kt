@@ -33,6 +33,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.utils.*
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_action_multi_select.*
 import kotlinx.coroutines.Dispatchers
@@ -83,8 +84,15 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun onActionSelected(type: SelectDialogAction? = null) {
-        if (type == null) setBackNavigationResult(DISABLE_SELECT_MODE, true)
-        else setBackNavigationResult(SELECT_DIALOG_ACTION, type)
+        val finalType = when(type) {
+            SelectDialogAction.ADD_FAVORITES -> BulkOperationType.ADD_FAVORITES
+            SelectDialogAction.OFFLINE -> BulkOperationType.SET_OFFLINE
+            SelectDialogAction.DUPLICATE -> BulkOperationType.COPY
+            else -> null
+        }
+
+        if (finalType == null) setBackNavigationResult(DISABLE_SELECT_MODE, true)
+        else setBackNavigationResult(SELECT_DIALOG_ACTION, finalType)
     }
 
     class ActionMultiSelectModel(app: Application) : AndroidViewModel(app) {
