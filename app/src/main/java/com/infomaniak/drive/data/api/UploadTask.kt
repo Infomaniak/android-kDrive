@@ -31,6 +31,7 @@ import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
+import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
 import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
 import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.lib.core.models.ApiResponse
@@ -45,6 +46,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.io.BufferedInputStream
+import java.util.*
 import kotlin.math.ceil
 
 class UploadTask(
@@ -59,6 +61,8 @@ class UploadTask(
     private var currentProgress = 0
 
     private var uploadNotification: NotificationCompat.Builder? = null
+    private var notificationStartTime = 0L
+    private var notificationElapsedTime = ELAPSED_TIME
     private lateinit var notificationManagerCompat: NotificationManagerCompat
 
     suspend fun start() = withContext(Dispatchers.IO) {
@@ -234,19 +238,24 @@ class UploadTask(
         if (worker.isStopped) throw CancellationException()
         ensureActive()
 
-        uploadNotification?.apply {
-            val intent = Intent(context, MainActivity::class.java).apply {
-                putExtra(MainActivity.INTENT_SHOW_PROGRESS, uploadFile.remoteFolder)
+
+        if (notificationElapsedTime >= ELAPSED_TIME) {
+            uploadNotification?.apply {
+                val intent = Intent(context, MainActivity::class.java).apply {
+                    putExtra(MainActivity.INTENT_SHOW_PROGRESS, uploadFile.remoteFolder)
+                }
+                val pendingIntent = PendingIntent.getActivity(
+                    context, 0,
+                    intent, UploadNotifications.pendingIntentFlags
+                )
+                setContentIntent(pendingIntent)
+                setContentText("${currentProgress}%")
+                setProgress(100, currentProgress, false)
+                notificationManagerCompat.notify(CURRENT_UPLOAD_ID, build())
+                notificationStartTime = System.currentTimeMillis()
+                notificationElapsedTime = 0L
             }
-            val pendingIntent = PendingIntent.getActivity(
-                context, 0,
-                intent, UploadNotifications.pendingIntentFlags
-            )
-            setContentIntent(pendingIntent)
-            setContentText("${currentProgress}%")
-            setProgress(100, currentProgress, false)
-            notificationManagerCompat.notify(CURRENT_UPLOAD_ID, build())
-        }
+        } else notificationElapsedTime = Date().time - notificationStartTime
 
         if (progress in 1..100) {
             launch { shareProgress(currentProgress) }
