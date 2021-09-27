@@ -179,12 +179,6 @@ class FileListViewModel : ViewModel() {
         }
     }
 
-    fun performCopyBulkOperation(bulkOperation: BulkOperation): LiveData<ApiResponse<File>> {
-        return liveData(Dispatchers.IO) {
-            emit(ApiRepository.performCopyBulkOperation(bulkOperation))
-        }
-    }
-
     @Synchronized
     fun getFolderActivities(folder: File, userDrive: UserDrive? = null): LiveData<Map<out Int, File.LocalFileActivity>> {
         getFolderActivitiesJob.cancel()

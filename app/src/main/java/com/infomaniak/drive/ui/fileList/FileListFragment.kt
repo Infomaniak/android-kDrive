@@ -36,7 +36,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -403,32 +402,16 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun sendBulkAction(fileCount: Int = 0, bulkOperation: BulkOperation) {
-        val observer: Observer<ApiResponse<*>> = Observer { apiResponse ->
-            if (apiResponse.isSuccess()) {
-                apiResponse.data?.let { data ->
-                    val notificationId = when (data) {
-                        is CancellableAction -> data.cancelId
-                        is File -> data.id.hashCode().toString()
-                        else -> data.hashCode().toString()
+            fileListViewModel.performCancellableBulkOperation(bulkOperation).observe(viewLifecycleOwner) { apiResponse ->
+                if (apiResponse.isSuccess()) {
+                    apiResponse.data?.let { cancellableAction ->
+                        requireContext().launchBulkOperationWorker(
+                            generateWorkerData(cancellableAction.cancelId, fileCount, bulkOperation.action)
+                        )
                     }
-
-                    requireContext().launchBulkOperationWorker(
-                        generateWorkerData(notificationId, fileCount, bulkOperation.action)
-                    )
-                }
-            } else requireActivity().showSnackbar(apiResponse.translateError())
-            closeMultiSelect()
-        }
-
-        fileListViewModel.apply {
-            if (bulkOperation.action.isCancellable)
-                performCancellableBulkOperation(bulkOperation).observe(viewLifecycleOwner, observer)
-            else
-                performCopyBulkOperation(bulkOperation).observe(viewLifecycleOwner) {
-                    // TODO : Display a message (we don't get the status periodically)
-
-                }
-        }
+                } else requireActivity().showSnackbar(apiResponse.translateError())
+                closeMultiSelect()
+            }
     }
 
     private fun setupMultiSelect() {
