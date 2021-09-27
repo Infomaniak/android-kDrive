@@ -18,6 +18,7 @@
 package com.infomaniak.drive.data.models
 
 import android.content.Context
+import android.os.Parcelable
 import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
@@ -25,8 +26,10 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.NotificationUtils.copyOperationProgressNotification
 import com.infomaniak.drive.utils.NotificationUtils.moveOperationProgressNotification
 import com.infomaniak.drive.utils.NotificationUtils.trashOperationProgressNotification
+import kotlinx.android.parcel.Parcelize
 
-enum class BulkOperationType(@StringRes val title: Int, @PluralsRes val successMessage: Int, val isCancellable: Boolean = true) {
+@Parcelize
+enum class BulkOperationType(@StringRes val title: Int, @PluralsRes val successMessage: Int, val isCancellable: Boolean = true): Parcelable {
     TRASH(R.string.fileListDeletionInProgressSnackbar, R.plurals.snackbarMoveTrashConfirmation),
     MOVE(R.string.fileListMoveInProgressSnackbar, R.plurals.fileListMoveFileConfirmationSnackbar),
     COPY(R.string.fileListCopyInProgressSnackbar, R.plurals.fileListDuplicationConfirmationSnackbar, false);

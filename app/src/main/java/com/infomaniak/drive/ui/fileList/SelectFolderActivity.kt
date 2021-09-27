@@ -43,11 +43,15 @@ class SelectFolderActivity : BaseActivity() {
         const val FOLDER_ID_TAG = "folderID"
         const val FOLDER_NAME_TAG = "folderNAME"
         const val DISABLE_SELECTED_FOLDER = "disableSelectedFolder"
+        const val CUSTOM_ARGS_TAG = "disableSelectedFolder"
+
+        const val BULK_OPERATION_CUSTOM_TAG = "bulk_operation_type"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val userID = intent.extras?.getInt(USER_ID_TAG) ?: throw MissingFormatArgumentException(USER_ID_TAG)
         val driveID = intent.extras?.getInt(USER_DRIVE_ID_TAG) ?: throw MissingFormatArgumentException(USER_DRIVE_ID_TAG)
+        val customArgs = intent.extras?.getBundle(CUSTOM_ARGS_TAG)
         saveExternalViewModel.userDrive = UserDrive(userID, driveID)
         saveExternalViewModel.currentDrive = DriveInfosController.getDrives(userID, driveID).firstOrNull()
         saveExternalViewModel.disableSelectedFolder = intent.extras?.getInt(DISABLE_SELECTED_FOLDER)
@@ -61,6 +65,7 @@ class SelectFolderActivity : BaseActivity() {
             val intent = Intent().apply {
                 putExtra(FOLDER_ID_TAG, currentFragment.folderID)
                 putExtra(FOLDER_NAME_TAG, currentFragment.folderName)
+                putExtra(CUSTOM_ARGS_TAG, customArgs)
             }
             setResult(RESULT_OK, intent)
             finish()

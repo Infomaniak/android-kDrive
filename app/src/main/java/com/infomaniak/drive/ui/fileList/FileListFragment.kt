@@ -60,6 +60,7 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog.Companion.SELECT_DIALOG_ACTION
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog.SelectDialogAction
+import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.BULK_OPERATION_CUSTOM_TAG
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.generateWorkerData
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
@@ -317,7 +318,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         updateVisibleProgresses()
     }
 
-    private fun performBulkOperation(selectedFiles: ArrayList<File>, type: BulkOperationType, destinationFolder: File? = null) {
+    private fun performBulkOperation(type: BulkOperationType, destinationFolder: File? = null) {
+        val selectedFiles = fileAdapter.itemSelected
         val fileCount =
             if (fileAdapter.allSelected) fileListViewModel.lastItemCount?.count ?: fileAdapter.itemCount else selectedFiles.size
 
@@ -421,15 +423,18 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         fileListViewModel.apply {
             if (bulkOperation.action.isCancellable)
                 performCancellableBulkOperation(bulkOperation).observe(viewLifecycleOwner, observer)
-           else
-                performCopyBulkOperation(bulkOperation).observe(viewLifecycleOwner, observer)
+            else
+                performCopyBulkOperation(bulkOperation).observe(viewLifecycleOwner) {
+                    // TODO : Display a message (we don't get the status periodically)
+
+                }
         }
     }
 
     private fun setupMultiSelect() {
         fileAdapter.enabledMultiSelectMode = true
         closeButtonMultiSelect.setOnClickListener { closeMultiSelect() }
-        deleteButtonMultiSelect.setOnClickListener { performBulkOperation(fileAdapter.itemSelected, BulkOperationType.TRASH) }
+        deleteButtonMultiSelect.setOnClickListener { performBulkOperation(BulkOperationType.TRASH) }
         moveButtonMultiSelect.setOnClickListener { Utils.moveFileClicked(this, folderID) }
         menuButtonMultiSelect.setOnClickListener {
             safeNavigate(
@@ -544,53 +549,67 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun onBackNavigationResult() {
         getBackNavigationResult<SelectDialogAction>(SELECT_DIALOG_ACTION) { type ->
-            val mediator = mainViewModel.createMultiSelectMediator()
-            val itemSelectedCount = fileAdapter.itemSelected.count()
-            enableButtonMultiSelect(false)
-
-            fileAdapter.itemSelected.forEach { file ->
-                val observer: (apiResponse: ApiResponse<*>) -> Unit =
-                    mainViewModel.updateMultiSelectMediator(mediator)
-
-                when (type) {
-                    SelectDialogAction.ADD_FAVORITES -> {
-                        mediator.addSource(mainViewModel.addFileToFavorites(file) {
-                            runBlocking(Dispatchers.Main) { fileAdapter.notifyFileChanged(file.id) { it.isFavorite = true } }
-                        }, observer)
+            if (fileAdapter.allSelected || fileAdapter.itemSelected.size > 10) {
+                if (type == SelectDialogAction.DUPLICATE) {
+                    val intent = Intent(requireContext(), SelectFolderActivity::class.java).apply {
+                        putExtra(SelectFolderActivity.USER_ID_TAG, AccountUtils.currentUserId)
+                        putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
+                        putExtra(
+                            SelectFolderActivity.CUSTOM_ARGS_TAG,
+                            bundleOf(BULK_OPERATION_CUSTOM_TAG to BulkOperationType.COPY)
+                        )
                     }
-                    SelectDialogAction.OFFLINE -> {
-                        addSelectedFilesToOffline(file)
-                    }
-                    SelectDialogAction.DUPLICATE -> {
-                        val duplicateFile = mainViewModel.duplicateFile(file, mainViewModel.currentFolder.value?.id, null)
-                        mediator.addSource(duplicateFile, observer)
+                    startActivityForResult(intent, SelectFolderActivity.SELECT_FOLDER_REQUEST)
+                }
+            } else {
+                val mediator = mainViewModel.createMultiSelectMediator()
+                val itemSelectedCount = fileAdapter.itemSelected.count()
+                enableButtonMultiSelect(false)
+
+                fileAdapter.itemSelected.forEach { file ->
+                    val observer: (apiResponse: ApiResponse<*>) -> Unit =
+                        mainViewModel.updateMultiSelectMediator(mediator)
+
+                    when (type) {
+                        SelectDialogAction.ADD_FAVORITES -> {
+                            mediator.addSource(mainViewModel.addFileToFavorites(file) {
+                                runBlocking(Dispatchers.Main) { fileAdapter.notifyFileChanged(file.id) { it.isFavorite = true } }
+                            }, observer)
+                        }
+                        SelectDialogAction.OFFLINE -> {
+                            addSelectedFilesToOffline(file)
+                        }
+                        SelectDialogAction.DUPLICATE -> {
+                            val duplicateFile = mainViewModel.duplicateFile(file, mainViewModel.currentFolder.value?.id, null)
+                            mediator.addSource(duplicateFile, observer)
+                        }
                     }
                 }
-            }
 
-            if (type == SelectDialogAction.OFFLINE) {
-                closeMultiSelect()
-            }
-
-            mediator.observe(viewLifecycleOwner) { (success, total) ->
-                if (total == itemSelectedCount) {
-                    val message = when (type) {
-                        SelectDialogAction.ADD_FAVORITES -> R.plurals.fileListAddFavorisConfirmationSnackbar
-                        SelectDialogAction.OFFLINE -> R.plurals.fileListAddOfflineConfirmationSnackbar
-                        SelectDialogAction.DUPLICATE -> R.plurals.fileListDuplicationConfirmationSnackbar
-                    }
-                    val title = resources.getQuantityString(
-                        message,
-                        success,
-                        success
-                    )
-                    if (success == 0) {
-                        requireActivity().showSnackbar(getString(R.string.anErrorHasOccurred), requireActivity().mainFab)
-                    } else {
-                        requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
-                    }
-                    refreshActivities()
+                if (type == SelectDialogAction.OFFLINE) {
                     closeMultiSelect()
+                }
+
+                mediator.observe(viewLifecycleOwner) { (success, total) ->
+                    if (total == itemSelectedCount) {
+                        val message = when (type) {
+                            SelectDialogAction.ADD_FAVORITES -> R.plurals.fileListAddFavorisConfirmationSnackbar
+                            SelectDialogAction.OFFLINE -> R.plurals.fileListAddOfflineConfirmationSnackbar
+                            SelectDialogAction.DUPLICATE -> R.plurals.fileListDuplicationConfirmationSnackbar
+                        }
+                        val title = resources.getQuantityString(
+                            message,
+                            success,
+                            success
+                        )
+                        if (success == 0) {
+                            requireActivity().showSnackbar(getString(R.string.anErrorHasOccurred), requireActivity().mainFab)
+                        } else {
+                            requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
+                        }
+                        refreshActivities()
+                        closeMultiSelect()
+                    }
                 }
             }
         }
@@ -615,14 +634,15 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun onSelectFolderResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == SelectFolderActivity.SELECT_FOLDER_REQUEST && resultCode == AppCompatActivity.RESULT_OK) {
-
             val folderName = data?.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
             val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
+            val customArgs = data?.extras?.getBundle(SelectFolderActivity.CUSTOM_ARGS_TAG)
+
+            val bulkOperationType = customArgs?.getParcelable<BulkOperationType>(BULK_OPERATION_CUSTOM_TAG)
 
             folderId?.let { destinationFolderId ->
                 performBulkOperation(
-                    selectedFiles = fileAdapter.itemSelected,
-                    type = BulkOperationType.MOVE,
+                    type = bulkOperationType!!,
                     destinationFolder = File(id = destinationFolderId, name = folderName, driveId = AccountUtils.currentDriveId)
                 )
             }

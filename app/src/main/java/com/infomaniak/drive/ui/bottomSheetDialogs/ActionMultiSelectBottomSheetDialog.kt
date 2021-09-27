@@ -59,7 +59,6 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
 
         val otherActionsVisibility = if (navigationArgs.fileIds.size in 1..10) VISIBLE else GONE
         availableOffline.visibility = otherActionsVisibility
-        duplicateFile.visibility = otherActionsVisibility
         addFavorites.visibility = otherActionsVisibility
 
         val drivePermissions = DrivePermissions()
