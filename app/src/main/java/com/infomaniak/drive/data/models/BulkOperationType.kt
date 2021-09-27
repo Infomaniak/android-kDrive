@@ -29,7 +29,7 @@ import com.infomaniak.drive.utils.NotificationUtils.trashOperationProgressNotifi
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-enum class BulkOperationType(@StringRes val title: Int? = null, @PluralsRes val successMessage: Int? = null): Parcelable {
+enum class BulkOperationType(@StringRes val title: Int? = null, @PluralsRes val successMessage: Int? = null) : Parcelable {
     TRASH(R.string.fileListDeletionInProgressSnackbar, R.plurals.snackbarMoveTrashConfirmation),
     MOVE(R.string.fileListMoveInProgressSnackbar, R.plurals.fileListMoveFileConfirmationSnackbar),
     COPY(R.string.fileListCopyInProgressSnackbar, R.plurals.fileListDuplicationConfirmationSnackbar),

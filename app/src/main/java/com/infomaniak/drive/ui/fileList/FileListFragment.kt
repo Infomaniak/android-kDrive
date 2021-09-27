@@ -58,7 +58,6 @@ import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWork
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog.Companion.SELECT_DIALOG_ACTION
-import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog.SelectDialogAction
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.BULK_OPERATION_CUSTOM_TAG
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.generateWorkerData
@@ -416,16 +415,16 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun sendBulkAction(fileCount: Int = 0, bulkOperation: BulkOperation) {
-            fileListViewModel.performCancellableBulkOperation(bulkOperation).observe(viewLifecycleOwner) { apiResponse ->
-                if (apiResponse.isSuccess()) {
-                    apiResponse.data?.let { cancellableAction ->
-                        requireContext().launchBulkOperationWorker(
-                            generateWorkerData(cancellableAction.cancelId, fileCount, bulkOperation.action)
-                        )
-                    }
-                } else requireActivity().showSnackbar(apiResponse.translateError())
-                closeMultiSelect()
-            }
+        fileListViewModel.performCancellableBulkOperation(bulkOperation).observe(viewLifecycleOwner) { apiResponse ->
+            if (apiResponse.isSuccess()) {
+                apiResponse.data?.let { cancellableAction ->
+                    requireContext().launchBulkOperationWorker(
+                        generateWorkerData(cancellableAction.cancelId, fileCount, bulkOperation.action)
+                    )
+                }
+            } else requireActivity().showSnackbar(apiResponse.translateError())
+            closeMultiSelect()
+        }
     }
 
     private fun setupMultiSelect() {
@@ -547,7 +546,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun onBackNavigationResult() {
         // TODO - 2 - Implement download for multiselection !
         getBackNavigationResult<BulkOperationType>(SELECT_DIALOG_ACTION) { type ->
-            if(type == BulkOperationType.COPY) {
+            if (type == BulkOperationType.COPY) {
                 val intent = Intent(requireContext(), SelectFolderActivity::class.java).apply {
                     putExtra(SelectFolderActivity.USER_ID_TAG, AccountUtils.currentUserId)
                     putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)

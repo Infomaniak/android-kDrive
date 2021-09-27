@@ -84,7 +84,7 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun onActionSelected(type: SelectDialogAction? = null) {
-        val finalType = when(type) {
+        val finalType = when (type) {
             SelectDialogAction.ADD_FAVORITES -> BulkOperationType.ADD_FAVORITES
             SelectDialogAction.OFFLINE -> BulkOperationType.SET_OFFLINE
             SelectDialogAction.DUPLICATE -> BulkOperationType.COPY

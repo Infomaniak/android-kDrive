@@ -52,11 +52,6 @@ import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
-import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.BULK_OPERATION_CUSTOM_TAG
-import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.CUSTOM_ARGS_TAG
-import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.DISABLE_SELECTED_FOLDER
-import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.USER_DRIVE_ID_TAG
-import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.USER_ID_TAG
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment
 import kotlinx.android.synthetic.main.dialog_download_progress.view.*
 import kotlinx.android.synthetic.main.dialog_name_prompt.view.*
@@ -92,8 +87,9 @@ object Utils {
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             onConfirmation(dialog)
-            if (autoDismiss) dialog.dismiss()
-            else {
+            if (autoDismiss) {
+                dialog.dismiss()
+            } else {
                 it.isEnabled = false
                 dialog.getButton(AlertDialog.BUTTON_NEGATIVE).isEnabled = false
             }
@@ -229,10 +225,13 @@ object Utils {
 
     fun moveFileClicked(ownerFragment: Fragment, currentFolder: Int) {
         val intent = Intent(ownerFragment.context, SelectFolderActivity::class.java).apply {
-            putExtra(USER_ID_TAG, AccountUtils.currentUserId)
-            putExtra(USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
-            putExtra(DISABLE_SELECTED_FOLDER, currentFolder)
-            putExtra(CUSTOM_ARGS_TAG, bundleOf(BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE))
+            putExtra(SelectFolderActivity.USER_ID_TAG, AccountUtils.currentUserId)
+            putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
+            putExtra(SelectFolderActivity.DISABLE_SELECTED_FOLDER, currentFolder)
+            putExtra(
+                SelectFolderActivity.CUSTOM_ARGS_TAG,
+                bundleOf(SelectFolderActivity.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE)
+            )
         }
         ownerFragment.startActivityForResult(intent, SelectFolderActivity.SELECT_FOLDER_REQUEST)
     }

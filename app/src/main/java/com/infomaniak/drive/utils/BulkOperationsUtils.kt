@@ -40,19 +40,15 @@ object BulkOperationsUtils {
                 .addTag(BulkOperationWorker.TAG)
                 .build()
 
-        WorkManager
-            .getInstance(this)
-            .enqueue(bulkOperationWorkRequest)
+        WorkManager.getInstance(this).enqueue(bulkOperationWorkRequest)
     }
 
     fun Context.trackBulkOperation(): LiveData<MutableList<WorkInfo>> {
-        return WorkManager
-            .getInstance(this)
-            .getWorkInfosLiveData(
-                WorkQuery.Builder
-                    .fromTags(listOf(BulkOperationWorker.TAG))
-                    .addStates(listOf(WorkInfo.State.SUCCEEDED))
-                    .build()
-            )
+        return WorkManager.getInstance(this).getWorkInfosLiveData(
+            WorkQuery.Builder
+                .fromTags(listOf(BulkOperationWorker.TAG))
+                .addStates(listOf(WorkInfo.State.SUCCEEDED))
+                .build()
+        )
     }
 }
