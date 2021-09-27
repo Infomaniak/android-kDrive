@@ -82,7 +82,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
 
         // Move the service to foreground
-        applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
         applicationContext.uploadServiceNotification().apply {
             setContentTitle(applicationContext.getString(R.string.notificationUploadServiceChannelName))
             setForeground(ForegroundInfo(NotificationUtils.UPLOAD_SERVICE_ID, build()))
@@ -182,6 +181,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val syncFiles = UploadFile.getAllPendingUploads()
         val lastUploadedCount = inputData.getInt(LAST_UPLOADED_COUNT, 0)
         var pendingCount = syncFiles.size
+
+        if (pendingCount > 0) applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
 
         Log.d(TAG, "startSyncFiles> upload for ${syncFiles.count()}")
 
