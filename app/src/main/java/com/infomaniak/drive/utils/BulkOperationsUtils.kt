@@ -25,6 +25,8 @@ import com.infomaniak.drive.data.services.BulkOperationWorker
 
 object BulkOperationsUtils {
 
+    const val MIN_SELECTED = 10
+
     fun generateWorkerData(actionUuid: String, fileCount: Int, type: BulkOperationType): Data {
         return workDataOf(
             BulkOperationWorker.ACTION_UUID to actionUuid,

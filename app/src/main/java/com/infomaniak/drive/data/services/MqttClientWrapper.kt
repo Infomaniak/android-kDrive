@@ -38,7 +38,7 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
     private var isSubscribed: Boolean = false
 
     private const val MQTT_USER = "ips:ips-public"
-    private const val MQTT_PASS = "8QC5EwBqpZ2Z"
+    private const val MQTT_PASS = "8QC5EwBqpZ2Z" // Yes it's normal, non-sensitive information
     private const val MQTT_URI = "wss://info-mq.infomaniak.com/ws"
 
     private val client: MqttAndroidClient by lazy {
@@ -83,9 +83,7 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
     fun registerForNotifications(token: IpsToken) {
         currentToken?.let { unsubscribe(topicFor(token)) }
         currentToken = token
-        if (!isSubscribed) {
-            subscribe(topicFor(token))
-        }
+        if (!isSubscribed) subscribe(topicFor(token))
     }
 
     private fun subscribe(topic: String, qos: Int = 1) {

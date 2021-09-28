@@ -58,7 +58,7 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
 
         disabledAvailableOffline.visibility = if (navigationArgs.onlyFolders) VISIBLE else GONE
 
-        val otherActionsVisibility = if (navigationArgs.fileIds.size in 1..10) VISIBLE else GONE
+        val otherActionsVisibility = if (navigationArgs.fileIds.size in 1..BulkOperationsUtils.MIN_SELECTED) VISIBLE else GONE
         availableOffline.visibility = otherActionsVisibility
         addFavorites.visibility = otherActionsVisibility
 

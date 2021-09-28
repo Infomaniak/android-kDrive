@@ -117,7 +117,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         const val DELETE_NOT_UPDATE_ACTION = "is_update_not_delete_action"
 
         const val ACTIVITIES_REFRESH_DELAY = 5000
-        const val MAX_FILES_BEFORE_BULK = 10
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -324,7 +323,9 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             if (fileAdapter.allSelected) fileListViewModel.lastItemCount?.count ?: fileAdapter.itemCount else selectedFiles.size
 
         val onActionApproved: (dialog: Dialog?) -> Unit = {
-            if (fileAdapter.allSelected && fileCount > MAX_FILES_BEFORE_BULK || selectedFiles.size > MAX_FILES_BEFORE_BULK) {
+            if (fileAdapter.allSelected && fileCount > BulkOperationsUtils.MIN_SELECTED ||
+                selectedFiles.size > BulkOperationsUtils.MIN_SELECTED
+            ) {
                 sendBulkAction(
                     fileCount,
                     BulkOperation(
@@ -450,7 +451,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             enableButtonMultiSelect(false)
             fileListViewModel.getFileCount(currentFolder!!).observe(viewLifecycleOwner) { fileCount ->
                 val fileNumber = fileCount.count
-                if (fileNumber < 10) fileAdapter.itemSelected = fileAdapter.getItems()
+                if (fileNumber < BulkOperationsUtils.MIN_SELECTED) fileAdapter.itemSelected = fileAdapter.getItems()
 
                 enableButtonMultiSelect(true)
                 titleMultiSelect.text = resources.getQuantityString(

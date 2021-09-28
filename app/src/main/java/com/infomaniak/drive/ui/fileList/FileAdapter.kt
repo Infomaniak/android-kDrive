@@ -324,12 +324,8 @@ open class FileAdapter(
                 notifyItemRangeChanged(0, itemCount)
                 addSelectedFile(file)
             }
-            isSelected -> {
-                addSelectedFile(file)
-            }
-            else -> {
-                removeSelectedFile(file)
-            }
+            isSelected -> addSelectedFile(file)
+            else -> removeSelectedFile(file)
         }
         updateMultiSelectMode?.invoke()
     }
