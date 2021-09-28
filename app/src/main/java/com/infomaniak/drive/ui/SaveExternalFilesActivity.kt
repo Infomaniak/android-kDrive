@@ -55,7 +55,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.util.*
 
-
 class SaveExternalFilesActivity : BaseActivity() {
 
     private val selectDriveViewModel: SelectDriveViewModel by viewModels()
@@ -133,11 +132,6 @@ class SaveExternalFilesActivity : BaseActivity() {
             } ?: run {
                 pathName.setText(R.string.selectFolderTitle)
             }
-        }
-
-        fileNameEdit?.addTextChangedListener {
-            fileNameEdit.showOrHideEmptyError()
-            saveButton.isEnabled = isValidFields()
         }
 
         saveButton.initProgress(this)
@@ -227,6 +221,10 @@ class SaveExternalFilesActivity : BaseActivity() {
         (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let { uri ->
             currentUri = uri
             fileNameEdit.setText(uri.fileName())
+            fileNameEdit.addTextChangedListener {
+                fileNameEdit.showOrHideEmptyError()
+                saveButton.isEnabled = isValidFields()
+            }
         }
     }
 
@@ -240,7 +238,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     }
 
     private fun isValidFields(): Boolean {
-        return (fileNameEdit == null || !fileNameEdit.showOrHideEmptyError()) &&
+        return (fileNameEdit == null || !fileNameEdit.showOrHideEmptyError() || isMultiple) &&
                 (currentUri != null || isMultiple) &&
                 selectDriveViewModel.selectedUserId.value != null &&
                 selectDriveViewModel.selectedDrive.value != null &&
