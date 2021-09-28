@@ -60,30 +60,33 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/marginStandard"
             android:hint="@string/saveExternalFileInputFileName"
+            android:visibility="gone"
             app:layout_constraintEnd_toStartOf="@id/end"
             app:layout_constraintStart_toEndOf="@id/start"
-            app:layout_constraintTop_toBottomOf="@id/title">
+            app:layout_constraintTop_toBottomOf="@id/title"
+            tools:visibility="visible">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/fileNameEdit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/fileNames"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/marginStandardSmall"
-                android:divider="@android:color/transparent"
-                android:dividerHeight="@dimen/marginStandardSmall"
-                android:orientation="vertical"
-                android:visibility="gone"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:itemCount="3"
-                tools:listitem="@layout/item_file_name"
-                tools:visibility="visible" />
-
         </com.google.android.material.textfield.TextInputLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/fileNames"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/marginStandardSmall"
+            android:overScrollMode="never"
+            android:visibility="gone"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintEnd_toStartOf="@id/end"
+            app:layout_constraintStart_toEndOf="@id/start"
+            app:layout_constraintTop_toBottomOf="@id/fileNameEditLayout"
+            tools:itemCount="3"
+            tools:listitem="@layout/item_file_name"
+            tools:visibility="visible" />
 
         <TextView
             android:id="@+id/kDriveTitle"
@@ -94,7 +97,7 @@
             android:text="@string/app_name"
             app:layout_constraintEnd_toStartOf="@id/end"
             app:layout_constraintStart_toEndOf="@id/start"
-            app:layout_constraintTop_toBottomOf="@id/fileNameEditLayout" />
+            app:layout_constraintTop_toBottomOf="@id/fileNames" />
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/selectDrive"
