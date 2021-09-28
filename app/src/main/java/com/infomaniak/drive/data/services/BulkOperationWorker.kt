@@ -83,7 +83,8 @@ class BulkOperationWorker(private val context: Context, workerParams: WorkerPara
     }
 
     companion object {
-        const val TAG = "BulkOperationWorker"
+        const val TAG = "bulk_operation_worker"
+
         const val ACTION_UUID = "action_uuid"
         const val TOTAL_FILES_KEY = "total_files"
         const val OPERATION_TYPE_KEY = "operation_type_key"

@@ -228,7 +228,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
 
         requireContext().trackBulkOperation().observe(viewLifecycleOwner) {
-            onRefresh()
+            if (it.isNotEmpty()) refreshActivities()
         }
 
         MqttClientWrapper.observe(viewLifecycleOwner) { notification ->
@@ -605,6 +605,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun refreshActivities() {
+        //TODO It is possible that some activities are missing
         if (isLoadingActivities || folderID == OTHER_ROOT_ID) return
         isLoadingActivities = true
         lastTimeActivitiesRefreshed = Date().time
