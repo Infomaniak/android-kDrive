@@ -66,7 +66,10 @@ import com.infomaniak.drive.utils.BulkOperationsUtils.trackBulkOperation
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.utils.hideProgress
+import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.setPagination
+import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.cardview_file_list.*
 import kotlinx.android.synthetic.main.empty_icon_layout.*
@@ -75,6 +78,7 @@ import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_new_folder.*
 import kotlinx.android.synthetic.main.fragment_new_folder.toolbar
+import kotlinx.android.synthetic.main.fragment_select_permission.*
 import kotlinx.android.synthetic.main.item_file.*
 import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.coroutines.*
@@ -441,24 +445,22 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 )
             )
         }
+        selectAllButton.initProgress(viewLifecycleOwner)
         selectAllButton.setOnClickListener {
-            fileAdapter.apply {
-                allSelected = true
-                fileAdapter.itemSelected.clear()
-                fileAdapter.notifyItemRangeChanged(0, fileAdapter.itemCount)
-            }
+            selectAllButton.showProgress(ContextCompat.getColor(requireContext(), R.color.primary))
+            if (fileAdapter.allSelected) {
+                fileAdapter.configureAllSelected(false)
+                onUpdateMultiSelect()
+            } else {
+                fileAdapter.configureAllSelected(true)
+                enableButtonMultiSelect(false)
 
-            enableButtonMultiSelect(false)
-            fileListViewModel.getFileCount(currentFolder!!).observe(viewLifecycleOwner) { fileCount ->
-                val fileNumber = fileCount.count
-                if (fileNumber < BulkOperationsUtils.MIN_SELECTED) fileAdapter.itemSelected = fileAdapter.getItems()
-
-                enableButtonMultiSelect(true)
-                titleMultiSelect.text = resources.getQuantityString(
-                    R.plurals.fileListMultiSelectedTitle,
-                    fileNumber,
-                    fileNumber
-                )
+                fileListViewModel.getFileCount(currentFolder!!).observe(viewLifecycleOwner) { fileCount ->
+                    val fileNumber = fileCount.count
+                    if (fileNumber < BulkOperationsUtils.MIN_SELECTED) fileAdapter.itemSelected = fileAdapter.getItems()
+                    enableButtonMultiSelect(true)
+                    onUpdateMultiSelect(fileNumber)
+                }
             }
         }
 
@@ -710,8 +712,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         selectAllButton.visibility = VISIBLE
     }
 
-    private fun onUpdateMultiSelect() {
-        val fileSelectedNumber = fileAdapter.itemSelected.size
+    private fun onUpdateMultiSelect(selectedNumber: Int? = null) {
+        val fileSelectedNumber = selectedNumber ?: fileAdapter.itemSelected.size
         when (fileSelectedNumber) {
             0, 1 -> {
                 val isEnabled = fileSelectedNumber == 1
@@ -723,13 +725,13 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             fileSelectedNumber,
             fileSelectedNumber
         )
+        selectAllButton.hideProgress(if (fileAdapter.allSelected) R.string.buttonDeselectAll else R.string.buttonSelectAll)
     }
 
     private fun enableButtonMultiSelect(isEnabled: Boolean) {
         deleteButtonMultiSelect.isEnabled = isEnabled
         moveButtonMultiSelect.isEnabled = isEnabled
         menuButtonMultiSelect.isEnabled = isEnabled
-        selectAllButton.isEnabled = isEnabled
     }
 
     private fun closeMultiSelect() {

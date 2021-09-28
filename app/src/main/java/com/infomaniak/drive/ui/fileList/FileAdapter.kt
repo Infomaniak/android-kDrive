@@ -319,15 +319,19 @@ open class FileAdapter(
     private fun onSelectedFile(file: File, isSelected: Boolean) {
         when {
             allSelected -> { // if all selected, unselect everything and only select the clicked one (like web-app)
-                allSelected = false
-                itemSelected.clear()
-                notifyItemRangeChanged(0, itemCount)
+                configureAllSelected(false)
                 addSelectedFile(file)
             }
             isSelected -> addSelectedFile(file)
             else -> removeSelectedFile(file)
         }
         updateMultiSelectMode?.invoke()
+    }
+
+    fun configureAllSelected(isSelectedAll: Boolean) {
+        allSelected = isSelectedAll
+        itemSelected.clear()
+        notifyItemRangeChanged(0, itemCount)
     }
 
     private fun addSelectedFile(file: File) {

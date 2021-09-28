@@ -77,8 +77,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@id/selectAllButton" />
 
-            <!-- TODO in futur version -->
-
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/selectAllButton"
                 style="@style/TextButton"
