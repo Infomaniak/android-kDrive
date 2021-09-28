@@ -128,7 +128,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                     folder.name
                 }
                 pathName.text = folderName
-                saveButton.isEnabled = isValidFields()
+                checkEnabledSaveButton()
             } ?: run {
                 pathName.setText(R.string.selectFolderTitle)
             }
@@ -220,11 +220,12 @@ class SaveExternalFilesActivity : BaseActivity() {
     private fun handleSendSingle(intent: Intent) {
         (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let { uri ->
             currentUri = uri
-            fileNameEdit.setText(uri.fileName())
+            fileNameEditLayout.visibility = VISIBLE
             fileNameEdit.addTextChangedListener {
                 fileNameEdit.showOrHideEmptyError()
-                saveButton.isEnabled = isValidFields()
+                checkEnabledSaveButton()
             }
+            fileNameEdit.setText(uri.fileName())
         }
     }
 
@@ -233,13 +234,16 @@ class SaveExternalFilesActivity : BaseActivity() {
         fileNames.adapter = SaveExternalUriAdapter(uris as ArrayList<Uri>)
         isMultiple = true
 
-        fileNameEditLayout.removeViewAt(0)
         fileNames.visibility = VISIBLE
+        checkEnabledSaveButton()
+    }
+
+    private fun checkEnabledSaveButton() {
+        saveButton.isEnabled = isValidFields()
     }
 
     private fun isValidFields(): Boolean {
-        return (fileNameEdit == null || !fileNameEdit.showOrHideEmptyError() || isMultiple) &&
-                (currentUri != null || isMultiple) &&
+        return (isMultiple || !fileNameEdit.showOrHideEmptyError()) &&
                 selectDriveViewModel.selectedUserId.value != null &&
                 selectDriveViewModel.selectedDrive.value != null &&
                 saveExternalFilesViewModel.folderId.value != null
