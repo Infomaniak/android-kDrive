@@ -58,14 +58,14 @@ class UploadTask(
     private var previousChunkBytesWritten = 0L
     private var currentProgress = 0
 
-    private var uploadNotification: NotificationCompat.Builder? = null
+    private lateinit var uploadNotification: NotificationCompat.Builder
     private lateinit var notificationManagerCompat: NotificationManagerCompat
 
     suspend fun start() = withContext(Dispatchers.IO) {
         notificationManagerCompat = NotificationManagerCompat.from(context)
 
         uploadNotification = context.uploadProgressNotification()
-        uploadNotification?.apply {
+        uploadNotification.apply {
             setContentTitle(uploadFile.fileName)
             notificationManagerCompat.notify(CURRENT_UPLOAD_ID, build())
         }
@@ -131,7 +131,7 @@ class UploadTask(
         }
 
         coroutineScope.ensureActive()
-        uploadNotification?.apply {
+        uploadNotification.apply {
             setOngoing(false)
             setContentText("100%")
             setSmallIcon(android.R.drawable.stat_sys_upload_done)
@@ -234,7 +234,7 @@ class UploadTask(
         if (worker.isStopped) throw CancellationException()
         ensureActive()
 
-        uploadNotification?.apply {
+        uploadNotification.apply {
             val intent = Intent(context, MainActivity::class.java).apply {
                 putExtra(MainActivity.INTENT_SHOW_PROGRESS, uploadFile.remoteFolder)
             }

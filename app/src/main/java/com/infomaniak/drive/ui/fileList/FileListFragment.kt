@@ -728,6 +728,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         deleteButtonMultiSelect.isEnabled = isEnabled
         moveButtonMultiSelect.isEnabled = isEnabled
         menuButtonMultiSelect.isEnabled = isEnabled
+        selectAllButton.isEnabled = isEnabled
     }
 
     private fun closeMultiSelect() {

@@ -19,6 +19,8 @@ package com.infomaniak.drive.data.services
 
 import android.content.Context
 import androidx.concurrent.futures.CallbackToFutureAdapter
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.Observer
 import androidx.work.ForegroundInfo
 import androidx.work.ListenableWorker
@@ -32,18 +34,26 @@ class BulkOperationWorker(private val context: Context, workerParams: WorkerPara
     ListenableWorker(context, workerParams) {
 
     private lateinit var actionUuid: String
+    private lateinit var bulkOperationNotification: NotificationCompat.Builder
     private lateinit var bulkOperationType: BulkOperationType
-    private var totalFiles: Int = 0
-    private var notificationId: Int = 0
     private lateinit var mqttNotificationsObserver: Observer<Notification>
+    private lateinit var notificationManagerCompat: NotificationManagerCompat
+
+    private var notificationId: Int = 0
+    private var totalFiles: Int = 0
 
     override fun startWork(): ListenableFuture<Result> {
         actionUuid = inputData.getString(ACTION_UUID).toString()
+        bulkOperationType = BulkOperationType.valueOf(inputData.getString(OPERATION_TYPE_KEY).toString())
         notificationId = actionUuid.hashCode()
+        notificationManagerCompat = NotificationManagerCompat.from(context)
         totalFiles = inputData.getInt(TOTAL_FILES_KEY, 0)
-        bulkOperationType = BulkOperationType.valueOf(inputData.getString(OPERATION_TYPE_KEY)!!)
 
-        createForegroundInfo(notificationId, 0, 0, totalFiles)
+        bulkOperationNotification = bulkOperationType.getNotificationBuilder(context).apply {
+            setContentTitle(context.getString(bulkOperationType.title, 0, totalFiles))
+        }
+        setForegroundAsync(ForegroundInfo(notificationId, bulkOperationNotification.build()))
+
         return CallbackToFutureAdapter.getFuture { completer ->
             launchObserver {
                 MqttClientWrapper.removeObserver(mqttNotificationsObserver)
@@ -58,28 +68,18 @@ class BulkOperationWorker(private val context: Context, workerParams: WorkerPara
                 if (notification.progress.percent == 100) {
                     onOperationFinished(true)
                 } else {
-                    setForegroundAsync(
-                        createForegroundInfo(
-                            notificationId,
-                            notification.progress.percent,
-                            notification.progress.success,
-                            totalFiles
-                        )
-                    )
+                    bulkOperationNotification.apply {
+                        val string = context.getString(bulkOperationType.title, notification.progress.success, totalFiles)
+                        setContentTitle(string)
+                        setContentText("${notification.progress.percent}%")
+                        setProgress(100, notification.progress.percent, false)
+                        notificationManagerCompat.notify(notificationId, build())
+                    }
                 }
             }
         }
 
         MqttClientWrapper.observeForever(mqttNotificationsObserver)
-    }
-
-    private fun createForegroundInfo(operationId: Int, percentage: Int, doneFiles: Int, totalFiles: Int): ForegroundInfo {
-        val notificationBuilder = bulkOperationType.getNotificationBuilder(context)!!.apply {
-            setContentTitle(context.getString(bulkOperationType.title!!, doneFiles, totalFiles))
-            setProgress(100, percentage, doneFiles == 0)
-            setContentText("$percentage%")
-        }
-        return ForegroundInfo(operationId, notificationBuilder.build())
     }
 
     companion object {

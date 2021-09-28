@@ -93,10 +93,6 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
         isSubscribed = true
     }
 
-    fun disconnect(listener: IMqttActionListener) {
-        client.disconnect(null, listener)
-    }
-
     override fun connectionLost(cause: Throwable?) {
         Log.e("MQTT Error", "Connection has been lost. Stacktrace below.")
         cause?.printStackTrace()

@@ -29,19 +29,19 @@ import com.infomaniak.drive.utils.NotificationUtils.trashOperationProgressNotifi
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-enum class BulkOperationType(@StringRes val title: Int? = null, @PluralsRes val successMessage: Int? = null) : Parcelable {
+enum class BulkOperationType(@StringRes val title: Int, @PluralsRes val successMessage: Int) : Parcelable {
     TRASH(R.string.fileListDeletionInProgressSnackbar, R.plurals.snackbarMoveTrashConfirmation),
     MOVE(R.string.fileListMoveInProgressSnackbar, R.plurals.fileListMoveFileConfirmationSnackbar),
     COPY(R.string.fileListCopyInProgressSnackbar, R.plurals.fileListDuplicationConfirmationSnackbar),
-    SET_OFFLINE(successMessage = R.plurals.fileListAddOfflineConfirmationSnackbar),
-    ADD_FAVORITES(successMessage = R.plurals.fileListAddFavorisConfirmationSnackbar);
 
-    fun getNotificationBuilder(context: Context): NotificationCompat.Builder? {
+    SET_OFFLINE(0, successMessage = R.plurals.fileListAddOfflineConfirmationSnackbar),
+    ADD_FAVORITES(0, successMessage = R.plurals.fileListAddFavorisConfirmationSnackbar);
+
+    fun getNotificationBuilder(context: Context): NotificationCompat.Builder {
         return when (this) {
             MOVE -> context.moveOperationProgressNotification()
             TRASH -> context.trashOperationProgressNotification()
-            COPY -> context.copyOperationProgressNotification()
-            else -> null
+            else -> context.copyOperationProgressNotification()
         }
     }
 }
