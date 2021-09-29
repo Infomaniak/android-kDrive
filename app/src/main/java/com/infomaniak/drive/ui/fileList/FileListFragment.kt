@@ -247,9 +247,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                                 else fileAdapter.deleteAt(itemPosition)
                             }
                             Action.FILE_RESTORE, Action.FILE_CREATE -> {
-                                if (notification.parentId == parentFolder.id && canRefresh) {
-                                    refreshActivities()
-                                }
+                                if (notification.parentId == parentFolder.id && canRefresh) refreshActivities()
                             }
                         }
                     }
@@ -312,7 +310,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        onSelectFolderResult(requestCode, resultCode, data)
+        data?.let { onSelectFolderResult(requestCode, resultCode, data) }
     }
 
     override fun onResume() {
@@ -573,20 +571,17 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
-    private fun onSelectFolderResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    private fun onSelectFolderResult(requestCode: Int, resultCode: Int, data: Intent) {
         if (requestCode == SelectFolderActivity.SELECT_FOLDER_REQUEST && resultCode == AppCompatActivity.RESULT_OK) {
-            val folderName = data?.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
-            val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
-            val customArgs = data?.extras?.getBundle(SelectFolderActivity.CUSTOM_ARGS_TAG)
+            val folderName = data.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
+            val folderId = data.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)!!
+            val customArgs = data.extras?.getBundle(SelectFolderActivity.CUSTOM_ARGS_TAG)
+            val bulkOperationType = customArgs?.getParcelable<BulkOperationType>(BULK_OPERATION_CUSTOM_TAG)!!
 
-            val bulkOperationType = customArgs?.getParcelable<BulkOperationType>(BULK_OPERATION_CUSTOM_TAG)
-
-            folderId?.let { destinationFolderId ->
-                performBulkOperation(
-                    type = bulkOperationType!!,
-                    destinationFolder = File(id = destinationFolderId, name = folderName, driveId = AccountUtils.currentDriveId)
-                )
-            }
+            performBulkOperation(
+                type = bulkOperationType,
+                destinationFolder = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId)
+            )
         }
     }
 
