@@ -39,6 +39,7 @@ object BulkOperationsUtils {
         val bulkOperationWorkRequest: OneTimeWorkRequest =
             OneTimeWorkRequestBuilder<BulkOperationWorker>()
                 .setInputData(workData)
+                .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
                 .addTag(BulkOperationWorker.TAG)
                 .build()
 

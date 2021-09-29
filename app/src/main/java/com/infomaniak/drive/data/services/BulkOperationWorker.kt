@@ -18,6 +18,7 @@
 package com.infomaniak.drive.data.services
 
 import android.content.Context
+import android.os.CountDownTimer
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -29,6 +30,8 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.infomaniak.drive.data.models.ActionProgressNotification
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.Notification
+import com.infomaniak.drive.utils.Utils
+import java.util.*
 
 class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : ListenableWorker(context, workerParams) {
 
@@ -37,6 +40,9 @@ class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : Li
     private lateinit var bulkOperationType: BulkOperationType
     private lateinit var mqttNotificationsObserver: Observer<Notification>
     private lateinit var notificationManagerCompat: NotificationManagerCompat
+
+    private lateinit var timer: CountDownTimer
+    private lateinit var lastReception: Date
 
     private var notificationId: Int = 0
     private var totalFiles: Int = 0
@@ -53,7 +59,17 @@ class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : Li
         }
         setForegroundAsync(ForegroundInfo(notificationId, bulkOperationNotification.build()))
 
+        lastReception = Date()
+
         return CallbackToFutureAdapter.getFuture { completer ->
+            timer = Utils.createRefreshTimer(milliseconds = 1000) {
+                if (Date().time - lastReception.time > 30000) {
+                    completer.set(Result.failure())
+                } else {
+                    timer.start()
+                }
+            }
+            timer.start()
             launchObserver {
                 MqttClientWrapper.removeObserver(mqttNotificationsObserver)
                 completer.set(Result.success())
@@ -64,6 +80,7 @@ class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : Li
     private fun launchObserver(onOperationFinished: (isSuccess: Boolean) -> Unit) {
         mqttNotificationsObserver = Observer<Notification> { notification ->
             if (notification is ActionProgressNotification && notification.actionUuid == actionUuid) {
+                lastReception = Date()
                 if (notification.progress.percent == 100) {
                     onOperationFinished(true)
                 } else {
