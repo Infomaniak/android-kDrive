@@ -56,7 +56,7 @@ class MySharesFragment : FileSubTypeListFragment() {
     private inner class DownloadFiles : (Boolean) -> Unit {
         override fun invoke(ignoreCache: Boolean) {
             if (ignoreCache) fileAdapter.setList(arrayListOf())
-            timer.start()
+            showLoadingTimer.start()
             fileAdapter.isComplete = false
 
             fileListViewModel.getMySharedFiles(fileListViewModel.sortType).observe(viewLifecycleOwner) {

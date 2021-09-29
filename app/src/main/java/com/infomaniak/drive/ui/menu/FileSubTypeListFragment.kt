@@ -38,7 +38,7 @@ open class FileSubTypeListFragment : FileListFragment() {
         if (fileAdapter.itemCount == 0 || forceClean) fileAdapter.setList(files)
         else fileRecyclerView.post { fileAdapter.addFileList(files) }
         fileAdapter.isComplete = isComplete
-        timer.cancel()
+        showLoadingTimer.cancel()
         swipeRefreshLayout.isRefreshing = false
         changeNoFilesLayoutVisibility(
             files.isEmpty(),

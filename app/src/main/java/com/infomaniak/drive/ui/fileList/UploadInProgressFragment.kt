@@ -166,7 +166,7 @@ class UploadInProgressFragment : FileListFragment() {
             if (!drivePermissions.checkWriteStoragePermission()) return
             if (ignoreCache) fileAdapter.setList(arrayListOf())
 
-            timer.start()
+            showLoadingTimer.start()
             fileAdapter.isComplete = false
             fileListViewModel.getPendingFiles(folderID).observe(viewLifecycleOwner) { syncFiles ->
                 lifecycleScope.launch(Dispatchers.IO) {
@@ -221,7 +221,7 @@ class UploadInProgressFragment : FileListFragment() {
                         toolbar.menu.findItem(R.id.closeItem).isVisible = true
                         fileAdapter.setList(files)
                         fileAdapter.isComplete = true
-                        timer.cancel()
+                        showLoadingTimer.cancel()
                         swipeRefreshLayout.isRefreshing = false
                         noFilesLayout.toggleVisibility(pendingFiles.isEmpty())
                     }

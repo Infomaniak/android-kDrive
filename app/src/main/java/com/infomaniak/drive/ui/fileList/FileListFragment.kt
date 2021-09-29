@@ -101,7 +101,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private var isDownloading = false
     private var lastTimeActivitiesRefreshed: Long = 0
 
-    protected lateinit var timer: CountDownTimer
+    protected lateinit var showLoadingTimer: CountDownTimer
     protected open var downloadFiles: (ignoreCache: Boolean) -> Unit = DownloadFiles()
     protected open var sortFiles: () -> Unit = SortFiles()
     protected open var enabledMultiSelectMode = true
@@ -143,7 +143,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        timer = Utils.createRefreshTimer {
+        showLoadingTimer = Utils.createRefreshTimer {
             swipeRefreshLayout?.isRefreshing = true
         }
 
@@ -790,7 +790,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private inner class DownloadFiles : (Boolean) -> Unit {
         override fun invoke(ignoreCache: Boolean) {
             if (ignoreCache) fileAdapter.setList(arrayListOf())
-            timer.start()
+            showLoadingTimer.start()
             isDownloading = true
             fileAdapter.isComplete = false
             getFolderFiles(ignoreCache, onFinish = {
@@ -817,7 +817,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     fileAdapter.isComplete = true
                 }
                 isDownloading = false
-                timer.cancel()
+                showLoadingTimer.cancel()
                 swipeRefreshLayout.isRefreshing = false
             })
         }
