@@ -62,7 +62,6 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.BULK_OPER
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.generateWorkerData
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
-import com.infomaniak.drive.utils.BulkOperationsUtils.trackBulkOperation
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.models.ApiResponse
@@ -96,10 +95,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     internal var folderName: String = "/"
     private var currentFolder: File? = null
 
+    private lateinit var activitiesRefreshTimer: CountDownTimer
     private var ignoreCreateFolderStack: Boolean = false
-    private var isLoadingActivities = false
     private var isDownloading = false
-    private var lastTimeActivitiesRefreshed: Long = 0
+    private var isLoadingActivities = false
+    private var retryLoadingActivities = false
 
     protected lateinit var showLoadingTimer: CountDownTimer
     protected open var downloadFiles: (ignoreCache: Boolean) -> Unit = DownloadFiles()
@@ -120,7 +120,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         const val SORT_TYPE_OPTION_KEY = "sort_type_option"
         const val DELETE_NOT_UPDATE_ACTION = "is_update_not_delete_action"
 
-        const val ACTIVITIES_REFRESH_DELAY = 5000
+        const val ACTIVITIES_REFRESH_DELAY = 5000L
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -145,6 +145,14 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         showLoadingTimer = Utils.createRefreshTimer {
             swipeRefreshLayout?.isRefreshing = true
+        }
+
+        activitiesRefreshTimer = Utils.createRefreshTimer(ACTIVITIES_REFRESH_DELAY) {
+            isLoadingActivities = false
+            if (retryLoadingActivities) {
+                retryLoadingActivities = false
+                if (isResumed) refreshActivities()
+            }
         }
 
         mainViewModel.intentShowProgressByFolderId.observe(viewLifecycleOwner) {
@@ -229,25 +237,19 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         toolbar?.menu?.findItem(R.id.searchItem)?.isVisible = findNavController().currentDestination?.id == R.id.fileListFragment
 
-
-        requireContext().trackBulkOperation().observe(viewLifecycleOwner) {
-            if (it.isNotEmpty()) refreshActivities()
-        }
-
         MqttClientWrapper.observe(viewLifecycleOwner) { notification ->
             currentFolder?.let { parentFolder ->
                 if (notification is ActionNotification && notification.driveId == AccountUtils.currentDriveId) {
                     val itemPosition = fileAdapter.indexOf(notification.fileId)
-                    val canRefresh = Date().time - lastTimeActivitiesRefreshed >= ACTIVITIES_REFRESH_DELAY
                     if (itemPosition >= 0) {
                         when (notification.action) {
                             Action.FILE_TRASH -> fileAdapter.deleteAt(itemPosition)
                             Action.FILE_MOVE -> {
-                                if (notification.parentId == parentFolder.id && canRefresh) refreshActivities()
+                                if (notification.parentId == parentFolder.id) refreshActivities()
                                 else fileAdapter.deleteAt(itemPosition)
                             }
                             Action.FILE_RESTORE, Action.FILE_CREATE -> {
-                                if (notification.parentId == parentFolder.id && canRefresh) refreshActivities()
+                                if (notification.parentId == parentFolder.id) refreshActivities()
                             }
                         }
                     }
@@ -315,8 +317,14 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onResume() {
         super.onResume()
+        if (!isDownloading) refreshActivities()
         showPendingFiles()
         updateVisibleProgresses()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        showLoadingTimer.cancel()
     }
 
     private fun performBulkOperation(type: BulkOperationType, destinationFolder: File? = null) {
@@ -594,16 +602,21 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun refreshActivities() {
-        //TODO It is possible that some activities are missing
-        if (isLoadingActivities || folderID == OTHER_ROOT_ID) return
+        if (folderID == OTHER_ROOT_ID) return
+
+        if (isLoadingActivities) {
+            retryLoadingActivities = true
+            return
+        }
+
+        activitiesRefreshTimer.cancel()
         isLoadingActivities = true
-        lastTimeActivitiesRefreshed = Date().time
         mainViewModel.currentFolder.value?.let { currentFolder ->
             FileController.getFileById(currentFolder.id)?.let { updatedFolder ->
                 downloadFolderActivities(updatedFolder)
-                isLoadingActivities = false
-            } ?: kotlin.run { isLoadingActivities = false }
-        } ?: kotlin.run { isLoadingActivities = false }
+                activitiesRefreshTimer.start()
+            } ?: kotlin.run { activitiesRefreshTimer.start() }
+        } ?: kotlin.run { activitiesRefreshTimer.start() }
     }
 
     private fun observeOfflineDownloadProgress() {
@@ -805,7 +818,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                             changeControlsVisibility = result.parentFolder?.isRoot() == false
                         )
                         fileAdapter.setList(result.files)
-                        result.parentFolder?.let { parent -> downloadFolderActivities(parent) }
+                        refreshActivities()
 
                     } else fileRecyclerView.post { fileAdapter.addFileList(result.files) }
                     fileAdapter.isComplete = result.isComplete

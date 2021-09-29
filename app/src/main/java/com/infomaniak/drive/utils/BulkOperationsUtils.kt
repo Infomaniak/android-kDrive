@@ -45,13 +45,4 @@ object BulkOperationsUtils {
 
         WorkManager.getInstance(this).enqueue(bulkOperationWorkRequest)
     }
-
-    fun Context.trackBulkOperation(): LiveData<MutableList<WorkInfo>> {
-        return WorkManager.getInstance(this).getWorkInfosLiveData(
-            WorkQuery.Builder
-                .fromTags(listOf(BulkOperationWorker.TAG))
-                .addStates(listOf(WorkInfo.State.SUCCEEDED))
-                .build()
-        )
-    }
 }

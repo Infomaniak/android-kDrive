@@ -532,7 +532,10 @@ object FileController {
                 }
             }
 
-            if ((ignoreCache || localFolder == null || localFolder.children.isNullOrEmpty() || !localFolder.isComplete) && !ignoreCloud) {
+            if (
+                (ignoreCache || localFolder == null || localFolder.children.isNullOrEmpty() || !localFolder.isComplete)
+                && !ignoreCloud
+            ) {
                 result = downloadFiles(userDrive, parentId, page, order, localFolder, realm, localFolderWithoutChildren)
             } else if (page == 1 && localFolderWithoutChildren != null) {
                 result = (localFolderWithoutChildren to getLocalSortedFolderFiles(localFolder, order, realm))
@@ -580,19 +583,9 @@ object FileController {
                 val apiChildrenRealmList = remoteFolder.children
                 val apiChildren = ArrayList<File>(apiChildrenRealmList.toList())
 
-                if (apiChildren.isNullOrEmpty()) {
-                    localFolder?.let { oldFile ->
-                        currentRealm.executeTransaction {
-                            oldFile.isComplete = true
-                            it.insertOrUpdate(oldFile)
-                        }
-                    }
-                    if (localFolderWithoutChildren != null) result = (localFolderWithoutChildren to arrayListOf())
-                } else {
-                    saveRemoteFiles(localFolder, remoteFolder, page, currentRealm, apiChildren, order, apiResponse)
-                    remoteFolder.children = RealmList()
-                    result = (remoteFolder to apiChildren)
-                }
+                saveRemoteFiles(localFolder, remoteFolder, page, currentRealm, apiChildren, order, apiResponse)
+                remoteFolder.children = RealmList()
+                result = (remoteFolder to apiChildren)
             }
         } else if (page == 1 && localFolderWithoutChildren != null) {
             result = (localFolderWithoutChildren to getLocalSortedFolderFiles(localFolder, order, currentRealm))
