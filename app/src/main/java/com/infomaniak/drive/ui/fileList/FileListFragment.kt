@@ -236,7 +236,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         MqttClientWrapper.observe(viewLifecycleOwner) { notification ->
             currentFolder?.let { parentFolder ->
-                if (notification is ActionNotification) {
+                if (notification is ActionNotification && notification.driveId == AccountUtils.currentDriveId) {
                     val itemPosition = fileAdapter.indexOf(notification.fileId)
                     val canRefresh = Date().time - lastTimeActivitiesRefreshed >= ACTIVITIES_REFRESH_DELAY
                     if (itemPosition >= 0) {
