@@ -238,23 +238,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         toolbar?.menu?.findItem(R.id.searchItem)?.isVisible = findNavController().currentDestination?.id == R.id.fileListFragment
 
         MqttClientWrapper.observe(viewLifecycleOwner) { notification ->
-            currentFolder?.let { parentFolder ->
-                if (notification is ActionNotification && notification.driveId == AccountUtils.currentDriveId) {
-                    val itemPosition = fileAdapter.indexOf(notification.fileId)
-                    if (itemPosition >= 0) {
-                        when (notification.action) {
-                            Action.FILE_TRASH -> fileAdapter.deleteAt(itemPosition)
-                            Action.FILE_MOVE -> {
-                                if (notification.parentId == parentFolder.id) refreshActivities()
-                                else fileAdapter.deleteAt(itemPosition)
-                            }
-                            Action.FILE_RESTORE, Action.FILE_CREATE -> {
-                                if (notification.parentId == parentFolder.id) refreshActivities()
-                            }
-                        }
-                    }
-                }
-            }
+            if (notification is ActionNotification && notification.driveId == AccountUtils.currentDriveId) refreshActivities()
         }
 
         setupBackActionHandler()
