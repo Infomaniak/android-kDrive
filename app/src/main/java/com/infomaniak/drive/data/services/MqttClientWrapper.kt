@@ -52,9 +52,9 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
         isSubscribed = false
     }
 
-    fun init(context: Context, clientId: String = "", onClientConnected: (success: Boolean) -> Unit) {
+    fun init(context: Context) {
         this.appContext = context
-        this.clientId = clientId
+        this.clientId = generateClientId()
 
         client.setCallback(this)
         val options = MqttConnectOptions()
@@ -66,12 +66,12 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
         try {
             client.connect(options, null, object : IMqttActionListener {
                 override fun onSuccess(asyncActionToken: IMqttToken?) {
-                    onClientConnected(true)
+                    Log.i("MQTT connection", "Success : true")
                 }
 
                 override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
                     exception?.printStackTrace()
-                    onClientConnected(false)
+                    Log.i("MQTT connection", "Success : false")
                 }
 
             })
@@ -86,9 +86,14 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
         if (!isSubscribed) subscribe(topicFor(token))
     }
 
-    private fun subscribe(topic: String, qos: Int = 1) {
+    // QoS0 to have auto-delete queues
+    private fun subscribe(topic: String, qos: Int = 0) {
         client.subscribe(topic, qos, null, null)
         isSubscribed = true
+    }
+
+    private fun generateClientId(): String {
+        return "mqtt_android_kdrive_" + buildString { repeat(10) { append(('a'..'z').random()) } }
     }
 
     override fun connectionLost(cause: Throwable?) {

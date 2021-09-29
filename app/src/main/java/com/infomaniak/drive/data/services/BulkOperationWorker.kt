@@ -30,8 +30,7 @@ import com.infomaniak.drive.data.models.ActionProgressNotification
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.Notification
 
-class BulkOperationWorker(private val context: Context, workerParams: WorkerParameters) :
-    ListenableWorker(context, workerParams) {
+class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : ListenableWorker(context, workerParams) {
 
     private lateinit var actionUuid: String
     private lateinit var bulkOperationNotification: NotificationCompat.Builder
@@ -46,11 +45,11 @@ class BulkOperationWorker(private val context: Context, workerParams: WorkerPara
         actionUuid = inputData.getString(ACTION_UUID).toString()
         bulkOperationType = BulkOperationType.valueOf(inputData.getString(OPERATION_TYPE_KEY).toString())
         notificationId = actionUuid.hashCode()
-        notificationManagerCompat = NotificationManagerCompat.from(context)
+        notificationManagerCompat = NotificationManagerCompat.from(applicationContext)
         totalFiles = inputData.getInt(TOTAL_FILES_KEY, 0)
 
-        bulkOperationNotification = bulkOperationType.getNotificationBuilder(context).apply {
-            setContentTitle(context.getString(bulkOperationType.title, 0, totalFiles))
+        bulkOperationNotification = bulkOperationType.getNotificationBuilder(applicationContext).apply {
+            setContentTitle(applicationContext.getString(bulkOperationType.title, 0, totalFiles))
         }
         setForegroundAsync(ForegroundInfo(notificationId, bulkOperationNotification.build()))
 
@@ -69,7 +68,8 @@ class BulkOperationWorker(private val context: Context, workerParams: WorkerPara
                     onOperationFinished(true)
                 } else {
                     bulkOperationNotification.apply {
-                        val string = context.getString(bulkOperationType.title, notification.progress.success, totalFiles)
+                        val string =
+                            applicationContext.getString(bulkOperationType.title, notification.progress.success, totalFiles)
                         setContentTitle(string)
                         setContentText("${notification.progress.percent}%")
                         setProgress(100, notification.progress.percent, false)

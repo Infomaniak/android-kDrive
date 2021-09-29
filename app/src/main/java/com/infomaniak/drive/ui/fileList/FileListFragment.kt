@@ -387,18 +387,9 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                         val title = if (success == 0) {
                             getString(R.string.anErrorHasOccurred)
                         } else {
-                            type.successMessage?.let { message ->
-                                resources.getQuantityString(
-                                    message,
-                                    success,
-                                    success,
-                                    destinationFolder?.name + "/"
-                                )
-                            }
+                            resources.getQuantityString(type.successMessage, success, success, destinationFolder?.name + "/")
                         }
-                        if (title != null) {
-                            requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
-                        }
+                        requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
                         refreshActivities()
                         closeMultiSelect()
                     }
