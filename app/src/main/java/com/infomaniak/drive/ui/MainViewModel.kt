@@ -48,6 +48,8 @@ import java.util.*
 
 class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
+    val realm = FileController.getRealmInstance()
+
     val currentFolder = MutableLiveData<File>()
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
     val currentFileList = MutableLiveData<ArrayList<File>>()
@@ -159,7 +161,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     fun addFileToFavorites(file: File, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
         ApiRepository.postFavoriteFile(file).let { apiResponse ->
             if (apiResponse.isSuccess()) {
-                FileController.updateFile(file.id) { localFile ->
+                FileController.updateFile(file.id, realm) { localFile ->
                     localFile.isFavorite = true
                 }
                 onSuccess?.invoke()
@@ -418,5 +420,10 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             }
             recursive(1)
         }
+    }
+
+    override fun onCleared() {
+        realm.close()
+        super.onCleared()
     }
 }
