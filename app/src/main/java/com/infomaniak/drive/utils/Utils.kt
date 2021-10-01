@@ -45,6 +45,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.AppSettings
+import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
@@ -59,7 +60,6 @@ import java.util.*
 import kotlin.math.min
 import kotlin.math.pow
 
-
 object Utils {
 
     const val ROOT_ID = 1
@@ -67,53 +67,11 @@ object Utils {
 
     const val INDETERMINATE_PROGRESS = -1
 
-    fun confirmFileDeletion(
-        context: Context,
-        fileName: String?,
-        fromTrash: Boolean = false,
-        deletionCount: Int = 1,
-        onPositiveButtonClicked: (dialog: Dialog) -> Unit
-    ) {
-        val title: Int
-        val message: String
-        val button: Int
-        if (fromTrash) {
-            title = R.string.modalDeleteTitle
-            message = context.resources.getQuantityString(
-                R.plurals.modalDeleteDescription,
-                deletionCount,
-                fileName ?: deletionCount
-            )
-            button = R.string.buttonDelete
-        } else {
-            title = R.string.modalMoveTrashTitle
-            message = context.resources.getQuantityString(
-                R.plurals.modalMoveTrashDescription,
-                if (fileName == null) deletionCount else 1,
-                fileName ?: deletionCount
-            )
-            button = R.string.buttonMove
-        }
-        val dialog = MaterialAlertDialogBuilder(context, R.style.DeleteDialogStyle)
-            .setTitle(title)
-            .setMessage(message)
-            .setPositiveButton(button) { _, _ -> }
-            .setNegativeButton(R.string.buttonCancel) { _, _ -> }
-            .setCancelable(false)
-            .show()
-
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-            onPositiveButtonClicked(dialog)
-            it.isEnabled = false
-            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).isEnabled = false
-        }
-    }
-
     fun createConfirmation(
         context: Context,
         title: String,
         message: String? = null,
-        mainButtonText: String? = null,
+        buttonText: String? = null,
         autoDismiss: Boolean = true,
         isDeletion: Boolean = false,
         onConfirmation: (dialog: Dialog) -> Unit
@@ -122,7 +80,7 @@ object Utils {
         val dialog = MaterialAlertDialogBuilder(context, style)
             .setTitle(title)
             .setMessage(message)
-            .setPositiveButton(mainButtonText ?: context.getString(R.string.buttonConfirm)) { _, _ -> }
+            .setPositiveButton(buttonText ?: context.getString(R.string.buttonConfirm)) { _, _ -> }
             .setNegativeButton(R.string.buttonCancel) { _, _ -> }
             .setCancelable(false)
             .show()
@@ -136,6 +94,32 @@ object Utils {
                 dialog.getButton(AlertDialog.BUTTON_NEGATIVE).isEnabled = false
             }
         }
+    }
+
+    fun confirmFileDeletion(
+        context: Context,
+        fileName: String? = null,
+        fileCount: Int = 1,
+        fromTrash: Boolean = false,
+        onConfirmation: (dialog: Dialog) -> Unit
+    ) {
+        val title: Int = if (fromTrash) R.string.modalDeleteTitle else R.string.modalMoveTrashTitle
+        val message: String = context.resources.getQuantityString(
+            if (fromTrash) R.plurals.modalDeleteDescription
+            else R.plurals.modalMoveTrashDescription,
+            if (fileName == null) fileCount else 1,
+            fileName ?: fileCount
+        )
+        val button: Int = if (fromTrash) R.string.buttonDelete else R.string.buttonMove
+
+        createConfirmation(
+            context = context,
+            title = context.getString(title),
+            message = message,
+            isDeletion = true,
+            buttonText = context.getString(button),
+            onConfirmation = onConfirmation
+        )
     }
 
     fun getRootName(context: Context): String {
@@ -243,7 +227,11 @@ object Utils {
         val intent = Intent(ownerFragment.context, SelectFolderActivity::class.java).apply {
             putExtra(SelectFolderActivity.USER_ID_TAG, AccountUtils.currentUserId)
             putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
-            putExtra(SelectFolderActivity.DISABLE_SELECTED_FOLDER, currentFolder)
+            putExtra(SelectFolderActivity.DISABLE_SELECTED_FOLDER_TAG, currentFolder)
+            putExtra(
+                SelectFolderActivity.CUSTOM_ARGS_TAG,
+                bundleOf(SelectFolderActivity.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE)
+            )
         }
         ownerFragment.startActivityForResult(intent, SelectFolderActivity.SELECT_FOLDER_REQUEST)
     }

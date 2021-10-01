@@ -21,12 +21,9 @@ import android.graphics.drawable.Drawable
 import androidx.lifecycle.*
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.UploadFile
-import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.IsComplete
 import com.infomaniak.drive.utils.SingleLiveEvent
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.coroutines.Dispatchers
@@ -57,6 +54,8 @@ class FileListViewModel : ViewModel() {
     var currentPage = 1
     var oldList: ArrayList<File>? = null
     val isListMode = SingleLiveEvent<Boolean>()
+
+    var lastItemCount: FileCount? = null
 
     fun sortTypeIsInitialized() = ::sortType.isInitialized
 
@@ -156,13 +155,27 @@ class FileListViewModel : ViewModel() {
         emit(UploadFile.getCurrentUserPendingUploadsCount(folderID))
     }
 
-    fun getMySharedFiles(sortType: File.SortType): LiveData<Pair<ArrayList<File>, IsComplete>?> {
+    fun getFileCount(folder: File): LiveData<FileCount> = liveData(Dispatchers.IO) {
+        lastItemCount?.let { emit(it) }
+        ApiRepository.getFileCount(folder).data?.let { fileCount ->
+            lastItemCount = fileCount
+            emit(fileCount)
+        }
+    }
+
+    fun getMySharedFiles(sortType: File.SortType): LiveData<Pair<ArrayList<File>, Boolean>?> {
         getFilesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
             FileController.getMySharedFiles(UserDrive(), sortType) { files, isComplete ->
                 runBlocking { emit(files to isComplete) }
             }
+        }
+    }
+
+    fun performCancellableBulkOperation(bulkOperation: BulkOperation): LiveData<ApiResponse<CancellableAction>> {
+        return liveData(Dispatchers.IO) {
+            emit(ApiRepository.performCancellableBulkOperation(bulkOperation))
         }
     }
 

@@ -106,7 +106,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
 
         override fun invoke(ignoreCache: Boolean) {
             if (ignoreCache) fileAdapter.setList(arrayListOf())
-            timer.start()
+            showLoadingTimer.start()
             fileAdapter.isComplete = false
 
             folder?.let { folder ->

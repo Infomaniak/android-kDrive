@@ -40,7 +40,7 @@ open class FileAdapter(
     override val itemList: ArrayList<File> = arrayListOf()
 ) : PaginationAdapter<File>() {
 
-    val itemSelected: ArrayList<File> = arrayListOf()
+    var itemSelected: ArrayList<File> = arrayListOf()
 
     var onFileClicked: ((file: File) -> Unit)? = null
     var onMenuClicked: ((selectedFile: File) -> Unit)? = null
@@ -50,6 +50,7 @@ open class FileAdapter(
 
     var enabledMultiSelectMode: Boolean = false
     var multiSelectMode: Boolean = false
+    var allSelected = false
     var offlineMode: Boolean = false
     var selectFolder: Boolean = false
     var showShareFileButton: Boolean = true
@@ -248,7 +249,7 @@ open class FileAdapter(
                         stopUploadButton?.visibility = VISIBLE
                     }
                     multiSelectMode -> {
-                        fileChecked.isChecked = isSelectedFile(file)
+                        fileChecked.isChecked = isSelectedFile(file) || allSelected
                         fileChecked.visibility = VISIBLE
                         filePreview.visibility = if (isGrid) VISIBLE else GONE
                     }
@@ -316,12 +317,21 @@ open class FileAdapter(
     }
 
     private fun onSelectedFile(file: File, isSelected: Boolean) {
-        if (isSelected) {
-            addSelectedFile(file)
-        } else {
-            removeSelectedFile(file)
+        when {
+            allSelected -> { // if all selected, unselect everything and only select the clicked one (like web-app)
+                configureAllSelected(false)
+                addSelectedFile(file)
+            }
+            isSelected -> addSelectedFile(file)
+            else -> removeSelectedFile(file)
         }
         updateMultiSelectMode?.invoke()
+    }
+
+    fun configureAllSelected(isSelectedAll: Boolean) {
+        allSelected = isSelectedAll
+        itemSelected.clear()
+        notifyItemRangeChanged(0, itemCount)
     }
 
     private fun addSelectedFile(file: File) {

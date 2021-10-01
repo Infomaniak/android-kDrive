@@ -180,6 +180,10 @@ object ApiRepository {
         return callApi(ApiRoutes.getFileDetails(file), GET)
     }
 
+    fun getFileCount(file: File): ApiResponse<FileCount> {
+        return callApi(ApiRoutes.getFileCount(file), GET)
+    }
+
     fun getFileActivities(file: File, page: Int): ApiResponse<ArrayList<FileActivity>> {
         val url = "${ApiRoutes.getFileActivities(file)}?with=user&${pagination(page, 25)}"
         return callApi(url, GET)
@@ -310,6 +314,14 @@ object ApiRepository {
 
     fun cancelAction(action: CancellableAction): ApiResponse<Boolean> {
         return callApi(ApiRoutes.cancelAction(action.driveId), POST, mapOf("cancel_id" to action.cancelId))
+    }
+
+    fun performCancellableBulkOperation(bulkOperation: BulkOperation): ApiResponse<CancellableAction> {
+        return callApi(ApiRoutes.bulkAction(bulkOperation.parent), POST, bulkOperation.toMap())
+    }
+
+    fun performCopyBulkOperation(bulkOperation: BulkOperation): ApiResponse<File> {
+        return callApi(ApiRoutes.bulkAction(bulkOperation.parent), POST, bulkOperation.toMap())
     }
 
     fun getUUIDArchiveFiles(driveId: Int, fileIds: IntArray): ApiResponse<ArchiveUUID> {

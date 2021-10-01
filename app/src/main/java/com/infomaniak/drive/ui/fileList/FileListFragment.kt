@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.fileList
 
+import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -42,25 +43,32 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import androidx.work.WorkInfo
+import androidx.work.*
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.services.DownloadWorker
+import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog.Companion.SELECT_DIALOG_ACTION
-import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog.SelectDialogAction
+import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.BULK_OPERATION_CUSTOM_TAG
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.BulkOperationsUtils.generateWorkerData
+import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.utils.hideProgress
+import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.setPagination
+import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.cardview_file_list.*
 import kotlinx.android.synthetic.main.empty_icon_layout.*
@@ -69,8 +77,11 @@ import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_new_folder.*
 import kotlinx.android.synthetic.main.fragment_new_folder.toolbar
+import kotlinx.android.synthetic.main.fragment_select_permission.*
+import kotlinx.android.synthetic.main.item_file.*
 import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.coroutines.*
+import java.util.*
 
 open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
@@ -84,11 +95,13 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     internal var folderName: String = "/"
     private var currentFolder: File? = null
 
+    private lateinit var activitiesRefreshTimer: CountDownTimer
     private var ignoreCreateFolderStack: Boolean = false
-    private var isLoadingActivities = false
     private var isDownloading = false
+    private var isLoadingActivities = false
+    private var retryLoadingActivities = false
 
-    protected lateinit var timer: CountDownTimer
+    protected lateinit var showLoadingTimer: CountDownTimer
     protected open var downloadFiles: (ignoreCache: Boolean) -> Unit = DownloadFiles()
     protected open var sortFiles: () -> Unit = SortFiles()
     protected open var enabledMultiSelectMode = true
@@ -106,6 +119,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         const val CANCELLABLE_ACTION_KEY = "cancellable_action"
         const val SORT_TYPE_OPTION_KEY = "sort_type_option"
         const val DELETE_NOT_UPDATE_ACTION = "is_update_not_delete_action"
+
+        const val ACTIVITIES_REFRESH_DELAY = 5000L
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -128,8 +143,16 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        timer = Utils.createRefreshTimer {
+        showLoadingTimer = Utils.createRefreshTimer {
             swipeRefreshLayout?.isRefreshing = true
+        }
+
+        activitiesRefreshTimer = Utils.createRefreshTimer(ACTIVITIES_REFRESH_DELAY) {
+            isLoadingActivities = false
+            if (retryLoadingActivities) {
+                retryLoadingActivities = false
+                if (isResumed) refreshActivities()
+            }
         }
 
         mainViewModel.intentShowProgressByFolderId.observe(viewLifecycleOwner) {
@@ -213,6 +236,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         toolbar?.menu?.findItem(R.id.searchItem)?.isVisible = findNavController().currentDestination?.id == R.id.fileListFragment
+
+        MqttClientWrapper.observe(viewLifecycleOwner) { notification ->
+            if (notification is ActionNotification && notification.driveId == AccountUtils.currentDriveId) refreshActivities()
+        }
+
         setupBackActionHandler()
     }
 
@@ -268,47 +296,88 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        onSelectFolderResult(requestCode, resultCode, data)
+        data?.let { onSelectFolderResult(requestCode, resultCode, data) }
     }
 
     override fun onResume() {
         super.onResume()
+        if (!isDownloading) refreshActivities()
         showPendingFiles()
         updateVisibleProgresses()
     }
 
-    private fun setupMultiSelect() {
-        fileAdapter.enabledMultiSelectMode = true
-        closeButtonMultiSelect.setOnClickListener { closeMultiSelect() }
-        deleteButtonMultiSelect.setOnClickListener {
-            val selectedFiles = fileAdapter.itemSelected
-            val fileName = if (selectedFiles.size == 1) fileAdapter.itemSelected.first().getFileName() else null
-            Utils.confirmFileDeletion(requireContext(), fileName = fileName, deletionCount = selectedFiles.size) { dialog ->
+    override fun onPause() {
+        super.onPause()
+        showLoadingTimer.cancel()
+    }
+
+    private fun performBulkOperation(type: BulkOperationType, destinationFolder: File? = null) {
+        val selectedFiles = fileAdapter.itemSelected
+        val fileCount =
+            if (fileAdapter.allSelected) fileListViewModel.lastItemCount?.count ?: fileAdapter.itemCount else selectedFiles.size
+
+        val onActionApproved: (dialog: Dialog?) -> Unit = {
+            if (fileAdapter.allSelected && fileCount > BulkOperationsUtils.MIN_SELECTED ||
+                selectedFiles.size > BulkOperationsUtils.MIN_SELECTED
+            ) {
+                sendBulkAction(
+                    fileCount,
+                    BulkOperation(
+                        action = type,
+                        fileIds = if (!fileAdapter.allSelected) selectedFiles.map { it.id } else null,
+                        parent = currentFolder!!,
+                        destinationFolderId = destinationFolder?.id
+                    )
+                )
+            } else {
                 val mediator = mainViewModel.createMultiSelectMediator()
-                val selectedCount = selectedFiles.count()
                 enableButtonMultiSelect(false)
 
-                selectedFiles.forEach { file ->
+                fileAdapter.itemSelected.forEach { file ->
                     val onSuccess: (Int) -> Unit = { fileID ->
                         runBlocking(Dispatchers.Main) { fileAdapter.deleteByFileId(fileID) }
                     }
-                    mediator.addSource(
-                        mainViewModel.deleteFile(file, onSuccess),
-                        mainViewModel.updateMultiSelectMediator(mediator)
-                    )
+
+                    when (type) {
+                        BulkOperationType.TRASH -> {
+                            mediator.addSource(
+                                mainViewModel.deleteFile(file, onSuccess),
+                                mainViewModel.updateMultiSelectMediator(mediator)
+                            )
+                        }
+                        BulkOperationType.MOVE -> {
+                            mediator.addSource(
+                                mainViewModel.moveFile(file, destinationFolder!!, onSuccess),
+                                mainViewModel.updateMultiSelectMediator(mediator)
+                            )
+                        }
+                        BulkOperationType.COPY -> {
+                            mediator.addSource(
+                                mainViewModel.duplicateFile(
+                                    file,
+                                    destinationFolder!!.id,
+                                    requireContext().getString(R.string.allDuplicateFileName, fileName, file.getFileExtension())
+                                ),
+                                mainViewModel.updateMultiSelectMediator(mediator)
+                            )
+                        }
+                        BulkOperationType.SET_OFFLINE -> {
+                            addSelectedFilesToOffline(file)
+                        }
+                        BulkOperationType.ADD_FAVORITES -> {
+                            mediator.addSource(mainViewModel.addFileToFavorites(file) {
+                                runBlocking(Dispatchers.Main) { fileAdapter.notifyFileChanged(file.id) { it.isFavorite = true } }
+                            }, mainViewModel.updateMultiSelectMediator(mediator))
+                        }
+                    }
                 }
 
                 mediator.observe(viewLifecycleOwner) { (success, total) ->
-                    dialog.dismiss()
-                    if (total == selectedCount) {
+                    if (total == fileCount) {
                         val title = if (success == 0) {
                             getString(R.string.anErrorHasOccurred)
                         } else {
-                            resources.getQuantityString(
-                                R.plurals.snackbarMoveTrashConfirmation,
-                                success,
-                                success
-                            )
+                            resources.getQuantityString(type.successMessage, success, success, destinationFolder?.name + "/")
                         }
                         requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
                         refreshActivities()
@@ -318,6 +387,36 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
         }
 
+        if (type == BulkOperationType.TRASH) {
+            Utils.createConfirmation(
+                context = requireContext(),
+                title = getString(R.string.modalMoveTrashTitle),
+                message = resources.getQuantityString(R.plurals.modalMoveTrashDescription, fileCount, fileCount),
+                isDeletion = true,
+                onConfirmation = onActionApproved
+            )
+        } else {
+            onActionApproved(null)
+        }
+    }
+
+    private fun sendBulkAction(fileCount: Int = 0, bulkOperation: BulkOperation) {
+        fileListViewModel.performCancellableBulkOperation(bulkOperation).observe(viewLifecycleOwner) { apiResponse ->
+            if (apiResponse.isSuccess()) {
+                apiResponse.data?.let { cancellableAction ->
+                    requireContext().launchBulkOperationWorker(
+                        generateWorkerData(cancellableAction.cancelId, fileCount, bulkOperation.action)
+                    )
+                }
+            } else requireActivity().showSnackbar(apiResponse.translateError())
+            closeMultiSelect()
+        }
+    }
+
+    private fun setupMultiSelect() {
+        fileAdapter.enabledMultiSelectMode = true
+        closeButtonMultiSelect.setOnClickListener { closeMultiSelect() }
+        deleteButtonMultiSelect.setOnClickListener { performBulkOperation(BulkOperationType.TRASH) }
         moveButtonMultiSelect.setOnClickListener { Utils.moveFileClicked(this, folderID) }
         menuButtonMultiSelect.setOnClickListener {
             safeNavigate(
@@ -327,7 +426,24 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 )
             )
         }
-        selectAllButton.setOnClickListener { /*TODO in future version*/ }
+        selectAllButton.initProgress(viewLifecycleOwner)
+        selectAllButton.setOnClickListener {
+            selectAllButton.showProgress(ContextCompat.getColor(requireContext(), R.color.primary))
+            if (fileAdapter.allSelected) {
+                fileAdapter.configureAllSelected(false)
+                onUpdateMultiSelect()
+            } else {
+                fileAdapter.configureAllSelected(true)
+                enableButtonMultiSelect(false)
+
+                fileListViewModel.getFileCount(currentFolder!!).observe(viewLifecycleOwner) { fileCount ->
+                    val fileNumber = fileCount.count
+                    if (fileNumber < BulkOperationsUtils.MIN_SELECTED) fileAdapter.itemSelected = fileAdapter.getItems()
+                    enableButtonMultiSelect(true)
+                    onUpdateMultiSelect(fileNumber)
+                }
+            }
+        }
 
         getBackNavigationResult<Boolean>(ActionMultiSelectBottomSheetDialog.DISABLE_SELECT_MODE) {
             if (it) closeMultiSelect()
@@ -412,55 +528,20 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun onBackNavigationResult() {
-        getBackNavigationResult<SelectDialogAction>(SELECT_DIALOG_ACTION) { type ->
-            val mediator = mainViewModel.createMultiSelectMediator()
-            val itemSelectedCount = fileAdapter.itemSelected.count()
-            enableButtonMultiSelect(false)
-
-            fileAdapter.itemSelected.forEach { file ->
-                val observer: (apiResponse: ApiResponse<*>) -> Unit =
-                    mainViewModel.updateMultiSelectMediator(mediator)
-
-                when (type) {
-                    SelectDialogAction.ADD_FAVORITES -> {
-                        mediator.addSource(mainViewModel.addFileToFavorites(file) {
-                            runBlocking(Dispatchers.Main) { fileAdapter.notifyFileChanged(file.id) { it.isFavorite = true } }
-                        }, observer)
-                    }
-                    SelectDialogAction.OFFLINE -> {
-                        addSelectedFilesToOffline(file)
-                    }
-                    SelectDialogAction.DUPLICATE -> {
-                        val duplicateFile = mainViewModel.duplicateFile(file, mainViewModel.currentFolder.value?.id, null)
-                        mediator.addSource(duplicateFile, observer)
-                    }
-                }
-            }
-
-            if (type == SelectDialogAction.OFFLINE) {
-                closeMultiSelect()
-            }
-
-            mediator.observe(viewLifecycleOwner) { (success, total) ->
-                if (total == itemSelectedCount) {
-                    val message = when (type) {
-                        SelectDialogAction.ADD_FAVORITES -> R.plurals.fileListAddFavorisConfirmationSnackbar
-                        SelectDialogAction.OFFLINE -> R.plurals.fileListAddOfflineConfirmationSnackbar
-                        SelectDialogAction.DUPLICATE -> R.plurals.fileListDuplicationConfirmationSnackbar
-                    }
-                    val title = resources.getQuantityString(
-                        message,
-                        success,
-                        success
+        // TODO - 2 - Implement download for multiselection !
+        getBackNavigationResult<BulkOperationType>(SELECT_DIALOG_ACTION) { type ->
+            if (type == BulkOperationType.COPY) {
+                val intent = Intent(requireContext(), SelectFolderActivity::class.java).apply {
+                    putExtra(SelectFolderActivity.USER_ID_TAG, AccountUtils.currentUserId)
+                    putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
+                    putExtra(
+                        SelectFolderActivity.CUSTOM_ARGS_TAG,
+                        bundleOf(BULK_OPERATION_CUSTOM_TAG to BulkOperationType.COPY)
                     )
-                    if (success == 0) {
-                        requireActivity().showSnackbar(getString(R.string.anErrorHasOccurred), requireActivity().mainFab)
-                    } else {
-                        requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
-                    }
-                    refreshActivities()
-                    closeMultiSelect()
                 }
+                startActivityForResult(intent, SelectFolderActivity.SELECT_FOLDER_REQUEST)
+            } else {
+                performBulkOperation(type)
             }
         }
     }
@@ -482,43 +563,17 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
-    private fun onSelectFolderResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    private fun onSelectFolderResult(requestCode: Int, resultCode: Int, data: Intent) {
         if (requestCode == SelectFolderActivity.SELECT_FOLDER_REQUEST && resultCode == AppCompatActivity.RESULT_OK) {
-            val folderName = data?.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
+            val folderName = data.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
+            val folderId = data.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)!!
+            val customArgs = data.extras?.getBundle(SelectFolderActivity.CUSTOM_ARGS_TAG)
+            val bulkOperationType = customArgs?.getParcelable<BulkOperationType>(BULK_OPERATION_CUSTOM_TAG)!!
 
-            data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)?.let { folderID ->
-                val mediator = mainViewModel.createMultiSelectMediator()
-                val selectedCount = fileAdapter.itemSelected.count()
-                enableButtonMultiSelect(false)
-
-                fileAdapter.itemSelected.forEach { file ->
-                    val newParent = File(id = folderID, driveId = AccountUtils.currentDriveId)
-                    val moveFile = mainViewModel.moveFile(file, newParent) { fileID ->
-                        lifecycleScope.launchWhenResumed {
-                            fileAdapter.deleteByFileId(fileID)
-                            checkIfNoFiles()
-                        }
-                    }
-                    mediator.addSource(moveFile, mainViewModel.updateMultiSelectMediator(mediator))
-                }
-
-                mediator.observe(viewLifecycleOwner) { (success, total) ->
-                    if (total == selectedCount) {
-                        val title = if (success == 0) {
-                            getString(R.string.anErrorHasOccurred)
-                        } else {
-                            resources.getQuantityString(
-                                R.plurals.fileListMoveFileConfirmationSnackbar,
-                                success,
-                                success, folderName
-                            )
-                        }
-                        requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
-                        refreshActivities()
-                        closeMultiSelect()
-                    }
-                }
-            }
+            performBulkOperation(
+                type = bulkOperationType,
+                destinationFolder = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId)
+            )
         }
     }
 
@@ -531,14 +586,21 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun refreshActivities() {
-        if (isLoadingActivities || folderID == OTHER_ROOT_ID) return
+        if (folderID == OTHER_ROOT_ID) return
+
+        if (isLoadingActivities) {
+            retryLoadingActivities = true
+            return
+        }
+
+        activitiesRefreshTimer.cancel()
         isLoadingActivities = true
         mainViewModel.currentFolder.value?.let { currentFolder ->
             FileController.getFileById(currentFolder.id)?.let { updatedFolder ->
                 downloadFolderActivities(updatedFolder)
-                isLoadingActivities = false
-            } ?: kotlin.run { isLoadingActivities = false }
-        } ?: kotlin.run { isLoadingActivities = false }
+                activitiesRefreshTimer.start()
+            } ?: kotlin.run { activitiesRefreshTimer.start() }
+        } ?: kotlin.run { activitiesRefreshTimer.start() }
     }
 
     private fun observeOfflineDownloadProgress() {
@@ -630,10 +692,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         fileAdapter.notifyItemRangeChanged(0, fileAdapter.itemCount)
         collapsingToolbarLayout.visibility = GONE
         multiSelectLayout.visibility = VISIBLE
+        selectAllButton.visibility = VISIBLE
     }
 
-    private fun onUpdateMultiSelect() {
-        val fileSelectedNumber = fileAdapter.itemSelected.size
+    private fun onUpdateMultiSelect(selectedNumber: Int? = null) {
+        val fileSelectedNumber = selectedNumber ?: fileAdapter.itemSelected.size
         when (fileSelectedNumber) {
             0, 1 -> {
                 val isEnabled = fileSelectedNumber == 1
@@ -645,21 +708,26 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             fileSelectedNumber,
             fileSelectedNumber
         )
+        selectAllButton.hideProgress(if (fileAdapter.allSelected) R.string.buttonDeselectAll else R.string.buttonSelectAll)
     }
 
     private fun enableButtonMultiSelect(isEnabled: Boolean) {
         deleteButtonMultiSelect.isEnabled = isEnabled
         moveButtonMultiSelect.isEnabled = isEnabled
         menuButtonMultiSelect.isEnabled = isEnabled
-        selectAllButton.isEnabled = isEnabled
     }
 
     private fun closeMultiSelect() {
-        fileAdapter.itemSelected.clear()
-        fileAdapter.multiSelectMode = false
-        fileAdapter.notifyItemRangeChanged(0, fileAdapter.itemCount)
+        fileAdapter.apply {
+            itemSelected.clear()
+            multiSelectMode = false
+            allSelected = false
+            notifyItemRangeChanged(0, itemCount)
+        }
+
         collapsingToolbarLayout.visibility = VISIBLE
         multiSelectLayout.visibility = GONE
+        selectAllButton.visibility = GONE
     }
 
     private fun downloadFolderActivities(currentFolder: File) {
@@ -719,7 +787,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private inner class DownloadFiles : (Boolean) -> Unit {
         override fun invoke(ignoreCache: Boolean) {
             if (ignoreCache) fileAdapter.setList(arrayListOf())
-            timer.start()
+            showLoadingTimer.start()
             isDownloading = true
             fileAdapter.isComplete = false
             getFolderFiles(ignoreCache, onFinish = {
@@ -734,7 +802,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                             changeControlsVisibility = result.parentFolder?.isRoot() == false
                         )
                         fileAdapter.setList(result.files)
-                        result.parentFolder?.let { parent -> downloadFolderActivities(parent) }
+                        refreshActivities()
 
                     } else fileRecyclerView.post { fileAdapter.addFileList(result.files) }
                     fileAdapter.isComplete = result.isComplete
@@ -746,7 +814,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     fileAdapter.isComplete = true
                 }
                 isDownloading = false
-                timer.cancel()
+                showLoadingTimer.cancel()
                 swipeRefreshLayout.isRefreshing = false
             })
         }

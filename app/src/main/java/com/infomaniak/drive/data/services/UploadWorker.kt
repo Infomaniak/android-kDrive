@@ -69,8 +69,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     private var currentUploadTask: UploadTask? = null
     private var uploadedCount = 0
 
-    private var notificationStartTime = 0L
     private var notificationElapsedTime = ELAPSED_TIME
+    private var notificationStartTime = 0L
 
     override suspend fun doWork(): Result {
         contentResolver = applicationContext.contentResolver

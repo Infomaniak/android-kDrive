@@ -65,7 +65,7 @@ abstract class PaginationAdapter<T> : RecyclerView.Adapter<ViewHolder>() {
         val beforeItemCount = itemCount
         itemList.addAll(newItemList)
         hideLoading()
-        notifyItemRangeInserted(beforeItemCount, itemCount)
+        notifyItemRangeInserted(beforeItemCount, newItemList.size)
     }
 
     fun setList(newItemList: ArrayList<T>) {

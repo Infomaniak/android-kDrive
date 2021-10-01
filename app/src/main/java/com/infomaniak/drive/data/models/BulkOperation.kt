@@ -15,23 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.data.models.drive
+package com.infomaniak.drive.data.models
 
-import androidx.collection.ArrayMap
-import com.google.gson.annotations.SerializedName
-import com.infomaniak.drive.data.models.DriveUser
-import com.infomaniak.drive.data.models.IpsToken
-import com.infomaniak.drive.data.models.Team
-
-data class DriveInfo(
-    val drives: DriveList = DriveList(),
-    val users: ArrayMap<Int, DriveUser> = ArrayMap(),
-    val teams: ArrayList<Team> = ArrayList(),
-    @SerializedName("ips_token") val ipsToken: IpsToken
+data class BulkOperation(
+    val action: BulkOperationType,
+    val fileIds: List<Int>?,
+    val parent: File,
+    val destinationFolderId: Int?
 ) {
-    data class DriveList(
-        val main: ArrayList<Drive> = ArrayList(),
-        @SerializedName("shared_with_me")
-        val sharedWithMe: ArrayList<Drive> = ArrayList()
-    )
+
+    fun toMap(): Map<String, Any> {
+        var body = mapOf<String, Any>("action" to action.toString().lowercase())
+        destinationFolderId?.let { body = body.plus("destination_directory_id" to destinationFolderId) }
+        fileIds?.let { body = body.plus("file_ids" to fileIds) } ?: run { body = body.plus("parent_id" to parent.id) }
+        return body
+    }
 }

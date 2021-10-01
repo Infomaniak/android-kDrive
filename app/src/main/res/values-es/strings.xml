@@ -44,6 +44,7 @@
     <string name="allFileAddRightError">No tienes los derechos para acceder a los archivos en esta carpeta.</string>
     <string name="allFileDeleteFavoris">%s eliminado de favoritos</string>
     <string name="allFileDuplicate">%s copiado correctamente</string>
+    <string name="allFileDuplicateCancelled">Copia anulado</string>
     <string name="allFileMove">%1$s movido a %2$s correctamente</string>
     <string name="allFileMoveCancelled">Desplazamiento anulado</string>
     <string name="allFileRename">%s nombre cambiado correctamente</string>
@@ -97,6 +98,7 @@
     <string name="buttonCreateOnlyOfficeCopy">Crear una copia .%s</string>
     <string name="buttonCreatePublicLink">Crear un enlace público</string>
     <string name="buttonDelete">Eliminar</string>
+    <string name="buttonDeselectAll">Deseleccionar todo</string>
     <string name="buttonDisableDropBox">Desactivar el buzón de depósito</string>
     <string name="buttonDocumentScanning">Digitalizar un documento</string>
     <string name="buttonDownload">Descargar</string>
@@ -330,14 +332,23 @@
         <item quantity="one">Un archivo disponible sin conexión</item>
         <item quantity="other">%d archivos disponibles sin conexión</item>
     </plurals>
+    <string name="fileListCopyDoneSnackbar">Copias finalizadas correctamente</string>
+    <string name="fileListCopyInProgressSnackbar">Copias en curso: %1$d/%2$d</string>
+    <string name="fileListCopyStartedSnackbar">Comienzan las copias</string>
+    <string name="fileListDeletionDoneSnackbar">Eliminaciones finalizadas correctamente</string>
+    <string name="fileListDeletionInProgressSnackbar">Eliminaciones en curso: %1$d/%2$d</string>
+    <string name="fileListDeletionStartedSnackbar">Comienzan las eliminaciones</string>
     <plurals name="fileListDuplicationConfirmationSnackbar">
         <item quantity="one">Un archivo duplicado correctamente</item>
         <item quantity="other">%d archivos duplicados correctamente</item>
     </plurals>
+    <string name="fileListMoveDoneSnackbar">Desplazamientos finalizados correctamente</string>
     <plurals name="fileListMoveFileConfirmationSnackbar">
         <item quantity="one">Se ha movido correctamente un archivo a %2$s</item>
         <item quantity="other">%1$d archivos movidos correctamente a %2$s</item>
     </plurals>
+    <string name="fileListMoveInProgressSnackbar">Desplazamiento en curso: %1$d/%2$d</string>
+    <string name="fileListMoveStartedSnackbar">Comienzan los desplazamientos</string>
     <plurals name="fileListMultiSelectedTitle">
         <item quantity="one">%d seleccionado</item>
         <item quantity="other">%d seleccionados</item>

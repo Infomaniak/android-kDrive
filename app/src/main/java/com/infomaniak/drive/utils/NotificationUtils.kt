@@ -37,6 +37,18 @@ object NotificationUtils {
 
     private const val DEFAULT_SMALL_ICON = R.drawable.ic_logo_notification
 
+    fun Context.moveOperationProgressNotification(): NotificationCompat.Builder {
+        return progressNotification(getString(R.string.fileListMoveStartedSnackbar), R.drawable.ic_folder_select)
+    }
+
+    fun Context.copyOperationProgressNotification(): NotificationCompat.Builder {
+        return progressNotification(getString(R.string.fileListCopyStartedSnackbar), R.drawable.ic_copy)
+    }
+
+    fun Context.trashOperationProgressNotification(): NotificationCompat.Builder {
+        return progressNotification(getString(R.string.fileListDeletionStartedSnackbar), R.drawable.ic_delete)
+    }
+
     fun Context.downloadProgressNotification(): NotificationCompat.Builder {
         return progressNotification(getString(R.string.notificationStartDownloadTicker), android.R.drawable.stat_sys_download)
     }

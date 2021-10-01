@@ -60,16 +60,16 @@ class UploadTask(
     private var previousChunkBytesWritten = 0L
     private var currentProgress = 0
 
-    private var uploadNotification: NotificationCompat.Builder? = null
-    private var notificationStartTime = 0L
-    private var notificationElapsedTime = ELAPSED_TIME
     private lateinit var notificationManagerCompat: NotificationManagerCompat
+    private lateinit var uploadNotification: NotificationCompat.Builder
+    private var uploadNotificationElapsedTime = ELAPSED_TIME
+    private var uploadNotificationStartTime = 0L
 
     suspend fun start() = withContext(Dispatchers.IO) {
         notificationManagerCompat = NotificationManagerCompat.from(context)
 
         uploadNotification = context.uploadProgressNotification()
-        uploadNotification?.apply {
+        uploadNotification.apply {
             setContentTitle(uploadFile.fileName)
             notificationManagerCompat.notify(CURRENT_UPLOAD_ID, build())
         }
@@ -135,7 +135,7 @@ class UploadTask(
         }
 
         coroutineScope.ensureActive()
-        uploadNotification?.apply {
+        uploadNotification.apply {
             setOngoing(false)
             setContentText("100%")
             setSmallIcon(android.R.drawable.stat_sys_upload_done)
@@ -239,8 +239,8 @@ class UploadTask(
         ensureActive()
 
 
-        if (notificationElapsedTime >= ELAPSED_TIME) {
-            uploadNotification?.apply {
+        if (uploadNotificationElapsedTime >= ELAPSED_TIME) {
+            uploadNotification.apply {
                 val intent = Intent(context, MainActivity::class.java).apply {
                     putExtra(MainActivity.INTENT_SHOW_PROGRESS, uploadFile.remoteFolder)
                 }
@@ -252,10 +252,10 @@ class UploadTask(
                 setContentText("${currentProgress}%")
                 setProgress(100, currentProgress, false)
                 notificationManagerCompat.notify(CURRENT_UPLOAD_ID, build())
-                notificationStartTime = System.currentTimeMillis()
-                notificationElapsedTime = 0L
+                uploadNotificationStartTime = System.currentTimeMillis()
+                uploadNotificationElapsedTime = 0L
             }
-        } else notificationElapsedTime = Date().time - notificationStartTime
+        } else uploadNotificationElapsedTime = Date().time - uploadNotificationStartTime
 
         if (progress in 1..100) {
             launch { shareProgress(currentProgress) }

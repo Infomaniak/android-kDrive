@@ -15,23 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.data.models.drive
+package com.infomaniak.drive.data.models
 
-import androidx.collection.ArrayMap
 import com.google.gson.annotations.SerializedName
-import com.infomaniak.drive.data.models.DriveUser
-import com.infomaniak.drive.data.models.IpsToken
-import com.infomaniak.drive.data.models.Team
 
-data class DriveInfo(
-    val drives: DriveList = DriveList(),
-    val users: ArrayMap<Int, DriveUser> = ArrayMap(),
-    val teams: ArrayList<Team> = ArrayList(),
-    @SerializedName("ips_token") val ipsToken: IpsToken
-) {
-    data class DriveList(
-        val main: ArrayList<Drive> = ArrayList(),
-        @SerializedName("shared_with_me")
-        val sharedWithMe: ArrayList<Drive> = ArrayList()
-    )
+enum class Action {
+    @SerializedName("file_move")
+    FILE_MOVE,
+
+    @SerializedName("file_trash")
+    FILE_TRASH,
+
+    @SerializedName("file_restore")
+    FILE_RESTORE,
+
+    @SerializedName("file_create")
+    FILE_CREATE
 }
