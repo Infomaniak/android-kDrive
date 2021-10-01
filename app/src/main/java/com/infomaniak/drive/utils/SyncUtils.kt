@@ -55,33 +55,39 @@ object SyncUtils {
         val dateModifiedIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DATE_MODIFIED)
 
         val fileCreatedAt = when {
-            dateTakenIndex != -1 -> Date(cursor.getLong(dateTakenIndex))
-            dateAddedIndex != -1 -> Date(cursor.getLong(dateAddedIndex) * 1000)
+            cursor.isValidDate(dateTakenIndex) -> Date(cursor.getLong(dateTakenIndex))
+            cursor.isValidDate(dateAddedIndex) -> Date(cursor.getLong(dateAddedIndex) * 1000)
             else -> null
         }
 
         var fileModifiedAt = when {
-            lastModifiedIndex != -1 -> Date(cursor.getLong(lastModifiedIndex))
-            dateModifiedIndex != -1 -> Date(cursor.getLong(dateModifiedIndex) * 1000)
+            cursor.isValidDate(lastModifiedIndex) -> Date(cursor.getLong(lastModifiedIndex))
+            cursor.isValidDate(dateModifiedIndex) -> Date(cursor.getLong(dateModifiedIndex) * 1000)
             fileCreatedAt != null -> fileCreatedAt
-            else -> Date()
+            else -> null
         }
 
-        if (fileModifiedAt.time == 0L) {
-            fileModifiedAt = fileCreatedAt ?: Date()
+        if (fileModifiedAt == null || fileModifiedAt.time == 0L) {
+            fileModifiedAt = Date()
             Sentry.withScope { scope ->
+                if (dateTakenIndex != -1)
+                    scope.setExtra("dateTakenIndex", cursor.getLong(dateTakenIndex).toString())
+                if (dateAddedIndex != -1)
+                    scope.setExtra("dateAddedIndex", cursor.getLong(dateAddedIndex).toString())
+
                 if (lastModifiedIndex != -1)
                     scope.setExtra("lastModifiedIndex", cursor.getLong(lastModifiedIndex).toString())
                 if (dateModifiedIndex != -1)
                     scope.setExtra("dateModifiedIndex", cursor.getLong(dateModifiedIndex).toString())
-                if (fileCreatedAt != null)
-                    scope.setExtra("fileCreatedAt", fileCreatedAt.time.toString())
+
                 Sentry.captureMessage("Error fileModifiedAt is null")
             }
         }
 
         return Pair(fileCreatedAt, fileModifiedAt)
     }
+
+    private fun Cursor.isValidDate(index: Int) = index != -1 && this.getLong(index) > 0
 
     fun FragmentActivity.launchAllUpload(drivePermissions: DrivePermissions) {
         if (AccountUtils.isEnableAppSync() &&
