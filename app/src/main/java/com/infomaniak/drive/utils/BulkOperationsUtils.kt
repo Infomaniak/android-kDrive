@@ -18,7 +18,6 @@
 package com.infomaniak.drive.utils
 
 import android.content.Context
-import androidx.lifecycle.LiveData
 import androidx.work.*
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.services.BulkOperationWorker

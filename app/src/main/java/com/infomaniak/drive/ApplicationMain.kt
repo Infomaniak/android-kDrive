@@ -23,7 +23,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
-import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationManagerCompat
 import coil.ImageLoader
