@@ -116,6 +116,7 @@ object Utils {
             context = context,
             title = context.getString(title),
             message = message,
+            autoDismiss = false,
             isDeletion = true,
             buttonText = context.getString(button),
             onConfirmation = onConfirmation
