@@ -710,47 +710,41 @@ object FileController {
         when (this.getAction()) {
             FileActivity.FileActivityType.FILE_DELETE,
             FileActivity.FileActivityType.FILE_MOVE_OUT,
-            FileActivity.FileActivityType.FILE_TRASH,
-            FileActivity.FileActivityType.COLLABORATIVE_FOLDER_DELETE -> {
-                if (returnResponse[this.fileId] == null) {
-                    getParentFile(fileId = fileId, realm = realm)?.let { parent ->
-                        if (parent.id == currentFolder.id) {
-                            removeFile(fileId, customRealm = realm, recursive = false)
-                        }
+            FileActivity.FileActivityType.FILE_TRASH -> if (returnResponse[this.fileId] == null) {
+                getParentFile(fileId = fileId, realm = realm)?.let { parent ->
+                    if (parent.id == currentFolder.id) {
+                        removeFile(fileId, customRealm = realm, recursive = false)
                     }
-                    returnResponse[this.fileId] = File.LocalFileActivity.IS_DELETE
                 }
+                returnResponse[this.fileId] = File.LocalFileActivity.IS_DELETE
             }
-            FileActivity.FileActivityType.FILE_MOVE_IN,
-            FileActivity.FileActivityType.FILE_RESTORE,
             FileActivity.FileActivityType.FILE_CREATE,
-            FileActivity.FileActivityType.COLLABORATIVE_FOLDER_CREATE -> {
-                if (returnResponse[this.fileId] == null && this.file != null) {
-                    realm.where(File::class.java).equalTo(File::id.name, currentFolder.id).findFirst()?.let { realmFolder ->
-                        if (!realmFolder.children.contains(this.file)) {
-                            addChild(realm, realmFolder, this.file!!)
-                            returnResponse[this.fileId] = File.LocalFileActivity.IS_NEW
-                        } else {
-                            updateFileFromActivity(realm, returnResponse, this, realmFolder.id)
-                        }
+            FileActivity.FileActivityType.FILE_MOVE_IN,
+            FileActivity.FileActivityType.FILE_RESTORE -> if (returnResponse[this.fileId] == null && this.file != null) {
+                realm.where(File::class.java).equalTo(File::id.name, currentFolder.id).findFirst()?.let { realmFolder ->
+                    if (!realmFolder.children.contains(this.file)) {
+                        addChild(realm, realmFolder, this.file!!)
+                        returnResponse[this.fileId] = File.LocalFileActivity.IS_NEW
+                    } else {
+                        updateFileFromActivity(realm, returnResponse, this, realmFolder.id)
                     }
                 }
             }
-            FileActivity.FileActivityType.FILE_UPDATE,
-            FileActivity.FileActivityType.FILE_RENAME,
+            FileActivity.FileActivityType.COLLABORATIVE_FOLDER_CREATE,
+            FileActivity.FileActivityType.COLLABORATIVE_FOLDER_DELETE,
+            FileActivity.FileActivityType.COLLABORATIVE_FOLDER_UPDATE,
             FileActivity.FileActivityType.FILE_FAVORITE_CREATE,
             FileActivity.FileActivityType.FILE_FAVORITE_REMOVE,
+            FileActivity.FileActivityType.FILE_RENAME,
             FileActivity.FileActivityType.FILE_SHARE_CREATE,
-            FileActivity.FileActivityType.FILE_SHARE_UPDATE,
             FileActivity.FileActivityType.FILE_SHARE_DELETE,
-            FileActivity.FileActivityType.COLLABORATIVE_FOLDER_UPDATE -> {
-                if (returnResponse[this.fileId] == null) {
-                    if (this.file == null) {
-                        removeFile(fileId, customRealm = realm, recursive = false)
-                        returnResponse[this.fileId] = File.LocalFileActivity.IS_DELETE
-                    } else {
-                        updateFileFromActivity(realm, returnResponse, this, currentFolder.id)
-                    }
+            FileActivity.FileActivityType.FILE_SHARE_UPDATE,
+            FileActivity.FileActivityType.FILE_UPDATE -> if (returnResponse[this.fileId] == null) {
+                if (this.file == null) {
+                    removeFile(fileId, customRealm = realm, recursive = false)
+                    returnResponse[this.fileId] = File.LocalFileActivity.IS_DELETE
+                } else {
+                    updateFileFromActivity(realm, returnResponse, this, currentFolder.id)
                 }
             }
             else -> Unit

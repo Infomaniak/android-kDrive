@@ -35,7 +35,6 @@ import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.setBackNavigationResult
 import com.infomaniak.drive.utils.showOrHideEmptyError
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.hideProgress
@@ -143,7 +142,7 @@ open class ManageDropboxFragment : Fragment() {
             disableButton.showProgress(ContextCompat.getColor(requireContext(), R.color.title))
             mainViewModel.deleteDropBox(file).observe(viewLifecycleOwner) { apiResponse ->
                 if (apiResponse.isSuccess()) {
-                    setBackNavigationResult(MANAGE_DROPBOX_SUCCESS, apiResponse.result)
+                    findNavController().popBackStack()
                 } else {
                     requireActivity().showSnackbar(R.string.errorDelete)
                 }
@@ -227,9 +226,5 @@ open class ManageDropboxFragment : Fragment() {
 
     protected fun enableSaveButton() {
         saveButton.isEnabled = !isManageDropBox || (validationCount > 0 && !hasErrors)
-    }
-
-    companion object {
-        const val MANAGE_DROPBOX_SUCCESS = "manage_dropbox_success"
     }
 }
