@@ -30,6 +30,25 @@ import okhttp3.OkHttpClient
 object ApiRepository {
 
     var PER_PAGE = 200
+    private const val ACTIONS = "&actions[]=file_move" +
+            "&actions[]=file_trash" +
+            "&actions[]=file_create" +
+            "&actions[]=file_update" +
+            "&actions[]=file_rename" +
+            "&actions[]=file_delete" +
+            "&actions[]=file_restore" +
+            "&actions[]=file_move_out" +
+            "&actions[]=file_share_create" +
+            "&actions[]=file_share_update" +
+            "&actions[]=file_share_delete" +
+            "&actions[]=file_favorite_create" +
+            "&actions[]=file_favorite_remove" +
+            "&actions[]=share_link_create" +
+            "&actions[]=share_link_update" +
+            "&actions[]=share_link_delete" +
+            "&actions[]=collaborative_folder_create" +
+            "&actions[]=collaborative_folder_update" +
+            "&actions[]=collaborative_folder_delete"
 
     fun getAllDrivesData(
         okHttpClient: OkHttpClient
@@ -67,27 +86,7 @@ object ApiRepository {
 
     fun getFileActivities(okHttpClient: OkHttpClient, file: File, page: Int): ApiResponse<ArrayList<FileActivity>> {
         val url = "${ApiRoutes.getFileActivities(file)}?${pagination(page)}&depth=children&from_date=${file.responseAt}" +
-                "&with=file,rights,collaborative_folder,favorite,share_link,mobile" +
-                "&actions[]=file_move" +
-                "&actions[]=file_trash" +
-                "&actions[]=file_create" +
-                "&actions[]=file_update" +
-                "&actions[]=file_rename" +
-                "&actions[]=file_delete" +
-                "&actions[]=file_restore" +
-                "&actions[]=file_move_out" +
-                "&actions[]=file_share_create" +
-                "&actions[]=file_share_update" +
-                "&actions[]=file_share_delete" +
-                "&actions[]=file_favorite_create" +
-                "&actions[]=file_favorite_remove" +
-                "&actions[]=share_link_create" +
-                "&actions[]=share_link_update" +
-                "&actions[]=share_link_delete" +
-                "&actions[]=collaborative_folder_create" +
-                "&actions[]=collaborative_folder_update" +
-                "&actions[]=collaborative_folder_delete"
-
+                "&with=file,rights,collaborative_folder,favorite,share_link,mobile" + ACTIONS
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
@@ -185,7 +184,7 @@ object ApiRepository {
     }
 
     fun getFileActivities(file: File, page: Int): ApiResponse<ArrayList<FileActivity>> {
-        val url = "${ApiRoutes.getFileActivities(file)}?with=user&${pagination(page, 25)}"
+        val url = "${ApiRoutes.getFileActivities(file)}?with=user&${pagination(page, 25)}" + ACTIONS
         return callApi(url, GET)
     }
 

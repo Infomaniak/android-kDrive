@@ -64,7 +64,6 @@ import com.infomaniak.drive.utils.BulkOperationsUtils.generateWorkerData
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.setPagination
@@ -167,7 +166,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         mainViewModel.createDropBoxSuccess.observe(viewLifecycleOwner) { dropBox ->
-            onRefresh()
             safeNavigate(
                 FileListFragmentDirections.actionFileListFragmentToDropBoxResultBottomSheetDialog(
                     url = dropBox.url,
@@ -281,10 +279,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
         }
 
-        getBackNavigationResult<ApiResponse.Status>(ManageDropboxFragment.MANAGE_DROPBOX_SUCCESS) { result ->
-            if (result == ApiResponse.Status.SUCCESS) onRefresh()
-        }
-
         getBackNavigationResult<Int>(REFRESH_FAVORITE_FILE) { fileId ->
             if (findNavController().currentDestination?.id == R.id.favoritesFragment) {
                 fileAdapter.deleteByFileId(fileId)
@@ -304,11 +298,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         if (!isDownloading) refreshActivities()
         showPendingFiles()
         updateVisibleProgresses()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        showLoadingTimer.cancel()
     }
 
     private fun performBulkOperation(type: BulkOperationType, destinationFolder: File? = null) {
