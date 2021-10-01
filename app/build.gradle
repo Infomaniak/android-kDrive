@@ -22,7 +22,6 @@ android {
         buildConfigField 'String', 'OFFICE_URL', '"https://drive.infomaniak.com/app/office/"'
         buildConfigField 'String', 'SHOP_URL', '"https://shop.infomaniak.com/order/"'
         buildConfigField 'String', 'SUPPORT_URL', '"https://support.infomaniak.com/"'
-        buildConfigField 'Boolean', 'BETA', 'true' // Todo
 
         resValue 'string', 'ACCOUNT_TYPE', 'com.infomaniak.drive'
         resValue 'string', 'CLOUD_STORAGE_AUTHORITY', 'com.infomaniak.drive.documents'

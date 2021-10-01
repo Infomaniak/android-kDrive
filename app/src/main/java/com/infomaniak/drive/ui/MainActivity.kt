@@ -52,7 +52,6 @@ import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.navigation.NavigationBarItemView
-import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.R
 import com.infomaniak.drive.checkUpdateIsAvailable
 import com.infomaniak.drive.data.models.AppSettings
@@ -189,8 +188,7 @@ class MainActivity : BaseActivity() {
         drivePermissions.registerPermissions(this)
         drivePermissions.checkWriteStoragePermission()
 
-        if (!BuildConfig.BETA)
-            if (AppSettings.appLaunches == 20 || (AppSettings.appLaunches != 0 && AppSettings.appLaunches % 100 == 0)) launchInAppReview()
+        if (AppSettings.appLaunches == 20 || (AppSettings.appLaunches != 0 && AppSettings.appLaunches % 100 == 0)) launchInAppReview()
 
         if (!UISettings(this).updateLater || AppSettings.appLaunches % 10 == 0) {
             checkUpdateIsAvailable { updateIsAvailable ->
