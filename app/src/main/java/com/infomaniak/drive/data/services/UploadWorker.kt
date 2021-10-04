@@ -55,6 +55,7 @@ import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.ApiController
 import com.infomaniak.lib.core.utils.hasPermissions
+import com.infomaniak.lib.core.utils.isNetworkException
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.*
@@ -170,12 +171,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
         }
     }
-
-    private fun Exception.isNetworkException() =
-        this.javaClass.name.contains("java.net.", ignoreCase = true) ||
-                this.javaClass.name.contains("javax.net.", ignoreCase = true) ||
-                this is java.io.InterruptedIOException ||
-                (this is java.io.IOException && this.message == "stream closed") // Okhttp3
 
     private suspend fun startSyncFiles(): Result = withContext(Dispatchers.IO) {
         val syncFiles = UploadFile.getAllPendingUploads()

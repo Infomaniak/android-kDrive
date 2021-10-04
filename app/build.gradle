@@ -86,7 +86,7 @@ dependencies {
     standardImplementation 'com.google.android.play:core:1.10.2'
     standardImplementation 'com.google.firebase:firebase-messaging-ktx:22.0.0'
 
-    implementation 'io.sentry:sentry-android:5.2.0'
+    implementation 'io.sentry:sentry-android:5.2.1'
 
     implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0'
     implementation 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'

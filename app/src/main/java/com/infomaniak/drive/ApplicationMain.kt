@@ -87,12 +87,8 @@ class ApplicationMain : Application(), ImageLoaderFactory {
                     detectLeakedClosableObjects()
                     detectLeakedRegistrationObjects()
                     detectFileUriExposure()
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        detectContentUriWithoutPermission()
-                    }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        detectCredentialProtectedWhileLocked()
-                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) detectContentUriWithoutPermission()
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) detectCredentialProtectedWhileLocked()
                 }.build()
             )
         }
