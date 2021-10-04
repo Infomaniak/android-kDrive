@@ -22,6 +22,7 @@ import android.content.Intent
 import android.os.ParcelFileDescriptor.AutoCloseOutputStream
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.work.*
 import com.infomaniak.drive.R
@@ -45,7 +46,9 @@ import okhttp3.Response
 import java.io.BufferedInputStream
 
 
-class DownloadWorker(private val context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
+class DownloadWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
+
+    private var notificationManagerCompat: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)
 
     override suspend fun doWork(): Result {
         val fileId = inputData.getInt(FILE_ID, 0)
@@ -53,7 +56,7 @@ class DownloadWorker(private val context: Context, workerParams: WorkerParameter
         val driveID = inputData.getInt(DRIVE_ID, AccountUtils.currentDriveId)
         val userDrive = UserDrive(userId, driveID)
         val file = FileController.getFileById(fileId, userDrive)
-        val offlineFile = file?.getOfflineFile(context, userId)
+        val offlineFile = file?.getOfflineFile(applicationContext, userId)
 
         return try {
             if (file != null && offlineFile != null) {
@@ -63,7 +66,7 @@ class DownloadWorker(private val context: Context, workerParams: WorkerParameter
             }
         } catch (exception: CancellationException) {
             exception.printStackTrace()
-            if (offlineFile != null && offlineFile.exists() && !file.isOffline) offlineFile.delete()
+            if (offlineFile?.exists() == true && !file.isIntactFile(offlineFile)) offlineFile.delete()
             notifyDownloadCancelled(fileId)
             Result.failure()
         } catch (exception: Exception) {
@@ -72,28 +75,29 @@ class DownloadWorker(private val context: Context, workerParams: WorkerParameter
         }
     }
 
-    private suspend fun initOfflineDownload(file: File, offlineFile: java.io.File, userDrive: UserDrive): Result =
-        withContext(Dispatchers.IO) {
-            val cacheFile = file.getCacheFile(context, userDrive)
+    private suspend fun initOfflineDownload(file: File, offlineFile: java.io.File, userDrive: UserDrive): Result {
+        val cacheFile = file.getCacheFile(applicationContext, userDrive)
 
-            if (file.isOfflineAndIntact(offlineFile)) return@withContext Result.success()
+        if (file.isOfflineAndIntact(offlineFile)) return Result.success()
 
-            val firstUpdate = workDataOf(PROGRESS to 0, FILE_ID to file.id)
-            setProgress(firstUpdate)
+        val firstUpdate = workDataOf(PROGRESS to 0, FILE_ID to file.id)
+        setProgress(firstUpdate)
 
-            if (offlineFile.exists()) offlineFile.delete()
-            if (cacheFile.exists()) cacheFile.delete()
+        if (offlineFile.exists()) offlineFile.delete()
+        if (cacheFile.exists()) cacheFile.delete()
 
-            val cancelPendingIntent = WorkManager.getInstance(applicationContext).createCancelPendingIntent(id)
-            val cancelAction = NotificationCompat.Action(null, context.getString(R.string.buttonCancel), cancelPendingIntent)
-            val downloadNotification = context.downloadProgressNotification().apply {
-                setOngoing(true)
-                setContentTitle(file.name)
-                addAction(cancelAction)
-                setForeground(ForegroundInfo(file.id, build()))
-            }
-            startOfflineDownload(file, downloadNotification, offlineFile, userDrive)
+        val cancelPendingIntent = WorkManager.getInstance(applicationContext).createCancelPendingIntent(id)
+        val cancelAction =
+            NotificationCompat.Action(null, applicationContext.getString(R.string.buttonCancel), cancelPendingIntent)
+        val downloadNotification = applicationContext.downloadProgressNotification().apply {
+            setOngoing(true)
+            setContentTitle(file.name)
+            addAction(cancelAction)
+            setForeground(ForegroundInfo(file.id, build()))
         }
+
+        return startOfflineDownload(file, downloadNotification, offlineFile, userDrive)
+    }
 
     private suspend fun startOfflineDownload(
         file: File,
@@ -101,47 +105,40 @@ class DownloadWorker(private val context: Context, workerParams: WorkerParameter
         offlineFile: java.io.File,
         userDrive: UserDrive
     ): Result = withContext(Dispatchers.IO) {
-        try {
-            val lastUpdate = workDataOf(PROGRESS to 100, FILE_ID to file.id)
-            val okHttpClient = KDriveHttpClient.getHttpClient(userDrive.userId, null)
-            val response = downloadFileResponse(
-                fileUrl = ApiRoutes.downloadFile(file),
-                okHttpClient = okHttpClient
-            ) { progress ->
-                launch(Dispatchers.Main) {
-                    setProgress(workDataOf(PROGRESS to progress, FILE_ID to file.id))
-                }
-                Log.d(TAG, "download $progress%")
-                downloadNotification.apply {
-                    setContentText("$progress%")
-                    setProgress(100, progress, false)
-                    // runBlocking for sync the progress
-                    runBlocking { setForeground(ForegroundInfo(file.id, build())) }
-                }
+        val lastUpdate = workDataOf(PROGRESS to 100, FILE_ID to file.id)
+        val okHttpClient = KDriveHttpClient.getHttpClient(userDrive.userId, null)
+        val response = downloadFileResponse(
+            fileUrl = ApiRoutes.downloadFile(file),
+            okHttpClient = okHttpClient
+        ) { progress ->
+            launch(Dispatchers.Main) {
+                setProgress(workDataOf(PROGRESS to progress, FILE_ID to file.id))
             }
-
-            saveRemoteData(response, offlineFile) {
-                launch(Dispatchers.Main) { setProgress(lastUpdate) }
-                FileController.updateOfflineStatus(file.id, true)
-                offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
-                if (file.isMedia()) MediaUtils.scanFile(context, offlineFile)
+            Log.d(TAG, "download $progress%")
+            downloadNotification.apply {
+                ensureActive()
+                setContentText("$progress%")
+                setProgress(100, progress, false)
+                notificationManagerCompat.notify(file.id, build())
             }
-
-            if (response.isSuccessful) Result.success()
-            else Result.failure()
-
-        } catch (e: Exception) {
-            if (offlineFile.exists()) offlineFile.delete()
-            e.printStackTrace()
-            Result.failure()
         }
+
+        saveRemoteData(response, offlineFile) {
+            launch(Dispatchers.Main) { setProgress(lastUpdate) }
+            FileController.updateOfflineStatus(file.id, true)
+            offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
+            if (file.isMedia()) MediaUtils.scanFile(applicationContext, offlineFile)
+        }
+
+        if (response.isSuccessful) Result.success()
+        else Result.failure()
     }
 
     private fun notifyDownloadCancelled(fileID: Int) {
         Intent().apply {
             action = DownloadReceiver.TAG
             putExtra(DownloadReceiver.CANCELLED_FILE_ID, fileID)
-            LocalBroadcastManager.getInstance(context).sendBroadcast(this)
+            LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(this)
         }
     }
 
