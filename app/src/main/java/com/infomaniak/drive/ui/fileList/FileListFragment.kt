@@ -64,6 +64,7 @@ import com.infomaniak.drive.utils.BulkOperationsUtils.generateWorkerData
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.setPagination
@@ -142,11 +143,9 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        showLoadingTimer = Utils.createRefreshTimer {
-            swipeRefreshLayout?.isRefreshing = true
-        }
+        showLoadingTimer = createRefreshTimer { swipeRefreshLayout?.isRefreshing = true }
 
-        activitiesRefreshTimer = Utils.createRefreshTimer(ACTIVITIES_REFRESH_DELAY) {
+        activitiesRefreshTimer = createRefreshTimer(ACTIVITIES_REFRESH_DELAY) {
             isLoadingActivities = false
             if (retryLoadingActivities) {
                 retryLoadingActivities = false

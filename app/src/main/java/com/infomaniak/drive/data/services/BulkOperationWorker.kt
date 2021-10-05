@@ -31,6 +31,7 @@ import com.infomaniak.drive.data.models.ActionProgressNotification
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.Notification
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import java.util.*
 
 class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : ListenableWorker(context, workerParams) {
@@ -62,7 +63,7 @@ class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : Li
         lastReception = Date()
 
         return CallbackToFutureAdapter.getFuture { completer ->
-            timer = Utils.createRefreshTimer(milliseconds = 1000) {
+            timer = createRefreshTimer(milliseconds = 1000) {
                 if (Date().time - lastReception.time > 30000) {
                     completer.set(Result.failure())
                 } else {

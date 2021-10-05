@@ -34,6 +34,7 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.getScreenSizeInDp
+import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import com.infomaniak.lib.core.utils.toDp
 import kotlinx.android.synthetic.main.fragment_pictures.*
 import kotlin.math.max
@@ -54,9 +55,7 @@ class PicturesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        timer = Utils.createRefreshTimer {
-            swipeRefreshLayout?.isRefreshing = true
-        }
+        timer = createRefreshTimer { swipeRefreshLayout?.isRefreshing = true }
 
         toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()

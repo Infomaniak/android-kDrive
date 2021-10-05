@@ -186,15 +186,6 @@ object Utils {
         }
     }
 
-    fun createRefreshTimer(milliseconds: Long = 600, onTimerFinish: () -> Unit): CountDownTimer {
-        return object : CountDownTimer(milliseconds, milliseconds) {
-            override fun onTick(millisUntilFinished: Long) = Unit
-            override fun onFinish() {
-                onTimerFinish()
-            }
-        }
-    }
-
     fun displayFile(
         mainViewModel: MainViewModel,
         navController: NavController,
