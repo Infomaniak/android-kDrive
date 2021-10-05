@@ -26,7 +26,7 @@ import com.infomaniak.drive.data.models.ActionProgressNotification
 import com.infomaniak.drive.data.models.IpsToken
 import com.infomaniak.drive.data.models.Notification
 import com.infomaniak.lib.core.utils.ApiController.gson
-import org.eclipse.paho.android.service.MqttAndroidClient
+import info.mqtt.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
 
 object MqttClientWrapper : MqttCallback, LiveData<Notification>() {

@@ -168,10 +168,12 @@
             android:name="androidx.core.content.FileProvider"
             android:authorities="@string/FILE_AUTHORITY"
             android:exported="false"
-            android:grantUriPermissions="true">
+            android:grantUriPermissions="true"
+            tools:replace="android:authorities">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/exposed_files_path" />
+                android:resource="@xml/exposed_files_path"
+                tools:replace="android:resource" />
         </provider>
 
         <provider

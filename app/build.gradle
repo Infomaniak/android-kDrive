@@ -88,8 +88,7 @@ dependencies {
 
     implementation 'io.sentry:sentry-android:5.2.1'
 
-    implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0'
-    implementation 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
+    implementation 'com.github.hannesa2:paho.mqtt.android:3.3.0'
 
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.1'
     testImplementation 'io.github.serpro69:kotlin-faker:1.6.0'
