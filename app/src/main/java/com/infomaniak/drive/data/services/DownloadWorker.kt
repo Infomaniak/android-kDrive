@@ -133,8 +133,14 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
             if (file.isMedia()) MediaUtils.scanFile(applicationContext, offlineFile)
         }
 
-        if (response.isSuccessful) Result.success()
-        else Result.failure()
+        if (response.isSuccessful) {
+            downloadNotification.apply {
+                setContentText("100%")
+                setProgress(100, 100, false)
+                notificationManagerCompat.notify(file.id, build())
+            }
+            Result.success()
+        } else Result.failure()
     }
 
     private fun notifyDownloadCancelled(fileID: Int) {
@@ -147,10 +153,10 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
 
     companion object {
         const val TAG = "DownloadWorker"
-        const val PROGRESS = "Progress"
-        const val FILE_ID = "fileID"
-        const val USER_ID = "userID"
-        const val DRIVE_ID = "driveID"
+        const val DRIVE_ID = "drive_id"
+        const val FILE_ID = "file_id"
+        const val PROGRESS = "progress"
+        const val USER_ID = "user_id"
 
         @Throws(Exception::class)
         fun downloadFileResponse(

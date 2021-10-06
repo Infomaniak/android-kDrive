@@ -270,7 +270,9 @@ object Utils {
     }
 
     fun downloadAsOfflineFile(context: Context, file: File, userDrive: UserDrive = UserDrive()) {
-        if (file.isPendingOffline(context)) return
+        val workManager = WorkManager.getInstance(context)
+
+        if (file.isPendingOffline(context)) workManager.cancelAllWorkByTag(file.getWorkerTag())
         val inputData = workDataOf(
             DownloadWorker.FILE_ID to file.id,
             DownloadWorker.USER_ID to userDrive.userId,
@@ -287,7 +289,7 @@ object Utils {
             .setConstraints(constraints)
             .build()
 
-        WorkManager.getInstance(context)
+        workManager
             .enqueueUniqueWork(DownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
     }
 
