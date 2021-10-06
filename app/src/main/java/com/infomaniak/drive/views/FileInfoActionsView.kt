@@ -307,11 +307,17 @@ class FileInfoActionsView @JvmOverloads constructor(
         observeDownloadOffline = mainViewModel.observeDownloadOffline(context.applicationContext)
         observeDownloadOffline?.observe(lifecycleOwner) { workInfoList ->
             if (workInfoList.isEmpty()) return@observe
-            val workInfo = workInfoList.firstOrNull() ?: return@observe
 
-            val fileId: Int = workInfo.progress.getInt(DownloadWorker.FILE_ID, 0)
-            val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 0)
-            Log.w("isPendingOffline", "progress from FileActionView $progress% for file $fileId, state:${workInfo.state}")
+            val workInfo = workInfoList.firstOrNull { it.state == WorkInfo.State.RUNNING }
+                ?: workInfoList.firstOrNull { workInfo -> workInfo.tags.any { it == currentFile.getWorkerTag() } }
+                ?: return@observe
+
+            val fileId: Int =
+                if (workInfo.state.isFinished) workInfo.outputData.getInt(DownloadWorker.FILE_ID, 0)
+                else workInfo.tags.first { it == currentFile.getWorkerTag() }.toInt()
+            val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 100)
+
+            Log.d("FileInfoActionsView", "observeOfflineProgression> $progress% file:$fileId state:${workInfo.state}")
 
             if (currentFile.id == fileId) {
                 currentFile.currentProgress = progress
@@ -338,7 +344,7 @@ class FileInfoActionsView @JvmOverloads constructor(
     fun refreshBottomSheetUi(file: File, isOfflineProgress: Boolean = false) {
         val isPendingOffline = file.isPendingOffline(context)
         val isOfflineFile = file.isOfflineFile(context)
-        enableAvailableOffline(!isPendingOffline)
+        enableAvailableOffline(!isPendingOffline || file.currentProgress == 100)
         if (isOfflineProgress) setupFileProgress(file) else fileView.setFileItem(file)
         if (availableOfflineSwitch.isEnabled && availableOffline.visibility == VISIBLE) {
             availableOfflineSwitch.isChecked = isOfflineFile
@@ -349,7 +355,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         copyPublicLinkText.setText(if (file.shareLink == null) R.string.buttonCreatePublicLink else R.string.buttonCopyPublicLink)
 
         when {
-            isPendingOffline -> {
+            isPendingOffline && file.currentProgress in 0..99 -> {
                 availableOfflineComplete.visibility = GONE
                 availableOfflineIcon.visibility = GONE
                 availableOfflineProgress.visibility = GONE // Before changing the type of progression it must first be gone

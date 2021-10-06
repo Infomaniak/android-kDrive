@@ -231,7 +231,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     fun observeDownloadOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(
         WorkQuery.Builder
             .fromUniqueWorkNames(arrayListOf(DownloadWorker.TAG))
-            .addStates(arrayListOf(WorkInfo.State.RUNNING))
+            .addStates(arrayListOf(WorkInfo.State.RUNNING, WorkInfo.State.SUCCEEDED))
             .build()
     )
 

@@ -594,7 +594,13 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun observeOfflineDownloadProgress() {
         mainViewModel.observeDownloadOffline(requireContext().applicationContext).observe(viewLifecycleOwner) { workInfoList ->
             if (workInfoList.isEmpty()) return@observe
-            val workInfo = workInfoList.firstOrNull() ?: return@observe
+
+            val workInfo = workInfoList.firstOrNull { it.state == WorkInfo.State.RUNNING }
+
+            if (workInfo == null) {
+                updateVisibleProgresses()
+                return@observe
+            }
 
             val fileId: Int = workInfo.progress.getInt(DownloadWorker.FILE_ID, 0)
             if (fileId == 0) return@observe
