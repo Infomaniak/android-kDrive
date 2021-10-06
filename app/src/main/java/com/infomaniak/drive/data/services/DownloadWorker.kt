@@ -111,12 +111,15 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
             fileUrl = ApiRoutes.downloadFile(file),
             okHttpClient = okHttpClient
         ) { progress ->
+            if (!isActive) {
+                notificationManagerCompat.cancel(file.id)
+                throw CancellationException()
+            }
             launch(Dispatchers.Main) {
                 setProgress(workDataOf(PROGRESS to progress, FILE_ID to file.id))
             }
             Log.d(TAG, "download $progress%")
             downloadNotification.apply {
-                ensureActive()
                 setContentText("$progress%")
                 setProgress(100, progress, false)
                 notificationManagerCompat.notify(file.id, build())

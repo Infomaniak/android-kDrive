@@ -311,7 +311,8 @@ class FileInfoActionsView @JvmOverloads constructor(
 
             val fileId: Int = workInfo.progress.getInt(DownloadWorker.FILE_ID, 0)
             val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 0)
-            Log.w("isPendingOffline", "progress from FileActionView $progress% for file $fileId, state:${workInfo.state}")
+
+            Log.d("FileInfoActionsView", "observeOfflineProgression> $progress% file:$fileId state:${workInfo.state}")
 
             if (currentFile.id == fileId) {
                 currentFile.currentProgress = progress
