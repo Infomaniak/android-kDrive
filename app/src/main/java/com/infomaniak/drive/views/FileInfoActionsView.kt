@@ -313,17 +313,15 @@ class FileInfoActionsView @JvmOverloads constructor(
                 ?: workInfoList.firstOrNull { workInfo -> workInfo.tags.any { it == currentFile.getWorkerTag() } }
                 ?: return@observe
 
-            val fileId: Int =
-                if (workInfo.state.isFinished) workInfo.outputData.getInt(DownloadWorker.FILE_ID, 0)
-                else workInfo.tags.first { it == currentFile.getWorkerTag() }.toInt()
+            val fileId: Int = workInfo.tags.first { it == currentFile.getWorkerTag() }.toInt()
             val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 100)
 
             Log.d("FileInfoActionsView", "observeOfflineProgression> $progress% file:$fileId state:${workInfo.state}")
 
             if (currentFile.id == fileId) {
                 currentFile.currentProgress = progress
-                if (progress == 100) {
-                    updateFile(fileId)
+                if (progress == 100 && FileController.isOffline(fileId, UserDrive(driveId = currentFile.driveId))) {
+                    updateFile?.invoke(fileId)
                     currentFile.isOffline = true
                     refreshBottomSheetUi(currentFile)
                 } else {

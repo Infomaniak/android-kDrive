@@ -121,6 +121,12 @@ object FileController {
         }
     }
 
+    fun isOffline(fileId: Int, userDrive: UserDrive): Boolean {
+        return getRealmInstance(userDrive).use { realm ->
+            realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst()?.isOffline ?: false
+        }
+    }
+
     fun removeFile(
         fileId: Int,
         keepFileCaches: ArrayList<Int> = arrayListOf(),
