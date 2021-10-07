@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -48,21 +49,29 @@ class FavoritesFragment : FileListFragment() {
             if (file.isFolder()) {
                 fileListViewModel.cancelDownloadFiles()
                 safeNavigate(FavoritesFragmentDirections.actionFavoritesFragmentSelf(file.id, file.name))
-            } else Utils.displayFile(mainViewModel, findNavController(), file, fileAdapter.getItems())
+            } else {
+                val fileList = fileAdapter.getFileObjectsList(mainViewModel.realm)
+                Utils.displayFile(mainViewModel, findNavController(), file, fileList)
+            }
         }
     }
 
     private inner class DownloadFiles : (Boolean) -> Unit {
         override fun invoke(ignoreCache: Boolean) {
-            if (ignoreCache) fileAdapter.setList(arrayListOf())
             showLoadingTimer.start()
             fileAdapter.isComplete = false
             fileListViewModel.getFavoriteFiles(fileListViewModel.sortType).observe(viewLifecycleOwner) {
                 it?.let { result ->
                     if (fileAdapter.itemCount == 0 || result.page == 1) {
                         changeNoFilesLayoutVisibility(result.files.isEmpty(), false)
-                        fileAdapter.setList(result.files)
-                    } else fileRecyclerView.post { fileAdapter.addFileList(result.files) }
+                        val realmFiles = FileController.getRealmLiveFiles(
+                            order = fileListViewModel.sortType,
+                            parentId = FileController.FAVORITES_FILE_ID,
+                            realm = mainViewModel.realm,
+                            withVisibilitySort = false
+                        )
+                        fileAdapter.updateFileList(realmFiles)
+                    }
                     fileAdapter.isComplete = result.isComplete
                 } ?: run {
                     changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, false)

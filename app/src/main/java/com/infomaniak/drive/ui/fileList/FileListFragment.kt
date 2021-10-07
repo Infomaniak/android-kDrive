@@ -266,11 +266,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         getBackNavigationResult<Int>(REFRESH_FAVORITE_FILE) { fileId ->
             refreshActivities()
-//            if (findNavController().currentDestination?.id == R.id.favoritesFragment) {
-//                fileAdapter.deleteByFileId(fileId)
-//            } else {
-//                fileAdapter.notifyFileChanged(fileId)
-//            }
         }
     }
 
@@ -451,10 +446,10 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         val filesQuery = FileController.getRealmLiveFiles(
             parentId = folderID,
             order = fileListViewModel.sortType,
-            mainViewModel.realm
+            realm = mainViewModel.realm
         )
 
-        fileAdapter = FileAdapter(filesQuery ?: FileController.emptyList(mainViewModel.realm))
+        fileAdapter = FileAdapter(filesQuery)
         fileAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         fileAdapter.onFileClicked = { file ->
             when {
@@ -777,8 +772,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 FileController.getRealmLiveFiles(
                     parentId = folderID,
                     order = newSortType,
-                    mainViewModel.realm
-                )?.let { fileAdapter.updateFileList(it) }
+                    realm = mainViewModel.realm
+                ).apply { fileAdapter.updateFileList(this) }
 
                 UISettings(requireContext()).sortType = newSortType
                 refreshActivities()

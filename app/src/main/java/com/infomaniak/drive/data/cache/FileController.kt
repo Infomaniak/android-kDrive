@@ -56,7 +56,7 @@ object FileController {
 
     private fun getFileById(realm: Realm, fileId: Int) = realm.where(File::class.java).equalTo("id", fileId).findFirst()
 
-    fun emptyList(realm: Realm) = realm.where(File::class.java).alwaysFalse().findAll()
+    private fun emptyList(realm: Realm) = realm.where(File::class.java).alwaysFalse().findAll()
 
     fun getParentFile(fileId: Int, userDrive: UserDrive? = null, realm: Realm? = null): File? {
         val block: (Realm) -> File? = { currentRealm ->
@@ -534,10 +534,11 @@ object FileController {
 
     fun getRealmLiveFiles(
         parentId: Int,
+        realm: Realm,
         order: File.SortType = File.SortType.NAME_AZ,
-        realm: Realm
-    ): RealmResults<File>? {
-        return getRealmLiveSortedFiles(getFileById(realm, parentId), order)
+        withVisibilitySort: Boolean = true
+    ): RealmResults<File> {
+        return getRealmLiveSortedFiles(getFileById(realm, parentId), order, withVisibilitySort) ?: emptyList(realm)
     }
 
     fun getFilesFromCacheOrDownload(
@@ -672,13 +673,14 @@ object FileController {
     private fun getRealmLiveSortedFiles(
         localFolder: File?,
         order: File.SortType,
+        withVisibilitySort: Boolean = true,
         localChildren: RealmResults<File>? = null
     ): RealmResults<File>? {
         val children = localChildren ?: localFolder?.children
         return children?.where()?.let { realmQuery ->
             return realmQuery.getSortQueryByOrder(order)
+                .apply { if (withVisibilitySort) sort(File::visibility.name, Sort.DESCENDING) }
                 .sort(File::type.name, Sort.ASCENDING)
-                .sort(File::visibility.name, Sort.DESCENDING)
                 .findAll()
         }
     }
