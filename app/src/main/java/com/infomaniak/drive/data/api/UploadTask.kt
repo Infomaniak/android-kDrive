@@ -101,6 +101,12 @@ class UploadTask(
                 ApiRepository.getValidChunks(uploadFile.driveId, uploadFile.remoteFolder, uploadFile.identifier).data
             val restartUpload = uploadedChunks?.let { needToResetUpload(it) } ?: false
 
+            Sentry.addBreadcrumb(Breadcrumb().apply {
+                category = "Upload"
+                message = "start with $totalChunks chunks and $uploadedChunks uploadedChunks"
+                level = SentryLevel.INFO
+            })
+
             Log.d("kDrive", " upload task started with total chunk: $totalChunks, valid: $uploadedChunks")
 
             previousChunkBytesWritten = uploadedChunks?.uploadedSize ?: 0
@@ -164,7 +170,7 @@ class UploadTask(
                             level = SentryLevel.INFO
                         })
                     }
-                    updateProgress(currentBytes, bytesWritten, contentLength)
+                    updateProgress(currentBytes, bytesWritten, contentLength, url)
                 }
             }
         }
@@ -198,6 +204,7 @@ class UploadTask(
         ensureActive()
         response.use {
             val bodyResponse = it.body?.string()
+            Log.i("UploadTask", "response successful ${it.isSuccessful}")
             if (!it.isSuccessful) {
                 notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
                 val apiResponse = try {
@@ -210,6 +217,7 @@ class UploadTask(
                     apiResponse?.error?.code.equals("lock_error") -> throw LockErrorException()
                     apiResponse?.error?.code.equals("object_not_found") -> throw FolderNotFoundException()
                     apiResponse?.error?.code.equals("quota_exceeded_error") -> throw QuotaExceededException()
+                    apiResponse?.error?.code.equals("not_authorized") -> throw NotAuthorizedException()
                     apiResponse?.error?.code.equals("upload_error") -> {
                         uploadFile.refreshIdentifier()
                         throw UploadErrorException()
@@ -220,7 +228,7 @@ class UploadTask(
         }
     }
 
-    private fun CoroutineScope.updateProgress(currentBytes: Int, bytesWritten: Long, contentLength: Long) {
+    private fun CoroutineScope.updateProgress(currentBytes: Int, bytesWritten: Long, contentLength: Long, url: String) {
         val totalBytesWritten = currentBytes + previousChunkBytesWritten
         val progress = ((totalBytesWritten.toDouble() / uploadFile.fileSize.toDouble()) * 100).toInt()
         currentProgress = progress
@@ -234,6 +242,8 @@ class UploadTask(
                 scope.setExtra("uploaded size", "$previousChunkBytesWritten")
                 scope.setExtra("bytesWritten", "$bytesWritten")
                 scope.setExtra("contentLength", "$contentLength")
+                scope.setExtra("chunk size", "$chunkSize")
+                scope.setExtra("url", url)
                 Sentry.captureMessage("Chunk total size exceed fileSize 😢")
             }
             Log.d(
@@ -321,6 +331,7 @@ class UploadTask(
     class ChunksSizeExceededException : Exception()
     class FolderNotFoundException : Exception()
     class LockErrorException : Exception()
+    class NotAuthorizedException : Exception()
     class QuotaExceededException : Exception()
     class UploadErrorException : Exception()
 

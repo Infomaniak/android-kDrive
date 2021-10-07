@@ -35,12 +35,10 @@ class ProgressRequestBody(
     private val onProgress: (currentBytes: Int, bytesWritten: Long, contentLength: Long) -> Unit
 ) : RequestBody() {
 
-    @Synchronized
     override fun contentType(): MediaType? {
         return requestBody.contentType()
     }
 
-    @Synchronized
     override fun contentLength(): Long {
         try {
             return requestBody.contentLength()
@@ -49,6 +47,8 @@ class ProgressRequestBody(
         }
         return -1
     }
+
+    override fun isOneShot() = true
 
     @Throws(IOException::class)
     override fun writeTo(sink: BufferedSink) {

@@ -138,14 +138,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             currentUploadFile?.lockErrorNotification(applicationContext)
             Result.retry()
 
-        } catch (exception: UploadTask.ChunksSizeExceededException) {
-            Result.retry()
-
-        } catch (exception: UploadTask.UploadErrorException) {
-            Result.retry()
-
         } catch (exception: Exception) {
             when {
+                exception is UploadTask.ChunksSizeExceededException
+                        || exception is UploadTask.NotAuthorizedException
+                        || exception is UploadTask.UploadErrorException -> Result.retry()
+
                 exception.isNetworkException() -> {
                     currentUploadFile?.networkErrorNotification(applicationContext)
                     Result.retry()
