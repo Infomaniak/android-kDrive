@@ -510,6 +510,28 @@ object FileController {
         customRealm?.let(block) ?: getRealmInstance().use(block)
     }
 
+    fun saveNewSort(parentId: Int, order: File.SortType = File.SortType.NAME_AZ, userDrive: UserDrive?) {
+        getRealmInstance(userDrive).use { realm ->
+            val localFolder = getFileById(realm, parentId)
+            val isNewSort = localFolder?.order != order.order || localFolder.orderBy != order.orderBy
+
+            if (isNewSort && localFolder != null) {
+                realm.executeTransaction {
+                    localFolder.order = order.order
+                    localFolder.orderBy = order.orderBy
+                }
+            }
+        }
+    }
+
+    fun getRealmLiveFiles(
+        parentId: Int,
+        order: File.SortType = File.SortType.NAME_AZ,
+        realm: Realm
+    ): RealmResults<File>? {
+        return getRealmLiveSortedFiles(getFileById(realm, parentId), order)
+    }
+
     fun getFilesFromCacheOrDownload(
         parentId: Int,
         page: Int,
@@ -636,6 +658,20 @@ object FileController {
             remoteFolder.order = order.order
             remoteFolder.orderBy = order.orderBy
             remoteFolder.responseAt = responseAt
+        }
+    }
+
+    private fun getRealmLiveSortedFiles(
+        localFolder: File?,
+        order: File.SortType,
+        localChildren: RealmResults<File>? = null
+    ): RealmResults<File>? {
+        val children = localChildren ?: localFolder?.children
+        return children?.where()?.let { realmQuery ->
+            return realmQuery.getSortQueryByOrder(order)
+                .sort(File::type.name, Sort.ASCENDING)
+                .sort(File::visibility.name, Sort.DESCENDING)
+                .findAll()
         }
     }
 
