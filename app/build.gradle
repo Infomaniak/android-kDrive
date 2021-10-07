@@ -12,8 +12,8 @@ android {
         applicationId "com.infomaniak.drive"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 40003201
-        versionName "4.0.32"
+        versionCode 40003301
+        versionName "4.0.33"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField 'String', 'CLIENT_ID', '"9473D73C-C20F-4971-9E10-D957C563FA68"'
@@ -62,7 +62,7 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation project(path: ':Core')
 
-    def work_version = '2.7.0-beta01'
+    def work_version = '2.7.0-rc01'
     implementation "androidx.work:work-runtime-ktx:$work_version"
 
     implementation 'androidx.concurrent:concurrent-futures-ktx:1.1.0'
@@ -80,15 +80,16 @@ dependencies {
     implementation 'com.github.MikeOrtiz:TouchImageView:3.1.1'
     implementation 'com.github.rubensousa:gravitysnaphelper:2.2.1'
     implementation 'com.tbuonomo.andrui:viewpagerdotsindicator:4.1.2'
-    implementation 'io.coil-kt:coil:1.3.2'
-    implementation 'io.coil-kt:coil-gif:1.3.2'
+    def coil_version = '1.4.0'
+    implementation "io.coil-kt:coil:$coil_version"
+    implementation "io.coil-kt:coil-gif:$coil_version"
 
     standardImplementation 'com.google.android.play:core:1.10.2'
     standardImplementation 'com.google.firebase:firebase-messaging-ktx:22.0.0'
 
     implementation 'io.sentry:sentry-android:5.2.1'
 
-    implementation 'com.github.hannesa2:paho.mqtt.android:3.3.0'
+    implementation 'com.github.hannesa2:paho.mqtt.android:3.4.0-beta2'
 
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.1'
     testImplementation 'io.github.serpro69:kotlin-faker:1.6.0'
