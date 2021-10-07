@@ -31,16 +31,21 @@ import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.utils.setupFileProgress
-import com.infomaniak.drive.views.PaginationAdapter
+import com.infomaniak.drive.views.PaginationAdapter.Companion.VIEW_TYPE_LOADING
+import com.infomaniak.drive.views.PaginationAdapter.Companion.createLoadingViewHolder
 import com.infomaniak.lib.core.views.ViewHolder
+import io.realm.OrderedRealmCollection
+import io.realm.RealmList
+import io.realm.RealmRecyclerViewAdapter
 import kotlinx.android.synthetic.main.cardview_file_list.view.*
 import kotlinx.android.synthetic.main.item_file.view.*
 
 open class FileAdapter(
-    override val itemList: ArrayList<File> = arrayListOf()
-) : PaginationAdapter<File>() {
+//    var fileList: ArrayList<File> = arrayListOf(),
+    var fileList: OrderedRealmCollection<File> = RealmList()
+) : RealmRecyclerViewAdapter<File, ViewHolder>(fileList, true, true) {
 
-    var itemSelected: ArrayList<File> = arrayListOf()
+    var itemSelected: OrderedRealmCollection<File> = RealmList()
 
     var onFileClicked: ((file: File) -> Unit)? = null
     var onMenuClicked: ((selectedFile: File) -> Unit)? = null
@@ -59,14 +64,17 @@ open class FileAdapter(
     var pendingWifiConnection: Boolean = false
     var uploadInProgress: Boolean = false
 
-    private fun getFile(position: Int) = itemList[position]
+    var isComplete = false
+    private var showLoading = false
+
+    private fun getFile(position: Int) = fileList[position]
 
     fun addActivities(newFileList: ArrayList<File>, activities: Map<out Int, File.LocalFileActivity>) {
         var currentIndex = 0
         var fileIndex = 0
         while (fileIndex in 0 until newFileList.size) {
             val file = newFileList[fileIndex]
-            if (currentIndex <= itemList.lastIndex) {
+            if (currentIndex <= fileList.lastIndex) {
                 val currentAdapterFile = getFile(currentIndex)
 
                 when {
@@ -103,13 +111,22 @@ open class FileAdapter(
             fileIndex++
         }
 
-        if (itemList.size > newFileList.size) {
-            val oldCount = itemList.size
-            itemList.subList(currentIndex, oldCount).clear()
+        if (fileList.size > newFileList.size) {
+            val oldCount = fileList.size
+            fileList.subList(currentIndex, oldCount).clear()
             if (currentIndex > 0) {
                 notifyItemChanged(currentIndex - 1)
             }
             notifyItemRangeRemoved(currentIndex, oldCount - newFileList.size)
+        }
+    }
+
+    fun getFiles() = fileList
+
+    fun showLoading() {
+        if (!showLoading) {
+            showLoading = true
+            notifyItemInserted(itemCount - 1)
         }
     }
 
@@ -121,35 +138,58 @@ open class FileAdapter(
         }
     }
 
+    fun updateFileList(newFileList: OrderedRealmCollection<File>) {
+        super.updateData(newFileList)
+        fileList = newFileList
+    }
+
+    fun setFiles(newItemList: ArrayList<File>) {
+//        fileList = newItemList
+        hideLoading()
+        notifyDataSetChanged()
+    }
+
+    fun addAll(newItemList: ArrayList<File>) {
+        val beforeItemCount = itemCount
+        fileList.addAll(newItemList)
+        hideLoading()
+        notifyItemRangeInserted(beforeItemCount, itemCount)
+    }
+
     fun addAt(position: Int, newFile: File) {
-        itemList.add(position, newFile)
+        fileList.add(position, newFile)
         notifyItemInserted(position)
 
         if (viewHolderType == DisplayType.LIST) {
-            if (position == 0 && itemList.size > 1) {
+            if (position == 0 && fileList.size > 1) {
                 notifyItemChanged(1)
-            } else if (position == itemList.size - 1 && itemList.size > 1) {
-                notifyItemChanged(itemList.size - 2)
+            } else if (position == fileList.size - 1 && fileList.size > 1) {
+                notifyItemChanged(fileList.size - 2)
             }
         }
     }
 
     private fun updateAt(position: Int, newFile: File) {
-        itemList[position] = newFile
-        notifyItemChanged(position)
+        //fileList[position] = newFile
+        //notifyItemChanged(position)
     }
 
     fun deleteAt(position: Int) {
-        itemList.removeAt(position)
+        fileList.removeAt(position)
         notifyItemRemoved(position)
 
         if (viewHolderType == DisplayType.LIST) {
-            if (position == 0 && itemList.size > 0) {
+            if (position == 0 && fileList.size > 0) {
                 notifyItemChanged(0)
-            } else if (position == itemList.size && itemList.size > 0) {
-                notifyItemChanged(itemList.size - 1)
+            } else if (position == fileList.size && fileList.size > 0) {
+                notifyItemChanged(fileList.size - 1)
             }
         }
+    }
+
+    private fun hideLoading() {
+        showLoading = false
+        notifyItemRemoved(itemCount)
     }
 
     fun deleteByFileId(fileId: Int) {
@@ -157,8 +197,8 @@ open class FileAdapter(
         if (position >= 0) deleteAt(position)
     }
 
-    fun indexOf(fileId: Int) = itemList.indexOfFirst { it.id == fileId }
-    fun indexOf(fileName: String) = itemList.indexOfFirst { it.name == fileName }
+    fun indexOf(fileId: Int) = fileList.indexOfFirst { it.id == fileId }
+    fun indexOf(fileName: String) = fileList.indexOfFirst { it.name == fileName }
 
     fun notifyFileChanged(fileId: Int, onChange: ((file: File) -> Unit)? = null) {
         val fileIndex = indexOf(fileId)
@@ -185,15 +225,15 @@ open class FileAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        var itemViewType = super.getItemViewType(position)
-        if (itemViewType == VIEW_TYPE_NORMAL) {
-            itemViewType = when (viewHolderType) {
+        return if (position < fileList.size) {
+            when (viewHolderType) {
                 DisplayType.LIST -> DisplayType.LIST.layout
                 else -> if (getFile(position).isFolder() || getFile(position).isDrive()) DisplayType.GRID_FOLDER.layout else DisplayType.GRID.layout
             }
-        }
-        return itemViewType
+        } else VIEW_TYPE_LOADING
     }
+
+    override fun getItemCount() = fileList.size + if (showLoading) 1 else 0
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return when (viewType) {
@@ -292,7 +332,7 @@ open class FileAdapter(
     }
 
     fun contains(fileName: String): Boolean {
-        return itemList.find { it.name == fileName } != null
+        return fileList.find { it.name == fileName } != null
     }
 
     private fun View.checkIfEnableFile(file: File) = when {

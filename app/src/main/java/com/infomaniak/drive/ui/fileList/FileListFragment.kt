@@ -426,7 +426,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
                 fileListViewModel.getFileCount(currentFolder!!).observe(viewLifecycleOwner) { fileCount ->
                     val fileNumber = fileCount.count
-                    if (fileNumber < BulkOperationsUtils.MIN_SELECTED) fileAdapter.itemSelected = fileAdapter.getItems()
+                    if (fileNumber < BulkOperationsUtils.MIN_SELECTED) fileAdapter.itemSelected = fileAdapter.getFiles()
                     enableButtonMultiSelect(true)
                     onUpdateMultiSelect(fileNumber)
                 }
@@ -461,7 +461,13 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             noNetwork.visibility = if (isInternetAvailable) GONE else VISIBLE
         }
 
-        fileAdapter = FileAdapter()
+        val filesQuery = FileController.getRealmLiveFiles(
+            parentId = folderID,
+            order = fileListViewModel.sortType,
+            mainViewModel.realm
+        )
+
+        fileAdapter = FileAdapter(filesQuery ?: FileController.emptyList(mainViewModel.realm))
         fileAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         fileAdapter.onFileClicked = { file ->
             when {
@@ -482,7 +488,9 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                         )
                     }
                 }
-                else -> Utils.displayFile(mainViewModel, findNavController(), file, fileAdapter.getItems())
+                else -> {
+                    Utils.displayFile(mainViewModel, findNavController(), file, fileAdapter.fileList)
+                }
             }
         }
 
@@ -609,7 +617,9 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 100)
                 fileRecyclerView.post {
                     fileAdapter.updateFileProgressByFileId(fileId, progress) { _, file ->
-                        file.isOffline = true
+                        CoroutineScope(Dispatchers.IO).launch {
+                            FileController.updateOfflineStatus(fileId, true)
+                        }
                         file.currentProgress = Utils.INDETERMINATE_PROGRESS
                     }
                 }
@@ -731,7 +741,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     ignoreCache = false,
                     onFinish = {
                         it?.let { (_, files, _) ->
-                            fileAdapter.addActivities(files, activities)
                             changeNoFilesLayoutVisibility(
                                 hideFileList = files.isEmpty(),
                                 changeControlsVisibility = !currentFolder.isRoot()
@@ -772,33 +781,44 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             getBackNavigationResult<File.SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
                 fileListViewModel.sortType = newSortType
                 sortButton?.setText(fileListViewModel.sortType.translation)
-                downloadFiles(fileListViewModel.isSharedWithMe)
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    fileListViewModel.saveNewSort(folderID, newSortType, userDrive)
+                }
+
+                FileController.getRealmLiveFiles(
+                    parentId = folderID,
+                    order = newSortType,
+                    mainViewModel.realm
+                )?.let { fileAdapter.updateFileList(it) }
+
                 UISettings(requireContext()).sortType = newSortType
+                refreshActivities()
             }
         }
     }
 
     private inner class DownloadFiles : (Boolean) -> Unit {
         override fun invoke(ignoreCache: Boolean) {
-            if (ignoreCache) fileAdapter.setList(arrayListOf())
             showLoadingTimer.start()
             isDownloading = true
             fileAdapter.isComplete = false
             getFolderFiles(ignoreCache, onFinish = {
                 it?.let { result ->
                     if (fileAdapter.itemCount == 0 || result.page == 1) {
+
                         currentFolder = if (result.parentFolder?.id == ROOT_ID) {
                             AccountUtils.getCurrentDrive()?.convertToFile(Utils.getRootName(requireContext()))
                         } else result.parentFolder
+
                         mainViewModel.currentFolder.value = currentFolder
                         changeNoFilesLayoutVisibility(
                             hideFileList = result.files.isEmpty(),
                             changeControlsVisibility = result.parentFolder?.isRoot() == false
                         )
-                        fileAdapter.setList(result.files)
-                        refreshActivities()
 
-                    } else fileRecyclerView.post { fileAdapter.addFileList(result.files) }
+                        refreshActivities()
+                    }
                     fileAdapter.isComplete = result.isComplete
                 } ?: run {
                     changeNoFilesLayoutVisibility(
