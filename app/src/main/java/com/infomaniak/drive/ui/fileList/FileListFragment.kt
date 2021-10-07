@@ -112,7 +112,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     protected var userDrive: UserDrive? = null
 
     companion object {
-        const val FILE_KEY = "passed_file"
         const val REFRESH_FAVORITE_FILE = "force_list_refresh"
         const val CANCELLABLE_MAIN_KEY = "cancellable_main"
         const val CANCELLABLE_TITLE_KEY = "cancellable_message"
@@ -244,41 +243,34 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         getBackNavigationResult<Bundle>(CANCELLABLE_MAIN_KEY) { bundle ->
             bundle.getString(CANCELLABLE_TITLE_KEY)?.let { title ->
                 bundle.getParcelable<CancellableAction>(CANCELLABLE_ACTION_KEY)?.let { action ->
-                    bundle.getParcelable<File>(FILE_KEY)?.let { file ->
-                        val fileIndex = fileAdapter.indexOf(file.id)
+                    checkIfNoFiles()
 
-                        checkIfNoFiles()
-
-                        val onCancelActionClicked: (() -> Unit)? = if (allowCancellation) ({
-                            lifecycleScope.launch(Dispatchers.IO) {
-                                if (ApiRepository.cancelAction(action).data == true && isResumed) {
-                                    withContext(Dispatchers.Main) {
-                                        currentFolder?.let {
-                                            refreshActivities()
-                                        } ?: run {
-                                            fileAdapter.addAt(fileIndex, file)
-                                        }
-                                    }
+                    val onCancelActionClicked: (() -> Unit)? = if (allowCancellation) ({
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            if (ApiRepository.cancelAction(action).data == true && isResumed) {
+                                withContext(Dispatchers.Main) {
+                                    refreshActivities()
                                 }
                             }
-                        }) else null
+                        }
+                    }) else null
 
-                        requireActivity().showSnackbar(
-                            title,
-                            anchorView = requireActivity().mainFab,
-                            onActionClicked = onCancelActionClicked
-                        )
-                    }
+                    requireActivity().showSnackbar(
+                        title,
+                        anchorView = requireActivity().mainFab,
+                        onActionClicked = onCancelActionClicked
+                    )
                 } ?: run { requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab) }
             }
         }
 
         getBackNavigationResult<Int>(REFRESH_FAVORITE_FILE) { fileId ->
-            if (findNavController().currentDestination?.id == R.id.favoritesFragment) {
-                fileAdapter.deleteByFileId(fileId)
-            } else {
-                fileAdapter.notifyFileChanged(fileId)
-            }
+            refreshActivities()
+//            if (findNavController().currentDestination?.id == R.id.favoritesFragment) {
+//                fileAdapter.deleteByFileId(fileId)
+//            } else {
+//                fileAdapter.notifyFileChanged(fileId)
+//            }
         }
     }
 
@@ -494,8 +486,9 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         fileAdapter.updateMultiSelectMode = { onUpdateMultiSelect() }
 
         fileAdapter.onMenuClicked = { file ->
+            val fileObject = file.realm?.copyFromRealm(file, 1) ?: file
             val bundle = bundleOf(
-                "file" to file,
+                "file" to fileObject,
                 "userDrive" to UserDrive(driveId = file.driveId, sharedWithMe = fileListViewModel.isSharedWithMe)
             )
             safeNavigate(R.id.fileInfoActionsBottomSheetDialog, bundle)

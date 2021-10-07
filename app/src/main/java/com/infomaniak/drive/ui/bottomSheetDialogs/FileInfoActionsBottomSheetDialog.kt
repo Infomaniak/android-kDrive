@@ -39,7 +39,6 @@ import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_ACTION_KEY
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_MAIN_KEY
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_TITLE_KEY
-import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.FILE_KEY
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.REFRESH_FAVORITE_FILE
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
@@ -157,7 +156,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun addFavoritesClicked() {
-        getCurrentFileObject().apply {
+        currentFile.apply {
             val observer: Observer<ApiResponse<Boolean>> = Observer { apiResponse ->
                 if (apiResponse.isSuccess()) {
                     isFavorite = !isFavorite
@@ -179,7 +178,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File) {
         lifecycleScope.launch {
-            mainViewModel.removeOfflineFile(getCurrentFileObject(), offlineLocalPath, cacheFile)
+            mainViewModel.removeOfflineFile(currentFile, offlineLocalPath, cacheFile)
 
             withContext(Dispatchers.Main) {
                 currentFile.isOffline = false
@@ -199,7 +198,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) {
         val folderId = FileController.getParentFile(currentFile.id)?.id
-        mainViewModel.duplicateFile(getCurrentFileObject(), folderId, result).observe(viewLifecycleOwner) { apiResponse ->
+        mainViewModel.duplicateFile(currentFile, folderId, result).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 apiResponse.data?.let {
                     mainViewModel.refreshActivities.value = true
@@ -273,11 +272,10 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun onMoveFile(destinationFolder: File) {
-        mainViewModel.moveFile(getCurrentFileObject(), destinationFolder)
+        mainViewModel.moveFile(currentFile, destinationFolder)
             .observe(viewLifecycleOwner) { apiResponse ->
                 if (apiResponse.isSuccess()) {
                     mainViewModel.refreshActivities.value = true
-                    val isFavoriteFolder = findNavController().previousBackStackEntry?.destination?.id == R.id.favoritesFragment
                     transmitActionAndPopBack(
                         getString(R.string.allFileMove, currentFile.name, destinationFolder.name),
                         apiResponse.data?.setDriveAndReturn(currentFile.driveId)
@@ -287,8 +285,6 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                 }
             }
     }
-
-    fun getCurrentFileObject() = mainViewModel.realm.copyFromRealm(navigationArgs.file, 0)
 
     private fun File.showFavoritesResultSnackbar() {
         if (isFavorite) {
@@ -305,8 +301,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     private fun transmitActionAndPopBack(message: String, action: CancellableAction? = null) {
-        val bundle = bundleOf(CANCELLABLE_TITLE_KEY to message, CANCELLABLE_ACTION_KEY to action, FILE_KEY to currentFile)
-
+        val bundle = bundleOf(CANCELLABLE_TITLE_KEY to message, CANCELLABLE_ACTION_KEY to action)
         setBackNavigationResult(CANCELLABLE_MAIN_KEY, bundle)
     }
 }
