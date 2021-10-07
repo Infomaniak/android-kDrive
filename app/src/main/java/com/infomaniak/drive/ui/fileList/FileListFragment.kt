@@ -118,7 +118,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         const val CANCELLABLE_TITLE_KEY = "cancellable_message"
         const val CANCELLABLE_ACTION_KEY = "cancellable_action"
         const val SORT_TYPE_OPTION_KEY = "sort_type_option"
-        const val DELETE_NOT_UPDATE_ACTION = "is_update_not_delete_action"
 
         const val ACTIVITIES_REFRESH_DELAY = 5000L
     }
@@ -247,12 +246,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 bundle.getParcelable<CancellableAction>(CANCELLABLE_ACTION_KEY)?.let { action ->
                     bundle.getParcelable<File>(FILE_KEY)?.let { file ->
                         val fileIndex = fileAdapter.indexOf(file.id)
-                        if (bundle.containsKey(DELETE_NOT_UPDATE_ACTION)) {
-                            if (bundle.getBoolean(DELETE_NOT_UPDATE_ACTION)) {
-                                fileAdapter.deleteAt(fileIndex)
-                                checkIfNoFiles()
-                            } else fileAdapter.notifyFileChanged(file.id)
-                        }
+
+                        checkIfNoFiles()
 
                         val onCancelActionClicked: (() -> Unit)? = if (allowCancellation) ({
                             lifecycleScope.launch(Dispatchers.IO) {

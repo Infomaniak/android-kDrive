@@ -381,12 +381,10 @@ class FileInfoActionsView @JvmOverloads constructor(
         onSuccess: ((action: CancellableAction) -> Unit)? = null,
         onError: ((translatedError: String) -> Unit)? = null
     ) {
-        mainViewModel.renameFile(currentFile, newName).observe(ownerFragment) { apiResponse ->
+        mainViewModel.renameFile(getCurrentFileObject(), newName).observe(ownerFragment) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 apiResponse?.data?.let { action ->
                     action.driveId = currentFile.driveId
-                    currentFile.name = newName
-                    refreshBottomSheetUi(currentFile)
                     onSuccess?.invoke(action)
                 }
             } else {
@@ -394,6 +392,8 @@ class FileInfoActionsView @JvmOverloads constructor(
             }
         }
     }
+
+    fun getCurrentFileObject() = currentFile.realm?.copyFromRealm(currentFile, 0) ?: currentFile
 
     interface OnItemClickListener {
         fun addFavoritesClicked()
