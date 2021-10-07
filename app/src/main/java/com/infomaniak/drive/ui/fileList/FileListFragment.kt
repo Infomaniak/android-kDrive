@@ -476,7 +476,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     }
                 }
                 else -> {
-                    Utils.displayFile(mainViewModel, findNavController(), file, fileAdapter.fileList, mainViewModel.realm)
+                    val fileList = fileAdapter.getFileObjectsList(mainViewModel.realm)
+                    Utils.displayFile(mainViewModel, findNavController(), file, fileList)
                 }
             }
         }

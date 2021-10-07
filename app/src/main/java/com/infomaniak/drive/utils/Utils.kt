@@ -192,11 +192,10 @@ object Utils {
         mainViewModel: MainViewModel,
         navController: NavController,
         selectedFile: File,
-        fileList: OrderedRealmCollection<File>,
-        realm: Realm,
+        fileList: ArrayList<File>,
         isSharedWithMe: Boolean = false
     ) {
-        mainViewModel.currentFileList = ArrayList(realm.copyFromRealm(fileList, 1))
+        mainViewModel.currentFileList = fileList
         val navOptions = NavOptions.Builder()
             .setEnterAnim(R.anim.fragment_open_enter)
             .setExitAnim(R.anim.fragment_open_exit)

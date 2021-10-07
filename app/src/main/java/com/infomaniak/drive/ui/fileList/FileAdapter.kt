@@ -35,13 +35,13 @@ import com.infomaniak.drive.views.PaginationAdapter.Companion.VIEW_TYPE_LOADING
 import com.infomaniak.drive.views.PaginationAdapter.Companion.createLoadingViewHolder
 import com.infomaniak.lib.core.views.ViewHolder
 import io.realm.OrderedRealmCollection
+import io.realm.Realm
 import io.realm.RealmList
 import io.realm.RealmRecyclerViewAdapter
 import kotlinx.android.synthetic.main.cardview_file_list.view.*
 import kotlinx.android.synthetic.main.item_file.view.*
 
 open class FileAdapter(
-//    var fileList: ArrayList<File> = arrayListOf(),
     var fileList: OrderedRealmCollection<File> = RealmList()
 ) : RealmRecyclerViewAdapter<File, ViewHolder>(fileList, true, true) {
 
@@ -68,58 +68,6 @@ open class FileAdapter(
     private var showLoading = false
 
     private fun getFile(position: Int) = fileList[position]
-
-    fun addActivities(newFileList: ArrayList<File>, activities: Map<out Int, File.LocalFileActivity>) {
-        var currentIndex = 0
-        var fileIndex = 0
-        while (fileIndex in 0 until newFileList.size) {
-            val file = newFileList[fileIndex]
-            if (currentIndex <= fileList.lastIndex) {
-                val currentAdapterFile = getFile(currentIndex)
-
-                when {
-                    activities[currentAdapterFile.id] == File.LocalFileActivity.IS_DELETE -> {
-                        deleteAt(currentIndex)
-                        fileIndex--
-                    }
-                    activities[file.id] == null -> {
-                        if (currentAdapterFile.id != file.id) {
-                            updateAt(currentIndex, file)
-                        }
-                        currentIndex++
-                    }
-                    else -> {
-                        when (activities[file.id]) {
-                            File.LocalFileActivity.IS_UPDATE -> {
-                                updateAt(currentIndex, file)
-                                currentIndex++
-                            }
-                            File.LocalFileActivity.IS_NEW -> {
-                                addAt(currentIndex, file)
-                                currentIndex++
-                            }
-                            File.LocalFileActivity.IS_DELETE -> {
-                                deleteAt(currentIndex)
-                            }
-                        }
-                    }
-                }
-            } else {
-                addFileList(ArrayList(newFileList.subList(fileIndex, newFileList.size)))
-                return
-            }
-            fileIndex++
-        }
-
-        if (fileList.size > newFileList.size) {
-            val oldCount = fileList.size
-            fileList.subList(currentIndex, oldCount).clear()
-            if (currentIndex > 0) {
-                notifyItemChanged(currentIndex - 1)
-            }
-            notifyItemRangeRemoved(currentIndex, oldCount - newFileList.size)
-        }
-    }
 
     fun getFiles() = fileList
 
@@ -169,11 +117,6 @@ open class FileAdapter(
         }
     }
 
-    private fun updateAt(position: Int, newFile: File) {
-        //fileList[position] = newFile
-        //notifyItemChanged(position)
-    }
-
     fun deleteAt(position: Int) {
         fileList.removeAt(position)
         notifyItemRemoved(position)
@@ -185,6 +128,10 @@ open class FileAdapter(
                 notifyItemChanged(fileList.size - 1)
             }
         }
+    }
+
+    fun getFileObjectsList(realm: Realm): ArrayList<File> {
+        return ArrayList(realm.copyFromRealm(fileList, 1))
     }
 
     private fun hideLoading() {
