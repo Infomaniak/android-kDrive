@@ -187,13 +187,13 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                 } else {
                     fileInfoActionsView.refreshBottomSheetUi(currentFile)
                 }
-                mainViewModel.updateOfflineFile.value = currentFile.id to false
+                mainViewModel.updateOfflineFile.value = currentFile.id
             }
         }
     }
 
     override fun onCacheAddedToOffline() {
-        mainViewModel.updateOfflineFile.value = currentFile.id to true
+        mainViewModel.updateOfflineFile.value = currentFile.id
     }
 
     override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) {

@@ -39,6 +39,7 @@ import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.VisibilityType.*
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
@@ -224,7 +225,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             }
         } else {
             Utils.downloadAsOfflineFile(context, currentFile)
-            if (currentFile.isPendingOffline(context)) mainViewModel.updateOfflineFile.value = currentFile.id to false
+            if (currentFile.isPendingOffline(context)) mainViewModel.updateOfflineFile.value = currentFile.id
         }
         refreshBottomSheetUi(currentFile)
     }
@@ -303,7 +304,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         availableOffline.isEnabled = isEnabled
     }
 
-    fun observeOfflineProgression(lifecycleOwner: LifecycleOwner, updateFile: (fileId: Int) -> Unit) {
+    fun observeOfflineProgression(lifecycleOwner: LifecycleOwner, updateFile: ((fileId: Int) -> Unit)? = null) {
         observeDownloadOffline = mainViewModel.observeDownloadOffline(context.applicationContext)
         observeDownloadOffline?.observe(lifecycleOwner) { workInfoList ->
             if (workInfoList.isEmpty()) return@observe

@@ -82,7 +82,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             userDrive = UserDrive(driveId = driveId, sharedWithMe = isSharedWithMe)
             hideActions = arguments?.getBoolean(PREVIEW_HIDE_ACTIONS, false) ?: false
             currentPreviewFile = fileId?.let {
-                FileController.getFileById(it, userDrive) ?: mainViewModel.currentFileList.value?.first { file -> file.id == it }
+                FileController.getFileById(it, userDrive) ?: mainViewModel.currentFileList.first { file -> file.id == it }
             } ?: throw Exception("No current preview found")
             previewSliderViewModel.currentPreview = currentPreviewFile
             previewSliderViewModel.userDrive = userDrive
@@ -137,12 +137,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         openWithButton.setOnClickListener { openWithClicked() }
         backButton.setOnClickListener { findNavController().popBackStack() }
 
-        mainViewModel.currentFileList.observe(viewLifecycleOwner) {
-            it?.let { files ->
-                previewSliderAdapter.setFiles(files)
-                val position = previewSliderAdapter.getPosition(currentPreviewFile)
-                viewPager.setCurrentItem(position, false)
-            }
+        mainViewModel.currentFileList.let { files ->
+            previewSliderAdapter.setFiles(files)
+            val position = previewSliderAdapter.getPosition(currentPreviewFile)
+            viewPager.setCurrentItem(position, false)
         }
 
         configureBottomSheetFileInfo()
@@ -189,24 +187,12 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         onSelectFolderResult(requestCode, resultCode, data)
     }
 
-    fun toggleBottomSheet(show: Boolean? = null) {
-        val mustShow = show ?: (bottomSheetBehavior.state == BottomSheetBehavior.STATE_HIDDEN)
-        bottomSheetFileInfos?.scrollToTop()
-        bottomSheetBehavior.state = if (mustShow) {
-            BottomSheetBehavior.STATE_COLLAPSED
-        } else {
-            BottomSheetBehavior.STATE_HIDDEN
-        }
-    }
-
     override fun onResume() {
         super.onResume()
         activity?.window?.statusBarColor = ContextCompat.getColor(requireContext(), R.color.previewBackground)
         activity?.window?.lightStatusBar(false)
         bottomSheetFileInfos.updateAvailableOfflineItem()
-        bottomSheetFileInfos.observeOfflineProgression(this) { fileId ->
-            previewSliderAdapter.updateFile(fileId) { file -> file.isOffline = true }
-        }
+        bottomSheetFileInfos.observeOfflineProgression(this)
     }
 
     override fun onPause() {
@@ -270,6 +256,16 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
+    private fun toggleBottomSheet(show: Boolean? = null) {
+        val mustShow = show ?: (bottomSheetBehavior.state == BottomSheetBehavior.STATE_HIDDEN)
+        bottomSheetFileInfos?.scrollToTop()
+        bottomSheetBehavior.state = if (mustShow) {
+            BottomSheetBehavior.STATE_COLLAPSED
+        } else {
+            BottomSheetBehavior.STATE_HIDDEN
+        }
+    }
+
     private fun File.showFavoritesResultSnackbar() {
         if (isFavorite) {
             requireActivity().showSnackbar(getString(R.string.allFileAddFavoris, name))
@@ -299,7 +295,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 } else {
                     toggleBottomSheet(true)
                 }
-                mainViewModel.currentFileList.value?.remove(currentPreviewFile)
+                mainViewModel.currentFileList.remove(currentPreviewFile)
                 requireActivity().showSnackbar(R.string.snackbarLeaveShareConfirmation)
             } else {
                 requireActivity().showSnackbar(apiResponse.translatedError)
@@ -318,7 +314,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         mainViewModel.duplicateFile(currentPreviewFile, folderID, result).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 apiResponse.data?.let { file ->
-                    mainViewModel.currentFileList.value?.add(file)
+                    mainViewModel.currentFileList.add(file)
                     previewSliderAdapter.addFile(file)
                     requireActivity().showSnackbar(getString(R.string.allFileDuplicate, currentPreviewFile.name))
                     toggleBottomSheet(true)
@@ -348,7 +344,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         mainViewModel.deleteFile(currentPreviewFile).observe(viewLifecycleOwner) { apiResponse ->
             onApiResponse()
             if (apiResponse.isSuccess()) {
-                mainViewModel.currentFileList.value?.remove(currentPreviewFile)
+                mainViewModel.currentFileList.remove(currentPreviewFile)
                 if (previewSliderAdapter.deleteFile(currentPreviewFile)) {
                     findNavController().popBackStack()
                 } else {

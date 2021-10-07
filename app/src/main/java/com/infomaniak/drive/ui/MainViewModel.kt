@@ -52,7 +52,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     val currentFolder = MutableLiveData<File>()
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
-    val currentFileList = MutableLiveData<ArrayList<File>>()
+    var currentFileList = ArrayList<File>()
     val isInternetAvailable = MutableLiveData(true)
 
     val createDropBoxSuccess = SingleLiveEvent<DropBox>()
@@ -62,7 +62,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     val deleteFileFromHome = SingleLiveEvent<Boolean>()
     val forcedDriveSelection = SingleLiveEvent<Boolean>()
     val refreshActivities = SingleLiveEvent<Boolean>()
-    val updateOfflineFile = SingleLiveEvent<Pair<FileId, IsOffline>>()
+    val updateOfflineFile = SingleLiveEvent<FileId>()
     val updateVisibleFiles = MutableLiveData<Boolean>()
 
     private var getFileDetailsJob = Job()

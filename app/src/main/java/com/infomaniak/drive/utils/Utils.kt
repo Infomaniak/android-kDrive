@@ -22,7 +22,6 @@ import android.content.*
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.os.CountDownTimer
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.view.View
@@ -53,10 +52,13 @@ import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment
+import io.realm.OrderedRealmCollection
+import io.realm.Realm
 import kotlinx.android.synthetic.main.dialog_download_progress.view.*
 import kotlinx.android.synthetic.main.dialog_name_prompt.view.*
 import kotlinx.android.synthetic.main.dialog_name_prompt.view.icon
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.min
 import kotlin.math.pow
 
@@ -190,10 +192,11 @@ object Utils {
         mainViewModel: MainViewModel,
         navController: NavController,
         selectedFile: File,
-        fileList: ArrayList<File>,
+        fileList: OrderedRealmCollection<File>,
+        realm: Realm,
         isSharedWithMe: Boolean = false
     ) {
-        mainViewModel.currentFileList.value = fileList
+        mainViewModel.currentFileList = ArrayList(realm.copyFromRealm(fileList, 1))
         val navOptions = NavOptions.Builder()
             .setEnterAnim(R.anim.fragment_open_enter)
             .setExitAnim(R.anim.fragment_open_exit)
