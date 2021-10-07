@@ -44,7 +44,11 @@ object SyncUtils {
         else "datetaken"
 
     fun getFileName(cursor: Cursor): String {
-        return cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)) ?: ""
+        val columnIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        return when {
+            columnIndex != -1 -> cursor.getString(columnIndex) ?: ""
+            else -> ""
+        }
     }
 
     fun getFileDates(cursor: Cursor): Pair<Date?, Date> {
@@ -70,15 +74,22 @@ object SyncUtils {
         if (fileModifiedAt == null || fileModifiedAt.time == 0L) {
             fileModifiedAt = Date()
             Sentry.withScope { scope ->
-                if (dateTakenIndex != -1)
-                    scope.setExtra("dateTakenIndex", cursor.getLong(dateTakenIndex).toString())
-                if (dateAddedIndex != -1)
-                    scope.setExtra("dateAddedIndex", cursor.getLong(dateAddedIndex).toString())
+                val noData = "No data"
+                val dateTakenValue = if (dateTakenIndex != -1) cursor.getLong(dateTakenIndex).toString() else noData
+                scope.setExtra("dateTakenIndex", dateTakenValue)
 
-                if (lastModifiedIndex != -1)
-                    scope.setExtra("lastModifiedIndex", cursor.getLong(lastModifiedIndex).toString())
-                if (dateModifiedIndex != -1)
-                    scope.setExtra("dateModifiedIndex", cursor.getLong(dateModifiedIndex).toString())
+                val dateAddedValue = if (dateAddedIndex != -1) cursor.getLong(dateAddedIndex).toString() else noData
+                scope.setExtra("dateAddedIndex", dateAddedValue)
+
+                val lastModifiedData = if (lastModifiedIndex != -1) cursor.getLong(lastModifiedIndex).toString() else noData
+                scope.setExtra("lastModifiedIndex", lastModifiedData)
+
+                val dateModifiedData = if (dateModifiedIndex != -1) cursor.getLong(dateModifiedIndex).toString() else noData
+                scope.setExtra("dateModifiedIndex", dateModifiedData)
+
+                scope.setExtra("fileName", getFileName(cursor))
+
+                scope.setExtra("columnNames", cursor.columnNames.joinToString(", "))
 
                 Sentry.captureMessage("Error fileModifiedAt is null")
             }
