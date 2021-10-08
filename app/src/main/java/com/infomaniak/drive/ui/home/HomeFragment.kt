@@ -37,17 +37,20 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.AppBarLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive
+import com.infomaniak.drive.data.services.UploadWorker
+import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.safeNavigate
-import com.infomaniak.drive.utils.showSnackbar
+import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.utils.setPagination
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.fragment_home.*
+import kotlinx.android.synthetic.main.fragment_home.searchViewCard
+import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.android.synthetic.main.item_search_view.*
 
 class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
@@ -130,12 +133,28 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 isEnabled = verticalOffset == 0
             })
         }
+
+        homeUploadFileInProgress.setUploadFileInProgress(R.string.uploadInProgressTitle) {
+            // TODO
+        }
+
+        requireContext().trackUploadWorkerProgress().observe(viewLifecycleOwner) {
+            val workInfo = it.firstOrNull() ?: return@observe
+            if (workInfo.progress.getBoolean(UploadWorker.IS_UPLOADED, false)) {
+                showPendingFiles()
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
         if (lastElementsRecyclerView.adapter == null) initLastElementsAdapter()
         updateUi()
+        showPendingFiles()
+    }
+
+    private fun showPendingFiles() {
+        homeUploadFileInProgress.updateUploadFileInProgress(UploadFile.getCurrentUserPendingUploadsCount())
     }
 
     // TODO - Use same fragment with PicturesAdapter and LastPictures

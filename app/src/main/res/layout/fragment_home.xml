@@ -122,11 +122,22 @@
                         android:layout_marginHorizontal="@dimen/marginStandard"
                         android:layout_marginBottom="@dimen/marginStandardMedium" />
 
+                    <include
+                        android:id="@+id/homeUploadFileInProgress"
+                        layout="@layout/cardview_file_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/marginStandard"
+                        android:layout_marginTop="@dimen/marginStandardSmall"
+                        android:layout_marginBottom="@dimen/marginStandardMedium"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
                     <com.infomaniak.drive.views.NotEnoughStorageView
                         android:id="@+id/notEnoughStorage"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="@dimen/marginStandard"
+                        android:layout_marginBottom="@dimen/marginStandardMedium"
                         android:visibility="gone"
                         tools:visibility="visible" />
 

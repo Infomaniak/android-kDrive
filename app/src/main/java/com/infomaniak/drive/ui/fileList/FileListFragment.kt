@@ -42,9 +42,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import androidx.work.*
-import com.google.android.material.card.MaterialCardView
-import com.google.android.material.shape.CornerFamily
+import androidx.work.WorkInfo
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
@@ -457,6 +455,10 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         sortButton.setOnClickListener {
             safeNavigate(R.id.sortFilesBottomSheetDialog, bundleOf("sortType" to fileListViewModel.sortType))
         }
+
+        uploadFileInProgress.setUploadFileInProgress(R.string.uploadInThisFolderTitle) {
+            goToUploadInProgress(folderID)
+        }
     }
 
     private fun setupFileAdapter() {
@@ -640,34 +642,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun showPendingFiles() {
         if (!showPendingFiles) return
         fileListViewModel.getPendingFilesCount(folderID).observe(viewLifecycleOwner) { pendingFilesCount ->
-            uploadFileInProgress.apply {
-                val radius = resources.getDimension(R.dimen.cardViewRadius)
-
-                if (pendingFilesCount > 0L) {
-                    (this as MaterialCardView).shapeAppearanceModel = shapeAppearanceModel.toBuilder()
-                        .setTopLeftCorner(CornerFamily.ROUNDED, radius)
-                        .setTopRightCorner(CornerFamily.ROUNDED, radius)
-                        .setBottomLeftCorner(CornerFamily.ROUNDED, radius)
-                        .setBottomRightCorner(CornerFamily.ROUNDED, radius)
-                        .build()
-
-                    fileName.setText(R.string.uploadInThisFolderTitle)
-                    fileSize.text = resources.getQuantityString(
-                        R.plurals.uploadInProgressNumberFile,
-                        pendingFilesCount,
-                        pendingFilesCount
-                    )
-                    filePreview.visibility = GONE
-                    fileProgression.visibility = VISIBLE
-                    visibility = VISIBLE
-
-                    setOnClickListener {
-                        goToUploadInProgress(folderID)
-                    }
-                } else {
-                    visibility = GONE
-                }
-            }
+            uploadFileInProgress.updateUploadFileInProgress(pendingFilesCount)
         }
     }
 
