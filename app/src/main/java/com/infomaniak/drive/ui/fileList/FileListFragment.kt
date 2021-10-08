@@ -781,17 +781,17 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             isDownloading = true
             fileAdapter.isComplete = false
 
-            if (fileAdapter.fileList.isEmpty()) {
-                FileController.getRealmLiveFiles(
-                    parentId = folderID,
-                    order = fileListViewModel.sortType,
-                    realm = mainViewModel.realm
-                ).apply { fileAdapter.updateFileList(this) }
-            }
-
             getFolderFiles(ignoreCache, onFinish = {
                 it?.let { result ->
                     if (fileAdapter.itemCount == 0 || result.page == 1) {
+
+                        if (fileAdapter.fileList.isEmpty()) {
+                            FileController.getRealmLiveFiles(
+                                parentId = folderID,
+                                order = fileListViewModel.sortType,
+                                realm = mainViewModel.realm
+                            ).apply { fileAdapter.updateFileList(this) }
+                        }
 
                         currentFolder = if (result.parentFolder?.id == ROOT_ID) {
                             AccountUtils.getCurrentDrive()?.convertToFile(Utils.getRootName(requireContext()))
@@ -799,7 +799,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
                         mainViewModel.currentFolder.value = currentFolder
                         changeNoFilesLayoutVisibility(
-                            hideFileList = result.files.isEmpty(),
+                            hideFileList = fileAdapter.fileList.isEmpty(),
                             changeControlsVisibility = result.parentFolder?.isRoot() == false
                         )
 

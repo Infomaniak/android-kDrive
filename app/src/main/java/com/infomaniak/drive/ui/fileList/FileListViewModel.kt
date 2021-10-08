@@ -80,15 +80,18 @@ class FileListViewModel : ViewModel() {
                     ignoreCache = ignoreCache,
                     ignoreCloud = ignoreCloud,
                     order = order,
-                    userDrive = userDrive
+                    userDrive = userDrive,
+                    withChildren = false
                 )
 
                 when {
                     resultList == null -> emit(null)
-                    resultList.second.size < ApiRepository.PER_PAGE ->
-                        emit(FolderFilesResult(resultList.first, resultList.second, true, page))
+                    resultList.second.size < ApiRepository.PER_PAGE -> {
+                        if (page == 1) {
+                            emit(FolderFilesResult(resultList.first, resultList.second, true, page))
+                        }
+                    }
                     else -> {
-                        emit(FolderFilesResult(resultList.first, resultList.second, false, page))
                         recursiveDownload(parentId, page + 1)
                     }
                 }
