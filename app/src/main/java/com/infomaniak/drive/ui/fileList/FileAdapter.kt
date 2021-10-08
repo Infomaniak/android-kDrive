@@ -92,16 +92,17 @@ open class FileAdapter(
     }
 
     fun setFiles(newItemList: ArrayList<File>) {
-//        fileList = newItemList
+        fileList = RealmList(*newItemList.toTypedArray())
         hideLoading()
         notifyDataSetChanged()
     }
 
     fun addAll(newItemList: ArrayList<File>) {
         val beforeItemCount = itemCount
-        fileList.addAll(newItemList)
+        val list = ArrayList(fileList).apply { addAll(newItemList) }
+        fileList = RealmList(*list.toTypedArray())
         hideLoading()
-        notifyItemRangeInserted(beforeItemCount, itemCount)
+        notifyItemRangeInserted(beforeItemCount, newItemList.count())
     }
 
     fun addAt(position: Int, newFile: File) {
@@ -131,7 +132,7 @@ open class FileAdapter(
     }
 
     fun getFileObjectsList(realm: Realm): ArrayList<File> {
-        return ArrayList(realm.copyFromRealm(fileList, 1))
+        return if (fileList.isManaged) ArrayList(realm.copyFromRealm(fileList, 1)) else ArrayList(fileList)
     }
 
     private fun hideLoading() {

@@ -443,13 +443,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             noNetwork.visibility = if (isInternetAvailable) GONE else VISIBLE
         }
 
-        val filesQuery = FileController.getRealmLiveFiles(
-            parentId = folderID,
-            order = fileListViewModel.sortType,
-            realm = mainViewModel.realm
-        )
-
-        fileAdapter = FileAdapter(filesQuery)
+        fileAdapter = FileAdapter(FileController.emptyList(mainViewModel.realm))
         fileAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         fileAdapter.onFileClicked = { file ->
             when {
@@ -786,6 +780,15 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             showLoadingTimer.start()
             isDownloading = true
             fileAdapter.isComplete = false
+
+            if (fileAdapter.fileList.isEmpty()) {
+                FileController.getRealmLiveFiles(
+                    parentId = folderID,
+                    order = fileListViewModel.sortType,
+                    realm = mainViewModel.realm
+                ).apply { fileAdapter.updateFileList(this) }
+            }
+
             getFolderFiles(ignoreCache, onFinish = {
                 it?.let { result ->
                     if (fileAdapter.itemCount == 0 || result.page == 1) {

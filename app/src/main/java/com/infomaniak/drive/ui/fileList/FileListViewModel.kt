@@ -26,6 +26,7 @@ import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.SingleLiveEvent
 import com.infomaniak.lib.core.models.ApiResponse
+import io.realm.OrderedRealmCollection
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -49,7 +50,7 @@ class FileListViewModel : ViewModel() {
     var isSharedWithMe = false
 
     var currentPage = 1
-    var oldList: ArrayList<File>? = null
+    var oldList: OrderedRealmCollection<File>? = null
     val isListMode = SingleLiveEvent<Boolean>()
 
     var lastItemCount: FileCount? = null
