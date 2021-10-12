@@ -536,7 +536,9 @@ object FileController {
         order: File.SortType = File.SortType.NAME_AZ,
         withVisibilitySort: Boolean = true
     ): RealmResults<File> {
-        return getRealmLiveSortedFiles(getFileById(realm, parentId), order, withVisibilitySort) ?: emptyList(realm)
+        realm.refresh()
+        val realmLiveSortedFiles = getRealmLiveSortedFiles(getFileById(realm, parentId), order, withVisibilitySort)
+        return realmLiveSortedFiles ?: emptyList(realm)
     }
 
     fun getFilesFromCacheOrDownload(
