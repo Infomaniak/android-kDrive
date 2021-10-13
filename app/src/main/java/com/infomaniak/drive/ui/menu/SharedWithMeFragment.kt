@@ -24,6 +24,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialog
@@ -32,10 +33,12 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.isPositive
 import com.infomaniak.drive.utils.safeNavigate
+import io.realm.Realm
 import kotlinx.android.synthetic.main.fragment_file_list.*
 
 class SharedWithMeFragment : FileSubTypeListFragment() {
 
+    private lateinit var realm: Realm
     private val navigationArgs: SharedWithMeFragmentArgs by navArgs()
 
     override var hideBackButtonWhenRoot: Boolean = false
@@ -44,7 +47,8 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
         val inDriveList = folderID == ROOT_ID && !navigationArgs.driveID.isPositive()
         val inDriveRoot = folderID == ROOT_ID && navigationArgs.driveID.isPositive()
         mainViewModel.currentFolder.value = null
-
+        userDrive = UserDrive(driveId = navigationArgs.driveID, sharedWithMe = true)
+        realm = FileController.getRealmInstance(userDrive)
         downloadFiles = DownloadFiles(
             when {
                 inDriveList -> null
@@ -75,9 +79,17 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                         }
                 }
                 file.isFolder() -> openSharedWithMeFolder(file)
-                else -> Utils.displayFile(mainViewModel, findNavController(), file, fileAdapter.getItems(), isSharedWithMe = true)
+                else -> {
+                    val fileList = fileAdapter.getFileObjectsList(realm)
+                    Utils.displayFile(mainViewModel, findNavController(), file, fileList, isSharedWithMe = true)
+                }
             }
         }
+    }
+
+    override fun onDestroy() {
+        if (::realm.isInitialized) realm.close()
+        super.onDestroy()
     }
 
     private fun openMaintenanceDialog(driveName: String) {
@@ -105,7 +117,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
         }
 
         override fun invoke(ignoreCache: Boolean) {
-            if (ignoreCache) fileAdapter.setList(arrayListOf())
+            if (ignoreCache && !fileAdapter.fileList.isManaged) fileAdapter.setFiles(arrayListOf())
             showLoadingTimer.start()
             fileAdapter.isComplete = false
 
@@ -114,11 +126,11 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                     parentId = if (folder.isDrive()) ROOT_ID else folder.id,
                     ignoreCache = true,
                     order = fileListViewModel.sortType,
-                    userDrive = UserDrive(driveId = folder.driveId, sharedWithMe = true)
+                    userDrive = userDrive
                 ).observe(viewLifecycleOwner) {
-                    it?.let { (_, children, isComplete) ->
+                    it?.let { (_, children, _) ->
                         mainViewModel.currentFolder.value = it.parentFolder
-                        populateFileList(ArrayList(children), isComplete)
+                        populateFileList(ArrayList(children), true, realm = realm)
                     }
                 }
             } ?: run {
