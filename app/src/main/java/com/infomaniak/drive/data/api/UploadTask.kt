@@ -132,6 +132,7 @@ class UploadTask(
 
                 val url = uploadUrl(
                     chunkNumber = chunkNumber,
+                    if (uploadFile.type == UploadFile.Type.SYNC.name) ConflictOption.replace else ConflictOption.rename,
                     currentChunkSize = count,
                     totalChunks = totalChunks
                 )
@@ -307,6 +308,7 @@ class UploadTask(
 
     private fun uploadUrl(
         chunkNumber: Int,
+        conflictOption: ConflictOption,
         currentChunkSize: Int,
         totalChunks: Int
     ): String {
@@ -319,7 +321,7 @@ class UploadTask(
                 "&identifier=${uploadFile.identifier}" +
                 "&file_name=${uploadFile.encodedName()}" +
                 "&last_modified_at=${uploadFile.fileModifiedAt.time / 1000}" +
-                "&conflict=replace" +
+                "&conflict=" + conflictOption.name +
                 relativePath +
                 if (uploadFile.fileCreatedAt == null) "" else "&file_created_at=${uploadFile.fileCreatedAt!!.time / 1000}"
     }
@@ -339,5 +341,13 @@ class UploadTask(
         var chunkSize: Int = 1 * 1024 * 1024 // Chunk 1 Mo
         private val progressMutex = Mutex()
         private const val TOTAL_CHUNKS = 8000
+
+        @Suppress("EnumEntryName")
+        enum class ConflictOption {
+            error,
+            replace,
+            rename,
+            ignore;
+        }
     }
 }
