@@ -17,8 +17,10 @@
  */
 package com.infomaniak.drive.ui.menu
 
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.FileListFragment
+import io.realm.Realm
 import kotlinx.android.synthetic.main.fragment_file_list.*
 
 /**
@@ -33,15 +35,23 @@ open class FileSubTypeListFragment : FileListFragment() {
         files: ArrayList<File>,
         isComplete: Boolean,
         ignoreOffline: Boolean = false,
-        forceClean: Boolean = false
+        forceClean: Boolean = false,
+        realm: Realm? = null
     ) {
-        if (fileAdapter.itemCount == 0 || forceClean) fileAdapter.setList(files)
-        else fileRecyclerView.post { fileAdapter.addFileList(files) }
+        if (fileAdapter.itemCount == 0 || forceClean) {
+            if (realm == null) {
+                fileAdapter.setFiles(files)
+            } else {
+                FileController.getRealmLiveFiles(folderID, realm, fileListViewModel.sortType).apply {
+                    fileAdapter.updateFileList(this)
+                }
+            }
+        }
         fileAdapter.isComplete = isComplete
         showLoadingTimer.cancel()
         swipeRefreshLayout.isRefreshing = false
         changeNoFilesLayoutVisibility(
-            files.isEmpty(),
+            fileAdapter.fileList.isEmpty(),
             changeControlsVisibility = true,
             ignoreOffline = ignoreOffline
         )

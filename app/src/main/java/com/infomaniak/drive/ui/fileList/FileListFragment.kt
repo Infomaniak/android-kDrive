@@ -32,7 +32,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -214,17 +213,23 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         requireContext().trackUploadWorkerProgress().observe(viewLifecycleOwner) {
             val workInfo = it.firstOrNull() ?: return@observe
             val isUploaded = workInfo.progress.getBoolean(UploadWorker.IS_UPLOADED, false)
-            val notIsUploadView = findNavController().currentDestination?.id != R.id.uploadInProgressFragment
+            val remoteFolderId = workInfo.progress.getInt(UploadWorker.REMOTE_FOLDER_ID, 0)
 
-            if (isUploaded || notIsUploadView && !uploadFileInProgress.isVisible) mainViewModel.refreshActivities.value = true
+
+            if (remoteFolderId == folderID && isUploaded) {
+                when {
+                    findNavController().currentDestination?.id == R.id.sharedWithMeFragment
+                            && folderID == ROOT_ID -> downloadFiles(true)
+                    else -> refreshActivities()
+                }
+            }
         }
 
         mainViewModel.refreshActivities.observe(viewLifecycleOwner) {
             it?.let {
                 showPendingFiles()
                 when (findNavController().currentDestination?.id) {
-                    R.id.searchFragment -> Unit
-                    R.id.sharedWithMeFragment -> onRefresh()
+                    R.id.searchFragment, R.id.sharedWithMeFragment -> Unit
                     else -> refreshActivities()
                 }
             }
@@ -264,8 +269,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
         }
 
-        getBackNavigationResult<Int>(REFRESH_FAVORITE_FILE) { fileId ->
-            refreshActivities()
+        getBackNavigationResult<Int>(REFRESH_FAVORITE_FILE) {
+            mainViewModel.refreshActivities.value = true
         }
     }
 
@@ -311,7 +316,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     when (type) {
                         BulkOperationType.TRASH -> {
                             mediator.addSource(
-                                mainViewModel.deleteFile(file, onSuccess),
+                                mainViewModel.deleteFile(file, onSuccess = onSuccess),
                                 mainViewModel.updateMultiSelectMediator(mediator)
                             )
                         }
@@ -569,7 +574,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         activitiesRefreshTimer.cancel()
         isLoadingActivities = true
         mainViewModel.currentFolder.value?.let { currentFolder ->
-            FileController.getFileById(currentFolder.id)?.let { updatedFolder ->
+            FileController.getFileById(currentFolder.id, userDrive)?.let { updatedFolder ->
                 downloadFolderActivities(updatedFolder)
                 activitiesRefreshTimer.start()
             } ?: kotlin.run { activitiesRefreshTimer.start() }
@@ -784,14 +789,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             getFolderFiles(ignoreCache, onFinish = {
                 it?.let { result ->
                     if (fileAdapter.itemCount == 0 || result.page == 1) {
-
-                        if (fileAdapter.fileList.isEmpty()) {
-                            FileController.getRealmLiveFiles(
-                                parentId = folderID,
-                                order = fileListViewModel.sortType,
-                                realm = mainViewModel.realm
-                            ).apply { fileAdapter.updateFileList(this) }
-                        }
+                        FileController.getRealmLiveFiles(
+                            parentId = folderID,
+                            order = fileListViewModel.sortType,
+                            realm = mainViewModel.realm
+                        ).apply { fileAdapter.updateFileList(this) }
 
                         currentFolder = if (result.parentFolder?.id == ROOT_ID) {
                             AccountUtils.getCurrentDrive()?.convertToFile(Utils.getRootName(requireContext()))

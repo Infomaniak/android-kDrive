@@ -81,7 +81,7 @@ class FileListViewModel : ViewModel() {
                     ignoreCloud = ignoreCloud,
                     order = order,
                     userDrive = userDrive,
-                    withChildren = false
+                    withChildren = true
                 )
 
                 when {
@@ -92,6 +92,9 @@ class FileListViewModel : ViewModel() {
                         }
                     }
                     else -> {
+                        if (page == 1) {
+                            emit(FolderFilesResult(resultList.first, resultList.second, true, page))
+                        }
                         recursiveDownload(parentId, page + 1)
                     }
                 }

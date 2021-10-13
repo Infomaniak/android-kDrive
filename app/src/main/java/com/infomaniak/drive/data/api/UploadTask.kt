@@ -152,8 +152,8 @@ class UploadTask(
             notificationManagerCompat.notify(CURRENT_UPLOAD_ID, build())
         }
         notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
-        UploadFile.uploadFinished(uri)
         shareProgress(100, true)
+        UploadFile.uploadFinished(uri)
     }
 
     private fun CoroutineScope.uploadChunkRequest(

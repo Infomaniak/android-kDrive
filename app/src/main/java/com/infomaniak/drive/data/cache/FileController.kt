@@ -154,7 +154,7 @@ object FileController {
         customRealm?.let(block) ?: getRealmInstance().use(block)
     }
 
-    fun updateFile(fileId: Int, realm: Realm? = null, userDrive: UserDrive = UserDrive(), transaction: (file: File) -> Unit) {
+    fun updateFile(fileId: Int, realm: Realm? = null, userDrive: UserDrive? = null, transaction: (file: File) -> Unit) {
         try {
             val block: (Realm) -> Unit? = { currentRealm ->
                 getFileById(currentRealm, fileId)?.let { file ->
@@ -690,12 +690,9 @@ object FileController {
         localChildren: RealmResults<File>? = null
     ): RealmResults<File>? {
         val children = localChildren ?: localFolder?.children
-        return children?.where()?.let { realmQuery ->
-            return realmQuery.getSortQueryByOrder(order)
-                .apply { if (withVisibilitySort) sort(File::visibility.name, Sort.DESCENDING) }
-                .sort(File::type.name, Sort.ASCENDING)
-                .findAll()
-        }
+        return children?.where()?.getSortQueryByOrder(order)
+            ?.apply { if (withVisibilitySort) sort(File::visibility.name, Sort.DESCENDING) }
+            ?.sort(File::type.name, Sort.ASCENDING)?.findAll()
     }
 
     private fun getLocalSortedFolderFiles(

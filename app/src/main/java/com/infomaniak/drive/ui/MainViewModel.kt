@@ -158,10 +158,10 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         emit(ApiRepository.createOfficeFile(driveId, folderId, createFile))
     }
 
-    fun addFileToFavorites(file: File, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
+    fun addFileToFavorites(file: File, userDrive: UserDrive? = null, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
         ApiRepository.postFavoriteFile(file).let { apiResponse ->
             if (apiResponse.isSuccess()) {
-                FileController.updateFile(file.id, realm) { localFile ->
+                FileController.updateFile(file.id, userDrive = userDrive) { localFile ->
                     localFile.isFavorite = true
                 }
                 onSuccess?.invoke()
@@ -170,7 +170,12 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    fun deleteFileFromFavorites(file: File) = liveData(Dispatchers.IO) {
+    fun deleteFileFromFavorites(file: File, userDrive: UserDrive? = null) = liveData(Dispatchers.IO) {
+        CoroutineScope(Dispatchers.IO).launch {
+            FileController.updateFile(file.id, userDrive = userDrive) {
+                it.isFavorite = false
+            }
+        }
         emit(ApiRepository.deleteFavoriteFile(file))
     }
 
@@ -208,19 +213,20 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         emit(apiResponse)
     }
 
-    fun deleteFile(file: File, onSuccess: ((fileID: Int) -> Unit)? = null) = liveData(Dispatchers.IO) {
-        val apiResponse = ApiRepository.deleteFile(file)
-        if (apiResponse.isSuccess()) {
-            file.deleteCaches(getContext())
+    fun deleteFile(file: File, userDrive: UserDrive? = null, onSuccess: ((fileID: Int) -> Unit)? = null) =
+        liveData(Dispatchers.IO) {
+            val apiResponse = ApiRepository.deleteFile(file)
+            if (apiResponse.isSuccess()) {
+                file.deleteCaches(getContext())
 
-            FileController.updateFile(file.id) { localFile ->
-                localFile.deleteFromRealm()
+                FileController.updateFile(file.id, userDrive = userDrive) { localFile ->
+                    localFile.deleteFromRealm()
+                }
+
+                onSuccess?.invoke(file.id)
             }
-
-            onSuccess?.invoke(file.id)
+            emit(apiResponse)
         }
-        emit(apiResponse)
-    }
 
     fun duplicateFile(file: File, folderId: Int? = null, copyName: String?) = liveData(Dispatchers.IO) {
         emit(ApiRepository.duplicateFile(file, copyName, folderId ?: Utils.ROOT_ID))

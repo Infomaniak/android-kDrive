@@ -169,9 +169,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             }
 
             if (isFavorite) {
-                mainViewModel.deleteFileFromFavorites(this).observe(viewLifecycleOwner, observer)
+                mainViewModel.deleteFileFromFavorites(this, navigationArgs.userDrive).observe(viewLifecycleOwner, observer)
             } else {
-                mainViewModel.addFileToFavorites(this).observe(viewLifecycleOwner, observer)
+                mainViewModel.addFileToFavorites(this, navigationArgs.userDrive).observe(viewLifecycleOwner, observer)
             }
         }
     }
@@ -227,7 +227,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun onDeleteFile(onApiResponse: () -> Unit) {
-        mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { apiResponse ->
+        mainViewModel.deleteFile(currentFile, navigationArgs.userDrive).observe(viewLifecycleOwner) { apiResponse ->
             onApiResponse()
             if (apiResponse.isSuccess()) {
                 mainViewModel.refreshActivities.value = true
