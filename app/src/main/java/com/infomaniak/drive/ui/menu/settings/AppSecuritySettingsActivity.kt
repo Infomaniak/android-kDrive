@@ -17,18 +17,15 @@
  */
 package com.infomaniak.drive.ui.menu.settings
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.CompoundButton
 import androidx.appcompat.app.AppCompatActivity
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
-import com.infomaniak.drive.ui.LockActivity
 import com.infomaniak.drive.ui.LockActivity.Companion.FACE_ID_LOG_TAG
 import com.infomaniak.drive.utils.requestCredentials
-import com.infomaniak.drive.utils.silentClick
 import kotlinx.android.synthetic.main.view_switch_settings.*
 
 class AppSecuritySettingsActivity : AppCompatActivity() {
@@ -66,14 +63,9 @@ class AppSecuritySettingsActivity : AppCompatActivity() {
         AppSettings.appSecurityLock = enableFaceIdSwitch.isChecked
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == LockActivity.REQUEST_CODE_SECURITY) {
-            if (resultCode == Activity.RESULT_OK) {
-                onCredentialsSuccessful()
-            } else {
-                Log.i(FACE_ID_LOG_TAG, "error")
-            }
-        }
-        super.onActivityResult(requestCode, resultCode, data)
+    private fun CompoundButton.silentClick() {
+        tag = true
+        performClick()
+        tag = null
     }
 }

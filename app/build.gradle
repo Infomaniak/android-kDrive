@@ -91,6 +91,8 @@ dependencies {
 
     implementation 'com.github.hannesa2:paho.mqtt.android:3.4.0-beta2'
 
+    implementation 'androidx.biometric:biometric:1.1.0'
+
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.1'
     testImplementation 'io.github.serpro69:kotlin-faker:1.6.0'
     testImplementation 'junit:junit:4.13.2'
