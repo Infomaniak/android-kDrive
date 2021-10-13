@@ -30,7 +30,6 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.infomaniak.drive.data.models.ActionProgressNotification
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.Notification
-import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import java.util.*
 
@@ -39,8 +38,8 @@ class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : Li
     private lateinit var actionUuid: String
     private lateinit var bulkOperationNotification: NotificationCompat.Builder
     private lateinit var bulkOperationType: BulkOperationType
-    private lateinit var mqttNotificationsObserver: Observer<Notification>
     private lateinit var notificationManagerCompat: NotificationManagerCompat
+    private var mqttNotificationsObserver: Observer<Notification>? = null
 
     private lateinit var timer: CountDownTimer
     private lateinit var lastReception: Date
@@ -64,26 +63,25 @@ class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : Li
 
         return CallbackToFutureAdapter.getFuture { completer ->
             timer = createRefreshTimer(milliseconds = 1000) {
-                if (Date().time - lastReception.time > 30000) {
-                    completer.set(Result.failure())
-                } else {
-                    timer.start()
-                }
+                if (Date().time - lastReception.time > 30000) onFinish(completer) else timer.start()
             }
             timer.start()
-            launchObserver {
-                MqttClientWrapper.removeObserver(mqttNotificationsObserver)
-                completer.set(Result.success())
-            }
+
+            launchObserver { onFinish(completer) }
         }
     }
 
-    private fun launchObserver(onOperationFinished: (isSuccess: Boolean) -> Unit) {
+    private fun onFinish(completer: CallbackToFutureAdapter.Completer<Result>) {
+        mqttNotificationsObserver?.let { MqttClientWrapper.removeObserver(it) }
+        completer.set(Result.success())
+    }
+
+    private fun launchObserver(onOperationFinished: () -> Unit) {
         mqttNotificationsObserver = Observer<Notification> { notification ->
             if (notification is ActionProgressNotification && notification.actionUuid == actionUuid) {
                 lastReception = Date()
-                if (notification.progress.percent == 100) {
-                    onOperationFinished(true)
+                if (notification.progress.todo == 0) {
+                    onOperationFinished()
                 } else {
                     bulkOperationNotification.apply {
                         val string =
@@ -97,7 +95,7 @@ class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : Li
             }
         }
 
-        MqttClientWrapper.observeForever(mqttNotificationsObserver)
+        MqttClientWrapper.observeForever(mqttNotificationsObserver!!)
     }
 
     companion object {
