@@ -697,8 +697,7 @@ object FileController {
                     if (withVisibilitySort) sort(File::visibility.name, Sort.DESCENDING)
                     sort(File::type.name, Sort.ASCENDING)
                 }
-            }
-            ?.findAll()
+            }?.findAll()
     }
 
     private fun getLocalSortedFolderFiles(

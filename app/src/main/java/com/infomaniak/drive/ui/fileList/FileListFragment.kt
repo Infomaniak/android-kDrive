@@ -109,6 +109,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     protected open var allowCancellation = true
 
     protected var userDrive: UserDrive? = null
+    protected var isNewSort: Boolean = false
 
     companion object {
         const val REFRESH_FAVORITE_FILE = "force_list_refresh"
@@ -762,17 +763,14 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         override fun invoke() {
             getBackNavigationResult<File.SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
                 fileListViewModel.sortType = newSortType
+                isNewSort = true
                 sortButton?.setText(fileListViewModel.sortType.translation)
 
                 CoroutineScope(Dispatchers.IO).launch {
                     fileListViewModel.saveNewSort(folderID, newSortType, userDrive)
                 }
 
-                FileController.getRealmLiveFiles(
-                    parentId = folderID,
-                    order = newSortType,
-                    realm = mainViewModel.realm
-                ).apply { fileAdapter.updateFileList(this) }
+                downloadFiles(fileListViewModel.isSharedWithMe)
 
                 UISettings(requireContext()).sortType = newSortType
                 refreshActivities()
@@ -781,14 +779,14 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private inner class DownloadFiles : (Boolean) -> Unit {
+
         override fun invoke(ignoreCache: Boolean) {
             showLoadingTimer.start()
             isDownloading = true
             fileAdapter.isComplete = false
-
             getFolderFiles(ignoreCache, onFinish = {
                 it?.let { result ->
-                    if (fileAdapter.itemCount == 0 || result.page == 1) {
+                    if (fileAdapter.itemCount == 0 || result.page == 1 || isNewSort) {
                         FileController.getRealmLiveFiles(
                             parentId = folderID,
                             order = fileListViewModel.sortType,
@@ -815,6 +813,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     )
                     fileAdapter.isComplete = true
                 }
+                isNewSort = false
                 isDownloading = false
                 showLoadingTimer.cancel()
                 swipeRefreshLayout.isRefreshing = false
