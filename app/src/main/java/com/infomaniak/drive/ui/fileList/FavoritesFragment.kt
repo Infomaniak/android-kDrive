@@ -63,7 +63,6 @@ class FavoritesFragment : FileListFragment() {
             fileListViewModel.getFavoriteFiles(fileListViewModel.sortType).observe(viewLifecycleOwner) {
                 it?.let { result ->
                     if (fileAdapter.itemCount == 0 || result.page == 1) {
-                        changeNoFilesLayoutVisibility(result.files.isEmpty(), false)
                         val realmFiles = FileController.getRealmLiveFiles(
                             order = fileListViewModel.sortType,
                             parentId = FileController.FAVORITES_FILE_ID,
@@ -71,6 +70,7 @@ class FavoritesFragment : FileListFragment() {
                             withVisibilitySort = false
                         )
                         fileAdapter.updateFileList(realmFiles)
+                        changeNoFilesLayoutVisibility(realmFiles.isEmpty(), false)
                     }
                     fileAdapter.isComplete = result.isComplete
                 } ?: run {
