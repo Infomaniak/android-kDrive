@@ -43,9 +43,9 @@ object FileController {
     private const val REALM_DB_SHARES_WITH_ME = "kDrive-%s-%s-shares.realm"
 
     const val FAVORITES_FILE_ID = -1
+    const val RECENT_CHANGES_FILE_ID = -4
     private const val MY_SHARES_FILE_ID = -2
     private const val PICTURES_FILE_ID = -3
-    private const val RECENT_CHANGES_FILE_ID = -4
 
     private val FAVORITES_FILE = File(FAVORITES_FILE_ID, name = "Favoris")
     private val MY_SHARES_FILE = File(MY_SHARES_FILE_ID, name = "My Shares")
@@ -450,20 +450,20 @@ object FileController {
     }
 
     fun storeRecentChanges(files: ArrayList<File>, isFirstPage: Boolean = false) {
-        getRealmInstance().use { realm ->
-            realm.beginTransaction()
-            val folder = realm.where(File::class.java).equalTo(File::id.name, RECENT_CHANGES_FILE_ID).findFirst()
-                ?: realm.copyToRealm(RECENT_CHANGES_FILE)
-            if (isFirstPage) {
-                folder.children = RealmList()
-            }
-            files.forEach { file ->
-                realm.where(File::class.java).equalTo(File::id.name, file.id).findFirst()?.let { realmFile ->
-                    keepOldLocalFilesData(realmFile, file)
+        getRealmInstance().use {
+            it.executeTransaction { realm ->
+                val folder = realm.where(File::class.java).equalTo(File::id.name, RECENT_CHANGES_FILE_ID).findFirst()
+                    ?: realm.copyToRealm(RECENT_CHANGES_FILE)
+                if (isFirstPage) {
+                    folder.children = RealmList()
                 }
-                folder.children.add(file)
+                files.forEach { file ->
+                    realm.where(File::class.java).equalTo(File::id.name, file.id).findFirst()?.let { realmFile ->
+                        keepOldLocalFilesData(realmFile, file)
+                    }
+                    folder.children.add(file)
+                }
             }
-            realm.commitTransaction()
         }
     }
 
@@ -533,7 +533,7 @@ object FileController {
     fun getRealmLiveFiles(
         parentId: Int,
         realm: Realm,
-        order: File.SortType = File.SortType.NAME_AZ,
+        order: File.SortType?,
         withVisibilitySort: Boolean = true
     ): RealmResults<File> {
         realm.refresh()
@@ -685,14 +685,20 @@ object FileController {
 
     private fun getRealmLiveSortedFiles(
         localFolder: File?,
-        order: File.SortType,
+        order: File.SortType?,
         withVisibilitySort: Boolean = true,
         localChildren: RealmResults<File>? = null
     ): RealmResults<File>? {
         val children = localChildren ?: localFolder?.children
-        return children?.where()?.getSortQueryByOrder(order)
-            ?.apply { if (withVisibilitySort) sort(File::visibility.name, Sort.DESCENDING) }
-            ?.sort(File::type.name, Sort.ASCENDING)?.findAll()
+        return children?.where()
+            ?.apply {
+                order?.let {
+                    getSortQueryByOrder(it)
+                    if (withVisibilitySort) sort(File::visibility.name, Sort.DESCENDING)
+                    sort(File::type.name, Sort.ASCENDING)
+                }
+            }
+            ?.findAll()
     }
 
     private fun getLocalSortedFolderFiles(

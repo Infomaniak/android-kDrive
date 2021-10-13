@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.View.GONE
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import kotlinx.android.synthetic.main.fragment_file_list.*
@@ -43,12 +44,17 @@ class RecentChangesFragment : FileSubTypeListFragment() {
 
     private inner class DownloadFiles : (Boolean) -> Unit {
         override fun invoke(ignoreCache: Boolean) {
-            if (ignoreCache) fileAdapter.setList(arrayListOf())
             showLoadingTimer.start()
             fileAdapter.isComplete = false
 
             mainViewModel.getRecentChanges(AccountUtils.currentDriveId, false).observe(viewLifecycleOwner) { result ->
-                populateFileList(result?.files ?: ArrayList(), isComplete = result?.isComplete ?: true, ignoreOffline = true)
+                populateFileList(
+                    files = result?.files ?: arrayListOf(),
+                    folderId = FileController.RECENT_CHANGES_FILE_ID,
+                    ignoreOffline = true,
+                    isComplete = result?.isComplete ?: true,
+                    realm = mainViewModel.realm,
+                )
             }
         }
     }

@@ -402,13 +402,17 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
                     data?.let { FileController.storeRecentChanges(it, isFirstPage) }
                     when {
                         data == null -> Unit
-                        data.size < ApiRepository.PER_PAGE -> emit(
-                            FileListFragment.FolderFilesResult(files = data, isComplete = true, page = page)
-                        )
-                        else -> {
-                            emit(
-                                FileListFragment.FolderFilesResult(files = data, isComplete = false, page = page)
+                        data.size < ApiRepository.PER_PAGE -> {
+                            if (isFirstPage) emit(
+                                FileListFragment.FolderFilesResult(files = data, isComplete = true, page = page)
                             )
+                        }
+                        else -> {
+                            if (isFirstPage) {
+                                emit(
+                                    FileListFragment.FolderFilesResult(files = data, isComplete = true, page = page)
+                                )
+                            }
                             if (!onlyFirstPage) recursive(page + 1)
                         }
                     }

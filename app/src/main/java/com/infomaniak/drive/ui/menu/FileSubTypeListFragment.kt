@@ -17,6 +17,8 @@
  */
 package com.infomaniak.drive.ui.menu
 
+import androidx.navigation.fragment.findNavController
+import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.FileListFragment
@@ -34,15 +36,21 @@ open class FileSubTypeListFragment : FileListFragment() {
     protected fun populateFileList(
         files: ArrayList<File>,
         isComplete: Boolean,
-        ignoreOffline: Boolean = false,
+        folderId: Int? = null,
         forceClean: Boolean = false,
-        realm: Realm? = null
+        ignoreOffline: Boolean = false,
+        realm: Realm? = null,
     ) {
         if (fileAdapter.itemCount == 0 || forceClean) {
             if (realm == null) {
                 fileAdapter.setFiles(files)
             } else {
-                FileController.getRealmLiveFiles(folderID, realm, fileListViewModel.sortType).apply {
+                val order = when (findNavController().currentDestination?.id) {
+                    R.id.recentChangesFragment -> null
+                    else -> fileListViewModel.sortType
+                }
+
+                FileController.getRealmLiveFiles(folderId ?: this.folderID, realm, order).apply {
                     fileAdapter.updateFileList(this)
                 }
             }
@@ -51,7 +59,7 @@ open class FileSubTypeListFragment : FileListFragment() {
         showLoadingTimer.cancel()
         swipeRefreshLayout.isRefreshing = false
         changeNoFilesLayoutVisibility(
-            fileAdapter.fileList.isEmpty(),
+            files.isEmpty(),
             changeControlsVisibility = true,
             ignoreOffline = ignoreOffline
         )
