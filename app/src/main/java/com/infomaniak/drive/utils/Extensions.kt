@@ -32,17 +32,13 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Point
-import android.hardware.biometrics.BiometricManager
-import android.hardware.biometrics.BiometricPrompt
 import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.CancellationSignal
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.DisplayMetrics
-import android.util.Log
 import android.util.Size
 import android.view.View
 import android.view.View.GONE
@@ -57,12 +53,14 @@ import android.widget.CompoundButton
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
-import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavDirections
@@ -83,8 +81,6 @@ import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.drive.Drive
-import com.infomaniak.drive.ui.LockActivity
-import com.infomaniak.drive.ui.LockActivity.Companion.FACE_ID_LOG_TAG
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialog.Companion.FILE_ID
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
@@ -494,48 +490,23 @@ fun Activity.showSnackbar(
     )
 }
 
-fun CompoundButton.silentClick() {
-    tag = true
-    performClick()
-    tag = null
-}
-
 @SuppressLint("NewApi")
-fun Context.requestCredentials(onSuccess: () -> Unit) {
-    when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
-            val builder = BiometricPrompt.Builder(this).setTitle(getString(R.string.app_name))
-
-            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) builder.setDeviceCredentialAllowed(true)
-            else builder.setAllowedAuthenticators(BiometricManager.Authenticators.DEVICE_CREDENTIAL or BiometricManager.Authenticators.BIOMETRIC_WEAK)
-
-            val cancellationSignal = CancellationSignal().apply {
-                setOnCancelListener {
-                    Log.i(FACE_ID_LOG_TAG, "Cancel")
-                }
+fun FragmentActivity.requestCredentials(onSuccess: () -> Unit) {
+    val biometricPrompt = BiometricPrompt(this,
+        ContextCompat.getMainExecutor(this),
+        object : BiometricPrompt.AuthenticationCallback() {
+            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                super.onAuthenticationSucceeded(result)
+                onSuccess()
             }
-            builder.build().authenticate(cancellationSignal, mainExecutor, object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult?) {
-                    Log.i(FACE_ID_LOG_TAG, "success")
-                    onSuccess()
-                }
+        })
 
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence?) {
-                    super.onAuthenticationError(errorCode, errString)
-                    Log.i(FACE_ID_LOG_TAG, errString.toString())
-                }
-            })
-        }
-        else -> {
-            val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
-            if (keyguardManager != null) {
-                val intent = keyguardManager.createConfirmDeviceCredentialIntent(null, null)
-                startActivityForResult(this as Activity, intent, LockActivity.REQUEST_CODE_SECURITY, null)
-            } else {
-                Log.i(FACE_ID_LOG_TAG, "Keyguard manager is null")
-            }
-        }
-    }
+    val promptInfo = BiometricPrompt.PromptInfo.Builder()
+        .setTitle(getString(R.string.app_name))
+        .setAllowedAuthenticators(BiometricManager.Authenticators.DEVICE_CREDENTIAL or BiometricManager.Authenticators.BIOMETRIC_WEAK)
+        .build()
+
+    biometricPrompt.authenticate(promptInfo)
 }
 
 fun View.hideKeyboard() {

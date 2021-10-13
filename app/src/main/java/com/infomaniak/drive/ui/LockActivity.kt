@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -29,21 +28,21 @@ import kotlinx.android.synthetic.main.activity_lock.*
 class LockActivity : AppCompatActivity() {
 
     companion object {
-        const val REQUEST_CODE_SECURITY = 1
         const val FACE_ID_LOG_TAG = "Face ID"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lock)
-        requestCredentials {
-            onCredentialsSuccessful()
+        if (savedInstanceState?.getBoolean("firstLaunch") != false) {
+            requestCredentials { onCredentialsSuccessful() }
         }
-        unLock.setOnClickListener {
-            requestCredentials {
-                onCredentialsSuccessful()
-            }
-        }
+        unLock.setOnClickListener { requestCredentials { onCredentialsSuccessful() } }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean("firstLaunch", false)
     }
 
     private fun onCredentialsSuccessful() {
@@ -54,17 +53,6 @@ class LockActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_CODE_SECURITY) {
-            if (resultCode == Activity.RESULT_OK) {
-                onCredentialsSuccessful()
-            } else {
-                Log.i(FACE_ID_LOG_TAG, "error")
-            }
-        }
     }
 
     private fun startMainActivity() {
