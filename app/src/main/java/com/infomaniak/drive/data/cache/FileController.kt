@@ -43,8 +43,8 @@ object FileController {
     private const val REALM_DB_SHARES_WITH_ME = "kDrive-%s-%s-shares.realm"
 
     const val FAVORITES_FILE_ID = -1
+    const val MY_SHARES_FILE_ID = -2
     const val RECENT_CHANGES_FILE_ID = -4
-    private const val MY_SHARES_FILE_ID = -2
     private const val PICTURES_FILE_ID = -3
 
     private val FAVORITES_FILE = File(FAVORITES_FILE_ID, name = "Favoris")
