@@ -585,16 +585,11 @@ object FileController {
         return customRealm?.let(operation) ?: getRealmInstance(userDrive).use(operation)
     }
 
-    fun getFilesFromIdList(idList: Array<Int>, order: File.SortType = File.SortType.NAME_AZ): ArrayList<File> {
-        return getRealmInstance().use { realm ->
-            realm
-                .where(File::class.java)
-                .`in`(File::id.name, idList)
-                .getSortQueryByOrder(order)
-                .findAll()?.let { files ->
-                    realm.copyFromRealm(files) as ArrayList<File>
-                } ?: arrayListOf()
-        }
+    fun getFilesFromIdList(realm: Realm, idList: Array<Int>, order: File.SortType = File.SortType.NAME_AZ): RealmResults<File>? {
+        return realm.where(File::class.java)
+            .`in`(File::id.name, idList)
+            .getSortQueryByOrder(order)
+            .findAll()
     }
 
     private fun downloadAndSaveFiles(
