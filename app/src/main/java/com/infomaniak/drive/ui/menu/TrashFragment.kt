@@ -106,19 +106,19 @@ class TrashFragment : FileSubTypeListFragment() {
                     else -> newSortType
                 }
                 sortButton.setText(fileListViewModel.sortType.translation)
-                downloadFiles(true)
+                downloadFiles(true, true)
             }
         }
     }
 
-    private inner class DownloadFiles() : (Boolean) -> Unit {
+    private inner class DownloadFiles() : (Boolean, Boolean) -> Unit {
         private var folder: File? = null
 
         constructor(folder: File?) : this() {
             this.folder = folder
         }
 
-        override fun invoke(ignoreCache: Boolean) {
+        override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             if (ignoreCache) fileAdapter.setFiles(arrayListOf())
             showLoadingTimer.start()
             fileAdapter.isComplete = false
@@ -129,7 +129,8 @@ class TrashFragment : FileSubTypeListFragment() {
                         populateFileList(
                             files = result.files,
                             isComplete = isComplete,
-                            forceClean = result.page == 1
+                            forceClean = result.page == 1,
+                            isNewSort = isNewSort
                         )
                     }
                 }
@@ -139,7 +140,8 @@ class TrashFragment : FileSubTypeListFragment() {
                         populateFileList(
                             files = result?.files ?: ArrayList(),
                             isComplete = result?.isComplete ?: true,
-                            forceClean = result?.page == 1
+                            forceClean = result?.page == 1,
+                            isNewSort = isNewSort
                         )
                     }
             }

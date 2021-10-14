@@ -114,7 +114,7 @@ class UploadInProgressFragment : FileListFragment() {
 
     override fun onResume() {
         super.onResume()
-        downloadFiles(true)
+        downloadFiles(true, false)
     }
 
     override fun onDestroy() {
@@ -186,8 +186,8 @@ class UploadInProgressFragment : FileListFragment() {
         findNavController().popBackStack()
     }
 
-    private inner class DownloadFiles : (Boolean) -> Unit {
-        override fun invoke(ignoreCache: Boolean) {
+    private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
+        override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             if (!drivePermissions.checkWriteStoragePermission()) return
             if (ignoreCache) fileAdapter.setFiles(arrayListOf())
 

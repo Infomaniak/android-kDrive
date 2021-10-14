@@ -54,7 +54,8 @@ object FileController {
 
     private fun getFileById(realm: Realm, fileId: Int) = realm.where(File::class.java).equalTo("id", fileId).findFirst()
 
-    fun emptyList(realm: Realm) = realm.where(File::class.java).alwaysFalse().findAll()
+    // https://github.com/realm/realm-java/issues/1862
+    fun emptyList(realm: Realm): RealmResults<File> = realm.where(File::class.java).alwaysFalse().findAll()
 
     fun getParentFile(fileId: Int, userDrive: UserDrive? = null, realm: Realm? = null): File? {
         val block: (Realm) -> File? = { currentRealm ->

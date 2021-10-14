@@ -69,12 +69,12 @@ class SearchFragment : FileListFragment() {
         searchView.addTextChangedListener(DebouncingTextWatcher(lifecycle) {
             clearButton?.visibility = if (it.isNullOrEmpty()) INVISIBLE else VISIBLE
             fileListViewModel.currentPage = 1
-            downloadFiles(true)
+            downloadFiles(true, false)
         })
         searchView.setOnEditorActionListener { _, actionId, _ ->
             if (EditorInfo.IME_ACTION_SEARCH == actionId) {
                 fileListViewModel.currentPage = 1
-                downloadFiles(true)
+                downloadFiles(true, false)
                 true
             } else false
         }
@@ -83,7 +83,7 @@ class SearchFragment : FileListFragment() {
             if (!fileAdapter.isComplete && !isDownloading) {
                 fileAdapter.showLoading()
                 fileListViewModel.currentPage++
-                downloadFiles(true)
+                downloadFiles(true, false)
             }
         })
 
@@ -117,7 +117,7 @@ class SearchFragment : FileListFragment() {
             fileListViewModel.currentConvertedType = null
             fileListViewModel.currentConvertedTypeText = null
             fileListViewModel.currentConvertedTypeDrawable = null
-            downloadFiles(true)
+            downloadFiles(true, false)
         }
 
         convertedType.text = fileListViewModel.currentConvertedTypeText
@@ -171,7 +171,7 @@ class SearchFragment : FileListFragment() {
         convertedTypeLayout.visibility = VISIBLE
         fileListViewModel.currentPage = 1
         fileListViewModel.currentConvertedType = type.name.lowercase(Locale.ROOT)
-        downloadFiles(true)
+        downloadFiles(true, false)
     }
 
     override fun onPause() {
@@ -194,8 +194,8 @@ class SearchFragment : FileListFragment() {
     }
 
 
-    private inner class DownloadFiles : (Boolean) -> Unit {
-        override fun invoke(ignoreCache: Boolean) {
+    private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
+        override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             swipeRefreshLayout.isRefreshing = true
             val currentQuery = searchView?.text?.toString()
 

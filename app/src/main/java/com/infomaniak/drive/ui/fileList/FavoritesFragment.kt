@@ -56,8 +56,8 @@ class FavoritesFragment : FileListFragment() {
         }
     }
 
-    private inner class DownloadFiles : (Boolean) -> Unit {
-        override fun invoke(ignoreCache: Boolean) {
+    private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
+        override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             showLoadingTimer.start()
             fileAdapter.isComplete = false
             fileListViewModel.getFavoriteFiles(fileListViewModel.sortType).observe(viewLifecycleOwner) {
@@ -77,7 +77,6 @@ class FavoritesFragment : FileListFragment() {
                     changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, false)
                     fileAdapter.isComplete = true
                 }
-                isNewSort = false
                 showLoadingTimer.cancel()
                 swipeRefreshLayout.isRefreshing = false
             }

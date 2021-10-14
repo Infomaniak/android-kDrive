@@ -320,6 +320,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
             if (currentFile.id == fileId) {
                 currentFile.currentProgress = progress
+                // Check isOffline because progressing to 100 doesn't necessarily mean it's finish
                 if (progress == 100 && FileController.isOffline(fileId, UserDrive(driveId = currentFile.driveId))) {
                     updateFile?.invoke(fileId)
                     currentFile.isOffline = true

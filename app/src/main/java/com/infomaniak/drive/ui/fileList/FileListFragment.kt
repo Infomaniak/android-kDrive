@@ -101,7 +101,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private var retryLoadingActivities = false
 
     protected lateinit var showLoadingTimer: CountDownTimer
-    protected open var downloadFiles: (ignoreCache: Boolean) -> Unit = DownloadFiles()
+    protected open var downloadFiles: (ignoreCache: Boolean, isNewSort: Boolean) -> Unit = DownloadFiles()
     protected open var sortFiles: () -> Unit = SortFiles()
     protected open var enabledMultiSelectMode = true
     protected open var hideBackButtonWhenRoot: Boolean = true
@@ -109,7 +109,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     protected open var allowCancellation = true
 
     protected var userDrive: UserDrive? = null
-    protected var isNewSort: Boolean = false
 
     companion object {
         const val REFRESH_FAVORITE_FILE = "force_list_refresh"
@@ -173,7 +172,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         noFilesLayout.setup(title = R.string.noFilesDescription, initialListView = fileRecyclerView) {
             fileListViewModel.cancelDownloadFiles()
-            downloadFiles(false)
+            downloadFiles(false, false)
         }
 
         if ((folderID == ROOT_ID || folderID == OTHER_ROOT_ID) && hideBackButtonWhenRoot) toolbar.navigationIcon = null
@@ -208,7 +207,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         sortFiles()
         setupDisplay()
 
-        if (!isDownloading) downloadFiles(false)
+        if (!isDownloading) downloadFiles(false, false)
         observeOfflineDownloadProgress()
 
         requireContext().trackUploadWorkerProgress().observe(viewLifecycleOwner) {
@@ -220,7 +219,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             if (remoteFolderId == folderID && isUploaded) {
                 when {
                     findNavController().currentDestination?.id == R.id.sharedWithMeFragment
-                            && folderID == ROOT_ID -> downloadFiles(true)
+                            && folderID == ROOT_ID -> downloadFiles(true, false)
                     else -> refreshActivities()
                 }
             }
@@ -617,7 +616,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onRefresh() {
         fileListViewModel.cancelDownloadFiles()
-        downloadFiles(true)
+        downloadFiles(true, false)
     }
 
     private fun showPendingFiles() {
@@ -763,14 +762,13 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         override fun invoke() {
             getBackNavigationResult<File.SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
                 fileListViewModel.sortType = newSortType
-                isNewSort = true
                 sortButton?.setText(fileListViewModel.sortType.translation)
 
                 CoroutineScope(Dispatchers.IO).launch {
                     fileListViewModel.saveNewSort(folderID, newSortType, userDrive)
                 }
 
-                downloadFiles(fileListViewModel.isSharedWithMe)
+                downloadFiles(fileListViewModel.isSharedWithMe, true)
 
                 UISettings(requireContext()).sortType = newSortType
                 refreshActivities()
@@ -778,9 +776,9 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
-    private inner class DownloadFiles : (Boolean) -> Unit {
+    private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
 
-        override fun invoke(ignoreCache: Boolean) {
+        override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             showLoadingTimer.start()
             isDownloading = true
             fileAdapter.isComplete = false
@@ -813,7 +811,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     )
                     fileAdapter.isComplete = true
                 }
-                isNewSort = false
                 isDownloading = false
                 showLoadingTimer.cancel()
                 swipeRefreshLayout.isRefreshing = false

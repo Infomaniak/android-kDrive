@@ -109,14 +109,14 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
         )
     }
 
-    private inner class DownloadFiles() : (Boolean) -> Unit {
+    private inner class DownloadFiles() : (Boolean, Boolean) -> Unit {
         private var folder: File? = null
 
         constructor(folder: File?) : this() {
             this.folder = folder
         }
 
-        override fun invoke(ignoreCache: Boolean) {
+        override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             if (ignoreCache && !fileAdapter.fileList.isManaged) fileAdapter.setFiles(arrayListOf())
             showLoadingTimer.start()
             fileAdapter.isComplete = false
@@ -130,12 +130,21 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                 ).observe(viewLifecycleOwner) {
                     it?.let { (_, children, _) ->
                         mainViewModel.currentFolder.value = it.parentFolder
-                        populateFileList(ArrayList(children), true, realm = realm)
+                        populateFileList(
+                            ArrayList(children),
+                            isComplete = true,
+                            realm = realm,
+                            isNewSort = isNewSort
+                        )
                     }
                 }
             } ?: run {
                 val driveList = DriveInfosController.getDrives(userId = AccountUtils.currentUserId, sharedWithMe = true)
-                populateFileList(ArrayList(driveList.map { drive -> drive.convertToFile() }), true)
+                populateFileList(
+                    ArrayList(driveList.map { drive -> drive.convertToFile() }),
+                    isComplete = true,
+                    isNewSort = isNewSort
+                )
             }
         }
     }

@@ -42,15 +42,14 @@ class OfflineFileFragment : FileSubTypeListFragment() {
         )
     }
 
-    private inner class DownloadFiles : (Boolean) -> Unit {
-        override fun invoke(ignoreCache: Boolean) {
+    private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
+        override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             if (fileAdapter.fileList.isEmpty() || isNewSort) {
                 FileController.getOfflineFiles(order = fileListViewModel.sortType, customRealm = mainViewModel.realm).apply {
                     fileAdapter.updateFileList(this)
                 }
             }
 
-            isNewSort = false
             fileAdapter.isComplete = true
             swipeRefreshLayout.isRefreshing = false
             changeNoFilesLayoutVisibility(

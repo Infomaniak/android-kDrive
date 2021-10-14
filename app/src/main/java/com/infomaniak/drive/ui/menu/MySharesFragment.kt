@@ -57,8 +57,8 @@ class MySharesFragment : FileSubTypeListFragment() {
         }
     }
 
-    private inner class DownloadFiles : (Boolean) -> Unit {
-        override fun invoke(ignoreCache: Boolean) {
+    private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
+        override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             showLoadingTimer.start()
             fileAdapter.isComplete = false
 
@@ -70,6 +70,7 @@ class MySharesFragment : FileSubTypeListFragment() {
                     forceClean = true,
                     isComplete = true,
                     realm = mainViewModel.realm,
+                    isNewSort = isNewSort
                 )
             }
         }
