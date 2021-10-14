@@ -582,6 +582,7 @@
     <string name="uploadCancelTitle">Upload cancelled</string>
     <string name="uploadErrorTitle">Upload error</string>
     <string name="uploadFolderNotFoundError">Deleted or non-existent folder</string>
+    <string name="uploadFolderNotFoundSyncDisabledError">Automatic backup has been disabled because the destination folder no longer exists</string>
     <string name="uploadInProgressCancelAllUploadTitle">Cancel uploads</string>
     <string name="uploadInProgressCancelFileUploadTitle">Cancel %s?</string>
     <string name="uploadInProgressNoFile">No upload in progress</string>

@@ -573,6 +573,7 @@
     <string name="uploadCancelTitle">Importación anulada</string>
     <string name="uploadErrorTitle">Error en la importación</string>
     <string name="uploadFolderNotFoundError">Carpeta eliminada o no existe</string>
+    <string name="uploadFolderNotFoundSyncDisabledError">Se ha desactivado la copia de seguridad automática porque la carpeta de destino ya no existe</string>
     <string name="uploadInProgressCancelAllUploadTitle">Anular las importaciones</string>
     <string name="uploadInProgressCancelFileUploadTitle">¿Anular %s?</string>
     <string name="uploadInProgressNoFile">No hay cargas en curso</string>

@@ -22,7 +22,6 @@ import android.content.*
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.os.CountDownTimer
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.view.View

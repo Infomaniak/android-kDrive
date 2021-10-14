@@ -573,6 +573,7 @@
     <string name="uploadCancelTitle">Importation annulée</string>
     <string name="uploadErrorTitle">Erreur d’importation</string>
     <string name="uploadFolderNotFoundError">Dossier supprimé ou inexistant</string>
+    <string name="uploadFolderNotFoundSyncDisabledError">La sauvegarde automatique a été désactivée car le dossier de destination n’existe plus</string>
     <string name="uploadInProgressCancelAllUploadTitle">Annuler les imports</string>
     <string name="uploadInProgressCancelFileUploadTitle">Annuler %s ?</string>
     <string name="uploadInProgressNoFile">Aucune importation en cours</string>
