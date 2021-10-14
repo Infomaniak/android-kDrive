@@ -41,7 +41,7 @@ open class FileSubTypeListFragment : FileListFragment() {
         ignoreOffline: Boolean = false,
         realm: Realm? = null,
     ) {
-        if (fileAdapter.itemCount == 0 || forceClean) {
+        if (fileAdapter.itemCount == 0 || forceClean || isNewSort) {
             if (realm == null) {
                 fileAdapter.setFiles(files)
             } else {
@@ -55,6 +55,7 @@ open class FileSubTypeListFragment : FileListFragment() {
                 }
             }
         }
+        isNewSort = false
         fileAdapter.isComplete = isComplete
         showLoadingTimer.cancel()
         swipeRefreshLayout.isRefreshing = false

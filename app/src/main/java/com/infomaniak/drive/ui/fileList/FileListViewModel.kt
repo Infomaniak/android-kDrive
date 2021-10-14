@@ -151,14 +151,6 @@ class FileListViewModel : ViewModel() {
         }
     }
 
-    fun getOfflineFiles(order: File.SortType) = liveData(Dispatchers.IO) {
-        emit(FileController.getOfflineFiles(order))
-    }
-
-    fun getPendingFiles(folderID: Int) = liveData(Dispatchers.IO) {
-        emit(UploadFile.getCurrentUserPendingUploads(folderID))
-    }
-
     fun getPendingFilesCount(folderID: Int) = liveData(Dispatchers.IO) {
         emit(UploadFile.getCurrentUserPendingUploadsCount(folderID))
     }

@@ -28,10 +28,7 @@ import androidx.core.net.toUri
 import com.infomaniak.drive.data.sync.UploadMigration
 import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.lib.core.utils.format
-import io.realm.Realm
-import io.realm.RealmConfiguration
-import io.realm.RealmObject
-import io.realm.RealmQuery
+import io.realm.*
 import io.realm.annotations.PrimaryKey
 import java.io.File
 import java.net.URLEncoder
@@ -137,11 +134,8 @@ open class UploadFile(
             }
         }
 
-        fun getCurrentUserPendingUploads(folderId: Int): ArrayList<UploadFile> {
-            return getRealmInstance().use { realm ->
-                pendingUploadsQuery(realm, folderId, UserDrive())
-                    .findAll()?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile> ?: arrayListOf()
-            }
+        fun getCurrentUserPendingUploads(folderId: Int, realm: Realm): RealmResults<UploadFile>? {
+            return pendingUploadsQuery(realm, folderId, UserDrive()).findAll()
         }
 
         fun getAllPendingUploadsCount(): Int {
