@@ -68,6 +68,7 @@ import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.setPagination
 import com.infomaniak.lib.core.utils.showProgress
+import io.realm.RealmList
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.cardview_file_list.*
 import kotlinx.android.synthetic.main.empty_icon_layout.*
@@ -705,7 +706,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun closeMultiSelect() {
         fileAdapter.apply {
-            itemSelected.clear()
+            itemSelected = RealmList()
             multiSelectMode = false
             allSelected = false
             notifyItemRangeChanged(0, itemCount)
