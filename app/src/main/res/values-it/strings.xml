@@ -573,6 +573,7 @@
     <string name="uploadCancelTitle">Importazione annullata</string>
     <string name="uploadErrorTitle">Errore di importazione</string>
     <string name="uploadFolderNotFoundError">Cartella eliminata o inesistente</string>
+    <string name="uploadFolderNotFoundSyncDisabledError">Il backup automatico è stato disabilitato perché la cartella di destinazione non esiste più</string>
     <string name="uploadInProgressCancelAllUploadTitle">Annulla le importazioni</string>
     <string name="uploadInProgressCancelFileUploadTitle">Annullare %s?</string>
     <string name="uploadInProgressNoFile">Nessun caricamento in corso</string>

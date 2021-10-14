@@ -132,7 +132,7 @@ class UploadTask(
 
                 val url = uploadUrl(
                     chunkNumber = chunkNumber,
-                    if (uploadFile.type == UploadFile.Type.SYNC.name) ConflictOption.REPLACE else ConflictOption.RENAME,
+                    conflictOption = if (uploadFile.isSync()) ConflictOption.REPLACE else ConflictOption.RENAME,
                     currentChunkSize = count,
                     totalChunks = totalChunks
                 )
