@@ -94,7 +94,7 @@ class TrashFragment : FileSubTypeListFragment() {
 
     private fun removeFileFromAdapter(fileId: Int) {
         fileAdapter.deleteByFileId(fileId)
-        noFilesLayout.toggleVisibility(fileAdapter.getItems().isEmpty())
+        noFilesLayout.toggleVisibility(fileAdapter.getFiles().isEmpty())
     }
 
     private inner class SortFiles : () -> Unit {
@@ -119,7 +119,7 @@ class TrashFragment : FileSubTypeListFragment() {
         }
 
         override fun invoke(ignoreCache: Boolean) {
-            if (ignoreCache) fileAdapter.setList(arrayListOf())
+            if (ignoreCache) fileAdapter.setFiles(arrayListOf())
             showLoadingTimer.start()
             fileAdapter.isComplete = false
 
