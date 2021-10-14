@@ -132,7 +132,7 @@ class UploadTask(
 
                 val url = uploadUrl(
                     chunkNumber = chunkNumber,
-                    if (uploadFile.type == UploadFile.Type.SYNC.name) ConflictOption.replace else ConflictOption.rename,
+                    if (uploadFile.type == UploadFile.Type.SYNC.name) ConflictOption.REPLACE else ConflictOption.RENAME,
                     currentChunkSize = count,
                     totalChunks = totalChunks
                 )
@@ -321,7 +321,7 @@ class UploadTask(
                 "&identifier=${uploadFile.identifier}" +
                 "&file_name=${uploadFile.encodedName()}" +
                 "&last_modified_at=${uploadFile.fileModifiedAt.time / 1000}" +
-                "&conflict=" + conflictOption.name +
+                "&conflict=" + conflictOption.toString() +
                 relativePath +
                 if (uploadFile.fileCreatedAt == null) "" else "&file_created_at=${uploadFile.fileCreatedAt!!.time / 1000}"
     }
@@ -342,12 +342,13 @@ class UploadTask(
         private val progressMutex = Mutex()
         private const val TOTAL_CHUNKS = 8000
 
-        @Suppress("EnumEntryName")
         enum class ConflictOption {
-            error,
-            replace,
-            rename,
-            ignore;
+            ERROR,
+            REPLACE,
+            RENAME,
+            IGNORE;
+
+            override fun toString(): String = name.lowercase()
         }
     }
 }
