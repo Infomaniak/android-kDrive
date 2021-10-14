@@ -49,7 +49,7 @@ import java.util.*
 
 class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
-    val realm = FileController.getRealmInstance()
+    var realm = FileController.getRealmInstance()
 
     val currentFolder = MutableLiveData<File>()
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
