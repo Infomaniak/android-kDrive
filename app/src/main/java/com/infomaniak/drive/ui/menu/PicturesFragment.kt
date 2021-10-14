@@ -103,16 +103,16 @@ class PicturesFragment : Fragment() {
         picturesViewModel.cancelPicturesJob()
         picturesViewModel.getAllPicturesFiles(AccountUtils.currentDriveId, ignoreCloud).observe(viewLifecycleOwner) {
             it?.let { (pictures, isComplete) ->
-                noPicturesLayout.toggleVisibility(pictures.isEmpty())
                 val pictureList = picturesAdapter.formatList(requireContext(), pictures)
                 if (picturesAdapter.itemCount == 0) picturesAdapter.setList(pictureList)
                 else picturesRecyclerView.post { picturesAdapter.addAll(pictureList) }
                 picturesAdapter.isComplete = isComplete
+                noPicturesLayout.toggleVisibility(picturesAdapter.pictureList.isEmpty())
             } ?: run {
                 picturesAdapter.isComplete = true
                 noPicturesLayout.toggleVisibility(
                     noNetwork = ignoreCloud,
-                    isVisible = true,
+                    isVisible = picturesAdapter.pictureList.isEmpty(),
                     showRefreshButton = true
                 )
             }

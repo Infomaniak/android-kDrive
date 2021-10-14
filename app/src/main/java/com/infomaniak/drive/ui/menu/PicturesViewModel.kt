@@ -44,7 +44,7 @@ class PicturesViewModel : ViewModel() {
                         val data = apiResponse.data
                         val isFirstPage = page == 1
                         when {
-                            data == null -> emit(null)
+                            data.isNullOrEmpty() -> emit(null)
                             data.size < ApiRepository.PER_PAGE -> {
                                 FileController.storeDriveSoloPictures(data, isFirstPage)
                                 emit(data to true)
