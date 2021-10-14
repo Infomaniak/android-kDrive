@@ -309,7 +309,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 val mediator = mainViewModel.createMultiSelectMediator()
                 enableButtonMultiSelect(false)
 
-                fileAdapter.itemSelected.forEach { file ->
+                fileAdapter.itemSelected.forEach {
+                    val file = it.realm?.copyFromRealm(it, 0) ?: it
                     val onSuccess: (Int) -> Unit = { fileID ->
                         runBlocking(Dispatchers.Main) { fileAdapter.deleteByFileId(fileID) }
                     }
