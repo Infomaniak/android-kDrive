@@ -52,13 +52,10 @@ import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment
-import io.realm.OrderedRealmCollection
-import io.realm.Realm
 import kotlinx.android.synthetic.main.dialog_download_progress.view.*
 import kotlinx.android.synthetic.main.dialog_name_prompt.view.*
 import kotlinx.android.synthetic.main.dialog_name_prompt.view.icon
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.math.min
 import kotlin.math.pow
 
