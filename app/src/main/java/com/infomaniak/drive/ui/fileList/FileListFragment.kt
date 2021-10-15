@@ -287,6 +287,13 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         updateVisibleProgresses()
     }
 
+    override fun onStop() {
+        if (fileAdapter.fileList.isManaged) {
+            fileAdapter.updateFileList(null)
+        }
+        super.onStop()
+    }
+
     private fun performBulkOperation(type: BulkOperationType, destinationFolder: File? = null) {
         val selectedFiles = fileAdapter.itemSelected
         val fileCount =

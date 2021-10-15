@@ -86,8 +86,8 @@ open class FileAdapter(
         }
     }
 
-    fun updateFileList(newFileList: OrderedRealmCollection<File>) {
-        fileList = newFileList
+    fun updateFileList(newFileList: OrderedRealmCollection<File>?) {
+        fileList = newFileList ?: RealmList()
         super.updateData(newFileList)
     }
 
