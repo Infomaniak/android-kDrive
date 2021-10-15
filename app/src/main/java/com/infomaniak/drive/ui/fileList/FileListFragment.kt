@@ -771,10 +771,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 fileListViewModel.sortType = newSortType
                 sortButton?.setText(fileListViewModel.sortType.translation)
 
-                CoroutineScope(Dispatchers.IO).launch {
-                    fileListViewModel.saveNewSort(folderID, newSortType, userDrive)
-                }
-
                 downloadFiles(fileListViewModel.isSharedWithMe, true)
 
                 UISettings(requireContext()).sortType = newSortType

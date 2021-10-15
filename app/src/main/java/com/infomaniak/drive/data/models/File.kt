@@ -93,8 +93,6 @@ open class File(
     var users: @WriteWith<IntRealmListParceler> RealmList<Int> = RealmList(),
     var visibility: String = "",
 
-    var order: String = "",
-    var orderBy: String = "",
     var responseAt: Long = 0,
 
     /**
@@ -296,11 +294,18 @@ open class File(
         }
     }
 
+    // For applyFileActivity in FileController
     override fun equals(other: Any?): Boolean {
         if (other is File) {
             return other.id == id
         }
         return super.equals(other)
+    }
+
+    override fun hashCode(): Int {
+        var result = id
+        result = 31 * result + driveId
+        return result
     }
 
     enum class LocalFileActivity {

@@ -27,7 +27,10 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.SingleLiveEvent
 import com.infomaniak.lib.core.models.ApiResponse
 import io.realm.OrderedRealmCollection
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -56,10 +59,6 @@ class FileListViewModel : ViewModel() {
     var lastItemCount: FileCount? = null
 
     fun sortTypeIsInitialized() = ::sortType.isInitialized
-
-    suspend fun saveNewSort(parentId: Int, order: File.SortType, userDrive: UserDrive?) = withContext(Dispatchers.IO) {
-        FileController.saveNewSort(parentId, order, userDrive)
-    }
 
     fun getFiles(
         parentId: Int,

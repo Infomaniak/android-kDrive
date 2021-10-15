@@ -281,7 +281,8 @@ object FileController {
 
     private fun getRealmConfiguration(dbName: String): RealmConfiguration {
         return RealmConfiguration.Builder()
-            .deleteRealmIfMigrationNeeded()
+            .schemaVersion(FileMigration.bddVersion) // Must be bumped when the schema changes
+            .migration(FileMigration())
             .modules(RealmModules.LocalFilesModule())
             .name(dbName)
             .build()
@@ -515,20 +516,6 @@ object FileController {
         customRealm?.let(block) ?: getRealmInstance().use(block)
     }
 
-    fun saveNewSort(parentId: Int, order: File.SortType = File.SortType.NAME_AZ, userDrive: UserDrive?) {
-        getRealmInstance(userDrive).use { realm ->
-            val localFolder = getFileById(realm, parentId)
-            val isNewSort = localFolder?.order != order.order || localFolder.orderBy != order.orderBy
-
-            if (isNewSort && localFolder != null) {
-                realm.executeTransaction {
-                    localFolder.order = order.order
-                    localFolder.orderBy = order.orderBy
-                }
-            }
-        }
-    }
-
     fun getRealmLiveFiles(
         parentId: Int,
         realm: Realm,
@@ -554,14 +541,6 @@ object FileController {
             var result: Pair<File, ArrayList<File>>? = null
             val localFolder = getFileById(realm, parentId)
             val localFolderWithoutChildren = localFolder?.let { realm.copyFromRealm(it, 1) }
-            val isNewSort = localFolder?.order != order.order || localFolder.orderBy != order.orderBy
-
-            if (isNewSort && localFolder != null) {
-                realm.executeTransaction {
-                    localFolder.order = order.order
-                    localFolder.orderBy = order.orderBy
-                }
-            }
 
             if (
                 (ignoreCache || localFolder == null || localFolder.children.isNullOrEmpty() || !localFolder.isComplete)
@@ -620,7 +599,7 @@ object FileController {
                 val apiChildrenRealmList = remoteFolder.children
                 val apiChildren = ArrayList<File>(apiChildrenRealmList.toList())
 
-                saveRemoteFiles(localFolder, remoteFolder, page, currentRealm, apiChildren, order, apiResponse)
+                saveRemoteFiles(localFolder, remoteFolder, page, currentRealm, apiChildren, apiResponse)
                 remoteFolder.children = RealmList()
                 result = (remoteFolder to if (withChildren) apiChildren else arrayListOf())
             }
@@ -637,18 +616,17 @@ object FileController {
         page: Int,
         currentRealm: Realm,
         apiChildren: ArrayList<File>,
-        order: File.SortType,
         apiResponse: ApiResponse<File>
     ) {
         // Restore same children data
         keepSubFolderChildren(localFolder?.children, remoteFolder.children)
         // Save to realm
         if (localFolder?.children.isNullOrEmpty() || page == 1) {
-            saveRemoteFolder(currentRealm, remoteFolder, apiChildren.size, order, apiResponse.responseAt)
+            saveRemoteFolder(currentRealm, remoteFolder, apiChildren.size, apiResponse.responseAt)
         } else {
             localFolder?.let { it ->
                 addChildren(currentRealm, it, apiChildren)
-                saveRemoteFolder(currentRealm, it, apiChildren.size, order, apiResponse.responseAt)
+                saveRemoteFolder(currentRealm, it, apiChildren.size, apiResponse.responseAt)
             }
         }
     }
@@ -666,13 +644,10 @@ object FileController {
         currentRealm: Realm,
         remoteFolder: File,
         childrenSize: Int,
-        order: File.SortType,
         responseAt: Long
     ) {
         insertOrUpdateFile(currentRealm, remoteFolder) {
             if (childrenSize < ApiRepository.PER_PAGE) remoteFolder.isComplete = true
-            remoteFolder.order = order.order
-            remoteFolder.orderBy = order.orderBy
             remoteFolder.responseAt = responseAt
         }
     }
@@ -709,7 +684,7 @@ object FileController {
         }
     }
 
-    fun getFolderActivitiesRec(
+    private fun getFolderActivitiesRec(
         realm: Realm,
         folder: File,
         page: Int,
