@@ -329,6 +329,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                             )
                         }
                         BulkOperationType.COPY -> {
+                            val fileName = file.getFileName()
                             mediator.addSource(
                                 mainViewModel.duplicateFile(
                                     file,
