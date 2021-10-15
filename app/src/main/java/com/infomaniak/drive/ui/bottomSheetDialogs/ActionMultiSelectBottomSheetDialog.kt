@@ -67,6 +67,7 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
         downloadFile.setOnClickListener {
             if (drivePermissions.checkWriteStoragePermission()) downloadFileArchive()
         }
+        downloadFile.visibility = if (navigationArgs.fileIds.isNotEmpty()) VISIBLE else GONE
     }
 
     private fun downloadFileArchive() {
