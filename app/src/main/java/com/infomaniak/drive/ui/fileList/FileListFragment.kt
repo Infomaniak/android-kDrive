@@ -280,6 +280,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         data?.let { onSelectFolderResult(requestCode, resultCode, data) }
     }
 
+    override fun onStart() {
+        super.onStart()
+        fileAdapter.resetRealmListener()
+    }
+
     override fun onResume() {
         super.onResume()
         if (!isDownloading) refreshActivities()
@@ -288,9 +293,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     override fun onStop() {
-        if (fileAdapter.fileList.isManaged) {
-            fileAdapter.updateFileList(null)
-        }
+        fileAdapter.removeRealmDataListener()
         super.onStop()
     }
 
