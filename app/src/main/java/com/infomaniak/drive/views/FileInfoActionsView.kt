@@ -39,7 +39,6 @@ import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.VisibilityType.*
-import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
@@ -313,21 +312,22 @@ class FileInfoActionsView @JvmOverloads constructor(
                 ?: workInfoList.firstOrNull { workInfo -> workInfo.tags.any { it == currentFile.getWorkerTag() } }
                 ?: return@observe
 
-            val fileId: Int = workInfo.tags.first { it == currentFile.getWorkerTag() }.toInt()
+            val tag = workInfo.tags.firstOrNull { it == currentFile.getWorkerTag() }
+            if (currentFile.getWorkerTag() != tag) return@observe
+
+            val fileId: Int = currentFile.id
             val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 100)
 
             Log.d("FileInfoActionsView", "observeOfflineProgression> $progress% file:$fileId state:${workInfo.state}")
 
-            if (currentFile.id == fileId) {
-                currentFile.currentProgress = progress
-                // Check isOffline because progressing to 100 doesn't necessarily mean it's finish
-                if (progress == 100 && FileController.isOffline(fileId, UserDrive(driveId = currentFile.driveId))) {
-                    updateFile?.invoke(fileId)
-                    currentFile.isOffline = true
-                    refreshBottomSheetUi(currentFile)
-                } else {
-                    refreshBottomSheetUi(currentFile, true)
-                }
+            currentFile.currentProgress = progress
+            // Check isOffline because progressing to 100 doesn't necessarily mean it's finish
+            if (progress == 100 && workInfo.state.isFinished) {
+                updateFile?.invoke(fileId)
+                currentFile.isOffline = true
+                refreshBottomSheetUi(currentFile)
+            } else {
+                refreshBottomSheetUi(currentFile, true)
             }
         }
 

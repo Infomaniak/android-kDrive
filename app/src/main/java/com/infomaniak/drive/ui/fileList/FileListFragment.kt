@@ -606,10 +606,13 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 100)
                 fileRecyclerView.post {
                     fileAdapter.updateFileProgressByFileId(fileId, progress) { _, file ->
-                        CoroutineScope(Dispatchers.IO).launch {
-                            FileController.updateOfflineStatus(fileId, true)
+                        val tag = workInfo.tags.firstOrNull { it == file.getWorkerTag() }
+                        if (tag != null) {
+                            CoroutineScope(Dispatchers.IO).launch {
+                                FileController.updateOfflineStatus(fileId, true)
+                            }
+                            file.currentProgress = Utils.INDETERMINATE_PROGRESS
                         }
-                        file.currentProgress = Utils.INDETERMINATE_PROGRESS
                     }
                 }
                 Log.i("isPendingOffline", "progress from fragment $progress% for file $fileId, state:${workInfo.state}")

@@ -255,7 +255,7 @@ open class File(
         return id == ROOT_ID
     }
 
-    fun getWorkerTag() = "$id"
+    fun getWorkerTag() = "${id}_$driveId"
 
     fun isPendingOffline(context: Context): Boolean {
         val get = WorkManager.getInstance(context).getWorkInfosByTag(getWorkerTag()).get()
