@@ -32,6 +32,9 @@ import com.infomaniak.drive.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.fragment_pictures.collapsingToolbarLayout
 import kotlinx.android.synthetic.main.fragment_pictures.swipeRefreshLayout
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class ActivityFilesFragment : FileListFragment() {
 
@@ -54,19 +57,31 @@ class ActivityFilesFragment : FileListFragment() {
             String.format("%s %s", navigationArgs.activityUser?.displayName, navigationArgs.activityTranslation)
     }
 
-    private inner class DownloadFiles(private var fileIdList: IntArray) : (Boolean) -> Unit {
-        override fun invoke(ignoreCache: Boolean) {
+    private inner class DownloadFiles(private var fileIdList: IntArray) : (Boolean, Boolean) -> Unit {
+        override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             collapsingToolbarLayout.title = getString(R.string.fileDetailsActivitiesTitle)
-            val fileList = FileController.getFilesFromIdList(fileIdList.toTypedArray(), fileListViewModel.sortType).apply {
-                map {
-                    it.isFromActivities = true
+            val fileList = FileController.getFilesFromIdList(
+                realm = mainViewModel.realm,
+                idList = fileIdList.toTypedArray(),
+                order = fileListViewModel.sortType
+            )?.apply {
+                map { file ->
+                    val fileId = file.id
+                    CoroutineScope(Dispatchers.IO).launch {
+                        FileController.updateFile(fileId) {
+                            file.isFromActivities = true
+                        }
+                    }
                 }
             }
-            fileAdapter.apply {
-                setList(fileList)
-                isComplete = true
-                onFileClicked = {
-                    openFile(it)
+
+            fileList?.let { files ->
+                fileAdapter.apply {
+                    updateFileList(files)
+                    isComplete = true
+                    onFileClicked = {
+                        openFile(it)
+                    }
                 }
             }
         }
@@ -83,7 +98,10 @@ class ActivityFilesFragment : FileListFragment() {
                         folderName = file.name
                     )
                 )
-            } else Utils.displayFile(mainViewModel, findNavController(), file, fileAdapter.getItems())
+            } else {
+                val fileList = fileAdapter.getFileObjectsList(mainViewModel.realm)
+                Utils.displayFile(mainViewModel, findNavController(), file, fileList)
+            }
         }
     }
 }

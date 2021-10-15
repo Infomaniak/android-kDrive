@@ -224,7 +224,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             }
         } else {
             Utils.downloadAsOfflineFile(context, currentFile)
-            if (currentFile.isPendingOffline(context)) mainViewModel.updateOfflineFile.value = currentFile.id to false
+            if (currentFile.isPendingOffline(context)) mainViewModel.updateOfflineFile.value = currentFile.id
         }
         refreshBottomSheetUi(currentFile)
     }
@@ -303,7 +303,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         availableOffline.isEnabled = isEnabled
     }
 
-    fun observeOfflineProgression(lifecycleOwner: LifecycleOwner, updateFile: (fileId: Int) -> Unit) {
+    fun observeOfflineProgression(lifecycleOwner: LifecycleOwner, updateFile: ((fileId: Int) -> Unit)? = null) {
         observeDownloadOffline = mainViewModel.observeDownloadOffline(context.applicationContext)
         observeDownloadOffline?.observe(lifecycleOwner) { workInfoList ->
             if (workInfoList.isEmpty()) return@observe
@@ -312,22 +312,22 @@ class FileInfoActionsView @JvmOverloads constructor(
                 ?: workInfoList.firstOrNull { workInfo -> workInfo.tags.any { it == currentFile.getWorkerTag() } }
                 ?: return@observe
 
-            val fileId: Int =
-                if (workInfo.state.isFinished) workInfo.outputData.getInt(DownloadWorker.FILE_ID, 0)
-                else workInfo.tags.first { it == currentFile.getWorkerTag() }.toInt()
+            val tag = workInfo.tags.firstOrNull { it == currentFile.getWorkerTag() }
+            if (currentFile.getWorkerTag() != tag) return@observe
+
+            val fileId: Int = currentFile.id
             val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 100)
 
             Log.d("FileInfoActionsView", "observeOfflineProgression> $progress% file:$fileId state:${workInfo.state}")
 
-            if (currentFile.id == fileId) {
-                currentFile.currentProgress = progress
-                if (progress == 100) {
-                    updateFile(fileId)
-                    currentFile.isOffline = true
-                    refreshBottomSheetUi(currentFile)
-                } else {
-                    refreshBottomSheetUi(currentFile, true)
-                }
+            currentFile.currentProgress = progress
+            // Check isOffline because progressing to 100 doesn't necessarily mean it's finish
+            if (progress == 100 && workInfo.state.isFinished) {
+                updateFile?.invoke(fileId)
+                currentFile.isOffline = true
+                refreshBottomSheetUi(currentFile)
+            } else {
+                refreshBottomSheetUi(currentFile, true)
             }
         }
 
@@ -385,8 +385,6 @@ class FileInfoActionsView @JvmOverloads constructor(
             if (apiResponse.isSuccess()) {
                 apiResponse?.data?.let { action ->
                     action.driveId = currentFile.driveId
-                    currentFile.name = newName
-                    refreshBottomSheetUi(currentFile)
                     onSuccess?.invoke(action)
                 }
             } else {

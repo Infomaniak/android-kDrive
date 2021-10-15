@@ -17,8 +17,12 @@
  */
 package com.infomaniak.drive.ui.menu
 
+import androidx.navigation.fragment.findNavController
+import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.FileListFragment
+import io.realm.Realm
 import kotlinx.android.synthetic.main.fragment_file_list.*
 
 /**
@@ -32,11 +36,26 @@ open class FileSubTypeListFragment : FileListFragment() {
     protected fun populateFileList(
         files: ArrayList<File>,
         isComplete: Boolean,
+        folderId: Int? = null,
+        forceClean: Boolean = false,
         ignoreOffline: Boolean = false,
-        forceClean: Boolean = false
+        realm: Realm? = null,
+        isNewSort: Boolean
     ) {
-        if (fileAdapter.itemCount == 0 || forceClean) fileAdapter.setList(files)
-        else fileRecyclerView.post { fileAdapter.addFileList(files) }
+        if (fileAdapter.itemCount == 0 || forceClean || isNewSort) {
+            if (realm == null) {
+                fileAdapter.setFiles(files)
+            } else {
+                val order = when (findNavController().currentDestination?.id) {
+                    R.id.recentChangesFragment -> null
+                    else -> fileListViewModel.sortType
+                }
+
+                FileController.getRealmLiveFiles(folderId ?: this.folderID, realm, order).apply {
+                    fileAdapter.updateFileList(this)
+                }
+            }
+        }
         fileAdapter.isComplete = isComplete
         showLoadingTimer.cancel()
         swipeRefreshLayout.isRefreshing = false

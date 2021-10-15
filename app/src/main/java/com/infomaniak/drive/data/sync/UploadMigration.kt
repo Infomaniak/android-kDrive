@@ -25,6 +25,10 @@ import io.realm.FieldAttribute
 import io.realm.RealmMigration
 
 class UploadMigration : RealmMigration {
+    companion object {
+        const val bddVersion = 3L // Must be bumped when the schema changes
+    }
+
     override fun migrate(realm: DynamicRealm, oldVersion: Long, newVersion: Long) {
         var oldVersionTemp = oldVersion
 

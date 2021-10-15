@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.menu
 import android.os.Bundle
 import android.view.View
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.utils.Utils
 import kotlinx.android.synthetic.main.fragment_file_list.*
 
@@ -41,12 +42,21 @@ class OfflineFileFragment : FileSubTypeListFragment() {
         )
     }
 
-    private inner class DownloadFiles : (Boolean) -> Unit {
-        override fun invoke(ignoreCache: Boolean) {
-            fileAdapter.setList(arrayListOf())
-            fileListViewModel.getOfflineFiles(fileListViewModel.sortType).observe(viewLifecycleOwner) { files ->
-                populateFileList(files, isComplete = true, ignoreOffline = true)
+    private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
+        override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
+            if (fileAdapter.fileList.isEmpty() || isNewSort) {
+                FileController.getOfflineFiles(order = fileListViewModel.sortType, customRealm = mainViewModel.realm).apply {
+                    fileAdapter.updateFileList(this)
+                }
             }
+
+            fileAdapter.isComplete = true
+            swipeRefreshLayout.isRefreshing = false
+            changeNoFilesLayoutVisibility(
+                fileAdapter.fileList.isEmpty(),
+                changeControlsVisibility = true,
+                ignoreOffline = true
+            )
         }
     }
 }

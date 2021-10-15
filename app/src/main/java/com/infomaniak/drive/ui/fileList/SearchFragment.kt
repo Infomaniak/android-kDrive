@@ -69,12 +69,12 @@ class SearchFragment : FileListFragment() {
         searchView.addTextChangedListener(DebouncingTextWatcher(lifecycle) {
             clearButton?.visibility = if (it.isNullOrEmpty()) INVISIBLE else VISIBLE
             fileListViewModel.currentPage = 1
-            downloadFiles(true)
+            downloadFiles(true, false)
         })
         searchView.setOnEditorActionListener { _, actionId, _ ->
             if (EditorInfo.IME_ACTION_SEARCH == actionId) {
                 fileListViewModel.currentPage = 1
-                downloadFiles(true)
+                downloadFiles(true, false)
                 true
             } else false
         }
@@ -83,7 +83,7 @@ class SearchFragment : FileListFragment() {
             if (!fileAdapter.isComplete && !isDownloading) {
                 fileAdapter.showLoading()
                 fileListViewModel.currentPage++
-                downloadFiles(true)
+                downloadFiles(true, false)
             }
         })
 
@@ -93,7 +93,10 @@ class SearchFragment : FileListFragment() {
                 safeNavigate(
                     SearchFragmentDirections.actionSearchFragmentToFileListFragment(file.id, file.name)
                 )
-            } else Utils.displayFile(mainViewModel, findNavController(), file, fileAdapter.getItems())
+            } else {
+                val fileList = fileAdapter.getFileObjectsList(mainViewModel.realm)
+                Utils.displayFile(mainViewModel, findNavController(), file, fileList)
+            }
         }
 
         filterLayoutView.apply {
@@ -114,7 +117,7 @@ class SearchFragment : FileListFragment() {
             fileListViewModel.currentConvertedType = null
             fileListViewModel.currentConvertedTypeText = null
             fileListViewModel.currentConvertedTypeDrawable = null
-            downloadFiles(true)
+            downloadFiles(true, false)
         }
 
         convertedType.text = fileListViewModel.currentConvertedTypeText
@@ -132,7 +135,7 @@ class SearchFragment : FileListFragment() {
                     searchList.apply { map { file -> file.isFromSearch = true } }
                     when {
                         fileListViewModel.currentPage == 1 -> {
-                            fileAdapter.setList(searchList)
+                            fileAdapter.setFiles(searchList)
                             changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, false)
                             fileRecyclerView.scrollTo(0, 0)
                         }
@@ -168,11 +171,11 @@ class SearchFragment : FileListFragment() {
         convertedTypeLayout.visibility = VISIBLE
         fileListViewModel.currentPage = 1
         fileListViewModel.currentConvertedType = type.name.lowercase(Locale.ROOT)
-        downloadFiles(true)
+        downloadFiles(true, false)
     }
 
     override fun onPause() {
-        fileListViewModel.oldList = fileAdapter.getItems()
+        fileListViewModel.oldList = fileAdapter.getFiles()
         searchView.isFocusable = false
         super.onPause()
     }
@@ -191,21 +194,21 @@ class SearchFragment : FileListFragment() {
     }
 
 
-    private inner class DownloadFiles : (Boolean) -> Unit {
-        override fun invoke(ignoreCache: Boolean) {
+    private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
+        override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             swipeRefreshLayout.isRefreshing = true
             val currentQuery = searchView?.text?.toString()
 
             if (currentQuery.isNullOrEmpty() && fileListViewModel.currentConvertedType == null) {
-                fileAdapter.setList(arrayListOf())
+                fileAdapter.setFiles(arrayListOf())
                 showFilterLayout(true)
                 swipeRefreshLayout.isRefreshing = false
                 return
             }
 
             val oldList = fileListViewModel.oldList?.toMutableList() as? ArrayList
-            if (!oldList.isNullOrEmpty() && fileAdapter.getItems().isEmpty()) {
-                fileAdapter.setList(oldList)
+            if (!oldList.isNullOrEmpty() && fileAdapter.getFiles().isEmpty()) {
+                fileAdapter.setFiles(oldList)
                 fileListViewModel.oldList = null
                 if (fileListViewModel.currentConvertedType != null) convertedTypeLayout.visibility = VISIBLE
                 showFilterLayout(false)

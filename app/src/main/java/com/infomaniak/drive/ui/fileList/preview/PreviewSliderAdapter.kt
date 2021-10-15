@@ -69,7 +69,7 @@ class PreviewSliderAdapter(manager: FragmentManager, lifecycle: Lifecycle) : Fra
     fun addFile(file: File) {
         files.add(file)
         filePagesIds.add(file.hashCode().toLong())
-        notifyDataSetChanged()
+        notifyItemInserted(files.lastIndex)
     }
 
     fun deleteFile(file: File): Boolean {

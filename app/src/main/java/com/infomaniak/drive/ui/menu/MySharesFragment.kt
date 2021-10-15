@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -49,19 +50,28 @@ class MySharesFragment : FileSubTypeListFragment() {
                     file.id,
                     file.name
                 )
-            ) else Utils.displayFile(mainViewModel, findNavController(), file, fileAdapter.getItems())
+            ) else {
+                val fileList = fileAdapter.getFileObjectsList(mainViewModel.realm)
+                Utils.displayFile(mainViewModel, findNavController(), file, fileList)
+            }
         }
     }
 
-    private inner class DownloadFiles : (Boolean) -> Unit {
-        override fun invoke(ignoreCache: Boolean) {
-            if (ignoreCache) fileAdapter.setList(arrayListOf())
+    private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
+        override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             showLoadingTimer.start()
             fileAdapter.isComplete = false
 
             fileListViewModel.getMySharedFiles(fileListViewModel.sortType).observe(viewLifecycleOwner) {
                 // forceClean because myShares is not paginated
-                populateFileList(files = it?.first ?: ArrayList(), isComplete = true, forceClean = true)
+                populateFileList(
+                    files = it?.first ?: ArrayList(),
+                    folderId = FileController.MY_SHARES_FILE_ID,
+                    forceClean = true,
+                    isComplete = true,
+                    realm = mainViewModel.realm,
+                    isNewSort = isNewSort
+                )
             }
         }
     }

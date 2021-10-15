@@ -192,7 +192,7 @@ object Utils {
         fileList: ArrayList<File>,
         isSharedWithMe: Boolean = false
     ) {
-        mainViewModel.currentFileList.value = fileList
+        mainViewModel.currentFileList = fileList
         val navOptions = NavOptions.Builder()
             .setEnterAnim(R.anim.fragment_open_enter)
             .setExitAnim(R.anim.fragment_open_exit)

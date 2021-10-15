@@ -26,6 +26,7 @@ import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.SingleLiveEvent
 import com.infomaniak.lib.core.models.ApiResponse
+import io.realm.OrderedRealmCollection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
@@ -52,7 +53,7 @@ class FileListViewModel : ViewModel() {
     var isSharedWithMe = false
 
     var currentPage = 1
-    var oldList: ArrayList<File>? = null
+    var oldList: OrderedRealmCollection<File>? = null
     val isListMode = SingleLiveEvent<Boolean>()
 
     var lastItemCount: FileCount? = null
@@ -78,15 +79,21 @@ class FileListViewModel : ViewModel() {
                     ignoreCache = ignoreCache,
                     ignoreCloud = ignoreCloud,
                     order = order,
-                    userDrive = userDrive
+                    userDrive = userDrive,
+                    withChildren = true
                 )
 
                 when {
                     resultList == null -> emit(null)
-                    resultList.second.size < ApiRepository.PER_PAGE ->
-                        emit(FolderFilesResult(resultList.first, resultList.second, true, page))
+                    resultList.second.size < ApiRepository.PER_PAGE -> {
+                        if (page == 1) {
+                            emit(FolderFilesResult(resultList.first, resultList.second, true, page))
+                        }
+                    }
                     else -> {
-                        emit(FolderFilesResult(resultList.first, resultList.second, false, page))
+                        if (page == 1) {
+                            emit(FolderFilesResult(resultList.first, resultList.second, true, page))
+                        }
                         recursiveDownload(parentId, page + 1)
                     }
                 }
@@ -141,14 +148,6 @@ class FileListViewModel : ViewModel() {
                 else -> emit(apiResponse)
             }
         }
-    }
-
-    fun getOfflineFiles(order: File.SortType) = liveData(Dispatchers.IO) {
-        emit(FileController.getOfflineFiles(order))
-    }
-
-    fun getPendingFiles(folderID: Int) = liveData(Dispatchers.IO) {
-        emit(UploadFile.getCurrentUserPendingUploads(folderID))
     }
 
     fun getPendingFilesCount(folderID: Int) = liveData(Dispatchers.IO) {

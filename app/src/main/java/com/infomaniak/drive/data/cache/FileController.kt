@@ -37,17 +37,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
-import java.util.*
-import kotlin.collections.ArrayList
 
 object FileController {
     private const val REALM_DB_FILE = "kDrive-%s-%s.realm"
     private const val REALM_DB_SHARES_WITH_ME = "kDrive-%s-%s-shares.realm"
 
     const val FAVORITES_FILE_ID = -1
-    private const val MY_SHARES_FILE_ID = -2
+    const val MY_SHARES_FILE_ID = -2
+    const val RECENT_CHANGES_FILE_ID = -4
     private const val PICTURES_FILE_ID = -3
-    private const val RECENT_CHANGES_FILE_ID = -4
 
     private val FAVORITES_FILE = File(FAVORITES_FILE_ID, name = "Favoris")
     private val MY_SHARES_FILE = File(MY_SHARES_FILE_ID, name = "My Shares")
@@ -55,6 +53,9 @@ object FileController {
     private val RECENT_CHANGES_FILE = File(RECENT_CHANGES_FILE_ID, name = "Recent changes")
 
     private fun getFileById(realm: Realm, fileId: Int) = realm.where(File::class.java).equalTo("id", fileId).findFirst()
+
+    // https://github.com/realm/realm-java/issues/1862
+    fun emptyList(realm: Realm): RealmResults<File> = realm.where(File::class.java).alwaysFalse().findAll()
 
     fun getParentFile(fileId: Int, userDrive: UserDrive? = null, realm: Realm? = null): File? {
         val block: (Realm) -> File? = { currentRealm ->
@@ -148,7 +149,7 @@ object FileController {
         customRealm?.let(block) ?: getRealmInstance().use(block)
     }
 
-    fun updateFile(fileId: Int, realm: Realm? = null, userDrive: UserDrive = UserDrive(), transaction: (file: File) -> Unit) {
+    fun updateFile(fileId: Int, realm: Realm? = null, userDrive: UserDrive? = null, transaction: (file: File) -> Unit) {
         try {
             val block: (Realm) -> Unit? = { currentRealm ->
                 getFileById(currentRealm, fileId)?.let { file ->
@@ -175,12 +176,10 @@ object FileController {
 
     fun updateExistingFile(
         newFile: File,
-        userDrive: UserDrive
+        realm: Realm
     ) {
-        getRealmInstance(userDrive).use { realm ->
-            getFileById(realm, newFile.id)?.let { localFile ->
-                insertOrUpdateFile(realm, newFile, localFile)
-            }
+        getFileById(realm, newFile.id)?.let { localFile ->
+            insertOrUpdateFile(realm, newFile, localFile)
         }
     }
 
@@ -276,7 +275,8 @@ object FileController {
 
     private fun getRealmConfiguration(dbName: String): RealmConfiguration {
         return RealmConfiguration.Builder()
-            .deleteRealmIfMigrationNeeded()
+            .schemaVersion(FileMigration.bddVersion) // Must be bumped when the schema changes
+            .migration(FileMigration())
             .modules(RealmModules.LocalFilesModule())
             .name(dbName)
             .build()
@@ -444,20 +444,20 @@ object FileController {
     }
 
     fun storeRecentChanges(files: ArrayList<File>, isFirstPage: Boolean = false) {
-        getRealmInstance().use { realm ->
-            realm.beginTransaction()
-            val folder = realm.where(File::class.java).equalTo(File::id.name, RECENT_CHANGES_FILE_ID).findFirst()
-                ?: realm.copyToRealm(RECENT_CHANGES_FILE)
-            if (isFirstPage) {
-                folder.children = RealmList()
-            }
-            files.forEach { file ->
-                realm.where(File::class.java).equalTo(File::id.name, file.id).findFirst()?.let { realmFile ->
-                    keepOldLocalFilesData(realmFile, file)
+        getRealmInstance().use {
+            it.executeTransaction { realm ->
+                val folder = realm.where(File::class.java).equalTo(File::id.name, RECENT_CHANGES_FILE_ID).findFirst()
+                    ?: realm.copyToRealm(RECENT_CHANGES_FILE)
+                if (isFirstPage) {
+                    folder.children = RealmList()
                 }
-                folder.children.add(file)
+                files.forEach { file ->
+                    realm.where(File::class.java).equalTo(File::id.name, file.id).findFirst()?.let { realmFile ->
+                        keepOldLocalFilesData(realmFile, file)
+                    }
+                    folder.children.add(file)
+                }
             }
-            realm.commitTransaction()
         }
     }
 
@@ -510,6 +510,17 @@ object FileController {
         customRealm?.let(block) ?: getRealmInstance().use(block)
     }
 
+    fun getRealmLiveFiles(
+        parentId: Int,
+        realm: Realm,
+        order: File.SortType?,
+        withVisibilitySort: Boolean = true
+    ): RealmResults<File> {
+        realm.refresh()
+        val realmLiveSortedFiles = getRealmLiveSortedFiles(getFileById(realm, parentId), order, withVisibilitySort)
+        return realmLiveSortedFiles ?: emptyList(realm)
+    }
+
     fun getFilesFromCacheOrDownload(
         parentId: Int,
         page: Int,
@@ -517,54 +528,53 @@ object FileController {
         ignoreCloud: Boolean = false,
         order: File.SortType = File.SortType.NAME_AZ,
         userDrive: UserDrive?,
-        customRealm: Realm? = null
+        customRealm: Realm? = null,
+        withChildren: Boolean = true
     ): Pair<File, ArrayList<File>>? {
         val operation: (Realm) -> Pair<File, ArrayList<File>>? = { realm ->
             var result: Pair<File, ArrayList<File>>? = null
             val localFolder = getFileById(realm, parentId)
             val localFolderWithoutChildren = localFolder?.let { realm.copyFromRealm(it, 1) }
-            val isNewSort = localFolder?.order != order.order || localFolder.orderBy != order.orderBy
-
-            if (isNewSort && localFolder != null) {
-                realm.executeTransaction {
-                    localFolder.order = order.order
-                    localFolder.orderBy = order.orderBy
-                }
-            }
 
             if (
                 (ignoreCache || localFolder == null || localFolder.children.isNullOrEmpty() || !localFolder.isComplete)
                 && !ignoreCloud
             ) {
-                result = downloadFiles(userDrive, parentId, page, order, localFolder, realm, localFolderWithoutChildren)
+                result = downloadAndSaveFiles(
+                    currentRealm = realm,
+                    localFolder = localFolder,
+                    localFolderWithoutChildren = localFolderWithoutChildren,
+                    order = order,
+                    page = page,
+                    parentId = parentId,
+                    userDrive = userDrive,
+                    withChildren = withChildren
+                )
             } else if (page == 1 && localFolderWithoutChildren != null) {
-                result = (localFolderWithoutChildren to getLocalSortedFolderFiles(localFolder, order, realm))
+                val localSortedFolderFiles = if (withChildren) getLocalSortedFolderFiles(localFolder, order) else arrayListOf()
+                result = (localFolderWithoutChildren to localSortedFolderFiles)
             }
             result
         }
         return customRealm?.let(operation) ?: getRealmInstance(userDrive).use(operation)
     }
 
-    fun getFilesFromIdList(idList: Array<Int>, order: File.SortType = File.SortType.NAME_AZ): ArrayList<File> {
-        return getRealmInstance().use { realm ->
-            realm
-                .where(File::class.java)
-                .`in`(File::id.name, idList)
-                .getSortQueryByOrder(order)
-                .findAll()?.let { files ->
-                    realm.copyFromRealm(files) as ArrayList<File>
-                } ?: arrayListOf()
-        }
+    fun getFilesFromIdList(realm: Realm, idList: Array<Int>, order: File.SortType = File.SortType.NAME_AZ): RealmResults<File>? {
+        return realm.where(File::class.java)
+            .`in`(File::id.name, idList)
+            .getSortQueryByOrder(order)
+            .findAll()
     }
 
-    private fun downloadFiles(
-        userDrive: UserDrive?,
-        parentId: Int,
-        page: Int,
-        order: File.SortType,
-        localFolder: File?,
+    private fun downloadAndSaveFiles(
         currentRealm: Realm,
-        localFolderWithoutChildren: File?
+        localFolder: File?,
+        localFolderWithoutChildren: File?,
+        order: File.SortType,
+        page: Int,
+        parentId: Int,
+        userDrive: UserDrive?,
+        withChildren: Boolean
     ): Pair<File, ArrayList<File>>? {
         var result: Pair<File, ArrayList<File>>? = null
         val okHttpClient: OkHttpClient
@@ -583,12 +593,13 @@ object FileController {
                 val apiChildrenRealmList = remoteFolder.children
                 val apiChildren = ArrayList<File>(apiChildrenRealmList.toList())
 
-                saveRemoteFiles(localFolder, remoteFolder, page, currentRealm, apiChildren, order, apiResponse)
+                saveRemoteFiles(localFolder, remoteFolder, page, currentRealm, apiChildren, apiResponse)
                 remoteFolder.children = RealmList()
-                result = (remoteFolder to apiChildren)
+                result = (remoteFolder to if (withChildren) apiChildren else arrayListOf())
             }
         } else if (page == 1 && localFolderWithoutChildren != null) {
-            result = (localFolderWithoutChildren to getLocalSortedFolderFiles(localFolder, order, currentRealm))
+            val localSortedFolderFiles = if (withChildren) getLocalSortedFolderFiles(localFolder, order) else arrayListOf()
+            result = (localFolderWithoutChildren to localSortedFolderFiles)
         }
         return result
     }
@@ -599,18 +610,17 @@ object FileController {
         page: Int,
         currentRealm: Realm,
         apiChildren: ArrayList<File>,
-        order: File.SortType,
         apiResponse: ApiResponse<File>
     ) {
         // Restore same children data
         keepSubFolderChildren(localFolder?.children, remoteFolder.children)
         // Save to realm
         if (localFolder?.children.isNullOrEmpty() || page == 1) {
-            saveRemoteFolder(currentRealm, remoteFolder, apiChildren.size, order, apiResponse.responseAt)
+            saveRemoteFolder(currentRealm, remoteFolder, apiChildren.size, apiResponse.responseAt)
         } else {
             localFolder?.let { it ->
                 addChildren(currentRealm, it, apiChildren)
-                saveRemoteFolder(currentRealm, it, apiChildren.size, order, apiResponse.responseAt)
+                saveRemoteFolder(currentRealm, it, apiChildren.size, apiResponse.responseAt)
             }
         }
     }
@@ -628,44 +638,38 @@ object FileController {
         currentRealm: Realm,
         remoteFolder: File,
         childrenSize: Int,
-        order: File.SortType,
         responseAt: Long
     ) {
         insertOrUpdateFile(currentRealm, remoteFolder) {
             if (childrenSize < ApiRepository.PER_PAGE) remoteFolder.isComplete = true
-            remoteFolder.order = order.order
-            remoteFolder.orderBy = order.orderBy
             remoteFolder.responseAt = responseAt
         }
+    }
+
+    private fun getRealmLiveSortedFiles(
+        localFolder: File?,
+        order: File.SortType?,
+        withVisibilitySort: Boolean = true,
+        localChildren: RealmResults<File>? = null
+    ): RealmResults<File>? {
+        val children = localChildren ?: localFolder?.children
+        return children?.where()
+            ?.apply {
+                order?.let {
+                    getSortQueryByOrder(it)
+                    if (withVisibilitySort) sort(File::visibility.name, Sort.DESCENDING)
+                    sort(File::type.name, Sort.ASCENDING)
+                }
+            }?.findAll()
     }
 
     private fun getLocalSortedFolderFiles(
         localFolder: File?,
         order: File.SortType,
-        currentRealm: Realm,
         localChildren: RealmResults<File>? = null
     ): ArrayList<File> {
-        val children = localChildren ?: localFolder?.children
-        return children?.where()?.let { realmQuery ->
-            val results = realmQuery.getSortQueryByOrder(order).findAll()
-            val isTeamSpaceName = File.VisibilityType.IS_TEAM_SPACE.name.lowercase(Locale.ROOT)
-            val isSharedSpaceName = File.VisibilityType.IS_SHARED_SPACE.name.lowercase(Locale.ROOT)
-            val teamSpaces = results.where().equalTo(File::visibility.name, isTeamSpaceName).findAll()
-            val sharedSpaces = results.where().equalTo(File::visibility.name, isSharedSpaceName).findAll()
-            val dirs = results.where().equalTo(File::type.name, File.Type.FOLDER.value)
-                .notEqualTo(File::visibility.name, isTeamSpaceName)
-                .and()
-                .notEqualTo(File::visibility.name, isSharedSpaceName)
-                .findAll()
-            val files = results.where().equalTo(File::type.name, File.Type.FILE.value).findAll()
-
-            arrayListOf<File>().apply {
-                addAll(currentRealm.copyFromRealm(teamSpaces, 1))
-                addAll(currentRealm.copyFromRealm(sharedSpaces, 1))
-                addAll(currentRealm.copyFromRealm(dirs, 1))
-                addAll(currentRealm.copyFromRealm(files, 1))
-            }
-        } ?: arrayListOf()
+        val realmLiveSortedFiles = getRealmLiveSortedFiles(localFolder, order, localChildren = localChildren)
+        return realmLiveSortedFiles?.let { ArrayList(it) } ?: arrayListOf()
     }
 
     fun getFolderActivities(folder: File, page: Int, userDrive: UserDrive? = null): Map<out Int, File.LocalFileActivity> {
@@ -674,7 +678,7 @@ object FileController {
         }
     }
 
-    fun getFolderActivitiesRec(
+    private fun getFolderActivitiesRec(
         realm: Realm,
         folder: File,
         page: Int,
@@ -751,15 +755,19 @@ object FileController {
         }
     }
 
-    fun getOfflineFiles(order: File.SortType?, userDrive: UserDrive = UserDrive(), customRealm: Realm? = null): ArrayList<File> {
-        val block: (Realm) -> ArrayList<File> = { realm ->
+    fun getOfflineFiles(
+        order: File.SortType?,
+        userDrive: UserDrive = UserDrive(),
+        customRealm: Realm? = null
+    ): RealmResults<File> {
+        val block: (Realm) -> RealmResults<File> = { realm ->
             realm.where(File::class.java)
                 .equalTo(File::isOffline.name, true)
                 .notEqualTo(File::type.name, File.Type.FOLDER.value)
                 .findAll()?.let { files ->
-                    if (order == null) realm.copyFromRealm(files) as ArrayList
-                    else getLocalSortedFolderFiles(null, order, realm, files)
-                } ?: arrayListOf()
+                    if (order == null) files
+                    else getRealmLiveSortedFiles(localFolder = null, order = order, localChildren = files)
+                } ?: emptyList(realm)
         }
         return customRealm?.let(block) ?: getRealmInstance(userDrive).use(block)
     }
@@ -772,7 +780,7 @@ object FileController {
     ): ArrayList<File> {
         val block: (Realm) -> ArrayList<File> = { currRealm ->
             currRealm.where(File::class.java).like(File::name.name, "*$query*").findAll()?.let { files ->
-                getLocalSortedFolderFiles(null, order, currRealm, files)
+                getLocalSortedFolderFiles(null, order, files)
             } ?: arrayListOf()
         }
         return customRealm?.let(block) ?: getRealmInstance(userDrive).use(block)

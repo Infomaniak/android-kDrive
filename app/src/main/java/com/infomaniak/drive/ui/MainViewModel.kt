@@ -42,15 +42,18 @@ import com.infomaniak.drive.utils.MediaUtils.isMedia
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
+import io.realm.Realm
 import io.sentry.Sentry
 import kotlinx.coroutines.*
 import java.util.*
 
 class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
+    var realm = FileController.getRealmInstance()
+
     val currentFolder = MutableLiveData<File>()
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
-    val currentFileList = MutableLiveData<ArrayList<File>>()
+    var currentFileList = ArrayList<File>()
     val isInternetAvailable = MutableLiveData(true)
 
     val createDropBoxSuccess = SingleLiveEvent<DropBox>()
@@ -60,7 +63,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     val deleteFileFromHome = SingleLiveEvent<Boolean>()
     val forcedDriveSelection = SingleLiveEvent<Boolean>()
     val refreshActivities = SingleLiveEvent<Boolean>()
-    val updateOfflineFile = SingleLiveEvent<Pair<FileId, IsOffline>>()
+    val updateOfflineFile = SingleLiveEvent<FileId>()
     val updateVisibleFiles = MutableLiveData<Boolean>()
 
     private var getFileDetailsJob = Job()
@@ -156,10 +159,10 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         emit(ApiRepository.createOfficeFile(driveId, folderId, createFile))
     }
 
-    fun addFileToFavorites(file: File, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
+    fun addFileToFavorites(file: File, userDrive: UserDrive? = null, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
         ApiRepository.postFavoriteFile(file).let { apiResponse ->
             if (apiResponse.isSuccess()) {
-                FileController.updateFile(file.id) { localFile ->
+                FileController.updateFile(file.id, userDrive = userDrive) { localFile ->
                     localFile.isFavorite = true
                 }
                 onSuccess?.invoke()
@@ -168,7 +171,12 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    fun deleteFileFromFavorites(file: File) = liveData(Dispatchers.IO) {
+    fun deleteFileFromFavorites(file: File, userDrive: UserDrive? = null) = liveData(Dispatchers.IO) {
+        CoroutineScope(Dispatchers.IO).launch {
+            FileController.updateFile(file.id, userDrive = userDrive) {
+                it.isFavorite = false
+            }
+        }
         emit(ApiRepository.deleteFavoriteFile(file))
     }
 
@@ -206,19 +214,20 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         emit(apiResponse)
     }
 
-    fun deleteFile(file: File, onSuccess: ((fileID: Int) -> Unit)? = null) = liveData(Dispatchers.IO) {
-        val apiResponse = ApiRepository.deleteFile(file)
-        if (apiResponse.isSuccess()) {
-            file.deleteCaches(getContext())
+    fun deleteFile(file: File, userDrive: UserDrive? = null, onSuccess: ((fileID: Int) -> Unit)? = null) =
+        liveData(Dispatchers.IO) {
+            val apiResponse = ApiRepository.deleteFile(file)
+            if (apiResponse.isSuccess()) {
+                file.deleteCaches(getContext())
 
-            FileController.updateFile(file.id) { localFile ->
-                localFile.deleteFromRealm()
+                FileController.updateFile(file.id, userDrive = userDrive) { localFile ->
+                    localFile.deleteFromRealm()
+                }
+
+                onSuccess?.invoke(file.id)
             }
-
-            onSuccess?.invoke(file.id)
+            emit(apiResponse)
         }
-        emit(apiResponse)
-    }
 
     fun duplicateFile(file: File, folderId: Int? = null, copyName: String?) = liveData(Dispatchers.IO) {
         emit(ApiRepository.duplicateFile(file, copyName, folderId ?: Utils.ROOT_ID))
@@ -261,20 +270,22 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             DriveInfosController.getDrives(AccountUtils.currentUserId).forEach { drive ->
                 val userDrive = UserDrive(driveId = drive.id)
 
-                FileController.getOfflineFiles(null, userDrive).forEach loopFiles@{ file ->
-                    if (file.isPendingOffline(getContext())) return@loopFiles
+                FileController.getRealmInstance(userDrive).use { realm ->
+                    FileController.getOfflineFiles(null, customRealm = realm).forEach loopFiles@{ file ->
+                        if (file.isPendingOffline(getContext())) return@loopFiles
 
-                    file.getOfflineFile(getContext(), userDrive.userId)?.let { offlineFile ->
-                        migrateOfflineIfNeeded(file, offlineFile, userDrive)
+                        file.getOfflineFile(getContext(), userDrive.userId)?.let { offlineFile ->
+                            migrateOfflineIfNeeded(file, offlineFile, userDrive)
 
-                        val apiResponse = ApiRepository.getFileDetails(file)
-                        apiResponse.data?.let { remoteFile ->
-                            remoteFile.isOffline = true
-                            if (offlineFile.lastModified() > file.getLastModifiedInMilliSecond()) {
-                                uploadFile(file, remoteFile, offlineFile, userDrive)
-                            } else downloadOfflineFile(file, remoteFile, offlineFile, userDrive)
-                        } ?: let {
-                            if (apiResponse.error?.code?.equals("object_not_found") == true) offlineFile.delete()
+                            val apiResponse = ApiRepository.getFileDetails(file)
+                            apiResponse.data?.let { remoteFile ->
+                                remoteFile.isOffline = true
+                                if (offlineFile.lastModified() > file.getLastModifiedInMilliSecond()) {
+                                    uploadFile(file, remoteFile, offlineFile, userDrive, realm)
+                                } else downloadOfflineFile(file, remoteFile, offlineFile, userDrive, realm)
+                            } ?: let {
+                                if (apiResponse.error?.code?.equals("object_not_found") == true) offlineFile.delete()
+                            }
                         }
                     }
                 }
@@ -282,20 +293,20 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    private fun uploadFile(file: File, remoteFile: File, offlineFile: java.io.File, userDrive: UserDrive) {
+    private fun uploadFile(file: File, remoteFile: File, offlineFile: java.io.File, userDrive: UserDrive, realm: Realm) {
         val uri = Uri.fromFile(offlineFile)
         val fileModifiedAt = Date(offlineFile.lastModified())
         if (UploadFile.canUpload(uri, fileModifiedAt)) {
             remoteFile.lastModifiedAt = offlineFile.lastModified() / 1000
             remoteFile.size = offlineFile.length()
-            FileController.updateExistingFile(newFile = remoteFile, userDrive = userDrive)
+            FileController.updateExistingFile(newFile = remoteFile, realm = realm)
             UploadFile(
                 uri = uri.toString(),
                 driveId = userDrive.driveId,
                 fileModifiedAt = fileModifiedAt,
                 fileName = file.name,
                 fileSize = offlineFile.length(),
-                remoteFolder = FileController.getParentFile(file.id, userDrive)!!.id,
+                remoteFolder = FileController.getParentFile(file.id, realm = realm)!!.id,
                 type = UploadFile.Type.SYNC_OFFLINE.name,
                 userId = userDrive.userId,
             ).store()
@@ -307,7 +318,8 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         file: File,
         remoteFile: File,
         offlineFile: java.io.File,
-        userDrive: UserDrive
+        userDrive: UserDrive,
+        realm: Realm
     ) {
         val remoteOfflineFile = remoteFile.getOfflineFile(getContext(), userDrive.userId) ?: return
 
@@ -318,7 +330,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
 
         if (!file.isPendingOffline(getContext()) && (!remoteFile.isOfflineAndIntact(remoteOfflineFile) || pathChanged)) {
-            FileController.updateExistingFile(newFile = remoteFile, userDrive = userDrive)
+            FileController.updateExistingFile(newFile = remoteFile, realm = realm)
             Utils.downloadAsOfflineFile(getContext(), remoteFile, userDrive)
         }
     }
@@ -394,13 +406,17 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
                     data?.let { FileController.storeRecentChanges(it, isFirstPage) }
                     when {
                         data == null -> Unit
-                        data.size < ApiRepository.PER_PAGE -> emit(
-                            FileListFragment.FolderFilesResult(files = data, isComplete = true, page = page)
-                        )
-                        else -> {
-                            emit(
-                                FileListFragment.FolderFilesResult(files = data, isComplete = false, page = page)
+                        data.size < ApiRepository.PER_PAGE -> {
+                            if (isFirstPage) emit(
+                                FileListFragment.FolderFilesResult(files = data, isComplete = true, page = page)
                             )
+                        }
+                        else -> {
+                            if (isFirstPage) {
+                                emit(
+                                    FileListFragment.FolderFilesResult(files = data, isComplete = true, page = page)
+                                )
+                            }
                             if (!onlyFirstPage) recursive(page + 1)
                         }
                     }
@@ -418,5 +434,10 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             }
             recursive(1)
         }
+    }
+
+    override fun onCleared() {
+        realm.close()
+        super.onCleared()
     }
 }

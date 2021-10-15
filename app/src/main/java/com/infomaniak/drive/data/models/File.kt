@@ -93,8 +93,6 @@ open class File(
     var users: @WriteWith<IntRealmListParceler> RealmList<Int> = RealmList(),
     var visibility: String = "",
 
-    var order: String = "",
-    var orderBy: String = "",
     var responseAt: Long = 0,
 
     /**
@@ -257,7 +255,7 @@ open class File(
         return id == ROOT_ID
     }
 
-    fun getWorkerTag() = "$id"
+    fun getWorkerTag() = "${id}_$driveId"
 
     fun isPendingOffline(context: Context): Boolean {
         val get = WorkManager.getInstance(context).getWorkInfosByTag(getWorkerTag()).get()
@@ -296,11 +294,18 @@ open class File(
         }
     }
 
+    // For applyFileActivity in FileController
     override fun equals(other: Any?): Boolean {
         if (other is File) {
             return other.id == id
         }
         return super.equals(other)
+    }
+
+    override fun hashCode(): Int {
+        var result = id
+        result = 31 * result + driveId
+        return result
     }
 
     enum class LocalFileActivity {
