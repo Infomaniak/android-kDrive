@@ -343,7 +343,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                         }
                         BulkOperationType.ADD_FAVORITES -> {
                             mediator.addSource(mainViewModel.addFileToFavorites(file) {
-                                runBlocking(Dispatchers.Main) { fileAdapter.notifyFileChanged(file.id) { it.isFavorite = true } }
+                                runBlocking(Dispatchers.Main) {
+                                    fileAdapter.notifyFileChanged(file.id) { file ->
+                                        if (!file.isManaged) file.isFavorite = true
+                                    }
+                                }
                             }, mainViewModel.updateMultiSelectMediator(mediator))
                         }
                     }

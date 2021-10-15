@@ -320,7 +320,7 @@ open class FileAdapter(
 
     fun configureAllSelected(isSelectedAll: Boolean) {
         allSelected = isSelectedAll
-        itemSelected.clear()
+        itemSelected = RealmList()
         notifyItemRangeChanged(0, itemCount)
     }
 
