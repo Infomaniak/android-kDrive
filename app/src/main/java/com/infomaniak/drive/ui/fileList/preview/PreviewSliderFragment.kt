@@ -192,7 +192,11 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         activity?.window?.statusBarColor = ContextCompat.getColor(requireContext(), R.color.previewBackground)
         activity?.window?.lightStatusBar(false)
         bottomSheetFileInfos.updateAvailableOfflineItem()
-        bottomSheetFileInfos.observeOfflineProgression(this)
+        bottomSheetFileInfos.observeOfflineProgression(this) { fileId ->
+            previewSliderAdapter.updateFile(fileId) { file ->
+                file.isOffline = true
+            }
+        }
     }
 
     override fun onPause() {
