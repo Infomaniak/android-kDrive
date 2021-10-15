@@ -602,21 +602,19 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             val fileId: Int = workInfo.progress.getInt(DownloadWorker.FILE_ID, 0)
             if (fileId == 0) return@observe
 
-            if (workInfo.state == WorkInfo.State.RUNNING) {
-                val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 100)
-                fileRecyclerView.post {
-                    fileAdapter.updateFileProgressByFileId(fileId, progress) { _, file ->
-                        val tag = workInfo.tags.firstOrNull { it == file.getWorkerTag() }
-                        if (tag != null) {
-                            CoroutineScope(Dispatchers.IO).launch {
-                                FileController.updateOfflineStatus(fileId, true)
-                            }
-                            file.currentProgress = Utils.INDETERMINATE_PROGRESS
+            val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 100)
+            fileRecyclerView.post {
+                fileAdapter.updateFileProgressByFileId(fileId, progress) { _, file ->
+                    val tag = workInfo.tags.firstOrNull { it == file.getWorkerTag() }
+                    if (tag != null) {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            FileController.updateOfflineStatus(fileId, true)
                         }
+                        file.currentProgress = Utils.INDETERMINATE_PROGRESS
                     }
                 }
-                Log.i("isPendingOffline", "progress from fragment $progress% for file $fileId, state:${workInfo.state}")
             }
+            Log.i("isPendingOffline", "progress from fragment $progress% for file $fileId, state:${workInfo.state}")
         }
 
         mainViewModel.updateVisibleFiles.observe(viewLifecycleOwner) {
