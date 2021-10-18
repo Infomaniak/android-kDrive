@@ -18,9 +18,6 @@
 package com.infomaniak.drive.data.cache
 
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.MediaFolder
-import com.infomaniak.drive.data.models.SyncSettings
-import com.infomaniak.drive.data.models.UploadFile
 import io.realm.DynamicRealm
 import io.realm.FieldAttribute
 import io.realm.RealmMigration
@@ -38,9 +35,16 @@ class FileMigration : RealmMigration {
 
         // Migrate to version 1
         if (oldVersionTemp == 0L) {
-            schema.get(File::class.java.simpleName)!!
-                .removeField("order")
-                .removeField("orderBy")
+            schema.get(File::class.java.simpleName)?.apply {
+                removeField("order")
+                removeField("orderBy")
+                if (hasField("canUseTag")) removeField("canUseTag")
+                if (hasField("tags")) removeField("tags")
+                if (hasField("isWaitingOffline")) removeField("isWaitingOffline")
+                if (!hasField(File::isFromUploads.name)) {
+                    addField(File::isFromUploads.name, Boolean::class.java, FieldAttribute.REQUIRED)
+                }                
+            }
             oldVersionTemp++
         }
     }
