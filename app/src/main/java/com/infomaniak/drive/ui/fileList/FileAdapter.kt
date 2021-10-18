@@ -341,7 +341,10 @@ open class FileAdapter(
     }
 
     private fun isSelectedFile(file: File): Boolean {
-        return itemSelected.find { it.id == file.id } != null
+        return itemSelected.find {
+            it.isManaged && it.isValid && it.id == file.id
+                    || !it.isManaged && it.id == file.id
+        } != null
     }
 
     fun toggleOfflineMode(context: Context, isOffline: Boolean) {
