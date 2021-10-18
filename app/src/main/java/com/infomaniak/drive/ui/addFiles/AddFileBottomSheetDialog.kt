@@ -28,7 +28,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.FileProvider
-import androidx.core.net.toUri
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -231,7 +230,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                 val fileSize = file.length()
                 val applicationContext = context?.applicationContext
                 lifecycleScope.launch(Dispatchers.IO) {
-                    val cacheUri = Utils.copyDataToUploadCache(requireContext(), file.toUri(), fileModifiedAt)
+                    val cacheUri = Utils.copyDataToUploadCache(requireContext(), file, fileModifiedAt)
                     UploadFile(
                         uri = cacheUri.toString(),
                         driveId = currentFolderFile.driveId,
