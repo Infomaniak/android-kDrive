@@ -128,10 +128,11 @@ class UploadInProgressFragment : FileListFragment() {
             val deletions = changeSet.deletionRanges
             for (i in deletions.indices.reversed()) {
                 val range = deletions[i]
-                for (fileIndex in range.length - 1..range.startIndex step -1) {
+                for (fileIndex in range.startIndex until range.length) {
                     fileAdapter.deleteAt(fileIndex)
                 }
                 fileAdapter.notifyItemRangeRemoved(range.startIndex, range.length)
+                if (fileAdapter.fileList.isEmpty()) popBackStack()
             }
         }
     }
