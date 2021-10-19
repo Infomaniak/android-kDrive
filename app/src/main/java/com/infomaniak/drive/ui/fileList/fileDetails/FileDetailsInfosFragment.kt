@@ -106,7 +106,8 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
     private fun setupShareLinkContainer(currentFile: File?, share: Share?) {
         if (currentFile?.rights?.canBecomeLink == true || currentFile?.shareLink?.isNotBlank() == true) {
             shareLinkContainer.visibility = VISIBLE
-            shareDivider.visibility = VISIBLE
+            topShareDivider.visibility = VISIBLE
+            botShareDivider.visibility = VISIBLE
             shareLinkContainer.setup(shareLink = share?.link, file = currentFile, onSwitchClicked = { isEnabled ->
                 mainViewModel.apply {
                     if (isEnabled) {
@@ -122,7 +123,8 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
             })
         } else {
             shareLinkContainer.visibility = GONE
-            shareDivider.visibility = GONE
+            topShareDivider.visibility = GONE
+            botShareDivider.visibility = GONE
         }
     }
 
