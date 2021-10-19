@@ -225,8 +225,10 @@ class UploadInProgressFragment : FileListFragment() {
                     val files = arrayListOf<File>()
                     FileController.getRealmInstance().use { realmFile ->
                         uploadFiles.forEach { uploadFile ->
-                            val name =
+                            val folderName =
                                 FileController.getFileProxyById(uploadFile.remoteFolder, customRealm = realmFile)!!.name
+                            val name =
+                                if (uploadFile.remoteFolder == Utils.ROOT_ID) Utils.getRootName(requireContext()) else folderName
                             files.add(
                                 File(
                                     id = uploadFile.remoteFolder,
@@ -239,9 +241,10 @@ class UploadInProgressFragment : FileListFragment() {
 
                     fileAdapter.isComplete = true
                     fileAdapter.setFiles(files)
+                    noFilesLayout.toggleVisibility(uploadFiles.isEmpty())
                     showLoadingTimer.cancel()
                     swipeRefreshLayout.isRefreshing = false
-                    noFilesLayout.toggleVisibility(uploadFiles.isEmpty())
+                    toolbar.menu.findItem(R.id.closeItem).isVisible = true
                 }
             } ?: noFilesLayout.toggleVisibility(true)
         }
