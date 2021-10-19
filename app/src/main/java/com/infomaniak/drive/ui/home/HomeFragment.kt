@@ -135,7 +135,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         homeUploadFileInProgress.setUploadFileInProgress(R.string.uploadInProgressTitle) {
-            // TODO
+            navigateToUploadView(Utils.OTHER_ROOT_ID)
         }
 
         requireContext().trackUploadWorkerProgress().observe(viewLifecycleOwner) {

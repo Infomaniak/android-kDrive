@@ -22,11 +22,13 @@ import android.os.Bundle
 import android.provider.OpenableColumns
 import android.util.Log
 import android.view.View
+import androidx.activity.addCallback
 import androidx.core.net.toFile
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.work.Data
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.UploadWorker
@@ -39,6 +41,8 @@ import io.realm.RealmResults
 import io.sentry.Sentry
 import kotlinx.android.synthetic.main.dialog_download_progress.view.*
 import kotlinx.android.synthetic.main.fragment_file_list.*
+import kotlinx.android.synthetic.main.fragment_file_list.toolbar
+import kotlinx.android.synthetic.main.fragment_new_folder.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -102,17 +106,19 @@ class UploadInProgressFragment : FileListFragment() {
             }
         }
 
+        if (isPendingFolders()) {
+            fileAdapter.onFileClicked = { navigateToUploadView(it.id) }
+        } else {
+            toolbar.setNavigationOnClickListener { popBackStack() }
+            requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { popBackStack() }
+        }
+
         sortLayout.visibility = View.GONE
         noFilesLayout.setup(
             icon = R.drawable.ic_upload,
             title = R.string.uploadInProgressNoFile,
             initialListView = fileRecyclerView
         )
-    }
-
-    override fun onResume() {
-        super.onResume()
-        downloadFiles(true, false)
     }
 
     override fun onDestroy() {
@@ -135,6 +141,15 @@ class UploadInProgressFragment : FileListFragment() {
         }
     }
 
+    private fun ignorePendingFoldersIfNeeded(): Boolean {
+        val isFromPendingFolders =
+            findNavController().previousBackStackEntry?.destination?.id == R.id.uploadInProgressFragment
+        if (UploadFile.getAllPendingFoldersCount(realm) in 0..1 && isFromPendingFolders) {
+            findNavController().popBackStack(R.id.homeFragment, false)
+            return true
+        }
+        return false
+    }
 
     private fun whenAnUploadIsDone() {
         if (fileAdapter.fileList.isEmpty()) {
@@ -180,9 +195,11 @@ class UploadInProgressFragment : FileListFragment() {
         }
     }
 
+    private fun isPendingFolders() = folderID == Utils.OTHER_ROOT_ID
+
     private fun popBackStack() {
         mainViewModel.refreshActivities.value = true
-        findNavController().popBackStack()
+        if (!ignorePendingFoldersIfNeeded()) findNavController().popBackStack()
     }
 
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
@@ -193,9 +210,46 @@ class UploadInProgressFragment : FileListFragment() {
             showLoadingTimer.start()
             fileAdapter.isComplete = false
 
-            UploadFile.getCurrentUserPendingUploads(folderID, realm)?.let { syncFiles ->
+            if (isPendingFolders()) {
+                downloadPendingFolders()
+            } else {
+                downloadPendingFilesByFolderId()
+            }
+        }
+
+        private fun downloadPendingFolders() {
+            UploadFile.getAllPendingFolders(realm)?.let { uploadFiles ->
+                if (uploadFiles.count() == 1) {
+                    navigateToUploadView(uploadFiles.first()!!.remoteFolder)
+                } else {
+                    val files = arrayListOf<File>()
+                    FileController.getRealmInstance().use { realmFile ->
+                        uploadFiles.forEach { uploadFile ->
+                            val name =
+                                FileController.getFileProxyById(uploadFile.remoteFolder, customRealm = realmFile)!!.name
+                            files.add(
+                                File(
+                                    id = uploadFile.remoteFolder,
+                                    isFromUploads = true,
+                                    name = name,
+                                )
+                            )
+                        }
+                    }
+
+                    fileAdapter.isComplete = true
+                    fileAdapter.setFiles(files)
+                    showLoadingTimer.cancel()
+                    swipeRefreshLayout.isRefreshing = false
+                    noFilesLayout.toggleVisibility(uploadFiles.isEmpty())
+                }
+            } ?: noFilesLayout.toggleVisibility(true)
+        }
+
+        private fun downloadPendingFilesByFolderId() {
+            UploadFile.getCurrentUserPendingUploads(folderID, realm)?.let { uploadFiles ->
                 val files = arrayListOf<File>()
-                syncFiles.forEach { uploadFile ->
+                uploadFiles.forEach { uploadFile ->
                     val uri = uploadFile.getUriObject()
 
                     if (uri.scheme.equals(ContentResolver.SCHEME_CONTENT)) {
@@ -240,10 +294,10 @@ class UploadInProgressFragment : FileListFragment() {
                 }
 
                 realmListener?.let {
-                    uploadFiles = syncFiles
-                    uploadFiles?.addChangeListener(it)
+                    this@UploadInProgressFragment.uploadFiles = uploadFiles
+                    this@UploadInProgressFragment.uploadFiles?.addChangeListener(it)
                 }
-                pendingFiles = ArrayList(realm.copyFromRealm(syncFiles, 0))
+                pendingFiles = ArrayList(realm.copyFromRealm(uploadFiles, 0))
 
                 toolbar.menu.findItem(R.id.restartItem).isVisible = true
                 toolbar.menu.findItem(R.id.closeItem).isVisible = true
@@ -251,7 +305,7 @@ class UploadInProgressFragment : FileListFragment() {
                 fileAdapter.isComplete = true
                 showLoadingTimer.cancel()
                 swipeRefreshLayout.isRefreshing = false
-                noFilesLayout.toggleVisibility(syncFiles.isEmpty())
+                noFilesLayout.toggleVisibility(uploadFiles.isEmpty())
             } ?: noFilesLayout.toggleVisibility(true)
         }
     }

@@ -277,6 +277,14 @@ fun View.setFileItem(
                     filePreview.scaleType = ImageView.ScaleType.CENTER_CROP
                     filePreview.loadUrl(file.thumbnail(), file.getFileType().icon)
                 }
+                file.isFromUploads && file.id > 0 -> { // It's a folder
+                    if (file.id == ROOT_ID) {
+                        filePreview.load(R.drawable.ic_drive)
+                        filePreview.setColorFilter(Color.parseColor(file.driveColor))
+                    } else {
+                        filePreview.load(R.drawable.ic_folder_filled)
+                    }
+                }
                 file.isFromUploads && (file.getMimeType().startsWith("image/") || file.getMimeType().startsWith("video/")) -> {
                     filePreview.scaleType = ImageView.ScaleType.CENTER_CROP
                     filePreview.load(context.getLocalThumbnail(file)) {
@@ -549,6 +557,15 @@ fun Fragment.safeNavigate(
     navigatorExtras: Navigator.Extras? = null
 ) {
     if (canNavigate()) findNavController().navigate(resId, args, navOptions, navigatorExtras)
+}
+
+fun Fragment.navigateToUploadView(folderId: Int) {
+    safeNavigate(
+        R.id.uploadInProgressFragment, bundleOf(
+            "folderID" to folderId,
+            "folderName" to getString(R.string.uploadInProgressTitle)
+        )
+    )
 }
 
 fun Drive?.getDriveUsers(): List<DriveUser> = this?.users?.let { categories ->

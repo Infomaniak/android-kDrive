@@ -106,10 +106,11 @@ object FileController {
         }
     }
 
-    fun getFileProxyById(fileId: Int, userDrive: UserDrive? = null): File? {
-        return getRealmInstance(userDrive).use { realm ->
+    fun getFileProxyById(fileId: Int, userDrive: UserDrive? = null, customRealm: Realm? = null): File? {
+        val block: (Realm) -> File? = { realm ->
             realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst()
         }
+        return customRealm?.let(block) ?: getRealmInstance(userDrive).use(block)
     }
 
     fun getFileById(fileId: Int, userDrive: UserDrive? = null): File? {

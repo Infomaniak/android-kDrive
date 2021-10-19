@@ -136,6 +136,14 @@ open class UploadFile(
             }
         }
 
+        fun getAllPendingFolders(realm: Realm): RealmResults<UploadFile>? {
+            return realm.where(UploadFile::class.java).distinct(UploadFile::remoteFolder.name).findAll()
+        }
+
+        fun getAllPendingFoldersCount(realm: Realm): Long {
+            return realm.where(UploadFile::class.java).distinct(UploadFile::remoteFolder.name).count()
+        }
+
         fun getCurrentUserPendingUploads(folderId: Int, realm: Realm): RealmResults<UploadFile>? {
             return pendingUploadsQuery(realm, folderId, UserDrive()).findAll()
         }
