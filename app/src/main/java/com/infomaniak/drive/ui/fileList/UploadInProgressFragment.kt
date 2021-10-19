@@ -183,7 +183,14 @@ class UploadInProgressFragment : FileListFragment() {
 
         lifecycleScope.launch(Dispatchers.IO) {
             uploadFiles?.let { UploadFile.deleteAll(uploadFiles) }
-            folderId?.let { UploadFile.deleteAll(folderId) }
+            folderId?.let {
+                if (isPendingFolders()) {
+                    UploadFile.deleteAll(null)
+                } else {
+                    folderId.let { UploadFile.deleteAll(folderId) }
+                }
+            }
+
             withContext(Dispatchers.Main) {
                 lifecycleScope.launchWhenResumed {
                     progressDialog.dismiss()
