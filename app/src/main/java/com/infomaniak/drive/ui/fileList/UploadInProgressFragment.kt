@@ -39,10 +39,12 @@ import io.realm.OrderedRealmCollectionChangeListener
 import io.realm.Realm
 import io.realm.RealmResults
 import io.sentry.Sentry
+import io.sentry.SentryLevel
 import kotlinx.android.synthetic.main.dialog_download_progress.view.*
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.fragment_file_list.toolbar
 import kotlinx.android.synthetic.main.fragment_new_folder.*
+import kotlinx.android.synthetic.main.item_file_name.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -271,33 +273,39 @@ class UploadInProgressFragment : FileListFragment() {
                                         val size = cursor.getLong(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE))
                                         files.add(
                                             File(
-                                                id = 0,
+                                                isFromUploads = true,
                                                 name = uploadFile.fileName,
-                                                size = size,
                                                 path = uploadFile.uri,
-                                                isFromUploads = true
+                                                size = size,
                                             )
                                         )
                                     }
                                 }
                             } catch (exception: Exception) {
                                 exception.printStackTrace()
+                                files.add(
+                                    File(
+                                        isFromUploads = true,
+                                        name = uploadFile.fileName,
+                                        path = uploadFile.uri,
+                                    )
+                                )
+
                                 Sentry.withScope { scope ->
-                                    scope.setExtra("data", uploadFile.uri)
-                                    scope.setExtra("stack trace", exception.stackTraceToString())
-                                    exception.message?.let { Sentry.captureMessage(it) }
+                                    scope.level = SentryLevel.WARNING
+                                    scope.setExtra("fileName", uploadFile.fileName)
+                                    scope.setExtra("uri", uploadFile.uri)
+                                    Sentry.captureException(exception)
                                 }
-                                return@forEach
                             }
                         }
                     } else {
                         files.add(
                             File(
-                                id = 0,
+                                isFromUploads = true,
                                 name = uploadFile.fileName,
-                                size = uri.toFile().length(),
                                 path = uploadFile.uri,
-                                isFromUploads = true
+                                size = uri.toFile().length(),
                             )
                         )
                     }
