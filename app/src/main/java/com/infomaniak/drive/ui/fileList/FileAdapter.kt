@@ -242,7 +242,7 @@ open class FileAdapter(
                 checkIfEnableFile(file)
 
                 when {
-                    uploadInProgress -> {
+                    uploadInProgress && !file.isPendingUploadFolder() -> {
                         stopUploadButton?.setOnClickListener { onStopUploadButtonClicked?.invoke(file.name) }
                         stopUploadButton?.visibility = VISIBLE
                     }
