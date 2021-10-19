@@ -68,9 +68,7 @@ class ActivityFilesFragment : FileListFragment() {
                 map { file ->
                     val fileId = file.id
                     CoroutineScope(Dispatchers.IO).launch {
-                        FileController.updateFile(fileId) {
-                            file.isFromActivities = true
-                        }
+                        FileController.updateFile(fileId) { it.isFromActivities = true }
                     }
                 }
             }
