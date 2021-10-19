@@ -295,13 +295,17 @@ open class FileAdapter(
 
     private fun View.checkIfEnableFile(file: File) = when {
         uploadInProgress -> {
-            val enable = file.currentProgress > 0 && context.isSyncActive()
-            val title = when {
-                enable -> R.string.uploadInProgressTitle
-                pendingWifiConnection -> R.string.uploadNetworkErrorWifiRequired
-                else -> R.string.uploadInProgressPending
+            if (file.isPendingUploadFolder()) {
+                fileDate?.setText(file.path)
+            } else {
+                val enable = file.currentProgress > 0 && context.isSyncActive()
+                val title = when {
+                    enable -> R.string.uploadInProgressTitle
+                    pendingWifiConnection -> R.string.uploadNetworkErrorWifiRequired
+                    else -> R.string.uploadInProgressPending
+                }
+                fileDate?.setText(title)
             }
-            fileDate?.setText(title)
         }
         else -> {
             if (selectFolder || offlineMode) enabledFile(file.isFolder() || file.isDrive() || (offlineMode && file.isOffline))

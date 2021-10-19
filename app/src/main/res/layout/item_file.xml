@@ -158,8 +158,10 @@
 
     <TextView
         android:id="@+id/fileDate"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:ellipsize="middle"
+        android:singleLine="true"
         android:textColor="@color/secondaryText"
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -167,6 +169,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/fileSeparator"
         app:layout_constraintTop_toBottomOf="@+id/fileNameLayout"
+        app:layout_constraintVertical_weight="1"
         tools:ignore="SmallSp"
         tools:text="Modifié le 5 oct. 16:10" />
 

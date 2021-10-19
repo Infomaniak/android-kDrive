@@ -277,7 +277,7 @@ fun View.setFileItem(
                     filePreview.scaleType = ImageView.ScaleType.CENTER_CROP
                     filePreview.loadUrl(file.thumbnail(), file.getFileType().icon)
                 }
-                file.isFromUploads && file.id > 0 -> { // It's a folder
+                file.isPendingUploadFolder() -> {
                     if (file.id == ROOT_ID) {
                         filePreview.load(R.drawable.ic_drive)
                         filePreview.setColorFilter(Color.parseColor(file.driveColor))

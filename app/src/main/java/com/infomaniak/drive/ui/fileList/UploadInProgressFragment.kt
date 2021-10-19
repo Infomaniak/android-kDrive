@@ -232,15 +232,15 @@ class UploadInProgressFragment : FileListFragment() {
                     val files = arrayListOf<File>()
                     FileController.getRealmInstance().use { realmFile ->
                         uploadFiles.forEach { uploadFile ->
-                            val folderName =
-                                FileController.getFileProxyById(uploadFile.remoteFolder, customRealm = realmFile)!!.name
+                            val folder = FileController.getFileProxyById(uploadFile.remoteFolder, customRealm = realmFile)!!
                             val name =
-                                if (uploadFile.remoteFolder == Utils.ROOT_ID) Utils.getRootName(requireContext()) else folderName
+                                if (uploadFile.remoteFolder == Utils.ROOT_ID) Utils.getRootName(requireContext()) else folder.name
                             files.add(
                                 File(
                                     id = uploadFile.remoteFolder,
                                     isFromUploads = true,
                                     name = name,
+                                    path = folder.getRemotePath()
                                 )
                             )
                         }
