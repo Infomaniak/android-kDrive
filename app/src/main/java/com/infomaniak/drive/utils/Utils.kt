@@ -311,17 +311,13 @@ object Utils {
         showSnackbar(view, view.context.getString(title), anchorView, actionButtonTitle, onActionClicked)
     }
 
-    fun copyDataToUploadCache(context: Context, uri: Uri, fileModifiedAt: Date): Uri {
+    fun copyDataToUploadCache(context: Context, file: java.io.File, fileModifiedAt: Date): Uri {
         val folder = java.io.File(context.cacheDir, UploadWorker.UPLOAD_FOLDER).apply { if (!exists()) mkdirs() }
-        val outputFile = java.io.File(folder, uri.hashCode().toString()).also { if (it.exists()) it.delete() }
-        if (outputFile.createNewFile()) {
-            outputFile.setLastModified(fileModifiedAt.time)
-            context.contentResolver.openInputStream(uri)?.use { input ->
-                outputFile.outputStream().use { output ->
-                    input.copyTo(output)
-                }
-            }
+        val outputFile = java.io.File(folder, file.toUri().hashCode().toString()).apply {
+            if (exists()) delete()
+            setLastModified(fileModifiedAt.time)
         }
+        file.copyTo(outputFile, true)
         return outputFile.toUri()
     }
 
