@@ -341,7 +341,10 @@ open class FileAdapter(
     }
 
     private fun isSelectedFile(file: File): Boolean {
-        return itemSelected.find { it.id == file.id } != null
+        return itemSelected.find {
+            val isValidInRealm = it.isManaged && it.isValid
+            (isValidInRealm || !it.isManaged) && it.id == file.id
+        } != null
     }
 
     fun toggleOfflineMode(context: Context, isOffline: Boolean) {
