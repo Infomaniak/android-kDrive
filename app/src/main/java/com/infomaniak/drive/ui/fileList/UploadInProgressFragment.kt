@@ -83,8 +83,7 @@ class UploadInProgressFragment : FileListFragment() {
             val position = fileAdapter.indexOf(fileName)
 
             if (folderID == remoteFolderId && position >= 0) {
-                if (isUploaded) whenAnUploadIsDone()
-                else fileAdapter.updateFileProgress(position = position, progress = progress)
+                if (!isUploaded) fileAdapter.updateFileProgress(position = position, progress = progress)
             }
 
             Log.d("uploadInProgress", "$fileName $progress%")
@@ -96,7 +95,6 @@ class UploadInProgressFragment : FileListFragment() {
             pendingFiles.find { it.fileName == fileName }?.let { syncFile ->
                 val title = getString(R.string.uploadInProgressCancelFileUploadTitle, syncFile.fileName)
                 Utils.createConfirmation(requireContext(), title) {
-                    val position = fileAdapter.getFiles().indexOfFirst { it.name == fileName }
                     if (fileAdapter.contains(syncFile.fileName)) {
                         closeItemClicked(uploadFiles = arrayListOf(syncFile))
                     }
@@ -128,17 +126,18 @@ class UploadInProgressFragment : FileListFragment() {
             val deletions = changeSet.deletionRanges
             for (i in deletions.indices.reversed()) {
                 val range = deletions[i]
-                for (fileIndex in range.length - 1..range.startIndex step -1) {
+                for (fileIndex in range.startIndex until range.length) {
                     fileAdapter.deleteAt(fileIndex)
                 }
                 fileAdapter.notifyItemRangeRemoved(range.startIndex, range.length)
+                whenAnUploadIsDone()
             }
         }
     }
 
 
     private fun whenAnUploadIsDone() {
-        if (uploadFiles?.isEmpty() == true) {
+        if (fileAdapter.fileList.isEmpty()) {
             noFilesLayout.toggleVisibility(true)
             requireActivity().showSnackbar(R.string.allUploadFinishedTitle)
             popBackStack()
