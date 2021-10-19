@@ -27,10 +27,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.SingleLiveEvent
 import com.infomaniak.lib.core.models.ApiResponse
 import io.realm.OrderedRealmCollection
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -73,6 +70,7 @@ class FileListViewModel : ViewModel() {
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
             suspend fun recursiveDownload(parentId: Int, page: Int) {
+                getFilesJob.ensureActive()
                 val resultList = FileController.getFilesFromCacheOrDownload(
                     parentId = parentId,
                     page = page,
@@ -107,6 +105,7 @@ class FileListViewModel : ViewModel() {
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
             suspend fun recursive(page: Int) {
+                getFilesJob.ensureActive()
                 val apiResponse = ApiRepository.getFavoriteFiles(AccountUtils.currentDriveId, order, page)
                 if (apiResponse.isSuccess()) {
                     when {
