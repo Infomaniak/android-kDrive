@@ -136,10 +136,12 @@ class UploadInProgressFragment : FileListFragment() {
             val deletions = changeSet.deletionRanges
             for (i in deletions.indices.reversed()) {
                 val range = deletions[i]
-                for (fileIndex in range.startIndex until range.length) {
-                    fileAdapter.deleteAt(fileIndex)
+                if (range.length.isPositive()) {
+                    for (fileIndex in (range.length - 1) downTo range.startIndex) {
+                        fileAdapter.deleteAt(fileIndex)
+                    }
+                    fileAdapter.notifyItemRangeRemoved(range.startIndex, range.length)
                 }
-                fileAdapter.notifyItemRangeRemoved(range.startIndex, range.length)
                 whenAnUploadIsDone()
             }
         }
