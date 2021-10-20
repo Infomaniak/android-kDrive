@@ -132,7 +132,7 @@ class UploadInProgressFragment : FileListFragment() {
     }
 
     private fun createListener(): OrderedRealmCollectionChangeListener<RealmResults<UploadFile>> {
-        return OrderedRealmCollectionChangeListener<RealmResults<UploadFile>> { files, changeSet ->
+        return OrderedRealmCollectionChangeListener<RealmResults<UploadFile>> { _, changeSet ->
             // For deletions, notify the UI in reverse order if removing elements the UI
             val deletions = changeSet.deletionRanges
             for (i in deletions.indices.reversed()) {
@@ -254,6 +254,10 @@ class UploadInProgressFragment : FileListFragment() {
                             )
                         }
 
+                        realmListener?.let {
+                            this@UploadInProgressFragment.uploadFiles = uploadFiles
+                            this@UploadInProgressFragment.uploadFiles?.addChangeListener(it)
+                        }
 
                         fileAdapter.isComplete = true
                         fileAdapter.setFiles(files)
