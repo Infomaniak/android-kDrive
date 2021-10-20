@@ -141,7 +141,7 @@ class MenuFragment : Fragment() {
         }
 
         menuUploadFileInProgress.setUploadFileInProgress(R.string.uploadInProgressTitle) {
-            // TODO
+            navigateToUploadView(Utils.OTHER_ROOT_ID)
         }
     }
 
