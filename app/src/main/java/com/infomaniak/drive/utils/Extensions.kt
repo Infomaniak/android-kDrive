@@ -559,11 +559,11 @@ fun Fragment.safeNavigate(
     if (canNavigate()) findNavController().navigate(resId, args, navOptions, navigatorExtras)
 }
 
-fun Fragment.navigateToUploadView(folderId: Int) {
+fun Fragment.navigateToUploadView(folderId: Int, folderName: String? = null) {
     safeNavigate(
         R.id.uploadInProgressFragment, bundleOf(
             "folderID" to folderId,
-            "folderName" to getString(R.string.uploadInProgressTitle)
+            "folderName" to (folderName ?: getString(R.string.uploadInProgressTitle))
         )
     )
 }

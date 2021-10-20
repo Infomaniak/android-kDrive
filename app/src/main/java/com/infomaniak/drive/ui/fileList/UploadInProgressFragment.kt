@@ -78,7 +78,10 @@ class UploadInProgressFragment : FileListFragment() {
         fileAdapter.checkIsPendingWifi(requireContext())
         realmListener = createListener()
 
-        collapsingToolbarLayout.title = getString(R.string.uploadInProgressTitle)
+        val fromPendingFolders = findNavController().previousBackStackEntry?.destination?.id == R.id.uploadInProgressFragment
+        collapsingToolbarLayout.title =
+            if (folderID > 0 && fromPendingFolders) folderName
+            else getString(R.string.uploadInProgressTitle)
 
         requireContext().trackUploadWorkerProgress().observe(viewLifecycleOwner) {
             val workInfo = it.firstOrNull() ?: return@observe
@@ -109,7 +112,7 @@ class UploadInProgressFragment : FileListFragment() {
         }
 
         if (isPendingFolders()) {
-            fileAdapter.onFileClicked = { navigateToUploadView(it.id) }
+            fileAdapter.onFileClicked = { navigateToUploadView(it.id, it.name) }
         } else {
             toolbar.setNavigationOnClickListener { popBackStack() }
             requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { popBackStack() }
@@ -228,11 +231,13 @@ class UploadInProgressFragment : FileListFragment() {
 
         private fun downloadPendingFolders() {
             UploadFile.getAllPendingFolders(realm)?.let { uploadFiles ->
-                if (uploadFiles.count() == 1) {
-                    navigateToUploadView(uploadFiles.first()!!.remoteFolder)
-                } else {
-                    val files = arrayListOf<File>()
-                    FileController.getRealmInstance().use { realmFile ->
+                FileController.getRealmInstance().use { realmFile ->
+                    if (uploadFiles.count() == 1) {
+                        val uploadFile = uploadFiles.first()!!
+                        val folder = FileController.getFileProxyById(uploadFile.remoteFolder, customRealm = realmFile)!!
+                        navigateToUploadView(uploadFile.remoteFolder, folder.name)
+                    } else {
+                        val files = arrayListOf<File>()
                         uploadFiles.forEach { uploadFile ->
                             val folder = FileController.getFileProxyById(uploadFile.remoteFolder, customRealm = realmFile)!!
                             val name =
@@ -246,14 +251,15 @@ class UploadInProgressFragment : FileListFragment() {
                                 )
                             )
                         }
-                    }
 
-                    fileAdapter.isComplete = true
-                    fileAdapter.setFiles(files)
-                    noFilesLayout.toggleVisibility(uploadFiles.isEmpty())
-                    showLoadingTimer.cancel()
-                    swipeRefreshLayout.isRefreshing = false
-                    toolbar.menu.findItem(R.id.closeItem).isVisible = true
+
+                        fileAdapter.isComplete = true
+                        fileAdapter.setFiles(files)
+                        noFilesLayout.toggleVisibility(uploadFiles.isEmpty())
+                        showLoadingTimer.cancel()
+                        swipeRefreshLayout.isRefreshing = false
+                        toolbar.menu.findItem(R.id.closeItem).isVisible = true
+                    }
                 }
             } ?: noFilesLayout.toggleVisibility(true)
         }
