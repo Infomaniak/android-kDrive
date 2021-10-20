@@ -45,7 +45,7 @@ open class FileAdapter(
     var fileList: OrderedRealmCollection<File> = RealmList()
 ) : RealmRecyclerViewAdapter<File, ViewHolder>(fileList, true, true) {
 
-    var itemSelected: OrderedRealmCollection<File> = RealmList()
+    var itemsSelected: OrderedRealmCollection<File> = RealmList()
 
     var onFileClicked: ((file: File) -> Unit)? = null
     var onMenuClicked: ((selectedFile: File) -> Unit)? = null
@@ -71,7 +71,7 @@ open class FileAdapter(
 
     fun getFiles() = fileList
 
-    fun getValidItemSelected() = if (itemSelected.isManaged) itemSelected.filter { it.isValid } else itemSelected
+    fun getValidItemsSelected() = if (itemsSelected.isManaged) itemsSelected.filter { it.isValid } else itemsSelected
 
     fun showLoading() {
         if (!showLoading) {
@@ -330,20 +330,20 @@ open class FileAdapter(
 
     fun configureAllSelected(isSelectedAll: Boolean) {
         allSelected = isSelectedAll
-        itemSelected = RealmList()
+        itemsSelected = RealmList()
         notifyItemRangeChanged(0, itemCount)
     }
 
     private fun addSelectedFile(file: File) {
-        itemSelected.add(file)
+        itemsSelected.add(file)
     }
 
     private fun removeSelectedFile(file: File) {
-        itemSelected.remove(file)
+        itemsSelected.remove(file)
     }
 
     private fun isSelectedFile(file: File): Boolean {
-        return itemSelected.find {
+        return itemsSelected.find {
             val isValidInRealm = it.isManaged && it.isValid
             (isValidInRealm || !it.isManaged) && it.id == file.id
         } != null

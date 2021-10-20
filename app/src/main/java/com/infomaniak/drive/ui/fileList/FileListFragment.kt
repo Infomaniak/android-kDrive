@@ -298,7 +298,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun performBulkOperation(type: BulkOperationType, destinationFolder: File? = null) {
-        val selectedFiles = fileAdapter.getValidItemSelected()
+        val selectedFiles = fileAdapter.getValidItemsSelected()
         val fileCount =
             if (fileAdapter.allSelected) fileListViewModel.lastItemCount?.count ?: fileAdapter.itemCount else selectedFiles.size
 
@@ -319,7 +319,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 val mediator = mainViewModel.createMultiSelectMediator()
                 enableButtonMultiSelect(false)
 
-                fileAdapter.getValidItemSelected().forEach {
+                fileAdapter.getValidItemsSelected().forEach {
                     val file = it.realm?.copyFromRealm(it, 0) ?: it
                     val onSuccess: (Int) -> Unit = { fileID ->
                         runBlocking(Dispatchers.Main) { fileAdapter.deleteByFileId(fileID) }
@@ -413,8 +413,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         menuButtonMultiSelect.setOnClickListener {
             safeNavigate(
                 FileListFragmentDirections.actionFileListFragmentToActionMultiSelectBottomSheetDialog(
-                    fileIds = fileAdapter.getValidItemSelected().map { it.id }.toIntArray(),
-                    onlyFolders = fileAdapter.getValidItemSelected().all { it.isFolder() }
+                    fileIds = fileAdapter.getValidItemsSelected().map { it.id }.toIntArray(),
+                    onlyFolders = fileAdapter.getValidItemsSelected().all { it.isFolder() }
                 )
             )
         }
@@ -430,7 +430,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
                 fileListViewModel.getFileCount(currentFolder!!).observe(viewLifecycleOwner) { fileCount ->
                     val fileNumber = fileCount.count
-                    if (fileNumber < BulkOperationsUtils.MIN_SELECTED) fileAdapter.itemSelected = fileAdapter.getFiles()
+                    if (fileNumber < BulkOperationsUtils.MIN_SELECTED) fileAdapter.itemsSelected = fileAdapter.getFiles()
                     enableButtonMultiSelect(true)
                     onUpdateMultiSelect(fileNumber)
                 }
@@ -700,7 +700,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun onUpdateMultiSelect(selectedNumber: Int? = null) {
-        val fileSelectedNumber = selectedNumber ?: fileAdapter.getValidItemSelected().size
+        val fileSelectedNumber = selectedNumber ?: fileAdapter.getValidItemsSelected().size
         when (fileSelectedNumber) {
             0, 1 -> {
                 val isEnabled = fileSelectedNumber == 1
@@ -723,7 +723,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun closeMultiSelect() {
         fileAdapter.apply {
-            itemSelected = RealmList()
+            itemsSelected = RealmList()
             multiSelectMode = false
             allSelected = false
             notifyItemRangeChanged(0, itemCount)
