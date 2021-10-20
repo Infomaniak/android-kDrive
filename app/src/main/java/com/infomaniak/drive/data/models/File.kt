@@ -200,7 +200,7 @@ open class File(
         }
     }
 
-    fun isPendingUploadFolder() = isFromUploads && id > 0
+    fun isPendingUploadFolder() = isFromUploads && isFolder()
 
     fun isObsolete(dataFile: java.io.File): Boolean {
         return (dataFile.lastModified() / 1000) < lastModifiedAt

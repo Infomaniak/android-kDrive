@@ -113,14 +113,13 @@ open class UploadFile(
         }
 
         private fun allPendingFoldersQuery(realm: Realm): RealmQuery<UploadFile> {
-            return pendingUploadsQuery(realm, withSort = false).distinct(UploadFile::remoteFolder.name)
+            return pendingUploadsQuery(realm).distinct(UploadFile::remoteFolder.name)
         }
 
         private fun pendingUploadsQuery(
             realm: Realm,
             folderId: Int? = null,
-            userDrive: UserDrive? = null,
-            withSort: Boolean = true
+            userDrive: UserDrive? = null
         ): RealmQuery<UploadFile> {
             return realm.where(UploadFile::class.java).apply {
                 folderId?.let { equalTo(UploadFile::remoteFolder.name, it) }
@@ -130,7 +129,6 @@ open class UploadFile(
                 }
                 isNull(UploadFile::uploadAt.name)
                 isNull(UploadFile::deletedAt.name)
-                if (withSort) sort(UploadFile::uri.name)
             }
         }
 

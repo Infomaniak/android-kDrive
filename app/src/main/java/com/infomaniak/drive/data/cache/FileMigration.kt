@@ -43,7 +43,7 @@ class FileMigration : RealmMigration {
                 if (hasField("isWaitingOffline")) removeField("isWaitingOffline")
                 if (!hasField(File::isFromUploads.name)) {
                     addField(File::isFromUploads.name, Boolean::class.java, FieldAttribute.REQUIRED)
-                }                
+                }
             }
             oldVersionTemp++
         }
