@@ -71,6 +71,8 @@ import androidx.navigation.fragment.findNavController
 import coil.ImageLoader
 import coil.load
 import coil.request.Disposable
+import com.google.android.material.card.MaterialCardView
+import com.google.android.material.shape.CornerFamily
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
@@ -549,6 +551,15 @@ fun Fragment.safeNavigate(
     if (canNavigate()) findNavController().navigate(resId, args, navOptions, navigatorExtras)
 }
 
+fun Fragment.navigateToUploadView(folderId: Int, folderName: String? = null) {
+    safeNavigate(
+        R.id.uploadInProgressFragment, bundleOf(
+            "folderID" to folderId,
+            "folderName" to (folderName ?: getString(R.string.uploadInProgressTitle))
+        )
+    )
+}
+
 fun Drive?.getDriveUsers(): List<DriveUser> = this?.users?.let { categories ->
     return@let DriveInfosController.getUsers(ArrayList(categories.drive + categories.account))
 } ?: listOf()
@@ -651,4 +662,33 @@ fun Context.startDownloadFile(downloadURL: Uri, fileName: String) {
     }
 
     (getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
+}
+
+fun View.setUploadFileInProgress(title: Int, onClickListener: () -> Unit) {
+    val radius = resources.getDimension(R.dimen.cardViewRadius)
+    (this as MaterialCardView).shapeAppearanceModel = shapeAppearanceModel.toBuilder()
+        .setTopLeftCorner(CornerFamily.ROUNDED, radius)
+        .setTopRightCorner(CornerFamily.ROUNDED, radius)
+        .setBottomLeftCorner(CornerFamily.ROUNDED, radius)
+        .setBottomRightCorner(CornerFamily.ROUNDED, radius)
+        .build()
+
+    fileName.setText(title)
+
+    setOnClickListener { onClickListener() }
+}
+
+fun View.updateUploadFileInProgress(pendingFilesCount: Int) {
+    if (pendingFilesCount > 0) {
+        fileSize.text = resources.getQuantityString(
+            R.plurals.uploadInProgressNumberFile,
+            pendingFilesCount,
+            pendingFilesCount
+        )
+        filePreview.visibility = GONE
+        fileProgression.visibility = VISIBLE
+        visibility = VISIBLE
+    } else {
+        visibility = GONE
+    }
 }

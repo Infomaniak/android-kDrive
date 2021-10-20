@@ -184,6 +184,10 @@ open class File(
         }
     }
 
+    fun getRemotePath(userDrive: UserDrive = UserDrive()): String {
+        return if (path.isBlank() && id != ROOT_ID) FileController.generateAndSavePath(id, userDrive) else path
+    }
+
     fun getFileExtension(): String? {
         val extension = name.substringAfterLast('.')
         return if (extension == name) null else ".$extension"
@@ -195,6 +199,8 @@ open class File(
             it.initRightIds()
         }
     }
+
+    fun isPendingUploadFolder() = isFromUploads && (isFolder() || isDrive())
 
     fun isObsolete(dataFile: java.io.File): Boolean {
         return (dataFile.lastModified() / 1000) < lastModifiedAt
@@ -225,9 +231,7 @@ open class File(
         val userDrive = UserDrive(userId, driveId)
         val mediaFolder = context.externalMediaDirs?.firstOrNull() ?: context.filesDir
         val rootFolder = java.io.File(mediaFolder, "offline_storage/${userId}/$driveId")
-        val path =
-            if (this.path.isEmpty()) FileController.generateAndSavePath(id, userDrive)
-            else this.path
+        val path = getRemotePath(userDrive)
 
         if (path.isEmpty()) return null
         val folder = java.io.File(rootFolder, path.substringBeforeLast("/"))
