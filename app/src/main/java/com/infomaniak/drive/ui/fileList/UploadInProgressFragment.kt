@@ -243,18 +243,7 @@ class UploadInProgressFragment : FileListFragment() {
                     } else {
                         val files = arrayListOf<File>()
                         pendingFolders.forEach { uploadFile ->
-                            val folder = FileController.getFileProxyById(uploadFile.remoteFolder, customRealm = realmFile)!!
-                            val name =
-                                if (uploadFile.remoteFolder == Utils.ROOT_ID) Utils.getRootName(requireContext()) else folder.name
-                            files.add(
-                                File(
-                                    id = uploadFile.remoteFolder,
-                                    isFromUploads = true,
-                                    name = name,
-                                    path = folder.getRemotePath(),
-                                    type = File.Type.FOLDER.value
-                                )
-                            )
+                            files.add(createFolderFile(uploadFile.remoteFolder, realmFile))
                         }
 
                         realmListener?.let {
@@ -271,6 +260,28 @@ class UploadInProgressFragment : FileListFragment() {
                     }
                 }
             } ?: noFilesLayout.toggleVisibility(true)
+        }
+
+        private fun createFolderFile(fileId: Int, realmFile: Realm): File {
+            val folder = FileController.getFileProxyById(fileId, customRealm = realmFile)!!
+            val name: String
+            val type: String
+
+            if (fileId == Utils.ROOT_ID) {
+                name = Utils.getRootName(requireContext())
+                type = File.Type.DRIVE.value
+            } else {
+                name = folder.name
+                type = File.Type.FOLDER.value
+            }
+
+            return File(
+                id = fileId,
+                isFromUploads = true,
+                name = name,
+                path = folder.getRemotePath(),
+                type = type
+            )
         }
 
         private fun downloadPendingFilesByFolderId() {

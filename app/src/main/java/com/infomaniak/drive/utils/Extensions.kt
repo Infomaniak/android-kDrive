@@ -252,14 +252,6 @@ fun View.setFileItem(
 
     filePreview.scaleType = ImageView.ScaleType.CENTER
     when {
-        file.isPendingUploadFolder() -> {
-            if (file.id == ROOT_ID) {
-                filePreview.load(R.drawable.ic_drive)
-                filePreview.setColorFilter(Color.parseColor(file.driveColor))
-            } else {
-                filePreview.load(R.drawable.ic_folder_filled)
-            }
-        }
         file.isFolder() -> {
             when (file.getVisibilityType()) {
                 File.VisibilityType.IS_TEAM_SPACE -> filePreview.load(R.drawable.ic_folder_common_documents)
