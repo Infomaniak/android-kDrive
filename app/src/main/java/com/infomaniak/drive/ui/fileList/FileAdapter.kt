@@ -71,6 +71,8 @@ open class FileAdapter(
 
     fun getFiles() = fileList
 
+    fun getValidItemSelected() = if (itemSelected.isManaged) itemSelected.filter { it.isValid } else itemSelected
+
     fun showLoading() {
         if (!showLoading) {
             showLoading = true

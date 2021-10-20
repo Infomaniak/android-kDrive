@@ -298,7 +298,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun performBulkOperation(type: BulkOperationType, destinationFolder: File? = null) {
-        val selectedFiles = fileAdapter.itemSelected
+        val selectedFiles = fileAdapter.getValidItemSelected()
         val fileCount =
             if (fileAdapter.allSelected) fileListViewModel.lastItemCount?.count ?: fileAdapter.itemCount else selectedFiles.size
 
@@ -319,7 +319,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 val mediator = mainViewModel.createMultiSelectMediator()
                 enableButtonMultiSelect(false)
 
-                fileAdapter.itemSelected.forEach {
+                fileAdapter.getValidItemSelected().forEach {
                     val file = it.realm?.copyFromRealm(it, 0) ?: it
                     val onSuccess: (Int) -> Unit = { fileID ->
                         runBlocking(Dispatchers.Main) { fileAdapter.deleteByFileId(fileID) }
@@ -413,8 +413,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         menuButtonMultiSelect.setOnClickListener {
             safeNavigate(
                 FileListFragmentDirections.actionFileListFragmentToActionMultiSelectBottomSheetDialog(
-                    fileIds = fileAdapter.itemSelected.map { it.id }.toIntArray(),
-                    onlyFolders = fileAdapter.itemSelected.all { it.isFolder() }
+                    fileIds = fileAdapter.getValidItemSelected().map { it.id }.toIntArray(),
+                    onlyFolders = fileAdapter.getValidItemSelected().all { it.isFolder() }
                 )
             )
         }
@@ -700,7 +700,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun onUpdateMultiSelect(selectedNumber: Int? = null) {
-        val fileSelectedNumber = selectedNumber ?: fileAdapter.itemSelected.size
+        val fileSelectedNumber = selectedNumber ?: fileAdapter.getValidItemSelected().size
         when (fileSelectedNumber) {
             0, 1 -> {
                 val isEnabled = fileSelectedNumber == 1
