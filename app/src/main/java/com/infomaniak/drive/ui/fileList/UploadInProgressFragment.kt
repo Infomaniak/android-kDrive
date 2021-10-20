@@ -150,7 +150,9 @@ class UploadInProgressFragment : FileListFragment() {
         val isFromPendingFolders =
             findNavController().previousBackStackEntry?.destination?.id == R.id.uploadInProgressFragment
         if (UploadFile.getAllPendingFoldersCount(realm) in 0..1 && isFromPendingFolders) {
-            findNavController().popBackStack(R.id.homeFragment, false)
+            val lastIndex = findNavController().backQueue.lastIndex
+            val previousDestinationId = findNavController().backQueue[lastIndex - 2].destination.id
+            findNavController().popBackStack(previousDestinationId, false)
             return true
         }
         return false
