@@ -48,6 +48,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.io.BufferedInputStream
+import java.io.FileNotFoundException
 import java.util.*
 import kotlin.math.ceil
 
@@ -78,6 +79,14 @@ class UploadTask(
 
         try {
             uploadTask(this)
+        } catch (exception: FileNotFoundException) {
+            UploadFile.deleteIfExists(uploadFile.getUriObject(), keepSyncFile = true)
+            Sentry.withScope { scope ->
+                scope.level = SentryLevel.WARNING
+                scope.setExtra("data", gson.toJson(uploadFile))
+                Sentry.captureException(exception)
+            }
+
         } catch (exception: Exception) {
             exception.printStackTrace()
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
