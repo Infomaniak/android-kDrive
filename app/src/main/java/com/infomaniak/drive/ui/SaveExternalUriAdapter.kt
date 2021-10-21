@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui
 
 import android.net.Uri
+import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -38,14 +39,14 @@ class SaveExternalUriAdapter(val uris: ArrayList<Uri>) : RecyclerView.Adapter<Vi
         with(holder.itemView) {
             val uri = uris[position]
             try {
-                context?.contentResolver?.query(uri, null, null, null, null)?.use { cursor ->
+                context?.contentResolver?.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
                     if (cursor.moveToFirst()) name.text = SyncUtils.getFileName(cursor)
                 }
-            } catch (nullPointerException: NullPointerException) {
+            } catch (exception: Exception) {
                 name.setText(R.string.anErrorHasOccurred)
                 Sentry.withScope { scope ->
                     scope.setExtra("uri", uri.toString())
-                    Sentry.captureException(Exception("SaveExternalUriAdapter"))
+                    Sentry.captureException(exception)
                 }
             }
         }

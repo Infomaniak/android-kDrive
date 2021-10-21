@@ -251,6 +251,7 @@ open class UploadFile(
                     realm.where(UploadFile::class.java)
                         .apply { folderId?.let { equalTo(UploadFile::remoteFolder.name, folderId) } }
                         .beginsWith(UploadFile::uri.name, ContentResolver.SCHEME_FILE)
+                        .isNull(UploadFile::uploadAt.name)
                         .findAll().forEach { uploadFile ->
                             if (!uploadFile.isSyncOffline()) uploadFile.getUriObject().toFile().apply { if (exists()) delete() }
                         }
@@ -258,17 +259,20 @@ open class UploadFile(
                     if (permanently) {
                         realm.where(UploadFile::class.java)
                             .apply { folderId?.let { equalTo(UploadFile::remoteFolder.name, folderId) } }
+                            .isNull(UploadFile::uploadAt.name)
                             .findAll().deleteAllFromRealm()
                     } else {
                         // Delete all uploads with type SYNC
                         pendingUploadsQuery(realm, folderId)
                             .equalTo(UploadFile::type.name, Type.SYNC.name)
+                            .isNull(UploadFile::uploadAt.name)
                             .findAll().forEach { uploadFile -> uploadFile.deletedAt = Date() }
 
                         // Delete all uploads without type SYNC
                         realm.where(UploadFile::class.java)
                             .apply { folderId?.let { equalTo(UploadFile::remoteFolder.name, folderId) } }
                             .notEqualTo(UploadFile::type.name, Type.SYNC.name)
+                            .isNull(UploadFile::uploadAt.name)
                             .findAll().deleteAllFromRealm()
                     }
                 }

@@ -286,11 +286,12 @@ class SaveExternalFilesActivity : BaseActivity() {
     private fun store(uri: Uri, name: String? = null, userId: Int, driveId: Int, folderId: Int): Boolean {
         val folder = java.io.File(cacheDir, SHARED_FILE_FOLDER).apply { if (!exists()) mkdirs() }
 
-        contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+        contentResolver.query(uri, SyncUtils.projectionFile, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
-                val fileSize = cursor.getLong(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE))
                 val fileName = name ?: SyncUtils.getFileName(cursor)
+                val fileSize = SyncUtils.getFileSize(cursor)
+
                 val outputFile = java.io.File(folder, fileName).also { if (it.exists()) it.delete() }
 
                 try {
@@ -325,7 +326,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     }
 
     private fun Uri.fileName(): String {
-        return contentResolver.query(this, null, null, null, null)?.use { cursor ->
+        return contentResolver.query(this, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) SyncUtils.getFileName(cursor) else ""
         } ?: ""
     }
