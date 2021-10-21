@@ -216,8 +216,7 @@ open class UploadFile(
             getRealmInstance().use { realm ->
                 syncFileByUriQuery(realm, uri.toString()).findFirst()?.let { syncFile ->
                     realm.executeTransaction {
-                        if (keepFile) syncFile.deletedAt = Date()
-                        else syncFile.deleteFromRealm()
+                        if (keepFile) syncFile.deletedAt = Date() else syncFile.deleteFromRealm()
                     }
                 }
             }
