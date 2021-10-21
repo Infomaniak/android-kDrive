@@ -80,7 +80,7 @@ class UploadTask(
         try {
             uploadTask(this)
         } catch (exception: FileNotFoundException) {
-            UploadFile.deleteIfExists(uploadFile.getUriObject(), keepSyncFile = true)
+            UploadFile.deleteIfExists(uploadFile.getUriObject(), keepFile = uploadFile.isSync())
             Sentry.withScope { scope ->
                 scope.level = SentryLevel.WARNING
                 scope.setExtra("data", gson.toJson(uploadFile))

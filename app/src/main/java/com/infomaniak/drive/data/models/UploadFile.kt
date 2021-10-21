@@ -212,11 +212,11 @@ open class UploadFile(
             }
         }
 
-        fun deleteIfExists(uri: Uri, keepSyncFile: Boolean = false) {
+        fun deleteIfExists(uri: Uri, keepFile: Boolean = false) {
             getRealmInstance().use { realm ->
                 syncFileByUriQuery(realm, uri.toString()).findFirst()?.let { syncFile ->
                     realm.executeTransaction {
-                        if (keepSyncFile && syncFile.isSync()) syncFile.deletedAt = Date()
+                        if (keepFile) syncFile.deletedAt = Date()
                         else syncFile.deleteFromRealm()
                     }
                 }
