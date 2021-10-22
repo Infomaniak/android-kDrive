@@ -258,11 +258,13 @@ open class UploadFile(
                     if (permanently) {
                         realm.where(UploadFile::class.java)
                             .apply { folderId?.let { equalTo(UploadFile::remoteFolder.name, folderId) } }
+                            .isNull(UploadFile::uploadAt.name)
                             .findAll().deleteAllFromRealm()
                     } else {
                         // Delete all uploads with type SYNC
                         pendingUploadsQuery(realm, folderId)
                             .equalTo(UploadFile::type.name, Type.SYNC.name)
+                            .isNull(UploadFile::uploadAt.name)
                             .findAll().forEach { uploadFile -> uploadFile.deletedAt = Date() }
 
                         // Delete all uploads without type SYNC

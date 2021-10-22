@@ -218,12 +218,11 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             } else {
                 SyncUtils.checkDocumentProviderPermissions(applicationContext, uri)
 
-                contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
                     if (cursor.moveToFirst()) {
-                        val mediaSize = cursor.getLong(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE))
+                        val mediaSize = SyncUtils.getFileSize(cursor)
                         val descriptorSize = fileDescriptorSize(uploadFile.getOriginalUri(applicationContext))
-                        val size = descriptorSize?.let { if (mediaSize > it) mediaSize else it }
-                            ?: mediaSize //TODO Temp solution
+                        val size = descriptorSize?.let { if (mediaSize > it) mediaSize else it } ?: mediaSize //TODO Temp solution
                         startUploadFile(uploadFile, size)
                     } else UploadFile.deleteIfExists(uri)
                 }
@@ -337,14 +336,16 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val sortOrder = SyncUtils.DATE_TAKEN + " ASC, " + MediaStore.MediaColumns.DATE_ADDED + " ASC, " +
                 MediaStore.MediaColumns.DATE_MODIFIED + " ASC"
 
-        contentResolver.query(contentUri, null, selection, args, sortOrder)
+        contentResolver.query(contentUri, SyncUtils.projectionFile, selection, args, sortOrder)
             ?.use { cursor ->
                 Log.d(TAG, "getLocalLastMediasAsync > from ${mediaFolder.name} ${cursor.count} found")
                 while (cursor.moveToNext()) {
-                    val fileName = SyncUtils.getFileName(cursor)
-                    val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
                     val uri = cursor.uri(contentUri)
-                    val fileSize = fileDescriptorSize(uri) ?: cursor.getLong(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE))
+
+                    val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
+                    val fileName = SyncUtils.getFileName(cursor)
+                    val fileSize = fileDescriptorSize(uri) ?: SyncUtils.getFileSize(cursor)
+
                     Log.d(TAG, "getLocalLastMediasAsync > ${mediaFolder.name}/$fileName found")
 
                     if (UploadFile.canUpload(uri, fileModifiedAt) && fileSize > 0) {

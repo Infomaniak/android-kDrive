@@ -23,7 +23,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -256,12 +255,13 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     @Throws(Exception::class)
     private fun initUpload(uri: Uri) {
         uri.let { returnUri ->
-            requireContext().contentResolver.query(returnUri, null, null, null, null)
+            requireContext().contentResolver.query(returnUri, SyncUtils.projectionFile, null, null, null)
         }?.use { cursor ->
             if (cursor.moveToFirst()) {
-                val fileName = SyncUtils.getFileName(cursor)
-                val fileSize = cursor.getLong(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE))
                 val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
+                val fileName = SyncUtils.getFileName(cursor)
+                val fileSize = SyncUtils.getFileSize(cursor)
+
                 val memoryInfo = requireContext().getAvailableMemory()
                 val isLowMemory = memoryInfo.lowMemory || memoryInfo.availMem < UploadTask.chunkSize
 

@@ -294,9 +294,9 @@ class UploadInProgressFragment : FileListFragment() {
                         context?.apply {
                             try {
                                 SyncUtils.checkDocumentProviderPermissions(this, uri)
-                                contentResolver?.query(uri, null, null, null, null)?.use { cursor ->
+                                contentResolver?.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
                                     if (cursor.moveToFirst()) {
-                                        val size = cursor.getLong(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE))
+                                        val size = SyncUtils.getFileSize(cursor)
                                         files.add(
                                             File(
                                                 isFromUploads = true,
