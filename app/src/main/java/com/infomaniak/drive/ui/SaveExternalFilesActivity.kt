@@ -286,7 +286,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     private fun store(uri: Uri, name: String? = null, userId: Int, driveId: Int, folderId: Int): Boolean {
         val folder = java.io.File(cacheDir, SHARED_FILE_FOLDER).apply { if (!exists()) mkdirs() }
 
-        contentResolver.query(uri, SyncUtils.projectionFile, null, null, null)?.use { cursor ->
+        contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
                 val fileName = name ?: SyncUtils.getFileName(cursor)

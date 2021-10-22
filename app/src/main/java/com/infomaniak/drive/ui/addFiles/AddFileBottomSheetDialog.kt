@@ -255,7 +255,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     @Throws(Exception::class)
     private fun initUpload(uri: Uri) {
         uri.let { returnUri ->
-            requireContext().contentResolver.query(returnUri, SyncUtils.projectionFile, null, null, null)
+            requireContext().contentResolver.query(returnUri, null, null, null, null)
         }?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)

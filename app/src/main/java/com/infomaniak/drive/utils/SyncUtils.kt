@@ -43,16 +43,6 @@ object SyncUtils {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.MediaColumns.DATE_TAKEN
         else "datetaken"
 
-    val projectionFile = arrayOf(
-        MediaStore.MediaColumns._ID,
-        OpenableColumns.DISPLAY_NAME,
-        OpenableColumns.SIZE,
-        DATE_TAKEN,
-        MediaStore.MediaColumns.DATE_ADDED,
-        DocumentsContract.Document.COLUMN_LAST_MODIFIED,
-        MediaStore.MediaColumns.DATE_MODIFIED
-    )
-
     fun getFileName(cursor: Cursor): String {
         val columnIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
         return when {

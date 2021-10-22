@@ -336,7 +336,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val sortOrder = SyncUtils.DATE_TAKEN + " ASC, " + MediaStore.MediaColumns.DATE_ADDED + " ASC, " +
                 MediaStore.MediaColumns.DATE_MODIFIED + " ASC"
 
-        contentResolver.query(contentUri, SyncUtils.projectionFile, selection, args, sortOrder)
+        contentResolver.query(contentUri, null, selection, args, sortOrder)
             ?.use { cursor ->
                 Log.d(TAG, "getLocalLastMediasAsync > from ${mediaFolder.name} ${cursor.count} found")
                 while (cursor.moveToNext()) {
