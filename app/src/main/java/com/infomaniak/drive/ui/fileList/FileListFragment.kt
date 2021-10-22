@@ -583,8 +583,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun refreshActivities() {
-        if (folderID == OTHER_ROOT_ID) return
-
+        val isUploadInProgressNavigationMessage = findNavController().currentDestination?.id == R.id.uploadInProgressFragment
+        if (folderID == OTHER_ROOT_ID || isUploadInProgressNavigationMessage) return
         if (isLoadingActivities) {
             retryLoadingActivities = true
             return
