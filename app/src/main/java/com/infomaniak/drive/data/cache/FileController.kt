@@ -697,11 +697,15 @@ object FileController {
             }
 
             if ((apiResponse.data?.size ?: 0) < ApiRepository.PER_PAGE) {
-                updateFile(folder.id, realm) { file -> file.responseAt = apiResponse.responseAt }
+                if (apiResponse.responseAt > 0L) {
+                    updateFile(folder.id, realm) { file -> file.responseAt = apiResponse.responseAt }
+                }
                 returnResponse
             } else returnResponse.apply { putAll(getFolderActivitiesRec(realm, folder, page + 1, userDrive)) }
         } else {
-            updateFile(folder.id, realm) { file -> file.responseAt = apiResponse.responseAt }
+            if (apiResponse.responseAt > 0L) {
+                updateFile(folder.id, realm) { file -> file.responseAt = apiResponse.responseAt }
+            }
             returnResponse
         }
     }
