@@ -691,6 +691,7 @@ object FileController {
         val returnResponse = arrayMapOf<Int, File.LocalFileActivity>()
         val apiResponse = ApiRepository.getFileActivities(okHttpClient, folder, page)
         if (!apiResponse.isSuccess()) return returnResponse
+
         return if (apiResponse.data?.isNotEmpty() == true) {
             apiResponse.data?.forEach { fileActivity ->
                 fileActivity.applyFileActivity(realm, returnResponse, folder)
@@ -699,12 +700,23 @@ object FileController {
             if ((apiResponse.data?.size ?: 0) < ApiRepository.PER_PAGE) {
                 if (apiResponse.responseAt > 0L) {
                     updateFile(folder.id, realm) { file -> file.responseAt = apiResponse.responseAt }
+                } else {
+                    Sentry.withScope { scope ->
+                        scope.setExtra("data", apiResponse.toString())
+                        Sentry.captureMessage("response at is null")
+                    }
                 }
                 returnResponse
+
             } else returnResponse.apply { putAll(getFolderActivitiesRec(realm, folder, page + 1, userDrive)) }
         } else {
             if (apiResponse.responseAt > 0L) {
                 updateFile(folder.id, realm) { file -> file.responseAt = apiResponse.responseAt }
+            } else {
+                Sentry.withScope { scope ->
+                    scope.setExtra("data", apiResponse.toString())
+                    Sentry.captureMessage("response at is null")
+                }
             }
             returnResponse
         }
