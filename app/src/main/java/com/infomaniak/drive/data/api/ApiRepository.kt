@@ -319,10 +319,6 @@ object ApiRepository {
         return callApi(ApiRoutes.bulkAction(bulkOperation.parent), POST, bulkOperation.toMap())
     }
 
-    fun performCopyBulkOperation(bulkOperation: BulkOperation): ApiResponse<File> {
-        return callApi(ApiRoutes.bulkAction(bulkOperation.parent), POST, bulkOperation.toMap())
-    }
-
     fun getUUIDArchiveFiles(driveId: Int, fileIds: IntArray): ApiResponse<ArchiveUUID> {
         return callApi(ApiRoutes.getUUIDArchiveFiles(driveId), POST, mapOf("file_ids" to fileIds))
     }

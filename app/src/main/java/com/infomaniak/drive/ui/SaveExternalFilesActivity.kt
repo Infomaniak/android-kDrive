@@ -292,9 +292,11 @@ class SaveExternalFilesActivity : BaseActivity() {
                 val fileName = name ?: SyncUtils.getFileName(cursor)
                 val fileSize = SyncUtils.getFileSize(cursor)
 
-                val outputFile = java.io.File(folder, fileName).also { if (it.exists()) it.delete() }
-
                 try {
+                    if (fileName == null) return false
+
+                    val outputFile = java.io.File(folder, fileName).also { if (it.exists()) it.delete() }
+
                     if (outputFile.createNewFile()) {
                         outputFile.setLastModified(fileModifiedAt.time)
                         contentResolver.openInputStream(uri)?.use { input ->
@@ -320,7 +322,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                     exception.printStackTrace()
                     return false
                 }
-            } else return false
+            }
         }
         return false
     }

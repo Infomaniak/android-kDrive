@@ -43,11 +43,11 @@ object SyncUtils {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.MediaColumns.DATE_TAKEN
         else "datetaken"
 
-    fun getFileName(cursor: Cursor): String {
+    fun getFileName(cursor: Cursor): String? {
         val columnIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
         return when {
-            columnIndex != -1 -> cursor.getString(columnIndex) ?: ""
-            else -> ""
+            columnIndex != -1 -> cursor.getString(columnIndex)
+            else -> null
         }
     }
 
@@ -89,7 +89,7 @@ object SyncUtils {
                 val dateModifiedData = if (dateModifiedIndex != -1) cursor.getLong(dateModifiedIndex).toString() else noData
                 scope.setExtra("dateModifiedIndex", dateModifiedData)
 
-                scope.setExtra("fileName", getFileName(cursor))
+                scope.setExtra("fileName", getFileName(cursor) ?: "noData")
 
                 scope.setExtra("columnNames", cursor.columnNames.joinToString(", "))
 

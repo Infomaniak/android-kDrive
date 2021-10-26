@@ -265,21 +265,27 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                 val memoryInfo = requireContext().getAvailableMemory()
                 val isLowMemory = memoryInfo.lowMemory || memoryInfo.availMem < UploadTask.chunkSize
 
-                if (isLowMemory) {
-                    requireActivity().showSnackbar(R.string.uploadOutOfMemoryError)
-                } else {
-                    lifecycleScope.launch(Dispatchers.IO) {
-                        UploadFile(
-                            uri = uri.toString(),
-                            driveId = currentFolderFile.driveId,
-                            fileCreatedAt = fileCreatedAt,
-                            fileModifiedAt = fileModifiedAt,
-                            fileName = fileName,
-                            fileSize = fileSize,
-                            remoteFolder = currentFolderFile.id,
-                            type = UploadFile.Type.UPLOAD.name,
-                            userId = currentUserId,
-                        ).store()
+                when {
+                    isLowMemory -> {
+                        requireActivity().showSnackbar(R.string.uploadOutOfMemoryError)
+                    }
+                    fileName == null -> {
+                        requireActivity().showSnackbar(R.string.anErrorHasOccurred)
+                    }
+                    else -> {
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            UploadFile(
+                                uri = uri.toString(),
+                                driveId = currentFolderFile.driveId,
+                                fileCreatedAt = fileCreatedAt,
+                                fileModifiedAt = fileModifiedAt,
+                                fileName = fileName,
+                                fileSize = fileSize,
+                                remoteFolder = currentFolderFile.id,
+                                type = UploadFile.Type.UPLOAD.name,
+                                userId = currentUserId,
+                            ).store()
+                        }
                     }
                 }
             }
