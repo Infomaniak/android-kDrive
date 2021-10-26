@@ -669,8 +669,10 @@ object FileController {
         order: File.SortType,
         localChildren: RealmResults<File>? = null
     ): ArrayList<File> {
-        val realmLiveSortedFiles = getRealmLiveSortedFiles(localFolder, order, localChildren = localChildren)
-        return realmLiveSortedFiles?.let { ArrayList(it) } ?: arrayListOf()
+        val files = getRealmLiveSortedFiles(localFolder, order, localChildren = localChildren)?.let { realmFiles ->
+            localFolder?.realm?.copyFromRealm(realmFiles, 1)
+        }
+        return files?.let { ArrayList(it) } ?: arrayListOf()
     }
 
     fun getFolderActivities(folder: File, page: Int, userDrive: UserDrive? = null): Map<out Int, File.LocalFileActivity> {
