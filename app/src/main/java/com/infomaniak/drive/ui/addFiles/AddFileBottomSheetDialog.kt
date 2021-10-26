@@ -22,7 +22,9 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.provider.DocumentsContract
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -64,6 +66,12 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     companion object {
         const val SELECT_FILES_REQ = 2
         const val CAPTURE_MEDIA_REQ = 3
+
+        private val documentProjection = arrayOf(
+            DocumentsContract.Document.COLUMN_LAST_MODIFIED,
+            OpenableColumns.DISPLAY_NAME,
+            OpenableColumns.SIZE,
+        )
     }
 
     override fun onCreateView(
@@ -255,7 +263,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     @Throws(Exception::class)
     private fun initUpload(uri: Uri) {
         uri.let { returnUri ->
-            requireContext().contentResolver.query(returnUri, null, null, null, null)
+            requireContext().contentResolver.query(returnUri, documentProjection, null, null, null)
         }?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)

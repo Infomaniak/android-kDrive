@@ -336,7 +336,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val sortOrder = SyncUtils.DATE_TAKEN + " ASC, " + MediaStore.MediaColumns.DATE_ADDED + " ASC, " +
                 MediaStore.MediaColumns.DATE_MODIFIED + " ASC"
 
-        contentResolver.query(contentUri, null, selection, args, sortOrder)
+        contentResolver.query(contentUri, mediaProjection, selection, args, sortOrder)
             ?.use { cursor ->
                 Log.d(TAG, "getLocalLastMediasAsync > from ${mediaFolder.name} ${cursor.count} found")
                 while (cursor.moveToNext()) {
@@ -387,6 +387,14 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         private const val MAX_RETRY_COUNT = 3
         private const val CHECK_LOCAL_LAST_MEDIAS_DELAY = 10000 // 10s (ms)
+
+        private val mediaProjection = arrayOf(
+            MediaStore.MediaColumns.DATE_ADDED,
+            MediaStore.MediaColumns.DATE_MODIFIED,
+            OpenableColumns.DISPLAY_NAME,
+            OpenableColumns.SIZE,
+            SyncUtils.DATE_TAKEN,
+        )
 
         fun workConstraints(): Constraints {
             val networkType = if (AppSettings.onlyWifiSync) NetworkType.UNMETERED else NetworkType.CONNECTED
