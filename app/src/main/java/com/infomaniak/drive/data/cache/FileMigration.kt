@@ -41,6 +41,9 @@ class FileMigration : RealmMigration {
                 if (hasField("canUseTag")) removeField("canUseTag")
                 if (hasField("tags")) removeField("tags")
                 if (hasField("isWaitingOffline")) removeField("isWaitingOffline")
+                if (!hasField(File::isFromSearch.name)) {
+                    addField(File::isFromSearch.name, Boolean::class.java, FieldAttribute.REQUIRED)
+                }
                 if (!hasField(File::isFromUploads.name)) {
                     addField(File::isFromUploads.name, Boolean::class.java, FieldAttribute.REQUIRED)
                 }
