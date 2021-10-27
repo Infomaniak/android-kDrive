@@ -617,7 +617,7 @@ fun Context.getLocalThumbnail(file: File): Bitmap? {
                 ContentUris.parseId(fileUri)
             } catch (e: Exception) {
                 fileUri.lastPathSegment?.split(":")?.let {
-                    it.getOrNull(1)?.toLong()
+                    it.getOrNull(1)?.toLongOrNull()
                 }
             }?.let { fileId ->
                 val options = BitmapFactory.Options().apply {
