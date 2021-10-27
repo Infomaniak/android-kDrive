@@ -36,6 +36,8 @@ import com.infomaniak.drive.R
 import com.infomaniak.lib.core.utils.hasPermissions
 import com.infomaniak.lib.core.utils.requestPermissionsIsPossible
 import com.infomaniak.lib.core.utils.startAppSettingsConfig
+import io.sentry.Sentry
+import io.sentry.SentryLevel
 
 
 class DrivePermissions {
@@ -117,10 +119,14 @@ class DrivePermissions {
 
             try {
                 startActivity(intent)
-            } catch (e: ActivityNotFoundException) {
+            } catch (activityNotFoundException: ActivityNotFoundException) {
                 try {
                     startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
-                } catch (ignore: Exception) {
+                } catch (exception: Exception) {
+                    Sentry.withScope { scope ->
+                        scope.level = SentryLevel.WARNING
+                        Sentry.captureException(exception)
+                    }
                 }
             }
         }
