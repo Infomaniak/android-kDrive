@@ -19,7 +19,7 @@ package com.infomaniak.drive.utils
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -41,7 +41,6 @@ import com.infomaniak.lib.core.utils.startAppSettingsConfig
 class DrivePermissions {
 
     companion object {
-        private const val REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 1
         val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_MEDIA_LOCATION)
         } else {
@@ -115,9 +114,14 @@ class DrivePermissions {
                 Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
                 Uri.parse("package:$packageName")
             )
-            when (this) {
-                is Fragment -> startActivityForResult(intent, REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                is Activity -> startActivityForResult(intent, REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+
+            try {
+                startActivity(intent)
+            } catch (e: ActivityNotFoundException) {
+                try {
+                    startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+                } catch (ignore: Exception) {
+                }
             }
         }
     }
