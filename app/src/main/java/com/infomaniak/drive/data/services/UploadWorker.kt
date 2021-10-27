@@ -348,7 +348,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
                     Log.d(TAG, "getLocalLastMediasAsync > ${mediaFolder.name}/$fileName found")
 
-                    if (UploadFile.canUpload(uri, fileModifiedAt) && fileSize > 0) {
+                    if (fileName != null && UploadFile.canUpload(uri, fileModifiedAt) && fileSize > 0) {
                         UploadFile.deleteIfExists(uri)
                         UploadFile(
                             uri = uri.toString(),
