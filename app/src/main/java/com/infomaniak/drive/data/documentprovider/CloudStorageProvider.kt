@@ -42,8 +42,8 @@ import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.Utils
 import io.realm.Realm
 import io.sentry.Sentry
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -71,7 +71,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
         AccountUtils.getAllUsersSync().forEach { user ->
             cursor.addRoot(user.id.toString(), user.id.toString(), user.email)
-            GlobalScope.launch(Dispatchers.IO) {
+            CoroutineScope(Dispatchers.IO).launch {
                 context?.let {
                     val okHttpClient = KDriveHttpClient.getHttpClient(user.id)
                     AccountUtils.updateCurrentUserAndDrives(it, fromCloudStorage = true, okHttpClient = okHttpClient)
@@ -174,7 +174,7 @@ class CloudStorageProvider : DocumentsProvider() {
             isSharedWithMeFolder -> cursor.addRootDrives(userId, SHARED_WITHME_FOLDER_ID, true)
             isMySharesFolder -> cursor.addRootDrives(userId, MY_SHARES_FOLDER_ID)
             isSharedUri(parentDocumentId) && fileFolderId == Utils.ROOT_ID -> {
-                GlobalScope.launch(Dispatchers.IO + cursor.job) {
+                CoroutineScope(Dispatchers.IO + cursor.job).launch {
                     if (parentDocumentId.contains(MY_SHARES_FOLDER_ID.toString())) {
                         FileController.getMySharedFiles(
                             UserDrive(userId, driveId),
@@ -191,7 +191,7 @@ class CloudStorageProvider : DocumentsProvider() {
                 }
             }
             else -> {
-                GlobalScope.launch(Dispatchers.IO + cursor.job) {
+                CoroutineScope(Dispatchers.IO + cursor.job).launch {
                     FileController.getCloudStorageFiles(
                         parentId = fileFolderId,
                         userDrive = UserDrive(userId, driveId),
@@ -266,7 +266,7 @@ class CloudStorageProvider : DocumentsProvider() {
         val userId = getUserId(parentDocumentId)
         val userDrive = UserDrive(userId.toInt(), driveId, comeFromSharedWithMe(parentDocumentId))
 
-        GlobalScope.launch(Dispatchers.IO + cursor.job) {
+        CoroutineScope(Dispatchers.IO + cursor.job).launch {
             FileController.cloudStorageSearch(userDrive, query, onResponse = { files ->
                 files.forEach { file -> cursor.addFile(file, createFileDocumentId(parentDocumentId, file.id)) }
                 if (files.isNotEmpty()) context?.contentResolver?.notifyChange(uri, null)
