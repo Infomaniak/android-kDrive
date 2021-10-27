@@ -57,17 +57,9 @@ class CloudStorageProvider : DocumentsProvider() {
         Log.d(TAG, "onCreate")
         var result = false
         runBlocking {
-            mutex.withLock {
-                context?.let {
-                    try {
-                        Realm.getDefaultInstance()
-                    } catch (exception: Exception) {
-                        Realm.init(it)
-                        AccountUtils.init(it)
-                        Sentry.captureMessage("Realm.init in CloudStorageProvider")
-                    }
-                    result = true
-                }
+            context?.let {
+                it.initRealm()
+                result = true
             }
         }
         return result
@@ -429,6 +421,17 @@ class CloudStorageProvider : DocumentsProvider() {
             DocumentsContract.Document.COLUMN_FLAGS,
             DocumentsContract.Document.COLUMN_SIZE
         )
+
+        suspend fun Context.initRealm() {
+            mutex.withLock {
+                try {
+                    Realm.getDefaultInstance()
+                } catch (exception: Exception) {
+                    Realm.init(this)
+                    AccountUtils.init(this)
+                }
+            }
+        }
 
         private fun getUserId(documentId: String) = documentId.substringBefore(SEPARATOR)
         private fun getFileIdFromDocumentId(documentId: String) = documentId.substringAfterLast(SEPARATOR).toInt()
