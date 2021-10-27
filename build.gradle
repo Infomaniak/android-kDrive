@@ -12,11 +12,15 @@ buildscript {
     }
     dependencies {
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$navigation_version"
-        classpath 'io.realm:realm-gradle-plugin:10.6.1'
+        classpath 'io.realm:realm-gradle-plugin:10.8.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.android.tools.build:gradle:7.0.3'
         classpath 'com.google.gms:google-services:4.3.10'
     }
+}
+
+plugins {
+    id "io.sentry.android.gradle" version "3.0.0-alpha.2"
 }
 
 allprojects {
