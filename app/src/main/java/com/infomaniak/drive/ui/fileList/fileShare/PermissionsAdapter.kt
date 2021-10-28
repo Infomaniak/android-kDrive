@@ -32,7 +32,6 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File.FolderPermission
 import com.infomaniak.drive.data.models.Permission
-import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.loadAvatar
@@ -47,9 +46,7 @@ class PermissionsAdapter(
     private var currentUser: User? = null,
     private var isExternalUser: Boolean = false,
     private var sharedUsers: ArrayList<DriveUser> = ArrayList(),
-
     private var showSelectionCheckIcon: Boolean = true,
-    private var onUpgradeOfferClicked: (() -> Unit)? = null,
     private val onPermissionChanged: (newPermission: Permission) -> Unit,
 ) : RecyclerView.Adapter<ViewHolder>() {
 
@@ -127,16 +124,6 @@ class PermissionsAdapter(
                     mainIcon.shapeAppearanceModel = ShapeAppearanceModel()
 
                     when {
-                        permission == ShareLink.ShareLinkPermission.PASSWORD -> {
-                            val enabled = AccountUtils.getCurrentDrive()?.packFunctionality?.canSetSharelinkPassword == true
-                            enableViewHolder(enabled)
-                            if (!enabled) {
-                                upgradeOffer.visibility = VISIBLE
-                                upgradeOffer.setOnClickListener {
-                                    onUpgradeOfferClicked?.invoke()
-                                }
-                            }
-                        }
                         permission == Shareable.ShareablePermission.MANAGE && isExternalUser -> {
                             enableViewHolder(false)
                             userExternalWarning.visibility = VISIBLE
