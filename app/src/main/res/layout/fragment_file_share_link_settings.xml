@@ -114,39 +114,122 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/newPasswordButton"
-                style="@style/TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/marginStandardMedium"
-                android:text="@string/buttonNewPassword"
-                android:visibility="gone"
-                tools:visibility="visible" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/passwordTextLayout"
-                style="@style/TextInputLayout.OutlinedBox"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/addPasswordLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/marginStandardMedium"
-                android:hint="@string/allPasswordHint"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/passwordDescription"
-                app:passwordToggleEnabled="true"
-                app:passwordToggleTint="@color/iconColor"
-                tools:visibility="visible">
+                android:paddingVertical="@dimen/marginStandardMedium">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/passwordEditText"
+                <TextView
+                    android:id="@+id/addPasswordTitle"
+                    style="@style/Subtitle2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/addPassword"
+                    app:layout_constraintBottom_toTopOf="@+id/addPasswordDescription"
+                    app:layout_constraintEnd_toStartOf="@id/addPasswordSwitch"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/addPasswordSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/addPasswordDescription"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPassword" />
+                    android:layout_marginTop="@dimen/marginStandardSmall"
+                    android:text="@string/shareLinkPasswordRightDescription"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/addPasswordSwitch" />
 
-            </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/upgradeOfferPassword"
+                    style="@style/ChipLink"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="@string/buttonUpgradeOffer"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/addPasswordDescription"
+                    tools:visibility="visible" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/passwordTextLayout"
+                    style="@style/TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/marginStandardMedium"
+                    android:hint="@string/allPasswordHint"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/addPasswordDescription"
+                    app:passwordToggleEnabled="true"
+                    app:passwordToggleTint="@color/iconColor">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/passwordEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPassword" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/newPasswordButton"
+                    style="@style/TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/marginStandardMedium"
+                    android:text="@string/buttonNewPassword"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/addPasswordDescription" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="@dimen/marginStandardMedium">
+
+                <TextView
+                    android:id="@+id/allowDownloadTitle"
+                    style="@style/Subtitle2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/shareLinkSettingsAllowDownloadTitle"
+                    app:layout_constraintBottom_toTopOf="@+id/allowDownloadDescription"
+                    app:layout_constraintEnd_toStartOf="@id/allowDownloadValue"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/allowDownloadValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/allowDownloadDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/marginStandardSmall"
+                    android:text="@string/shareLinkSettingsAllowDownloadDescription"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/allowDownloadValue" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/addExpirationDateLayout"
@@ -182,7 +265,7 @@
                     app:layout_constraintTop_toBottomOf="@id/addExpirationDateSwitch" />
 
                 <com.google.android.material.chip.Chip
-                    android:id="@+id/upgradeOffer"
+                    android:id="@+id/upgradeOfferExpirationDate"
                     style="@style/ChipLink"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -191,7 +274,8 @@
                     android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/addExpirationDateDescription" />
+                    app:layout_constraintTop_toBottomOf="@id/addExpirationDateDescription"
+                    tools:visibility="visible" />
 
                 <com.infomaniak.drive.views.DateInputView
                     android:id="@+id/expirationDateInput"
@@ -203,40 +287,6 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/addExpirationDateDescription" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingVertical="@dimen/marginStandardMedium">
-
-                <TextView
-                    android:id="@+id/allowDownloadTitle"
-                    style="@style/Subtitle2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/shareLinkSettingsAllowDownloadTitle"
-                    app:layout_constraintBottom_toTopOf="@+id/allowDownloadDescription"
-                    app:layout_constraintEnd_toStartOf="@id/allowDownloadValue"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/allowDownloadValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/allowDownloadDescription"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/marginStandardSmall"
-                    android:text="@string/shareLinkSettingsAllowDownloadDescription"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/allowDownloadValue" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
