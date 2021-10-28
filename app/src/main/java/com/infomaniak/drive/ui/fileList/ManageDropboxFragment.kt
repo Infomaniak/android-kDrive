@@ -73,7 +73,8 @@ open class ManageDropboxFragment : Fragment() {
         shareLinkContainer.apply {
             shareLinkTitle.text = getString(R.string.dropBoxLinkTitle)
             shareLinkUrl.visibility = View.VISIBLE
-            imageView2.visibility = View.GONE
+            shareLinkIcon.visibility = View.GONE
+            titleSeparator.visibility = View.GONE
             shareLinkStatus.visibility = View.GONE
             shareLinkSwitch.visibility = View.GONE
             shareLinkSettings.visibility = View.GONE
@@ -135,7 +136,7 @@ open class ManageDropboxFragment : Fragment() {
             needNewPassword = false
         }
 
-        limiteStorageValue.addTextChangedListener { limiteStorageChanged(it) }
+        limiteStorageValue.addTextChangedListener { limitStorageChanged(it) }
 
         disableButton.initProgress(this)
         disableButton.setOnClickListener {
@@ -172,7 +173,7 @@ open class ManageDropboxFragment : Fragment() {
         }
     }
 
-    private fun limiteStorageChanged(it: Editable?) {
+    private fun limitStorageChanged(it: Editable?) {
         if (limiteStorageSwitch.isChecked && (it.toString().isBlank() || it.toString().toLong() == 0L)) {
             hasErrors = currentDropBox?.limitFileSize != null
             limiteStorageValueLayout.error = when {

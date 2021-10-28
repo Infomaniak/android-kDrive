@@ -100,7 +100,7 @@
             android:id="@+id/newPasswordButton"
             style="@style/TextButton"
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:text="@string/allPasswordHint"
             android:visibility="gone"
@@ -238,6 +238,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/marginStandardMedium"
             android:layout_marginEnd="@dimen/marginStandardMedium"
+            android:checked="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
