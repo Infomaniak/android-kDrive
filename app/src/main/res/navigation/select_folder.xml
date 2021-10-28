@@ -204,6 +204,10 @@
         <argument
             android:name="shareLink"
             app:argType="com.infomaniak.drive.data.models.ShareLink" />
+        <argument
+            android:name="onlyoffice"
+            android:defaultValue="false"
+            app:argType="boolean" />
     </fragment>
 
     <dialog

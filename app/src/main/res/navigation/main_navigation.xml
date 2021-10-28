@@ -453,6 +453,10 @@
             android:name="driveId"
             app:argType="integer" />
         <argument
+            android:name="onlyoffice"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
             android:name="shareLink"
             app:argType="com.infomaniak.drive.data.models.ShareLink" />
         <action
@@ -755,4 +759,3 @@
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
     </dialog>
 </navigation>
-

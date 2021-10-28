@@ -31,14 +31,14 @@ data class ShareLink(
     val type: String = "",
     var password: String? = null,
     val onlyoffice: Boolean = false,
-    var permission: ShareLinkPermission = ShareLinkPermission.PUBLIC,
+    var permission: ShareLinkPermission = ShareLinkPermission.INHERIT,
     @SerializedName("file_id") val fileId: Int = 0,
     @SerializedName("created_by") val createdBy: Int = 0,
     @SerializedName("created_at") val createdAt: Long = 0,
     @SerializedName("updated_at") val updatedAt: Long = 0,
     @SerializedName("mime_type") val mimeType: String = "",
     @SerializedName("valid_until") var validUntil: Date? = null,
-    @SerializedName("can_edit") val canEdit: Boolean = false,
+    @SerializedName("can_edit") var canEdit: Boolean = false,
     @SerializedName("show_stats") val showStats: Boolean = false,
     @SerializedName("converted_type") val convertedType: String = "",
     @SerializedName("block_comments") var blockComments: Boolean = true,
@@ -57,7 +57,7 @@ data class ShareLink(
 
         @SerializedName("public")
         PUBLIC(
-            R.drawable.ic_view,
+            R.drawable.ic_unlock,
             R.string.shareLinkPublicRightTitle,
             R.string.shareLinkPublicRightDescription,
             "public"
@@ -65,19 +65,14 @@ data class ShareLink(
 
         @SerializedName("inherit")
         INHERIT(
-            R.drawable.ic_users,
-            R.string.shareLinkDriveUsersRightTitle,
-            R.string.shareLinkDriveUsersRightDescription,
+            R.drawable.ic_lock,
+            R.string.shareLinkRestrictedRightTitle,
+            R.string.shareLinkRestrictedRightDescription,
             "inherit"
         ),
 
         @SerializedName("password")
-        PASSWORD(
-            R.drawable.ic_lock,
-            R.string.shareLinkPasswordRightTitle,
-            R.string.shareLinkPasswordRightDescription,
-            "password"
-        )
+        PASSWORD(-1, -1, -1, "password")
     }
 
     @Parcelize
