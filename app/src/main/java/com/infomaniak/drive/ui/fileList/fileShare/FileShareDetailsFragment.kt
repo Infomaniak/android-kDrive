@@ -232,7 +232,7 @@ class FileShareDetailsFragment : Fragment(), ShareLinkContainerView.ShareLinkLis
         this.shareLink = shareLink
         val currentPermission =
             if (this.shareLink != null) ShareLink.ShareLinkPermission.PUBLIC
-            else ShareLink.ShareLinkPermission.INHERIT
+            else ShareLink.ShareLinkPermission.RESTRICTED
 
         findNavController().navigate(
             FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToSelectPermissionBottomSheetDialog(

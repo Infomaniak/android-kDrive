@@ -81,7 +81,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
             permissionsGroup.let { permissionsGroup ->
                 val newPermissions: ArrayList<Permission> = when (permissionsGroup) {
                     PermissionsGroup.SHARE_LINK_SETTINGS -> arrayListOf(
-                        ShareLink.ShareLinkPermission.INHERIT,
+                        ShareLink.ShareLinkPermission.RESTRICTED,
                         ShareLink.ShareLinkPermission.PUBLIC
                     )
                     PermissionsGroup.EXTERNAL_USERS_RIGHTS,

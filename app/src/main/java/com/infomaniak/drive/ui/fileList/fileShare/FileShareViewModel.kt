@@ -40,7 +40,7 @@ class FileShareViewModel : ViewModel() {
 
     fun editFileShareLink(file: File, shareLink: ShareLink) = liveData(Dispatchers.IO) {
         val body = mutableMapOf<String, Any?>(
-            "permission" to shareLink.permission.apiValue,
+            "permission" to shareLink.permission,
             "block_downloads" to shareLink.blockDownloads,
             "block_comments" to shareLink.blockComments,
             "block_information" to shareLink.blockInformation,
