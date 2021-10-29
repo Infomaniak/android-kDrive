@@ -187,7 +187,7 @@
     <string name="createDatedSubFoldersDescription">Automatisches Erstellen von Unterordnern mit dem Monat und Jahr des Fotos</string>
     <string name="createDatedSubFoldersTitle">Einen Ordner pro Monat erstellen</string>
     <string name="createDropBoxHint">Name des Briefkastens</string>
-    <string name="createDropBoxLimiteFileSizeError">Muss höher sein als 0</string>
+    <string name="createDropBoxLimitFileSizeError">Muss höher sein als 0</string>
     <string name="createDropBoxTitle">Briefkasten anlegen</string>
     <string name="createFolderAccessPermissionTitle">Wer kann auf diesen Ordner zugreifen?</string>
     <string name="createFolderEmailWhenFinishedTitle">E-Mail erhalten, sobald eine Datei importiert wurde</string>

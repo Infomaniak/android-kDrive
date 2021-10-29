@@ -187,7 +187,7 @@
     <string name="createDatedSubFoldersDescription">Crear automáticamente subcarpetas con el mes y el año de la foto</string>
     <string name="createDatedSubFoldersTitle">Crear una carpeta por mes</string>
     <string name="createDropBoxHint">Nombre del buzón de depósito</string>
-    <string name="createDropBoxLimiteFileSizeError">Debe ser superior a 0</string>
+    <string name="createDropBoxLimitFileSizeError">Debe ser superior a 0</string>
     <string name="createDropBoxTitle">Crear un buzón de depósito</string>
     <string name="createFolderAccessPermissionTitle">¿Quién puede acceder a esta carpeta?</string>
     <string name="createFolderEmailWhenFinishedTitle">Recibir un correo electrónico cuando se haya importado un archivo</string>

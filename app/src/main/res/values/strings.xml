@@ -196,7 +196,7 @@
     <string name="createDatedSubFoldersDescription">Automatically create subfolders with the month and year of the photo</string>
     <string name="createDatedSubFoldersTitle">Create one folder per month</string>
     <string name="createDropBoxHint">Name of drop box</string>
-    <string name="createDropBoxLimiteFileSizeError">Must be greater than 0</string>
+    <string name="createDropBoxLimitFileSizeError">Must be greater than 0</string>
     <string name="createDropBoxTitle">Create a drop box</string>
     <string name="createFolderAccessPermissionTitle">Who can access this folder?</string>
     <string name="createFolderEmailWhenFinishedTitle">Receive an email when a file has been uploaded</string>

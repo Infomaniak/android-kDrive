@@ -187,7 +187,7 @@
     <string name="createDatedSubFoldersDescription">Crea automaticamente sottocartelle con il mese e l’anno della foto</string>
     <string name="createDatedSubFoldersTitle">Creare una cartella al mese</string>
     <string name="createDropBoxHint">Nome del deposito file</string>
-    <string name="createDropBoxLimiteFileSizeError">Deve essere maggiore di 0</string>
+    <string name="createDropBoxLimitFileSizeError">Deve essere maggiore di 0</string>
     <string name="createDropBoxTitle">Crea un deposito file</string>
     <string name="createFolderAccessPermissionTitle">Chi può accedere a questa cartella?</string>
     <string name="createFolderEmailWhenFinishedTitle">Ricevi una e-mail quando è stato importato un file</string>

@@ -101,10 +101,10 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
         showAdvancedSettings(showAdvancedSettings)
         passwordSwitch.setOnCheckedChangeListener(createOnCheckedChangeListener(passwordTextLayout))
         expirationDateSwitch.setOnCheckedChangeListener(createOnCheckedChangeListener(expirationDateInput))
-        limiteStorageSwitch.setOnCheckedChangeListener(
+        limitStorageSwitch.setOnCheckedChangeListener(
             createOnCheckedChangeListener(
-                limiteStorageValueLayout,
-                limiteStorageValueUnit
+                limitStorageValueLayout,
+                limitStorageValueUnit
             )
         )
         expirationDateInput.init(fragmentManager = parentFragmentManager)
@@ -124,15 +124,15 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
             result = !passwordTextInput.showOrHideEmptyError()
         }
 
-        if (limiteStorageSwitch.isChecked) {
-            limiteStorageValue.text.toString().apply {
+        if (limitStorageSwitch.isChecked) {
+            limitStorageValue.text.toString().apply {
                 when {
                     this.isBlank() -> {
-                        limiteStorageValueLayout.error = getString(R.string.allEmptyInputError)
+                        limitStorageValueLayout.error = getString(R.string.allEmptyInputError)
                         result = false
                     }
                     this.toLong() < 1 -> {
-                        limiteStorageValueLayout.error = getString(R.string.createDropBoxLimiteFileSizeError)
+                        limitStorageValueLayout.error = getString(R.string.createDropBoxLimitFileSizeError)
                         result = false
                     }
                 }
@@ -151,7 +151,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
         val emailWhenFinished = emailWhenFinishedSwitch.isChecked
         val validUntil = if (expirationDateSwitch.isChecked) expirationDateInput.getCurrentTimestampValue() else null
         val password = passwordTextInput.text.toString()
-        val limitFileSize = Utils.convertGigaByteToBytes(limiteStorageValue.text.toString().toLongOrDefault(1))
+        val limitFileSize = Utils.convertGigaByteToBytes(limitStorageValue.text.toString().toLongOrDefault(1))
 
 
         createFolder(false) { file, _ ->

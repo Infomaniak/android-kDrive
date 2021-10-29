@@ -54,7 +54,7 @@ class ConvertToDropBoxFragment : ManageDropboxFragment() {
             saveButton.initProgress(this)
             saveButton.setOnClickListener {
                 val limitFileSize =
-                    if (limiteStorageSwitch.isChecked) limiteStorageValue.text?.toString()?.toLongOrNull() else null
+                    if (limitStorageSwitch.isChecked) limitStorageValue.text?.toString()?.toLongOrNull() else null
                 saveButton.showProgress()
                 mainViewModel.createDropBoxFolder(
                     file,

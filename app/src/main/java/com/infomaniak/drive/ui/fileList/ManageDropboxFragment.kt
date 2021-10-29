@@ -108,16 +108,16 @@ open class ManageDropboxFragment : Fragment() {
             emailWhenFinishedSwitch.isChecked = dropBox.emailWhenFinished
             passwordSwitch.isChecked = dropBox.password
             expirationDateSwitch.isChecked = dropBox.validUntil != null
-            limiteStorageSwitch.isChecked = dropBox.limitFileSize != null
-            dropBox.limitFileSize?.let { size -> limiteStorageValue.setText(Utils.convertBytesToGigaBytes(size).toString()) }
+            limitStorageSwitch.isChecked = dropBox.limitFileSize != null
+            dropBox.limitFileSize?.let { size -> limitStorageValue.setText(Utils.convertBytesToGigaBytes(size).toString()) }
 
             if (dropBox.password) {
                 newPasswordButton.visibility = View.VISIBLE
                 needNewPassword = true
             }
             if (expirationDateSwitch.isChecked) expirationDateInput.visibility = View.VISIBLE
-            if (limiteStorageSwitch.isChecked) limiteStorageValueLayout.visibility = View.VISIBLE
-            if (limiteStorageSwitch.isChecked) limiteStorageValueUnit.visibility = View.VISIBLE
+            if (limitStorageSwitch.isChecked) limitStorageValueLayout.visibility = View.VISIBLE
+            if (limitStorageSwitch.isChecked) limitStorageValueUnit.visibility = View.VISIBLE
 
             expirationDateInput.init(fragmentManager = parentFragmentManager, dropBox.validUntil ?: Date()) {
                 currentDropBox?.newValidUntil = Date(it)
@@ -129,14 +129,14 @@ open class ManageDropboxFragment : Fragment() {
         emailWhenFinishedSwitch.setOnCheckedChangeListener { _, isChecked -> emailSwitched(dropBox, isChecked) }
         passwordSwitch.setOnCheckedChangeListener { _, isChecked -> passwordSwitched(dropBox, isChecked) }
         expirationDateSwitch.setOnCheckedChangeListener { _, isChecked -> expirationDateSwitched(dropBox, isChecked) }
-        limiteStorageSwitch.setOnCheckedChangeListener { _, isChecked -> limitStorageSwitched(dropBox, isChecked) }
+        limitStorageSwitch.setOnCheckedChangeListener { _, isChecked -> limitStorageSwitched(dropBox, isChecked) }
         newPasswordButton.setOnClickListener {
             passwordTextLayout.visibility = View.VISIBLE
             newPasswordButton.visibility = View.GONE
             needNewPassword = false
         }
 
-        limiteStorageValue.addTextChangedListener { limitStorageChanged(it) }
+        limitStorageValue.addTextChangedListener { limitStorageChanged(it) }
 
         disableButton.initProgress(this)
         disableButton.setOnClickListener {
@@ -155,8 +155,8 @@ open class ManageDropboxFragment : Fragment() {
         saveButton.setOnClickListener {
             currentDropBox?.newPasswordValue = passwordTextInput.text?.toString()
             currentDropBox?.newLimitFileSize =
-                if (limiteStorageSwitch.isChecked) {
-                    limiteStorageValue.text?.toString()?.toLongOrNull()?.let { Utils.convertGigaByteToBytes(it) }
+                if (limitStorageSwitch.isChecked) {
+                    limitStorageValue.text?.toString()?.toLongOrNull()?.let { Utils.convertGigaByteToBytes(it) }
                 } else null
 
             currentDropBox?.let {
@@ -174,17 +174,17 @@ open class ManageDropboxFragment : Fragment() {
     }
 
     private fun limitStorageChanged(it: Editable?) {
-        if (limiteStorageSwitch.isChecked && (it.toString().isBlank() || it.toString().toLong() == 0L)) {
+        if (limitStorageSwitch.isChecked && (it.toString().isBlank() || it.toString().toLong() == 0L)) {
             hasErrors = currentDropBox?.limitFileSize != null
-            limiteStorageValueLayout.error = when {
-                it.toString().toLongOrNull() == 0L -> getString(R.string.createDropBoxLimiteFileSizeError)
+            limitStorageValueLayout.error = when {
+                it.toString().toLongOrNull() == 0L -> getString(R.string.createDropBoxLimitFileSizeError)
                 it.toString().isBlank() -> getString(R.string.allEmptyInputError)
                 else -> ""
             }
         } else {
             val newSize = it.toString().toLong()
             if (Utils.convertGigaByteToBytes(newSize) != currentDropBox?.limitFileSize && validationCount == 0) validationCount++
-            limiteStorageValue.showOrHideEmptyError()
+            limitStorageValue.showOrHideEmptyError()
             hasErrors = false
         }
         enableSaveButton()
@@ -219,8 +219,8 @@ open class ManageDropboxFragment : Fragment() {
 
     private fun limitStorageSwitched(dropBox: DropBox?, isChecked: Boolean) {
         if ((dropBox?.limitFileSize != null) == isChecked) validationCount-- else validationCount++
-        limiteStorageValueLayout.visibility = if (isChecked) View.VISIBLE else View.GONE
-        limiteStorageValueUnit.visibility = if (isChecked) View.VISIBLE else View.GONE
+        limitStorageValueLayout.visibility = if (isChecked) View.VISIBLE else View.GONE
+        limitStorageValueUnit.visibility = if (isChecked) View.VISIBLE else View.GONE
         currentDropBox?.withLimitFileSize = isChecked
         enableSaveButton()
     }
