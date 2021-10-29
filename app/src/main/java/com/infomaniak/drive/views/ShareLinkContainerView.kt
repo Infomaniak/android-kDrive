@@ -41,18 +41,12 @@ class ShareLinkContainerView @JvmOverloads constructor(
         inflate(context, R.layout.view_share_link_container, this)
     }
 
-    private lateinit var shareLinkListener: ShareLinkListener
-
-    interface ShareLinkListener {
-        fun onTitleClicked(shareLink: ShareLink?, currentFileId: Int)
-        fun onSettingsClicked(shareLink: ShareLink, currentFile: File)
-    }
-
-    fun init(listener: ShareLinkListener) {
-        shareLinkListener = listener
-    }
-
-    fun setup(shareLink: ShareLink?, file: File) {
+    fun setup(
+        shareLink: ShareLink?,
+        file: File,
+        onTitleClicked: (shareLink: ShareLink?, currentFileId: Int) -> Unit,
+        onSettingsClicked: (shareLink: ShareLink, currentFile: File) -> Unit
+    ) {
         currentFile = file
         this.shareLink = shareLink
         visibility = VISIBLE
@@ -60,14 +54,9 @@ class ShareLinkContainerView @JvmOverloads constructor(
 
         updateUi()
 
-        titleContainer.setOnClickListener {
-            shareLinkListener.onTitleClicked(this.shareLink, currentFile.id) // cannot be null, if null, settings will not appear
-        }
-
-        shareLinkSettings.setOnClickListener {
-            // cannot be null, if null, settings will not appear
-            shareLinkListener.onSettingsClicked(this.shareLink!!, currentFile)
-        }
+        titleContainer.setOnClickListener { onTitleClicked(this.shareLink, currentFile.id) }
+        // cannot be null, if null, settings will not appear
+        shareLinkSettings.setOnClickListener { onSettingsClicked(this.shareLink!!, currentFile) }
 
         shareLinkButton.setOnClickListener {
             this.shareLink?.url?.let {

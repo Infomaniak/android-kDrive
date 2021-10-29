@@ -35,13 +35,12 @@ import com.infomaniak.drive.data.models.Share
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.views.ShareLinkContainerView
 import com.infomaniak.drive.views.UserAvatarView
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.fragment_file_details.*
 import kotlinx.android.synthetic.main.fragment_file_details_infos.*
 
-class FileDetailsInfosFragment : FileDetailsSubFragment(), ShareLinkContainerView.ShareLinkListener {
+class FileDetailsInfosFragment : FileDetailsSubFragment() {
 
     private var shareLink: ShareLink? = null
 
@@ -50,8 +49,6 @@ class FileDetailsInfosFragment : FileDetailsSubFragment(), ShareLinkContainerVie
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        shareLinkContainer.init(this)
 
         fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) { currentFile ->
             setupShareLinkContainer(currentFile, fileDetailsViewModel.currentFileShare.value)
@@ -127,12 +124,40 @@ class FileDetailsInfosFragment : FileDetailsSubFragment(), ShareLinkContainerVie
         }
     }
 
-    private fun setupShareLinkContainer(currentFile: File?, share: Share?) {
-        if (currentFile?.rights?.canBecomeLink == true || currentFile?.shareLink?.isNotBlank() == true) {
+    private fun setupShareLinkContainer(file: File?, share: Share?) {
+
+        if (file?.rights?.canBecomeLink == true || file?.shareLink?.isNotBlank() == true) {
             shareLinkContainer.visibility = VISIBLE
             topShareDivider.visibility = VISIBLE
             botShareDivider.visibility = VISIBLE
-            shareLinkContainer.setup(shareLink = share?.link, file = currentFile)
+            shareLinkContainer.setup(
+                shareLink = share?.link,
+                file = file,
+                onTitleClicked = { shareLink, currentFileId ->
+                    this.shareLink = shareLink
+                    val currentPermission =
+                        if (this.shareLink != null) ShareLink.ShareLinkPermission.PUBLIC
+                        else ShareLink.ShareLinkPermission.RESTRICTED
+                    findNavController().navigate(
+                        FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectPermissionBottomSheetDialog(
+                            currentFileId = currentFileId,
+                            currentPermission = currentPermission,
+                            permissionsGroup = SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_SETTINGS
+                        )
+                    )
+                },
+                onSettingsClicked = { shareLink, currentFile ->
+                    this.shareLink = shareLink
+                    findNavController().navigate(
+                        FileDetailsFragmentDirections.actionFileDetailsFragmentToFileShareLinkSettings(
+                            fileId = currentFile.id,
+                            driveId = currentFile.driveId,
+                            shareLink = this.shareLink!!, // cannot be null, if null, settings will not appear
+                            onlyoffice = currentFile.onlyoffice
+                        )
+                    )
+                })
+
         } else {
             shareLinkContainer.visibility = GONE
             topShareDivider.visibility = GONE
@@ -185,34 +210,6 @@ class FileDetailsInfosFragment : FileDetailsSubFragment(), ShareLinkContainerVie
             else
                 requireActivity().showSnackbar(apiResponse.translateError())
         }
-    }
-
-    override fun onTitleClicked(shareLink: ShareLink?, currentFileId: Int) {
-
-        this.shareLink = shareLink
-        val currentPermission =
-            if (this.shareLink != null) ShareLink.ShareLinkPermission.PUBLIC
-            else ShareLink.ShareLinkPermission.RESTRICTED
-
-        findNavController().navigate(
-            FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectPermissionBottomSheetDialog(
-                currentFileId = currentFileId,
-                currentPermission = currentPermission,
-                permissionsGroup = SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_SETTINGS
-            )
-        )
-    }
-
-    override fun onSettingsClicked(shareLink: ShareLink, currentFile: File) {
-        this.shareLink = shareLink
-        findNavController().navigate(
-            FileDetailsFragmentDirections.actionFileDetailsFragmentToFileShareLinkSettings(
-                fileId = currentFile.id,
-                driveId = currentFile.driveId,
-                shareLink = this.shareLink!!, // cannot be null, if null, settings will not appear
-                onlyoffice = currentFile.onlyoffice
-            )
-        )
     }
 
     override fun onResume() {
