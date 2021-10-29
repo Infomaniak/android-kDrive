@@ -409,6 +409,7 @@
     <string name="homeSeeAllImages">Ver todas mis imágenes</string>
     <string name="homeTitle">Recepción</string>
     <string name="inputExpirationDate">Fecha de caducidad</string>
+    <string name="inputExpirationTime">Tiempo de expiración</string>
     <string name="lastEditsTitle">Últimas modificaciones</string>
     <string name="locateButton">Localizar</string>
     <string name="lockAppTitle">Aplicación bloqueada</string>

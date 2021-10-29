@@ -409,6 +409,7 @@
     <string name="homeSeeAllImages">Voir toutes mes images</string>
     <string name="homeTitle">Accueil</string>
     <string name="inputExpirationDate">Date d’expiration</string>
+    <string name="inputExpirationTime">Heure d‘expiration</string>
     <string name="lastEditsTitle">Dernières modifications</string>
     <string name="locateButton">Localiser</string>
     <string name="lockAppTitle">Application verrouillée</string>

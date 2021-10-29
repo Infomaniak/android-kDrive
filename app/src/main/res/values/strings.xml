@@ -418,6 +418,7 @@
     <string name="homeSeeAllImages">View all my images</string>
     <string name="homeTitle">Welcome</string>
     <string name="inputExpirationDate">Expiry date</string>
+    <string name="inputExpirationTime">Expiration time</string>
     <string name="lastEditsTitle">Most recent changes</string>
     <string name="locateButton">Locate</string>
     <string name="lockAppTitle">Application locked</string>

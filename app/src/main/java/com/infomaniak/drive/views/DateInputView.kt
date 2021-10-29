@@ -51,7 +51,7 @@ class DateInputView @JvmOverloads constructor(
                 if (event.action == MotionEvent.ACTION_UP) {
                     showDatePicker(fragmentManager, currentCalendarDate) { calendarResult ->
                         currentCalendarDate = Date(calendarResult)
-                        dateValueInput.text = SpannableStringBuilder(currentCalendarDate.format())
+                        text = SpannableStringBuilder(currentCalendarDate.format())
                         onDateSet?.invoke(calendarResult)
                     }
                 }

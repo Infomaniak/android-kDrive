@@ -138,7 +138,29 @@ class FileShareLinkSettingsFragment : Fragment() {
 
             addExpirationDateSwitch.isChecked = shareLink.validUntil != null
             expirationDateInput.init(fragmentManager = parentFragmentManager, defaultCalendarTimestamp) {
-                val validUntil = Date(it)
+                val validUntil = Calendar.getInstance().apply {
+                    val date = Date(it)
+                    set(
+                        date.year(),
+                        date.month(),
+                        date.day(),
+                        defaultCalendarTimestamp.hours(),
+                        defaultCalendarTimestamp.minutes()
+                    )
+                }.time
+                shareLink.validUntil = validUntil
+                defaultCalendarTimestamp = validUntil
+            }
+            expirationTimeInput.init(fragmentManager = parentFragmentManager, defaultCalendarTimestamp) { hours, minutes ->
+                val validUntil = Calendar.getInstance().apply {
+                    set(
+                        defaultCalendarTimestamp.year(),
+                        defaultCalendarTimestamp.month(),
+                        defaultCalendarTimestamp.day(),
+                        hours,
+                        minutes
+                    )
+                }.time
                 shareLink.validUntil = validUntil
                 defaultCalendarTimestamp = validUntil
             }
@@ -158,6 +180,7 @@ class FileShareLinkSettingsFragment : Fragment() {
 
         addExpirationDateSwitch.setOnCheckedChangeListener { _, isChecked ->
             expirationDateInput.isVisible = isChecked
+            expirationTimeInput.isVisible = isChecked
             shareLink.validUntil = if (isChecked) defaultCalendarTimestamp else null
         }
 
@@ -206,9 +229,6 @@ class FileShareLinkSettingsFragment : Fragment() {
             if (!isValid) {
                 saveButton?.hideProgress(R.string.buttonSave)
             } else {
-
-                shareLink.validUntil = shareLink.validUntil?.endOfTheDay()
-
                 shareViewModel.editFileShareLink(file, shareLink).observe(viewLifecycleOwner) { apiResponse ->
                     if (apiResponse.data == true) {
                         findNavController().popBackStack()

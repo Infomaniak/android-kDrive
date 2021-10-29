@@ -342,13 +342,31 @@ fun Long.toApiDate(): Date {
     return Date(this / 1000)
 }
 
-fun Date.endOfTheDay(): Date =
+fun Date.year(): Int =
     Calendar.getInstance().apply {
-        time = this@endOfTheDay
-        set(Calendar.HOUR_OF_DAY, 23)
-        set(Calendar.MINUTE, 59)
-        set(Calendar.SECOND, 59)
-    }.time
+        time = this@year
+    }.get(Calendar.YEAR)
+
+
+fun Date.month(): Int =
+    Calendar.getInstance().apply {
+        time = this@month
+    }.get(Calendar.MONTH)
+
+fun Date.day(): Int =
+    Calendar.getInstance().apply {
+        time = this@day
+    }.get(Calendar.DAY_OF_MONTH)
+
+fun Date.hours(): Int =
+    Calendar.getInstance().apply {
+        time = this@hours
+    }.get(Calendar.HOUR_OF_DAY)
+
+fun Date.minutes(): Int =
+    Calendar.getInstance().apply {
+        time = this@minutes
+    }.get(Calendar.MINUTE)
 
 fun ImageView.animateRotation(isDeployed: Boolean = false) {
     val startDeg = if (isDeployed) 0F else 90F

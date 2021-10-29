@@ -22,21 +22,21 @@
     android:layout_height="wrap_content">
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/dateValueLayout"
+        android:id="@+id/timeValueLayout"
         style="@style/TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/marginStandardMedium"
-        android:hint="@string/inputExpirationDate"
-        app:endIconDrawable="@drawable/ic_calendar"
+        android:hint="@string/inputExpirationTime"
+        app:endIconDrawable="@drawable/ic_clock"
         app:endIconMode="custom">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/dateValueInput"
+            android:id="@+id/timeValueInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="date"
-            tools:text="18.10.2021" />
+            tools:text="16:42" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

@@ -274,19 +274,39 @@
                     android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/addExpirationDateDescription"
-                    tools:visibility="visible" />
+                    app:layout_constraintTop_toBottomOf="@id/addExpirationDateDescription" />
 
                 <com.infomaniak.drive.views.DateInputView
                     android:id="@+id/expirationDateInput"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/marginStandardMedium"
                     android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/expirationDateSeparator"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/addExpirationDateDescription" />
+                    app:layout_constraintTop_toBottomOf="@id/addExpirationDateDescription"
+                    tools:visibility="visible" />
+
+                <View
+                    android:id="@+id/expirationDateSeparator"
+                    android:layout_width="@dimen/marginStandard"
+                    android:layout_height="0dp"
+                    app:layout_constraintBottom_toBottomOf="@id/expirationDateInput"
+                    app:layout_constraintEnd_toStartOf="@id/expirationTimeInput"
+                    app:layout_constraintStart_toEndOf="@id/expirationDateInput"
+                    app:layout_constraintTop_toTopOf="@id/expirationDateInput" />
+
+                <com.infomaniak.drive.views.TimeInputView
+                    android:id="@+id/expirationTimeInput"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="@id/expirationDateInput"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/expirationDateSeparator"
+                    app:layout_constraintTop_toTopOf="@id/expirationDateInput"
+                    tools:visibility="visible" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -159,7 +159,7 @@
     <string name="buttonValid">Convalida</string>
     <string name="categoriesFilterTitle">Categorie</string>
     <string name="categoriesPanelDescription">kDrive ora ti permette di classificare i tuoi documenti con categorie personalizzate. La ricerca permette poi di trovare i file secondo le categorie di vostra scelta.</string>
-    <string name="categoriesPanelTitle">Novità: semplificare l\'archiviazione con le categorie!</string>
+    <string name="categoriesPanelTitle">Novità: semplificare l‘archiviazione con le categorie!</string>
     <string name="categoryBanking">Banca</string>
     <string name="categoryBill">Fattura</string>
     <string name="categoryColorTitle">Colore della categoria</string>
@@ -206,7 +206,7 @@
     <string name="createFolderTitle">Crea una cartella</string>
     <string name="createFolderValidUntilDescription">Dopo tale data, gli utenti non potranno più trasferire i file.</string>
     <string name="createPrivateFolderSucces">Cartella creata con successo</string>
-    <string name="deletePicturesDescription">L\'applicazione ti chiederà regolarmente di cancellare le foto dal tuo dispositivo che sono già sincronizzate sul tuo kDrive. Dovrai autorizzare manualmente la cancellazione</string>
+    <string name="deletePicturesDescription">L‘applicazione ti chiederà regolarmente di cancellare le foto dal tuo dispositivo che sono già sincronizzate sul tuo kDrive. Dovrai autorizzare manualmente la cancellazione</string>
     <string name="deletePicturesTitle">Cancellare le foto (Beta)</string>
     <plurals name="driveBlockedDescription">
         <item quantity="one">Il prodotto è scaduto dal %s. Rinnovalo per gestirlo e accedere ai suoi dati.</item>
@@ -409,6 +409,7 @@
     <string name="homeSeeAllImages">Mostra tutte le mie immagini</string>
     <string name="homeTitle">Home</string>
     <string name="inputExpirationDate">Data di scadenza</string>
+    <string name="inputExpirationTime">Tempo di scadenza</string>
     <string name="lastEditsTitle">Ultime modifiche</string>
     <string name="locateButton">Localizzare</string>
     <string name="lockAppTitle">Applicazione bloccata</string>
