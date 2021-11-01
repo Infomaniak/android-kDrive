@@ -103,6 +103,10 @@ import kotlinx.android.synthetic.main.item_file.view.fileOfflineProgression
 import kotlinx.android.synthetic.main.item_file.view.filePreview
 import kotlinx.android.synthetic.main.item_file.view.progressLayout
 import kotlinx.android.synthetic.main.item_user.view.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.abs
@@ -279,8 +283,10 @@ fun View.setFileItem(
                 }
                 file.isFromUploads && (file.getMimeType().startsWith("image/") || file.getMimeType().startsWith("video/")) -> {
                     filePreview.scaleType = ImageView.ScaleType.CENTER_CROP
-                    filePreview.load(context.getLocalThumbnail(file)) {
-                        fallback(file.getFileType().icon)
+                    CoroutineScope(Dispatchers.Default).launch {
+                        filePreview.load(context.getLocalThumbnail(file)) {
+                            fallback(file.getFileType().icon)
+                        }
                     }
                 }
                 else -> {
@@ -564,10 +570,11 @@ fun Drive?.getDriveUsers(): List<DriveUser> = this?.users?.let { categories ->
     return@let DriveInfosController.getUsers(ArrayList(categories.drive + categories.account))
 } ?: listOf()
 
-fun Context.getLocalThumbnail(file: File): Bitmap? {
+@Suppress("BlockingMethodInNonBlockingContext")
+suspend fun Context.getLocalThumbnail(file: File): Bitmap? = withContext(Dispatchers.IO) {
     val fileUri = file.path.toUri()
     val thumbnailSize = 100
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+    return@withContext if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         val size = Size(thumbnailSize, thumbnailSize)
         try {
             if (fileUri.scheme.equals(ContentResolver.SCHEME_FILE)) {
@@ -598,7 +605,7 @@ fun Context.getLocalThumbnail(file: File): Bitmap? {
                 localFile.absolutePath
             }
             "com.android.externalstorage.documents" == fileUri.authority -> {
-                Utils.getRealPathFromExternalStorage(this, fileUri)
+                Utils.getRealPathFromExternalStorage(this@getLocalThumbnail, fileUri)
             }
             else -> ""
         }
