@@ -21,10 +21,10 @@ import android.os.Bundle
 import android.text.format.Formatter
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.core.view.forEachIndexed
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
@@ -57,28 +57,28 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
 
             if (currentFile.createdAt.isPositive()) {
                 addedDateValue.text = currentFile.getCreatedAt().format("dd MMM yyyy - HH:mm")
-                addedDate.visibility = VISIBLE
+                addedDate.isVisible = true
             }
 
             if (currentFile.fileCreatedAt.isPositive()) {
                 creationDateValue.text = currentFile.getFileCreatedAt().format("dd MMM yyyy - HH:mm")
-                creationDate.visibility = VISIBLE
+                creationDate.isVisible = true
             }
 
             displayFileOwner(currentFile)
 
             if (currentFile.path.isNotBlank()) {
                 pathValue.text = currentFile.path
-                path.visibility = VISIBLE
+                path.isVisible = true
             }
 
             currentFile.sizeWithVersions?.let {
                 totalSizeValue.text = Formatter.formatFileSize(context, it)
-                totalSize.visibility = VISIBLE
+                totalSize.isVisible = true
             }
             currentFile.size?.let {
                 originalSizeValue.text = Formatter.formatFileSize(context, it)
-                originalSize.visibility = VISIBLE
+                originalSize.isVisible = true
             }
         }
 
@@ -103,23 +103,23 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
 
     private fun setupShareButton(currentFile: File) {
         if (currentFile.rights?.share == true) {
-            shareButton.visibility = VISIBLE
+            shareButton.isVisible = true
             shareButton.setOnClickListener {
                 parentFragment?.safeNavigate(
                     FileDetailsFragmentDirections.actionFileDetailsFragmentToFileShareDetailsFragment(file = currentFile)
                 )
             }
         } else {
-            shareButton.visibility = GONE
+            shareButton.isGone = true
         }
     }
 
     private fun setupShareLinkContainer(file: File?, share: Share?) {
 
         if (file?.rights?.canBecomeLink == true || file?.shareLink?.isNotBlank() == true) {
-            shareLinkContainer.visibility = VISIBLE
-            topShareDivider.visibility = VISIBLE
-            botShareDivider.visibility = VISIBLE
+            shareLinkContainer.isVisible = true
+            topShareDivider.isVisible = true
+            botShareDivider.isVisible = true
             shareLinkContainer.setup(
                 shareLink = share?.link,
                 file = file,
@@ -148,9 +148,9 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
                 })
 
         } else {
-            shareLinkContainer.visibility = GONE
-            topShareDivider.visibility = GONE
-            botShareDivider.visibility = GONE
+            shareLinkContainer.isGone = true
+            topShareDivider.isGone = true
+            botShareDivider.isGone = true
         }
     }
 
@@ -158,9 +158,9 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         val userIds = if (file.users.isEmpty()) arrayListOf(file.createdBy) else ArrayList(file.users)
         val userList = DriveInfosController.getUsers(userIds = userIds)
         if (userList.isEmpty()) {
-            users.visibility = GONE
+            users.isGone = true
         } else {
-            users.visibility = VISIBLE
+            users.isVisible = true
             userListLayout.forEachIndexed { index, view ->
                 (view as UserAvatarView).apply {
                     if (index < MAX_DISPLAYED_USERS) {
@@ -176,7 +176,7 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
     private fun displayFileOwner(file: File) {
         val userList = DriveInfosController.getUsers(arrayListOf(file.createdBy))
         userList.firstOrNull()?.apply {
-            owner.visibility = VISIBLE
+            owner.isVisible = true
             ownerAvatar.loadAvatar(this)
             ownerValue.text = displayName
         }
@@ -203,7 +203,7 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
 
     override fun onResume() {
         super.onResume()
-        requireParentFragment().addCommentButton.visibility = GONE
+        requireParentFragment().addCommentButton.isGone = true
     }
 
     companion object {

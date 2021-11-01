@@ -19,9 +19,11 @@ package com.infomaniak.drive.ui.fileList.fileShare
 
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.*
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.infomaniak.drive.R
@@ -51,9 +53,9 @@ class SharedItemsAdapter(
         holder.itemView.apply {
             if (item.id != file.createdBy && file.rights?.share == true) {
                 setOnClickListener { onItemClicked(item) }
-                chevron.visibility = VISIBLE
+                chevron.isVisible = true
             } else {
-                chevron.visibility = INVISIBLE
+                chevron.isInvisible = true
             }
 
             when (item) {
@@ -76,8 +78,8 @@ class SharedItemsAdapter(
                     if (driveUser.status == "pending") R.string.shareUserNotAccepted
                     else R.string.shareUserExternal
                 )
-                visibility = VISIBLE
-            } else visibility = GONE
+                isVisible = true
+            } else isGone = true
         }
         if (file.createdBy == driveUser.id) {
             rightsValue.setTextColor(ContextCompat.getColor(context, R.color.secondaryText))
@@ -87,11 +89,11 @@ class SharedItemsAdapter(
     private fun View.bindInvitation(invitation: Invitation) {
         if (invitation.displayName.isNullOrEmpty()) {
             name.text = invitation.email
-            infos.visibility = GONE
+            infos.isGone = true
         } else {
             name.text = invitation.displayName
             infos.text = invitation.email
-            infos.visibility = VISIBLE
+            infos.isVisible = true
         }
 
         avatar.apply {
@@ -101,7 +103,7 @@ class SharedItemsAdapter(
         rightsValue.setText(invitation.getFilePermission().translation)
         externalUserLabel.apply {
             text = context.getString(R.string.shareUserNotAccepted)
-            visibility = VISIBLE
+            isVisible = true
         }
 
         if (invitation.id != file.createdBy && file.rights?.share == true) {
@@ -119,7 +121,7 @@ class SharedItemsAdapter(
         }
         avatar.setBackgroundColor(team.getParsedColor())
 
-        infos.visibility = GONE
+        infos.isGone = true
         rightsValue.setText(team.getFilePermission().translation)
         if (file.createdBy == team.id) {
             rightsValue.setTextColor(ContextCompat.getColor(context, R.color.secondaryText))

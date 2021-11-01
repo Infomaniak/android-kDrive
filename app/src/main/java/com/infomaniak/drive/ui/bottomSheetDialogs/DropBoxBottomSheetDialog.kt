@@ -19,7 +19,7 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import android.os.Bundle
 import android.view.View
-import android.view.View.VISIBLE
+import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.utils.AccountUtils
@@ -41,7 +41,7 @@ class DropBoxBottomSheetDialog : InformationBottomSheetDialog() {
             dismiss()
         }
 
-        packAvailability.visibility = VISIBLE
+        packAvailability.isVisible = true
         packAvailability.text = getString(R.string.allPackAvailability, "Team & Pro")
     }
 }

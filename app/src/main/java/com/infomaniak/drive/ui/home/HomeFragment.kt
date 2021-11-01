@@ -22,10 +22,10 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -94,16 +94,16 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
-            noNetworkCard.visibility = if (isInternetAvailable) GONE else VISIBLE
+            noNetworkCard.isGone = isInternetAvailable
         }
 
         homeViewModel.driveSelectionDialogDismissed.observe(viewLifecycleOwner) { newDriveIsSelected ->
             if (newDriveIsSelected == true) {
                 (activity as? MainActivity)?.saveLastNavigationItemSelected()
                 AccountUtils.reloadApp?.invoke() // TODO Hack
-//                homeViewModel.clearDownloadTimes()
-//                initLastElementsAdapter() // Re-init the adapters if Drive type has changed between two Drives
-//                updateDriveInfos(newDriveIsSelected)
+                // homeViewModel.clearDownloadTimes()
+                // initLastElementsAdapter() // Re-init the adapters if Drive type has changed between two Drives
+                // updateDriveInfos(newDriveIsSelected)
             }
         }
 
@@ -111,8 +111,8 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             safeNavigate(R.id.switchDriveDialog)
         }
 
-        searchView.visibility = GONE
-        searchViewText.visibility = VISIBLE
+        searchView.isGone = true
+        searchViewText.isVisible = true
         ViewCompat.requestApplyInsets(homeCoordinator)
 
         searchViewCard.setOnClickListener {
@@ -253,7 +253,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun setupLastElementsTitle(isProOrTeam: Boolean) {
         lastElementsTitle.apply {
             text = if (isProOrTeam) getString(R.string.homeLastActivities) else getString(R.string.homeMyLastPictures)
-            visibility = VISIBLE
+            isVisible = true
         }
     }
 
@@ -311,8 +311,8 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
         mainViewModel.getRecentChanges(AccountUtils.currentDriveId, true, forceDownload).observe(viewLifecycleOwner) { result ->
             result?.apply {
-                lastFilesRecyclerView.visibility = if (files.isNullOrEmpty()) GONE else VISIBLE
-                lastFilesTitle.visibility = if (files.isNullOrEmpty()) GONE else VISIBLE
+                lastFilesRecyclerView.isGone = files.isNullOrEmpty()
+                lastFilesTitle.isGone = files.isNullOrEmpty()
                 lastFilesAdapter.addAll(files)
             }
         }

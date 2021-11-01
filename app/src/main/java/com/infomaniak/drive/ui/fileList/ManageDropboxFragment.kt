@@ -23,6 +23,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -72,12 +74,12 @@ open class ManageDropboxFragment : Fragment() {
 
         shareLinkContainer.apply {
             shareLinkTitle.text = getString(R.string.dropBoxLinkTitle)
-            shareLinkUrl.visibility = View.VISIBLE
-            shareLinkIcon.visibility = View.GONE
-            titleSeparator.visibility = View.GONE
-            shareLinkStatus.visibility = View.GONE
-            shareLinkSwitch.visibility = View.GONE
-            shareLinkSettings.visibility = View.GONE
+            shareLinkUrl.isVisible = true
+            shareLinkIcon.isGone = true
+            titleSeparator.isGone = true
+            shareLinkStatus.isGone = true
+            shareLinkSwitch.isGone = true
+            shareLinkSettings.isGone = true
         }
 
         disableButton.isEnabled = false
@@ -112,12 +114,12 @@ open class ManageDropboxFragment : Fragment() {
             dropBox.limitFileSize?.let { size -> limitStorageValue.setText(Utils.convertBytesToGigaBytes(size).toString()) }
 
             if (dropBox.password) {
-                newPasswordButton.visibility = View.VISIBLE
+                newPasswordButton.isVisible = true
                 needNewPassword = true
             }
-            if (expirationDateSwitch.isChecked) expirationDateInput.visibility = View.VISIBLE
-            if (limitStorageSwitch.isChecked) limitStorageValueLayout.visibility = View.VISIBLE
-            if (limitStorageSwitch.isChecked) limitStorageValueUnit.visibility = View.VISIBLE
+            if (expirationDateSwitch.isChecked) expirationDateInput.isVisible = true
+            if (limitStorageSwitch.isChecked) limitStorageValueLayout.isVisible = true
+            if (limitStorageSwitch.isChecked) limitStorageValueUnit.isVisible = true
 
             expirationDateInput.init(fragmentManager = parentFragmentManager, dropBox.validUntil ?: Date()) {
                 currentDropBox?.newValidUntil = Date(it)
@@ -131,8 +133,8 @@ open class ManageDropboxFragment : Fragment() {
         expirationDateSwitch.setOnCheckedChangeListener { _, isChecked -> expirationDateSwitched(dropBox, isChecked) }
         limitStorageSwitch.setOnCheckedChangeListener { _, isChecked -> limitStorageSwitched(dropBox, isChecked) }
         newPasswordButton.setOnClickListener {
-            passwordTextLayout.visibility = View.VISIBLE
-            newPasswordButton.visibility = View.GONE
+            passwordTextLayout.isVisible = true
+            newPasswordButton.isGone = true
             needNewPassword = false
         }
 
@@ -197,30 +199,34 @@ open class ManageDropboxFragment : Fragment() {
     }
 
     private fun passwordSwitched(dropBox: DropBox?, isChecked: Boolean) {
+
         if (dropBox?.password == isChecked) validationCount-- else validationCount++
-        if (needNewPassword) {
-            newPasswordButton.visibility = if (isChecked) View.VISIBLE else View.GONE
-        } else {
-            passwordTextLayout.visibility = if (isChecked) View.VISIBLE else View.GONE
-        }
+
+        if (needNewPassword) newPasswordButton else passwordTextLayout
+            .apply { isVisible = isChecked }
+
         currentDropBox?.newPassword = isChecked
+
         enableSaveButton()
     }
 
     private fun expirationDateSwitched(dropBox: DropBox?, isChecked: Boolean) {
+
         if ((dropBox?.validUntil != null) == isChecked) validationCount-- else validationCount++
-        expirationDateInput.visibility = if (isChecked) View.VISIBLE else View.GONE
+
+        expirationDateInput.isVisible = isChecked
 
         currentDropBox?.newValidUntil =
             if (isChecked) currentDropBox?.validUntil ?: Date()
             else null
+
         enableSaveButton()
     }
 
     private fun limitStorageSwitched(dropBox: DropBox?, isChecked: Boolean) {
         if ((dropBox?.limitFileSize != null) == isChecked) validationCount-- else validationCount++
-        limitStorageValueLayout.visibility = if (isChecked) View.VISIBLE else View.GONE
-        limitStorageValueUnit.visibility = if (isChecked) View.VISIBLE else View.GONE
+        limitStorageValueLayout.isVisible = isChecked
+        limitStorageValueUnit.isVisible = isChecked
         currentDropBox?.withLimitFileSize = isChecked
         enableSaveButton()
     }

@@ -20,9 +20,8 @@ package com.infomaniak.drive.ui.fileList.fileShare
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -98,7 +97,7 @@ class FileShareLinkSettingsFragment : Fragment() {
             addPasswordLayout.apply {
                 addPasswordSwitch.isEnabled = false
                 addPasswordSwitch.isClickable = false
-                upgradeOfferPassword.visibility = VISIBLE
+                upgradeOfferPassword.isVisible = true
             }
 
             settingsLayout?.apply {
@@ -110,7 +109,7 @@ class FileShareLinkSettingsFragment : Fragment() {
             addExpirationDateLayout.apply {
                 addExpirationDateSwitch.isEnabled = false
                 addExpirationDateSwitch.isClickable = false
-                upgradeOfferExpirationDate.visibility = VISIBLE
+                upgradeOfferExpirationDate.isVisible = true
             }
         }
 
@@ -121,13 +120,13 @@ class FileShareLinkSettingsFragment : Fragment() {
         shareLink.apply {
 
             if (navigationArgs.isOnlyOfficeFile || navigationArgs.isFolder) {
-                rightsTitle.visibility = VISIBLE
-                fileShareLinkRights.visibility = VISIBLE
+                rightsTitle.isVisible = true
+                fileShareLinkRights.isVisible = true
                 rightsValue.setText(officePermission.translation)
                 rightsIcon.load(officePermission.icon)
             } else {
-                rightsTitle.visibility = GONE
-                fileShareLinkRights.visibility = GONE
+                rightsTitle.isGone = true
+                fileShareLinkRights.isGone = true
             }
 
             allowDownloadValue.isChecked = !blockDownloads
@@ -135,8 +134,8 @@ class FileShareLinkSettingsFragment : Fragment() {
             blockUsersConsultValue.isChecked = blockInformation
 
             if (permission == ShareLink.ShareLinkFilePermission.PASSWORD) {
-                passwordTextLayout.visibility = GONE
-                newPasswordButton.visibility = VISIBLE
+                passwordTextLayout.isGone = true
+                newPasswordButton.isVisible = true
                 addPasswordSwitch.isChecked = true
             }
 
@@ -184,7 +183,7 @@ class FileShareLinkSettingsFragment : Fragment() {
             if (shareLink.permission == ShareLink.ShareLinkFilePermission.PUBLIC) {
                 passwordTextLayout.isVisible = isChecked
             } else if (shareLink.permission == ShareLink.ShareLinkFilePermission.PASSWORD) {
-                passwordTextLayout.visibility = GONE
+                passwordTextLayout.isGone = true
                 newPasswordButton.isVisible = isChecked
             }
         }
@@ -196,8 +195,8 @@ class FileShareLinkSettingsFragment : Fragment() {
         }
 
         newPasswordButton.setOnClickListener {
-            newPasswordButton.visibility = GONE
-            passwordTextLayout.visibility = VISIBLE
+            newPasswordButton.isGone = true
+            passwordTextLayout.isVisible = true
         }
 
         allowDownloadValue.setOnCheckedChangeListener { _, isChecked ->

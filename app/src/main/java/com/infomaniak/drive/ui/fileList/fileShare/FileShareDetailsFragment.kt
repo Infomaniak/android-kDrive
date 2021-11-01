@@ -20,10 +20,10 @@ package com.infomaniak.drive.ui.fileList.fileShare
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.activity.addCallback
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -79,7 +79,7 @@ class FileShareDetailsFragment : Fragment() {
             currentFile.name
         )
 
-        sharedUsersTitle.visibility = GONE
+        sharedUsersTitle.isGone = true
         setupShareLinkContainer(currentFile, null)
         refreshUi()
 
@@ -148,7 +148,7 @@ class FileShareDetailsFragment : Fragment() {
                         notShareableTeamIds = ArrayList(share.teams.map { team -> team.id })
                     }
 
-                    sharedUsersTitle.visibility = VISIBLE
+                    sharedUsersTitle.isVisible = true
                     sharedItemsAdapter.setAll(ArrayList(share.invitations + share.teams + share.users))
                     setupShareLinkContainer(file, share.link)
                 }
@@ -164,7 +164,7 @@ class FileShareDetailsFragment : Fragment() {
     private fun setupShareLinkContainer(file: File, shareLink: ShareLink?) {
 
         if (file.rights?.canBecomeLink == true || file.shareLink?.isNotBlank() == true) {
-            shareLinkLayout.visibility = VISIBLE
+            shareLinkLayout.isVisible = true
             shareLinkContainer.setup(
                 shareLink = shareLink,
                 file = file,
@@ -196,7 +196,7 @@ class FileShareDetailsFragment : Fragment() {
                 })
 
         } else {
-            shareLinkLayout.visibility = GONE
+            shareLinkLayout.isGone = true
         }
     }
 

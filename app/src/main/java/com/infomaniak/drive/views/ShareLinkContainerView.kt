@@ -19,8 +19,9 @@ package com.infomaniak.drive.views
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.View
 import android.widget.FrameLayout
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
@@ -48,7 +49,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
     ) {
         currentFile = file
         this.shareLink = shareLink
-        visibility = VISIBLE
+        isVisible = true
         urlValue = file.shareLink ?: ""
 
         updateUi()
@@ -70,13 +71,13 @@ class ShareLinkContainerView @JvmOverloads constructor(
         val title = if (shareLink == null && urlValue.isBlank()) {
             shareLinkIcon.setImageResource(R.drawable.ic_lock)
             shareLinkTitle.setText(R.string.restrictedSharedLinkTitle)
-            shareLinkBottomContainer.visibility = View.GONE
+            shareLinkBottomContainer.isGone = true
             if (currentFile.isFolder()) R.string.shareLinkRestrictedRightFolderDescription
             else R.string.shareLinkRestrictedRightFileDescription
         } else {
             shareLinkIcon.setImageResource(R.drawable.ic_unlock)
             shareLinkTitle.setText(R.string.publicSharedLinkTitle)
-            shareLinkBottomContainer.visibility = View.VISIBLE
+            shareLinkBottomContainer.isVisible = true
             if (currentFile.isFolder()) R.string.shareLinkPublicRightFolderDescription
             else R.string.shareLinkPublicRightFileDescription
         }

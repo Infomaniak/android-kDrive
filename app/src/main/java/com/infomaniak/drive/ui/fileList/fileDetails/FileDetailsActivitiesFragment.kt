@@ -20,8 +20,8 @@ package com.infomaniak.drive.ui.fileList.fileDetails
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
 import android.view.ViewGroup
+import androidx.core.view.isGone
 import com.infomaniak.drive.R
 import kotlinx.android.synthetic.main.fragment_file_details.*
 import kotlinx.android.synthetic.main.fragment_file_details_activities.*
@@ -55,6 +55,6 @@ class FileDetailsActivitiesFragment : FileDetailsSubFragment() {
 
     override fun onResume() {
         super.onResume()
-        requireParentFragment().addCommentButton.visibility = GONE
+        requireParentFragment().addCommentButton.isGone = true
     }
 }

@@ -18,8 +18,8 @@
 package com.infomaniak.drive.ui.menu.settings
 
 import android.view.LayoutInflater
-import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.MediaFolder
@@ -59,7 +59,7 @@ class MediaFoldersAdapter(
                 mediaFolderTitle.text = mediaFolder.name
                 mediaFolderSwitch.apply {
                     isChecked = mediaFolder.isSynced
-                    visibility = VISIBLE
+                    isVisible = true
                     setOnCheckedChangeListener { _, isChecked ->
                         if (mediaFolderSwitch.isPressed) {
                             onSwitchChanged(mediaFolder, isChecked)

@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.fileList
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isGone
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
@@ -42,8 +43,8 @@ class ConvertToDropBoxFragment : ManageDropboxFragment() {
 
         fileShareCollapsingToolbarLayout.title = getString(R.string.convertToDropboxTitle, navigationArgs.fileName)
 
-        shareLinkCardView.visibility = View.GONE
-        disableButton.visibility = View.GONE
+        shareLinkCardView.isGone = true
+        disableButton.isGone = true
 
         FileController.getFileById(navigationArgs.fileId)?.let { file ->
             updateUI(file, null)

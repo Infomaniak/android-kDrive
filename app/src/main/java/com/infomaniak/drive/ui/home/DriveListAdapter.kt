@@ -20,8 +20,8 @@ package com.infomaniak.drive.ui.home
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isGone
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
@@ -48,8 +48,7 @@ class DriveListAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         driveList[position].let { drive ->
             holder.itemView.apply {
-                switchDrive.visibility =
-                    if (drive.id == AccountUtils.currentDriveId && hideCurrentDriveChevron) View.GONE else View.VISIBLE
+                switchDrive.isGone = (drive.id == AccountUtils.currentDriveId) && hideCurrentDriveChevron
                 driveName.text = drive.name
                 driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(drive.preferences.color))
                 setOnClickListener { onItemClicked(drive) }

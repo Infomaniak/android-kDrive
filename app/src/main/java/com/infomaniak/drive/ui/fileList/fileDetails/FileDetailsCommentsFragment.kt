@@ -20,8 +20,8 @@ package com.infomaniak.drive.ui.fileList.fileDetails
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileComment
@@ -181,6 +181,6 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
 
     override fun onResume() {
         super.onResume()
-        requireParentFragment().addCommentButton.visibility = VISIBLE
+        requireParentFragment().addCommentButton.isVisible = true
     }
 }

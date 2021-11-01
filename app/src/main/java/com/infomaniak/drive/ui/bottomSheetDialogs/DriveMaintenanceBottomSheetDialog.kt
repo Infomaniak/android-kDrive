@@ -19,7 +19,7 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import android.os.Bundle
 import android.view.View
-import android.view.View.GONE
+import androidx.core.view.isGone
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.utils.toPx
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
@@ -43,7 +43,7 @@ class DriveMaintenanceBottomSheetDialog : InformationBottomSheetDialog() {
             setOnClickListener { dismiss() }
         }
 
-        secondaryActionButton.visibility = GONE
+        secondaryActionButton.isGone = true
     }
 
     companion object {

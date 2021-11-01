@@ -21,8 +21,8 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
-import android.view.View.VISIBLE
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
@@ -46,8 +46,8 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
         accessPermissionTitle.setText(R.string.createCommonFolderDescription)
         createFolderCollapsing.title = getString(R.string.createCommonFolderTitle)
         folderCreateIcon.icon.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_folder_common_documents))
-        pathCard.visibility = VISIBLE
-        pathTitle.visibility = VISIBLE
+        pathCard.isVisible = true
+        pathTitle.isVisible = true
 
         AccountUtils.getCurrentDrive()?.let { drive ->
             pathDriveText.text = drive.name

@@ -19,8 +19,8 @@ package com.infomaniak.drive.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View.GONE
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isGone
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -58,12 +58,10 @@ class MaintenanceActivity : AppCompatActivity() {
 
         noDriveActionButton.apply {
             if (isTechnicalMaintenance) {
-                visibility = GONE
+                isGone = true
             } else {
                 noDriveActionButton.text = getString(R.string.buttonRenew)
-                setOnClickListener {
-                    openUrl(ApiRoutes.orderDrive())
-                }
+                setOnClickListener { openUrl(ApiRoutes.orderDrive()) }
             }
         }
 

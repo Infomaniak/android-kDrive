@@ -20,9 +20,9 @@ package com.infomaniak.drive.ui.fileList
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
@@ -246,27 +246,30 @@ open class FileAdapter(
                 when {
                     uploadInProgress && !file.isPendingUploadFolder() -> {
                         stopUploadButton?.setOnClickListener { onStopUploadButtonClicked?.invoke(file.name) }
-                        stopUploadButton?.visibility = VISIBLE
+                        stopUploadButton?.isVisible = true
                     }
                     multiSelectMode -> {
                         fileChecked.isChecked = isSelectedFile(file) || allSelected
-                        fileChecked.visibility = VISIBLE
-                        filePreview.visibility = if (isGrid) VISIBLE else GONE
+                        fileChecked.isVisible = true
+                        filePreview.isVisible = isGrid
                     }
                     else -> {
-                        filePreview.visibility = VISIBLE
-                        fileChecked.visibility = GONE
+                        filePreview.isVisible = true
+                        fileChecked.isGone = true
                     }
                 }
 
-                menuButton?.visibility = when {
-                    uploadInProgress || uploadInProgress || selectFolder ||
-                            file.isDrive() || file.isTrashed() ||
-                            file.isFromActivities || file.isFromSearch ||
-                            (offlineMode && !file.isOffline) -> GONE
-                    else -> VISIBLE
+                menuButton?.apply {
+                    isGone = uploadInProgress
+                            || uploadInProgress
+                            || selectFolder
+                            || file.isDrive()
+                            || file.isTrashed()
+                            || file.isFromActivities
+                            || file.isFromSearch
+                            || (offlineMode && !file.isOffline)
+                    setOnClickListener { onMenuClicked?.invoke(file) }
                 }
-                menuButton?.setOnClickListener { onMenuClicked?.invoke(file) }
 
                 fileChecked.setOnClickListener {
                     onSelectedFile(file, fileChecked.isChecked)
@@ -316,7 +319,7 @@ open class FileAdapter(
     }
 
     private fun View.enabledFile(enable: Boolean = true) {
-        disabled.visibility = if (enable) GONE else VISIBLE
+        disabled.isGone = enable
         fileCardView.isEnabled = enable
     }
 
