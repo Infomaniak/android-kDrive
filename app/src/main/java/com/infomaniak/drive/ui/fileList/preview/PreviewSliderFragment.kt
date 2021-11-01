@@ -93,7 +93,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
 
         getBackNavigationResult<Boolean>(DownloadProgressDialog.OPEN_WITH) {
-            requireContext().openWith(currentPreviewFile, userDrive)
+            context?.openWith(currentPreviewFile, userDrive)
         }
 
         drivePermissions = DrivePermissions()
