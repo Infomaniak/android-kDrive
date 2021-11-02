@@ -47,12 +47,12 @@ class FileShareViewModel : ViewModel() {
             "valid_until" to (shareLink.validUntil?.time?.let { it / 1_000L } ?: "")
         )
 
-        if (shareLink.password.isNullOrBlank()) {
-            body.remove("password")
-            if (shareLink.permission == ShareLink.ShareLinkPermission.PASSWORD)
-                body.remove("permission")
-        } else
-            body["password"] = shareLink.password
+        when {
+            shareLink.password.isNullOrBlank() -> {
+                if (shareLink.permission == ShareLink.ShareLinkPermission.PASSWORD) body.remove("permission")
+            }
+            else -> body["password"] = shareLink.password
+        }
 
         emit(ApiRepository.putFileShareLink(file, body))
     }

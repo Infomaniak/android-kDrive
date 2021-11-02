@@ -104,7 +104,7 @@ object ApiRoutes {
 
     fun getFileActivities(file: File) = "${fileURL(file)}/activity"
 
-    fun postDropBox(file: File) = "${fileURL(file)}/collaborate"
+    fun dropBox(file: File) = "${fileURL(file)}/collaborate"
 
     fun getLastActivities(driveId: Int) =
         "${DRIVE_API}$driveId/file/activity?with=file,rights,collaborative_folder,favorite,mobile,share_link&depth=unlimited" +

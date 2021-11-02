@@ -28,6 +28,7 @@
         android:id="@+id/titleContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?selectableItemBackground"
         android:padding="@dimen/marginStandardMedium"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -44,10 +45,10 @@
         <View
             android:id="@+id/titleSeparator"
             android:layout_width="@dimen/marginStandardMedium"
+            android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="@id/shareLinkTitle"
             app:layout_constraintStart_toEndOf="@id/shareLinkIcon"
-            app:layout_constraintTop_toTopOf="@id/shareLinkTitle"
-            android:layout_height="0dp"/>
+            app:layout_constraintTop_toTopOf="@id/shareLinkTitle" />
 
         <TextView
             android:id="@+id/shareLinkTitle"
@@ -56,7 +57,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintStart_toEndOf="@id/titleSeparator"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="@string/sharedLinkTitle" />
+            tools:text="@string/restrictedSharedLinkTitle" />
 
         <ImageView
             android:id="@+id/shareLinkSwitch"
@@ -76,6 +77,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/marginStandardMedium"
         android:layout_marginEnd="@dimen/marginStandardMedium"
+        android:layout_marginBottom="@dimen/marginStandardSmall"
         app:layout_constraintBottom_toTopOf="@id/shareLinkBottomContainer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -84,10 +86,12 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/shareLinkBottomContainer"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/shareLinkStatus"
         tools:visibility="visible">
 
@@ -98,31 +102,24 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardSmall"
             android:text="@string/fileShareLinkSettingsTitle"
-            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/shareLinkButton"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/shareLinkImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingStart="@dimen/marginStandardMedium"
-            android:paddingEnd="@dimen/marginStandardMedium"
-            android:src="@drawable/ic_share_file"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/shareLinkButton"
+            style="@style/IconButton"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:layout_marginEnd="@dimen/marginStandardSmall"
+            app:icon="@drawable/ic_share_file"
+            app:iconSize="18dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/iconColor"
             tools:ignore="ContentDescription" />
-
-        <View
-            android:id="@+id/shareLinkButton"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@id/shareLinkImage"
-            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.infomaniak.drive.views.UrlDisplayView

@@ -732,3 +732,12 @@ fun View.updateUploadFileInProgress(pendingFilesCount: Int) {
         visibility = GONE
     }
 }
+
+fun Context.shareText(text: String) {
+    val intent = Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, text)
+        type = "text/plain"
+    }
+    ContextCompat.startActivity(this, Intent.createChooser(intent, null), null)
+}

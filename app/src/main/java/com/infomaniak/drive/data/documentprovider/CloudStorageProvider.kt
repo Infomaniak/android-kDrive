@@ -41,7 +41,6 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.Utils
 import io.realm.Realm
-import io.sentry.Sentry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

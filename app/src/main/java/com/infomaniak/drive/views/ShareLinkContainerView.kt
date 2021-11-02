@@ -18,14 +18,13 @@
 package com.infomaniak.drive.views
 
 import android.content.Context
-import android.content.Intent
 import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
-import androidx.core.content.ContextCompat.startActivity
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
+import com.infomaniak.drive.utils.shareText
 import kotlinx.android.synthetic.main.view_share_link_container.view.*
 
 class ShareLinkContainerView @JvmOverloads constructor(
@@ -58,16 +57,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
         // cannot be null, if null, settings will not appear
         shareLinkSettings.setOnClickListener { onSettingsClicked(this.shareLink!!, currentFile) }
 
-        shareLinkButton.setOnClickListener {
-            this.shareLink?.url?.let {
-                val intent = Intent().apply {
-                    action = Intent.ACTION_SEND
-                    putExtra(Intent.EXTRA_TEXT, it)
-                    type = "text/plain"
-                }
-                startActivity(context, Intent.createChooser(intent, null), null)
-            }
-        }
+        shareLinkButton.setOnClickListener { this.shareLink?.url?.let { context.shareText(it) } }
     }
 
     fun update(shareLink: ShareLink? = null) {

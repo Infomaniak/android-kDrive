@@ -21,7 +21,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
 import com.infomaniak.drive.R
-import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.shareText
 import kotlinx.android.synthetic.main.view_url_display.view.*
 
 class UrlDisplayView @JvmOverloads constructor(
@@ -32,19 +32,18 @@ class UrlDisplayView @JvmOverloads constructor(
 
     init {
         inflate(context, R.layout.view_url_display, this).apply {
-            urlCopyButton.setOnClickListener { copyButton ->
+            shareUrlButton.setOnClickListener { copyButton ->
                 copyButton.requestFocus()
-                copyUrl(context)
+                shareUrl(context)
             }
             cardViewUrlValue.setOnClickListener {
-                copyUrl(context)
+                shareUrl(context)
             }
         }
     }
 
-    private fun copyUrl(context: Context) {
-        Utils.copyToClipboard(context, urlValue.text.toString())
-        Utils.showSnackbar(urlCopyButton, R.string.fileInfoLinkCopiedToClipboard)
+    private fun shareUrl(context: Context) {
+        context.shareText(urlValue.text.toString())
     }
 
     fun setUrl(url: String) {

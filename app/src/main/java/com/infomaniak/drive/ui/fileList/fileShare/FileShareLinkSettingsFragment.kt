@@ -119,10 +119,12 @@ class FileShareLinkSettingsFragment : Fragment() {
         shareLink.apply {
 
             if (showOfficePermission) {
+                rightsTitle.visibility = VISIBLE
                 fileShareLinkRights.visibility = VISIBLE
                 rightsValue.setText(officePermission.translation)
                 rightsIcon.load(officePermission.icon)
             } else {
+                rightsTitle.visibility = GONE
                 fileShareLinkRights.visibility = GONE
             }
 
