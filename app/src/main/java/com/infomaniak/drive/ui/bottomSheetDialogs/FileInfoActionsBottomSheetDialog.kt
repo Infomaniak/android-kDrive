@@ -74,7 +74,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         fileInfoActionsView.updateCurrentFile(currentFile)
 
         getBackNavigationResult<Boolean>(DownloadProgressDialog.OPEN_WITH) {
-            requireContext().openWith(currentFile)
+            context?.openWith(currentFile)
         }
     }
 
