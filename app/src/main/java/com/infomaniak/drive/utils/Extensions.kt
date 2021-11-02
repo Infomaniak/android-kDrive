@@ -342,6 +342,14 @@ fun Long.toApiDate(): Date {
     return Date(this / 1000)
 }
 
+fun Date.endOfTheDay(): Date =
+    Calendar.getInstance().apply {
+        time = this@endOfTheDay
+        set(Calendar.HOUR_OF_DAY, 23)
+        set(Calendar.MINUTE, 59)
+        set(Calendar.SECOND, 0)
+    }.time
+
 fun Date.year(): Int =
     Calendar.getInstance().apply {
         time = this@year

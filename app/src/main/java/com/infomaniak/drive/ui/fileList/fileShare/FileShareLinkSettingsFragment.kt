@@ -45,7 +45,7 @@ import java.util.*
 class FileShareLinkSettingsFragment : Fragment() {
     private lateinit var shareLink: ShareLink
     private val navigationArgs: FileShareLinkSettingsFragmentArgs by navArgs()
-    private var defaultCalendarTimestamp: Date = Date()
+    private var defaultCalendarTimestamp: Date = Date().endOfTheDay()
     private val shareViewModel: FileShareViewModel by viewModels()
 
     private var showOfficePermission: Boolean = false
