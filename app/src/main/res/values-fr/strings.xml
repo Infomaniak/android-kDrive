@@ -527,11 +527,14 @@
     <string name="shareLinkOfficePermissionReadTitle">Consulter</string>
     <string name="shareLinkOfficePermissionWriteDescription">Les utilisateurs peuvent modifier les fichiers de type document, tableur ou présentation.</string>
     <string name="shareLinkOfficePermissionWriteTitle">Modifier</string>
-    <string name="shareLinkPasswordRightDescription">Les personnes possédant le lien devront entrer un mot de passe pour accéder au dossier/fichier.</string>
+    <string name="shareLinkPasswordRightFileDescription">Les personnes possédant le lien devront entrer un mot de passe pour accéder au fichier.</string>
+    <string name="shareLinkPasswordRightFolderDescription">Les personnes possédant le lien devront entrer un mot de passe pour accéder au dossier.</string>
     <string name="shareLinkPasswordRightTitle">Avec mot de passe</string>
-    <string name="shareLinkPublicRightDescription">Toutes les personnes possédant le lien peuvent accéder au dossier/fichier.</string>
+    <string name="shareLinkPublicRightFileDescription">Toutes les personnes possédant le lien peuvent accéder au fichier.</string>
+    <string name="shareLinkPublicRightFolderDescription">Toutes les personnes possédant le lien peuvent accéder au dossier.</string>
     <string name="shareLinkPublicRightTitle">Public</string>
-    <string name="shareLinkRestrictedRightDescription">Uniquement les utilisateurs ajoutés peuvent accéder au dossier/fichier.</string>
+    <string name="shareLinkRestrictedRightFileDescription">Uniquement les utilisateurs ajoutés peuvent accéder au fichier.</string>
+    <string name="shareLinkRestrictedRightFolderDescription">Uniquement les utilisateurs ajoutés peuvent accéder au dossier.</string>
     <string name="shareLinkRestrictedRightTitle">Restreint</string>
     <string name="shareLinkSettingsAddExpirationDateDescription">Le lien de partage ne pourra plus être utilisé dès que la date sera passée.</string>
     <string name="shareLinkSettingsAllowDownloadDescription">Les utilisateurs pourront télécharger les fichiers depuis ce lien.</string>

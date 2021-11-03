@@ -67,16 +67,19 @@ class ShareLinkContainerView @JvmOverloads constructor(
     }
 
     private fun updateUi() {
-        if (shareLink == null && urlValue.isBlank()) {
+        val title = if (shareLink == null && urlValue.isBlank()) {
             shareLinkIcon.setImageResource(R.drawable.ic_lock)
             shareLinkTitle.setText(R.string.restrictedSharedLinkTitle)
-            shareLinkStatus.setText(R.string.shareLinkRestrictedRightDescription)
             shareLinkBottomContainer.visibility = View.GONE
+            if (currentFile.isFolder()) R.string.shareLinkRestrictedRightFolderDescription
+            else R.string.shareLinkRestrictedRightFileDescription
         } else {
             shareLinkIcon.setImageResource(R.drawable.ic_unlock)
             shareLinkTitle.setText(R.string.publicSharedLinkTitle)
-            shareLinkStatus.setText(R.string.shareLinkPublicRightDescription)
             shareLinkBottomContainer.visibility = View.VISIBLE
+            if (currentFile.isFolder()) R.string.shareLinkPublicRightFolderDescription
+            else R.string.shareLinkPublicRightFileDescription
         }
+        shareLinkStatus.setText(title)
     }
 }

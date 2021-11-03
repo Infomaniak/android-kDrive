@@ -527,11 +527,14 @@
     <string name="shareLinkOfficePermissionReadTitle">Consulta</string>
     <string name="shareLinkOfficePermissionWriteDescription">Gli utenti possono modificare documenti, fogli di calcolo e file di presentazione.</string>
     <string name="shareLinkOfficePermissionWriteTitle">Modifica</string>
-    <string name="shareLinkPasswordRightDescription">Coloro che dispongono del link dovranno inserire la password per accedere alla cartella/al file.</string>
+    <string name="shareLinkPasswordRightFileDescription">Chiunque abbia il link dovrà inserire una password per accedere al file.</string>
+    <string name="shareLinkPasswordRightFolderDescription">Coloro che dispongono del link dovranno inserire la password per accedere alla cartella.</string>
     <string name="shareLinkPasswordRightTitle">Con la password</string>
-    <string name="shareLinkPublicRightDescription">Tutti quelli che hanno il link possono accedere alla cartella/file.</string>
+    <string name="shareLinkPublicRightFileDescription">Tutti quelli che hanno il link possono accedere alla file.</string>
+    <string name="shareLinkPublicRightFolderDescription">Tutti quelli che hanno il link possono accedere alla cartella.</string>
     <string name="shareLinkPublicRightTitle">Pubblico</string>
-    <string name="shareLinkRestrictedRightDescription">Solo gli utenti aggiunti possono accedere alla cartella/file.</string>
+    <string name="shareLinkRestrictedRightFileDescription">Solo gli utenti aggiunti possono accedere alla file.</string>
+    <string name="shareLinkRestrictedRightFolderDescription">Solo gli utenti aggiunti possono accedere alla cartella.</string>
     <string name="shareLinkRestrictedRightTitle">Limitato</string>
     <string name="shareLinkSettingsAddExpirationDateDescription">Il link di condivisione non potrà più essere utilizzato successivamente alla data.</string>
     <string name="shareLinkSettingsAllowDownloadDescription">Gli utenti potranno scaricare i file da questo link.</string>

@@ -38,6 +38,7 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDia
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSIONS_GROUP_BUNDLE_KEY
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.SHAREABLE_BUNDLE_KEY
+import com.infomaniak.drive.ui.fileList.fileDetails.FileDetailsInfosFragment
 import com.infomaniak.drive.ui.fileList.fileShare.FileShareAddUserDialog.Companion.SHARE_SELECTION_KEY
 import com.infomaniak.drive.utils.*
 import kotlinx.android.synthetic.main.fragment_file_share_details.*
@@ -89,21 +90,15 @@ class FileShareDetailsFragment : Fragment() {
                 bundle.getParcelable<SelectPermissionBottomSheetDialog.PermissionsGroup>(PERMISSIONS_GROUP_BUNDLE_KEY)
 
             // Determine if we come back from users permission selection or share link office
-            if (permissionsType == SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_SETTINGS) {
-                permission as ShareLink.ShareLinkPermission
-                val isEnabled = permission == ShareLink.ShareLinkPermission.PUBLIC
-                        || permission == ShareLink.ShareLinkPermission.PASSWORD
+            if (permissionsType == SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_FILE_SETTINGS ||
+                permissionsType == SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_FOLDER_SETTINGS
+            ) {
+                val isPublic = FileDetailsInfosFragment.isPublicPermission(permission)
 
                 fileShareViewModel.currentFile.value?.let { currentFile ->
-                    if (
-                        (isEnabled && shareLink == null) ||
-                        (!isEnabled && shareLink != null)
-                    ) {
+                    if ((isPublic && shareLink == null) || (!isPublic && shareLink != null)) {
                         mainViewModel.apply {
-                            if (isEnabled)
-                                createShareLink(currentFile)
-                            else
-                                deleteShareLink(currentFile)
+                            if (isPublic) createShareLink(currentFile) else deleteShareLink(currentFile)
                         }
                     }
                 }
@@ -175,14 +170,15 @@ class FileShareDetailsFragment : Fragment() {
                 file = file,
                 onTitleClicked = { newShareLink, currentFileId ->
                     this.shareLink = newShareLink
-                    val currentPermission =
-                        if (this.shareLink != null) ShareLink.ShareLinkPermission.PUBLIC
-                        else ShareLink.ShareLinkPermission.RESTRICTED
+                    val (permissionsGroup, currentPermission) = FileDetailsInfosFragment.selectPermissions(
+                        file.isFolder(),
+                        shareLink != null
+                    )
                     findNavController().navigate(
                         FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToSelectPermissionBottomSheetDialog(
                             currentFileId = currentFileId,
                             currentPermission = currentPermission,
-                            permissionsGroup = SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_SETTINGS
+                            permissionsGroup = permissionsGroup
                         )
                     )
                 },

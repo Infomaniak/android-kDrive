@@ -536,11 +536,14 @@
     <string name="shareLinkOfficePermissionReadTitle">View</string>
     <string name="shareLinkOfficePermissionWriteDescription">Users can edit document, spreadsheet and presentation files.</string>
     <string name="shareLinkOfficePermissionWriteTitle">Modify</string>
-    <string name="shareLinkPasswordRightDescription">Anyone who has the link will have to enter a password to access the file/folder.</string>
+    <string name="shareLinkPasswordRightFileDescription">Anyone who has the link will have to enter a password to access the file.</string>
+    <string name="shareLinkPasswordRightFolderDescription">Anyone who has the link will have to enter a password to access the folder.</string>
     <string name="shareLinkPasswordRightTitle">With password</string>
-    <string name="shareLinkPublicRightDescription">Everyone who has the link can access the folder/file.</string>
+    <string name="shareLinkPublicRightFileDescription">Everyone who has the link can access the file.</string>
+    <string name="shareLinkPublicRightFolderDescription">Everyone who has the link can access the folder.</string>
     <string name="shareLinkPublicRightTitle">Public</string>
-    <string name="shareLinkRestrictedRightDescription">Only added users can access the folder/file.</string>
+    <string name="shareLinkRestrictedRightFileDescription">Only added users can access the file.</string>
+    <string name="shareLinkRestrictedRightFolderDescription">Only added users can access the folder.</string>
     <string name="shareLinkRestrictedRightTitle">Restricted</string>
     <string name="shareLinkSettingsAddExpirationDateDescription">The share link will only work until the expiry date.</string>
     <string name="shareLinkSettingsAllowDownloadDescription">Users will be able to download files using this link.</string>

@@ -80,9 +80,13 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         permissionsRecyclerView.adapter = adapter.apply {
             permissionsGroup.let { permissionsGroup ->
                 val newPermissions: ArrayList<Permission> = when (permissionsGroup) {
-                    PermissionsGroup.SHARE_LINK_SETTINGS -> arrayListOf(
-                        ShareLink.ShareLinkPermission.RESTRICTED,
-                        ShareLink.ShareLinkPermission.PUBLIC
+                    PermissionsGroup.SHARE_LINK_FILE_SETTINGS -> arrayListOf(
+                        ShareLink.ShareLinkFilePermission.RESTRICTED,
+                        ShareLink.ShareLinkFilePermission.PUBLIC
+                    )
+                    PermissionsGroup.SHARE_LINK_FOLDER_SETTINGS -> arrayListOf(
+                        ShareLink.ShareLinkFolderPermission.RESTRICTED,
+                        ShareLink.ShareLinkFolderPermission.PUBLIC
                     )
                     PermissionsGroup.EXTERNAL_USERS_RIGHTS,
                     PermissionsGroup.USERS_RIGHTS -> arrayListOf(
@@ -239,7 +243,8 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     @Parcelize
     enum class PermissionsGroup : Parcelable {
-        SHARE_LINK_SETTINGS,
+        SHARE_LINK_FILE_SETTINGS,
+        SHARE_LINK_FOLDER_SETTINGS,
         SHARE_LINK_OFFICE,
         USERS_RIGHTS,
         EXTERNAL_USERS_RIGHTS,

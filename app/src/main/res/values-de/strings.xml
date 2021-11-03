@@ -527,11 +527,14 @@
     <string name="shareLinkOfficePermissionReadTitle">Einsehen</string>
     <string name="shareLinkOfficePermissionWriteDescription">Benutzer können Dokumente, Tabellenkalkulationen und Präsentationsdateien bearbeiten.</string>
     <string name="shareLinkOfficePermissionWriteTitle">Ändern</string>
-    <string name="shareLinkPasswordRightDescription">Personen, die über diesen Link verfügen, müssen ein Passwort eingeben, um auf den Ordner bzw. die Datei zuzugreifen.</string>
+    <string name="shareLinkPasswordRightFileDescription">Jeder, der den Link hat, muss ein Passwort eingeben, um auf die Datei zuzugreifen.</string>
+    <string name="shareLinkPasswordRightFolderDescription">Personen, die über diesen Link verfügen, müssen ein Passwort eingeben, um auf den Ordner.</string>
     <string name="shareLinkPasswordRightTitle">Mit Passwort</string>
-    <string name="shareLinkPublicRightDescription">Jeder, der den Link hat, kann auf den Ordner/die Datei zugreifen.</string>
+    <string name="shareLinkPublicRightFileDescription">Jeder, der den Link hat, kann die Datei zugreifen.</string>
+    <string name="shareLinkPublicRightFolderDescription">Jeder, der den Link hat, kann auf den Ordner.</string>
     <string name="shareLinkPublicRightTitle">Öffentlich</string>
-    <string name="shareLinkRestrictedRightDescription">Nur hinzugefügte Benutzer können auf den Ordner/die Datei zugreifen.</string>
+    <string name="shareLinkRestrictedRightFileDescription">Nur hinzugefügte Benutzer können die Datei zugreifen.</string>
+    <string name="shareLinkRestrictedRightFolderDescription">Nur hinzugefügte Benutzer können auf den Ordner.</string>
     <string name="shareLinkRestrictedRightTitle">Eingeschränkt</string>
     <string name="shareLinkSettingsAddExpirationDateDescription">Der Freigabelink kann nicht mehr verwendet werden, wenn das Datum verstrichen ist.</string>
     <string name="shareLinkSettingsAllowDownloadDescription">Benutzer können die Dateien über diesen Link herunter- bzw. heraufladen.</string>

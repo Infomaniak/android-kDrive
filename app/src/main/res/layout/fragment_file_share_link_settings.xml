@@ -143,9 +143,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/marginStandardSmall"
-                    android:text="@string/shareLinkPasswordRightDescription"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/addPasswordSwitch" />
+                    app:layout_constraintTop_toBottomOf="@id/addPasswordSwitch"
+                    tools:text="@string/shareLinkPasswordRightFileDescription" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/upgradeOfferPassword"

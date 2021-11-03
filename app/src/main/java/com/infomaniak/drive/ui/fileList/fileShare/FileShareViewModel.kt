@@ -49,7 +49,7 @@ class FileShareViewModel : ViewModel() {
 
         when {
             shareLink.password.isNullOrBlank() -> {
-                if (shareLink.permission == ShareLink.ShareLinkPermission.PASSWORD) body.remove("permission")
+                if (shareLink.permission == ShareLink.ShareLinkFilePermission.PASSWORD) body.remove("permission")
             }
             else -> body["password"] = shareLink.password
         }

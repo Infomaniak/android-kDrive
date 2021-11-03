@@ -527,11 +527,14 @@
     <string name="shareLinkOfficePermissionReadTitle">Consultar</string>
     <string name="shareLinkOfficePermissionWriteDescription">Los usuarios pueden editar archivos de documentos, hojas de cálculo y presentaciones.</string>
     <string name="shareLinkOfficePermissionWriteTitle">Modificar</string>
-    <string name="shareLinkPasswordRightDescription">Las personas que tengan el enlace deberán introducir una contraseña para acceder a la carpeta/archivo.</string>
+    <string name="shareLinkPasswordRightFileDescription">Cualquiera que tenga el enlace tendrá que introducir una contraseña para acceder al archivo.</string>
+    <string name="shareLinkPasswordRightFolderDescription">Las personas que tengan el enlace deberán introducir una contraseña para acceder a la carpeta.</string>
     <string name="shareLinkPasswordRightTitle">Con contraseña</string>
-    <string name="shareLinkPublicRightDescription">Todos los que tienen el enlace pueden acceder a la carpeta/archivo.</string>
+    <string name="shareLinkPublicRightFileDescription">Todos los que tienen el enlace pueden acceder a la archivo.</string>
+    <string name="shareLinkPublicRightFolderDescription">Todos los que tienen el enlace pueden acceder a la carpeta.</string>
     <string name="shareLinkPublicRightTitle">Público</string>
-    <string name="shareLinkRestrictedRightDescription">Sólo los usuarios añadidos pueden acceder a la carpeta/archivo.</string>
+    <string name="shareLinkRestrictedRightFileDescription">Sólo los usuarios añadidos pueden acceder a la archivo.</string>
+    <string name="shareLinkRestrictedRightFolderDescription">Sólo los usuarios añadidos pueden acceder a la carpeta.</string>
     <string name="shareLinkRestrictedRightTitle">Restringido</string>
     <string name="shareLinkSettingsAddExpirationDateDescription">El enlace de uso compartido no podrá utilizarse una vez transcurrida la fecha.</string>
     <string name="shareLinkSettingsAllowDownloadDescription">Los usuarios podrán descargar los archivos desde este enlace.</string>

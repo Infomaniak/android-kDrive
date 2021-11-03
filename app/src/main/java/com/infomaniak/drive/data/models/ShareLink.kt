@@ -31,7 +31,7 @@ data class ShareLink(
     val type: String = "",
     var password: String? = null,
     val onlyoffice: Boolean = false,
-    var permission: ShareLinkPermission = ShareLinkPermission.RESTRICTED,
+    var permission: ShareLinkFilePermission = ShareLinkFilePermission.RESTRICTED,
     @SerializedName("file_id") val fileId: Int = 0,
     @SerializedName("created_by") val createdBy: Int = 0,
     @SerializedName("created_at") val createdAt: Long = 0,
@@ -48,7 +48,7 @@ data class ShareLink(
 ) : Parcelable {
 
     @Parcelize
-    enum class ShareLinkPermission(
+    enum class ShareLinkFilePermission(
         override val icon: Int,
         override val translation: Int,
         override val description: Int
@@ -58,18 +58,40 @@ data class ShareLink(
         PUBLIC(
             R.drawable.ic_unlock,
             R.string.shareLinkPublicRightTitle,
-            R.string.shareLinkPublicRightDescription
+            R.string.shareLinkPublicRightFileDescription
         ),
 
         @SerializedName("inherit")
         RESTRICTED(
             R.drawable.ic_lock,
             R.string.shareLinkRestrictedRightTitle,
-            R.string.shareLinkRestrictedRightDescription
+            R.string.shareLinkRestrictedRightFileDescription
         ),
 
         @SerializedName("password")
         PASSWORD(-1, -1, -1)
+    }
+
+    @Parcelize
+    enum class ShareLinkFolderPermission(
+        override val icon: Int,
+        override val translation: Int,
+        override val description: Int
+    ) : Permission {
+
+        @SerializedName("public")
+        PUBLIC(
+            R.drawable.ic_unlock,
+            R.string.shareLinkPublicRightTitle,
+            R.string.shareLinkPublicRightFolderDescription
+        ),
+
+        @SerializedName("inherit")
+        RESTRICTED(
+            R.drawable.ic_lock,
+            R.string.shareLinkRestrictedRightTitle,
+            R.string.shareLinkRestrictedRightFolderDescription
+        ),
     }
 
     @Parcelize

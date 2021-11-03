@@ -88,23 +88,13 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         }
 
         getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.SELECT_PERMISSION_NAV_KEY) { bundle ->
-
             val permission = bundle.getParcelable<Permission>(SelectPermissionBottomSheetDialog.PERMISSION_BUNDLE_KEY)
-            permission as ShareLink.ShareLinkPermission
-            val isEnabled = permission == ShareLink.ShareLinkPermission.PUBLIC
-                    || permission == ShareLink.ShareLinkPermission.PASSWORD
+            val isPublic = isPublicPermission(permission)
 
             fileDetailsViewModel.currentFile.value?.let { currentFile ->
-
-                if (
-                    (isEnabled && shareLink == null) ||
-                    (!isEnabled && shareLink != null)
-                ) {
+                if ((isPublic && shareLink == null) || (!isPublic && shareLink != null)) {
                     mainViewModel.apply {
-                        if (isEnabled)
-                            createShareLink(currentFile)
-                        else
-                            deleteShareLink(currentFile)
+                        if (isPublic) createShareLink(currentFile) else deleteShareLink(currentFile)
                     }
                 }
             }
@@ -135,14 +125,12 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
                 file = file,
                 onTitleClicked = { shareLink, currentFileId ->
                     this.shareLink = shareLink
-                    val currentPermission =
-                        if (this.shareLink != null) ShareLink.ShareLinkPermission.PUBLIC
-                        else ShareLink.ShareLinkPermission.RESTRICTED
+                    val (permissionsGroup, currentPermission) = selectPermissions(file.isFolder(), shareLink != null)
                     findNavController().navigate(
                         FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectPermissionBottomSheetDialog(
                             currentFileId = currentFileId,
                             currentPermission = currentPermission,
-                            permissionsGroup = SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_SETTINGS
+                            permissionsGroup = permissionsGroup
                         )
                     )
                 },
@@ -217,7 +205,35 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         requireParentFragment().addCommentButton.visibility = GONE
     }
 
-    private companion object {
+    companion object {
         const val MAX_DISPLAYED_USERS = 4
+
+        fun isPublicPermission(permission: Permission?): Boolean {
+            return when (permission) {
+                is ShareLink.ShareLinkFilePermission -> permission == ShareLink.ShareLinkFilePermission.PUBLIC
+                is ShareLink.ShareLinkFolderPermission -> permission == ShareLink.ShareLinkFolderPermission.PUBLIC
+                else -> false
+            }
+        }
+
+        fun selectPermissions(
+            isFolder: Boolean,
+            shareLinkExiste: Boolean
+        ): Pair<SelectPermissionBottomSheetDialog.PermissionsGroup, Permission> {
+            val permissionsGroup: SelectPermissionBottomSheetDialog.PermissionsGroup
+            val currentPermission = when {
+                isFolder -> {
+                    permissionsGroup = SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_FOLDER_SETTINGS
+                    if (shareLinkExiste) ShareLink.ShareLinkFolderPermission.PUBLIC
+                    else ShareLink.ShareLinkFolderPermission.RESTRICTED
+                }
+                else -> {
+                    permissionsGroup = SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_FILE_SETTINGS
+                    if (shareLinkExiste) ShareLink.ShareLinkFilePermission.PUBLIC
+                    else ShareLink.ShareLinkFilePermission.RESTRICTED
+                }
+            }
+            return Pair(permissionsGroup, currentPermission)
+        }
     }
 }

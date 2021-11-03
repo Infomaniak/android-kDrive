@@ -132,11 +132,18 @@ class FileShareLinkSettingsFragment : Fragment() {
             blockCommentsValue.isChecked = blockComments
             blockUsersConsultValue.isChecked = blockInformation
 
-            if (permission == ShareLink.ShareLinkPermission.PASSWORD) {
+            if (permission == ShareLink.ShareLinkFilePermission.PASSWORD) {
                 passwordTextLayout.visibility = GONE
                 newPasswordButton.visibility = VISIBLE
                 addPasswordSwitch.isChecked = true
             }
+
+            val passwordDescriptor = if (shareViewModel.currentFile.value?.isFolder() == true) {
+                R.string.shareLinkPasswordRightFolderDescription
+            } else {
+                R.string.shareLinkPasswordRightFileDescription
+            }
+            addPasswordDescription.setText(passwordDescriptor)
 
             addExpirationDateSwitch.isChecked = shareLink.validUntil != null
             expirationDateInput.init(fragmentManager = parentFragmentManager, defaultCalendarTimestamp) {
@@ -172,9 +179,9 @@ class FileShareLinkSettingsFragment : Fragment() {
     private fun setupUiListeners() {
 
         addPasswordSwitch?.setOnCheckedChangeListener { _, isChecked ->
-            if (shareLink.permission == ShareLink.ShareLinkPermission.PUBLIC) {
+            if (shareLink.permission == ShareLink.ShareLinkFilePermission.PUBLIC) {
                 passwordTextLayout.isVisible = isChecked
-            } else if (shareLink.permission == ShareLink.ShareLinkPermission.PASSWORD) {
+            } else if (shareLink.permission == ShareLink.ShareLinkFilePermission.PASSWORD) {
                 passwordTextLayout.visibility = GONE
                 newPasswordButton.isVisible = isChecked
             }
@@ -221,11 +228,11 @@ class FileShareLinkSettingsFragment : Fragment() {
                 val password = passwordEditText.text
                 if (password?.isNotBlank() == true) shareLink.apply {
                     this.password = password.toString()
-                    this.permission = ShareLink.ShareLinkPermission.PASSWORD
+                    this.permission = ShareLink.ShareLinkFilePermission.PASSWORD
                 }
 
             } else {
-                shareLink.permission = ShareLink.ShareLinkPermission.PUBLIC
+                shareLink.permission = ShareLink.ShareLinkFilePermission.PUBLIC
             }
 
             if (!isValid) {
