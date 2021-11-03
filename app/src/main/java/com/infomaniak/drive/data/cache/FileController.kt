@@ -20,6 +20,7 @@ package com.infomaniak.drive.data.cache
 import androidx.collection.ArrayMap
 import androidx.collection.arrayMapOf
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileActivity
 import com.infomaniak.drive.data.models.UserDrive
@@ -148,6 +149,16 @@ object FileController {
             }
         }
         customRealm?.let(block) ?: getRealmInstance().use(block)
+    }
+
+    fun renameFile(file: File, newName: String, realm: Realm? = null): ApiResponse<CancellableAction> {
+        val apiResponse = ApiRepository.renameFile(file, newName)
+        if (apiResponse.isSuccess()) {
+            updateFile(file.id, realm) { localFile ->
+                localFile.name = newName
+            }
+        }
+        return apiResponse
     }
 
     fun updateFile(fileId: Int, realm: Realm? = null, userDrive: UserDrive? = null, transaction: (file: File) -> Unit) {

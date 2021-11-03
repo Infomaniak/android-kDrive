@@ -205,12 +205,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     }
 
     fun renameFile(file: File, newName: String) = liveData(Dispatchers.IO) {
-        val apiResponse = ApiRepository.renameFile(file, newName)
-        if (apiResponse.isSuccess()) {
-            FileController.updateFile(file.id) { localFile ->
-                localFile.name = newName
-            }
-        }
+        val apiResponse = FileController.renameFile(file, newName)
         emit(apiResponse)
     }
 

@@ -116,17 +116,13 @@ class CloudStorageProvider : DocumentsProvider() {
         }
     }
 
-    private fun comeFromSharedWithMe(documentId: String): Boolean {
-        return documentId.split("/").getOrNull(1) == SHARED_WITHME_FOLDER_ID.toString()
-    }
-
     override fun queryChildDocuments(parentDocumentId: String, projection: Array<out String>?, sortOrder: String?): Cursor {
         Log.d(TAG, "queryChildDocuments(), parentDocumentId=$parentDocumentId, sort=$sortOrder")
 
         val cursor = DocumentCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION)
 
         val uri = DocumentCursor.createUri(context, parentDocumentId)
-        val isNewJob = uri != oldQueryChildUri
+        val isNewJob = uri != oldQueryChildUri || needRefresh
         val isLoading = uri == oldQueryChildUri && oldQueryChildCursor?.job?.isCompleted == false || isNewJob
 
         Log.i(TAG, "queryChildDocuments() isloading:$isLoading, isnew: $isNewJob")
@@ -139,6 +135,7 @@ class CloudStorageProvider : DocumentsProvider() {
             oldQueryChildUri = uri
             oldQueryChildCursor = cursor
             currentParentDocumentId = parentDocumentId
+            needRefresh = false
         } else {
             cursor.restore(oldQueryChildCursor!!)
             cursor.extras = bundleOf(DocumentsContract.EXTRA_LOADING to false)
@@ -217,15 +214,14 @@ class CloudStorageProvider : DocumentsProvider() {
 
         val accessMode = ParcelFileDescriptor.parseMode(mode)
         val fileId = getFileIdFromDocumentId(documentId)
-        val driveId = getDriveFromDocId(documentId).id
-        val userId = getUserId(documentId).toInt()
-        val userDrive = UserDrive(userId, driveId, comeFromSharedWithMe(documentId))
+        val userDrive = createUserDrive(documentId)
         val file = FileController.getFileById(fileId, userDrive)
 
-        if (file != null) {
-            return getDataFile(context, file, userDrive, accessMode)
+        return if (file != null) {
+            getDataFile(context, file, userDrive, accessMode)
+        } else {
+            null
         }
-        return null
     }
 
     override fun querySearchDocuments(rootId: String, query: String, projection: Array<out String>?): Cursor {
@@ -238,8 +234,9 @@ class CloudStorageProvider : DocumentsProvider() {
             getFileIdFromDocumentId(currentParentDocumentId!!) == SHARED_WITHME_FOLDER_ID ||
             getFileIdFromDocumentId(currentParentDocumentId!!) == MY_SHARES_FOLDER_ID
         ) {
-            cursor.extras =
-                bundleOf(DocumentsContract.EXTRA_ERROR to context?.getString(R.string.cloudStorageSuerySearchImpossibleSelectDrive))
+            cursor.extras = bundleOf(
+                DocumentsContract.EXTRA_ERROR to context?.getString(R.string.cloudStorageQuerySearchImpossibleSelectDrive)
+            )
             return cursor
         }
 
@@ -280,10 +277,9 @@ class CloudStorageProvider : DocumentsProvider() {
 
         val fileId = getFileIdFromDocumentId(documentId)
         val userId = getUserId(documentId)
-        val driveId = getDriveFromDocId(documentId)
 
         var parcel: ParcelFileDescriptor? = null
-        val userDrive = UserDrive(userId.toInt(), driveId.id, comeFromSharedWithMe(documentId))
+        val userDrive = createUserDrive(documentId)
         FileController.getFileById(fileId, userDrive)?.let { file ->
             val outputFolder = java.io.File(context?.cacheDir, "thumbnails").apply { if (!exists()) mkdirs() }
             val name = "${fileId}_${file.name}"
@@ -308,8 +304,41 @@ class CloudStorageProvider : DocumentsProvider() {
 
         }
 
-        return if (parcel == null) super.openDocumentThumbnail(documentId, sizeHint, signal)
-        else AssetFileDescriptor(parcel, 0, AssetFileDescriptor.UNKNOWN_LENGTH)
+        return if (parcel == null) {
+            super.openDocumentThumbnail(documentId, sizeHint, signal)
+        } else {
+            AssetFileDescriptor(parcel, 0, AssetFileDescriptor.UNKNOWN_LENGTH)
+        }
+    }
+
+    override fun renameDocument(documentId: String, displayName: String): String? {
+
+        FileController.getRealmInstance(
+            createUserDrive(documentId)
+        ).use { realm ->
+
+            FileController.getFileProxyById(
+                getFileIdFromDocumentId(documentId),
+                customRealm = realm
+            )?.let { file ->
+
+                // Rename
+                val apiResponse = FileController.renameFile(file, displayName, realm)
+
+                if (apiResponse.isSuccess()) {
+                    // Refresh
+                    currentParentDocumentId?.let {
+                        needRefresh = true
+                        context?.contentResolver?.notifyChange(DocumentCursor.createUri(context, it), null)
+                    }
+
+                } else {
+                    throw Exception("Rename document failed")
+                }
+            }
+        }
+
+        return null
     }
 
     private fun MatrixCursor.addRoot(rootId: String, documentId: String, summary: String) {
@@ -350,6 +379,10 @@ class CloudStorageProvider : DocumentsProvider() {
             flags = flags or DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL
         }
 
+        if (file != null) {
+            flags = flags or DocumentsContract.Document.FLAG_SUPPORTS_RENAME
+        }
+
         newRow().apply {
             add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, documentId)
             add(DocumentsContract.Document.COLUMN_MIME_TYPE, mimetype)
@@ -385,7 +418,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
     companion object {
 
-        val mutex = Mutex()
+        private val mutex = Mutex()
 
         private const val TAG = "CloudStorageProvider"
         private const val SEPARATOR = "/"
@@ -402,6 +435,8 @@ class CloudStorageProvider : DocumentsProvider() {
 
         private var oldSearchUri: Uri? = null
         private var oldSearchCursor: DocumentCursor? = null
+
+        private var needRefresh: Boolean = false
 
         private val DEFAULT_ROOT_PROJECTION = arrayOf(
             DocumentsContract.Root.COLUMN_ROOT_ID,
@@ -508,6 +543,16 @@ class CloudStorageProvider : DocumentsProvider() {
 
             return null
         }
+
+        private fun comeFromSharedWithMe(documentId: String): Boolean =
+            documentId.split("/").getOrNull(1) == SHARED_WITHME_FOLDER_ID.toString()
+
+        private fun createUserDrive(documentId: String): UserDrive =
+            UserDrive(
+                getUserId(documentId).toInt(),
+                getDriveFromDocId(documentId).id,
+                comeFromSharedWithMe(documentId)
+            )
 
         fun notifyRootsChanged(context: Context) {
             val authority = context.getString(R.string.CLOUD_STORAGE_AUTHORITY)
