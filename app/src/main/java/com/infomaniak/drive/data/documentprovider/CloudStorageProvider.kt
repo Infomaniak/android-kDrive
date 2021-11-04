@@ -312,9 +312,14 @@ class CloudStorageProvider : DocumentsProvider() {
         }
     }
 
-    // override fun createDocument(parentDocumentId: String, mimeType: String, displayName: String): String {
-    //
-    // }
+    override fun createDocument(parentDocumentId: String, mimeType: String, displayName: String): String {
+        Log.d(TAG, "createDocument(), parentId=$parentDocumentId, mimeType=$mimeType, name=$displayName")
+
+        return if (mimeType.equals(DocumentsContract.Document.MIME_TYPE_DIR, true))
+            createNewFolder(parentDocumentId, displayName) // If we want to create a new folder
+        else
+            createNewFile(parentDocumentId, displayName) // If another provider copies or moves a file into kDrive
+    }
 
     override fun deleteDocument(documentId: String) {
         Log.d(TAG, "deleteDocument(), id=$documentId")
@@ -389,6 +394,35 @@ class CloudStorageProvider : DocumentsProvider() {
     // override fun moveDocument(sourceDocumentId: String, sourceParentDocumentId: String, targetParentDocumentId: String): String {
     //
     // }
+
+    private fun createNewFolder(parentDocumentId: String, displayName: String): String {
+
+        val userDrive = createUserDrive(parentDocumentId)
+        val parentId = getFileIdFromDocumentId(parentDocumentId)
+
+        val apiResponse = runBlocking { FileController.createFolder(displayName, parentId, true, userDrive) }
+        val file = apiResponse.data
+
+        if (apiResponse.isSuccess() && file != null) {
+
+            FileController.saveNewFolder(parentId, file, userDrive)
+
+            // Refresh
+            currentParentDocumentId?.let {
+                needRefresh = true
+                context?.contentResolver?.notifyChange(DocumentCursor.createUri(context, it), null)
+            }
+
+            return createFileDocumentId(parentDocumentId, file.id)
+        }
+
+        throw Exception("Create folder failed")
+    }
+
+    private fun createNewFile(parentDocumentId: String, displayName: String): String {
+        // TODO
+        return "COLUMN_DOCUMENT_ID"
+    }
 
     private fun MatrixCursor.addRoot(rootId: String, documentId: String, summary: String) {
         val flags = DocumentsContract.Root.FLAG_SUPPORTS_CREATE or

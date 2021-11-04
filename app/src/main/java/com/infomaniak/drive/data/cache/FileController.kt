@@ -852,7 +852,7 @@ object FileController {
         }
     }
 
-    fun addFileTo(parentFolderID: Int, file: File, userDrive: UserDrive?) {
+    private fun addFileTo(parentFolderID: Int, file: File, userDrive: UserDrive?) {
         getRealmInstance(userDrive).use { realm ->
             val localFolder = realm.where(File::class.java).equalTo(File::id.name, parentFolderID).findFirst()
             if (localFolder != null) {
@@ -861,6 +861,22 @@ object FileController {
                 }
             }
         }
+    }
+
+    suspend fun createFolder(name: String, parentId: Int, onlyForMe: Boolean, userDrive: UserDrive?): ApiResponse<File> {
+        val okHttpClient = userDrive?.userId?.let { KDriveHttpClient.getHttpClient(it) } ?: HttpClient.okHttpClient
+        val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId
+        return ApiRepository.createFolder(okHttpClient, driveId, parentId, name, onlyForMe, false)
+    }
+
+    suspend fun createCommonFolder(name: String, forAllUsers: Boolean, userDrive: UserDrive?): ApiResponse<File> {
+        val okHttpClient = userDrive?.userId?.let { KDriveHttpClient.getHttpClient(it) } ?: HttpClient.okHttpClient
+        val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId
+        return ApiRepository.createTeamFolder(okHttpClient, driveId, name, forAllUsers)
+    }
+
+    fun saveNewFolder(parentFolderId: Int, newFolder: File, userDrive: UserDrive?) {
+        addFileTo(parentFolderId, newFolder, userDrive)
     }
 
     private fun keepOldLocalFilesData(oldFile: File, newFile: File) {

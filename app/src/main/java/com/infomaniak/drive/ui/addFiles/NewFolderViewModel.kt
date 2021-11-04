@@ -20,13 +20,9 @@ package com.infomaniak.drive.ui.addFiles
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
-import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.KDriveHttpClient
-import com.infomaniak.lib.core.networking.HttpClient
 import kotlinx.coroutines.Dispatchers
 
 class NewFolderViewModel : ViewModel() {
@@ -35,18 +31,14 @@ class NewFolderViewModel : ViewModel() {
     var userDrive: UserDrive? = null
 
     fun createFolder(name: String, parentId: Int, onlyForMe: Boolean) = liveData(Dispatchers.IO) {
-        val okHttpClient = userDrive?.userId?.let { KDriveHttpClient.getHttpClient(it) } ?: HttpClient.okHttpClient
-        val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId
-        emit(ApiRepository.createFolder(okHttpClient, driveId, parentId, name, onlyForMe, false))
+        emit(FileController.createFolder(name, parentId, onlyForMe, userDrive))
     }
 
     fun createCommonFolder(name: String, forAllUsers: Boolean) = liveData(Dispatchers.IO) {
-        val okHttpClient = userDrive?.userId?.let { KDriveHttpClient.getHttpClient(it) } ?: HttpClient.okHttpClient
-        val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId
-        emit(ApiRepository.createTeamFolder(okHttpClient, driveId, name, forAllUsers))
+        emit(FileController.createCommonFolder(name, forAllUsers, userDrive))
     }
 
-    fun saveNewFolder(parentFolder: Int, newFolder: File) {
-        FileController.addFileTo(parentFolder, newFolder, userDrive)
+    fun saveNewFolder(parentFolderId: Int, newFolder: File) {
+        FileController.saveNewFolder(parentFolderId, newFolder, userDrive)
     }
 }
