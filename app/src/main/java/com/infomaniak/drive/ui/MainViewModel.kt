@@ -211,16 +211,8 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     fun deleteFile(file: File, userDrive: UserDrive? = null, onSuccess: ((fileID: Int) -> Unit)? = null) =
         liveData(Dispatchers.IO) {
-            val apiResponse = ApiRepository.deleteFile(file)
-            if (apiResponse.isSuccess()) {
-                file.deleteCaches(getContext())
-
-                FileController.updateFile(file.id, userDrive = userDrive) { localFile ->
-                    localFile.deleteFromRealm()
-                }
-
-                onSuccess?.invoke(file.id)
-            }
+            val apiResponse =
+                FileController.deleteFile(file, userDrive = userDrive, context = getContext(), onSuccess = onSuccess)
             emit(apiResponse)
         }
 

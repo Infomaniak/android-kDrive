@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.data.cache
 
+import android.content.Context
 import androidx.collection.ArrayMap
 import androidx.collection.arrayMapOf
 import com.infomaniak.drive.data.api.ApiRepository
@@ -157,6 +158,22 @@ object FileController {
             updateFile(file.id, realm) { localFile ->
                 localFile.name = newName
             }
+        }
+        return apiResponse
+    }
+
+    fun deleteFile(
+        file: File,
+        realm: Realm? = null,
+        userDrive: UserDrive? = null,
+        context: Context,
+        onSuccess: ((fileID: Int) -> Unit)? = null
+    ): ApiResponse<CancellableAction> {
+        val apiResponse = ApiRepository.deleteFile(file)
+        if (apiResponse.isSuccess()) {
+            file.deleteCaches(context)
+            updateFile(file.id, realm, userDrive = userDrive) { localFile -> localFile.deleteFromRealm() }
+            onSuccess?.invoke(file.id)
         }
         return apiResponse
     }
@@ -501,13 +518,14 @@ object FileController {
         customRealm?.let(block) ?: getRealmInstance().use(block)
     }
 
-    fun removeOrphanAndActivityFiles() {
-        getRealmInstance().use { realm ->
+    fun removeOrphanAndActivityFiles(customRealm: Realm? = null) {
+        val block: (Realm) -> Unit = { realm ->
             realm.executeTransaction {
                 realm.where(FileActivity::class.java).findAll().deleteAllFromRealm()
             }
             removeOrphanFiles(realm)
         }
+        customRealm?.let(block) ?: getRealmInstance().use(block)
     }
 
     fun removeOrphanFiles(customRealm: Realm? = null) {

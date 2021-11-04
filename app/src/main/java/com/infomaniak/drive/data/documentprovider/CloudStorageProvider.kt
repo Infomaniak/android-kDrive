@@ -23,6 +23,7 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.graphics.Point
 import android.net.Uri
+import android.os.Build
 import android.os.CancellationSignal
 import android.os.ParcelFileDescriptor
 import android.provider.DocumentsContract
@@ -125,7 +126,7 @@ class CloudStorageProvider : DocumentsProvider() {
         val isNewJob = uri != oldQueryChildUri || needRefresh
         val isLoading = uri == oldQueryChildUri && oldQueryChildCursor?.job?.isCompleted == false || isNewJob
 
-        Log.i(TAG, "queryChildDocuments() isloading:$isLoading, isnew: $isNewJob")
+        Log.i(TAG, "queryChildDocuments() isLoading: $isLoading, isNew: $isNewJob")
 
         cursor.extras = bundleOf(DocumentsContract.EXTRA_LOADING to isLoading)
         cursor.setNotificationUri(context?.contentResolver, uri)
@@ -311,7 +312,47 @@ class CloudStorageProvider : DocumentsProvider() {
         }
     }
 
+    // override fun createDocument(parentDocumentId: String, mimeType: String, displayName: String): String {
+    //
+    // }
+
+    override fun deleteDocument(documentId: String) {
+        Log.d(TAG, "deleteDocument(), id=$documentId")
+
+        val context = context ?: return
+
+        FileController.getRealmInstance(
+            createUserDrive(documentId)
+        ).use { realm ->
+
+            FileController.getFileProxyById(
+                getFileIdFromDocumentId(documentId),
+                customRealm = realm
+            )?.let { file ->
+
+                // Delete
+                val apiResponse = FileController.deleteFile(file, realm, context = context)
+
+                if (apiResponse.isSuccess()) {
+
+                    // Delete orphans
+                    FileController.removeOrphanAndActivityFiles(realm)
+
+                    // Refresh
+                    currentParentDocumentId?.let {
+                        needRefresh = true
+                        context.contentResolver.notifyChange(DocumentCursor.createUri(context, it), null)
+                    }
+
+                } else {
+                    throw Exception("Delete document failed")
+                }
+            }
+        }
+    }
+
     override fun renameDocument(documentId: String, displayName: String): String? {
+        Log.d(TAG, "renameDocument(), id=$documentId, name=$displayName")
 
         FileController.getRealmInstance(
             createUserDrive(documentId)
@@ -340,6 +381,14 @@ class CloudStorageProvider : DocumentsProvider() {
 
         return null
     }
+
+    // override fun copyDocument(sourceDocumentId: String, targetParentDocumentId: String): String {
+    //
+    // }
+
+    // override fun moveDocument(sourceDocumentId: String, sourceParentDocumentId: String, targetParentDocumentId: String): String {
+    //
+    // }
 
     private fun MatrixCursor.addRoot(rootId: String, documentId: String, summary: String) {
         val flags = DocumentsContract.Root.FLAG_SUPPORTS_CREATE or
@@ -380,7 +429,14 @@ class CloudStorageProvider : DocumentsProvider() {
         }
 
         if (file != null) {
-            flags = flags or DocumentsContract.Document.FLAG_SUPPORTS_RENAME
+            flags = flags or
+                    DocumentsContract.Document.FLAG_SUPPORTS_DELETE or
+                    DocumentsContract.Document.FLAG_SUPPORTS_RENAME
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                flags = flags or
+                        DocumentsContract.Document.FLAG_SUPPORTS_COPY or
+                        DocumentsContract.Document.FLAG_SUPPORTS_MOVE
+            }
         }
 
         newRow().apply {
