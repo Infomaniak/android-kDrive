@@ -23,7 +23,6 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.core.os.bundleOf
 import androidx.navigation.findNavController
-import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
@@ -31,6 +30,7 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDia
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.CURRENT_FILE_ID_ARG
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.CURRENT_PERMISSION_ARG
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSIONS_GROUP_ARG
+import com.infomaniak.drive.utils.loadGlide
 import kotlinx.android.synthetic.main.view_share_link_container.view.*
 
 class ShareLinkContainerView @JvmOverloads constructor(
@@ -132,7 +132,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
             if (showOfficePermission) {
                 officePermissionView.visibility = View.VISIBLE
                 officePermissionValue.setText(officePermission.translation)
-                officePermissionIcon.load(officePermission.icon)
+                officePermissionIcon.loadGlide(officePermission.icon)
             } else {
                 officePermissionView.visibility = View.GONE
             }

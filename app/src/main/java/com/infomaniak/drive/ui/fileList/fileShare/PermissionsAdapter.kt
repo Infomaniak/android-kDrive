@@ -24,7 +24,6 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.RelativeCornerSize
 import com.google.android.material.shape.ShapeAppearanceModel
@@ -36,6 +35,7 @@ import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.loadAvatar
+import com.infomaniak.drive.utils.loadGlide
 import com.infomaniak.lib.core.models.User
 import com.infomaniak.lib.core.utils.toPx
 import com.infomaniak.lib.core.views.ViewHolder
@@ -123,7 +123,7 @@ class PermissionsAdapter(
                     }
                 }
                 else -> {
-                    mainIcon.load(permission.icon)
+                    mainIcon.loadGlide(permission.icon)
                     mainIcon.shapeAppearanceModel = ShapeAppearanceModel()
 
                     when {

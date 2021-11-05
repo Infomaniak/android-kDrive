@@ -39,6 +39,8 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.work.*
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
+import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.infomaniak.drive.R
@@ -65,6 +67,8 @@ object Utils {
     const val OTHER_ROOT_ID = -1
 
     const val INDETERMINATE_PROGRESS = -1
+
+    val CROSS_FADE_TRANSITION = withCrossFade(DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build())
 
     fun createConfirmation(
         context: Context,

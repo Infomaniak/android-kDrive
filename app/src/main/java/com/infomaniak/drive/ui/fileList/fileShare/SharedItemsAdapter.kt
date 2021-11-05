@@ -23,11 +23,10 @@ import android.view.View.*
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.utils.loadAvatar
-import com.infomaniak.drive.utils.loadUrl
+import com.infomaniak.drive.utils.loadGlide
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_shareable_item.view.*
 
@@ -95,7 +94,7 @@ class SharedItemsAdapter(
         }
 
         avatar.apply {
-            loadUrl(null, R.drawable.ic_circle_send)
+            loadGlide(null, errorRes = R.drawable.ic_circle_send)
         }
 
         rightsValue.setText(invitation.getFilePermission().translation)
@@ -112,10 +111,10 @@ class SharedItemsAdapter(
     private fun View.bindTeam(team: Team) {
         if (team.isAllUsers()) {
             name.setText(R.string.allAllDriveUsers)
-            avatar.load(R.drawable.ic_circle_drive)
+            avatar.loadGlide(R.drawable.ic_circle_drive)
         } else {
             name.text = team.name
-            avatar.load(R.drawable.ic_circle_team)
+            avatar.loadGlide(R.drawable.ic_circle_team)
         }
         avatar.setBackgroundColor(team.getParsedColor())
 

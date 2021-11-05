@@ -32,6 +32,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Point
+import android.graphics.drawable.Drawable
 import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Build
@@ -71,6 +72,7 @@ import androidx.navigation.fragment.findNavController
 import coil.ImageLoader
 import coil.load
 import coil.request.Disposable
+import com.bumptech.glide.Glide
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -103,17 +105,14 @@ import kotlinx.android.synthetic.main.item_file.view.fileOfflineProgression
 import kotlinx.android.synthetic.main.item_file.view.filePreview
 import kotlinx.android.synthetic.main.item_file.view.progressLayout
 import kotlinx.android.synthetic.main.item_user.view.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
+
 typealias FileId = Int
-typealias IsOffline = Boolean
 typealias IsComplete = Boolean
 
 fun Intent.clearStack() = apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK }
@@ -129,15 +128,30 @@ fun Context.isKeyguardSecure(): Boolean {
     return (getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager)?.isKeyguardSecure ?: false
 }
 
-fun ImageView.loadUrl(
-    uri: String?,
-    @DrawableRes placeholder: Int = R.drawable.failback_image
-): Disposable {
-    return load(uri) {
-        error(placeholder)
-        fallback(placeholder)
-        placeholder(R.drawable.placeholder)
-    }
+fun ImageView.loadGlide(@DrawableRes drawable: Int) {
+    Glide.with(this).load(drawable).into(this)
+}
+
+fun ImageView.loadGlide(bitmap: Bitmap?, @DrawableRes errorRes: Int) {
+    Glide.with(this)
+        .load(bitmap)
+        .transition(Utils.CROSS_FADE_TRANSITION)
+        .placeholder(R.drawable.placeholder)
+        .error(errorRes)
+        .centerCrop().into(this)
+}
+
+fun ImageView.loadGlideUrl(
+    url: String?,
+    @DrawableRes errorRes: Int = R.drawable.failback_image,
+    errorDrawable: Drawable? = null
+) {
+    Glide.with(this)
+        .load(OkHttpLibraryGlideModule.GlideAuthUrl(url))
+        .transition(Utils.CROSS_FADE_TRANSITION)
+        .placeholder(R.drawable.placeholder)
+        .apply { if (errorDrawable == null) error(errorRes) else error(errorDrawable) }
+        .centerCrop().into(this)
 }
 
 fun ImageView.loadAvatar(driveUser: DriveUser): Disposable =
@@ -255,46 +269,44 @@ fun View.setFileItem(
     progressLayout.visibility = GONE
 
     filePreview.scaleType = ImageView.ScaleType.CENTER
+
     when {
         file.isFolder() -> {
             when (file.getVisibilityType()) {
-                File.VisibilityType.IS_TEAM_SPACE -> filePreview.load(R.drawable.ic_folder_common_documents)
-                File.VisibilityType.IS_SHARED_SPACE -> filePreview.load(R.drawable.ic_folder_shared)
-                File.VisibilityType.IS_COLLABORATIVE_FOLDER -> filePreview.load(R.drawable.ic_folder_dropbox)
+                File.VisibilityType.IS_TEAM_SPACE -> filePreview.loadGlide(R.drawable.ic_folder_common_documents)
+                File.VisibilityType.IS_SHARED_SPACE -> filePreview.loadGlide(R.drawable.ic_folder_shared)
+                File.VisibilityType.IS_COLLABORATIVE_FOLDER -> filePreview.loadGlide(R.drawable.ic_folder_dropbox)
                 else -> {
                     if (file.isDisabled()) {
-                        filePreview.load(R.drawable.ic_folder_disable)
+                        filePreview.loadGlide(R.drawable.ic_folder_disable)
                     } else {
-                        filePreview.load(R.drawable.ic_folder_filled)
+                        filePreview.loadGlide(R.drawable.ic_folder_filled)
                     }
                 }
             }
         }
         file.isDrive() -> {
-            filePreview.load(R.drawable.ic_drive)
+            filePreview.loadGlide(R.drawable.ic_drive)
             filePreview.setColorFilter(Color.parseColor(file.driveColor))
         }
         else -> {
             when {
                 file.hasThumbnail && (isGrid || file.getFileType() == File.ConvertedType.IMAGE
                         || file.getFileType() == File.ConvertedType.VIDEO) -> {
-                    filePreview.scaleType = ImageView.ScaleType.CENTER_CROP
-                    filePreview.loadUrl(file.thumbnail(), file.getFileType().icon)
+                    filePreview.loadGlideUrl(file.thumbnail(), file.getFileType().icon)
                 }
                 file.isFromUploads && (file.getMimeType().startsWith("image/") || file.getMimeType().startsWith("video/")) -> {
-                    filePreview.scaleType = ImageView.ScaleType.CENTER_CROP
                     CoroutineScope(Dispatchers.Default).launch {
-                        filePreview.load(context.getLocalThumbnail(file)) {
-                            fallback(file.getFileType().icon)
-                        }
+                        filePreview.loadGlide(context.getLocalThumbnail(file), file.getFileType().icon)
                     }
                 }
                 else -> {
-                    filePreview.load(file.getFileType().icon)
+                    filePreview.loadGlide(file.getFileType().icon)
                 }
             }
-            filePreview2?.load(file.getFileType().icon)
-            setupFileProgress(file)
+            filePreview2?.loadGlide(file.getFileType().icon)
+            val progress = file.currentProgress
+//            setupFileProgress(file)
         }
     }
 }

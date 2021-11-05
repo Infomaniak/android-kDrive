@@ -25,7 +25,6 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Filter
 import android.widget.Filterable
-import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.Invitation
@@ -34,6 +33,7 @@ import com.infomaniak.drive.data.models.Team
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.isEmail
 import com.infomaniak.drive.utils.loadAvatar
+import com.infomaniak.drive.utils.loadGlide
 import kotlinx.android.synthetic.main.item_user.view.*
 
 /**
@@ -104,14 +104,14 @@ class AvailableShareableItemsAdapter(
                     chevron.visibility = GONE
                 }
                 is Invitation -> {
-                    userAvatar.load(R.drawable.ic_account)
+                    userAvatar.loadGlide(R.drawable.ic_account)
                     userName.text = item.email
                     userEmail.text = context.getString(R.string.userInviteByEmail)
                     chevron.visibility = GONE
                 }
                 is Team -> {
                     val teamUsersCount = item.usersCount(AccountUtils.getCurrentDrive()!!)
-                    userAvatar.load(R.drawable.ic_circle_team)
+                    userAvatar.loadGlide(R.drawable.ic_circle_team)
                     userAvatar.setBackgroundColor(item.getParsedColor())
                     userName.text = item.name
                     userEmail.text =

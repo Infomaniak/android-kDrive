@@ -21,7 +21,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.utils.loadUrl
+import com.infomaniak.drive.utils.loadGlideUrl
 import com.infomaniak.drive.views.PaginationAdapter
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_picture.view.*
@@ -38,7 +38,7 @@ class HomePicturesAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val file = itemList[position]
         holder.itemView.apply {
-            picture.loadUrl(file.thumbnail())
+            picture.loadGlideUrl(file.thumbnail())
             picture.contentDescription = file.name
             setOnClickListener {
                 onItemClick(file)

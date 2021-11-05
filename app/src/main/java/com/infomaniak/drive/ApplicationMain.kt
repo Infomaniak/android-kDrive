@@ -57,10 +57,7 @@ import io.sentry.SentryEvent
 import io.sentry.SentryOptions
 import io.sentry.android.core.SentryAndroid
 import io.sentry.android.core.SentryAndroidOptions
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import org.eclipse.paho.client.mqttv3.*
@@ -159,7 +156,7 @@ class ApplicationMain : Application(), ImageLoaderFactory {
             notificationManagerCompat.notify(UUID.randomUUID().hashCode(), build())
         }
 
-        GlobalScope.launch(Dispatchers.IO) {
+        CoroutineScope(Dispatchers.IO).launch {
             AccountUtils.removeUser(this@ApplicationMain, user)
         }
     }
