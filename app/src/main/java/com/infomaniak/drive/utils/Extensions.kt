@@ -85,7 +85,6 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialog.Companion.FILE_ID
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
-import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.models.User
 import com.infomaniak.lib.core.networking.HttpUtils
@@ -301,25 +300,24 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
     }
 }
 
-fun View.setupFileProgress(file: File) {
+fun View.setupFileProgress(file: File, containsProgress: Boolean = false) {
     val progress = file.currentProgress
-    val isPendingOffline = file.isPendingOffline(context)
-    val isSyncActive = context.isSyncActive()
+
     when {
-        (isPendingOffline || isSyncActive) && progress in 0..99 -> {
+        !containsProgress && file.isPendingOffline(context) && progress == Utils.INDETERMINATE_PROGRESS -> {
+            fileOffline.isGone = true
+            fileOfflineProgression.isGone = true
+            fileOfflineProgression.isIndeterminate = true
+            fileOfflineProgression.isVisible = true
+            progressLayout.isVisible = true
+        }
+        containsProgress && progress in 0..99 -> {
             fileOffline.isGone = true
             if (fileOfflineProgression.isIndeterminate) {
                 fileOfflineProgression.isGone = true
                 fileOfflineProgression.isIndeterminate = false
             }
             fileOfflineProgression.progress = progress
-            fileOfflineProgression.isVisible = true
-            progressLayout.isVisible = true
-        }
-        isPendingOffline && progress == Utils.INDETERMINATE_PROGRESS -> {
-            fileOffline.isGone = true
-            fileOfflineProgression.isGone = true
-            fileOfflineProgression.isIndeterminate = true
             fileOfflineProgression.isVisible = true
             progressLayout.isVisible = true
         }
