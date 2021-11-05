@@ -120,9 +120,8 @@ object ApiRepository {
         )
     }
 
-    fun createOfficeFile(driveId: Int, folderId: Int, createFile: CreateFile): ApiResponse<File> {
-        return callApi(ApiRoutes.createOfficeFile(driveId, folderId), POST, createFile)
-    }
+    fun createOfficeFile(driveId: Int, folderId: Int, createFile: CreateFile): ApiResponse<File> =
+        callApi(ApiRoutes.createOfficeFile(driveId, folderId), POST, createFile)
 
     fun createTeamFolder(
         okHttpClient: OkHttpClient,

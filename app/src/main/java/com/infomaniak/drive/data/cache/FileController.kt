@@ -852,7 +852,7 @@ object FileController {
         }
     }
 
-    private fun addFileTo(parentFolderID: Int, file: File, userDrive: UserDrive?) {
+    fun addFileTo(parentFolderID: Int, file: File, userDrive: UserDrive?) {
         getRealmInstance(userDrive).use { realm ->
             val localFolder = realm.where(File::class.java).equalTo(File::id.name, parentFolderID).findFirst()
             if (localFolder != null) {

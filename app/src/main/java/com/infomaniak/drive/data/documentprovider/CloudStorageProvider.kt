@@ -25,6 +25,7 @@ import android.graphics.Point
 import android.net.Uri
 import android.os.Build
 import android.os.CancellationSignal
+import android.os.Handler
 import android.os.ParcelFileDescriptor
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
@@ -33,14 +34,19 @@ import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.KDriveHttpClient
+import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.utils.ApiController
 import io.realm.Realm
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -49,15 +55,21 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okhttp3.OkHttpClient
+import java.io.IOException
 import java.net.URLEncoder
+import java.util.*
 
 class CloudStorageProvider : DocumentsProvider() {
 
+    private lateinit var cacheDir: java.io.File
+
     override fun onCreate(): Boolean {
         Log.d(TAG, "onCreate")
+
         var result = false
         runBlocking {
             context?.let {
+                cacheDir = java.io.File(it.filesDir, "cloud_storage_temp_files")
                 it.initRealm()
                 result = true
             }
@@ -213,13 +225,39 @@ class CloudStorageProvider : DocumentsProvider() {
         Log.d(TAG, "openDocument(), id=$documentId, mode=$mode, signalIsCancelled: ${signal?.isCanceled}")
         val context = context ?: return null
 
+        val isWrite = mode.indexOf('w') != -1
         val accessMode = ParcelFileDescriptor.parseMode(mode)
         val fileId = getFileIdFromDocumentId(documentId)
         val userDrive = createUserDrive(documentId)
         val file = FileController.getFileById(fileId, userDrive)
 
         return if (file != null) {
-            getDataFile(context, file, userDrive, accessMode)
+            if (isWrite) {
+                val parentFile = FileController.getParentFile(file.id, userDrive) ?: return null
+                val tempFile = createTempFile(parentFile.id, file.name)
+                val handler = Handler(context.mainLooper)
+                ParcelFileDescriptor.open(tempFile, accessMode, handler) { exception: IOException? ->
+                    if (exception == null) {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            UploadFile(
+                                uri = tempFile.toUri().toString(),
+                                driveId = userDrive.driveId,
+                                fileCreatedAt = Date(),
+                                fileName = file.name,
+                                fileSize = tempFile.length(),
+                                remoteFolder = parentFile.id,
+                                type = UploadFile.Type.CLOUD_STORAGE.name,
+                                userId = userDrive.userId,
+                            ).store()
+                            context.syncImmediately()
+                        }
+                    } else {
+                        exception.printStackTrace()
+                    }
+                }
+            } else {
+                getDataFile(context, file, userDrive, accessMode)
+            }
         } else {
             null
         }
@@ -324,7 +362,7 @@ class CloudStorageProvider : DocumentsProvider() {
     override fun deleteDocument(documentId: String) {
         Log.d(TAG, "deleteDocument(), id=$documentId")
 
-        val context = context ?: return
+        val context = context ?: throw Exception("Delete document failed: missing Android Context")
 
         FileController.getRealmInstance(
             createUserDrive(documentId)
@@ -420,8 +458,39 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     private fun createNewFile(parentDocumentId: String, displayName: String): String {
-        // TODO
-        return "COLUMN_DOCUMENT_ID"
+
+        val driveId = getDriveFromDocId(parentDocumentId).id
+        val parentFolderId = getFileIdFromDocumentId(parentDocumentId)
+        val userDrive = createUserDrive(parentDocumentId)
+
+        val uploadUrl = ApiRoutes.uploadFile(driveId, parentFolderId) +
+                "?total_size=0" +
+                "&file_name=${URLEncoder.encode(displayName, "UTF-8")}" +
+                "&last_modified_at=${Date().time / 1_000L}" +
+                "&conflict=" + UploadTask.Companion.ConflictOption.RENAME.toString()
+
+        val apiResponse = ApiController.callApi<ApiResponse<List<File>>>(
+            uploadUrl,
+            ApiController.ApiMethod.PUT,
+            okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(userDrive.userId, 120) }
+        )
+        val file = apiResponse.data?.firstOrNull()
+
+        if (apiResponse.isSuccess() && file != null) {
+            FileController.addFileTo(parentFolderId, file, userDrive)
+
+            createTempFile(getFileIdFromDocumentId(parentDocumentId), displayName)
+
+            return createFileDocumentId(parentDocumentId, file.id)
+        }
+
+        throw Exception("Copy file failed")
+    }
+
+    private fun createTempFile(parentFileId: Int, displayName: String): java.io.File {
+        val tempFileFolder = java.io.File(cacheDir, "$parentFileId")
+            .apply { if (!exists()) mkdirs() }
+        return java.io.File(tempFileFolder, displayName).apply { if (!exists()) createNewFile() }
     }
 
     private fun MatrixCursor.addRoot(rootId: String, documentId: String, summary: String) {
@@ -559,9 +628,8 @@ class CloudStorageProvider : DocumentsProvider() {
 
         private fun getUserId(documentId: String) = documentId.substringBefore(SEPARATOR)
         private fun getFileIdFromDocumentId(documentId: String) = documentId.substringAfterLast(SEPARATOR).toInt()
-        private fun createFileDocumentId(parentDocumentId: String, fileId: Int): String {
-            return parentDocumentId.substringBeforeLast(SEPARATOR) + SEPARATOR + fileId.toString()
-        }
+        private fun createFileDocumentId(parentDocumentId: String, fileId: Int): String =
+            parentDocumentId.substringBeforeLast(SEPARATOR) + SEPARATOR + fileId.toString()
 
         private fun isSharedUri(documentId: String) = documentId.matches(SHARED_URI_REGEX)
 
