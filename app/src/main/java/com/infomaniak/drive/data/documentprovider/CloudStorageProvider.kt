@@ -47,6 +47,7 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.ApiController
+import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import io.realm.Realm
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -60,6 +61,8 @@ import java.net.URLEncoder
 import java.util.*
 
 class CloudStorageProvider : DocumentsProvider() {
+
+    private val syncRefreshTimer = createRefreshTimer() { context?.syncImmediately() }
 
     private lateinit var cacheDir: java.io.File
 
@@ -249,7 +252,8 @@ class CloudStorageProvider : DocumentsProvider() {
                                 type = UploadFile.Type.CLOUD_STORAGE.name,
                                 userId = userDrive.userId,
                             ).store()
-                            context.syncImmediately()
+                            syncRefreshTimer.cancel()
+                            syncRefreshTimer.start()
                         }
                     } else {
                         exception.printStackTrace()
