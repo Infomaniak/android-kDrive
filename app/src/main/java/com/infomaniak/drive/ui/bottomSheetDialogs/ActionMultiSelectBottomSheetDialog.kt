@@ -22,9 +22,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.liveData
@@ -56,18 +55,18 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
         availableOffline.setOnClickListener { onActionSelected(SelectDialogAction.OFFLINE) }
         duplicateFile.setOnClickListener { onActionSelected(SelectDialogAction.DUPLICATE) }
 
-        disabledAvailableOffline.visibility = if (navigationArgs.onlyFolders) VISIBLE else GONE
+        disabledAvailableOffline.isVisible = navigationArgs.onlyFolders
 
-        val otherActionsVisibility = if (navigationArgs.fileIds.size in 1..BulkOperationsUtils.MIN_SELECTED) VISIBLE else GONE
-        availableOffline.visibility = otherActionsVisibility
-        addFavorites.visibility = otherActionsVisibility
+        val otherActionsVisibility = navigationArgs.fileIds.size in 1..BulkOperationsUtils.MIN_SELECTED
+        availableOffline.isVisible = otherActionsVisibility
+        addFavorites.isVisible = otherActionsVisibility
 
         val drivePermissions = DrivePermissions()
         drivePermissions.registerPermissions(this) { authorized -> if (authorized) downloadFileArchive() }
         downloadFile.setOnClickListener {
             if (drivePermissions.checkWriteStoragePermission()) downloadFileArchive()
         }
-        downloadFile.visibility = if (navigationArgs.fileIds.isNotEmpty()) VISIBLE else GONE
+        downloadFile.isVisible = navigationArgs.fileIds.isNotEmpty()
     }
 
     private fun downloadFileArchive() {

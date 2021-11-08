@@ -22,6 +22,8 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
 import kotlinx.android.synthetic.main.view_no_items.view.*
@@ -60,37 +62,35 @@ class NoItemsLayoutView @JvmOverloads constructor(
         if (secondaryBackground) noItemsIconLayout.setBackgroundResource(R.drawable.round_empty_secondary)
     }
 
-    fun toggleVisibility(
-        isVisible: Boolean,
-        noNetwork: Boolean = false,
-        showRefreshButton: Boolean = true
-    ) {
+    fun toggleVisibility(isVisible: Boolean, noNetwork: Boolean = false, showRefreshButton: Boolean = true) {
+
         if (!isVisible) {
-            this.visibility = GONE
-            initialListView.visibility = VISIBLE
+            this.isGone = true
+            initialListView.isVisible = true
+
         } else {
-            this.visibility = VISIBLE
-            initialListView.visibility = GONE
+
+            this.isVisible = true
+            initialListView.isGone = true
             noItemsIconLayout.icon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_no_network))
             noItemsTitle.setText(R.string.noFilesDescriptionNoNetwork)
+
             if (noNetwork) {
                 if (showRefreshButton) {
-                    noItemsRefreshButton.visibility = VISIBLE
-                    noItemsRefreshButton.setOnClickListener {
-                        onNetworkUnavailableRefresh?.invoke()
-                    }
+                    noItemsRefreshButton.isVisible = true
+                    noItemsRefreshButton.setOnClickListener { onNetworkUnavailableRefresh?.invoke() }
                 }
             } else {
                 noItemsIconLayout.icon.setImageResource(icon)
                 noItemsTitle.setText(title)
-                noItemsRefreshButton.visibility = GONE
+                noItemsRefreshButton.isGone = true
             }
 
             description?.let {
-                noItemsDescription.visibility = VISIBLE
+                noItemsDescription.isVisible = true
                 noItemsDescription.text = context.getString(it)
             } ?: run {
-                noItemsDescription.visibility = GONE
+                noItemsDescription.isGone = true
             }
         }
     }

@@ -24,6 +24,8 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.LinearLayout
 import androidx.core.os.bundleOf
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.navigation.fragment.findNavController
@@ -86,10 +88,10 @@ class SwitchDriveDialog : DialogFragment() {
         searchView.doOnTextChanged { text, _, _, _ ->
             driveListAdapter.apply {
                 this.driveList = if (text.isNullOrEmpty()) {
-                    clearButton.visibility = View.INVISIBLE
+                    clearButton.isInvisible = true
                     initialDriveList
                 } else {
-                    clearButton.visibility = View.VISIBLE
+                    clearButton.isVisible = true
                     ArrayList(initialDriveList.filter { it.name.contains(text, true) })
                 }
                 notifyDataSetChanged()

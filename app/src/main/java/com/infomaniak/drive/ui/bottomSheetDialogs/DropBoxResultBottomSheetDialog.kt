@@ -19,8 +19,8 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import android.os.Bundle
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.utils.toPx
@@ -28,7 +28,7 @@ import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 
 class DropBoxResultBottomSheetDialog : InformationBottomSheetDialog() {
 
-    val arguments: DropBoxResultBottomSheetDialogArgs by navArgs()
+    private val arguments: DropBoxResultBottomSheetDialogArgs by navArgs()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -39,13 +39,11 @@ class DropBoxResultBottomSheetDialog : InformationBottomSheetDialog() {
         illu.layoutParams.width = 80.toPx()
         illu.setImageResource(R.drawable.ic_folder_dropbox)
 
-        urlDisplay.visibility = VISIBLE
+        urlDisplay.isVisible = true
         urlDisplay.setUrl(arguments.url)
 
-        secondaryActionButton.visibility = GONE
+        secondaryActionButton.isGone = true
         actionButton.setText(R.string.buttonLater)
-        actionButton.setOnClickListener {
-            dismiss()
-        }
+        actionButton.setOnClickListener { dismiss() }
     }
 }

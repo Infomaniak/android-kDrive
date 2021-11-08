@@ -33,8 +33,6 @@ import android.os.Bundle
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -42,6 +40,7 @@ import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.get
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.findNavController
@@ -143,19 +142,19 @@ class MainActivity : BaseActivity() {
                 level = SentryLevel.INFO
             })
 
-            val visibility = when (destination.id) {
+            val isVisible = when (destination.id) {
                 R.id.addFileBottomSheetDialog,
                 R.id.favoritesFragment,
                 R.id.fileInfoActionsBottomSheetDialog,
                 R.id.fileListFragment,
                 R.id.homeFragment,
                 R.id.menuFragment,
-                R.id.sharedWithMeFragment -> VISIBLE
-                else -> GONE
+                R.id.sharedWithMeFragment -> true
+                else -> false
             }
-            mainFab.visibility = visibility
-            bottomNavigation.visibility = visibility
-            bottomNavigationBackgroundView.visibility = visibility
+            mainFab.isVisible = isVisible
+            bottomNavigation.isVisible = isVisible
+            bottomNavigationBackgroundView.isVisible = isVisible
 
             when (destination.id) {
                 R.id.favoritesFragment,

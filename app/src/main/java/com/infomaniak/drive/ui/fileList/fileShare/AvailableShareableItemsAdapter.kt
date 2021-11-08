@@ -20,11 +20,11 @@ package com.infomaniak.drive.ui.fileList.fileShare
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Filter
 import android.widget.Filterable
+import androidx.core.view.isGone
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.Invitation
@@ -101,13 +101,13 @@ class AvailableShareableItemsAdapter(
                     userAvatar.loadAvatar(item)
                     userName.text = item.displayName
                     userEmail.text = item.email
-                    chevron.visibility = GONE
+                    chevron.isGone = true
                 }
                 is Invitation -> {
                     userAvatar.loadGlide(R.drawable.ic_account)
                     userName.text = item.email
                     userEmail.text = context.getString(R.string.userInviteByEmail)
-                    chevron.visibility = GONE
+                    chevron.isGone = true
                 }
                 is Team -> {
                     val teamUsersCount = item.usersCount(AccountUtils.getCurrentDrive()!!)
@@ -116,7 +116,7 @@ class AvailableShareableItemsAdapter(
                     userName.text = item.name
                     userEmail.text =
                         resources.getQuantityString(R.plurals.shareUsersCount, teamUsersCount, teamUsersCount)
-                    chevron.visibility = GONE
+                    chevron.isGone = true
                 }
             }
 

@@ -22,6 +22,8 @@ import android.util.AttributeSet
 import android.widget.FrameLayout
 import androidx.appcompat.widget.TooltipCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.utils.isPositive
@@ -40,8 +42,8 @@ class UserAvatarView @JvmOverloads constructor(
 
     fun setUserAvatarOrHide(user: DriveUser? = null) {
         user?.let {
-            this.visibility = VISIBLE
-            remainingText.visibility = GONE
+            this.isVisible = true
+            remainingText.isGone = true
             avatarImageView.setBackgroundColor(
                 ContextCompat.getColor(
                     context,
@@ -51,18 +53,18 @@ class UserAvatarView @JvmOverloads constructor(
             avatarImageView.loadAvatar(user)
             TooltipCompat.setTooltipText(this, user.displayName)
         } ?: run {
-            this.visibility = GONE
+            this.isGone = true
         }
     }
 
     fun setUsersNumber(number: Int) {
         if (number.isPositive()) {
-            this.visibility = VISIBLE
+            this.isVisible = true
             avatarImageView.setBackgroundColor(ContextCompat.getColor(context, R.color.primaryText))
             remainingText.text = "+$number"
-            remainingText.visibility = VISIBLE
+            remainingText.isVisible = true
         } else {
-            this.visibility = GONE
+            this.isGone = true
         }
     }
 }

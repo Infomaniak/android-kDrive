@@ -19,10 +19,9 @@ package com.infomaniak.drive.ui.addFiles
 
 import android.os.Bundle
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.widget.CompoundButton
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
@@ -42,7 +41,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        advancedSettings.visibility = VISIBLE
+        advancedSettings.isVisible = true
         createFolderButton.setText(R.string.createDropBoxTitle)
         createFolderCollapsing.title = getString(R.string.createDropBoxTitle)
         folderCreateIcon.icon.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_folder_dropbox))
@@ -57,7 +56,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
             }
         }
 
-        advancedSettingsCardView.visibility = VISIBLE
+        advancedSettingsCardView.isVisible = true
         advancedSettings.setOnClickListener {
             toggleShowAdvancedSettings()
         }
@@ -90,33 +89,28 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
     }
 
     private fun showAdvancedSettings(show: Boolean, displayAnimation: Boolean = false) {
-        val visibility = if (show) VISIBLE else GONE
         if (displayAnimation) advancedSettingsChevron.animateRotation(show)
-
-        dropboxSettingsDivider.visibility = visibility
-        dropboxSettings.visibility = visibility
+        dropboxSettingsDivider.isVisible = show
+        dropboxSettings.isVisible = show
     }
 
     private fun setupAdvancedSettings() {
         showAdvancedSettings(showAdvancedSettings)
         passwordSwitch.setOnCheckedChangeListener(createOnCheckedChangeListener(passwordTextLayout))
         expirationDateSwitch.setOnCheckedChangeListener(createOnCheckedChangeListener(expirationDateInput))
-        limiteStorageSwitch.setOnCheckedChangeListener(
+        limitStorageSwitch.setOnCheckedChangeListener(
             createOnCheckedChangeListener(
-                limiteStorageValueLayout,
-                limiteStorageValueUnit
+                limitStorageValueLayout,
+                limitStorageValueUnit
             )
         )
         expirationDateInput.init(fragmentManager = parentFragmentManager)
     }
 
-    private fun createOnCheckedChangeListener(vararg viewsToReveal: View): CompoundButton.OnCheckedChangeListener {
-        return CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            viewsToReveal.forEach {
-                it.visibility = if (isChecked) VISIBLE else GONE
-            }
+    private fun createOnCheckedChangeListener(vararg viewsToReveal: View): CompoundButton.OnCheckedChangeListener =
+        CompoundButton.OnCheckedChangeListener { _, isChecked ->
+            viewsToReveal.forEach { it.isVisible = isChecked }
         }
-    }
 
     private fun isValid(): Boolean {
         var result = true
@@ -124,15 +118,15 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
             result = !passwordTextInput.showOrHideEmptyError()
         }
 
-        if (limiteStorageSwitch.isChecked) {
-            limiteStorageValue.text.toString().apply {
+        if (limitStorageSwitch.isChecked) {
+            limitStorageValue.text.toString().apply {
                 when {
                     this.isBlank() -> {
-                        limiteStorageValueLayout.error = getString(R.string.allEmptyInputError)
+                        limitStorageValueLayout.error = getString(R.string.allEmptyInputError)
                         result = false
                     }
                     this.toLong() < 1 -> {
-                        limiteStorageValueLayout.error = getString(R.string.createDropBoxLimiteFileSizeError)
+                        limitStorageValueLayout.error = getString(R.string.createDropBoxLimitFileSizeError)
                         result = false
                     }
                 }
@@ -151,7 +145,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
         val emailWhenFinished = emailWhenFinishedSwitch.isChecked
         val validUntil = if (expirationDateSwitch.isChecked) expirationDateInput.getCurrentTimestampValue() else null
         val password = passwordTextInput.text.toString()
-        val limitFileSize = Utils.convertGigaByteToBytes(limiteStorageValue.text.toString().toLongOrDefault(1))
+        val limitFileSize = Utils.convertGigaByteToBytes(limitStorageValue.text.toString().toLongOrDefault(1))
 
 
         createFolder(false) { file, _ ->

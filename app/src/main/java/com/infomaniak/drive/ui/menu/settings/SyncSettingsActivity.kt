@@ -22,10 +22,10 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
@@ -100,13 +100,13 @@ class SyncSettingsActivity : BaseActivity() {
             it?.let {
                 driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(it.preferences.color))
                 driveName.text = it.name
-                selectDivider.visibility = VISIBLE
-                selectPath.visibility = VISIBLE
+                selectDivider.isVisible = true
+                selectPath.isVisible = true
             } ?: run {
                 driveIcon.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.iconColor))
                 driveName.setText(R.string.selectDriveTitle)
-                selectDivider.visibility = GONE
-                selectPath.visibility = GONE
+                selectDivider.isGone = true
+                selectPath.isGone = true
             }
             if (selectDriveViewModel.selectedUserId.value != oldSyncSettings?.userId ||
                 selectDriveViewModel.selectedDrive.value?.id != oldSyncSettings?.driveId ||
@@ -251,40 +251,27 @@ class SyncSettingsActivity : BaseActivity() {
     }
 
     private fun activeSelectDrive() {
-        switchDrive.visibility = VISIBLE
+        switchDrive.isVisible = true
         selectDrive.setOnClickListener {
             SelectDriveDialog().show(supportFragmentManager, "SyncSettingsSelectDriveDialog")
         }
     }
 
-    private fun saveSettingVisibility(isVisibility: Boolean) {
-        val visibility = if (isVisibility) {
-            mediaFoldersSettingsVisibility(syncSettingsViewModel.syncFolder.value != null)
-            VISIBLE
-        } else {
-            mediaFoldersSettingsVisibility(false)
-            GONE
-        }
-        saveSettingsTitle.visibility = visibility
-        saveSettingsLayout.visibility = visibility
+    private fun saveSettingVisibility(isVisible: Boolean) {
+        mediaFoldersSettingsVisibility(if (isVisible) syncSettingsViewModel.syncFolder.value != null else false)
+        saveSettingsTitle.isVisible = isVisible
+        saveSettingsLayout.isVisible = isVisible
     }
 
-    private fun mediaFoldersSettingsVisibility(isVisibility: Boolean) {
-        val visibility = if (isVisibility) {
-            syncSettingsVisibility(MediaFolder.getAllSyncedFoldersCount() > 0)
-            VISIBLE
-        } else {
-            syncSettingsVisibility(false)
-            GONE
-        }
-        mediaFoldersSettingsTitle.visibility = visibility
-        mediaFoldersSettingsLayout.visibility = visibility
+    private fun mediaFoldersSettingsVisibility(isVisible: Boolean) {
+        syncSettingsVisibility(if (isVisible) MediaFolder.getAllSyncedFoldersCount() > 0 else false)
+        mediaFoldersSettingsTitle.isVisible = isVisible
+        mediaFoldersSettingsLayout.isVisible = isVisible
     }
 
-    private fun syncSettingsVisibility(isVisibility: Boolean) {
-        val visibility = if (isVisibility) VISIBLE else GONE
-        syncSettingsTitle.visibility = visibility
-        syncSettingsLayout.visibility = visibility
+    private fun syncSettingsVisibility(isVisible: Boolean) {
+        syncSettingsTitle.isVisible = isVisible
+        syncSettingsLayout.isVisible = isVisible
     }
 
     private fun changeSaveButtonStatus() {
@@ -295,7 +282,7 @@ class SyncSettingsActivity : BaseActivity() {
                 || (syncSettingsViewModel.syncFolder.value != oldSyncSettings?.syncFolder)
                 || (syncSettingsViewModel.saveOldPictures.value != null)
                 || allSyncedFoldersCount > 0
-        saveButton.visibility = if (isEdited) VISIBLE else GONE
+        saveButton.isVisible = isEdited
 
         mediaFoldersTitle.text = if (allSyncedFoldersCount == 0) getString(R.string.noSelectMediaFolders)
         else resources.getQuantityString(R.plurals.mediaFoldersSelected, allSyncedFoldersCount, allSyncedFoldersCount)

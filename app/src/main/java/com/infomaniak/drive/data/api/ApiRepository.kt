@@ -263,19 +263,19 @@ object ApiRepository {
     }
 
     fun getDropBox(file: File): ApiResponse<DropBox> {
-        return callApi(ApiRoutes.postDropBox(file), GET)
+        return callApi(ApiRoutes.dropBox(file), GET)
     }
 
     fun updateDropBox(file: File, body: JsonElement): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.postDropBox(file), PUT, body)
+        return callApi(ApiRoutes.dropBox(file), PUT, body)
     }
 
     fun postDropBox(file: File, body: Map<String, Any?>): ApiResponse<DropBox> {
-        return callApi(ApiRoutes.postDropBox(file), POST, body)
+        return callApi(ApiRoutes.dropBox(file), POST, body)
     }
 
     fun deleteDropBox(file: File): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.postDropBox(file), DELETE)
+        return callApi(ApiRoutes.dropBox(file), DELETE)
     }
 
     fun convertFile(file: File): ApiResponse<File> {

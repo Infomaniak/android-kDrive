@@ -34,6 +34,7 @@ import android.view.animation.OvershootInterpolator
 import android.widget.FrameLayout
 import androidx.collection.SimpleArrayMap
 import androidx.core.view.ViewCompat
+import androidx.core.view.isGone
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import java.util.*
@@ -106,7 +107,7 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(context: Context, at
 
 
     private fun childHasMenu(itemView: ViewGroup): Boolean {
-        if (itemView.visibility != VISIBLE) return false
+        if (itemView.isGone) return false
 
         val itemChildCount = itemView.childCount
         val itemLastChild =

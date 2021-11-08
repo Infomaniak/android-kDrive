@@ -20,11 +20,11 @@ package com.infomaniak.drive.ui.fileList.fileDetails
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -92,9 +92,9 @@ class FileDetailsFragment : FileDetailsSubFragment() {
             subtitleToolbar.title.setTextColor(titleColor)
             subtitleToolbar.subTitle.setTextColor(subTitleColor)
             toolbar.setNavigationIconTint(titleColor)
-            collapsingBackground.visibility = GONE
-            collapsingBackgroundShadow.visibility = GONE
-            noPreviewLayout.visibility = VISIBLE
+            collapsingBackground.isGone = true
+            collapsingBackgroundShadow.isGone = true
+            noPreviewLayout.isVisible = true
             noPreviewLayout.icon.loadGlide(file.getFileType().icon)
         }
     }
@@ -107,7 +107,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
             )
 
             if (!isFolder) {
-                fileComments.visibility = VISIBLE
+                fileComments.isVisible = true
                 tabs.add(
                     FileDetailsTab(
                         position = 2,

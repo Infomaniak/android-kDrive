@@ -22,9 +22,9 @@ import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -61,11 +61,11 @@ class PreviewPDFFragment : PreviewFragment() {
 
         fileIcon.setImageResource(file.getFileType().icon)
         fileName.text = file.name
-        downloadProgress.visibility = VISIBLE
+        downloadProgress.isVisible = true
         previewDescription.setText(R.string.previewDownloadIndication)
-        previewDescription.visibility = VISIBLE
-        downloadLayout.visibility = VISIBLE
-        pdfViewRecycler.visibility = GONE
+        previewDescription.isVisible = true
+        downloadLayout.isVisible = true
+        pdfViewRecycler.isGone = true
 
         previewPDFViewModel.downloadProgress.observe(viewLifecycleOwner, Observer { progress ->
             if (progress >= 100 && previewPDFViewModel.pdfJob.isCancelled) downloadPdf()
@@ -99,9 +99,9 @@ class PreviewPDFFragment : PreviewFragment() {
 
     private fun showPdf(pdfCore: PdfCore) = lifecycleScope.launchWhenResumed {
         withContext(Dispatchers.Main) {
-            downloadLayout.visibility = GONE
-            pdfViewRecycler.visibility = VISIBLE
-            pageNumberChip.visibility = VISIBLE
+            downloadLayout.isGone = true
+            pdfViewRecycler.isVisible = true
+            pageNumberChip.isVisible = true
             previewPDFAdapter = PreviewPDFAdapter(pdfCore)
             pdfViewRecycler.adapter = previewPDFAdapter
             previewPDFAdapter?.itemCount?.let { updatePageNumber(totalPage = it) }
@@ -133,7 +133,7 @@ class PreviewPDFFragment : PreviewFragment() {
                         this.pdfCore = pdfCore
                         showPdf(pdfCore)
                     } ?: run {
-                        downloadProgress.visibility = GONE
+                        downloadProgress.isGone = true
                         previewDescription.setText(R.string.previewNoPreview)
                     }
                     previewSliderViewModel.pdfIsDownloading.value = false

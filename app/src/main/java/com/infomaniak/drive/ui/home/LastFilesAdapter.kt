@@ -18,9 +18,9 @@
 package com.infomaniak.drive.ui.home
 
 import android.view.LayoutInflater
-import android.view.View.GONE
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
+import androidx.core.view.isGone
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.setFileItem
@@ -42,7 +42,7 @@ class LastFilesAdapter : LoaderAdapter<File>() {
         holder.itemView.apply {
             val marginStandardSmall = resources.getDimensionPixelSize(R.dimen.marginStandardSmall)
             fileCardView.setMargin(2, marginStandardSmall, marginStandardSmall, marginStandardSmall)
-            menuButton.visibility = GONE
+            menuButton.isGone = true
 
             if (getItemViewType(position) == VIEW_TYPE_LOADING) {
                 fileCardView.startLoading()

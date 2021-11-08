@@ -24,14 +24,14 @@ import android.os.CountDownTimer
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -317,8 +317,12 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 val mediator = mainViewModel.createMultiSelectMediator()
                 enableButtonMultiSelect(false)
 
-                fileAdapter.getValidItemsSelected().forEach {
-                    val file = it.realm?.copyFromRealm(it, 0) ?: it
+                selectedFiles.reversed().forEach {
+                    val file = when {
+                        it.isManagedByRealm() -> it.realm.copyFromRealm(it, 0)
+                        it.isNotManagedByRealm() -> it
+                        else -> return@forEach
+                    }
                     val onSuccess: (Int) -> Unit = { fileID ->
                         runBlocking(Dispatchers.Main) { fileAdapter.deleteByFileId(fileID) }
                     }
@@ -464,11 +468,12 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun setupFileAdapter() {
         mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
             fileAdapter.toggleOfflineMode(requireContext(), !isInternetAvailable)
-            noNetwork.visibility = if (isInternetAvailable) GONE else VISIBLE
+            noNetwork.isGone = isInternetAvailable
         }
 
         fileAdapter = FileAdapter(FileController.emptyList(mainViewModel.realm))
         fileAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+        fileAdapter.setHasStableIds(true)
         fileAdapter.onFileClicked = { file ->
             when {
                 file.isFolder() -> {
@@ -509,6 +514,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         onBackNavigationResult()
+        fileRecyclerView.setHasFixedSize(true)
         fileRecyclerView.adapter = fileAdapter
         fileRecyclerView.setPagination({
             if (!fileAdapter.isComplete) fileAdapter.showLoading()
@@ -669,9 +675,9 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun openMultiSelect() {
         fileAdapter.multiSelectMode = true
         fileAdapter.notifyItemRangeChanged(0, fileAdapter.itemCount)
-        collapsingToolbarLayout.visibility = GONE
-        multiSelectLayout.visibility = VISIBLE
-        selectAllButton.visibility = VISIBLE
+        collapsingToolbarLayout.isGone = true
+        multiSelectLayout.isVisible = true
+        selectAllButton.isVisible = true
     }
 
     private fun onUpdateMultiSelect(selectedNumber: Int? = null) {
@@ -704,9 +710,9 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             notifyItemRangeChanged(0, itemCount)
         }
 
-        collapsingToolbarLayout.visibility = VISIBLE
-        multiSelectLayout.visibility = GONE
-        selectAllButton.visibility = GONE
+        collapsingToolbarLayout.isVisible = true
+        multiSelectLayout.isGone = true
+        selectAllButton.isGone = true
     }
 
     private fun downloadFolderActivities(currentFolder: File) {
@@ -815,7 +821,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     )
 
     /**
-     * Will change the noFilesLayout visility
+     * Will change the noFilesLayout visibility
      * @param hideFileList will hide or show the fileList in order to replace (or not) by the `no-files` layout
      * @param changeControlsVisibility will determine if we need to touch the controls visibility based on no-network/no-files
      * @param ignoreOffline will allow to ignore if we're offline to show `No Files` instead of `No Connection` in all cases
@@ -828,11 +834,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         val isOffline = mainViewModel.isInternetAvailable.value == false
         val hasFilesAndIsOffline = !hideFileList && isOffline
 
-        sortLayout?.visibility = if (hideFileList) GONE else VISIBLE
+        sortLayout?.isGone = hideFileList
 
         if (changeControlsVisibility) {
             val isFileListDestination = findNavController().currentDestination?.id == R.id.fileListFragment
-            noNetwork.visibility = if (!hasFilesAndIsOffline) GONE else VISIBLE
+            noNetwork.isVisible = hasFilesAndIsOffline
             toolbar?.menu?.findItem(R.id.searchItem)?.isVisible = !hideFileList && isFileListDestination
         }
 

@@ -42,8 +42,6 @@ import android.provider.MediaStore
 import android.util.DisplayMetrics
 import android.util.Size
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.view.Window
 import android.view.animation.Animation
@@ -59,6 +57,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
@@ -87,7 +87,6 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialog.Companion.FILE_ID
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
-import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.models.User
 import com.infomaniak.lib.core.networking.HttpUtils
@@ -248,25 +247,27 @@ fun Window.lightNavigationBar(enabled: Boolean) {
     }
 }
 
-fun View.setFileItem(
-    file: File,
-    isGrid: Boolean = false
-) {
+fun View.setFileItem(file: File, isGrid: Boolean = false) {
+
     fileName.text = file.name
-    fileFavorite.visibility = if (file.isFavorite) VISIBLE else GONE
-    fileDate?.visibility = if (file.id != ROOT_ID) VISIBLE else GONE
+    fileFavorite.isVisible = file.isFavorite
+    fileDate?.isVisible = file.id != ROOT_ID
     fileDate?.text =
-        if (file.deletedAt.isPositive()) file.getDeletedAt().format(context.getString(R.string.allDeletedFilePattern))
-        else file.getLastModifiedAt().format(context.getString(R.string.allLastModifiedFilePattern))
+        if (file.deletedAt.isPositive()) {
+            file.getDeletedAt().format(context.getString(R.string.allDeletedFilePattern))
+        } else {
+            file.getLastModifiedAt().format(context.getString(R.string.allLastModifiedFilePattern))
+        }
+
     file.size?.let {
         fileSize?.text = FormatterFileSize.formatShortFileSize(context, it)
-        fileSeparator?.visibility = VISIBLE
+        fileSeparator?.isVisible = true
     } ?: run {
         fileSize?.text = ""
-        fileSeparator?.visibility = GONE
+        fileSeparator?.isGone = true
     }
 
-    progressLayout.visibility = GONE
+    progressLayout.isGone = true
 
     filePreview.scaleType = ImageView.ScaleType.CENTER
 
@@ -311,34 +312,33 @@ fun View.setFileItem(
     }
 }
 
-fun View.setupFileProgress(file: File) {
+fun View.setupFileProgress(file: File, containsProgress: Boolean = false) {
     val progress = file.currentProgress
-    val isPendingOffline = file.isPendingOffline(context)
-    val isSyncActive = context.isSyncActive()
+
     when {
-        (isPendingOffline || isSyncActive) && progress in 0..99 -> {
-            fileOffline.visibility = GONE
+        !containsProgress && file.isPendingOffline(context) && progress == Utils.INDETERMINATE_PROGRESS -> {
+            fileOffline.isGone = true
+            fileOfflineProgression.isGone = true
+            fileOfflineProgression.isIndeterminate = true
+            fileOfflineProgression.isVisible = true
+            progressLayout.isVisible = true
+        }
+        containsProgress && progress in 0..99 -> {
+            fileOffline.isGone = true
             if (fileOfflineProgression.isIndeterminate) {
-                fileOfflineProgression.visibility = GONE
+                fileOfflineProgression.isGone = true
                 fileOfflineProgression.isIndeterminate = false
             }
             fileOfflineProgression.progress = progress
-            fileOfflineProgression.visibility = VISIBLE
-            progressLayout.visibility = VISIBLE
-        }
-        isPendingOffline && progress == Utils.INDETERMINATE_PROGRESS -> {
-            fileOffline.visibility = GONE
-            fileOfflineProgression.visibility = GONE
-            fileOfflineProgression.isIndeterminate = true
-            fileOfflineProgression.visibility = VISIBLE
-            progressLayout.visibility = VISIBLE
+            fileOfflineProgression.isVisible = true
+            progressLayout.isVisible = true
         }
         file.isOfflineFile(context) -> {
-            fileOffline.visibility = VISIBLE
-            fileOfflineProgression.visibility = GONE
-            progressLayout.visibility = VISIBLE
+            fileOffline.isVisible = true
+            fileOfflineProgression.isGone = true
+            progressLayout.isVisible = true
         }
-        else -> progressLayout.visibility = GONE
+        else -> progressLayout.isGone = true
     }
 }
 
@@ -346,7 +346,7 @@ fun View.setUserView(user: User, showChevron: Boolean = true, onItemClicked: (us
     userName.text = user.displayName
     userEmail.text = user.email
     userAvatar.loadAvatar(user)
-    chevron.visibility = if (showChevron) VISIBLE else GONE
+    chevron.isVisible = showChevron
     setOnClickListener { onItemClicked(user) }
 }
 
@@ -354,9 +354,42 @@ fun Long.toApiDate(): Date {
     return Date(this / 1000)
 }
 
+fun Date.endOfTheDay(): Date =
+    Calendar.getInstance().apply {
+        time = this@endOfTheDay
+        set(Calendar.HOUR_OF_DAY, 23)
+        set(Calendar.MINUTE, 59)
+        set(Calendar.SECOND, 0)
+    }.time
+
+fun Date.year(): Int =
+    Calendar.getInstance().apply {
+        time = this@year
+    }.get(Calendar.YEAR)
+
+fun Date.month(): Int =
+    Calendar.getInstance().apply {
+        time = this@month
+    }.get(Calendar.MONTH)
+
+fun Date.day(): Int =
+    Calendar.getInstance().apply {
+        time = this@day
+    }.get(Calendar.DAY_OF_MONTH)
+
+fun Date.hours(): Int =
+    Calendar.getInstance().apply {
+        time = this@hours
+    }.get(Calendar.HOUR_OF_DAY)
+
+fun Date.minutes(): Int =
+    Calendar.getInstance().apply {
+        time = this@minutes
+    }.get(Calendar.MINUTE)
+
 fun ImageView.animateRotation(isDeployed: Boolean = false) {
-    val startDeg = if (isDeployed) 0F else 90F
-    val endDeg = if (isDeployed) 90F else 0F
+    val startDeg = if (isDeployed) 0.0f else 90.0f
+    val endDeg = if (isDeployed) 90.0f else 0.0f
     this.startAnimation(
         RotateAnimation(startDeg, endDeg, Animation.RELATIVE_TO_SELF, 0.5F, Animation.RELATIVE_TO_SELF, 0.5F)
             .apply {
@@ -704,10 +737,19 @@ fun View.updateUploadFileInProgress(pendingFilesCount: Int) {
             pendingFilesCount,
             pendingFilesCount
         )
-        filePreview.visibility = GONE
-        fileProgression.visibility = VISIBLE
-        visibility = VISIBLE
+        filePreview.isGone = true
+        fileProgression.isVisible = true
+        isVisible = true
     } else {
-        visibility = GONE
+        isGone = true
     }
+}
+
+fun Context.shareText(text: String) {
+    val intent = Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, text)
+        type = "text/plain"
+    }
+    ContextCompat.startActivity(this, Intent.createChooser(intent, null), null)
 }

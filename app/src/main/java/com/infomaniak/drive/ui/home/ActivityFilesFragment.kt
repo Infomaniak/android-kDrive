@@ -19,7 +19,7 @@ package com.infomaniak.drive.ui.home
 
 import android.os.Bundle
 import android.view.View
-import android.view.View.VISIBLE
+import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
@@ -51,7 +51,7 @@ class ActivityFilesFragment : FileListFragment() {
     }
 
     private fun initActivity() {
-        currentActivity.visibility = VISIBLE
+        currentActivity.isVisible = true
         navigationArgs.activityUser?.let { user -> currentActivityAvatar.loadAvatar(user) }
         currentActivityContent.text =
             String.format("%s %s", navigationArgs.activityUser?.displayName, navigationArgs.activityTranslation)

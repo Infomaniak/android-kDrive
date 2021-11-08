@@ -19,8 +19,10 @@ package com.infomaniak.drive.ui.fileList.fileDetails
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
-import android.view.View.*
 import android.view.ViewGroup
+import androidx.core.view.isGone
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.FileActivity
 import com.infomaniak.drive.utils.loadAvatar
@@ -56,13 +58,13 @@ class FileActivitiesAdapter(
 
             if (position == 0 || !isSameDay(currentFileActivity.createdAt, itemList[position - 1].createdAt)) {
                 activityDate.text = currentFileActivity.getDay(context)
-                line1.visibility = if (position == 0) INVISIBLE else VISIBLE
-                line2.visibility = VISIBLE
-                activityDateCardView.visibility = VISIBLE
+                line1.isInvisible = position == 0
+                line2.isVisible = true
+                activityDateCardView.isVisible = true
             } else {
-                line1.visibility = GONE
-                line2.visibility = GONE
-                activityDateCardView.visibility = GONE
+                line1.isGone = true
+                line2.isGone = true
+                activityDateCardView.isGone = true
             }
         }
     }

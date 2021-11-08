@@ -20,13 +20,14 @@ package com.infomaniak.drive.ui.fileList.fileShare
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
@@ -41,10 +42,12 @@ import kotlinx.android.synthetic.main.fragment_file_share_link_settings.*
 import java.util.*
 
 class FileShareLinkSettingsFragment : Fragment() {
-    private lateinit var shareLink: ShareLink
     private val navigationArgs: FileShareLinkSettingsFragmentArgs by navArgs()
-    private var defaultCalendarTimestamp: Date = Date()
     private val shareViewModel: FileShareViewModel by viewModels()
+    private var defaultCalendarTimestamp: Date = Date().endOfTheDay()
+
+    private lateinit var officePermission: ShareLink.EditPermission
+    private lateinit var shareLink: ShareLink
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_file_share_link_settings, container, false)
@@ -54,6 +57,10 @@ class FileShareLinkSettingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         shareLink = navigationArgs.shareLink
+        officePermission = when {
+            navigationArgs.isFolder -> if (shareLink.canEdit) ShareLink.OfficeFolderPermission.WRITE else ShareLink.OfficeFolderPermission.READ
+            else -> if (shareLink.canEdit) ShareLink.OfficeFilePermission.WRITE else ShareLink.OfficeFilePermission.READ
+        }
 
         toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
@@ -65,72 +72,131 @@ class FileShareLinkSettingsFragment : Fragment() {
         }
 
         getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.SELECT_PERMISSION_NAV_KEY) { bundle ->
-            shareLink.permission = bundle.getParcelable(PERMISSION_BUNDLE_KEY)!!
-            setupShareLinkSettingsUi(firstLoad = false)
+            officePermission = bundle.getParcelable(PERMISSION_BUNDLE_KEY)!!
+            shareLink.canEdit = officePermission.apiValue
+            setupShareLinkSettingsUi()
         }
 
         setupUiListeners()
 
         fileShareLinkRights.setOnClickListener {
+            val permissionsGroup =
+                if (navigationArgs.isFolder) SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_FOLDER_OFFICE
+                else SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_FILE_OFFICE
             safeNavigate(
                 FileShareLinkSettingsFragmentDirections.actionFileShareLinkSettingsFragmentToSelectPermissionBottomSheetDialog(
-                    currentPermission = shareLink.permission,
-                    permissionsGroup = SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_SETTINGS
+                    currentPermission = officePermission,
+                    currentFileId = navigationArgs.fileId,
+                    permissionsGroup = permissionsGroup
                 )
             )
         }
 
         if (AccountUtils.getCurrentDrive()?.pack == Drive.DrivePack.FREE.value) {
-            val beforeLastIndex = settingsLayout.indexOfChild(saveButton) - 1
-            val expirationDateLayout = addExpirationDateLayout
-            settingsLayout.removeView(expirationDateLayout)
-            settingsLayout.addView(expirationDateLayout, beforeLastIndex)
 
-            expirationDateLayout.apply {
+            addPasswordLayout.apply {
+                addPasswordSwitch.isEnabled = false
+                addPasswordSwitch.isClickable = false
+                upgradeOfferPassword.isVisible = true
+            }
+
+            settingsLayout?.apply {
+                val beforeLastIndex = indexOfChild(saveButton) - 1
+                removeView(addExpirationDateLayout)
+                addView(addExpirationDateLayout, beforeLastIndex)
+            }
+
+            addExpirationDateLayout.apply {
                 addExpirationDateSwitch.isEnabled = false
                 addExpirationDateSwitch.isClickable = false
-                upgradeOffer.visibility = VISIBLE
+                upgradeOfferExpirationDate.isVisible = true
             }
         }
 
         setupShareLinkSettingsUi()
     }
 
-    private fun setupShareLinkSettingsUi(firstLoad: Boolean = true) {
+    private fun setupShareLinkSettingsUi() {
         shareLink.apply {
-            rightsValue.setText(permission.translation)
-            rightsIcon.setImageResource(permission.icon)
+
+            if (navigationArgs.isOnlyOfficeFile || navigationArgs.isFolder) {
+                rightsTitle.isVisible = true
+                fileShareLinkRights.isVisible = true
+                rightsValue.setText(officePermission.translation)
+                rightsIcon.load(officePermission.icon)
+            } else {
+                rightsTitle.isGone = true
+                fileShareLinkRights.isGone = true
+            }
+
             allowDownloadValue.isChecked = !blockDownloads
             blockCommentsValue.isChecked = blockComments
             blockUsersConsultValue.isChecked = blockInformation
 
-            if (permission == ShareLink.ShareLinkPermission.PASSWORD) {
-                if (firstLoad) {
-                    passwordTextLayout.visibility = GONE
-                    newPasswordButton.visibility = VISIBLE
-                } else {
-                    showPasswordLayout()
-                }
-            } else {
-                passwordTextLayout.visibility = GONE
-                newPasswordButton.visibility = GONE
+            if (permission == ShareLink.ShareLinkFilePermission.PASSWORD) {
+                passwordTextLayout.isGone = true
+                newPasswordButton.isVisible = true
+                addPasswordSwitch.isChecked = true
             }
+
+            val passwordDescriptor = if (shareViewModel.currentFile.value?.isFolder() == true) {
+                R.string.shareLinkPasswordRightFolderDescription
+            } else {
+                R.string.shareLinkPasswordRightFileDescription
+            }
+            addPasswordDescription.setText(passwordDescriptor)
 
             addExpirationDateSwitch.isChecked = shareLink.validUntil != null
             expirationDateInput.init(fragmentManager = parentFragmentManager, defaultCalendarTimestamp) {
-                shareLink.validUntil = Date(it)
+                val validUntil = Calendar.getInstance().apply {
+                    val date = Date(it)
+                    set(
+                        date.year(),
+                        date.month(),
+                        date.day(),
+                        defaultCalendarTimestamp.hours(),
+                        defaultCalendarTimestamp.minutes()
+                    )
+                }.time
+                shareLink.validUntil = validUntil
+                defaultCalendarTimestamp = validUntil
+            }
+            expirationTimeInput.init(fragmentManager = parentFragmentManager, defaultCalendarTimestamp) { hours, minutes ->
+                val validUntil = Calendar.getInstance().apply {
+                    set(
+                        defaultCalendarTimestamp.year(),
+                        defaultCalendarTimestamp.month(),
+                        defaultCalendarTimestamp.day(),
+                        hours,
+                        minutes
+                    )
+                }.time
+                shareLink.validUntil = validUntil
+                defaultCalendarTimestamp = validUntil
             }
         }
     }
 
     private fun setupUiListeners() {
+
+        addPasswordSwitch?.setOnCheckedChangeListener { _, isChecked ->
+            if (shareLink.permission == ShareLink.ShareLinkFilePermission.PUBLIC) {
+                passwordTextLayout.isVisible = isChecked
+            } else if (shareLink.permission == ShareLink.ShareLinkFilePermission.PASSWORD) {
+                passwordTextLayout.isGone = true
+                newPasswordButton.isVisible = isChecked
+            }
+        }
+
         addExpirationDateSwitch.setOnCheckedChangeListener { _, isChecked ->
-            expirationDateInput.visibility = if (isChecked) VISIBLE else GONE
+            expirationDateInput.isVisible = isChecked
+            expirationTimeInput.isVisible = isChecked
             shareLink.validUntil = if (isChecked) defaultCalendarTimestamp else null
         }
 
         newPasswordButton.setOnClickListener {
-            showPasswordLayout()
+            newPasswordButton.isGone = true
+            passwordTextLayout.isVisible = true
         }
 
         allowDownloadValue.setOnCheckedChangeListener { _, isChecked ->
@@ -145,9 +211,9 @@ class FileShareLinkSettingsFragment : Fragment() {
             shareLink.blockInformation = isChecked
         }
 
-        upgradeOffer.setOnClickListener {
-            safeNavigate(R.id.secureLinkShareBottomSheetDialog)
-        }
+        val upgradeOfferOnClickListener = View.OnClickListener { safeNavigate(R.id.secureLinkShareBottomSheetDialog) }
+        upgradeOfferPassword.setOnClickListener(upgradeOfferOnClickListener)
+        upgradeOfferExpirationDate.setOnClickListener(upgradeOfferOnClickListener)
 
         saveButton.initProgress(this)
         saveButton.setOnClickListener {
@@ -155,11 +221,24 @@ class FileShareLinkSettingsFragment : Fragment() {
             val file = File(id = navigationArgs.fileId, driveId = navigationArgs.driveId)
 
             var isValid = true
-            if (shareLink.permission == ShareLink.ShareLinkPermission.PASSWORD) {
-                isValid = !passwordEditText.showOrHideEmptyError()
-                shareLink.password = passwordEditText.text.toString()
+            if (addPasswordSwitch.isChecked) {
+
+                val hasError = passwordEditText.showOrHideEmptyError()
+                isValid = !(hasError && passwordTextLayout.isVisible)
+
+                val password = passwordEditText.text
+                if (password?.isNotBlank() == true) shareLink.apply {
+                    this.password = password.toString()
+                    this.permission = ShareLink.ShareLinkFilePermission.PASSWORD
+                }
+
+            } else {
+                shareLink.permission = ShareLink.ShareLinkFilePermission.PUBLIC
             }
-            if (isValid) {
+
+            if (!isValid) {
+                saveButton?.hideProgress(R.string.buttonSave)
+            } else {
                 shareViewModel.editFileShareLink(file, shareLink).observe(viewLifecycleOwner) { apiResponse ->
                     if (apiResponse.data == true) {
                         findNavController().popBackStack()
@@ -170,10 +249,5 @@ class FileShareLinkSettingsFragment : Fragment() {
                 }
             }
         }
-    }
-
-    private fun showPasswordLayout() {
-        newPasswordButton.visibility = GONE
-        passwordTextLayout.visibility = VISIBLE
     }
 }

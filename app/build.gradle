@@ -85,6 +85,7 @@ dependencies {
     def work_version = '2.7.0'
     implementation "androidx.work:work-runtime-ktx:$work_version"
 
+    implementation 'androidx.biometric:biometric:1.1.0'
     implementation 'androidx.concurrent:concurrent-futures-ktx:1.1.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
@@ -100,6 +101,8 @@ dependencies {
     implementation 'com.github.MikeOrtiz:TouchImageView:3.1.1'
     implementation 'com.github.rubensousa:gravitysnaphelper:2.2.1'
     implementation 'com.tbuonomo.andrui:viewpagerdotsindicator:4.1.2'
+    implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
+
     def coil_version = '1.4.0'
     implementation "io.coil-kt:coil:$coil_version"
     implementation "io.coil-kt:coil-gif:$coil_version"
@@ -116,11 +119,9 @@ dependencies {
     standardImplementation 'com.google.android.play:core:1.10.2'
     standardImplementation 'com.google.firebase:firebase-messaging-ktx:22.0.0'
 
-    implementation 'io.sentry:sentry-android:5.3.0'
-
     implementation 'com.github.hannesa2:paho.mqtt.android:3.3.0'
 
-    implementation 'androidx.biometric:biometric:1.1.0'
+    implementation 'io.sentry:sentry-android:5.3.0'
 
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.1'
     testImplementation 'io.github.serpro69:kotlin-faker:1.6.0'

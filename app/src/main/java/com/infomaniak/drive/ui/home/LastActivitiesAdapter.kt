@@ -20,11 +20,11 @@ package com.infomaniak.drive.ui.home
 import android.text.format.DateUtils.*
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
@@ -78,9 +78,9 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
         fileName1.text = fileActivityName
 
         if (sizeMergedFile >= 1) {
-            cardFilePreview2.visibility = VISIBLE
-            fileIcon2.visibility = VISIBLE
-            fileName2.visibility = VISIBLE
+            cardFilePreview2.isVisible = true
+            fileIcon2.isVisible = true
+            fileName2.isVisible = true
 
             fileActivity.file.loadPreview(filePreview1, filePreviewIcon1 as ConstraintLayout)
             val file2 = fileActivity.mergedFileActivities[0].file
@@ -89,15 +89,15 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
             fileName2.text = file2?.name ?: fileActivity.mergedFileActivities[0].path.substringAfterLast("/")
 
             if (sizeMergedFile == 1) {
-                cardFilePreview3.visibility = GONE
-                fileIcon3.visibility = GONE
-                fileName3.visibility = GONE
+                cardFilePreview3.isGone = true
+                fileIcon3.isGone = true
+                fileName3.isGone = true
                 (cardFilePreview1.layoutParams as ConstraintLayout.LayoutParams).dimensionRatio = "3:2"
                 (cardFilePreview2.layoutParams as ConstraintLayout.LayoutParams).dimensionRatio = "3:2"
             } else {
-                cardFilePreview3.visibility = VISIBLE
-                fileIcon3.visibility = VISIBLE
-                fileName3.visibility = VISIBLE
+                cardFilePreview3.isVisible = true
+                fileIcon3.isVisible = true
+                fileName3.isVisible = true
 
                 val file3 = fileActivity.mergedFileActivities[1].file
                 file3.loadPreview(filePreview3, filePreviewIcon3 as ConstraintLayout)
@@ -108,20 +108,20 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
                     fileIcon3.loadGlide(R.drawable.ic_copy)
                     fileName3.text = fileName3.context.getString(R.string.fileActivityOtherFiles, sizeMergedFile - 1)
                     moreFile.text = "+${sizeMergedFile - 1}"
-                    moreFile.visibility = VISIBLE
+                    moreFile.isVisible = true
                 } else {
                     fileIcon3.loadGlide(getFileTypeIcon(file3))
                     fileName3.text = file3?.name ?: fileActivity.mergedFileActivities[1].path.substringAfterLast("/")
-                    moreFile.visibility = GONE
+                    moreFile.isGone = true
                 }
             }
         } else {
-            cardFilePreview2.visibility = GONE
-            cardFilePreview3.visibility = GONE
-            fileIcon2.visibility = GONE
-            fileIcon3.visibility = GONE
-            fileName2.visibility = GONE
-            fileName3.visibility = GONE
+            cardFilePreview2.isGone = true
+            cardFilePreview3.isGone = true
+            fileIcon2.isGone = true
+            fileIcon3.isGone = true
+            fileName2.isGone = true
+            fileName3.isGone = true
             (cardFilePreview1.layoutParams as ConstraintLayout.LayoutParams).dimensionRatio = "3:1"
             fileActivity.file.loadPreview(filePreview1, filePreviewIcon1 as ConstraintLayout)
         }
@@ -165,12 +165,12 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
 
     private fun File?.loadPreview(imageView: ImageView, iconView: ConstraintLayout) {
         if (this?.hasThumbnail == true && getFileType() == File.ConvertedType.IMAGE || this?.getFileType() == File.ConvertedType.VIDEO) {
-            iconView.visibility = GONE
-            imageView.visibility = VISIBLE
+            iconView.isGone = true
+            imageView.isVisible = true
             imageView.loadGlideUrl(thumbnail(), getFileType().icon)
         } else {
-            imageView.visibility = GONE
-            iconView.visibility = VISIBLE
+            imageView.isGone = true
+            iconView.isVisible = true
             iconView.icon.loadGlide(getFileTypeIcon(this))
         }
     }

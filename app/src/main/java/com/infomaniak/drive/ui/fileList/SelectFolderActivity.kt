@@ -19,9 +19,9 @@ package com.infomaniak.drive.ui.fileList
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import androidx.activity.viewModels
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModel
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -78,7 +78,7 @@ class SelectFolderActivity : BaseActivity() {
     }
 
     fun showSaveButton() {
-        saveButton.visibility = VISIBLE
+        saveButton.isVisible = true
     }
 
     fun enableSaveButton(enable: Boolean) {
@@ -86,7 +86,7 @@ class SelectFolderActivity : BaseActivity() {
     }
 
     fun hideSaveButton() {
-        saveButton.visibility = GONE
+        saveButton.isGone = true
     }
 
     class SaveExternalViewModel : ViewModel() {

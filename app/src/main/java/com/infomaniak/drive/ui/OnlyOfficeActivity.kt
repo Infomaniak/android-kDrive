@@ -19,9 +19,9 @@ package com.infomaniak.drive.ui
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.View
 import android.webkit.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isGone
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.InfomaniakCore
 import kotlinx.android.synthetic.main.activity_only_office.*
@@ -59,9 +59,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
             webChromeClient = object : WebChromeClient() {
                 override fun onProgressChanged(view: WebView, newProgress: Int) {
                     progressBar.progress = newProgress
-                    if (newProgress == 100) {
-                        progressBar.visibility = View.GONE
-                    }
+                    if (newProgress == 100) progressBar.isGone = true
                 }
             }
         }

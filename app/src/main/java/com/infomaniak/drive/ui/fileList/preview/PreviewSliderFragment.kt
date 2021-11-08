@@ -23,10 +23,9 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -110,9 +109,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 currentPreviewFile = previewSliderAdapter.getFile(position)
-                editButton.visibility = if (currentPreviewFile.isOnlyOfficePreview()) VISIBLE else GONE
-                openWithButton.visibility = if (!currentPreviewFile.isOnlyOfficePreview()) VISIBLE else GONE
-                bottomSheetFileInfos.openWith.visibility = VISIBLE
+                editButton.isVisible = currentPreviewFile.isOnlyOfficePreview()
+                openWithButton.isGone = currentPreviewFile.isOnlyOfficePreview()
+                bottomSheetFileInfos.openWith.isVisible = true
 
                 lifecycleScope.launchWhenResumed {
                     withContext(Dispatchers.Main) {
@@ -123,17 +122,11 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         })
 
         previewSliderViewModel.pdfIsDownloading.observe(viewLifecycleOwner) { isDownloading ->
-            val visibility = if (isDownloading) GONE else VISIBLE
-            if (!currentPreviewFile.isOnlyOfficePreview() && openWithButton.isVisible != !isDownloading) {
-                openWithButton.visibility = visibility
-            }
-            bottomSheetFileInfos.openWith.visibility = visibility
+            if (!currentPreviewFile.isOnlyOfficePreview()) openWithButton.isGone = isDownloading
+            bottomSheetFileInfos.openWith.isGone = isDownloading
         }
 
-        editButton.setOnClickListener {
-            openOnlyOfficeDocument(currentPreviewFile)
-        }
-
+        editButton.setOnClickListener { openOnlyOfficeDocument(currentPreviewFile) }
         openWithButton.setOnClickListener { openWithClicked() }
         backButton.setOnClickListener { findNavController().popBackStack() }
 
@@ -152,7 +145,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         transition.duration = 200
         transition.addTarget(R.id.header)
         TransitionManager.beginDelayedTransition(previewSliderParent, transition)
-        header.visibility = if (showUi) VISIBLE else GONE
+        header.isVisible = showUi
         toggleBottomSheet(showUi)
         showUi = !showUi
     }

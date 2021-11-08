@@ -19,12 +19,14 @@ package com.infomaniak.drive.ui.fileList
 
 import android.os.Bundle
 import android.view.View
-import android.view.View.*
 import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.get
+import androidx.core.view.isGone
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
@@ -60,14 +62,14 @@ class SearchFragment : FileListFragment() {
         )
 
         collapsingToolbarLayout.title = getString(R.string.searchTitle)
-        searchViewCard.visibility = VISIBLE
+        searchViewCard.isVisible = true
         fileListLayout.addView(filterLayoutView, 1)
 
         clearButton.setOnClickListener { searchView.text = null }
 
         searchView.hint = getString(R.string.searchViewHint)
         searchView.addTextChangedListener(DebouncingTextWatcher(lifecycle) {
-            clearButton?.visibility = if (it.isNullOrEmpty()) INVISIBLE else VISIBLE
+            clearButton?.isInvisible = it.isNullOrEmpty()
             fileListViewModel.currentPage = 1
             downloadFiles(true, false)
         })
@@ -113,7 +115,7 @@ class SearchFragment : FileListFragment() {
         }
 
         convertedTypeClose.setOnClickListener {
-            convertedTypeLayout.visibility = GONE
+            convertedTypeLayout.isGone = true
             fileListViewModel.currentConvertedType = null
             fileListViewModel.currentConvertedTypeText = null
             fileListViewModel.currentConvertedTypeDrawable = null
@@ -168,7 +170,7 @@ class SearchFragment : FileListFragment() {
 
         convertedType.text = fileListViewModel.currentConvertedTypeText
         convertedTypeIcon.setImageDrawable(fileListViewModel.currentConvertedTypeDrawable)
-        convertedTypeLayout.visibility = VISIBLE
+        convertedTypeLayout.isVisible = true
         fileListViewModel.currentPage = 1
         fileListViewModel.currentConvertedType = type.name.lowercase(Locale.ROOT)
         downloadFiles(true, false)
@@ -182,14 +184,14 @@ class SearchFragment : FileListFragment() {
 
     private fun showFilterLayout(show: Boolean) {
         if (show) {
-            convertedTypeLayout.visibility = GONE
-            fileRecyclerView.visibility = GONE
-            filterLayoutView.visibility = VISIBLE
-            sortLayout.visibility = GONE
+            convertedTypeLayout.isGone = true
+            fileRecyclerView.isGone = true
+            filterLayoutView.isVisible = true
+            sortLayout.isGone = true
         } else {
-            fileRecyclerView.visibility = VISIBLE
-            filterLayoutView.visibility = GONE
-            sortLayout.visibility = VISIBLE
+            fileRecyclerView.isVisible = true
+            filterLayoutView.isGone = true
+            sortLayout.isVisible = true
         }
     }
 
@@ -210,7 +212,7 @@ class SearchFragment : FileListFragment() {
             if (!oldList.isNullOrEmpty() && fileAdapter.getFiles().isEmpty()) {
                 fileAdapter.setFiles(oldList)
                 fileListViewModel.oldList = null
-                if (fileListViewModel.currentConvertedType != null) convertedTypeLayout.visibility = VISIBLE
+                if (fileListViewModel.currentConvertedType != null) convertedTypeLayout.isVisible = true
                 showFilterLayout(false)
                 swipeRefreshLayout.isRefreshing = false
                 return

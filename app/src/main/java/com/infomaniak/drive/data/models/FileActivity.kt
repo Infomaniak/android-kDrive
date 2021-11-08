@@ -20,6 +20,7 @@ package com.infomaniak.drive.data.models
 import android.content.Context
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
+import com.infomaniak.lib.core.utils.FORMAT_DATE_HOUR_MINUTE
 import com.infomaniak.lib.core.utils.FORMAT_FULL_DATE
 import com.infomaniak.lib.core.utils.format
 import io.realm.RealmObject
@@ -179,7 +180,7 @@ open class FileActivity(
     }
 
     fun getHour(): String {
-        return createdAt.format("HH:mm")
+        return createdAt.format(FORMAT_DATE_HOUR_MINUTE)
     }
 
     fun getAction(): FileActivityType {
