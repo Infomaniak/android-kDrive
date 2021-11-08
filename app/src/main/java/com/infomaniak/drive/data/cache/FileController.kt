@@ -875,10 +875,6 @@ object FileController {
         return ApiRepository.createTeamFolder(okHttpClient, driveId, name, forAllUsers)
     }
 
-    fun saveNewFolder(parentFolderId: Int, newFolder: File, userDrive: UserDrive?) {
-        addFileTo(parentFolderId, newFolder, userDrive)
-    }
-
     private fun keepOldLocalFilesData(oldFile: File, newFile: File) {
         newFile.children = oldFile.children
         newFile.isComplete = oldFile.isComplete

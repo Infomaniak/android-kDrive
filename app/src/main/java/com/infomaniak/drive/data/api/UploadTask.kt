@@ -141,9 +141,7 @@ class UploadTask(
 
                 val url = uploadUrl(
                     chunkNumber = chunkNumber,
-                    conflictOption =
-                    if (uploadFile.isSync() || uploadFile.isCloudStorage()) ConflictOption.REPLACE
-                    else ConflictOption.RENAME,
+                    conflictOption = if (uploadFile.isSync() || uploadFile.isCloudStorage()) ConflictOption.REPLACE else ConflictOption.RENAME,
                     currentChunkSize = count,
                     totalChunks = totalChunks
                 )

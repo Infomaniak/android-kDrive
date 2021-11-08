@@ -33,6 +33,7 @@ import android.util.Log
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -124,7 +125,7 @@ class CloudStorageProvider : DocumentsProvider() {
                 else -> { // isFile
                     val fileId = getFileIdFromDocumentId(documentId)
                     val userDrive = UserDrive(userId.toInt(), driveDocument.id, fromSharedWithMe)
-                    FileController.getFileById(fileId, userDrive)?.let { file ->
+                    FileController.getFileProxyById(fileId, userDrive)?.let { file ->
                         addFile(file, documentId)
                     }
                 }
@@ -141,7 +142,7 @@ class CloudStorageProvider : DocumentsProvider() {
         val isNewJob = uri != oldQueryChildUri || needRefresh
         val isLoading = uri == oldQueryChildUri && oldQueryChildCursor?.job?.isCompleted == false || isNewJob
 
-        Log.i(TAG, "queryChildDocuments() isLoading: $isLoading, isNew: $isNewJob")
+        Log.i(TAG, "queryChildDocuments(), isLoading=$isLoading, isNew=$isNewJob")
 
         cursor.extras = bundleOf(DocumentsContract.EXTRA_LOADING to isLoading)
         cursor.setNotificationUri(context?.contentResolver, uri)
@@ -277,9 +278,8 @@ class CloudStorageProvider : DocumentsProvider() {
             getFileIdFromDocumentId(currentParentDocumentId!!) == SHARED_WITHME_FOLDER_ID ||
             getFileIdFromDocumentId(currentParentDocumentId!!) == MY_SHARES_FOLDER_ID
         ) {
-            cursor.extras = bundleOf(
-                DocumentsContract.EXTRA_ERROR to context?.getString(R.string.cloudStorageQuerySearchImpossibleSelectDrive)
-            )
+            cursor.extras =
+                bundleOf(DocumentsContract.EXTRA_ERROR to context?.getString(R.string.cloudStorageQuerySearchImpossibleSelectDrive))
             return cursor
         }
 
@@ -323,7 +323,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
         var parcel: ParcelFileDescriptor? = null
         val userDrive = createUserDrive(documentId)
-        FileController.getFileById(fileId, userDrive)?.let { file ->
+        FileController.getFileProxyById(fileId, userDrive)?.let { file ->
             val outputFolder = java.io.File(context?.cacheDir, "thumbnails").apply { if (!exists()) mkdirs() }
             val name = "${fileId}_${file.name}"
             val outputFile = java.io.File(outputFolder, name)
@@ -357,25 +357,20 @@ class CloudStorageProvider : DocumentsProvider() {
     override fun createDocument(parentDocumentId: String, mimeType: String, displayName: String): String {
         Log.d(TAG, "createDocument(), parentId=$parentDocumentId, mimeType=$mimeType, name=$displayName")
 
-        return if (mimeType.equals(DocumentsContract.Document.MIME_TYPE_DIR, true))
+        return if (mimeType.equals(DocumentsContract.Document.MIME_TYPE_DIR, true)) {
             createNewFolder(parentDocumentId, displayName) // If we want to create a new folder
-        else
+        } else {
             createNewFile(parentDocumentId, displayName) // If another provider copies or moves a file into kDrive
+        }
     }
 
     override fun deleteDocument(documentId: String) {
         Log.d(TAG, "deleteDocument(), id=$documentId")
 
-        val context = context ?: throw Exception("Delete document failed: missing Android Context")
+        val context = context ?: throw IllegalStateException("Delete document failed: missing Android Context")
 
-        FileController.getRealmInstance(
-            createUserDrive(documentId)
-        ).use { realm ->
-
-            FileController.getFileProxyById(
-                getFileIdFromDocumentId(documentId),
-                customRealm = realm
-            )?.let { file ->
+        FileController.getRealmInstance(createUserDrive(documentId)).use { realm ->
+            FileController.getFileProxyById(getFileIdFromDocumentId(documentId), customRealm = realm)?.let { file ->
 
                 // Delete
                 val apiResponse = FileController.deleteFile(file, realm, context = context)
@@ -392,7 +387,7 @@ class CloudStorageProvider : DocumentsProvider() {
                     }
 
                 } else {
-                    throw Exception("Delete document failed")
+                    throw RuntimeException("Delete document failed")
                 }
             }
         }
@@ -401,14 +396,8 @@ class CloudStorageProvider : DocumentsProvider() {
     override fun renameDocument(documentId: String, displayName: String): String? {
         Log.d(TAG, "renameDocument(), id=$documentId, name=$displayName")
 
-        FileController.getRealmInstance(
-            createUserDrive(documentId)
-        ).use { realm ->
-
-            FileController.getFileProxyById(
-                getFileIdFromDocumentId(documentId),
-                customRealm = realm
-            )?.let { file ->
+        FileController.getRealmInstance(createUserDrive(documentId)).use { realm ->
+            FileController.getFileProxyById(getFileIdFromDocumentId(documentId), customRealm = realm)?.let { file ->
 
                 // Rename
                 val apiResponse = FileController.renameFile(file, displayName, realm)
@@ -421,7 +410,7 @@ class CloudStorageProvider : DocumentsProvider() {
                     }
 
                 } else {
-                    throw Exception("Rename document failed")
+                    throw RuntimeException("Rename document failed")
                 }
             }
         }
@@ -429,13 +418,56 @@ class CloudStorageProvider : DocumentsProvider() {
         return null
     }
 
-    // override fun copyDocument(sourceDocumentId: String, targetParentDocumentId: String): String {
-    //
-    // }
+    override fun copyDocument(sourceDocumentId: String, targetParentDocumentId: String): String {
+        Log.d(TAG, "copyDocument(), sourceId=$sourceDocumentId, targetParentId=$targetParentDocumentId")
 
-    // override fun moveDocument(sourceDocumentId: String, sourceParentDocumentId: String, targetParentDocumentId: String): String {
-    //
-    // }
+        val fileId = getFileIdFromDocumentId(sourceDocumentId)
+        val userDrive = createUserDrive(sourceDocumentId)
+        val file = FileController.getFileProxyById(fileId, userDrive) ?: throw IllegalStateException("File not found")
+        val copyName = file.name
+        val targetParentFileId = getFileIdFromDocumentId(targetParentDocumentId)
+
+        val apiResponse = ApiRepository.duplicateFile(file, copyName, targetParentFileId)
+
+        if (apiResponse.isSuccess()) {
+            return sourceDocumentId
+        }
+
+        throw RuntimeException("Copy document failed")
+    }
+
+    override fun moveDocument(sourceDocumentId: String, sourceParentDocumentId: String, targetParentDocumentId: String): String {
+        Log.d(
+            TAG, "moveDocument(), " +
+                    "sourceId=$sourceDocumentId, " +
+                    "sourceParentId=$sourceParentDocumentId, " +
+                    "targetParentId=$targetParentDocumentId"
+        )
+
+        val userDrive = createUserDrive(sourceDocumentId)
+
+        return FileController.getRealmInstance(userDrive).use { realm ->
+
+            val fileNotFoundException = IllegalStateException("File not found")
+
+            val fileId = getFileIdFromDocumentId(sourceDocumentId)
+            val file = FileController.getFileProxyById(fileId, userDrive, realm) ?: throw fileNotFoundException
+
+            val targetParentFileId = getFileIdFromDocumentId(targetParentDocumentId)
+            val targetParentFile =
+                FileController.getFileProxyById(targetParentFileId, customRealm = realm) ?: throw fileNotFoundException
+
+            val apiResponse = ApiRepository.moveFile(file, targetParentFile)
+
+            if (apiResponse.isSuccess()) {
+                realm.executeTransaction { file.deleteFromRealm() }
+                return@use sourceDocumentId
+
+            } else {
+                throw RuntimeException("Move document failed")
+            }
+        }
+    }
 
     private fun createNewFolder(parentDocumentId: String, displayName: String): String {
 
@@ -447,7 +479,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
         if (apiResponse.isSuccess() && file != null) {
 
-            FileController.saveNewFolder(parentId, file, userDrive)
+            FileController.addFileTo(parentId, file, userDrive)
 
             // Refresh
             currentParentDocumentId?.let {
@@ -458,7 +490,7 @@ class CloudStorageProvider : DocumentsProvider() {
             return createFileDocumentId(parentDocumentId, file.id)
         }
 
-        throw Exception("Create folder failed")
+        throw RuntimeException("Create folder failed")
     }
 
     private fun createNewFile(parentDocumentId: String, displayName: String): String {
@@ -488,12 +520,11 @@ class CloudStorageProvider : DocumentsProvider() {
             return createFileDocumentId(parentDocumentId, file.id)
         }
 
-        throw Exception("Copy file failed")
+        throw RuntimeException("Copy file failed")
     }
 
     private fun createTempFile(parentFileId: Int, displayName: String): java.io.File {
-        val tempFileFolder = java.io.File(cacheDir, "$parentFileId")
-            .apply { if (!exists()) mkdirs() }
+        val tempFileFolder = java.io.File(cacheDir, "$parentFileId").apply { if (!exists()) mkdirs() }
         return java.io.File(tempFileFolder, displayName).apply { if (!exists()) createNewFile() }
     }
 
@@ -631,9 +662,12 @@ class CloudStorageProvider : DocumentsProvider() {
         }
 
         private fun getUserId(documentId: String) = documentId.substringBefore(SEPARATOR)
+
         private fun getFileIdFromDocumentId(documentId: String) = documentId.substringAfterLast(SEPARATOR).toInt()
-        private fun createFileDocumentId(parentDocumentId: String, fileId: Int): String =
-            parentDocumentId.substringBeforeLast(SEPARATOR) + SEPARATOR + fileId.toString()
+
+        private fun createFileDocumentId(parentDocumentId: String, fileId: Int): String {
+            return parentDocumentId.substringBeforeLast(SEPARATOR) + SEPARATOR + fileId.toString()
+        }
 
         private fun isSharedUri(documentId: String) = documentId.matches(SHARED_URI_REGEX)
 

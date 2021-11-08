@@ -39,6 +39,6 @@ class NewFolderViewModel : ViewModel() {
     }
 
     fun saveNewFolder(parentFolderId: Int, newFolder: File) {
-        FileController.saveNewFolder(parentFolderId, newFolder, userDrive)
+        FileController.addFileTo(parentFolderId, newFolder, userDrive)
     }
 }

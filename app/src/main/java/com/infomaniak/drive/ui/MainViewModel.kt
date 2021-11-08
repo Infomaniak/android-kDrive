@@ -205,15 +205,12 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     }
 
     fun renameFile(file: File, newName: String) = liveData(Dispatchers.IO) {
-        val apiResponse = FileController.renameFile(file, newName)
-        emit(apiResponse)
+        emit(FileController.renameFile(file, newName))
     }
 
     fun deleteFile(file: File, userDrive: UserDrive? = null, onSuccess: ((fileID: Int) -> Unit)? = null) =
         liveData(Dispatchers.IO) {
-            val apiResponse =
-                FileController.deleteFile(file, userDrive = userDrive, context = getContext(), onSuccess = onSuccess)
-            emit(apiResponse)
+            emit(FileController.deleteFile(file, userDrive = userDrive, context = getContext(), onSuccess = onSuccess))
         }
 
     fun duplicateFile(file: File, folderId: Int? = null, copyName: String?) = liveData(Dispatchers.IO) {
