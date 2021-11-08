@@ -195,6 +195,10 @@ open class FileAdapter(
 
     override fun getItemCount() = fileList.size + if (showLoading) 1 else 0
 
+    override fun getItemId(position: Int): Long {
+        return if (hasStableIds()) fileList[position].id.toLong() else super.getItemId(position)
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return when (viewType) {
             VIEW_TYPE_LOADING -> createLoadingViewHolder(parent)
@@ -208,7 +212,7 @@ open class FileAdapter(
             val progress = payloads.first() as Int
             if (progress != Utils.INDETERMINATE_PROGRESS || !file.isPendingOffline(holder.itemView.context)) {
                 holder.itemView.apply {
-                    setupFileProgress(file)
+                    setupFileProgress(file, true)
                     checkIfEnableFile(file)
                 }
             }

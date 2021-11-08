@@ -473,6 +473,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         fileAdapter = FileAdapter(FileController.emptyList(mainViewModel.realm))
         fileAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+        fileAdapter.setHasStableIds(true)
         fileAdapter.onFileClicked = { file ->
             when {
                 file.isFolder() -> {
@@ -513,6 +514,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         onBackNavigationResult()
+        fileRecyclerView.setHasFixedSize(true)
         fileRecyclerView.adapter = fileAdapter
         fileRecyclerView.setPagination({
             if (!fileAdapter.isComplete) fileAdapter.showLoading()
