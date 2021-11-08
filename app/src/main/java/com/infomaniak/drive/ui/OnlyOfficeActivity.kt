@@ -59,8 +59,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
             webChromeClient = object : WebChromeClient() {
                 override fun onProgressChanged(view: WebView, newProgress: Int) {
                     progressBar.progress = newProgress
-                    if (newProgress == 100)
-                        progressBar.isGone = true
+                    if (newProgress == 100) progressBar.isGone = true
                 }
             }
         }

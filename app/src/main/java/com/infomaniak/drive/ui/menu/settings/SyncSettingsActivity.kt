@@ -258,19 +258,13 @@ class SyncSettingsActivity : BaseActivity() {
     }
 
     private fun saveSettingVisibility(isVisible: Boolean) {
-        if (isVisible)
-            mediaFoldersSettingsVisibility(syncSettingsViewModel.syncFolder.value != null)
-        else
-            mediaFoldersSettingsVisibility(false)
+        mediaFoldersSettingsVisibility(if (isVisible) syncSettingsViewModel.syncFolder.value != null else false)
         saveSettingsTitle.isVisible = isVisible
         saveSettingsLayout.isVisible = isVisible
     }
 
     private fun mediaFoldersSettingsVisibility(isVisible: Boolean) {
-        if (isVisible)
-            syncSettingsVisibility(MediaFolder.getAllSyncedFoldersCount() > 0)
-        else
-            syncSettingsVisibility(false)
+        syncSettingsVisibility(if (isVisible) MediaFolder.getAllSyncedFoldersCount() > 0 else false)
         mediaFoldersSettingsTitle.isVisible = isVisible
         mediaFoldersSettingsLayout.isVisible = isVisible
     }

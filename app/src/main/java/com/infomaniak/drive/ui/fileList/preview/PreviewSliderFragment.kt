@@ -122,10 +122,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         })
 
         previewSliderViewModel.pdfIsDownloading.observe(viewLifecycleOwner) { isDownloading ->
-            val isVisible = !isDownloading
-            if (!currentPreviewFile.isOnlyOfficePreview() && openWithButton.isVisible != !isDownloading)
-                openWithButton.isVisible = isVisible
-            bottomSheetFileInfos.openWith.isVisible = isVisible
+            if (!currentPreviewFile.isOnlyOfficePreview()) openWithButton.isGone = isDownloading
+            bottomSheetFileInfos.openWith.isGone = isDownloading
         }
 
         editButton.setOnClickListener { openOnlyOfficeDocument(currentPreviewFile) }

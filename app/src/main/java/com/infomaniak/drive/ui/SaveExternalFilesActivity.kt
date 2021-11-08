@@ -89,10 +89,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 saveButton.isEnabled = false
                 UISettings(this).getSaveExternalFilesPref().let { (userId, driveId, folderId) ->
                     saveExternalFilesViewModel.folderId.value =
-                        if (userId == selectDriveViewModel.selectedUserId.value && driveId == it.id)
-                            folderId
-                        else
-                            null
+                        if (userId == selectDriveViewModel.selectedUserId.value && driveId == it.id) folderId else null
                 }
 
                 pathTitle.isVisible = true

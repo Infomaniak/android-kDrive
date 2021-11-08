@@ -202,8 +202,7 @@ open class ManageDropboxFragment : Fragment() {
 
         if (dropBox?.password == isChecked) validationCount-- else validationCount++
 
-        if (needNewPassword) newPasswordButton else passwordTextLayout
-            .apply { isVisible = isChecked }
+        (if (needNewPassword) newPasswordButton else passwordTextLayout).apply { isVisible = isChecked }
 
         currentDropBox?.newPassword = isChecked
 

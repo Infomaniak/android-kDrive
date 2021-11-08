@@ -261,7 +261,6 @@ open class FileAdapter(
 
                 menuButton?.apply {
                     isGone = uploadInProgress
-                            || uploadInProgress
                             || selectFolder
                             || file.isDrive()
                             || file.isTrashed()

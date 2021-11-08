@@ -136,10 +136,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
             if (currentFile.isDropBox() || currentFile.rights?.canBecomeCollab == true) {
                 dropBoxText.text = context.getString(
-                    if (currentFile.isDropBox())
-                        R.string.buttonManageDropBox
-                    else
-                        R.string.buttonConvertToDropBox
+                    if (currentFile.isDropBox()) R.string.buttonManageDropBox else R.string.buttonConvertToDropBox
                 )
                 dropBox.setOnClickListener { onItemClickListener.dropBoxClicked(isDropBox = currentFile.isDropBox()) }
                 dropBox.isVisible = true

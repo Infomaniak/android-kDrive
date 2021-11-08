@@ -240,10 +240,11 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
     fileFavorite.isVisible = file.isFavorite
     fileDate?.isVisible = file.id != ROOT_ID
     fileDate?.text =
-        if (file.deletedAt.isPositive())
+        if (file.deletedAt.isPositive()) {
             file.getDeletedAt().format(context.getString(R.string.allDeletedFilePattern))
-        else
+        } else {
             file.getLastModifiedAt().format(context.getString(R.string.allLastModifiedFilePattern))
+        }
 
     file.size?.let {
         fileSize?.text = FormatterFileSize.formatShortFileSize(context, it)
@@ -377,8 +378,8 @@ fun Date.minutes(): Int =
     }.get(Calendar.MINUTE)
 
 fun ImageView.animateRotation(isDeployed: Boolean = false) {
-    val startDeg = if (isDeployed) 0F else 90F
-    val endDeg = if (isDeployed) 90F else 0F
+    val startDeg = if (isDeployed) 0.0f else 90.0f
+    val endDeg = if (isDeployed) 90.0f else 0.0f
     this.startAnimation(
         RotateAnimation(startDeg, endDeg, Animation.RELATIVE_TO_SELF, 0.5F, Animation.RELATIVE_TO_SELF, 0.5F)
             .apply {
