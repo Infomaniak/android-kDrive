@@ -90,7 +90,7 @@ object FileController {
         getRealmInstance(userDrive).use { realm ->
             getFileById(realm, fileId)?.let { file ->
                 realm.executeTransaction {
-                    file.path = generatedPath
+                    if (file.isValid) file.path = generatedPath
                 }
             }
         }
