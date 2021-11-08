@@ -21,16 +21,10 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
-import androidx.core.os.bundleOf
-import androidx.navigation.findNavController
-import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
-import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
-import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.CURRENT_FILE_ID_ARG
-import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.CURRENT_PERMISSION_ARG
-import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSIONS_GROUP_ARG
+import com.infomaniak.drive.utils.shareText
 import kotlinx.android.synthetic.main.view_share_link_container.view.*
 
 class ShareLinkContainerView @JvmOverloads constructor(
@@ -40,67 +34,30 @@ class ShareLinkContainerView @JvmOverloads constructor(
 ) : FrameLayout(context, attrs, defStyleAttr) {
     private var shareLink: ShareLink? = null
     private var urlValue: String = ""
-    private var showOfficePermission: Boolean = false
     private lateinit var currentFile: File
-    var officePermission: ShareLink.OfficePermission = ShareLink.OfficePermission.READ
-        set(value) {
-            field = value
-            updateUi()
-        }
 
     init {
         inflate(context, R.layout.view_share_link_container, this)
     }
 
-    private fun onSettingsClicked() {
-        findNavController().navigate(
-            R.id.fileShareLinkSettingsFragment, bundleOf(
-                "fileId" to currentFile.id,
-                "driveId" to currentFile.driveId,
-                "shareLink" to shareLink!! // cannot be null, if null, settings will not appear
-            )
-        )
-    }
-
-    private fun onOfficePermissionClicked() {
-        findNavController().navigate(
-            R.id.selectPermissionBottomSheetDialog, bundleOf(
-                CURRENT_FILE_ID_ARG to currentFile.id,
-                CURRENT_PERMISSION_ARG to officePermission,
-                PERMISSIONS_GROUP_ARG to SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_OFFICE
-            )
-        )
-    }
-
     fun setup(
         shareLink: ShareLink?,
-        title: Int = R.string.sharedLinkTitle,
         file: File,
-        onSwitchClicked: (isChecked: Boolean) -> Unit,
+        onTitleClicked: (shareLink: ShareLink?, currentFileId: Int) -> Unit,
+        onSettingsClicked: (shareLink: ShareLink, currentFile: File) -> Unit
     ) {
-        this.currentFile = file
+        currentFile = file
         this.shareLink = shareLink
-        this.visibility = VISIBLE
-        this.urlValue = file.shareLink ?: ""
-        this.showOfficePermission = file.onlyoffice
-        this.officePermission =
-            if (shareLink?.canEdit == true) ShareLink.OfficePermission.WRITE
-            else ShareLink.OfficePermission.READ
+        visibility = VISIBLE
+        urlValue = file.shareLink ?: ""
 
         updateUi()
-        shareLinkTitle.setText(title)
-        shareLinkSwitch.setOnCheckedChangeListener { _, isChecked ->
-            if (shareLinkSwitch.isPressed) {
-                toggleSwitchingApproval(false)
-                onSwitchClicked(isChecked)
-            }
-        }
-        shareLinkSettings.setOnClickListener {
-            onSettingsClicked()
-        }
-        officePermissionView.setOnClickListener {
-            onOfficePermissionClicked()
-        }
+
+        titleContainer.setOnClickListener { onTitleClicked(this.shareLink, currentFile.id) }
+        // cannot be null, if null, settings will not appear
+        shareLinkSettings.setOnClickListener { onSettingsClicked(this.shareLink!!, currentFile) }
+
+        shareLinkButton.setOnClickListener { this.shareLink?.url?.let { context.shareText(it) } }
     }
 
     fun update(shareLink: ShareLink? = null) {
@@ -109,33 +66,20 @@ class ShareLinkContainerView @JvmOverloads constructor(
         updateUi()
     }
 
-    fun toggleSwitchingApproval(allow: Boolean, isChecked: Boolean? = null) {
-        shareLinkSwitch.isClickable = allow
-        isChecked?.let { shareLinkSwitch.isChecked = it }
-    }
-
     private fun updateUi() {
-        if (shareLink == null && urlValue.isBlank()) {
-            shareLinkStatus.setText(R.string.allDisabled)
-            shareLinkSwitch.isChecked = false
-            shareLinkUrl.visibility = View.GONE
-            officePermissionView.visibility = View.GONE
-            shareLinkSettings.visibility = View.GONE
+        val title = if (shareLink == null && urlValue.isBlank()) {
+            shareLinkIcon.setImageResource(R.drawable.ic_lock)
+            shareLinkTitle.setText(R.string.restrictedSharedLinkTitle)
+            shareLinkBottomContainer.visibility = View.GONE
+            if (currentFile.isFolder()) R.string.shareLinkRestrictedRightFolderDescription
+            else R.string.shareLinkRestrictedRightFileDescription
         } else {
-            shareLinkStatus.setText(R.string.allActivated)
-            shareLinkSwitch.isChecked = true
-            shareLinkUrl.setUrl(shareLink?.url ?: urlValue)
-            shareLinkUrl.visibility = View.VISIBLE
-            shareLinkSettings.visibility = View.VISIBLE
-            shareLinkSettings.isEnabled = shareLink != null
-
-            if (showOfficePermission) {
-                officePermissionView.visibility = View.VISIBLE
-                officePermissionValue.setText(officePermission.translation)
-                officePermissionIcon.load(officePermission.icon)
-            } else {
-                officePermissionView.visibility = View.GONE
-            }
+            shareLinkIcon.setImageResource(R.drawable.ic_unlock)
+            shareLinkTitle.setText(R.string.publicSharedLinkTitle)
+            shareLinkBottomContainer.visibility = View.VISIBLE
+            if (currentFile.isFolder()) R.string.shareLinkPublicRightFolderDescription
+            else R.string.shareLinkPublicRightFileDescription
         }
+        shareLinkStatus.setText(title)
     }
 }

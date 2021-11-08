@@ -24,134 +24,115 @@
     android:animateLayoutChanges="true"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/shareLinkTitle"
-        style="@style/Subtitle2"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/titleContainer"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/marginStandardMedium"
-        android:layout_marginTop="@dimen/marginStandardMedium"
-        android:text="@string/sharedLinkTitle"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:background="?selectableItemBackground"
+        android:padding="@dimen/marginStandardMedium"
+        app:layout_constraintTop_toTopOf="parent">
 
-    <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:layout_marginStart="@dimen/marginStandardVerySmall"
-        android:src="@drawable/ic_link"
-        app:layout_constraintBottom_toBottomOf="@id/shareLinkTitle"
-        app:layout_constraintStart_toEndOf="@+id/shareLinkTitle"
-        app:layout_constraintTop_toTopOf="@id/shareLinkTitle"
-        app:tint="@color/title"
-        tools:ignore="ContentDescription" />
+        <ImageView
+            android:id="@+id/shareLinkIcon"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            app:layout_constraintBottom_toBottomOf="@id/shareLinkTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/shareLinkTitle"
+            tools:ignore="ContentDescription"
+            tools:src="@drawable/ic_lock" />
 
-    <com.google.android.material.switchmaterial.SwitchMaterial
-        android:id="@+id/shareLinkSwitch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="10dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <View
+            android:id="@+id/titleSeparator"
+            android:layout_width="@dimen/marginStandardMedium"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="@id/shareLinkTitle"
+            app:layout_constraintStart_toEndOf="@id/shareLinkIcon"
+            app:layout_constraintTop_toTopOf="@id/shareLinkTitle" />
+
+        <TextView
+            android:id="@+id/shareLinkTitle"
+            style="@style/Subtitle2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@id/titleSeparator"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="@string/restrictedSharedLinkTitle" />
+
+        <ImageView
+            android:id="@+id/shareLinkSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_chevron_right"
+            app:layout_constraintBottom_toBottomOf="@id/shareLinkTitle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/shareLinkTitle"
+            app:tint="@color/iconColor"
+            tools:ignore="ContentDescription" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
         android:id="@+id/shareLinkStatus"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/marginStandardSmall"
-        android:text="@string/allDisabled"
-        app:layout_constraintBottom_toTopOf="@id/shareLinkUrl"
-        app:layout_constraintStart_toStartOf="@id/shareLinkTitle"
-        app:layout_constraintTop_toBottomOf="@id/shareLinkTitle"
-        app:layout_goneMarginBottom="@dimen/marginStandardMedium" />
+        android:layout_marginStart="@dimen/marginStandardMedium"
+        android:layout_marginEnd="@dimen/marginStandardMedium"
+        android:layout_marginBottom="@dimen/marginStandardSmall"
+        app:layout_constraintBottom_toTopOf="@id/shareLinkBottomContainer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/titleContainer"
+        tools:text="@string/shareLinkRestrictedRightFileDescription" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/shareLinkBottomContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/shareLinkStatus"
+        tools:visibility="visible">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/shareLinkSettings"
+            style="@style/TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/marginStandardSmall"
+            android:text="@string/fileShareLinkSettingsTitle"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/shareLinkButton"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/shareLinkButton"
+            style="@style/IconButton"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:layout_marginEnd="@dimen/marginStandardSmall"
+            app:icon="@drawable/ic_share_file"
+            app:iconSize="18dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="ContentDescription" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.infomaniak.drive.views.UrlDisplayView
         android:id="@+id/shareLinkUrl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/marginStandardMedium"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/officePermissionView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/shareLinkStatus"
-        tools:visibility="visible" />
-
-
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/officePermissionView"
-        style="@style/BorderedCardViewInfomaniak"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/marginStandardMedium"
-        android:visibility="gone"
-        app:cardElevation="0dp"
-        app:layout_constraintBottom_toTopOf="@id/shareLinkSettings"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/shareLinkUrl"
-        tools:visibility="visible">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="@dimen/marginStandardMedium">
-
-            <ImageView
-                android:id="@+id/officePermissionIcon"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:scaleType="centerCrop"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:shapeAppearanceOverlay="@style/CircleImageView"
-                app:srcCompat="@drawable/ic_view"
-                tools:ignore="ContentDescription" />
-
-            <TextView
-                android:id="@+id/officePermissionValue"
-                style="@style/Subtitle2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/marginStandardMedium"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="@string/shareLinkOfficePermissionReadTitle"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/chevron"
-                app:layout_constraintStart_toEndOf="@id/officePermissionIcon"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <ImageView
-                android:id="@+id/chevron"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:rotation="90"
-                android:src="@drawable/ic_chevron_right"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="ContentDescription" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/shareLinkSettings"
-        style="@style/TextButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/marginStandardSmall"
-        android:text="@string/fileShareLinkSettingsTitle"
-        android:textSize="14sp"
+        android:layout_marginStart="@dimen/marginStandardMedium"
+        android:layout_marginEnd="@dimen/marginStandardMedium"
+        android:layout_marginBottom="@dimen/marginStandardMedium"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/officePermissionView"
-        tools:visibility="visible" />
+        app:layout_constraintTop_toBottomOf="@id/titleContainer" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

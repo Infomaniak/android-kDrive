@@ -38,7 +38,6 @@ import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.safeNavigate
 import com.infomaniak.drive.utils.setBackNavigationResult
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.lib.core.models.ApiResponse
@@ -74,9 +73,6 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         permissionsGroup = navigationArgs.permissionsGroup
         adapter = PermissionsAdapter(
             isExternalUser = permissionsGroup == PermissionsGroup.EXTERNAL_USERS_RIGHTS,
-            onUpgradeOfferClicked = {
-                safeNavigate(R.id.secureLinkShareBottomSheetDialog)
-            },
             onPermissionChanged = { newPermission ->
                 selectPermissionViewModel.currentPermission = newPermission
             })
@@ -84,10 +80,13 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         permissionsRecyclerView.adapter = adapter.apply {
             permissionsGroup.let { permissionsGroup ->
                 val newPermissions: ArrayList<Permission> = when (permissionsGroup) {
-                    PermissionsGroup.SHARE_LINK_SETTINGS -> arrayListOf(
-                        ShareLink.ShareLinkPermission.PUBLIC,
-                        ShareLink.ShareLinkPermission.INHERIT,
-                        ShareLink.ShareLinkPermission.PASSWORD
+                    PermissionsGroup.SHARE_LINK_FILE_SETTINGS -> arrayListOf(
+                        ShareLink.ShareLinkFilePermission.RESTRICTED,
+                        ShareLink.ShareLinkFilePermission.PUBLIC
+                    )
+                    PermissionsGroup.SHARE_LINK_FOLDER_SETTINGS -> arrayListOf(
+                        ShareLink.ShareLinkFolderPermission.RESTRICTED,
+                        ShareLink.ShareLinkFolderPermission.PUBLIC
                     )
                     PermissionsGroup.EXTERNAL_USERS_RIGHTS,
                     PermissionsGroup.USERS_RIGHTS -> arrayListOf(
@@ -101,9 +100,13 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
                         Shareable.ShareablePermission.WRITE,
                         Shareable.ShareablePermission.MANAGE
                     )
-                    PermissionsGroup.SHARE_LINK_OFFICE -> arrayListOf(
-                        ShareLink.OfficePermission.READ,
-                        ShareLink.OfficePermission.WRITE
+                    PermissionsGroup.SHARE_LINK_FILE_OFFICE -> arrayListOf(
+                        ShareLink.OfficeFilePermission.READ,
+                        ShareLink.OfficeFilePermission.WRITE
+                    )
+                    PermissionsGroup.SHARE_LINK_FOLDER_OFFICE -> arrayListOf(
+                        ShareLink.OfficeFolderPermission.READ,
+                        ShareLink.OfficeFolderPermission.WRITE
                     )
                 }
                 setAll(newPermissions)
@@ -122,7 +125,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
                         )
                     }
                 }
-                PermissionsGroup.SHARE_LINK_OFFICE -> {
+                PermissionsGroup.SHARE_LINK_FILE_OFFICE, PermissionsGroup.SHARE_LINK_FOLDER_OFFICE -> {
                     selectPermissionViewModel.currentFile?.let { file ->
                         updateShareLinkOfficePermission(
                             file = file,
@@ -149,13 +152,14 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         saveButton.showProgress()
         selectPermissionViewModel.editFileShareLinkOfficePermission(
             file = file,
-            canEdit = (permission as ShareLink.OfficePermission).apiValue
+            canEdit = (permission as ShareLink.EditPermission).apiValue
         ).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.data == true) {
                 setBackNavigationResult(
                     SELECT_PERMISSION_NAV_KEY,
                     bundleOf(
-                        PERMISSION_BUNDLE_KEY to permission, PERMISSIONS_GROUP_BUNDLE_KEY to navigationArgs.permissionsGroup
+                        PERMISSION_BUNDLE_KEY to permission,
+                        PERMISSIONS_GROUP_BUNDLE_KEY to navigationArgs.permissionsGroup
                     )
                 )
             } else {
@@ -239,16 +243,14 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         const val PERMISSION_BUNDLE_KEY = "permission_bundle_key"
         const val SHAREABLE_BUNDLE_KEY = "shareable_bundle_key"
         const val PERMISSIONS_GROUP_BUNDLE_KEY = "permissions_group_bundle"
-
-        const val PERMISSIONS_GROUP_ARG = "permissionsGroup"
-        const val CURRENT_FILE_ID_ARG = "currentFileId"
-        const val CURRENT_PERMISSION_ARG = "currentPermission"
     }
 
     @Parcelize
     enum class PermissionsGroup : Parcelable {
-        SHARE_LINK_SETTINGS,
-        SHARE_LINK_OFFICE,
+        SHARE_LINK_FILE_SETTINGS,
+        SHARE_LINK_FOLDER_SETTINGS,
+        SHARE_LINK_FILE_OFFICE,
+        SHARE_LINK_FOLDER_OFFICE,
         USERS_RIGHTS,
         EXTERNAL_USERS_RIGHTS,
         FILE_SHARE_UPDATE

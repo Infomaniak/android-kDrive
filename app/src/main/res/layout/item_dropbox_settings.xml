@@ -100,7 +100,7 @@
             android:id="@+id/newPasswordButton"
             style="@style/TextButton"
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:text="@string/allPasswordHint"
             android:visibility="gone"
@@ -202,7 +202,7 @@
         android:background="@color/divider" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/limiteStorageLayout"
+        android:id="@+id/limitStorageLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/marginStandardMedium"
@@ -210,30 +210,30 @@
         android:minHeight="@dimen/buttonHeight">
 
         <TextView
-            android:id="@+id/limiteStorageTitle"
+            android:id="@+id/limitStorageTitle"
             style="@style/Subtitle2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandard"
             android:layout_marginTop="@dimen/marginStandardMedium"
             android:text="@string/createFolderLimitFileSizeTitle"
-            app:layout_constraintEnd_toStartOf="@id/limiteStorageSwitch"
+            app:layout_constraintEnd_toStartOf="@id/limitStorageSwitch"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/limiteStorageDescription"
+            android:id="@+id/limitStorageDescription"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginVertical="@dimen/marginStandardMedium"
             android:layout_marginStart="@dimen/marginStandard"
             android:text="@string/createFolderLimitFileSizeDescription"
-            app:layout_constraintEnd_toStartOf="@id/limiteStorageSwitch"
+            app:layout_constraintEnd_toStartOf="@id/limitStorageSwitch"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/limiteStorageTitle" />
+            app:layout_constraintTop_toBottomOf="@id/limitStorageTitle" />
 
         <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/limiteStorageSwitch"
+            android:id="@+id/limitStorageSwitch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/marginStandardMedium"
@@ -242,7 +242,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/limiteStorageValueLayout"
+            android:id="@+id/limitStorageValueLayout"
             style="@style/TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -251,13 +251,13 @@
             android:hint="@string/createFolderLimitFileSizeInput"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/limiteStorageValueUnit"
+            app:layout_constraintEnd_toStartOf="@id/limitStorageValueUnit"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/limiteStorageDescription"
+            app:layout_constraintTop_toBottomOf="@id/limitStorageDescription"
             tools:visibility="visible">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/limiteStorageValue"
+                android:id="@+id/limitStorageValue"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number|none" />
@@ -265,7 +265,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
-            android:id="@+id/limiteStorageValueUnit"
+            android:id="@+id/limitStorageValueUnit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardSmall"
@@ -273,10 +273,10 @@
             android:text="@string/createFolderLimitFileSizeUnitTitle"
             android:textColor="@color/title"
             android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@id/limiteStorageValueLayout"
+            app:layout_constraintBottom_toBottomOf="@id/limitStorageValueLayout"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/limiteStorageValueLayout"
-            app:layout_constraintTop_toTopOf="@id/limiteStorageValueLayout"
+            app:layout_constraintStart_toEndOf="@id/limitStorageValueLayout"
+            app:layout_constraintTop_toTopOf="@id/limitStorageValueLayout"
             tools:visibility="visible" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 

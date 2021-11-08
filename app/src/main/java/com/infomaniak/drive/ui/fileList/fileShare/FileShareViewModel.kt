@@ -40,19 +40,18 @@ class FileShareViewModel : ViewModel() {
 
     fun editFileShareLink(file: File, shareLink: ShareLink) = liveData(Dispatchers.IO) {
         val body = mutableMapOf<String, Any?>(
-            "permission" to (shareLink.permission.apiValue),
-            "block_downloads" to (shareLink.blockDownloads),
-            "block_comments" to (shareLink.blockComments),
-            "block_information" to (shareLink.blockInformation),
-            "valid_until" to (shareLink.validUntil?.time?.let { it / 1000 } ?: "")
+            "permission" to shareLink.permission,
+            "block_downloads" to shareLink.blockDownloads,
+            "block_comments" to shareLink.blockComments,
+            "block_information" to shareLink.blockInformation,
+            "valid_until" to (shareLink.validUntil?.time?.let { it / 1_000L } ?: "")
         )
 
-        if (shareLink.permission == ShareLink.ShareLinkPermission.PASSWORD) {
-            if (shareLink.password.isNullOrBlank()) {
-                body.remove("password")
-            } else {
-                body["password"] = shareLink.password
+        when {
+            shareLink.password.isNullOrBlank() -> {
+                if (shareLink.permission == ShareLink.ShareLinkFilePermission.PASSWORD) body.remove("permission")
             }
+            else -> body["password"] = shareLink.password
         }
 
         emit(ApiRepository.putFileShareLink(file, body))

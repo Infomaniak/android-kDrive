@@ -51,7 +51,7 @@ class DateInputView @JvmOverloads constructor(
                 if (event.action == MotionEvent.ACTION_UP) {
                     showDatePicker(fragmentManager, currentCalendarDate) { calendarResult ->
                         currentCalendarDate = Date(calendarResult)
-                        dateValueInput.text = SpannableStringBuilder(currentCalendarDate.format())
+                        text = SpannableStringBuilder(currentCalendarDate.format())
                         onDateSet?.invoke(calendarResult)
                     }
                 }
@@ -60,21 +60,19 @@ class DateInputView @JvmOverloads constructor(
         }
     }
 
-    fun getCurrentTimestampValue(): Long? {
-        return if (this::currentCalendarDate.isInitialized) currentCalendarDate.time / 1000 else null
-    }
+    fun getCurrentTimestampValue(): Long? =
+        if (this::currentCalendarDate.isInitialized) currentCalendarDate.time / 1_000L else null
 
     private fun showDatePicker(fragmentManager: FragmentManager, defaultDate: Date, onDateSet: (timestamp: Long) -> Unit) {
-        val yesterday = Calendar.getInstance().apply { this.add(Calendar.DATE, -1) }
+
+        val startDate = Date().time
+        // FIXME before the year 2038: https://en.wikipedia.org/wiki/Year_2038_problem
+        val endDate = Calendar.getInstance().apply { set(2038, 0, 0) }.timeInMillis
+
         val calendarConstraints = CalendarConstraints.Builder()
-            .setValidator(
-                CompositeDateValidator.allOf(
-                    listOf(
-                        DateValidatorPointForward.from(yesterday.timeInMillis),
-                        DateValidatorPointBackward.before(Calendar.getInstance().apply { set(2038, 0, 0) }.timeInMillis)
-                    )
-                )
-            )
+            .setStart(startDate)
+            .setEnd(endDate)
+            .setValidator(DateValidatorPointForward.now())
             .build()
 
         val materialDatePickerBuilder = MaterialDatePicker.Builder

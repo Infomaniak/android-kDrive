@@ -204,6 +204,14 @@
         <argument
             android:name="shareLink"
             app:argType="com.infomaniak.drive.data.models.ShareLink" />
+        <argument
+            android:name="isOnlyOfficeFile"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="isFolder"
+            android:defaultValue="false"
+            app:argType="boolean" />
     </fragment>
 
     <dialog
