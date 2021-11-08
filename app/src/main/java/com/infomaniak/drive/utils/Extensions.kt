@@ -306,8 +306,7 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
                 }
             }
             filePreview2?.loadGlide(file.getFileType().icon)
-            val progress = file.currentProgress
-//            setupFileProgress(file)
+            setupFileProgress(file)
         }
     }
 }
