@@ -114,6 +114,10 @@ open class File(
     @Ignore
     var currentProgress: Int = INDETERMINATE_PROGRESS
 
+    fun isManagedByRealm() = isManaged && isValid
+
+    fun isNotManagedByRealm() = !isManaged
+
     fun isFolder(): Boolean {
         return type == "dir"
     }

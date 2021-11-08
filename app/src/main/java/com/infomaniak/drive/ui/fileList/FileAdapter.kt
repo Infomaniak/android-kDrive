@@ -348,8 +348,7 @@ open class FileAdapter(
 
     private fun isSelectedFile(file: File): Boolean {
         return itemsSelected.find {
-            val isValidInRealm = it.isManaged && it.isValid
-            (isValidInRealm || !it.isManaged) && it.id == file.id
+            (it.isManagedByRealm() || it.isNotManagedByRealm()) && it.id == file.id
         } != null
     }
 
