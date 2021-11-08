@@ -19,10 +19,9 @@ package com.infomaniak.drive.ui.addFiles
 
 import android.os.Bundle
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.widget.CompoundButton
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
@@ -42,7 +41,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        advancedSettings.visibility = VISIBLE
+        advancedSettings.isVisible = true
         createFolderButton.setText(R.string.createDropBoxTitle)
         createFolderCollapsing.title = getString(R.string.createDropBoxTitle)
         folderCreateIcon.icon.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_folder_dropbox))
@@ -57,7 +56,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
             }
         }
 
-        advancedSettingsCardView.visibility = VISIBLE
+        advancedSettingsCardView.isVisible = true
         advancedSettings.setOnClickListener {
             toggleShowAdvancedSettings()
         }
@@ -90,11 +89,9 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
     }
 
     private fun showAdvancedSettings(show: Boolean, displayAnimation: Boolean = false) {
-        val visibility = if (show) VISIBLE else GONE
         if (displayAnimation) advancedSettingsChevron.animateRotation(show)
-
-        dropboxSettingsDivider.visibility = visibility
-        dropboxSettings.visibility = visibility
+        dropboxSettingsDivider.isVisible = show
+        dropboxSettings.isVisible = show
     }
 
     private fun setupAdvancedSettings() {
@@ -110,13 +107,10 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
         expirationDateInput.init(fragmentManager = parentFragmentManager)
     }
 
-    private fun createOnCheckedChangeListener(vararg viewsToReveal: View): CompoundButton.OnCheckedChangeListener {
-        return CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            viewsToReveal.forEach {
-                it.visibility = if (isChecked) VISIBLE else GONE
-            }
+    private fun createOnCheckedChangeListener(vararg viewsToReveal: View): CompoundButton.OnCheckedChangeListener =
+        CompoundButton.OnCheckedChangeListener { _, isChecked ->
+            viewsToReveal.forEach { it.isVisible = isChecked }
         }
-    }
 
     private fun isValid(): Boolean {
         var result = true

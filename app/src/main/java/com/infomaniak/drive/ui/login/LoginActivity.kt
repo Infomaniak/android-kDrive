@@ -20,10 +20,9 @@ package com.infomaniak.drive.ui.login
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.View.INVISIBLE
-import android.view.View.VISIBLE
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.infomaniak.drive.BuildConfig
@@ -68,9 +67,9 @@ class LoginActivity : AppCompatActivity() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 val showConnectButton = position == 2
-                nextButton.visibility = if (showConnectButton) INVISIBLE else VISIBLE
-                connectButton.visibility = if (showConnectButton) VISIBLE else INVISIBLE
-                signInButton.visibility = if (showConnectButton) VISIBLE else INVISIBLE
+                nextButton.isInvisible = showConnectButton
+                connectButton.isInvisible = !showConnectButton
+                signInButton.isInvisible = !showConnectButton
             }
         })
         dotsIndicator.setViewPager2(introViewpager)

@@ -24,11 +24,11 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.collection.arrayMapOf
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -75,14 +75,12 @@ class SettingsFragment : Fragment() {
         }
         appSecurity.apply {
             if (requireContext().isKeyguardSecure()) {
-                appSecuritySeparator.visibility = VISIBLE
-                visibility = VISIBLE
-                setOnClickListener {
-                    safeNavigate(R.id.appSecurityActivity, null, null)
-                }
+                appSecuritySeparator.isVisible = true
+                isVisible = true
+                setOnClickListener { safeNavigate(R.id.appSecurityActivity, null, null) }
             } else {
-                appSecuritySeparator.visibility = GONE
-                visibility = GONE
+                appSecuritySeparator.isGone = true
+                isGone = true
             }
         }
         about.setOnClickListener {

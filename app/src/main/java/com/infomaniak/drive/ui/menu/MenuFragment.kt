@@ -21,10 +21,11 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.*
 import android.view.ViewGroup
 import androidx.core.graphics.drawable.DrawableCompat.setTint
 import androidx.core.graphics.drawable.DrawableCompat.wrap
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -65,9 +66,9 @@ class MenuFragment : Fragment() {
                 }, null, null, null)
 
                 if (currentDrive.size == 0L) {
-                    driveStorageProgress.visibility = INVISIBLE
+                    driveStorageProgress.isInvisible = true
                 } else {
-                    driveStorageProgress.visibility = VISIBLE
+                    driveStorageProgress.isVisible = true
                     progressDriveQuota.max = 1000
                     val progress = (currentDrive.usedSize.toDouble() / currentDrive.size) * 1000
                     progressDriveQuota.progress = progress.toInt()
@@ -85,9 +86,8 @@ class MenuFragment : Fragment() {
                 safeNavigate(MenuFragmentDirections.actionMenuFragmentToHomeFragment())
             }
 
-            sharedWithMeFiles.visibility =
-                if (DriveInfosController.getDrives(userId = AccountUtils.currentUserId, sharedWithMe = true).isEmpty()) GONE
-                else VISIBLE
+            sharedWithMeFiles.isVisible =
+                DriveInfosController.getDrives(userId = AccountUtils.currentUserId, sharedWithMe = true).isNotEmpty()
 
             sharedWithMeFiles.setOnClickListener {
                 safeNavigate(MenuFragmentDirections.actionMenuFragmentToSharedWithMeFragment())

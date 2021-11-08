@@ -19,10 +19,10 @@ package com.infomaniak.drive.ui.fileList.fileShare
 
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.google.android.material.card.MaterialCardView
@@ -99,21 +99,21 @@ class PermissionsAdapter(
             when (permission) {
                 FolderPermission.ONLY_ME -> {
                     currentUser?.let { user -> mainIcon.loadAvatar(user) }
-                    permissionDescription.visibility = GONE
+                    permissionDescription.isGone = true
                 }
                 FolderPermission.INHERIT -> {
                     if (sharedUsers.isNotEmpty()) {
                         sharedUsers.firstOrNull()?.let { firstUser -> mainIcon.loadAvatar(firstUser) }
                         secondIcon.apply {
                             sharedUsers.getOrNull(1)?.let { user ->
-                                visibility = VISIBLE
+                                isVisible = true
                                 loadAvatar(user)
                             }
                         }
                         thirdIcon.apply {
                             if (sharedUsers.size > 2) {
-                                visibility = VISIBLE
-                                remainingText.visibility = VISIBLE
+                                isVisible = true
+                                remainingText.isVisible = true
                                 remainingText.text = "+${sharedUsers.size - 2}"
                             }
                         }
@@ -126,7 +126,7 @@ class PermissionsAdapter(
                     when {
                         permission == Shareable.ShareablePermission.MANAGE && isExternalUser -> {
                             enableViewHolder(false)
-                            userExternalWarning.visibility = VISIBLE
+                            userExternalWarning.isVisible = true
                         }
                         else -> enableViewHolder(true)
                     }
@@ -137,9 +137,9 @@ class PermissionsAdapter(
 
     private fun View.enableViewHolder(enabled: Boolean) {
         isEnabled = enabled
-        disabled.visibility = if (enabled) GONE else VISIBLE
-        upgradeOffer.visibility = GONE
-        userExternalWarning.visibility = GONE
+        disabled.isGone = enabled
+        upgradeOffer.isGone = true
+        userExternalWarning.isGone = true
     }
 
     private fun MaterialCardView.setupSelection(enabled: Boolean) {

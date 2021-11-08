@@ -25,6 +25,8 @@ import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -38,6 +40,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.File.*
 import com.infomaniak.drive.data.models.File.VisibilityType.*
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.ui.MainViewModel
@@ -86,11 +89,11 @@ class FileInfoActionsView @JvmOverloads constructor(
 
         refreshBottomSheetUi(currentFile)
         if (currentFile.isFromActivities) {
-            quickActionsLayout.visibility = GONE
-            actionListLayout.visibility = GONE
+            quickActionsLayout.isGone = true
+            actionListLayout.isGone = true
         } else {
-            quickActionsLayout.visibility = VISIBLE
-            quickActionsLayout.visibility = VISIBLE
+            quickActionsLayout.isVisible = true
+            quickActionsLayout.isVisible = true
 
             val isOnline = mainViewModel.isInternetAvailable.value == true
             val isCommonDocumentOrSharedSpace =
@@ -99,16 +102,16 @@ class FileInfoActionsView @JvmOverloads constructor(
             // TODO - Enhanceable code : Replace these let by an autonomous view with "enabled/disabled" method ?
             currentFile.rights.let { rights ->
                 displayInfo.isEnabled = isOnline
-                disabledInfo.visibility = if (isOnline) GONE else VISIBLE
+                disabledInfo.isGone = isOnline
 
                 (rights?.share == true && isOnline).let { rightsEnabled ->
                     fileRights.isEnabled = rightsEnabled
-                    disabledFileRights.visibility = if (rightsEnabled) GONE else VISIBLE
+                    disabledFileRights.isGone = rightsEnabled
                 }
 
                 (rights?.canBecomeLink == true && isOnline || currentFile.shareLink != null || !file.collaborativeFolder.isNullOrBlank()).let { publicLinkEnabled ->
                     copyPublicLink.isEnabled = publicLinkEnabled
-                    disabledPublicLink.visibility = if (publicLinkEnabled) GONE else VISIBLE
+                    disabledPublicLink.isGone = publicLinkEnabled
                     if (!file.collaborativeFolder.isNullOrBlank()) {
                         copyPublicLinkText.text = context.getString(R.string.buttonCopyLink)
                     }
@@ -116,37 +119,39 @@ class FileInfoActionsView @JvmOverloads constructor(
 
                 ((file.isFolder() && rights?.newFile == true && rights.newFolder) || !file.isFolder()).let { sendCopyEnabled ->
                     sendCopy.isEnabled = sendCopyEnabled
-                    disabledSendCopy.visibility = if (sendCopyEnabled) GONE else VISIBLE
+                    disabledSendCopy.isGone = sendCopyEnabled
                 }
 
-                addFavorites.visibility = if (rights?.canFavorite == true) VISIBLE else GONE
-                editDocument.visibility =
-                    if ((currentFile.onlyoffice && rights?.write == true) || currentFile.onlyofficeConvertExtension != null) VISIBLE else GONE
+                addFavorites.isVisible = rights?.canFavorite == true
+                editDocument.isVisible =
+                    (currentFile.onlyoffice && rights?.write == true) || (currentFile.onlyofficeConvertExtension != null)
                 val offlineNotAvailable = currentFile.getOfflineFile(context) == null
-                availableOffline.visibility = if (isSharedWithMe || offlineNotAvailable) GONE else VISIBLE
-                moveFile.visibility = if (rights?.move == true && !isSharedWithMe) VISIBLE else GONE
-                renameFile.visibility = if (rights?.rename == true && !isSharedWithMe) VISIBLE else GONE
-                deleteFile.visibility = if (rights?.delete == true) VISIBLE else GONE
-                leaveShare.visibility = if (rights?.leave == true) VISIBLE else GONE
-                duplicateFile.visibility = if (isSharedWithMe || isCommonDocumentOrSharedSpace) GONE else VISIBLE
+                availableOffline.isGone = isSharedWithMe || offlineNotAvailable
+                moveFile.isVisible = rights?.move == true && !isSharedWithMe
+                renameFile.isVisible = rights?.rename == true && !isSharedWithMe
+                deleteFile.isVisible = rights?.delete == true
+                leaveShare.isVisible = rights?.leave == true
+                duplicateFile.isGone = isSharedWithMe || isCommonDocumentOrSharedSpace
             }
 
-            dropBox.visibility = when {
-                currentFile.isDropBox() || currentFile.rights?.canBecomeCollab == true -> {
-                    dropBoxText.text =
-                        if (currentFile.isDropBox()) context.getString(R.string.buttonManageDropBox)
-                        else context.getString(R.string.buttonConvertToDropBox)
-                    dropBox.setOnClickListener { onItemClickListener.dropBoxClicked(isDropBox = currentFile.isDropBox()) }
-                    VISIBLE
-                }
-                else -> GONE
+            if (currentFile.isDropBox() || currentFile.rights?.canBecomeCollab == true) {
+                dropBoxText.text = context.getString(
+                    if (currentFile.isDropBox())
+                        R.string.buttonManageDropBox
+                    else
+                        R.string.buttonConvertToDropBox
+                )
+                dropBox.setOnClickListener { onItemClickListener.dropBoxClicked(isDropBox = currentFile.isDropBox()) }
+                dropBox.isVisible = true
+            } else {
+                dropBox.isGone = true
             }
 
             if (currentFile.isFolder()) {
                 sendCopyIcon.setImageResource(R.drawable.ic_add)
                 sendCopyText.setText(R.string.buttonAdd)
-                availableOffline.visibility = GONE
-                openWith.visibility = GONE
+                availableOffline.isGone = true
+                openWith.isGone = true
             }
         }
     }
@@ -278,8 +283,8 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     private fun showCopyPublicLinkLoader(show: Boolean) {
-        copyPublicLinkLayout.visibility = if (show) GONE else VISIBLE
-        copyPublicLinkLoader.visibility = if (show) VISIBLE else GONE
+        copyPublicLinkLayout.isGone = show
+        copyPublicLinkLoader.isVisible = show
     }
 
     private fun copyPublicLink(url: String) {
@@ -346,7 +351,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         val isOfflineFile = file.isOfflineFile(context)
         enableAvailableOffline(!isPendingOffline || file.currentProgress == 100)
         if (isOfflineProgress) setupFileProgress(file) else fileView.setFileItem(file)
-        if (availableOfflineSwitch.isEnabled && availableOffline.visibility == VISIBLE) {
+        if (availableOfflineSwitch.isEnabled && availableOffline.isVisible) {
             availableOfflineSwitch.isChecked = isOfflineFile
         }
         addFavorites.isEnabled = true
@@ -356,21 +361,21 @@ class FileInfoActionsView @JvmOverloads constructor(
 
         when {
             isPendingOffline && file.currentProgress in 0..99 -> {
-                availableOfflineComplete.visibility = GONE
-                availableOfflineIcon.visibility = GONE
-                availableOfflineProgress.visibility = GONE // Before changing the type of progression it must first be gone
+                availableOfflineComplete.isGone = true
+                availableOfflineIcon.isGone = true
+                availableOfflineProgress.isGone = true // Before changing the type of progression it must first be gone
                 if (isOfflineProgress) {
                     availableOfflineProgress.isIndeterminate = false
                     availableOfflineProgress.progress = file.currentProgress
                 } else {
                     availableOfflineProgress.isIndeterminate = true
                 }
-                availableOfflineProgress.visibility = VISIBLE
+                availableOfflineProgress.isVisible = true
             }
             !isOfflineProgress -> {
-                availableOfflineProgress.visibility = GONE
-                availableOfflineComplete.visibility = if (isOfflineFile) VISIBLE else GONE
-                availableOfflineIcon.visibility = if (isOfflineFile) GONE else VISIBLE
+                availableOfflineProgress.isGone = true
+                availableOfflineComplete.isVisible = isOfflineFile
+                availableOfflineIcon.isGone = isOfflineFile
             }
         }
     }

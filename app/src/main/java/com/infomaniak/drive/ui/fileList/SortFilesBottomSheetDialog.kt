@@ -20,9 +20,9 @@ package com.infomaniak.drive.ui.fileList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
@@ -87,9 +87,9 @@ class SortFilesBottomSheetDialog : BottomSheetDialogFragment() {
 
         itemList.forEach { (sortType, checkIconView) ->
             if (sortType == currentSortType) {
-                checkIconView.visibility = VISIBLE
+                checkIconView.isVisible = true
                 return
-            } else checkIconView.visibility = GONE
+            } else checkIconView.isGone = true
         }
     }
 }

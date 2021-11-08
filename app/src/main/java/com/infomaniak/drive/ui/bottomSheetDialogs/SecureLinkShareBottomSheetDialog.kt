@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.utils.AccountUtils
@@ -39,7 +40,7 @@ class SecureLinkShareBottomSheetDialog : InformationBottomSheetDialog() {
             dismiss()
         }
 
-        packAvailability.visibility = View.VISIBLE
+        packAvailability.isVisible = true
         packAvailability.text = getString(R.string.allPackAvailability, "Solo, Team & Pro")
     }
 }

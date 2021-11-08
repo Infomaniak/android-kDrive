@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.menu
 import android.os.Bundle
 import android.view.View
 import androidx.core.os.bundleOf
+import androidx.core.view.isGone
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
@@ -67,7 +68,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
             initialListView = fileRecyclerView
         )
 
-        sortButton.visibility = if (inDriveList) View.GONE else View.VISIBLE
+        sortButton.isGone = inDriveList
         fileAdapter.onFileClicked = { file ->
             fileListViewModel.cancelDownloadFiles()
             when {

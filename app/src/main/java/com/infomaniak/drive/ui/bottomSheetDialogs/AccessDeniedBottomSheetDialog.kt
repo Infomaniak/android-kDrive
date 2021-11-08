@@ -19,8 +19,8 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import android.os.Bundle
 import android.view.View
-import android.view.View.GONE
 import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
@@ -79,10 +79,8 @@ class AccessDeniedBottomSheetDialog : InformationBottomSheetDialog() {
         } else {
             description.setText(R.string.accessDeniedDescriptionIsNotAdmin)
             actionButton.setText(R.string.buttonClose)
-            actionButton.setOnClickListener {
-                dismiss()
-            }
-            secondaryActionButton.visibility = GONE
+            actionButton.setOnClickListener { dismiss() }
+            secondaryActionButton.isGone = true
         }
     }
 

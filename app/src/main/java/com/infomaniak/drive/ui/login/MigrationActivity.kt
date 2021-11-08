@@ -25,10 +25,10 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import androidx.appcompat.app.AppCompatActivity
 import androidx.collection.ArrayMap
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.work.WorkManager
 import com.infomaniak.drive.BuildConfig
@@ -130,7 +130,7 @@ class MigrationActivity : AppCompatActivity() {
                 if (newUserList.isEmpty()) {
                     showError(textError)
                 }
-                startButton.visibility = VISIBLE
+                startButton.isVisible = true
             }
         }
     }
@@ -141,16 +141,16 @@ class MigrationActivity : AppCompatActivity() {
             authenticateOldUsers()
         }
         startButton.setText(R.string.buttonRetry)
-        loginInManuallyButton.visibility = VISIBLE
-        progressMigration.visibility = GONE
-        progressMigrationDescription.visibility = GONE
+        loginInManuallyButton.isVisible = true
+        progressMigration.isGone = true
+        progressMigrationDescription.isGone = true
     }
 
     private fun showLoading() {
-        startButton.visibility = GONE
-        loginInManuallyButton.visibility = GONE
-        progressMigration.visibility = VISIBLE
-        progressMigrationDescription.visibility = VISIBLE
+        startButton.isGone = true
+        loginInManuallyButton.isGone = true
+        progressMigration.isVisible = true
+        progressMigrationDescription.isVisible = true
         startButton.setOnClickListener {
             AppSettings.migrated = true
             clearOldUser()

@@ -19,9 +19,10 @@ package com.infomaniak.drive.ui.menu.settings
 
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.CompoundButton
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.ui.LockActivity.Companion.FACE_ID_LOG_TAG
@@ -33,16 +34,14 @@ class AppSecuritySettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.view_switch_settings)
-        toolbar.setNavigationOnClickListener {
-            onBackPressed()
-        }
+        toolbar.setNavigationOnClickListener { onBackPressed() }
 
         switchSettingsTitle.text = getString(R.string.appSecurityTitle)
         description.text = getString(R.string.appSecurityDescription)
         image.setImageResource(R.drawable.ic_face_id_edit)
-        enableFaceId.visibility = View.VISIBLE
-        usersRecyclerView.visibility = View.GONE
-        addUser.visibility = View.GONE
+        enableFaceId.isVisible = true
+        usersRecyclerView.isGone = true
+        addUser.isGone = true
 
         enableFaceId.setOnClickListener { enableFaceIdSwitch.isChecked = !enableFaceIdSwitch.isChecked }
         enableFaceIdSwitch.isChecked = AppSettings.appSecurityLock
@@ -50,9 +49,7 @@ class AppSecuritySettingsActivity : AppCompatActivity() {
             // Reverse switch (before official parameter changed) by silent click
             if (enableFaceIdSwitch.tag == null) {
                 enableFaceIdSwitch.silentClick()
-                requestCredentials {
-                    onCredentialsSuccessful()
-                }
+                requestCredentials { onCredentialsSuccessful() }
             }
         }
     }

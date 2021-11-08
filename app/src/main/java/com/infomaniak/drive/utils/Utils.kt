@@ -25,7 +25,6 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.view.View
-import android.view.View.VISIBLE
 import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -34,6 +33,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
@@ -143,7 +144,7 @@ object Utils {
         iconRes?.let {
             promptLayoutView.icon.let { iconView ->
                 iconView.setImageDrawable(ContextCompat.getDrawable(context, iconRes))
-                iconView.visibility = VISIBLE
+                iconView.isVisible = true
             }
         }
 
@@ -368,7 +369,7 @@ object Utils {
             setTitle(title)
             setCancelable(false)
             View.inflate(context, R.layout.dialog_download_progress, null).apply {
-                icon.visibility = View.GONE
+                icon.isGone = true
                 downloadProgress.isIndeterminate = true
                 setView(this)
             }

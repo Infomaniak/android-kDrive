@@ -22,10 +22,10 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.core.net.toUri
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.audio.AudioAttributes
 import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSource
@@ -87,9 +87,9 @@ open class PreviewVideoFragment : PreviewFragment() {
                         "Source error" -> previewDescription?.setText(R.string.previewVideoSourceError)
                         else -> previewDescription?.setText(R.string.previewLoadError)
                     }
-                    playerView?.visibility = GONE
-                    previewDescription?.visibility = VISIBLE
-                    errorLayout?.visibility = VISIBLE
+                    playerView?.isGone = true
+                    previewDescription?.isVisible = true
+                    errorLayout?.isVisible = true
                 }
             })
         }

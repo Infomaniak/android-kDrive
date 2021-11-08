@@ -24,6 +24,7 @@ import android.util.Log
 import android.view.View
 import androidx.activity.addCallback
 import androidx.core.net.toFile
+import androidx.core.view.isGone
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.work.Data
@@ -117,7 +118,7 @@ class UploadInProgressFragment : FileListFragment() {
             requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { popBackStack() }
         }
 
-        sortLayout.visibility = View.GONE
+        sortLayout.isGone = true
         noFilesLayout.setup(
             icon = R.drawable.ic_upload,
             title = R.string.uploadInProgressNoFile,

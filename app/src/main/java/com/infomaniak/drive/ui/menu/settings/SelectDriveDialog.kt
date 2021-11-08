@@ -20,9 +20,9 @@ package com.infomaniak.drive.ui.menu.settings
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.PopupWindow
+import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -69,10 +69,10 @@ class SelectDriveDialog : FullScreenBottomSheetDialog() {
                     popupWindow = PopupWindow(popupLayout, userCardview.width, ViewGroup.LayoutParams.WRAP_CONTENT)
                     popupWindow.isOutsideTouchable = true
                     popupWindow.isFocusable = true
-                    popupWindow.elevation = 20F
+                    popupWindow.elevation = 20.0f
                     popupWindow.showAsDropDown(userCardview)
                 }
-                userCardview.visibility = VISIBLE
+                userCardview.isVisible = true
 
                 popupLayout.usersRecyclerView.adapter = UserAdapter(users as ArrayList<User>, isCardview = false) { user ->
                     selectedUser = user

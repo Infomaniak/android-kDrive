@@ -21,6 +21,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.drive.Drive
@@ -49,7 +51,7 @@ class NotEnoughStorageView @JvmOverloads constructor(
         currentDrive.apply {
             val storagePercentage = if (size > 0) (usedSize.toFloat() / size) * 100 else 0F
             if (storagePercentage > STORAGE_ALERT_MIN_PERCENTAGE) {
-                this@NotEnoughStorageView.visibility = VISIBLE
+                this@NotEnoughStorageView.isVisible = true
 
                 val usedStorage = FormatterFileSize.formatShortFileSize(context, usedSize, justValue = true)
                 val totalStorage = FormatterFileSize.formatShortFileSize(context, size)
@@ -59,22 +61,22 @@ class NotEnoughStorageView @JvmOverloads constructor(
                 when (pack) {
                     Drive.DrivePack.SOLO.value, Drive.DrivePack.FREE.value -> {
                         description.setText(R.string.notEnoughStorageDescription1)
-                        upgradeOffer.visibility = VISIBLE
+                        upgradeOffer.isVisible = true
                         upgradeOffer.setOnClickListener {
                             context.openUrl(ApiRoutes.upgradeDrive(AccountUtils.currentDriveId))
                         }
                     }
                     Drive.DrivePack.PRO.value, Drive.DrivePack.TEAM.value -> {
                         description.setText(R.string.notEnoughStorageDescription2)
-                        upgradeOffer.visibility = GONE
+                        upgradeOffer.isGone = true
                     }
                 }
 
                 close.setOnClickListener {
-                    this@NotEnoughStorageView.visibility = GONE
+                    this@NotEnoughStorageView.isGone = true
                 }
             } else {
-                this@NotEnoughStorageView.visibility = GONE
+                this@NotEnoughStorageView.isGone = true
             }
         }
     }

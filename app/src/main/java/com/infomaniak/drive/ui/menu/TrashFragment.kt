@@ -19,7 +19,7 @@ package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
 import android.view.View
-import android.view.View.VISIBLE
+import androidx.core.view.isVisible
 import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
@@ -44,7 +44,7 @@ class TrashFragment : FileSubTypeListFragment() {
         super.onViewCreated(view, savedInstanceState)
         toolbar.setContentInsetsRelative(0, 0)
         emptyTrash.apply {
-            visibility = VISIBLE
+            isVisible = true
             setOnClickListener {
                 Utils.createConfirmation(
                     context = requireContext(),

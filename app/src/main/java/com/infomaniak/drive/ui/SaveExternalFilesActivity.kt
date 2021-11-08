@@ -24,10 +24,10 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import android.provider.OpenableColumns
-import android.view.View.VISIBLE
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -88,15 +88,15 @@ class SaveExternalFilesActivity : BaseActivity() {
                 driveName.text = it.name
                 saveButton.isEnabled = false
                 UISettings(this).getSaveExternalFilesPref().let { (userId, driveId, folderId) ->
-                    if (userId == selectDriveViewModel.selectedUserId.value && driveId == it.id) {
-                        saveExternalFilesViewModel.folderId.value = folderId
-                    } else {
-                        saveExternalFilesViewModel.folderId.value = null
-                    }
+                    saveExternalFilesViewModel.folderId.value =
+                        if (userId == selectDriveViewModel.selectedUserId.value && driveId == it.id)
+                            folderId
+                        else
+                            null
                 }
 
-                pathTitle.visibility = VISIBLE
-                selectPath.visibility = VISIBLE
+                pathTitle.isVisible = true
+                selectPath.isVisible = true
                 selectPath.setOnClickListener {
                     val intent = Intent(this, SelectFolderActivity::class.java).apply {
                         putExtra(SelectFolderActivity.USER_ID_TAG, selectDriveViewModel.selectedUserId.value)
@@ -220,7 +220,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     private fun handleSendSingle(intent: Intent) {
         (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let { uri ->
             currentUri = uri
-            fileNameEditLayout.visibility = VISIBLE
+            fileNameEditLayout.isVisible = true
             fileNameEdit.addTextChangedListener {
                 fileNameEdit.showOrHideEmptyError()
                 checkEnabledSaveButton()
@@ -234,7 +234,7 @@ class SaveExternalFilesActivity : BaseActivity() {
         fileNames.adapter = SaveExternalUriAdapter(uris as ArrayList<Uri>)
         isMultiple = true
 
-        fileNames.visibility = VISIBLE
+        fileNames.isVisible = true
         checkEnabledSaveButton()
     }
 
@@ -255,7 +255,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     }
 
     private fun activeSelectDrive() {
-        switchDrive.visibility = VISIBLE
+        switchDrive.isVisible = true
         selectDrive.setOnClickListener {
             SelectDriveDialog().show(supportFragmentManager, "SyncSettingsSelectDriveDialog")
         }

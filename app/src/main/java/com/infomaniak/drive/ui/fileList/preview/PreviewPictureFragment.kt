@@ -22,10 +22,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.core.net.toUri
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import coil.Coil
 import coil.load
@@ -49,8 +49,8 @@ class PreviewPictureFragment : PreviewFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val timer = createRefreshTimer(milliseconds = 400) { noThumbnailLayout?.visibility = VISIBLE }.start()
-        previewDescription.visibility = GONE
+        val timer = createRefreshTimer(milliseconds = 400) { noThumbnailLayout?.isVisible = true }.start()
+        previewDescription.isGone = true
         fileIcon.setImageResource(file.getFileType().icon)
 
         val imageViewDisposable = imageView.load(file.thumbnail()) { placeholder(R.drawable.coil_hack) }
@@ -65,10 +65,10 @@ class PreviewPictureFragment : PreviewFragment() {
             val previewRequest = ImageRequest.Builder(requireContext())
                 .data(file.imagePreview())
                 .listener(
-                    onError = { _, _ -> previewDescription?.visibility = VISIBLE },
+                    onError = { _, _ -> previewDescription?.isVisible = true },
                     onSuccess = { _, _ ->
                         timer.cancel()
-                        noThumbnailLayout?.visibility = GONE
+                        noThumbnailLayout?.isGone = true
                     }
                 )
                 .build()

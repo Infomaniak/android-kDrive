@@ -19,7 +19,7 @@ package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
 import android.view.View
-import android.view.View.GONE
+import androidx.core.view.isGone
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.utils.AccountUtils
@@ -33,7 +33,7 @@ class RecentChangesFragment : FileSubTypeListFragment() {
         folderID = Utils.OTHER_ROOT_ID
         super.onViewCreated(view, savedInstanceState)
 
-        sortButton.visibility = GONE
+        sortButton.isGone = true
         collapsingToolbarLayout.title = getString(R.string.lastEditsTitle)
         noFilesLayout.setup(
             icon = R.drawable.ic_clock,

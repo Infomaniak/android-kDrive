@@ -41,8 +41,6 @@ import android.provider.MediaStore
 import android.util.DisplayMetrics
 import android.util.Size
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.view.Window
 import android.view.animation.Animation
@@ -58,6 +56,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
@@ -234,25 +234,26 @@ fun Window.lightNavigationBar(enabled: Boolean) {
     }
 }
 
-fun View.setFileItem(
-    file: File,
-    isGrid: Boolean = false
-) {
+fun View.setFileItem(file: File, isGrid: Boolean = false) {
+
     fileName.text = file.name
-    fileFavorite.visibility = if (file.isFavorite) VISIBLE else GONE
-    fileDate?.visibility = if (file.id != ROOT_ID) VISIBLE else GONE
+    fileFavorite.isVisible = file.isFavorite
+    fileDate?.isVisible = file.id != ROOT_ID
     fileDate?.text =
-        if (file.deletedAt.isPositive()) file.getDeletedAt().format(context.getString(R.string.allDeletedFilePattern))
-        else file.getLastModifiedAt().format(context.getString(R.string.allLastModifiedFilePattern))
+        if (file.deletedAt.isPositive())
+            file.getDeletedAt().format(context.getString(R.string.allDeletedFilePattern))
+        else
+            file.getLastModifiedAt().format(context.getString(R.string.allLastModifiedFilePattern))
+
     file.size?.let {
         fileSize?.text = FormatterFileSize.formatShortFileSize(context, it)
-        fileSeparator?.visibility = VISIBLE
+        fileSeparator?.isVisible = true
     } ?: run {
         fileSize?.text = ""
-        fileSeparator?.visibility = GONE
+        fileSeparator?.isGone = true
     }
 
-    progressLayout.visibility = GONE
+    progressLayout.isGone = true
 
     filePreview.scaleType = ImageView.ScaleType.CENTER
     when {
@@ -305,28 +306,28 @@ fun View.setupFileProgress(file: File) {
     val isSyncActive = context.isSyncActive()
     when {
         (isPendingOffline || isSyncActive) && progress in 0..99 -> {
-            fileOffline.visibility = GONE
+            fileOffline.isGone = true
             if (fileOfflineProgression.isIndeterminate) {
-                fileOfflineProgression.visibility = GONE
+                fileOfflineProgression.isGone = true
                 fileOfflineProgression.isIndeterminate = false
             }
             fileOfflineProgression.progress = progress
-            fileOfflineProgression.visibility = VISIBLE
-            progressLayout.visibility = VISIBLE
+            fileOfflineProgression.isVisible = true
+            progressLayout.isVisible = true
         }
         isPendingOffline && progress == Utils.INDETERMINATE_PROGRESS -> {
-            fileOffline.visibility = GONE
-            fileOfflineProgression.visibility = GONE
+            fileOffline.isGone = true
+            fileOfflineProgression.isGone = true
             fileOfflineProgression.isIndeterminate = true
-            fileOfflineProgression.visibility = VISIBLE
-            progressLayout.visibility = VISIBLE
+            fileOfflineProgression.isVisible = true
+            progressLayout.isVisible = true
         }
         file.isOfflineFile(context) -> {
-            fileOffline.visibility = VISIBLE
-            fileOfflineProgression.visibility = GONE
-            progressLayout.visibility = VISIBLE
+            fileOffline.isVisible = true
+            fileOfflineProgression.isGone = true
+            progressLayout.isVisible = true
         }
-        else -> progressLayout.visibility = GONE
+        else -> progressLayout.isGone = true
     }
 }
 
@@ -334,7 +335,7 @@ fun View.setUserView(user: User, showChevron: Boolean = true, onItemClicked: (us
     userName.text = user.displayName
     userEmail.text = user.email
     userAvatar.loadAvatar(user)
-    chevron.visibility = if (showChevron) VISIBLE else GONE
+    chevron.isVisible = showChevron
     setOnClickListener { onItemClicked(user) }
 }
 
@@ -725,11 +726,11 @@ fun View.updateUploadFileInProgress(pendingFilesCount: Int) {
             pendingFilesCount,
             pendingFilesCount
         )
-        filePreview.visibility = GONE
-        fileProgression.visibility = VISIBLE
-        visibility = VISIBLE
+        filePreview.isGone = true
+        fileProgression.isVisible = true
+        isVisible = true
     } else {
-        visibility = GONE
+        isGone = true
     }
 }
 
