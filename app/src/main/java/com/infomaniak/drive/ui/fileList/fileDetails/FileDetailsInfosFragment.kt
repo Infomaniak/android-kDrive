@@ -141,7 +141,8 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
                             fileId = currentFile.id,
                             driveId = currentFile.driveId,
                             shareLink = this.shareLink!!, // cannot be null, if null, settings will not appear
-                            onlyoffice = currentFile.onlyoffice
+                            isOnlyOfficeFile = currentFile.onlyoffice,
+                            isFolder = currentFile.isFolder()
                         )
                     )
                 })

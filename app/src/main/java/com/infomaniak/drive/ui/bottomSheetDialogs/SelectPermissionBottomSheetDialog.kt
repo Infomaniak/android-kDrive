@@ -100,9 +100,13 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
                         Shareable.ShareablePermission.WRITE,
                         Shareable.ShareablePermission.MANAGE
                     )
-                    PermissionsGroup.SHARE_LINK_OFFICE -> arrayListOf(
-                        ShareLink.OfficePermission.READ,
-                        ShareLink.OfficePermission.WRITE
+                    PermissionsGroup.SHARE_LINK_FILE_OFFICE -> arrayListOf(
+                        ShareLink.OfficeFilePermission.READ,
+                        ShareLink.OfficeFilePermission.WRITE
+                    )
+                    PermissionsGroup.SHARE_LINK_FOLDER_OFFICE -> arrayListOf(
+                        ShareLink.OfficeFolderPermission.READ,
+                        ShareLink.OfficeFolderPermission.WRITE
                     )
                 }
                 setAll(newPermissions)
@@ -121,7 +125,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
                         )
                     }
                 }
-                PermissionsGroup.SHARE_LINK_OFFICE -> {
+                PermissionsGroup.SHARE_LINK_FILE_OFFICE, PermissionsGroup.SHARE_LINK_FOLDER_OFFICE -> {
                     selectPermissionViewModel.currentFile?.let { file ->
                         updateShareLinkOfficePermission(
                             file = file,
@@ -148,7 +152,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         saveButton.showProgress()
         selectPermissionViewModel.editFileShareLinkOfficePermission(
             file = file,
-            canEdit = (permission as ShareLink.OfficePermission).apiValue
+            canEdit = (permission as ShareLink.EditPermission).apiValue
         ).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.data == true) {
                 setBackNavigationResult(
@@ -245,7 +249,8 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
     enum class PermissionsGroup : Parcelable {
         SHARE_LINK_FILE_SETTINGS,
         SHARE_LINK_FOLDER_SETTINGS,
-        SHARE_LINK_OFFICE,
+        SHARE_LINK_FILE_OFFICE,
+        SHARE_LINK_FOLDER_OFFICE,
         USERS_RIGHTS,
         EXTERNAL_USERS_RIGHTS,
         FILE_SHARE_UPDATE

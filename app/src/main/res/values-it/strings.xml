@@ -523,9 +523,11 @@
     <string name="settingsOnlyWifiSyncTitle">Trasferimento solo tramite Wi-Fi</string>
     <string name="settingsTitle">Impostazioni</string>
     <string name="shareFileInputUserAndEmail">Invita un utente o un indirizzo e-mail…</string>
-    <string name="shareLinkOfficePermissionReadDescription">Gli utenti possono soltanto consultare il file.</string>
+    <string name="shareLinkOfficePermissionReadFileDescription">Gli utenti possono soltanto consultare il documento.</string>
+    <string name="shareLinkOfficePermissionReadFolderDescription">Gli utenti possono soltanto consultare i file presenti nella cartella condivisa.</string>
     <string name="shareLinkOfficePermissionReadTitle">Consulta</string>
-    <string name="shareLinkOfficePermissionWriteDescription">Gli utenti possono modificare documenti, fogli di calcolo e file di presentazione.</string>
+    <string name="shareLinkOfficePermissionWriteFileDescription">Gli utenti possono modificare il documento.</string>
+    <string name="shareLinkOfficePermissionWriteFolderDescription">Gli utenti possono modificare il(i) file del tipo documento, foglio di calcolo o presentazione.</string>
     <string name="shareLinkOfficePermissionWriteTitle">Modifica</string>
     <string name="shareLinkPasswordRightFileDescription">Chiunque abbia il link dovrà inserire una password per accedere al file.</string>
     <string name="shareLinkPasswordRightFolderDescription">Coloro che dispongono del link dovranno inserire la password per accedere alla cartella.</string>

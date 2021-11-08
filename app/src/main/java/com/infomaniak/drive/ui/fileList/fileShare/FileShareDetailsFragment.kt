@@ -189,7 +189,8 @@ class FileShareDetailsFragment : Fragment() {
                             fileId = currentFile.id,
                             driveId = currentFile.driveId,
                             shareLink = newShareLink,
-                            onlyoffice = currentFile.onlyoffice
+                            isOnlyOfficeFile = currentFile.onlyoffice,
+                            isFolder = currentFile.isFolder()
                         )
                     )
                 })

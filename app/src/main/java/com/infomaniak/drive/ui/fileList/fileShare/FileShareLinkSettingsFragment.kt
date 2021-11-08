@@ -43,13 +43,12 @@ import kotlinx.android.synthetic.main.fragment_file_share_link_settings.*
 import java.util.*
 
 class FileShareLinkSettingsFragment : Fragment() {
-    private lateinit var shareLink: ShareLink
     private val navigationArgs: FileShareLinkSettingsFragmentArgs by navArgs()
-    private var defaultCalendarTimestamp: Date = Date().endOfTheDay()
     private val shareViewModel: FileShareViewModel by viewModels()
+    private var defaultCalendarTimestamp: Date = Date().endOfTheDay()
 
-    private var showOfficePermission: Boolean = false
-    private var officePermission: ShareLink.OfficePermission = ShareLink.OfficePermission.READ
+    private lateinit var officePermission: ShareLink.EditPermission
+    private lateinit var shareLink: ShareLink
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_file_share_link_settings, container, false)
@@ -59,10 +58,10 @@ class FileShareLinkSettingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         shareLink = navigationArgs.shareLink
-        showOfficePermission = navigationArgs.onlyoffice
-        officePermission =
-            if (shareLink.canEdit) ShareLink.OfficePermission.WRITE
-            else ShareLink.OfficePermission.READ
+        officePermission = when {
+            navigationArgs.isFolder -> if (shareLink.canEdit) ShareLink.OfficeFolderPermission.WRITE else ShareLink.OfficeFolderPermission.READ
+            else -> if (shareLink.canEdit) ShareLink.OfficeFilePermission.WRITE else ShareLink.OfficeFilePermission.READ
+        }
 
         toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
@@ -75,18 +74,21 @@ class FileShareLinkSettingsFragment : Fragment() {
 
         getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.SELECT_PERMISSION_NAV_KEY) { bundle ->
             officePermission = bundle.getParcelable(PERMISSION_BUNDLE_KEY)!!
-            shareLink.canEdit = officePermission == ShareLink.OfficePermission.WRITE
+            shareLink.canEdit = officePermission.apiValue
             setupShareLinkSettingsUi()
         }
 
         setupUiListeners()
 
         fileShareLinkRights.setOnClickListener {
+            val permissionsGroup =
+                if (navigationArgs.isFolder) SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_FOLDER_OFFICE
+                else SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_FILE_OFFICE
             safeNavigate(
                 FileShareLinkSettingsFragmentDirections.actionFileShareLinkSettingsFragmentToSelectPermissionBottomSheetDialog(
                     currentPermission = officePermission,
                     currentFileId = navigationArgs.fileId,
-                    permissionsGroup = SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_OFFICE
+                    permissionsGroup = permissionsGroup
                 )
             )
         }
@@ -118,7 +120,7 @@ class FileShareLinkSettingsFragment : Fragment() {
     private fun setupShareLinkSettingsUi() {
         shareLink.apply {
 
-            if (showOfficePermission) {
+            if (navigationArgs.isOnlyOfficeFile || navigationArgs.isFolder) {
                 rightsTitle.visibility = VISIBLE
                 fileShareLinkRights.visibility = VISIBLE
                 rightsValue.setText(officePermission.translation)

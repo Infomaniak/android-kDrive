@@ -94,23 +94,48 @@ data class ShareLink(
         ),
     }
 
+    interface EditPermission : Permission {
+        val apiValue: Boolean
+    }
+
     @Parcelize
-    enum class OfficePermission(
+    enum class OfficeFilePermission(
         override val icon: Int,
         override val translation: Int,
         override val description: Int,
-        val apiValue: Boolean
-    ) : Permission {
+        override val apiValue: Boolean
+    ) : EditPermission {
         READ(
             R.drawable.ic_view,
             R.string.shareLinkOfficePermissionReadTitle,
-            R.string.shareLinkOfficePermissionReadDescription,
+            R.string.shareLinkOfficePermissionReadFileDescription,
             false
         ),
         WRITE(
             R.drawable.ic_edit,
             R.string.shareLinkOfficePermissionWriteTitle,
-            R.string.shareLinkOfficePermissionWriteDescription,
+            R.string.shareLinkOfficePermissionWriteFileDescription,
+            true
+        )
+    }
+
+    @Parcelize
+    enum class OfficeFolderPermission(
+        override val icon: Int,
+        override val translation: Int,
+        override val description: Int,
+        override val apiValue: Boolean
+    ) : EditPermission {
+        READ(
+            R.drawable.ic_view,
+            R.string.shareLinkOfficePermissionReadTitle,
+            R.string.shareLinkOfficePermissionReadFolderDescription,
+            false
+        ),
+        WRITE(
+            R.drawable.ic_edit,
+            R.string.shareLinkOfficePermissionWriteTitle,
+            R.string.shareLinkOfficePermissionWriteFolderDescription,
             true
         )
     }

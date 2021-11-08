@@ -532,9 +532,11 @@
     <string name="settingsOnlyWifiSyncTitle">WiFi-only transfer</string>
     <string name="settingsTitle">Settings</string>
     <string name="shareFileInputUserAndEmail">Invite a user or an email address…</string>
-    <string name="shareLinkOfficePermissionReadDescription">Users can only view the file.</string>
+    <string name="shareLinkOfficePermissionReadFileDescription">Users can only view the document.</string>
+    <string name="shareLinkOfficePermissionReadFolderDescription">Users can only view files within the shared folder.</string>
     <string name="shareLinkOfficePermissionReadTitle">View</string>
-    <string name="shareLinkOfficePermissionWriteDescription">Users can edit document, spreadsheet and presentation files.</string>
+    <string name="shareLinkOfficePermissionWriteFileDescription">Users can modify the document.</string>
+    <string name="shareLinkOfficePermissionWriteFolderDescription">Users can edit the document, spreadsheet or presentation file(s).</string>
     <string name="shareLinkOfficePermissionWriteTitle">Modify</string>
     <string name="shareLinkPasswordRightFileDescription">Anyone who has the link will have to enter a password to access the file.</string>
     <string name="shareLinkPasswordRightFolderDescription">Anyone who has the link will have to enter a password to access the folder.</string>
