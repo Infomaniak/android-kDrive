@@ -149,7 +149,7 @@ fun ImageView.loadGlideUrl(
         .load(OkHttpLibraryGlideModule.GlideAuthUrl(url))
         .transition(Utils.CROSS_FADE_TRANSITION)
         .placeholder(R.drawable.placeholder)
-        .apply { if (errorDrawable == null) error(errorRes) else error(errorDrawable) }
+        .let { if (errorDrawable == null) it.error(errorRes) else it.error(errorDrawable) }
         .centerCrop().into(this)
 }
 
