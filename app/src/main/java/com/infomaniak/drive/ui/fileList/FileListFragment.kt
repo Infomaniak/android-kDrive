@@ -475,28 +475,13 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         fileAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         fileAdapter.setHasStableIds(true)
         fileAdapter.onFileClicked = { file ->
-            when {
-                file.isFolder() -> {
-                    if (file.isDisabled()) {
-                        safeNavigate(
-                            FileListFragmentDirections.actionFileListFragmentToAccessDeniedBottomSheetFragment(
-                                AccountUtils.getCurrentDrive()?.isUserAdmin() ?: false,
-                                file.id
-                            )
-                        )
-                    } else {
-                        fileListViewModel.cancelDownloadFiles()
-                        safeNavigate(
-                            FileListFragmentDirections.fileListFragmentToFileListFragment(
-                                file.id, file.name
-                            )
-                        )
-                    }
-                }
-                else -> {
-                    val fileList = fileAdapter.getFileObjectsList(mainViewModel.realm)
-                    Utils.displayFile(mainViewModel, findNavController(), file, fileList)
-                }
+            if (file.isManagedByRealm() || file.isNotManagedByRealm()) {
+                if (file.isFolder())
+                    openFolder(file)
+                else
+                    displayFile(file)
+            } else {
+                refreshActivities()
             }
         }
 
@@ -528,6 +513,29 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 }
             }
         }
+    }
+
+    private fun openFolder(file: File) {
+        if (file.isDisabled()) {
+            safeNavigate(
+                FileListFragmentDirections.actionFileListFragmentToAccessDeniedBottomSheetFragment(
+                    AccountUtils.getCurrentDrive()?.isUserAdmin() ?: false,
+                    file.id
+                )
+            )
+        } else {
+            fileListViewModel.cancelDownloadFiles()
+            safeNavigate(
+                FileListFragmentDirections.fileListFragmentToFileListFragment(
+                    file.id, file.name
+                )
+            )
+        }
+    }
+
+    private fun displayFile(file: File) {
+        val fileList = fileAdapter.getFileObjectsList(mainViewModel.realm)
+        Utils.displayFile(mainViewModel, findNavController(), file, fileList)
     }
 
     private fun onBackNavigationResult() {
