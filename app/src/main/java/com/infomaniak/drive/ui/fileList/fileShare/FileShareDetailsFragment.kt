@@ -172,7 +172,7 @@ class FileShareDetailsFragment : Fragment() {
                     this.shareLink = newShareLink
                     val (permissionsGroup, currentPermission) = FileDetailsInfosFragment.selectPermissions(
                         file.isFolder(),
-                        shareLink != null
+                        this.shareLink != null
                     )
                     findNavController().navigate(
                         FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToSelectPermissionBottomSheetDialog(
