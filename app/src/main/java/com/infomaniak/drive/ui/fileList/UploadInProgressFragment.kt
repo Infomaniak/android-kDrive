@@ -32,6 +32,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
 import com.infomaniak.drive.utils.*
@@ -53,7 +54,7 @@ import kotlinx.coroutines.withContext
 
 class UploadInProgressFragment : FileListFragment() {
 
-    private lateinit var realm: Realm
+    private lateinit var realmUpload: Realm
     private lateinit var drivePermissions: DrivePermissions
     override var enabledMultiSelectMode: Boolean = false
     override var hideBackButtonWhenRoot: Boolean = false
@@ -65,7 +66,7 @@ class UploadInProgressFragment : FileListFragment() {
     private var realmListener: OrderedRealmCollectionChangeListener<RealmResults<UploadFile>>? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        realm = UploadFile.getRealmInstance()
+        realmUpload = UploadFile.getRealmInstance()
         downloadFiles = DownloadFiles()
         setNoFilesLayout = SetNoFilesLayout()
         drivePermissions = DrivePermissions()
@@ -124,6 +125,7 @@ class UploadInProgressFragment : FileListFragment() {
 
     override fun onDestroy() {
         realmListener?.let { uploadFiles?.removeChangeListener(it) }
+        realmUpload.close()
         super.onDestroy()
     }
 
@@ -204,7 +206,7 @@ class UploadInProgressFragment : FileListFragment() {
             val isFromPendingFolders =
                 findNavController().previousBackStackEntry?.destination?.id == R.id.uploadInProgressFragment
 
-            return if (UploadFile.getAllPendingFoldersCount(realm) in 0..1 && isFromPendingFolders) {
+            return if (UploadFile.getAllPendingFoldersCount(realmUpload) in 0..1 && isFromPendingFolders) {
                 val lastIndex = findNavController().backQueue.lastIndex
                 val previousDestinationId = findNavController().backQueue[lastIndex - 2].destination.id
                 findNavController().popBackStack(previousDestinationId, false)
@@ -241,36 +243,35 @@ class UploadInProgressFragment : FileListFragment() {
         }
 
         private fun downloadPendingFolders() {
-            UploadFile.getAllPendingFolders(realm)?.let { pendingFolders ->
-                FileController.getRealmInstance().use { realmFile ->
-                    if (pendingFolders.count() == 1) {
-                        val uploadFile = pendingFolders.first()!!
-                        val folder = FileController.getFileProxyById(uploadFile.remoteFolder, customRealm = realmFile)!!
-                        navigateToUploadView(uploadFile.remoteFolder, folder.name)
-                    } else {
-                        val files = arrayListOf<File>()
-                        pendingFolders.forEach { uploadFile ->
-                            files.add(createFolderFile(uploadFile.remoteFolder, realmFile))
-                        }
-
-                        realmListener?.let {
-                            uploadFiles = pendingFolders
-                            uploadFiles?.addChangeListener(it)
-                        }
-
-                        fileAdapter.isComplete = true
-                        fileAdapter.setFiles(files)
-                        noFilesLayout.toggleVisibility(pendingFolders.isEmpty())
-                        showLoadingTimer.cancel()
-                        swipeRefreshLayout.isRefreshing = false
-                        toolbar.menu.findItem(R.id.closeItem).isVisible = true
+            UploadFile.getAllPendingFolders(realmUpload)?.let { pendingFolders ->
+                if (pendingFolders.count() == 1) {
+                    val uploadFile = pendingFolders.first()!!
+                    val folder =
+                        FileController.getFileById(uploadFile.remoteFolder, UserDrive(driveId = uploadFile.driveId))!!
+                    navigateToUploadView(uploadFile.remoteFolder, folder.name)
+                } else {
+                    val files = arrayListOf<File>()
+                    pendingFolders.forEach { uploadFile ->
+                        files.add(createFolderFile(uploadFile.remoteFolder, uploadFile.driveId))
                     }
+
+                    realmListener?.let {
+                        uploadFiles = pendingFolders
+                        uploadFiles?.addChangeListener(it)
+                    }
+
+                    fileAdapter.isComplete = true
+                    fileAdapter.setFiles(files)
+                    noFilesLayout.toggleVisibility(pendingFolders.isEmpty())
+                    showLoadingTimer.cancel()
+                    swipeRefreshLayout.isRefreshing = false
+                    toolbar.menu.findItem(R.id.closeItem).isVisible = true
                 }
             } ?: noFilesLayout.toggleVisibility(true)
         }
 
-        private fun createFolderFile(fileId: Int, realmFile: Realm): File {
-            val folder = FileController.getFileProxyById(fileId, customRealm = realmFile)!!
+        private fun createFolderFile(fileId: Int, driveId: Int): File {
+            val folder = FileController.getFileById(fileId, UserDrive(driveId = driveId))!!
             val name: String
             val type: String
 
@@ -292,7 +293,7 @@ class UploadInProgressFragment : FileListFragment() {
         }
 
         private fun downloadPendingFilesByFolderId() {
-            UploadFile.getCurrentUserPendingUploads(folderID, realm)?.let { currentUserPendingUploads ->
+            UploadFile.getCurrentUserPendingUploads(folderID, realmUpload)?.let { currentUserPendingUploads ->
                 val files = arrayListOf<File>()
                 currentUserPendingUploads.forEach { uploadFile ->
                     val uri = uploadFile.getUriObject()
@@ -351,7 +352,7 @@ class UploadInProgressFragment : FileListFragment() {
                     uploadFiles = currentUserPendingUploads
                     uploadFiles?.addChangeListener(it)
                 }
-                pendingFiles = ArrayList(realm.copyFromRealm(currentUserPendingUploads, 0))
+                pendingFiles = ArrayList(realmUpload.copyFromRealm(currentUserPendingUploads, 0))
 
                 toolbar.menu.findItem(R.id.restartItem).isVisible = true
                 toolbar.menu.findItem(R.id.closeItem).isVisible = true
