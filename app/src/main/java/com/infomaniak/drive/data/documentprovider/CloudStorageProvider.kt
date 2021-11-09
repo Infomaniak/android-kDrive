@@ -125,8 +125,10 @@ class CloudStorageProvider : DocumentsProvider() {
                 else -> { // isFile
                     val fileId = getFileIdFromDocumentId(documentId)
                     val userDrive = UserDrive(userId.toInt(), driveDocument.id, fromSharedWithMe)
-                    FileController.getFileProxyById(fileId, userDrive)?.let { file ->
-                        addFile(file, documentId)
+                    FileController.getRealmInstance(userDrive).use { realm ->
+                        FileController.getFileProxyById(fileId, customRealm = realm)?.let { file ->
+                            addFile(file, documentId)
+                        }
                     }
                 }
             }
@@ -171,7 +173,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
         when {
             isRootFolder -> {
-                cursor.addRootDrives(userId)
+                cursor.addRootDrives(userId, isRootFolder = true)
 
                 var documentId = parentDocumentId + SEPARATOR + MY_SHARES_FOLDER_ID
                 var name = context?.getString(R.string.mySharesTitle) ?: "My Shares"
@@ -320,31 +322,12 @@ class CloudStorageProvider : DocumentsProvider() {
 
         val fileId = getFileIdFromDocumentId(documentId)
         val userId = getUserId(documentId)
-
         var parcel: ParcelFileDescriptor? = null
-        val userDrive = createUserDrive(documentId)
-        FileController.getFileProxyById(fileId, userDrive)?.let { file ->
-            val outputFolder = java.io.File(context?.cacheDir, "thumbnails").apply { if (!exists()) mkdirs() }
-            val name = "${fileId}_${file.name}"
-            val outputFile = java.io.File(outputFolder, name)
 
-            try {
-                val okHttpClient: OkHttpClient
-                runBlocking { okHttpClient = KDriveHttpClient.getHttpClient(userId.toInt()) }
-                val response = DownloadWorker.downloadFileResponse(file.thumbnail(), okHttpClient) {}
-
-                if (response.isSuccessful) {
-                    DownloadWorker.saveRemoteData(response, outputFile) {
-                        parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
-                    }
-                } else if (outputFile.exists()) {
-                    parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                if (outputFile.exists()) parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
+        FileController.getRealmInstance(createUserDrive(documentId)).use { realm ->
+            FileController.getFileProxyById(fileId, customRealm = realm)?.let { file ->
+                parcel = generateThumbnail(fileId, file, userId)
             }
-
         }
 
         return if (parcel == null) {
@@ -352,6 +335,34 @@ class CloudStorageProvider : DocumentsProvider() {
         } else {
             AssetFileDescriptor(parcel, 0, AssetFileDescriptor.UNKNOWN_LENGTH)
         }
+    }
+
+    private fun generateThumbnail(fileId: Int, file: File, userId: String): ParcelFileDescriptor? {
+
+        val outputFolder = java.io.File(context?.cacheDir, "thumbnails").apply { if (!exists()) mkdirs() }
+        val name = "${fileId}_${file.name}"
+        val outputFile = java.io.File(outputFolder, name)
+        var parcel: ParcelFileDescriptor? = null
+
+        try {
+            val okHttpClient: OkHttpClient
+            runBlocking { okHttpClient = KDriveHttpClient.getHttpClient(userId.toInt()) }
+            val response = DownloadWorker.downloadFileResponse(file.thumbnail(), okHttpClient) {}
+
+            if (response.isSuccessful) {
+                DownloadWorker.saveRemoteData(response, outputFile) {
+                    parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
+                }
+            } else if (outputFile.exists()) {
+                parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            if (outputFile.exists()) parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
+        }
+
+        return parcel
     }
 
     override fun createDocument(parentDocumentId: String, mimeType: String, displayName: String): String {
@@ -381,10 +392,7 @@ class CloudStorageProvider : DocumentsProvider() {
                     FileController.removeOrphanAndActivityFiles(realm)
 
                     // Refresh
-                    currentParentDocumentId?.let {
-                        needRefresh = true
-                        context.contentResolver.notifyChange(DocumentCursor.createUri(context, it), null)
-                    }
+                    scheduleRefresh()
 
                 } else {
                     throw RuntimeException("Delete document failed")
@@ -404,10 +412,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
                 if (apiResponse.isSuccess()) {
                     // Refresh
-                    currentParentDocumentId?.let {
-                        needRefresh = true
-                        context?.contentResolver?.notifyChange(DocumentCursor.createUri(context, it), null)
-                    }
+                    scheduleRefresh()
 
                 } else {
                     throw RuntimeException("Rename document failed")
@@ -421,19 +426,26 @@ class CloudStorageProvider : DocumentsProvider() {
     override fun copyDocument(sourceDocumentId: String, targetParentDocumentId: String): String {
         Log.d(TAG, "copyDocument(), sourceId=$sourceDocumentId, targetParentId=$targetParentDocumentId")
 
-        val fileId = getFileIdFromDocumentId(sourceDocumentId)
-        val userDrive = createUserDrive(sourceDocumentId)
-        val file = FileController.getFileProxyById(fileId, userDrive) ?: throw IllegalStateException("File not found")
-        val copyName = file.name
-        val targetParentFileId = getFileIdFromDocumentId(targetParentDocumentId)
+        return FileController.getRealmInstance(createUserDrive(sourceDocumentId)).use { realm ->
 
-        val apiResponse = ApiRepository.duplicateFile(file, copyName, targetParentFileId)
+            val fileId = getFileIdFromDocumentId(sourceDocumentId)
+            val file =
+                FileController.getFileProxyById(fileId, customRealm = realm) ?: throw IllegalStateException("File not found")
+            val copyName = file.name
+            val targetParentFileId = getFileIdFromDocumentId(targetParentDocumentId)
 
-        if (apiResponse.isSuccess()) {
-            return sourceDocumentId
+            val apiResponse = ApiRepository.duplicateFile(file, copyName, targetParentFileId)
+
+            if (apiResponse.isSuccess()) {
+
+                // Refresh
+                scheduleRefresh()
+
+                return@use sourceDocumentId
+            } else {
+                throw RuntimeException("Copy document failed")
+            }
         }
-
-        throw RuntimeException("Copy document failed")
     }
 
     override fun moveDocument(sourceDocumentId: String, sourceParentDocumentId: String, targetParentDocumentId: String): String {
@@ -444,14 +456,12 @@ class CloudStorageProvider : DocumentsProvider() {
                     "targetParentId=$targetParentDocumentId"
         )
 
-        val userDrive = createUserDrive(sourceDocumentId)
-
-        return FileController.getRealmInstance(userDrive).use { realm ->
+        return FileController.getRealmInstance(createUserDrive(sourceDocumentId)).use { realm ->
 
             val fileNotFoundException = IllegalStateException("File not found")
 
             val fileId = getFileIdFromDocumentId(sourceDocumentId)
-            val file = FileController.getFileProxyById(fileId, userDrive, realm) ?: throw fileNotFoundException
+            val file = FileController.getFileProxyById(fileId, customRealm = realm) ?: throw fileNotFoundException
 
             val targetParentFileId = getFileIdFromDocumentId(targetParentDocumentId)
             val targetParentFile =
@@ -461,6 +471,10 @@ class CloudStorageProvider : DocumentsProvider() {
 
             if (apiResponse.isSuccess()) {
                 realm.executeTransaction { file.deleteFromRealm() }
+
+                // Refresh
+                scheduleRefresh(sourceParentDocumentId)
+
                 return@use sourceDocumentId
 
             } else {
@@ -482,10 +496,7 @@ class CloudStorageProvider : DocumentsProvider() {
             FileController.addFileTo(parentId, file, userDrive)
 
             // Refresh
-            currentParentDocumentId?.let {
-                needRefresh = true
-                context?.contentResolver?.notifyChange(DocumentCursor.createUri(context, it), null)
-            }
+            scheduleRefresh()
 
             return createFileDocumentId(parentDocumentId, file.id)
         }
@@ -528,6 +539,13 @@ class CloudStorageProvider : DocumentsProvider() {
         return java.io.File(tempFileFolder, displayName).apply { if (!exists()) createNewFile() }
     }
 
+    private fun scheduleRefresh(sourceParentDocumentId: String? = currentParentDocumentId) {
+        sourceParentDocumentId?.let {
+            needRefresh = true
+            context?.contentResolver?.notifyChange(DocumentCursor.createUri(context, it), null)
+        }
+    }
+
     private fun MatrixCursor.addRoot(rootId: String, documentId: String, summary: String) {
         val flags = DocumentsContract.Root.FLAG_SUPPORTS_CREATE or
                 DocumentsContract.Root.FLAG_SUPPORTS_RECENTS or
@@ -543,24 +561,34 @@ class CloudStorageProvider : DocumentsProvider() {
         }
     }
 
-    private fun MatrixCursor.addRootDrives(userId: Int, shareFolderID: Int? = null, shareWithMe: Boolean = false) {
+    private fun MatrixCursor.addRootDrives(
+        userId: Int,
+        shareFolderID: Int? = null,
+        shareWithMe: Boolean = false,
+        isRootFolder: Boolean = false
+    ) {
         runBlocking {
             DriveInfosController.getDrives(userId, sharedWithMe = shareWithMe).forEach { drive ->
                 val driveDocument = "${drive.name}$DRIVE_SEPARATOR${drive.id}"
                 val documentId =
                     if (shareFolderID == null) "$userId$SEPARATOR$driveDocument$SEPARATOR${Utils.ROOT_ID}"
                     else "$userId$SEPARATOR$shareFolderID$SEPARATOR$driveDocument$SEPARATOR${Utils.ROOT_ID}"
-                addFile(null, documentId, drive.name)
+                addFile(null, documentId, drive.name, isRootFolder)
             }
         }
     }
 
-    private fun MatrixCursor.addFile(file: File?, documentId: String, name: String = "") {
+    private fun MatrixCursor.addFile(file: File?, documentId: String, name: String = "", isRootFolder: Boolean = false) {
         var flags = 0
 
-        if (file?.isFolder() == true) flags = flags or DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE
+        if ((file?.isFolder() == true && file.rights?.newFile == true) || isRootFolder) {
+            flags = flags or DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE
+        }
 
-        val mimetype = if (file == null || file.isFolder()) DocumentsContract.Document.MIME_TYPE_DIR else file.getMimeType()
+        val mimetype = if (file == null || file.isFolder()) {
+            // flags = flags or DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE
+            DocumentsContract.Document.MIME_TYPE_DIR
+        } else file.getMimeType()
 
         if (file?.isFolder() == false && file.hasThumbnail) {
             flags = flags or DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL
