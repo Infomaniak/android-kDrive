@@ -143,7 +143,7 @@ fun ImageView.loadGlide(bitmap: Bitmap?, @DrawableRes errorRes: Int) {
 
 fun ImageView.loadGlideUrl(
     url: String?,
-    @DrawableRes errorRes: Int = R.drawable.failback_image,
+    @DrawableRes errorRes: Int = R.drawable.fallback_image,
     errorDrawable: Drawable? = null
 ) {
     Glide.with(this)
