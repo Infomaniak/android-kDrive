@@ -151,7 +151,8 @@ fun ImageView.loadGlideUrl(
         .transition(Utils.CROSS_FADE_TRANSITION)
         .placeholder(R.drawable.placeholder)
         .let { if (errorDrawable == null) it.error(errorRes) else it.error(errorDrawable) }
-        .centerCrop().into(this)
+        .centerCrop()
+        .into(this)
 }
 
 fun ImageView.loadAvatar(driveUser: DriveUser): Disposable =
