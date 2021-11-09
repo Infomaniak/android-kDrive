@@ -66,10 +66,7 @@ class FileShareLinkSettingsFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-        shareLink.validUntil?.let { validUntil ->
-            if (validUntil.time < Date().time) shareLink.validUntil = null
-            else defaultCalendarTimestamp = validUntil
-        }
+        shareLink.validUntil?.let { defaultCalendarTimestamp = it }
 
         getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.SELECT_PERMISSION_NAV_KEY) { bundle ->
             officePermission = bundle.getParcelable(PERMISSION_BUNDLE_KEY)!!
