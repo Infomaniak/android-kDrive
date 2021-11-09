@@ -317,7 +317,7 @@ fun View.setupFileProgress(file: File, containsProgress: Boolean = false) {
     val progress = file.currentProgress
 
     when {
-        !containsProgress && file.isPendingOffline(context) && progress == Utils.INDETERMINATE_PROGRESS -> {
+        !containsProgress && progress == Utils.INDETERMINATE_PROGRESS && file.isPendingOffline(context) -> {
             fileOffline.isGone = true
             fileOfflineProgression.isGone = true
             fileOfflineProgression.isIndeterminate = true
@@ -334,7 +334,7 @@ fun View.setupFileProgress(file: File, containsProgress: Boolean = false) {
             fileOfflineProgression.isVisible = true
             progressLayout.isVisible = true
         }
-        file.isOfflineFile(context) -> {
+        file.isOfflineFile(context, checkLocalFile = false) -> {
             fileOffline.isVisible = true
             fileOfflineProgression.isGone = true
             progressLayout.isVisible = true
