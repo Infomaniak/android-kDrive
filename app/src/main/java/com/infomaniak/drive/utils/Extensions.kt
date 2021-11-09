@@ -137,7 +137,8 @@ fun ImageView.loadGlide(bitmap: Bitmap?, @DrawableRes errorRes: Int) {
         .transition(Utils.CROSS_FADE_TRANSITION)
         .placeholder(R.drawable.placeholder)
         .error(errorRes)
-        .centerCrop().into(this)
+        .centerCrop()
+        .into(this)
 }
 
 fun ImageView.loadGlideUrl(
