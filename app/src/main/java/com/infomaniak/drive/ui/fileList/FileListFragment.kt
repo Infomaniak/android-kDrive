@@ -476,10 +476,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         fileAdapter.setHasStableIds(true)
         fileAdapter.onFileClicked = { file ->
             if (file.isManagedAndValidByRealm() || file.isNotManagedByRealm()) {
-                if (file.isFolder())
-                    openFolder(file)
-                else
-                    displayFile(file)
+                if (file.isFolder()) openFolder(file) else displayFile(file)
             } else {
                 refreshActivities()
             }
