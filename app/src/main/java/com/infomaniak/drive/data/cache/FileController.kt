@@ -321,7 +321,7 @@ object FileController {
             val apiResponse = ApiRepository.getFileDetails(File(id = fileId, driveId = userDrive.driveId))
             if (apiResponse.isSuccess()) {
                 apiResponse.data?.let { remoteFile ->
-                    insertOrUpdateFile(realm, remoteFile, getFileProxyById(fileId, userDrive))
+                    insertOrUpdateFile(realm, remoteFile, getFileProxyById(fileId, customRealm = realm))
                     remoteFile
                 }
             } else {
@@ -813,7 +813,7 @@ object FileController {
     ) {
         returnResponse[fileActivity.fileId] = File.LocalFileActivity.IS_UPDATE
 
-        getFileProxyById(fileActivity.fileId)?.let { file ->
+        getFileProxyById(fileActivity.fileId, customRealm = realm)?.let { file ->
             insertOrUpdateFile(realm, fileActivity.file!!, file)
         } ?: also {
             returnResponse[fileActivity.fileId] = File.LocalFileActivity.IS_NEW
