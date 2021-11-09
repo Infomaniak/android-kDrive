@@ -29,11 +29,11 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.viewpager2.widget.ViewPager2
-import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.utils.loadUrl
+import com.infomaniak.drive.utils.loadGlide
+import com.infomaniak.drive.utils.loadGlideUrl
 import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
@@ -82,7 +82,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
 
     private fun setBannerThumbnail(file: File) {
         if (file.hasThumbnail) {
-            collapsingBackground.loadUrl(file.thumbnail())
+            collapsingBackground.loadGlideUrl(file.thumbnail())
         } else {
             appBar.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.background))
             val params = subtitleToolbar.layoutParams as CoordinatorLayout.LayoutParams
@@ -95,7 +95,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
             collapsingBackground.isGone = true
             collapsingBackgroundShadow.isGone = true
             noPreviewLayout.isVisible = true
-            noPreviewLayout.icon.load(file.getFileType().icon)
+            noPreviewLayout.icon.loadGlide(file.getFileType().icon)
         }
     }
 

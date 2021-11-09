@@ -132,7 +132,7 @@ class FileListViewModel : ViewModel() {
         }
     }
 
-    fun searchFiles(query: String, order: File.SortType, page: Int): LiveData<ApiResponse<ArrayList<File>>> {
+    private fun searchFiles(query: String, order: File.SortType, page: Int): LiveData<ApiResponse<ArrayList<File>>> {
         getFilesJob.cancel()
         getFilesJob = Job()
 

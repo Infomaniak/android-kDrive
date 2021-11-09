@@ -23,10 +23,10 @@ import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
-import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.FileActivity
 import com.infomaniak.drive.utils.loadAvatar
+import com.infomaniak.drive.utils.loadGlide
 import com.infomaniak.drive.views.PaginationAdapter
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_file_activity.view.*
@@ -53,7 +53,7 @@ class FileActivitiesAdapter(
                 activityUserAvatar.loadAvatar(driveUser)
             } ?: run {
                 activityUserName.setText(R.string.allUserAnonymous)
-                activityUserAvatar.load(R.drawable.ic_account)
+                activityUserAvatar.loadGlide(R.drawable.ic_account)
             }
 
             if (position == 0 || !isSameDay(currentFileActivity.createdAt, itemList[position - 1].createdAt)) {

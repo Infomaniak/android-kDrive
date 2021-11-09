@@ -214,8 +214,8 @@ open class File(
         return dataFile.length() == size
     }
 
-    fun isOfflineFile(context: Context, userId: Int = AccountUtils.currentUserId): Boolean {
-        return isOffline || getOfflineFile(context, userId)?.exists() == true && !isFolder()
+    fun isOfflineFile(context: Context, userId: Int = AccountUtils.currentUserId, checkLocalFile: Boolean = true): Boolean {
+        return isOffline || (checkLocalFile && !isFolder() && getOfflineFile(context, userId)?.exists() == true)
     }
 
     /**

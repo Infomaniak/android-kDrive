@@ -22,7 +22,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.utils.loadUrl
+import com.infomaniak.drive.utils.loadGlideUrl
 import com.infomaniak.drive.views.PaginationAdapter
 import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.views.ViewHolder
@@ -91,7 +91,7 @@ class PicturesAdapter(
                 val file = (item as File)
 
                 holder.itemView.apply {
-                    picture.loadUrl(file.thumbnail())
+                    picture.loadGlideUrl(file.thumbnail())
                     picture.contentDescription = file.name
 
                     setOnClickListener {
