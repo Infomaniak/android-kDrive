@@ -23,6 +23,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
@@ -61,14 +62,15 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
                 file?.let {
                     saveNewFolder(file)
                     requireActivity().showSnackbar(R.string.createCommonFolderSucces)
-                    safeNavigate(
-                        if (currentPermission == SPECIFIC_USERS) CreateCommonFolderFragmentDirections.actionCreateCommonFolderFragmentToFileShareDetailsFragment(
-                            file = file, ignoreCreateFolderStack = true
+                    if (currentPermission == SPECIFIC_USERS) {
+                        safeNavigate(
+                            CreateCommonFolderFragmentDirections.actionCreateCommonFolderFragmentToFileShareDetailsFragment(
+                                file = file, ignoreCreateFolderStack = true
+                            )
                         )
-                        else CreateCommonFolderFragmentDirections.actionCreateCommonFolderFragmentToFileListFragment(
-                            folderID = file.id, folderName = file.name, ignoreCreateFolderStack = true
-                        )
-                    )
+                    } else {
+                        findNavController().popBackStack(R.id.newFolderFragment, true)
+                    }
                 }
             }
         }

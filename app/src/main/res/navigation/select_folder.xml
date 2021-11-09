@@ -86,9 +86,6 @@
         android:label="CreatePrivateFolderFragment"
         tools:layout="@layout/fragment_create_folder">
         <action
-            android:id="@+id/action_createPrivateFolderFragment_to_fileListFragment"
-            app:destination="@id/selectFolderFragment" />
-        <action
             android:id="@+id/action_createPrivateFolderFragment_to_fileShareDetailsFragment"
             app:destination="@id/fileShareDetailsFragment" />
     </fragment>
@@ -98,9 +95,6 @@
         android:name="com.infomaniak.drive.ui.addFiles.CreateCommonFolderFragment"
         android:label="CreateCommonFolderFragment"
         tools:layout="@layout/fragment_create_folder">
-        <action
-            android:id="@+id/action_createCommonFolderFragment_to_fileListFragment"
-            app:destination="@id/selectFolderFragment" />
         <action
             android:id="@+id/action_createCommonFolderFragment_to_fileShareDetailsFragment"
             app:destination="@id/fileShareDetailsFragment" />

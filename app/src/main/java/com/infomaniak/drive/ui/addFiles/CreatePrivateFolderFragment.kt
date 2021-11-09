@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.addFiles
 
 import android.os.Bundle
 import android.view.View
+import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File.FolderPermission.*
 import com.infomaniak.drive.utils.safeNavigate
@@ -44,14 +45,15 @@ class CreatePrivateFolderFragment : CreateFolderFragment() {
                 file?.let {
                     saveNewFolder(file)
                     requireActivity().showSnackbar(R.string.createPrivateFolderSucces, anchorView = requireActivity().mainFab)
-                    safeNavigate(
-                        if (redirectToShareDetails) CreatePrivateFolderFragmentDirections.actionCreatePrivateFolderFragmentToFileShareDetailsFragment(
-                            file = file, ignoreCreateFolderStack = true
+                    if (redirectToShareDetails) {
+                        safeNavigate(
+                            CreatePrivateFolderFragmentDirections.actionCreatePrivateFolderFragmentToFileShareDetailsFragment(
+                                file = file, ignoreCreateFolderStack = true
+                            )
                         )
-                        else CreatePrivateFolderFragmentDirections.actionCreatePrivateFolderFragmentToFileListFragment(
-                            folderID = file.id, folderName = file.name, ignoreCreateFolderStack = true
-                        )
-                    )
+                    } else {
+                        findNavController().popBackStack(R.id.newFolderFragment, true)
+                    }
                 }
             }
         }
