@@ -319,7 +319,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
                 selectedFiles.reversed().forEach {
                     val file = when {
-                        it.isManagedByRealm() -> it.realm.copyFromRealm(it, 0)
+                        it.isManagedAndValidByRealm() -> it.realm.copyFromRealm(it, 0)
                         it.isNotManagedByRealm() -> it
                         else -> return@forEach
                     }
@@ -475,28 +475,10 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         fileAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         fileAdapter.setHasStableIds(true)
         fileAdapter.onFileClicked = { file ->
-            when {
-                file.isFolder() -> {
-                    if (file.isDisabled()) {
-                        safeNavigate(
-                            FileListFragmentDirections.actionFileListFragmentToAccessDeniedBottomSheetFragment(
-                                AccountUtils.getCurrentDrive()?.isUserAdmin() ?: false,
-                                file.id
-                            )
-                        )
-                    } else {
-                        fileListViewModel.cancelDownloadFiles()
-                        safeNavigate(
-                            FileListFragmentDirections.fileListFragmentToFileListFragment(
-                                file.id, file.name
-                            )
-                        )
-                    }
-                }
-                else -> {
-                    val fileList = fileAdapter.getFileObjectsList(mainViewModel.realm)
-                    Utils.displayFile(mainViewModel, findNavController(), file, fileList)
-                }
+            if (file.isManagedAndValidByRealm() || file.isNotManagedByRealm()) {
+                if (file.isFolder()) openFolder(file) else displayFile(file)
+            } else {
+                refreshActivities()
             }
         }
 
@@ -528,6 +510,29 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 }
             }
         }
+    }
+
+    private fun openFolder(file: File) {
+        if (file.isDisabled()) {
+            safeNavigate(
+                FileListFragmentDirections.actionFileListFragmentToAccessDeniedBottomSheetFragment(
+                    AccountUtils.getCurrentDrive()?.isUserAdmin() ?: false,
+                    file.id
+                )
+            )
+        } else {
+            fileListViewModel.cancelDownloadFiles()
+            safeNavigate(
+                FileListFragmentDirections.fileListFragmentToFileListFragment(
+                    file.id, file.name
+                )
+            )
+        }
+    }
+
+    private fun displayFile(file: File) {
+        val fileList = fileAdapter.getFileObjectsList(mainViewModel.realm)
+        Utils.displayFile(mainViewModel, findNavController(), file, fileList)
     }
 
     private fun onBackNavigationResult() {
