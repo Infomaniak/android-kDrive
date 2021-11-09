@@ -114,7 +114,7 @@ open class File(
     @Ignore
     var currentProgress: Int = INDETERMINATE_PROGRESS
 
-    fun isManagedByRealm() = isManaged && isValid
+    fun isManagedAndValidByRealm() = isManaged && isValid
 
     fun isNotManagedByRealm() = !isManaged
 

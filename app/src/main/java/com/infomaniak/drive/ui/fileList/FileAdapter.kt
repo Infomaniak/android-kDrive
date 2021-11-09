@@ -354,7 +354,7 @@ open class FileAdapter(
 
     private fun isSelectedFile(file: File): Boolean {
         return itemsSelected.find {
-            (it.isManagedByRealm() || it.isNotManagedByRealm()) && it.id == file.id
+            (it.isManagedAndValidByRealm() || it.isNotManagedByRealm()) && it.id == file.id
         } != null
     }
 

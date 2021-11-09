@@ -319,7 +319,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
                 selectedFiles.reversed().forEach {
                     val file = when {
-                        it.isManagedByRealm() -> it.realm.copyFromRealm(it, 0)
+                        it.isManagedAndValidByRealm() -> it.realm.copyFromRealm(it, 0)
                         it.isNotManagedByRealm() -> it
                         else -> return@forEach
                     }
@@ -475,7 +475,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         fileAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         fileAdapter.setHasStableIds(true)
         fileAdapter.onFileClicked = { file ->
-            if (file.isManagedByRealm() || file.isNotManagedByRealm()) {
+            if (file.isManagedAndValidByRealm() || file.isNotManagedByRealm()) {
                 if (file.isFolder())
                     openFolder(file)
                 else
