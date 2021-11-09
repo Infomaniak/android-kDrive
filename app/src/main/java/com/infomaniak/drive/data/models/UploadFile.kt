@@ -26,6 +26,7 @@ import android.provider.MediaStore
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import com.infomaniak.drive.data.sync.UploadMigration
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.lib.core.utils.format
 import io.realm.*
@@ -121,14 +122,11 @@ open class UploadFile(
         private fun pendingUploadsQuery(
             realm: Realm,
             folderId: Int? = null,
-            userDrive: UserDrive? = null
+            onlyCurrentUser: Boolean = false
         ): RealmQuery<UploadFile> {
             return realm.where(UploadFile::class.java).apply {
                 folderId?.let { equalTo(UploadFile::remoteFolder.name, it) }
-                userDrive?.let {
-                    equalTo(UploadFile::userId.name, userDrive.userId)
-                    equalTo(UploadFile::driveId.name, userDrive.driveId)
-                }
+                if (onlyCurrentUser) equalTo(UploadFile::userId.name, AccountUtils.currentUserId)
                 isNull(UploadFile::uploadAt.name)
                 isNull(UploadFile::deletedAt.name)
             }
@@ -150,7 +148,7 @@ open class UploadFile(
         }
 
         fun getCurrentUserPendingUploads(folderId: Int, realm: Realm): RealmResults<UploadFile>? {
-            return pendingUploadsQuery(realm, folderId, UserDrive()).findAll()
+            return pendingUploadsQuery(realm, folderId, true).findAll()
         }
 
         fun getAllPendingUploadsCount(): Int {
@@ -161,7 +159,7 @@ open class UploadFile(
 
         fun getCurrentUserPendingUploadsCount(folderId: Int? = null): Int {
             return getRealmInstance().use { realm ->
-                pendingUploadsQuery(realm, folderId, UserDrive()).count().toInt()
+                pendingUploadsQuery(realm, folderId, true).count().toInt()
             }
         }
 

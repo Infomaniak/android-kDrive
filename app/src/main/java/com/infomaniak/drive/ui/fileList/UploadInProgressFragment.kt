@@ -29,6 +29,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.work.Data
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
@@ -246,8 +247,9 @@ class UploadInProgressFragment : FileListFragment() {
             UploadFile.getAllPendingFolders(realmUpload)?.let { pendingFolders ->
                 if (pendingFolders.count() == 1) {
                     val uploadFile = pendingFolders.first()!!
-                    val folder =
-                        FileController.getFileById(uploadFile.remoteFolder, UserDrive(driveId = uploadFile.driveId))!!
+                    val drive = DriveInfosController.getDrives(AccountUtils.currentUserId, uploadFile.driveId, null).first()
+                    val userDrive = UserDrive(driveId = uploadFile.driveId, sharedWithMe = drive.sharedWithMe)
+                    val folder = FileController.getFileById(uploadFile.remoteFolder, userDrive)!!
                     navigateToUploadView(uploadFile.remoteFolder, folder.name)
                 } else {
                     val files = arrayListOf<File>()
@@ -271,7 +273,9 @@ class UploadInProgressFragment : FileListFragment() {
         }
 
         private fun createFolderFile(fileId: Int, driveId: Int): File {
-            val folder = FileController.getFileById(fileId, UserDrive(driveId = driveId))!!
+            val drive = DriveInfosController.getDrives(AccountUtils.currentUserId, driveId, null).first()
+            val userDrive = UserDrive(driveId = driveId, sharedWithMe = drive.sharedWithMe)
+            val folder = FileController.getFileById(fileId, userDrive)!!
             val name: String
             val type: String
 
