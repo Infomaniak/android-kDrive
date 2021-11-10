@@ -357,7 +357,7 @@ open class FileAdapter(
     }
 
     private fun isSelectedFile(file: File): Boolean {
-        return itemsSelected.find { it.isUsable() && it.id == file.id } != null
+        return itemsSelected.any { it.isUsable() && it.id == file.id }
     }
 
     fun toggleOfflineMode(context: Context, isOffline: Boolean) {
