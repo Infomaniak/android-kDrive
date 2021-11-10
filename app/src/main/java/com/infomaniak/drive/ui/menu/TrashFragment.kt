@@ -37,9 +37,9 @@ class TrashFragment : FileSubTypeListFragment() {
         sortFiles = SortFiles()
         downloadFiles =
             DownloadFiles(
-                if (folderID != ROOT_ID) File(id = folderID, name = folderName, driveId = AccountUtils.currentDriveId)
-                else null
+                if (folderID != ROOT_ID) File(id = folderID, name = folderName, driveId = AccountUtils.currentDriveId) else null
             )
+        setNoFilesLayout = SetNoFilesLayout()
 
         super.onViewCreated(view, savedInstanceState)
         toolbar.setContentInsetsRelative(0, 0)
@@ -65,7 +65,6 @@ class TrashFragment : FileSubTypeListFragment() {
         }
 
         if (folderID == ROOT_ID) collapsingToolbarLayout.title = getString(R.string.trashTitle)
-        noFilesLayout.setup(icon = R.drawable.ic_delete, title = R.string.trashNoFile, initialListView = fileRecyclerView)
 
         fileAdapter.apply {
             showShareFileButton = false
@@ -108,6 +107,16 @@ class TrashFragment : FileSubTypeListFragment() {
                 sortButton.setText(fileListViewModel.sortType.translation)
                 downloadFiles(true, true)
             }
+        }
+    }
+
+    private inner class SetNoFilesLayout : () -> Unit {
+        override fun invoke() {
+            noFilesLayout.setup(
+                icon = R.drawable.ic_delete,
+                title = R.string.trashNoFile,
+                initialListView = fileRecyclerView
+            )
         }
     }
 

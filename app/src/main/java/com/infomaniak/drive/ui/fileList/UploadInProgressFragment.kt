@@ -67,6 +67,7 @@ class UploadInProgressFragment : FileListFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         realm = UploadFile.getRealmInstance()
         downloadFiles = DownloadFiles()
+        setNoFilesLayout = SetNoFilesLayout()
         drivePermissions = DrivePermissions()
         drivePermissions.registerPermissions(this) { authorized ->
             if (!authorized) {
@@ -119,11 +120,6 @@ class UploadInProgressFragment : FileListFragment() {
         }
 
         sortLayout.isGone = true
-        noFilesLayout.setup(
-            icon = R.drawable.ic_upload,
-            title = R.string.uploadInProgressNoFile,
-            initialListView = fileRecyclerView
-        )
     }
 
     override fun onDestroy() {
@@ -217,6 +213,16 @@ class UploadInProgressFragment : FileListFragment() {
         }
 
         if (notIgnorePendingFoldersIfNeeded()) findNavController().popBackStack()
+    }
+
+    private inner class SetNoFilesLayout : () -> Unit {
+        override fun invoke() {
+            noFilesLayout.setup(
+                icon = R.drawable.ic_upload,
+                title = R.string.uploadInProgressNoFile,
+                initialListView = fileRecyclerView
+            )
+        }
     }
 
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {

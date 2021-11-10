@@ -52,14 +52,9 @@ class SearchFragment : FileListFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         fileListViewModel.sortType = File.SortType.RECENT
         downloadFiles = DownloadFiles()
+        setNoFilesLayout = SetNoFilesLayout()
         filterLayoutView = layoutInflater.inflate(R.layout.search_filter, null)
         super.onViewCreated(view, savedInstanceState)
-
-        noFilesLayout.setup(
-            icon = R.drawable.ic_search_grey,
-            title = R.string.searchNoFile,
-            initialListView = fileRecyclerView
-        )
 
         collapsingToolbarLayout.title = getString(R.string.searchTitle)
         searchViewCard.isVisible = true
@@ -195,6 +190,15 @@ class SearchFragment : FileListFragment() {
         }
     }
 
+    private inner class SetNoFilesLayout : () -> Unit {
+        override fun invoke() {
+            noFilesLayout.setup(
+                icon = R.drawable.ic_search_grey,
+                title = R.string.searchNoFile,
+                initialListView = fileRecyclerView
+            )
+        }
+    }
 
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
         override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {

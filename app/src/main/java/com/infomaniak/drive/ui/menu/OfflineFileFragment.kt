@@ -30,16 +30,22 @@ class OfflineFileFragment : FileSubTypeListFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         downloadFiles = DownloadFiles()
+        setNoFilesLayout = SetNoFilesLayout()
         folderID = Utils.OTHER_ROOT_ID
         super.onViewCreated(view, savedInstanceState)
 
         collapsingToolbarLayout.title = getString(R.string.offlineFileTitle)
-        noFilesLayout.setup(
-            icon = R.drawable.ic_offline,
-            title = R.string.offlineFileNoFile,
-            description = R.string.offlineFileNoFileDescription,
-            initialListView = fileRecyclerView
-        )
+    }
+
+    private inner class SetNoFilesLayout : () -> Unit {
+        override fun invoke() {
+            noFilesLayout.setup(
+                icon = R.drawable.ic_offline,
+                title = R.string.offlineFileNoFile,
+                description = R.string.offlineFileNoFileDescription,
+                initialListView = fileRecyclerView
+            )
+        }
     }
 
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {

@@ -102,6 +102,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     protected lateinit var showLoadingTimer: CountDownTimer
     protected open var downloadFiles: (ignoreCache: Boolean, isNewSort: Boolean) -> Unit = DownloadFiles()
     protected open var sortFiles: () -> Unit = SortFiles()
+    protected open var setNoFilesLayout: () -> Unit = SetNoFilesLayout()
     protected open var enabledMultiSelectMode = true
     protected open var hideBackButtonWhenRoot: Boolean = true
     protected open var showPendingFiles = true
@@ -169,10 +170,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             )
         }
 
-        noFilesLayout.setup(title = R.string.noFilesDescription, initialListView = fileRecyclerView) {
-            fileListViewModel.cancelDownloadFiles()
-            downloadFiles(false, false)
-        }
+        setNoFilesLayout()
 
         if ((folderID == ROOT_ID || folderID == OTHER_ROOT_ID) && hideBackButtonWhenRoot) toolbar.navigationIcon = null
         toolbar.setOnMenuItemClickListener { menuItem ->
@@ -772,6 +770,15 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
                 UISettings(requireContext()).sortType = newSortType
                 refreshActivities()
+            }
+        }
+    }
+
+    private inner class SetNoFilesLayout : () -> Unit {
+        override fun invoke() {
+            noFilesLayout.setup(title = R.string.noFilesDescription, initialListView = fileRecyclerView) {
+                fileListViewModel.cancelDownloadFiles()
+                downloadFiles(false, false)
             }
         }
     }
