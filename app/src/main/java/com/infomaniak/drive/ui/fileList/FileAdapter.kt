@@ -71,7 +71,7 @@ open class FileAdapter(
 
     fun getFiles() = fileList
 
-    fun getValidItemsSelected() = if (itemsSelected.isManaged) itemsSelected.filter { it.isValid } else itemsSelected
+    fun getValidItemsSelected() = itemsSelected.filter { it.isUsable() }
 
     fun showLoading() {
         if (!showLoading) {
@@ -327,13 +327,17 @@ open class FileAdapter(
     }
 
     private fun onSelectedFile(file: File, isSelected: Boolean) {
-        when {
-            allSelected -> { // if all selected, unselect everything and only select the clicked one (like web-app)
-                configureAllSelected(false)
-                addSelectedFile(file)
+        if (file.isUsable()) {
+            when {
+                allSelected -> { // if all selected, unselect everything and only select the clicked one (like web-app)
+                    configureAllSelected(false)
+                    addSelectedFile(file)
+                }
+                isSelected -> addSelectedFile(file)
+                else -> removeSelectedFile(file)
             }
-            isSelected -> addSelectedFile(file)
-            else -> removeSelectedFile(file)
+        } else {
+            itemsSelected = RealmList()
         }
         updateMultiSelectMode?.invoke()
     }
@@ -353,9 +357,7 @@ open class FileAdapter(
     }
 
     private fun isSelectedFile(file: File): Boolean {
-        return itemsSelected.find {
-            (it.isManagedAndValidByRealm() || it.isNotManagedByRealm()) && it.id == file.id
-        } != null
+        return itemsSelected.find { it.isUsable() && it.id == file.id } != null
     }
 
     fun toggleOfflineMode(context: Context, isOffline: Boolean) {

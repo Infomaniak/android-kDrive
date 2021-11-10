@@ -564,8 +564,10 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
 
                 fileAdapter.updateFileProgressByFileId(file.id, 100) { _, currentFile ->
-                    currentFile.isOffline = true
-                    currentFile.currentProgress = 0
+                    if (currentFile.isNotManagedByRealm()) {
+                        currentFile.isOffline = true
+                        currentFile.currentProgress = 0
+                    }
                 }
             } else Utils.downloadAsOfflineFile(requireContext(), file)
         }
