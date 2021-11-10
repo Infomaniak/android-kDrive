@@ -64,12 +64,7 @@ class NoItemsLayoutView @JvmOverloads constructor(
 
     fun toggleVisibility(isVisible: Boolean, noNetwork: Boolean = false, showRefreshButton: Boolean = true) {
 
-        if (!isVisible) {
-            this.isGone = true
-            initialListView.isVisible = true
-
-        } else {
-
+        if (isVisible) {
             this.isVisible = true
             initialListView.isGone = true
             noItemsIconLayout.icon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_no_network))
@@ -92,6 +87,9 @@ class NoItemsLayoutView @JvmOverloads constructor(
             } ?: run {
                 noItemsDescription.isGone = true
             }
+        } else {
+            this.isGone = true
+            initialListView.isVisible = true
         }
     }
 }

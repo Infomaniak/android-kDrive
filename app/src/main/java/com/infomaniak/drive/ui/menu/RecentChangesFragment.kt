@@ -30,16 +30,22 @@ class RecentChangesFragment : FileSubTypeListFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         downloadFiles = DownloadFiles()
+        setNoFilesLayout = SetNoFilesLayout()
         folderID = Utils.OTHER_ROOT_ID
         super.onViewCreated(view, savedInstanceState)
 
         sortButton.isGone = true
         collapsingToolbarLayout.title = getString(R.string.lastEditsTitle)
-        noFilesLayout.setup(
-            icon = R.drawable.ic_clock,
-            title = R.string.homeNoActivities,
-            initialListView = fileRecyclerView
-        )
+    }
+
+    private inner class SetNoFilesLayout : () -> Unit {
+        override fun invoke() {
+            noFilesLayout.setup(
+                icon = R.drawable.ic_clock,
+                title = R.string.homeNoActivities,
+                initialListView = fileRecyclerView
+            )
+        }
     }
 
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {

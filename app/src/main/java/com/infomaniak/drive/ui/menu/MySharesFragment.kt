@@ -38,10 +38,10 @@ class MySharesFragment : FileSubTypeListFragment() {
             downloadFiles = DownloadFiles()
             folderID = OTHER_ROOT_ID
         }
+        setNoFilesLayout = SetNoFilesLayout()
         super.onViewCreated(view, savedInstanceState)
 
         collapsingToolbarLayout.title = getString(R.string.mySharesTitle)
-        noFilesLayout.setup(icon = R.drawable.ic_share, title = R.string.mySharesNoFile, initialListView = fileRecyclerView)
 
         fileAdapter.onFileClicked = { file ->
             fileListViewModel.cancelDownloadFiles()
@@ -54,6 +54,16 @@ class MySharesFragment : FileSubTypeListFragment() {
                 val fileList = fileAdapter.getFileObjectsList(mainViewModel.realm)
                 Utils.displayFile(mainViewModel, findNavController(), file, fileList)
             }
+        }
+    }
+
+    private inner class SetNoFilesLayout : () -> Unit {
+        override fun invoke() {
+            noFilesLayout.setup(
+                icon = R.drawable.ic_share,
+                title = R.string.mySharesNoFile,
+                initialListView = fileRecyclerView
+            )
         }
     }
 

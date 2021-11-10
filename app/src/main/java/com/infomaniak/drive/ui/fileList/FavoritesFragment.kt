@@ -37,13 +37,9 @@ class FavoritesFragment : FileListFragment() {
             downloadFiles = DownloadFiles()
             folderID = OTHER_ROOT_ID
         }
+        setNoFilesLayout = SetNoFilesLayout()
         super.onViewCreated(view, savedInstanceState)
 
-        noFilesLayout.setup(
-            icon = R.drawable.ic_star_filled,
-            title = R.string.favoritesNoFile,
-            initialListView = fileRecyclerView
-        )
         collapsingToolbarLayout.title = getString(R.string.favoritesTitle)
         fileAdapter.onFileClicked = { file ->
             if (file.isFolder()) {
@@ -53,6 +49,16 @@ class FavoritesFragment : FileListFragment() {
                 val fileList = fileAdapter.getFileObjectsList(mainViewModel.realm)
                 Utils.displayFile(mainViewModel, findNavController(), file, fileList)
             }
+        }
+    }
+
+    private inner class SetNoFilesLayout : () -> Unit {
+        override fun invoke() {
+            noFilesLayout.setup(
+                icon = R.drawable.ic_star_filled,
+                title = R.string.favoritesNoFile,
+                initialListView = fileRecyclerView
+            )
         }
     }
 

@@ -57,16 +57,12 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                 else -> File(id = folderID, name = folderName, driveId = navigationArgs.driveID)
             }
         )
+        setNoFilesLayout = SetNoFilesLayout()
 
         fileListViewModel.isSharedWithMe = true
         super.onViewCreated(view, savedInstanceState)
 
         collapsingToolbarLayout.title = if (inDriveList) getString(R.string.sharedWithMeTitle) else navigationArgs.folderName
-        noFilesLayout.setup(
-            icon = R.drawable.ic_share,
-            title = R.string.sharedWithMeNoFile,
-            initialListView = fileRecyclerView
-        )
 
         sortButton.isGone = inDriveList
         fileAdapter.onFileClicked = { file ->
@@ -108,6 +104,16 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                 driveID = file.driveId
             )
         )
+    }
+
+    private inner class SetNoFilesLayout : () -> Unit {
+        override fun invoke() {
+            noFilesLayout.setup(
+                icon = R.drawable.ic_share,
+                title = R.string.sharedWithMeNoFile,
+                initialListView = fileRecyclerView
+            )
+        }
     }
 
     private inner class DownloadFiles() : (Boolean, Boolean) -> Unit {
