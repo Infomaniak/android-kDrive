@@ -150,7 +150,7 @@ class UploadInProgressFragment : FileListFragment() {
     private fun whenAnUploadIsDone() {
         if (fileAdapter.fileList.isEmpty()) {
             if (isResumed) noFilesLayout?.toggleVisibility(true)
-            requireActivity().showSnackbar(R.string.allUploadFinishedTitle)
+            activity?.showSnackbar(R.string.allUploadFinishedTitle)
             popBackStack()
         }
     }
