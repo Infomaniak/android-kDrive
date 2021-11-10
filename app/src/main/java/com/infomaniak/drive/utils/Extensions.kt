@@ -299,8 +299,11 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
                     filePreview.loadGlideUrl(file.thumbnail(), file.getFileType().icon)
                 }
                 file.isFromUploads && (file.getMimeType().startsWith("image/") || file.getMimeType().startsWith("video/")) -> {
-                    CoroutineScope(Dispatchers.Default).launch {
-                        filePreview.loadGlide(context.getLocalThumbnail(file), file.getFileType().icon)
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val bitmap = context.getLocalThumbnail(file)
+                        withContext(Dispatchers.Main) {
+                            filePreview.loadGlide(bitmap, file.getFileType().icon)
+                        }
                     }
                 }
                 else -> {
