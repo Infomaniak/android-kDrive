@@ -103,7 +103,7 @@ object FileController {
         val folder = file.localParent?.createSnapshot()?.firstOrNull { it.id > 0 }
         return when {
             folder == null -> ""
-            folder.id == Utils.ROOT_ID -> "/${file.name}"
+            folder.id == Utils.ROOT_ID -> userDrive.driveName ?: "" + "/${file.name}"
             else -> generatePath(folder, userDrive) + "/${file.name}"
         }
     }
