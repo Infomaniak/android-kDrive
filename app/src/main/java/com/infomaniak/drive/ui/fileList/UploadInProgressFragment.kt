@@ -300,6 +300,7 @@ class UploadInProgressFragment : FileListFragment() {
                                         val size = SyncUtils.getFileSize(cursor)
                                         files.add(
                                             File(
+                                                id = uploadFile.uri.hashCode(),
                                                 isFromUploads = true,
                                                 name = uploadFile.fileName,
                                                 path = uploadFile.uri,
@@ -312,6 +313,7 @@ class UploadInProgressFragment : FileListFragment() {
                                 exception.printStackTrace()
                                 files.add(
                                     File(
+                                        id = uploadFile.uri.hashCode(),
                                         isFromUploads = true,
                                         name = uploadFile.fileName,
                                         path = uploadFile.uri,
@@ -329,6 +331,7 @@ class UploadInProgressFragment : FileListFragment() {
                     } else {
                         files.add(
                             File(
+                                id = uploadFile.uri.hashCode(),
                                 isFromUploads = true,
                                 name = uploadFile.fileName,
                                 path = uploadFile.uri,
