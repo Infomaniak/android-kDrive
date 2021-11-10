@@ -458,7 +458,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
-    private fun setupFileAdapter() {
+    protected open fun setupFileAdapter() {
         mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
             fileAdapter.toggleOfflineMode(requireContext(), !isInternetAvailable)
             noNetwork.isGone = isInternetAvailable

@@ -23,6 +23,7 @@ import android.provider.OpenableColumns
 import android.util.Log
 import android.view.View
 import androidx.activity.addCallback
+import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toFile
 import androidx.core.view.isGone
 import androidx.lifecycle.lifecycleScope
@@ -50,7 +51,6 @@ import kotlinx.android.synthetic.main.fragment_new_folder.*
 import kotlinx.android.synthetic.main.item_file_name.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 class UploadInProgressFragment : FileListFragment() {
@@ -63,6 +63,9 @@ class UploadInProgressFragment : FileListFragment() {
 
     private var pendingFiles = arrayListOf<UploadFile>()
     private var uploadFiles: RealmResults<UploadFile>? = null
+    private var isCancelled = false
+    private var progressDialog: AlertDialog? = null
+
 
     private var realmListener: OrderedRealmCollectionChangeListener<RealmResults<UploadFile>>? = null
 
@@ -77,10 +80,6 @@ class UploadInProgressFragment : FileListFragment() {
             }
         }
         super.onViewCreated(view, savedInstanceState)
-        fileAdapter.onFileClicked = null
-        fileAdapter.uploadInProgress = true
-        fileAdapter.checkIsPendingWifi(requireContext())
-        realmListener = createListener()
 
         val fromPendingFolders = findNavController().previousBackStackEntry?.destination?.id == R.id.uploadInProgressFragment
         collapsingToolbarLayout.title =
@@ -124,6 +123,14 @@ class UploadInProgressFragment : FileListFragment() {
         sortLayout.isGone = true
     }
 
+    override fun setupFileAdapter() {
+        super.setupFileAdapter()
+        fileAdapter.onFileClicked = null
+        fileAdapter.uploadInProgress = true
+        fileAdapter.checkIsPendingWifi(requireContext())
+        realmListener = createListener()
+    }
+
     override fun onDestroy() {
         realmListener?.let { uploadFiles?.removeChangeListener(it) }
         realmUpload.close()
@@ -142,17 +149,27 @@ class UploadInProgressFragment : FileListFragment() {
                     }
                     fileAdapter.notifyItemRangeRemoved(range.startIndex, range.length)
                 }
-                whenAnUploadIsDone()
+
+                if (fileAdapter.fileList.isEmpty()) {
+                    if (isCancelled) cancelledByUser() else whenAnUploadIsDone()
+                }
             }
+            progressDialog?.dismiss()
+            isCancelled = false
         }
     }
 
+    private fun cancelledByUser() {
+        progressDialog?.dismiss()
+        val data = Data.Builder().putBoolean(UploadWorker.CANCELLED_BY_USER, true).build()
+        requireContext().syncImmediately(data, true)
+        popBackStack()
+    }
+
     private fun whenAnUploadIsDone() {
-        if (fileAdapter.fileList.isEmpty()) {
-            if (isResumed) noFilesLayout?.toggleVisibility(true)
-            activity?.showSnackbar(R.string.allUploadFinishedTitle)
-            popBackStack()
-        }
+        if (isResumed) noFilesLayout?.toggleVisibility(true)
+        activity?.showSnackbar(R.string.allUploadFinishedTitle)
+        popBackStack()
     }
 
     override fun onRestartItemsClicked() {
@@ -169,14 +186,13 @@ class UploadInProgressFragment : FileListFragment() {
         val title = getString(R.string.uploadInProgressCancelAllUploadTitle)
         Utils.createConfirmation(requireContext(), title) {
             closeItemClicked(folderId = folderID)
-            fileAdapter.setFiles(arrayListOf())
         }
     }
 
     private fun closeItemClicked(uploadFiles: ArrayList<UploadFile>? = null, folderId: Int? = null) {
 
-        val progressDialog = Utils.createProgressDialog(requireContext(), R.string.allCancellationInProgress)
-
+        progressDialog = Utils.createProgressDialog(requireContext(), R.string.allCancellationInProgress)
+        isCancelled = true
         lifecycleScope.launch(Dispatchers.IO) {
             uploadFiles?.let { UploadFile.deleteAll(uploadFiles) }
             folderId?.let {
@@ -184,15 +200,6 @@ class UploadInProgressFragment : FileListFragment() {
                     UploadFile.deleteAll(null)
                 } else {
                     folderId.let { UploadFile.deleteAll(folderId) }
-                }
-            }
-
-            withContext(Dispatchers.Main) {
-                lifecycleScope.launchWhenResumed {
-                    progressDialog.dismiss()
-                    val data = Data.Builder().putBoolean(UploadWorker.CANCELLED_BY_USER, true).build()
-                    requireContext().syncImmediately(data, true)
-                    popBackStack()
                 }
             }
         }
