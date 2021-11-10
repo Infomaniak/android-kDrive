@@ -113,6 +113,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
             // Start uploads
             val result = startSyncFiles()
+
             // Check if need to re-sync
             checkIfNeedReSync(appSyncSettings)
 
@@ -282,7 +283,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private suspend fun checkLocalLastMedias(syncSettings: SyncSettings) = withContext(Dispatchers.IO) {
         val lastUploadDate = UploadFile.getLastDate(applicationContext).time - CHECK_LOCAL_LAST_MEDIAS_DELAY
-        val selection = "(" + SyncUtils.DATE_TAKEN + " >= ? OR " + MediaStore.MediaColumns.DATE_ADDED + " >= ? " +
+        val selection = "( ${SyncUtils.DATE_TAKEN} >= ? " +
+                "OR ${MediaStore.MediaColumns.DATE_ADDED} >= ? " +
                 "OR ${MediaStore.MediaColumns.DATE_MODIFIED} = ? )"
         val args = arrayOf(lastUploadDate.toString(), (lastUploadDate / 1000).toString(), (lastUploadDate / 1000).toString())
         var customSelection: String
@@ -333,7 +335,9 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         args: Array<String>,
         mediaFolder: MediaFolder
     ) = async {
-        val sortOrder = SyncUtils.DATE_TAKEN + " ASC, " + MediaStore.MediaColumns.DATE_ADDED + " ASC, " +
+
+        val sortOrder = SyncUtils.DATE_TAKEN + " ASC, " +
+                MediaStore.MediaColumns.DATE_ADDED + " ASC, " +
                 MediaStore.MediaColumns.DATE_MODIFIED + " ASC"
 
         contentResolver.query(contentUri, null, selection, args, sortOrder)
