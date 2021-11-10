@@ -55,9 +55,11 @@ class UploadInProgressFragment : FileListFragment() {
 
     private lateinit var realm: Realm
     private lateinit var drivePermissions: DrivePermissions
+
+    override var enableStableIds: Boolean = false
     override var enabledMultiSelectMode: Boolean = false
     override var hideBackButtonWhenRoot: Boolean = false
-    override var showPendingFiles = false
+    override var showPendingFiles: Boolean = false
 
     private var pendingFiles = arrayListOf<UploadFile>()
     private var uploadFiles: RealmResults<UploadFile>? = null

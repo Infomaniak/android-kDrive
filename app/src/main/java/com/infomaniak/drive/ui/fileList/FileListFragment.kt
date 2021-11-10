@@ -102,10 +102,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     protected lateinit var showLoadingTimer: CountDownTimer
     protected open var downloadFiles: (ignoreCache: Boolean, isNewSort: Boolean) -> Unit = DownloadFiles()
     protected open var sortFiles: () -> Unit = SortFiles()
+    protected open var allowCancellation = true
+    protected open var enableStableIds = true
     protected open var enabledMultiSelectMode = true
     protected open var hideBackButtonWhenRoot: Boolean = true
     protected open var showPendingFiles = true
-    protected open var allowCancellation = true
 
     protected var userDrive: UserDrive? = null
 
@@ -473,7 +474,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         fileAdapter = FileAdapter(FileController.emptyList(mainViewModel.realm))
         fileAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
-        fileAdapter.setHasStableIds(true)
+        fileAdapter.setHasStableIds(enableStableIds)
         fileAdapter.onFileClicked = { file ->
             if (file.isManagedAndValidByRealm() || file.isNotManagedByRealm()) {
                 if (file.isFolder()) openFolder(file) else displayFile(file)
