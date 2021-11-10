@@ -646,7 +646,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun showPendingFiles() {
-        if (!showPendingFiles) return
+        val isNotCurrentDriveRoot = folderID == ROOT_ID && findNavController().currentDestination?.id != R.id.fileListFragment
+        if (!showPendingFiles || isNotCurrentDriveRoot) return
         fileListViewModel.getPendingFilesCount(folderID).observe(viewLifecycleOwner) { pendingFilesCount ->
             uploadFileInProgress.updateUploadFileInProgress(pendingFilesCount)
         }
