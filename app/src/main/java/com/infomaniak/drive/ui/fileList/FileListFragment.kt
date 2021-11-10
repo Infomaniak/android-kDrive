@@ -184,6 +184,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             if (fileAdapter.multiSelectMode) {
                 closeMultiSelect()
+            } else {
+                findNavController().popBackStack()
             }
         }
 

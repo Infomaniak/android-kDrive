@@ -33,10 +33,6 @@
             android:name="folderName"
             android:defaultValue="/"
             app:argType="string" />
-        <argument
-            android:name="ignoreCreateFolderStack"
-            android:defaultValue="false"
-            app:argType="boolean" />
         <action
             android:id="@+id/fileListFragmentToFileListFragment"
             app:destination="@id/selectFolderFragment"
