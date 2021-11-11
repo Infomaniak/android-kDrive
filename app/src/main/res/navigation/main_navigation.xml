@@ -59,10 +59,6 @@
             android:name="folderName"
             android:defaultValue="/"
             app:argType="string" />
-        <argument
-            android:name="ignoreCreateFolderStack"
-            android:defaultValue="false"
-            app:argType="boolean" />
         <action
             android:id="@+id/action_fileListFragment_to_previewSliderFragment"
             app:destination="@id/previewSliderFragment" />
@@ -580,9 +576,6 @@
         android:label="CreatePrivateFolderFragment"
         tools:layout="@layout/fragment_create_folder">
         <action
-            android:id="@+id/action_createPrivateFolderFragment_to_fileListFragment"
-            app:destination="@id/fileListFragment" />
-        <action
             android:id="@+id/action_createPrivateFolderFragment_to_fileShareDetailsFragment"
             app:destination="@id/fileShareDetailsFragment" />
     </fragment>
@@ -592,9 +585,6 @@
         android:name="com.infomaniak.drive.ui.addFiles.CreateCommonFolderFragment"
         android:label="CreateCommonFolderFragment"
         tools:layout="@layout/fragment_create_folder">
-        <action
-            android:id="@+id/action_createCommonFolderFragment_to_fileListFragment"
-            app:destination="@id/fileListFragment" />
         <action
             android:id="@+id/action_createCommonFolderFragment_to_fileShareDetailsFragment"
             app:destination="@id/fileShareDetailsFragment" />

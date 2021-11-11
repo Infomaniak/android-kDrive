@@ -88,8 +88,7 @@ class SelectFolderFragment : FileListFragment() {
                         safeNavigate(
                             SelectFolderFragmentDirections.fileListFragmentToFileListFragment(
                                 folderID = file.id,
-                                folderName = file.name,
-                                ignoreCreateFolderStack = false
+                                folderName = file.name
                             )
                         )
                     }

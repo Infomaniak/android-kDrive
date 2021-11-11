@@ -94,7 +94,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private var currentFolder: File? = null
 
     private lateinit var activitiesRefreshTimer: CountDownTimer
-    private var ignoreCreateFolderStack: Boolean = false
     private var isDownloading = false
     private var isLoadingActivities = false
     private var retryLoadingActivities = false
@@ -133,7 +132,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     ): View {
         folderID = navigationArgs.folderID
         folderName = if (folderID == ROOT_ID) AccountUtils.getCurrentDrive()?.name ?: "/" else navigationArgs.folderName
-        ignoreCreateFolderStack = navigationArgs.ignoreCreateFolderStack
         return inflater.inflate(R.layout.fragment_file_list, container, false)
     }
 
@@ -181,15 +179,13 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
             true
         }
-        toolbar.setNavigationOnClickListener {
-            Utils.ignoreCreateFolderBackStack(findNavController(), ignoreCreateFolderStack)
-        }
+        toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             if (fileAdapter.multiSelectMode) {
                 closeMultiSelect()
             } else {
-                Utils.ignoreCreateFolderBackStack(findNavController(), ignoreCreateFolderStack)
+                findNavController().popBackStack()
             }
         }
 
@@ -211,7 +207,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             val workInfo = it.firstOrNull() ?: return@observe
             val isUploaded = workInfo.progress.getBoolean(UploadWorker.IS_UPLOADED, false)
             val remoteFolderId = workInfo.progress.getInt(UploadWorker.REMOTE_FOLDER_ID, 0)
-
 
             if (remoteFolderId == folderID && isUploaded) {
                 when {
