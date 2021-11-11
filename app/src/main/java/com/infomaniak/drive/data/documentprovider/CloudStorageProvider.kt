@@ -58,7 +58,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import okhttp3.OkHttpClient
 import java.io.IOException
 import java.net.URLEncoder
 import java.util.*
@@ -321,8 +320,7 @@ class CloudStorageProvider : DocumentsProvider() {
         var parcel: ParcelFileDescriptor? = null
 
         try {
-            val okHttpClient: OkHttpClient
-            runBlocking { okHttpClient = KDriveHttpClient.getHttpClient(userId.toInt()) }
+            val okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(userId.toInt()) }
             val response = DownloadWorker.downloadFileResponse(file.thumbnail(), okHttpClient) {}
 
             if (response.isSuccessful) {
@@ -333,9 +331,12 @@ class CloudStorageProvider : DocumentsProvider() {
                 parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
             }
 
-        } catch (e: Exception) {
-            e.printStackTrace()
-            if (outputFile.exists()) parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+
+            if (outputFile.exists()) {
+                parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
+            }
         }
 
         return parcel
