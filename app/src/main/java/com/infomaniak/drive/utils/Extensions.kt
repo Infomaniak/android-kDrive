@@ -34,8 +34,6 @@ import android.graphics.Color
 import android.graphics.Point
 import android.graphics.drawable.Drawable
 import android.media.ThumbnailUtils
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -761,15 +759,3 @@ fun Context.shareText(text: String) {
     }
     ContextCompat.startActivity(this, Intent.createChooser(intent, null), null)
 }
-
-fun Context?.hasInternet(): Boolean =
-    this?.let {
-        (it.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).run {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                val netInfo = activeNetworkInfo
-                netInfo != null && netInfo.isConnected
-            } else {
-                getNetworkCapabilities(activeNetwork)?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            }
-        }
-    } ?: false

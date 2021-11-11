@@ -586,7 +586,6 @@ class CloudStorageProvider : DocumentsProvider() {
         }
 
         val mimetype = if (file == null || file.isFolder()) {
-            // flags = flags or DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE
             DocumentsContract.Document.MIME_TYPE_DIR
         } else file.getMimeType()
 
