@@ -23,13 +23,11 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.graphics.Point
 import android.net.Uri
-import android.os.Build
-import android.os.CancellationSignal
-import android.os.Handler
-import android.os.ParcelFileDescriptor
+import android.os.*
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
 import android.util.Log
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import com.infomaniak.drive.R
@@ -43,11 +41,15 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.KDriveHttpClient
+import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
+import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.ApiController
+import com.infomaniak.lib.core.utils.hasPermissions
 import io.realm.Realm
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -62,8 +64,6 @@ import java.net.URLEncoder
 import java.util.*
 
 class CloudStorageProvider : DocumentsProvider() {
-
-    private lateinit var cacheDir: java.io.File
 
     override fun onCreate(): Boolean {
         Log.d(TAG, "onCreate")
@@ -98,6 +98,8 @@ class CloudStorageProvider : DocumentsProvider() {
 
     override fun queryDocument(documentId: String, projection: Array<out String>?): Cursor {
         Log.d(TAG, "queryDocument(), documentId=$documentId")
+
+        showSyncPermissionNotification()
 
         return MatrixCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION).apply {
             val userId = getUserId(documentId)
@@ -587,6 +589,26 @@ class CloudStorageProvider : DocumentsProvider() {
         }
     }
 
+    private fun showSyncPermissionNotification() {
+        context?.let { ctx ->
+
+            // If we don't have the permissions, notify the user
+            if (!ctx.hasPermissions(DrivePermissions.permissions)) {
+
+                // Cancel previous notification
+                previousNotifID?.let { ctx.cancelNotification(it) }
+                val newNotifID = UUID.randomUUID().hashCode()
+                previousNotifID = newNotifID
+
+                // Display new notification
+                ctx.showGeneralNotification(ctx.getString(R.string.uploadPermissionError)).apply {
+                    setContentText(ctx.getString(R.string.cloudStorageMissingPermissionNotifDescription))
+                    NotificationManagerCompat.from(ctx).notify(newNotifID, build())
+                }
+            }
+        }
+    }
+
     private fun MatrixCursor.addRoot(rootId: String, documentId: String, summary: String) {
         val flags = DocumentsContract.Root.FLAG_SUPPORTS_CREATE or
                 DocumentsContract.Root.FLAG_SUPPORTS_RECENTS or
@@ -699,6 +721,10 @@ class CloudStorageProvider : DocumentsProvider() {
         private var oldSearchCursor: DocumentCursor? = null
 
         private var needRefresh: Boolean = false
+
+        private lateinit var cacheDir: java.io.File
+
+        private var previousNotifID: Int? = null
 
         private val DEFAULT_ROOT_PROJECTION = arrayOf(
             DocumentsContract.Root.COLUMN_ROOT_ID,
