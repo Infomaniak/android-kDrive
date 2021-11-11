@@ -118,6 +118,8 @@ open class File(
 
     fun isNotManagedByRealm() = !isManaged
 
+    fun isUsable() = isManagedAndValidByRealm() || isNotManagedByRealm()
+
     fun isFolder(): Boolean {
         return type == "dir"
     }
