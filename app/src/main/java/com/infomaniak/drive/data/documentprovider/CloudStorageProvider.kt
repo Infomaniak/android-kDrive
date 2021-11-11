@@ -50,6 +50,8 @@ import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.ApiController
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import io.realm.Realm
+import io.sentry.Sentry
+import io.sentry.SentryLevel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -237,36 +239,12 @@ class CloudStorageProvider : DocumentsProvider() {
         val userDrive = createUserDrive(documentId)
         val file = FileController.getFileById(fileId, userDrive)
 
-        return if (file != null) {
+        return file?.let {
             if (isWrite) {
-                val parentFile = FileController.getParentFile(file.id, userDrive) ?: return null
-                val tempFile = createTempFile(parentFile.id, file.name)
-                val handler = Handler(context.mainLooper)
-                ParcelFileDescriptor.open(tempFile, accessMode, handler) { exception: IOException? ->
-                    if (exception == null) {
-                        CoroutineScope(Dispatchers.IO).launch {
-                            UploadFile(
-                                uri = tempFile.toUri().toString(),
-                                driveId = userDrive.driveId,
-                                fileCreatedAt = Date(),
-                                fileName = file.name,
-                                fileSize = tempFile.length(),
-                                remoteFolder = parentFile.id,
-                                type = UploadFile.Type.CLOUD_STORAGE.name,
-                                userId = userDrive.userId,
-                            ).store()
-                            syncRefreshTimer.cancel()
-                            syncRefreshTimer.start()
-                        }
-                    } else {
-                        exception.printStackTrace()
-                    }
-                }
+                writeDataFile(context, file, userDrive, accessMode)
             } else {
                 getDataFile(context, file, userDrive, accessMode)
             }
-        } else {
-            null
         }
     }
 
@@ -539,6 +517,74 @@ class CloudStorageProvider : DocumentsProvider() {
         return java.io.File(tempFileFolder, displayName).apply { if (!exists()) createNewFile() }
     }
 
+    private fun writeDataFile(context: Context, file: File, userDrive: UserDrive, accessMode: Int): ParcelFileDescriptor? {
+        val parentFileId = FileController.getParentFile(file.id, userDrive)?.id ?: return null
+        val tempFile = createTempFile(parentFileId, file.name)
+        val handler = Handler(context.mainLooper)
+
+        return ParcelFileDescriptor.open(tempFile, accessMode, handler) { exception: IOException? ->
+            if (exception == null) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    UploadFile(
+                        uri = tempFile.toUri().toString(),
+                        driveId = userDrive.driveId,
+                        fileCreatedAt = Date(),
+                        fileName = file.name,
+                        fileSize = tempFile.length(),
+                        remoteFolder = parentFileId,
+                        type = UploadFile.Type.CLOUD_STORAGE.name,
+                        userId = userDrive.userId,
+                    ).store()
+                    syncRefreshTimer.cancel()
+                    syncRefreshTimer.start()
+                }
+            } else {
+                exception.printStackTrace()
+                Sentry.withScope { scope ->
+                    scope.level = SentryLevel.INFO
+                    scope.setExtra("tempFile path", tempFile.path)
+                    Sentry.captureException(exception)
+                }
+            }
+        }
+    }
+
+    private fun getDataFile(context: Context, file: File, userDrive: UserDrive, accessMode: Int): ParcelFileDescriptor? {
+        val cacheFile = file.getCacheFile(context, userDrive)
+        val offlineFile = file.getOfflineFile(context, userDrive.userId)
+
+        try {
+            // Get offline file if it's intact
+            if (offlineFile != null && file.isOfflineAndIntact(offlineFile)) {
+                return ParcelFileDescriptor.open(offlineFile, accessMode)
+            }
+
+            // Get cache file if it's exists and if the file is updated
+            if (!file.isObsolete(cacheFile) && file.size == cacheFile.length()) {
+                return ParcelFileDescriptor.open(cacheFile, accessMode)
+            }
+
+            // Download data file
+            val okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(userDrive.userId) }
+            val response = DownloadWorker.downloadFileResponse(
+                fileUrl = ApiRoutes.downloadFile(file),
+                okHttpClient = okHttpClient
+            ) { progress ->
+                Log.i(TAG, "open currentProgress: $progress")
+            }
+
+            if (response.isSuccessful) {
+                DownloadWorker.saveRemoteData(response, cacheFile)
+                cacheFile.setLastModified(file.getLastModifiedInMilliSecond())
+                return ParcelFileDescriptor.open(cacheFile, accessMode)
+            }
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+        }
+
+        return null
+    }
+
     private fun scheduleRefresh(sourceParentDocumentId: String? = currentParentDocumentId) {
         sourceParentDocumentId?.let {
             needRefresh = true
@@ -716,41 +762,6 @@ class CloudStorageProvider : DocumentsProvider() {
                 "_size DESC" -> File.SortType.BIGGER
                 else -> File.SortType.NAME_AZ
             }
-        }
-
-        private fun getDataFile(
-            context: Context,
-            file: File,
-            userDrive: UserDrive,
-            accessMode: Int
-        ): ParcelFileDescriptor? {
-            val cacheFile = file.getCacheFile(context, userDrive)
-            val offlineFile = file.getOfflineFile(context, userDrive.userId)
-
-            try {
-                if (offlineFile != null && file.isOfflineAndIntact(offlineFile))
-                    return ParcelFileDescriptor.open(offlineFile, accessMode)
-                if (!file.isObsolete(cacheFile) && file.size == cacheFile.length())
-                    return ParcelFileDescriptor.open(cacheFile, accessMode)
-
-                val okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(userDrive.userId) }
-                val response = DownloadWorker.downloadFileResponse(
-                    ApiRoutes.downloadFile(file),
-                    okHttpClient
-                ) { progress ->
-                    Log.i(TAG, "open currentProgress: $progress")
-                }
-
-                if (response.isSuccessful) {
-                    DownloadWorker.saveRemoteData(response, cacheFile)
-                    cacheFile.setLastModified(file.getLastModifiedInMilliSecond())
-                    return ParcelFileDescriptor.open(cacheFile, accessMode)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-
-            return null
         }
 
         fun createShareFileUri(context: Context, file: File, userDrive: UserDrive = UserDrive()): Uri? {
