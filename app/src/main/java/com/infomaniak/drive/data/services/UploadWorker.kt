@@ -114,7 +114,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             // Start uploads
             val result = startSyncFiles()
             // Check if need to re-sync
-            appSyncSettings?.let { checkIfNeedReSync(it) }
+            checkIfNeedReSync(appSyncSettings)
 
             result
         } catch (exception: UploadTask.FolderNotFoundException) {
@@ -264,8 +264,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private suspend fun checkIfNeedReSync(syncSettings: SyncSettings) {
-        checkLocalLastMedias(syncSettings)
+    private suspend fun checkIfNeedReSync(syncSettings: SyncSettings?) {
+        syncSettings?.let { checkLocalLastMedias(it) }
         if (UploadFile.getAllPendingUploadsCount() > 0) {
             val data = Data.Builder().putInt(LAST_UPLOADED_COUNT, uploadedCount).build()
             applicationContext.syncImmediately(data, true)
