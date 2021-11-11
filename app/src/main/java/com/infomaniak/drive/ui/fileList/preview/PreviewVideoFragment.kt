@@ -133,7 +133,6 @@ open class PreviewVideoFragment : PreviewFragment() {
             playWhenReady = false
 
             playerView.player = this
-            playerView.setControlDispatcher(DefaultControlDispatcher())
             playerView.controllerShowTimeoutMs = 1000
             playerView.controllerHideOnTouch = false
 
