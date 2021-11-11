@@ -300,18 +300,16 @@ class CloudStorageProvider : DocumentsProvider() {
 
         val fileId = getFileIdFromDocumentId(documentId)
         val userId = getUserId(documentId)
-        var parcel: ParcelFileDescriptor? = null
 
-        FileController.getRealmInstance(createUserDrive(documentId)).use { realm ->
+        return FileController.getRealmInstance(createUserDrive(documentId)).use { realm ->
+
             FileController.getFileProxyById(fileId, customRealm = realm)?.let { file ->
-                parcel = generateThumbnail(fileId, file, userId)
-            }
-        }
 
-        return if (parcel == null) {
-            super.openDocumentThumbnail(documentId, sizeHint, signal)
-        } else {
-            AssetFileDescriptor(parcel, 0, AssetFileDescriptor.UNKNOWN_LENGTH)
+                generateThumbnail(fileId, file, userId)?.let { parcel ->
+                    AssetFileDescriptor(parcel, 0, AssetFileDescriptor.UNKNOWN_LENGTH)
+                }
+
+            } ?: super.openDocumentThumbnail(documentId, sizeHint, signal)
         }
     }
 
