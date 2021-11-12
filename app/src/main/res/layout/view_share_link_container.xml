@@ -82,7 +82,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/titleContainer"
-        tools:text="@string/shareLinkRestrictedRightFileDescription" />
+        tools:text="@string/shareLinkRestrictedRightDescription" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/shareLinkBottomContainer"

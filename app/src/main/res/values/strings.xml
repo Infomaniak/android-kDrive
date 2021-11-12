@@ -36,7 +36,7 @@
     <string name="accessDeniedTitle">You’re not authorised to access this folder.</string>
     <string name="addCategoriesTitle">Add categories</string>
     <string name="addFileSelectUploadFile">Select a file to upload</string>
-    <string name="addPassword">Add a password</string>
+    <string name="addPassword">Protect with a password</string>
     <string name="alertRemoveUserDescription">Are you sure you want to remove the user “%s” from this application?</string>
     <string name="alertRemoveUserTitle">Remove user</string>
     <string name="allActivated">Enabled</string>
@@ -45,7 +45,7 @@
     <string name="allAllDriveUsers">All kDrive users</string>
     <string name="allArchive">Archives</string>
     <string name="allAudio">Audios</string>
-    <string name="allCancellationInProgress">Cancellation in progress …</string>
+    <string name="allCancellationInProgress">Cancellation in progress…</string>
     <string name="allCode">Code</string>
     <string name="allDeletedFilePattern">\'Deleted on \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Disabled</string>
@@ -70,7 +70,7 @@
     <string name="allOfficeNote">Text</string>
     <string name="allOfficePoints">Presentation</string>
     <string name="allPackAvailability">Available for %s plans only 🚀</string>
-    <string name="allPasswordHint">Set a password</string>
+    <string name="allPasswordHint">Password</string>
     <string name="allPathTitle">Location</string>
     <string name="allPdf">PDF</string>
     <string name="allPermissionNeeded">You must allow access to your files to be able to upload and save them</string>
@@ -235,6 +235,8 @@
     <string name="dropBoxResultDescription">Share the link below with people who need to send you files.</string>
     <string name="dropBoxResultTitle">Share the drop box %s</string>
     <string name="dropBoxTitle">Drop box</string>
+    <string name="dropboxSharedLinkDescription">You cannot create a share link on a drop box.</string>
+    <string name="dropboxSharedLinkTitle">Dropbox sharing link</string>
     <string name="editCategoryInfoDescription">The modification will be visible to all kDrive users who have access to the categories.</string>
     <string name="editCategoryTitle">Edit a category</string>
     <string name="errorAddComment">Error when adding comment</string>
@@ -309,6 +311,7 @@
     </plurals>
     <string name="fileDetailsActivitiesTitle">Activity</string>
     <string name="fileDetailsActivityFileAccess">accessed the file</string>
+    <string name="fileDetailsActivityFileCategorize">added a category to the element</string>
     <string name="fileDetailsActivityFileCommentCreate">commented the file</string>
     <string name="fileDetailsActivityFileCommentDelete">deleted their comment</string>
     <string name="fileDetailsActivityFileCommentLike">liked a comment</string>
@@ -329,6 +332,7 @@
     <string name="fileDetailsActivityFileShareLinkUpdate">changed the file sharing link</string>
     <string name="fileDetailsActivityFileShareUpdate">changed the file sharing</string>
     <string name="fileDetailsActivityFileTrash">moved the file to the trash</string>
+    <string name="fileDetailsActivityFileUncategorize">removed a category from the element</string>
     <string name="fileDetailsActivityFileUpdate">modified the file</string>
     <string name="fileDetailsActivityFolderAccess">accessed the folder</string>
     <string name="fileDetailsActivityFolderCommentCreate">commented the folder</string>
@@ -401,7 +405,7 @@
     <string name="fileShareFileTitle">Share file</string>
     <string name="fileShareFolderTitle">Share folder</string>
     <string name="fileShareLinkSettingsAccessRightTitle">Editing rights</string>
-    <string name="fileShareLinkSettingsTitle">Advanced settings</string>
+    <string name="fileShareLinkSettingsTitle">Advanced sharing link settings</string>
     <string name="fileTypeFilterTitle">File type</string>
     <string name="filtersTitle">Filters</string>
     <string name="folderDescription">Private or shared folder</string>
@@ -534,18 +538,23 @@
     <string name="shareFileInputUserAndEmail">Invite a user or an email address…</string>
     <string name="shareLinkOfficePermissionReadFileDescription">Users can only view the document.</string>
     <string name="shareLinkOfficePermissionReadFolderDescription">Users can only view files within the shared folder.</string>
-    <string name="shareLinkOfficePermissionReadTitle">View</string>
+    <string name="shareLinkOfficePermissionReadTitle">Consult</string>
     <string name="shareLinkOfficePermissionWriteFileDescription">Users can modify the document.</string>
     <string name="shareLinkOfficePermissionWriteFolderDescription">Users can edit the document, spreadsheet or presentation file(s).</string>
     <string name="shareLinkOfficePermissionWriteTitle">Modify</string>
-    <string name="shareLinkPasswordRightFileDescription">Anyone who has the link will have to enter a password to access the file.</string>
-    <string name="shareLinkPasswordRightFolderDescription">Anyone who has the link will have to enter a password to access the folder.</string>
+    <string name="shareLinkPasswordRightDescription">Anyone who has the link will have to enter a password to access the %s.</string>
     <string name="shareLinkPasswordRightTitle">With password</string>
-    <string name="shareLinkPublicRightFileDescription">Everyone who has the link can access the file.</string>
-    <string name="shareLinkPublicRightFolderDescription">Everyone who has the link can access the folder.</string>
+    <string name="shareLinkPublicRightDescription">Everyone who has the link can %1$s this %3$s%2$s%4$s.</string>
+    <string name="shareLinkPublicRightDescriptionDate">\u0020until %s</string>
+    <string name="shareLinkPublicRightDescriptionPassword">password-protected\u0020</string>
+    <string name="shareLinkPublicRightDocumentDescriptionShort">Everyone who has the link can access the document.</string>
+    <string name="shareLinkPublicRightFileDescriptionShort">Everyone who has the link can access the file.</string>
+    <string name="shareLinkPublicRightFolderDescriptionShort">Everyone who has the link can access the folder.</string>
     <string name="shareLinkPublicRightTitle">Public</string>
-    <string name="shareLinkRestrictedRightFileDescription">Only added users can access the file.</string>
-    <string name="shareLinkRestrictedRightFolderDescription">Only added users can access the folder.</string>
+    <string name="shareLinkRestrictedRightDescription">Only the users added can access this %s according to their rights.</string>
+    <string name="shareLinkRestrictedRightDocumentDescriptionShort">Only the users added can access the document.</string>
+    <string name="shareLinkRestrictedRightFileDescriptionShort">Only the users added can access the file.</string>
+    <string name="shareLinkRestrictedRightFolderDescriptionShort">Only added users can access the folder.</string>
     <string name="shareLinkRestrictedRightTitle">Restricted</string>
     <string name="shareLinkSettingsAddExpirationDateDescription">The share link will only work until the expiry date.</string>
     <string name="shareLinkSettingsAllowDownloadDescription">Users will be able to download files using this link.</string>
@@ -554,6 +563,9 @@
     <string name="shareLinkSettingsBlockCommentsTitle">Enable this option to prevent users from reading comments</string>
     <string name="shareLinkSettingsBlockUsersConsultDescription">Users with access to the files will not be able to read any comments.</string>
     <string name="shareLinkSettingsBlockUsersConsultTitle">Enable this option to prevent users from seeing who is viewing the files</string>
+    <string name="shareLinkTypeDocument">document</string>
+    <string name="shareLinkTypeFile">file</string>
+    <string name="shareLinkTypeFolder">folder</string>
     <string name="shareUserExternal">kDrive external user</string>
     <string name="shareUserNotAccepted">The user hasn’t yet accepted the share and is an external user of the kDrive.</string>
     <plurals name="shareUsersCount">

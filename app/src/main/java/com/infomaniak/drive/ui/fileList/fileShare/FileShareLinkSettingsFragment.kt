@@ -135,13 +135,16 @@ class FileShareLinkSettingsFragment : Fragment() {
                 newPasswordButton.isVisible = true
                 addPasswordSwitch.isChecked = true
             }
-
-            val passwordDescriptor = if (shareViewModel.currentFile.value?.isFolder() == true) {
-                R.string.shareLinkPasswordRightFolderDescription
-            } else {
-                R.string.shareLinkPasswordRightFileDescription
-            }
-            addPasswordDescription.setText(passwordDescriptor)
+            addPasswordDescription.text = getString(
+                R.string.shareLinkPasswordRightDescription,
+                context?.getString(
+                    when {
+                        navigationArgs.isFolder -> R.string.shareLinkTypeFolder
+                        navigationArgs.isOnlyOfficeFile -> R.string.shareLinkTypeDocument
+                        else -> R.string.shareLinkTypeFile
+                    }
+                )
+            )
 
             addExpirationDateSwitch.isChecked = shareLink.validUntil != null
             expirationDateInput.init(fragmentManager = parentFragmentManager, defaultCalendarTimestamp) {

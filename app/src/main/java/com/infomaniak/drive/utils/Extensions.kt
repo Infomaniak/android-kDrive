@@ -759,3 +759,12 @@ fun Context.shareText(text: String) {
     }
     ContextCompat.startActivity(this, Intent.createChooser(intent, null), null)
 }
+
+fun File.getTypeName(context: Context): String =
+    context.getString(
+        when {
+            isFolder() -> R.string.shareLinkTypeFolder
+            onlyoffice -> R.string.shareLinkTypeDocument
+            else -> R.string.shareLinkTypeFile
+        }
+    )

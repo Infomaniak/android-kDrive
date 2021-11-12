@@ -27,7 +27,7 @@
     <string name="accessDeniedTitle">No tienes autorización para acceder a esta carpeta.</string>
     <string name="addCategoriesTitle">Añadir categorías</string>
     <string name="addFileSelectUploadFile">Seleccionar un archivo para importar</string>
-    <string name="addPassword">Añadir una contraseña</string>
+    <string name="addPassword">Proteger mediante contraseña</string>
     <string name="alertRemoveUserDescription">¿Estás seguro/a de que deseas retirar al usuario “%s” de esta aplicación?</string>
     <string name="alertRemoveUserTitle">Retirar al usuario</string>
     <string name="allActivated">Activado</string>
@@ -36,7 +36,7 @@
     <string name="allAllDriveUsers">Todos los usuarios del kDrive</string>
     <string name="allArchive">Registros</string>
     <string name="allAudio">Audios</string>
-    <string name="allCancellationInProgress">Anulación en curso ...</string>
+    <string name="allCancellationInProgress">Anulación en curso…</string>
     <string name="allCode">Código</string>
     <string name="allDeletedFilePattern">\'Eliminado el \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Desactivado</string>
@@ -61,7 +61,7 @@
     <string name="allOfficeNote">Texto</string>
     <string name="allOfficePoints">Presentación</string>
     <string name="allPackAvailability">Disponible únicamente para los planes %s 🚀</string>
-    <string name="allPasswordHint">Establecer una contraseña</string>
+    <string name="allPasswordHint">Contraseña</string>
     <string name="allPathTitle">Emplazamiento</string>
     <string name="allPdf">PDF</string>
     <string name="allPermissionNeeded">Debes autorizar el acceso a tus archivos para poder importarlos y guardarlos</string>
@@ -226,6 +226,8 @@
     <string name="dropBoxResultDescription">Comparte el siguiente enlace con las personas que deban enviarte archivos.</string>
     <string name="dropBoxResultTitle">Compartir el buzón de depósito %s</string>
     <string name="dropBoxTitle">Buzón de depósito</string>
+    <string name="dropboxSharedLinkDescription">No puedes crear un enlace de uso compartido para un buzón de depósito.</string>
+    <string name="dropboxSharedLinkTitle">Enlace para compartir en el buzón de depósito</string>
     <string name="editCategoryInfoDescription">El cambio será visible para todos los usuarios del kDrive con acceso a las categorías.</string>
     <string name="editCategoryTitle">Modificar una categoría</string>
     <string name="errorAddComment">Error al agregar el comentario</string>
@@ -300,6 +302,7 @@
     </plurals>
     <string name="fileDetailsActivitiesTitle">Actividad</string>
     <string name="fileDetailsActivityFileAccess">ha consultado el archivo</string>
+    <string name="fileDetailsActivityFileCategorize">ha añadido una categoría al elemento</string>
     <string name="fileDetailsActivityFileCommentCreate">ha comentado el archivo</string>
     <string name="fileDetailsActivityFileCommentDelete">ha eliminado su comentario</string>
     <string name="fileDetailsActivityFileCommentLike">le ha gustado un comentario</string>
@@ -320,6 +323,7 @@
     <string name="fileDetailsActivityFileShareLinkUpdate">ha modificado el enlace de uso compartido del archivo</string>
     <string name="fileDetailsActivityFileShareUpdate">ha modificado el uso compartido del archivo</string>
     <string name="fileDetailsActivityFileTrash">ha movido el archivo a la papelera</string>
+    <string name="fileDetailsActivityFileUncategorize">ha eliminado una categoría del elemento</string>
     <string name="fileDetailsActivityFileUpdate">ha modificado el archivo</string>
     <string name="fileDetailsActivityFolderAccess">ha consultado la carpeta</string>
     <string name="fileDetailsActivityFolderCommentCreate">ha comentado la carpeta</string>
@@ -392,7 +396,7 @@
     <string name="fileShareFileTitle">Compartir el archivo</string>
     <string name="fileShareFolderTitle">Compartir la carpeta</string>
     <string name="fileShareLinkSettingsAccessRightTitle">Derechos de edición</string>
-    <string name="fileShareLinkSettingsTitle">Configuración avanzada</string>
+    <string name="fileShareLinkSettingsTitle">Parámetros avanzados del enlace de uso compartido</string>
     <string name="fileTypeFilterTitle">Tipo de archivo</string>
     <string name="filtersTitle">Filtros</string>
     <string name="folderDescription">Carpeta privada o compartida</string>
@@ -529,14 +533,19 @@
     <string name="shareLinkOfficePermissionWriteFileDescription">Los usuarios pueden modificar el documento.</string>
     <string name="shareLinkOfficePermissionWriteFolderDescription">Los usuarios pueden modificar el / los archivo(s) de tipo documento, hoja de cálculo o presentación.</string>
     <string name="shareLinkOfficePermissionWriteTitle">Modificar</string>
-    <string name="shareLinkPasswordRightFileDescription">Cualquiera que tenga el enlace tendrá que introducir una contraseña para acceder al archivo.</string>
-    <string name="shareLinkPasswordRightFolderDescription">Las personas que tengan el enlace deberán introducir una contraseña para acceder a la carpeta.</string>
+    <string name="shareLinkPasswordRightDescription">Cualquiera que tenga el enlace tendrá que introducir una contraseña para acceder al %s.</string>
     <string name="shareLinkPasswordRightTitle">Con contraseña</string>
-    <string name="shareLinkPublicRightFileDescription">Todos los que tienen el enlace pueden acceder a la archivo.</string>
-    <string name="shareLinkPublicRightFolderDescription">Todos los que tienen el enlace pueden acceder a la carpeta.</string>
+    <string name="shareLinkPublicRightDescription">Todos aquellos que tengan el enlace pueden %1$s este %2$s%3$s%4$s.</string>
+    <string name="shareLinkPublicRightDescriptionDate">\u0020hasta el %s</string>
+    <string name="shareLinkPublicRightDescriptionPassword">\u0020protegido por contraseña</string>
+    <string name="shareLinkPublicRightDocumentDescriptionShort">Todas las personas con el enlace pueden acceder al documento.</string>
+    <string name="shareLinkPublicRightFileDescriptionShort">Todos los que tienen el enlace pueden acceder a la archivo.</string>
+    <string name="shareLinkPublicRightFolderDescriptionShort">Todos los que tienen el enlace pueden acceder a la carpeta.</string>
     <string name="shareLinkPublicRightTitle">Público</string>
-    <string name="shareLinkRestrictedRightFileDescription">Sólo los usuarios añadidos pueden acceder a la archivo.</string>
-    <string name="shareLinkRestrictedRightFolderDescription">Sólo los usuarios añadidos pueden acceder a la carpeta.</string>
+    <string name="shareLinkRestrictedRightDescription">Sólo los usuarios añadidos pueden acceder a este %s según sus derechos.</string>
+    <string name="shareLinkRestrictedRightDocumentDescriptionShort">Sólo pueden acceder al documento los usuarios añadidos.</string>
+    <string name="shareLinkRestrictedRightFileDescriptionShort">Sólo pueden acceder al archivo los usuarios añadidos.</string>
+    <string name="shareLinkRestrictedRightFolderDescriptionShort">Sólo los usuarios añadidos pueden acceder a la carpeta.</string>
     <string name="shareLinkRestrictedRightTitle">Restringido</string>
     <string name="shareLinkSettingsAddExpirationDateDescription">El enlace de uso compartido no podrá utilizarse una vez transcurrida la fecha.</string>
     <string name="shareLinkSettingsAllowDownloadDescription">Los usuarios podrán descargar los archivos desde este enlace.</string>
@@ -545,6 +554,9 @@
     <string name="shareLinkSettingsBlockCommentsTitle">Activa esta opción para impedir que los usuarios lean los comentarios</string>
     <string name="shareLinkSettingsBlockUsersConsultDescription">Los usuarios con acceso a los archivos no podrán leer los comentarios.</string>
     <string name="shareLinkSettingsBlockUsersConsultTitle">Activa esta opción para impedir que los usuarios vean quién consulta los ficheros</string>
+    <string name="shareLinkTypeDocument">documento</string>
+    <string name="shareLinkTypeFile">archivo</string>
+    <string name="shareLinkTypeFolder">carpeta</string>
     <string name="shareUserExternal">Usuario externo de kDrive</string>
     <string name="shareUserNotAccepted">El usuario todavía no ha aceptado el uso compartido y es un usuario externo del kDrive.</string>
     <plurals name="shareUsersCount">

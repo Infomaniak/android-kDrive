@@ -25,7 +25,10 @@ import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
+import com.infomaniak.drive.utils.getTypeName
 import com.infomaniak.drive.utils.shareText
+import com.infomaniak.lib.core.utils.FORMAT_SHARELINK_DATE
+import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.view_share_link_container.view.*
 
 class ShareLinkContainerView @JvmOverloads constructor(
@@ -72,15 +75,36 @@ class ShareLinkContainerView @JvmOverloads constructor(
             shareLinkIcon.setImageResource(R.drawable.ic_lock)
             shareLinkTitle.setText(R.string.restrictedSharedLinkTitle)
             shareLinkBottomContainer.isGone = true
-            if (currentFile.isFolder()) R.string.shareLinkRestrictedRightFolderDescription
-            else R.string.shareLinkRestrictedRightFileDescription
+            context.getString(R.string.shareLinkRestrictedRightDescription, currentFile.getTypeName(context))
         } else {
             shareLinkIcon.setImageResource(R.drawable.ic_unlock)
             shareLinkTitle.setText(R.string.publicSharedLinkTitle)
             shareLinkBottomContainer.isVisible = true
-            if (currentFile.isFolder()) R.string.shareLinkPublicRightFolderDescription
-            else R.string.shareLinkPublicRightFileDescription
+
+            context.getString(
+
+                R.string.shareLinkPublicRightDescription,
+
+                context.getString(
+                    if (shareLink?.canEdit == true) R.string.shareLinkOfficePermissionWriteTitle
+                    else R.string.shareLinkOfficePermissionReadTitle
+                ).lowercase(),
+
+                currentFile.getTypeName(context),
+
+                if (shareLink?.permission == ShareLink.ShareLinkFilePermission.PASSWORD)
+                    context.getString(R.string.shareLinkPublicRightDescriptionPassword)
+                else "",
+
+                if (shareLink?.validUntil != null)
+                    context.getString(
+                        R.string.shareLinkPublicRightDescriptionDate,
+                        shareLink?.validUntil?.format(FORMAT_SHARELINK_DATE)
+                    )
+                else ""
+            )
         }
-        shareLinkStatus.setText(title)
+
+        shareLinkStatus.text = title
     }
 }
