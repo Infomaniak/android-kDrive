@@ -27,7 +27,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
@@ -35,6 +34,7 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.views.ShareLinkContainerView.Companion.getTypeName
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress
@@ -120,7 +120,7 @@ class FileShareLinkSettingsFragment : Fragment() {
                 rightsTitle.isVisible = true
                 fileShareLinkRights.isVisible = true
                 rightsValue.setText(officePermission.translation)
-                rightsIcon.load(officePermission.icon)
+                rightsIcon.setImageResource(officePermission.icon)
             } else {
                 rightsTitle.isGone = true
                 fileShareLinkRights.isGone = true
@@ -135,13 +135,10 @@ class FileShareLinkSettingsFragment : Fragment() {
                 newPasswordButton.isVisible = true
                 addPasswordSwitch.isChecked = true
             }
-
-            val passwordDescriptor = if (shareViewModel.currentFile.value?.isFolder() == true) {
-                R.string.shareLinkPasswordRightFolderDescription
-            } else {
-                R.string.shareLinkPasswordRightFileDescription
-            }
-            addPasswordDescription.setText(passwordDescriptor)
+            addPasswordDescription.text = getString(
+                R.string.shareLinkPasswordRightDescription,
+                context?.getString(getTypeName(navigationArgs.isFolder, navigationArgs.isOnlyOfficeFile))
+            )
 
             addExpirationDateSwitch.isChecked = shareLink.validUntil != null
             expirationDateInput.init(fragmentManager = parentFragmentManager, defaultCalendarTimestamp) {

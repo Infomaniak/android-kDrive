@@ -35,6 +35,7 @@ import com.infomaniak.drive.data.models.Share
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.views.ShareLinkContainerView
 import com.infomaniak.drive.views.UserAvatarView
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.fragment_file_details.*
@@ -56,12 +57,12 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
             setupShareButton(currentFile)
 
             if (currentFile.createdAt.isPositive()) {
-                addedDateValue.text = currentFile.getCreatedAt().format("dd MMM yyyy - HH:mm")
+                addedDateValue.text = currentFile.getCreatedAt().format(ShareLinkContainerView.formatFullDate)
                 addedDate.isVisible = true
             }
 
             if (currentFile.fileCreatedAt.isPositive()) {
-                creationDateValue.text = currentFile.getFileCreatedAt().format("dd MMM yyyy - HH:mm")
+                creationDateValue.text = currentFile.getFileCreatedAt().format(ShareLinkContainerView.formatFullDate)
                 creationDate.isVisible = true
             }
 
@@ -125,7 +126,11 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
                 file = file,
                 onTitleClicked = { shareLink, currentFileId ->
                     this.shareLink = shareLink
-                    val (permissionsGroup, currentPermission) = selectPermissions(file.isFolder(), shareLink != null)
+                    val (permissionsGroup, currentPermission) = selectPermissions(
+                        file.isFolder(),
+                        file.onlyoffice,
+                        shareLink != null
+                    )
                     findNavController().navigate(
                         FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectPermissionBottomSheetDialog(
                             currentFileId = currentFileId,
@@ -213,24 +218,31 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
             return when (permission) {
                 is ShareLink.ShareLinkFilePermission -> permission == ShareLink.ShareLinkFilePermission.PUBLIC
                 is ShareLink.ShareLinkFolderPermission -> permission == ShareLink.ShareLinkFolderPermission.PUBLIC
+                is ShareLink.ShareLinkDocumentPermission -> permission == ShareLink.ShareLinkDocumentPermission.PUBLIC
                 else -> false
             }
         }
 
         fun selectPermissions(
             isFolder: Boolean,
-            shareLinkExiste: Boolean
+            isOnlyOffice: Boolean,
+            shareLinkExist: Boolean
         ): Pair<SelectPermissionBottomSheetDialog.PermissionsGroup, Permission> {
             val permissionsGroup: SelectPermissionBottomSheetDialog.PermissionsGroup
             val currentPermission = when {
                 isFolder -> {
                     permissionsGroup = SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_FOLDER_SETTINGS
-                    if (shareLinkExiste) ShareLink.ShareLinkFolderPermission.PUBLIC
+                    if (shareLinkExist) ShareLink.ShareLinkFolderPermission.PUBLIC
                     else ShareLink.ShareLinkFolderPermission.RESTRICTED
+                }
+                isOnlyOffice -> {
+                    permissionsGroup = SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_DOCUMENT_SETTINGS
+                    if (shareLinkExist) ShareLink.ShareLinkDocumentPermission.PUBLIC
+                    else ShareLink.ShareLinkDocumentPermission.RESTRICTED
                 }
                 else -> {
                     permissionsGroup = SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_FILE_SETTINGS
-                    if (shareLinkExiste) ShareLink.ShareLinkFilePermission.PUBLIC
+                    if (shareLinkExist) ShareLink.ShareLinkFilePermission.PUBLIC
                     else ShareLink.ShareLinkFilePermission.RESTRICTED
                 }
             }

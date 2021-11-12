@@ -27,7 +27,7 @@
     <string name="accessDeniedTitle">Sie haben nicht die Berechtigung für den Zugriff auf diesen Ordner.</string>
     <string name="addCategoriesTitle">Kategorien hinzufügen</string>
     <string name="addFileSelectUploadFile">Eine zu importierende Datei auswählen</string>
-    <string name="addPassword">Passwort hinzufügen</string>
+    <string name="addPassword">Mit Passwort schützen</string>
     <string name="alertRemoveUserDescription">Sind Sie sicher, den Benutzer “%s” von dieser Anwendung entfernen zu wollen?</string>
     <string name="alertRemoveUserTitle">Benutzer entfernen</string>
     <string name="allActivated">Aktiviert</string>
@@ -36,7 +36,7 @@
     <string name="allAllDriveUsers">Alle kDrive-Benutzer</string>
     <string name="allArchive">Archive</string>
     <string name="allAudio">Audiodateien</string>
-    <string name="allCancellationInProgress">Annullierung im Gange ...</string>
+    <string name="allCancellationInProgress">Annullierung im Gange…</string>
     <string name="allCode">Code</string>
     <string name="allDeletedFilePattern">\'Gelöscht am \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Deaktiviert</string>
@@ -61,7 +61,7 @@
     <string name="allOfficeNote">Text</string>
     <string name="allOfficePoints">Präsentation</string>
     <string name="allPackAvailability">Nur verfügbar für die Pläne %s 🚀</string>
-    <string name="allPasswordHint">Passwort festlegen</string>
+    <string name="allPasswordHint">Kennwort</string>
     <string name="allPathTitle">Speicherort</string>
     <string name="allPdf">PDF</string>
     <string name="allPermissionNeeded">Sie müssen den Zugriff auf Ihre Dateien erlauben, um den Import und zu speichern durchführen zu können</string>
@@ -226,6 +226,8 @@
     <string name="dropBoxResultDescription">Teilen Sie den nachfolgenden Link mit Benutzern, die Ihnen Dateien senden müssen.</string>
     <string name="dropBoxResultTitle">Briefkasten %s freigeben</string>
     <string name="dropBoxTitle">Briefkasten</string>
+    <string name="dropboxSharedLinkDescription">Sie können keinen Freigabelink für einen Briefkasten erstellen.</string>
+    <string name="dropboxSharedLinkTitle">Dropbox-Freigabelink</string>
     <string name="editCategoryInfoDescription">Die Änderung ist für alle Benutzer des kDrive sichtbar, die Zugriff auf die Kategorien besitzen.</string>
     <string name="editCategoryTitle">Kategorie bearbeiten</string>
     <string name="errorAddComment">Fehler beim Hinzufügen des Kommentars</string>
@@ -300,6 +302,7 @@
     </plurals>
     <string name="fileDetailsActivitiesTitle">Aktivität</string>
     <string name="fileDetailsActivityFileAccess">hat die Datei eingesehen</string>
+    <string name="fileDetailsActivityFileCategorize">dem Element eine Kategorie hinzugefügt</string>
     <string name="fileDetailsActivityFileCommentCreate">hat die Datei kommentiert</string>
     <string name="fileDetailsActivityFileCommentDelete">hat seinen Kommentar gelöscht</string>
     <string name="fileDetailsActivityFileCommentLike">hat einen Kommentar mit Gefällt mir markiert</string>
@@ -320,6 +323,7 @@
     <string name="fileDetailsActivityFileShareLinkUpdate">hat den Link für die Freigabe der Datei geändert</string>
     <string name="fileDetailsActivityFileShareUpdate">hat die Freigabe der Datei geändert</string>
     <string name="fileDetailsActivityFileTrash">hat die Datei in den Papierkorb verschoben</string>
+    <string name="fileDetailsActivityFileUncategorize">eine Kategorie aus dem Element entfernt</string>
     <string name="fileDetailsActivityFileUpdate">hat die Datei geändert</string>
     <string name="fileDetailsActivityFolderAccess">hat den Ordner eingesehen</string>
     <string name="fileDetailsActivityFolderCommentCreate">hat den Ordner kommentiert</string>
@@ -392,7 +396,7 @@
     <string name="fileShareFileTitle">Datei freigeben</string>
     <string name="fileShareFolderTitle">Ordner freigeben</string>
     <string name="fileShareLinkSettingsAccessRightTitle">Bearbeitungsrechte</string>
-    <string name="fileShareLinkSettingsTitle">Erweiterte Einstellungen</string>
+    <string name="fileShareLinkSettingsTitle">Erweiterte Einstellungen des Freigabelinks</string>
     <string name="fileTypeFilterTitle">Dateityp</string>
     <string name="filtersTitle">Filter</string>
     <string name="folderDescription">Privater oder freigegebener Ordner</string>
@@ -525,18 +529,23 @@
     <string name="shareFileInputUserAndEmail">Laden Sie einen Benutzer oder eine E-Mail-Adresse ein…</string>
     <string name="shareLinkOfficePermissionReadFileDescription">Benutzer können das Dokument nur einsehen.</string>
     <string name="shareLinkOfficePermissionReadFolderDescription">Benutzer können nur Dateien innerhalb des freigegebenen Ordners einsehen.</string>
-    <string name="shareLinkOfficePermissionReadTitle">Einsehen</string>
+    <string name="shareLinkOfficePermissionReadTitle">Anzeigen</string>
     <string name="shareLinkOfficePermissionWriteFileDescription">Benutzer können das Dokument bearbeiten.</string>
     <string name="shareLinkOfficePermissionWriteFolderDescription">Die Benutzer können die Datei / Dateien des Typs Dokument, Tabellenkalkulation oder Präsentation ändern.</string>
-    <string name="shareLinkOfficePermissionWriteTitle">Ändern</string>
-    <string name="shareLinkPasswordRightFileDescription">Jeder, der den Link hat, muss ein Passwort eingeben, um auf die Datei zuzugreifen.</string>
-    <string name="shareLinkPasswordRightFolderDescription">Personen, die über diesen Link verfügen, müssen ein Passwort eingeben, um auf den Ordner.</string>
+    <string name="shareLinkOfficePermissionWriteTitle">Bearbeiten</string>
+    <string name="shareLinkPasswordRightDescription">Jeder, der den Link hat, muss ein Passwort eingeben, um auf die %s zuzugreifen.</string>
     <string name="shareLinkPasswordRightTitle">Mit Passwort</string>
-    <string name="shareLinkPublicRightFileDescription">Jeder, der den Link hat, kann die Datei zugreifen.</string>
-    <string name="shareLinkPublicRightFolderDescription">Jeder, der den Link hat, kann auf den Ordner.</string>
+    <string name="shareLinkPublicRightDescription">Jeder, der über den Link verfügt, kann dieses %2$s%3$s%4$s %1$s.</string>
+    <string name="shareLinkPublicRightDescriptionDate">, bis zum %s</string>
+    <string name="shareLinkPublicRightDescriptionPassword">, das durch ein Kennwort geschützt ist</string>
+    <string name="shareLinkPublicRightDocumentDescriptionShort">Alle Personen, die über den Link verfügen, können auf die Dokument zugreifen.</string>
+    <string name="shareLinkPublicRightFileDescriptionShort">Jeder, der den Link hat, kann die Datei zugreifen.</string>
+    <string name="shareLinkPublicRightFolderDescriptionShort">Jeder, der den Link hat, kann auf den Ordner.</string>
     <string name="shareLinkPublicRightTitle">Öffentlich</string>
-    <string name="shareLinkRestrictedRightFileDescription">Nur hinzugefügte Benutzer können die Datei zugreifen.</string>
-    <string name="shareLinkRestrictedRightFolderDescription">Nur hinzugefügte Benutzer können auf den Ordner.</string>
+    <string name="shareLinkRestrictedRightDescription">Nur hinzugefügte Benutzer können je nach Berechtigung auf dieses %s zugreifen.</string>
+    <string name="shareLinkRestrictedRightDocumentDescriptionShort">Nur hinzugefügte Benutzer können auf die Dokument zugreifen.</string>
+    <string name="shareLinkRestrictedRightFileDescriptionShort">Nur hinzugefügte Benutzer können auf die Datei zugreifen.</string>
+    <string name="shareLinkRestrictedRightFolderDescriptionShort">Nur hinzugefügte Benutzer können auf den Ordner.</string>
     <string name="shareLinkRestrictedRightTitle">Eingeschränkt</string>
     <string name="shareLinkSettingsAddExpirationDateDescription">Der Freigabelink kann nicht mehr verwendet werden, wenn das Datum verstrichen ist.</string>
     <string name="shareLinkSettingsAllowDownloadDescription">Benutzer können die Dateien über diesen Link herunter- bzw. heraufladen.</string>
@@ -545,6 +554,9 @@
     <string name="shareLinkSettingsBlockCommentsTitle">Aktivieren Sie diese Option, wenn Benutzer keine Kommentare lesen sollen</string>
     <string name="shareLinkSettingsBlockUsersConsultDescription">Benutzer, die Zugang zu den Dateien besitzen, können die Kommentare nicht lesen.</string>
     <string name="shareLinkSettingsBlockUsersConsultTitle">Aktivieren Sie diese Option, wenn Benutzer nicht sehen sollen, wer die Dateien abruft</string>
+    <string name="shareLinkTypeDocument">Dokument</string>
+    <string name="shareLinkTypeFile">Datei</string>
+    <string name="shareLinkTypeFolder">Ordner</string>
     <string name="shareUserExternal">kDrive externer Benutzer</string>
     <string name="shareUserNotAccepted">Der Benutzer hat die Freigabe noch nicht angenommen und ist ein externer Benutzer des kDrive.</string>
     <plurals name="shareUsersCount">

@@ -58,14 +58,14 @@ data class ShareLink(
         PUBLIC(
             R.drawable.ic_unlock,
             R.string.shareLinkPublicRightTitle,
-            R.string.shareLinkPublicRightFileDescription
+            R.string.shareLinkPublicRightFileDescriptionShort
         ),
 
         @SerializedName("inherit")
         RESTRICTED(
             R.drawable.ic_lock,
             R.string.shareLinkRestrictedRightTitle,
-            R.string.shareLinkRestrictedRightFileDescription
+            R.string.shareLinkRestrictedRightFileDescriptionShort
         ),
 
         @SerializedName("password")
@@ -83,14 +83,36 @@ data class ShareLink(
         PUBLIC(
             R.drawable.ic_unlock,
             R.string.shareLinkPublicRightTitle,
-            R.string.shareLinkPublicRightFolderDescription
+            R.string.shareLinkPublicRightFolderDescriptionShort
         ),
 
         @SerializedName("inherit")
         RESTRICTED(
             R.drawable.ic_lock,
             R.string.shareLinkRestrictedRightTitle,
-            R.string.shareLinkRestrictedRightFolderDescription
+            R.string.shareLinkRestrictedRightFolderDescriptionShort
+        ),
+    }
+
+    @Parcelize
+    enum class ShareLinkDocumentPermission(
+        override val icon: Int,
+        override val translation: Int,
+        override val description: Int
+    ) : Permission {
+
+        @SerializedName("public")
+        PUBLIC(
+            R.drawable.ic_unlock,
+            R.string.shareLinkPublicRightTitle,
+            R.string.shareLinkPublicRightDocumentDescriptionShort
+        ),
+
+        @SerializedName("inherit")
+        RESTRICTED(
+            R.drawable.ic_lock,
+            R.string.shareLinkRestrictedRightTitle,
+            R.string.shareLinkRestrictedRightDocumentDescriptionShort
         ),
     }
 

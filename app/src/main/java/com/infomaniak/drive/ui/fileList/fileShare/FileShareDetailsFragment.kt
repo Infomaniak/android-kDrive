@@ -172,6 +172,7 @@ class FileShareDetailsFragment : Fragment() {
                     this.shareLink = newShareLink
                     val (permissionsGroup, currentPermission) = FileDetailsInfosFragment.selectPermissions(
                         file.isFolder(),
+                        file.onlyoffice,
                         this.shareLink != null
                     )
                     findNavController().navigate(

@@ -88,6 +88,10 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
                         ShareLink.ShareLinkFolderPermission.RESTRICTED,
                         ShareLink.ShareLinkFolderPermission.PUBLIC
                     )
+                    PermissionsGroup.SHARE_LINK_DOCUMENT_SETTINGS -> arrayListOf(
+                        ShareLink.ShareLinkDocumentPermission.RESTRICTED,
+                        ShareLink.ShareLinkDocumentPermission.PUBLIC
+                    )
                     PermissionsGroup.EXTERNAL_USERS_RIGHTS,
                     PermissionsGroup.USERS_RIGHTS -> arrayListOf(
                         Shareable.ShareablePermission.READ,
@@ -249,6 +253,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
     enum class PermissionsGroup : Parcelable {
         SHARE_LINK_FILE_SETTINGS,
         SHARE_LINK_FOLDER_SETTINGS,
+        SHARE_LINK_DOCUMENT_SETTINGS,
         SHARE_LINK_FILE_OFFICE,
         SHARE_LINK_FOLDER_OFFICE,
         USERS_RIGHTS,

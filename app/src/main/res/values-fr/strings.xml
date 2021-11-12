@@ -27,7 +27,7 @@
     <string name="accessDeniedTitle">Vous n’avez pas l’autorisation d’accéder à ce dossier.</string>
     <string name="addCategoriesTitle">Ajouter des catégories</string>
     <string name="addFileSelectUploadFile">Sélectionner un fichier à importer</string>
-    <string name="addPassword">Ajouter un mot de passe</string>
+    <string name="addPassword">Protéger avec un mot de passe</string>
     <string name="alertRemoveUserDescription">Êtes vous sûr(e) de vouloir retirer l’utilisateur “%s” de cette application ?</string>
     <string name="alertRemoveUserTitle">Retirer l’utilisateur</string>
     <string name="allActivated">Activé</string>
@@ -36,7 +36,7 @@
     <string name="allAllDriveUsers">Tous les utilisateurs du kDrive</string>
     <string name="allArchive">Archives</string>
     <string name="allAudio">Audios</string>
-    <string name="allCancellationInProgress">Annulation en cours …</string>
+    <string name="allCancellationInProgress">Annulation en cours…</string>
     <string name="allCode">Code</string>
     <string name="allDeletedFilePattern">\'Supprimé le \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Désactivé</string>
@@ -61,7 +61,7 @@
     <string name="allOfficeNote">Texte</string>
     <string name="allOfficePoints">Présentation</string>
     <string name="allPackAvailability">Disponible uniquement pour les plans %s 🚀</string>
-    <string name="allPasswordHint">Définir un mot de passe</string>
+    <string name="allPasswordHint">Mot de passe</string>
     <string name="allPathTitle">Emplacement</string>
     <string name="allPdf">PDF</string>
     <string name="allPermissionNeeded">Vous devez autorisez l’accès à vos fichiers pour pouvoir les importer et les enregistrer</string>
@@ -226,6 +226,8 @@
     <string name="dropBoxResultDescription">Partagez le lien ci-dessous aux personnes qui doivent vous envoyer des fichiers.</string>
     <string name="dropBoxResultTitle">Partager la boîte de dépôt %s</string>
     <string name="dropBoxTitle">Boîte de dépôt</string>
+    <string name="dropboxSharedLinkDescription">Vous ne pouvez pas créer un lien de partage sur une boite de dépôt.</string>
+    <string name="dropboxSharedLinkTitle">Lien de partage de la boîte de dépôt</string>
     <string name="editCategoryInfoDescription">La modification sera visible par tous les utilisateurs du kDrive ayant accès aux catégories.</string>
     <string name="editCategoryTitle">Modifier une catégorie</string>
     <string name="errorAddComment">Erreur lors de l’ajout du commentaire</string>
@@ -300,6 +302,7 @@
     </plurals>
     <string name="fileDetailsActivitiesTitle">Activité</string>
     <string name="fileDetailsActivityFileAccess">a consulté le fichier</string>
+    <string name="fileDetailsActivityFileCategorize">a ajouté une catégorie à l’élément</string>
     <string name="fileDetailsActivityFileCommentCreate">a commenté le fichier</string>
     <string name="fileDetailsActivityFileCommentDelete">a supprimé son commentaire</string>
     <string name="fileDetailsActivityFileCommentLike">a aimé un commentaire</string>
@@ -320,6 +323,7 @@
     <string name="fileDetailsActivityFileShareLinkUpdate">a modifié le lien de partage du fichier</string>
     <string name="fileDetailsActivityFileShareUpdate">a modifié le partage du fichier</string>
     <string name="fileDetailsActivityFileTrash">a déplacé le fichier dans la corbeille</string>
+    <string name="fileDetailsActivityFileUncategorize">a retiré une catégorie à l’élément</string>
     <string name="fileDetailsActivityFileUpdate">a modifié le fichier</string>
     <string name="fileDetailsActivityFolderAccess">a consulté le dossier</string>
     <string name="fileDetailsActivityFolderCommentCreate">a commenté le dossier</string>
@@ -392,7 +396,7 @@
     <string name="fileShareFileTitle">Partager le fichier</string>
     <string name="fileShareFolderTitle">Partager le dossier</string>
     <string name="fileShareLinkSettingsAccessRightTitle">Droits d‘édition</string>
-    <string name="fileShareLinkSettingsTitle">Paramètres avancés</string>
+    <string name="fileShareLinkSettingsTitle">Paramètres avancés du lien de partage</string>
     <string name="fileTypeFilterTitle">Type de fichier</string>
     <string name="filtersTitle">Filtres</string>
     <string name="folderDescription">Dossier privé ou partagé</string>
@@ -524,19 +528,24 @@
     <string name="settingsTitle">Paramètres</string>
     <string name="shareFileInputUserAndEmail">Invitez un utilisateur ou une adresse mail…</string>
     <string name="shareLinkOfficePermissionReadFileDescription">Les utilisateurs peuvent uniquement consulter le document.</string>
-    <string name="shareLinkOfficePermissionReadFolderDescription">Les utilisateurs peuvent uniquement consulter les fichiers à l\'intérieur du dossier partagé.</string>
+    <string name="shareLinkOfficePermissionReadFolderDescription">Les utilisateurs peuvent uniquement consulter les fichiers à l’intérieur du dossier partagé.</string>
     <string name="shareLinkOfficePermissionReadTitle">Consulter</string>
     <string name="shareLinkOfficePermissionWriteFileDescription">Les utilisateurs peuvent modifier le document.</string>
     <string name="shareLinkOfficePermissionWriteFolderDescription">Les utilisateurs peuvent modifier le(s) fichier(s) de type document, tableur ou présentation.</string>
     <string name="shareLinkOfficePermissionWriteTitle">Modifier</string>
-    <string name="shareLinkPasswordRightFileDescription">Les personnes possédant le lien devront entrer un mot de passe pour accéder au fichier.</string>
-    <string name="shareLinkPasswordRightFolderDescription">Les personnes possédant le lien devront entrer un mot de passe pour accéder au dossier.</string>
+    <string name="shareLinkPasswordRightDescription">Les personnes possédant le lien devront entrer un mot de passe pour accéder au %s.</string>
     <string name="shareLinkPasswordRightTitle">Avec mot de passe</string>
-    <string name="shareLinkPublicRightFileDescription">Toutes les personnes possédant le lien peuvent accéder au fichier.</string>
-    <string name="shareLinkPublicRightFolderDescription">Toutes les personnes possédant le lien peuvent accéder au dossier.</string>
+    <string name="shareLinkPublicRightDescription">Tout le monde disposant du lien peut %1$s ce %2$s%3$s%4$s.</string>
+    <string name="shareLinkPublicRightDescriptionDate">\u0020jusqu’au %s</string>
+    <string name="shareLinkPublicRightDescriptionPassword">\u0020protégé par un mot de passe</string>
+    <string name="shareLinkPublicRightDocumentDescriptionShort">Toutes les personnes possédant le lien peuvent accéder au document.</string>
+    <string name="shareLinkPublicRightFileDescriptionShort">Toutes les personnes possédant le lien peuvent accéder au fichier.</string>
+    <string name="shareLinkPublicRightFolderDescriptionShort">Toutes les personnes possédant le lien peuvent accéder au dossier.</string>
     <string name="shareLinkPublicRightTitle">Public</string>
-    <string name="shareLinkRestrictedRightFileDescription">Uniquement les utilisateurs ajoutés peuvent accéder au fichier.</string>
-    <string name="shareLinkRestrictedRightFolderDescription">Uniquement les utilisateurs ajoutés peuvent accéder au dossier.</string>
+    <string name="shareLinkRestrictedRightDescription">Seuls les utilisateurs ajoutés peuvent accéder à ce %s selon leur droit.</string>
+    <string name="shareLinkRestrictedRightDocumentDescriptionShort">Uniquement les utilisateurs ajoutés peuvent accéder au document.</string>
+    <string name="shareLinkRestrictedRightFileDescriptionShort">Uniquement les utilisateurs ajoutés peuvent accéder au fichier.</string>
+    <string name="shareLinkRestrictedRightFolderDescriptionShort">Uniquement les utilisateurs ajoutés peuvent accéder au dossier.</string>
     <string name="shareLinkRestrictedRightTitle">Restreint</string>
     <string name="shareLinkSettingsAddExpirationDateDescription">Le lien de partage ne pourra plus être utilisé dès que la date sera passée.</string>
     <string name="shareLinkSettingsAllowDownloadDescription">Les utilisateurs pourront télécharger les fichiers depuis ce lien.</string>
@@ -545,6 +554,9 @@
     <string name="shareLinkSettingsBlockCommentsTitle">Activez cette option pour empêcher les utilisateurs de lire les commentaires</string>
     <string name="shareLinkSettingsBlockUsersConsultDescription">Les utilisateurs ayant accès aux fichiers ne pourront pas lire les commentaires.</string>
     <string name="shareLinkSettingsBlockUsersConsultTitle">Activez cette option pour empêcher les utilisateurs de voir qui consulte les fichiers</string>
+    <string name="shareLinkTypeDocument">document</string>
+    <string name="shareLinkTypeFile">fichier</string>
+    <string name="shareLinkTypeFolder">dossier</string>
     <string name="shareUserExternal">Utilisateur externe du kDrive</string>
     <string name="shareUserNotAccepted">L’utilisateur n’a pas encore accepté le partage et est un utilisateur externe du kDrive.</string>
     <plurals name="shareUsersCount">
