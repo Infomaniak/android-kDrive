@@ -26,7 +26,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.ui.home.DriveListAdapter
 import com.infomaniak.drive.ui.menu.UserAdapter
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.setUserView

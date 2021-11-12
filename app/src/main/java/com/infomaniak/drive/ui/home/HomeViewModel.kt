@@ -25,7 +25,6 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileActivity
-import com.infomaniak.drive.utils.SingleLiveEvent
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.ApiResponse.Status.SUCCESS
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +35,6 @@ import kotlin.collections.ArrayList
 class HomeViewModel : ViewModel() {
     private var lastActivityJob = Job()
     private var lastModifiedJob = Job()
-    var driveSelectionDialogDismissed = SingleLiveEvent<Boolean>()
 
     var lastActivityPage = 1
     var lastPicturesPage = 1

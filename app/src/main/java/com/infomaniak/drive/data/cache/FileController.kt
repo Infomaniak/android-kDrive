@@ -892,7 +892,7 @@ object FileController {
             File.SortType.RECENT_TRASHED -> this.sort(File::deletedAt.name, Sort.DESCENDING)
             File.SortType.SMALLER -> this.sort(File::size.name, Sort.ASCENDING)
             File.SortType.BIGGER -> this.sort(File::size.name, Sort.DESCENDING)
-            File.SortType.EXTENSION -> this.sort(File::convertedType.name, Sort.ASCENDING) // TODO implement
+            //File.SortType.EXTENSION -> this.sort(File::convertedType.name, Sort.ASCENDING) // TODO implement
         }
     }
 }

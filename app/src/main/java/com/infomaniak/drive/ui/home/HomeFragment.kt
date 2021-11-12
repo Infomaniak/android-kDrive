@@ -41,7 +41,6 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
-import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.utils.setPagination
@@ -97,19 +96,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             noNetworkCard.isGone = isInternetAvailable
         }
 
-        homeViewModel.driveSelectionDialogDismissed.observe(viewLifecycleOwner) { newDriveIsSelected ->
-            if (newDriveIsSelected == true) {
-                (activity as? MainActivity)?.saveLastNavigationItemSelected()
-                AccountUtils.reloadApp?.invoke() // TODO Hack
-                // homeViewModel.clearDownloadTimes()
-                // initLastElementsAdapter() // Re-init the adapters if Drive type has changed between two Drives
-                // updateDriveInfos(newDriveIsSelected)
-            }
-        }
-
-        driveInfos.setOnClickListener {
-            safeNavigate(R.id.switchDriveDialog)
-        }
+        driveInfos.setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
 
         searchView.isGone = true
         searchViewText.isVisible = true
@@ -117,10 +104,6 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         searchViewCard.setOnClickListener {
             safeNavigate(HomeFragmentDirections.actionHomeFragmentToSearchFragment())
-        }
-
-        mainViewModel.forcedDriveSelection.observe(viewLifecycleOwner) {
-            driveInfos.performClick()
         }
 
         mainViewModel.deleteFileFromHome.observe(viewLifecycleOwner) { fileDeleted ->

@@ -61,7 +61,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     val intentShowProgressByFolderId = SingleLiveEvent<Int>()
 
     val deleteFileFromHome = SingleLiveEvent<Boolean>()
-    val forcedDriveSelection = SingleLiveEvent<Boolean>()
     val refreshActivities = SingleLiveEvent<Boolean>()
     val updateOfflineFile = SingleLiveEvent<FileId>()
     val updateVisibleFiles = MutableLiveData<Boolean>()
