@@ -74,6 +74,8 @@ open class UploadFile(
 
     fun isSyncOffline() = type == Type.SYNC_OFFLINE.name
 
+    fun isCloudStorage() = type == Type.CLOUD_STORAGE.name
+
     fun refreshIdentifier() {
         getRealmInstance().use { realm ->
             syncFileByUriQuery(realm, uri).findFirst()?.apply {
@@ -94,7 +96,7 @@ open class UploadFile(
     }
 
     enum class Type {
-        SYNC, UPLOAD, SHARED_FILE, SYNC_OFFLINE
+        SYNC, UPLOAD, SHARED_FILE, SYNC_OFFLINE, CLOUD_STORAGE
     }
 
     companion object {

@@ -141,7 +141,7 @@ class UploadTask(
 
                 val url = uploadUrl(
                     chunkNumber = chunkNumber,
-                    conflictOption = if (uploadFile.isSync()) ConflictOption.REPLACE else ConflictOption.RENAME,
+                    conflictOption = if (uploadFile.isSync() || uploadFile.isCloudStorage()) ConflictOption.REPLACE else ConflictOption.RENAME,
                     currentChunkSize = count,
                     totalChunks = totalChunks
                 )
@@ -267,7 +267,6 @@ class UploadTask(
 
         if (worker.isStopped) throw CancellationException()
         ensureActive()
-
 
         if (uploadNotificationElapsedTime >= ELAPSED_TIME) {
             uploadNotification.apply {

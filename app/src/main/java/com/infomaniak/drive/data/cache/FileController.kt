@@ -17,9 +17,11 @@
  */
 package com.infomaniak.drive.data.cache
 
+import android.content.Context
 import androidx.collection.ArrayMap
 import androidx.collection.arrayMapOf
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileActivity
 import com.infomaniak.drive.data.models.UserDrive
@@ -148,6 +150,32 @@ object FileController {
             }
         }
         customRealm?.let(block) ?: getRealmInstance().use(block)
+    }
+
+    fun renameFile(file: File, newName: String, realm: Realm? = null): ApiResponse<CancellableAction> {
+        val apiResponse = ApiRepository.renameFile(file, newName)
+        if (apiResponse.isSuccess()) {
+            updateFile(file.id, realm) { localFile ->
+                localFile.name = newName
+            }
+        }
+        return apiResponse
+    }
+
+    fun deleteFile(
+        file: File,
+        realm: Realm? = null,
+        userDrive: UserDrive? = null,
+        context: Context,
+        onSuccess: ((fileID: Int) -> Unit)? = null
+    ): ApiResponse<CancellableAction> {
+        val apiResponse = ApiRepository.deleteFile(file)
+        if (apiResponse.isSuccess()) {
+            file.deleteCaches(context)
+            updateFile(file.id, realm, userDrive = userDrive) { localFile -> localFile.deleteFromRealm() }
+            onSuccess?.invoke(file.id)
+        }
+        return apiResponse
     }
 
     fun updateFile(fileId: Int, realm: Realm? = null, userDrive: UserDrive? = null, transaction: (file: File) -> Unit) {
@@ -490,13 +518,14 @@ object FileController {
         customRealm?.let(block) ?: getRealmInstance().use(block)
     }
 
-    fun removeOrphanAndActivityFiles() {
-        getRealmInstance().use { realm ->
+    fun removeOrphanAndActivityFiles(customRealm: Realm? = null) {
+        val block: (Realm) -> Unit = { realm ->
             realm.executeTransaction {
                 realm.where(FileActivity::class.java).findAll().deleteAllFromRealm()
             }
             removeOrphanFiles(realm)
         }
+        customRealm?.let(block) ?: getRealmInstance().use(block)
     }
 
     fun removeOrphanFiles(customRealm: Realm? = null) {
@@ -832,6 +861,18 @@ object FileController {
                 }
             }
         }
+    }
+
+    suspend fun createFolder(name: String, parentId: Int, onlyForMe: Boolean, userDrive: UserDrive?): ApiResponse<File> {
+        val okHttpClient = userDrive?.userId?.let { KDriveHttpClient.getHttpClient(it) } ?: HttpClient.okHttpClient
+        val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId
+        return ApiRepository.createFolder(okHttpClient, driveId, parentId, name, onlyForMe, false)
+    }
+
+    suspend fun createCommonFolder(name: String, forAllUsers: Boolean, userDrive: UserDrive?): ApiResponse<File> {
+        val okHttpClient = userDrive?.userId?.let { KDriveHttpClient.getHttpClient(it) } ?: HttpClient.okHttpClient
+        val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId
+        return ApiRepository.createTeamFolder(okHttpClient, driveId, name, forAllUsers)
     }
 
     private fun keepOldLocalFilesData(oldFile: File, newFile: File) {

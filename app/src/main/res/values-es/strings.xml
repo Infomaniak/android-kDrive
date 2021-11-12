@@ -174,7 +174,7 @@
     <string name="categoryTransportation">Transporte</string>
     <string name="categoryWarranty">Garantía</string>
     <string name="categoryWork">Trabajo</string>
-    <string name="cloudStorageSuerySearchImpossibleSelectDrive">No se puede buscar. No se ha seleccionado ningún drive</string>
+    <string name="cloudStorageQuerySearchImpossibleSelectDrive">No se puede buscar. No se ha seleccionado ningún drive</string>
     <string name="commonFolderDescription">Comparte esta carpeta con los usuarios del kDrive %s</string>
     <string name="commonFolderTitle">Carpeta común</string>
     <string name="contentDescriptionIsSelected">Está seleccionado</string>

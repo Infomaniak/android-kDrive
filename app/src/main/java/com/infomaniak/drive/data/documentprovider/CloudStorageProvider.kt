@@ -23,7 +23,9 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.graphics.Point
 import android.net.Uri
+import android.os.Build
 import android.os.CancellationSignal
+import android.os.Handler
 import android.os.ParcelFileDescriptor
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
@@ -31,32 +33,45 @@ import android.util.Log
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.KDriveHttpClient
+import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.utils.ApiController
 import io.realm.Realm
+import io.sentry.Sentry
+import io.sentry.SentryLevel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import okhttp3.OkHttpClient
+import java.io.IOException
 import java.net.URLEncoder
+import java.util.*
 
 class CloudStorageProvider : DocumentsProvider() {
 
+    private lateinit var cacheDir: java.io.File
+
     override fun onCreate(): Boolean {
         Log.d(TAG, "onCreate")
+
         var result = false
         runBlocking {
             context?.let {
+                cacheDir = java.io.File(it.filesDir, "cloud_storage_temp_files")
                 it.initRealm()
                 result = true
             }
@@ -108,16 +123,14 @@ class CloudStorageProvider : DocumentsProvider() {
                 else -> { // isFile
                     val fileId = getFileIdFromDocumentId(documentId)
                     val userDrive = UserDrive(userId.toInt(), driveDocument.id, fromSharedWithMe)
-                    FileController.getFileById(fileId, userDrive)?.let { file ->
-                        addFile(file, documentId)
+                    FileController.getRealmInstance(userDrive).use { realm ->
+                        FileController.getFileProxyById(fileId, customRealm = realm)?.let { file ->
+                            addFile(file, documentId)
+                        }
                     }
                 }
             }
         }
-    }
-
-    private fun comeFromSharedWithMe(documentId: String): Boolean {
-        return documentId.split("/").getOrNull(1) == SHARED_WITHME_FOLDER_ID.toString()
     }
 
     override fun queryChildDocuments(parentDocumentId: String, projection: Array<out String>?, sortOrder: String?): Cursor {
@@ -126,10 +139,10 @@ class CloudStorageProvider : DocumentsProvider() {
         val cursor = DocumentCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION)
 
         val uri = DocumentCursor.createUri(context, parentDocumentId)
-        val isNewJob = uri != oldQueryChildUri
+        val isNewJob = uri != oldQueryChildUri || needRefresh
         val isLoading = uri == oldQueryChildUri && oldQueryChildCursor?.job?.isCompleted == false || isNewJob
 
-        Log.i(TAG, "queryChildDocuments() isloading:$isLoading, isnew: $isNewJob")
+        Log.i(TAG, "queryChildDocuments(), isLoading=$isLoading, isNew=$isNewJob")
 
         cursor.extras = bundleOf(DocumentsContract.EXTRA_LOADING to isLoading)
         cursor.setNotificationUri(context?.contentResolver, uri)
@@ -139,6 +152,7 @@ class CloudStorageProvider : DocumentsProvider() {
             oldQueryChildUri = uri
             oldQueryChildCursor = cursor
             currentParentDocumentId = parentDocumentId
+            needRefresh = false
         } else {
             cursor.restore(oldQueryChildCursor!!)
             cursor.extras = bundleOf(DocumentsContract.EXTRA_LOADING to false)
@@ -157,7 +171,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
         when {
             isRootFolder -> {
-                cursor.addRootDrives(userId)
+                cursor.addRootDrives(userId, isRootFolder = true)
 
                 var documentId = parentDocumentId + SEPARATOR + MY_SHARES_FOLDER_ID
                 var name = context?.getString(R.string.mySharesTitle) ?: "My Shares"
@@ -215,17 +229,19 @@ class CloudStorageProvider : DocumentsProvider() {
         Log.d(TAG, "openDocument(), id=$documentId, mode=$mode, signalIsCancelled: ${signal?.isCanceled}")
         val context = context ?: return null
 
+        val isWrite = mode.indexOf('w') != -1
         val accessMode = ParcelFileDescriptor.parseMode(mode)
         val fileId = getFileIdFromDocumentId(documentId)
-        val driveId = getDriveFromDocId(documentId).id
-        val userId = getUserId(documentId).toInt()
-        val userDrive = UserDrive(userId, driveId, comeFromSharedWithMe(documentId))
+        val userDrive = createUserDrive(documentId)
         val file = FileController.getFileById(fileId, userDrive)
 
-        if (file != null) {
-            return getDataFile(context, file, userDrive, accessMode)
+        return file?.let {
+            if (isWrite) {
+                writeDataFile(context, file, userDrive, accessMode)
+            } else {
+                getDataFile(context, file, userDrive, accessMode)
+            }
         }
-        return null
     }
 
     override fun querySearchDocuments(rootId: String, query: String, projection: Array<out String>?): Cursor {
@@ -239,7 +255,7 @@ class CloudStorageProvider : DocumentsProvider() {
             getFileIdFromDocumentId(currentParentDocumentId!!) == MY_SHARES_FOLDER_ID
         ) {
             cursor.extras =
-                bundleOf(DocumentsContract.EXTRA_ERROR to context?.getString(R.string.cloudStorageSuerySearchImpossibleSelectDrive))
+                bundleOf(DocumentsContract.EXTRA_ERROR to context?.getString(R.string.cloudStorageQuerySearchImpossibleSelectDrive))
             return cursor
         }
 
@@ -280,36 +296,295 @@ class CloudStorageProvider : DocumentsProvider() {
 
         val fileId = getFileIdFromDocumentId(documentId)
         val userId = getUserId(documentId)
-        val driveId = getDriveFromDocId(documentId)
 
+        return FileController.getRealmInstance(createUserDrive(documentId)).use { realm ->
+
+            FileController.getFileProxyById(fileId, customRealm = realm)?.let { file ->
+
+                generateThumbnail(fileId, file, userId)?.let { parcel ->
+                    AssetFileDescriptor(parcel, 0, AssetFileDescriptor.UNKNOWN_LENGTH)
+                }
+
+            } ?: super.openDocumentThumbnail(documentId, sizeHint, signal)
+        }
+    }
+
+    private fun generateThumbnail(fileId: Int, file: File, userId: String): ParcelFileDescriptor? {
+
+        val outputFolder = java.io.File(context?.cacheDir, "thumbnails").apply { if (!exists()) mkdirs() }
+        val name = "${fileId}_${file.name}"
+        val outputFile = java.io.File(outputFolder, name)
         var parcel: ParcelFileDescriptor? = null
-        val userDrive = UserDrive(userId.toInt(), driveId.id, comeFromSharedWithMe(documentId))
-        FileController.getFileById(fileId, userDrive)?.let { file ->
-            val outputFolder = java.io.File(context?.cacheDir, "thumbnails").apply { if (!exists()) mkdirs() }
-            val name = "${fileId}_${file.name}"
-            val outputFile = java.io.File(outputFolder, name)
 
-            try {
-                val okHttpClient: OkHttpClient
-                runBlocking { okHttpClient = KDriveHttpClient.getHttpClient(userId.toInt()) }
-                val response = DownloadWorker.downloadFileResponse(file.thumbnail(), okHttpClient) {}
+        try {
+            val okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(userId.toInt()) }
+            val response = DownloadWorker.downloadFileResponse(file.thumbnail(), okHttpClient) {}
 
-                if (response.isSuccessful) {
-                    DownloadWorker.saveRemoteData(response, outputFile) {
-                        parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
-                    }
-                } else if (outputFile.exists()) {
+            if (response.isSuccessful) {
+                DownloadWorker.saveRemoteData(response, outputFile) {
                     parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                if (outputFile.exists()) parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
+            } else if (outputFile.exists()) {
+                parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
             }
 
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+
+            if (outputFile.exists()) {
+                parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
+            }
         }
 
-        return if (parcel == null) super.openDocumentThumbnail(documentId, sizeHint, signal)
-        else AssetFileDescriptor(parcel, 0, AssetFileDescriptor.UNKNOWN_LENGTH)
+        return parcel
+    }
+
+    override fun createDocument(parentDocumentId: String, mimeType: String, displayName: String): String {
+        Log.d(TAG, "createDocument(), parentId=$parentDocumentId, mimeType=$mimeType, name=$displayName")
+
+        return if (mimeType.equals(DocumentsContract.Document.MIME_TYPE_DIR, true)) {
+            createNewFolder(parentDocumentId, displayName) // If we want to create a new folder
+        } else {
+            createNewFile(parentDocumentId, displayName) // If another provider copies or moves a file into kDrive
+        }
+    }
+
+    override fun deleteDocument(documentId: String) {
+        Log.d(TAG, "deleteDocument(), id=$documentId")
+
+        val context = context ?: throw IllegalStateException("Delete document failed: missing Android Context")
+
+        FileController.getRealmInstance(createUserDrive(documentId)).use { realm ->
+            FileController.getFileProxyById(getFileIdFromDocumentId(documentId), customRealm = realm)?.let { file ->
+
+                // Delete
+                val apiResponse = FileController.deleteFile(file, realm, context = context)
+
+                if (apiResponse.isSuccess()) {
+
+                    // Delete orphans
+                    FileController.removeOrphanAndActivityFiles(realm)
+
+                    // Refresh
+                    scheduleRefresh()
+
+                } else {
+                    throw RuntimeException("Delete document failed")
+                }
+            }
+        }
+    }
+
+    override fun renameDocument(documentId: String, displayName: String): String? {
+        Log.d(TAG, "renameDocument(), id=$documentId, name=$displayName")
+
+        FileController.getRealmInstance(createUserDrive(documentId)).use { realm ->
+            FileController.getFileProxyById(getFileIdFromDocumentId(documentId), customRealm = realm)?.let { file ->
+
+                // Rename
+                val apiResponse = FileController.renameFile(file, displayName, realm)
+
+                if (apiResponse.isSuccess()) {
+                    // Refresh
+                    scheduleRefresh()
+
+                } else {
+                    throw RuntimeException("Rename document failed")
+                }
+            }
+        }
+
+        return null
+    }
+
+    override fun copyDocument(sourceDocumentId: String, targetParentDocumentId: String): String {
+        Log.d(TAG, "copyDocument(), sourceId=$sourceDocumentId, targetParentId=$targetParentDocumentId")
+
+        return FileController.getRealmInstance(createUserDrive(sourceDocumentId)).use { realm ->
+
+            val fileId = getFileIdFromDocumentId(sourceDocumentId)
+            val file =
+                FileController.getFileProxyById(fileId, customRealm = realm) ?: throw IllegalStateException("File not found")
+            val copyName = file.name
+            val targetParentFileId = getFileIdFromDocumentId(targetParentDocumentId)
+
+            val apiResponse = ApiRepository.duplicateFile(file, copyName, targetParentFileId)
+
+            if (apiResponse.isSuccess()) {
+
+                // Refresh
+                scheduleRefresh()
+
+                return@use sourceDocumentId
+            } else {
+                throw RuntimeException("Copy document failed")
+            }
+        }
+    }
+
+    override fun moveDocument(sourceDocumentId: String, sourceParentDocumentId: String, targetParentDocumentId: String): String {
+        Log.d(
+            TAG, "moveDocument(), " +
+                    "sourceId=$sourceDocumentId, " +
+                    "sourceParentId=$sourceParentDocumentId, " +
+                    "targetParentId=$targetParentDocumentId"
+        )
+
+        return FileController.getRealmInstance(createUserDrive(sourceDocumentId)).use { realm ->
+
+            val fileNotFoundException = IllegalStateException("File not found")
+
+            val fileId = getFileIdFromDocumentId(sourceDocumentId)
+            val file = FileController.getFileProxyById(fileId, customRealm = realm) ?: throw fileNotFoundException
+
+            val targetParentFileId = getFileIdFromDocumentId(targetParentDocumentId)
+            val targetParentFile =
+                FileController.getFileProxyById(targetParentFileId, customRealm = realm) ?: throw fileNotFoundException
+
+            val apiResponse = ApiRepository.moveFile(file, targetParentFile)
+
+            if (apiResponse.isSuccess()) {
+                realm.executeTransaction { file.deleteFromRealm() }
+
+                // Refresh
+                scheduleRefresh(sourceParentDocumentId)
+
+                return@use sourceDocumentId
+
+            } else {
+                throw RuntimeException("Move document failed")
+            }
+        }
+    }
+
+    private fun createNewFolder(parentDocumentId: String, displayName: String): String {
+
+        val userDrive = createUserDrive(parentDocumentId)
+        val parentId = getFileIdFromDocumentId(parentDocumentId)
+
+        val apiResponse = runBlocking { FileController.createFolder(displayName, parentId, true, userDrive) }
+        val file = apiResponse.data
+
+        if (apiResponse.isSuccess() && file != null) {
+
+            FileController.addFileTo(parentId, file, userDrive)
+
+            // Refresh
+            scheduleRefresh()
+
+            return createFileDocumentId(parentDocumentId, file.id)
+        }
+
+        throw RuntimeException("Create folder failed")
+    }
+
+    private fun createNewFile(parentDocumentId: String, displayName: String): String {
+
+        val driveId = getDriveFromDocId(parentDocumentId).id
+        val parentFolderId = getFileIdFromDocumentId(parentDocumentId)
+        val userDrive = createUserDrive(parentDocumentId)
+
+        val uploadUrl = ApiRoutes.uploadFile(driveId, parentFolderId) +
+                "?total_size=0" +
+                "&file_name=${URLEncoder.encode(displayName, "UTF-8")}" +
+                "&last_modified_at=${Date().time / 1_000L}" +
+                "&conflict=" + UploadTask.Companion.ConflictOption.RENAME.toString()
+
+        val apiResponse = ApiController.callApi<ApiResponse<List<File>>>(
+            uploadUrl,
+            ApiController.ApiMethod.PUT,
+            okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(userDrive.userId, 120) }
+        )
+        val file = apiResponse.data?.firstOrNull()
+
+        if (apiResponse.isSuccess() && file != null) {
+            FileController.addFileTo(parentFolderId, file, userDrive)
+
+            createTempFile(getFileIdFromDocumentId(parentDocumentId), displayName)
+
+            return createFileDocumentId(parentDocumentId, file.id)
+        }
+
+        throw RuntimeException("Copy file failed")
+    }
+
+    private fun createTempFile(parentFileId: Int, displayName: String): java.io.File {
+        val tempFileFolder = java.io.File(cacheDir, "$parentFileId").apply { if (!exists()) mkdirs() }
+        return java.io.File(tempFileFolder, displayName).apply { if (!exists()) createNewFile() }
+    }
+
+    private fun writeDataFile(context: Context, file: File, userDrive: UserDrive, accessMode: Int): ParcelFileDescriptor? {
+        val parentFileId = FileController.getParentFile(file.id, userDrive)?.id ?: return null
+        val tempFile = createTempFile(parentFileId, file.name)
+        val handler = Handler(context.mainLooper)
+
+        return ParcelFileDescriptor.open(tempFile, accessMode, handler) { exception: IOException? ->
+            if (exception == null) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    UploadFile(
+                        uri = tempFile.toUri().toString(),
+                        driveId = userDrive.driveId,
+                        fileCreatedAt = Date(),
+                        fileName = file.name,
+                        fileSize = tempFile.length(),
+                        remoteFolder = parentFileId,
+                        type = UploadFile.Type.CLOUD_STORAGE.name,
+                        userId = userDrive.userId,
+                    ).store()
+                    context.syncImmediately()
+                }
+            } else {
+                exception.printStackTrace()
+                Sentry.withScope { scope ->
+                    scope.level = SentryLevel.INFO
+                    scope.setExtra("tempFile path", tempFile.path)
+                    Sentry.captureException(exception)
+                }
+            }
+        }
+    }
+
+    private fun getDataFile(context: Context, file: File, userDrive: UserDrive, accessMode: Int): ParcelFileDescriptor? {
+        val cacheFile = file.getCacheFile(context, userDrive)
+        val offlineFile = file.getOfflineFile(context, userDrive.userId)
+
+        try {
+            // Get offline file if it's intact
+            if (offlineFile != null && file.isOfflineAndIntact(offlineFile)) {
+                return ParcelFileDescriptor.open(offlineFile, accessMode)
+            }
+
+            // Get cache file if it's exists and if the file is updated
+            if (!file.isObsolete(cacheFile) && file.size == cacheFile.length()) {
+                return ParcelFileDescriptor.open(cacheFile, accessMode)
+            }
+
+            // Download data file
+            val okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(userDrive.userId) }
+            val response = DownloadWorker.downloadFileResponse(
+                fileUrl = ApiRoutes.downloadFile(file),
+                okHttpClient = okHttpClient
+            ) { progress ->
+                Log.i(TAG, "open currentProgress: $progress")
+            }
+
+            if (response.isSuccessful) {
+                DownloadWorker.saveRemoteData(response, cacheFile)
+                cacheFile.setLastModified(file.getLastModifiedInMilliSecond())
+                return ParcelFileDescriptor.open(cacheFile, accessMode)
+            }
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+        }
+
+        return null
+    }
+
+    private fun scheduleRefresh(sourceParentDocumentId: String? = currentParentDocumentId) {
+        sourceParentDocumentId?.let {
+            needRefresh = true
+            context?.contentResolver?.notifyChange(DocumentCursor.createUri(context, it), null)
+        }
     }
 
     private fun MatrixCursor.addRoot(rootId: String, documentId: String, summary: String) {
@@ -327,27 +602,47 @@ class CloudStorageProvider : DocumentsProvider() {
         }
     }
 
-    private fun MatrixCursor.addRootDrives(userId: Int, shareFolderID: Int? = null, shareWithMe: Boolean = false) {
+    private fun MatrixCursor.addRootDrives(
+        userId: Int,
+        shareFolderID: Int? = null,
+        shareWithMe: Boolean = false,
+        isRootFolder: Boolean = false
+    ) {
         runBlocking {
             DriveInfosController.getDrives(userId, sharedWithMe = shareWithMe).forEach { drive ->
                 val driveDocument = "${drive.name}$DRIVE_SEPARATOR${drive.id}"
                 val documentId =
                     if (shareFolderID == null) "$userId$SEPARATOR$driveDocument$SEPARATOR${Utils.ROOT_ID}"
                     else "$userId$SEPARATOR$shareFolderID$SEPARATOR$driveDocument$SEPARATOR${Utils.ROOT_ID}"
-                addFile(null, documentId, drive.name)
+                addFile(null, documentId, drive.name, isRootFolder)
             }
         }
     }
 
-    private fun MatrixCursor.addFile(file: File?, documentId: String, name: String = "") {
+    private fun MatrixCursor.addFile(file: File?, documentId: String, name: String = "", isRootFolder: Boolean = false) {
         var flags = 0
 
-        if (file?.isFolder() == true) flags = flags or DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE
+        if ((file?.isFolder() == true && file.rights?.newFile == true) || isRootFolder) {
+            flags = flags or DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE
+        }
 
-        val mimetype = if (file == null || file.isFolder()) DocumentsContract.Document.MIME_TYPE_DIR else file.getMimeType()
+        val mimetype = if (file == null || file.isFolder()) {
+            DocumentsContract.Document.MIME_TYPE_DIR
+        } else file.getMimeType()
 
         if (file?.isFolder() == false && file.hasThumbnail) {
             flags = flags or DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL
+        }
+
+        if (file != null) {
+            flags = flags or
+                    DocumentsContract.Document.FLAG_SUPPORTS_DELETE or
+                    DocumentsContract.Document.FLAG_SUPPORTS_RENAME
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                flags = flags or
+                        DocumentsContract.Document.FLAG_SUPPORTS_COPY or
+                        DocumentsContract.Document.FLAG_SUPPORTS_MOVE
+            }
         }
 
         newRow().apply {
@@ -385,7 +680,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
     companion object {
 
-        val mutex = Mutex()
+        private val mutex = Mutex()
 
         private const val TAG = "CloudStorageProvider"
         private const val SEPARATOR = "/"
@@ -402,6 +697,8 @@ class CloudStorageProvider : DocumentsProvider() {
 
         private var oldSearchUri: Uri? = null
         private var oldSearchCursor: DocumentCursor? = null
+
+        private var needRefresh: Boolean = false
 
         private val DEFAULT_ROOT_PROJECTION = arrayOf(
             DocumentsContract.Root.COLUMN_ROOT_ID,
@@ -433,7 +730,9 @@ class CloudStorageProvider : DocumentsProvider() {
         }
 
         private fun getUserId(documentId: String) = documentId.substringBefore(SEPARATOR)
+
         private fun getFileIdFromDocumentId(documentId: String) = documentId.substringAfterLast(SEPARATOR).toInt()
+
         private fun createFileDocumentId(parentDocumentId: String, fileId: Int): String {
             return parentDocumentId.substringBeforeLast(SEPARATOR) + SEPARATOR + fileId.toString()
         }
@@ -460,41 +759,6 @@ class CloudStorageProvider : DocumentsProvider() {
             }
         }
 
-        private fun getDataFile(
-            context: Context,
-            file: File,
-            userDrive: UserDrive,
-            accessMode: Int
-        ): ParcelFileDescriptor? {
-            val cacheFile = file.getCacheFile(context, userDrive)
-            val offlineFile = file.getOfflineFile(context, userDrive.userId)
-
-            try {
-                if (offlineFile != null && file.isOfflineAndIntact(offlineFile))
-                    return ParcelFileDescriptor.open(offlineFile, accessMode)
-                if (!file.isObsolete(cacheFile) && file.size == cacheFile.length())
-                    return ParcelFileDescriptor.open(cacheFile, accessMode)
-
-                val okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(userDrive.userId) }
-                val response = DownloadWorker.downloadFileResponse(
-                    ApiRoutes.downloadFile(file),
-                    okHttpClient
-                ) { progress ->
-                    Log.i(TAG, "open currentProgress: $progress")
-                }
-
-                if (response.isSuccessful) {
-                    DownloadWorker.saveRemoteData(response, cacheFile)
-                    cacheFile.setLastModified(file.getLastModifiedInMilliSecond())
-                    return ParcelFileDescriptor.open(cacheFile, accessMode)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-
-            return null
-        }
-
         fun createShareFileUri(context: Context, file: File, userDrive: UserDrive = UserDrive()): Uri? {
             val currentUserId = userDrive.userId
             val currentDriveId = userDrive.driveId
@@ -508,6 +772,16 @@ class CloudStorageProvider : DocumentsProvider() {
 
             return null
         }
+
+        private fun comeFromSharedWithMe(documentId: String): Boolean =
+            documentId.split("/").getOrNull(1) == SHARED_WITHME_FOLDER_ID.toString()
+
+        private fun createUserDrive(documentId: String): UserDrive =
+            UserDrive(
+                getUserId(documentId).toInt(),
+                getDriveFromDocId(documentId).id,
+                comeFromSharedWithMe(documentId)
+            )
 
         fun notifyRootsChanged(context: Context) {
             val authority = context.getString(R.string.CLOUD_STORAGE_AUTHORITY)
