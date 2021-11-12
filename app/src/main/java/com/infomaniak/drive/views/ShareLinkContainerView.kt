@@ -25,9 +25,7 @@ import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
-import com.infomaniak.drive.utils.getTypeName
 import com.infomaniak.drive.utils.shareText
-import com.infomaniak.lib.core.utils.FORMAT_SHARELINK_DATE
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.view_share_link_container.view.*
 
@@ -92,19 +90,34 @@ class ShareLinkContainerView @JvmOverloads constructor(
 
                 currentFile.getTypeName(context),
 
-                if (shareLink?.permission == ShareLink.ShareLinkFilePermission.PASSWORD)
+                if (shareLink?.permission == ShareLink.ShareLinkFilePermission.PASSWORD) {
                     context.getString(R.string.shareLinkPublicRightDescriptionPassword)
-                else "",
+                } else "",
 
-                if (shareLink?.validUntil != null)
+                if (shareLink?.validUntil != null) {
                     context.getString(
                         R.string.shareLinkPublicRightDescriptionDate,
-                        shareLink?.validUntil?.format(FORMAT_SHARELINK_DATE)
+                        shareLink?.validUntil?.format(formatFullDate)
                     )
-                else ""
+                } else ""
             )
         }
 
         shareLinkStatus.text = title
+    }
+
+    private fun File.getTypeName(context: Context): String = context.getString(getTypeName(isFolder(), onlyoffice))
+
+    companion object {
+
+        const val formatFullDate = "dd MMM yyyy - HH:mm"
+
+        fun getTypeName(isFolder: Boolean, isOnlyOffice: Boolean): Int {
+            return when {
+                isFolder -> R.string.shareLinkTypeFolder
+                isOnlyOffice -> R.string.shareLinkTypeDocument
+                else -> R.string.shareLinkTypeFile
+            }
+        }
     }
 }

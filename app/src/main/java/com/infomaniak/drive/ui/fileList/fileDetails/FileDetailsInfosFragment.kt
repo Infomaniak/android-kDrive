@@ -35,6 +35,7 @@ import com.infomaniak.drive.data.models.Share
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.views.ShareLinkContainerView
 import com.infomaniak.drive.views.UserAvatarView
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.fragment_file_details.*
@@ -56,12 +57,12 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
             setupShareButton(currentFile)
 
             if (currentFile.createdAt.isPositive()) {
-                addedDateValue.text = currentFile.getCreatedAt().format("dd MMM yyyy - HH:mm")
+                addedDateValue.text = currentFile.getCreatedAt().format(ShareLinkContainerView.formatFullDate)
                 addedDate.isVisible = true
             }
 
             if (currentFile.fileCreatedAt.isPositive()) {
-                creationDateValue.text = currentFile.getFileCreatedAt().format("dd MMM yyyy - HH:mm")
+                creationDateValue.text = currentFile.getFileCreatedAt().format(ShareLinkContainerView.formatFullDate)
                 creationDate.isVisible = true
             }
 
