@@ -155,7 +155,7 @@
         android:id="@+id/sortFilesBottomSheetDialog"
         android:name="com.infomaniak.drive.ui.fileList.SortFilesBottomSheetDialog"
         android:label="SortFilesBottomSheetDialog"
-        tools:layout="@layout/fragment_bottom_sheet_sort_files">
+        tools:layout="@layout/fragment_bottom_sheet_select">
         <argument
             android:name="sortType"
             android:defaultValue="NAME_AZ"

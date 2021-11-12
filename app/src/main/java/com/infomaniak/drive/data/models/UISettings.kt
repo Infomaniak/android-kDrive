@@ -88,7 +88,7 @@ class UISettings(val context: Context) {
                 File.SortType.RECENT.name -> File.SortType.RECENT
                 File.SortType.BIGGER.name -> File.SortType.BIGGER
                 File.SortType.SMALLER.name -> File.SortType.SMALLER
-                File.SortType.EXTENSION.name -> File.SortType.EXTENSION
+                //File.SortType.EXTENSION.name -> File.SortType.EXTENSION
                 else -> File.SortType.NAME_AZ
             }
         }

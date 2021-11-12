@@ -179,9 +179,9 @@
 
     <dialog
         android:id="@+id/switchDriveDialog"
-        android:name="com.infomaniak.drive.ui.home.SwitchDriveDialog"
+        android:name="com.infomaniak.drive.ui.SwitchDriveDialog"
         android:label="ActionMultiSelectBottomSheetDialog"
-        tools:layout="@layout/dialog_switch_drive" />
+        tools:layout="@layout/fragment_bottom_sheet_select" />
 
     <fragment
         android:id="@+id/activityFilesFragment"
@@ -234,9 +234,6 @@
         <action
             android:id="@+id/action_menuFragment_to_switchUserActivity"
             app:destination="@id/switchUserActivity" />
-        <action
-            android:id="@+id/action_menuFragment_to_homeFragment"
-            app:destination="@id/homeFragment" />
         <action
             android:id="@+id/action_menuFragment_to_settingsFragment"
             app:destination="@id/settingsFragment"
@@ -361,7 +358,7 @@
         android:id="@+id/sortFilesBottomSheetDialog"
         android:name="com.infomaniak.drive.ui.fileList.SortFilesBottomSheetDialog"
         android:label="SortFilesBottomSheetDialog"
-        tools:layout="@layout/fragment_bottom_sheet_sort_files">
+        tools:layout="@layout/fragment_bottom_sheet_select">
         <argument
             android:name="sortType"
             android:defaultValue="NAME_AZ"

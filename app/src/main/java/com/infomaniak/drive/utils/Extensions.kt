@@ -420,11 +420,10 @@ fun View.setMargin(left: Int? = null, top: Int? = null, right: Int? = null, bott
 /**
  * Send a value to the previous navigation
  */
-fun <T> Fragment.setBackNavigationResult(key: String, value: T, popBackStack: Boolean = true) {
-    findNavController().previousBackStackEntry?.savedStateHandle?.set(key, value)
-
-    if (popBackStack) {
-        findNavController().popBackStack()
+fun <T> Fragment.setBackNavigationResult(key: String, value: T) {
+    findNavController().apply {
+        previousBackStackEntry?.savedStateHandle?.set(key, value)
+        popBackStack()
     }
 }
 

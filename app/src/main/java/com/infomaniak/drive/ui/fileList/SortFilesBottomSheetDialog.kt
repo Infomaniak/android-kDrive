@@ -18,78 +18,29 @@
 package com.infomaniak.drive.ui.fileList
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.core.view.isGone
-import androidx.core.view.isVisible
 import androidx.navigation.fragment.navArgs
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.setBackNavigationResult
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_sort_files.*
+import com.infomaniak.drive.views.SelectBottomSheetDialog
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_select.*
 
-class SortFilesBottomSheetDialog : BottomSheetDialogFragment() {
+class SortFilesBottomSheetDialog : SelectBottomSheetDialog() {
 
     private val navigationArgs: SortFilesBottomSheetDialogArgs by navArgs()
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View = inflater.inflate(R.layout.fragment_bottom_sheet_sort_files, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        sortAz.setOnClickListener {
-            onSortTypeClicked(File.SortType.NAME_AZ)
+        selectTitle.setText(R.string.sortTitle)
+
+        selectRecyclerView.adapter = SortFilesBottomSheetAdapter(navigationArgs.sortType) {
+            onSortTypeClicked(it)
         }
-        sortZa.setOnClickListener {
-            onSortTypeClicked(File.SortType.NAME_ZA)
-        }
-        sortMostRecent.setOnClickListener {
-            onSortTypeClicked(File.SortType.RECENT)
-        }
-        sortOlder.setOnClickListener {
-            onSortTypeClicked(File.SortType.OLDER)
-        }
-        sortBigger.setOnClickListener {
-            onSortTypeClicked(File.SortType.BIGGER)
-        }
-        sortSmaller.setOnClickListener {
-            onSortTypeClicked(File.SortType.SMALLER)
-        }
-        sortExtension.setOnClickListener {
-            // TODO implement extension sort
-            onSortTypeClicked(File.SortType.EXTENSION)
-        }
-        updateCurrentSortTypeIcon(navigationArgs.sortType)
     }
 
     private fun onSortTypeClicked(sortType: File.SortType) {
-        updateCurrentSortTypeIcon(sortType)
-        setBackNavigationResult(FileListFragment.SORT_TYPE_OPTION_KEY, sortType, true)
-    }
-
-    private fun updateCurrentSortTypeIcon(currentSortType: File.SortType) {
-        val itemList = arrayListOf(
-            File.SortType.NAME_AZ to sortAzActiveIcon,
-            File.SortType.NAME_ZA to sortZaActiveIcon,
-            File.SortType.RECENT to sortMostRecentActiveIcon,
-            File.SortType.RECENT_TRASHED to sortMostRecentActiveIcon,
-            File.SortType.OLDER to sortOlderActiveIcon,
-            File.SortType.OLDER_TRASHED to sortOlderActiveIcon,
-            File.SortType.BIGGER to sortBiggerActiveIcon,
-            File.SortType.SMALLER to sortSmallerActiveIcon,
-            File.SortType.EXTENSION to sortExtensionActiveIcon
-        )
-
-        itemList.forEach { (sortType, checkIconView) ->
-            if (sortType == currentSortType) {
-                checkIconView.isVisible = true
-                return
-            } else checkIconView.isGone = true
-        }
+        setBackNavigationResult(FileListFragment.SORT_TYPE_OPTION_KEY, sortType)
     }
 }
