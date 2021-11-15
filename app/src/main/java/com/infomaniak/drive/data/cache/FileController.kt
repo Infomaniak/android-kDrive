@@ -54,6 +54,8 @@ object FileController {
     private val PICTURES_FILE = File(PICTURES_FILE_ID, name = "Pictures")
     private val RECENT_CHANGES_FILE = File(RECENT_CHANGES_FILE_ID, name = "Recent changes")
 
+    private const val COMMON_DOCUMENTS_FOLDER_NAME = "Common documents"
+
     private fun getFileById(realm: Realm, fileId: Int) = realm.where(File::class.java).equalTo("id", fileId).findFirst()
 
     // https://github.com/realm/realm-java/issues/1862
@@ -69,6 +71,12 @@ object FileController {
             }
         }
         return realm?.let(block) ?: getRealmInstance(userDrive).use(block)
+    }
+
+    fun getCommonDocumentsFolderID(): Int? {
+        return getRealmInstance().use { realm ->
+            realm.where(File::class.java).equalTo(File::name.name, COMMON_DOCUMENTS_FOLDER_NAME).findFirst()?.id
+        }
     }
 
     fun generateAndSavePath(fileId: Int, userDrive: UserDrive): String {
