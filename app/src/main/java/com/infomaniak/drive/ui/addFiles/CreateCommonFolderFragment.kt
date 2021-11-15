@@ -60,7 +60,6 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
         createFolderButton.setOnClickListener {
             createCommonFolder { file ->
                 file?.let {
-                    saveNewFolder(file)
                     requireActivity().showSnackbar(R.string.createCommonFolderSucces)
                     if (currentPermission == SPECIFIC_USERS) {
                         safeNavigate(
