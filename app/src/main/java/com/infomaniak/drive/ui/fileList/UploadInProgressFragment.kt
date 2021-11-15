@@ -282,7 +282,8 @@ class UploadInProgressFragment : FileListFragment() {
 
         private fun createFolderFile(fileId: Int, driveId: Int): File {
             val drive = DriveInfosController.getDrives(AccountUtils.currentUserId, driveId, null).first()
-            val userDrive = UserDrive(driveId = driveId, sharedWithMe = drive.sharedWithMe, driveName = drive.name)
+            val driveName = if (drive.sharedWithMe) drive.name else null
+            val userDrive = UserDrive(driveId = driveId, sharedWithMe = drive.sharedWithMe, driveName = driveName)
             val folder = FileController.getFileById(fileId, userDrive)!!
             val name: String
             val type: String
