@@ -266,6 +266,7 @@ class UploadInProgressFragment : FileListFragment() {
 
                     realmListener?.let {
                         uploadFiles = pendingFolders
+                        uploadFiles?.removeAllChangeListeners()
                         uploadFiles?.addChangeListener(it)
                     }
 
@@ -361,6 +362,7 @@ class UploadInProgressFragment : FileListFragment() {
 
                 realmListener?.let {
                     uploadFiles = currentUserPendingUploads
+                    uploadFiles?.removeAllChangeListeners()
                     uploadFiles?.addChangeListener(it)
                 }
                 pendingFiles = ArrayList(realmUpload.copyFromRealm(currentUserPendingUploads, 0))
