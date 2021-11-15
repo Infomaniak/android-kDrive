@@ -62,8 +62,8 @@ class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : Li
         lastReception = Date()
 
         return CallbackToFutureAdapter.getFuture { completer ->
-            timer = createRefreshTimer(milliseconds = 1000) {
-                if (Date().time - lastReception.time > 30000) onFinish(completer) else timer.start()
+            timer = createRefreshTimer(milliseconds = 1_000L) {
+                if (Date().time - lastReception.time > BULK_OPERATION_TIMEOUT) onFinish(completer) else timer.start()
             }
             timer.start()
 
@@ -104,5 +104,6 @@ class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : Li
         const val ACTION_UUID = "action_uuid"
         const val TOTAL_FILES_KEY = "total_files"
         const val OPERATION_TYPE_KEY = "operation_type_key"
+        const val BULK_OPERATION_TIMEOUT = 30_000L
     }
 }

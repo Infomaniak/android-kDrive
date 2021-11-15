@@ -118,7 +118,7 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         KDriveHttpClient.onRefreshTokenError = refreshTokenError
         initNotificationChannel()
         HttpClient.init(tokenInterceptorListener())
-        MqttClientWrapper.init(context = applicationContext)
+        MqttClientWrapper.init(applicationContext)
     }
 
     override fun newImageLoader(): ImageLoader {

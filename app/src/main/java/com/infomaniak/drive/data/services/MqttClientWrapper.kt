@@ -18,6 +18,7 @@
 package com.infomaniak.drive.data.services
 
 import android.content.Context
+import android.os.CountDownTimer
 import android.util.Log
 import androidx.lifecycle.LiveData
 import com.google.gson.JsonParser
@@ -25,14 +26,20 @@ import com.infomaniak.drive.data.models.ActionNotification
 import com.infomaniak.drive.data.models.ActionProgressNotification
 import com.infomaniak.drive.data.models.IpsToken
 import com.infomaniak.drive.data.models.Notification
+import com.infomaniak.drive.utils.SyncUtils.isBulkOperationActive
 import com.infomaniak.lib.core.utils.ApiController.gson
+import com.infomaniak.lib.core.utils.Utils
 import info.mqtt.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
 
 object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
 
+    private const val MQTT_AUTO_DISCONNECT_TIMER = 5_000L
+
     private lateinit var appContext: Context
     private lateinit var clientId: String
+    private lateinit var options: MqttConnectOptions
+    private lateinit var timer: CountDownTimer
     private var currentToken: IpsToken? = null
     private var isSubscribed: Boolean = false
 
@@ -40,32 +47,55 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
     private const val MQTT_PASS = "8QC5EwBqpZ2Z" // Yes it's normal, non-sensitive information
     private const val MQTT_URI = "wss://info-mq.infomaniak.com/ws"
 
-    private val client: MqttAndroidClient by lazy {
-        MqttAndroidClient(appContext, MQTT_URI, clientId)
-    }
-
-    private fun topicFor(token: IpsToken) = "drive/${token.uuid}"
-
-    private fun unsubscribe(topic: String) {
-        client.unsubscribe(topic, null, null)
-        isSubscribed = false
-    }
+    private val client: MqttAndroidClient by lazy { MqttAndroidClient(appContext, MQTT_URI, clientId) }
 
     fun init(context: Context) {
-        this.appContext = context
-        this.clientId = generateClientId()
+
+        fun generateClientId(): String {
+            return "mqtt_android_kdrive_" + buildString { repeat(10) { append(('a'..'z').random()) } }
+        }
+
+        appContext = context
+        clientId = generateClientId()
 
         client.setCallback(this)
-        val options = MqttConnectOptions()
+        options = MqttConnectOptions()
         options.userName = MQTT_USER
         options.password = MQTT_PASS.toCharArray()
         options.keepAliveInterval = 30
         options.isAutomaticReconnect = true
+    }
 
+    fun updateToken(token: IpsToken) {
+        if (token.uuid != currentToken?.uuid) {
+            if (isSubscribed) {
+                currentToken?.let { unsubscribe(topicFor(it)) }
+                subscribe(topicFor(token))
+            }
+            currentToken = token
+        }
+    }
+
+    fun start(completion: () -> Unit) {
         try {
             client.connect(options, null, object : IMqttActionListener {
                 override fun onSuccess(asyncActionToken: IMqttToken?) {
                     Log.i("MQTT connection", "Success : true")
+                    currentToken?.let {
+                        subscribe(topicFor(it))
+                        completion()
+                    }
+
+                    // If there is no more active worker, stop MQTT
+                    timer = Utils.createRefreshTimer(milliseconds = MQTT_AUTO_DISCONNECT_TIMER) {
+                        if (!appContext.isBulkOperationActive()) {
+                            currentToken?.let { unsubscribe(topicFor(it)) }
+                            client.disconnect()
+                        } else {
+                            timer.start()
+                        }
+                    }
+                    timer.start()
                 }
 
                 override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
@@ -79,20 +109,19 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
         }
     }
 
-    fun registerForNotifications(token: IpsToken) {
-        currentToken?.let { unsubscribe(topicFor(token)) }
-        currentToken = token
-        if (!isSubscribed) subscribe(topicFor(token))
-    }
-
-    // QoS0 to have auto-delete queues
+    // QoS 0 to have auto-delete queues
     private fun subscribe(topic: String, qos: Int = 0) {
         client.subscribe(topic, qos, null, null)
         isSubscribed = true
     }
 
-    private fun generateClientId(): String {
-        return "mqtt_android_kdrive_" + buildString { repeat(10) { append(('a'..'z').random()) } }
+    private fun unsubscribe(topic: String) {
+        client.unsubscribe(topic, null, null)
+        isSubscribed = false
+    }
+
+    private fun topicFor(token: IpsToken): String {
+        return "drive/${token.uuid}"
     }
 
     override fun connectionLost(cause: Throwable?) {
@@ -106,7 +135,6 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
             message.toString(),
             if (isProgress) ActionProgressNotification::class.java else ActionNotification::class.java
         )
-
         postValue(notification)
     }
 

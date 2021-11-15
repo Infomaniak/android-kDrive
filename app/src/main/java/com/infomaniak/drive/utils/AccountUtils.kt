@@ -146,7 +146,7 @@ object AccountUtils : CredentialManager {
                                 }
                             }
 
-                            MqttClientWrapper.registerForNotifications(driveInfo.ipsToken)
+                            MqttClientWrapper.updateToken(driveInfo.ipsToken)
 
                             TokenAuthenticator.mutex.withLock {
                                 if (currentUserId == user.id) {
