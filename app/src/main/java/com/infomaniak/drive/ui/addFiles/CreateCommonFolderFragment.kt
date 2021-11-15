@@ -27,7 +27,6 @@ import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
-import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.FolderPermission.ALL_DRIVE_USERS
 import com.infomaniak.drive.data.models.File.FolderPermission.SPECIFIC_USERS
@@ -61,7 +60,6 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
         createFolderButton.setOnClickListener {
             createCommonFolder { file ->
                 file?.let {
-                    saveNewFolder(file, FileController.getCommonDocumentsFolderID())
                     requireActivity().showSnackbar(R.string.createCommonFolderSucces)
                     if (currentPermission == SPECIFIC_USERS) {
                         safeNavigate(

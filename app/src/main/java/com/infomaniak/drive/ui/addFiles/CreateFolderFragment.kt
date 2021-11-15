@@ -78,10 +78,11 @@ open class CreateFolderFragment : Fragment() {
         return userList.size > 1 || teamList.isNotEmpty()
     }
 
-    protected fun saveNewFolder(newFolder: File, parentFolderID: Int? = null) {
-        val locationID = parentFolderID ?: mainViewModel.currentFolder.value?.id
-        locationID?.let {
-            runBlocking(Dispatchers.IO) { newFolderViewModel.saveNewFolder(it, newFolder) }
+    protected fun saveNewFolder(newFolder: File) {
+        mainViewModel.currentFolder.value?.id?.let { parentFolderID ->
+            runBlocking(Dispatchers.IO) {
+                newFolderViewModel.saveNewFolder(parentFolderID, newFolder)
+            }
         }
         mainViewModel.currentFolder.value = newFolder
     }
