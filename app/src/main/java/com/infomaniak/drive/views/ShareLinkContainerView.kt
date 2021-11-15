@@ -110,7 +110,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
 
     companion object {
 
-        const val formatFullDate = "dd MMM yyyy - HH:mm"
+        const val formatFullDate = "dd MMMM yyyy HH:mm"
 
         fun getTypeName(isFolder: Boolean, isOnlyOffice: Boolean): Int {
             return when {
