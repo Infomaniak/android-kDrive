@@ -458,7 +458,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
-    private fun setupFileAdapter() {
+    protected open fun setupFileAdapter() {
         mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
             fileAdapter.toggleOfflineMode(requireContext(), !isInternetAvailable)
             noNetwork.isGone = isInternetAvailable
@@ -646,7 +646,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun showPendingFiles() {
-        if (!showPendingFiles) return
+        val isNotCurrentDriveRoot = folderID == ROOT_ID && findNavController().currentDestination?.id != R.id.fileListFragment
+        if (!showPendingFiles || isNotCurrentDriveRoot) return
         fileListViewModel.getPendingFilesCount(folderID).observe(viewLifecycleOwner) { pendingFilesCount ->
             uploadFileInProgress.updateUploadFileInProgress(pendingFilesCount)
         }
