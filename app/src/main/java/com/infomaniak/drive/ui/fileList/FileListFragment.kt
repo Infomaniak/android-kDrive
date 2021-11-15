@@ -388,15 +388,17 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun sendBulkAction(fileCount: Int = 0, bulkOperation: BulkOperation) {
-        fileListViewModel.performCancellableBulkOperation(bulkOperation).observe(viewLifecycleOwner) { apiResponse ->
-            if (apiResponse.isSuccess()) {
-                apiResponse.data?.let { cancellableAction ->
-                    requireContext().launchBulkOperationWorker(
-                        generateWorkerData(cancellableAction.cancelId, fileCount, bulkOperation.action)
-                    )
-                }
-            } else requireActivity().showSnackbar(apiResponse.translateError())
-            closeMultiSelect()
+        MqttClientWrapper.start {
+            fileListViewModel.performCancellableBulkOperation(bulkOperation).observe(viewLifecycleOwner) { apiResponse ->
+                if (apiResponse.isSuccess()) {
+                    apiResponse.data?.let { cancellableAction ->
+                        requireContext().launchBulkOperationWorker(
+                            generateWorkerData(cancellableAction.cancelId, fileCount, bulkOperation.action)
+                        )
+                    }
+                } else requireActivity().showSnackbar(apiResponse.translateError())
+                closeMultiSelect()
+            }
         }
     }
 
