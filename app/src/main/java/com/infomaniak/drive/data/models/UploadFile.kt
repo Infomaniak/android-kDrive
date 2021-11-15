@@ -25,6 +25,7 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.core.net.toFile
 import androidx.core.net.toUri
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.sync.UploadMigration
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
@@ -116,17 +117,24 @@ open class UploadFile(
         }
 
         private fun allPendingFoldersQuery(realm: Realm): RealmQuery<UploadFile> {
-            return pendingUploadsQuery(realm, onlyCurrentUser = true).distinct(UploadFile::remoteFolder.name)
+            val sharedWithMeDriveIds =
+                DriveInfosController.getDrives(AccountUtils.currentUserId, sharedWithMe = true).map { it.id }
+            val currentDrive = AccountUtils.currentDriveId
+            val driveIds = arrayOf(currentDrive, *sharedWithMeDriveIds.toTypedArray())
+
+            return pendingUploadsQuery(realm, onlyCurrentUser = true, driveIds = driveIds).distinct(UploadFile::remoteFolder.name)
         }
 
         private fun pendingUploadsQuery(
             realm: Realm,
             folderId: Int? = null,
-            onlyCurrentUser: Boolean = false
+            onlyCurrentUser: Boolean = false,
+            driveIds: Array<Int>? = null
         ): RealmQuery<UploadFile> {
             return realm.where(UploadFile::class.java).apply {
                 folderId?.let { equalTo(UploadFile::remoteFolder.name, it) }
                 if (onlyCurrentUser) equalTo(UploadFile::userId.name, AccountUtils.currentUserId)
+                driveIds?.let { `in`(UploadFile::driveId.name, it) }
                 isNull(UploadFile::uploadAt.name)
                 isNull(UploadFile::deletedAt.name)
             }

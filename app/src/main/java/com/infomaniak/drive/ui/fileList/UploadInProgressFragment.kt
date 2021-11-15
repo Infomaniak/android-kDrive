@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.fileList
 import android.content.ContentResolver
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.util.ArrayMap
 import android.util.Log
 import android.view.View
 import androidx.activity.addCallback
@@ -257,16 +258,34 @@ class UploadInProgressFragment : FileListFragment() {
 
         private fun downloadPendingFolders() {
             UploadFile.getAllPendingFolders(realmUpload)?.let { pendingFolders ->
+
                 if (pendingFolders.count() == 1) {
                     val uploadFile = pendingFolders.first()!!
-                    val drive = DriveInfosController.getDrives(AccountUtils.currentUserId, uploadFile.driveId, null).first()
-                    val userDrive = UserDrive(driveId = uploadFile.driveId, sharedWithMe = drive.sharedWithMe)
+                    val isSharedWithMe = AccountUtils.currentDriveId == uploadFile.driveId
+                    val userDrive = UserDrive(driveId = uploadFile.driveId, sharedWithMe = isSharedWithMe)
                     val folder = FileController.getFileById(uploadFile.remoteFolder, userDrive)!!
                     navigateToUploadView(uploadFile.remoteFolder, folder.name)
+
                 } else {
                     val files = arrayListOf<File>()
+                    val drivesNames = ArrayMap<Int, String>()
+
                     pendingFolders.forEach { uploadFile ->
-                        files.add(createFolderFile(uploadFile.remoteFolder, uploadFile.driveId))
+                        val driveId = uploadFile.driveId
+                        val isSharedWithMe = AccountUtils.currentDriveId == driveId
+
+                        val driveName = if (drivesNames[driveId] == null) {
+                            val drive = DriveInfosController.getDrives(AccountUtils.currentUserId, driveId, null).first()
+                            drivesNames[driveId] = drive.name
+
+                            if (isSharedWithMe) drive.name else null
+
+                        } else {
+                            drivesNames[driveId]
+                        }
+
+                        val userDrive = UserDrive(driveId = driveId, sharedWithMe = isSharedWithMe, driveName = driveName)
+                        files.add(createFolderFile(uploadFile.remoteFolder, userDrive))
                     }
 
                     fileAdapter.isComplete = true
@@ -279,10 +298,7 @@ class UploadInProgressFragment : FileListFragment() {
             } ?: noFilesLayout.toggleVisibility(true)
         }
 
-        private fun createFolderFile(fileId: Int, driveId: Int): File {
-            val drive = DriveInfosController.getDrives(AccountUtils.currentUserId, driveId, null).first()
-            val driveName = if (drive.sharedWithMe) drive.name else null
-            val userDrive = UserDrive(driveId = driveId, sharedWithMe = drive.sharedWithMe, driveName = driveName)
+        private fun createFolderFile(fileId: Int, userDrive: UserDrive): File {
             val folder = FileController.getFileById(fileId, userDrive)!!
             val name: String
             val type: String
