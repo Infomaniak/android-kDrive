@@ -30,7 +30,6 @@ import androidx.fragment.app.FragmentActivity
 import androidx.work.*
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
-import com.infomaniak.drive.data.services.BulkOperationWorker
 import com.infomaniak.drive.data.services.PeriodicUploadWorker
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.FileObserveService
@@ -133,14 +132,6 @@ object SyncUtils {
     private fun Context.isAutoSyncActive(): Boolean {
         return WorkManager.getInstance(this).getWorkInfos(
             WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(PeriodicUploadWorker.TAG))
-                .addStates(arrayListOf(WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED))
-                .build()
-        ).get()?.isNotEmpty() == true
-    }
-
-    fun Context.isBulkOperationActive(): Boolean {
-        return WorkManager.getInstance(this).getWorkInfos(
-            WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(BulkOperationWorker.TAG))
                 .addStates(arrayListOf(WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED))
                 .build()
         ).get()?.isNotEmpty() == true

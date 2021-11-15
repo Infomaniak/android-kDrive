@@ -388,7 +388,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun sendBulkAction(fileCount: Int = 0, bulkOperation: BulkOperation) {
-        MqttClientWrapper.start() {
+        MqttClientWrapper.start {
             fileListViewModel.performCancellableBulkOperation(bulkOperation).observe(viewLifecycleOwner) { apiResponse ->
                 if (apiResponse.isSuccess()) {
                     apiResponse.data?.let { cancellableAction ->

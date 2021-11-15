@@ -26,7 +26,7 @@ import com.infomaniak.drive.data.models.ActionNotification
 import com.infomaniak.drive.data.models.ActionProgressNotification
 import com.infomaniak.drive.data.models.IpsToken
 import com.infomaniak.drive.data.models.Notification
-import com.infomaniak.drive.utils.SyncUtils.isBulkOperationActive
+import com.infomaniak.drive.utils.BulkOperationsUtils.isBulkOperationActive
 import com.infomaniak.lib.core.utils.ApiController.gson
 import com.infomaniak.lib.core.utils.Utils
 import info.mqtt.android.service.MqttAndroidClient
@@ -77,6 +77,13 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
     }
 
     fun start(completion: () -> Unit) {
+
+        // If we are already connected, just run the BulkOperation immediately
+        if (client.isConnected) {
+            completion()
+            return
+        }
+
         try {
             client.connect(options, null, object : IMqttActionListener {
                 override fun onSuccess(asyncActionToken: IMqttToken?) {
@@ -88,11 +95,11 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
 
                     // If there is no more active worker, stop MQTT
                     timer = Utils.createRefreshTimer(milliseconds = MQTT_AUTO_DISCONNECT_TIMER) {
-                        if (!appContext.isBulkOperationActive()) {
+                        if (appContext.isBulkOperationActive()) {
+                            timer.start()
+                        } else {
                             currentToken?.let { unsubscribe(topicFor(it)) }
                             client.disconnect()
-                        } else {
-                            timer.start()
                         }
                     }
                     timer.start()

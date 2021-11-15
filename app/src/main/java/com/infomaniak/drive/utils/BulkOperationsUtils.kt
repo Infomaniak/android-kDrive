@@ -44,4 +44,12 @@ object BulkOperationsUtils {
 
         WorkManager.getInstance(this).enqueue(bulkOperationWorkRequest)
     }
+
+    fun Context.isBulkOperationActive(): Boolean {
+        return WorkManager.getInstance(this).getWorkInfos(
+            WorkQuery.Builder.fromTags(listOf(BulkOperationWorker.TAG))
+                .addStates(arrayListOf(WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED))
+                .build()
+        ).get()?.isNotEmpty() == true
+    }
 }
