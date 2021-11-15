@@ -147,7 +147,7 @@ open class UploadFile(
             return allPendingFoldersQuery(realm).count()
         }
 
-        fun getCurrentUserPendingUploads(folderId: Int, realm: Realm): RealmResults<UploadFile>? {
+        fun getCurrentUserPendingUploads(realm: Realm, folderId: Int): RealmResults<UploadFile>? {
             return pendingUploadsQuery(realm, folderId, true).findAll()
         }
 

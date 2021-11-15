@@ -26,5 +26,5 @@ data class UserDrive(
     val userId: Int = AccountUtils.currentUserId,
     val driveId: Int = AccountUtils.currentDriveId,
     val sharedWithMe: Boolean = false,
-    val driveName: String? = null
+    val driveName: String? = null // SharedWithMe
 ) : Parcelable

@@ -306,7 +306,7 @@ class UploadInProgressFragment : FileListFragment() {
         }
 
         private fun downloadPendingFilesByFolderId() {
-            UploadFile.getCurrentUserPendingUploads(folderID, realmUpload)?.let { currentUserPendingUploads ->
+            UploadFile.getCurrentUserPendingUploads(realmUpload, folderID)?.let { currentUserPendingUploads ->
                 val files = arrayListOf<File>()
                 currentUserPendingUploads.forEach { uploadFile ->
                     val uri = uploadFile.getUriObject()
