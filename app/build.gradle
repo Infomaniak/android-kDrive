@@ -56,6 +56,13 @@ android {
             dimension "distribution"
         }
     }
+
+    gradle.buildFinished { BuildResult buildResult ->
+        try {
+            "say \"Ok\"".execute()
+        } catch (Throwable ignored) {
+        }
+    }
 }
 
 sentry {
