@@ -17,8 +17,6 @@
  */
 package com.infomaniak.drive.ui.home
 
-import android.content.res.ColorStateList
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -88,15 +86,13 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
         }
 
-        AccountUtils.getCurrentDrive()?.let { currentDrive ->
-            setDriveHeader(currentDrive)
-        }
+        AccountUtils.getCurrentDrive()?.let { currentDrive -> setDriveHeader(currentDrive) }
 
         mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
             noNetworkCard.isGone = isInternetAvailable
         }
 
-        driveInfos.setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
+        switchDriveButton.setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
 
         searchView.isGone = true
         searchViewText.isVisible = true
@@ -229,8 +225,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun setDriveHeader(currentDrive: Drive) {
-        driveName.text = currentDrive.name
-        driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(currentDrive.preferences.color))
+        switchDriveButton.text = currentDrive.name
     }
 
     private fun setupLastElementsTitle(isProOrTeam: Boolean) {

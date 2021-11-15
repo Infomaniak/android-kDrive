@@ -44,6 +44,34 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="120.8dp"
+                        android:gravity="bottom">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/switchDriveButton"
+                            style="@style/TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginEnd="@dimen/marginStandard"
+                            android:contentDescription="@string/buttonSwitchDrive"
+                            android:ellipsize="end"
+                            android:fontFamily="@font/suisseintl_bold"
+                            android:gravity="start|center"
+                            android:lineSpacingMultiplier="1"
+                            android:maxLines="2"
+                            android:textColor="@color/title"
+                            android:textSize="28sp"
+                            app:icon="@drawable/ic_keyboard_arrow_down"
+                            app:iconGravity="end"
+                            app:iconSize="28dp"
+                            app:iconTint="@color/iconColor"
+                            tools:text="Drive de test dev infomaniak" />
+
+                    </LinearLayout>
+
                     <include
                         android:id="@+id/noNetworkCard"
                         layout="@layout/view_network_unavailable_home"
@@ -54,72 +82,13 @@
                         android:visibility="gone"
                         tools:visibility="visible" />
 
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/driveInfos"
-                        style="@style/CardViewInfomaniak"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="@dimen/marginStandard"
-                        android:layout_marginTop="@dimen/marginStandard"
-                        android:layout_marginBottom="@dimen/marginStandard"
-                        android:clickable="true"
-                        android:contentDescription="@string/buttonSwitchDrive"
-                        android:focusable="true"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/searchForm">
-
-                        <androidx.constraintlayout.widget.ConstraintLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent">
-
-                            <ImageView
-                                android:id="@+id/driveIcon"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_margin="@dimen/marginStandard"
-                                android:src="@drawable/ic_drive"
-                                app:layout_constraintBottom_toBottomOf="parent"
-                                app:layout_constraintStart_toStartOf="parent"
-                                app:layout_constraintTop_toTopOf="parent"
-                                tools:ignore="ContentDescription" />
-
-                            <TextView
-                                android:id="@+id/driveName"
-                                style="@style/H1"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="@dimen/marginStandardSmall"
-                                android:layout_weight="1"
-                                android:textSize="20sp"
-                                app:layout_constraintBottom_toBottomOf="parent"
-                                app:layout_constraintEnd_toStartOf="@id/endChevron"
-                                app:layout_constraintStart_toEndOf="@id/driveIcon"
-                                app:layout_constraintTop_toTopOf="parent"
-                                tools:text="Westworld" />
-
-                            <ImageView
-                                android:id="@+id/endChevron"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginEnd="@dimen/marginStandardMedium"
-                                android:src="@drawable/ic_chevron_right"
-                                app:layout_constraintBottom_toBottomOf="parent"
-                                app:layout_constraintEnd_toEndOf="parent"
-                                app:layout_constraintTop_toTopOf="parent"
-                                tools:ignore="ContentDescription" />
-
-                        </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    </com.google.android.material.card.MaterialCardView>
-
                     <include
                         android:id="@+id/searchViewCard"
                         layout="@layout/item_search_view"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:layout_marginHorizontal="@dimen/marginStandard"
+                        android:layout_marginTop="@dimen/marginStandard"
                         android:layout_marginBottom="@dimen/marginStandardMedium" />
 
                     <include
@@ -148,8 +117,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="@dimen/marginStandard"
                         android:layout_marginTop="@dimen/marginStandardSmall"
-                        android:text="@string/homeLastFilesTitle"
-                        app:layout_constraintTop_toBottomOf="@id/driveInfos" />
+                        android:text="@string/homeLastFilesTitle" />
 
                     <com.github.rubensousa.gravitysnaphelper.GravitySnapRecyclerView
                         android:id="@+id/lastFilesRecyclerView"
@@ -163,7 +131,6 @@
                         android:paddingStart="@dimen/marginStandard"
                         android:paddingEnd="100dp"
                         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                        app:layout_constraintTop_toBottomOf="@id/lastFilesTitle"
                         app:snapGravity="start"
                         app:snapToPadding="true"
                         tools:ignore="RtlSymmetry"
