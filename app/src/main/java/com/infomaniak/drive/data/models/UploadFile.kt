@@ -116,7 +116,7 @@ open class UploadFile(
         }
 
         private fun allPendingFoldersQuery(realm: Realm): RealmQuery<UploadFile> {
-            return pendingUploadsQuery(realm).distinct(UploadFile::remoteFolder.name)
+            return pendingUploadsQuery(realm, onlyCurrentUser = true).distinct(UploadFile::remoteFolder.name)
         }
 
         private fun pendingUploadsQuery(
