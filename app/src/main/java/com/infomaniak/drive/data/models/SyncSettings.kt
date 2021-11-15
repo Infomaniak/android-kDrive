@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.models
 
-import android.os.Build
 import com.infomaniak.drive.R
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
@@ -52,16 +51,16 @@ open class SyncSettings(
         }
     }
 
-    enum class IntervalType(val title: Int, val immediately: Boolean, val interval: Long, val minAndroidSdk: Int) {
-        IMMEDIATELY(R.string.syncSettingsSyncPeriodicityInstantValue, true, INTERVAL_FOUR_HOURS, Build.VERSION_CODES.LOLLIPOP),
-        ONE_QUARTER(R.string.syncSettingsSyncPeriodicityOneQuarterValue, false, INTERVAL_QUARTER, Build.VERSION_CODES.N),
-        ONE_HOUR(R.string.syncSettingsSyncPeriodicityOneHourValue, false, INTERVAL_HOUR, Build.VERSION_CODES.LOLLIPOP),
-        FOUR_HOURS(R.string.syncSettingsSyncPeriodicityFourHoursValue, false, INTERVAL_FOUR_HOURS, Build.VERSION_CODES.LOLLIPOP)
+    enum class IntervalType(val title: Int, val immediately: Boolean, val interval: Long) {
+        IMMEDIATELY(R.string.syncSettingsSyncPeriodicityInstantValue, true, INTERVAL_FOUR_HOURS),
+        ONE_QUARTER(R.string.syncSettingsSyncPeriodicityOneQuarterValue, false, INTERVAL_QUARTER),
+        ONE_HOUR(R.string.syncSettingsSyncPeriodicityOneHourValue, false, INTERVAL_HOUR),
+        FOUR_HOURS(R.string.syncSettingsSyncPeriodicityFourHoursValue, false, INTERVAL_FOUR_HOURS)
     }
 
     companion object {
-        private const val INTERVAL_HOUR: Long = 60 * 60
-        private const val INTERVAL_QUARTER: Long = 15 * 60
-        private const val INTERVAL_FOUR_HOURS: Long = 4 * 60 * 60
+        private const val INTERVAL_HOUR: Long = 60 * 60L
+        private const val INTERVAL_QUARTER: Long = 15 * 60L
+        private const val INTERVAL_FOUR_HOURS: Long = 4 * 60 * 60L
     }
 }

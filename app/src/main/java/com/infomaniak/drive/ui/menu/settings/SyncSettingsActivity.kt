@@ -20,7 +20,6 @@ package com.infomaniak.drive.ui.menu.settings
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
@@ -150,6 +149,8 @@ class SyncSettingsActivity : BaseActivity() {
         }
 
         syncSettingsViewModel.syncIntervalType.observe(this) {
+            if (syncSettingsViewModel.syncIntervalType.value != oldSyncSettings?.getIntervalType()) editNumber++
+            changeSaveButtonStatus()
             syncPeriodicityValue.setText(it.title)
         }
 
@@ -207,29 +208,7 @@ class SyncSettingsActivity : BaseActivity() {
         }
 
         syncPeriodicity.setOnClickListener {
-            var syncIntervalType = syncSettingsViewModel.syncIntervalType.value!!
-            val choiceItems: ArrayList<String> = arrayListOf()
-            val intervalTypeList: ArrayList<SyncSettings.IntervalType> = arrayListOf()
-            for (intervalType in SyncSettings.IntervalType.values()) {
-                if (Build.VERSION.SDK_INT >= intervalType.minAndroidSdk) {
-                    choiceItems.add(getString(intervalType.title))
-                    intervalTypeList.add(intervalType)
-                }
-            }
-            val checkedItem = intervalTypeList.indexOfFirst { it == syncIntervalType }
-
-            MaterialAlertDialogBuilder(this, R.style.DialogStyle)
-                .setTitle(getString(R.string.syncSettingsButtonSyncPeriodicity))
-                .setSingleChoiceItems(choiceItems.toTypedArray(), checkedItem) { _, position ->
-                    syncIntervalType = intervalTypeList[position]
-                }
-                .setPositiveButton(R.string.buttonConfirm) { _, _ ->
-                    if (syncSettingsViewModel.syncIntervalType.value != syncIntervalType) editNumber++
-                    changeSaveButtonStatus()
-                    syncSettingsViewModel.syncIntervalType.value = syncIntervalType
-                }
-                .setNegativeButton(R.string.buttonCancel) { _, _ -> }
-                .setCancelable(false).show()
+            SelectIntervalTypeBottomSheetDialog().show(supportFragmentManager, "SyncSettingsSelectIntervalTypeBottomSheetDialog")
         }
 
         saveButton.initProgress(this)
