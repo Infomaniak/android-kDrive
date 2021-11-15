@@ -51,6 +51,7 @@ import kotlinx.android.synthetic.main.fragment_new_folder.*
 import kotlinx.android.synthetic.main.item_file_name.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class UploadInProgressFragment : FileListFragment() {
@@ -62,12 +63,8 @@ class UploadInProgressFragment : FileListFragment() {
     override var showPendingFiles = false
 
     private var pendingFiles = arrayListOf<UploadFile>()
-    private var uploadFiles: RealmResults<UploadFile>? = null
     private var isCancelled = false
     private var progressDialog: AlertDialog? = null
-
-
-    private var realmListener: OrderedRealmCollectionChangeListener<RealmResults<UploadFile>>? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         realmUpload = UploadFile.getRealmInstance()
@@ -128,11 +125,9 @@ class UploadInProgressFragment : FileListFragment() {
         fileAdapter.onFileClicked = null
         fileAdapter.uploadInProgress = true
         fileAdapter.checkIsPendingWifi(requireContext())
-        realmListener = createListener()
     }
 
     override fun onDestroy() {
-        realmListener?.let { uploadFiles?.removeChangeListener(it) }
         realmUpload.close()
         super.onDestroy()
     }
@@ -190,20 +185,30 @@ class UploadInProgressFragment : FileListFragment() {
     }
 
     private fun closeItemClicked(uploadFiles: ArrayList<UploadFile>? = null, folderId: Int? = null) {
-
-        progressDialog = Utils.createProgressDialog(requireContext(), R.string.allCancellationInProgress)
+        val progressDialog = Utils.createProgressDialog(requireContext(), R.string.allCancellationInProgress)
         isCancelled = true
         lifecycleScope.launch(Dispatchers.IO) {
-            uploadFiles?.let { UploadFile.deleteAll(uploadFiles) }
+            var needPopBackStack = false
+            uploadFiles?.let {
+                UploadFile.deleteAll(it)
+                needPopBackStack = true
+            }
             folderId?.let {
-                if (isPendingFolders()) {
-                    UploadFile.deleteAll(null)
-                } else {
-                    folderId.let { UploadFile.deleteAll(folderId) }
+                UploadFile.deleteAll(it)
+                needPopBackStack = UploadFile.getCurrentUserPendingUploadsCount(it) == 0
+            }
+
+            withContext(Dispatchers.Main) {
+                if (isResumed && needPopBackStack) {
+                    progressDialog.dismiss()
+                    val data = Data.Builder().putBoolean(UploadWorker.CANCELLED_BY_USER, true).build()
+                    requireContext().syncImmediately(data, true)
+                    popBackStack()
                 }
             }
         }
     }
+
 
     private fun isPendingFolders() = folderID == Utils.OTHER_ROOT_ID
 
@@ -262,12 +267,6 @@ class UploadInProgressFragment : FileListFragment() {
                     val files = arrayListOf<File>()
                     pendingFolders.forEach { uploadFile ->
                         files.add(createFolderFile(uploadFile.remoteFolder, uploadFile.driveId))
-                    }
-
-                    realmListener?.let {
-                        uploadFiles = pendingFolders
-                        uploadFiles?.removeAllChangeListeners()
-                        uploadFiles?.addChangeListener(it)
                     }
 
                     fileAdapter.isComplete = true
@@ -361,11 +360,6 @@ class UploadInProgressFragment : FileListFragment() {
                     }
                 }
 
-                realmListener?.let {
-                    uploadFiles = currentUserPendingUploads
-                    uploadFiles?.removeAllChangeListeners()
-                    uploadFiles?.addChangeListener(it)
-                }
                 pendingFiles = ArrayList(realmUpload.copyFromRealm(currentUserPendingUploads, 0))
 
                 toolbar.menu.findItem(R.id.restartItem).isVisible = true
