@@ -26,6 +26,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.lib.core.views.ViewHolder
 import io.sentry.Sentry
+import io.sentry.SentryLevel
 import kotlinx.android.synthetic.main.item_file_name.view.*
 
 class SaveExternalUriAdapter(val uris: ArrayList<Uri>) : RecyclerView.Adapter<ViewHolder>() {
@@ -45,6 +46,7 @@ class SaveExternalUriAdapter(val uris: ArrayList<Uri>) : RecyclerView.Adapter<Vi
             } catch (exception: Exception) {
                 name.setText(R.string.anErrorHasOccurred)
                 Sentry.withScope { scope ->
+                    scope.level = SentryLevel.WARNING
                     scope.setExtra("uri", uri.toString())
                     Sentry.captureException(exception)
                 }
