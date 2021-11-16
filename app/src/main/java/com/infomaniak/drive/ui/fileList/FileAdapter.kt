@@ -196,7 +196,8 @@ open class FileAdapter(
     override fun getItemCount() = fileList.size + if (showLoading) 1 else 0
 
     override fun getItemId(position: Int): Long {
-        return if (hasStableIds()) fileList[position].id.toLong() else super.getItemId(position)
+        val file = fileList.getOrNull(position)
+        return if (hasStableIds() && file != null) file.id.toLong() else super.getItemId(position)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
