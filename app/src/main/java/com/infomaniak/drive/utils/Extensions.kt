@@ -112,7 +112,6 @@ import kotlin.math.roundToInt
 
 
 typealias FileId = Int
-typealias FileName = String
 typealias IsComplete = Boolean
 typealias Position = Int
 

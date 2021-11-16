@@ -37,6 +37,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
+import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerSucceeded
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import io.realm.Realm
@@ -90,9 +91,9 @@ class UploadInProgressFragment : FileListFragment() {
             val remoteFolderId = workInfo.progress.getInt(UploadWorker.REMOTE_FOLDER_ID, 0)
             val position = fileAdapter.indexOf(fileName)
 
-            if (folderID == remoteFolderId && position >= 0) {
+            if (folderID == remoteFolderId && position >= 0 || isPendingFolders()) {
                 if (isUploaded) {
-                    whenAnUploadIsDone(position, fileName)
+                    if (!isPendingFolders()) whenAnUploadIsDone(position, fileAdapter.fileList[position].id)
                     fileListViewModel.deleteUploadedFiles.value = fileAdapter.getFileObjectsList(null)
                 } else {
                     fileAdapter.updateFileProgress(position = position, progress = progress)
@@ -102,10 +103,14 @@ class UploadInProgressFragment : FileListFragment() {
             Log.d("uploadInProgress", "$fileName $progress%")
         }
 
+        requireContext().trackUploadWorkerSucceeded().observe(viewLifecycleOwner) {
+            fileListViewModel.deleteUploadedFiles.value = fileAdapter.getFileObjectsList(null)
+        }
+
         fileListViewModel.indexUploadToDelete.observe(viewLifecycleOwner) { list ->
             list?.let {
-                list.forEach { (position, filename) ->
-                    whenAnUploadIsDone(position, filename)
+                list.forEach { (position, fileId) ->
+                    whenAnUploadIsDone(position, fileId)
                 }
             }
         }
@@ -143,7 +148,9 @@ class UploadInProgressFragment : FileListFragment() {
 
     override fun onResume() {
         super.onResume()
-        fileListViewModel.deleteUploadedFiles.value = fileAdapter.getFileObjectsList(null)
+        if (fileAdapter.fileList.isNotEmpty()) {
+            fileListViewModel.deleteUploadedFiles.value = fileAdapter.getFileObjectsList(null)
+        }
     }
 
     override fun onDestroy() {
@@ -151,8 +158,8 @@ class UploadInProgressFragment : FileListFragment() {
         super.onDestroy()
     }
 
-    private fun whenAnUploadIsDone(position: Int, filename: String) {
-        if (fileAdapter.fileList.getOrNull(position)?.name == filename) {
+    private fun whenAnUploadIsDone(position: Int, fileId: Int) {
+        if (fileAdapter.fileList.getOrNull(position)?.id == fileId) {
             fileAdapter.deleteAt(position)
         }
 
@@ -190,14 +197,16 @@ class UploadInProgressFragment : FileListFragment() {
                 needPopBackStack = true
             }
             folderId?.let {
-                UploadFile.deleteAll(it)
+                if (isPendingFolders()) UploadFile.deleteAll(null)
+                else UploadFile.deleteAll(it)
+
                 fileAdapter.setFiles(arrayListOf())
                 needPopBackStack = UploadFile.getCurrentUserPendingUploadsCount(it) == 0
             }
 
             withContext(Dispatchers.Main) {
+                progressDialog.dismiss()
                 if (isResumed && needPopBackStack) {
-                    progressDialog.dismiss()
                     val data = Data.Builder().putBoolean(UploadWorker.CANCELLED_BY_USER, true).build()
                     requireContext().syncImmediately(data, true)
                     popBackStack()
@@ -257,7 +266,7 @@ class UploadInProgressFragment : FileListFragment() {
 
                 if (pendingFolders.count() == 1) {
                     val uploadFile = pendingFolders.first()!!
-                    val isSharedWithMe = AccountUtils.currentDriveId == uploadFile.driveId
+                    val isSharedWithMe = AccountUtils.currentDriveId != uploadFile.driveId
                     val userDrive = UserDrive(driveId = uploadFile.driveId, sharedWithMe = isSharedWithMe)
                     val folder = FileController.getFileById(uploadFile.remoteFolder, userDrive)!!
                     navigateToUploadView(uploadFile.remoteFolder, folder.name)
@@ -268,7 +277,7 @@ class UploadInProgressFragment : FileListFragment() {
 
                     pendingFolders.forEach { uploadFile ->
                         val driveId = uploadFile.driveId
-                        val isSharedWithMe = AccountUtils.currentDriveId == driveId
+                        val isSharedWithMe = driveId != AccountUtils.currentDriveId
 
                         val driveName = if (drivesNames[driveId] == null) {
                             val drive = DriveInfosController.getDrives(AccountUtils.currentUserId, driveId, null).first()

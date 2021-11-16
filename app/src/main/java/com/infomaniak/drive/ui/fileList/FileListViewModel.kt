@@ -24,7 +24,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.FileName
+import com.infomaniak.drive.utils.FileId
 import com.infomaniak.drive.utils.Position
 import com.infomaniak.drive.utils.SingleLiveEvent
 import com.infomaniak.lib.core.models.ApiResponse
@@ -194,22 +194,31 @@ class FileListViewModel : ViewModel() {
     private var pendingJob = Job()
     val deleteUploadedFiles = MutableLiveData<ArrayList<File>>()
     val indexUploadToDelete = Transformations.switchMap(deleteUploadedFiles) { files ->
-        val adapterPendingFiles = files.map { it.name }
-        pendingFilesToDelete(adapterPendingFiles)
+        val adapterPendingFiles = files.map { it.id }
+        val isFileType = files.firstOrNull()?.type == File.Type.FILE.value
+        pendingFilesToDelete(adapterPendingFiles, isFileType)
     }
 
-    private fun pendingFilesToDelete(adapterPendingFiles: List<String>): LiveData<ArrayList<Pair<Position, FileName>>> {
+    private fun pendingFilesToDelete(adapterPendingFiles: List<Int>, isFileType: Boolean):
+            LiveData<ArrayList<Pair<Position, FileId>>> {
+
         pendingJob.cancel()
         pendingJob = Job()
 
         return liveData(Dispatchers.IO + pendingJob) {
-            val realmUploadFiles = UploadFile.getAllPendingUploads()
-            val positions = arrayListOf<Pair<Position, FileName>>()
+            val uploadRealm = UploadFile.getRealmInstance()
+            val positions = arrayListOf<Pair<Position, FileId>>()
+            val realmUploadFiles =
+                if (isFileType) UploadFile.getAllPendingUploads(customRealm = uploadRealm)
+                else UploadFile.getAllPendingFolders(realm = uploadRealm)
 
-            adapterPendingFiles.forEachIndexed { index, fileName ->
+            adapterPendingFiles.forEachIndexed { index, fileId ->
                 pendingJob.ensureActive()
-                if (!realmUploadFiles.any { fileName == it.fileName }) {
-                    positions.add(index to fileName)
+                val uploadExists = realmUploadFiles?.any { uploadFile ->
+                    isFileType && fileId == uploadFile.uri.hashCode() || !isFileType && fileId == uploadFile.remoteFolder
+                }
+                if (uploadExists == false) {
+                    positions.add(index to fileId)
                 }
             }
 

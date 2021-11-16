@@ -421,5 +421,13 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                     .build()
             )
         }
+
+        fun Context.trackUploadWorkerSucceeded(): LiveData<MutableList<WorkInfo>> {
+            return WorkManager.getInstance(this).getWorkInfosLiveData(
+                WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(TAG))
+                    .addStates(arrayListOf(WorkInfo.State.SUCCEEDED))
+                    .build()
+            )
+        }
     }
 }

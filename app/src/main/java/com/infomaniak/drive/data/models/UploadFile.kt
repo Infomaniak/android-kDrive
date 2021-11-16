@@ -140,11 +140,12 @@ open class UploadFile(
             }
         }
 
-        fun getAllPendingUploads(): ArrayList<UploadFile> {
-            return getRealmInstance().use { realm ->
+        fun getAllPendingUploads(customRealm: Realm? = null): ArrayList<UploadFile> {
+            val block: (Realm) -> ArrayList<UploadFile> = { realm ->
                 pendingUploadsQuery(realm)
                     .findAll()?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile> ?: arrayListOf()
             }
+            return customRealm?.let(block) ?: getRealmInstance().use(block)
         }
 
         fun getAllPendingFolders(realm: Realm): RealmResults<UploadFile>? {
