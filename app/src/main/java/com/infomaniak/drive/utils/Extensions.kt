@@ -112,7 +112,9 @@ import kotlin.math.roundToInt
 
 
 typealias FileId = Int
+typealias FileName = String
 typealias IsComplete = Boolean
+typealias Position = Int
 
 fun Intent.clearStack() = apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK }
 

@@ -24,7 +24,6 @@ import android.util.ArrayMap
 import android.util.Log
 import android.view.View
 import androidx.activity.addCallback
-import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toFile
 import androidx.core.view.isGone
 import androidx.lifecycle.lifecycleScope
@@ -40,15 +39,14 @@ import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import io.realm.OrderedRealmCollectionChangeListener
 import io.realm.Realm
-import io.realm.RealmResults
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.android.synthetic.main.dialog_download_progress.view.*
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.fragment_file_list.toolbar
 import kotlinx.android.synthetic.main.fragment_new_folder.*
+import kotlinx.android.synthetic.main.item_file.*
 import kotlinx.android.synthetic.main.item_file_name.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -63,9 +61,10 @@ class UploadInProgressFragment : FileListFragment() {
     override var hideBackButtonWhenRoot: Boolean = false
     override var showPendingFiles = false
 
-    private var pendingFiles = arrayListOf<UploadFile>()
+    private var pendingUploadFiles = arrayListOf<UploadFile>()
+    private var pendingFiles = arrayListOf<File>()
+
     private var isCancelled = false
-    private var progressDialog: AlertDialog? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         realmUpload = UploadFile.getRealmInstance()
@@ -92,20 +91,34 @@ class UploadInProgressFragment : FileListFragment() {
             val position = fileAdapter.indexOf(fileName)
 
             if (folderID == remoteFolderId && position >= 0) {
-                if (!isUploaded) fileAdapter.updateFileProgress(position = position, progress = progress)
+                if (isUploaded) {
+                    whenAnUploadIsDone(position, fileName)
+                    fileListViewModel.deleteUploadedFiles.value = fileAdapter.getFileObjectsList(null)
+                } else {
+                    fileAdapter.updateFileProgress(position = position, progress = progress)
+                }
             }
 
             Log.d("uploadInProgress", "$fileName $progress%")
         }
 
+        fileListViewModel.indexUploadToDelete.observe(viewLifecycleOwner) { list ->
+            list?.let {
+                list.forEach { (position, filename) ->
+                    whenAnUploadIsDone(position, filename)
+                }
+            }
+        }
+
         mainViewModel.refreshActivities.removeObservers(super.getViewLifecycleOwner())
 
-        fileAdapter.onStopUploadButtonClicked = { fileName ->
-            pendingFiles.find { it.fileName == fileName }?.let { syncFile ->
+        fileAdapter.onStopUploadButtonClicked = { position, fileName ->
+            pendingUploadFiles.find { it.fileName == fileName }?.let { syncFile ->
                 val title = getString(R.string.uploadInProgressCancelFileUploadTitle, syncFile.fileName)
                 Utils.createConfirmation(requireContext(), title) {
-                    if (fileAdapter.contains(syncFile.fileName)) {
-                        closeItemClicked(uploadFiles = arrayListOf(syncFile))
+                    if (fileAdapter.fileList.getOrNull(position)?.name == fileName) {
+                        closeItemClicked(uploadFile = syncFile)
+                        fileAdapter.deleteAt(position)
                     }
                 }
             }
@@ -128,44 +141,26 @@ class UploadInProgressFragment : FileListFragment() {
         fileAdapter.checkIsPendingWifi(requireContext())
     }
 
+    override fun onResume() {
+        super.onResume()
+        fileListViewModel.deleteUploadedFiles.value = fileAdapter.getFileObjectsList(null)
+    }
+
     override fun onDestroy() {
         realmUpload.close()
         super.onDestroy()
     }
 
-    private fun createListener(): OrderedRealmCollectionChangeListener<RealmResults<UploadFile>> {
-        return OrderedRealmCollectionChangeListener<RealmResults<UploadFile>> { _, changeSet ->
-            // For deletions, notify the UI in reverse order if removing elements the UI
-            val deletions = changeSet.deletionRanges
-            for (i in deletions.indices.reversed()) {
-                val range = deletions[i]
-                if (range.length.isPositive()) {
-                    for (fileIndex in (range.length - 1) downTo range.startIndex) {
-                        fileAdapter.deleteAt(fileIndex)
-                    }
-                    fileAdapter.notifyItemRangeRemoved(range.startIndex, range.length)
-                }
-
-                if (fileAdapter.fileList.isEmpty()) {
-                    if (isCancelled) cancelledByUser() else whenAnUploadIsDone()
-                }
-            }
-            progressDialog?.dismiss()
-            isCancelled = false
+    private fun whenAnUploadIsDone(position: Int, filename: String) {
+        if (fileAdapter.fileList.getOrNull(position)?.name == filename) {
+            fileAdapter.deleteAt(position)
         }
-    }
 
-    private fun cancelledByUser() {
-        progressDialog?.dismiss()
-        val data = Data.Builder().putBoolean(UploadWorker.CANCELLED_BY_USER, true).build()
-        requireContext().syncImmediately(data, true)
-        popBackStack()
-    }
-
-    private fun whenAnUploadIsDone() {
-        if (isResumed) noFilesLayout?.toggleVisibility(true)
-        activity?.showSnackbar(R.string.allUploadFinishedTitle)
-        popBackStack()
+        if (fileAdapter.fileList.isEmpty()) {
+            if (isResumed) noFilesLayout?.toggleVisibility(true)
+            activity?.showSnackbar(R.string.allUploadFinishedTitle)
+            popBackStack()
+        }
     }
 
     override fun onRestartItemsClicked() {
@@ -185,17 +180,18 @@ class UploadInProgressFragment : FileListFragment() {
         }
     }
 
-    private fun closeItemClicked(uploadFiles: ArrayList<UploadFile>? = null, folderId: Int? = null) {
+    private fun closeItemClicked(uploadFile: UploadFile? = null, folderId: Int? = null) {
         val progressDialog = Utils.createProgressDialog(requireContext(), R.string.allCancellationInProgress)
         isCancelled = true
         lifecycleScope.launch(Dispatchers.IO) {
             var needPopBackStack = false
-            uploadFiles?.let {
-                UploadFile.deleteAll(it)
+            uploadFile?.let {
+                UploadFile.deleteAll(arrayListOf(it))
                 needPopBackStack = true
             }
             folderId?.let {
                 UploadFile.deleteAll(it)
+                fileAdapter.setFiles(arrayListOf())
                 needPopBackStack = UploadFile.getCurrentUserPendingUploadsCount(it) == 0
             }
 
@@ -288,6 +284,7 @@ class UploadInProgressFragment : FileListFragment() {
                         files.add(createFolderFile(uploadFile.remoteFolder, userDrive))
                     }
 
+                    pendingFiles = files
                     fileAdapter.isComplete = true
                     fileAdapter.setFiles(files)
                     noFilesLayout.toggleVisibility(pendingFolders.isEmpty())
@@ -376,7 +373,8 @@ class UploadInProgressFragment : FileListFragment() {
                     }
                 }
 
-                pendingFiles = ArrayList(realmUpload.copyFromRealm(currentUserPendingUploads, 0))
+                pendingUploadFiles = ArrayList(realmUpload.copyFromRealm(currentUserPendingUploads, 0))
+                pendingFiles = files
 
                 toolbar.menu.findItem(R.id.restartItem).isVisible = true
                 toolbar.menu.findItem(R.id.closeItem).isVisible = true

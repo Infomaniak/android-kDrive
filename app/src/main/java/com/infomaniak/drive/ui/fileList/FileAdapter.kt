@@ -49,7 +49,7 @@ open class FileAdapter(
 
     var onFileClicked: ((file: File) -> Unit)? = null
     var onMenuClicked: ((selectedFile: File) -> Unit)? = null
-    var onStopUploadButtonClicked: ((fileName: String) -> Unit)? = null
+    var onStopUploadButtonClicked: ((index: Int, fileName: String) -> Unit)? = null
     var openMultiSelectMode: (() -> Unit)? = null
     var updateMultiSelectMode: (() -> Unit)? = null
 
@@ -141,8 +141,8 @@ open class FileAdapter(
         }
     }
 
-    fun getFileObjectsList(realm: Realm): ArrayList<File> {
-        return if (fileList.isManaged) ArrayList(realm.copyFromRealm(fileList, 1)) else ArrayList(fileList)
+    fun getFileObjectsList(realm: Realm?): ArrayList<File> {
+        return if (realm != null && fileList.isManaged) ArrayList(realm.copyFromRealm(fileList, 1)) else ArrayList(fileList)
     }
 
     private fun hideLoading() {
@@ -250,7 +250,7 @@ open class FileAdapter(
 
                 when {
                     uploadInProgress && !file.isPendingUploadFolder() -> {
-                        stopUploadButton?.setOnClickListener { onStopUploadButtonClicked?.invoke(file.name) }
+                        stopUploadButton?.setOnClickListener { onStopUploadButtonClicked?.invoke(position, file.name) }
                         stopUploadButton?.isVisible = true
                     }
                     multiSelectMode -> {
@@ -298,9 +298,7 @@ open class FileAdapter(
         }
     }
 
-    fun contains(fileName: String): Boolean {
-        return fileList.find { it.name == fileName } != null
-    }
+    fun contains(fileName: String) = fileList.any { it.name == fileName }
 
     private fun View.checkIfEnableFile(file: File) = when {
         uploadInProgress -> {
