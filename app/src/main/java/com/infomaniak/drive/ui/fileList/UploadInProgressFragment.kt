@@ -279,11 +279,10 @@ class UploadInProgressFragment : FileListFragment() {
                         val driveId = uploadFile.driveId
                         val isSharedWithMe = driveId != AccountUtils.currentDriveId
 
-                        val driveName = if (drivesNames[driveId] == null) {
+                        val driveName = if (isSharedWithMe && drivesNames[driveId] == null) {
                             val drive = DriveInfosController.getDrives(AccountUtils.currentUserId, driveId, null).first()
                             drivesNames[driveId] = drive.name
-
-                            if (isSharedWithMe) drive.name else null
+                            drive.name
 
                         } else {
                             drivesNames[driveId]
