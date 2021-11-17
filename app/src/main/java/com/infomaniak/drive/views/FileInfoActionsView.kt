@@ -95,12 +95,10 @@ class FileInfoActionsView @JvmOverloads constructor(
             quickActionsLayout.isVisible = true
             quickActionsLayout.isVisible = true
 
-            val isOnline = mainViewModel.isInternetAvailable.value == true
-            val isCommonDocumentOrSharedSpace =
-                currentFile.getVisibilityType() == IS_TEAM_SPACE || currentFile.getVisibilityType() == IS_SHARED_SPACE
-
             // TODO - Enhanceable code : Replace these let by an autonomous view with "enabled/disabled" method ?
             currentFile.rights.let { rights ->
+                val isOnline = mainViewModel.isInternetAvailable.value == true
+
                 displayInfo.isEnabled = isOnline
                 disabledInfo.isGone = isOnline
 
@@ -123,15 +121,18 @@ class FileInfoActionsView @JvmOverloads constructor(
                 }
 
                 addFavorites.isVisible = rights?.canFavorite == true
-                editDocument.isVisible =
-                    (currentFile.onlyoffice && rights?.write == true) || (currentFile.onlyofficeConvertExtension != null)
-                val offlineNotAvailable = currentFile.getOfflineFile(context) == null
-                availableOffline.isGone = isSharedWithMe || offlineNotAvailable
+                availableOffline.isGone = isSharedWithMe || currentFile.getOfflineFile(context) == null
+                deleteFile.isVisible = rights?.delete == true
+                downloadFile.isVisible = rights?.read == true
+                duplicateFile.isGone = rights?.read == false
+                        || isSharedWithMe
+                        || currentFile.getVisibilityType() == IS_TEAM_SPACE
+                        || currentFile.getVisibilityType() == IS_SHARED_SPACE
+                editDocument.isVisible = (currentFile.onlyoffice && rights?.write == true)
+                        || (currentFile.onlyofficeConvertExtension != null)
+                leaveShare.isVisible = rights?.leave == true
                 moveFile.isVisible = rights?.move == true && !isSharedWithMe
                 renameFile.isVisible = rights?.rename == true && !isSharedWithMe
-                deleteFile.isVisible = rights?.delete == true
-                leaveShare.isVisible = rights?.leave == true
-                duplicateFile.isGone = isSharedWithMe || isCommonDocumentOrSharedSpace
             }
 
             if (currentFile.isDropBox() || currentFile.rights?.canBecomeCollab == true) {
