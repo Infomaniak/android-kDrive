@@ -18,13 +18,14 @@
 package com.infomaniak.drive.data.cache
 
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.FileCategory
 import io.realm.DynamicRealm
 import io.realm.FieldAttribute
 import io.realm.RealmMigration
 
 class FileMigration : RealmMigration {
     companion object {
-        const val bddVersion = 1L // Must be bumped when the schema changes
+        const val bddVersion = 2L // Must be bumped when the schema changes
     }
 
     override fun migrate(realm: DynamicRealm, oldVersion: Long, newVersion: Long) {
@@ -47,6 +48,20 @@ class FileMigration : RealmMigration {
                 if (!hasField(File::isFromUploads.name)) {
                     addField(File::isFromUploads.name, Boolean::class.java, FieldAttribute.REQUIRED)
                 }
+            }
+            oldVersionTemp++
+        }
+
+        // Migrate to version 2: Add new field in File table
+        if (oldVersionTemp == 1L) {
+            val fileCategorySchema = schema.create(FileCategory::class.java.simpleName).apply {
+                addField(FileCategory::id.name, Int::class.java, FieldAttribute.PRIMARY_KEY)
+                addField(FileCategory::iaCategoryUserValidation.name, String::class.java, FieldAttribute.REQUIRED)
+                addField(FileCategory::isGeneratedByIa.name, Boolean::class.java, FieldAttribute.REQUIRED)
+                addField(FileCategory::userId.name, Int::class.java).setNullable(FileCategory::userId.name, true)
+            }
+            schema.get(File::class.java.simpleName)?.apply {
+                addRealmListField(File::categories.name, fileCategorySchema)
             }
             oldVersionTemp++
         }

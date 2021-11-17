@@ -21,6 +21,7 @@ import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Rights
 import com.infomaniak.drive.utils.Utils
+import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
 
@@ -43,6 +44,8 @@ open class Drive(
     private var role: String = "",
     var sharedWithMe: Boolean = false,
     var userId: Int = 0,
+    @SerializedName("category_rights")
+    var categoryRights: CategoryRights? = CategoryRights(),
 
     /**
      * Drive data
@@ -66,6 +69,7 @@ open class Drive(
     private var _users: DriveUsersCategories? = DriveUsersCategories(),
     @SerializedName("teams")
     private var _teams: DriveTeamsCategories? = DriveTeamsCategories(),
+    var categories: RealmList<Category> = RealmList()
 ) : RealmObject() {
 
     val packFunctionality: DrivePackFunctionality
