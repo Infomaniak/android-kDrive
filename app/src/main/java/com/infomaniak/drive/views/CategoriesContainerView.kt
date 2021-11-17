@@ -1,0 +1,76 @@
+/*
+ * Infomaniak kDrive - Android
+ * Copyright (C) 2021 Infomaniak Network SA
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package com.infomaniak.drive.views
+
+import android.content.Context
+import android.content.res.ColorStateList
+import android.util.AttributeSet
+import android.widget.FrameLayout
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColorInt
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
+import com.google.android.material.chip.Chip
+import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.drive.CategoryRights
+import com.infomaniak.drive.utils.getName
+import kotlinx.android.synthetic.main.view_categories_container.view.*
+
+class CategoriesContainerView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : FrameLayout(context, attrs, defStyleAttr) {
+
+    init {
+        inflate(context, R.layout.view_categories_container, this)
+    }
+
+    fun setup(file: File, categoryRights: CategoryRights?, onClicked: (currentFileId: Int) -> Unit) {
+
+        val categories = file.getCategories()
+
+        if (categoryRights?.canPutCategoryOnFile == true) {
+            titleContainer.setOnClickListener { onClicked(file.id) }
+            categorySwitch.isVisible = true
+            categoryTitle.setText(if (categories.isEmpty()) R.string.addCategoriesTitle else R.string.manageCategoriesTitle)
+        } else {
+            categorySwitch.isGone = true
+            categoryTitle.setText(R.string.categoriesFilterTitle)
+        }
+
+        if (categories.isEmpty()) {
+            categoriesGroup.isVisible = false
+        } else {
+            categoriesGroup.removeAllViews()
+
+            // Populate categories
+            categories.forEach { category ->
+                val chip = Chip(context)
+                chip.text = category.getName(context)
+                category.color?.let { chip.chipBackgroundColor = ColorStateList.valueOf(it.toColorInt()) }
+                chip.setTextColor(ContextCompat.getColor(context, R.color.white))
+                categoriesGroup.addView(chip)
+            }
+
+            // Show categories
+            categoriesGroup.isVisible = true
+        }
+    }
+}
