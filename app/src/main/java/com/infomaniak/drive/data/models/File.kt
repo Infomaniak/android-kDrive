@@ -26,10 +26,11 @@ import androidx.work.WorkManager
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.RealmListParceler.FileRealmListParceler
-import com.infomaniak.drive.utils.RealmListParceler.IntRealmListParceler
+import com.infomaniak.drive.utils.RealmListParceler.*
 import com.infomaniak.drive.utils.Utils.INDETERMINATE_PROGRESS
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.BuildConfig
@@ -92,6 +93,7 @@ open class File(
     var type: String = "file",
     var users: @WriteWith<IntRealmListParceler> RealmList<Int> = RealmList(),
     var visibility: String = "",
+    var categories: @WriteWith<FileCategoryRealmListParceler> RealmList<FileCategory> = RealmList(),
 
     var responseAt: Long = 0,
 
@@ -300,6 +302,22 @@ open class File(
                     users.size > 1 -> VisibilityType.IS_SHARED
                     else -> VisibilityType.IS_PRIVATE
                 }
+            }
+        }
+    }
+
+    fun getCategories(): List<Category> {
+        val fileCategoriesIds = getSortedCategoriesIds()
+        return DriveInfosController.getCategories(fileCategoriesIds.toTypedArray())
+    }
+
+    private fun getSortedCategoriesIds(): List<Int> {
+        return if (isManaged) {
+            categories.sort(FileCategory::addedToFileAt.name).map { it.id }
+        } else {
+            FileController.getRealmInstance().use { realm ->
+                FileController.getFileProxyById(id, customRealm = realm)
+                    ?.categories?.sort(FileCategory::addedToFileAt.name)?.map { it.id } ?: emptyList()
             }
         }
     }

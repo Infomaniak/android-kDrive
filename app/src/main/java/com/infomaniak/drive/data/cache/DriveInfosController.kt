@@ -19,8 +19,11 @@ package com.infomaniak.drive.data.cache
 
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.Team
+import com.infomaniak.drive.data.models.drive.Category
+import com.infomaniak.drive.data.models.drive.CategoryRights
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.models.drive.DriveInfo
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
 import io.realm.Realm
 import io.realm.RealmConfiguration
@@ -46,17 +49,14 @@ object DriveInfosController {
         drive.objectId = "${drive.id}_$userId"
         drive.userId = userId
         drive.sharedWithMe = sharedWithMe
+        drive.categories.forEach { it.objectId = "${drive.id}_${it.id}" }
         add(drive)
     }
 
     fun storeDriveInfos(userId: Int, driveInfo: DriveInfo): List<Drive> {
         val driveList = arrayListOf<Drive>()
-        for (drive in driveInfo.drives.main) {
-            driveList.initDriveForRealm(drive, userId, false)
-        }
-        for (drive in driveInfo.drives.sharedWithMe) {
-            driveList.initDriveForRealm(drive, userId, true)
-        }
+        driveInfo.drives.main.forEach { driveList.initDriveForRealm(it, userId, false) }
+        driveInfo.drives.sharedWithMe.forEach { driveList.initDriveForRealm(it, userId, true) }
 
         val driveRemoved = getDrives(userId, sharedWithMe = null).filterNot { driveList.contains(it) }
         val driveRemovedID = driveRemoved.map(Drive::objectId)
@@ -128,5 +128,35 @@ object DriveInfosController {
         } as ArrayList<Team>? ?: ArrayList()
 
         return teamList.filter { drive.teams.account.contains(it.id) }
+    }
+
+    fun getCategories(ids: Array<Int>): List<Category> {
+
+        if (ids.isEmpty()) return emptyList()
+
+        val categories = getRealmInstance().use { realm ->
+            val drive = realm.where(Drive::class.java)
+                .equalTo(Drive::id.name, AccountUtils.currentDriveId)
+                .findFirst()
+
+            drive?.categories?.let {
+                val categories = it.where()
+                    .`in`(Category::id.name, ids)
+                    .findAll()
+
+                realm.copyFromRealm(categories, 0)
+            }
+
+        } as? List<Category> ?: emptyList()
+
+        // Sort the categories
+        return ids.mapNotNull { id -> categories.find { it.id == id } }
+    }
+
+    fun getCategoryRights(): CategoryRights? {
+        return getRealmInstance().use { realm ->
+            realm.where(CategoryRights::class.java).findFirst()
+                ?.let { realm.copyFromRealm(it, 0) }
+        }
     }
 }

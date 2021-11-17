@@ -25,13 +25,13 @@ import com.infomaniak.drive.data.models.Team
 
 object ApiRoutes {
 
-    private const val with = "with=children,rights,collaborative_folder,favorite,mobile,share_link"
+    private const val with = "with=children,rights,collaborative_folder,favorite,mobile,share_link,categories"
 
     private fun fileURL(file: File) = "${DRIVE_API}${file.driveId}/file/${file.id}"
 
     private fun trashURL(file: File) = "${DRIVE_API}${file.driveId}/file/trash/${file.id}"
 
-    fun getAllDrivesData() = "${DRIVE_API}init?with=drives,users,teams,ips"
+    fun getAllDrivesData() = "${DRIVE_API}init?with=drives,users,teams,ips,categories"
 
     fun getUserProfile() = "${INFOMANIAK_API}profile"
 
@@ -81,8 +81,8 @@ object ApiRoutes {
 
     fun unLikeCommentFile(file: File, commentId: Int) = "${fileURL(file)}/comment/$commentId/unlike"
 
-    fun getFileDetails(file: File) =
-        "${fileURL(file)}?with=user,teams,children,parent,rights,favorite,version,extras,share_link,collaborative_folder,mobile,conversion"
+    fun getFileDetails(file: File) = "${fileURL(file)}?with=user,teams,children,parent,rights,favorite,version,extras," +
+            "share_link,collaborative_folder,mobile,conversion,categories"
 
     fun getFileCount(file: File) = "${fileURL(file)}/count"
 
