@@ -55,7 +55,9 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) { currentFile ->
+
             setupShareLinkContainer(currentFile, fileDetailsViewModel.currentFileShare.value)
+            setupCategoriesContainer(currentFile)
             displayUsersAvatars(currentFile)
             setupShareButton(currentFile)
 
@@ -128,8 +130,7 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
 
         if (file?.rights?.canBecomeLink == true || file?.shareLink?.isNotBlank() == true) {
             shareLinkContainer.isVisible = true
-            topShareDivider.isVisible = true
-            botShareDivider.isVisible = true
+            shareLinkDivider.isVisible = true
             shareLinkContainer.setup(
                 shareLink = share?.link,
                 file = file,
@@ -163,8 +164,27 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
 
         } else {
             shareLinkContainer.isGone = true
-            topShareDivider.isGone = true
-            botShareDivider.isGone = true
+            shareLinkDivider.isGone = true
+        }
+    }
+
+    private fun setupCategoriesContainer(file: File?) {
+
+        val categoryRights = DriveInfosController.getCategoryRights()
+
+        if (file != null && categoryRights?.canReadCategoryOnFile == true) {
+            categoriesContainer.isVisible = true
+            categoriesDivider.isVisible = true
+            categoriesContainer.setup(
+                file = file,
+                categoryRights = categoryRights,
+                onClicked = { currentFileId ->
+
+                })
+
+        } else {
+            categoriesContainer.isGone = true
+            categoriesDivider.isGone = true
         }
     }
 
