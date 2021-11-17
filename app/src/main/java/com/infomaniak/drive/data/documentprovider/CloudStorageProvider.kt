@@ -17,19 +17,21 @@
  */
 package com.infomaniak.drive.data.documentprovider
 
+import android.annotation.SuppressLint
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.res.AssetFileDescriptor
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.graphics.Point
 import android.net.Uri
-import android.os.Build
-import android.os.CancellationSignal
-import android.os.Handler
-import android.os.ParcelFileDescriptor
+import android.os.*
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
+import android.provider.Settings
 import android.util.Log
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import com.infomaniak.drive.R
@@ -42,8 +44,11 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
+import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.KDriveHttpClient
+import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
+import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.models.ApiResponse
@@ -480,6 +485,9 @@ class CloudStorageProvider : DocumentsProvider() {
 
     private fun createNewFile(parentDocumentId: String, displayName: String): String {
 
+        // If we don't have the permissions, notify the user
+        showSyncPermissionNotification()
+
         val driveId = getDriveFromDocId(parentDocumentId).id
         val parentFolderId = getFileIdFromDocumentId(parentDocumentId)
         val userDrive = createUserDrive(parentDocumentId)
@@ -584,6 +592,40 @@ class CloudStorageProvider : DocumentsProvider() {
         sourceParentDocumentId?.let {
             needRefresh = true
             context?.contentResolver?.notifyChange(DocumentCursor.createUri(context, it), null)
+        }
+    }
+
+    @SuppressLint("BatteryLife")
+    private fun showSyncPermissionNotification() {
+        context?.let { context ->
+
+            val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager?
+
+            if (
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && powerManager?.isIgnoringBatteryOptimizations(context.packageName) == false
+            ) {
+
+                // Cancel previous notification
+                context.cancelNotification(syncPermissionNotifID)
+
+                // Display new notification
+                context.showGeneralNotification(context.getString(R.string.uploadPermissionError)).apply {
+                    setContentText(context.getString(R.string.cloudStorageMissingPermissionNotifDescription))
+                    setContentIntent(
+                        PendingIntent.getActivity(
+                            context,
+                            0,
+                            Intent(
+                                Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                                Uri.parse("package:${context.packageName}")
+                            ),
+                            UploadNotifications.pendingIntentFlags
+                        )
+                    )
+                    NotificationManagerCompat.from(context).notify(syncPermissionNotifID, build())
+                }
+            }
         }
     }
 
@@ -699,6 +741,8 @@ class CloudStorageProvider : DocumentsProvider() {
         private var oldSearchCursor: DocumentCursor? = null
 
         private var needRefresh: Boolean = false
+
+        private val syncPermissionNotifID = UUID.randomUUID().hashCode()
 
         private val DEFAULT_ROOT_PROJECTION = arrayOf(
             DocumentsContract.Root.COLUMN_ROOT_ID,
