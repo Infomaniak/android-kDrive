@@ -174,7 +174,7 @@
     <string name="categoryTransportation">Transport</string>
     <string name="categoryWarranty">Garantie</string>
     <string name="categoryWork">Arbeit</string>
-    <string name="cloudStorageMissingPermissionNotifDescription">Die App kann aufgrund einer fehlenden Berechtigung nicht im Hintergrund ausgeführt werden. Bitte gehen Sie zu den App-Einstellungen und konfigurieren Sie die Fotosicherung.</string>
+    <string name="cloudStorageMissingPermissionNotifDescription">Die App kann aufgrund einer fehlenden Berechtigung nicht im Hintergrund ausgeführt werden.</string>
     <string name="cloudStorageQuerySearchImpossibleSelectDrive">Suche nicht möglich, es wurde kein Drive ausgewählt</string>
     <string name="commonFolderDescription">Teilen Sie diesen Ordner mit den Benutzern des kDrive %s</string>
     <string name="commonFolderTitle">Gemeinsamer Ordner</string>

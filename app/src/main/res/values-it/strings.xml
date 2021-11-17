@@ -174,7 +174,7 @@
     <string name="categoryTransportation">Trasporto</string>
     <string name="categoryWarranty">Garanzia</string>
     <string name="categoryWork">Lavoro</string>
-    <string name="cloudStorageMissingPermissionNotifDescription">L’app non può essere eseguita in background a causa di un’autorizzazione mancante. Vai alle Impostazioni dell’app e configura il backup delle foto.</string>
+    <string name="cloudStorageMissingPermissionNotifDescription">L’app non può essere eseguita in background a causa di un’autorizzazione mancante.</string>
     <string name="cloudStorageQuerySearchImpossibleSelectDrive">Impossibile effettuare la ricerca, non è stato selezionato nessun drive</string>
     <string name="commonFolderDescription">Condividi questa cartella con utenti del kDrive %s</string>
     <string name="commonFolderTitle">Cartella comune</string>
