@@ -15,22 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.ui.fileList.fileDetails
+package com.infomaniak.drive.ui.home
 
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.Lifecycle
-import androidx.viewpager2.adapter.FragmentStateAdapter
 
-class FileDetailsPagerAdapter(
-    manager: FragmentManager,
-    lifecycle: Lifecycle,
-    private val tabs: ArrayList<FileDetailsFragment.FileDetailsTab>
-) : FragmentStateAdapter(manager, lifecycle) {
-
-    override fun getItemCount() = tabs.size
-
-    override fun createFragment(position: Int): Fragment {
-        return tabs[position].fragment
-    }
+class HomeOfflineFragment : Fragment() {
 }
