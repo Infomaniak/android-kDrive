@@ -46,6 +46,7 @@ import io.realm.Realm
 import io.sentry.Sentry
 import kotlinx.coroutines.*
 import java.util.*
+import kotlin.collections.LinkedHashMap
 
 class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
@@ -53,7 +54,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     val currentFolder = MutableLiveData<File>()
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
-    var currentFileList = ArrayList<File>()
+    var currentFileList = LinkedHashMap<Int, File>()
     val isInternetAvailable = MutableLiveData(true)
 
     val createDropBoxSuccess = SingleLiveEvent<DropBox>()

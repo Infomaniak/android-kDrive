@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.fileList.preview
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.navigation.fragment.findNavController
@@ -26,11 +27,13 @@ import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.ui.MainViewModel
 import io.sentry.Sentry
 
 open class PreviewFragment : Fragment() {
 
     protected lateinit var file: File
+    private val mainViewModel: MainViewModel by activityViewModels()
     private val previewViewModel: PreviewViewModel by viewModels()
     protected val previewSliderViewModel: PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
 
@@ -38,8 +41,9 @@ open class PreviewFragment : Fragment() {
         if (previewViewModel.currentFile == null) {
 
             arguments?.let {
-                it.getParcelable<File>(FILE_TAG)?.let { file ->
-                    previewViewModel.currentFile = getCurrentFile(file)
+                val fileId = it.getInt(FILE_ID_TAG)
+                if (fileId > 0) {
+                    previewViewModel.currentFile = getCurrentFile(fileId)
                 }
             }
         }
@@ -47,8 +51,8 @@ open class PreviewFragment : Fragment() {
         super.onCreate(savedInstanceState)
     }
 
-    private fun getCurrentFile(file: File) = try {
-        FileController.getFileById(file.id, previewSliderViewModel.userDrive) ?: file
+    private fun getCurrentFile(fileId: Int) = try {
+        FileController.getFileById(fileId, previewSliderViewModel.userDrive) ?: mainViewModel.currentFileList[fileId]
     } catch (exception: Exception) {
         exception.printStackTrace()
         Sentry.withScope { scope ->
@@ -60,7 +64,7 @@ open class PreviewFragment : Fragment() {
             scope.setExtra("exception", exception.stackTraceToString())
             Sentry.captureMessage("Get file from preview fragment 🤔")
         }
-        file
+        null
     }
 
     protected fun noFileFound() = previewViewModel.currentFile == null
@@ -70,6 +74,6 @@ open class PreviewFragment : Fragment() {
     }
 
     companion object {
-        const val FILE_TAG = "file_id_tag"
+        const val FILE_ID_TAG = "file_id_tag"
     }
 }
