@@ -80,7 +80,7 @@ class HomeActivitiesFragment : Fragment() {
 
             lastActivitiesAdapter.apply {
                 onMoreFilesClicked = { fileActivity, validPreviewFiles ->
-                    safeNavigate(
+                    parentFragment?.safeNavigate(
                         HomeFragmentDirections.actionHomeFragmentToActivityFilesFragment(
                             fileIdList = validPreviewFiles.map { file -> file.id }.toIntArray(),
                             activityUser = fileActivity.user,
