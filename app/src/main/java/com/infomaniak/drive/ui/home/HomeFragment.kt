@@ -30,6 +30,7 @@ import androidx.navigation.navGraphViewModels
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.AppBarLayout
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.UISettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.UploadWorker
@@ -99,11 +100,11 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         val tabsHome = arrayListOf(
             TabViewPagerUtils.FragmentTab(0, HomeActivitiesFragment(), R.id.homeActivitiesButton),
             TabViewPagerUtils.FragmentTab(1, HomeOfflineFragment(), R.id.homeOfflineButton),
-            TabViewPagerUtils.FragmentTab(3, HomePicturesFragment(), R.id.homePicturesButton)
+            TabViewPagerUtils.FragmentTab(2, HomePicturesFragment(), R.id.homePicturesButton)
         )
 
-        setup(homeViewPager, tabsHomeGroup, tabsHome)
-
+        setup(homeViewPager, tabsHomeGroup, tabsHome) { UISettings(requireContext()).lastHomeSelectedTab = it }
+        homeViewPager.currentItem = UISettings(requireContext()).lastHomeSelectedTab
     }
 
     override fun onResume() {

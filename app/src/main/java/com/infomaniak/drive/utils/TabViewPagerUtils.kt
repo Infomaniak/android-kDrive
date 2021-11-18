@@ -26,7 +26,12 @@ import com.google.android.material.button.MaterialButtonToggleGroup
 
 object TabViewPagerUtils {
 
-    fun Fragment.setup(tabsViewPager: ViewPager2, tabsGroup: MaterialButtonToggleGroup, tabs: ArrayList<FragmentTab>) {
+    fun Fragment.setup(
+        tabsViewPager: ViewPager2,
+        tabsGroup: MaterialButtonToggleGroup,
+        tabs: ArrayList<FragmentTab>,
+        onCheckedButton: ((position: Position) -> Unit)? = null
+    ) {
         tabsViewPager.apply {
             adapter = ViewPagerAdapter(childFragmentManager, lifecycle, tabs)
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
@@ -42,6 +47,7 @@ object TabViewPagerUtils {
             if (isChecked) {
                 val position = (tabsViewPager.adapter as ViewPagerAdapter).tabs.find { it.button == checkedId }!!.position
                 tabsViewPager.setCurrentItem(position, true)
+                onCheckedButton?.invoke(position)
             }
         }
     }
