@@ -34,7 +34,7 @@ import kotlin.collections.ArrayList
 
 class HomeViewModel : ViewModel() {
     private var lastActivityJob = Job()
-    private var lastModifiedJob = Job()
+    private var lastPicturesJob = Job()
 
     var lastActivityPage = 1
     var lastPicturesPage = 1
@@ -49,10 +49,10 @@ class HomeViewModel : ViewModel() {
     private var lastPictures = arrayListOf<File>()
 
     fun getLastPictures(driveId: Int, forceDownload: Boolean = false): LiveData<ApiResponse<ArrayList<File>>?> {
-        lastActivityJob.cancel()
-        lastActivityJob = Job()
+        lastPicturesJob.cancel()
+        lastPicturesJob = Job()
 
-        return liveData(Dispatchers.IO + lastActivityJob) {
+        return liveData(Dispatchers.IO + lastPicturesJob) {
             val isFirstPage = lastPicturesPage == 1 || forceDownload
             if (lastPicturesTime != 0L && Date().time - lastPicturesTime < DOWNLOAD_INTERVAL && isFirstPage && !forceDownload) {
                 lastPicturesPage = lastPicturesLastPage
@@ -171,16 +171,9 @@ class HomeViewModel : ViewModel() {
                 previousActivity.fileId == currentActivity.fileId
     }
 
-    fun clearDownloadTimes() {
-        lastActivityJob.cancel()
-        lastModifiedJob.cancel()
-        lastPicturesTime = 0
-        lastActivitiesTime = 0
-    }
-
     override fun onCleared() {
         lastActivityJob.cancel()
-        lastModifiedJob.cancel()
+        lastPicturesJob.cancel()
         super.onCleared()
     }
 
