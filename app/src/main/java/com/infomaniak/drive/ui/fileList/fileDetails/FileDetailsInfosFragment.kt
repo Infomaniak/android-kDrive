@@ -17,6 +17,9 @@
  */
 package com.infomaniak.drive.ui.fileList.fileDetails
 
+import android.annotation.SuppressLint
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.text.format.Formatter
 import android.view.LayoutInflater
@@ -68,10 +71,7 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
 
             displayFileOwner(currentFile)
 
-            if (currentFile.path.isNotBlank()) {
-                pathValue.text = currentFile.path
-                path.isVisible = true
-            }
+            if (currentFile.path.isNotBlank()) setPath(currentFile.driveId, currentFile.path)
 
             currentFile.sizeWithVersions?.let {
                 totalSizeValue.text = Formatter.formatFileSize(context, it)
@@ -84,8 +84,9 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         }
 
         fileDetailsViewModel.currentFileShare.observe(viewLifecycleOwner) { share ->
-            pathValue.text = share.path
-            setupShareLinkContainer(fileDetailsViewModel.currentFile.value, share)
+            val currentFile = fileDetailsViewModel.currentFile.value
+            setPath(currentFile?.driveId ?: AccountUtils.currentDriveId, share.path)
+            setupShareLinkContainer(currentFile, share)
         }
 
         getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.SELECT_PERMISSION_NAV_KEY) { bundle ->
@@ -100,6 +101,14 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
                 }
             }
         }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun setPath(driveId: Int, path: String) {
+        val drive = DriveInfosController.getDrives(AccountUtils.currentUserId, driveId = driveId).first()
+        driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(drive.preferences.color))
+        pathValue.text = "${drive.name}$path"
+        pathView.isVisible = true
     }
 
     private fun setupShareButton(currentFile: File) {
