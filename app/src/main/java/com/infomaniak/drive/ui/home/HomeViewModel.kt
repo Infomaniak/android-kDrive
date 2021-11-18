@@ -54,7 +54,7 @@ class HomeViewModel : ViewModel() {
 
         return liveData(Dispatchers.IO + lastActivityJob) {
             val isFirstPage = lastPicturesPage == 1 || forceDownload
-            if (lastPicturesTime != 0 && Date().time - lastPicturesTime < DOWNLOAD_INTERVAL && isFirstPage && !forceDownload) {
+            if (lastPicturesTime != 0L && Date().time - lastPicturesTime < DOWNLOAD_INTERVAL && isFirstPage && !forceDownload) {
                 lastPicturesPage = lastPicturesLastPage
                 emit(ApiResponse(SUCCESS, lastPictures, null, 1, 1))
                 return@liveData
