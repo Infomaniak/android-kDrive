@@ -43,6 +43,7 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_add_file.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -271,7 +272,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                     requireActivity().showSnackbar(R.string.anErrorHasOccurred)
                 }
                 else -> {
-                    lifecycleScope.launch(Dispatchers.IO) {
+                    CoroutineScope(Dispatchers.IO).launch {
                         UploadFile(
                             uri = uri.toString(),
                             driveId = currentFolderFile.driveId,
