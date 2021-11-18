@@ -74,7 +74,6 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     init {
         inflate(context, R.layout.view_file_info_actions, this)
-        initOnClickListeners()
     }
 
     fun init(ownerFragment: Fragment, onItemClickListener: OnItemClickListener, isSharedWithMe: Boolean = false) {
@@ -82,6 +81,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         this.onItemClickListener = onItemClickListener
         this.isSharedWithMe = isSharedWithMe
         mainViewModel = ViewModelProvider(ownerFragment.requireActivity())[MainViewModel::class.java]
+        initOnClickListeners()
     }
 
     fun updateCurrentFile(file: File) {
