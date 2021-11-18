@@ -20,10 +20,10 @@ package com.infomaniak.drive.ui.fileList
 import android.content.ContentResolver
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.util.ArrayMap
 import android.util.Log
 import android.view.View
 import androidx.activity.addCallback
-import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toFile
 import androidx.core.view.isGone
 import androidx.lifecycle.lifecycleScope
@@ -37,20 +37,21 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
+import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerSucceeded
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import io.realm.OrderedRealmCollectionChangeListener
 import io.realm.Realm
-import io.realm.RealmResults
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.android.synthetic.main.dialog_download_progress.view.*
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.fragment_file_list.toolbar
 import kotlinx.android.synthetic.main.fragment_new_folder.*
+import kotlinx.android.synthetic.main.item_file.*
 import kotlinx.android.synthetic.main.item_file_name.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class UploadInProgressFragment : FileListFragment() {
@@ -61,13 +62,8 @@ class UploadInProgressFragment : FileListFragment() {
     override var hideBackButtonWhenRoot: Boolean = false
     override var showPendingFiles = false
 
-    private var pendingFiles = arrayListOf<UploadFile>()
-    private var uploadFiles: RealmResults<UploadFile>? = null
-    private var isCancelled = false
-    private var progressDialog: AlertDialog? = null
-
-
-    private var realmListener: OrderedRealmCollectionChangeListener<RealmResults<UploadFile>>? = null
+    private var pendingUploadFiles = arrayListOf<UploadFile>()
+    private var pendingFiles = arrayListOf<File>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         realmUpload = UploadFile.getRealmInstance()
@@ -93,21 +89,39 @@ class UploadInProgressFragment : FileListFragment() {
             val remoteFolderId = workInfo.progress.getInt(UploadWorker.REMOTE_FOLDER_ID, 0)
             val position = fileAdapter.indexOf(fileName)
 
-            if (folderID == remoteFolderId && position >= 0) {
-                if (!isUploaded) fileAdapter.updateFileProgress(position = position, progress = progress)
+            if (folderID == remoteFolderId && position >= 0 || isPendingFolders()) {
+                if (isUploaded) {
+                    if (!isPendingFolders()) whenAnUploadIsDone(position, fileAdapter.fileList[position].id)
+                    fileListViewModel.currentAdapterPendingFiles.value = fileAdapter.getFileObjectsList(null)
+                } else {
+                    fileAdapter.updateFileProgress(position = position, progress = progress)
+                }
             }
 
             Log.d("uploadInProgress", "$fileName $progress%")
         }
 
+        requireContext().trackUploadWorkerSucceeded().observe(viewLifecycleOwner) {
+            fileListViewModel.currentAdapterPendingFiles.value = fileAdapter.getFileObjectsList(null)
+        }
+
+        fileListViewModel.indexUploadToDelete.observe(viewLifecycleOwner) { list ->
+            list?.let {
+                list.forEach { (position, fileId) ->
+                    whenAnUploadIsDone(position, fileId)
+                }
+            }
+        }
+
         mainViewModel.refreshActivities.removeObservers(super.getViewLifecycleOwner())
 
-        fileAdapter.onStopUploadButtonClicked = { fileName ->
-            pendingFiles.find { it.fileName == fileName }?.let { syncFile ->
+        fileAdapter.onStopUploadButtonClicked = { position, fileName ->
+            pendingUploadFiles.find { it.fileName == fileName }?.let { syncFile ->
                 val title = getString(R.string.uploadInProgressCancelFileUploadTitle, syncFile.fileName)
                 Utils.createConfirmation(requireContext(), title) {
-                    if (fileAdapter.contains(syncFile.fileName)) {
-                        closeItemClicked(uploadFiles = arrayListOf(syncFile))
+                    if (fileAdapter.fileList.getOrNull(position)?.name == fileName) {
+                        closeItemClicked(uploadFile = syncFile)
+                        fileAdapter.deleteAt(position)
                     }
                 }
             }
@@ -128,48 +142,30 @@ class UploadInProgressFragment : FileListFragment() {
         fileAdapter.onFileClicked = null
         fileAdapter.uploadInProgress = true
         fileAdapter.checkIsPendingWifi(requireContext())
-        realmListener = createListener()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (fileAdapter.fileList.isNotEmpty()) {
+            fileListViewModel.currentAdapterPendingFiles.value = fileAdapter.getFileObjectsList(null)
+        }
     }
 
     override fun onDestroy() {
-        realmListener?.let { uploadFiles?.removeChangeListener(it) }
         realmUpload.close()
         super.onDestroy()
     }
 
-    private fun createListener(): OrderedRealmCollectionChangeListener<RealmResults<UploadFile>> {
-        return OrderedRealmCollectionChangeListener<RealmResults<UploadFile>> { _, changeSet ->
-            // For deletions, notify the UI in reverse order if removing elements the UI
-            val deletions = changeSet.deletionRanges
-            for (i in deletions.indices.reversed()) {
-                val range = deletions[i]
-                if (range.length.isPositive()) {
-                    for (fileIndex in (range.length - 1) downTo range.startIndex) {
-                        fileAdapter.deleteAt(fileIndex)
-                    }
-                    fileAdapter.notifyItemRangeRemoved(range.startIndex, range.length)
-                }
-
-                if (fileAdapter.fileList.isEmpty()) {
-                    if (isCancelled) cancelledByUser() else whenAnUploadIsDone()
-                }
-            }
-            progressDialog?.dismiss()
-            isCancelled = false
+    private fun whenAnUploadIsDone(position: Int, fileId: Int) {
+        if (fileAdapter.fileList.getOrNull(position)?.id == fileId) {
+            fileAdapter.deleteAt(position)
         }
-    }
 
-    private fun cancelledByUser() {
-        progressDialog?.dismiss()
-        val data = Data.Builder().putBoolean(UploadWorker.CANCELLED_BY_USER, true).build()
-        requireContext().syncImmediately(data, true)
-        popBackStack()
-    }
-
-    private fun whenAnUploadIsDone() {
-        if (isResumed) noFilesLayout?.toggleVisibility(true)
-        activity?.showSnackbar(R.string.allUploadFinishedTitle)
-        popBackStack()
+        if (fileAdapter.fileList.isEmpty()) {
+            if (isResumed) noFilesLayout?.toggleVisibility(true)
+            activity?.showSnackbar(R.string.allUploadFinishedTitle)
+            popBackStack()
+        }
     }
 
     override fun onRestartItemsClicked() {
@@ -189,21 +185,33 @@ class UploadInProgressFragment : FileListFragment() {
         }
     }
 
-    private fun closeItemClicked(uploadFiles: ArrayList<UploadFile>? = null, folderId: Int? = null) {
-
-        progressDialog = Utils.createProgressDialog(requireContext(), R.string.allCancellationInProgress)
-        isCancelled = true
+    private fun closeItemClicked(uploadFile: UploadFile? = null, folderId: Int? = null) {
+        val progressDialog = Utils.createProgressDialog(requireContext(), R.string.allCancellationInProgress)
         lifecycleScope.launch(Dispatchers.IO) {
-            uploadFiles?.let { UploadFile.deleteAll(uploadFiles) }
+            var needPopBackStack = false
+            uploadFile?.let {
+                UploadFile.deleteAll(arrayListOf(it))
+                needPopBackStack = true
+            }
             folderId?.let {
-                if (isPendingFolders()) {
-                    UploadFile.deleteAll(null)
-                } else {
-                    folderId.let { UploadFile.deleteAll(folderId) }
+                if (isPendingFolders()) UploadFile.deleteAll(null)
+                else UploadFile.deleteAll(it)
+
+                fileAdapter.setFiles(arrayListOf())
+                needPopBackStack = UploadFile.getCurrentUserPendingUploadsCount(it) == 0
+            }
+
+            withContext(Dispatchers.Main) {
+                progressDialog.dismiss()
+                if (isResumed && needPopBackStack) {
+                    val data = Data.Builder().putBoolean(UploadWorker.CANCELLED_BY_USER, true).build()
+                    requireContext().syncImmediately(data, true)
+                    popBackStack()
                 }
             }
         }
     }
+
 
     private fun isPendingFolders() = folderID == Utils.OTHER_ROOT_ID
 
@@ -252,24 +260,36 @@ class UploadInProgressFragment : FileListFragment() {
 
         private fun downloadPendingFolders() {
             UploadFile.getAllPendingFolders(realmUpload)?.let { pendingFolders ->
+
                 if (pendingFolders.count() == 1) {
                     val uploadFile = pendingFolders.first()!!
-                    val drive = DriveInfosController.getDrives(AccountUtils.currentUserId, uploadFile.driveId, null).first()
-                    val userDrive = UserDrive(driveId = uploadFile.driveId, sharedWithMe = drive.sharedWithMe)
+                    val isSharedWithMe = AccountUtils.currentDriveId != uploadFile.driveId
+                    val userDrive = UserDrive(driveId = uploadFile.driveId, sharedWithMe = isSharedWithMe)
                     val folder = FileController.getFileById(uploadFile.remoteFolder, userDrive)!!
                     navigateToUploadView(uploadFile.remoteFolder, folder.name)
+
                 } else {
                     val files = arrayListOf<File>()
+                    val drivesNames = ArrayMap<Int, String>()
+
                     pendingFolders.forEach { uploadFile ->
-                        files.add(createFolderFile(uploadFile.remoteFolder, uploadFile.driveId))
+                        val driveId = uploadFile.driveId
+                        val isSharedWithMe = driveId != AccountUtils.currentDriveId
+
+                        val driveName = if (isSharedWithMe && drivesNames[driveId] == null) {
+                            val drive = DriveInfosController.getDrives(AccountUtils.currentUserId, driveId, null).first()
+                            drivesNames[driveId] = drive.name
+                            drive.name
+
+                        } else {
+                            drivesNames[driveId]
+                        }
+
+                        val userDrive = UserDrive(driveId = driveId, sharedWithMe = isSharedWithMe, driveName = driveName)
+                        files.add(createFolderFile(uploadFile.remoteFolder, userDrive))
                     }
 
-                    realmListener?.let {
-                        uploadFiles = pendingFolders
-                        uploadFiles?.removeAllChangeListeners()
-                        uploadFiles?.addChangeListener(it)
-                    }
-
+                    pendingFiles = files
                     fileAdapter.isComplete = true
                     fileAdapter.setFiles(files)
                     noFilesLayout.toggleVisibility(pendingFolders.isEmpty())
@@ -280,10 +300,7 @@ class UploadInProgressFragment : FileListFragment() {
             } ?: noFilesLayout.toggleVisibility(true)
         }
 
-        private fun createFolderFile(fileId: Int, driveId: Int): File {
-            val drive = DriveInfosController.getDrives(AccountUtils.currentUserId, driveId, null).first()
-            val driveName = if (drive.sharedWithMe) drive.name else null
-            val userDrive = UserDrive(driveId = driveId, sharedWithMe = drive.sharedWithMe, driveName = driveName)
+        private fun createFolderFile(fileId: Int, userDrive: UserDrive): File {
             val folder = FileController.getFileById(fileId, userDrive)!!
             val name: String
             val type: String
@@ -361,12 +378,8 @@ class UploadInProgressFragment : FileListFragment() {
                     }
                 }
 
-                realmListener?.let {
-                    uploadFiles = currentUserPendingUploads
-                    uploadFiles?.removeAllChangeListeners()
-                    uploadFiles?.addChangeListener(it)
-                }
-                pendingFiles = ArrayList(realmUpload.copyFromRealm(currentUserPendingUploads, 0))
+                pendingUploadFiles = ArrayList(realmUpload.copyFromRealm(currentUserPendingUploads, 0))
+                pendingFiles = files
 
                 toolbar.menu.findItem(R.id.restartItem).isVisible = true
                 toolbar.menu.findItem(R.id.closeItem).isVisible = true

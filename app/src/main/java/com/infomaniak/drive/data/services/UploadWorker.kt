@@ -208,14 +208,19 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         try {
             if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
-                val cacheFile = uri.toFile()
-                if (!cacheFile.exists()) {
-                    UploadFile.deleteIfExists(uri)
-                    return@withContext
+
+                val cacheFile = uri.toFile().apply {
+                    if (!exists()) {
+                        UploadFile.deleteIfExists(uri)
+                        return@withContext
+                    }
                 }
+
                 startUploadFile(uploadFile, cacheFile.length())
                 UploadFile.deleteIfExists(uri)
+
                 if (!uploadFile.isSyncOffline()) cacheFile.delete()
+
             } else {
                 SyncUtils.checkDocumentProviderPermissions(applicationContext, uri)
 
@@ -413,6 +418,14 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             return WorkManager.getInstance(this).getWorkInfosLiveData(
                 WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(TAG))
                     .addStates(arrayListOf(WorkInfo.State.RUNNING))
+                    .build()
+            )
+        }
+
+        fun Context.trackUploadWorkerSucceeded(): LiveData<MutableList<WorkInfo>> {
+            return WorkManager.getInstance(this).getWorkInfosLiveData(
+                WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(TAG))
+                    .addStates(arrayListOf(WorkInfo.State.SUCCEEDED))
                     .build()
             )
         }

@@ -25,6 +25,7 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.core.net.toFile
 import androidx.core.net.toUri
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.sync.UploadMigration
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
@@ -115,28 +116,36 @@ open class UploadFile(
             return realm.where(UploadFile::class.java).equalTo(UploadFile::uri.name, uri)
         }
 
-        private fun allPendingFoldersQuery(realm: Realm): RealmQuery<UploadFile> {
-            return pendingUploadsQuery(realm, onlyCurrentUser = true).distinct(UploadFile::remoteFolder.name)
-        }
-
         private fun pendingUploadsQuery(
             realm: Realm,
             folderId: Int? = null,
-            onlyCurrentUser: Boolean = false
+            onlyCurrentUser: Boolean = false,
+            driveIds: Array<Int>? = null
         ): RealmQuery<UploadFile> {
             return realm.where(UploadFile::class.java).apply {
                 folderId?.let { equalTo(UploadFile::remoteFolder.name, it) }
                 if (onlyCurrentUser) equalTo(UploadFile::userId.name, AccountUtils.currentUserId)
+                driveIds?.let { `in`(UploadFile::driveId.name, it) }
                 isNull(UploadFile::uploadAt.name)
                 isNull(UploadFile::deletedAt.name)
             }
         }
 
-        fun getAllPendingUploads(): ArrayList<UploadFile> {
-            return getRealmInstance().use { realm ->
+        private fun allPendingFoldersQuery(realm: Realm): RealmQuery<UploadFile> {
+            val sharedWithMeDriveIds =
+                DriveInfosController.getDrives(AccountUtils.currentUserId, sharedWithMe = true).map { it.id }
+            val currentDriveId = AccountUtils.currentDriveId
+            val driveIds = arrayOf(currentDriveId, *sharedWithMeDriveIds.toTypedArray())
+
+            return pendingUploadsQuery(realm, onlyCurrentUser = true, driveIds = driveIds).distinct(UploadFile::remoteFolder.name)
+        }
+
+        fun getAllPendingUploads(customRealm: Realm? = null): ArrayList<UploadFile> {
+            val block: (Realm) -> ArrayList<UploadFile> = { realm ->
                 pendingUploadsQuery(realm)
                     .findAll()?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile> ?: arrayListOf()
             }
+            return customRealm?.let(block) ?: getRealmInstance().use(block)
         }
 
         fun getAllPendingFolders(realm: Realm): RealmResults<UploadFile>? {

@@ -24,6 +24,8 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.FileId
+import com.infomaniak.drive.utils.Position
 import com.infomaniak.drive.utils.SingleLiveEvent
 import com.infomaniak.lib.core.models.ApiResponse
 import io.realm.OrderedRealmCollection
@@ -189,7 +191,42 @@ class FileListViewModel : ViewModel() {
         }
     }
 
+    private var pendingJob = Job()
+    val currentAdapterPendingFiles = MutableLiveData<ArrayList<File>>()
+    val indexUploadToDelete = Transformations.switchMap(currentAdapterPendingFiles) { files ->
+        val adapterPendingFileIds = files.map { it.id }
+        val isFileType = files.firstOrNull()?.type == File.Type.FILE.value
+        pendingFilesToDelete(adapterPendingFileIds, isFileType)
+    }
+
+    private fun pendingFilesToDelete(adapterPendingFileIds: List<Int>, isFileType: Boolean):
+            LiveData<ArrayList<Pair<Position, FileId>>> {
+
+        pendingJob.cancel()
+        pendingJob = Job()
+
+        return liveData(Dispatchers.IO + pendingJob) {
+            val uploadRealm = UploadFile.getRealmInstance()
+            val positions = arrayListOf<Pair<Position, FileId>>()
+            val realmUploadFiles =
+                if (isFileType) UploadFile.getAllPendingUploads(customRealm = uploadRealm)
+                else UploadFile.getAllPendingFolders(realm = uploadRealm)
+
+            adapterPendingFileIds.forEachIndexed { index, fileId ->
+                pendingJob.ensureActive()
+                val uploadExists = realmUploadFiles?.any { uploadFile ->
+                    isFileType && fileId == uploadFile.uri.hashCode() || !isFileType && fileId == uploadFile.remoteFolder
+                }
+                if (uploadExists == false) positions.add(index to fileId)
+            }
+
+            pendingJob.ensureActive()
+            emit(positions)
+        }
+    }
+
     fun cancelDownloadFiles() {
+        pendingJob.cancel()
         getFilesJob.cancel()
         getFilesJob.cancelChildren()
     }
