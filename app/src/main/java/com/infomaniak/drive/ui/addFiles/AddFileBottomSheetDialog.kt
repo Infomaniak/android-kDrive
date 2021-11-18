@@ -27,6 +27,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.FileProvider
+import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -254,38 +255,34 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     @Throws(Exception::class)
     private fun initUpload(uri: Uri) {
-        uri.let { returnUri ->
-            requireContext().contentResolver.query(returnUri, null, null, null, null)
-        }?.use { cursor ->
-            if (cursor.moveToFirst()) {
-                val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
-                val fileName = SyncUtils.getFileName(cursor)
-                val fileSize = SyncUtils.getFileSize(cursor)
+        DocumentFile.fromSingleUri(requireContext(), uri)?.let { documentFile ->
+            val fileName = documentFile.name
+            val fileSize = documentFile.length()
+            val fileModifiedAt = Date(documentFile.lastModified())
 
-                val memoryInfo = requireContext().getAvailableMemory()
-                val isLowMemory = memoryInfo.lowMemory || memoryInfo.availMem < UploadTask.chunkSize
+            val memoryInfo = requireContext().getAvailableMemory()
+            val isLowMemory = memoryInfo.lowMemory || memoryInfo.availMem < UploadTask.chunkSize
 
-                when {
-                    isLowMemory -> {
-                        requireActivity().showSnackbar(R.string.uploadOutOfMemoryError)
-                    }
-                    fileName == null -> {
-                        requireActivity().showSnackbar(R.string.anErrorHasOccurred)
-                    }
-                    else -> {
-                        lifecycleScope.launch(Dispatchers.IO) {
-                            UploadFile(
-                                uri = uri.toString(),
-                                driveId = currentFolderFile.driveId,
-                                fileCreatedAt = fileCreatedAt,
-                                fileModifiedAt = fileModifiedAt,
-                                fileName = fileName,
-                                fileSize = fileSize,
-                                remoteFolder = currentFolderFile.id,
-                                type = UploadFile.Type.UPLOAD.name,
-                                userId = currentUserId,
-                            ).store()
-                        }
+            when {
+                isLowMemory -> {
+                    requireActivity().showSnackbar(R.string.uploadOutOfMemoryError)
+                }
+                fileName == null -> {
+                    requireActivity().showSnackbar(R.string.anErrorHasOccurred)
+                }
+                else -> {
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        UploadFile(
+                            uri = uri.toString(),
+                            driveId = currentFolderFile.driveId,
+                            fileCreatedAt = fileModifiedAt,
+                            fileModifiedAt = fileModifiedAt,
+                            fileName = fileName,
+                            fileSize = fileSize,
+                            remoteFolder = currentFolderFile.id,
+                            type = UploadFile.Type.UPLOAD.name,
+                            userId = currentUserId,
+                        ).store()
                     }
                 }
             }
