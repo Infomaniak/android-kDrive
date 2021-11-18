@@ -192,14 +192,14 @@ class FileListViewModel : ViewModel() {
     }
 
     private var pendingJob = Job()
-    val deleteUploadedFiles = MutableLiveData<ArrayList<File>>()
-    val indexUploadToDelete = Transformations.switchMap(deleteUploadedFiles) { files ->
-        val adapterPendingFiles = files.map { it.id }
+    val currentAdapterPendingFiles = MutableLiveData<ArrayList<File>>()
+    val indexUploadToDelete = Transformations.switchMap(currentAdapterPendingFiles) { files ->
+        val adapterPendingFileIds = files.map { it.id }
         val isFileType = files.firstOrNull()?.type == File.Type.FILE.value
-        pendingFilesToDelete(adapterPendingFiles, isFileType)
+        pendingFilesToDelete(adapterPendingFileIds, isFileType)
     }
 
-    private fun pendingFilesToDelete(adapterPendingFiles: List<Int>, isFileType: Boolean):
+    private fun pendingFilesToDelete(adapterPendingFileIds: List<Int>, isFileType: Boolean):
             LiveData<ArrayList<Pair<Position, FileId>>> {
 
         pendingJob.cancel()
@@ -212,14 +212,12 @@ class FileListViewModel : ViewModel() {
                 if (isFileType) UploadFile.getAllPendingUploads(customRealm = uploadRealm)
                 else UploadFile.getAllPendingFolders(realm = uploadRealm)
 
-            adapterPendingFiles.forEachIndexed { index, fileId ->
+            adapterPendingFileIds.forEachIndexed { index, fileId ->
                 pendingJob.ensureActive()
                 val uploadExists = realmUploadFiles?.any { uploadFile ->
                     isFileType && fileId == uploadFile.uri.hashCode() || !isFileType && fileId == uploadFile.remoteFolder
                 }
-                if (uploadExists == false) {
-                    positions.add(index to fileId)
-                }
+                if (uploadExists == false) positions.add(index to fileId)
             }
 
             pendingJob.ensureActive()

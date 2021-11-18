@@ -65,8 +65,6 @@ class UploadInProgressFragment : FileListFragment() {
     private var pendingUploadFiles = arrayListOf<UploadFile>()
     private var pendingFiles = arrayListOf<File>()
 
-    private var isCancelled = false
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         realmUpload = UploadFile.getRealmInstance()
         downloadFiles = DownloadFiles()
@@ -94,7 +92,7 @@ class UploadInProgressFragment : FileListFragment() {
             if (folderID == remoteFolderId && position >= 0 || isPendingFolders()) {
                 if (isUploaded) {
                     if (!isPendingFolders()) whenAnUploadIsDone(position, fileAdapter.fileList[position].id)
-                    fileListViewModel.deleteUploadedFiles.value = fileAdapter.getFileObjectsList(null)
+                    fileListViewModel.currentAdapterPendingFiles.value = fileAdapter.getFileObjectsList(null)
                 } else {
                     fileAdapter.updateFileProgress(position = position, progress = progress)
                 }
@@ -104,7 +102,7 @@ class UploadInProgressFragment : FileListFragment() {
         }
 
         requireContext().trackUploadWorkerSucceeded().observe(viewLifecycleOwner) {
-            fileListViewModel.deleteUploadedFiles.value = fileAdapter.getFileObjectsList(null)
+            fileListViewModel.currentAdapterPendingFiles.value = fileAdapter.getFileObjectsList(null)
         }
 
         fileListViewModel.indexUploadToDelete.observe(viewLifecycleOwner) { list ->
@@ -149,7 +147,7 @@ class UploadInProgressFragment : FileListFragment() {
     override fun onResume() {
         super.onResume()
         if (fileAdapter.fileList.isNotEmpty()) {
-            fileListViewModel.deleteUploadedFiles.value = fileAdapter.getFileObjectsList(null)
+            fileListViewModel.currentAdapterPendingFiles.value = fileAdapter.getFileObjectsList(null)
         }
     }
 
@@ -189,7 +187,6 @@ class UploadInProgressFragment : FileListFragment() {
 
     private fun closeItemClicked(uploadFile: UploadFile? = null, folderId: Int? = null) {
         val progressDialog = Utils.createProgressDialog(requireContext(), R.string.allCancellationInProgress)
-        isCancelled = true
         lifecycleScope.launch(Dispatchers.IO) {
             var needPopBackStack = false
             uploadFile?.let {

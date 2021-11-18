@@ -116,15 +116,6 @@ open class UploadFile(
             return realm.where(UploadFile::class.java).equalTo(UploadFile::uri.name, uri)
         }
 
-        private fun allPendingFoldersQuery(realm: Realm): RealmQuery<UploadFile> {
-            val sharedWithMeDriveIds =
-                DriveInfosController.getDrives(AccountUtils.currentUserId, sharedWithMe = true).map { it.id }
-            val currentDrive = AccountUtils.currentDriveId
-            val driveIds = arrayOf(currentDrive, *sharedWithMeDriveIds.toTypedArray())
-
-            return pendingUploadsQuery(realm, onlyCurrentUser = true, driveIds = driveIds).distinct(UploadFile::remoteFolder.name)
-        }
-
         private fun pendingUploadsQuery(
             realm: Realm,
             folderId: Int? = null,
@@ -138,6 +129,15 @@ open class UploadFile(
                 isNull(UploadFile::uploadAt.name)
                 isNull(UploadFile::deletedAt.name)
             }
+        }
+
+        private fun allPendingFoldersQuery(realm: Realm): RealmQuery<UploadFile> {
+            val sharedWithMeDriveIds =
+                DriveInfosController.getDrives(AccountUtils.currentUserId, sharedWithMe = true).map { it.id }
+            val currentDriveId = AccountUtils.currentDriveId
+            val driveIds = arrayOf(currentDriveId, *sharedWithMeDriveIds.toTypedArray())
+
+            return pendingUploadsQuery(realm, onlyCurrentUser = true, driveIds = driveIds).distinct(UploadFile::remoteFolder.name)
         }
 
         fun getAllPendingUploads(customRealm: Realm? = null): ArrayList<UploadFile> {
