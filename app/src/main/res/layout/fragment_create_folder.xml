@@ -207,7 +207,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/pathChevron"
                         app:layout_constraintHorizontal_chainStyle="packed"
-                        app:layout_constraintStart_toEndOf="@+id/pathDriveIcon"
+                        app:layout_constraintStart_toEndOf="@id/pathDriveIcon"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintWidth_max="wrap"
                         app:layout_constraintWidth_percent="0.4"
@@ -222,7 +222,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/pathFolderIcon"
                         app:layout_constraintHorizontal_chainStyle="packed"
-                        app:layout_constraintStart_toEndOf="@+id/pathDriveText"
+                        app:layout_constraintStart_toEndOf="@id/pathDriveText"
                         app:layout_constraintTop_toTopOf="parent"
                         tools:ignore="ContentDescription" />
 
@@ -235,7 +235,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/pathFolderText"
                         app:layout_constraintHorizontal_chainStyle="packed"
-                        app:layout_constraintStart_toEndOf="@+id/pathChevron"
+                        app:layout_constraintStart_toEndOf="@id/pathChevron"
                         app:layout_constraintTop_toTopOf="parent"
                         tools:ignore="ContentDescription" />
 
@@ -248,7 +248,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintHorizontal_chainStyle="packed"
-                        app:layout_constraintStart_toEndOf="@+id/pathFolderIcon"
+                        app:layout_constraintStart_toEndOf="@id/pathFolderIcon"
                         app:layout_constraintTop_toTopOf="parent" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>

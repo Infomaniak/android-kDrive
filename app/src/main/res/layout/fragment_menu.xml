@@ -53,7 +53,7 @@
             android:textSize="22sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/userImage"
+            app:layout_constraintTop_toBottomOf="@id/userImage"
             tools:text="@tools:sample/full_names" />
 
         <TextView
@@ -65,7 +65,7 @@
             android:gravity="center"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/userName"
+            app:layout_constraintTop_toBottomOf="@id/userName"
             tools:text="thiago@silva.com" />
 
         <TextView
@@ -80,7 +80,7 @@
             app:drawableStartCompat="@drawable/ic_drive"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/userEmail"
+            app:layout_constraintTop_toBottomOf="@id/userEmail"
             tools:text="Westworld" />
 
         <com.google.android.material.button.MaterialButton
@@ -105,7 +105,7 @@
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/driveName"
+            app:layout_constraintTop_toBottomOf="@id/driveName"
             app:layout_constraintWidth_percent="0.6">
 
             <com.google.android.material.progressindicator.LinearProgressIndicator
