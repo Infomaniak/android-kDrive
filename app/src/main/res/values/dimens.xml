@@ -20,4 +20,5 @@
     <dimen name="h1">28sp</dimen>
     <dimen name="h3">16sp</dimen>
     <dimen name="userAvatarOverlap">-6dp</dimen>
+    <dimen name="categoryIconOverlap">-7dp</dimen>
 </resources>

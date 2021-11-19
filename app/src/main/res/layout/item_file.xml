@@ -97,10 +97,44 @@
         android:src="@drawable/ic_star_filled"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/fileNameLayout"
-        app:layout_constraintEnd_toStartOf="@id/endIconLayout"
+        app:layout_constraintEnd_toStartOf="@id/categoriesLayout"
         app:layout_constraintStart_toEndOf="@id/fileNameLayout"
         app:layout_constraintTop_toTopOf="@id/fileNameLayout"
         tools:visibility="visible" />
+
+    <LinearLayout
+        android:id="@+id/categoriesLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/fileNameLayout"
+        app:layout_constraintEnd_toStartOf="@id/endIconLayout"
+        app:layout_constraintStart_toEndOf="@id/fileFavorite"
+        app:layout_constraintTop_toTopOf="@id/fileNameLayout"
+        tools:visibility="visible">
+
+        <com.infomaniak.drive.views.CategoryIconView
+            android:id="@+id/categoryIcon1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <com.infomaniak.drive.views.CategoryIconView
+            android:id="@+id/categoryIcon2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/categoryIconOverlap"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <com.infomaniak.drive.views.CategoryIconView
+            android:id="@+id/categoryIconRemaining"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/categoryIconOverlap"
+            android:visibility="gone"
+            tools:visibility="visible" />
+    </LinearLayout>
 
     <FrameLayout
         android:id="@+id/progressLayout"
