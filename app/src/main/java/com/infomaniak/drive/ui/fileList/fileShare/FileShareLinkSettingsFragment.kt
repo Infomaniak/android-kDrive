@@ -97,12 +97,6 @@ class FileShareLinkSettingsFragment : Fragment() {
                 upgradeOfferPassword.isVisible = true
             }
 
-            settingsLayout?.apply {
-                val beforeLastIndex = indexOfChild(saveButton) - 1
-                removeView(addExpirationDateLayout)
-                addView(addExpirationDateLayout, beforeLastIndex)
-            }
-
             addExpirationDateLayout.apply {
                 addExpirationDateSwitch.isEnabled = false
                 addExpirationDateSwitch.isClickable = false
