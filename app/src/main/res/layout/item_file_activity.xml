@@ -94,7 +94,7 @@
             android:layout_marginHorizontal="6dp"
             android:layout_marginVertical="2dp"
             app:layout_constraintBottom_toTopOf="@id/activityAction"
-            app:layout_constraintEnd_toStartOf="@+id/activityHourLayout"
+            app:layout_constraintEnd_toStartOf="@id/activityHourLayout"
             app:layout_constraintStart_toEndOf="@id/activityUserAvatar"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="@tools:sample/full_names" />
@@ -106,7 +106,7 @@
             android:layout_marginHorizontal="6dp"
             android:layout_marginVertical="2dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/activityHourLayout"
+            app:layout_constraintEnd_toStartOf="@id/activityHourLayout"
             app:layout_constraintStart_toEndOf="@id/activityUserAvatar"
             app:layout_constraintTop_toBottomOf="@id/activityUserName"
             tools:text="a modifié le fichier" />

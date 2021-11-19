@@ -48,8 +48,8 @@
             android:layout_marginHorizontal="@dimen/marginStandardMedium"
             android:translationY="-8dp"
             android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="@+id/mainIcon"
-            app:layout_constraintStart_toStartOf="@+id/mainIcon"
+            app:layout_constraintEnd_toEndOf="@id/mainIcon"
+            app:layout_constraintStart_toStartOf="@id/mainIcon"
             app:layout_constraintTop_toBottomOf="@id/mainIcon"
             app:shapeAppearanceOverlay="@style/CircleImageView"
             tools:srcCompat="@tools:sample/avatars" />
@@ -61,10 +61,10 @@
             android:layout_height="30dp"
             android:layout_marginTop="@dimen/marginStandardSmall"
             android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="@+id/secondIcon"
+            app:layout_constraintEnd_toEndOf="@id/secondIcon"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/secondIcon"
-            app:layout_constraintTop_toTopOf="@+id/secondIcon" />
+            app:layout_constraintStart_toStartOf="@id/secondIcon"
+            app:layout_constraintTop_toTopOf="@id/secondIcon" />
 
         <TextView
             android:id="@+id/permissionTitle"
