@@ -24,14 +24,13 @@ import androidx.appcompat.widget.TooltipCompat
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.FileComment
 import com.infomaniak.drive.utils.loadAvatar
-import com.infomaniak.drive.views.PaginationAdapter
+import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_file_comment.view.*
 
 class FileCommentsAdapter(
-    override val itemList: ArrayList<FileComment> = arrayListOf(),
     val onLikeButtonClicked: (currentComment: FileComment) -> Unit
-) : PaginationAdapter<FileComment>() {
+) : LoaderAdapter<FileComment>() {
 
     var onEditClicked: ((comment: FileComment) -> Unit)? = null
     var onDeleteClicked: ((comment: FileComment) -> Unit)? = null

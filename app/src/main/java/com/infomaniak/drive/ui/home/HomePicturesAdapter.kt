@@ -22,14 +22,13 @@ import android.view.ViewGroup
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.loadGlideUrl
-import com.infomaniak.drive.views.PaginationAdapter
+import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_picture.view.*
 
 class HomePicturesAdapter(
-    override var itemList: ArrayList<File> = arrayListOf(),
     private val onItemClick: (file: File) -> Unit
-) : PaginationAdapter<File>() {
+) : LoaderAdapter<File>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cardview_picture, parent, false))

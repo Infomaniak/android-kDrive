@@ -41,7 +41,6 @@ import java.util.*
 
 class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
 
-    var isComplete = false
     var onFileClicked: ((currentFile: File, validPreviewFiles: ArrayList<File>) -> Unit)? = null
     var onMoreFilesClicked: ((fileActivity: FileActivity, validPreviewFiles: ArrayList<File>) -> Unit)? = null
 

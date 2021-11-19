@@ -85,7 +85,7 @@ class PicturesFragment : Fragment() {
         gridLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
                 return when {
-                    picturesAdapter.getItems()[position] is String -> numPicturesColumns
+                    picturesAdapter.itemList[position] is String -> numPicturesColumns
                     else -> 1
                 }
             }
@@ -104,8 +104,7 @@ class PicturesFragment : Fragment() {
         picturesViewModel.getAllPicturesFiles(AccountUtils.currentDriveId, ignoreCloud).observe(viewLifecycleOwner) {
             it?.let { (pictures, isComplete) ->
                 val pictureList = picturesAdapter.formatList(requireContext(), pictures)
-                if (picturesAdapter.itemCount == 0) picturesAdapter.setList(pictureList)
-                else picturesRecyclerView.post { picturesAdapter.addAll(pictureList) }
+                picturesRecyclerView.post { picturesAdapter.addAll(pictureList) }
                 picturesAdapter.isComplete = isComplete
                 noPicturesLayout.toggleVisibility(picturesAdapter.pictureList.isEmpty())
             } ?: run {

@@ -70,7 +70,6 @@ class HomeActivitiesFragment : Fragment() {
             paginationListener = setPagination(
                 whenLoadMoreIsPossible = {
                     if (!lastActivitiesAdapter.isComplete && !isDownloadingActivities) {
-                        lastActivitiesAdapter.showLoading()
                         homeViewModel.lastActivityPage++
                         homeViewModel.lastActivityLastPage++
 
@@ -108,8 +107,8 @@ class HomeActivitiesFragment : Fragment() {
         (homeTabsRecyclerView?.adapter as? LastActivitiesAdapter)?.apply {
             if (forceDownload) {
                 clean()
-                showLoading()
             }
+            showLoading()
             isComplete = false
             isDownloadingActivities = true
             homeViewModel.getLastActivities(driveId, forceDownload).observe(viewLifecycleOwner) {

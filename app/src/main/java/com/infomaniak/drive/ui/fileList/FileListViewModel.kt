@@ -86,9 +86,7 @@ class FileListViewModel : ViewModel() {
                 when {
                     resultList == null -> emit(null)
                     resultList.second.size < ApiRepository.PER_PAGE -> {
-                        if (page == 1) {
-                            emit(FolderFilesResult(resultList.first, resultList.second, true, page))
-                        }
+                        emit(FolderFilesResult(resultList.first, resultList.second, true, page))
                     }
                     else -> {
                         if (page == 1) {

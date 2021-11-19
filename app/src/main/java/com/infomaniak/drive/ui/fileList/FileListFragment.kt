@@ -811,6 +811,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                         refreshActivities()
                     }
                     fileAdapter.isComplete = result.isComplete
+                    fileAdapter.hideLoading()
                 } ?: run {
                     changeNoFilesLayoutVisibility(
                         hideFileList = fileAdapter.itemCount == 0,

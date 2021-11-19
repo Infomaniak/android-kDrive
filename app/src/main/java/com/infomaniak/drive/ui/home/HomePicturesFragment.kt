@@ -65,7 +65,7 @@ class HomePicturesFragment : Fragment() {
             // Don't remove unnecessary parentheses from function call with lambda,
             // else "kotlin.UninitializedPropertyAccessException: lateinit property lastElementsAdapter has not been initialized"
             val homePicturesAdapter = HomePicturesAdapter() { file ->
-                val pictures = (adapter as HomePicturesAdapter).getItems()
+                val pictures = (adapter as HomePicturesAdapter).itemList
                 Utils.displayFile(mainViewModel, findNavController(), file, pictures)
             }
             homePicturesAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT
@@ -97,7 +97,6 @@ class HomePicturesFragment : Fragment() {
             homeViewModel.getLastPictures(driveId, forceDownload).observe(viewLifecycleOwner) { apiResponse ->
                 stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
                 apiResponse?.data?.let { lastPictures ->
-                    clean()
                     addAll(lastPictures)
                     isComplete = lastPictures.size < ApiRepository.PER_PAGE
                 } ?: also { isComplete = true }

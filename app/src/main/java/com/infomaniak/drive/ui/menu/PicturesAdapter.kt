@@ -23,17 +23,16 @@ import android.view.ViewGroup
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.loadGlideUrl
-import com.infomaniak.drive.views.PaginationAdapter
 import com.infomaniak.lib.core.utils.format
+import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_picture.view.*
 import kotlinx.android.synthetic.main.title_recycler_section.view.*
 import java.util.*
 
 class PicturesAdapter(
-    override var itemList: ArrayList<Any> = arrayListOf(),
     private val onItemClick: (file: File) -> Unit
-) : PaginationAdapter<Any>() {
+) : LoaderAdapter<Any>() {
 
     private var lastSectionTitle: String = ""
     var pictureList: ArrayList<File> = arrayListOf()
