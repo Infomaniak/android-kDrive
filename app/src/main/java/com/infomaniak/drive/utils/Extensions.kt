@@ -57,6 +57,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
+import androidx.core.view.forEachIndexed
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -87,8 +88,10 @@ import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialog.Companion.FILE_ID
+import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED_CATEGORIES
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.drive.views.CategoryIconView
 import com.infomaniak.lib.core.models.User
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
@@ -97,7 +100,9 @@ import com.infomaniak.lib.core.utils.UtilsUi.getInitials
 import com.infomaniak.lib.core.utils.format
 import io.sentry.Sentry
 import kotlinx.android.synthetic.main.cardview_file_grid.view.*
+import kotlinx.android.synthetic.main.fragment_file_details_infos.*
 import kotlinx.android.synthetic.main.item_file.view.*
+import kotlinx.android.synthetic.main.item_file.view.categoriesLayout
 import kotlinx.android.synthetic.main.item_file.view.fileFavorite
 import kotlinx.android.synthetic.main.item_file.view.fileName
 import kotlinx.android.synthetic.main.item_file.view.fileOffline
@@ -315,6 +320,25 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
             }
             filePreview2?.loadGlide(file.getFileType().icon)
             setupFileProgress(file)
+        }
+    }
+
+    if (!isGrid) {
+        val categories = file.getCategories()
+        if (categories.isEmpty()) {
+            categoriesLayout.isGone = true
+        } else {
+            categoriesLayout.forEachIndexed { index, view ->
+                (view as CategoryIconView).apply {
+                    val category = categories.getOrNull(index)
+                    if (index < MAX_DISPLAYED_CATEGORIES) {
+                        setCategoryIconOrHide(category)
+                    } else {
+                        setRemainingCategoriesNumber(categories.size - MAX_DISPLAYED_CATEGORIES - 1, category)
+                    }
+                }
+            }
+            categoriesLayout.isVisible = true
         }
     }
 }
