@@ -49,11 +49,11 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.itemView.apply {
+        (holder.itemView as LoaderCardView).apply {
             if (getItemViewType(position) == VIEW_TYPE_LOADING) {
-                (this as LoaderCardView).startLoading()
+                startLoading()
             } else {
-                (this as LoaderCardView).stopLoading()
+                stopLoading()
                 val fileActivity = itemList[position]
                 fileActivity.user?.let { user -> this.createActivity(fileActivity, user) }
             }

@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -25,6 +26,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginVertical="@dimen/marginStandardMedium"
-        android:layout_marginStart="@dimen/marginStandard" />
+        android:layout_marginStart="@dimen/marginStandard"
+        tools:text="Novembre 2021" />
 
 </LinearLayout>

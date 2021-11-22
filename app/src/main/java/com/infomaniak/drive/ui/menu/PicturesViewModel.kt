@@ -46,25 +46,26 @@ class PicturesViewModel : ViewModel() {
                         when {
                             data.isNullOrEmpty() -> emit(null)
                             data.size < ApiRepository.PER_PAGE -> {
-                                FileController.storeDriveSoloPictures(data, isFirstPage)
+                                FileController.storePicturesDrive(data, isFirstPage)
                                 emit(data to true)
                             }
                             else -> {
-                                FileController.storeDriveSoloPictures(data, isFirstPage)
+                                FileController.storePicturesDrive(data, isFirstPage)
                                 emit(data to false)
                                 recursive(page + 1)
                             }
                         }
                         if (isFirstPage) FileController.removeOrphanFiles()
-                    } else emit(FileController.getDriveSoloPictures() to true)
+                    } else emit(FileController.getPicturesDrive() to true)
                 }
             }
             recursive(1)
         }
     }
 
-    fun cancelPicturesJob() {
+    override fun onCleared() {
         getPicturesJob.cancel()
+        super.onCleared()
     }
 
 }

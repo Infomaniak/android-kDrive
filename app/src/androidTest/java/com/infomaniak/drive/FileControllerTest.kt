@@ -123,10 +123,10 @@ class FileControllerTest : KDriveTest() {
         Assert.assertFalse("get pictures response data cannot be null or empty", apiResponse.data.isNullOrEmpty())
 
         // Store remote pictures
-        FileController.storeDriveSoloPictures(apiResponse.data!!, customRealm = realm)
+        FileController.storePicturesDrive(apiResponse.data!!, customRealm = realm)
 
         // Get saved remote files from realm
-        val localFiles = FileController.getDriveSoloPictures(realm)
+        val localFiles = FileController.getPicturesDrive(realm)
         Assert.assertTrue("local pictures cannot be empty ", localFiles.isNotEmpty())
 
         // Compare remote pictures with local pictures

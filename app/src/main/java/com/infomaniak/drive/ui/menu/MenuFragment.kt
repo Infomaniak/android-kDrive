@@ -99,7 +99,7 @@ class MenuFragment : Fragment() {
             }
 
             pictures.setOnClickListener {
-                safeNavigate(MenuFragmentDirections.actionMenuFragmentToPicturesFragment())
+                safeNavigate(MenuFragmentDirections.actionMenuFragmentToMenuPicturesFragment())
             }
 
             trashbin.setOnClickListener {

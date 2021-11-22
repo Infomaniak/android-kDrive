@@ -18,11 +18,9 @@
 package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -34,19 +32,22 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.getScreenSizeInDp
-import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import com.infomaniak.lib.core.utils.toDp
 import kotlinx.android.synthetic.main.fragment_pictures.*
 import kotlin.math.max
 import kotlin.math.min
 
-class PicturesFragment : Fragment() {
+class PicturesFragment(
+    private val onFinish: (() -> Unit)? = null
+) : Fragment() {
 
     private val mainViewModel: MainViewModel by activityViewModels()
-    private lateinit var picturesAdapter: PicturesAdapter
     private val picturesViewModel: PicturesViewModel by viewModels()
-
-    private lateinit var timer: CountDownTimer
+    private val picturesAdapter: PicturesAdapter by lazy {
+        PicturesAdapter { file ->
+            Utils.displayFile(mainViewModel, findNavController(), file, picturesAdapter.pictureList)
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_pictures, container, false)
@@ -55,37 +56,21 @@ class PicturesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        timer = createRefreshTimer { swipeRefreshLayout?.isRefreshing = true }
-
-        toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
-        }
-
-        ViewCompat.requestApplyInsets(pictureListCoordinator)
-
         noPicturesLayout.setup(
             icon = R.drawable.ic_images,
             title = R.string.picturesNoFile,
             initialListView = picturesRecyclerView
         )
 
-        swipeRefreshLayout.setOnRefreshListener {
-            picturesAdapter.clearPictures()
-            getPictures()
-        }
+        picturesAdapter.numberItemLoader = 12
+        picturesAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT
 
-        picturesAdapter = PicturesAdapter { file ->
-            Utils.displayFile(mainViewModel, findNavController(), file, picturesAdapter.pictureList)
-        }
-        picturesAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
-
-        timer.start()
         val numPicturesColumns = getNumPicturesColumns()
         val gridLayoutManager = GridLayoutManager(requireContext(), numPicturesColumns)
         gridLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
                 return when {
-                    picturesAdapter.itemList[position] is String -> numPicturesColumns
+                    picturesAdapter.itemList.getOrNull(position) is String -> numPicturesColumns
                     else -> 1
                 }
             }
@@ -93,30 +78,38 @@ class PicturesFragment : Fragment() {
         picturesRecyclerView.layoutManager = gridLayoutManager
         picturesRecyclerView.adapter = picturesAdapter
 
-        picturesAdapter.isComplete = false
-
         getPictures()
     }
 
+    fun reloadPictures() {
+        if (isResumed) {
+            picturesAdapter.clearPictures()
+            getPictures()
+        }
+    }
+
     private fun getPictures() {
-        val ignoreCloud = mainViewModel.isInternetAvailable.value == false
-        picturesViewModel.cancelPicturesJob()
-        picturesViewModel.getAllPicturesFiles(AccountUtils.currentDriveId, ignoreCloud).observe(viewLifecycleOwner) {
-            it?.let { (pictures, isComplete) ->
-                val pictureList = picturesAdapter.formatList(requireContext(), pictures)
-                picturesRecyclerView.post { picturesAdapter.addAll(pictureList) }
-                picturesAdapter.isComplete = isComplete
-                noPicturesLayout.toggleVisibility(picturesAdapter.pictureList.isEmpty())
-            } ?: run {
-                picturesAdapter.isComplete = true
-                noPicturesLayout.toggleVisibility(
-                    noNetwork = ignoreCloud,
-                    isVisible = picturesAdapter.pictureList.isEmpty(),
-                    showRefreshButton = true
-                )
+        picturesAdapter.apply {
+            val ignoreCloud = mainViewModel.isInternetAvailable.value == false
+            showLoading()
+            isComplete = false
+            picturesViewModel.getAllPicturesFiles(AccountUtils.currentDriveId, ignoreCloud).observe(viewLifecycleOwner) {
+                it?.let { (pictures, isComplete) ->
+                    stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+                    val pictureList = formatList(requireContext(), pictures)
+                    picturesRecyclerView.post { addAll(pictureList) }
+                    this.isComplete = isComplete
+                    noPicturesLayout.toggleVisibility(pictureList.isEmpty())
+                } ?: run {
+                    isComplete = true
+                    noPicturesLayout.toggleVisibility(
+                        noNetwork = ignoreCloud,
+                        isVisible = pictureList.isEmpty(),
+                        showRefreshButton = true
+                    )
+                }
+                onFinish?.invoke()
             }
-            timer.cancel()
-            swipeRefreshLayout.isRefreshing = false
         }
     }
 

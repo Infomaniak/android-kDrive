@@ -270,8 +270,8 @@
             app:popEnterAnim="@anim/fragment_open_enter"
             app:popExitAnim="@anim/fragment_open_exit" />
         <action
-            android:id="@+id/action_menuFragment_to_picturesFragment"
-            app:destination="@id/picturesFragment"
+            android:id="@+id/action_menuFragment_to_menuPicturesFragment"
+            app:destination="@id/menuPicturesFragment"
             app:enterAnim="@anim/fragment_open_enter"
             app:exitAnim="@anim/fragment_open_exit"
             app:popEnterAnim="@anim/fragment_open_enter"
@@ -283,7 +283,6 @@
             app:exitAnim="@anim/fragment_open_exit"
             app:popEnterAnim="@anim/fragment_open_enter"
             app:popExitAnim="@anim/fragment_open_exit" />
-
     </fragment>
 
     <activity
@@ -750,4 +749,9 @@
             android:name="userDrive"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
     </dialog>
+    <fragment
+        android:id="@+id/menuPicturesFragment"
+        android:name="com.infomaniak.drive.ui.menu.MenuPicturesFragment"
+        android:label="MenuPicturesFragment"
+        tools:layout="@layout/fragment_menu_pictures" />
 </navigation>

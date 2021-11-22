@@ -36,6 +36,7 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.menu.PicturesFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.TabViewPagerUtils.getFragment
 import com.infomaniak.drive.utils.TabViewPagerUtils.setup
@@ -100,7 +101,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         val tabsHome = arrayListOf(
             TabViewPagerUtils.FragmentTab(0, HomeActivitiesFragment(), R.id.homeActivitiesButton),
             TabViewPagerUtils.FragmentTab(1, HomeOfflineFragment(), R.id.homeOfflineButton),
-            TabViewPagerUtils.FragmentTab(2, HomePicturesFragment(), R.id.homePicturesButton)
+            TabViewPagerUtils.FragmentTab(2, PicturesFragment(), R.id.homePicturesButton)
         )
 
         setup(homeViewPager, tabsHomeGroup, tabsHome) { UISettings(requireContext()).lastHomeSelectedTab = it }
@@ -123,7 +124,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             if (downloadRequired) resetAndScrollToTop()
 
             (homeViewPager.getFragment(0) as HomeActivitiesFragment).getLastActivities(currentDrive.id, downloadRequired)
-            (homeViewPager.getFragment(2) as HomePicturesFragment).getPictures(currentDrive.id, downloadRequired)
+            (homeViewPager.getFragment(2) as PicturesFragment).reloadPictures()
 
             setDriveHeader(currentDrive)
             notEnoughStorage.setup(currentDrive)
@@ -139,8 +140,6 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         homeViewModel.apply {
             lastActivityPage = 1
             lastActivityLastPage = 1
-            lastPicturesPage = 1
-            lastPicturesLastPage = 1
         }
         homeCoordinator.scrollTo(0, 0)
     }

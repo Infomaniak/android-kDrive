@@ -455,7 +455,7 @@ object FileController {
         return activityResults
     }
 
-    fun getDriveSoloPictures(customRealm: Realm? = null): ArrayList<File> {
+    fun getPicturesDrive(customRealm: Realm? = null): ArrayList<File> {
         val operation: (Realm) -> ArrayList<File> = { realm ->
             realm.where(File::class.java).equalTo(File::id.name, PICTURES_FILE_ID).findFirst()?.let { picturesFolder ->
                 realm.copyFromRealm(picturesFolder.children, 0) as ArrayList<File>
@@ -506,7 +506,7 @@ object FileController {
         }
     }
 
-    fun storeDriveSoloPictures(pictures: ArrayList<File>, isFirstPage: Boolean = false, customRealm: Realm? = null) {
+    fun storePicturesDrive(pictures: ArrayList<File>, isFirstPage: Boolean = false, customRealm: Realm? = null) {
         val block: (Realm) -> Unit = {
             it.executeTransaction { realm ->
                 val picturesFolder = realm.where(File::class.java).equalTo(File::id.name, PICTURES_FILE_ID).findFirst()
