@@ -19,7 +19,6 @@ package com.infomaniak.drive.data.api
 
 import com.google.gson.JsonElement
 import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.User
@@ -44,6 +43,8 @@ object ApiRepository {
             "&actions[]=file_share_delete" +
             "&actions[]=file_favorite_create" +
             "&actions[]=file_favorite_remove" +
+            "&actions[]=file_categorize" +
+            "&actions[]=file_uncategorize" +
             "&actions[]=share_link_create" +
             "&actions[]=share_link_update" +
             "&actions[]=share_link_delete" +
@@ -87,7 +88,7 @@ object ApiRepository {
 
     fun getFileActivities(okHttpClient: OkHttpClient, file: File, page: Int): ApiResponse<ArrayList<FileActivity>> {
         val url = "${ApiRoutes.getFileActivities(file)}?${pagination(page)}&depth=children&from_date=${file.responseAt}" +
-                "&with=file,rights,collaborative_folder,favorite,share_link,mobile" + ACTIONS
+                "&with=file,rights,collaborative_folder,favorite,share_link,mobile,categories" + ACTIONS
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 

@@ -324,8 +324,9 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
     }
 
     if (!isGrid) {
+        val canReadCategoryOnFile = DriveInfosController.getCategoryRights()?.canReadCategoryOnFile ?: false
         val categories = file.getCategories()
-        if (categories.isEmpty()) {
+        if (!canReadCategoryOnFile || categories.isEmpty()) {
             categoriesLayout.isGone = true
         } else {
             categoriesLayout.forEachIndexed { index, view ->
