@@ -294,6 +294,11 @@
                                 <LayoutPositions />
                               </value>
                             </entry>
+                            <entry key="action_fileDetailsFragment_to_selectCategoriesBottomSheetDialog">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
                             <entry key="action_fileDetailsFragment_to_selectPermissionBottomSheetDialog">
                               <value>
                                 <LayoutPositions />
@@ -545,11 +550,6 @@
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_menuFragment_to_menuPicturesFragment">
-                              <value>
-                                <LayoutPositions />
-                              </value>
-                            </entry>
                             <entry key="action_menuFragment_to_mySharesFragment">
                               <value>
                                 <LayoutPositions />
@@ -795,6 +795,18 @@
                         <option name="myPosition">
                           <Point>
                             <option name="x" value="1964" />
+                            <option name="y" value="12" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
+                  <entry key="selectCategoriesBottomSheetDialog">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="12" />
                             <option name="y" value="12" />
                           </Point>
                         </option>

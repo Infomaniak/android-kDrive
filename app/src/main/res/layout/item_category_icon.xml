@@ -22,10 +22,9 @@
     android:layout_height="14dp">
 
     <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/avatarImageView"
+        android:id="@+id/categoryImageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop"
         app:shapeAppearanceOverlay="@style/CircleImageView"
         app:strokeColor="@color/background"
         app:strokeWidth="1dp"

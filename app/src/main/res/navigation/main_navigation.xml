@@ -43,7 +43,6 @@
         android:name="com.infomaniak.drive.ui.fileList.FileListFragment"
         android:label="@string/fileListTitle"
         tools:layout="@layout/fragment_file_list">
-
         <action
             android:id="@+id/fileListFragmentToFileListFragment"
             app:destination="@id/fileListFragment"
@@ -89,6 +88,7 @@
             android:id="@+id/action_fileListFragment_to_dropBoxResultBottomSheetDialog"
             app:destination="@id/dropBoxResultBottomSheetDialog" />
     </fragment>
+
     <fragment
         android:id="@+id/previewSliderFragment"
         android:name="com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment"
@@ -107,6 +107,7 @@
             android:id="@+id/action_previewSliderFragment_to_downloadProgressDialog"
             app:destination="@id/downloadProgressDialog" />
     </fragment>
+
     <fragment
         android:id="@+id/previewFragment"
         android:name="com.infomaniak.drive.ui.fileList.preview.PreviewFragment"
@@ -116,6 +117,7 @@
             android:id="@+id/action_previewFragment_to_fileDetailsFragment"
             app:destination="@id/fileDetailsFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/fileDetailsFragment"
         android:name="com.infomaniak.drive.ui.fileList.fileDetails.FileDetailsFragment"
@@ -136,7 +138,11 @@
         <action
             android:id="@+id/action_fileDetailsFragment_to_selectPermissionBottomSheetDialog"
             app:destination="@id/selectPermissionBottomSheetDialog" />
+        <action
+            android:id="@+id/action_fileDetailsFragment_to_selectCategoriesBottomSheetDialog"
+            app:destination="@id/selectCategoriesBottomSheetDialog" />
     </fragment>
+
     <dialog
         android:id="@+id/fileInfoActionsBottomSheetDialog"
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialog"
@@ -164,6 +170,7 @@
             android:id="@+id/action_fileInfoActionsBottomSheetDialog_to_downloadProgressDialog"
             app:destination="@id/downloadProgressDialog" />
     </dialog>
+
     <dialog
         android:id="@+id/actionMultiSelectBottomSheetDialog"
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog"
@@ -310,6 +317,7 @@
             app:popEnterAnim="@anim/fragment_open_enter"
             app:popExitAnim="@anim/fragment_open_exit" />
     </dialog>
+
     <fragment
         android:id="@+id/newFolderFragment"
         android:name="com.infomaniak.drive.ui.addFiles.NewFolderFragment"
@@ -332,6 +340,7 @@
             android:id="@+id/action_newFolderFragment_to_createDropBoxFolderFragment"
             app:destination="@id/createDropBoxFolderFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/trashFragment"
         android:name="com.infomaniak.drive.ui.menu.TrashFragment"
@@ -373,16 +382,19 @@
             android:id="@+id/action_settingsFragment_to_aboutSettingsFragment"
             app:destination="@id/aboutSettingsFragment" />
     </fragment>
+
     <activity
         android:id="@+id/appSecurityActivity"
         android:name="com.infomaniak.drive.ui.menu.settings.AppSecuritySettingsActivity"
         android:label="AppSecurityActivity"
         tools:layout="@layout/view_switch_settings" />
+
     <fragment
         android:id="@+id/aboutSettingsFragment"
         android:name="com.infomaniak.drive.ui.menu.settings.AboutSettingsFragment"
         android:label="AboutSettingsFragment"
         tools:layout="@layout/fragment_settings_about" />
+
     <fragment
         android:id="@+id/fileShareDetailsFragment"
         android:name="com.infomaniak.drive.ui.fileList.fileShare.FileShareDetailsFragment"
@@ -485,7 +497,6 @@
             android:id="@+id/action_searchFragment_to_fileListFragment"
             app:destination="@id/fileListFragment" />
     </fragment>
-
 
     <dialog
         android:id="@+id/accessDeniedBottomSheetFragment"
@@ -685,6 +696,7 @@
             android:id="@+id/action_picturesFragment_to_previewSliderFragment"
             app:destination="@id/previewSliderFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/recentChangesFragment"
         android:name="com.infomaniak.drive.ui.menu.RecentChangesFragment"
@@ -710,6 +722,19 @@
             android:name="permissionsGroup"
             app:argType="com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog$PermissionsGroup" />
     </dialog>
+
+    <dialog
+        android:id="@+id/selectCategoriesBottomSheetDialog"
+        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SelectCategoriesBottomSheetDialog"
+        android:label="SelectCategoriesBottomSheetDialog">
+        <argument
+            android:name="fileId"
+            app:argType="integer" />
+        <argument
+            android:name="categoriesIds"
+            app:argType="integer[]" />
+    </dialog>
+
     <fragment
         android:id="@+id/manageDropboxFragment"
         android:name="com.infomaniak.drive.ui.fileList.ManageDropboxFragment"
@@ -722,6 +747,7 @@
             android:name="fileName"
             app:argType="string" />
     </fragment>
+
     <fragment
         android:id="@+id/convertToDropBoxFragment"
         android:name="com.infomaniak.drive.ui.fileList.ConvertToDropBoxFragment"
@@ -734,6 +760,7 @@
             android:name="fileName"
             app:argType="string" />
     </fragment>
+
     <dialog
         android:id="@+id/downloadProgressDialog"
         android:name="com.infomaniak.drive.ui.fileList.DownloadProgressDialog"
@@ -749,9 +776,5 @@
             android:name="userDrive"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
     </dialog>
-    <fragment
-        android:id="@+id/menuPicturesFragment"
-        android:name="com.infomaniak.drive.ui.menu.MenuPicturesFragment"
-        android:label="MenuPicturesFragment"
-        tools:layout="@layout/fragment_menu_pictures" />
+
 </navigation>

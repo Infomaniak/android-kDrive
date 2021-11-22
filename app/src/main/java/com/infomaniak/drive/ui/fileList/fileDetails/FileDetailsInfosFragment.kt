@@ -36,7 +36,10 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.data.models.Share
 import com.infomaniak.drive.data.models.ShareLink
+import com.infomaniak.drive.data.models.drive.Category
+import com.infomaniak.drive.ui.bottomSheetDialogs.SelectCategoriesBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
+import com.infomaniak.drive.ui.bottomSheetDialogs.UICategory
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.ShareLinkContainerView
 import com.infomaniak.drive.views.UserAvatarView
@@ -57,7 +60,7 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) { currentFile ->
 
             setupShareLinkContainer(currentFile, fileDetailsViewModel.currentFileShare.value)
-            setupCategoriesContainer(currentFile)
+            setupCategoriesContainer(currentFile != null, currentFile.id, currentFile.getCategories())
             displayUsersAvatars(currentFile)
             setupShareButton(currentFile)
 
@@ -102,6 +105,14 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
                     }
                 }
             }
+        }
+
+        getBackNavigationResult<Bundle>(SelectCategoriesBottomSheetDialog.SELECT_CATEGORIES_NAV_KEY) { bundle ->
+            val uiCategories = bundle.getParcelableArrayList(SelectCategoriesBottomSheetDialog.CATEGORIES_BUNDLE_KEY)
+                ?: emptyList<UICategory>()
+            val categories = DriveInfosController.getCategories(uiCategories.map { it.id }.toTypedArray())
+            val file = fileDetailsViewModel.currentFile.value
+            setupCategoriesContainer(file != null, file?.id ?: -1, categories)
         }
     }
 
@@ -168,18 +179,23 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         }
     }
 
-    private fun setupCategoriesContainer(file: File?) {
+    private fun setupCategoriesContainer(hasFile: Boolean, fileId: Int, categories: List<Category>) {
 
         val categoryRights = DriveInfosController.getCategoryRights()
 
-        if (file != null && categoryRights?.canReadCategoryOnFile == true) {
+        if (hasFile && categoryRights?.canReadCategoryOnFile == true) {
             categoriesContainer.isVisible = true
             categoriesDivider.isVisible = true
             categoriesContainer.setup(
-                file = file,
+                categories = categories,
                 categoryRights = categoryRights,
-                onClicked = { currentFileId ->
-
+                onClicked = {
+                    findNavController().navigate(
+                        FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectCategoriesBottomSheetDialog(
+                            fileId = fileId,
+                            categoriesIds = categories.map { it.id }.toIntArray()
+                        )
+                    )
                 })
 
         } else {
