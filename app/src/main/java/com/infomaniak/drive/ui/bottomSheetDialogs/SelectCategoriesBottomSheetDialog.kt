@@ -27,9 +27,11 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
@@ -82,6 +84,12 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
         }
 
         val file = FileController.getFileById(navigationArgs.fileId)
+        if (file == null) {
+            Utils.showSnackbar(requireView(), R.string.anErrorHasOccurred)
+            findNavController().popBackStack()
+            return
+        }
+
         val allCategories = DriveInfosController.getCategories()
         val enabledCategories = DriveInfosController.getCategories(navigationArgs.categoriesIds.toTypedArray())
 
@@ -94,35 +102,21 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
             )
         }
 
-        selectCategoriesViewModel.file = file!!
+        adapter = CategoriesAdapter(onCategoryChanged = { categoryId, isSelected, position ->
 
-        adapter = CategoriesAdapter(onCategoryChanged = { id, isSelected, position ->
-            (if (isSelected) selectCategoriesViewModel.addCategory(id)
-            else selectCategoriesViewModel.removeCategory(id))
-                .observe(viewLifecycleOwner) { apiResponse ->
-                    if (apiResponse.isSuccess()) {
-                        val customRealm = FileController.getRealmInstance()
-                        FileController.updateFile(file.id, customRealm) { localFile ->
-                            if (isSelected) {
-                                localFile.categories.add(
-                                    FileCategory(
-                                        id = id,
-                                        userId = AccountUtils.currentUserId,
-                                        addedToFileAt = Date()
-                                    )
-                                )
-                            } else {
-                                val categories = localFile.categories
-                                val category = categories.find { it.id == id }
-                                categories.remove(category)
-                            }
-                        }
-                        adapter.categories.find { it.id == id }?.isSelected = isSelected
-                        adapter.notifyItemChanged(position)
-                    } else {
-                        Utils.showSnackbar(requireView(), R.string.errorNetwork)
-                    }
+            val requestLiveData = with(selectCategoriesViewModel) {
+                if (isSelected) addCategory(file, categoryId)
+                else removeCategory(file, categoryId)
+            }
+
+            requestLiveData.observe(viewLifecycleOwner) { apiResponse ->
+                if (apiResponse.isSuccess()) {
+                    adapter.categories.find { it.id == categoryId }?.isSelected = isSelected
+                    adapter.notifyItemChanged(position)
+                } else {
+                    Utils.showSnackbar(requireView(), apiResponse.translateError())
                 }
+            }
         })
 
         categoriesRecyclerView.adapter = adapter.apply {
@@ -132,14 +126,38 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     internal class SelectCategoriesViewModel : ViewModel() {
 
-        lateinit var file: File
+        fun addCategory(file: File, categoryId: Int): LiveData<ApiResponse<Unit>> = liveData(Dispatchers.IO) {
 
-        fun addCategory(id: Int): LiveData<ApiResponse<Unit>> = liveData(Dispatchers.IO) {
-            emit(ApiRepository.addCategory(file, mapOf("id" to id)))
+            val apiResponse = ApiRepository.addCategory(file, mapOf("id" to categoryId))
+
+            if (apiResponse.isSuccess()) {
+                FileController.updateFile(file.id) { localFile ->
+                    localFile.categories.add(
+                        FileCategory(
+                            id = categoryId,
+                            userId = AccountUtils.currentUserId,
+                            addedToFileAt = Date()
+                        )
+                    )
+                }
+            }
+
+            emit(apiResponse)
         }
 
-        fun removeCategory(id: Int): LiveData<ApiResponse<Unit>> = liveData(Dispatchers.IO) {
-            emit(ApiRepository.removeCategory(file, id))
+        fun removeCategory(file: File, categoryId: Int): LiveData<ApiResponse<Unit>> = liveData(Dispatchers.IO) {
+
+            val apiResponse = ApiRepository.removeCategory(file, categoryId)
+
+            if (apiResponse.isSuccess()) {
+                FileController.updateFile(file.id) { localFile ->
+                    val categories = localFile.categories
+                    val category = categories.find { it.id == categoryId }
+                    categories.remove(category)
+                }
+            }
+
+            emit(apiResponse)
         }
     }
 

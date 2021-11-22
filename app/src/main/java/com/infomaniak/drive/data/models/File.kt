@@ -30,7 +30,8 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.RealmListParceler.*
+import com.infomaniak.drive.utils.RealmListParceler.FileRealmListParceler
+import com.infomaniak.drive.utils.RealmListParceler.IntRealmListParceler
 import com.infomaniak.drive.utils.Utils.INDETERMINATE_PROGRESS
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.BuildConfig
@@ -41,6 +42,7 @@ import io.realm.annotations.Ignore
 import io.realm.annotations.LinkingObjects
 import io.realm.annotations.PrimaryKey
 import kotlinx.android.parcel.Parcelize
+import kotlinx.android.parcel.RawValue
 import kotlinx.android.parcel.WriteWith
 import java.util.*
 
@@ -93,7 +95,7 @@ open class File(
     var type: String = "file",
     var users: @WriteWith<IntRealmListParceler> RealmList<Int> = RealmList(),
     var visibility: String = "",
-    var categories: @WriteWith<FileCategoryRealmListParceler> RealmList<FileCategory> = RealmList(),
+    var categories: @RawValue RealmList<FileCategory> = RealmList(),
 
     var responseAt: Long = 0,
 
