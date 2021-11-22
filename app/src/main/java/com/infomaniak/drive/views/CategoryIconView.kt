@@ -27,7 +27,7 @@ import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.utils.isPositive
-import kotlinx.android.synthetic.main.item_user_avatar.view.*
+import kotlinx.android.synthetic.main.item_category_icon.view.*
 
 class CategoryIconView @JvmOverloads constructor(
     context: Context,
@@ -43,7 +43,7 @@ class CategoryIconView @JvmOverloads constructor(
         category?.let {
             isVisible = true
             remainingText.isGone = true
-            avatarImageView.setBackgroundColor(Color.parseColor(category.color))
+            categoryImageView.setBackgroundColor(Color.parseColor(category.color))
         } ?: run {
             isGone = true
         }
@@ -52,7 +52,7 @@ class CategoryIconView @JvmOverloads constructor(
     @SuppressLint("SetTextI18n")
     fun setRemainingCategoriesNumber(number: Int, category: Category?) {
         if (category != null) {
-            avatarImageView.setBackgroundColor(Color.parseColor(category.color))
+            categoryImageView.setBackgroundColor(Color.parseColor(category.color))
             if (number.isPositive()) {
                 remainingText.text = "+$number"
                 remainingText.isVisible = true

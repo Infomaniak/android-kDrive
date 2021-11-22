@@ -27,7 +27,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.google.android.material.chip.Chip
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.CategoryRights
 import com.infomaniak.drive.utils.getName
 import kotlinx.android.synthetic.main.view_categories_container.view.*
@@ -42,12 +42,10 @@ class CategoriesContainerView @JvmOverloads constructor(
         inflate(context, R.layout.view_categories_container, this)
     }
 
-    fun setup(file: File, categoryRights: CategoryRights?, onClicked: (currentFileId: Int) -> Unit) {
-
-        val categories = file.getCategories()
+    fun setup(categories: List<Category>, categoryRights: CategoryRights?, onClicked: () -> Unit) {
 
         if (categoryRights?.canPutCategoryOnFile == true) {
-            titleContainer.setOnClickListener { onClicked(file.id) }
+            titleContainer.setOnClickListener { onClicked() }
             categorySwitch.isVisible = true
             categoryTitle.setText(if (categories.isEmpty()) R.string.addCategoriesTitle else R.string.manageCategoriesTitle)
         } else {
@@ -64,7 +62,7 @@ class CategoriesContainerView @JvmOverloads constructor(
             categories.forEach { category ->
                 val chip = Chip(context)
                 chip.text = category.getName(context)
-                category.color?.let { chip.chipBackgroundColor = ColorStateList.valueOf(it.toColorInt()) }
+                chip.chipBackgroundColor = ColorStateList.valueOf(category.color.toColorInt())
                 chip.setTextColor(ContextCompat.getColor(context, R.color.white))
                 categoriesGroup.addView(chip)
             }

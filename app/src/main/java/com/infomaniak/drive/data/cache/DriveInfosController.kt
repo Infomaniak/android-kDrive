@@ -130,9 +130,9 @@ object DriveInfosController {
         return teamList.filter { drive.teams.account.contains(it.id) }
     }
 
-    fun getCategories(ids: Array<Int>): List<Category> {
+    fun getCategories(fileCategoriesIds: Array<Int>? = null): List<Category> {
 
-        if (ids.isEmpty()) return emptyList()
+        if (fileCategoriesIds != null && fileCategoriesIds.isEmpty()) return emptyList()
 
         val categories = getRealmInstance().use { realm ->
             val drive = realm.where(Drive::class.java)
@@ -141,7 +141,10 @@ object DriveInfosController {
 
             drive?.categories?.let {
                 val categories = it.where()
-                    .`in`(Category::id.name, ids)
+                    .let { query ->
+                        if (fileCategoriesIds != null) query.`in`(Category::id.name, fileCategoriesIds)
+                        query
+                    }
                     .findAll()
 
                 realm.copyFromRealm(categories, 0)
@@ -149,8 +152,9 @@ object DriveInfosController {
 
         } as? List<Category> ?: emptyList()
 
-        // Sort the categories
-        return ids.mapNotNull { id -> categories.find { it.id == id } }
+        return fileCategoriesIds
+            ?.mapNotNull { id -> categories.find { it.id == id } } // Sort the categories
+            ?: categories
     }
 
     fun getCategoryRights(): CategoryRights? {

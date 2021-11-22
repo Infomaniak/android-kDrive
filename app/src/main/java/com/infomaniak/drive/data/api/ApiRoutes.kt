@@ -118,6 +118,16 @@ object ApiRoutes {
 
     fun shareLink(file: File) = "${fileURL(file)}/link"
 
+    fun createCategory(driveId: Int) = "${DRIVE_API}$driveId/category"
+
+    fun editCategory(driveId: Int, categoryId: Int) = "${DRIVE_API}$driveId/category/$categoryId"
+
+    fun deleteCategory(driveId: Int, categoryId: Int) = "${DRIVE_API}$driveId/category/$categoryId"
+
+    fun addCategory(file: File) = "${fileURL(file)}/category"
+
+    fun removeCategory(file: File, categoryId: Int) = "${fileURL(file)}/category/$categoryId"
+
     fun getLastPictures(driveId: Int) =
         "${DRIVE_API}$driveId/file/search?order=desc&order_by=last_modified_at&converted_type=image&$with"
 
