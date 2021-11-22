@@ -25,7 +25,7 @@ import java.util.*
 open class Category(
     @PrimaryKey var objectId: String = "",
     var id: Int = -1,
-    var color: String? = null,
+    var color: String = "#000000",
     @SerializedName("created_at")
     var createdAt: Date = Date(),
     @SerializedName("created_by")

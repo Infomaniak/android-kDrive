@@ -19,6 +19,7 @@ package com.infomaniak.drive.data.api
 
 import com.google.gson.JsonElement
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.User
@@ -251,6 +252,28 @@ object ApiRepository {
 
     fun putFileShareLink(file: File, body: Map<String, Any?>): ApiResponse<Boolean> {
         return callApi(ApiRoutes.shareLink(file), PUT, body)
+    }
+
+    fun createCategory(driveId: Int, name: String, color: String): ApiResponse<Unit> {
+        val body = mapOf("name" to name, "color" to color)
+        return callApi(ApiRoutes.createCategory(driveId), POST, body)
+    }
+
+    fun editCategory(driveId: Int, categoryId: Int, name: String, color: String): ApiResponse<Unit> {
+        val body = mapOf("name" to name, "color" to color)
+        return callApi(ApiRoutes.editCategory(driveId, categoryId), PATCH, body)
+    }
+
+    fun deleteCategory(driveId: Int, categoryId: Int): ApiResponse<Unit> {
+        return callApi(ApiRoutes.deleteCategory(driveId, categoryId), DELETE)
+    }
+
+    fun addCategory(file: File, body: Map<String, Int>): ApiResponse<Unit> {
+        return callApi(ApiRoutes.addCategory(file), POST, body)
+    }
+
+    fun removeCategory(file: File, categoryId: Int): ApiResponse<Unit> {
+        return callApi(ApiRoutes.removeCategory(file, categoryId), DELETE)
     }
 
     fun getLastActivities(driveId: Int, page: Int): ApiResponse<ArrayList<FileActivity>> {
