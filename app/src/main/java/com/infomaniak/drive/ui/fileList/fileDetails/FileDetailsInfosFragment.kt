@@ -190,12 +190,15 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
                 categories = categories,
                 categoryRights = categoryRights,
                 onClicked = {
-                    findNavController().navigate(
-                        FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectCategoriesBottomSheetDialog(
-                            fileId = fileId,
-                            categoriesIds = categories.map { it.id }.toIntArray()
+                    try {
+                        findNavController().navigate(
+                            FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectCategoriesBottomSheetDialog(
+                                fileId = fileId,
+                                categoriesIds = categories.map { it.id }.toIntArray()
+                            )
                         )
-                    )
+                    } catch (_: IllegalArgumentException) {
+                    }
                 })
 
         } else {

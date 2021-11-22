@@ -76,6 +76,10 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         getBackNavigationResult<Boolean>(DownloadProgressDialog.OPEN_WITH) {
             context?.openWith(currentFile)
         }
+
+        getBackNavigationResult<Bundle>(SelectCategoriesBottomSheetDialog.SELECT_CATEGORIES_NAV_KEY) {
+            fileInfoActionsView.refreshBottomSheetUi(currentFile)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -153,6 +157,13 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         fileInfoActionsView.downloadFile(drivePermissions) {
             findNavController().popBackStack()
         }
+    }
+
+    override fun manageCategoriesClicked(fileId: Int, categoriesIds: IntArray) {
+        safeNavigate(
+            FileInfoActionsBottomSheetDialogDirections
+                .actionFileInfoActionsBottomSheetDialogToSelectCategoriesBottomSheetDialog(fileId, categoriesIds)
+        )
     }
 
     override fun addFavoritesClicked() {
