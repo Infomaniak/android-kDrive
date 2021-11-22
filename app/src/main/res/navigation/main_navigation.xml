@@ -106,6 +106,9 @@
         <action
             android:id="@+id/action_previewSliderFragment_to_downloadProgressDialog"
             app:destination="@id/downloadProgressDialog" />
+        <action
+            android:id="@+id/action_previewSliderFragment_to_selectCategoriesBottomSheetDialog"
+            app:destination="@id/selectCategoriesBottomSheetDialog" />
     </fragment>
 
     <fragment
@@ -169,6 +172,9 @@
         <action
             android:id="@+id/action_fileInfoActionsBottomSheetDialog_to_downloadProgressDialog"
             app:destination="@id/downloadProgressDialog" />
+        <action
+            android:id="@+id/action_fileInfoActionsBottomSheetDialog_to_selectCategoriesBottomSheetDialog"
+            app:destination="@id/selectCategoriesBottomSheetDialog" />
     </dialog>
 
     <dialog
