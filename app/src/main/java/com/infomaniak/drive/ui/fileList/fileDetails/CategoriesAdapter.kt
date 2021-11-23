@@ -32,7 +32,12 @@ class CategoriesAdapter(
     private val onCategoryChanged: (categoryID: Int, isSelected: Boolean, position: Int) -> Unit
 ) : RecyclerView.Adapter<ViewHolder>() {
 
+    var canEditCategory: Boolean = false
+    var canDeleteCategory: Boolean = false
+
     var categories = emptyList<UICategory>()
+
+    var onMenuClicked: ((category: UICategory) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cardview_category, parent, false))
@@ -52,6 +57,8 @@ class CategoriesAdapter(
                 checkIcon.isVisible = category.isSelected
                 categoryTitle.text = category.name
                 setOnClickListener { onCategoryChanged(category.id, !category.isSelected, position) }
+                menuButton.isVisible = canEditCategory || canDeleteCategory
+                menuButton.setOnClickListener { onMenuClicked?.invoke(category) }
             }
         }
     }
