@@ -21,8 +21,8 @@
     android:id="@+id/categoryCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="@dimen/marginStandard"
-    app:cardBackgroundColor="@color/backgroundCardview">
+    app:cardBackgroundColor="@color/backgroundCardview"
+    app:cardCornerRadius="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -42,8 +42,8 @@
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/checkIcon"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
             android:src="@drawable/ic_big_check"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/categoryIcon"

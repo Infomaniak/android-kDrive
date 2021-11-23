@@ -194,7 +194,6 @@ object FileController {
                 Sentry.captureException(exception)
             }
         }
-
     }
 
     fun updateOfflineStatus(fileId: Int, isOffline: Boolean) {

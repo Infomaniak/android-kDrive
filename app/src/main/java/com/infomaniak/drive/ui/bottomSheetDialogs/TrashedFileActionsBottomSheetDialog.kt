@@ -114,7 +114,7 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
             requireActivity().showSnackbar(getString(title, *args.toTypedArray()))
             dismissAndRemoveFileFromList()
         } else {
-            val title = if (apiResponse.formatError() == ErrorCode.AN_ERROR_HAS_OCCURED) R.string.errorRestore
+            val title = if (apiResponse.formatError() == ErrorCode.AN_ERROR_HAS_OCCURRED) R.string.errorRestore
             else apiResponse.translateError()
 
             requireActivity().showSnackbar(title)

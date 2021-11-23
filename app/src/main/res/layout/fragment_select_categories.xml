@@ -38,7 +38,8 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin" />
+                app:layout_collapseMode="pin"
+                app:menu="@menu/add_category_menu" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
@@ -51,7 +52,7 @@
         android:clipToPadding="false"
         android:orientation="vertical"
         android:overScrollMode="never"
-        android:paddingVertical="@dimen/marginStandard"
+        android:layout_margin="@dimen/marginStandard"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:itemCount="3"

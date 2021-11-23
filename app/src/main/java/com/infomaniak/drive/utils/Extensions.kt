@@ -41,6 +41,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.DisplayMetrics
 import android.util.Size
+import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
@@ -801,3 +802,6 @@ fun Category.getName(context: Context): String =
         "PREDEF_CAT_WORK" -> context.getString(R.string.categoryWork)
         else -> name
     }
+
+fun Int.dpToPx(context: Context): Int =
+    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), context.resources.displayMetrics).toInt()

@@ -124,6 +124,18 @@
                       </LayoutPositions>
                     </value>
                   </entry>
+                  <entry key="createCategoriesBottomSheetDialog">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="12" />
+                            <option name="y" value="12" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
                   <entry key="createCommonFolderFragment">
                     <value>
                       <LayoutPositions>
@@ -341,6 +353,11 @@
                               </value>
                             </entry>
                             <entry key="action_fileInfoActionsBottomSheetDialog_to_manageDropboxFragment">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
+                            <entry key="action_fileInfoActionsBottomSheetDialog_to_selectCategoriesBottomSheetDialog">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -747,6 +764,11 @@
                               </value>
                             </entry>
                             <entry key="action_previewSliderFragment_to_previewFragment">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
+                            <entry key="action_previewSliderFragment_to_selectCategoriesBottomSheetDialog">
                               <value>
                                 <LayoutPositions />
                               </value>

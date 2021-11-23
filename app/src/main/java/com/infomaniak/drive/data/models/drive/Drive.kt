@@ -70,6 +70,7 @@ open class Drive(
     @SerializedName("teams")
     private var _teams: DriveTeamsCategories? = DriveTeamsCategories(),
     var categories: RealmList<Category> = RealmList()
+
 ) : RealmObject() {
 
     val packFunctionality: DrivePackFunctionality

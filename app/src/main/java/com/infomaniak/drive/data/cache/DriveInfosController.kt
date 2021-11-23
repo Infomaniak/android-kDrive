@@ -79,6 +79,19 @@ object DriveInfosController {
         return driveRemoved
     }
 
+    fun updateDrive(transaction: (drive: Drive) -> Unit) {
+        getRealmInstance().use { realm ->
+            realm.where(Drive::class.java)
+                .equalTo(Drive::id.name, AccountUtils.currentDriveId)
+                .findFirst()
+                ?.let { drive ->
+                    realm.executeTransaction {
+                        if (drive.isValid) transaction(drive)
+                    }
+                }
+        }
+    }
+
     fun getUsers(userIds: ArrayList<Int>? = arrayListOf()): List<DriveUser> {
         return getRealmInstance().use { realm ->
             val userList = realm.copyFromRealm(realm.where(DriveUser::class.java).apply {

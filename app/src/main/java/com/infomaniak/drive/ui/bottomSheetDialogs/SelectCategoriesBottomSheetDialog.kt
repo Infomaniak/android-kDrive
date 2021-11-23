@@ -37,16 +37,12 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.getName
-import com.infomaniak.drive.utils.setBackNavigationResult
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.android.synthetic.main.fragment_select_categories.*
 import kotlinx.coroutines.Dispatchers
 import java.util.*
-
 
 data class UICategory(
     val id: Int,
@@ -57,9 +53,10 @@ data class UICategory(
 
 class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
 
-    private lateinit var adapter: CategoriesAdapter
     private val navigationArgs: SelectCategoriesBottomSheetDialogArgs by navArgs()
+
     private val selectCategoriesViewModel: SelectCategoriesViewModel by viewModels()
+    private lateinit var adapter: CategoriesAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         inflater.inflate(R.layout.fragment_select_categories, container, false)
@@ -74,6 +71,13 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
             )
         }
 
+        toolbar.setOnMenuItemClickListener { menuItem ->
+            if (menuItem.itemId == R.id.addCategory) {
+                safeNavigate(SelectCategoriesBottomSheetDialogDirections.actionSelectCategoriesBottomSheetDialogToCreateCategoryBottomSheetDialog())
+                true
+            } else
+                false
+        }
         toolbar.setNavigationOnClickListener { setBackNavResult() }
 
         dialog?.setOnKeyListener { _, keyCode, event ->
@@ -90,16 +94,25 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
             return
         }
 
-        val allCategories = DriveInfosController.getCategories()
-        val enabledCategories = DriveInfosController.getCategories(navigationArgs.categoriesIds.toTypedArray())
+        getBackNavigationResult<Bundle>(CreateCategoryBottomSheetDialog.CREATE_CATEGORY_NAV_KEY) { bundle ->
 
-        val uiCategories = allCategories.map { category ->
-            UICategory(
-                category.id,
-                category.getName(requireContext()),
-                category.color,
-                enabledCategories.find { it.id == category.id } != null
-            )
+            val categoryId = bundle.getInt(CreateCategoryBottomSheetDialog.CATEGORY_ID_BUNDLE_KEY)
+
+            selectCategoriesViewModel.addCategory(file, categoryId).observe(viewLifecycleOwner) { apiResponse ->
+                if (apiResponse.isSuccess()) {
+
+                    val oldIds = adapter.categories.filter { it.isSelected }.map { it.id }
+
+                    val ids = mutableListOf<Int>()
+                    ids.addAll(oldIds)
+                    ids.add(categoryId)
+
+                    updateUI(ids.toTypedArray())
+
+                } else {
+                    Utils.showSnackbar(requireView(), apiResponse.translateError())
+                }
+            }
         }
 
         adapter = CategoriesAdapter(onCategoryChanged = { categoryId, isSelected, position ->
@@ -119,9 +132,26 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
             }
         })
 
-        categoriesRecyclerView.adapter = adapter.apply {
-            setAll(uiCategories)
+        categoriesRecyclerView.adapter = adapter
+
+        updateUI(navigationArgs.categoriesIds.toTypedArray())
+    }
+
+    private fun updateUI(enabledCategoriesIds: Array<Int>) {
+
+        val allCategories = DriveInfosController.getCategories()
+        val enabledCategories = DriveInfosController.getCategories(enabledCategoriesIds)
+
+        val uiCategories = allCategories.map { category ->
+            UICategory(
+                category.id,
+                category.getName(requireContext()),
+                category.color,
+                enabledCategories.find { it.id == category.id } != null
+            )
         }
+
+        adapter.setAll(uiCategories)
     }
 
     internal class SelectCategoriesViewModel : ViewModel() {

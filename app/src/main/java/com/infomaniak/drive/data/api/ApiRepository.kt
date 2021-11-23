@@ -19,6 +19,7 @@ package com.infomaniak.drive.data.api
 
 import com.google.gson.JsonElement
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.User
@@ -255,7 +256,7 @@ object ApiRepository {
         return callApi(ApiRoutes.shareLink(file), PUT, body)
     }
 
-    fun createCategory(driveId: Int, name: String, color: String): ApiResponse<Unit> {
+    fun createCategory(driveId: Int, name: String, color: String): ApiResponse<Category> {
         val body = mapOf("name" to name, "color" to color)
         return callApi(ApiRoutes.createCategory(driveId), POST, body)
     }
