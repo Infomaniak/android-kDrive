@@ -56,8 +56,8 @@ import kotlinx.coroutines.withContext
 
 class UploadInProgressFragment : FileListFragment() {
 
-    private lateinit var realmUpload: Realm
-    private lateinit var drivePermissions: DrivePermissions
+    private val drivePermissions: DrivePermissions by lazy { DrivePermissions() }
+    private val realmUpload: Realm by lazy { UploadFile.getRealmInstance() }
     override var enabledMultiSelectMode: Boolean = false
     override var hideBackButtonWhenRoot: Boolean = false
     override var showPendingFiles = false
@@ -66,10 +66,8 @@ class UploadInProgressFragment : FileListFragment() {
     private var pendingFiles = arrayListOf<File>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        realmUpload = UploadFile.getRealmInstance()
         downloadFiles = DownloadFiles()
         setNoFilesLayout = SetNoFilesLayout()
-        drivePermissions = DrivePermissions()
         drivePermissions.registerPermissions(this) { authorized ->
             if (!authorized) {
                 findNavController().popBackStack()
