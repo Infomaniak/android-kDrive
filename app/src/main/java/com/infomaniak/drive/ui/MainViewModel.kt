@@ -50,7 +50,13 @@ import kotlin.collections.LinkedHashMap
 
 class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
-    val realm: Realm by lazy { FileController.getRealmInstance() }
+    var selectFolderUserDrive: UserDrive? = null
+    val realm: Realm by lazy {
+        selectFolderUserDrive?.let {
+            FileController.getRealmInstance(it)
+        } ?: FileController.getRealmInstance()
+
+    }
 
     val currentFolder = MutableLiveData<File>()
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()

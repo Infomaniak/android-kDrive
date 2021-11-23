@@ -56,6 +56,7 @@ class SelectFolderActivity : BaseActivity() {
         val customArgs = intent.extras?.getBundle(CUSTOM_ARGS_TAG)
         val userDrive = UserDrive(userID, driveID)
 
+        mainViewModel.selectFolderUserDrive = userDrive
         saveExternalViewModel.userDrive = userDrive
         saveExternalViewModel.currentDrive = DriveInfosController.getDrives(userID, driveID).firstOrNull()
         saveExternalViewModel.disableSelectedFolder = intent.extras?.getInt(DISABLE_SELECTED_FOLDER_TAG)
