@@ -739,7 +739,15 @@
         <argument
             android:name="categoriesIds"
             app:argType="integer[]" />
+        <action
+            android:id="@+id/action_SelectCategoriesBottomSheetDialog_to_CreateCategoryBottomSheetDialog"
+            app:destination="@id/createCategoryBottomSheetDialog" />
     </dialog>
+
+    <dialog
+        android:id="@+id/createCategoryBottomSheetDialog"
+        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.CreateCategoryBottomSheetDialog"
+        android:label="CreateCategoryBottomSheetDialog" />
 
     <fragment
         android:id="@+id/manageDropboxFragment"

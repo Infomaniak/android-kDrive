@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.fileList.fileDetails
 
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -36,9 +37,10 @@ class CategoriesAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cardview_category, parent, false))
 
+    @SuppressLint("NotifyDataSetChanged")
     fun setAll(newCategories: List<UICategory>) {
         categories = newCategories
-        notifyItemRangeInserted(0, newCategories.size)
+        notifyDataSetChanged()
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {

@@ -23,11 +23,12 @@ import com.infomaniak.lib.core.models.ApiResponse
 
 @Suppress("unused")
 enum class ErrorCode(val code: String, @StringRes val translateRes: Int) {
-    AN_ERROR_HAS_OCCURED("an_error_has_occured", R.string.anErrorHasOccurred),
+    AN_ERROR_HAS_OCCURRED("an_error_has_occured", R.string.anErrorHasOccurred),
     COLLABORATIVE_FOLDER_ALREADY_EXISTS_FOR_FILE("collaborative_folder_already_exists_for_file", R.string.anErrorHasOccurred),
     CONFLICT_ERROR("conflict_error", R.string.errorConflict),
     DESTINATION_ALREADY_EXISTS("destination_already_exists", R.string.errorFileCreate),
-    SHARE_LINK_ALREADY_EXISTS("file_share_link_already_exists", R.string.errorShareLink);
+    SHARE_LINK_ALREADY_EXISTS("file_share_link_already_exists", R.string.errorShareLink),
+    CATEGORY_ALREADY_EXIST_ERROR("category_already_exist_error", R.string.errorCategoryAlreadyExists);
 
     companion object {
 
@@ -37,10 +38,9 @@ enum class ErrorCode(val code: String, @StringRes val translateRes: Int) {
         }
 
         fun <T> ApiResponse<T>.formatError(): ErrorCode {
-            return if (error?.code == null) AN_ERROR_HAS_OCCURED
+            return if (error?.code == null) AN_ERROR_HAS_OCCURRED
             else values().firstOrNull { it.code.equals(error?.code, true) }
-                ?: AN_ERROR_HAS_OCCURED
+                ?: AN_ERROR_HAS_OCCURRED
         }
     }
-
 }

@@ -15,17 +15,13 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<resources>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <declare-styleable name="FabBottomNavigationView">
-        <attr name="cradle_vertical_offset" format="dimension" />
-        <attr name="fab_cradle_margin" format="dimension" />
-        <attr name="fab_cradle_rounded_corner_radius" format="dimension" />
-        <attr name="fab_size" format="dimension" />
-    </declare-styleable>
+    <item
+        android:id="@+id/addCategory"
+        android:icon="@drawable/ic_add_category"
+        android:title="@string/createCategoryTitle"
+        app:showAsAction="ifRoom" />
 
-    <declare-styleable name="AutoGridLayout">
-        <attr name="columnWidth" format="dimension" />
-    </declare-styleable>
-
-</resources>
+</menu>
