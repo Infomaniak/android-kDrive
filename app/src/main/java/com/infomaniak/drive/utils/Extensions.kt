@@ -303,7 +303,7 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
                     CoroutineScope(Dispatchers.IO).launch {
                         val bitmap = context.getLocalThumbnail(file)
                         withContext(Dispatchers.Main) {
-                            if (filePreview?.isVisible == true) {
+                            if (filePreview?.isVisible == true && context != null) {
                                 filePreview.loadGlide(bitmap, file.getFileType().icon)
                             }
                         }
