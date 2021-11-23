@@ -561,13 +561,19 @@ object FileController {
         customRealm: Realm? = null,
         withChildren: Boolean = true
     ): Pair<File, ArrayList<File>>? {
+
+        fun hasDuplicatesFiles(query: RealmQuery<File>): Boolean {
+            return query.count() != query.distinct(File::id.name).count()
+        }
+
         val operation: (Realm) -> Pair<File, ArrayList<File>>? = { realm ->
             var result: Pair<File, ArrayList<File>>? = null
             val localFolder = getFileById(realm, parentId)
             val localFolderWithoutChildren = localFolder?.let { realm.copyFromRealm(it, 1) }
+            val hasDuplicatesFiles = localFolder?.children?.where()?.let(::hasDuplicatesFiles) ?: false
 
             if (
-                (ignoreCache || localFolder == null || localFolder.children.isNullOrEmpty() || !localFolder.isComplete)
+                (ignoreCache || localFolder == null || localFolder.children.isNullOrEmpty() || !localFolder.isComplete || hasDuplicatesFiles)
                 && !ignoreCloud
             ) {
                 result = downloadAndSaveFiles(
