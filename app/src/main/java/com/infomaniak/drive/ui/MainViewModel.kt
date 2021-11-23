@@ -55,7 +55,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         selectFolderUserDrive?.let {
             FileController.getRealmInstance(it)
         } ?: FileController.getRealmInstance()
-
     }
 
     val currentFolder = MutableLiveData<File>()
