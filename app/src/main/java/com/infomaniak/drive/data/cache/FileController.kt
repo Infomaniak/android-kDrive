@@ -219,11 +219,11 @@ object FileController {
         moreTransaction: (() -> Unit)? = null
     ) {
         realm.executeTransaction {
-            oldFile?.let { file ->
-                newFile.isComplete = file.isComplete
-                newFile.children = file.children
-                newFile.responseAt = file.responseAt
-                newFile.isOffline = file.isOffline
+            if (oldFile?.isUsable() == true) {
+                newFile.isComplete = oldFile.isComplete
+                newFile.children = oldFile.children
+                newFile.responseAt = oldFile.responseAt
+                newFile.isOffline = oldFile.isOffline
             }
             moreTransaction?.invoke()
             it.insertOrUpdate(newFile)
