@@ -309,7 +309,6 @@ open class File(
         if (other is File) {
             return isUsable() && other.isUsable() && other.id == id
         }
-
         return super.equals(other)
     }
 
