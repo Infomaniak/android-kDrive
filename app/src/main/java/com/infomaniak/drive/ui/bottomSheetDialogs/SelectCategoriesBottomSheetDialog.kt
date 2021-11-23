@@ -71,6 +71,9 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
             )
         }
 
+        val categoryRights = DriveInfosController.getCategoryRights()
+
+        toolbar.menu.findItem(R.id.addCategory).isVisible = categoryRights?.canCreateCategory == true
         toolbar.setOnMenuItemClickListener { menuItem ->
             if (menuItem.itemId == R.id.addCategory) {
                 safeNavigate(SelectCategoriesBottomSheetDialogDirections.actionSelectCategoriesBottomSheetDialogToCreateCategoryBottomSheetDialog())
@@ -132,6 +135,9 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
             }
         })
 
+        adapter.canEditCategory = categoryRights?.canEditCategory ?: false
+        adapter.canDeleteCategory = categoryRights?.canDeleteCategory ?: false
+
         categoriesRecyclerView.adapter = adapter
 
         updateUI(navigationArgs.categoriesIds.toTypedArray())
@@ -152,6 +158,15 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
         }
 
         adapter.setAll(uiCategories)
+
+        adapter.onMenuClicked = { category ->
+            val bundle = bundleOf(
+                "categoryId" to category.id,
+                "categoryName" to category.name,
+                "categoryColor" to category.color
+            )
+            safeNavigate(R.id.categoryInfoActionsBottomSheetDialog, bundle)
+        }
     }
 
     internal class SelectCategoriesViewModel : ViewModel() {

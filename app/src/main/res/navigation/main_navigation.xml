@@ -749,6 +749,22 @@
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.CreateCategoryBottomSheetDialog"
         android:label="CreateCategoryBottomSheetDialog" />
 
+    <dialog
+        android:id="@+id/categoryInfoActionsBottomSheetDialog"
+        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialog"
+        android:label="CategoryInfoActionsBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_category_info_actions">
+        <argument
+            android:name="categoryId"
+            app:argType="integer" />
+        <argument
+            android:name="categoryName"
+            app:argType="string" />
+        <argument
+            android:name="categoryColor"
+            app:argType="string" />
+    </dialog>
+
     <fragment
         android:id="@+id/manageDropboxFragment"
         android:name="com.infomaniak.drive.ui.fileList.ManageDropboxFragment"

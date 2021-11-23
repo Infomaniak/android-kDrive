@@ -60,10 +60,27 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="12dp"
             app:layout_constraintBottom_toBottomOf="@id/categoryIcon"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/endIconLayout"
             app:layout_constraintStart_toEndOf="@id/categoryIcon"
             app:layout_constraintTop_toTopOf="@id/categoryIcon"
             tools:text="@string/categoryBanking" />
+
+        <FrameLayout
+            android:id="@+id/endIconLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/menuButton"
+                style="@style/IconButton"
+                android:contentDescription="@string/buttonMenu"
+                app:icon="@drawable/ic_menu"
+                app:iconTint="@color/primaryText" />
+        </FrameLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>
