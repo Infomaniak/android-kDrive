@@ -127,6 +127,27 @@ object Utils {
         )
     }
 
+    fun confirmCategoryDeletion(
+        context: Context,
+        categoryName: String,
+        onConfirmation: (dialog: Dialog) -> Unit
+    ) {
+
+        val title = R.string.buttonDelete
+        val message = context.resources.getString(R.string.modalDeleteCategoryDescription, categoryName)
+        val button = R.string.buttonDelete
+
+        createConfirmation(
+            context = context,
+            title = context.getString(title),
+            message = message,
+            autoDismiss = false,
+            isDeletion = true,
+            buttonText = context.getString(button),
+            onConfirmation = onConfirmation
+        )
+    }
+
     fun getRootName(context: Context): String {
         return context.getString(R.string.allRootName, AccountUtils.getCurrentDrive()?.name)
     }

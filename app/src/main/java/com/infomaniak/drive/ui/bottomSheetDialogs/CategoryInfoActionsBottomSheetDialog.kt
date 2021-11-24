@@ -78,15 +78,22 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
                 categoryColor,
             )
         }
-        deleteCategory.setOnClickListener { deleteCategory(driveId, categoryId) }
+
+        deleteCategory.setOnClickListener {
+            Utils.confirmCategoryDeletion(requireContext(), categoryName) { dialog ->
+                deleteCategory(driveId, categoryId) {
+                    dialog.dismiss()
+                }
+            }
+        }
 
         getBackNavigationResult<Bundle>(CreateOrEditCategoryBottomSheetDialog.EDIT_CATEGORY_NAV_KEY) {
 
             val ids = FileController.getFileById(fileId)?.getSortedCategoriesIds()
 
             setBackNavigationResult(
-                CATEGORY_INFO_ACTIONS_NAV_KEY,
-                bundleOf(CATEGORY_INFO_ACTIONS_BUNDLE_KEY to ids)
+                EDIT_CATEGORY_NAV_KEY,
+                bundleOf(EDIT_CATEGORY_BUNDLE_KEY to ids)
             )
         }
     }
@@ -119,8 +126,11 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
         )
     }
 
-    private fun deleteCategory(driveId: Int, categoryId: Int) {
+    private fun deleteCategory(driveId: Int, categoryId: Int, dismissDialog: () -> Unit) {
+
         categoryInfoActionViewModel.deleteCategory(driveId, categoryId).observe(viewLifecycleOwner) { apiResponse ->
+
+            dismissDialog()
 
             if (apiResponse.isSuccess()) {
                 setBackNavigationResult(DELETE_CATEGORY_NAV_KEY, bundleOf(CATEGORY_ID_BUNDLE_KEY to categoryId))
@@ -153,7 +163,7 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
         const val DELETE_CATEGORY_NAV_KEY = "delete_category_nav_key"
         const val CATEGORY_ID_BUNDLE_KEY = "category_id_bundle_key"
 
-        const val CATEGORY_INFO_ACTIONS_NAV_KEY = "category_info_actions_nav_key"
-        const val CATEGORY_INFO_ACTIONS_BUNDLE_KEY = "category_info_actions_bundle_key"
+        const val EDIT_CATEGORY_NAV_KEY = "edit_category_nav_key"
+        const val EDIT_CATEGORY_BUNDLE_KEY = "edit_category_bundle_key"
     }
 }
