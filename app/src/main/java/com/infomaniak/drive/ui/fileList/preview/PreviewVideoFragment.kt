@@ -47,7 +47,7 @@ import kotlinx.android.synthetic.main.fragment_preview_video.container
 
 open class PreviewVideoFragment : PreviewFragment() {
 
-    private lateinit var simpleExoPlayer: ExoPlayer
+    private lateinit var exoPlayer: ExoPlayer
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return if (noFileFound()) null else inflater.inflate(R.layout.fragment_preview_video, container, false)
@@ -70,10 +70,10 @@ open class PreviewVideoFragment : PreviewFragment() {
     override fun onStart() {
         super.onStart()
 
-        if (!::simpleExoPlayer.isInitialized) {
+        if (!::exoPlayer.isInitialized) {
             initializePlayer()
 
-            simpleExoPlayer.addListener(object : Player.Listener {
+            exoPlayer.addListener(object : Player.Listener {
 
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
                     super.onIsPlayingChanged(isPlaying)
@@ -98,12 +98,12 @@ open class PreviewVideoFragment : PreviewFragment() {
 
     override fun onPause() {
         super.onPause()
-        simpleExoPlayer.pause()
+        exoPlayer.pause()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (this::simpleExoPlayer.isInitialized) simpleExoPlayer.release()
+        if (this::exoPlayer.isInitialized) exoPlayer.release()
     }
 
     private fun initializePlayer() {
@@ -123,12 +123,12 @@ open class PreviewVideoFragment : PreviewFragment() {
             setParameters(buildUponParameters().setMaxVideoSizeSd())
         }
 
-        simpleExoPlayer = ExoPlayer.Builder(context, renderersFactory)
+        exoPlayer = ExoPlayer.Builder(context, renderersFactory)
             .setMediaSourceFactory(mediaSourceFactory)
             .setTrackSelector(trackSelector)
             .build()
 
-        simpleExoPlayer.apply {
+        exoPlayer.apply {
             addAnalyticsListener(EventLogger(trackSelector))
             setAudioAttributes(AudioAttributes.DEFAULT,  /* handleAudioFocus= */true)
             playWhenReady = false
