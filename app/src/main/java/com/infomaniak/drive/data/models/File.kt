@@ -313,7 +313,7 @@ open class File(
         return DriveInfosController.getCategories(fileCategoriesIds.toTypedArray())
     }
 
-    private fun getSortedCategoriesIds(): List<Int> {
+    fun getSortedCategoriesIds(): List<Int> {
         return if (isManaged) {
             categories.sort(FileCategory::addedToFileAt.name).map { it.id }
         } else {

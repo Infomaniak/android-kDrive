@@ -59,6 +59,9 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
     private val selectCategoriesViewModel: SelectCategoriesViewModel by viewModels()
 
     private lateinit var adapter: CategoriesAdapter
+    private lateinit var file: File
+
+    private var aCategoryHasBeenEdited:Boolean = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         inflater.inflate(R.layout.fragment_select_categories, container, false)
@@ -69,15 +72,21 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
         fun setBackNavResult() {
             setBackNavigationResult(
                 SELECT_CATEGORIES_NAV_KEY,
-                bundleOf(CATEGORIES_BUNDLE_KEY to adapter.categories.filter { it.isSelected })
+                bundleOf(
+                    CATEGORIES_BUNDLE_KEY to adapter.categories.filter { it.isSelected },
+                    A_CATEGORY_HAS_BEEN_EDITED to aCategoryHasBeenEdited,
+                )
             )
         }
 
-        val file = FileController.getFileById(navigationArgs.fileId)
-        if (file == null) {
-            Utils.showSnackbar(requireView(), R.string.anErrorHasOccurred)
-            findNavController().popBackStack()
-            return
+        FileController.getFileById(navigationArgs.fileId).let {
+            if (it == null) {
+                Utils.showSnackbar(requireView(), R.string.anErrorHasOccurred)
+                findNavController().popBackStack()
+                return
+            } else {
+                file = it
+            }
         }
 
         val categoryRights = DriveInfosController.getCategoryRights()
@@ -86,9 +95,12 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
         toolbar.setOnMenuItemClickListener { menuItem ->
             if (menuItem.itemId == R.id.addCategory) {
                 safeNavigate(
-                    SelectCategoriesBottomSheetDialogDirections.actionSelectCategoriesBottomSheetDialogToCreateCategoryBottomSheetDialog(
+                    SelectCategoriesBottomSheetDialogDirections.actionSelectCategoriesBottomSheetDialogToCreateOrEditCategoryBottomSheetDialog(
                         fileId = file.id,
-                        driveId = file.driveId
+                        driveId = file.driveId,
+                        categoryId = CreateOrEditCategoryBottomSheetDialog.NO_PREVIOUS_CATEGORY_ID,
+                        categoryName = null,
+                        categoryColor = null,
                     )
                 )
                 true
@@ -104,16 +116,16 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
             } else false
         }
 
-        getBackNavigationResult<Bundle>(CreateCategoryBottomSheetDialog.CREATE_CATEGORY_NAV_KEY) { bundle ->
+        getBackNavigationResult<Bundle>(CreateOrEditCategoryBottomSheetDialog.CREATE_CATEGORY_NAV_KEY) { bundle ->
 
-            val categoryId = bundle.getInt(CreateCategoryBottomSheetDialog.CATEGORY_ID_BUNDLE_KEY)
+            val categoryId = bundle.getInt(CreateOrEditCategoryBottomSheetDialog.CATEGORY_ID_BUNDLE_KEY)
             val oldIds = adapter.categories.filter { it.isSelected }.map { it.id }
 
             val ids = mutableListOf<Int>()
             ids.addAll(oldIds)
             ids.add(categoryId)
 
-            updateUI(ids.toTypedArray())
+            updateUI(ids.toTypedArray(), file.id)
         }
 
         getBackNavigationResult<Bundle>(CategoryInfoActionsBottomSheetDialog.DELETE_CATEGORY_NAV_KEY) { bundle ->
@@ -122,7 +134,18 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
 
             val ids = adapter.categories.filter { it.isSelected && it.id != categoryId }.map { it.id }
 
-            updateUI(ids.toTypedArray())
+            updateUI(ids.toTypedArray(), file.id)
+        }
+
+        getBackNavigationResult<Bundle>(CategoryInfoActionsBottomSheetDialog.CATEGORY_INFO_ACTIONS_NAV_KEY) { bundle ->
+
+            aCategoryHasBeenEdited = true
+
+            val ids = bundle.getIntegerArrayList(CategoryInfoActionsBottomSheetDialog.CATEGORY_INFO_ACTIONS_BUNDLE_KEY)
+
+            if (ids != null) {
+                updateUI(ids.toTypedArray(), file.id)
+            }
         }
 
         adapter = CategoriesAdapter(onCategoryChanged = { categoryId, isSelected, position ->
@@ -147,10 +170,10 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
 
         categoriesRecyclerView.adapter = adapter
 
-        updateUI(navigationArgs.categoriesIds.toTypedArray())
+        updateUI(navigationArgs.categoriesIds.toTypedArray(), file.id)
     }
 
-    private fun updateUI(enabledCategoriesIds: Array<Int>) {
+    private fun updateUI(enabledCategoriesIds: Array<Int>, fileId: Int) {
 
         val allCategories = DriveInfosController.getCategories()
         val enabledCategories = DriveInfosController.getCategories(enabledCategoriesIds)
@@ -172,6 +195,7 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
 
         adapter.onMenuClicked = { category ->
             val bundle = bundleOf(
+                "fileId" to fileId,
                 "categoryId" to category.id,
                 "categoryName" to category.name,
                 "categoryColor" to category.color,
@@ -221,5 +245,6 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
     companion object {
         const val SELECT_CATEGORIES_NAV_KEY = "categories_dialog_key"
         const val CATEGORIES_BUNDLE_KEY = "categories_bundle_key"
+        const val A_CATEGORY_HAS_BEEN_EDITED = "a_category_has_been_edited"
     }
 }

@@ -68,7 +68,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         currentFile = navigationArgs.file
 
         drivePermissions = DrivePermissions()
-        drivePermissions.registerPermissions(this) { autorized -> if (autorized) downloadFileClicked() }
+        drivePermissions.registerPermissions(this) { authorized -> if (authorized) downloadFileClicked() }
 
         fileInfoActionsView.init(this, this, navigationArgs.userDrive.sharedWithMe)
         fileInfoActionsView.updateCurrentFile(currentFile)
@@ -77,7 +77,13 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             context?.openWith(currentFile)
         }
 
-        getBackNavigationResult<Bundle>(SelectCategoriesBottomSheetDialog.SELECT_CATEGORIES_NAV_KEY) {
+        getBackNavigationResult<Bundle>(SelectCategoriesBottomSheetDialog.SELECT_CATEGORIES_NAV_KEY) { bundle ->
+
+            val aCategoryHasBeenEdited = bundle.getBoolean(SelectCategoriesBottomSheetDialog.A_CATEGORY_HAS_BEEN_EDITED)
+            if (aCategoryHasBeenEdited) {
+                findNavController().previousBackStackEntry?.savedStateHandle?.set(UPDATE_CATEGORIES_NAV_KEY, currentFile.id)
+            }
+
             fileInfoActionsView.refreshBottomSheetUi(currentFile)
         }
     }
@@ -330,5 +336,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     private fun transmitActionAndPopBack(message: String, action: CancellableAction? = null) {
         val bundle = bundleOf(CANCELLABLE_TITLE_KEY to message, CANCELLABLE_ACTION_KEY to action)
         setBackNavigationResult(CANCELLABLE_MAIN_KEY, bundle)
+    }
+
+    companion object {
+        const val UPDATE_CATEGORIES_NAV_KEY = "update_categories_nav_key"
     }
 }

@@ -56,6 +56,7 @@ import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWork
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog.Companion.SELECT_DIALOG_ACTION
+import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.BULK_OPERATION_CUSTOM_TAG
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.generateWorkerData
@@ -72,6 +73,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.cardview_file_list.*
 import kotlinx.android.synthetic.main.empty_icon_layout.*
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_add_file.*
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_file_info_actions.*
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_new_folder.*
@@ -269,6 +271,13 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         getBackNavigationResult<Int>(REFRESH_FAVORITE_FILE) {
             mainViewModel.refreshActivities.value = true
+        }
+
+        getBackNavigationResult<Int>(FileInfoActionsBottomSheetDialog.UPDATE_CATEGORIES_NAV_KEY) { fileId ->
+            val files = fileAdapter.getFiles()
+            val file = files.find { it.id == fileId }
+            val index = files.indexOf(file)
+            fileAdapter.notifyItemChanged(index)
         }
     }
 
