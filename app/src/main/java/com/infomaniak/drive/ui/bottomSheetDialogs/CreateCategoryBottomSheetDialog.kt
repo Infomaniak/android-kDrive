@@ -158,7 +158,11 @@ class CreateCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
 
                 if (apiResponse.isSuccess()) {
                     DriveInfosController.updateDrive { localDrive ->
-                        localDrive.categories.add(apiResponse.data)
+                        localDrive.categories.add(
+                            apiResponse.data?.apply {
+                                objectId = "${driveId}_$id"
+                            }
+                        )
                     }
                 }
 

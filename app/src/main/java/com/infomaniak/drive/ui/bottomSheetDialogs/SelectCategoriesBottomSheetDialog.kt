@@ -48,7 +48,8 @@ data class UICategory(
     val id: Int,
     val name: String,
     val color: String,
-    var isSelected: Boolean
+    val isPredefined: Boolean,
+    var isSelected: Boolean,
 )
 
 class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
@@ -115,6 +116,15 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
             updateUI(ids.toTypedArray())
         }
 
+        getBackNavigationResult<Bundle>(CategoryInfoActionsBottomSheetDialog.DELETE_CATEGORY_NAV_KEY) { bundle ->
+
+            val categoryId = bundle.getInt(CategoryInfoActionsBottomSheetDialog.CATEGORY_ID_BUNDLE_KEY)
+
+            val ids = adapter.categories.filter { it.isSelected && it.id != categoryId }.map { it.id }
+
+            updateUI(ids.toTypedArray())
+        }
+
         adapter = CategoriesAdapter(onCategoryChanged = { categoryId, isSelected, position ->
 
             val requestLiveData = with(selectCategoriesViewModel) {
@@ -145,14 +155,18 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
         val allCategories = DriveInfosController.getCategories()
         val enabledCategories = DriveInfosController.getCategories(enabledCategoriesIds)
 
-        val uiCategories = allCategories.map { category ->
-            UICategory(
-                category.id,
-                category.getName(requireContext()),
-                category.color,
-                enabledCategories.find { it.id == category.id } != null
-            )
-        }
+        val uiCategories = allCategories
+            .map { category ->
+                UICategory(
+                    id = category.id,
+                    name = category.getName(requireContext()),
+                    color = category.color,
+                    isPredefined = category.isPredefined ?: true,
+                    isSelected = enabledCategories.find { it.id == category.id } != null
+                )
+            }
+            .sortedWith { a: UICategory, b: UICategory -> a.name.compareTo(b.name, true) }
+            .sortedByDescending { it.isPredefined }
 
         adapter.setAll(uiCategories)
 
@@ -160,7 +174,8 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
             val bundle = bundleOf(
                 "categoryId" to category.id,
                 "categoryName" to category.name,
-                "categoryColor" to category.color
+                "categoryColor" to category.color,
+                "categoryIsPredefined" to category.isPredefined,
             )
             safeNavigate(R.id.categoryInfoActionsBottomSheetDialog, bundle)
         }

@@ -266,11 +266,11 @@ object ApiRepository {
         return callApi(ApiRoutes.editCategory(driveId, categoryId), PATCH, body)
     }
 
-    fun deleteCategory(driveId: Int, categoryId: Int): ApiResponse<Unit> {
+    fun deleteCategory(driveId: Int, categoryId: Int): ApiResponse<Boolean> {
         return callApi(ApiRoutes.deleteCategory(driveId, categoryId), DELETE)
     }
 
-    fun addCategory(fileId: Int, driveId : Int, body: Map<String, Int>): ApiResponse<Unit> {
+    fun addCategory(fileId: Int, driveId: Int, body: Map<String, Int>): ApiResponse<Unit> {
         return callApi(ApiRoutes.addCategory(fileId, driveId), POST, body)
     }
 

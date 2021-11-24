@@ -770,6 +770,9 @@
         <argument
             android:name="categoryColor"
             app:argType="string" />
+        <argument
+            android:name="categoryIsPredefined"
+            app:argType="boolean" />
     </dialog>
 
     <fragment

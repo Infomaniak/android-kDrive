@@ -57,7 +57,7 @@ class CategoriesAdapter(
                 checkIcon.isVisible = category.isSelected
                 categoryTitle.text = category.name
                 setOnClickListener { onCategoryChanged(category.id, !category.isSelected, position) }
-                menuButton.isVisible = canEditCategory || canDeleteCategory
+                menuButton.isVisible = canEditCategory || (canDeleteCategory && !category.isPredefined)
                 menuButton.setOnClickListener { onMenuClicked?.invoke(category) }
             }
         }
