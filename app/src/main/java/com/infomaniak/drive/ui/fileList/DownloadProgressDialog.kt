@@ -50,11 +50,9 @@ class DownloadProgressDialog : DialogFragment() {
     private val navigationArgs: DownloadProgressDialogArgs by navArgs()
     private val downloadViewModel: DownloadViewModel by viewModels()
 
-    private lateinit var dialogView: View
+    private val dialogView: View by lazy { View.inflate(context, R.layout.dialog_download_progress, null) }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        dialogView = View.inflate(context, R.layout.dialog_download_progress, null)
-
         isCancelable = false
         FileController.getFileById(navigationArgs.fileID, navigationArgs.userDrive)?.let { file ->
             dialogView.icon.setImageResource(file.getFileType().icon)

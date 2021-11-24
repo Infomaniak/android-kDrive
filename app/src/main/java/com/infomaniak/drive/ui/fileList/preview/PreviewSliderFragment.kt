@@ -141,13 +141,15 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     private var showUi = false
     fun toggleFullscreen() {
-        val transition = Slide(Gravity.TOP)
-        transition.duration = 200
-        transition.addTarget(R.id.header)
-        TransitionManager.beginDelayedTransition(previewSliderParent, transition)
-        header.isVisible = showUi
-        toggleBottomSheet(showUi)
-        showUi = !showUi
+        previewSliderParent?.apply {
+            val transition = Slide(Gravity.TOP)
+            transition.duration = 200
+            transition.addTarget(R.id.header)
+            TransitionManager.beginDelayedTransition(this, transition)
+            header.isVisible = showUi
+            toggleBottomSheet(showUi)
+            showUi = !showUi
+        }
     }
 
     private fun configureBottomSheetFileInfo() {

@@ -95,7 +95,7 @@ open class CreateFolderFragment : Fragment() {
     }
 
     private fun toggleCreateFolderButton() {
-        createFolderButton.isEnabled = currentPermission != null && !folderNameValueInput.text.isNullOrBlank()
+        createFolderButton?.isEnabled = currentPermission != null && !folderNameValueInput.text.isNullOrBlank()
     }
 
     protected fun getShare(onSuccess: (share: Share) -> Unit) {

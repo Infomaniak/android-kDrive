@@ -307,7 +307,7 @@ open class File(
     // For applyFileActivity in FileController
     override fun equals(other: Any?): Boolean {
         if (other is File) {
-            return other.id == id
+            return isUsable() && other.isUsable() && other.id == id
         }
         return super.equals(other)
     }

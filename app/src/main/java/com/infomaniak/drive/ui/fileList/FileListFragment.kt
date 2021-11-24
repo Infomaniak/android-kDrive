@@ -52,6 +52,7 @@ import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
+import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerSucceeded
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog.Companion.SELECT_DIALOG_ACTION
@@ -215,6 +216,10 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     else -> refreshActivities()
                 }
             }
+        }
+
+        requireContext().trackUploadWorkerSucceeded().observe(viewLifecycleOwner) {
+            if (!isDownloading) activitiesRefreshTimer.start()
         }
 
         mainViewModel.refreshActivities.observe(viewLifecycleOwner) {
@@ -469,8 +474,9 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         fileAdapter = FileAdapter(FileController.emptyList(mainViewModel.realm))
         fileAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         fileAdapter.setHasStableIds(true)
+
         fileAdapter.onFileClicked = { file ->
-            if (file.isManagedAndValidByRealm() || file.isNotManagedByRealm()) {
+            if (file.isUsable()) {
                 if (file.isFolder()) openFolder(file) else displayFile(file)
             } else {
                 refreshActivities()
@@ -592,7 +598,9 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun refreshActivities() {
         val isUploadInProgressNavigation = findNavController().currentDestination?.id == R.id.uploadInProgressFragment
-        if (folderID == OTHER_ROOT_ID || isUploadInProgressNavigation) return
+
+        if (folderID == OTHER_ROOT_ID || isUploadInProgressNavigation || !fileAdapter.isComplete) return
+
         if (isLoadingActivities) {
             retryLoadingActivities = true
             return
@@ -789,9 +797,12 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             showLoadingTimer.start()
             isDownloading = true
             fileAdapter.isComplete = false
+
             getFolderFiles(ignoreCache, onFinish = {
                 it?.let { result ->
+
                     if (fileAdapter.itemCount == 0 || result.page == 1 || isNewSort) {
+
                         FileController.getRealmLiveFiles(
                             parentId = folderID,
                             order = fileListViewModel.sortType,
@@ -800,18 +811,21 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
                         currentFolder = if (result.parentFolder?.id == ROOT_ID) {
                             AccountUtils.getCurrentDrive()?.convertToFile(Utils.getRootName(requireContext()))
-                        } else result.parentFolder
+                        } else {
+                            result.parentFolder
+                        }
 
                         mainViewModel.currentFolder.value = currentFolder
                         changeNoFilesLayoutVisibility(
                             hideFileList = fileAdapter.fileList.isEmpty(),
                             changeControlsVisibility = result.parentFolder?.isRoot() == false
                         )
-
-                        refreshActivities()
                     }
+
                     fileAdapter.isComplete = result.isComplete
                     fileAdapter.hideLoading()
+                    refreshActivities()
+
                 } ?: run {
                     changeNoFilesLayoutVisibility(
                         hideFileList = fileAdapter.itemCount == 0,

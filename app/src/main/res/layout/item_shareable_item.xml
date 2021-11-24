@@ -73,7 +73,7 @@
         android:layout_marginHorizontal="10dp"
         android:layout_marginTop="@dimen/marginStandardVerySmall"
         android:text="@string/userPermissionRead"
-        app:layout_constraintBottom_toTopOf="@+id/externalUserLabel"
+        app:layout_constraintBottom_toTopOf="@id/externalUserLabel"
         app:layout_constraintEnd_toStartOf="@id/chevron"
         app:layout_constraintStart_toEndOf="@id/avatar"
         app:layout_constraintTop_toBottomOf="@id/infos"

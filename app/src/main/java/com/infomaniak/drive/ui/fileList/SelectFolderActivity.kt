@@ -25,7 +25,6 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModel
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.BaseActivity
@@ -56,7 +55,8 @@ class SelectFolderActivity : BaseActivity() {
         val driveID = intent.extras?.getInt(USER_DRIVE_ID_TAG) ?: throw MissingFormatArgumentException(USER_DRIVE_ID_TAG)
         val customArgs = intent.extras?.getBundle(CUSTOM_ARGS_TAG)
         val userDrive = UserDrive(userID, driveID)
-        mainViewModel.realm = FileController.getRealmInstance(userDrive)
+
+        mainViewModel.selectFolderUserDrive = userDrive
         saveExternalViewModel.userDrive = userDrive
         saveExternalViewModel.currentDrive = DriveInfosController.getDrives(userID, driveID).firstOrNull()
         saveExternalViewModel.disableSelectedFolder = intent.extras?.getInt(DISABLE_SELECTED_FOLDER_TAG)
