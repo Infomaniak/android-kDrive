@@ -61,7 +61,7 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
     private lateinit var adapter: CategoriesAdapter
     private lateinit var file: File
 
-    private var aCategoryHasBeenEdited:Boolean = false
+    private var aCategoryHasBeenModified:Boolean = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         inflater.inflate(R.layout.fragment_select_categories, container, false)
@@ -74,7 +74,7 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
                 SELECT_CATEGORIES_NAV_KEY,
                 bundleOf(
                     CATEGORIES_BUNDLE_KEY to adapter.categories.filter { it.isSelected },
-                    A_CATEGORY_HAS_BEEN_EDITED to aCategoryHasBeenEdited,
+                    A_CATEGORY_HAS_BEEN_MODIFIED to aCategoryHasBeenModified,
                 )
             )
         }
@@ -130,6 +130,8 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
 
         getBackNavigationResult<Bundle>(CategoryInfoActionsBottomSheetDialog.DELETE_CATEGORY_NAV_KEY) { bundle ->
 
+            aCategoryHasBeenModified = true
+
             val categoryId = bundle.getInt(CategoryInfoActionsBottomSheetDialog.CATEGORY_ID_BUNDLE_KEY)
 
             val ids = adapter.categories.filter { it.isSelected && it.id != categoryId }.map { it.id }
@@ -137,11 +139,11 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
             updateUI(ids.toTypedArray(), file.id)
         }
 
-        getBackNavigationResult<Bundle>(CategoryInfoActionsBottomSheetDialog.CATEGORY_INFO_ACTIONS_NAV_KEY) { bundle ->
+        getBackNavigationResult<Bundle>(CategoryInfoActionsBottomSheetDialog.EDIT_CATEGORY_NAV_KEY) { bundle ->
 
-            aCategoryHasBeenEdited = true
+            aCategoryHasBeenModified = true
 
-            val ids = bundle.getIntegerArrayList(CategoryInfoActionsBottomSheetDialog.CATEGORY_INFO_ACTIONS_BUNDLE_KEY)
+            val ids = bundle.getIntegerArrayList(CategoryInfoActionsBottomSheetDialog.EDIT_CATEGORY_BUNDLE_KEY)
 
             if (ids != null) {
                 updateUI(ids.toTypedArray(), file.id)
@@ -245,6 +247,6 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
     companion object {
         const val SELECT_CATEGORIES_NAV_KEY = "categories_dialog_key"
         const val CATEGORIES_BUNDLE_KEY = "categories_bundle_key"
-        const val A_CATEGORY_HAS_BEEN_EDITED = "a_category_has_been_edited"
+        const val A_CATEGORY_HAS_BEEN_MODIFIED = "a_category_has_been_modified"
     }
 }

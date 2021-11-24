@@ -79,8 +79,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
         getBackNavigationResult<Bundle>(SelectCategoriesBottomSheetDialog.SELECT_CATEGORIES_NAV_KEY) { bundle ->
 
-            val aCategoryHasBeenEdited = bundle.getBoolean(SelectCategoriesBottomSheetDialog.A_CATEGORY_HAS_BEEN_EDITED)
-            if (aCategoryHasBeenEdited) {
+            val aCategoryHasBeenModified = bundle.getBoolean(SelectCategoriesBottomSheetDialog.A_CATEGORY_HAS_BEEN_MODIFIED)
+            if (aCategoryHasBeenModified) {
                 findNavController().previousBackStackEntry?.savedStateHandle?.set(UPDATE_CATEGORIES_NAV_KEY, currentFile.id)
             }
 
