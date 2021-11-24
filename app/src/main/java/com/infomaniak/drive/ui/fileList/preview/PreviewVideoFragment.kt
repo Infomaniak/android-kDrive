@@ -33,7 +33,7 @@ import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.MediaSourceFactory
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.DataSource
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.upstream.FileDataSource
 import com.google.android.exoplayer2.util.EventLogger
 import com.google.android.exoplayer2.util.Util
@@ -47,7 +47,7 @@ import kotlinx.android.synthetic.main.fragment_preview_video.container
 
 open class PreviewVideoFragment : PreviewFragment() {
 
-    private lateinit var simpleExoPlayer: SimpleExoPlayer
+    private lateinit var exoPlayer: ExoPlayer
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return if (noFileFound()) null else inflater.inflate(R.layout.fragment_preview_video, container, false)
@@ -70,10 +70,10 @@ open class PreviewVideoFragment : PreviewFragment() {
     override fun onStart() {
         super.onStart()
 
-        if (!::simpleExoPlayer.isInitialized) {
+        if (!::exoPlayer.isInitialized) {
             initializePlayer()
 
-            simpleExoPlayer.addListener(object : Player.Listener {
+            exoPlayer.addListener(object : Player.Listener {
 
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
                     super.onIsPlayingChanged(isPlaying)
@@ -98,12 +98,12 @@ open class PreviewVideoFragment : PreviewFragment() {
 
     override fun onPause() {
         super.onPause()
-        simpleExoPlayer.pause()
+        exoPlayer.pause()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (this::simpleExoPlayer.isInitialized) simpleExoPlayer.release()
+        if (this::exoPlayer.isInitialized) exoPlayer.release()
     }
 
     private fun initializePlayer() {
@@ -122,12 +122,13 @@ open class PreviewVideoFragment : PreviewFragment() {
         val trackSelector = DefaultTrackSelector(context).apply {
             setParameters(buildUponParameters().setMaxVideoSizeSd())
         }
-        simpleExoPlayer = SimpleExoPlayer.Builder(context, renderersFactory)
+
+        exoPlayer = ExoPlayer.Builder(context, renderersFactory)
             .setMediaSourceFactory(mediaSourceFactory)
             .setTrackSelector(trackSelector)
             .build()
 
-        simpleExoPlayer.apply {
+        exoPlayer.apply {
             addAnalyticsListener(EventLogger(trackSelector))
             setAudioAttributes(AudioAttributes.DEFAULT,  /* handleAudioFocus= */true)
             playWhenReady = false
@@ -151,8 +152,7 @@ open class PreviewVideoFragment : PreviewFragment() {
             .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
     }
 
-    @Synchronized
-    fun getDataSourceFactory(context: Context): DataSource.Factory {
+    private fun getDataSourceFactory(context: Context): DataSource.Factory {
         val appContext = context.applicationContext
 
         val userAgent = Util.getUserAgent(appContext, context.getString(R.string.app_name))
@@ -160,11 +160,10 @@ open class PreviewVideoFragment : PreviewFragment() {
             setUserAgent(userAgent)
             setDefaultRequestProperties(HttpUtils.getHeaders().toMap())
         }
-        return DefaultDataSourceFactory(appContext, okHttpDataSource)
+        return DefaultDataSource.Factory(appContext, okHttpDataSource)
     }
 
-    @Synchronized
-    fun getOfflineDataSourceFactory(): DataSource.Factory {
+    private fun getOfflineDataSourceFactory(): DataSource.Factory {
         return DataSource.Factory {
             FileDataSource()
         }
