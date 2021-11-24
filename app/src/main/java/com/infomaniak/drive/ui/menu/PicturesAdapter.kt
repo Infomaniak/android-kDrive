@@ -76,27 +76,23 @@ class PicturesAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        if (super.getItemViewType(position) == VIEW_TYPE_LOADING) {
-            (holder.itemView as LoaderCardView).startLoading()
-        } else {
-            val item = itemList[position]
-            when (getItemViewType(position)) {
-                DisplayType.TITLE.layout -> {
-                    holder.itemView.apply {
-                        title.text = (item as String)
-                    }
-                }
-                DisplayType.PICTURE.layout -> {
-                    val file = (item as File)
+        when {
+            super.getItemViewType(position) == VIEW_TYPE_LOADING -> {
+                (holder.itemView as LoaderCardView).startLoading()
+            }
+            getItemViewType(position) == DisplayType.TITLE.layout -> {
+                holder.itemView.title.text = (itemList[position] as String)
+            }
+            getItemViewType(position) == DisplayType.PICTURE.layout -> {
+                val file = (itemList[position] as File)
 
-                    (holder.itemView as LoaderCardView).apply {
-                        stopLoading()
-                        picture.loadGlideUrl(file.thumbnail())
-                        picture.contentDescription = file.name
+                (holder.itemView as LoaderCardView).apply {
+                    stopLoading()
+                    picture.loadGlideUrl(file.thumbnail())
+                    picture.contentDescription = file.name
 
-                        setOnClickListener {
-                            onItemClick(file)
-                        }
+                    setOnClickListener {
+                        onItemClick(file)
                     }
                 }
             }

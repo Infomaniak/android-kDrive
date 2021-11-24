@@ -58,9 +58,9 @@ class MenuPicturesFragment : Fragment() {
         }
 
         timer.start()
-        if (childFragmentManager.findFragmentByTag("TOTO") == null) {
+        if (childFragmentManager.findFragmentByTag("picturesFragment") == null) {
             childFragmentManager.beginTransaction()
-                .replace(R.id.picturesFragmentView, picturesFragment, "TOTO")
+                .replace(R.id.picturesFragmentView, picturesFragment, "picturesFragment")
                 .commit()
         }
     }

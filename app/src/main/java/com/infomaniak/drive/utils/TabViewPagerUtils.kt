@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.utils
 
+import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
@@ -70,6 +71,6 @@ object TabViewPagerUtils {
     data class FragmentTab(
         val position: Int,
         val fragment: Fragment,
-        val button: Int
+        @IdRes val button: Int
     )
 }
