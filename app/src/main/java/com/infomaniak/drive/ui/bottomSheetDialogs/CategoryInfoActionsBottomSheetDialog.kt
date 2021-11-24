@@ -19,31 +19,33 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
-import androidx.core.view.isVisible
+import androidx.core.view.isInvisible
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.liveData
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.models.CancellableAction
-import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_ACTION_KEY
-import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_MAIN_KEY
-import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_TITLE_KEY
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setBackNavigationResult
+import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_category_info_actions.*
+import kotlinx.coroutines.Dispatchers
 
 class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
     private val navigationArgs: CategoryInfoActionsBottomSheetDialogArgs by navArgs()
 
-//    private val mainViewModel: MainViewModel by activityViewModels()
-//
-//    private lateinit var currentFile: File
-//    private lateinit var drivePermissions: DrivePermissions
+    private val categoryInfoActionViewModel: CategoryInfoActionViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         inflater.inflate(R.layout.fragment_bottom_sheet_category_info_actions, container, false)
@@ -51,19 +53,56 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        categoryTitle.text = navigationArgs.categoryName
-        categoryIcon.setBackgroundColor(Color.parseColor(navigationArgs.categoryColor))
-
+        val driveId = AccountUtils.currentDriveId
+        val categoryId = navigationArgs.categoryId
+        val categoryName = navigationArgs.categoryName
+        val categoryColor = Color.parseColor(navigationArgs.categoryColor)
         val categoryRights = DriveInfosController.getCategoryRights()
-        editCategory.isVisible = categoryRights?.canEditCategory == true
-        deleteCategory.isVisible = categoryRights?.canDeleteCategory == true
+        val canEditCategory = categoryRights?.canEditCategory ?: false
+        val canDeleteCategory = categoryRights?.canDeleteCategory ?: false
+        val categoryIsPredefined = navigationArgs.categoryIsPredefined
 
-        editCategory.setOnClickListener { Log.e("TOTO", "editCategory") }
-        deleteCategory.setOnClickListener { Log.e("TOTO", "deleteCategory") }
+        categoryTitle.text = categoryName
+        categoryIcon.setBackgroundColor(categoryColor)
+
+        editCategory.isInvisible = !canEditCategory
+        deleteCategory.isInvisible = !(canDeleteCategory && !categoryIsPredefined)
+
+        editCategory.setOnClickListener { }
+
+        deleteCategory.setOnClickListener {
+            categoryInfoActionViewModel.deleteCategory(driveId, categoryId).observe(viewLifecycleOwner) { apiResponse ->
+
+                if (apiResponse.isSuccess()) {
+                    setBackNavigationResult(DELETE_CATEGORY_NAV_KEY, bundleOf(CATEGORY_ID_BUNDLE_KEY to categoryId))
+
+                } else {
+                    Utils.showSnackbar(requireView(), apiResponse.translateError())
+                }
+            }
+        }
     }
 
-    private fun transmitActionAndPopBack(message: String, action: CancellableAction? = null) {
-        val bundle = bundleOf(CANCELLABLE_TITLE_KEY to message, CANCELLABLE_ACTION_KEY to action)
-        setBackNavigationResult(CANCELLABLE_MAIN_KEY, bundle)
+    internal class CategoryInfoActionViewModel : ViewModel() {
+
+        fun deleteCategory(driveId: Int, categoryId: Int): LiveData<ApiResponse<Boolean>> =
+            liveData(Dispatchers.IO) {
+
+                val apiResponse = ApiRepository.deleteCategory(driveId, categoryId)
+
+                if (apiResponse.isSuccess()) {
+                    DriveInfosController.updateDrive { localDrive ->
+                        val category = localDrive.categories.find { it.id == categoryId }
+                        localDrive.categories.remove(category)
+                    }
+                }
+
+                emit(apiResponse)
+            }
+    }
+
+    companion object {
+        const val DELETE_CATEGORY_NAV_KEY = "delete_category_nav_key"
+        const val CATEGORY_ID_BUNDLE_KEY = "category_id_bundle_key"
     }
 }
