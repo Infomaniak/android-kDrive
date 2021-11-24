@@ -740,20 +740,8 @@
             android:name="categoriesIds"
             app:argType="integer[]" />
         <action
-            android:id="@+id/action_SelectCategoriesBottomSheetDialog_to_CreateCategoryBottomSheetDialog"
-            app:destination="@id/createCategoryBottomSheetDialog" />
-    </dialog>
-
-    <dialog
-        android:id="@+id/createCategoryBottomSheetDialog"
-        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.CreateCategoryBottomSheetDialog"
-        android:label="CreateCategoryBottomSheetDialog">
-        <argument
-            android:name="fileId"
-            app:argType="integer" />
-        <argument
-            android:name="driveId"
-            app:argType="integer" />
+            android:id="@+id/action_SelectCategoriesBottomSheetDialog_to_CreateOrEditCategoryBottomSheetDialog"
+            app:destination="@id/createOrEditCategoryBottomSheetDialog" />
     </dialog>
 
     <dialog
@@ -761,6 +749,9 @@
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialog"
         android:label="CategoryInfoActionsBottomSheetDialog"
         tools:layout="@layout/fragment_bottom_sheet_category_info_actions">
+        <argument
+            android:name="fileId"
+            app:argType="integer" />
         <argument
             android:name="categoryId"
             app:argType="integer" />
@@ -773,6 +764,36 @@
         <argument
             android:name="categoryIsPredefined"
             app:argType="boolean" />
+        <action
+            android:id="@+id/action_CategoryInfoActionsBottomSheetDialog_to_CreateOrEditCategoryBottomSheetDialog"
+            app:destination="@id/createOrEditCategoryBottomSheetDialog" />
+    </dialog>
+
+    <dialog
+        android:id="@+id/createOrEditCategoryBottomSheetDialog"
+        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.CreateOrEditCategoryBottomSheetDialog"
+        android:label="CreateOrEditCategoryBottomSheetDialog">
+        <argument
+            android:name="fileId"
+            app:argType="integer" />
+        <argument
+            android:name="driveId"
+            app:argType="integer" />
+        <argument
+            android:name="categoryIsPredefined"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="categoryId"
+            app:argType="integer" />
+        <argument
+            android:name="categoryName"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="categoryColor"
+            app:argType="string"
+            app:nullable="true" />
     </dialog>
 
     <fragment

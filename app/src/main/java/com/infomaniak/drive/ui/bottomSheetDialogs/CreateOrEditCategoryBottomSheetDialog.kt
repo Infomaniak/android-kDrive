@@ -51,11 +51,11 @@ import kotlinx.android.synthetic.main.fragment_create_category.*
 import kotlinx.android.synthetic.main.view_shapeable_image.view.*
 import kotlinx.coroutines.Dispatchers
 
-class CreateCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
+class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
 
-    private val navigationArgs: CreateCategoryBottomSheetDialogArgs by navArgs()
+    private val navigationArgs: CreateOrEditCategoryBottomSheetDialogArgs by navArgs()
 
-    private val createCategoryViewModel: CreateCategoryViewModel by viewModels()
+    private val createOrEditCategoryViewModel: CreateOrEditCategoryViewModel by viewModels()
     private val selectCategoriesViewModel: SelectCategoriesBottomSheetDialog.SelectCategoriesViewModel by viewModels()
 
     private val colorLayouts = mutableListOf<ConstraintLayout>()
@@ -64,48 +64,106 @@ class CreateCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         inflater.inflate(R.layout.fragment_create_category, container, false)
 
-    @SuppressLint("InflateParams")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        editCategoryWarningText.isGone = navigationArgs.categoryId == NO_PREVIOUS_CATEGORY_ID
+
+        categoryName.isGone = navigationArgs.categoryIsPredefined
+        saveButton.isEnabled = navigationArgs.categoryIsPredefined
+
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
+        categoryName.addTextChangedListener { saveButton.isEnabled = it.toString().isNotEmpty() }
+
+        val previousCategoryName = navigationArgs.categoryName
+        if (previousCategoryName != null) {
+            categoryName.setText(previousCategoryName)
+        }
+
+        configureSaveButton()
+
+        configureColorsGrid()
+
+        // Select first element
+        val previousColor = navigationArgs.categoryColor
+        val previousColorPosition = CATEGORY_COLORS.indexOfFirst { it == previousColor }
+        val position =
+            if (previousColor == null || previousColorPosition == -1) 0
+            else previousColorPosition
+        onColorClicked(position)
+    }
+
+    private fun configureSaveButton() {
         saveButton.setOnClickListener {
             saveButton.showProgress()
 
-            val name = categoryName.text.toString()
-            val color = CATEGORY_COLORS[selected]
-
-            createCategoryViewModel.createCategory(navigationArgs.driveId, name, color)
-                .observe(viewLifecycleOwner) { createCategoryApiResponse ->
-
-                    if (createCategoryApiResponse.isSuccess()) {
-
-                        val categoryId = createCategoryApiResponse.data?.id ?: -1
-
-                        selectCategoriesViewModel.addCategory(navigationArgs.fileId, navigationArgs.driveId, categoryId)
-                            .observe(viewLifecycleOwner) { addCategoryApiResponse ->
-
-                                if (addCategoryApiResponse.isSuccess()) {
-                                    setBackNavigationResult(
-                                        CREATE_CATEGORY_NAV_KEY,
-                                        bundleOf(CATEGORY_ID_BUNDLE_KEY to categoryId)
-                                    )
-
-                                } else {
-                                    saveButton.hideProgress(R.string.buttonSave)
-                                    Utils.showSnackbar(requireView(), addCategoryApiResponse.translateError())
-                                }
-                            }
-
-                    } else {
-                        saveButton.hideProgress(R.string.buttonSave)
-                        Utils.showSnackbar(requireView(), createCategoryApiResponse.translateError())
-                    }
-                }
+            val previousCategoryId = navigationArgs.categoryId
+            if (previousCategoryId == NO_PREVIOUS_CATEGORY_ID) {
+                createCategory() // Create a new Category
+            } else {
+                editCategory(previousCategoryId) // Edit an existing Category
+            }
         }
 
-        categoryName.addTextChangedListener { saveButton.isEnabled = it.toString().isNotEmpty() }
+    }
+
+    private fun createCategory() {
+
+        val name = categoryName.text.toString()
+        val color = CATEGORY_COLORS[selected]
+        val driveId = navigationArgs.driveId
+
+        createOrEditCategoryViewModel.createCategory(driveId, name, color)
+            .observe(viewLifecycleOwner) { createCategoryApiResponse ->
+
+                if (createCategoryApiResponse.isSuccess()) {
+
+                    val categoryId = createCategoryApiResponse.data?.id ?: -1
+
+                    selectCategoriesViewModel.addCategory(navigationArgs.fileId, driveId, categoryId)
+                        .observe(viewLifecycleOwner) { addCategoryApiResponse ->
+
+                            if (addCategoryApiResponse.isSuccess()) {
+                                setBackNavigationResult(
+                                    CREATE_CATEGORY_NAV_KEY,
+                                    bundleOf(CATEGORY_ID_BUNDLE_KEY to categoryId)
+                                )
+
+                            } else {
+                                saveButton.hideProgress(R.string.buttonSave)
+                                Utils.showSnackbar(requireView(), addCategoryApiResponse.translateError())
+                            }
+                        }
+
+                } else {
+                    saveButton.hideProgress(R.string.buttonSave)
+                    Utils.showSnackbar(requireView(), createCategoryApiResponse.translateError())
+                }
+            }
+    }
+
+    private fun editCategory(previousCategoryId: Int) {
+
+        val name = categoryName.text.toString().let { if (it.isEmpty()) null else it }
+        val color = CATEGORY_COLORS[selected]
+        val driveId = navigationArgs.driveId
+
+        createOrEditCategoryViewModel.editCategory(driveId, previousCategoryId, name, color)
+            .observe(viewLifecycleOwner) { apiResponse ->
+
+                if (apiResponse.isSuccess()) {
+                    setBackNavigationResult(EDIT_CATEGORY_NAV_KEY, bundleOf())
+
+                } else {
+                    saveButton.hideProgress(R.string.buttonSave)
+                    Utils.showSnackbar(requireView(), apiResponse.translateError())
+                }
+            }
+    }
+
+    @SuppressLint("InflateParams")
+    private fun configureColorsGrid() {
 
         val ctx = requireContext()
 
@@ -134,22 +192,19 @@ class CreateCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
             colorLayouts.add(colorLayout)
             categoryColorsView.addView(colorLayout)
         }
-
-        // Select first element
-        onColorClicked(0)
     }
 
-    private fun onColorClicked(pos: Int) {
-        if (pos != selected) {
+    private fun onColorClicked(position: Int) {
+        if (position != selected) {
             colorLayouts.getOrNull(selected)?.shapeableImageIcon?.isGone = true
-            colorLayouts.getOrNull(pos)?.let {
+            colorLayouts.getOrNull(position)?.let {
                 it.shapeableImageIcon.isVisible = true
-                selected = pos
+                selected = position
             }
         }
     }
 
-    internal class CreateCategoryViewModel : ViewModel() {
+    internal class CreateOrEditCategoryViewModel : ViewModel() {
 
         fun createCategory(driveId: Int, name: String, color: String): LiveData<ApiResponse<Category>> =
             liveData(Dispatchers.IO) {
@@ -168,11 +223,41 @@ class CreateCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
 
                 emit(apiResponse)
             }
+
+        fun editCategory(driveId: Int, categoryId: Int, name: String?, color: String): LiveData<ApiResponse<Category>> =
+            liveData(Dispatchers.IO) {
+
+                val apiResponse = ApiRepository.editCategory(driveId, categoryId, name, color)
+
+                if (apiResponse.isSuccess()) {
+                    DriveInfosController.updateDrive { localDrive ->
+
+                        // Delete previous Category
+                        val category = localDrive.categories.find { it.id == categoryId }
+                        localDrive.categories.remove(category)
+
+                        // Add new Category
+                        localDrive.categories.add(
+                            apiResponse.data?.apply {
+                                objectId = "${driveId}_$id"
+                            }
+                        )
+
+                    }
+                }
+
+                emit(apiResponse)
+            }
     }
 
     companion object {
         const val CREATE_CATEGORY_NAV_KEY = "create_category_nav_key"
         const val CATEGORY_ID_BUNDLE_KEY = "category_id_bundle_key"
+
+        const val EDIT_CATEGORY_NAV_KEY = "edit_category_nav_key"
+
+        const val NO_PREVIOUS_CATEGORY_ID = -1
+
         private val CATEGORY_COLORS = listOf(
             "#1ABC9C",
             "#11806A",

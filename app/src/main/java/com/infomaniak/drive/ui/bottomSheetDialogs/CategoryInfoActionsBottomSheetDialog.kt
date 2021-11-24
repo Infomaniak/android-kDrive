@@ -34,9 +34,8 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.setBackNavigationResult
+import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_category_info_actions.*
 import kotlinx.coroutines.Dispatchers
@@ -53,32 +52,81 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val fileId = navigationArgs.fileId
         val driveId = AccountUtils.currentDriveId
         val categoryId = navigationArgs.categoryId
         val categoryName = navigationArgs.categoryName
-        val categoryColor = Color.parseColor(navigationArgs.categoryColor)
+        val categoryColor = navigationArgs.categoryColor
         val categoryRights = DriveInfosController.getCategoryRights()
         val canEditCategory = categoryRights?.canEditCategory ?: false
         val canDeleteCategory = categoryRights?.canDeleteCategory ?: false
         val categoryIsPredefined = navigationArgs.categoryIsPredefined
 
         categoryTitle.text = categoryName
-        categoryIcon.setBackgroundColor(categoryColor)
+        categoryIcon.setBackgroundColor(Color.parseColor(categoryColor))
 
         editCategory.isInvisible = !canEditCategory
         deleteCategory.isInvisible = !(canDeleteCategory && !categoryIsPredefined)
 
-        editCategory.setOnClickListener { }
+        editCategory.setOnClickListener {
+            editCategory(
+                fileId,
+                driveId,
+                categoryIsPredefined,
+                categoryId,
+                categoryName,
+                categoryColor,
+            )
+        }
+        deleteCategory.setOnClickListener { deleteCategory(driveId, categoryId) }
 
-        deleteCategory.setOnClickListener {
-            categoryInfoActionViewModel.deleteCategory(driveId, categoryId).observe(viewLifecycleOwner) { apiResponse ->
+        getBackNavigationResult<Bundle>(CreateOrEditCategoryBottomSheetDialog.EDIT_CATEGORY_NAV_KEY) {
 
-                if (apiResponse.isSuccess()) {
-                    setBackNavigationResult(DELETE_CATEGORY_NAV_KEY, bundleOf(CATEGORY_ID_BUNDLE_KEY to categoryId))
+            val ids = FileController.getFileById(fileId)?.getSortedCategoriesIds()
 
-                } else {
-                    Utils.showSnackbar(requireView(), apiResponse.translateError())
-                }
+            setBackNavigationResult(
+                CATEGORY_INFO_ACTIONS_NAV_KEY,
+                bundleOf(CATEGORY_INFO_ACTIONS_BUNDLE_KEY to ids)
+            )
+        }
+    }
+
+    private fun editCategory(
+        fileId: Int,
+        driveId: Int,
+        categoryIsPredefined: Boolean,
+        categoryId: Int,
+        categoryName: String,
+        categoryColor: String,
+    ) {
+
+        val name =
+            if (categoryIsPredefined) {
+                null
+            } else {
+                categoryName
+            }
+
+        safeNavigate(
+            CategoryInfoActionsBottomSheetDialogDirections.actionCategoryInfoActionsBottomSheetDialogToCreateOrEditCategoryBottomSheetDialog(
+                fileId = fileId,
+                driveId = driveId,
+                categoryIsPredefined = categoryIsPredefined,
+                categoryId = categoryId,
+                categoryName = name,
+                categoryColor = categoryColor,
+            )
+        )
+    }
+
+    private fun deleteCategory(driveId: Int, categoryId: Int) {
+        categoryInfoActionViewModel.deleteCategory(driveId, categoryId).observe(viewLifecycleOwner) { apiResponse ->
+
+            if (apiResponse.isSuccess()) {
+                setBackNavigationResult(DELETE_CATEGORY_NAV_KEY, bundleOf(CATEGORY_ID_BUNDLE_KEY to categoryId))
+
+            } else {
+                Utils.showSnackbar(requireView(), apiResponse.translateError())
             }
         }
     }
@@ -104,5 +152,8 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
     companion object {
         const val DELETE_CATEGORY_NAV_KEY = "delete_category_nav_key"
         const val CATEGORY_ID_BUNDLE_KEY = "category_id_bundle_key"
+
+        const val CATEGORY_INFO_ACTIONS_NAV_KEY = "category_info_actions_nav_key"
+        const val CATEGORY_INFO_ACTIONS_BUNDLE_KEY = "category_info_actions_bundle_key"
     }
 }

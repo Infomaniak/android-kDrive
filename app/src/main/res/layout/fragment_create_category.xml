@@ -17,6 +17,7 @@
   -->
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -50,18 +51,39 @@
         android:paddingBottom="@dimen/recyclerViewPaddingBottom"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+        <TextView
+            android:id="@+id/editCategoryWarningText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/marginStandard"
+            android:background="@drawable/background_create_category_warning"
+            android:drawablePadding="@dimen/marginStandardMedium"
+            android:padding="@dimen/marginStandardMedium"
+            android:text="@string/editCategoryInfoDescription"
+            android:textSize="14sp"
+            android:visibility="gone"
+            app:drawableStartCompat="@drawable/ic_info"
+            app:drawableTint="@color/blue_general"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
         <EditText
             android:id="@+id/categoryName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/background_create_category_name"
             android:layout_marginHorizontal="@dimen/marginStandard"
+            android:padding="@dimen/marginStandardMedium"
+            android:layout_marginTop="@dimen/marginStandard"
             android:autofillHints="name"
             android:hint="@string/categoryNameField"
             android:inputType="text"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/editCategoryWarningText" />
 
         <TextView
             android:id="@+id/chooseCategory"

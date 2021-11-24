@@ -261,8 +261,11 @@ object ApiRepository {
         return callApi(ApiRoutes.createCategory(driveId), POST, body)
     }
 
-    fun editCategory(driveId: Int, categoryId: Int, name: String, color: String): ApiResponse<Unit> {
-        val body = mapOf("name" to name, "color" to color)
+    fun editCategory(driveId: Int, categoryId: Int, name: String?, color: String): ApiResponse<Category> {
+        val body = mutableMapOf<String, Any>().apply {
+            if (name != null) put("name", name)
+            put("color", color)
+        }
         return callApi(ApiRoutes.editCategory(driveId, categoryId), PATCH, body)
     }
 
