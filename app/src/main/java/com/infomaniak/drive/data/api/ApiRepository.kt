@@ -270,8 +270,8 @@ object ApiRepository {
         return callApi(ApiRoutes.deleteCategory(driveId, categoryId), DELETE)
     }
 
-    fun addCategory(file: File, body: Map<String, Int>): ApiResponse<Unit> {
-        return callApi(ApiRoutes.addCategory(file), POST, body)
+    fun addCategory(fileId: Int, driveId : Int, body: Map<String, Int>): ApiResponse<Unit> {
+        return callApi(ApiRoutes.addCategory(fileId, driveId), POST, body)
     }
 
     fun removeCategory(file: File, categoryId: Int): ApiResponse<Unit> {

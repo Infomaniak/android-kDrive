@@ -747,7 +747,14 @@
     <dialog
         android:id="@+id/createCategoryBottomSheetDialog"
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.CreateCategoryBottomSheetDialog"
-        android:label="CreateCategoryBottomSheetDialog" />
+        android:label="CreateCategoryBottomSheetDialog">
+        <argument
+            android:name="fileId"
+            app:argType="integer" />
+        <argument
+            android:name="driveId"
+            app:argType="integer" />
+    </dialog>
 
     <dialog
         android:id="@+id/categoryInfoActionsBottomSheetDialog"
