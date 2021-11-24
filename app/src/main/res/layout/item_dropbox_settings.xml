@@ -106,7 +106,7 @@
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@id/passwordDescription"
-            app:layout_constraintTop_toBottomOf="@+id/passwordDescription"
+            app:layout_constraintTop_toBottomOf="@id/passwordDescription"
             tools:visibility="visible" />
 
         <com.google.android.material.textfield.TextInputLayout

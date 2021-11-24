@@ -126,7 +126,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@string/addPassword"
-                    app:layout_constraintBottom_toTopOf="@+id/addPasswordDescription"
+                    app:layout_constraintBottom_toTopOf="@id/addPasswordDescription"
                     app:layout_constraintEnd_toStartOf="@id/addPasswordSwitch"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -208,7 +208,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@string/shareLinkSettingsAllowDownloadTitle"
-                    app:layout_constraintBottom_toTopOf="@+id/allowDownloadDescription"
+                    app:layout_constraintBottom_toTopOf="@id/allowDownloadDescription"
                     app:layout_constraintEnd_toStartOf="@id/allowDownloadValue"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -243,7 +243,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@string/allAddExpirationDateTitle"
-                    app:layout_constraintBottom_toTopOf="@+id/addExpirationDateDescription"
+                    app:layout_constraintBottom_toTopOf="@id/addExpirationDateDescription"
                     app:layout_constraintEnd_toStartOf="@id/addExpirationDateSwitch"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -324,7 +324,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@string/shareLinkSettingsBlockUsersConsultTitle"
-                    app:layout_constraintBottom_toTopOf="@+id/blockUsersConsultDescription"
+                    app:layout_constraintBottom_toTopOf="@id/blockUsersConsultDescription"
                     app:layout_constraintEnd_toStartOf="@id/blockUsersConsultValue"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -361,7 +361,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@string/shareLinkSettingsBlockCommentsTitle"
-                    app:layout_constraintBottom_toTopOf="@+id/blockCommentsDescription"
+                    app:layout_constraintBottom_toTopOf="@id/blockCommentsDescription"
                     app:layout_constraintEnd_toStartOf="@id/blockCommentsValue"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />

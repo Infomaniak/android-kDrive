@@ -197,49 +197,61 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) {
-        val folderId = FileController.getParentFile(currentFile.id)?.id
-        mainViewModel.duplicateFile(currentFile, folderId, result).observe(viewLifecycleOwner) { apiResponse ->
-            if (apiResponse.isSuccess()) {
-                apiResponse.data?.let {
-                    mainViewModel.refreshActivities.value = true
-                    transmitActionAndPopBack(getString(R.string.allFileDuplicate, currentFile.name))
+        if (isResumed) {
+            val folderId = FileController.getParentFile(currentFile.id)?.id
+            mainViewModel.duplicateFile(currentFile, folderId, result).observe(viewLifecycleOwner) { apiResponse ->
+                if (apiResponse.isSuccess()) {
+                    apiResponse.data?.let {
+                        mainViewModel.refreshActivities.value = true
+                        transmitActionAndPopBack(getString(R.string.allFileDuplicate, currentFile.name))
+                    }
+                } else {
+                    transmitActionAndPopBack(getString(R.string.errorDuplicate))
                 }
-            } else {
-                transmitActionAndPopBack(getString(R.string.errorDuplicate))
+                onApiResponse()
             }
+        } else {
             onApiResponse()
         }
     }
 
     override fun onRenameFile(newName: String, onApiResponse: () -> Unit) {
-        fileInfoActionsView.onRenameFile(mainViewModel, newName,
-            onSuccess = { action ->
-                mainViewModel.refreshActivities.value = true
-                transmitActionAndPopBack(
-                    getString(R.string.allFileRename, currentFile.name),
-                    action.setDriveAndReturn(currentFile.driveId)
-                )
-                onApiResponse()
-            }, onError = { translatedError ->
-                transmitActionAndPopBack(translatedError)
-                onApiResponse()
-            })
+        if (isResumed) {
+            fileInfoActionsView.onRenameFile(mainViewModel, newName,
+                onSuccess = { action ->
+                    mainViewModel.refreshActivities.value = true
+                    transmitActionAndPopBack(
+                        getString(R.string.allFileRename, currentFile.name),
+                        action.setDriveAndReturn(currentFile.driveId)
+                    )
+                    onApiResponse()
+                }, onError = { translatedError ->
+                    transmitActionAndPopBack(translatedError)
+                    onApiResponse()
+                })
+        } else {
+            onApiResponse()
+        }
     }
 
     override fun onDeleteFile(onApiResponse: () -> Unit) {
-        mainViewModel.deleteFile(currentFile, navigationArgs.userDrive).observe(viewLifecycleOwner) { apiResponse ->
-            onApiResponse()
-            if (apiResponse.isSuccess()) {
-                mainViewModel.refreshActivities.value = true
-                val title = resources.getQuantityString(
-                    R.plurals.snackbarMoveTrashConfirmation,
-                    1,
-                    currentFile.name
-                )
-                transmitActionAndPopBack(title, apiResponse.data?.setDriveAndReturn(currentFile.driveId))
-            } else {
-                transmitActionAndPopBack(getString(R.string.errorDelete))
+        if (isResumed) {
+            mainViewModel.deleteFile(currentFile, navigationArgs.userDrive).observe(viewLifecycleOwner) { apiResponse ->
+                onApiResponse()
+                if (apiResponse.isSuccess()) {
+                    mainViewModel.refreshActivities.value = true
+                    val title = resources.getQuantityString(
+                        R.plurals.snackbarMoveTrashConfirmation,
+                        1,
+                        currentFile.name
+                    )
+                    transmitActionAndPopBack(title, apiResponse.data?.setDriveAndReturn(currentFile.driveId))
+                } else {
+                    transmitActionAndPopBack(getString(R.string.errorDelete))
+                }
             }
+        } else {
+            onApiResponse()
         }
     }
 
@@ -260,14 +272,18 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun onLeaveShare(onApiResponse: () -> Unit) {
-        mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { apiResponse ->
-            onApiResponse()
-            if (apiResponse.isSuccess()) {
-                transmitActionAndPopBack(getString(R.string.snackbarLeaveShareConfirmation))
-                mainViewModel.refreshActivities.value = true
-            } else {
-                transmitActionAndPopBack(getString(R.string.anErrorHasOccurred))
+        if (isResumed) {
+            mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { apiResponse ->
+                onApiResponse()
+                if (apiResponse.isSuccess()) {
+                    transmitActionAndPopBack(getString(R.string.snackbarLeaveShareConfirmation))
+                    mainViewModel.refreshActivities.value = true
+                } else {
+                    transmitActionAndPopBack(getString(R.string.anErrorHasOccurred))
+                }
             }
+        } else {
+            onApiResponse()
         }
     }
 

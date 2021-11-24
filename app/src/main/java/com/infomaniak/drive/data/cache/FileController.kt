@@ -219,11 +219,11 @@ object FileController {
         moreTransaction: (() -> Unit)? = null
     ) {
         realm.executeTransaction {
-            oldFile?.let { file ->
-                newFile.isComplete = file.isComplete
-                newFile.children = file.children
-                newFile.responseAt = file.responseAt
-                newFile.isOffline = file.isOffline
+            if (oldFile?.isUsable() == true) {
+                newFile.isComplete = oldFile.isComplete
+                newFile.children = oldFile.children
+                newFile.responseAt = oldFile.responseAt
+                newFile.isOffline = oldFile.isOffline
             }
             moreTransaction?.invoke()
             it.insertOrUpdate(newFile)
@@ -561,13 +561,19 @@ object FileController {
         customRealm: Realm? = null,
         withChildren: Boolean = true
     ): Pair<File, ArrayList<File>>? {
+
+        fun hasDuplicatesFiles(query: RealmQuery<File>): Boolean {
+            return query.count() != query.distinct(File::id.name).count()
+        }
+
         val operation: (Realm) -> Pair<File, ArrayList<File>>? = { realm ->
             var result: Pair<File, ArrayList<File>>? = null
             val localFolder = getFileById(realm, parentId)
             val localFolderWithoutChildren = localFolder?.let { realm.copyFromRealm(it, 1) }
+            val hasDuplicatesFiles = localFolder?.children?.where()?.let(::hasDuplicatesFiles) ?: false
 
             if (
-                (ignoreCache || localFolder == null || localFolder.children.isNullOrEmpty() || !localFolder.isComplete)
+                (ignoreCache || localFolder == null || localFolder.children.isNullOrEmpty() || !localFolder.isComplete || hasDuplicatesFiles)
                 && !ignoreCloud
             ) {
                 result = downloadAndSaveFiles(

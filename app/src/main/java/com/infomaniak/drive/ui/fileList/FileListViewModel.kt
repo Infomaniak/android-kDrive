@@ -185,6 +185,7 @@ class FileListViewModel : ViewModel() {
         getFolderActivitiesJob = Job()
         return liveData(Dispatchers.IO + getFolderActivitiesJob) {
             mutex.withLock {
+                getFolderActivitiesJob.ensureActive()
                 val activities = FileController.getFolderActivities(folder, 1, userDrive)
                 if (activities.isNotEmpty()) emit(activities)
             }

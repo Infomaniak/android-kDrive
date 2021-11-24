@@ -49,7 +49,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/marginStandardSmall"
             app:layout_constrainedWidth="true"
-            app:layout_constraintBottom_toBottomOf="@+id/progressIndicator"
+            app:layout_constraintBottom_toBottomOf="@id/progressIndicator"
             app:layout_constraintEnd_toStartOf="@id/subtitle"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintHorizontal_chainStyle="packed"
@@ -64,8 +64,8 @@
             android:text="@string/notEnoughStorageUsed"
             android:textColor="@color/title"
             app:layout_constrainedWidth="true"
-            app:layout_constraintBottom_toBottomOf="@+id/title"
-            app:layout_constraintEnd_toStartOf="@+id/close"
+            app:layout_constraintBottom_toBottomOf="@id/title"
+            app:layout_constraintEnd_toStartOf="@id/close"
             app:layout_constraintStart_toEndOf="@id/title"
             app:layout_constraintTop_toTopOf="@id/title" />
 

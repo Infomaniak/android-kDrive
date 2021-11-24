@@ -75,7 +75,7 @@
                 android:layout_height="10dp"
                 android:src="@drawable/ic_clock"
                 app:layout_constraintBottom_toBottomOf="@id/commentDateValue"
-                app:layout_constraintStart_toStartOf="@+id/commentValue"
+                app:layout_constraintStart_toStartOf="@id/commentValue"
                 app:layout_constraintTop_toTopOf="@id/commentDateValue"
                 tools:ignore="ContentDescription" />
 

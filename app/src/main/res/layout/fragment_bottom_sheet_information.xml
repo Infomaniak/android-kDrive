@@ -88,7 +88,7 @@
         android:visibility="gone"
         app:layout_constraintEnd_toStartOf="@id/end"
         app:layout_constraintStart_toEndOf="@id/start"
-        app:layout_constraintTop_toBottomOf="@+id/description"
+        app:layout_constraintTop_toBottomOf="@id/description"
         tools:visibility="visible" />
 
     <TextView
@@ -99,9 +99,9 @@
         android:gravity="center"
         android:textSize="12sp"
         android:visibility="gone"
-        app:layout_constraintEnd_toStartOf="@+id/end"
-        app:layout_constraintStart_toStartOf="@+id/start"
-        app:layout_constraintTop_toBottomOf="@+id/urlDisplay"
+        app:layout_constraintEnd_toStartOf="@id/end"
+        app:layout_constraintStart_toStartOf="@id/start"
+        app:layout_constraintTop_toBottomOf="@id/urlDisplay"
         tools:text="@string/allPackAvailability"
         tools:visibility="visible" />
 
@@ -117,7 +117,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/actionButton"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/packAvailability" />
+        app:layout_constraintTop_toBottomOf="@id/packAvailability" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/actionButton"
@@ -129,7 +129,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/secondaryActionButton"
-        app:layout_constraintTop_toBottomOf="@+id/packAvailability"
+        app:layout_constraintTop_toBottomOf="@id/packAvailability"
         app:layout_goneMarginStart="@dimen/marginStandardMedium"
         tools:text="@string/buttonConfirmNotify" />
 

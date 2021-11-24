@@ -48,7 +48,7 @@
             android:layout_marginStart="@dimen/marginStandardSmall"
             android:text="@string/allNoNetwork"
             app:layout_constrainedWidth="true"
-            app:layout_constraintBottom_toBottomOf="@+id/icon"
+            app:layout_constraintBottom_toBottomOf="@id/icon"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toEndOf="@id/icon"
