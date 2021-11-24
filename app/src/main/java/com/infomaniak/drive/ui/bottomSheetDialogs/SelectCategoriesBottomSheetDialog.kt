@@ -56,6 +56,7 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
     private val navigationArgs: SelectCategoriesBottomSheetDialogArgs by navArgs()
 
     private val selectCategoriesViewModel: SelectCategoriesViewModel by viewModels()
+
     private lateinit var adapter: CategoriesAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
@@ -71,12 +72,24 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
             )
         }
 
+        val file = FileController.getFileById(navigationArgs.fileId)
+        if (file == null) {
+            Utils.showSnackbar(requireView(), R.string.anErrorHasOccurred)
+            findNavController().popBackStack()
+            return
+        }
+
         val categoryRights = DriveInfosController.getCategoryRights()
 
         toolbar.menu.findItem(R.id.addCategory).isVisible = categoryRights?.canCreateCategory == true
         toolbar.setOnMenuItemClickListener { menuItem ->
             if (menuItem.itemId == R.id.addCategory) {
-                safeNavigate(SelectCategoriesBottomSheetDialogDirections.actionSelectCategoriesBottomSheetDialogToCreateCategoryBottomSheetDialog())
+                safeNavigate(
+                    SelectCategoriesBottomSheetDialogDirections.actionSelectCategoriesBottomSheetDialogToCreateCategoryBottomSheetDialog(
+                        fileId = file.id,
+                        driveId = file.driveId
+                    )
+                )
                 true
             } else
                 false
@@ -90,38 +103,22 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
             } else false
         }
 
-        val file = FileController.getFileById(navigationArgs.fileId)
-        if (file == null) {
-            Utils.showSnackbar(requireView(), R.string.anErrorHasOccurred)
-            findNavController().popBackStack()
-            return
-        }
-
         getBackNavigationResult<Bundle>(CreateCategoryBottomSheetDialog.CREATE_CATEGORY_NAV_KEY) { bundle ->
 
             val categoryId = bundle.getInt(CreateCategoryBottomSheetDialog.CATEGORY_ID_BUNDLE_KEY)
+            val oldIds = adapter.categories.filter { it.isSelected }.map { it.id }
 
-            selectCategoriesViewModel.addCategory(file, categoryId).observe(viewLifecycleOwner) { apiResponse ->
-                if (apiResponse.isSuccess()) {
+            val ids = mutableListOf<Int>()
+            ids.addAll(oldIds)
+            ids.add(categoryId)
 
-                    val oldIds = adapter.categories.filter { it.isSelected }.map { it.id }
-
-                    val ids = mutableListOf<Int>()
-                    ids.addAll(oldIds)
-                    ids.add(categoryId)
-
-                    updateUI(ids.toTypedArray())
-
-                } else {
-                    Utils.showSnackbar(requireView(), apiResponse.translateError())
-                }
-            }
+            updateUI(ids.toTypedArray())
         }
 
         adapter = CategoriesAdapter(onCategoryChanged = { categoryId, isSelected, position ->
 
             val requestLiveData = with(selectCategoriesViewModel) {
-                if (isSelected) addCategory(file, categoryId)
+                if (isSelected) addCategory(file.id, file.driveId, categoryId)
                 else removeCategory(file, categoryId)
             }
 
@@ -171,12 +168,12 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     internal class SelectCategoriesViewModel : ViewModel() {
 
-        fun addCategory(file: File, categoryId: Int): LiveData<ApiResponse<Unit>> = liveData(Dispatchers.IO) {
+        fun addCategory(fileId: Int, driveId: Int, categoryId: Int): LiveData<ApiResponse<Unit>> = liveData(Dispatchers.IO) {
 
-            val apiResponse = ApiRepository.addCategory(file, mapOf("id" to categoryId))
+            val apiResponse = ApiRepository.addCategory(fileId, driveId, mapOf("id" to categoryId))
 
             if (apiResponse.isSuccess()) {
-                FileController.updateFile(file.id) { localFile ->
+                FileController.updateFile(fileId) { localFile ->
                     localFile.categories.add(
                         FileCategory(
                             id = categoryId,

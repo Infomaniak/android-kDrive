@@ -33,21 +33,30 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.drive.Category
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.dpToPx
+import com.infomaniak.drive.utils.setBackNavigationResult
+import com.infomaniak.drive.utils.setMargin
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.utils.hideProgress
+import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.android.synthetic.main.fragment_create_category.*
 import kotlinx.android.synthetic.main.view_shapeable_image.view.*
 import kotlinx.coroutines.Dispatchers
 
 class CreateCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
 
+    private val navigationArgs: CreateCategoryBottomSheetDialogArgs by navArgs()
+
     private val createCategoryViewModel: CreateCategoryViewModel by viewModels()
+    private val selectCategoriesViewModel: SelectCategoriesBottomSheetDialog.SelectCategoriesViewModel by viewModels()
 
     private val colorLayouts = mutableListOf<ConstraintLayout>()
     private var selected: Int = -1
@@ -62,21 +71,38 @@ class CreateCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
         saveButton.setOnClickListener {
+            saveButton.showProgress()
 
-            val driveId = AccountUtils.currentDriveId
             val name = categoryName.text.toString()
             val color = CATEGORY_COLORS[selected]
 
-            createCategoryViewModel.createCategory(driveId, name, color).observe(viewLifecycleOwner) { apiResponse ->
-                if (apiResponse.isSuccess()) {
-                    setBackNavigationResult(
-                        CREATE_CATEGORY_NAV_KEY,
-                        bundleOf(CATEGORY_ID_BUNDLE_KEY to apiResponse.data?.id)
-                    )
-                } else {
-                    Utils.showSnackbar(requireView(), apiResponse.translateError())
+            createCategoryViewModel.createCategory(navigationArgs.driveId, name, color)
+                .observe(viewLifecycleOwner) { createCategoryApiResponse ->
+
+                    if (createCategoryApiResponse.isSuccess()) {
+
+                        val categoryId = createCategoryApiResponse.data?.id ?: -1
+
+                        selectCategoriesViewModel.addCategory(navigationArgs.fileId, navigationArgs.driveId, categoryId)
+                            .observe(viewLifecycleOwner) { addCategoryApiResponse ->
+
+                                if (addCategoryApiResponse.isSuccess()) {
+                                    setBackNavigationResult(
+                                        CREATE_CATEGORY_NAV_KEY,
+                                        bundleOf(CATEGORY_ID_BUNDLE_KEY to categoryId)
+                                    )
+
+                                } else {
+                                    saveButton.hideProgress(R.string.buttonSave)
+                                    Utils.showSnackbar(requireView(), addCategoryApiResponse.translateError())
+                                }
+                            }
+
+                    } else {
+                        saveButton.hideProgress(R.string.buttonSave)
+                        Utils.showSnackbar(requireView(), createCategoryApiResponse.translateError())
+                    }
                 }
-            }
         }
 
         categoryName.addTextChangedListener { saveButton.isEnabled = it.toString().isNotEmpty() }
