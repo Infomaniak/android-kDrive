@@ -90,7 +90,13 @@ class MainActivity : BaseActivity() {
         downloadReceiver = DownloadReceiver(mainViewModel)
 
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
-        val navController = navHostFragment.navController
+
+        val navController = navHostFragment.navController.apply {
+            if (currentDestination == null) {
+                navigate(graph.startDestinationId)
+            }
+        }
+
         bottomNavigation.setupWithNavController(navController)
         bottomNavigation.itemIconTintList = ContextCompat.getColorStateList(this, R.color.item_icon_tint_bottom)
         bottomNavigation.selectedItemId = UISettings(this).bottomNavigationSelectedItem
