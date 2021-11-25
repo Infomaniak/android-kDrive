@@ -106,6 +106,10 @@ class HomeActivitiesFragment : Fragment() {
     fun getLastActivities(driveId: Int, forceDownload: Boolean = false) {
         (homeTabsRecyclerView?.adapter as? LastActivitiesAdapter)?.apply {
             if (forceDownload) {
+                homeViewModel.apply {
+                    lastActivityPage = 1
+                    lastActivityLastPage = 1
+                }
                 clean()
             }
             showLoading()

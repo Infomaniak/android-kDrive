@@ -26,7 +26,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.navGraphViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.AppBarLayout
 import com.infomaniak.drive.R
@@ -47,7 +47,6 @@ import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.android.synthetic.main.item_search_view.*
 
 class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
-    private val homeViewModel: HomeViewModel by navGraphViewModels(R.id.homeFragment)
     private val mainViewModel: MainViewModel by activityViewModels()
     private var mustRefreshUi: Boolean = false
 
@@ -99,13 +98,15 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         val tabsHome = arrayListOf(
-            TabViewPagerUtils.FragmentTab(0, HomeActivitiesFragment(), R.id.homeActivitiesButton),
-            TabViewPagerUtils.FragmentTab(1, HomeOfflineFragment(), R.id.homeOfflineButton),
-            TabViewPagerUtils.FragmentTab(2, PicturesFragment(), R.id.homePicturesButton)
+            TabViewPagerUtils.FragmentTab(HomeActivitiesFragment(), R.id.homeActivitiesButton),
+            TabViewPagerUtils.FragmentTab(HomeOfflineFragment(), R.id.homeOfflineButton),
+            TabViewPagerUtils.FragmentTab(PicturesFragment(), R.id.homePicturesButton)
         )
 
-        setup(homeViewPager, tabsHomeGroup, tabsHome) { UISettings(requireContext()).lastHomeSelectedTab = it }
-        homeViewPager.currentItem = UISettings(requireContext()).lastHomeSelectedTab
+        lifecycleScope.launchWhenResumed {
+            setup(homeViewPager, tabsHomeGroup, tabsHome) { UISettings(requireContext()).lastHomeSelectedTab = it }
+            homeViewPager.currentItem = UISettings(requireContext()).lastHomeSelectedTab
+        }
     }
 
     override fun onResume() {
@@ -121,10 +122,8 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun updateUi(forceDownload: Boolean = false) {
         AccountUtils.getCurrentDrive()?.let { currentDrive ->
             val downloadRequired = forceDownload || mustRefreshUi
-            if (downloadRequired) resetAndScrollToTop()
-
-            (homeViewPager.getFragment(0) as HomeActivitiesFragment).getLastActivities(currentDrive.id, downloadRequired)
-            (homeViewPager.getFragment(2) as PicturesFragment).reloadPictures()
+            (homeViewPager.getFragment(0) as? HomeActivitiesFragment)?.getLastActivities(currentDrive.id, downloadRequired)
+            (homeViewPager.getFragment(2) as? PicturesFragment)?.reloadPictures()
 
             setDriveHeader(currentDrive)
             notEnoughStorage.setup(currentDrive)
@@ -134,14 +133,6 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun setDriveHeader(currentDrive: Drive) {
         switchDriveButton.text = currentDrive.name
-    }
-
-    private fun resetAndScrollToTop() {
-        homeViewModel.apply {
-            lastActivityPage = 1
-            lastActivityLastPage = 1
-        }
-        homeCoordinator.scrollTo(0, 0)
     }
 
     override fun onRefresh() {

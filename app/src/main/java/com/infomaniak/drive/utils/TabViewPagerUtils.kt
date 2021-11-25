@@ -46,14 +46,14 @@ object TabViewPagerUtils {
 
         tabsGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
-                val position = (tabsViewPager.adapter as ViewPagerAdapter).tabs.find { it.button == checkedId }!!.position
+                val position = (tabsViewPager.adapter as ViewPagerAdapter).tabs.indexOfFirst { it.button == checkedId }
                 tabsViewPager.setCurrentItem(position, true)
                 onCheckedButton?.invoke(position)
             }
         }
     }
 
-    fun ViewPager2.getFragment(position: Int): Fragment = (adapter as ViewPagerAdapter).tabs[position].fragment
+    fun ViewPager2.getFragment(position: Int): Fragment? = (adapter as? ViewPagerAdapter)?.tabs?.getOrNull(position)?.fragment
 
     private class ViewPagerAdapter(
         manager: FragmentManager,
@@ -69,7 +69,6 @@ object TabViewPagerUtils {
     }
 
     data class FragmentTab(
-        val position: Int,
         val fragment: Fragment,
         @IdRes val button: Int
     )

@@ -102,13 +102,13 @@ class FileDetailsFragment : FileDetailsSubFragment() {
     private fun setupTabLayout(isFolder: Boolean) {
         if (tabsViewPager.adapter == null) {
             val tabs = arrayListOf(
-                TabViewPagerUtils.FragmentTab(0, FileDetailsInfosFragment(), R.id.fileInfo),
-                TabViewPagerUtils.FragmentTab(1, FileDetailsActivitiesFragment(), R.id.fileActivities),
+                TabViewPagerUtils.FragmentTab(FileDetailsInfosFragment(), R.id.fileInfo),
+                TabViewPagerUtils.FragmentTab(FileDetailsActivitiesFragment(), R.id.fileActivities),
             )
 
             if (!isFolder) {
                 fileComments.isVisible = true
-                tabs.add(TabViewPagerUtils.FragmentTab(2, FileDetailsCommentsFragment(), R.id.fileComments))
+                tabs.add(TabViewPagerUtils.FragmentTab(FileDetailsCommentsFragment(), R.id.fileComments))
             }
 
             setup(tabsViewPager, tabsGroup, tabs)
