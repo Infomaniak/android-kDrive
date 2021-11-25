@@ -61,6 +61,15 @@ class UISettings(val context: Context) {
             }
         }
 
+    var lastHomeSelectedTab: Int
+        get() = getUISettings().getInt("lastHomeSelectedTab", 0)
+        set(value) {
+            with(getUISettings().edit()) {
+                putInt("lastHomeSelectedTab", value)
+                apply()
+            }
+        }
+
     var listMode: Boolean
         get() = getUISettings().getBoolean("listMode", true)
         set(value) {

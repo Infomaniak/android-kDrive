@@ -823,6 +823,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     }
 
                     fileAdapter.isComplete = result.isComplete
+                    fileAdapter.hideLoading()
                     refreshActivities()
 
                 } ?: run {

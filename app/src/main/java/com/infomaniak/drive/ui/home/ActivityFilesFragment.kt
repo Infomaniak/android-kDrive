@@ -30,8 +30,6 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.drive.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_file_list.*
-import kotlinx.android.synthetic.main.fragment_pictures.collapsingToolbarLayout
-import kotlinx.android.synthetic.main.fragment_pictures.swipeRefreshLayout
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

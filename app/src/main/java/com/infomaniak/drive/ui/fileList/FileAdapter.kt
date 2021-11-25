@@ -31,8 +31,8 @@ import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.utils.setupFileProgress
-import com.infomaniak.drive.views.PaginationAdapter.Companion.VIEW_TYPE_LOADING
-import com.infomaniak.drive.views.PaginationAdapter.Companion.createLoadingViewHolder
+import com.infomaniak.lib.core.views.LoaderAdapter.Companion.VIEW_TYPE_LOADING
+import com.infomaniak.lib.core.views.LoaderAdapter.Companion.createLoadingViewHolder
 import com.infomaniak.lib.core.views.ViewHolder
 import io.realm.OrderedRealmCollection
 import io.realm.Realm
@@ -64,8 +64,8 @@ open class FileAdapter(
     var pendingWifiConnection: Boolean = false
     var uploadInProgress: Boolean = false
 
-    var isComplete = false
     private var showLoading = false
+    var isComplete = false
 
     private fun getFile(position: Int) = fileList[position]
 
@@ -115,6 +115,13 @@ open class FileAdapter(
         notifyItemRangeInserted(beforeItemCount, newItemList.count())
     }
 
+    fun hideLoading() {
+        if (showLoading) {
+            showLoading = false
+            notifyItemRemoved(itemCount)
+        }
+    }
+
     fun addAt(position: Int, newFile: File) {
         fileList.add(position, newFile)
         notifyItemInserted(position)
@@ -145,11 +152,6 @@ open class FileAdapter(
         return if (realm != null && fileList.isManaged) ArrayList(realm.copyFromRealm(fileList, 1)) else ArrayList(fileList)
     }
 
-    private fun hideLoading() {
-        showLoading = false
-        notifyItemRemoved(itemCount)
-    }
-
     fun deleteByFileId(fileId: Int) {
         if (!fileList.isManaged) {
             val position = indexOf(fileId)
@@ -157,7 +159,7 @@ open class FileAdapter(
         }
     }
 
-    fun indexOf(fileId: Int) = fileList.indexOfFirst { it.id == fileId }
+    private fun indexOf(fileId: Int) = fileList.indexOfFirst { it.id == fileId }
     fun indexOf(fileName: String) = fileList.indexOfFirst { it.name == fileName }
 
     fun notifyFileChanged(fileId: Int, onChange: ((file: File) -> Unit)? = null) {

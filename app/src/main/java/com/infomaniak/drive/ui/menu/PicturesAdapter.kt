@@ -23,17 +23,17 @@ import android.view.ViewGroup
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.loadGlideUrl
-import com.infomaniak.drive.views.PaginationAdapter
 import com.infomaniak.lib.core.utils.format
+import com.infomaniak.lib.core.views.LoaderAdapter
+import com.infomaniak.lib.core.views.LoaderCardView
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_picture.view.*
 import kotlinx.android.synthetic.main.title_recycler_section.view.*
 import java.util.*
 
 class PicturesAdapter(
-    override var itemList: ArrayList<Any> = arrayListOf(),
     private val onItemClick: (file: File) -> Unit
-) : PaginationAdapter<Any>() {
+) : LoaderAdapter<Any>() {
 
     private var lastSectionTitle: String = ""
     var pictureList: ArrayList<File> = arrayListOf()
@@ -58,19 +58,15 @@ class PicturesAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (itemList[position] is File) {
-            DisplayType.PICTURE.layout
-        } else {
-            DisplayType.TITLE.layout
+        return when {
+            super.getItemViewType(position) == VIEW_TYPE_LOADING -> DisplayType.PICTURE.layout
+            itemList[position] is File -> DisplayType.PICTURE.layout
+            else -> DisplayType.TITLE.layout
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(parent.context).inflate(viewType, parent, false))
-    }
-
-    override fun getItemCount(): Int {
-        return itemList.size
     }
 
     fun clearPictures() {
@@ -80,17 +76,18 @@ class PicturesAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = itemList[position]
-        when (getItemViewType(position)) {
-            DisplayType.TITLE.layout -> {
-                holder.itemView.apply {
-                    title.text = (item as String)
-                }
+        when {
+            super.getItemViewType(position) == VIEW_TYPE_LOADING -> {
+                (holder.itemView as LoaderCardView).startLoading()
             }
-            DisplayType.PICTURE.layout -> {
-                val file = (item as File)
+            getItemViewType(position) == DisplayType.TITLE.layout -> {
+                holder.itemView.title.text = (itemList[position] as String)
+            }
+            getItemViewType(position) == DisplayType.PICTURE.layout -> {
+                val file = (itemList[position] as File)
 
-                holder.itemView.apply {
+                (holder.itemView as LoaderCardView).apply {
+                    stopLoading()
                     picture.loadGlideUrl(file.thumbnail())
                     picture.contentDescription = file.name
 
@@ -104,6 +101,6 @@ class PicturesAdapter(
 
     enum class DisplayType(val layout: Int) {
         TITLE(R.layout.title_recycler_section),
-        PICTURE(R.layout.cardview_square_picture)
+        PICTURE(R.layout.cardview_picture)
     }
 }

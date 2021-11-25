@@ -305,6 +305,10 @@
         <item name="backgroundTint">@color/tabs_background</item>
     </style>
 
+    <style name="ButtonToggleGroupAlternative" parent="ButtonToggleGroup">
+        <item name="backgroundTint">@color/tabs_background_alternative</item>
+    </style>
+
     <!--Snackbar-->
 
     <style name="Widget.App.Snackbar" parent="Widget.MaterialComponents.Snackbar">

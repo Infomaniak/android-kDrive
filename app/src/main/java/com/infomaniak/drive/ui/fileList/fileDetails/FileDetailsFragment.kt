@@ -25,13 +25,13 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.viewpager2.widget.ViewPager2
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.utils.TabViewPagerUtils
+import com.infomaniak.drive.utils.TabViewPagerUtils.setup
 import com.infomaniak.drive.utils.loadGlide
 import com.infomaniak.drive.utils.loadGlideUrl
 import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior
@@ -102,46 +102,18 @@ class FileDetailsFragment : FileDetailsSubFragment() {
     private fun setupTabLayout(isFolder: Boolean) {
         if (tabsViewPager.adapter == null) {
             val tabs = arrayListOf(
-                FileDetailsTab(0, FileDetailsInfosFragment(), R.string.fileDetailsInfosTitle, R.id.fileInfo),
-                FileDetailsTab(1, FileDetailsActivitiesFragment(), R.string.fileDetailsActivitiesTitle, R.id.fileActivities),
+                TabViewPagerUtils.FragmentTab(FileDetailsInfosFragment(), R.id.fileInfo),
+                TabViewPagerUtils.FragmentTab(FileDetailsActivitiesFragment(), R.id.fileActivities),
             )
 
             if (!isFolder) {
                 fileComments.isVisible = true
-                tabs.add(
-                    FileDetailsTab(
-                        position = 2,
-                        fragment = FileDetailsCommentsFragment(),
-                        title = R.string.fileDetailsCommentsTitle,
-                        button = R.id.fileComments
-                    )
-                )
+                tabs.add(TabViewPagerUtils.FragmentTab(FileDetailsCommentsFragment(), R.id.fileComments))
             }
 
-            tabsViewPager.apply {
-                adapter = FileDetailsPagerAdapter(childFragmentManager, lifecycle, tabs)
-                registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                    override fun onPageSelected(position: Int) {
-                        super.onPageSelected(position)
-                        tabsGroup.check(tabs[position].button)
-                    }
-                })
-            }
-
-            tabsGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
-                if (isChecked) {
-                    tabsViewPager.setCurrentItem(tabs.find { it.button == checkedId }!!.position, true)
-                }
-            }
+            setup(tabsViewPager, tabsGroup, tabs)
         }
     }
-
-    data class FileDetailsTab(
-        val position: Int,
-        val fragment: Fragment,
-        val title: Int,
-        val button: Int
-    )
 
     override fun onPause() {
         super.onPause()

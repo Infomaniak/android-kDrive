@@ -23,7 +23,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileActivity
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.ApiResponse.Status.SUCCESS
@@ -34,54 +33,13 @@ import kotlin.collections.ArrayList
 
 class HomeViewModel : ViewModel() {
     private var lastActivityJob = Job()
-    private var lastModifiedJob = Job()
 
     var lastActivityPage = 1
-    var lastPicturesPage = 1
 
     var lastActivityLastPage = 1
     private var lastActivitiesTime: Long = 0
     private var lastActivities = arrayListOf<FileActivity>()
     private var lastMergedActivities = arrayListOf<FileActivity>()
-
-    var lastPicturesLastPage = 1
-    private var lastPicturesTime: Long = 0
-    private var lastPictures = arrayListOf<File>()
-
-    fun getLastPictures(driveId: Int, forceDownload: Boolean = false): LiveData<ApiResponse<ArrayList<File>>?> {
-        lastActivityJob.cancel()
-        lastActivityJob = Job()
-
-        return liveData(Dispatchers.IO + lastActivityJob) {
-            val isFirstPage = lastPicturesPage == 1 || forceDownload
-            if (lastPicturesTime != 0L && Date().time - lastPicturesTime < DOWNLOAD_INTERVAL && isFirstPage && !forceDownload) {
-                lastPicturesPage = lastPicturesLastPage
-                emit(ApiResponse(SUCCESS, lastPictures, null, 1, 1))
-                return@liveData
-            }
-
-            val apiResponse = ApiRepository.getLastPictures(driveId, lastPicturesPage)
-            lastPicturesTime = Date().time
-
-            if (apiResponse.isSuccess()) {
-                if (isFirstPage) {
-                    FileController.removeOrphanFiles()
-                    lastPictures = arrayListOf()
-                }
-
-                if (apiResponse.data?.isNullOrEmpty() == true) emit(null)
-                else {
-                    apiResponse.data?.let {
-                        FileController.storeDriveSoloPictures(it, isFirstPage)
-                        lastPictures.addAll(it)
-                    }
-                    emit(apiResponse)
-                }
-            } else {
-                emit(ApiResponse(SUCCESS, FileController.getDriveSoloPictures(), null, 1, 1))
-            }
-        }
-    }
 
     fun getLastActivities(
         driveId: Int,
@@ -171,16 +129,8 @@ class HomeViewModel : ViewModel() {
                 previousActivity.fileId == currentActivity.fileId
     }
 
-    fun clearDownloadTimes() {
-        lastActivityJob.cancel()
-        lastModifiedJob.cancel()
-        lastPicturesTime = 0
-        lastActivitiesTime = 0
-    }
-
     override fun onCleared() {
         lastActivityJob.cancel()
-        lastModifiedJob.cancel()
         super.onCleared()
     }
 

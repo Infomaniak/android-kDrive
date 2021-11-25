@@ -27,7 +27,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.FileActivity
 import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.drive.utils.loadGlide
-import com.infomaniak.drive.views.PaginationAdapter
+import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_file_activity.view.*
 import java.text.SimpleDateFormat
@@ -35,8 +35,7 @@ import java.util.*
 
 class FileActivitiesAdapter(
     val isFolder: Boolean,
-    override val itemList: ArrayList<FileActivity> = arrayListOf()
-) : PaginationAdapter<FileActivity>() {
+) : LoaderAdapter<FileActivity>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_file_activity, parent, false))
