@@ -62,7 +62,7 @@ class PicturesFragment(
             initialListView = picturesRecyclerView
         )
 
-        picturesAdapter.numberItemLoader = 12
+        picturesAdapter.numberItemLoader = numberItemLoader
         picturesAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT
 
         val numPicturesColumns = getNumPicturesColumns()
@@ -116,5 +116,9 @@ class PicturesFragment(
     private fun getNumPicturesColumns(minColumns: Int = 2, maxColumns: Int = 5, expectedItemSize: Int = 300): Int {
         val screenWidth = requireActivity().getScreenSizeInDp().x
         return min(max(minColumns, screenWidth / expectedItemSize.toDp()), maxColumns)
+    }
+
+    companion object {
+        private const val numberItemLoader = 12
     }
 }
