@@ -112,6 +112,18 @@
                       </LayoutPositions>
                     </value>
                   </entry>
+                  <entry key="categoriesInformationBottomSheetDialog">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="12" />
+                            <option name="y" value="12" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
                   <entry key="categoryInfoActionsBottomSheetDialog">
                     <value>
                       <LayoutPositions>
@@ -123,32 +135,7 @@
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_fileInfoActionsBottomSheetDialog_to_convertToDropBoxFragment">
-                              <value>
-                                <LayoutPositions />
-                              </value>
-                            </entry>
-                            <entry key="action_fileInfoActionsBottomSheetDialog_to_downloadProgressDialog">
-                              <value>
-                                <LayoutPositions />
-                              </value>
-                            </entry>
-                            <entry key="action_fileInfoActionsBottomSheetDialog_to_fileDetailsFragment">
-                              <value>
-                                <LayoutPositions />
-                              </value>
-                            </entry>
-                            <entry key="action_fileInfoActionsBottomSheetDialog_to_fileShareDetailsFragment">
-                              <value>
-                                <LayoutPositions />
-                              </value>
-                            </entry>
-                            <entry key="action_fileInfoActionsBottomSheetDialog_to_manageDropboxFragment">
-                              <value>
-                                <LayoutPositions />
-                              </value>
-                            </entry>
-                            <entry key="action_fileInfoActionsBottomSheetDialog_to_selectCategoriesBottomSheetDialog">
+                            <entry key="action_CategoryInfoActionsBottomSheetDialog_to_CreateOrEditCategoryBottomSheetDialog">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -165,18 +152,6 @@
                           <Point>
                             <option name="x" value="4190" />
                             <option name="y" value="3616" />
-                          </Point>
-                        </option>
-                      </LayoutPositions>
-                    </value>
-                  </entry>
-                  <entry key="createCategoryBottomSheetDialog">
-                    <value>
-                      <LayoutPositions>
-                        <option name="myPosition">
-                          <Point>
-                            <option name="x" value="12" />
-                            <option name="y" value="12" />
                           </Point>
                         </option>
                       </LayoutPositions>
@@ -225,6 +200,18 @@
                               </value>
                             </entry>
                           </map>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
+                  <entry key="createOrEditCategoryBottomSheetDialog">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="12" />
+                            <option name="y" value="12" />
+                          </Point>
                         </option>
                       </LayoutPositions>
                     </value>
@@ -613,6 +600,11 @@
                         </option>
                         <option name="myPositions">
                           <map>
+                            <entry key="action_menuFragment_to_menuPicturesFragment">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
                             <entry key="action_menuFragment_to_mySharesFragment">
                               <value>
                                 <LayoutPositions />
@@ -658,8 +650,8 @@
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="3702" />
-                            <option name="y" value="1080" />
+                            <option name="x" value="12" />
+                            <option name="y" value="12" />
                           </Point>
                         </option>
                       </LayoutPositions>
@@ -880,7 +872,7 @@
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_SelectCategoriesBottomSheetDialog_to_CreateCategoryBottomSheetDialog">
+                            <entry key="action_SelectCategoriesBottomSheetDialog_to_CreateOrEditCategoryBottomSheetDialog">
                               <value>
                                 <LayoutPositions />
                               </value>
