@@ -28,7 +28,7 @@ object ApiRoutes {
     private const val with = "with=children,rights,collaborative_folder,favorite,mobile,share_link,categories"
 
     private fun fileURL(file: File) = "${DRIVE_API}${file.driveId}/file/${file.id}"
-    private fun fileURL(fileId: Int, driveId: Int) = "${DRIVE_API}$driveId/file/$fileId"
+    private fun fileURL(fileId: Int, driveId: Int) = "${DRIVE_API}${driveId}/file/${fileId}"
 
     private fun trashURL(file: File) = "${DRIVE_API}${file.driveId}/file/trash/${file.id}"
 

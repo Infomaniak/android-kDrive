@@ -32,6 +32,8 @@ open class AppSettings(
     var _currentUserId: Int = -1,
     var _migrated: Boolean = false,
     var _onlyWifiSync: Boolean = false,
+    var _hasDisplayedSyncDialog: Boolean = false,
+    var _hasDisplayedCategoriesInformationDialog: Boolean = false,
 ) : RealmObject() {
 
     companion object {
@@ -102,6 +104,22 @@ open class AppSettings(
                 field = value
                 GlobalScope.launch(Dispatchers.IO) {
                     updateAppSettings { appSettings -> appSettings._onlyWifiSync = value }
+                }
+            }
+
+        var hasDisplayedSyncDialog: Boolean = getAppSettings()._hasDisplayedSyncDialog
+            set(value) {
+                field = value
+                GlobalScope.launch(Dispatchers.IO) {
+                    updateAppSettings { appSettings -> appSettings._hasDisplayedSyncDialog = value }
+                }
+            }
+
+        var hasDisplayedCategoriesInformationDialog: Boolean = getAppSettings()._hasDisplayedCategoriesInformationDialog
+            set(value) {
+                field = value
+                GlobalScope.launch(Dispatchers.IO) {
+                    updateAppSettings { appSettings -> appSettings._hasDisplayedCategoriesInformationDialog = value }
                 }
             }
     }
