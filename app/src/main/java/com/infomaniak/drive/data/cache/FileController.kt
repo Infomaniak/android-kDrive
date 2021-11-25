@@ -695,6 +695,7 @@ object FileController {
                     getSortQueryByOrder(it)
                     if (withVisibilitySort) sort(File::visibility.name, Sort.DESCENDING)
                     sort(File::type.name, Sort.ASCENDING)
+                    distinct(File::id.name)
                 }
             }?.findAll()
     }
