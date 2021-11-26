@@ -19,10 +19,10 @@ package com.infomaniak.drive.data.models.drive
 
 import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
-import io.realm.annotations.PrimaryKey
+import io.realm.annotations.RealmClass
 
+@RealmClass(embedded = true)
 open class DrivePackFunctionality(
-    @PrimaryKey var driveId: Int = -1,
     @SerializedName("can_set_sharelink_expiration")
     var canSetSharelinkExpiration: Boolean = false,
     @SerializedName("can_set_sharelink_password")
@@ -36,5 +36,5 @@ open class DrivePackFunctionality(
     @SerializedName("versions_kept_for_days")
     var versionsKeptForDays: Long = 0,
     var dropbox: Boolean = false,
-    var versioning: Boolean = false
+    var versioning: Boolean = false,
 ) : RealmObject()

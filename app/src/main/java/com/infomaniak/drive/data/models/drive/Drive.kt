@@ -85,13 +85,6 @@ open class Drive(
     val teams: DriveTeamsCategories
         get() = _teams ?: DriveTeamsCategories()
 
-    fun initIds() {
-        _packFunctionality?.let { it.driveId = id }
-        _preferences?.let { it.driveId = id }
-        _users?.let { it.driveId = id }
-        _teams?.let { it.driveId = id }
-    }
-
     fun convertToFile(rootName: String? = null): File {
         return File(
             id = if (rootName == null) id else Utils.ROOT_ID,

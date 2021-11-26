@@ -29,10 +29,7 @@ object DriveDeserializer : JsonDeserializer<Drive> {
         .registerTypeAdapter(Date::class.java, CustomDateTypeAdapter())
         .create()
 
-    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): Drive {
-        val drive = gson.fromJson(json, Drive::class.java)
-        drive.initIds()
-        return drive
-    }
+    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): Drive =
+        gson.fromJson(json, Drive::class.java)
 
 }

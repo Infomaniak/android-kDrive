@@ -213,11 +213,7 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
 
                 if (apiResponse.isSuccess()) {
                     DriveInfosController.updateDrive { localDrive ->
-                        localDrive.categories.add(
-                            apiResponse.data?.apply {
-                                objectId = "${driveId}_$id"
-                            }
-                        )
+                        localDrive.categories.add(apiResponse.data)
                     }
                 }
 
@@ -237,11 +233,7 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
                         localDrive.categories.remove(category)
 
                         // Add new Category
-                        localDrive.categories.add(
-                            apiResponse.data?.apply {
-                                objectId = "${driveId}_$id"
-                            }
-                        )
+                        localDrive.categories.add(apiResponse.data)
 
                     }
                 }

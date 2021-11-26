@@ -18,10 +18,10 @@
 package com.infomaniak.drive.data.models.drive
 
 import io.realm.RealmObject
-import io.realm.annotations.PrimaryKey
+import io.realm.annotations.RealmClass
 
+@RealmClass(embedded = true)
 open class DrivePreferences(
-    @PrimaryKey var driveId: Int = -1,
     var color: String = "#0098FF",
-    var hide: Boolean = false
+    var hide: Boolean = false,
 ) : RealmObject()
