@@ -49,7 +49,6 @@ object DriveInfosController {
         drive.objectId = "${drive.id}_$userId"
         drive.userId = userId
         drive.sharedWithMe = sharedWithMe
-        drive.categories.forEach { it.objectId = "${drive.id}_${it.id}" }
         add(drive)
     }
 

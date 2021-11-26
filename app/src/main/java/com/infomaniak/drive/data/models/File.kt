@@ -203,13 +203,6 @@ open class File(
         return if (extension == name) null else ".$extension"
     }
 
-    fun initRightIds() {
-        rights?.let { it.fileId = id }
-        children.forEach {
-            it.initRightIds()
-        }
-    }
-
     fun isPendingUploadFolder() = isFromUploads && (isFolder() || isDrive())
 
     fun isObsolete(dataFile: java.io.File): Boolean {

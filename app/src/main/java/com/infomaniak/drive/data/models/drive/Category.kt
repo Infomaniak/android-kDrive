@@ -19,11 +19,11 @@ package com.infomaniak.drive.data.models.drive
 
 import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
-import io.realm.annotations.PrimaryKey
+import io.realm.annotations.RealmClass
 import java.util.*
 
+@RealmClass(embedded = true)
 open class Category(
-    @PrimaryKey var objectId: String = "",
     var id: Int = -1,
     var color: String = "#000000",
     @SerializedName("created_at")

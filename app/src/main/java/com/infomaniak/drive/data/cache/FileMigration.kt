@@ -19,6 +19,7 @@ package com.infomaniak.drive.data.cache
 
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileCategory
+import com.infomaniak.drive.data.models.Rights
 import io.realm.DynamicRealm
 import io.realm.FieldAttribute
 import io.realm.RealmMigration
@@ -52,7 +53,9 @@ class FileMigration : RealmMigration {
             oldVersionTemp++
         }
 
-        // Migrate to version 2: Add new field in File table
+        // Migrate to version 2:
+        // - Add new field (FileCategory list) in File table
+        // - Modified field (Rights) in File table (remove PrimaryKey & ID, and switched to Embedded)
         if (oldVersionTemp == 1L) {
             val fileCategorySchema = schema.create(FileCategory::class.java.simpleName).apply {
                 addField(FileCategory::id.name, Int::class.java, FieldAttribute.PRIMARY_KEY)
@@ -62,6 +65,11 @@ class FileMigration : RealmMigration {
             }
             schema.get(File::class.java.simpleName)?.apply {
                 addRealmListField(File::categories.name, fileCategorySchema)
+            }
+            schema.get(Rights::class.java.simpleName)?.apply {
+                removePrimaryKey()
+                removeField("fileId")
+                isEmbedded = true
             }
             oldVersionTemp++
         }

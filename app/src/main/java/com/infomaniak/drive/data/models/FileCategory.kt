@@ -19,11 +19,12 @@ package com.infomaniak.drive.data.models
 
 import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
-import io.realm.annotations.PrimaryKey
+import io.realm.annotations.RealmClass
 import java.util.*
 
+@RealmClass(embedded = true)
 open class FileCategory(
-    @PrimaryKey var id: Int = -1,
+    var id: Int = -1,
     @SerializedName("ia_category_user_validation")
     var iaCategoryUserValidation: String = "",
     @SerializedName("is_generated_by_ia")

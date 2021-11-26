@@ -29,10 +29,7 @@ object FileDeserializer : JsonDeserializer<File> {
         .registerTypeAdapter(Date::class.java, CustomDateTypeAdapter())
         .create()
 
-    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): File {
-        val file = gson.fromJson(json, File::class.java)
-        file.initRightIds()
-        return file
-    }
+    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): File =
+        gson.fromJson(json, File::class.java)
 
 }
