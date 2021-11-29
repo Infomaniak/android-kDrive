@@ -137,11 +137,8 @@ open class UploadFile(
         }
 
         private fun currentDriveAndSharedWithMeIds(): Array<Int> {
-            val sharedWithMeDriveIds =
-                DriveInfosController.getDrives(AccountUtils.currentUserId, sharedWithMe = true).map { it.id }
-            val currentDriveId = AccountUtils.currentDriveId
-
-            return arrayOf(currentDriveId, *sharedWithMeDriveIds.toTypedArray())
+            val sharedWithMeIds = DriveInfosController.getDrives(AccountUtils.currentUserId, sharedWithMe = true).map { it.id }
+            return arrayOf(AccountUtils.currentDriveId, *sharedWithMeIds.toTypedArray())
         }
 
         fun getAllPendingUploads(customRealm: Realm? = null): ArrayList<UploadFile> {
@@ -172,8 +169,7 @@ open class UploadFile(
 
         fun getCurrentUserPendingUploadsCount(folderId: Int? = null): Int {
             return getRealmInstance().use { realm ->
-                val driveIds = currentDriveAndSharedWithMeIds()
-                pendingUploadsQuery(realm, folderId, true, driveIds).count().toInt()
+                pendingUploadsQuery(realm, folderId, true, driveIds = currentDriveAndSharedWithMeIds()).count().toInt()
             }
         }
 
