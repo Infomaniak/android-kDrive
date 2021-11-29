@@ -78,7 +78,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        lastFilesAdapter = LastFilesAdapter()
+        lastFilesAdapter = LastFilesAdapter(createGlideRequestManager())
         lastFilesRecyclerView.apply {
             adapter = lastFilesAdapter
             layoutManager = object : LinearLayoutManager(requireContext(), HORIZONTAL, false) {
@@ -167,10 +167,16 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 isProOrTeam = currentDrive.pack == Drive.DrivePack.PRO.value || currentDrive.pack == Drive.DrivePack.TEAM.value
                 // Don't remove unnecessary parentheses from function call with lambda,
                 // else "kotlin.UninitializedPropertyAccessException: lateinit property lastElementsAdapter has not been initialized"
-                lastElementsAdapter = if (isProOrTeam) LastActivitiesAdapter() else HomePicturesAdapter() { file ->
-                    val pictures = (lastElementsAdapter as HomePicturesAdapter).getItems()
-                    Utils.displayFile(mainViewModel, findNavController(), file, pictures)
-                }
+                lastElementsAdapter =
+                    if (isProOrTeam) {
+                        LastActivitiesAdapter(glideRequestManager = createGlideRequestManager())
+                    } else {
+                        HomePicturesAdapter(glideRequestManager = createGlideRequestManager()) { file ->
+                            val pictures = (lastElementsAdapter as HomePicturesAdapter).getItems()
+                            Utils.displayFile(mainViewModel, findNavController(), file, pictures)
+                        }
+                    }
+
                 lastElementsAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT
                 layoutManager = if (isProOrTeam) LinearLayoutManager(requireContext()) else StaggeredGridLayoutManager(
                     MAX_PICTURES_COLUMN,

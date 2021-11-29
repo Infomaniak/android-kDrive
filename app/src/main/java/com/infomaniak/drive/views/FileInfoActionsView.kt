@@ -348,7 +348,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         val isPendingOffline = file.isPendingOffline(context)
         val isOfflineFile = file.isOfflineFile(context)
         enableAvailableOffline(!isPendingOffline || file.currentProgress == 100)
-        if (isOfflineProgress) setupFileProgress(file) else fileView.setFileItem(file)
+        if (isOfflineProgress) setupFileProgress(file) else fileView.setFileItem(ownerFragment.createGlideRequestManager(), file)
         if (availableOfflineSwitch.isEnabled && availableOffline.isVisible) {
             availableOfflineSwitch.isChecked = isOfflineFile
         }

@@ -33,6 +33,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.createGlideRequestManager
 import com.infomaniak.drive.utils.getScreenSizeInDp
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import com.infomaniak.lib.core.utils.toDp
@@ -74,7 +75,7 @@ class PicturesFragment : Fragment() {
             getPictures()
         }
 
-        picturesAdapter = PicturesAdapter { file ->
+        picturesAdapter = PicturesAdapter(glideRequestManager = createGlideRequestManager()) { file ->
             Utils.displayFile(mainViewModel, findNavController(), file, picturesAdapter.pictureList)
         }
         picturesAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY

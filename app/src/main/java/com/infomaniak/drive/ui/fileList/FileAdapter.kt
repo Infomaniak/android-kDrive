@@ -23,6 +23,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import com.bumptech.glide.RequestManager
 import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
@@ -42,7 +43,8 @@ import kotlinx.android.synthetic.main.cardview_file_list.view.*
 import kotlinx.android.synthetic.main.item_file.view.*
 
 open class FileAdapter(
-    var fileList: OrderedRealmCollection<File> = RealmList()
+    var fileList: OrderedRealmCollection<File> = RealmList(),
+    private val glideRequestManager: RequestManager,
 ) : RealmRecyclerViewAdapter<File, ViewHolder>(fileList, true, true) {
 
     var itemsSelected: OrderedRealmCollection<File> = RealmList()
@@ -244,7 +246,7 @@ open class FileAdapter(
                         .build()
                 }
 
-                setFileItem(file, isGrid)
+                setFileItem(glideRequestManager, file, isGrid)
 
                 checkIfEnableFile(file)
 

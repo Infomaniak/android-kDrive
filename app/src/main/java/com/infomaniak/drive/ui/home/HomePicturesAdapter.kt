@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.home
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import com.bumptech.glide.RequestManager
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.loadGlideUrl
@@ -28,6 +29,7 @@ import kotlinx.android.synthetic.main.cardview_picture.view.*
 
 class HomePicturesAdapter(
     override var itemList: ArrayList<File> = arrayListOf(),
+    private val glideRequestManager: RequestManager,
     private val onItemClick: (file: File) -> Unit
 ) : PaginationAdapter<File>() {
 
@@ -38,7 +40,7 @@ class HomePicturesAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val file = itemList[position]
         holder.itemView.apply {
-            picture.loadGlideUrl(file.thumbnail())
+            picture.loadGlideUrl(glideRequestManager, file.thumbnail())
             picture.contentDescription = file.name
             setOnClickListener {
                 onItemClick(file)

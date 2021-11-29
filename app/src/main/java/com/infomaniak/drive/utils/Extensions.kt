@@ -73,6 +73,7 @@ import coil.ImageLoader
 import coil.load
 import coil.request.Disposable
 import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestManager
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -128,6 +129,8 @@ fun Context.isKeyguardSecure(): Boolean {
     return (getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager)?.isKeyguardSecure ?: false
 }
 
+fun Fragment.createGlideRequestManager() = Glide.with(this)
+
 fun ImageView.loadGlide(@DrawableRes drawable: Int) {
     Glide.with(this).load(drawable).into(this)
 }
@@ -143,11 +146,12 @@ fun ImageView.loadGlide(bitmap: Bitmap?, @DrawableRes errorRes: Int) {
 }
 
 fun ImageView.loadGlideUrl(
+    requestManager: RequestManager,
     url: String?,
     @DrawableRes errorRes: Int = R.drawable.fallback_image,
     errorDrawable: Drawable? = null
 ) {
-    Glide.with(this)
+    requestManager
         .load(OkHttpLibraryGlideModule.GlideAuthUrl(url))
         .transition(Utils.CROSS_FADE_TRANSITION)
         .placeholder(R.drawable.placeholder)
@@ -250,7 +254,7 @@ fun Window.lightNavigationBar(enabled: Boolean) {
     }
 }
 
-fun View.setFileItem(file: File, isGrid: Boolean = false) {
+fun View.setFileItem(requestManager: RequestManager, file: File, isGrid: Boolean = false) {
 
     fileName.text = file.name
     fileFavorite.isVisible = file.isFavorite
@@ -297,7 +301,7 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
             when {
                 file.hasThumbnail && (isGrid || file.getFileType() == File.ConvertedType.IMAGE
                         || file.getFileType() == File.ConvertedType.VIDEO) -> {
-                    filePreview.loadGlideUrl(file.thumbnail(), file.getFileType().icon)
+                    filePreview.loadGlideUrl(requestManager, file.thumbnail(), file.getFileType().icon)
                 }
                 file.isFromUploads && (file.getMimeType().startsWith("image/") || file.getMimeType().startsWith("video/")) -> {
                     CoroutineScope(Dispatchers.IO).launch {

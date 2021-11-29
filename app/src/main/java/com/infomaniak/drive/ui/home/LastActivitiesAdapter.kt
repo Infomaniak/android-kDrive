@@ -25,6 +25,7 @@ import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import com.bumptech.glide.RequestManager
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
@@ -39,7 +40,7 @@ import kotlinx.android.synthetic.main.cardview_home_file_activity.view.*
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
 import java.util.*
 
-class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
+class LastActivitiesAdapter(private val glideRequestManager: RequestManager) : LoaderAdapter<FileActivity>() {
 
     var isComplete = false
     var onFileClicked: ((currentFile: File, validPreviewFiles: ArrayList<File>) -> Unit)? = null
@@ -167,7 +168,7 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
         if (this?.hasThumbnail == true && getFileType() == File.ConvertedType.IMAGE || this?.getFileType() == File.ConvertedType.VIDEO) {
             iconView.isGone = true
             imageView.isVisible = true
-            imageView.loadGlideUrl(thumbnail(), getFileType().icon)
+            imageView.loadGlideUrl(glideRequestManager, thumbnail(), getFileType().icon)
         } else {
             imageView.isGone = true
             iconView.isVisible = true

@@ -21,6 +21,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
 import androidx.core.view.isGone
+import com.bumptech.glide.RequestManager
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.setFileItem
@@ -30,7 +31,7 @@ import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_file_grid.view.*
 
-class LastFilesAdapter : LoaderAdapter<File>() {
+class LastFilesAdapter(private val glideRequestManager: RequestManager) : LoaderAdapter<File>() {
 
     var onFileClicked: ((file: File) -> Unit)? = null
 
@@ -51,7 +52,7 @@ class LastFilesAdapter : LoaderAdapter<File>() {
                 val file = itemList[position]
                 fileCardView.stopLoading()
                 fileNameLayout.layoutParams.width = WRAP_CONTENT
-                setFileItem(file, isGrid = true)
+                setFileItem(glideRequestManager, file, isGrid = true)
                 fileCardView.setOnClickListener { onFileClicked?.invoke(file) }
             }
         }

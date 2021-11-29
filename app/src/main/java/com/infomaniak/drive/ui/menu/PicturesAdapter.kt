@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.menu
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import com.bumptech.glide.RequestManager
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.loadGlideUrl
@@ -32,6 +33,7 @@ import java.util.*
 
 class PicturesAdapter(
     override var itemList: ArrayList<Any> = arrayListOf(),
+    private val glideRequestManager: RequestManager,
     private val onItemClick: (file: File) -> Unit
 ) : PaginationAdapter<Any>() {
 
@@ -91,7 +93,7 @@ class PicturesAdapter(
                 val file = (item as File)
 
                 holder.itemView.apply {
-                    picture.loadGlideUrl(file.thumbnail())
+                    picture.loadGlideUrl(glideRequestManager, file.thumbnail())
                     picture.contentDescription = file.name
 
                     setOnClickListener {

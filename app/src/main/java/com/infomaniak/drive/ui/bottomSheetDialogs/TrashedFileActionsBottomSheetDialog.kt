@@ -33,10 +33,7 @@ import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.menu.TrashViewModel
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.setFileItem
-import com.infomaniak.drive.utils.showSnackbar
+import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_trashed_file_actions.*
 
@@ -54,7 +51,7 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
         currentTrashedFile = trashViewModel.selectedFile.value ?: File()
 
-        currentFile.setFileItem(currentTrashedFile)
+        currentFile.setFileItem(createGlideRequestManager(), currentTrashedFile)
         restoreFileIn.setOnClickListener {
             val intent = Intent(requireContext(), SelectFolderActivity::class.java).apply {
                 putExtra(SelectFolderActivity.USER_ID_TAG, AccountUtils.currentUserId)

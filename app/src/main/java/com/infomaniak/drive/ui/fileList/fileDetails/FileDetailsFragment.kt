@@ -32,6 +32,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.utils.createGlideRequestManager
 import com.infomaniak.drive.utils.loadGlide
 import com.infomaniak.drive.utils.loadGlideUrl
 import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior
@@ -82,7 +83,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
 
     private fun setBannerThumbnail(file: File) {
         if (file.hasThumbnail) {
-            collapsingBackground.loadGlideUrl(file.thumbnail())
+            collapsingBackground.loadGlideUrl(createGlideRequestManager(), file.thumbnail())
         } else {
             appBar.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.background))
             val params = subtitleToolbar.layoutParams as CoordinatorLayout.LayoutParams

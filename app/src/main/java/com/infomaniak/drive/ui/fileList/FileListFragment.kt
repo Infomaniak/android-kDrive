@@ -471,7 +471,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             noNetwork.isGone = isInternetAvailable
         }
 
-        fileAdapter = FileAdapter(FileController.emptyList(mainViewModel.realm))
+        fileAdapter = FileAdapter(FileController.emptyList(mainViewModel.realm), createGlideRequestManager())
         fileAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         fileAdapter.setHasStableIds(true)
 
