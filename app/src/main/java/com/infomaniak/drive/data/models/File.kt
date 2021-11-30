@@ -303,7 +303,7 @@ open class File(
 
     fun getCategories(): List<Category> {
         val fileCategoriesIds = getSortedCategoriesIds()
-        return DriveInfosController.getCategories(fileCategoriesIds.toTypedArray())
+        return DriveInfosController.getCurrentDriveCategories(fileCategoriesIds.toTypedArray())
     }
 
     fun getSortedCategoriesIds(): List<Int> {

@@ -123,8 +123,6 @@ object ApiRoutes {
 
     fun editCategory(driveId: Int, categoryId: Int) = "${DRIVE_API}$driveId/category/$categoryId"
 
-    fun deleteCategory(driveId: Int, categoryId: Int) = "${DRIVE_API}$driveId/category/$categoryId"
-
     fun addCategory(fileId: Int, driveId: Int) = "${fileURL(fileId, driveId)}/category"
 
     fun removeCategory(file: File, categoryId: Int) = "${fileURL(file)}/category/$categoryId"

@@ -142,8 +142,8 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     private fun updateUI(enabledCategoriesIds: Array<Int>, fileId: Int) {
 
-        val allCategories = DriveInfosController.getCategories()
-        val enabledCategories = DriveInfosController.getCategories(enabledCategoriesIds)
+        val allCategories = DriveInfosController.getCurrentDriveCategories()
+        val enabledCategories = DriveInfosController.getCurrentDriveCategories(enabledCategoriesIds)
 
         val uiCategories = allCategories.map { category ->
             CategoriesAdapter.UICategory(

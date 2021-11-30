@@ -263,14 +263,14 @@ object ApiRepository {
 
     fun editCategory(driveId: Int, categoryId: Int, name: String?, color: String): ApiResponse<Category> {
         val body = mutableMapOf<String, Any>().apply {
-            if (name != null) put("name", name)
+            name?.let { put("name", it) }
             put("color", color)
         }
         return callApi(ApiRoutes.editCategory(driveId, categoryId), PATCH, body)
     }
 
     fun deleteCategory(driveId: Int, categoryId: Int): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.deleteCategory(driveId, categoryId), DELETE)
+        return callApi(ApiRoutes.editCategory(driveId, categoryId), DELETE)
     }
 
     fun addCategory(fileId: Int, driveId: Int, body: Map<String, Int>): ApiResponse<Unit> {
