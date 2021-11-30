@@ -23,6 +23,7 @@ import com.infomaniak.drive.data.models.Rights
 import io.realm.DynamicRealm
 import io.realm.FieldAttribute
 import io.realm.RealmMigration
+import java.util.*
 
 class FileMigration : RealmMigration {
     companion object {
@@ -58,13 +59,17 @@ class FileMigration : RealmMigration {
         // - Modified field (Rights) in File table (remove PrimaryKey & ID, and switched to Embedded)
         if (oldVersionTemp == 1L) {
             val fileCategorySchema = schema.create(FileCategory::class.java.simpleName).apply {
-                addField(FileCategory::id.name, Int::class.java, FieldAttribute.PRIMARY_KEY)
+                addField(FileCategory::id.name, Int::class.java, FieldAttribute.REQUIRED)
                 addField(FileCategory::iaCategoryUserValidation.name, String::class.java, FieldAttribute.REQUIRED)
                 addField(FileCategory::isGeneratedByIa.name, Boolean::class.java, FieldAttribute.REQUIRED)
                 addField(FileCategory::userId.name, Int::class.java).setNullable(FileCategory::userId.name, true)
+                addField(FileCategory::addedToFileAt.name, Date::class.java, FieldAttribute.REQUIRED)
             }
             schema.get(File::class.java.simpleName)?.apply {
                 addRealmListField(File::categories.name, fileCategorySchema)
+            }
+            schema.get(FileCategory::class.java.simpleName)?.apply {
+                isEmbedded = true
             }
             schema.get(Rights::class.java.simpleName)?.apply {
                 removePrimaryKey()
@@ -84,6 +89,4 @@ class FileMigration : RealmMigration {
     override fun hashCode(): Int {
         return javaClass.hashCode()
     }
-
-
 }
