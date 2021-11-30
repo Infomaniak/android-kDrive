@@ -153,10 +153,7 @@ object DriveInfosController {
 
             drive?.categories?.let {
                 val categories = it.where()
-                    .let { query ->
-                        if (fileCategoriesIds != null) query.`in`(Category::id.name, fileCategoriesIds)
-                        query
-                    }
+                    .apply { fileCategoriesIds?.let { `in`(Category::id.name, fileCategoriesIds) } }
                     .findAll()
 
                 realm.copyFromRealm(categories, 0)
