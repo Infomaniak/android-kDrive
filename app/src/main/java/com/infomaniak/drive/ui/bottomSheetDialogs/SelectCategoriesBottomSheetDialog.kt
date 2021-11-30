@@ -155,7 +155,7 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
             requestLiveData.observe(viewLifecycleOwner) { apiResponse ->
                 if (apiResponse.isSuccess()) {
                     adapter.categories.find { it.id == categoryId }?.isSelected = isSelected
-                    adapter.notifyItemChanged(position)
+                    adapter.setAll(adapter.categories)
                 } else {
                     Utils.showSnackbar(requireView(), apiResponse.translateError())
                 }
@@ -185,8 +185,6 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
                     isSelected = enabledCategories.find { it.id == category.id } != null
                 )
             }
-            .sortedWith { a: UICategory, b: UICategory -> a.name.compareTo(b.name, true) }
-            .sortedByDescending { it.isPredefined }
 
         adapter.setAll(uiCategories)
 

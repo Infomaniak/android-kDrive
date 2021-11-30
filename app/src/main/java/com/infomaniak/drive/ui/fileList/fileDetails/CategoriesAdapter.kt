@@ -45,6 +45,9 @@ class CategoriesAdapter(
     @SuppressLint("NotifyDataSetChanged")
     fun setAll(newCategories: List<UICategory>) {
         categories = newCategories
+            .sortedWith { a: UICategory, b: UICategory -> a.name.compareTo(b.name, true) }
+            .sortedByDescending { it.isPredefined }
+            .sortedByDescending { it.isSelected }
         notifyDataSetChanged()
     }
 
