@@ -89,8 +89,6 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        AppSettings.appLaunches++
-
         downloadReceiver = DownloadReceiver(mainViewModel)
 
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -230,22 +228,18 @@ class MainActivity : BaseActivity() {
         launchAllUpload(drivePermissions)
         launchSyncOffline()
 
-        when (AppSettings.appLaunches) {
-            SYNC_DIALOG_LAUNCHES -> {
-                if (!AccountUtils.isEnableAppSync() && !UISettings(this).hasDisplayedSyncDialog) {
-                    UISettings(this).hasDisplayedSyncDialog = true
-                    val id =
-                        if (AppSettings.migrated) R.id.syncAfterMigrationBottomSheetDialog
-                        else R.id.syncConfigureBottomSheetDialog
-                    findNavController(R.id.hostFragment).navigate(id)
-                }
-            }
-            INFORMATION_CATEGORIES_LAUNCHES -> {
-                if (!UISettings(this).hasDisplayedCategoriesInformationDialog) {
-                    UISettings(this).hasDisplayedCategoriesInformationDialog = true
-                    findNavController(R.id.hostFragment).navigate(R.id.categoriesInformationBottomSheetDialog)
-                }
-            }
+        AppSettings.appLaunches++
+
+        // Display Informations panel
+        if (!AccountUtils.isEnableAppSync() && !UISettings(this).hasDisplayedSyncDialog) {
+            UISettings(this).hasDisplayedSyncDialog = true
+            val id =
+                if (AppSettings.migrated) R.id.syncAfterMigrationBottomSheetDialog
+                else R.id.syncConfigureBottomSheetDialog
+            findNavController(R.id.hostFragment).navigate(id)
+        } else if (!UISettings(this).hasDisplayedCategoriesInformationDialog) {
+            UISettings(this).hasDisplayedCategoriesInformationDialog = true
+            findNavController(R.id.hostFragment).navigate(R.id.categoriesInformationBottomSheetDialog)
         }
 
         setBottomNavigationUserAvatar(this)
@@ -358,10 +352,7 @@ class MainActivity : BaseActivity() {
     }
 
     companion object {
-        private const val SYNC_DIALOG_LAUNCHES = 1
-        private const val INFORMATION_CATEGORIES_LAUNCHES = 2
         private const val SYNCED_FILES_DELETION_FILES_AMOUNT = 10
-
         private const val SECURITY_APP_TOLERANCE = 1 * 60 * 1000 // 1min (ms)
         const val INTENT_SHOW_PROGRESS = "intent_folder_id_progress"
     }

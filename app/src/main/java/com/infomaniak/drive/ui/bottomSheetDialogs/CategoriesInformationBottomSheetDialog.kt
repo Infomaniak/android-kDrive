@@ -21,11 +21,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_categories_information.*
-import java.util.*
 
 class CategoriesInformationBottomSheetDialog : BottomSheetDialogFragment() {
 
@@ -34,17 +32,6 @@ class CategoriesInformationBottomSheetDialog : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        illu.setImageDrawable(
-            ContextCompat.getDrawable(
-                requireContext(),
-                if (Locale.getDefault().language.equals(Locale("fr").language, true)) {
-                    R.drawable.img_categories_fr
-                } else {
-                    R.drawable.img_categories_en
-                }
-            )
-        )
 
         actionButton.setOnClickListener { dismiss() }
     }

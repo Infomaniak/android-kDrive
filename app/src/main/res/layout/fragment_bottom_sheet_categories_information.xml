@@ -42,13 +42,13 @@
         android:layout_height="wrap_content"
         android:layout_marginVertical="@dimen/marginStandard"
         android:maxHeight="270dp"
+        android:src="@drawable/img_categories"
         app:layout_constraintBottom_toTopOf="@id/title"
         app:layout_constraintEnd_toStartOf="@id/end"
         app:layout_constraintStart_toEndOf="@id/start"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
-        tools:ignore="ContentDescription"
-        tools:src="@drawable/img_categories_en" />
+        tools:ignore="ContentDescription" />
 
     <TextView
         android:id="@+id/title"
