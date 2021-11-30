@@ -82,7 +82,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             hideActions = arguments?.getBoolean(PREVIEW_HIDE_ACTIONS, false) ?: false
 
             currentPreviewFile = fileId?.let {
-                FileController.getFileById(it, userDrive) ?: mainViewModel.currentFileList[it]
+                FileController.getFileById(it, userDrive) ?: mainViewModel.currentPreviewFileList[it]
             } ?: throw Exception("No current preview found")
 
             previewSliderViewModel.currentPreview = currentPreviewFile
@@ -132,7 +132,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         openWithButton.setOnClickListener { openWithClicked() }
         backButton.setOnClickListener { findNavController().popBackStack() }
 
-        mainViewModel.currentFileList.let { files ->
+        mainViewModel.currentPreviewFileList.let { files ->
             previewSliderAdapter.setFiles(ArrayList(files.values))
             val position = previewSliderAdapter.getPosition(currentPreviewFile)
             viewPager.setCurrentItem(position, false)
@@ -296,7 +296,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 } else {
                     toggleBottomSheet(true)
                 }
-                mainViewModel.currentFileList.remove(currentPreviewFile.id)
+                mainViewModel.currentPreviewFileList.remove(currentPreviewFile.id)
                 requireActivity().showSnackbar(R.string.snackbarLeaveShareConfirmation)
             } else {
                 requireActivity().showSnackbar(apiResponse.translatedError)
@@ -315,7 +315,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         mainViewModel.duplicateFile(currentPreviewFile, folderID, result).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 apiResponse.data?.let { file ->
-                    mainViewModel.currentFileList[file.id] = file
+                    mainViewModel.currentPreviewFileList[file.id] = file
                     previewSliderAdapter.addFile(file)
                     requireActivity().showSnackbar(getString(R.string.allFileDuplicate, currentPreviewFile.name))
                     toggleBottomSheet(true)
@@ -345,7 +345,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         mainViewModel.deleteFile(currentPreviewFile).observe(viewLifecycleOwner) { apiResponse ->
             onApiResponse()
             if (apiResponse.isSuccess()) {
-                mainViewModel.currentFileList.remove(currentPreviewFile.id)
+                mainViewModel.currentPreviewFileList.remove(currentPreviewFile.id)
                 if (previewSliderAdapter.deleteFile(currentPreviewFile)) {
                     findNavController().popBackStack()
                 } else {

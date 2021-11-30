@@ -225,7 +225,7 @@ class SearchFragment : FileListFragment() {
 
             val oldList = fileListViewModel.oldList?.toMutableList() as? ArrayList
             if (!oldList.isNullOrEmpty() && fileAdapter.getFiles().isEmpty()) {
-                fileAdapter.setFiles(ArrayList(mainViewModel.currentFileList.values))
+                fileAdapter.setFiles(ArrayList(mainViewModel.currentPreviewFileList.values))
                 fileListViewModel.oldList = null
                 if (fileListViewModel.currentConvertedType != null) convertedTypeLayout.isVisible = true
                 showFilterLayout(false)
