@@ -198,7 +198,7 @@ class MainActivity : BaseActivity() {
         if (!UISettings(this).updateLater || AppSettings.appLaunches % 10 == 0) {
             checkUpdateIsAvailable { updateIsAvailable ->
                 if (!updateAvailableShow && updateIsAvailable) {
-                    findNavController(R.id.hostFragment).navigate(R.id.updateAvailableBottomSheetDialog)
+                    navController.navigate(R.id.updateAvailableBottomSheetDialog)
                     updateAvailableShow = true
                 }
             }
