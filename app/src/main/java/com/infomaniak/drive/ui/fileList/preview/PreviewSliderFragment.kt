@@ -80,9 +80,11 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
             userDrive = UserDrive(driveId = driveId, sharedWithMe = isSharedWithMe)
             hideActions = arguments?.getBoolean(PREVIEW_HIDE_ACTIONS, false) ?: false
+
             currentPreviewFile = fileId?.let {
                 FileController.getFileById(it, userDrive) ?: mainViewModel.currentFileList[it]
             } ?: throw Exception("No current preview found")
+
             previewSliderViewModel.currentPreview = currentPreviewFile
             previewSliderViewModel.userDrive = userDrive
 

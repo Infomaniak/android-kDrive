@@ -41,6 +41,7 @@ import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.item_search_view.*
 import kotlinx.android.synthetic.main.search_filter.view.*
 import java.util.*
+import kotlin.collections.ArrayList
 
 class SearchFragment : FileListFragment() {
 
@@ -91,7 +92,7 @@ class SearchFragment : FileListFragment() {
                     SearchFragmentDirections.actionSearchFragmentToFileListFragment(file.id, file.name)
                 )
             } else {
-                val fileList = fileAdapter.getFileObjectsList(mainViewModel.realm)
+                val fileList = fileAdapter.getFileObjectsList(null)
                 Utils.displayFile(mainViewModel, findNavController(), file, fileList)
             }
         }
@@ -119,17 +120,25 @@ class SearchFragment : FileListFragment() {
 
         convertedType.text = fileListViewModel.currentConvertedTypeText
         convertedTypeIcon.setImageDrawable(fileListViewModel.currentConvertedTypeDrawable)
-        showFilterLayout(true)
+
+        if (fileAdapter.fileList.isEmpty()) {
+            showFilterLayout(true)
+        }
 
         observeSearchResult()
     }
 
     private fun observeSearchResult() {
         fileListViewModel.searchResults.observe(viewLifecycleOwner) {
+
+            if (!swipeRefreshLayout.isRefreshing) return@observe
+
             it?.let { apiResponse ->
+
                 if (apiResponse.isSuccess()) {
                     val searchList = apiResponse.data ?: arrayListOf()
                     searchList.apply { map { file -> file.isFromSearch = true } }
+
                     when {
                         fileListViewModel.currentPage == 1 -> {
                             fileAdapter.setFiles(searchList)
@@ -144,10 +153,12 @@ class SearchFragment : FileListFragment() {
                             fileAdapter.addFileList(searchList)
                         }
                     }
+
                 } else {
                     changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, false)
                     requireActivity().showSnackbar(apiResponse.translateError())
                 }
+
             } ?: let {
                 fileAdapter.isComplete = true
                 changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, false)
@@ -214,7 +225,7 @@ class SearchFragment : FileListFragment() {
 
             val oldList = fileListViewModel.oldList?.toMutableList() as? ArrayList
             if (!oldList.isNullOrEmpty() && fileAdapter.getFiles().isEmpty()) {
-                fileAdapter.setFiles(oldList)
+                fileAdapter.setFiles(ArrayList(mainViewModel.currentFileList.values))
                 fileListViewModel.oldList = null
                 if (fileListViewModel.currentConvertedType != null) convertedTypeLayout.isVisible = true
                 showFilterLayout(false)
