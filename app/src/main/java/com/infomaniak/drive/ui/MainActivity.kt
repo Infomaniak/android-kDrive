@@ -232,8 +232,8 @@ class MainActivity : BaseActivity() {
 
         when (AppSettings.appLaunches) {
             SYNC_DIALOG_LAUNCHES -> {
-                if (!AccountUtils.isEnableAppSync() && !AppSettings.hasDisplayedSyncDialog) {
-                    AppSettings.hasDisplayedSyncDialog = true
+                if (!AccountUtils.isEnableAppSync() && !UISettings(this).hasDisplayedSyncDialog) {
+                    UISettings(this).hasDisplayedSyncDialog = true
                     val id =
                         if (AppSettings.migrated) R.id.syncAfterMigrationBottomSheetDialog
                         else R.id.syncConfigureBottomSheetDialog
@@ -241,8 +241,8 @@ class MainActivity : BaseActivity() {
                 }
             }
             INFORMATION_CATEGORIES_LAUNCHES -> {
-                if (!AppSettings.hasDisplayedCategoriesInformationDialog) {
-                    AppSettings.hasDisplayedCategoriesInformationDialog = true
+                if (!UISettings(this).hasDisplayedCategoriesInformationDialog) {
+                    UISettings(this).hasDisplayedCategoriesInformationDialog = true
                     findNavController(R.id.hostFragment).navigate(R.id.categoriesInformationBottomSheetDialog)
                 }
             }

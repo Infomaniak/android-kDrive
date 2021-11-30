@@ -116,4 +116,22 @@ class UISettings(val context: Context) {
                 apply()
             }
         }
+
+    var hasDisplayedSyncDialog: Boolean
+        get() = getUISettings().getBoolean("hasDisplayedSyncDialog", false)
+        set(value) {
+            with(getUISettings().edit()) {
+                putBoolean("hasDisplayedSyncDialog", value)
+                apply()
+            }
+        }
+
+    var hasDisplayedCategoriesInformationDialog: Boolean
+        get() = getUISettings().getBoolean("hasDisplayedCategoriesInformationDialog", false)
+        set(value) {
+            with(getUISettings().edit()) {
+                putBoolean("hasDisplayedCategoriesInformationDialog", value)
+                apply()
+            }
+        }
 }
