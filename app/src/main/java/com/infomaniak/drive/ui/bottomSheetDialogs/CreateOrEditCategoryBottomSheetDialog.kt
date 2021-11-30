@@ -55,7 +55,7 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
     private val navigationArgs: CreateOrEditCategoryBottomSheetDialogArgs by navArgs()
 
     private val createOrEditCategoryViewModel: CreateOrEditCategoryViewModel by viewModels()
-    private val selectCategoriesViewModel: SelectCategoriesBottomSheetDialog.SelectCategoriesViewModel by viewModels()
+    private val selectCategoriesViewModel: SelectCategoriesViewModel by viewModels()
 
     private val colorLayouts = mutableListOf<ConstraintLayout>()
     private var selected: Int = -1

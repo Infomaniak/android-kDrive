@@ -22,7 +22,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isInvisible
+import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
@@ -64,8 +64,13 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
         categoryTitle.text = categoryName
         categoryIcon.setBackgroundColor(Color.parseColor(categoryColor))
 
-        editCategory.isInvisible = !canEditCategory
-        deleteCategory.isInvisible = !(canDeleteCategory && !categoryIsPredefined)
+        editCategory.isEnabled = canEditCategory
+        disabledEditCategory.isGone = canEditCategory
+
+        (canDeleteCategory && !categoryIsPredefined).let {
+            deleteCategory.isEnabled = it
+            disabledDeleteCategory.isGone = it
+        }
 
         editCategory.setOnClickListener {
             editCategory(

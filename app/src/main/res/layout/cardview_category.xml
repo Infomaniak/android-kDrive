@@ -21,8 +21,9 @@
     android:id="@+id/categoryCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardBackgroundColor="@color/backgroundCardview"
-    app:cardCornerRadius="0dp">
+    app:cardBackgroundColor="@color/appBar"
+    app:cardCornerRadius="0dp"
+    app:cardElevation="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -32,7 +33,7 @@
             android:id="@+id/categoryIcon"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_margin="12dp"
+            android:layout_margin="@dimen/marginStandardMedium"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -58,29 +59,24 @@
             style="@style/Subtitle2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="12dp"
+            android:layout_marginHorizontal="@dimen/marginStandardMedium"
+            android:singleLine="true"
             app:layout_constraintBottom_toBottomOf="@id/categoryIcon"
-            app:layout_constraintEnd_toStartOf="@id/endIconLayout"
+            app:layout_constraintEnd_toStartOf="@id/menuButton"
             app:layout_constraintStart_toEndOf="@id/categoryIcon"
             app:layout_constraintTop_toTopOf="@id/categoryIcon"
             tools:text="@string/categoryBanking" />
 
-        <FrameLayout
-            android:id="@+id/endIconLayout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/menuButton"
+            style="@style/IconButton"
+            android:layout_marginEnd="@dimen/marginStandardSmall"
+            android:contentDescription="@string/buttonMenu"
+            app:icon="@drawable/ic_menu"
+            app:iconTint="@color/primaryText"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/menuButton"
-                style="@style/IconButton"
-                android:contentDescription="@string/buttonMenu"
-                app:icon="@drawable/ic_menu"
-                app:iconTint="@color/primaryText" />
-        </FrameLayout>
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

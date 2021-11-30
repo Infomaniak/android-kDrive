@@ -24,38 +24,21 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
-import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.android.synthetic.main.fragment_select_categories.*
-import kotlinx.coroutines.Dispatchers
-import java.util.*
-
-data class UICategory(
-    val id: Int,
-    val name: String,
-    val color: String,
-    val isPredefined: Boolean,
-    var isSelected: Boolean,
-)
 
 class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     private val navigationArgs: SelectCategoriesBottomSheetDialogArgs by navArgs()
-
     private val selectCategoriesViewModel: SelectCategoriesViewModel by viewModels()
 
     private lateinit var adapter: CategoriesAdapter
@@ -68,16 +51,6 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        fun setBackNavResult() {
-            setBackNavigationResult(
-                SELECT_CATEGORIES_NAV_KEY,
-                bundleOf(
-                    CATEGORIES_BUNDLE_KEY to adapter.categories.filter { it.isSelected }.map { it.id },
-                    MODIFIED_CATEGORY_BUNDLE_KEY to aCategoryHasBeenModified,
-                )
-            )
-        }
 
         FileController.getFileById(navigationArgs.fileId).let {
             if (it == null) {
@@ -104,8 +77,7 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
                     )
                 )
                 true
-            } else
-                false
+            } else false
         }
         toolbar.setNavigationOnClickListener { setBackNavResult() }
 
@@ -116,37 +88,9 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
             } else false
         }
 
-        getBackNavigationResult<Int>(CreateOrEditCategoryBottomSheetDialog.CREATE_CATEGORY_NAV_KEY) { categoryId ->
+        setupAllGetBackNavigationResult()
 
-            val oldIds = adapter.categories.filter { it.isSelected }.map { it.id }
-
-            val ids = mutableListOf<Int>()
-            ids.addAll(oldIds)
-            ids.add(categoryId)
-
-            updateUI(ids.toTypedArray(), file.id)
-        }
-
-        getBackNavigationResult<Int>(CategoryInfoActionsBottomSheetDialog.DELETE_CATEGORY_NAV_KEY) { categoryId ->
-
-            aCategoryHasBeenModified = true
-
-            val ids = adapter.categories.filter { it.isSelected && it.id != categoryId }.map { it.id }
-
-            updateUI(ids.toTypedArray(), file.id)
-        }
-
-        getBackNavigationResult<List<Int>?>(CategoryInfoActionsBottomSheetDialog.EDIT_CATEGORY_NAV_KEY) { ids ->
-
-            aCategoryHasBeenModified = true
-
-            if (ids != null) {
-                updateUI(ids.toTypedArray(), file.id)
-            }
-        }
-
-        adapter = CategoriesAdapter(onCategoryChanged = { categoryId, isSelected, position ->
-
+        adapter = CategoriesAdapter(onCategoryChanged = { categoryId, isSelected ->
             val requestLiveData = with(selectCategoriesViewModel) {
                 if (isSelected) addCategory(file.id, file.driveId, categoryId)
                 else removeCategory(file, categoryId)
@@ -160,14 +104,40 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
                     Utils.showSnackbar(requireView(), apiResponse.translateError())
                 }
             }
-        })
-
-        adapter.canEditCategory = categoryRights?.canEditCategory ?: false
-        adapter.canDeleteCategory = categoryRights?.canDeleteCategory ?: false
+        }).apply {
+            canEditCategory = categoryRights?.canEditCategory ?: false
+            canDeleteCategory = categoryRights?.canDeleteCategory ?: false
+        }
 
         categoriesRecyclerView.adapter = adapter
 
         updateUI(navigationArgs.categoriesIds.toTypedArray(), file.id)
+    }
+
+    private fun setupAllGetBackNavigationResult() {
+        getBackNavigationResult<Int>(CreateOrEditCategoryBottomSheetDialog.CREATE_CATEGORY_NAV_KEY) { categoryId ->
+            val oldIds = adapter.categories.filter { it.isSelected }.map { it.id }
+            val ids = mutableListOf<Int>().apply {
+                addAll(oldIds)
+                add(categoryId)
+            }
+
+            updateUI(ids.toTypedArray(), file.id)
+        }
+
+        getBackNavigationResult<Int>(CategoryInfoActionsBottomSheetDialog.DELETE_CATEGORY_NAV_KEY) { categoryId ->
+            aCategoryHasBeenModified = true
+
+            val ids = adapter.categories.filter { it.isSelected && it.id != categoryId }.map { it.id }
+
+            updateUI(ids.toTypedArray(), file.id)
+        }
+
+        getBackNavigationResult<List<Int>?>(CategoryInfoActionsBottomSheetDialog.EDIT_CATEGORY_NAV_KEY) { ids ->
+            aCategoryHasBeenModified = true
+
+            ids?.let { updateUI(it.toTypedArray(), file.id) }
+        }
     }
 
     private fun updateUI(enabledCategoriesIds: Array<Int>, fileId: Int) {
@@ -175,16 +145,15 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
         val allCategories = DriveInfosController.getCategories()
         val enabledCategories = DriveInfosController.getCategories(enabledCategoriesIds)
 
-        val uiCategories = allCategories
-            .map { category ->
-                UICategory(
-                    id = category.id,
-                    name = category.getName(requireContext()),
-                    color = category.color,
-                    isPredefined = category.isPredefined ?: true,
-                    isSelected = enabledCategories.find { it.id == category.id } != null
-                )
-            }
+        val uiCategories = allCategories.map { category ->
+            CategoriesAdapter.UICategory(
+                id = category.id,
+                name = category.getName(requireContext()),
+                color = category.color,
+                isPredefined = category.isPredefined ?: true,
+                isSelected = enabledCategories.find { it.id == category.id } != null
+            )
+        }
 
         adapter.setAll(uiCategories)
 
@@ -200,41 +169,14 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
         }
     }
 
-    internal class SelectCategoriesViewModel : ViewModel() {
-
-        fun addCategory(fileId: Int, driveId: Int, categoryId: Int): LiveData<ApiResponse<Unit>> = liveData(Dispatchers.IO) {
-
-            val apiResponse = ApiRepository.addCategory(fileId, driveId, mapOf("id" to categoryId))
-
-            if (apiResponse.isSuccess()) {
-                FileController.updateFile(fileId) { localFile ->
-                    localFile.categories.add(
-                        FileCategory(
-                            id = categoryId,
-                            userId = AccountUtils.currentUserId,
-                            addedToFileAt = Date()
-                        )
-                    )
-                }
-            }
-
-            emit(apiResponse)
-        }
-
-        fun removeCategory(file: File, categoryId: Int): LiveData<ApiResponse<Unit>> = liveData(Dispatchers.IO) {
-
-            val apiResponse = ApiRepository.removeCategory(file, categoryId)
-
-            if (apiResponse.isSuccess()) {
-                FileController.updateFile(file.id) { localFile ->
-                    val categories = localFile.categories
-                    val category = categories.find { it.id == categoryId }
-                    categories.remove(category)
-                }
-            }
-
-            emit(apiResponse)
-        }
+    private fun setBackNavResult() {
+        setBackNavigationResult(
+            SELECT_CATEGORIES_NAV_KEY,
+            bundleOf(
+                CATEGORIES_BUNDLE_KEY to adapter.categories.filter { it.isSelected }.map { it.id },
+                MODIFIED_CATEGORY_BUNDLE_KEY to aCategoryHasBeenModified,
+            )
+        )
     }
 
     companion object {

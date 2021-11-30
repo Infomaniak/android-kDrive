@@ -231,15 +231,17 @@ class MainActivity : BaseActivity() {
         AppSettings.appLaunches++
 
         // Display Informations panel
-        if (!AccountUtils.isEnableAppSync() && !UISettings(this).hasDisplayedSyncDialog) {
-            UISettings(this).hasDisplayedSyncDialog = true
-            val id =
-                if (AppSettings.migrated) R.id.syncAfterMigrationBottomSheetDialog
-                else R.id.syncConfigureBottomSheetDialog
-            findNavController(R.id.hostFragment).navigate(id)
-        } else if (!UISettings(this).hasDisplayedCategoriesInformationDialog) {
-            UISettings(this).hasDisplayedCategoriesInformationDialog = true
-            findNavController(R.id.hostFragment).navigate(R.id.categoriesInformationBottomSheetDialog)
+        when {
+            !UISettings(this).hasDisplayedSyncDialog && !AccountUtils.isEnableAppSync() -> {
+                UISettings(this).hasDisplayedSyncDialog = true
+                val id =
+                    if (AppSettings.migrated) R.id.syncAfterMigrationBottomSheetDialog else R.id.syncConfigureBottomSheetDialog
+                findNavController(R.id.hostFragment).navigate(id)
+            }
+            !UISettings(this).hasDisplayedCategoriesInformationDialog -> {
+                UISettings(this).hasDisplayedCategoriesInformationDialog = true
+                findNavController(R.id.hostFragment).navigate(R.id.categoriesInformationBottomSheetDialog)
+            }
         }
 
         setBottomNavigationUserAvatar(this)

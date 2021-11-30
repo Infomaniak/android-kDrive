@@ -52,10 +52,10 @@
         android:clipToPadding="false"
         android:orientation="vertical"
         android:overScrollMode="never"
-        android:layout_margin="@dimen/marginStandard"
+        android:padding="@dimen/marginStandard"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:itemCount="3"
+        tools:itemCount="5"
         tools:listitem="@layout/cardview_category" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
