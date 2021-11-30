@@ -17,13 +17,10 @@
  */
 package com.infomaniak.drive.ui.fileList
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.get
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -31,6 +28,7 @@ import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
+import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.Utils
@@ -41,7 +39,7 @@ import com.infomaniak.lib.core.utils.setPagination
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.item_search_view.*
-import kotlinx.android.synthetic.main.search_filter.view.*
+import kotlinx.android.synthetic.main.search_filter.*
 import java.util.*
 import kotlin.collections.LinkedHashMap
 
@@ -49,9 +47,11 @@ class SearchFragment : FileListFragment() {
 
     override var enabledMultiSelectMode: Boolean = false
 
+    private lateinit var previousSearchesAdapter: SearchAdapter
     private lateinit var filterLayoutView: View
     private var isDownloading = false
 
+    @SuppressLint("InflateParams")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         fileListViewModel.sortType = File.SortType.RECENT
 
@@ -110,19 +110,6 @@ class SearchFragment : FileListFragment() {
             }
         }
 
-        filterLayoutView.apply {
-            imagefilterLayout.setOnClickListener { updateFilter(it, ConvertedType.IMAGE) }
-            videoFilterLayout.setOnClickListener { updateFilter(it, ConvertedType.VIDEO) }
-            audioFilterLayout.setOnClickListener { updateFilter(it, ConvertedType.AUDIO) }
-            pdfFilterLayout.setOnClickListener { updateFilter(it, ConvertedType.PDF) }
-            docsFilterLayout.setOnClickListener { updateFilter(it, ConvertedType.TEXT) }
-            pointsfilterLayout.setOnClickListener { updateFilter(it, ConvertedType.PRESENTATION) }
-            gridsFilterLayout.setOnClickListener { updateFilter(it, ConvertedType.SPREADSHEET) }
-            folderFilterLayout.setOnClickListener { updateFilter(it, ConvertedType.FOLDER) }
-            archiveFilterLayout.setOnClickListener { updateFilter(it, ConvertedType.ARCHIVE) }
-            codeFilterLayout.setOnClickListener { updateFilter(it, ConvertedType.CODE) }
-        }
-
         convertedTypeClose.setOnClickListener {
             convertedTypeLayout.isGone = true
             fileListViewModel.currentConvertedType = null
@@ -138,7 +125,15 @@ class SearchFragment : FileListFragment() {
             showFilterLayout(true)
         }
 
+        setSearchesAdapter()
         observeSearchResult()
+    }
+
+    private fun setSearchesAdapter() {
+        previousSearchesAdapter = SearchAdapter { searchView.setText(it) }.apply {
+            setAll(AppSettings.mostRecentSearches)
+        }
+        recentSearchesList.adapter = previousSearchesAdapter
     }
 
     private fun observeSearchResult() {
@@ -149,6 +144,9 @@ class SearchFragment : FileListFragment() {
             it?.let { apiResponse ->
 
                 if (apiResponse.isSuccess()) {
+
+                    updateMostRecentSearches()
+
                     val searchList = apiResponse.data ?: arrayListOf()
                     searchList.apply { map { file -> file.isFromSearch = true } }
 
@@ -182,17 +180,20 @@ class SearchFragment : FileListFragment() {
         }
     }
 
-    private fun updateFilter(view: View, type: ConvertedType) {
-        val cardView = view as ConstraintLayout
-        fileListViewModel.currentConvertedTypeDrawable = (cardView[0] as ImageView).drawable
-        fileListViewModel.currentConvertedTypeText = (cardView[1] as TextView).text?.toString()
-
-        convertedType.text = fileListViewModel.currentConvertedTypeText
-        convertedTypeIcon.setImageDrawable(fileListViewModel.currentConvertedTypeDrawable)
-        convertedTypeLayout.isVisible = true
-        fileListViewModel.currentPage = 1
-        fileListViewModel.currentConvertedType = type.name.lowercase(Locale.ROOT)
-        downloadFiles(true, false)
+    private fun updateMostRecentSearches() {
+        val newSearch = searchView.text.toString()
+        val previousSearches = AppSettings.mostRecentSearches
+        val newSearches = previousSearches
+            .apply {
+                if (contains(newSearch)) {
+                    move(previousSearches.indexOf(newSearch), 0)
+                } else {
+                    add(0, newSearch)
+                }
+            }
+            .filterIndexed { index, _ -> index < MAX_MOST_RECENT_SEARCHES }
+        AppSettings.mostRecentSearches = RealmList(*newSearches.toTypedArray())
+        previousSearchesAdapter.setAll(newSearches)
     }
 
     override fun onPause() {
@@ -203,6 +204,7 @@ class SearchFragment : FileListFragment() {
 
     private fun showFilterLayout(show: Boolean) {
         if (show) {
+            changeNoFilesLayoutVisibility(hideFileList = false, changeControlsVisibility = false)
             convertedTypeLayout.isGone = true
             fileRecyclerView.isGone = true
             filterLayoutView.isVisible = true
@@ -250,5 +252,9 @@ class SearchFragment : FileListFragment() {
             showFilterLayout(false)
             fileListViewModel.searchFileByName.value = currentQuery
         }
+    }
+
+    private companion object {
+        const val MAX_MOST_RECENT_SEARCHES = 5
     }
 }
