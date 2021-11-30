@@ -24,7 +24,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
@@ -125,10 +124,7 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
                         .observe(viewLifecycleOwner) { addCategoryApiResponse ->
 
                             if (addCategoryApiResponse.isSuccess()) {
-                                setBackNavigationResult(
-                                    CREATE_CATEGORY_NAV_KEY,
-                                    bundleOf(CATEGORY_ID_BUNDLE_KEY to categoryId)
-                                )
+                                setBackNavigationResult(CREATE_CATEGORY_NAV_KEY, categoryId)
 
                             } else {
                                 saveButton.hideProgress(R.string.buttonSave)
@@ -153,7 +149,7 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
             .observe(viewLifecycleOwner) { apiResponse ->
 
                 if (apiResponse.isSuccess()) {
-                    setBackNavigationResult(EDIT_CATEGORY_NAV_KEY, bundleOf())
+                    setBackNavigationResult(EDIT_CATEGORY_NAV_KEY, true)
 
                 } else {
                     saveButton.hideProgress(R.string.buttonSave)
@@ -244,12 +240,8 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     companion object {
         const val CREATE_CATEGORY_NAV_KEY = "create_category_nav_key"
-        const val CATEGORY_ID_BUNDLE_KEY = "category_id_bundle_key"
-
         const val EDIT_CATEGORY_NAV_KEY = "edit_category_nav_key"
-
         const val NO_PREVIOUS_CATEGORY_ID = -1
-
         private val CATEGORY_COLORS = listOf(
             "#1ABC9C",
             "#11806A",

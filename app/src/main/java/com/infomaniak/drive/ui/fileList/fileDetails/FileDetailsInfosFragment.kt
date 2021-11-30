@@ -39,7 +39,6 @@ import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectCategoriesBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
-import com.infomaniak.drive.ui.bottomSheetDialogs.UICategory
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.ShareLinkContainerView
 import com.infomaniak.drive.views.UserAvatarView
@@ -108,11 +107,18 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         }
 
         getBackNavigationResult<Bundle>(SelectCategoriesBottomSheetDialog.SELECT_CATEGORIES_NAV_KEY) { bundle ->
-            val uiCategories = bundle.getParcelableArrayList(SelectCategoriesBottomSheetDialog.CATEGORIES_BUNDLE_KEY)
-                ?: emptyList<UICategory>()
-            val categories = DriveInfosController.getCategories(uiCategories.map { it.id }.toTypedArray())
+
+            val ids = bundle.getParcelableArrayList(SelectCategoriesBottomSheetDialog.CATEGORIES_BUNDLE_KEY)
+                ?: emptyList<Int>()
+
+            val categories = DriveInfosController.getCategories(ids.toTypedArray())
             val file = fileDetailsViewModel.currentFile.value
-            setupCategoriesContainer(file != null, file?.id ?: -1, categories)
+
+            setupCategoriesContainer(
+                hasFile = file != null,
+                fileId = file?.id ?: -1,
+                categories = categories
+            )
         }
     }
 
