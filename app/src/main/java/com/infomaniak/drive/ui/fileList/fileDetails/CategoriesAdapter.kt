@@ -33,13 +33,12 @@ class CategoriesAdapter(
 
     var canEditCategory: Boolean = false
     var canDeleteCategory: Boolean = false
-
     var categories = emptyList<UICategory>()
-
     var onMenuClicked: ((category: UICategory) -> Unit)? = null
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cardview_category, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cardview_category, parent, false))
+    }
 
     fun setAll(newCategories: List<UICategory>) {
         categories = newCategories

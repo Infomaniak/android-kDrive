@@ -127,23 +127,14 @@ object Utils {
         )
     }
 
-    fun confirmCategoryDeletion(
-        context: Context,
-        categoryName: String,
-        onConfirmation: (dialog: Dialog) -> Unit
-    ) {
-
-        val title = R.string.buttonDelete
-        val message = context.resources.getString(R.string.modalDeleteCategoryDescription, categoryName)
-        val button = R.string.buttonDelete
-
+    fun confirmCategoryDeletion(context: Context, categoryName: String, onConfirmation: (dialog: Dialog) -> Unit) {
         createConfirmation(
             context = context,
-            title = context.getString(title),
-            message = message,
+            title = context.getString(R.string.buttonDelete),
+            message = context.getString(R.string.modalDeleteCategoryDescription, categoryName),
             autoDismiss = false,
             isDeletion = true,
-            buttonText = context.getString(button),
+            buttonText = context.getString(R.string.buttonDelete),
             onConfirmation = onConfirmation
         )
     }

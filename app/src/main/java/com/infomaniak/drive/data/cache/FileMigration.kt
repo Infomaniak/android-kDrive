@@ -54,8 +54,8 @@ class FileMigration : RealmMigration {
             oldVersionTemp++
         }
 
-        // Migrate to version 2:
-        // - Add new field (FileCategory list) in File table
+        // Migrated to version 2:
+        // - Added new field (FileCategory list) in File table
         // - Modified field (Rights) in File table (remove PrimaryKey & ID, and switched to Embedded)
         if (oldVersionTemp == 1L) {
             val fileCategorySchema = schema.create(FileCategory::class.java.simpleName).apply {

@@ -23,10 +23,9 @@ import android.widget.GridLayout
 import com.infomaniak.drive.R
 import kotlin.math.max
 
-class AutoGridLayout : GridLayout {
+class AutoResizeGridLayout : GridLayout {
 
     private var defaultColumnCount = 0
-
     private var columnWidth = 0
 
     constructor(context: Context?) : super(context) {
@@ -42,12 +41,12 @@ class AutoGridLayout : GridLayout {
     }
 
     private fun init(attrs: AttributeSet?, defStyleAttr: Int) {
-        var array = context.obtainStyledAttributes(attrs, R.styleable.AutoGridLayout, 0, defStyleAttr)
+        var array = context.obtainStyledAttributes(attrs, R.styleable.AutoResizeGridLayout, 0, defStyleAttr)
         try {
-            columnWidth = array.getDimensionPixelSize(R.styleable.AutoGridLayout_columnWidth, 0)
-            val set = intArrayOf(android.R.attr.columnCount /* id 0 */)
+            columnWidth = array.getDimensionPixelSize(R.styleable.AutoResizeGridLayout_columnWidth, 0)
+            val set = intArrayOf(android.R.attr.columnCount)
             array = context.obtainStyledAttributes(attrs, set, 0, defStyleAttr)
-            defaultColumnCount = array.getInt(0, 7)
+            defaultColumnCount = array.getInt(0, DEFAULT_COLUMN_COUNT)
         } finally {
             array.recycle()
         }
@@ -59,11 +58,14 @@ class AutoGridLayout : GridLayout {
     override fun onMeasure(widthSpec: Int, heightSpec: Int) {
         super.onMeasure(widthSpec, heightSpec)
         val width = MeasureSpec.getSize(widthSpec)
-        columnCount =
-            if (columnWidth > 0 && width > 0) {
-                max(1, (width - paddingRight - paddingLeft) / columnWidth)
-            } else {
-                defaultColumnCount
-            }
+        columnCount = if (columnWidth > 0 && width > 0) {
+            max(1, (width - paddingRight - paddingLeft) / columnWidth)
+        } else {
+            defaultColumnCount
+        }
+    }
+
+    private companion object {
+        const val DEFAULT_COLUMN_COUNT = 7
     }
 }

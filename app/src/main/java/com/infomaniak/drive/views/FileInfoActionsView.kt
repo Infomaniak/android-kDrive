@@ -87,11 +87,8 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     fun updateCurrentFile(file: File) {
         currentFile = file
-
         refreshBottomSheetUi(currentFile)
-
-        val canPutCategoryOnFile = DriveInfosController.getCategoryRights()?.canPutCategoryOnFile ?: false
-        manageCategories.isVisible = canPutCategoryOnFile
+        manageCategories.isVisible = DriveInfosController.getCategoryRights()?.canPutCategoryOnFile ?: false
 
         if (currentFile.isFromActivities) {
             quickActionsLayout.isGone = true
@@ -181,64 +178,45 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     private fun initOnClickListeners() {
-
         editDocument.setOnClickListener { onItemClickListener.editDocumentClicked(ownerFragment, currentFile) }
-
         displayInfo.setOnClickListener { onItemClickListener.displayInfoClicked() }
-
         fileRights.setOnClickListener { onItemClickListener.fileRightsClicked() }
-
         sendCopy.setOnClickListener { if (currentFile.isFolder()) openAddFileBottom() else shareFile() }
-
         copyPublicLink.setOnClickListener { onItemClickListener.copyPublicLink() }
-
         openWith.setOnClickListener { onItemClickListener.openWithClicked() }
-
         downloadFile.setOnClickListener { onItemClickListener.downloadFileClicked() }
-
         manageCategories.setOnClickListener {
             onItemClickListener.manageCategoriesClicked(
                 fileId = currentFile.id,
                 categoriesIds = currentFile.getCategories().map { it.id }.toIntArray()
             )
         }
-
         addFavorites.setOnClickListener {
             addFavorites.isEnabled = false
             onItemClickListener.addFavoritesClicked()
         }
-
         leaveShare.setOnClickListener { onItemClickListener.leaveShare(context, currentFile) }
-
         availableOfflineSwitch.setOnCheckedChangeListener { _, isChecked ->
             onItemClickListener.availableOfflineSwitched(this, currentFile, isChecked)
         }
-
-        availableOffline.setOnClickListener {
-            availableOfflineSwitch.performClick()
-        }
-
+        availableOffline.setOnClickListener { availableOfflineSwitch.performClick() }
         moveFile.setOnClickListener {
             val currentFolder = FileController.getParentFile(currentFile.id)?.id ?: -42
             onItemClickListener.moveFileClicked(ownerFragment, currentFolder)
         }
-
         duplicateFile.setOnClickListener {
             onItemClickListener.duplicateFileClicked(
                 ownerFragment.requireContext(),
                 currentFile
             )
         }
-
         renameFile.setOnClickListener {
             onItemClickListener.renameFileClicked(
                 ownerFragment.requireContext(),
                 currentFile
             )
         }
-
         deleteFile.setOnClickListener { onItemClickListener.deleteFileClicked(ownerFragment.requireContext(), currentFile) }
-
     }
 
     fun downloadAsOfflineFile() {

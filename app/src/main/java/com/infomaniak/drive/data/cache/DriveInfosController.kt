@@ -54,8 +54,12 @@ object DriveInfosController {
 
     fun storeDriveInfos(userId: Int, driveInfo: DriveInfo): List<Drive> {
         val driveList = arrayListOf<Drive>()
-        driveInfo.drives.main.forEach { driveList.initDriveForRealm(it, userId, false) }
-        driveInfo.drives.sharedWithMe.forEach { driveList.initDriveForRealm(it, userId, true) }
+        for (drive in driveInfo.drives.main) {
+            driveList.initDriveForRealm(drive, userId, false)
+        }
+        for (drive in driveInfo.drives.sharedWithMe) {
+            driveList.initDriveForRealm(drive, userId, true)
+        }
 
         val driveRemoved = getDrives(userId, sharedWithMe = null).filterNot { driveList.contains(it) }
         val driveRemovedID = driveRemoved.map(Drive::objectId)
@@ -143,7 +147,6 @@ object DriveInfosController {
     }
 
     fun getCurrentDriveCategories(fileCategoriesIds: Array<Int>? = null): List<Category> {
-
         if (fileCategoriesIds?.isEmpty() == true) return emptyList()
 
         val categories = getRealmInstance().use { realm ->
@@ -158,7 +161,6 @@ object DriveInfosController {
 
                 realm.copyFromRealm(categories, 0)
             }
-
         } ?: emptyList()
 
         val sortedList = fileCategoriesIds?.withIndex()?.associate { it.value to it.index }
@@ -169,12 +171,10 @@ object DriveInfosController {
 
     fun getCategoryRights(): CategoryRights? {
         return getRealmInstance().use { realm ->
-
             val categoryRights = realm.where(Drive::class.java)
                 .equalTo(Drive::id.name, AccountUtils.currentDriveId)
                 .findFirst()
                 ?.categoryRights
-
             categoryRights?.let { realm.copyFromRealm(it, 0) }
         }
     }

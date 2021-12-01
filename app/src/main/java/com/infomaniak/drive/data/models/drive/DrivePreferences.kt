@@ -23,5 +23,5 @@ import io.realm.annotations.RealmClass
 @RealmClass(embedded = true)
 open class DrivePreferences(
     var color: String = "#0098FF",
-    var hide: Boolean = false,
+    var hide: Boolean = false
 ) : RealmObject()

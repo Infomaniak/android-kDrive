@@ -81,6 +81,7 @@ class MainActivity : BaseActivity() {
     private var lastCloseApp = Date()
     private var updateAvailableShow = false
     private var uploadedFilesToDelete = arrayListOf<UploadFile>()
+    private var hasDisplayedInformationPanel: Boolean = false
 
     private lateinit var drivePermissions: DrivePermissions
     private lateinit var filesDeletionResult: ActivityResultLauncher<IntentSenderRequest>
@@ -230,17 +231,23 @@ class MainActivity : BaseActivity() {
 
         AppSettings.appLaunches++
 
-        // Display Informations panel
-        when {
-            !UISettings(this).hasDisplayedSyncDialog && !AccountUtils.isEnableAppSync() -> {
-                UISettings(this).hasDisplayedSyncDialog = true
-                val id =
-                    if (AppSettings.migrated) R.id.syncAfterMigrationBottomSheetDialog else R.id.syncConfigureBottomSheetDialog
-                findNavController(R.id.hostFragment).navigate(id)
-            }
-            !UISettings(this).hasDisplayedCategoriesInformationDialog -> {
-                UISettings(this).hasDisplayedCategoriesInformationDialog = true
-                findNavController(R.id.hostFragment).navigate(R.id.categoriesInformationBottomSheetDialog)
+        // Display Information panel
+        if (!hasDisplayedInformationPanel) {
+            UISettings(this).apply {
+                when {
+                    !hasDisplayedSyncDialog && !AccountUtils.isEnableAppSync() -> {
+                        hasDisplayedInformationPanel = true
+                        hasDisplayedSyncDialog = true
+                        val id =
+                            if (AppSettings.migrated) R.id.syncAfterMigrationBottomSheetDialog else R.id.syncConfigureBottomSheetDialog
+                        findNavController(R.id.hostFragment).navigate(id)
+                    }
+                    !hasDisplayedCategoriesInformationDialog -> {
+                        hasDisplayedInformationPanel = true
+                        hasDisplayedCategoriesInformationDialog = true
+                        findNavController(R.id.hostFragment).navigate(R.id.categoriesInformationBottomSheetDialog)
+                    }
+                }
             }
         }
 

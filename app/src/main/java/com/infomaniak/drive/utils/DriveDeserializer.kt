@@ -29,7 +29,8 @@ object DriveDeserializer : JsonDeserializer<Drive> {
         .registerTypeAdapter(Date::class.java, CustomDateTypeAdapter())
         .create()
 
-    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): Drive =
-        gson.fromJson(json, Drive::class.java)
+    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): Drive {
+        return gson.fromJson(json, Drive::class.java)
+    }
 
 }

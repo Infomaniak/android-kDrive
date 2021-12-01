@@ -27,12 +27,12 @@ import kotlinx.android.synthetic.main.fragment_bottom_sheet_categories_informati
 
 class CategoriesInformationBottomSheetDialog : BottomSheetDialogFragment() {
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        inflater.inflate(R.layout.fragment_bottom_sheet_categories_information, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return inflater.inflate(R.layout.fragment_bottom_sheet_categories_information, container, false)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         actionButton.setOnClickListener { dismiss() }
     }
 }

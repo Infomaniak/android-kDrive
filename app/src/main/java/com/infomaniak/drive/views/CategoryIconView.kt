@@ -41,9 +41,9 @@ class CategoryIconView @JvmOverloads constructor(
 
     fun setCategoryIconOrHide(category: Category?) {
         category?.let {
-            isVisible = true
             remainingText.isGone = true
-            categoryImageView.setBackgroundColor(Color.parseColor(category.color))
+            categoryImageView.setBackgroundColor(Color.parseColor(it.color))
+            isVisible = true
         } ?: run {
             isGone = true
         }
@@ -51,16 +51,18 @@ class CategoryIconView @JvmOverloads constructor(
 
     @SuppressLint("SetTextI18n")
     fun setRemainingCategoriesNumber(number: Int, category: Category?) {
-        if (category != null) {
-            categoryImageView.setBackgroundColor(Color.parseColor(category.color))
-            if (number.isPositive()) {
-                remainingText.text = "+$number"
-                remainingText.isVisible = true
-            } else {
-                remainingText.isGone = true
+        category?.let {
+            remainingText.apply {
+                if (number.isPositive()) {
+                    text = "+$number"
+                    isVisible = true
+                } else {
+                    isGone = true
+                }
             }
+            categoryImageView.setBackgroundColor(Color.parseColor(it.color))
             isVisible = true
-        } else {
+        } ?: run {
             isGone = true
         }
     }

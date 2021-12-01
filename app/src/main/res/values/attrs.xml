@@ -24,7 +24,7 @@
         <attr name="fab_size" format="dimension" />
     </declare-styleable>
 
-    <declare-styleable name="AutoGridLayout">
+    <declare-styleable name="AutoResizeGridLayout">
         <attr name="columnWidth" format="dimension" />
     </declare-styleable>
 

@@ -93,10 +93,13 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
             setupShareLinkContainer(currentFile, share)
         }
 
+        setupBackActionHandler()
+    }
+
+    private fun setupBackActionHandler() {
         getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.SELECT_PERMISSION_NAV_KEY) { bundle ->
             val permission = bundle.getParcelable<Permission>(SelectPermissionBottomSheetDialog.PERMISSION_BUNDLE_KEY)
             val isPublic = isPublicPermission(permission)
-
             fileDetailsViewModel.currentFile.value?.let { currentFile ->
                 if ((isPublic && shareLink == null) || (!isPublic && shareLink != null)) {
                     mainViewModel.apply {
@@ -107,13 +110,10 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         }
 
         getBackNavigationResult<Bundle>(SelectCategoriesBottomSheetDialog.SELECT_CATEGORIES_NAV_KEY) { bundle ->
-
             val ids = bundle.getParcelableArrayList(SelectCategoriesBottomSheetDialog.CATEGORIES_BUNDLE_KEY)
                 ?: emptyList<Int>()
-
             val categories = DriveInfosController.getCurrentDriveCategories(ids.toTypedArray())
             val file = fileDetailsViewModel.currentFile.value
-
             setupCategoriesContainer(
                 hasFile = file != null,
                 fileId = file?.id ?: -1,
@@ -186,7 +186,6 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
     }
 
     private fun setupCategoriesContainer(hasFile: Boolean, fileId: Int, categories: List<Category>) {
-
         val categoryRights = DriveInfosController.getCategoryRights()
 
         if (hasFile && categoryRights?.canReadCategoryOnFile == true) {
@@ -204,6 +203,7 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
                             )
                         )
                     } catch (_: IllegalArgumentException) {
+                        // No-op
                     }
                 })
 
@@ -243,20 +243,22 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
 
     private fun createShareLink(currentFile: File) {
         mainViewModel.postFileShareLink(currentFile).observe(viewLifecycleOwner) { apiResponse ->
-            if (apiResponse.isSuccess())
+            if (apiResponse.isSuccess()) {
                 shareLinkContainer.update(apiResponse.data)
-            else
+            } else {
                 requireActivity().showSnackbar(getString(R.string.errorShareLink))
+            }
         }
     }
 
     private fun deleteShareLink(currentFile: File) {
         mainViewModel.deleteFileShareLink(currentFile).observe(viewLifecycleOwner) { apiResponse ->
             val success = apiResponse.data == true
-            if (success)
+            if (success) {
                 shareLinkContainer.update(null)
-            else
+            } else {
                 requireActivity().showSnackbar(apiResponse.translateError())
+            }
         }
     }
 

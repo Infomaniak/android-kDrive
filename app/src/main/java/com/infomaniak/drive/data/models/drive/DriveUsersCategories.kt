@@ -26,5 +26,5 @@ open class DriveUsersCategories(
     var account: RealmList<Int> = RealmList(),
     var drive: RealmList<Int> = RealmList(),
     var internal: RealmList<Int> = RealmList(),
-    var external: RealmList<Int> = RealmList(),
+    var external: RealmList<Int> = RealmList()
 ) : RealmObject()

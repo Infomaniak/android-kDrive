@@ -42,11 +42,11 @@ import kotlinx.coroutines.Dispatchers
 class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
     private val navigationArgs: CategoryInfoActionsBottomSheetDialogArgs by navArgs()
-
     private val categoryInfoActionViewModel: CategoryInfoActionViewModel by viewModels()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        inflater.inflate(R.layout.fragment_bottom_sheet_category_info_actions, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return inflater.inflate(R.layout.fragment_bottom_sheet_category_info_actions, container, false)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -73,21 +73,21 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
         }
 
         editCategory.setOnClickListener {
-            editCategory(
-                fileId,
-                driveId,
-                categoryIsPredefined,
-                categoryId,
-                categoryName,
-                categoryColor,
+            safeNavigate(
+                CategoryInfoActionsBottomSheetDialogDirections.actionCategoryInfoActionsBottomSheetDialogToCreateOrEditCategoryBottomSheetDialog(
+                    fileId = fileId,
+                    driveId = driveId,
+                    categoryIsPredefined = categoryIsPredefined,
+                    categoryId = categoryId,
+                    categoryName = if (categoryIsPredefined) null else categoryName,
+                    categoryColor = categoryColor,
+                )
             )
         }
 
         deleteCategory.setOnClickListener {
             Utils.confirmCategoryDeletion(requireContext(), categoryName) { dialog ->
-                deleteCategory(driveId, categoryId) {
-                    dialog.dismiss()
-                }
+                deleteCategory(driveId, categoryId) { dialog.dismiss() }
             }
         }
 
@@ -97,43 +97,11 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun editCategory(
-        fileId: Int,
-        driveId: Int,
-        categoryIsPredefined: Boolean,
-        categoryId: Int,
-        categoryName: String,
-        categoryColor: String,
-    ) {
-
-        val name =
-            if (categoryIsPredefined) {
-                null
-            } else {
-                categoryName
-            }
-
-        safeNavigate(
-            CategoryInfoActionsBottomSheetDialogDirections.actionCategoryInfoActionsBottomSheetDialogToCreateOrEditCategoryBottomSheetDialog(
-                fileId = fileId,
-                driveId = driveId,
-                categoryIsPredefined = categoryIsPredefined,
-                categoryId = categoryId,
-                categoryName = name,
-                categoryColor = categoryColor,
-            )
-        )
-    }
-
     private fun deleteCategory(driveId: Int, categoryId: Int, dismissDialog: () -> Unit) {
-
         categoryInfoActionViewModel.deleteCategory(driveId, categoryId).observe(viewLifecycleOwner) { apiResponse ->
-
             dismissDialog()
-
             if (apiResponse.isSuccess()) {
                 setBackNavigationResult(DELETE_CATEGORY_NAV_KEY, categoryId)
-
             } else {
                 Utils.showSnackbar(requireView(), apiResponse.translateError())
             }
@@ -141,19 +109,15 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     internal class CategoryInfoActionViewModel : ViewModel() {
-
         fun deleteCategory(driveId: Int, categoryId: Int): LiveData<ApiResponse<Boolean>> =
             liveData(Dispatchers.IO) {
-
                 val apiResponse = ApiRepository.deleteCategory(driveId, categoryId)
-
                 if (apiResponse.isSuccess()) {
                     DriveInfosController.updateDrive { localDrive ->
                         val category = localDrive.categories.find { it.id == categoryId }
                         localDrive.categories.remove(category)
                     }
                 }
-
                 emit(apiResponse)
             }
     }

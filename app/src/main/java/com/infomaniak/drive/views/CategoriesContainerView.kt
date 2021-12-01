@@ -43,7 +43,6 @@ class CategoriesContainerView @JvmOverloads constructor(
     }
 
     fun setup(categories: List<Category>, categoryRights: CategoryRights?, onClicked: () -> Unit) {
-
         if (categoryRights?.canPutCategoryOnFile == true) {
             titleContainer.setOnClickListener { onClicked() }
             categorySwitch.isVisible = true
@@ -60,11 +59,13 @@ class CategoriesContainerView @JvmOverloads constructor(
 
             // Populate categories
             categories.forEach { category ->
-                val chip = Chip(context)
-                chip.text = category.getName(context)
-                chip.chipBackgroundColor = ColorStateList.valueOf(category.color.toColorInt())
-                chip.setTextColor(ContextCompat.getColor(context, R.color.white))
-                categoriesGroup.addView(chip)
+                categoriesGroup.addView(
+                    Chip(context).apply {
+                        text = category.getName(context)
+                        chipBackgroundColor = ColorStateList.valueOf(category.color.toColorInt())
+                        setTextColor(ContextCompat.getColor(context, R.color.white))
+                    }
+                )
             }
 
             // Show categories

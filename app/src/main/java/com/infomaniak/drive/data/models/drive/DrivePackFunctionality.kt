@@ -36,5 +36,5 @@ open class DrivePackFunctionality(
     @SerializedName("versions_kept_for_days")
     var versionsKeptForDays: Long = 0,
     var dropbox: Boolean = false,
-    var versioning: Boolean = false,
+    var versioning: Boolean = false
 ) : RealmObject()

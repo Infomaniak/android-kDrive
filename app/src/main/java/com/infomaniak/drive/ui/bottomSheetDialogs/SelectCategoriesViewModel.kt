@@ -32,9 +32,7 @@ import java.util.*
 class SelectCategoriesViewModel : ViewModel() {
 
     fun addCategory(fileId: Int, driveId: Int, categoryId: Int): LiveData<ApiResponse<Unit>> = liveData(Dispatchers.IO) {
-
         val apiResponse = ApiRepository.addCategory(fileId, driveId, mapOf("id" to categoryId))
-
         if (apiResponse.isSuccess()) {
             FileController.updateFile(fileId) { localFile ->
                 localFile.categories.add(
@@ -46,14 +44,11 @@ class SelectCategoriesViewModel : ViewModel() {
                 )
             }
         }
-
         emit(apiResponse)
     }
 
     fun removeCategory(file: File, categoryId: Int): LiveData<ApiResponse<Unit>> = liveData(Dispatchers.IO) {
-
         val apiResponse = ApiRepository.removeCategory(file, categoryId)
-
         if (apiResponse.isSuccess()) {
             FileController.updateFile(file.id) { localFile ->
                 val categories = localFile.categories
@@ -61,7 +56,6 @@ class SelectCategoriesViewModel : ViewModel() {
                 categories.remove(category)
             }
         }
-
         emit(apiResponse)
     }
 }

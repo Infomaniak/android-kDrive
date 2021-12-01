@@ -73,17 +73,19 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         fileInfoActionsView.init(this, this, navigationArgs.userDrive.sharedWithMe)
         fileInfoActionsView.updateCurrentFile(currentFile)
 
+        setupBackActionHandler()
+    }
+
+    private fun setupBackActionHandler() {
         getBackNavigationResult<Boolean>(DownloadProgressDialog.OPEN_WITH) {
             context?.openWith(currentFile)
         }
 
         getBackNavigationResult<Bundle>(SelectCategoriesBottomSheetDialog.SELECT_CATEGORIES_NAV_KEY) { bundle ->
-
             val aCategoryHasBeenModified = bundle.getBoolean(SelectCategoriesBottomSheetDialog.MODIFIED_CATEGORY_BUNDLE_KEY)
             if (aCategoryHasBeenModified) {
                 findNavController().previousBackStackEntry?.savedStateHandle?.set(UPDATE_CATEGORIES_NAV_KEY, currentFile.id)
             }
-
             fileInfoActionsView.refreshBottomSheetUi(currentFile)
         }
     }

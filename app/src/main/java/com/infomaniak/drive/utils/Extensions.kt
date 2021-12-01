@@ -787,22 +787,21 @@ fun Context.shareText(text: String) {
     ContextCompat.startActivity(this, Intent.createChooser(intent, null), null)
 }
 
-fun Category.getName(context: Context): String =
-    when (name) {
-        "PREDEF_CAT_BANKING" -> context.getString(R.string.categoryBanking)
-        "PREDEF_CAT_BILL" -> context.getString(R.string.categoryBill)
-        "PREDEF_CAT_CONTRACT" -> context.getString(R.string.categoryContract)
-        "PREDEF_CAT_FORM" -> context.getString(R.string.categoryForm)
-        "PREDEF_CAT_HOBBIES" -> context.getString(R.string.categoryHobbies)
-        "PREDEF_CAT_ID" -> context.getString(R.string.categoryID)
-        "PREDEF_CAT_INSURANCE" -> context.getString(R.string.categoryInsurance)
-        "PREDEF_CAT_QUOTATION" -> context.getString(R.string.categoryQuotation)
-        "PREDEF_CAT_TAXATION" -> context.getString(R.string.categoryTaxation)
-        "PREDEF_CAT_TRANSPORTATION" -> context.getString(R.string.categoryTransportation)
-        "PREDEF_CAT_WARRANTY" -> context.getString(R.string.categoryWarranty)
-        "PREDEF_CAT_WORK" -> context.getString(R.string.categoryWork)
-        else -> name
-    }
+fun Category.getName(context: Context): String = when (name) {
+    "PREDEF_CAT_BANKING" -> context.getString(R.string.categoryBanking)
+    "PREDEF_CAT_BILL" -> context.getString(R.string.categoryBill)
+    "PREDEF_CAT_CONTRACT" -> context.getString(R.string.categoryContract)
+    "PREDEF_CAT_FORM" -> context.getString(R.string.categoryForm)
+    "PREDEF_CAT_HOBBIES" -> context.getString(R.string.categoryHobbies)
+    "PREDEF_CAT_ID" -> context.getString(R.string.categoryID)
+    "PREDEF_CAT_INSURANCE" -> context.getString(R.string.categoryInsurance)
+    "PREDEF_CAT_QUOTATION" -> context.getString(R.string.categoryQuotation)
+    "PREDEF_CAT_TAXATION" -> context.getString(R.string.categoryTaxation)
+    "PREDEF_CAT_TRANSPORTATION" -> context.getString(R.string.categoryTransportation)
+    "PREDEF_CAT_WARRANTY" -> context.getString(R.string.categoryWarranty)
+    "PREDEF_CAT_WORK" -> context.getString(R.string.categoryWork)
+    else -> name
+}
 
 fun Int.dpToPx(context: Context): Int =
     TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), context.resources.displayMetrics).toInt()
