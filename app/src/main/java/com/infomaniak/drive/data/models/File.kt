@@ -307,12 +307,14 @@ open class File(
     }
 
     fun getSortedCategoriesIds(): List<Int> {
+        fun RealmList<FileCategory>.sort() = sort(FileCategory::addedToFileAt.name).map { it.id }
+
         return if (isManaged) {
-            categories.sort(FileCategory::addedToFileAt.name).map { it.id }
+            categories.sort()
         } else {
             FileController.getRealmInstance().use { realm ->
                 FileController.getFileProxyById(id, customRealm = realm)
-                    ?.categories?.sort(FileCategory::addedToFileAt.name)?.map { it.id } ?: emptyList()
+                    ?.categories?.sort() ?: emptyList()
             }
         }
     }
