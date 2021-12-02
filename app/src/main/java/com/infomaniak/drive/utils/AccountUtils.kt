@@ -263,12 +263,20 @@ object AccountUtils : CredentialManager {
     }
 
     private fun resetApp(context: Context) {
-        if (getAllUsers().value?.size == 0) {
+        val allUserCount = getAllUsers().value?.size ?: 0
+        if (allUserCount == 0) {
             AppSettings.removeAppSettings()
             UISettings(context).removeUiSettings()
+
             if (isEnableAppSync()) {
                 Sentry.captureMessage("AccountUtils: disableAutoSync")
                 context.disableAutoSync()
+            }
+
+            // Delete all app data
+            with(context) {
+                filesDir.deleteRecursively()
+                cacheDir.deleteRecursively()
             }
         }
     }
