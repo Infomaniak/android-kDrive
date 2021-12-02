@@ -51,17 +51,12 @@ class SearchFragment : FileListFragment() {
     private lateinit var filterLayoutView: View
     private var isDownloading = false
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        mainViewModel.currentPreviewFileList = LinkedHashMap()
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         fileListViewModel.sortType = File.SortType.RECENT
 
         // Get preview List if needed
         if (mainViewModel.currentPreviewFileList.isNotEmpty()) {
-            fileListViewModel.oldList = RealmList(*mainViewModel.currentPreviewFileList.values.toTypedArray())
+            fileListViewModel.searchOldFileList = RealmList(*mainViewModel.currentPreviewFileList.values.toTypedArray())
             mainViewModel.currentPreviewFileList = LinkedHashMap()
         }
 
@@ -196,7 +191,7 @@ class SearchFragment : FileListFragment() {
     }
 
     override fun onPause() {
-        fileListViewModel.oldList = fileAdapter.getFiles()
+        fileListViewModel.searchOldFileList = fileAdapter.getFiles()
         searchView.isFocusable = false
         super.onPause()
     }
@@ -236,10 +231,10 @@ class SearchFragment : FileListFragment() {
                 return
             }
 
-            val oldList = fileListViewModel.oldList?.toMutableList() as? ArrayList
+            val oldList = fileListViewModel.searchOldFileList?.toMutableList() as? ArrayList
             if (!oldList.isNullOrEmpty() && fileAdapter.getFiles().isEmpty()) {
                 fileAdapter.setFiles(oldList)
-                fileListViewModel.oldList = null
+                fileListViewModel.searchOldFileList = null
                 if (fileListViewModel.currentConvertedType != null) convertedTypeLayout.isVisible = true
                 showFilterLayout(false)
                 swipeRefreshLayout.isRefreshing = false
