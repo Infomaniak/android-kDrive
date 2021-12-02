@@ -52,7 +52,7 @@ class FileListViewModel : ViewModel() {
     var isSharedWithMe = false
 
     var currentPage = 1
-    var oldList: OrderedRealmCollection<File>? = null
+    var searchOldFileList: OrderedRealmCollection<File>? = null
     val isListMode = SingleLiveEvent<Boolean>()
 
     var lastItemCount: FileCount? = null

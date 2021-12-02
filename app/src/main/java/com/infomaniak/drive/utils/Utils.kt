@@ -197,7 +197,7 @@ object Utils {
         fileList: ArrayList<File>,
         isSharedWithMe: Boolean = false
     ) {
-        mainViewModel.currentFileList = fileList.associateBy { it.id } as LinkedHashMap<Int, File>
+        mainViewModel.currentPreviewFileList = fileList.associateBy { it.id } as LinkedHashMap<Int, File>
         val navOptions = NavOptions.Builder()
             .setEnterAnim(R.anim.fragment_open_enter)
             .setExitAnim(R.anim.fragment_open_exit)

@@ -52,7 +52,7 @@ open class PreviewFragment : Fragment() {
     }
 
     private fun getCurrentFile(fileId: Int) = try {
-        FileController.getFileById(fileId, previewSliderViewModel.userDrive) ?: mainViewModel.currentFileList[fileId]
+        FileController.getFileById(fileId, previewSliderViewModel.userDrive) ?: mainViewModel.currentPreviewFileList[fileId]
     } catch (exception: Exception) {
         exception.printStackTrace()
         Sentry.withScope { scope ->
