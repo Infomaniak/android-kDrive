@@ -108,7 +108,8 @@ object ApiRoutes {
     fun dropBox(file: File) = "${fileURL(file)}/collaborate"
 
     fun getLastActivities(driveId: Int) =
-        "${DRIVE_API}$driveId/file/activity?with=file,rights,collaborative_folder,favorite,mobile,share_link&depth=unlimited" +
+        "${DRIVE_API}$driveId/file/activity?with=file,rights,collaborative_folder,favorite,mobile,share_link,categories" +
+                "&depth=unlimited" +
                 "&actions[]=file_create" +
                 "&actions[]=file_update" +
                 "&actions[]=file_restore" +

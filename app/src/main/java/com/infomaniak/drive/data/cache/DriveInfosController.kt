@@ -171,11 +171,11 @@ object DriveInfosController {
 
     fun getCategoryRights(): CategoryRights? {
         return getRealmInstance().use { realm ->
-            val categoryRights = realm.where(Drive::class.java)
+            realm.where(Drive::class.java)
                 .equalTo(Drive::id.name, AccountUtils.currentDriveId)
                 .findFirst()
                 ?.categoryRights
-            categoryRights?.let { realm.copyFromRealm(it, 0) }
+                ?.let { realm.copyFromRealm(it, 0) }
         }
     }
 }

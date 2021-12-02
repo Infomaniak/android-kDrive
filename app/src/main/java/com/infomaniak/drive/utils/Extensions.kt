@@ -90,6 +90,7 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialog.Companion.FILE_ID
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED_CATEGORIES
+import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.*
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.views.CategoryIconView
@@ -805,3 +806,9 @@ fun Category.getName(context: Context): String = when (name) {
 
 fun Int.dpToPx(context: Context): Int =
     TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), context.resources.displayMetrics).toInt()
+
+fun List<UICategory>.sortCategoriesList(): List<UICategory> {
+    return sortedWith { a: UICategory, b: UICategory -> a.name.compareTo(b.name, true) }
+        .sortedByDescending { it.isPredefined }
+        .sortedByDescending { it.isSelected }
+}

@@ -139,8 +139,6 @@
             android:id="@+id/categoriesContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/marginStandardSmall"
-            android:layout_marginTop="@dimen/marginStandardMedium"
             android:visibility="gone"
             tools:visibility="visible" />
 
@@ -148,7 +146,6 @@
             android:id="@+id/categoriesDivider"
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_marginTop="@dimen/marginStandardMedium"
             android:background="@color/divider" />
 
         <androidx.constraintlayout.widget.ConstraintLayout

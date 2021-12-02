@@ -18,14 +18,14 @@
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import android.annotation.SuppressLint
-import android.graphics.Color
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColorInt
 import androidx.core.view.isGone
-import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
@@ -33,6 +33,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.android.material.button.MaterialButton
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
@@ -47,7 +48,6 @@ import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.android.synthetic.main.fragment_create_category.*
-import kotlinx.android.synthetic.main.view_shapeable_image.view.*
 import kotlinx.coroutines.Dispatchers
 
 class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
@@ -56,7 +56,7 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
     private val createOrEditCategoryViewModel: CreateOrEditCategoryViewModel by viewModels()
     private val selectCategoriesViewModel: SelectCategoriesViewModel by viewModels()
 
-    private val colorLayouts = mutableListOf<ConstraintLayout>()
+    private val colorLayouts = mutableListOf<MaterialButton>()
     private var selected: Int = -1
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -147,34 +147,40 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
         CATEGORY_COLORS.forEach { color ->
 
             // Create view
-            val colorLayout = LayoutInflater.from(ctx).inflate(R.layout.view_shapeable_image, null, false) as ConstraintLayout
+            (LayoutInflater.from(ctx).inflate(R.layout.view_category_color, null, false) as MaterialButton)
+                .apply {
 
-            // Set layout size
-            val size = 36.dpToPx(ctx)
-            colorLayout.layoutParams = ViewGroup.MarginLayoutParams(size, size)
+                    // Set layout size
+                    val size = 36.dpToPx(ctx)
+                    layoutParams = ViewGroup.MarginLayoutParams(size, size)
 
-            // Set layout margins
-            val margin = 8.dpToPx(ctx)
-            colorLayout.setMargin(margin, margin, margin, margin)
+                    // Set layout margins
+                    val margin = 8.dpToPx(ctx)
+                    setMargin(margin, margin, margin, margin)
 
-            // Set background color
-            colorLayout.shapeableImageBackground.setBackgroundColor(Color.parseColor(color))
+                    // Set background & icon colors
+                    val colorStateList = ColorStateList.valueOf(color.toColorInt())
+                    backgroundTintList = colorStateList
+                    iconTint = colorStateList
 
-            // Set click
-            val pos = colorLayouts.size
-            colorLayout.setOnClickListener { onColorClicked(pos) }
+                    // Set click
+                    val pos = colorLayouts.size
+                    setOnClickListener { onColorClicked(pos) }
 
-            // Add view
-            colorLayouts.add(colorLayout)
-            categoryColorsView.addView(colorLayout)
+                    // Add view
+                    colorLayouts.add(this)
+                    categoryColorsView.addView(this)
+                }
         }
     }
 
     private fun onColorClicked(position: Int) {
         if (position != selected) {
-            colorLayouts.getOrNull(selected)?.shapeableImageIcon?.isGone = true
+            colorLayouts.getOrNull(selected)?.let {
+                it.iconTint = it.backgroundTintList
+            }
             colorLayouts.getOrNull(position)?.let {
-                it.shapeableImageIcon.isVisible = true
+                it.iconTint = ContextCompat.getColorStateList(requireContext(), R.color.white)
                 selected = position
             }
         }

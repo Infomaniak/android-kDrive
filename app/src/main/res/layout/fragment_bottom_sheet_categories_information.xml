@@ -20,21 +20,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingHorizontal="@dimen/marginStandard"
     tools:background="@color/appBar">
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/start"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_begin="@dimen/marginStandard" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/end"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_end="@dimen/marginStandard" />
 
     <ImageView
         android:id="@+id/illu"
@@ -44,8 +31,8 @@
         android:maxHeight="270dp"
         android:src="@drawable/img_categories"
         app:layout_constraintBottom_toTopOf="@id/title"
-        app:layout_constraintEnd_toStartOf="@id/end"
-        app:layout_constraintStart_toEndOf="@id/start"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
         tools:ignore="ContentDescription" />
@@ -55,37 +42,40 @@
         style="@style/H2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/marginStandardMedium"
         android:gravity="center"
         android:text="@string/categoriesPanelTitle"
-        android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@id/description"
-        app:layout_constraintEnd_toStartOf="@id/end"
-        app:layout_constraintStart_toEndOf="@id/start"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/illu"
-        app:layout_constraintVertical_bias="0.45"
         app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
         android:id="@+id/description"
+        style="@style/Subtitle1"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/marginStandardMedium"
+        android:layout_marginBottom="@dimen/marginStandard"
         android:gravity="center"
         android:text="@string/categoriesPanelDescription"
-        android:textSize="14sp"
-        app:layout_constraintEnd_toStartOf="@id/end"
-        app:layout_constraintStart_toEndOf="@id/start"
-        app:layout_constraintTop_toBottomOf="@id/title" />
+        android:textColor="@color/primaryText"
+        app:layout_constraintBottom_toTopOf="@id/actionButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/actionButton"
         style="@style/ButtonInfomaniak"
         android:layout_width="0dp"
-        android:layout_marginVertical="@dimen/marginStandard"
+        android:layout_marginBottom="@dimen/marginStandard"
         android:text="@string/buttonClose"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/end"
-        app:layout_constraintStart_toStartOf="@id/start"
-        app:layout_constraintTop_toBottomOf="@+id/description" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/description"
+        app:layout_constraintVertical_chainStyle="packed" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

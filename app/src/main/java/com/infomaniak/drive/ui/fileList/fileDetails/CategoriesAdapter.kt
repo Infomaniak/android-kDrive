@@ -24,6 +24,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
+import com.infomaniak.drive.utils.sortCategoriesList
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_category.view.*
 
@@ -42,9 +43,6 @@ class CategoriesAdapter(
 
     fun setAll(newCategories: List<UICategory>) {
         categories = newCategories
-            .sortedWith { a: UICategory, b: UICategory -> a.name.compareTo(b.name, true) }
-            .sortedByDescending { it.isPredefined }
-            .sortedByDescending { it.isSelected }
         notifyItemRangeChanged(0, itemCount)
     }
 
@@ -76,6 +74,23 @@ class CategoriesAdapter(
     }
 
     override fun getItemCount() = categories.size
+
+    fun updateCategory(categoryId: Int, isSelected: Boolean) {
+
+        // Find and update the Category
+        val oldPos = categories.indexOfFirst { it.id == categoryId }
+        categories[oldPos].isSelected = isSelected
+
+        // Sort the list
+        categories = categories.sortCategoriesList()
+
+        // Find the Category's new position
+        val newPos = categories.indexOfFirst { it.id == categoryId }
+
+        // Notify the adapter
+        notifyItemMoved(oldPos, newPos)
+        notifyItemChanged(newPos)
+    }
 
     data class UICategory(
         val id: Int,

@@ -20,8 +20,10 @@ package com.infomaniak.drive.views
 import android.content.Context
 import android.content.res.ColorStateList
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.toColorInt
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -44,7 +46,7 @@ class CategoriesContainerView @JvmOverloads constructor(
 
     fun setup(categories: List<Category>, categoryRights: CategoryRights?, onClicked: () -> Unit) {
         if (categoryRights?.canPutCategoryOnFile == true) {
-            titleContainer.setOnClickListener { onClicked() }
+            categoriesContainerView.setOnClickListener { onClicked() }
             categorySwitch.isVisible = true
             categoryTitle.setText(if (categories.isEmpty()) R.string.addCategoriesTitle else R.string.manageCategoriesTitle)
         } else {
@@ -62,8 +64,11 @@ class CategoriesContainerView @JvmOverloads constructor(
                 categoriesGroup.addView(
                     Chip(context).apply {
                         text = category.getName(context)
-                        chipBackgroundColor = ColorStateList.valueOf(category.color.toColorInt())
+                        setTextSize(TypedValue.COMPLEX_UNIT_SP, 14.0f)
                         setTextColor(ContextCompat.getColor(context, R.color.white))
+                        typeface = ResourcesCompat.getFont(context, R.font.suisseintl_medium)
+                        chipBackgroundColor = ColorStateList.valueOf(category.color.toColorInt())
+                        setOnClickListener { onClicked() }
                     }
                 )
             }

@@ -33,6 +33,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.drive.CategoryRights
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter
+import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.UICategory
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import kotlinx.android.synthetic.main.fragment_select_categories.*
@@ -138,7 +139,7 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
     private fun updateUI(enabledCategoriesIds: Array<Int>, fileId: Int) {
         val allCategories = DriveInfosController.getCurrentDriveCategories()
         val uiCategories = allCategories.map { category ->
-            CategoriesAdapter.UICategory(
+            UICategory(
                 id = category.id,
                 name = category.getName(requireContext()),
                 color = category.color,
@@ -146,7 +147,7 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
                 isSelected = enabledCategoriesIds.find { it == category.id } != null
             )
         }
-        adapter.setAll(uiCategories)
+        adapter.setAll(uiCategories.sortCategoriesList())
         adapter.onMenuClicked = { category ->
             val bundle = bundleOf(
                 "fileId" to fileId,
@@ -170,8 +171,7 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
 
         requestLiveData.observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
-                adapter.categories.find { it.id == categoryId }?.isSelected = isSelected
-                adapter.setAll(adapter.categories)
+                adapter.updateCategory(categoryId, isSelected)
             } else {
                 Utils.showSnackbar(requireView(), apiResponse.translateError())
             }
