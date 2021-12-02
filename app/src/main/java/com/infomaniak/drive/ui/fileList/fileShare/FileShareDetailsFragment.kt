@@ -32,6 +32,7 @@ import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
@@ -59,7 +60,14 @@ class FileShareDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val currentFile = navigationArgs.file.also { fileShareViewModel.currentFile.value = it }
+        val currentFile = FileController.getFileById(navigationArgs.fileId)
+        currentFile?.let {
+            fileShareViewModel.currentFile.value = it
+        } ?: run {
+            findNavController().popBackStack()
+            return
+        }
+
         allUserList = AccountUtils.getCurrentDrive().getDriveUsers()
         allTeams = DriveInfosController.getTeams(AccountUtils.getCurrentDrive()!!)
 

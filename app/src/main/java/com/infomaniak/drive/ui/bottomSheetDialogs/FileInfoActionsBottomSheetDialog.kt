@@ -65,7 +65,15 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        currentFile = navigationArgs.file
+
+        FileController.getFileById(navigationArgs.fileId).let {
+            if (it == null) {
+                findNavController().popBackStack()
+                return
+            } else {
+                currentFile = it
+            }
+        }
 
         drivePermissions = DrivePermissions()
         drivePermissions.registerPermissions(this) { authorized -> if (authorized) downloadFileClicked() }
@@ -86,7 +94,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             if (aCategoryHasBeenModified) {
                 findNavController().previousBackStackEntry?.savedStateHandle?.set(UPDATE_CATEGORIES_NAV_KEY, currentFile.id)
             }
-            fileInfoActionsView.refreshBottomSheetUi(currentFile)
+            lifecycleScope.launchWhenResumed {
+                fileInfoActionsView.refreshBottomSheetUi(currentFile)
+            }
         }
     }
 
@@ -123,13 +133,11 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun fileRightsClicked() {
-        currentFile.apply {
-            safeNavigate(
-                FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToFileShareDetailsFragment(
-                    file = this
-                )
+        safeNavigate(
+            FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToFileShareDetailsFragment(
+                fileId = currentFile.id
             )
-        }
+        )
     }
 
     override fun dropBoxClicked(isDropBox: Boolean) {
@@ -167,10 +175,11 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
     }
 
-    override fun manageCategoriesClicked(fileId: Int, categoriesIds: IntArray) {
+    override fun manageCategoriesClicked(fileId: Int) {
         safeNavigate(
-            FileInfoActionsBottomSheetDialogDirections
-                .actionFileInfoActionsBottomSheetDialogToSelectCategoriesBottomSheetDialog(fileId, categoriesIds)
+            FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToSelectCategoriesBottomSheetDialog(
+                fileId
+            )
         )
     }
 

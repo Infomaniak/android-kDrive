@@ -499,7 +499,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         fileAdapter.onMenuClicked = { file ->
             val fileObject = file.realm?.copyFromRealm(file, 1) ?: file
             val bundle = bundleOf(
-                "file" to fileObject,
+                "fileId" to fileObject.id,
                 "userDrive" to UserDrive(driveId = file.driveId, sharedWithMe = fileListViewModel.isSharedWithMe)
             )
             safeNavigate(R.id.fileInfoActionsBottomSheetDialog, bundle, currentClassName = homeClassName())

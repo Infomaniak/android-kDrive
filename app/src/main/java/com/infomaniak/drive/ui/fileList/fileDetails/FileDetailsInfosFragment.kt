@@ -135,7 +135,7 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
             shareButton.isVisible = true
             shareButton.setOnClickListener {
                 parentFragment?.safeNavigate(
-                    FileDetailsFragmentDirections.actionFileDetailsFragmentToFileShareDetailsFragment(file = currentFile)
+                    FileDetailsFragmentDirections.actionFileDetailsFragmentToFileShareDetailsFragment(fileId = currentFile.id)
                 )
             }
         } else {
@@ -197,10 +197,7 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
                 onClicked = {
                     try {
                         findNavController().navigate(
-                            FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectCategoriesBottomSheetDialog(
-                                fileId = fileId,
-                                categoriesIds = categories.map { it.id }.toIntArray()
-                            )
+                            FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectCategoriesBottomSheetDialog(fileId)
                         )
                     } catch (_: IllegalArgumentException) {
                         // No-op

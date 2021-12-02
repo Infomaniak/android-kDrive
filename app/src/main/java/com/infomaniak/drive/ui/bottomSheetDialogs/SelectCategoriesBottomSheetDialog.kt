@@ -56,7 +56,6 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
 
         FileController.getFileById(navigationArgs.fileId).let {
             if (it == null) {
-                Utils.showSnackbar(requireView(), R.string.anErrorHasOccurred)
                 findNavController().popBackStack()
                 return
             } else {
@@ -77,7 +76,7 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
         setToolbar(categoryRights)
         setAdapter(categoryRights)
         setupBackActionHandler()
-        updateUI(navigationArgs.categoriesIds.toTypedArray(), file.id)
+        updateUI(file.categories.map { it.id }.toTypedArray(), file.id)
     }
 
     private fun setToolbar(categoryRights: CategoryRights?) {

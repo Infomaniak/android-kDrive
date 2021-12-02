@@ -185,12 +185,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         copyPublicLink.setOnClickListener { onItemClickListener.copyPublicLink() }
         openWith.setOnClickListener { onItemClickListener.openWithClicked() }
         downloadFile.setOnClickListener { onItemClickListener.downloadFileClicked() }
-        manageCategories.setOnClickListener {
-            onItemClickListener.manageCategoriesClicked(
-                fileId = currentFile.id,
-                categoriesIds = currentFile.getCategories().map { it.id }.toIntArray()
-            )
-        }
+        manageCategories.setOnClickListener { onItemClickListener.manageCategoriesClicked(currentFile.id) }
         addFavorites.setOnClickListener {
             addFavorites.isEnabled = false
             onItemClickListener.addFavoritesClicked()
@@ -404,7 +399,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun copyPublicLink()
         fun displayInfoClicked()
         fun downloadFileClicked()
-        fun manageCategoriesClicked(fileId: Int, categoriesIds: IntArray)
+        fun manageCategoriesClicked(fileId: Int)
         fun dropBoxClicked(isDropBox: Boolean) = Unit
         fun fileRightsClicked()
         fun onCacheAddedToOffline() = Unit

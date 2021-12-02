@@ -232,11 +232,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun fileRightsClicked() {
-        currentPreviewFile.apply {
-            safeNavigate(
-                PreviewSliderFragmentDirections.actionPreviewSliderFragmentToFileShareDetailsFragment(file = this)
-            )
-        }
+        safeNavigate(PreviewSliderFragmentDirections.actionPreviewSliderFragmentToFileShareDetailsFragment(currentPreviewFile.id))
     }
 
     override fun copyPublicLink() {
@@ -323,11 +319,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
-    override fun manageCategoriesClicked(fileId: Int, categoriesIds: IntArray) {
-        safeNavigate(
-            PreviewSliderFragmentDirections
-                .actionPreviewSliderFragmentToSelectCategoriesBottomSheetDialog(fileId, categoriesIds)
-        )
+    override fun manageCategoriesClicked(fileId: Int) {
+        safeNavigate(PreviewSliderFragmentDirections.actionPreviewSliderFragmentToSelectCategoriesBottomSheetDialog(fileId))
     }
 
     override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) {
