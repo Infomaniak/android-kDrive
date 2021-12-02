@@ -44,81 +44,89 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/marginStandard"
-        android:paddingBottom="@dimen/recyclerViewPaddingBottom"
+        android:layout_marginHorizontal="@dimen/marginStandardSmall"
+        android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <TextView
-            android:id="@+id/editCategoryWarningText"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/marginStandard"
-            android:background="@drawable/background_create_category_warning"
-            android:drawablePadding="@dimen/marginStandardMedium"
-            android:padding="@dimen/marginStandardMedium"
-            android:text="@string/editCategoryInfoDescription"
-            android:textSize="14sp"
-            android:visibility="gone"
-            app:drawableStartCompat="@drawable/ic_info"
-            app:drawableTint="@color/blue_general"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="visible" />
+            android:layout_height="match_parent"
+            android:paddingBottom="@dimen/recyclerViewPaddingBottom"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <EditText
-            android:id="@+id/categoryName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/marginStandard"
-            android:layout_marginTop="@dimen/marginStandard"
-            android:autofillHints="name"
-            android:background="@drawable/background_create_category_name"
-            android:hint="@string/categoryNameField"
-            android:inputType="text"
-            android:padding="@dimen/marginStandardMedium"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/editCategoryWarningText" />
+            <TextView
+                android:id="@+id/editCategoryWarningText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandardMedium"
+                android:layout_marginTop="@dimen/marginStandard"
+                android:background="@drawable/background_create_category_warning"
+                android:drawablePadding="@dimen/marginStandardMedium"
+                android:fontFamily="@font/suisseintl_regular"
+                android:padding="@dimen/marginStandardMedium"
+                android:text="@string/editCategoryInfoDescription"
+                android:textColor="@color/title"
+                android:textSize="14sp"
+                android:visibility="gone"
+                app:drawableStartCompat="@drawable/ic_info"
+                app:drawableTint="@color/blue_general"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
 
-        <TextView
-            android:id="@+id/chooseCategory"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/marginStandard"
-            android:layout_marginTop="@dimen/marginStandard"
-            android:text="@string/categoryColorTitle"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/categoryName" />
+            <EditText
+                android:id="@+id/categoryName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandardMedium"
+                android:layout_marginTop="@dimen/marginStandard"
+                android:autofillHints="name"
+                android:background="@drawable/background_create_category_name"
+                android:hint="@string/categoryNameField"
+                android:inputType="text"
+                android:padding="@dimen/marginStandardMedium"
+                android:textSize="@dimen/h3"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/editCategoryWarningText" />
 
-        <com.infomaniak.drive.views.AutoResizeGridLayout
-            android:id="@+id/categoryColorsView"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_marginTop="14dp"
-            android:columnCount="7"
-            android:paddingHorizontal="14dp"
-            app:columnWidth="52dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/chooseCategory" />
+            <TextView
+                android:id="@+id/chooseCategory"
+                style="@style/Subtitle2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandardMedium"
+                android:layout_marginTop="@dimen/marginStandard"
+                android:text="@string/categoryColorTitle"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/categoryName" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <com.infomaniak.drive.views.AutoResizeGridLayout
+                android:id="@+id/categoryColorsView"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginTop="@dimen/marginStandardSmall"
+                app:columnWidth="52dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/chooseCategory" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/saveButton"
         style="@style/ButtonInfomaniak"
         android:layout_width="match_parent"
         android:layout_gravity="bottom"
-        android:layout_margin="@dimen/marginStandard"
+        android:layout_marginHorizontal="@dimen/marginStandard"
+        android:layout_marginBottom="@dimen/marginStandard"
         android:enabled="false"
         android:text="@string/buttonSave" />
 

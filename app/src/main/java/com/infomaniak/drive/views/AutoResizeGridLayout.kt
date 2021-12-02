@@ -20,12 +20,12 @@ package com.infomaniak.drive.views
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.GridLayout
+import androidx.core.view.children
 import com.infomaniak.drive.R
 import kotlin.math.max
 
 class AutoResizeGridLayout : GridLayout {
 
-    private var defaultColumnCount = 0
     private var columnWidth = 0
 
     constructor(context: Context?) : super(context) {
@@ -41,28 +41,53 @@ class AutoResizeGridLayout : GridLayout {
     }
 
     private fun init(attrs: AttributeSet?, defStyleAttr: Int) {
-        var array = context.obtainStyledAttributes(attrs, R.styleable.AutoResizeGridLayout, 0, defStyleAttr)
+        val array = context.obtainStyledAttributes(attrs, R.styleable.AutoResizeGridLayout, 0, defStyleAttr)
         try {
             columnWidth = array.getDimensionPixelSize(R.styleable.AutoResizeGridLayout_columnWidth, 0)
-            val set = intArrayOf(android.R.attr.columnCount)
-            array = context.obtainStyledAttributes(attrs, set, 0, defStyleAttr)
-            defaultColumnCount = array.getInt(0, DEFAULT_COLUMN_COUNT)
         } finally {
             array.recycle()
         }
-
         // Initially set columnCount to 1, it will be changed automatically later.
         columnCount = 1
     }
 
     override fun onMeasure(widthSpec: Int, heightSpec: Int) {
         super.onMeasure(widthSpec, heightSpec)
+
         val width = MeasureSpec.getSize(widthSpec)
-        columnCount = if (columnWidth > 0 && width > 0) {
-            max(1, (width - paddingRight - paddingLeft) / columnWidth)
+        val oldColumnCount = columnCount
+        val newColumnCount = if (columnWidth > 0 && width > 0) {
+            max(1, width / columnWidth)
         } else {
-            defaultColumnCount
+            DEFAULT_COLUMN_COUNT
         }
+
+        when {
+            newColumnCount > oldColumnCount -> {
+                columnCount = newColumnCount
+                updateViewsPosition(newColumnCount)
+            }
+            newColumnCount < oldColumnCount -> {
+                updateViewsPosition(newColumnCount)
+                columnCount = newColumnCount
+            }
+        }
+    }
+
+    private fun updateViewsPosition(columns: Int) {
+        var col = 0
+        var row = 0
+        children.forEach {
+            it.layoutParams = (it.layoutParams as LayoutParams).apply {
+                columnSpec = spec(col, 1, 1.0f)
+                rowSpec = spec(row, 1, 1.0f)
+            }
+            if (++col == columns) {
+                col = 0
+                row++
+            }
+        }
+        requestLayout()
     }
 
     private companion object {

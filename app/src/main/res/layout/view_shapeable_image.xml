@@ -32,7 +32,7 @@
         app:shapeAppearanceOverlay="@style/CircleImageView"
         tools:background="@color/red" />
 
-    <com.google.android.material.imageview.ShapeableImageView
+    <ImageView
         android:id="@+id/shapeableImageIcon"
         android:layout_width="12dp"
         android:layout_height="12dp"
@@ -42,7 +42,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:shapeAppearanceOverlay="@style/CircleImageView"
+        tools:ignore="ContentDescription"
         tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
