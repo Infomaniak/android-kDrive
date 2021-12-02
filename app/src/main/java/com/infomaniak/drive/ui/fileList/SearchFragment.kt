@@ -37,10 +37,12 @@ import com.infomaniak.drive.utils.safeNavigate
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.DebouncingTextWatcher
 import com.infomaniak.lib.core.utils.setPagination
+import io.realm.RealmList
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.item_search_view.*
 import kotlinx.android.synthetic.main.search_filter.view.*
 import java.util.*
+import kotlin.collections.LinkedHashMap
 
 class SearchFragment : FileListFragment() {
 
@@ -51,6 +53,13 @@ class SearchFragment : FileListFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         fileListViewModel.sortType = File.SortType.RECENT
+
+        // Get preview List if needed
+        if (mainViewModel.currentPreviewFileList.isNotEmpty()) {
+            fileListViewModel.searchOldFileList = RealmList(*mainViewModel.currentPreviewFileList.values.toTypedArray())
+            mainViewModel.currentPreviewFileList = LinkedHashMap()
+        }
+
         downloadFiles = DownloadFiles()
         setNoFilesLayout = SetNoFilesLayout()
         filterLayoutView = layoutInflater.inflate(R.layout.search_filter, null)
@@ -91,7 +100,7 @@ class SearchFragment : FileListFragment() {
                     SearchFragmentDirections.actionSearchFragmentToFileListFragment(file.id, file.name)
                 )
             } else {
-                val fileList = fileAdapter.getFileObjectsList(mainViewModel.realm)
+                val fileList = fileAdapter.getFileObjectsList(null)
                 Utils.displayFile(mainViewModel, findNavController(), file, fileList)
             }
         }
@@ -119,17 +128,25 @@ class SearchFragment : FileListFragment() {
 
         convertedType.text = fileListViewModel.currentConvertedTypeText
         convertedTypeIcon.setImageDrawable(fileListViewModel.currentConvertedTypeDrawable)
-        showFilterLayout(true)
+
+        if (fileAdapter.fileList.isEmpty()) {
+            showFilterLayout(true)
+        }
 
         observeSearchResult()
     }
 
     private fun observeSearchResult() {
         fileListViewModel.searchResults.observe(viewLifecycleOwner) {
+
+            if (!swipeRefreshLayout.isRefreshing) return@observe
+
             it?.let { apiResponse ->
+
                 if (apiResponse.isSuccess()) {
                     val searchList = apiResponse.data ?: arrayListOf()
                     searchList.apply { map { file -> file.isFromSearch = true } }
+
                     when {
                         fileListViewModel.currentPage == 1 -> {
                             fileAdapter.setFiles(searchList)
@@ -144,10 +161,12 @@ class SearchFragment : FileListFragment() {
                             fileAdapter.addFileList(searchList)
                         }
                     }
+
                 } else {
                     changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, false)
                     requireActivity().showSnackbar(apiResponse.translateError())
                 }
+
             } ?: let {
                 fileAdapter.isComplete = true
                 changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, false)
@@ -172,7 +191,7 @@ class SearchFragment : FileListFragment() {
     }
 
     override fun onPause() {
-        fileListViewModel.oldList = fileAdapter.getFiles()
+        fileListViewModel.searchOldFileList = fileAdapter.getFiles()
         searchView.isFocusable = false
         super.onPause()
     }
@@ -212,10 +231,10 @@ class SearchFragment : FileListFragment() {
                 return
             }
 
-            val oldList = fileListViewModel.oldList?.toMutableList() as? ArrayList
+            val oldList = fileListViewModel.searchOldFileList?.toMutableList() as? ArrayList
             if (!oldList.isNullOrEmpty() && fileAdapter.getFiles().isEmpty()) {
                 fileAdapter.setFiles(oldList)
-                fileListViewModel.oldList = null
+                fileListViewModel.searchOldFileList = null
                 if (fileListViewModel.currentConvertedType != null) convertedTypeLayout.isVisible = true
                 showFilterLayout(false)
                 swipeRefreshLayout.isRefreshing = false
