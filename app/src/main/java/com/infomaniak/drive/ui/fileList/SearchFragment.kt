@@ -37,11 +37,12 @@ import com.infomaniak.drive.utils.safeNavigate
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.DebouncingTextWatcher
 import com.infomaniak.lib.core.utils.setPagination
+import io.realm.RealmList
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.item_search_view.*
 import kotlinx.android.synthetic.main.search_filter.view.*
 import java.util.*
-import kotlin.collections.ArrayList
+import kotlin.collections.LinkedHashMap
 
 class SearchFragment : FileListFragment() {
 
@@ -50,8 +51,20 @@ class SearchFragment : FileListFragment() {
     private lateinit var filterLayoutView: View
     private var isDownloading = false
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        mainViewModel.currentPreviewFileList = LinkedHashMap()
+        super.onCreate(savedInstanceState)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         fileListViewModel.sortType = File.SortType.RECENT
+
+        // Get preview List if needed
+        if (mainViewModel.currentPreviewFileList.isNotEmpty()) {
+            fileListViewModel.oldList = RealmList(*mainViewModel.currentPreviewFileList.values.toTypedArray())
+            mainViewModel.currentPreviewFileList = LinkedHashMap()
+        }
+
         downloadFiles = DownloadFiles()
         setNoFilesLayout = SetNoFilesLayout()
         filterLayoutView = layoutInflater.inflate(R.layout.search_filter, null)
@@ -225,7 +238,7 @@ class SearchFragment : FileListFragment() {
 
             val oldList = fileListViewModel.oldList?.toMutableList() as? ArrayList
             if (!oldList.isNullOrEmpty() && fileAdapter.getFiles().isEmpty()) {
-                fileAdapter.setFiles(ArrayList(mainViewModel.currentPreviewFileList.values))
+                fileAdapter.setFiles(oldList)
                 fileListViewModel.oldList = null
                 if (fileListViewModel.currentConvertedType != null) convertedTypeLayout.isVisible = true
                 showFilterLayout(false)

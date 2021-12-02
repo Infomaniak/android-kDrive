@@ -202,6 +202,14 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         bottomSheetFileInfos.removeOfflineObservations(this)
     }
 
+    override fun onDestroy() {
+        // Reset current preview file list
+        if (findNavController().previousBackStackEntry?.destination?.id != R.id.searchFragment) {
+            mainViewModel.currentPreviewFileList = LinkedHashMap()
+        }
+        super.onDestroy()
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         if (this::currentPreviewFile.isInitialized) outState.putInt(PREVIEW_FILE_ID_TAG, currentPreviewFile.id)
         super.onSaveInstanceState(outState)
