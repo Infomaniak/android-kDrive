@@ -123,7 +123,7 @@ object UploadNotifications {
     fun permissionErrorNotification(context: Context) {
         val mainActivityIntent = PendingIntent.getActivity(
             context, 0,
-            Intent(context, MainActivity::class.java).clearStack(), PendingIntent.FLAG_UPDATE_CURRENT
+            Intent(context, MainActivity::class.java).clearStack(), pendingIntentFlags
         )
         showNotification(
             context = context,
