@@ -25,6 +25,7 @@ import android.content.Intent
 import androidx.core.app.NotificationManagerCompat
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.MediaFolder
+import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.login.MigrationActivity.Companion.getOldkDriveUser
 import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
@@ -32,19 +33,21 @@ import com.infomaniak.drive.utils.SyncUtils.activateSyncIfNeeded
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.hasPermissions
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
 
 
 class RebootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
-        context.apply {
+        with(context) {
+
             if (!getOldkDriveUser().isEmpty) {
                 val openAppIntent = Intent(this, LaunchActivity::class.java).clearStack()
-                val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, openAppIntent, 0)
+                val pendingIntent = PendingIntent.getActivity(this, 0, openAppIntent, UploadNotifications.pendingIntentFlags)
                 val notificationManagerCompat = NotificationManagerCompat.from(context)
+
                 showGeneralNotification(getString(R.string.migrateNotificationTitle)).apply {
                     setContentText(getString(R.string.migrateNotificationDescription))
                     setContentIntent(pendingIntent)
@@ -52,7 +55,7 @@ class RebootReceiver : BroadcastReceiver() {
                 }
             }
 
-            GlobalScope.launch(Dispatchers.IO) {
+            CoroutineScope(Dispatchers.IO).launch {
                 MediaFolder.getRealmInstance().use { realm ->
                     if (context.hasPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)) &&
                         MediaFolder.getAllCount(realm) == 0L
