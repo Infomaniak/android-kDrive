@@ -34,5 +34,5 @@ open class Category(
     var isPredefined: Boolean? = null,
     var name: String = "",
     @SerializedName("user_usage_count")
-    var userUsageCount: Int? = null
+    var userUsageCount: Int = 0
 ) : RealmObject()

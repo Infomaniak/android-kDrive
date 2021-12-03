@@ -122,7 +122,7 @@ object ApiRoutes {
 
     fun createCategory(driveId: Int) = "${DRIVE_API}$driveId/category"
 
-    fun editCategory(driveId: Int, categoryId: Int) = "${DRIVE_API}$driveId/category/$categoryId"
+    fun updateCategory(driveId: Int, categoryId: Int) = "${DRIVE_API}$driveId/category/$categoryId"
 
     fun addCategory(fileId: Int, driveId: Int) = "${fileURL(fileId, driveId)}/category"
 

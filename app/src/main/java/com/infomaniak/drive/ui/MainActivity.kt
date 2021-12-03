@@ -238,9 +238,13 @@ class MainActivity : BaseActivity() {
                     !hasDisplayedSyncDialog && !AccountUtils.isEnableAppSync() -> {
                         hasDisplayedInformationPanel = true
                         hasDisplayedSyncDialog = true
-                        val id =
-                            if (AppSettings.migrated) R.id.syncAfterMigrationBottomSheetDialog else R.id.syncConfigureBottomSheetDialog
-                        findNavController(R.id.hostFragment).navigate(id)
+                        findNavController(R.id.hostFragment).navigate(
+                            if (AppSettings.migrated) {
+                                R.id.syncAfterMigrationBottomSheetDialog
+                            } else {
+                                R.id.syncConfigureBottomSheetDialog
+                            }
+                        )
                     }
                     !hasDisplayedCategoriesInformationDialog -> {
                         hasDisplayedInformationPanel = true

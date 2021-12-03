@@ -88,9 +88,7 @@ object DriveInfosController {
                 .equalTo(Drive::id.name, AccountUtils.currentDriveId)
                 .findFirst()
                 ?.let { drive ->
-                    realm.executeTransaction {
-                        if (drive.isValid) transaction(drive)
-                    }
+                    realm.executeTransaction { if (drive.isValid) transaction(drive) }
                 }
         }
     }
@@ -146,8 +144,26 @@ object DriveInfosController {
         return teamList.filter { drive.teams.account.contains(it.id) }
     }
 
-    fun getCurrentDriveCategories(fileCategoriesIds: Array<Int>? = null): List<Category> {
-        if (fileCategoriesIds?.isEmpty() == true) return emptyList()
+    fun getCurrentDriveCategories(): List<Category> {
+        val categories = getRealmInstance().use { realm ->
+            val currentDrive = realm.where(Drive::class.java)
+                .equalTo(Drive::id.name, AccountUtils.currentDriveId)
+                .findFirst()
+
+            currentDrive?.categories?.let {
+                val categories = it.where()
+                    .sort(Category::userUsageCount.name, Sort.DESCENDING)
+                    .findAll()
+
+                realm.copyFromRealm(categories, 0)
+            }
+        } ?: emptyList()
+
+        return categories
+    }
+
+    fun getCurrentDriveCategoriesFromIds(categoriesIds: Array<Int>): List<Category> {
+        if (categoriesIds.isEmpty()) return emptyList()
 
         val categories = getRealmInstance().use { realm ->
             val currentDrive = realm.where(Drive::class.java)
@@ -156,17 +172,16 @@ object DriveInfosController {
 
             currentDrive?.categories?.let {
                 val categories = it.where()
-                    .apply { fileCategoriesIds?.let { `in`(Category::id.name, fileCategoriesIds) } }
+                    .`in`(Category::id.name, categoriesIds)
                     .findAll()
 
                 realm.copyFromRealm(categories, 0)
             }
         } ?: emptyList()
 
-        val sortedList = fileCategoriesIds?.withIndex()?.associate { it.value to it.index }
-            ?.let { orderList -> categories.sortedBy { orderList[it.id] } }
-
-        return fileCategoriesIds?.let { sortedList } ?: categories
+        return categoriesIds.withIndex()
+            .associate { it.value to it.index }
+            .let { orderList -> categories.sortedBy { orderList[it.id] } }
     }
 
     fun getCategoryRights(): CategoryRights? {

@@ -303,10 +303,10 @@ open class File(
 
     fun getCategories(): List<Category> {
         val fileCategoriesIds = getSortedCategoriesIds()
-        return DriveInfosController.getCurrentDriveCategories(fileCategoriesIds.toTypedArray())
+        return DriveInfosController.getCurrentDriveCategoriesFromIds(fileCategoriesIds.toTypedArray())
     }
 
-    fun getSortedCategoriesIds(): List<Int> {
+    private fun getSortedCategoriesIds(): List<Int> {
         fun RealmList<FileCategory>.sort() = sort(FileCategory::addedToFileAt.name).map { it.id }
 
         return if (isManaged) {

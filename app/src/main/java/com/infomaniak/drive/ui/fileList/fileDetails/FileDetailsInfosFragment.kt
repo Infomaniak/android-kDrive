@@ -112,7 +112,7 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         getBackNavigationResult<Bundle>(SelectCategoriesBottomSheetDialog.SELECT_CATEGORIES_NAV_KEY) { bundle ->
             val ids = bundle.getParcelableArrayList(SelectCategoriesBottomSheetDialog.CATEGORIES_BUNDLE_KEY)
                 ?: emptyList<Int>()
-            val categories = DriveInfosController.getCurrentDriveCategories(ids.toTypedArray())
+            val categories = DriveInfosController.getCurrentDriveCategoriesFromIds(ids.toTypedArray())
             val file = fileDetailsViewModel.currentFile.value
             setupCategoriesContainer(
                 hasFile = file != null,

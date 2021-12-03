@@ -27,6 +27,8 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.sortCategoriesList
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_category.view.*
+import java.util.*
+import kotlin.collections.ArrayList
 
 class CategoriesAdapter(
     private val onCategoryChanged: (categoryID: Int, isSelected: Boolean) -> Unit
@@ -83,6 +85,8 @@ class CategoriesAdapter(
             color = categoryColor,
             isPredefined = false,
             isSelected = true,
+            userUsageCount = 1,
+            addedToFileAt = Date(),
         )
         categories.toMutableList().apply {
             add(newCategory)
@@ -110,7 +114,10 @@ class CategoriesAdapter(
 
         // Find and update the Category
         val oldPos = categories.indexOfFirst { it.id == categoryId }
-        categories[oldPos].isSelected = isSelected
+        categories[oldPos].apply {
+            this.isSelected = isSelected
+            this.addedToFileAt = if (isSelected) Date() else null
+        }
 
         // Sort the list
         categories = ArrayList(categories.sortCategoriesList())
@@ -129,5 +136,7 @@ class CategoriesAdapter(
         var color: String,
         val isPredefined: Boolean,
         var isSelected: Boolean,
+        val userUsageCount: Int,
+        var addedToFileAt: Date?,
     )
 }

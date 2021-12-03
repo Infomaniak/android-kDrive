@@ -808,7 +808,7 @@ fun Int.dpToPx(context: Context): Int =
     TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), context.resources.displayMetrics).toInt()
 
 fun List<UICategory>.sortCategoriesList(): List<UICategory> {
-    return sortedWith { a: UICategory, b: UICategory -> a.name.compareTo(b.name, true) }
-        .sortedByDescending { it.isPredefined }
+    return sortedByDescending { it.userUsageCount }
+        .sortedBy { it.addedToFileAt }
         .sortedByDescending { it.isSelected }
 }

@@ -31,12 +31,14 @@ import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.drive.CategoryRights
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.UICategory
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import kotlinx.android.synthetic.main.fragment_select_categories.*
+import java.util.*
 
 class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
 
@@ -77,7 +79,7 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
         setToolbar(categoryRights)
         setAdapter(categoryRights)
         setupBackActionHandler()
-        updateUI(file.categories.map { it.id }.toTypedArray(), file.id)
+        updateUI(file.categories.toList(), file.id)
     }
 
     private fun setToolbar(categoryRights: CategoryRights?) {
@@ -140,18 +142,22 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
         }
     }
 
-    private fun updateUI(enabledCategoriesIds: Array<Int>, fileId: Int) {
+    private fun updateUI(fileCategories: List<FileCategory>, fileId: Int) {
         val allCategories = DriveInfosController.getCurrentDriveCategories()
         val uiCategories = allCategories.map { category ->
+            val fileCategory = fileCategories.find { it.id == category.id }
             UICategory(
                 id = category.id,
                 name = category.getName(requireContext()),
                 color = category.color,
                 isPredefined = category.isPredefined ?: true,
-                isSelected = enabledCategoriesIds.find { it == category.id } != null
+                isSelected = fileCategory != null,
+                userUsageCount = category.userUsageCount,
+                addedToFileAt = fileCategory?.addedToFileAt,
             )
         }
         adapter.setAll(uiCategories.sortCategoriesList())
+
         adapter.onMenuClicked = { category ->
             val bundle = bundleOf(
                 "fileId" to fileId,
