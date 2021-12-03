@@ -33,7 +33,6 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_category_info_actions.*
@@ -91,9 +90,8 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
             }
         }
 
-        getBackNavigationResult<Boolean>(CreateOrEditCategoryBottomSheetDialog.EDIT_CATEGORY_NAV_KEY) {
-            val ids = FileController.getFileById(fileId)?.getSortedCategoriesIds()
-            setBackNavigationResult(EDIT_CATEGORY_NAV_KEY, ids)
+        getBackNavigationResult<Bundle>(CreateOrEditCategoryBottomSheetDialog.EDIT_CATEGORY_NAV_KEY) { bundle ->
+            setBackNavigationResult(CreateOrEditCategoryBottomSheetDialog.EDIT_CATEGORY_NAV_KEY, bundle)
         }
     }
 
@@ -124,6 +122,5 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
     companion object {
         const val DELETE_CATEGORY_NAV_KEY = "delete_category_nav_key"
-        const val EDIT_CATEGORY_NAV_KEY = "edit_category_nav_key"
     }
 }

@@ -34,21 +34,17 @@ class CategoriesAdapter(
 
     var canEditCategory: Boolean = false
     var canDeleteCategory: Boolean = false
-    var categories = emptyList<UICategory>()
+    var categories = arrayListOf<UICategory>()
     var onMenuClicked: ((category: UICategory) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cardview_category, parent, false))
     }
 
-    fun setAll(newCategories: List<UICategory>) {
-        categories = newCategories
-        notifyItemRangeChanged(0, itemCount)
-    }
-
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val category = categories[position]
         holder.itemView.categoryCard.apply {
+
+            val category = categories[position]
 
             var topCornerRadius = 0F
             var bottomCornerRadius = 0F
@@ -75,6 +71,41 @@ class CategoriesAdapter(
 
     override fun getItemCount() = categories.size
 
+    fun setAll(newCategories: List<UICategory>) {
+        categories = ArrayList(newCategories)
+        notifyItemRangeChanged(0, itemCount)
+    }
+
+    fun addCategory(categoryId: Int, categoryName: String, categoryColor: String) {
+        val newCategory = UICategory(
+            id = categoryId,
+            name = categoryName,
+            color = categoryColor,
+            isPredefined = false,
+            isSelected = true,
+        )
+        categories.toMutableList().apply {
+            add(newCategory)
+            categories = ArrayList(sortCategoriesList())
+        }
+        notifyItemInserted(categories.indexOf(newCategory))
+    }
+
+    fun editCategory(categoryId: Int, categoryName: String?, categoryColor: String?) {
+        val index = categories.indexOfFirst { it.id == categoryId }
+        categories[index].apply {
+            name = categoryName ?: name
+            color = categoryColor ?: color
+        }
+        notifyItemChanged(index)
+    }
+
+    fun deleteCategory(categoryId: Int) {
+        val index = categories.indexOfFirst { it.id == categoryId }
+        categories.removeAt(index)
+        notifyItemRemoved(index)
+    }
+
     fun updateCategory(categoryId: Int, isSelected: Boolean) {
 
         // Find and update the Category
@@ -82,7 +113,7 @@ class CategoriesAdapter(
         categories[oldPos].isSelected = isSelected
 
         // Sort the list
-        categories = categories.sortCategoriesList()
+        categories = ArrayList(categories.sortCategoriesList())
 
         // Find the Category's new position
         val newPos = categories.indexOfFirst { it.id == categoryId }
@@ -94,8 +125,8 @@ class CategoriesAdapter(
 
     data class UICategory(
         val id: Int,
-        val name: String,
-        val color: String,
+        var name: String,
+        var color: String,
         val isPredefined: Boolean,
         var isSelected: Boolean,
     )

@@ -115,24 +115,28 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
     }
 
     private fun setupBackActionHandler() {
-        getBackNavigationResult<Int>(CreateOrEditCategoryBottomSheetDialog.CREATE_CATEGORY_NAV_KEY) { categoryId ->
-            val oldIds = adapter.categories.filter { it.isSelected }.map { it.id }
-            val ids = mutableListOf<Int>().apply {
-                addAll(oldIds)
-                add(categoryId)
+        getBackNavigationResult<Bundle>(CreateOrEditCategoryBottomSheetDialog.CREATE_CATEGORY_NAV_KEY) { bundle ->
+            bundle.apply {
+                val id = getInt(CreateOrEditCategoryBottomSheetDialog.CATEGORY_ID_BUNDLE_KEY)
+                val name = getString(CreateOrEditCategoryBottomSheetDialog.CATEGORY_NAME_BUNDLE_KEY) ?: return@apply
+                val color = getString(CreateOrEditCategoryBottomSheetDialog.CATEGORY_COLOR_BUNDLE_KEY) ?: return@apply
+                adapter.addCategory(id, name, color)
             }
-            updateUI(ids.toTypedArray(), file.id)
+        }
+
+        getBackNavigationResult<Bundle>(CreateOrEditCategoryBottomSheetDialog.EDIT_CATEGORY_NAV_KEY) { bundle ->
+            aCategoryHasBeenModified = true
+            bundle.apply {
+                val id = getInt(CreateOrEditCategoryBottomSheetDialog.CATEGORY_ID_BUNDLE_KEY)
+                val name = getString(CreateOrEditCategoryBottomSheetDialog.CATEGORY_NAME_BUNDLE_KEY)
+                val color = getString(CreateOrEditCategoryBottomSheetDialog.CATEGORY_COLOR_BUNDLE_KEY)
+                adapter.editCategory(id, name, color)
+            }
         }
 
         getBackNavigationResult<Int>(CategoryInfoActionsBottomSheetDialog.DELETE_CATEGORY_NAV_KEY) { categoryId ->
             aCategoryHasBeenModified = true
-            val ids = adapter.categories.filter { it.isSelected && it.id != categoryId }.map { it.id }
-            updateUI(ids.toTypedArray(), file.id)
-        }
-
-        getBackNavigationResult<List<Int>?>(CategoryInfoActionsBottomSheetDialog.EDIT_CATEGORY_NAV_KEY) { ids ->
-            aCategoryHasBeenModified = true
-            ids?.let { updateUI(it.toTypedArray(), file.id) }
+            adapter.deleteCategory(categoryId)
         }
     }
 

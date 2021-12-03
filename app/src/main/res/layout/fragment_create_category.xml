@@ -29,10 +29,11 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/appBarTitle"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
-            app:title="@string/createCategoryTitle">
+            tools:title="@string/createCategoryTitle">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
@@ -54,7 +55,6 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingBottom="@dimen/recyclerViewPaddingBottom"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
             <TextView
@@ -65,7 +65,6 @@
                 android:layout_marginTop="@dimen/marginStandard"
                 android:background="@drawable/background_create_category_warning"
                 android:drawablePadding="@dimen/marginStandardMedium"
-                android:fontFamily="@font/suisseintl_regular"
                 android:padding="@dimen/marginStandardMedium"
                 android:text="@string/editCategoryInfoDescription"
                 android:textColor="@color/title"
@@ -78,21 +77,26 @@
                 app:layout_constraintTop_toTopOf="parent"
                 tools:visibility="visible" />
 
-            <EditText
-                android:id="@+id/categoryName"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/categoryNameValueLayout"
+                style="@style/TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/marginStandardMedium"
                 android:layout_marginTop="@dimen/marginStandard"
-                android:autofillHints="name"
-                android:background="@drawable/background_create_category_name"
                 android:hint="@string/categoryNameField"
-                android:inputType="text"
-                android:padding="@dimen/marginStandardMedium"
-                android:textSize="@dimen/h3"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/editCategoryWarningText" />
+                app:layout_constraintTop_toBottomOf="@id/editCategoryWarningText">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/categoryNameValueInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionDone"
+                    android:inputType="text" />
+
+            </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
                 android:id="@+id/chooseCategory"
@@ -104,7 +108,7 @@
                 android:text="@string/categoryColorTitle"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/categoryName" />
+                app:layout_constraintTop_toBottomOf="@id/categoryNameValueLayout" />
 
             <com.infomaniak.drive.views.AutoResizeGridLayout
                 android:id="@+id/categoryColorsView"
@@ -112,22 +116,26 @@
                 android:layout_height="match_parent"
                 android:layout_marginTop="@dimen/marginStandardSmall"
                 app:columnWidth="52dp"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/saveButton"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/chooseCategory" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/saveButton"
+                style="@style/ButtonInfomaniak"
+                android:layout_width="0dp"
+                android:layout_marginHorizontal="@dimen/marginStandard"
+                android:layout_marginTop="@dimen/marginStandardMedium"
+                android:layout_marginBottom="@dimen/marginStandard"
+                android:enabled="false"
+                android:text="@string/buttonSave"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/categoryColorsView" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/saveButton"
-        style="@style/ButtonInfomaniak"
-        android:layout_width="match_parent"
-        android:layout_gravity="bottom"
-        android:layout_marginHorizontal="@dimen/marginStandard"
-        android:layout_marginBottom="@dimen/marginStandard"
-        android:enabled="false"
-        android:text="@string/buttonSave" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

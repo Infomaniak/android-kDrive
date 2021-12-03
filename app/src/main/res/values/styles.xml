@@ -115,6 +115,7 @@
         <item name="bottomSheetStyle">@style/BottomSheetDialogTheme.ModalStyle</item>
         <item name="colorAccent">@color/primary</item>
         <item name="colorPrimary">@color/primary</item>
+        <item name="colorOnSurface">@color/colorOnSurface</item>
         <item name="snackbarButtonStyle">@style/Widget.App.SnackbarButton</item>
         <item name="snackbarStyle">@style/Widget.App.Snackbar</item>
         <item name="snackbarTextViewStyle">@style/Widget.App.SnackbarTextView</item>
