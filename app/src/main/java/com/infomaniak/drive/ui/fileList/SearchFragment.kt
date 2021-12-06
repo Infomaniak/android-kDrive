@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.fileList
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.core.view.isGone
@@ -126,6 +127,7 @@ class SearchFragment : FileListFragment() {
         }
 
         setSearchesAdapter()
+        setToolbar()
         observeSearchResult()
     }
 
@@ -134,6 +136,16 @@ class SearchFragment : FileListFragment() {
             setAll(AppSettings.mostRecentSearches)
         }
         recentSearchesList.adapter = previousSearchesAdapter
+    }
+
+    private fun setToolbar() = with(toolbar) {
+        setOnMenuItemClickListener { menuItem ->
+            if (menuItem.itemId == R.id.selectFilters) {
+                Log.e("Test", "onSelectFiltersClicked")
+            }
+            true
+        }
+        menu.findItem(R.id.selectFilters).isVisible = true
     }
 
     private fun observeSearchResult() {

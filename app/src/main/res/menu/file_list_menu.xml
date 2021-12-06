@@ -45,4 +45,11 @@
         android:visible="false"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/selectFilters"
+        android:icon="@drawable/ic_filter"
+        android:title="@string/filtersTitle"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
+
 </menu>
