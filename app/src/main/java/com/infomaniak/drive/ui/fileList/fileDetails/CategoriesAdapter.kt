@@ -36,8 +36,10 @@ class CategoriesAdapter(
 
     var canEditCategory: Boolean = false
     var canDeleteCategory: Boolean = false
-    var categories = arrayListOf<UICategory>()
     var onMenuClicked: ((category: UICategory) -> Unit)? = null
+    var categories: ArrayList<UICategory> = arrayListOf()
+    var filteredCategories: ArrayList<UICategory> = arrayListOf()
+    private var filterQuery: String = ""
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cardview_category, parent, false))
@@ -46,12 +48,15 @@ class CategoriesAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.itemView.categoryCard.apply {
 
-            val category = categories[position]
+            val category = filteredCategories[position]
 
-            var topCornerRadius = 0F
-            var bottomCornerRadius = 0F
+            var topCornerRadius = 0.0f
+            var bottomCornerRadius = 0.0f
             if (position == 0) topCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
-            if (position == itemCount - 1) bottomCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
+            val trimmedQuery = filterQuery.trim()
+            if (position == itemCount - 1 && (trimmedQuery.isBlank() || doesCategoryExist(trimmedQuery))) {
+                bottomCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
+            }
 
             shapeAppearanceModel = shapeAppearanceModel
                 .toBuilder()
@@ -71,11 +76,18 @@ class CategoriesAdapter(
         }
     }
 
-    override fun getItemCount() = categories.size
+    override fun getItemCount() = filteredCategories.size
+
+    private fun filterCategories() {
+        filteredCategories = ArrayList(categories.filter { it.name.contains(filterQuery, true) })
+        notifyDataSetChanged()
+    }
 
     fun setAll(newCategories: List<UICategory>) {
         categories = ArrayList(newCategories)
-        notifyItemRangeChanged(0, itemCount)
+
+        // Filter and display categories
+        filterCategories()
     }
 
     fun addCategory(categoryId: Int, categoryName: String, categoryColor: String) {
@@ -92,7 +104,9 @@ class CategoriesAdapter(
             add(newCategory)
             categories = ArrayList(sortCategoriesList())
         }
-        notifyItemInserted(categories.indexOf(newCategory))
+
+        // Filter and display categories
+        filterCategories()
     }
 
     fun editCategory(categoryId: Int, categoryName: String?, categoryColor: String?) {
@@ -101,13 +115,17 @@ class CategoriesAdapter(
             name = categoryName ?: name
             color = categoryColor ?: color
         }
-        notifyItemChanged(index)
+
+        // Filter and display categories
+        filterCategories()
     }
 
     fun deleteCategory(categoryId: Int) {
         val index = categories.indexOfFirst { it.id == categoryId }
         categories.removeAt(index)
-        notifyItemRemoved(index)
+
+        // Filter and display categories
+        filterCategories()
     }
 
     fun updateCategory(categoryId: Int, isSelected: Boolean) {
@@ -122,12 +140,19 @@ class CategoriesAdapter(
         // Sort the list
         categories = ArrayList(categories.sortCategoriesList())
 
-        // Find the Category's new position
-        val newPos = categories.indexOfFirst { it.id == categoryId }
+        // Filter and display categories
+        filterCategories()
+    }
 
-        // Notify the adapter
-        notifyItemMoved(oldPos, newPos)
-        notifyItemChanged(newPos)
+    fun updateFilter(query: String) {
+        filterQuery = query
+
+        // Filter and display categories
+        filterCategories()
+    }
+
+    fun doesCategoryExist(query: String): Boolean {
+        return !filteredCategories.none { it.name.equals(query, true) }
     }
 
     data class UICategory(

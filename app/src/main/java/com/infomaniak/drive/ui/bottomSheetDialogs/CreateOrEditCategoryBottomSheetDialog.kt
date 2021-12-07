@@ -92,7 +92,12 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
         editCategoryWarningText.isGone = previousCategoryId == NO_PREVIOUS_CATEGORY_ID
         previousCategoryName?.let { categoryNameValueInput.setText(it) }
         categoryNameValueLayout.isGone = categoryIsPredefined
-        saveButton.isEnabled = categoryIsPredefined || previousCategoryId != NO_PREVIOUS_CATEGORY_ID
+        saveButton.isEnabled = when {
+            categoryIsPredefined -> true
+            previousCategoryId != NO_PREVIOUS_CATEGORY_ID -> true
+            previousCategoryId == NO_PREVIOUS_CATEGORY_ID && !previousCategoryName.isNullOrEmpty() -> true
+            else -> false
+        }
     }
 
     private fun configureSaveButton() {

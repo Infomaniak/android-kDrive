@@ -45,17 +45,96 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/categoriesRecyclerView"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:orientation="vertical"
-        android:overScrollMode="never"
-        android:padding="@dimen/marginStandard"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:itemCount="5"
-        tools:listitem="@layout/cardview_category" />
+        android:layout_marginTop="@dimen/marginStandard"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/marginStandard"
+            android:orientation="vertical">
+
+            <include
+                android:id="@+id/searchViewCard"
+                layout="@layout/item_search_view"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginHorizontal="@dimen/marginStandard" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/categoriesRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:orientation="vertical"
+                android:overScrollMode="never"
+                android:paddingHorizontal="@dimen/marginStandard"
+                android:paddingTop="@dimen/marginStandard"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="5"
+                tools:listitem="@layout/cardview_category" />
+
+            <View
+                android:id="@+id/createCategoryRowSeparator"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/createCategoryRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandard"
+                android:visibility="gone"
+                app:cardBackgroundColor="@color/appBar"
+                app:cardElevation="0dp"
+                tools:visibility="visible">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/addCategoryIcon"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_margin="@dimen/marginStandardMedium"
+                        android:background="@color/infomaniak"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:shapeAppearanceOverlay="@style/CircleImageView" />
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:src="@drawable/ic_plus"
+                        android:tint="@color/white"
+                        app:layout_constraintBottom_toBottomOf="@id/addCategoryIcon"
+                        app:layout_constraintEnd_toEndOf="@id/addCategoryIcon"
+                        app:layout_constraintStart_toStartOf="@id/addCategoryIcon"
+                        app:layout_constraintTop_toTopOf="@id/addCategoryIcon"
+                        app:shapeAppearanceOverlay="@style/CircleImageView" />
+
+                    <TextView
+                        android:id="@+id/addCategoryTitle"
+                        style="@style/Subtitle2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/marginStandardMedium"
+                        android:singleLine="true"
+                        app:layout_constraintBottom_toBottomOf="@id/addCategoryIcon"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/addCategoryIcon"
+                        app:layout_constraintTop_toTopOf="@id/addCategoryIcon"
+                        tools:text="Create Category" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

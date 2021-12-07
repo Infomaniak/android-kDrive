@@ -17,15 +17,22 @@
  */
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
+import android.os.Build
 import android.os.Bundle
+import android.text.Html
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import androidx.core.os.bundleOf
+import androidx.core.view.isGone
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -36,8 +43,12 @@ import com.infomaniak.drive.data.models.drive.CategoryRights
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.UICategory
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.views.DebouncingTextWatcher
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
+import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.fragment_select_categories.*
+import kotlinx.android.synthetic.main.fragment_select_categories.toolbar
+import kotlinx.android.synthetic.main.item_search_view.*
 import java.util.*
 
 class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
@@ -47,7 +58,6 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     private lateinit var adapter: CategoriesAdapter
     private lateinit var file: File
-
     private var aCategoryHasBeenModified: Boolean = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -79,6 +89,7 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
         setToolbar(categoryRights)
         setAdapter(categoryRights)
         setupBackActionHandler()
+        setupSearch()
         updateUI(file.categories.toList(), file.id)
     }
 
@@ -87,15 +98,7 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
             menu.findItem(R.id.addCategory).isVisible = categoryRights?.canCreateCategory == true
             setOnMenuItemClickListener { menuItem ->
                 if (menuItem.itemId == R.id.addCategory) {
-                    safeNavigate(
-                        SelectCategoriesBottomSheetDialogDirections.actionSelectCategoriesBottomSheetDialogToCreateOrEditCategoryBottomSheetDialog(
-                            fileId = file.id,
-                            driveId = file.driveId,
-                            categoryId = CreateOrEditCategoryBottomSheetDialog.NO_PREVIOUS_CATEGORY_ID,
-                            categoryName = null,
-                            categoryColor = null,
-                        )
-                    )
+                    navigateToCreateCategory()
                     true
                 } else {
                     false
@@ -139,6 +142,72 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
         getBackNavigationResult<Int>(CategoryInfoActionsBottomSheetDialog.DELETE_CATEGORY_NAV_KEY) { categoryId ->
             aCategoryHasBeenModified = true
             adapter.deleteCategory(categoryId)
+        }
+    }
+
+    private fun setupSearch() {
+        searchView.apply {
+            clearButton.setOnClickListener { text = null }
+            hint = getString(R.string.searchTitle)
+            addTextChangedListener(DebouncingTextWatcher(lifecycle) {
+                clearButton.isInvisible = it.isNullOrEmpty()
+                adapter.updateFilter(searchView.text.toString())
+                handleCreateCategoryRow(it?.trim())
+            })
+            setOnEditorActionListener { _, actionId, _ ->
+                if (EditorInfo.IME_ACTION_SEARCH == actionId) {
+                    adapter.updateFilter(searchView.text.toString())
+                    true
+                } else false
+            }
+        }
+
+        createCategoryRow.setOnClickListener { navigateToCreateCategory() }
+    }
+
+    private fun navigateToCreateCategory() {
+        val categoryName = searchView.text.toString()
+        searchView.setText("")
+        safeNavigate(
+            SelectCategoriesBottomSheetDialogDirections.actionSelectCategoriesBottomSheetDialogToCreateOrEditCategoryBottomSheetDialog(
+                fileId = file.id,
+                driveId = file.driveId,
+                categoryId = CreateOrEditCategoryBottomSheetDialog.NO_PREVIOUS_CATEGORY_ID,
+                categoryName = categoryName,
+                categoryColor = null,
+            )
+        )
+    }
+
+    private fun handleCreateCategoryRow(categoryName: String?) {
+
+        val text = getString(R.string.manageCategoriesCreateTitle, "<b>$categoryName</b>")
+        addCategoryTitle.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT)
+        } else {
+            Html.fromHtml(text)
+        }
+
+        createCategoryRow.apply {
+
+            var topCornerRadius = 0.0f
+            if (adapter.filteredCategories.isEmpty()) {
+                topCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
+                createCategoryRowSeparator.isGone = true
+            } else {
+                createCategoryRowSeparator.isVisible = true
+            }
+            val bottomCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
+
+            shapeAppearanceModel = shapeAppearanceModel
+                .toBuilder()
+                .setTopLeftCorner(CornerFamily.ROUNDED, topCornerRadius)
+                .setTopRightCorner(CornerFamily.ROUNDED, topCornerRadius)
+                .setBottomLeftCorner(CornerFamily.ROUNDED, bottomCornerRadius)
+                .setBottomRightCorner(CornerFamily.ROUNDED, bottomCornerRadius)
+                .build()
+
+            isVisible = categoryName?.isNotBlank() == true && !adapter.doesCategoryExist(categoryName)
         }
     }
 
