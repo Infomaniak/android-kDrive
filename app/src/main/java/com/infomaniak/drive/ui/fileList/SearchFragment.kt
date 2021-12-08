@@ -19,9 +19,9 @@ package com.infomaniak.drive.ui.fileList
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -29,10 +29,13 @@ import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFiltersBottomSheetDialog
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.getBackNavigationResult
 import com.infomaniak.drive.utils.safeNavigate
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.DebouncingTextWatcher
@@ -111,13 +114,7 @@ class SearchFragment : FileListFragment() {
             }
         }
 
-        convertedTypeClose.setOnClickListener {
-            convertedTypeLayout.isGone = true
-            fileListViewModel.currentConvertedType = null
-            fileListViewModel.currentConvertedTypeText = null
-            fileListViewModel.currentConvertedTypeDrawable = null
-            downloadFiles(true, false)
-        }
+        convertedTypeClose.setOnClickListener { clearTypeFilter() }
 
         convertedType.text = fileListViewModel.currentConvertedTypeText
         convertedTypeIcon.setImageDrawable(fileListViewModel.currentConvertedTypeDrawable)
@@ -129,6 +126,7 @@ class SearchFragment : FileListFragment() {
         setSearchesAdapter()
         setToolbar()
         observeSearchResult()
+        setBackActionHandlers()
     }
 
     private fun setSearchesAdapter() {
@@ -141,11 +139,21 @@ class SearchFragment : FileListFragment() {
     private fun setToolbar() = with(toolbar) {
         setOnMenuItemClickListener { menuItem ->
             if (menuItem.itemId == R.id.selectFilters) {
-                Log.e("Test", "onSelectFiltersClicked")
+                with(fileListViewModel) {
+                    safeNavigate(
+                        SearchFragmentDirections.actionSearchFragmentToSearchFiltersBottomSheetDialog(
+                            date = currentDateFilter?.time ?: -1L,
+                            type = currentConvertedType?.uppercase(Locale.ROOT),
+                            categories = currentCategoriesFilter?.map { it.id }?.toIntArray(),
+                            categoriesFilter = currentCategoriesOwnershipFilter,
+                        )
+                    )
+                }
             }
             true
         }
-        menu.findItem(R.id.selectFilters).isVisible = true
+
+        toolbar.menu.findItem(R.id.selectFilters).isVisible = true
     }
 
     private fun observeSearchResult() {
@@ -192,8 +200,65 @@ class SearchFragment : FileListFragment() {
         }
     }
 
+    private fun setBackActionHandlers() {
+        getBackNavigationResult<Bundle>(SearchFiltersBottomSheetDialog.SEARCH_FILTERS_NAV_KEY) { bundle ->
+            with(bundle) {
+                setDateFilter(getLong(SearchFiltersBottomSheetDialog.SEARCH_FILTERS_DATE_BUNDLE_KEY))
+                setTypeFilter(getString(SearchFiltersBottomSheetDialog.SEARCH_FILTERS_TYPE_BUNDLE_KEY))
+                setCategoriesFilter(getIntArray(SearchFiltersBottomSheetDialog.SEARCH_FILTERS_CATEGORIES_BUNDLE_KEY))
+                setCategoriesOwnershipFilter(getInt(SearchFiltersBottomSheetDialog.SEARCH_FILTERS_CATEGORIES_OWNERSHIP_BUNDLE_KEY))
+            }
+        }
+    }
+
+    private fun setDateFilter(time: Long) {
+        fileListViewModel.currentDateFilter = if (time != -1L) Date(time) else null
+    }
+
+    private fun setTypeFilter(typeName: String?) {
+        typeName?.let {
+            val type = File.ConvertedType.valueOf(it)
+            updateFilter(type)
+        } ?: run {
+            clearTypeFilter()
+        }
+    }
+
+    private fun setCategoriesFilter(categories: IntArray?) {
+        fileListViewModel.currentCategoriesFilter =
+            categories?.let { DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray()) }
+    }
+
+    private fun setCategoriesOwnershipFilter(categoriesFilter: Int) {
+        fileListViewModel.currentCategoriesOwnershipFilter = categoriesFilter
+    }
+
+    private fun updateFilter(type: File.ConvertedType) {
+        with(fileListViewModel) {
+            currentConvertedTypeDrawable = ResourcesCompat.getDrawable(resources, type.icon, null)
+            currentConvertedTypeText = getString(type.searchFilterName)
+            convertedType.text = currentConvertedTypeText
+            convertedTypeIcon.setImageDrawable(currentConvertedTypeDrawable)
+            convertedTypeLayout.isVisible = true
+            currentPage = 1
+            currentConvertedType = type.name.lowercase(Locale.ROOT)
+            downloadFiles(true, false)
+        }
+    }
+
+    private fun clearTypeFilter() {
+        with(fileListViewModel) {
+            convertedTypeLayout.isGone = true
+            currentConvertedType = null
+            currentConvertedTypeText = null
+            currentConvertedTypeDrawable = null
+            downloadFiles(true, false)
+        }
+    }
+
     private fun updateMostRecentSearches() {
         val newSearch = searchView.text.toString()
+        if (newSearch.isBlank()) return
         val previousSearches = AppSettings.mostRecentSearches
         val newSearches = previousSearches
             .apply {

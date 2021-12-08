@@ -505,7 +505,40 @@
         <action
             android:id="@+id/action_searchFragment_to_fileListFragment"
             app:destination="@id/fileListFragment" />
+        <action
+            android:id="@+id/action_searchFragment_to_searchFiltersBottomSheetDialog"
+            app:destination="@id/searchFiltersBottomSheetDialog" />
     </fragment>
+
+    <dialog
+        android:id="@+id/searchFiltersBottomSheetDialog"
+        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SearchFiltersBottomSheetDialog"
+        android:label="SearchFiltersBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_search_filters">
+        <argument
+            android:name="date"
+            app:argType="long" />
+        <argument
+            android:name="type"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="categories"
+            app:argType="integer[]"
+            app:nullable="true" />
+        <argument
+            android:name="categoriesFilter"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_searchFiltersBottomSheetDialog_to_selectCategoriesBottomSheetDialog"
+            app:destination="@id/selectCategoriesBottomSheetDialog" />
+    </dialog>
+
+    <dialog
+        android:id="@+id/searchFilterFileTypeDialog"
+        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterFileTypeBottomSheetDialog"
+        android:label="SearchFilterFileTypeBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_search_filter_file_type" />
 
     <dialog
         android:id="@+id/accessDeniedBottomSheetFragment"
@@ -746,6 +779,11 @@
         <argument
             android:name="fileId"
             app:argType="integer" />
+        <argument
+            android:name="categories"
+            android:defaultValue="@null"
+            app:argType="integer[]"
+            app:nullable="true" />
         <action
             android:id="@+id/action_SelectCategoriesFragment_to_CreateOrEditCategoryFragment"
             app:destination="@id/createOrEditCategoryFragment" />

@@ -22,6 +22,8 @@ import androidx.lifecycle.*
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.drive.Category
+import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFiltersViewModel
 import com.infomaniak.drive.data.models.File.*
 import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.drive.utils.AccountUtils
@@ -33,6 +35,8 @@ import io.realm.OrderedRealmCollection
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.*
+import kotlin.collections.ArrayList
 
 class FileListViewModel : ViewModel() {
 
@@ -49,6 +53,10 @@ class FileListViewModel : ViewModel() {
     var currentConvertedType: String? = null
     var currentConvertedTypeDrawable: Drawable? = null
     var currentConvertedTypeText: String? = null
+
+    var currentDateFilter: Date? = null
+    var currentCategoriesFilter: List<Category>? = null
+    var currentCategoriesOwnershipFilter: Int = SearchFiltersViewModel.DEFAULT_CATEGORIES_FILTER_VALUE
 
     var isSharedWithMe = false
 
