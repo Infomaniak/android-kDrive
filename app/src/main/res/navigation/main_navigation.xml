@@ -527,7 +527,7 @@
             app:argType="integer[]"
             app:nullable="true" />
         <argument
-            android:name="categoriesFilter"
+            android:name="categoriesOwnership"
             app:argType="integer" />
         <action
             android:id="@+id/action_searchFiltersBottomSheetDialog_to_selectCategoriesBottomSheetDialog"

@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui.fileList
 
-import android.graphics.drawable.Drawable
 import androidx.lifecycle.*
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
@@ -36,7 +35,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.*
-import kotlin.collections.ArrayList
 
 class FileListViewModel : ViewModel() {
 
@@ -50,13 +48,18 @@ class FileListViewModel : ViewModel() {
         searchFiles(input, sortType, currentPage)
     }
 
-    var currentConvertedType: String? = null
-    var currentConvertedTypeDrawable: Drawable? = null
-    var currentConvertedTypeText: String? = null
+    enum class FilterKey(val id: Int) {
+        DATE(-1),
+        TYPE(-1),
+        CATEGORIES_FILTER(-1),
+        CATEGORIES_OWNERSHIP_FILTER(-1),
+    }
 
-    var currentDateFilter: Date? = null
-    var currentCategoriesFilter: List<Category>? = null
-    var currentCategoriesOwnershipFilter: Int = SearchFiltersViewModel.DEFAULT_CATEGORIES_FILTER_VALUE
+    var dateFilter: Pair<FilterKey, Date?> = Pair(FilterKey.DATE, null)
+    var typeFilter: Pair<FilterKey, File.ConvertedType?> = Pair(FilterKey.TYPE, null)
+    var categoriesFilter: Pair<FilterKey, List<Category>?> = Pair(FilterKey.CATEGORIES_FILTER, null)
+    var categoriesOwnershipFilter: Pair<FilterKey, Int> =
+        Pair(FilterKey.CATEGORIES_OWNERSHIP_FILTER, SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_FILTER_VALUE)
 
     var isSharedWithMe = false
 
@@ -145,7 +148,7 @@ class FileListViewModel : ViewModel() {
         getFilesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
-            val type = currentConvertedType
+            val type = typeFilter.second?.name?.lowercase(Locale.ROOT)
             val apiResponse =
                 ApiRepository.searchFiles(AccountUtils.currentDriveId, query, order.order, order.orderBy, page, type)
 

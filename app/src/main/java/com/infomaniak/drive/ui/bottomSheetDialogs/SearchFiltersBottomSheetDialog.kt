@@ -63,7 +63,7 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
         configureDateUI()
         configureTypeUI()
         configureCategoriesUI()
-        configureCategoriesFilterUI()
+        configureCategoriesOwnershipUI()
     }
 
     private fun configureClearButton() {
@@ -72,7 +72,7 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
             updateDateUI()
             updateTypeUI()
             updateCategoriesUI()
-            updateCategoriesFilterUI()
+            updateCategoriesOwnershipUI()
         }
     }
 
@@ -81,10 +81,10 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
             searchFiltersViewModel.apply {
                 setBackNavigationResult(
                     SEARCH_FILTERS_NAV_KEY, bundleOf(
-                        SEARCH_FILTERS_DATE_BUNDLE_KEY to date?.time,
+                        SEARCH_FILTERS_DATE_BUNDLE_KEY to (date?.time ?: -1L),
                         SEARCH_FILTERS_TYPE_BUNDLE_KEY to type?.name,
                         SEARCH_FILTERS_CATEGORIES_BUNDLE_KEY to categories?.map { it.id }?.toIntArray(),
-                        SEARCH_FILTERS_CATEGORIES_OWNERSHIP_BUNDLE_KEY to categoriesFilter,
+                        SEARCH_FILTERS_CATEGORIES_OWNERSHIP_BUNDLE_KEY to categoriesOwnership,
                     )
                 )
             }
@@ -145,17 +145,20 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
         }
     }
 
-    private fun configureCategoriesFilterUI() {
-        searchFiltersViewModel.categoriesFilter =
-            if (navigationArgs.categoriesFilter != -1) navigationArgs.categoriesFilter else SearchFiltersViewModel.DEFAULT_CATEGORIES_FILTER_VALUE
-        updateCategoriesFilterUI()
-        belongToAllCategoriesFilter.setOnClickListener {
-            searchFiltersViewModel.categoriesFilter = SearchFiltersViewModel.BELONG_TO_ALL_CATEGORIES_FILTER
-            updateCategoriesFilterUI()
-        }
-        belongToOneCategoryFilter.setOnClickListener {
-            searchFiltersViewModel.categoriesFilter = SearchFiltersViewModel.BELONG_TO_ONE_CATEGORY_FILTER
-            updateCategoriesFilterUI()
+    private fun configureCategoriesOwnershipUI() {
+        with(searchFiltersViewModel) {
+            categoriesOwnership = if (navigationArgs.categoriesOwnership != -1) {
+                navigationArgs.categoriesOwnership
+            } else SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_FILTER_VALUE
+            updateCategoriesOwnershipUI()
+            belongToAllCategoriesFilter.setOnClickListener {
+                categoriesOwnership = SearchFiltersViewModel.BELONG_TO_ALL_CATEGORIES_FILTER
+                updateCategoriesOwnershipUI()
+            }
+            belongToOneCategoryFilter.setOnClickListener {
+                categoriesOwnership = SearchFiltersViewModel.BELONG_TO_ONE_CATEGORY_FILTER
+                updateCategoriesOwnershipUI()
+            }
         }
     }
 
@@ -197,8 +200,8 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
         )
     }
 
-    private fun updateCategoriesFilterUI() {
-        if (searchFiltersViewModel.categoriesFilter == SearchFiltersViewModel.BELONG_TO_ALL_CATEGORIES_FILTER) {
+    private fun updateCategoriesOwnershipUI() {
+        if (searchFiltersViewModel.categoriesOwnership == SearchFiltersViewModel.BELONG_TO_ALL_CATEGORIES_FILTER) {
             belongToOneCategoryFilter.setupSelection(false)
             belongToAllCategoriesFilter.setupSelection(true)
         } else {

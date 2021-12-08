@@ -167,52 +167,19 @@
                 android:visibility="gone"
                 tools:visibility="visible" />
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/convertedTypeLayout"
-                style="@style/CardViewInfomaniak"
-                android:layout_width="wrap_content"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/filtersLayout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandard"
                 android:layout_marginVertical="@dimen/marginStandardMedium"
-                android:layout_marginStart="@dimen/marginStandard"
+                android:orientation="horizontal"
+                android:overScrollMode="never"
                 android:visibility="gone"
-                tools:visibility="visible">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandardMedium"
-                    android:layout_marginTop="@dimen/marginStandardSmall"
-                    android:layout_marginBottom="@dimen/marginStandardSmall"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:id="@+id/convertedTypeIcon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        tools:ignore="ContentDescription"
-                        tools:src="@drawable/ic_file_text" />
-
-                    <TextView
-                        android:id="@+id/convertedType"
-                        style="@style/Subtitle1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginStart="@dimen/marginStandardSmall"
-                        android:gravity="center"
-                        tools:text="@string/allOfficeDocs" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/convertedTypeClose"
-                        style="@style/IconButton"
-                        android:layout_marginStart="@dimen/marginStandardSmall"
-                        android:contentDescription="@string/buttonClose"
-                        app:icon="@drawable/ic_remove"
-                        app:iconPadding="0dp"
-                        app:iconTint="@color/primaryText" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="5"
+                tools:listitem="@layout/item_search_filter"
+                tools:visibility="visible" />
 
             <include
                 android:id="@+id/uploadFileInProgress"

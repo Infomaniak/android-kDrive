@@ -27,13 +27,13 @@ class SearchFiltersViewModel : ViewModel() {
     var date: Date? = DEFAULT_DATE_VALUE
     var type: File.ConvertedType? = DEFAULT_TYPE_VALUE
     var categories: List<Category>? = DEFAULT_CATEGORIES_VALUE
-    var categoriesFilter = DEFAULT_CATEGORIES_FILTER_VALUE
+    var categoriesOwnership = DEFAULT_CATEGORIES_OWNERSHIP_FILTER_VALUE
 
     fun clearFilters() {
         date = DEFAULT_DATE_VALUE
         type = DEFAULT_TYPE_VALUE
         categories = DEFAULT_CATEGORIES_VALUE
-        categoriesFilter = DEFAULT_CATEGORIES_FILTER_VALUE
+        categoriesOwnership = DEFAULT_CATEGORIES_OWNERSHIP_FILTER_VALUE
     }
 
     companion object {
@@ -43,6 +43,6 @@ class SearchFiltersViewModel : ViewModel() {
         private val DEFAULT_DATE_VALUE = null
         private val DEFAULT_TYPE_VALUE = null
         private val DEFAULT_CATEGORIES_VALUE = null
-        const val DEFAULT_CATEGORIES_FILTER_VALUE = BELONG_TO_ALL_CATEGORIES_FILTER
+        const val DEFAULT_CATEGORIES_OWNERSHIP_FILTER_VALUE = BELONG_TO_ALL_CATEGORIES_FILTER
     }
 }
