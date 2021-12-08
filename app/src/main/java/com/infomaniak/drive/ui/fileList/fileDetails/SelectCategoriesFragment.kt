@@ -50,8 +50,11 @@ class SelectCategoriesFragment : Fragment() {
     private val selectCategoriesViewModel: SelectCategoriesViewModel by viewModels()
     private val navigationArgs: SelectCategoriesFragmentArgs by navArgs()
 
+    private var usageMode = DEFAULT_USAGE_MODE
+
     private lateinit var categoriesAdapter: CategoriesAdapter
     private lateinit var file: File
+    private lateinit var selectedCategories: List<Category>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         inflater.inflate(R.layout.fragment_select_categories, container, false)
@@ -59,12 +62,28 @@ class SelectCategoriesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        file = FileController.getFileById(navigationArgs.fileId) ?: run {
-            findNavController().popBackStack()
-            return
+        // TODO: refactor this, it is way too complicated
+        val tmpFile = FileController.getFileById(navigationArgs.fileId)
+        if (navigationArgs.fileId == -1 || tmpFile == null) {
+            if (navigationArgs.categories != null) {
+                usageMode = SELECTED_CATEGORIES_USAGE_MODE
+                selectedCategories =
+                    DriveInfosController.getCurrentDriveCategoriesFromIds(navigationArgs.categories?.toTypedArray()!!)
+            } else {
+                findNavController().popBackStack()
+                return
+            }
+        } else {
+            file = tmpFile
         }
 
-        DriveInfosController.getCategoryRights().let {
+        DriveInfosController.getCategoryRights()?.apply {
+            if (usageMode == SELECTED_CATEGORIES_USAGE_MODE) {
+                canCreateCategory = false
+                canDeleteCategory = false
+                canEditCategory = false
+            }
+        }.let {
             setCategoriesAdapter(it?.canEditCategory == true, it?.canDeleteCategory == true)
             setAddCategoryButton(it?.canCreateCategory == true)
         }
@@ -83,31 +102,9 @@ class SelectCategoriesFragment : Fragment() {
         ).apply {
             this.canEditCategory = canEditCategory
             this.canDeleteCategory = canDeleteCategory
-
-            val uiCategories = DriveInfosController.getCurrentDriveCategories().map { category ->
-                val fileCategory = file.categories.find { it.id == category.id }
-                UICategory(
-                    id = category.id,
-                    name = category.getName(requireContext()),
-                    color = category.color,
-                    isPredefined = category.isPredefined,
-                    isSelected = fileCategory != null,
-                    userUsageCount = category.userUsageCount,
-                    addedToFileAt = fileCategory?.addedToFileAt,
-                )
-            }
-            setItems(uiCategories.sortCategoriesList())
-
-            onMenuClicked = { category ->
-                safeNavigate(
-                    R.id.categoryInfoActionsBottomSheetDialog, bundleOf(
-                        "fileId" to file.id,
-                        "categoryId" to category.id,
-                        "categoryName" to category.name,
-                        "categoryColor" to category.color,
-                        "categoryIsPredefined" to category.isPredefined,
-                    )
-                )
+            when (usageMode) {
+                FILE_CATEGORIES_USAGE_MODE -> updateFileCategoriesModeUI()
+                SELECTED_CATEGORIES_USAGE_MODE -> updateSelectedCategoriesModeUI()
             }
         }
 
@@ -160,6 +157,50 @@ class SelectCategoriesFragment : Fragment() {
         }
     }
 
+    private fun CategoriesAdapter.updateFileCategoriesModeUI() {
+        val uiCategories = DriveInfosController.getCurrentDriveCategories().map { category ->
+            val fileCategory = file.categories.find { it.id == category.id }
+            UICategory(
+                id = category.id,
+                name = category.getName(requireContext()),
+                color = category.color,
+                isPredefined = category.isPredefined,
+                isSelected = fileCategory != null,
+                userUsageCount = category.userUsageCount,
+                addedToFileAt = fileCategory?.addedToFileAt,
+            )
+        }
+        setItems(uiCategories.sortCategoriesList())
+
+        onMenuClicked = { category ->
+            safeNavigate(
+                R.id.categoryInfoActionsBottomSheetDialog, bundleOf(
+                    "fileId" to file.id,
+                    "categoryId" to category.id,
+                    "categoryName" to category.name,
+                    "categoryColor" to category.color,
+                    "categoryIsPredefined" to category.isPredefined,
+                )
+            )
+        }
+    }
+
+    private fun CategoriesAdapter.updateSelectedCategoriesModeUI() {
+        val uiCategories = DriveInfosController.getCurrentDriveCategories().map { category ->
+            val selectedCategory = selectedCategories.find { it.id == category.id }
+            UICategory(
+                id = category.id,
+                name = category.getName(requireContext()),
+                color = category.color,
+                isPredefined = category.isPredefined,
+                isSelected = selectedCategory != null,
+                userUsageCount = category.userUsageCount,
+                addedToFileAt = null,
+            )
+        }
+        setItems(uiCategories.sortCategoriesList())
+    }
+
     private fun navigateToCreateCategory() {
         safeNavigate(
             SelectCategoriesFragmentDirections.actionSelectCategoriesFragmentToCreateOrEditCategoryFragment(
@@ -172,6 +213,8 @@ class SelectCategoriesFragment : Fragment() {
     }
 
     private fun handleCreateCategoryRow(categoryName: String?) {
+        if (usageMode == SELECTED_CATEGORIES_USAGE_MODE) return
+
         val text = getString(R.string.manageCategoriesCreateTitle, "<b>$categoryName</b>")
         addCategoryTitle.text = HtmlCompat.fromHtml(text, HtmlCompat.FROM_HTML_MODE_COMPACT)
 
@@ -197,6 +240,11 @@ class SelectCategoriesFragment : Fragment() {
     }
 
     private fun addCategory(categoryId: Int) {
+        if (usageMode == SELECTED_CATEGORIES_USAGE_MODE) {
+            adapter.updateCategory(categoryId, true)
+            return
+        }
+
         selectCategoriesViewModel.addCategory(file, categoryId).observe(viewLifecycleOwner) { apiResponse ->
             val isSelected = if (apiResponse.isSuccess()) {
                 true
@@ -209,6 +257,12 @@ class SelectCategoriesFragment : Fragment() {
     }
 
     private fun removeCategory(categoryId: Int) {
+
+        if (usageMode == SELECTED_CATEGORIES_USAGE_MODE) {
+            adapter.updateCategory(categoryId, false)
+            return
+        }
+
         selectCategoriesViewModel.removeCategory(file, categoryId).observe(viewLifecycleOwner) { apiResponse ->
             val isSelected = if (apiResponse.isSuccess()) {
                 false
@@ -225,6 +279,9 @@ class SelectCategoriesFragment : Fragment() {
     }
 
     companion object {
+        private const val FILE_CATEGORIES_USAGE_MODE = 1
+        private const val SELECTED_CATEGORIES_USAGE_MODE = 2
+        private const val DEFAULT_USAGE_MODE = FILE_CATEGORIES_USAGE_MODE
         const val SELECT_CATEGORIES_NAV_KEY = "select_categories_nav_key"
     }
 }
