@@ -796,9 +796,14 @@ fun Category.getName(context: Context): String = when (name) {
     else -> name
 }
 
-fun List<UICategory>.sortCategoriesList(): List<UICategory> {
+fun List<UICategory>.sortFileCategories(): List<UICategory> {
     return sortedByDescending { it.userUsageCount }
         .sortedBy { it.addedToFileAt }
+        .sortedByDescending { it.isSelected }
+}
+
+fun List<UICategory>.sortSearchCategories(): List<UICategory> {
+    return sortedBy { it.name }
         .sortedByDescending { it.isSelected }
 }
 

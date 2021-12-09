@@ -170,7 +170,7 @@ class SelectCategoriesFragment : Fragment() {
                 addedToFileAt = fileCategory?.addedToFileAt,
             )
         }
-        setItems(uiCategories.sortCategoriesList())
+        setItems(uiCategories.sortFileCategories())
 
         onMenuClicked = { category ->
             safeNavigate(
@@ -198,7 +198,7 @@ class SelectCategoriesFragment : Fragment() {
                 addedToFileAt = null,
             )
         }
-        setItems(uiCategories.sortCategoriesList())
+        setItems(uiCategories.sortSearchCategories())
     }
 
     private fun navigateToCreateCategory() {
@@ -241,7 +241,7 @@ class SelectCategoriesFragment : Fragment() {
 
     private fun addCategory(categoryId: Int) {
         if (usageMode == SELECTED_CATEGORIES_USAGE_MODE) {
-            adapter.updateCategory(categoryId, true)
+            adapter.updateCategory(categoryId, true, usageMode)
             return
         }
 
@@ -252,14 +252,14 @@ class SelectCategoriesFragment : Fragment() {
                 Utils.showSnackbar(requireView(), apiResponse.translateError())
                 false
             }
-            categoriesAdapter.selectCategory(categoryId, isSelected)
+            categoriesAdapter.selectCategory(categoryId, isSelected, usageMode)
         }
     }
 
     private fun removeCategory(categoryId: Int) {
 
         if (usageMode == SELECTED_CATEGORIES_USAGE_MODE) {
-            adapter.updateCategory(categoryId, false)
+            adapter.updateCategory(categoryId, false, usageMode)
             return
         }
 
@@ -270,7 +270,7 @@ class SelectCategoriesFragment : Fragment() {
                 Utils.showSnackbar(requireView(), apiResponse.translateError())
                 true
             }
-            categoriesAdapter.selectCategory(categoryId, isSelected)
+            categoriesAdapter.selectCategory(categoryId, isSelected, usageMode)
         }
     }
 
@@ -280,7 +280,7 @@ class SelectCategoriesFragment : Fragment() {
 
     companion object {
         private const val FILE_CATEGORIES_USAGE_MODE = 1
-        private const val SELECTED_CATEGORIES_USAGE_MODE = 2
+        const val SELECTED_CATEGORIES_USAGE_MODE = 2
         private const val DEFAULT_USAGE_MODE = FILE_CATEGORIES_USAGE_MODE
         const val SELECT_CATEGORIES_NAV_KEY = "select_categories_nav_key"
     }
