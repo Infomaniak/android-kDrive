@@ -100,7 +100,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private var retryLoadingActivities = false
 
     protected lateinit var showLoadingTimer: CountDownTimer
-    protected open var downloadFiles: (ignoreCache: Boolean, isNewSort: Boolean) -> Unit = DownloadFiles()
+    open var downloadFiles: (ignoreCache: Boolean, isNewSort: Boolean) -> Unit = DownloadFiles()
     protected open var sortFiles: () -> Unit = SortFiles()
     protected open var setNoFilesLayout: () -> Unit = SetNoFilesLayout()
     protected open var enabledMultiSelectMode = true
@@ -493,7 +493,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 "file" to fileObject,
                 "userDrive" to UserDrive(driveId = file.driveId, sharedWithMe = fileListViewModel.isSharedWithMe)
             )
-            safeNavigate(R.id.fileInfoActionsBottomSheetDialog, bundle)
+            safeNavigate(R.id.fileInfoActionsBottomSheetDialog, bundle, currentClassName = homeClassName())
         }
 
         onBackNavigationResult()
@@ -512,6 +512,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
         }
     }
+
+    protected open fun homeClassName(): String? = null
 
     private fun openFolder(file: File) {
         if (file.isDisabled()) {

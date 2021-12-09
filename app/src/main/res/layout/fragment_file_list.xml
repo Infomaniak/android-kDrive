@@ -314,11 +314,18 @@
                 tools:itemCount="7"
                 tools:listitem="@layout/cardview_file_list" />
 
-            <com.infomaniak.drive.views.NoItemsLayoutView
-                android:id="@+id/noFilesLayout"
+            <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone" />
+                android:fillViewport="true">
+
+                <com.infomaniak.drive.views.NoItemsLayoutView
+                    android:id="@+id/noFilesLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone" />
+            </androidx.core.widget.NestedScrollView>
+
 
         </LinearLayout>
 

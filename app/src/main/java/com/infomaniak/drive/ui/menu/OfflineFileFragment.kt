@@ -24,7 +24,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.utils.Utils
 import kotlinx.android.synthetic.main.fragment_file_list.*
 
-class OfflineFileFragment : FileSubTypeListFragment() {
+open class OfflineFileFragment : FileSubTypeListFragment() {
 
     override var allowCancellation: Boolean = false
 

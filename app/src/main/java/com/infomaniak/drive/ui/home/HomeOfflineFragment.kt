@@ -17,7 +17,22 @@
  */
 package com.infomaniak.drive.ui.home
 
-import androidx.fragment.app.Fragment
+import android.os.Bundle
+import android.view.View
+import androidx.core.view.isGone
+import com.infomaniak.drive.ui.menu.OfflineFileFragment
+import kotlinx.android.synthetic.main.fragment_file_list.*
 
-class HomeOfflineFragment : Fragment() {
+class HomeOfflineFragment : OfflineFileFragment() {
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        //TODO - hide sort layout
+        //TODO - change linearLayoutManager
+
+        appBar.isGone = true
+    }
+
+    override fun homeClassName(): String = javaClass.name
 }

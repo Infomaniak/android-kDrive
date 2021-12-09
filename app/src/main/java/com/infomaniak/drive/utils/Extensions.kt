@@ -586,8 +586,8 @@ fun Context.openOnlyOfficeActivity(file: File) {
     })
 }
 
-private fun Fragment.canNavigate(): Boolean {
-    val className = when (val currentDestination = findNavController().currentDestination) {
+private fun Fragment.canNavigate(currentClassName: String? = null): Boolean {
+    val className = currentClassName ?: when (val currentDestination = findNavController().currentDestination) {
         is FragmentNavigator.Destination -> currentDestination.className
         is DialogFragmentNavigator.Destination -> currentDestination.className
         else -> null
@@ -603,9 +603,10 @@ fun Fragment.safeNavigate(
     @IdRes resId: Int,
     args: Bundle? = null,
     navOptions: NavOptions? = null,
-    navigatorExtras: Navigator.Extras? = null
+    navigatorExtras: Navigator.Extras? = null,
+    currentClassName: String? = null
 ) {
-    if (canNavigate()) findNavController().navigate(resId, args, navOptions, navigatorExtras)
+    if (canNavigate(currentClassName)) findNavController().navigate(resId, args, navOptions, navigatorExtras)
 }
 
 fun Fragment.navigateToUploadView(folderId: Int, folderName: String? = null) {
