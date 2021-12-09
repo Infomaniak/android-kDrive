@@ -148,9 +148,25 @@ class FileListViewModel : ViewModel() {
         getFilesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
-            val type = typeFilter.second?.name?.lowercase(Locale.ROOT)
-            val apiResponse =
-                ApiRepository.searchFiles(AccountUtils.currentDriveId, query, order.order, order.orderBy, page, type)
+            val categories = categoriesFilter.second?.joinToString(
+                separator =
+                if (categoriesOwnershipFilter.second == SearchFiltersViewModel.BELONG_TO_ALL_CATEGORIES_FILTER) {
+                    "%26"
+                } else {
+                    "|"
+                }
+            ) { it.id.toString() }
+
+            val apiResponse = ApiRepository.searchFiles(
+                AccountUtils.currentDriveId,
+                query,
+                order.order,
+                order.orderBy,
+                page,
+                dateFilter.second?.time?.toString(),
+                typeFilter.second?.name?.lowercase(Locale.ROOT),
+                categories
+            )
 
             when {
                 apiResponse.isSuccess() -> emit(apiResponse)
