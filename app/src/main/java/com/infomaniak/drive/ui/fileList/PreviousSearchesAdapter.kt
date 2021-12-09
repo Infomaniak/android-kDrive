@@ -20,6 +20,8 @@ package com.infomaniak.drive.ui.fileList
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.card.MaterialCardView
+import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_search_result.view.*
@@ -33,15 +35,39 @@ class PreviousSearchesAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_search_result, parent, false))
 
+    override fun getItemCount() = searches.size
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        with(holder.itemView) {
+        with(holder.itemView.searchResultCard) {
             val search = searches[position]
-            searchResultText.text = search
-            setOnClickListener { onSearchClicked(search) }
+            setLayouts(position)
+            setData(search)
+            setListeners(search)
         }
     }
 
-    override fun getItemCount() = searches.size
+    private fun MaterialCardView.setLayouts(position: Int) {
+        var topCornerRadius = 0.0f
+        var bottomCornerRadius = 0.0f
+        if (position == 0) topCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
+        if (position == itemCount - 1) bottomCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
+
+        shapeAppearanceModel = shapeAppearanceModel
+            .toBuilder()
+            .setTopLeftCorner(CornerFamily.ROUNDED, topCornerRadius)
+            .setTopRightCorner(CornerFamily.ROUNDED, topCornerRadius)
+            .setBottomLeftCorner(CornerFamily.ROUNDED, bottomCornerRadius)
+            .setBottomRightCorner(CornerFamily.ROUNDED, bottomCornerRadius)
+            .build()
+    }
+
+    private fun MaterialCardView.setData(search: String) {
+        searchResultText.text = search
+    }
+
+    private fun MaterialCardView.setListeners(search: String) {
+        setOnClickListener { onSearchClicked(search) }
+    }
 
     fun setAll(newSearches: List<String>) {
         searches = ArrayList(newSearches)
