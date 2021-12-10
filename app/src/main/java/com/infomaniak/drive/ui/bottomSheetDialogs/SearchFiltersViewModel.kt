@@ -18,13 +18,14 @@
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import androidx.lifecycle.ViewModel
-import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.File.ConvertedType
+import com.infomaniak.drive.data.models.SearchDateFilter
 import com.infomaniak.drive.data.models.drive.Category
 
 class SearchFiltersViewModel : ViewModel() {
 
     var date: SearchDateFilter? = DEFAULT_DATE_VALUE
-    var type: File.ConvertedType? = DEFAULT_TYPE_VALUE
+    var type: ConvertedType? = DEFAULT_TYPE_VALUE
     var categories: List<Category>? = DEFAULT_CATEGORIES_VALUE
     var categoriesOwnership = DEFAULT_CATEGORIES_OWNERSHIP_FILTER_VALUE
 

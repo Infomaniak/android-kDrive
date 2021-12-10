@@ -31,7 +31,8 @@ import androidx.navigation.navGraphViewModels
 import com.google.android.material.card.MaterialCardView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.File.ConvertedType
+import com.infomaniak.drive.data.models.SearchDateFilter
 import com.infomaniak.drive.utils.getBackNavigationResult
 import com.infomaniak.drive.utils.safeNavigate
 import com.infomaniak.drive.utils.setBackNavigationResult
@@ -92,25 +93,20 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
     }
 
     private fun setupBackActionHandler() {
-        // Date filter
         getBackNavigationResult<Parcelable>(SearchFilterDateBottomSheetDialog.SEARCH_FILTER_DATE_NAV_KEY) {
             searchFiltersViewModel.date = it as SearchDateFilter
             updateDateUI()
         }
 
-        // Type filter
         getBackNavigationResult<Boolean>(SearchFilterFileTypeBottomSheetDialog.SEARCH_FILTER_TYPE_NAV_KEY) {
             updateTypeUI()
         }
 
-        // Categories
         getBackNavigationResult<Bundle>(SelectCategoriesBottomSheetDialog.SELECT_CATEGORIES_NAV_KEY) { bundle ->
             val ids = bundle.getIntArray(SelectCategoriesBottomSheetDialog.CATEGORIES_BUNDLE_KEY)?.toTypedArray()
             searchFiltersViewModel.categories = if (ids?.isNotEmpty() == true) {
                 DriveInfosController.getCurrentDriveCategoriesFromIds(ids)
-            } else {
-                null
-            }
+            } else null
             updateCategoriesUI()
         }
     }
@@ -124,7 +120,7 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
     }
 
     private fun configureTypeUI() {
-        searchFiltersViewModel.type = navigationArgs.type?.let { File.ConvertedType.valueOf(it) }
+        searchFiltersViewModel.type = navigationArgs.type?.let { ConvertedType.valueOf(it) }
         updateTypeUI()
         fileTypeFilter.setOnClickListener { safeNavigate(R.id.searchFilterFileTypeDialog) }
     }

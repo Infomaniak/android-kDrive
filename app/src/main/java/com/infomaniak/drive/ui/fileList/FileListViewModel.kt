@@ -21,8 +21,8 @@ import androidx.lifecycle.*
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.File.*
 import com.infomaniak.drive.data.models.drive.Category
-import com.infomaniak.drive.ui.bottomSheetDialogs.SearchDateFilter
 import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFiltersViewModel
 import com.infomaniak.drive.data.models.File.*
 import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
@@ -49,15 +49,8 @@ class FileListViewModel : ViewModel() {
         searchFiles(input, sortType, currentPage)
     }
 
-    enum class FilterKey(val id: Int) {
-        DATE(-1),
-        TYPE(-1),
-        CATEGORIES_FILTER(-1),
-        CATEGORIES_OWNERSHIP_FILTER(-1),
-    }
-
     var dateFilter: Pair<FilterKey, SearchDateFilter?> = Pair(FilterKey.DATE, null)
-    var typeFilter: Pair<FilterKey, File.ConvertedType?> = Pair(FilterKey.TYPE, null)
+    var typeFilter: Pair<FilterKey, ConvertedType?> = Pair(FilterKey.TYPE, null)
     var categoriesFilter: Pair<FilterKey, List<Category>?> = Pair(FilterKey.CATEGORIES_FILTER, null)
     var categoriesOwnershipFilter: Pair<FilterKey, Int> =
         Pair(FilterKey.CATEGORIES_OWNERSHIP_FILTER, SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_FILTER_VALUE)

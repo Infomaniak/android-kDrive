@@ -25,7 +25,7 @@ import androidx.core.view.isVisible
 import androidx.navigation.navGraphViewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.File.ConvertedType
 import com.infomaniak.drive.utils.setBackNavigationResult
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_search_filter_file_type.*
 
@@ -40,17 +40,17 @@ open class SearchFilterFileTypeBottomSheetDialog : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val filters = listOf<Triple<View, View, File.ConvertedType>>(
-            Triple(imageFilterLayout, imageFilterEndIcon, File.ConvertedType.IMAGE),
-            Triple(videoFilterLayout, videoFilterEndIcon, File.ConvertedType.VIDEO),
-            Triple(audioFilterLayout, audioFilterEndIcon, File.ConvertedType.AUDIO),
-            Triple(pdfFilterLayout, pdfFilterEndIcon, File.ConvertedType.PDF),
-            Triple(docsFilterLayout, docsFilterEndIcon, File.ConvertedType.TEXT),
-            Triple(gridsFilterLayout, gridsFilterEndIcon, File.ConvertedType.SPREADSHEET),
-            Triple(pointsFilterLayout, pointsFilterEndIcon, File.ConvertedType.PRESENTATION),
-            Triple(folderFilterLayout, folderFilterEndIcon, File.ConvertedType.FOLDER),
-            Triple(archiveFilterLayout, archiveFilterEndIcon, File.ConvertedType.ARCHIVE),
-            Triple(codeFilterLayout, codeFilterEndIcon, File.ConvertedType.CODE),
+        val filters = listOf<Triple<View, View, ConvertedType>>(
+            Triple(imageFilterLayout, imageFilterEndIcon, ConvertedType.IMAGE),
+            Triple(videoFilterLayout, videoFilterEndIcon, ConvertedType.VIDEO),
+            Triple(audioFilterLayout, audioFilterEndIcon, ConvertedType.AUDIO),
+            Triple(pdfFilterLayout, pdfFilterEndIcon, ConvertedType.PDF),
+            Triple(docsFilterLayout, docsFilterEndIcon, ConvertedType.TEXT),
+            Triple(gridsFilterLayout, gridsFilterEndIcon, ConvertedType.SPREADSHEET),
+            Triple(pointsFilterLayout, pointsFilterEndIcon, ConvertedType.PRESENTATION),
+            Triple(folderFilterLayout, folderFilterEndIcon, ConvertedType.FOLDER),
+            Triple(archiveFilterLayout, archiveFilterEndIcon, ConvertedType.ARCHIVE),
+            Triple(codeFilterLayout, codeFilterEndIcon, ConvertedType.CODE),
         )
 
         // Set previously selected Type

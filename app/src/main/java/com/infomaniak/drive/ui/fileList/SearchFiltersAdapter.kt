@@ -24,17 +24,10 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
-import com.infomaniak.drive.ui.fileList.FileListViewModel.FilterKey
+import com.infomaniak.drive.data.models.FilterKey
+import com.infomaniak.drive.data.models.SearchFilter
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_search_filter.view.*
-
-data class SearchFilter(
-    val key: FilterKey,
-    val text: String,
-    val icon: Int? = null,
-    val tint: String? = null,
-    val categoryId: Int? = null,
-)
 
 class SearchFiltersAdapter(
     private val onFilterRemoved: (key: FilterKey, categoryId: Int?) -> Unit

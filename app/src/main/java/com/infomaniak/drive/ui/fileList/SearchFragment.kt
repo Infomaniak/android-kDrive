@@ -29,9 +29,8 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.models.AppSettings
-import com.infomaniak.drive.data.models.ConvertedType
-import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.File.*
 import com.infomaniak.drive.ui.bottomSheetDialogs.SearchDateFilter
 import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFiltersBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFiltersViewModel
@@ -60,7 +59,7 @@ class SearchFragment : FileListFragment() {
         searchFiltersAdapter = SearchFiltersAdapter { key, categoryId -> removeFilter(key, categoryId) }
         filtersLayout.adapter = searchFiltersAdapter
 
-        fileListViewModel.sortType = File.SortType.RECENT
+        fileListViewModel.sortType = SortType.RECENT
 
         // Get preview List if needed
         if (mainViewModel.currentPreviewFileList.isNotEmpty()) {
@@ -217,7 +216,7 @@ class SearchFragment : FileListFragment() {
         fileListViewModel.dateFilter = Pair(FilterKey.DATE, filter)
     }
 
-    private fun setTypeFilter(type: File.ConvertedType?) {
+    private fun setTypeFilter(type: ConvertedType?) {
         fileListViewModel.typeFilter = Pair(FilterKey.TYPE, type)
     }
 
