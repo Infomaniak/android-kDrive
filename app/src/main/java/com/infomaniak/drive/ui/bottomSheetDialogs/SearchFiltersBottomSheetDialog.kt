@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import android.os.Bundle
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,7 +38,6 @@ import com.infomaniak.drive.utils.setBackNavigationResult
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.lib.core.utils.toPx
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_search_filters.*
-import java.util.*
 
 class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
 
@@ -81,8 +81,8 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
             searchFiltersViewModel.apply {
                 setBackNavigationResult(
                     SEARCH_FILTERS_NAV_KEY, bundleOf(
-                        SEARCH_FILTERS_DATE_BUNDLE_KEY to (date?.time ?: -1L),
-                        SEARCH_FILTERS_TYPE_BUNDLE_KEY to type?.name,
+                        SEARCH_FILTERS_DATE_BUNDLE_KEY to date,
+                        SEARCH_FILTERS_TYPE_BUNDLE_KEY to type,
                         SEARCH_FILTERS_CATEGORIES_BUNDLE_KEY to categories?.map { it.id }?.toIntArray(),
                         SEARCH_FILTERS_CATEGORIES_OWNERSHIP_BUNDLE_KEY to categoriesOwnership,
                     )
@@ -93,9 +93,10 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     private fun setupBackActionHandler() {
         // Date filter
-        // getBackNavigationResult<Boolean>() {
-        //     updateDateUI()
-        // }
+        getBackNavigationResult<Parcelable>(SearchFilterDateBottomSheetDialog.SEARCH_FILTER_DATE_NAV_KEY) {
+            searchFiltersViewModel.date = it as SearchDateFilter
+            updateDateUI()
+        }
 
         // Type filter
         getBackNavigationResult<Boolean>(SearchFilterFileTypeBottomSheetDialog.SEARCH_FILTER_TYPE_NAV_KEY) {
@@ -115,10 +116,10 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
     }
 
     private fun configureDateUI() {
-        searchFiltersViewModel.date = if (navigationArgs.date != -1L) Date(navigationArgs.date) else null
+        searchFiltersViewModel.date = navigationArgs.date
         updateDateUI()
         modificationDateFilter.setOnClickListener {
-            // TODO()
+            safeNavigate(R.id.searchFilterDateDialog, bundleOf("date" to searchFiltersViewModel.date))
         }
     }
 
@@ -164,9 +165,9 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     private fun updateDateUI() {
         searchFiltersViewModel.date?.let {
-            // TODO()
+            modificationDateFilterText.text = it.text
         } ?: run {
-            // TODO()
+            modificationDateFilterText.setText(R.string.searchFiltersSelectDate)
         }
     }
 

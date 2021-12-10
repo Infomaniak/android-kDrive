@@ -22,6 +22,7 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.drive.Category
+import com.infomaniak.drive.ui.bottomSheetDialogs.SearchDateFilter
 import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFiltersViewModel
 import com.infomaniak.drive.data.models.File.*
 import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
@@ -55,7 +56,7 @@ class FileListViewModel : ViewModel() {
         CATEGORIES_OWNERSHIP_FILTER(-1),
     }
 
-    var dateFilter: Pair<FilterKey, Date?> = Pair(FilterKey.DATE, null)
+    var dateFilter: Pair<FilterKey, SearchDateFilter?> = Pair(FilterKey.DATE, null)
     var typeFilter: Pair<FilterKey, File.ConvertedType?> = Pair(FilterKey.TYPE, null)
     var categoriesFilter: Pair<FilterKey, List<Category>?> = Pair(FilterKey.CATEGORIES_FILTER, null)
     var categoriesOwnershipFilter: Pair<FilterKey, Int> =
@@ -163,7 +164,7 @@ class FileListViewModel : ViewModel() {
                 order.order,
                 order.orderBy,
                 page,
-                dateFilter.second?.time?.toString(),
+                dateFilter.second?.let { Pair((it.start.time / 1_000L).toString(), (it.end.time / 1_000L).toString()) },
                 typeFilter.second?.name?.lowercase(Locale.ROOT),
                 categories
             )

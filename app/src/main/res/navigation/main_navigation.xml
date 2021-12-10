@@ -517,7 +517,8 @@
         tools:layout="@layout/fragment_bottom_sheet_search_filters">
         <argument
             android:name="date"
-            app:argType="long" />
+            app:argType="com.infomaniak.drive.ui.bottomSheetDialogs.SearchDateFilter"
+            app:nullable="true" />
         <argument
             android:name="type"
             app:argType="string"
@@ -532,6 +533,17 @@
         <action
             android:id="@+id/action_searchFiltersBottomSheetDialog_to_selectCategoriesBottomSheetDialog"
             app:destination="@id/selectCategoriesBottomSheetDialog" />
+    </dialog>
+
+    <dialog
+        android:id="@+id/searchFilterDateDialog"
+        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterDateBottomSheetDialog"
+        android:label="SearchFilterDateBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_search_filter_date">
+        <argument
+            android:name="date"
+            app:argType="com.infomaniak.drive.ui.bottomSheetDialogs.SearchDateFilter"
+            app:nullable="true" />
     </dialog>
 
     <dialog

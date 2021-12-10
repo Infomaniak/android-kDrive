@@ -380,6 +380,14 @@ fun View.setUserView(user: User, showChevron: Boolean = true, onItemClicked: (us
     setOnClickListener { onItemClicked(user) }
 }
 
+fun Date.startOfTheDay(): Date =
+    Calendar.getInstance().apply {
+        time = this@startOfTheDay
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+    }.time
+
 fun Date.endOfTheDay(): Date =
     Calendar.getInstance().apply {
         time = this@endOfTheDay

@@ -32,6 +32,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.ui.bottomSheetDialogs.SearchDateFilter
 import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFiltersBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFiltersViewModel
 import com.infomaniak.drive.ui.fileList.FileListViewModel.*
@@ -137,7 +138,7 @@ class SearchFragment : FileListFragment() {
                 with(fileListViewModel) {
                     safeNavigate(
                         SearchFragmentDirections.actionSearchFragmentToSearchFiltersBottomSheetDialog(
-                            date = dateFilter.second?.time ?: -1L,
+                            date = dateFilter.second,
                             type = typeFilter.second?.name,
                             categories = categoriesFilter.second?.map { it.id }?.toIntArray(),
                             categoriesOwnership = categoriesOwnershipFilter.second,
@@ -203,8 +204,8 @@ class SearchFragment : FileListFragment() {
     private fun setBackActionHandlers() {
         getBackNavigationResult<Bundle>(SearchFiltersBottomSheetDialog.SEARCH_FILTERS_NAV_KEY) { bundle ->
             with(bundle) {
-                setDateFilter(getLong(SearchFiltersBottomSheetDialog.SEARCH_FILTERS_DATE_BUNDLE_KEY))
-                setTypeFilter(getString(SearchFiltersBottomSheetDialog.SEARCH_FILTERS_TYPE_BUNDLE_KEY))
+                setDateFilter(getParcelable(SearchFiltersBottomSheetDialog.SEARCH_FILTERS_DATE_BUNDLE_KEY))
+                setTypeFilter(getParcelable(SearchFiltersBottomSheetDialog.SEARCH_FILTERS_TYPE_BUNDLE_KEY))
                 setCategoriesFilter(getIntArray(SearchFiltersBottomSheetDialog.SEARCH_FILTERS_CATEGORIES_BUNDLE_KEY))
                 setCategoriesOwnershipFilter(getInt(SearchFiltersBottomSheetDialog.SEARCH_FILTERS_CATEGORIES_OWNERSHIP_BUNDLE_KEY))
             }
@@ -212,19 +213,18 @@ class SearchFragment : FileListFragment() {
         }
     }
 
-    private fun setDateFilter(time: Long) {
-        fileListViewModel.dateFilter = Pair(FilterKey.DATE, if (time != -1L) Date(time) else null)
+    private fun setDateFilter(filter: SearchDateFilter?) {
+        fileListViewModel.dateFilter = Pair(FilterKey.DATE, filter)
     }
 
-    private fun setTypeFilter(typeName: String?) {
-        fileListViewModel.typeFilter = Pair(FilterKey.TYPE, typeName?.let { File.ConvertedType.valueOf(it) })
+    private fun setTypeFilter(type: File.ConvertedType?) {
+        fileListViewModel.typeFilter = Pair(FilterKey.TYPE, type)
     }
 
     private fun setCategoriesFilter(categories: IntArray?) {
         fileListViewModel.categoriesFilter = Pair(
             FilterKey.CATEGORIES_FILTER,
-            categories?.let { DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray()) }
-        )
+            categories?.let { DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray()) })
     }
 
     private fun setCategoriesOwnershipFilter(categoriesOwnership: Int) {
@@ -253,7 +253,7 @@ class SearchFragment : FileListFragment() {
         with(fileListViewModel) {
             val filters = mutableListOf<SearchFilter>().apply {
                 dateFilter.second?.let {
-                    add(SearchFilter(key = dateFilter.first, text = it.toString(), icon = R.drawable.ic_calendar))
+                    add(SearchFilter(key = dateFilter.first, text = it.text, icon = R.drawable.ic_calendar))
                 }
                 typeFilter.second?.let {
                     add(SearchFilter(key = typeFilter.first, text = getString(it.searchFilterName), icon = it.icon))

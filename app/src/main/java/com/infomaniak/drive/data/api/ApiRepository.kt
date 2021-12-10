@@ -148,14 +148,14 @@ object ApiRepository {
         order: String,
         orderBy: String,
         page: Int,
-        date: String? = null,
+        date: Pair<String, String>? = null,
         type: String? = null,
         categories: String? = null,
         okHttpClient: OkHttpClient = HttpClient.okHttpClient
     ): ApiResponse<ArrayList<File>> {
         var url = "${ApiRoutes.searchFiles(driveId)}&order=$order&order_by=$orderBy&${pagination(page)}"
         if (query != null) url += "&query=$query"
-        if (date != null) url += "&modified_at=custom&from=$date&until=$date"
+        if (date != null) url += "&modified_at=custom&from=${date.first}&until=${date.second}"
         if (type != null) url += "&converted_type=$type"
         if (categories != null) url += "&category=$categories"
 
