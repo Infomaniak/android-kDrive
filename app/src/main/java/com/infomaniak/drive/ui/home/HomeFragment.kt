@@ -99,10 +99,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         val offlineFragment = HomeOfflineFragment().apply {
-            arguments = bundleOf(
-                "folderID" to 1,
-                "folderName" to ""
-            )
+            arguments = bundleOf("folderID" to 1, "folderName" to "")
         }
         val tabsHome = arrayListOf(
             TabViewPagerUtils.FragmentTab(HomeActivitiesFragment(), R.id.homeActivitiesButton),
@@ -130,7 +127,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         AccountUtils.getCurrentDrive()?.let { currentDrive ->
             val downloadRequired = forceDownload || mustRefreshUi
             (homeViewPager.getFragment(0) as? HomeActivitiesFragment)?.getLastActivities(currentDrive.id, downloadRequired)
-            (homeViewPager.getFragment(1) as? HomeOfflineFragment)?.downloadFiles?.let { it(true, false) }
+            (homeViewPager.getFragment(1) as? HomeOfflineFragment)?.reloadOffline()
             (homeViewPager.getFragment(2) as? PicturesFragment)?.reloadPictures()
 
             setDriveHeader(currentDrive)

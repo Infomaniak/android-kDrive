@@ -99,8 +99,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private var isLoadingActivities = false
     private var retryLoadingActivities = false
 
-    protected lateinit var showLoadingTimer: CountDownTimer
-    open var downloadFiles: (ignoreCache: Boolean, isNewSort: Boolean) -> Unit = DownloadFiles()
+    protected val showLoadingTimer: CountDownTimer by lazy { createRefreshTimer { swipeRefreshLayout?.isRefreshing = true } }
+    protected open var downloadFiles: (ignoreCache: Boolean, isNewSort: Boolean) -> Unit = DownloadFiles()
     protected open var sortFiles: () -> Unit = SortFiles()
     protected open var setNoFilesLayout: () -> Unit = SetNoFilesLayout()
     protected open var enabledMultiSelectMode = true
@@ -138,8 +138,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        showLoadingTimer = createRefreshTimer { swipeRefreshLayout?.isRefreshing = true }
 
         activitiesRefreshTimer = createRefreshTimer(ACTIVITIES_REFRESH_DELAY) {
             isLoadingActivities = false

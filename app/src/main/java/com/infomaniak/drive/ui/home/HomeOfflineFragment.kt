@@ -32,7 +32,12 @@ class HomeOfflineFragment : OfflineFileFragment() {
         //TODO - change linearLayoutManager
 
         appBar.isGone = true
+        sortButton.isGone = true
     }
 
     override fun homeClassName(): String = javaClass.name
+
+    fun reloadOffline() {
+        if (isResumed) onRefresh()
+    }
 }
