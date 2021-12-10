@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -28,6 +29,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File.ConvertedType
 import com.infomaniak.drive.utils.setBackNavigationResult
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_search_filter_file_type.*
+import kotlinx.android.synthetic.main.view_search_filter_type.view.*
 
 open class SearchFilterFileTypeBottomSheetDialog : BottomSheetDialogFragment() {
 
@@ -37,30 +39,36 @@ open class SearchFilterFileTypeBottomSheetDialog : BottomSheetDialogFragment() {
         return inflater.inflate(R.layout.fragment_bottom_sheet_search_filter_file_type, container, false)
     }
 
+    @SuppressLint("InflateParams")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val filters = listOf<Triple<View, View, ConvertedType>>(
-            Triple(imageFilterLayout, imageFilterEndIcon, ConvertedType.IMAGE),
-            Triple(videoFilterLayout, videoFilterEndIcon, ConvertedType.VIDEO),
-            Triple(audioFilterLayout, audioFilterEndIcon, ConvertedType.AUDIO),
-            Triple(pdfFilterLayout, pdfFilterEndIcon, ConvertedType.PDF),
-            Triple(docsFilterLayout, docsFilterEndIcon, ConvertedType.TEXT),
-            Triple(gridsFilterLayout, gridsFilterEndIcon, ConvertedType.SPREADSHEET),
-            Triple(pointsFilterLayout, pointsFilterEndIcon, ConvertedType.PRESENTATION),
-            Triple(folderFilterLayout, folderFilterEndIcon, ConvertedType.FOLDER),
-            Triple(archiveFilterLayout, archiveFilterEndIcon, ConvertedType.ARCHIVE),
-            Triple(codeFilterLayout, codeFilterEndIcon, ConvertedType.CODE),
-        )
+        val types = listOf(
+            Pair(ConvertedType.ARCHIVE, R.drawable.ic_file_zip),
+            Pair(ConvertedType.AUDIO, R.drawable.ic_file_audio),
+            Pair(ConvertedType.CODE, R.drawable.ic_file_code),
+            Pair(ConvertedType.FOLDER, R.drawable.ic_folder_filled),
+            Pair(ConvertedType.IMAGE, R.drawable.ic_file_image),
+            Pair(ConvertedType.PDF, R.drawable.ic_file_pdf),
+            Pair(ConvertedType.PRESENTATION, R.drawable.ic_file_presentation),
+            Pair(ConvertedType.SPREADSHEET, R.drawable.ic_file_grids),
+            Pair(ConvertedType.TEXT, R.drawable.ic_file_text),
+            Pair(ConvertedType.VIDEO, R.drawable.ic_file_video),
+        ).sortedBy { getString(it.first.searchFilterName) }
 
-        // Set previously selected Type
-        filters.find { it.third == searchFiltersViewModel.type }?.second?.isVisible = true
+        types.forEach { type ->
+            searchTypeFilerContainer.addView(
+                layoutInflater.inflate(R.layout.view_search_filter_type, null).apply {
+                    typeFilterStartIcon.setImageResource(type.second)
+                    typeFilterText.setText(type.first.searchFilterName)
+                    typeFilterEndIcon.isVisible = type.first == searchFiltersViewModel.type
+                    setOnClickListener {
+                        searchFiltersViewModel.type = type.first
+                        setBackNavigationResult(SEARCH_FILTER_TYPE_NAV_KEY, true)
+                    }
 
-        filters.forEach { filter ->
-            filter.first.setOnClickListener {
-                searchFiltersViewModel.type = filter.third
-                setBackNavigationResult(SEARCH_FILTER_TYPE_NAV_KEY, true)
-            }
+                }
+            )
         }
     }
 
