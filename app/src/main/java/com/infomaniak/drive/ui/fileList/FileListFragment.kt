@@ -38,7 +38,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -673,8 +672,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun setupDisplayMode(isListMode: Boolean) {
+        val navController = findNavController()
         fileRecyclerView.layoutManager =
-            if (isListMode) LinearLayoutManager(requireContext()) else GridLayoutManager(requireContext(), 2)
+            if (isListMode) SentryLinearLayoutManager(navController, requireContext())
+            else SentryGridLayoutManager(navController, requireContext(), 2)
+
         toggleDisplayButton.icon = ContextCompat.getDrawable(
             requireContext(),
             if (isListMode) R.drawable.ic_list else R.drawable.ic_grid

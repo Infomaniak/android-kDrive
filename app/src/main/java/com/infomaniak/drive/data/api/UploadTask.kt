@@ -111,8 +111,8 @@ class UploadTask(
             val restartUpload = uploadedChunks?.let { needToResetUpload(it) } ?: false
 
             Sentry.addBreadcrumb(Breadcrumb().apply {
-                category = "Upload"
-                message = "start with $totalChunks chunks and $uploadedChunks uploadedChunks"
+                category = UploadWorker.BREADCRUMB_TAG
+                message = "start ${uploadFile.fileName} with $totalChunks chunks and $uploadedChunks uploadedChunks"
                 level = SentryLevel.INFO
             })
 
@@ -173,13 +173,6 @@ class UploadTask(
         val uploadRequestBody = ProgressRequestBody(data.toRequestBody()) { currentBytes, bytesWritten, contentLength ->
             launch {
                 progressMutex.withLock {
-                    if (bytesWritten == contentLength) {
-                        Sentry.addBreadcrumb(Breadcrumb().apply {
-                            category = "Upload"
-                            message = "$bytesWritten bytes were written"
-                            level = SentryLevel.INFO
-                        })
-                    }
                     updateProgress(currentBytes, bytesWritten, contentLength, url)
                 }
             }

@@ -17,10 +17,6 @@
  */
 package com.infomaniak.drive.data.api
 
-import android.util.Log
-import io.sentry.Breadcrumb
-import io.sentry.Sentry
-import io.sentry.SentryLevel
 import okhttp3.MediaType
 import okhttp3.RequestBody
 import okhttp3.internal.http.CallServerInterceptor
@@ -57,12 +53,6 @@ class ProgressRequestBody(
         }
 
         if (isCalledByCallServerInterceptor) {
-            Log.d("ProgressRequestBody", "writeTo > called by server")
-            Sentry.addBreadcrumb(Breadcrumb().apply {
-                category = "Upload"
-                message = "writeTo > called by server"
-                level = SentryLevel.INFO
-            })
             val progressOutputStream = ProgressOutputStream(sink.outputStream(), onProgress, contentLength())
             val progressSink: BufferedSink = progressOutputStream.sink().buffer()
             requestBody.writeTo(progressSink)
