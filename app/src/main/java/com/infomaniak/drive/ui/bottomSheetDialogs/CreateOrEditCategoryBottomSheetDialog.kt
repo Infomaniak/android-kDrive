@@ -41,13 +41,13 @@ import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.dpToPx
 import com.infomaniak.drive.utils.setBackNavigationResult
 import com.infomaniak.drive.utils.setMargin
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.showProgress
+import com.infomaniak.lib.core.utils.toPx
 import kotlinx.android.synthetic.main.fragment_create_category.*
 import kotlinx.coroutines.Dispatchers
 
@@ -170,35 +170,32 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     @SuppressLint("InflateParams")
     private fun configureColorsGrid() {
-        val ctx = requireContext()
-
         CATEGORY_COLORS.forEach { color ->
 
             // Create view
-            (LayoutInflater.from(ctx).inflate(R.layout.view_category_color, null, false) as MaterialButton)
-                .apply {
+            (layoutInflater.inflate(R.layout.view_category_color, null) as MaterialButton).apply {
 
-                    // Set layout size
-                    val size = 36.dpToPx(ctx)
-                    layoutParams = ViewGroup.MarginLayoutParams(size, size)
+                // Set layout size
+                val size = 36.toPx()
+                layoutParams = ViewGroup.MarginLayoutParams(size, size)
 
-                    // Set layout margins
-                    val margin = 8.dpToPx(ctx)
-                    setMargin(margin, margin, margin, margin)
+                // Set layout margins
+                val margin = resources.getDimensionPixelSize(R.dimen.marginStandardSmall)
+                setMargin(margin, margin, margin, margin)
 
-                    // Set background & icon colors
-                    val colorStateList = ColorStateList.valueOf(color.toColorInt())
-                    backgroundTintList = colorStateList
-                    iconTint = colorStateList
+                // Set background & icon colors
+                val colorStateList = ColorStateList.valueOf(color.toColorInt())
+                backgroundTintList = colorStateList
+                iconTint = colorStateList
 
-                    // Set click
-                    val pos = colorLayouts.size
-                    setOnClickListener { onColorClicked(pos) }
+                // Set click
+                val pos = colorLayouts.size
+                setOnClickListener { onColorClicked(pos) }
 
-                    // Add view
-                    colorLayouts.add(this)
-                    categoryColorsView.addView(this)
-                }
+                // Add view
+                colorLayouts.add(this)
+                categoryColorsView.addView(this)
+            }
         }
     }
 
