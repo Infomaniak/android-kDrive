@@ -81,33 +81,30 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
         onColorClicked(position)
     }
 
-    private fun configureUI() {
-        val previousCategoryId = navigationArgs.categoryId
-        val previousCategoryName = navigationArgs.categoryName
-        val categoryIsPredefined = navigationArgs.categoryIsPredefined
-
+    private fun configureUI() = with(navigationArgs) {
         appBarTitle.title = getString(
-            if (previousCategoryId == NO_PREVIOUS_CATEGORY_ID) R.string.createCategoryTitle else R.string.editCategoryTitle
+            if (categoryId == NO_PREVIOUS_CATEGORY_ID) R.string.createCategoryTitle else R.string.editCategoryTitle
         )
-        editCategoryWarning.isGone = previousCategoryId == NO_PREVIOUS_CATEGORY_ID
-        previousCategoryName?.let { categoryNameValueInput.setText(it) }
+
+        editCategoryWarning.isGone = categoryId == NO_PREVIOUS_CATEGORY_ID
+        categoryName?.let { categoryNameValueInput.setText(it) }
         categoryNameValueLayout.isGone = categoryIsPredefined
+
         saveButton.isEnabled = when {
             categoryIsPredefined -> true
-            previousCategoryId != NO_PREVIOUS_CATEGORY_ID -> true
-            previousCategoryId == NO_PREVIOUS_CATEGORY_ID && !previousCategoryName.isNullOrEmpty() -> true
+            categoryId != NO_PREVIOUS_CATEGORY_ID -> true
+            categoryId == NO_PREVIOUS_CATEGORY_ID && categoryName?.isNotEmpty() == true -> true
             else -> false
         }
     }
 
-    private fun configureSaveButton() {
-        val previousCategoryId = navigationArgs.categoryId
+    private fun configureSaveButton() = with(navigationArgs) {
         saveButton.setOnClickListener {
             saveButton.showProgress()
-            if (previousCategoryId == NO_PREVIOUS_CATEGORY_ID) {
+            if (categoryId == NO_PREVIOUS_CATEGORY_ID) {
                 createCategory() // Create a new Category
             } else {
-                editCategory(previousCategoryId) // Edit an existing Category
+                editCategory(categoryId) // Edit an existing Category
             }
         }
     }
