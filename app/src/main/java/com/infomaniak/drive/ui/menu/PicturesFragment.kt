@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.menu
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -53,6 +54,11 @@ class PicturesFragment(
         return inflater.inflate(R.layout.fragment_pictures, container, false)
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        configPicturesLayoutManager()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -65,6 +71,13 @@ class PicturesFragment(
         picturesAdapter.numberItemLoader = numberItemLoader
         picturesAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT
 
+        configPicturesLayoutManager()
+        picturesRecyclerView.adapter = picturesAdapter
+
+        getPictures()
+    }
+
+    private fun configPicturesLayoutManager() {
         val numPicturesColumns = getNumPicturesColumns()
         val gridLayoutManager = GridLayoutManager(requireContext(), numPicturesColumns)
         gridLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
@@ -76,9 +89,6 @@ class PicturesFragment(
             }
         }
         picturesRecyclerView.layoutManager = gridLayoutManager
-        picturesRecyclerView.adapter = picturesAdapter
-
-        getPictures()
     }
 
     fun reloadPictures() {
