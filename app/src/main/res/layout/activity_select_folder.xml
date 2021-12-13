@@ -42,8 +42,10 @@
         android:layout_marginBottom="@dimen/marginStandard"
         android:text="@string/buttonValid"
         android:visibility="gone"
+        android:enabled="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
