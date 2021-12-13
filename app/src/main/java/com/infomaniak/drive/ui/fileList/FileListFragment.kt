@@ -674,8 +674,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun setupDisplayMode(isListMode: Boolean) {
         val navController = findNavController()
         fileRecyclerView.layoutManager =
-            if (isListMode) CustomLinearLayoutManager(navController, requireContext())
-            else CustomGridLayoutManager(navController, requireContext(), 2)
+            if (isListMode) SentryLinearLayoutManager(navController, requireContext())
+            else SentryGridLayoutManager(navController, requireContext(), 2)
 
         toggleDisplayButton.icon = ContextCompat.getDrawable(
             requireContext(),

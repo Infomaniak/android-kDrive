@@ -19,18 +19,35 @@ package com.infomaniak.drive.utils
 
 import android.content.Context
 import androidx.navigation.NavController
-import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.infomaniak.drive.utils.CustomLinearLayoutManager.Companion.layoutManagerSentryLog
+import io.sentry.Sentry
+import io.sentry.SentryLevel
 
-class CustomGridLayoutManager(private val navController: NavController, context: Context?, spanCount: Int) :
-    GridLayoutManager(context, spanCount) {
+/**
+ * TODO Temp fix
+ */
+class SentryLinearLayoutManager(private val navController: NavController, context: Context?) : LinearLayoutManager(context) {
 
     override fun onLayoutChildren(recycler: RecyclerView.Recycler?, state: RecyclerView.State?) {
         try {
             super.onLayoutChildren(recycler, state)
         } catch (exception: IndexOutOfBoundsException) {
             layoutManagerSentryLog(navController, exception)
+        }
+    }
+
+    companion object {
+        fun layoutManagerSentryLog(navController: NavController, exception: IndexOutOfBoundsException) {
+            exception.printStackTrace()
+            Sentry.withScope { scope ->
+                navController.currentDestination?.displayName?.let { name ->
+                    scope.setExtra("navigation", name)
+                }
+                scope.level = SentryLevel.WARNING
+                scope.setExtra("message", "Data modified in different thread")
+                Sentry.captureException(exception)
+            }
         }
     }
 }
