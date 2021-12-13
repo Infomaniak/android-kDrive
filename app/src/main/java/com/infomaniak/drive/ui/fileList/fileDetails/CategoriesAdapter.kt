@@ -66,11 +66,15 @@ class CategoriesAdapter(
                 .setBottomRightCorner(CornerFamily.ROUNDED, bottomCornerRadius)
                 .build()
 
+            isEnabled = true
             isCheckable = false
             categoryIcon.setBackgroundColor(Color.parseColor(category.color))
             checkIcon.isVisible = category.isSelected
             categoryTitle.text = category.name
-            setOnClickListener { onCategoryChanged(category.id, !category.isSelected) }
+            setOnClickListener {
+                isEnabled = false
+                onCategoryChanged(category.id, !category.isSelected)
+            }
             menuButton.isVisible = canEditCategory || (canDeleteCategory && !category.isPredefined)
             menuButton.setOnClickListener { onMenuClicked?.invoke(category) }
         }

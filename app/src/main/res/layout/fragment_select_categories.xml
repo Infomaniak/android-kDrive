@@ -42,7 +42,6 @@
                 app:menu="@menu/add_category_menu" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
-
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView

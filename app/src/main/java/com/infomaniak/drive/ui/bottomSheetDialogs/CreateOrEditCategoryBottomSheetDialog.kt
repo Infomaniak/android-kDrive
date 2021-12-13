@@ -89,7 +89,7 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
         appBarTitle.title = getString(
             if (previousCategoryId == NO_PREVIOUS_CATEGORY_ID) R.string.createCategoryTitle else R.string.editCategoryTitle
         )
-        editCategoryWarningText.isGone = previousCategoryId == NO_PREVIOUS_CATEGORY_ID
+        editCategoryWarning.isGone = previousCategoryId == NO_PREVIOUS_CATEGORY_ID
         previousCategoryName?.let { categoryNameValueInput.setText(it) }
         categoryNameValueLayout.isGone = categoryIsPredefined
         saveButton.isEnabled = when {

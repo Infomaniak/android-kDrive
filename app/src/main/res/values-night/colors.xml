@@ -17,4 +17,5 @@
   -->
 <resources>
     <color name="iconColor">#88969F</color>
+    <color name="disabledButtonBackgroundColor">@android:color/white</color>
 </resources>

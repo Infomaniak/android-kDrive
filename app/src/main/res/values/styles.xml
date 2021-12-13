@@ -115,7 +115,6 @@
         <item name="bottomSheetStyle">@style/BottomSheetDialogTheme.ModalStyle</item>
         <item name="colorAccent">@color/primary</item>
         <item name="colorPrimary">@color/primary</item>
-        <item name="colorOnSurface">@color/colorOnSurface</item>
         <item name="snackbarButtonStyle">@style/Widget.App.SnackbarButton</item>
         <item name="snackbarStyle">@style/Widget.App.Snackbar</item>
         <item name="snackbarTextViewStyle">@style/Widget.App.SnackbarTextView</item>
@@ -257,6 +256,7 @@
         <item name="android:maxWidth">500dp</item>
         <item name="android:stateListAnimator">@null</item>
         <item name="android:textAllCaps">false</item>
+        <item name="backgroundTint">@color/background_btn_color_selector</item>
         <item name="android:textSize">@dimen/h3</item>
         <item name="cornerRadius">@dimen/radius</item>
         <item name="iconTint">@color/white</item>

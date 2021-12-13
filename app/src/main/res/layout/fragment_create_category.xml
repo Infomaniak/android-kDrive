@@ -42,7 +42,6 @@
                 app:layout_collapseMode="pin" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
-
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -54,28 +53,31 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/editCategoryWarningText"
+            <com.google.android.material.card.MaterialCardView
+                style="@style/CardViewInfomaniak"
+                android:id="@+id/editCategoryWarning"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/marginStandardMedium"
                 android:layout_marginTop="@dimen/marginStandard"
-                android:background="@drawable/background_create_category_warning"
-                android:drawablePadding="@dimen/marginStandardMedium"
-                android:padding="@dimen/marginStandardMedium"
-                android:text="@string/editCategoryInfoDescription"
-                android:textColor="@color/title"
-                android:textSize="14sp"
                 android:visibility="gone"
-                app:drawableStartCompat="@drawable/ic_info"
-                app:drawableTint="@color/blue_general"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:visibility="visible" />
+                tools:visibility="visible">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawablePadding="@dimen/marginStandardMedium"
+                    android:padding="@dimen/marginStandardMedium"
+                    android:text="@string/editCategoryInfoDescription"
+                    android:textColor="@color/title"
+                    app:drawableStartCompat="@drawable/ic_info"
+                    app:drawableTint="@color/blue_general" />
+            </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/categoryNameValueLayout"
@@ -87,7 +89,7 @@
                 android:hint="@string/categoryNameField"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/editCategoryWarningText">
+                app:layout_constraintTop_toBottomOf="@id/editCategoryWarning">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/categoryNameValueInput"
