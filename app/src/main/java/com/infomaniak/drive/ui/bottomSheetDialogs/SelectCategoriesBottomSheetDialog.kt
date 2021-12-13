@@ -123,8 +123,8 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
         getBackNavigationResult<Bundle>(CreateOrEditCategoryBottomSheetDialog.CREATE_CATEGORY_NAV_KEY) { bundle ->
             bundle.apply {
                 val id = getInt(CreateOrEditCategoryBottomSheetDialog.CATEGORY_ID_BUNDLE_KEY)
-                val name = getString(CreateOrEditCategoryBottomSheetDialog.CATEGORY_NAME_BUNDLE_KEY) ?: return@apply
-                val color = getString(CreateOrEditCategoryBottomSheetDialog.CATEGORY_COLOR_BUNDLE_KEY) ?: return@apply
+                val name = getString(CreateOrEditCategoryBottomSheetDialog.CATEGORY_NAME_BUNDLE_KEY)!!
+                val color = getString(CreateOrEditCategoryBottomSheetDialog.CATEGORY_COLOR_BUNDLE_KEY)!!
                 adapter.addCategory(id, name, color)
             }
         }
@@ -172,7 +172,7 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
             SelectCategoriesBottomSheetDialogDirections.actionSelectCategoriesBottomSheetDialogToCreateOrEditCategoryBottomSheetDialog(
                 fileId = file.id,
                 driveId = file.driveId,
-                categoryId = CreateOrEditCategoryBottomSheetDialog.NO_PREVIOUS_CATEGORY_ID,
+                categoryId = CreateOrEditCategoryBottomSheetDialog.CREATE_CATEGORY_ID,
                 categoryName = categoryName,
                 categoryColor = null,
             )

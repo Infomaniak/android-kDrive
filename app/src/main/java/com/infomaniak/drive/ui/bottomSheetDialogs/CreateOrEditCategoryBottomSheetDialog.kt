@@ -58,7 +58,7 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
     private val selectCategoriesViewModel: SelectCategoriesViewModel by viewModels()
 
     private val colorLayouts = mutableListOf<MaterialButton>()
-    private var selected: Int = -1
+    private var colorSelectedPosition: Int = -1
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_create_category, container, false)
@@ -68,84 +68,72 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
         super.onViewCreated(view, savedInstanceState)
 
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+
         categoryNameValueInput.addTextChangedListener { saveButton.isEnabled = it.toString().isNotEmpty() }
 
         configureUI()
         configureSaveButton()
         configureColorsGrid()
 
-        // Select first element
-        val previousColor = navigationArgs.categoryColor
-        val previousColorPosition = CATEGORY_COLORS.indexOfFirst { it == previousColor }
-        val position = if (previousColor == null || previousColorPosition == -1) 0 else previousColorPosition
-        onColorClicked(position)
+        val colorPosition = CATEGORY_COLORS.indexOfFirst { it == navigationArgs.categoryColor }.let { if (it == -1) 0 else it }
+        onColorClicked(colorPosition)
     }
 
     private fun configureUI() = with(navigationArgs) {
-        appBarTitle.title = getString(
-            if (categoryId == NO_PREVIOUS_CATEGORY_ID) R.string.createCategoryTitle else R.string.editCategoryTitle
-        )
+        val isCreateCategory = categoryId == CREATE_CATEGORY_ID
 
-        editCategoryWarning.isGone = categoryId == NO_PREVIOUS_CATEGORY_ID
-        categoryName?.let { categoryNameValueInput.setText(it) }
+        appBarTitle.title = getString(if (isCreateCategory) R.string.createCategoryTitle else R.string.editCategoryTitle)
+        editCategoryWarning.isGone = isCreateCategory
+        categoryNameValueInput.setText(categoryName)
         categoryNameValueLayout.isGone = categoryIsPredefined
 
-        saveButton.isEnabled = when {
-            categoryIsPredefined -> true
-            categoryId != NO_PREVIOUS_CATEGORY_ID -> true
-            categoryId == NO_PREVIOUS_CATEGORY_ID && categoryName?.isNotEmpty() == true -> true
-            else -> false
-        }
+        saveButton.isEnabled = categoryIsPredefined || !isCreateCategory || categoryName.isNotEmpty()
     }
 
     private fun configureSaveButton() = with(navigationArgs) {
         saveButton.setOnClickListener {
             saveButton.showProgress()
-            if (categoryId == NO_PREVIOUS_CATEGORY_ID) {
-                createCategory() // Create a new Category
-            } else {
-                editCategory(categoryId) // Edit an existing Category
-            }
+            if (categoryId == CREATE_CATEGORY_ID) createCategory() else editCategory(categoryId)
         }
     }
 
     private fun createCategory() {
-        val driveId = navigationArgs.driveId
         val name = categoryNameValueInput.text.toString()
-        val color = CATEGORY_COLORS[selected]
-        val fileId = navigationArgs.fileId
+        val color = CATEGORY_COLORS[colorSelectedPosition]
 
-        createOrEditCategoryViewModel.createCategory(driveId, name, color)
-            .observe(viewLifecycleOwner) { createCategoryApiResponse ->
-
-                if (createCategoryApiResponse.isSuccess()) {
-                    val categoryId = createCategoryApiResponse.data?.id ?: -1
-                    selectCategoriesViewModel.addCategory(fileId, driveId, categoryId)
-                        .observe(viewLifecycleOwner) { addCategoryApiResponse ->
-                            if (addCategoryApiResponse.isSuccess()) {
-                                setBackNavigationResult(
-                                    CREATE_CATEGORY_NAV_KEY, bundleOf(
-                                        CATEGORY_ID_BUNDLE_KEY to categoryId,
-                                        CATEGORY_NAME_BUNDLE_KEY to name,
-                                        CATEGORY_COLOR_BUNDLE_KEY to color,
-                                    )
-                                )
-                            } else {
-                                saveButton.hideProgress(R.string.buttonSave)
-                                Utils.showSnackbar(requireView(), addCategoryApiResponse.translateError())
-                            }
-                        }
-
+        createOrEditCategoryViewModel.createCategory(navigationArgs.driveId, name, color)
+            .observe(viewLifecycleOwner) { createResponse ->
+                if (createResponse.isSuccess()) {
+                    val categoryId = createResponse.data?.id ?: -1 // TODO Why ?
+                    addCategory(categoryId, name, color)
                 } else {
                     saveButton.hideProgress(R.string.buttonSave)
-                    Utils.showSnackbar(requireView(), createCategoryApiResponse.translateError())
+                    Utils.showSnackbar(requireView(), createResponse.translateError())
+                }
+            }
+    }
+
+    private fun addCategory(categoryId: Int, name: String, color: String) {
+        selectCategoriesViewModel.addCategory(navigationArgs.fileId, navigationArgs.driveId, categoryId)
+            .observe(viewLifecycleOwner) { addResponse ->
+                if (addResponse.isSuccess()) {
+                    setBackNavigationResult(
+                        CREATE_CATEGORY_NAV_KEY, bundleOf(
+                            CATEGORY_ID_BUNDLE_KEY to categoryId,
+                            CATEGORY_NAME_BUNDLE_KEY to name,
+                            CATEGORY_COLOR_BUNDLE_KEY to color,
+                        )
+                    )
+                } else {
+                    saveButton.hideProgress(R.string.buttonSave)
+                    Utils.showSnackbar(requireView(), addResponse.translateError())
                 }
             }
     }
 
     private fun editCategory(categoryId: Int) {
         val name = categoryNameValueInput.text.toString().let { if (it.isEmpty()) null else it }
-        val color = CATEGORY_COLORS[selected]
+        val color = CATEGORY_COLORS[colorSelectedPosition]
         val driveId = navigationArgs.driveId
 
         createOrEditCategoryViewModel.editCategory(driveId, categoryId, name, color)
@@ -186,8 +174,8 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
                 iconTint = colorStateList
 
                 // Set click
-                val pos = colorLayouts.size
-                setOnClickListener { onColorClicked(pos) }
+                val position = colorLayouts.size
+                setOnClickListener { onColorClicked(position) }
 
                 // Add view
                 colorLayouts.add(this)
@@ -197,14 +185,10 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
     }
 
     private fun onColorClicked(position: Int) {
-        if (position != selected) {
-            colorLayouts.getOrNull(selected)?.let {
-                it.iconTint = it.backgroundTintList
-            }
-            colorLayouts.getOrNull(position)?.let {
-                it.iconTint = ContextCompat.getColorStateList(requireContext(), R.color.white)
-                selected = position
-            }
+        if (position != colorSelectedPosition) {
+            colorLayouts.getOrNull(colorSelectedPosition)?.let { it.iconTint = it.backgroundTintList }
+            colorLayouts[position].iconTint = ContextCompat.getColorStateList(requireContext(), R.color.white)
+            colorSelectedPosition = position
         }
     }
 
@@ -243,7 +227,7 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
         const val CATEGORY_ID_BUNDLE_KEY = "category_id_bundle_key"
         const val CATEGORY_NAME_BUNDLE_KEY = "category_name_bundle_key"
         const val CATEGORY_COLOR_BUNDLE_KEY = "category_color_bundle_key"
-        const val NO_PREVIOUS_CATEGORY_ID = -1
+        const val CREATE_CATEGORY_ID = -1
         private val CATEGORY_COLORS = listOf(
             "#1ABC9C",
             "#11806A",

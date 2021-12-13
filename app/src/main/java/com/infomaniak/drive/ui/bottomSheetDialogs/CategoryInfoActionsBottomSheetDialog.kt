@@ -78,7 +78,7 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
                     driveId = driveId,
                     categoryIsPredefined = categoryIsPredefined,
                     categoryId = categoryId,
-                    categoryName = if (categoryIsPredefined) null else categoryName,
+                    categoryName = if (categoryIsPredefined) "" else categoryName,
                     categoryColor = categoryColor,
                 )
             )

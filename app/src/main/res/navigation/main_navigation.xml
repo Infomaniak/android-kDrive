@@ -791,8 +791,7 @@
             app:argType="integer" />
         <argument
             android:name="categoryName"
-            app:argType="string"
-            app:nullable="true" />
+            app:argType="string" />
         <argument
             android:name="categoryColor"
             app:argType="string"
