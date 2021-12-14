@@ -243,9 +243,7 @@ object FileController {
     }
 
     fun saveFavoritesFiles(files: List<File>, replaceOldData: Boolean = false) {
-        saveFiles(FAVORITES_FILE, files, replaceOldData) { oldFiles ->
-            keepSubFolderChildren(oldFiles?.children, files)
-        }
+        saveFiles(FAVORITES_FILE, files, replaceOldData)
     }
 
     private fun saveMySharesFiles(files: ArrayList<File>, replaceOldData: Boolean) {
@@ -277,16 +275,14 @@ object FileController {
         folder: File,
         files: List<File>,
         replaceOldData: Boolean = false,
-        realm: Realm? = null,
-        onTransaction: ((oldFiles: File?) -> Unit)? = null
+        realm: Realm? = null
     ) {
         val block: (Realm) -> Unit = { currentRealm ->
             val mySharesFolder = currentRealm.where(File::class.java).equalTo(File::id.name, folder.id).findFirst()
             currentRealm.executeTransaction { realm ->
-                onTransaction?.invoke(mySharesFolder)
                 val newMySharesFolder = if (replaceOldData) realm.copyToRealmOrUpdate(folder)
                 else mySharesFolder ?: realm.copyToRealmOrUpdate(folder)
-                newMySharesFolder?.children?.addAll(files)
+                newMySharesFolder?.children?.addAll(realm, files)
             }
         }
 
@@ -506,16 +502,25 @@ object FileController {
         }
     }
 
-    fun storePicturesDrive(pictures: ArrayList<File>, isFirstPage: Boolean = false, customRealm: Realm? = null) {
+    fun storePicturesDrive(pictures: List<File>, isFirstPage: Boolean = false, customRealm: Realm? = null) {
         val block: (Realm) -> Unit = {
             it.executeTransaction { realm ->
                 val picturesFolder = realm.where(File::class.java).equalTo(File::id.name, PICTURES_FILE_ID).findFirst()
                     ?: realm.copyToRealm(PICTURES_FILE)
                 if (isFirstPage) picturesFolder.children = RealmList()
-                picturesFolder.children.addAll(pictures)
+                picturesFolder.children.addAll(realm, pictures)
             }
         }
         customRealm?.let(block) ?: getRealmInstance().use(block)
+    }
+
+    private fun RealmList<File>.addAll(realm: Realm, files: List<File>) {
+        files.forEach { file ->
+            realm.where(File::class.java).equalTo(File::id.name, file.id).findFirst()?.also { managedFile ->
+                keepOldLocalFilesData(managedFile, file)
+            }
+            add(file)
+        }
     }
 
     fun removeOrphanAndActivityFiles(customRealm: Realm? = null) {
@@ -882,11 +887,11 @@ object FileController {
         return ApiRepository.createTeamFolder(okHttpClient, driveId, name, forAllUsers)
     }
 
-    private fun keepOldLocalFilesData(oldFile: File, newFile: File) {
-        newFile.children = oldFile.children
-        newFile.isComplete = oldFile.isComplete
-        newFile.responseAt = oldFile.responseAt
-        newFile.isOffline = oldFile.isOffline
+    private fun keepOldLocalFilesData(managedFile: File, remoteFile: File) {
+        remoteFile.children = managedFile.children
+        remoteFile.isComplete = managedFile.isComplete
+        remoteFile.responseAt = managedFile.responseAt
+        remoteFile.isOffline = managedFile.isOffline
     }
 
     private fun RealmQuery<File>.getSortQueryByOrder(order: File.SortType): RealmQuery<File> {
