@@ -20,7 +20,10 @@ package com.infomaniak.drive.ui.home
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isGone
+import androidx.core.view.isVisible
+import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.menu.OfflineFileFragment
+import com.infomaniak.drive.utils.setMargin
 import kotlinx.android.synthetic.main.fragment_file_list.*
 
 class HomeOfflineFragment : OfflineFileFragment() {
@@ -28,11 +31,14 @@ class HomeOfflineFragment : OfflineFileFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //TODO - hide sort layout
-        //TODO - change linearLayoutManager
+        //TODO - change gridLayoutManager
 
         appBar.isGone = true
         sortButton.isGone = true
+        homeTabTitle.isVisible = true
+        swipeRefreshLayout.isEnabled = false
+
+        sortLayout.setMargin(top = resources.getDimension(R.dimen.marginStandardMedium).toInt())
     }
 
     override fun homeClassName(): String = javaClass.name
