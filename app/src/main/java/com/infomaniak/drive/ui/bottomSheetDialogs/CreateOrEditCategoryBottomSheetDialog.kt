@@ -136,21 +136,20 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
         val color = CATEGORY_COLORS[colorSelectedPosition]
         val driveId = navigationArgs.driveId
 
-        createOrEditCategoryViewModel.editCategory(driveId, categoryId, name, color)
-            .observe(viewLifecycleOwner) { apiResponse ->
-                if (apiResponse.isSuccess()) {
-                    setBackNavigationResult(
-                        EDIT_CATEGORY_NAV_KEY, bundleOf(
-                            CATEGORY_ID_BUNDLE_KEY to categoryId,
-                            CATEGORY_NAME_BUNDLE_KEY to name,
-                            CATEGORY_COLOR_BUNDLE_KEY to color,
-                        )
+        createOrEditCategoryViewModel.editCategory(driveId, categoryId, name, color).observe(viewLifecycleOwner) { apiResponse ->
+            if (apiResponse.isSuccess()) {
+                setBackNavigationResult(
+                    EDIT_CATEGORY_NAV_KEY, bundleOf(
+                        CATEGORY_ID_BUNDLE_KEY to categoryId,
+                        CATEGORY_NAME_BUNDLE_KEY to name,
+                        CATEGORY_COLOR_BUNDLE_KEY to color,
                     )
-                } else {
-                    saveButton.hideProgress(R.string.buttonSave)
-                    Utils.showSnackbar(requireView(), apiResponse.translateError())
-                }
+                )
+            } else {
+                saveButton.hideProgress(R.string.buttonSave)
+                Utils.showSnackbar(requireView(), apiResponse.translateError())
             }
+        }
     }
 
     @SuppressLint("InflateParams")
