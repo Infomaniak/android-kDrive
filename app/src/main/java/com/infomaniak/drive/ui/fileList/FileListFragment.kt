@@ -180,11 +180,13 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            if (fileAdapter.multiSelectMode) {
-                closeMultiSelect()
-            } else {
-                findNavController().popBackStack()
+        if (homeClassName() == null) {
+            requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+                if (fileAdapter.multiSelectMode) {
+                    closeMultiSelect()
+                } else {
+                    findNavController().popBackStack()
+                }
             }
         }
 
