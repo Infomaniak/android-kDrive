@@ -16,16 +16,10 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 <resources>
-
     <declare-styleable name="FabBottomNavigationView">
         <attr name="cradle_vertical_offset" format="dimension" />
         <attr name="fab_cradle_margin" format="dimension" />
         <attr name="fab_cradle_rounded_corner_radius" format="dimension" />
         <attr name="fab_size" format="dimension" />
     </declare-styleable>
-
-    <declare-styleable name="AutoResizeGridLayout">
-        <attr name="columnWidth" format="dimension" />
-    </declare-styleable>
-
 </resources>

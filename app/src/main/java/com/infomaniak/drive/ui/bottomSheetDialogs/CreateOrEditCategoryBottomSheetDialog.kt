@@ -178,7 +178,7 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
 
                 // Add view
                 colorLayouts.add(this)
-                categoryColorsView.addView(this)
+                categoriesFlexBoxLayout.addView(this)
             }
         }
     }

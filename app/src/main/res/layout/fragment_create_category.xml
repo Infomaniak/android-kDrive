@@ -47,7 +47,6 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginHorizontal="@dimen/marginStandardSmall"
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
@@ -56,15 +55,15 @@
             android:layout_height="match_parent">
 
             <com.google.android.material.card.MaterialCardView
-                style="@style/CardViewInfomaniak"
                 android:id="@+id/editCategoryWarning"
+                style="@style/CardViewInfomaniak"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/marginStandardMedium"
+                android:layout_marginHorizontal="@dimen/marginStandard"
                 android:layout_marginTop="@dimen/marginStandard"
                 android:visibility="gone"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:visibility="visible">
 
@@ -84,7 +83,7 @@
                 style="@style/TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/marginStandardMedium"
+                android:layout_marginHorizontal="@dimen/marginStandard"
                 android:layout_marginTop="@dimen/marginStandard"
                 android:hint="@string/categoryNameField"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -97,7 +96,6 @@
                     android:layout_height="wrap_content"
                     android:imeOptions="actionDone"
                     android:inputType="text" />
-
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
@@ -105,19 +103,21 @@
                 style="@style/Subtitle2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/marginStandardMedium"
+                android:layout_marginHorizontal="@dimen/marginStandard"
                 android:layout_marginTop="@dimen/marginStandard"
                 android:text="@string/categoryColorTitle"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/categoryNameValueLayout" />
 
-            <com.infomaniak.drive.views.AutoResizeGridLayout
-                android:id="@+id/categoryColorsView"
+            <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/categoriesFlexBoxLayout"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandardMedium"
                 android:layout_marginTop="@dimen/marginStandardSmall"
-                app:columnWidth="52dp"
+                app:flexWrap="wrap"
+                app:justifyContent="flex_start"
                 app:layout_constraintBottom_toTopOf="@id/saveButton"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -135,7 +135,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/categoryColorsView" />
+                app:layout_constraintTop_toBottomOf="@id/categoriesFlexBoxLayout" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
