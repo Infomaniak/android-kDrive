@@ -52,7 +52,7 @@ class CategoryIconView @JvmOverloads constructor(
     @SuppressLint("SetTextI18n")
     fun setRemainingCategoriesNumber(number: Int, category: Category?) {
         category?.let {
-            remainingText.apply {
+            with(remainingText) {
                 if (number.isPositive()) {
                     text = "+$number"
                     isVisible = true

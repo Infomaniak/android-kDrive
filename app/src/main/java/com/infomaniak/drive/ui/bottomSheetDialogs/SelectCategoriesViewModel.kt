@@ -27,35 +27,49 @@ import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import java.util.*
 
 class SelectCategoriesViewModel : ViewModel() {
 
-    fun addCategory(fileId: Int, driveId: Int, categoryId: Int): LiveData<ApiResponse<Unit>> = liveData(Dispatchers.IO) {
-        val apiResponse = ApiRepository.addCategory(fileId, driveId, mapOf("id" to categoryId))
-        if (apiResponse.isSuccess()) {
-            FileController.updateFile(fileId) { localFile ->
-                localFile.categories.add(
-                    FileCategory(
-                        id = categoryId,
-                        userId = AccountUtils.currentUserId,
-                        addedToFileAt = Date()
-                    )
-                )
+    private var addCategoryJob = Job()
+    private var removeCategoryJob = Job()
+
+    fun addCategory(fileId: Int, driveId: Int, categoryId: Int): LiveData<ApiResponse<Unit>> {
+        addCategoryJob.cancel()
+        addCategoryJob = Job()
+        return liveData(Dispatchers.IO + addCategoryJob) {
+            with(ApiRepository.addCategory(fileId, driveId, categoryId)) {
+                if (isSuccess()) {
+                    FileController.updateFile(fileId) {
+                        it.categories.add(FileCategory(categoryId, userId = AccountUtils.currentUserId, addedToFileAt = Date()))
+                    }
+                }
+                emit(this)
             }
         }
-        emit(apiResponse)
     }
 
-    fun removeCategory(file: File, categoryId: Int): LiveData<ApiResponse<Unit>> = liveData(Dispatchers.IO) {
-        val apiResponse = ApiRepository.removeCategory(file, categoryId)
-        if (apiResponse.isSuccess()) {
-            FileController.updateFile(file.id) { localFile ->
-                val categories = localFile.categories
-                val category = categories.find { it.id == categoryId }
-                categories.remove(category)
+    fun removeCategory(file: File, categoryId: Int): LiveData<ApiResponse<Unit>> {
+        removeCategoryJob.cancel()
+        removeCategoryJob = Job()
+        return liveData(Dispatchers.IO + removeCategoryJob) {
+            with(ApiRepository.removeCategory(file, categoryId)) {
+                if (isSuccess()) {
+                    FileController.updateFile(file.id) { localFile ->
+                        val categories = localFile.categories
+                        val category = categories.find { it.id == categoryId }
+                        categories.remove(category)
+                    }
+                }
+                emit(this)
             }
         }
-        emit(apiResponse)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        addCategoryJob.cancel()
+        removeCategoryJob.cancel()
     }
 }

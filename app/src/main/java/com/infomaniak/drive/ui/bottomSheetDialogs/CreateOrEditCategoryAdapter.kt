@@ -26,23 +26,21 @@ import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.view_category_color.view.*
-import java.util.*
 
 class CreateOrEditCategoryAdapter : RecyclerView.Adapter<ViewHolder>() {
 
-    var colors: ArrayList<String> = arrayListOf()
     var selectedPosition = 0
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.view_category_color, parent, false))
     }
 
-    override fun getItemCount(): Int = colors.size
+    override fun getItemCount(): Int = COLORS.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.itemView.categoryColorView.apply {
+        with(holder.itemView.categoryColorView) {
 
-            val color = ColorStateList.valueOf(colors[position].toColorInt())
+            val color = ColorStateList.valueOf(COLORS[position].toColorInt())
             val white = ContextCompat.getColorStateList(context, R.color.white)
 
             backgroundTintList = color
@@ -55,5 +53,33 @@ class CreateOrEditCategoryAdapter : RecyclerView.Adapter<ViewHolder>() {
                 notifyItemChanged(previousSelectedPosition)
             }
         }
+    }
+
+    companion object {
+        val COLORS = arrayListOf(
+            "#1ABC9C",
+            "#11806A",
+            "#2ECC71",
+            "#128040",
+            "#3498DB",
+            "#206694",
+            "#9B59B6",
+            "#71368A",
+            "#E91E63",
+            "#AD1457",
+            "#F1C40F",
+            "#C27C0E",
+            "#C45911",
+            "#44546A",
+            "#E74C3C",
+            "#992D22",
+            "#9D00FF",
+            "#00B0F0",
+            "#BE8F00",
+            "#0B4899",
+            "#009945",
+            "#2E77B5",
+            "#70AD47",
+        )
     }
 }

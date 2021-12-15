@@ -28,7 +28,7 @@ enum class ErrorCode(val code: String, @StringRes val translateRes: Int) {
     CONFLICT_ERROR("conflict_error", R.string.errorConflict),
     DESTINATION_ALREADY_EXISTS("destination_already_exists", R.string.errorFileCreate),
     SHARE_LINK_ALREADY_EXISTS("file_share_link_already_exists", R.string.errorShareLink),
-    CATEGORY_ALREADY_EXIST_ERROR("category_already_exist_error", R.string.errorCategoryAlreadyExists);
+    CATEGORY_ALREADY_EXISTS("category_already_exist_error", R.string.errorCategoryAlreadyExists);
 
     companion object {
 

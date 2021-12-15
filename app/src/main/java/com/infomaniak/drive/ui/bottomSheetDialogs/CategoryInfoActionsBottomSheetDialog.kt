@@ -37,6 +37,7 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_category_info_actions.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 
 class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
@@ -95,27 +96,44 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
             dismissDialog()
             if (apiResponse.isSuccess()) {
                 setBackNavigationResult(DELETE_CATEGORY_NAV_KEY, categoryId)
-            } else {
-                Utils.showSnackbar(requireView(), apiResponse.translateError())
-            }
+            } else Utils.showSnackbar(requireView(), apiResponse.translateError())
         }
     }
 
     internal class CategoryInfoActionViewModel : ViewModel() {
-        fun deleteCategory(driveId: Int, categoryId: Int): LiveData<ApiResponse<Boolean>> =
-            liveData(Dispatchers.IO) {
-                val apiResponse = ApiRepository.deleteCategory(driveId, categoryId)
-                if (apiResponse.isSuccess()) {
-                    DriveInfosController.updateDrive { localDrive ->
-                        val category = localDrive.categories.find { it.id == categoryId }
-                        localDrive.categories.remove(category)
-                    }
+
+        private var deleteCategoryJob = Job()
+
+        fun deleteCategory(driveId: Int, categoryId: Int): LiveData<ApiResponse<Boolean>> {
+            deleteCategoryJob.cancel()
+            deleteCategoryJob = Job()
+            return liveData(Dispatchers.IO + deleteCategoryJob) {
+                with(ApiRepository.deleteCategory(driveId, categoryId)) {
+                    val response = if (isSuccess() || isAlreadyDeleted(this)) {
+                        DriveInfosController.updateDrive { localDrive ->
+                            val category = localDrive.categories.find { it.id == categoryId }
+                            localDrive.categories.remove(category)
+                        }
+                        ApiResponse(result = ApiResponse.Status.SUCCESS)
+                    } else this
+                    emit(response)
                 }
-                emit(apiResponse)
             }
+        }
+
+        private fun isAlreadyDeleted(apiResponse: ApiResponse<Boolean>): Boolean {
+            return apiResponse.result == ApiResponse.Status.ERROR &&
+                    apiResponse.error?.code?.equals(CATEGORY_ALREADY_DELETED, true) == true
+        }
+
+        override fun onCleared() {
+            super.onCleared()
+            deleteCategoryJob.cancel()
+        }
     }
 
     companion object {
         const val DELETE_CATEGORY_NAV_KEY = "delete_category_nav_key"
+        private const val CATEGORY_ALREADY_DELETED = "object_not_found"
     }
 }

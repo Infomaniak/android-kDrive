@@ -69,7 +69,7 @@ open class Drive(
     private var _users: DriveUsersCategories? = DriveUsersCategories(),
     @SerializedName("teams")
     private var _teams: DriveTeamsCategories? = DriveTeamsCategories(),
-    var categories: RealmList<Category> = RealmList()
+    var categories: RealmList<Category> = RealmList(),
 
 ) : RealmObject() {
 

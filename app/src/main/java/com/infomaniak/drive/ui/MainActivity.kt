@@ -231,29 +231,7 @@ class MainActivity : BaseActivity() {
 
         AppSettings.appLaunches++
 
-        // Display Information panel
-        if (!hasDisplayedInformationPanel) {
-            UISettings(this).apply {
-                when {
-                    !hasDisplayedSyncDialog && !AccountUtils.isEnableAppSync() -> {
-                        hasDisplayedInformationPanel = true
-                        hasDisplayedSyncDialog = true
-                        findNavController(R.id.hostFragment).navigate(
-                            if (AppSettings.migrated) {
-                                R.id.syncAfterMigrationBottomSheetDialog
-                            } else {
-                                R.id.syncConfigureBottomSheetDialog
-                            }
-                        )
-                    }
-                    !hasDisplayedCategoriesInformationDialog -> {
-                        hasDisplayedInformationPanel = true
-                        hasDisplayedCategoriesInformationDialog = true
-                        findNavController(R.id.hostFragment).navigate(R.id.categoriesInformationBottomSheetDialog)
-                    }
-                }
-            }
-        }
+        displayInformationPanel()
 
         setBottomNavigationUserAvatar(this)
         startContentObserverService()
@@ -307,6 +285,28 @@ class MainActivity : BaseActivity() {
     override fun onDestroy() {
         super.onDestroy()
         LocalBroadcastManager.getInstance(this).unregisterReceiver(downloadReceiver)
+    }
+
+    private fun displayInformationPanel() {
+        if (!hasDisplayedInformationPanel) {
+            with(UISettings(this)) {
+                val destinationId = when {
+                    !hasDisplayedSyncDialog && !AccountUtils.isEnableAppSync() -> {
+                        hasDisplayedSyncDialog = true
+                        if (AppSettings.migrated) R.id.syncAfterMigrationBottomSheetDialog else R.id.syncConfigureBottomSheetDialog
+                    }
+                    !hasDisplayedCategoriesInformationDialog -> {
+                        hasDisplayedCategoriesInformationDialog = true
+                        R.id.categoriesInformationBottomSheetDialog
+                    }
+                    else -> null
+                }
+                destinationId?.let {
+                    hasDisplayedInformationPanel = true
+                    findNavController(R.id.hostFragment).navigate(it)
+                }
+            }
+        }
     }
 
     @SuppressLint("RestrictedApi")

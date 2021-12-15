@@ -45,11 +45,8 @@ import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.UICategory
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.DebouncingTextWatcher
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
-import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.fragment_select_categories.*
-import kotlinx.android.synthetic.main.fragment_select_categories.toolbar
 import kotlinx.android.synthetic.main.item_search_view.*
-import java.util.*
 
 class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
 
@@ -58,7 +55,7 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     private lateinit var adapter: CategoriesAdapter
     private lateinit var file: File
-    private var aCategoryHasBeenModified: Boolean = false
+    private var hasCategoryBeenModified: Boolean = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_select_categories, container, false)
@@ -67,42 +64,35 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        FileController.getFileById(navigationArgs.fileId).let {
-            if (it == null) {
-                findNavController().popBackStack()
-                return
-            } else {
-                file = it
-            }
+        file = FileController.getFileById(navigationArgs.fileId) ?: run {
+            findNavController().popBackStack()
+            return
         }
 
         dialog?.setOnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_BACK && event?.action == KeyEvent.ACTION_UP) {
                 setBackNavResult()
                 true
-            } else {
-                false
-            }
+            } else false
         }
 
-        val categoryRights = DriveInfosController.getCategoryRights()
-        setToolbar(categoryRights)
-        setAdapter(categoryRights)
+        with(DriveInfosController.getCategoryRights()) {
+            setToolbar(this)
+            setAdapter(this)
+        }
         setupBackActionHandler()
         setupSearch()
         updateUI(file.categories.toList(), file.id)
     }
 
     private fun setToolbar(categoryRights: CategoryRights?) {
-        toolbar.apply {
+        with(toolbar) {
             menu.findItem(R.id.addCategory).isVisible = categoryRights?.canCreateCategory == true
             setOnMenuItemClickListener { menuItem ->
                 if (menuItem.itemId == R.id.addCategory) {
                     navigateToCreateCategory()
                     true
-                } else {
-                    false
-                }
+                } else false
             }
             setNavigationOnClickListener { setBackNavResult() }
         }
@@ -110,7 +100,9 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     private fun setAdapter(categoryRights: CategoryRights?) {
         adapter = CategoriesAdapter(
-            onCategoryChanged = { categoryId, isSelected -> onCategoryChanged(categoryId, isSelected) }
+            onCategoryChanged = { categoryId, isSelected ->
+                if (isSelected) addCategory(categoryId) else removeCategory(categoryId)
+            }
         ).apply {
             canEditCategory = categoryRights?.canEditCategory ?: false
             canDeleteCategory = categoryRights?.canDeleteCategory ?: false
@@ -121,42 +113,44 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     private fun setupBackActionHandler() {
         getBackNavigationResult<Bundle>(CreateOrEditCategoryBottomSheetDialog.CREATE_CATEGORY_NAV_KEY) { bundle ->
-            bundle.apply {
-                val id = getInt(CreateOrEditCategoryBottomSheetDialog.CATEGORY_ID_BUNDLE_KEY)
-                val name = getString(CreateOrEditCategoryBottomSheetDialog.CATEGORY_NAME_BUNDLE_KEY)!!
-                val color = getString(CreateOrEditCategoryBottomSheetDialog.CATEGORY_COLOR_BUNDLE_KEY)!!
-                adapter.addCategory(id, name, color)
+            with(bundle) {
+                adapter.addCategory(
+                    id = getInt(CreateOrEditCategoryBottomSheetDialog.CATEGORY_ID_BUNDLE_KEY),
+                    name = getString(CreateOrEditCategoryBottomSheetDialog.CATEGORY_NAME_BUNDLE_KEY)!!,
+                    color = getString(CreateOrEditCategoryBottomSheetDialog.CATEGORY_COLOR_BUNDLE_KEY)!!,
+                )
             }
         }
 
         getBackNavigationResult<Bundle>(CreateOrEditCategoryBottomSheetDialog.EDIT_CATEGORY_NAV_KEY) { bundle ->
-            aCategoryHasBeenModified = true
-            bundle.apply {
-                val id = getInt(CreateOrEditCategoryBottomSheetDialog.CATEGORY_ID_BUNDLE_KEY)
-                val name = getString(CreateOrEditCategoryBottomSheetDialog.CATEGORY_NAME_BUNDLE_KEY)
-                val color = getString(CreateOrEditCategoryBottomSheetDialog.CATEGORY_COLOR_BUNDLE_KEY)
-                adapter.editCategory(id, name, color)
+            hasCategoryBeenModified = true
+            with(bundle) {
+                adapter.editCategory(
+                    id = getInt(CreateOrEditCategoryBottomSheetDialog.CATEGORY_ID_BUNDLE_KEY),
+                    name = getString(CreateOrEditCategoryBottomSheetDialog.CATEGORY_NAME_BUNDLE_KEY),
+                    color = getString(CreateOrEditCategoryBottomSheetDialog.CATEGORY_COLOR_BUNDLE_KEY),
+                )
             }
         }
 
         getBackNavigationResult<Int>(CategoryInfoActionsBottomSheetDialog.DELETE_CATEGORY_NAV_KEY) { categoryId ->
-            aCategoryHasBeenModified = true
+            hasCategoryBeenModified = true
             adapter.deleteCategory(categoryId)
         }
     }
 
     private fun setupSearch() {
-        searchView.apply {
+        with(searchView) {
             clearButton.setOnClickListener { text = null }
             hint = getString(R.string.searchTitle)
             addTextChangedListener(DebouncingTextWatcher(lifecycle) {
                 clearButton.isInvisible = it.isNullOrEmpty()
-                adapter.updateFilter(searchView.text.toString())
+                adapter.updateFilter(text.toString())
                 handleCreateCategoryRow(it?.trim())
             })
             setOnEditorActionListener { _, actionId, _ ->
                 if (EditorInfo.IME_ACTION_SEARCH == actionId) {
-                    adapter.updateFilter(searchView.text.toString())
+                    adapter.updateFilter(text.toString())
                     true
                 } else false
             }
@@ -166,17 +160,19 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
     }
 
     private fun navigateToCreateCategory() {
-        val categoryName = searchView.text.toString()
-        searchView.setText("")
-        safeNavigate(
-            SelectCategoriesBottomSheetDialogDirections.actionSelectCategoriesBottomSheetDialogToCreateOrEditCategoryBottomSheetDialog(
-                fileId = file.id,
-                driveId = file.driveId,
-                categoryId = CreateOrEditCategoryBottomSheetDialog.CREATE_CATEGORY_ID,
-                categoryName = categoryName,
-                categoryColor = null,
+        with(searchView) {
+            val categoryName = text.toString()
+            setText("")
+            safeNavigate(
+                SelectCategoriesBottomSheetDialogDirections.actionSelectCategoriesBottomSheetDialogToCreateOrEditCategoryBottomSheetDialog(
+                    fileId = file.id,
+                    driveId = file.driveId,
+                    categoryId = CreateOrEditCategoryBottomSheetDialog.CREATE_CATEGORY_ID,
+                    categoryName = categoryName,
+                    categoryColor = null,
+                )
             )
-        )
+        }
     }
 
     private fun handleCreateCategoryRow(categoryName: String?) {
@@ -184,19 +180,14 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
         val text = getString(R.string.manageCategoriesCreateTitle, "<b>$categoryName</b>")
         addCategoryTitle.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT)
-        } else {
-            Html.fromHtml(text)
-        }
+        } else Html.fromHtml(text)
 
-        createCategoryRow.apply {
-
+        with(createCategoryRow) {
             var topCornerRadius = 0.0f
             if (adapter.filteredCategories.isEmpty()) {
                 topCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
                 createCategoryRowSeparator.isGone = true
-            } else {
-                createCategoryRowSeparator.isVisible = true
-            }
+            } else createCategoryRowSeparator.isVisible = true
             val bottomCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
 
             shapeAppearanceModel = shapeAppearanceModel
@@ -228,41 +219,39 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
         adapter.setAll(uiCategories.sortCategoriesList())
 
         adapter.onMenuClicked = { category ->
-            val bundle = bundleOf(
-                "fileId" to fileId,
-                "categoryId" to category.id,
-                "categoryName" to category.name,
-                "categoryColor" to category.color,
-                "categoryIsPredefined" to category.isPredefined,
+            safeNavigate(
+                R.id.categoryInfoActionsBottomSheetDialog, bundleOf(
+                    "fileId" to fileId,
+                    "categoryId" to category.id,
+                    "categoryName" to category.name,
+                    "categoryColor" to category.color,
+                    "categoryIsPredefined" to category.isPredefined,
+                )
             )
-            safeNavigate(R.id.categoryInfoActionsBottomSheetDialog, bundle)
         }
     }
 
-    private fun onCategoryChanged(categoryId: Int, isSelected: Boolean) {
-        val requestLiveData = with(selectCategoriesViewModel) {
-            if (isSelected) {
-                addCategory(file.id, file.driveId, categoryId)
-            } else {
-                removeCategory(file, categoryId)
-            }
-        }
-
-        requestLiveData.observe(viewLifecycleOwner) { apiResponse ->
+    private fun addCategory(categoryId: Int) {
+        selectCategoriesViewModel.addCategory(file.id, file.driveId, categoryId).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
-                adapter.updateCategory(categoryId, isSelected)
-            } else {
-                Utils.showSnackbar(requireView(), apiResponse.translateError())
-            }
+                adapter.updateCategory(categoryId, true)
+            } else Utils.showSnackbar(requireView(), apiResponse.translateError())
+        }
+    }
+
+    private fun removeCategory(categoryId: Int) {
+        selectCategoriesViewModel.removeCategory(file, categoryId).observe(viewLifecycleOwner) { apiResponse ->
+            if (apiResponse.isSuccess()) {
+                adapter.updateCategory(categoryId, false)
+            } else Utils.showSnackbar(requireView(), apiResponse.translateError())
         }
     }
 
     private fun setBackNavResult() {
         setBackNavigationResult(
-            SELECT_CATEGORIES_NAV_KEY,
-            bundleOf(
-                CATEGORIES_BUNDLE_KEY to adapter.categories.filter { it.isSelected }.map { it.id },
-                MODIFIED_CATEGORY_BUNDLE_KEY to aCategoryHasBeenModified,
+            SELECT_CATEGORIES_NAV_KEY, bundleOf(
+                CATEGORIES_BUNDLE_KEY to adapter.allCategories.filter { it.isSelected }.map { it.id },
+                MODIFIED_CATEGORY_BUNDLE_KEY to hasCategoryBeenModified,
             )
         )
     }

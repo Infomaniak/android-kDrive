@@ -66,13 +66,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        FileController.getFileById(navigationArgs.fileId).let {
-            if (it == null) {
-                findNavController().popBackStack()
-                return
-            } else {
-                currentFile = it
-            }
+        currentFile = FileController.getFileById(navigationArgs.fileId) ?: run {
+            findNavController().popBackStack()
+            return
         }
 
         drivePermissions = DrivePermissions()
@@ -90,8 +86,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
 
         getBackNavigationResult<Bundle>(SelectCategoriesBottomSheetDialog.SELECT_CATEGORIES_NAV_KEY) { bundle ->
-            val aCategoryHasBeenModified = bundle.getBoolean(SelectCategoriesBottomSheetDialog.MODIFIED_CATEGORY_BUNDLE_KEY)
-            if (aCategoryHasBeenModified) {
+            val hasCategoryBeenModified = bundle.getBoolean(SelectCategoriesBottomSheetDialog.MODIFIED_CATEGORY_BUNDLE_KEY)
+            if (hasCategoryBeenModified) {
                 findNavController().previousBackStackEntry?.savedStateHandle?.set(UPDATE_CATEGORIES_NAV_KEY, currentFile.id)
             }
             lifecycleScope.launchWhenResumed {
@@ -178,7 +174,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override fun manageCategoriesClicked(fileId: Int) {
         safeNavigate(
             FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToSelectCategoriesBottomSheetDialog(
-                fileId
+               fileId = fileId
             )
         )
     }

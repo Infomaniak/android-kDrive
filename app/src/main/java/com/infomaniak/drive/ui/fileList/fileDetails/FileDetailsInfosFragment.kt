@@ -112,12 +112,11 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         getBackNavigationResult<Bundle>(SelectCategoriesBottomSheetDialog.SELECT_CATEGORIES_NAV_KEY) { bundle ->
             val ids = bundle.getParcelableArrayList(SelectCategoriesBottomSheetDialog.CATEGORIES_BUNDLE_KEY)
                 ?: emptyList<Int>()
-            val categories = DriveInfosController.getCurrentDriveCategoriesFromIds(ids.toTypedArray())
             val file = fileDetailsViewModel.currentFile.value
             setupCategoriesContainer(
                 hasFile = file != null,
                 fileId = file?.id ?: -1,
-                categories = categories
+                categories = DriveInfosController.getCurrentDriveCategoriesFromIds(ids.toTypedArray()),
             )
         }
     }
@@ -187,14 +186,11 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
 
     private fun setupCategoriesContainer(hasFile: Boolean, fileId: Int, categories: List<Category>) {
         val categoryRights = DriveInfosController.getCategoryRights()
-
         if (hasFile && categoryRights?.canReadCategoryOnFile == true) {
-            categoriesContainer.isVisible = true
             categoriesDivider.isVisible = true
-            categoriesContainer.setup(
-                categories = categories,
-                categoryRights = categoryRights,
-                onClicked = {
+            with(categoriesContainer) {
+                isVisible = true
+                setup(categories, categoryRights, onClicked = {
                     try {
                         findNavController().navigate(
                             FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectCategoriesBottomSheetDialog(fileId)
@@ -203,10 +199,10 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
                         // No-op
                     }
                 })
-
+            }
         } else {
-            categoriesContainer.isGone = true
             categoriesDivider.isGone = true
+            categoriesContainer.isGone = true
         }
     }
 

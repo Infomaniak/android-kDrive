@@ -84,12 +84,7 @@ object DriveInfosController {
 
     fun updateDrive(transaction: (drive: Drive) -> Unit) {
         getRealmInstance().use { realm ->
-            realm.where(Drive::class.java)
-                .equalTo(Drive::id.name, AccountUtils.currentDriveId)
-                .findFirst()
-                ?.let { drive ->
-                    realm.executeTransaction { if (drive.isValid) transaction(drive) }
-                }
+            getCurrentDrive(realm)?.let { drive -> realm.executeTransaction { if (drive.isValid) transaction(drive) } }
         }
     }
 
@@ -146,17 +141,14 @@ object DriveInfosController {
 
     fun getCurrentDriveCategories(): List<Category> {
         val categories = getRealmInstance().use { realm ->
-            val currentDrive = realm.where(Drive::class.java)
-                .equalTo(Drive::id.name, AccountUtils.currentDriveId)
-                .findFirst()
-
-            currentDrive?.categories?.let {
-                val categories = it.where()
-                    .sort(Category::userUsageCount.name, Sort.DESCENDING)
-                    .findAll()
-
-                realm.copyFromRealm(categories, 0)
-            }
+            getCurrentDrive(realm)
+                ?.categories
+                ?.let {
+                    val categories = it.where()
+                        .sort(Category::userUsageCount.name, Sort.DESCENDING)
+                        .findAll()
+                    realm.copyFromRealm(categories, 0)
+                }
         } ?: emptyList()
 
         return categories
@@ -166,17 +158,14 @@ object DriveInfosController {
         if (categoriesIds.isEmpty()) return emptyList()
 
         val categories = getRealmInstance().use { realm ->
-            val currentDrive = realm.where(Drive::class.java)
-                .equalTo(Drive::id.name, AccountUtils.currentDriveId)
-                .findFirst()
-
-            currentDrive?.categories?.let {
-                val categories = it.where()
-                    .`in`(Category::id.name, categoriesIds)
-                    .findAll()
-
-                realm.copyFromRealm(categories, 0)
-            }
+            getCurrentDrive(realm)
+                ?.categories
+                ?.let {
+                    val categories = it.where()
+                        .`in`(Category::id.name, categoriesIds)
+                        .findAll()
+                    realm.copyFromRealm(categories, 0)
+                }
         } ?: emptyList()
 
         return categoriesIds.withIndex()
@@ -186,11 +175,15 @@ object DriveInfosController {
 
     fun getCategoryRights(): CategoryRights? {
         return getRealmInstance().use { realm ->
-            realm.where(Drive::class.java)
-                .equalTo(Drive::id.name, AccountUtils.currentDriveId)
-                .findFirst()
+            getCurrentDrive(realm)
                 ?.categoryRights
                 ?.let { realm.copyFromRealm(it, 0) }
         }
+    }
+
+    private fun getCurrentDrive(realm: Realm): Drive? {
+        return realm.where(Drive::class.java)
+            .equalTo(Drive::id.name, AccountUtils.currentDriveId)
+            .findFirst()
     }
 }

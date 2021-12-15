@@ -32,5 +32,5 @@ open class FileCategory(
     @SerializedName("user_id")
     var userId: Int? = null,
     @SerializedName("added_to_file_at")
-    var addedToFileAt: Date = Date()
+    var addedToFileAt: Date = Date(),
 ) : RealmObject()

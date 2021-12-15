@@ -37,7 +37,7 @@ class CategoriesAdapter(
     var canEditCategory: Boolean = false
     var canDeleteCategory: Boolean = false
     var onMenuClicked: ((category: UICategory) -> Unit)? = null
-    var categories: ArrayList<UICategory> = arrayListOf()
+    var allCategories: ArrayList<UICategory> = arrayListOf()
     var filteredCategories: ArrayList<UICategory> = arrayListOf()
     private var filterQuery: String = ""
 
@@ -46,8 +46,7 @@ class CategoriesAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.itemView.categoryCard.apply {
-
+        with(holder.itemView.categoryCard) {
             val category = filteredCategories[position]
 
             var topCornerRadius = 0.0f
@@ -75,88 +74,79 @@ class CategoriesAdapter(
                 isEnabled = false
                 onCategoryChanged(category.id, !category.isSelected)
             }
-            menuButton.isVisible = canEditCategory || (canDeleteCategory && !category.isPredefined)
-            menuButton.setOnClickListener { onMenuClicked?.invoke(category) }
+            with(menuButton) {
+                isVisible = canEditCategory || (canDeleteCategory && !category.isPredefined)
+                setOnClickListener { onMenuClicked?.invoke(category) }
+            }
         }
     }
 
     override fun getItemCount() = filteredCategories.size
 
-    private fun filterCategories() {
-        filteredCategories = ArrayList(categories.filter { it.name.contains(filterQuery, true) })
-        notifyDataSetChanged()
-    }
-
     fun setAll(newCategories: List<UICategory>) {
-        categories = ArrayList(newCategories)
-
-        // Filter and display categories
+        allCategories = ArrayList(newCategories)
         filterCategories()
     }
 
-    fun addCategory(categoryId: Int, categoryName: String, categoryColor: String) {
-        val newCategory = UICategory(
-            id = categoryId,
-            name = categoryName,
-            color = categoryColor,
-            isPredefined = false,
-            isSelected = true,
-            userUsageCount = 1,
-            addedToFileAt = Date(),
-        )
-        categories.toMutableList().apply {
-            add(newCategory)
-            categories = ArrayList(sortCategoriesList())
+    fun addCategory(id: Int, name: String, color: String) {
+        with(allCategories.toMutableList()) {
+            add(
+                UICategory(
+                    id = id,
+                    name = name,
+                    color = color,
+                    isPredefined = false,
+                    isSelected = true,
+                    userUsageCount = 1,
+                    addedToFileAt = Date(),
+                )
+            )
+            allCategories = ArrayList(sortCategoriesList())
         }
-
-        // Filter and display categories
         filterCategories()
     }
 
-    fun editCategory(categoryId: Int, categoryName: String?, categoryColor: String?) {
-        val index = categories.indexOfFirst { it.id == categoryId }
-        categories[index].apply {
-            name = categoryName ?: name
-            color = categoryColor ?: color
+    fun editCategory(id: Int, name: String?, color: String?) {
+        val index = allCategories.indexOfFirst { it.id == id }
+        with(allCategories[index]) {
+            this.name = name ?: this.name
+            this.color = color ?: this.color
         }
-
-        // Filter and display categories
         filterCategories()
     }
 
     fun deleteCategory(categoryId: Int) {
-        val index = categories.indexOfFirst { it.id == categoryId }
-        categories.removeAt(index)
-
-        // Filter and display categories
+        with(allCategories) {
+            val index = indexOfFirst { it.id == categoryId }
+            removeAt(index)
+        }
         filterCategories()
     }
 
     fun updateCategory(categoryId: Int, isSelected: Boolean) {
-
-        // Find and update the Category
-        val oldPos = categories.indexOfFirst { it.id == categoryId }
-        categories[oldPos].apply {
-            this.isSelected = isSelected
-            this.addedToFileAt = if (isSelected) Date() else null
+        with(allCategories) {
+            val index = indexOfFirst { it.id == categoryId }
+            with(this[index]) {
+                this.isSelected = isSelected
+                this.addedToFileAt = if (isSelected) Date() else null
+            }
+            allCategories = ArrayList(sortCategoriesList())
         }
-
-        // Sort the list
-        categories = ArrayList(categories.sortCategoriesList())
-
-        // Filter and display categories
         filterCategories()
     }
 
     fun updateFilter(query: String) {
         filterQuery = query
-
-        // Filter and display categories
         filterCategories()
     }
 
     fun doesCategoryExist(query: String): Boolean {
         return !filteredCategories.none { it.name.equals(query, true) }
+    }
+
+    private fun filterCategories() {
+        filteredCategories = ArrayList(allCategories.filter { it.name.contains(filterQuery, true) })
+        notifyDataSetChanged()
     }
 
     data class UICategory(

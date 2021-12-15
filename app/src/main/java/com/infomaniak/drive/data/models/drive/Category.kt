@@ -28,11 +28,9 @@ open class Category(
     var color: String = "#000000",
     @SerializedName("created_at")
     var createdAt: Date = Date(),
-    @SerializedName("created_by")
-    var createdBy: Int = 0,
     @SerializedName("is_predefined")
     var isPredefined: Boolean? = null,
     var name: String = "",
     @SerializedName("user_usage_count")
-    var userUsageCount: Int = 0
+    var userUsageCount: Int = 0,
 ) : RealmObject()

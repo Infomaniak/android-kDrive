@@ -61,12 +61,11 @@ class FileShareDetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val currentFile = FileController.getFileById(navigationArgs.fileId)
-        currentFile?.let {
-            fileShareViewModel.currentFile.value = it
-        } ?: run {
-            findNavController().popBackStack()
-            return
-        }
+            ?.apply { fileShareViewModel.currentFile.value = this }
+            ?: run {
+                findNavController().popBackStack()
+                return
+            }
 
         allUserList = AccountUtils.getCurrentDrive().getDriveUsers()
         allTeams = DriveInfosController.getTeams(AccountUtils.getCurrentDrive()!!)

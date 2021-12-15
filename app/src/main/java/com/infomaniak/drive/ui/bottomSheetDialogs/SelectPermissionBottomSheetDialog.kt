@@ -192,10 +192,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
             if (apiResponse.data == true) {
                 setBackNavigationResult(
                     SELECT_PERMISSION_NAV_KEY,
-                    bundleOf(
-                        PERMISSION_BUNDLE_KEY to permission,
-                        SHAREABLE_BUNDLE_KEY to shareable
-                    )
+                    bundleOf(PERMISSION_BUNDLE_KEY to permission, SHAREABLE_BUNDLE_KEY to shareable)
                 )
             } else {
                 Utils.showSnackbar(requireView(), R.string.errorRightModification)
@@ -209,10 +206,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
             if (apiResponse.data == true) {
                 setBackNavigationResult(
                     SELECT_PERMISSION_NAV_KEY,
-                    bundleOf(
-                        PERMISSION_BUNDLE_KEY to permission,
-                        SHAREABLE_BUNDLE_KEY to shareable
-                    )
+                    bundleOf(PERMISSION_BUNDLE_KEY to permission, SHAREABLE_BUNDLE_KEY to shareable)
                 )
             } else {
                 Utils.showSnackbar(requireView(), R.string.errorDelete)

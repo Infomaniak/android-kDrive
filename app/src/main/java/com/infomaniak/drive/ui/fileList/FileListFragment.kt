@@ -273,10 +273,10 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         getBackNavigationResult<Int>(FileInfoActionsBottomSheetDialog.UPDATE_CATEGORIES_NAV_KEY) { fileId ->
-            val files = fileAdapter.getFiles()
-            val file = files.find { it.id == fileId }
-            val index = files.indexOf(file)
-            fileAdapter.notifyItemChanged(index)
+            with(fileAdapter.getFiles()) {
+                val file = find { it.id == fileId }
+                fileAdapter.notifyItemChanged(indexOf(file))
+            }
         }
     }
 

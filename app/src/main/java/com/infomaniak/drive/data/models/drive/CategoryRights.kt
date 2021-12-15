@@ -32,5 +32,5 @@ open class CategoryRights(
     @SerializedName("can_put_category_on_file")
     var canPutCategoryOnFile: Boolean = false,
     @SerializedName("can_read_category_on_file")
-    var canReadCategoryOnFile: Boolean = false
+    var canReadCategoryOnFile: Boolean = false,
 ) : RealmObject()

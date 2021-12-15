@@ -135,7 +135,7 @@ object Utils {
             autoDismiss = false,
             isDeletion = true,
             buttonText = context.getString(R.string.buttonDelete),
-            onConfirmation = onConfirmation
+            onConfirmation = onConfirmation,
         )
     }
 

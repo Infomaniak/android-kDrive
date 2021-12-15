@@ -54,27 +54,29 @@ class CategoriesContainerView @JvmOverloads constructor(
             categoryTitle.setText(R.string.categoriesFilterTitle)
         }
 
-        if (categories.isEmpty()) {
-            categoriesGroup.isVisible = false
-        } else {
-            categoriesGroup.removeAllViews()
+        with(categoriesGroup) {
+            if (categories.isEmpty()) {
+                isGone = true
+            } else {
+                removeAllViews()
 
-            // Populate categories
-            categories.forEach { category ->
-                categoriesGroup.addView(
-                    Chip(context).apply {
-                        text = category.getName(context)
-                        setTextSize(TypedValue.COMPLEX_UNIT_SP, 14.0f)
-                        setTextColor(ContextCompat.getColor(context, R.color.white))
-                        typeface = ResourcesCompat.getFont(context, R.font.suisseintl_medium)
-                        chipBackgroundColor = ColorStateList.valueOf(category.color.toColorInt())
-                        setOnClickListener { onClicked() }
-                    }
-                )
+                // Populate categories
+                categories.forEach { category ->
+                    addView(
+                        Chip(context).apply {
+                            text = category.getName(context)
+                            setTextSize(TypedValue.COMPLEX_UNIT_SP, 14.0f)
+                            setTextColor(ContextCompat.getColor(context, R.color.white))
+                            typeface = ResourcesCompat.getFont(context, R.font.suisseintl_medium)
+                            chipBackgroundColor = ColorStateList.valueOf(category.color.toColorInt())
+                            setOnClickListener { onClicked() }
+                        }
+                    )
+                }
+
+                // Show categories
+                isVisible = true
             }
-
-            // Show categories
-            categoriesGroup.isVisible = true
         }
     }
 }
