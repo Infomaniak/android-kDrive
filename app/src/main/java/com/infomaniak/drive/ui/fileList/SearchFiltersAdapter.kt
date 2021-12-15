@@ -58,7 +58,7 @@ class SearchFiltersAdapter(
 
     private fun View.setData(filter: SearchFilter) {
         filter.icon?.let { filterIcon.setImageResource(it) }
-        roundIcon.setBackgroundColor(Color.parseColor(filter.tint))
+        filter.tint?.let { roundIcon.setBackgroundColor(Color.parseColor(it)) }
         filterName.text = filter.text
     }
 

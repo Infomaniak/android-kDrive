@@ -113,7 +113,7 @@ class CategoriesAdapter(
         filterCategories()
     }
 
-    fun selectCategory(categoryId: Int, isSelected: Boolean) {
+    fun selectCategory(categoryId: Int, isSelected: Boolean, usageMode: Int) {
         with(allCategories) {
             val index = indexOfFirst { it.id == categoryId }
             this[index].apply {

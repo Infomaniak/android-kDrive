@@ -26,7 +26,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_search_result.view.*
 
-class PreviousSearchesAdapter(
+class RecentSearchesAdapter(
     private val onSearchClicked: (search: String) -> Unit
 ) : RecyclerView.Adapter<ViewHolder>() {
 

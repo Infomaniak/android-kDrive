@@ -50,7 +50,7 @@ class SearchFragment : FileListFragment() {
     override var enabledMultiSelectMode: Boolean = false
 
     private lateinit var searchFiltersAdapter: SearchFiltersAdapter
-    private lateinit var previousSearchesAdapter: PreviousSearchesAdapter
+    private lateinit var recentSearchesAdapter: RecentSearchesAdapter
     private lateinit var recentSearchesView: View
     private var isDownloading = false
 
@@ -120,15 +120,17 @@ class SearchFragment : FileListFragment() {
             showRecentSearchesLayout(true)
         }
 
-        setSearchesAdapter()
+        setRecentSearchesAdapter()
         setToolbar()
         observeSearchResult()
         setBackActionHandlers()
     }
 
-    private fun setSearchesAdapter() {
-        previousSearchesAdapter = PreviousSearchesAdapter { searchView.setText(it) }
-        recentSearchesList.adapter = previousSearchesAdapter
+    private fun setRecentSearchesAdapter() {
+        recentSearchesAdapter = RecentSearchesAdapter { searchView.setText(it) }.apply {
+            setAll(AppSettings.mostRecentSearches)
+        }
+        recentSearchesList.adapter = recentSearchesAdapter
     }
 
     private fun setToolbar() = with(toolbar) {
@@ -167,8 +169,8 @@ class SearchFragment : FileListFragment() {
 
                     updateMostRecentSearches()
 
-                    val searchList = apiResponse.data ?: arrayListOf()
-                    searchList.apply { map { file -> file.isFromSearch = true } }
+                    val searchList = (apiResponse.data ?: arrayListOf())
+                        .apply { map { file -> file.isFromSearch = true } }
 
                     when {
                         fileListViewModel.currentPage == 1 -> {
@@ -234,18 +236,18 @@ class SearchFragment : FileListFragment() {
         val newSearch = searchView.text.toString().trim()
         if (newSearch.isEmpty()) return
 
-        val previousSearches = AppSettings.mostRecentSearches
-        val newSearches = previousSearches
+        val recentSearches = AppSettings.mostRecentSearches
+        val newSearches = recentSearches
             .apply {
                 if (contains(newSearch)) {
-                    move(previousSearches.indexOf(newSearch), 0)
+                    move(recentSearches.indexOf(newSearch), 0)
                 } else {
                     add(0, newSearch)
                 }
             }
             .filterIndexed { index, _ -> index < MAX_MOST_RECENT_SEARCHES }
         AppSettings.mostRecentSearches = RealmList(*newSearches.toTypedArray())
-        previousSearchesAdapter.setAll(newSearches)
+        recentSearchesAdapter.setAll(newSearches)
     }
 
     private fun updateFilters() {

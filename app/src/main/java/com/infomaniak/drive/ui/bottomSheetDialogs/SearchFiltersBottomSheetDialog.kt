@@ -25,13 +25,13 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.navigation.navGraphViewModels
 import com.google.android.material.card.MaterialCardView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.models.File.ConvertedType
+import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.SearchDateFilter
 import com.infomaniak.drive.utils.getBackNavigationResult
 import com.infomaniak.drive.utils.safeNavigate
@@ -42,7 +42,7 @@ import kotlinx.android.synthetic.main.fragment_bottom_sheet_search_filters.*
 
 class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
 
-    private val searchFiltersViewModel: SearchFiltersViewModel by navGraphViewModels(R.id.searchFiltersBottomSheetDialog)
+    private val searchFiltersViewModel: SearchFiltersViewModel by viewModels()
     private val navigationArgs: SearchFiltersBottomSheetDialogArgs by navArgs()
 
     private val rights = DriveInfosController.getCategoryRights()
@@ -79,7 +79,7 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     private fun configureSaveButton() {
         saveButton.setOnClickListener {
-            searchFiltersViewModel.apply {
+            with(searchFiltersViewModel) {
                 setBackNavigationResult(
                     SEARCH_FILTERS_NAV_KEY, bundleOf(
                         SEARCH_FILTERS_DATE_BUNDLE_KEY to date,
@@ -98,7 +98,8 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
             updateDateUI()
         }
 
-        getBackNavigationResult<Boolean>(SearchFilterFileTypeBottomSheetDialog.SEARCH_FILTER_TYPE_NAV_KEY) {
+        getBackNavigationResult<Parcelable>(SearchFilterFileTypeBottomSheetDialog.SEARCH_FILTER_TYPE_NAV_KEY) {
+            searchFiltersViewModel.type = it as ConvertedType
             updateTypeUI()
         }
 
@@ -122,7 +123,9 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
     private fun configureTypeUI() {
         searchFiltersViewModel.type = navigationArgs.type?.let { ConvertedType.valueOf(it) }
         updateTypeUI()
-        fileTypeFilter.setOnClickListener { safeNavigate(R.id.searchFilterFileTypeDialog) }
+        fileTypeFilter.setOnClickListener {
+            safeNavigate(R.id.searchFilterFileTypeDialog, bundleOf("type" to searchFiltersViewModel.type))
+        }
     }
 
     private fun configureCategoriesUI() {
@@ -160,10 +163,9 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
     }
 
     private fun updateDateUI() {
-        searchFiltersViewModel.date?.let {
-            modificationDateFilterText.text = it.text
-        } ?: run {
-            modificationDateFilterText.setText(R.string.searchFiltersSelectDate)
+        with(modificationDateFilterText) {
+            searchFiltersViewModel.date?.let { text = it.text }
+                ?: run { setText(R.string.searchFiltersSelectDate) }
         }
     }
 

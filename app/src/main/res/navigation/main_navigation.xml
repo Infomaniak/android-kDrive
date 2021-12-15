@@ -550,7 +550,12 @@
         android:id="@+id/searchFilterFileTypeDialog"
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterFileTypeBottomSheetDialog"
         android:label="SearchFilterFileTypeBottomSheetDialog"
-        tools:layout="@layout/fragment_bottom_sheet_search_filter_file_type" />
+        tools:layout="@layout/fragment_bottom_sheet_search_filter_file_type">
+        <argument
+            android:name="type"
+            app:argType="com.infomaniak.drive.data.models.ConvertedType"
+            app:nullable="true" />
+    </dialog>
 
     <dialog
         android:id="@+id/accessDeniedBottomSheetFragment"

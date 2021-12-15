@@ -88,6 +88,10 @@ open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
+    private fun setBackNavResult(type: SearchDateFilterType, start: Date, end: Date, text: String) {
+        setBackNavigationResult(SEARCH_FILTER_DATE_NAV_KEY, SearchDateFilter(type, start, end, text))
+    }
+
     private fun dateIntervalText(start: Date, end: Date): String {
         return if (start.day() == end.day()) {
             start.format("d MMM yyyy")
@@ -98,16 +102,17 @@ open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun showDateRangePicker(onPositiveButtonClicked: (Long, Long) -> Unit) {
         activity?.supportFragmentManager?.let { fragmentManager ->
-            MaterialDatePicker.Builder.dateRangePicker().build().apply {
+            with(
+                MaterialDatePicker.Builder
+                    .dateRangePicker()
+                    .setTheme(R.style.MaterialCalendarThemeBackground)
+                    .build()
+            ) {
                 show(fragmentManager, toString())
                 addOnNegativeButtonClickListener { dismiss() }
                 addOnPositiveButtonClickListener { onPositiveButtonClicked(it.first, it.second) }
             }
         }
-    }
-
-    private fun setBackNavResult(type: SearchDateFilterType, start: Date, end: Date, text: String) {
-        setBackNavigationResult(SEARCH_FILTER_DATE_NAV_KEY, SearchDateFilter(type, start, end, text))
     }
 
     companion object {

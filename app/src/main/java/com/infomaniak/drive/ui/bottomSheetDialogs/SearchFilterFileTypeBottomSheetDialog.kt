@@ -23,17 +23,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.navigation.navGraphViewModels
+import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.File.ConvertedType
+import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.utils.setBackNavigationResult
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_search_filter_file_type.*
 import kotlinx.android.synthetic.main.view_search_filter_type.view.*
 
 open class SearchFilterFileTypeBottomSheetDialog : BottomSheetDialogFragment() {
 
-    private val searchFiltersViewModel: SearchFiltersViewModel by navGraphViewModels(R.id.searchFiltersBottomSheetDialog)
+    private val navigationArgs: SearchFilterFileTypeBottomSheetDialogArgs by navArgs()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_bottom_sheet_search_filter_file_type, container, false)
@@ -61,12 +61,8 @@ open class SearchFilterFileTypeBottomSheetDialog : BottomSheetDialogFragment() {
                 layoutInflater.inflate(R.layout.view_search_filter_type, null).apply {
                     typeFilterStartIcon.setImageResource(type.second)
                     typeFilterText.setText(type.first.searchFilterName)
-                    typeFilterEndIcon.isVisible = type.first == searchFiltersViewModel.type
-                    setOnClickListener {
-                        searchFiltersViewModel.type = type.first
-                        setBackNavigationResult(SEARCH_FILTER_TYPE_NAV_KEY, true)
-                    }
-
+                    typeFilterEndIcon.isVisible = type.first.value == navigationArgs.type?.value
+                    setOnClickListener { setBackNavigationResult(SEARCH_FILTER_TYPE_NAV_KEY, type.first) }
                 }
             )
         }

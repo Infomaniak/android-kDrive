@@ -18,7 +18,7 @@
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import androidx.lifecycle.ViewModel
-import com.infomaniak.drive.data.models.File.ConvertedType
+import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.SearchDateFilter
 import com.infomaniak.drive.data.models.drive.Category
 
