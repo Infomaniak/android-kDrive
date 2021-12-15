@@ -47,18 +47,13 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
         return inflater.inflate(R.layout.fragment_bottom_sheet_category_info_actions, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(navigationArgs) {
         super.onViewCreated(view, savedInstanceState)
 
-        val fileId = navigationArgs.fileId
         val driveId = AccountUtils.currentDriveId
-        val categoryId = navigationArgs.categoryId
-        val categoryName = navigationArgs.categoryName
-        val categoryColor = navigationArgs.categoryColor
         val categoryRights = DriveInfosController.getCategoryRights()
         val canEditCategory = categoryRights?.canEditCategory ?: false
         val canDeleteCategory = categoryRights?.canDeleteCategory ?: false
-        val categoryIsPredefined = navigationArgs.categoryIsPredefined
 
         categoryTitle.text = categoryName
         categoryIcon.setBackgroundColor(Color.parseColor(categoryColor))
@@ -66,9 +61,9 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
         editCategory.isEnabled = canEditCategory
         disabledEditCategory.isGone = canEditCategory
 
-        (canDeleteCategory && !categoryIsPredefined).let {
-            deleteCategory.isEnabled = it
-            disabledDeleteCategory.isGone = it
+        with(canDeleteCategory && !categoryIsPredefined) {
+            deleteCategory.isEnabled = this
+            disabledDeleteCategory.isGone = this
         }
 
         editCategory.setOnClickListener {
