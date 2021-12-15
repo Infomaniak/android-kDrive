@@ -31,7 +31,7 @@ class HomeOfflineFragment : OfflineFileFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //TODO - change gridLayoutManager
+        //TODO - Change linearLayoutManager as new home v2 design
 
         appBar.isGone = true
         sortButton.isGone = true
