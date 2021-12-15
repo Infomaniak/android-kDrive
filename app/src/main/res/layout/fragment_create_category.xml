@@ -110,14 +110,14 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/categoryNameValueLayout" />
 
-            <com.google.android.flexbox.FlexboxLayout
-                android:id="@+id/categoriesFlexBoxLayout"
-                android:layout_width="wrap_content"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/categoriesRecyclerView"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/marginStandardMedium"
                 android:layout_marginTop="@dimen/marginStandardSmall"
-                app:flexWrap="wrap"
-                app:justifyContent="flex_start"
+                android:overScrollMode="never"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                 app:layout_constraintBottom_toTopOf="@id/saveButton"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -135,7 +135,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/categoriesFlexBoxLayout" />
+                app:layout_constraintTop_toBottomOf="@id/categoriesRecyclerView" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
