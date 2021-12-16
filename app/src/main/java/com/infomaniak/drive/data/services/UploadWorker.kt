@@ -56,6 +56,7 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.ApiController
 import com.infomaniak.lib.core.utils.hasPermissions
 import com.infomaniak.lib.core.utils.isNetworkException
+import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.*
@@ -168,6 +169,11 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             }
         } finally {
             applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
+            Sentry.addBreadcrumb(Breadcrumb().apply {
+                category = BREADCRUMB_TAG
+                message = "finish with $uploadedCount files uploaded"
+                level = SentryLevel.INFO
+            })
         }
     }
 
@@ -384,6 +390,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     companion object {
         const val TAG = "upload_worker"
         const val PERIODIC_TAG = "upload_worker_periodic"
+        const val BREADCRUMB_TAG = "Upload"
 
         const val FILENAME = "filename"
         const val PROGRESS = "progress"

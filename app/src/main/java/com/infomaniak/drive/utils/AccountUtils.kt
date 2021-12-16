@@ -18,6 +18,7 @@
 package com.infomaniak.drive.utils
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import com.facebook.stetho.okhttp3.StethoInterceptor
 import com.infomaniak.drive.BuildConfig
@@ -197,6 +198,10 @@ object AccountUtils : CredentialManager {
         return userDatabase.userDao().getAll()
     }
 
+    private fun getAllUserCount(): Int {
+        return userDatabase.userDao().count()
+    }
+
     fun getAllUsersSync() = userDatabase.userDao().getAllSync()
 
     suspend fun setUserToken(user: User?, apiToken: ApiToken) {
@@ -263,13 +268,21 @@ object AccountUtils : CredentialManager {
     }
 
     private fun resetApp(context: Context) {
-        if (getAllUsers().value?.size == 0) {
+        if (getAllUserCount() == 0) {
             AppSettings.removeAppSettings()
             UISettings(context).removeUiSettings()
+
             if (isEnableAppSync()) {
                 Sentry.captureMessage("AccountUtils: disableAutoSync")
                 context.disableAutoSync()
             }
+
+            // Delete all app data
+            with(context) {
+                filesDir.deleteRecursively()
+                cacheDir.deleteRecursively()
+            }
+            Log.i("AccountUtils", "resetApp> all user data has been deleted")
         }
     }
 

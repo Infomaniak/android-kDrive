@@ -57,6 +57,7 @@ import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.UISettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
+import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.launchInAppReview
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
@@ -113,6 +114,11 @@ class MainActivity : BaseActivity() {
 
         intent?.getIntExtra(INTENT_SHOW_PROGRESS, 0)?.let { folderId ->
             if (folderId > 0) {
+                Sentry.addBreadcrumb(Breadcrumb().apply {
+                    category = UploadWorker.BREADCRUMB_TAG
+                    message = "Upload notification has been clicked"
+                    level = SentryLevel.INFO
+                })
                 navController.navigate(R.id.fileListFragment)
                 mainViewModel.intentShowProgressByFolderId.value = folderId
             }
