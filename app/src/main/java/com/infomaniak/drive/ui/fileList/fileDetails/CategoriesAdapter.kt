@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.fileList.fileDetails
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.shape.CornerFamily
@@ -65,15 +66,20 @@ class CategoriesAdapter(
                 .setBottomRightCorner(CornerFamily.ROUNDED, bottomCornerRadius)
                 .build()
 
+            categoryProgressBar.isGone = true
             isEnabled = true
             isCheckable = false
             categoryIcon.setBackgroundColor(Color.parseColor(category.color))
             checkIcon.isVisible = category.isSelected
             categoryTitle.text = category.name
+
             setOnClickListener {
                 isEnabled = false
+                categoryProgressBar.isVisible = true
+                checkIcon.isGone = true
                 onCategoryChanged(category.id, !category.isSelected)
             }
+
             with(menuButton) {
                 isVisible = canEditCategory || (canDeleteCategory && !category.isPredefined)
                 setOnClickListener { onMenuClicked?.invoke(category) }

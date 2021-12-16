@@ -174,7 +174,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override fun manageCategoriesClicked(fileId: Int) {
         safeNavigate(
             FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToSelectCategoriesBottomSheetDialog(
-               fileId = fileId
+                fileId = fileId
             )
         )
     }
