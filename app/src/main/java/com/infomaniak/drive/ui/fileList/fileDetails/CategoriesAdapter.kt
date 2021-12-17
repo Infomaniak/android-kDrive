@@ -23,6 +23,7 @@ import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.sortCategoriesList
@@ -46,48 +47,59 @@ class CategoriesAdapter(
         return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cardview_category, parent, false))
     }
 
+    override fun getItemCount() = filteredCategories.size
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         with(holder.itemView.categoryCard) {
             val category = filteredCategories[position]
-
-            var topCornerRadius = 0.0f
-            var bottomCornerRadius = 0.0f
-            if (position == 0) topCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
-            val trimmedQuery = filterQuery.trim()
-            if (position == itemCount - 1 && (trimmedQuery.isBlank() || doesCategoryExist(trimmedQuery))) {
-                bottomCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
-            }
-
-            shapeAppearanceModel = shapeAppearanceModel
-                .toBuilder()
-                .setTopLeftCorner(CornerFamily.ROUNDED, topCornerRadius)
-                .setTopRightCorner(CornerFamily.ROUNDED, topCornerRadius)
-                .setBottomLeftCorner(CornerFamily.ROUNDED, bottomCornerRadius)
-                .setBottomRightCorner(CornerFamily.ROUNDED, bottomCornerRadius)
-                .build()
-
-            categoryProgressBar.isGone = true
-            isEnabled = true
-            isCheckable = false
-            categoryIcon.setBackgroundColor(Color.parseColor(category.color))
-            checkIcon.isVisible = category.isSelected
-            categoryTitle.text = category.name
-
-            setOnClickListener {
-                isEnabled = false
-                categoryProgressBar.isVisible = true
-                checkIcon.isGone = true
-                onCategoryChanged(category.id, !category.isSelected)
-            }
-
-            with(menuButton) {
-                isVisible = canEditCategory || (canDeleteCategory && !category.isPredefined)
-                setOnClickListener { onMenuClicked?.invoke(category) }
-            }
+            setLayouts(position)
+            setData(category)
+            setStates(category)
+            setListeners(category)
         }
     }
 
-    override fun getItemCount() = filteredCategories.size
+    private fun MaterialCardView.setLayouts(position: Int) {
+        var topCornerRadius = 0.0f
+        var bottomCornerRadius = 0.0f
+        if (position == 0) topCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
+        val trimmedQuery = filterQuery.trim()
+        if (position == itemCount - 1 && (trimmedQuery.isBlank() || doesCategoryExist(trimmedQuery))) {
+            bottomCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
+        }
+
+        shapeAppearanceModel = shapeAppearanceModel
+            .toBuilder()
+            .setTopLeftCorner(CornerFamily.ROUNDED, topCornerRadius)
+            .setTopRightCorner(CornerFamily.ROUNDED, topCornerRadius)
+            .setBottomLeftCorner(CornerFamily.ROUNDED, bottomCornerRadius)
+            .setBottomRightCorner(CornerFamily.ROUNDED, bottomCornerRadius)
+            .build()
+    }
+
+    private fun MaterialCardView.setData(category: UICategory) {
+        categoryIcon.setBackgroundColor(Color.parseColor(category.color))
+        categoryTitle.text = category.name
+    }
+
+    private fun MaterialCardView.setStates(category: UICategory) {
+        categoryProgressBar.isGone = true
+        checkIcon.isVisible = category.isSelected
+        isCheckable = false
+        isEnabled = true
+        menuButton.isVisible = canEditCategory || (canDeleteCategory && !category.isPredefined)
+    }
+
+    private fun MaterialCardView.setListeners(category: UICategory) {
+        setOnClickListener {
+            categoryProgressBar.isVisible = true
+            checkIcon.isGone = true
+            isEnabled = false
+            onCategoryChanged(category.id, !category.isSelected)
+        }
+
+        menuButton.setOnClickListener { onMenuClicked?.invoke(category) }
+    }
 
     fun setAll(newCategories: List<UICategory>) {
         allCategories = ArrayList(newCategories)

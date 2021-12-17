@@ -93,10 +93,10 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
             setupShareLinkContainer(currentFile, share)
         }
 
-        setupBackActionHandler()
+        setBackActionHandlers()
     }
 
-    private fun setupBackActionHandler() {
+    private fun setBackActionHandlers() {
         getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.SELECT_PERMISSION_NAV_KEY) { bundle ->
             val permission = bundle.getParcelable<Permission>(SelectPermissionBottomSheetDialog.PERMISSION_BUNDLE_KEY)
             val isPublic = isPublicPermission(permission)
@@ -185,12 +185,12 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
     }
 
     private fun setupCategoriesContainer(hasFile: Boolean, fileId: Int, categories: List<Category>) {
-        val categoryRights = DriveInfosController.getCategoryRights()
-        if (hasFile && categoryRights?.canReadCategoryOnFile == true) {
+        val rights = DriveInfosController.getCategoryRights()
+        if (hasFile && rights?.canReadCategoryOnFile == true) {
             categoriesDivider.isVisible = true
             with(categoriesContainer) {
                 isVisible = true
-                setup(categories, categoryRights, onClicked = {
+                setup(categories, rights.canPutCategoryOnFile, onClicked = {
                     try {
                         findNavController().navigate(
                             FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectCategoriesBottomSheetDialog(fileId)

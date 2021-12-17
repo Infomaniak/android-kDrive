@@ -38,8 +38,6 @@ import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.FileCategory
-import com.infomaniak.drive.data.models.drive.CategoryRights
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.UICategory
 import com.infomaniak.drive.utils.*
@@ -69,6 +67,63 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
             return
         }
 
+        with(DriveInfosController.getCategoryRights()) {
+            setCategoriesAdapter(this?.canEditCategory == true, this?.canDeleteCategory == true)
+            setData()
+            setStates(this?.canCreateCategory == true)
+            setListeners()
+            setBackActionHandlers()
+        }
+    }
+
+    private fun setCategoriesAdapter(canEditCategory: Boolean, canDeleteCategory: Boolean) {
+        adapter = CategoriesAdapter(
+            onCategoryChanged = { categoryId, isSelected ->
+                if (isSelected) addCategory(categoryId) else removeCategory(categoryId)
+            }
+        ).apply {
+            this.canEditCategory = canEditCategory
+            this.canDeleteCategory = canDeleteCategory
+
+            val uiCategories = DriveInfosController.getCurrentDriveCategories().map { category ->
+                val fileCategory = file.categories.find { it.id == category.id }
+                UICategory(
+                    id = category.id,
+                    name = category.getName(requireContext()),
+                    color = category.color,
+                    isPredefined = category.isPredefined ?: true,
+                    isSelected = fileCategory != null,
+                    userUsageCount = category.userUsageCount,
+                    addedToFileAt = fileCategory?.addedToFileAt,
+                )
+            }
+            setAll(uiCategories.sortCategoriesList())
+
+            onMenuClicked = { category ->
+                safeNavigate(
+                    R.id.categoryInfoActionsBottomSheetDialog, bundleOf(
+                        "fileId" to file.id,
+                        "categoryId" to category.id,
+                        "categoryName" to category.name,
+                        "categoryColor" to category.color,
+                        "categoryIsPredefined" to category.isPredefined,
+                    )
+                )
+            }
+        }
+
+        categoriesRecyclerView.adapter = adapter
+    }
+
+    private fun setData() {
+        searchView.hint = getString(R.string.searchTitle)
+    }
+
+    private fun setStates(canCreateCategory: Boolean) {
+        toolbar.menu.findItem(R.id.addCategory).isVisible = canCreateCategory
+    }
+
+    private fun setListeners() {
         dialog?.setOnKeyListener { _, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_BACK && event?.action == KeyEvent.ACTION_UP) {
                 setBackNavResult()
@@ -76,18 +131,7 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
             } else false
         }
 
-        with(DriveInfosController.getCategoryRights()) {
-            setToolbar(this)
-            setAdapter(this)
-        }
-        setupBackActionHandler()
-        setupSearch()
-        updateUI(file.categories.toList(), file.id)
-    }
-
-    private fun setToolbar(categoryRights: CategoryRights?) {
         with(toolbar) {
-            menu.findItem(R.id.addCategory).isVisible = categoryRights?.canCreateCategory == true
             setOnMenuItemClickListener { menuItem ->
                 if (menuItem.itemId == R.id.addCategory) {
                     navigateToCreateCategory()
@@ -96,22 +140,26 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
             }
             setNavigationOnClickListener { setBackNavResult() }
         }
-    }
 
-    private fun setAdapter(categoryRights: CategoryRights?) {
-        adapter = CategoriesAdapter(
-            onCategoryChanged = { categoryId, isSelected ->
-                if (isSelected) addCategory(categoryId) else removeCategory(categoryId)
+        createCategoryRow.setOnClickListener { navigateToCreateCategory() }
+
+        with(searchView) {
+            clearButton.setOnClickListener { text = null }
+            addTextChangedListener(DebouncingTextWatcher(lifecycle) {
+                clearButton.isInvisible = it.isNullOrEmpty()
+                adapter.updateFilter(text.toString())
+                handleCreateCategoryRow(it?.trim())
+            })
+            setOnEditorActionListener { _, actionId, _ ->
+                if (EditorInfo.IME_ACTION_SEARCH == actionId) {
+                    adapter.updateFilter(text.toString())
+                    true
+                } else false
             }
-        ).apply {
-            canEditCategory = categoryRights?.canEditCategory ?: false
-            canDeleteCategory = categoryRights?.canDeleteCategory ?: false
         }
-
-        categoriesRecyclerView.adapter = adapter
     }
 
-    private fun setupBackActionHandler() {
+    private fun setBackActionHandlers() {
         getBackNavigationResult<Bundle>(CreateOrEditCategoryBottomSheetDialog.CREATE_CATEGORY_NAV_KEY) { bundle ->
             with(bundle) {
                 adapter.addCategory(
@@ -137,26 +185,6 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
             hasCategoryBeenModified = true
             adapter.deleteCategory(categoryId)
         }
-    }
-
-    private fun setupSearch() {
-        with(searchView) {
-            clearButton.setOnClickListener { text = null }
-            hint = getString(R.string.searchTitle)
-            addTextChangedListener(DebouncingTextWatcher(lifecycle) {
-                clearButton.isInvisible = it.isNullOrEmpty()
-                adapter.updateFilter(text.toString())
-                handleCreateCategoryRow(it?.trim())
-            })
-            setOnEditorActionListener { _, actionId, _ ->
-                if (EditorInfo.IME_ACTION_SEARCH == actionId) {
-                    adapter.updateFilter(text.toString())
-                    true
-                } else false
-            }
-        }
-
-        createCategoryRow.setOnClickListener { navigateToCreateCategory() }
     }
 
     private fun navigateToCreateCategory() {
@@ -199,35 +227,6 @@ class SelectCategoriesBottomSheetDialog : FullScreenBottomSheetDialog() {
                 .build()
 
             isVisible = categoryName?.isNotBlank() == true && !adapter.doesCategoryExist(categoryName)
-        }
-    }
-
-    private fun updateUI(fileCategories: List<FileCategory>, fileId: Int) {
-        val allCategories = DriveInfosController.getCurrentDriveCategories()
-        val uiCategories = allCategories.map { category ->
-            val fileCategory = fileCategories.find { it.id == category.id }
-            UICategory(
-                id = category.id,
-                name = category.getName(requireContext()),
-                color = category.color,
-                isPredefined = category.isPredefined ?: true,
-                isSelected = fileCategory != null,
-                userUsageCount = category.userUsageCount,
-                addedToFileAt = fileCategory?.addedToFileAt,
-            )
-        }
-        adapter.setAll(uiCategories.sortCategoriesList())
-
-        adapter.onMenuClicked = { category ->
-            safeNavigate(
-                R.id.categoryInfoActionsBottomSheetDialog, bundleOf(
-                    "fileId" to fileId,
-                    "categoryId" to category.id,
-                    "categoryName" to category.name,
-                    "categoryColor" to category.color,
-                    "categoryIsPredefined" to category.isPredefined,
-                )
-            )
         }
     }
 

@@ -39,9 +39,7 @@ import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.bottomSheetDialogs.CreateOrEditCategoryAdapter.Companion.COLORS
-import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.getScreenSizeInDp
-import com.infomaniak.drive.utils.setBackNavigationResult
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.hideProgress
@@ -64,10 +62,13 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
         return inflater.inflate(R.layout.fragment_create_category, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(navigationArgs) {
         super.onViewCreated(view, savedInstanceState)
         configureAdapter()
-        configureUI()
+        val isCreateCategory = categoryId == CREATE_CATEGORY_ID
+        setData(isCreateCategory)
+        setStates(isCreateCategory)
+        setListeners()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -96,22 +97,22 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
         return max(minColumns, (screenWidth - margins) / expectedItemSize)
     }
 
-    private fun configureUI() = with(navigationArgs) {
-        toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
-
-        val isCreateCategory = categoryId == CREATE_CATEGORY_ID
-
+    private fun setData(isCreateCategory: Boolean) = with(navigationArgs) {
         appBarTitle.title = getString(if (isCreateCategory) R.string.createCategoryTitle else R.string.editCategoryTitle)
-        editCategoryWarning.isGone = isCreateCategory
-        with(categoryNameValueInput) {
-            addTextChangedListener { saveButton.isEnabled = it.toString().isNotEmpty() }
-            setText(categoryName)
-        }
-        categoryNameValueLayout.isGone = categoryIsPredefined
+        categoryNameValueInput.setText(categoryName)
+        saveButton.initProgress(this@CreateOrEditCategoryBottomSheetDialog)
+    }
 
+    private fun setStates(isCreateCategory: Boolean) = with(navigationArgs) {
+        categoryNameValueLayout.isGone = categoryIsPredefined
+        editCategoryWarning.isGone = isCreateCategory
+        saveButton.isEnabled = categoryIsPredefined || !isCreateCategory || categoryName.isNotEmpty()
+    }
+
+    private fun setListeners() = with(navigationArgs) {
+        categoryNameValueInput.addTextChangedListener { saveButton.isEnabled = it.toString().isNotEmpty() }
+        toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
         with(saveButton) {
-            isEnabled = categoryIsPredefined || !isCreateCategory || categoryName.isNotEmpty()
-            initProgress(this@CreateOrEditCategoryBottomSheetDialog)
             setOnClickListener {
                 showProgress()
                 if (categoryId == CREATE_CATEGORY_ID) createCategory() else editCategory(categoryId)
@@ -200,10 +201,8 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
                 with(ApiRepository.editCategory(driveId, categoryId, name, color)) {
                     if (isSuccess()) {
                         DriveInfosController.updateDrive { localDrive ->
-                            // Delete previous Category
                             val category = localDrive.categories.find { it.id == categoryId }
                             localDrive.categories.remove(category)
-                            // Add new Category
                             localDrive.categories.add(data)
                         }
                     }

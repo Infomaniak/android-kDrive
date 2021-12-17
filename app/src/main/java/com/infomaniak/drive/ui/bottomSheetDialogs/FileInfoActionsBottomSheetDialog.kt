@@ -90,9 +90,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             if (hasCategoryBeenModified) {
                 findNavController().previousBackStackEntry?.savedStateHandle?.set(UPDATE_CATEGORIES_NAV_KEY, currentFile.id)
             }
-            lifecycleScope.launchWhenResumed {
-                fileInfoActionsView.refreshBottomSheetUi(currentFile)
-            }
+            lifecycleScope.launchWhenResumed { fileInfoActionsView.refreshBottomSheetUi(currentFile) }
         }
     }
 

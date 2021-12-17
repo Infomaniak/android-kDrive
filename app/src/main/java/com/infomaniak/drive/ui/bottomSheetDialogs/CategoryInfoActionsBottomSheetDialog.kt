@@ -50,22 +50,31 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(navigationArgs) {
         super.onViewCreated(view, savedInstanceState)
+        setData()
+        setStates()
+        setListeners()
+        setBackActionHandlers()
+    }
 
-        val driveId = AccountUtils.currentDriveId
-        val categoryRights = DriveInfosController.getCategoryRights()
-        val canEditCategory = categoryRights?.canEditCategory ?: false
-        val canDeleteCategory = categoryRights?.canDeleteCategory ?: false
-
-        categoryTitle.text = categoryName
+    private fun setData() = with(navigationArgs) {
         categoryIcon.setBackgroundColor(Color.parseColor(categoryColor))
+        categoryTitle.text = categoryName
+    }
 
-        editCategory.isEnabled = canEditCategory
-        disabledEditCategory.isGone = canEditCategory
-
-        with(canDeleteCategory && !categoryIsPredefined) {
+    private fun setStates() = with(navigationArgs) {
+        val rights = DriveInfosController.getCategoryRights()
+        with(rights?.canEditCategory ?: false) {
+            disabledEditCategory.isGone = this
+            editCategory.isEnabled = this
+        }
+        with(rights?.canDeleteCategory ?: false && !categoryIsPredefined) {
             deleteCategory.isEnabled = this
             disabledDeleteCategory.isGone = this
         }
+    }
+
+    private fun setListeners() = with(navigationArgs) {
+        val driveId = AccountUtils.currentDriveId
 
         editCategory.setOnClickListener {
             safeNavigate(
@@ -85,7 +94,9 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
                 deleteCategory(driveId, categoryId) { dialog.dismiss() }
             }
         }
+    }
 
+    private fun setBackActionHandlers() {
         getBackNavigationResult<Bundle>(CreateOrEditCategoryBottomSheetDialog.EDIT_CATEGORY_NAV_KEY) { bundle ->
             setBackNavigationResult(CreateOrEditCategoryBottomSheetDialog.EDIT_CATEGORY_NAV_KEY, bundle)
         }

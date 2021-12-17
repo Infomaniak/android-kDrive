@@ -25,12 +25,10 @@ import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.toColorInt
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.google.android.material.chip.Chip
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Category
-import com.infomaniak.drive.data.models.drive.CategoryRights
 import com.infomaniak.drive.utils.getName
 import kotlinx.android.synthetic.main.view_categories_container.view.*
 
@@ -44,23 +42,36 @@ class CategoriesContainerView @JvmOverloads constructor(
         inflate(context, R.layout.view_categories_container, this)
     }
 
-    fun setup(categories: List<Category>, categoryRights: CategoryRights?, onClicked: () -> Unit) {
-        if (categoryRights?.canPutCategoryOnFile == true) {
+    fun setup(categories: List<Category>, canPutCategoryOnFile: Boolean, onClicked: () -> Unit) {
+        setData(canPutCategoryOnFile, categories)
+        setStates(canPutCategoryOnFile, categories)
+        setListeners(canPutCategoryOnFile, onClicked)
+        setCategories(categories, onClicked)
+    }
+
+    private fun setData(canPutCategoryOnFile: Boolean, categories: List<Category>) {
+        categoryTitle.setText(
+            if (canPutCategoryOnFile) {
+                if (categories.isEmpty()) R.string.addCategoriesTitle else R.string.manageCategoriesTitle
+            } else R.string.categoriesFilterTitle
+        )
+    }
+
+    private fun setStates(canPutCategoryOnFile: Boolean, categories: List<Category>) {
+        categorySwitch.isVisible = canPutCategoryOnFile
+        categoriesGroup.isVisible = categories.isNotEmpty()
+    }
+
+    private fun setListeners(canPutCategoryOnFile: Boolean, onClicked: () -> Unit) {
+        if (canPutCategoryOnFile) {
             categoriesContainerView.setOnClickListener { onClicked() }
-            categorySwitch.isVisible = true
-            categoryTitle.setText(if (categories.isEmpty()) R.string.addCategoriesTitle else R.string.manageCategoriesTitle)
-        } else {
-            categorySwitch.isGone = true
-            categoryTitle.setText(R.string.categoriesFilterTitle)
         }
+    }
 
-        with(categoriesGroup) {
-            if (categories.isEmpty()) {
-                isGone = true
-            } else {
+    private fun setCategories(categories: List<Category>, onClicked: () -> Unit) {
+        if (categories.isNotEmpty()) {
+            with(categoriesGroup) {
                 removeAllViews()
-
-                // Populate categories
                 categories.forEach { category ->
                     addView(
                         Chip(context).apply {
@@ -73,9 +84,6 @@ class CategoriesContainerView @JvmOverloads constructor(
                         }
                     )
                 }
-
-                // Show categories
-                isVisible = true
             }
         }
     }

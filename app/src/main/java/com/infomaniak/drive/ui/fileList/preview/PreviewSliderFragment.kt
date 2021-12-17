@@ -94,13 +94,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             userDrive = previewSliderViewModel.userDrive
         }
 
-        getBackNavigationResult<Boolean>(DownloadProgressDialog.OPEN_WITH) {
-            context?.openWith(currentPreviewFile, userDrive)
-        }
-
-        getBackNavigationResult<Bundle>(SelectCategoriesBottomSheetDialog.SELECT_CATEGORIES_NAV_KEY) {
-            bottomSheetFileInfos.refreshBottomSheetUi(currentPreviewFile)
-        }
+        setBackActionHandlers()
 
         drivePermissions = DrivePermissions()
         drivePermissions.registerPermissions(this) { authorized -> if (authorized) downloadFileClicked() }
@@ -144,6 +138,16 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
 
         configureBottomSheetFileInfo()
+    }
+
+    private fun setBackActionHandlers() {
+        getBackNavigationResult<Boolean>(DownloadProgressDialog.OPEN_WITH) {
+            context?.openWith(currentPreviewFile, userDrive)
+        }
+
+        getBackNavigationResult<Bundle>(SelectCategoriesBottomSheetDialog.SELECT_CATEGORIES_NAV_KEY) {
+            bottomSheetFileInfos.refreshBottomSheetUi(currentPreviewFile)
+        }
     }
 
     private var showUi = false
