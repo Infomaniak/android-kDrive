@@ -36,7 +36,7 @@ open class AppSettings(
 
     companion object {
         private const val DB_NAME = "AppSettings.realm"
-        private var realmConfiguration: RealmConfiguration = RealmConfiguration.Builder().name(DB_NAME)
+        private val realmConfiguration: RealmConfiguration = RealmConfiguration.Builder().name(DB_NAME)
             .modules(RealmModules.AppSettingsModule())
             .build()
 

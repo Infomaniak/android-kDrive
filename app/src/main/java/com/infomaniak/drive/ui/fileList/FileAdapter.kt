@@ -18,11 +18,13 @@
 package com.infomaniak.drive.ui.fileList
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
@@ -67,6 +69,49 @@ open class FileAdapter(
     var isComplete = false
     private var showLoading = false
 
+    private var hasFileAdapterObserver = false
+    private var recyclerView: RecyclerView? = null
+
+    private val fileAdapterObserver = object : RecyclerView.AdapterDataObserver() {
+
+        private fun notifyChanged(position: Int) {
+            recyclerView?.post {
+                if (fileList.isNotEmpty() && position < fileList.count()) notifyItemChanged(position)
+            }
+        }
+
+        override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+            if (viewHolderType == DisplayType.LIST && fileList.isNotEmpty()) {
+                when {
+                    positionStart == 0 -> notifyChanged(0)
+                    positionStart >= fileList.count() -> notifyChanged(fileList.lastIndex)
+                }
+            }
+        }
+
+        override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+            if (viewHolderType == DisplayType.LIST && fileList.count() > 1) {
+                when {
+                    positionStart == 0 -> notifyChanged(itemCount)
+                    positionStart + itemCount == fileList.count() -> notifyChanged(fileList.lastIndex - itemCount)
+                }
+            }
+        }
+    }
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        this.recyclerView = recyclerView
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        if (hasFileAdapterObserver) kotlin.runCatching {
+            unregisterAdapterDataObserver(fileAdapterObserver)
+            hasFileAdapterObserver = false
+        }
+    }
+
     private fun getFile(position: Int) = fileList[position]
 
     fun getFiles() = fileList
@@ -90,6 +135,10 @@ open class FileAdapter(
 
     fun updateFileList(newFileList: OrderedRealmCollection<File>) {
         fileList = newFileList
+        if (!hasFileAdapterObserver) {
+            registerAdapterDataObserver(fileAdapterObserver)
+            hasFileAdapterObserver = true
+        }
         super.updateData(newFileList)
     }
 
@@ -119,11 +168,10 @@ open class FileAdapter(
         fileList.add(position, newFile)
         notifyItemInserted(position)
 
-        if (viewHolderType == DisplayType.LIST) {
-            if (position == 0 && fileList.size > 1) {
-                notifyItemChanged(1)
-            } else if (position == fileList.size - 1 && fileList.size > 1) {
-                notifyItemChanged(fileList.size - 2)
+        if (viewHolderType == DisplayType.LIST && fileList.count() > 1) {
+            when (position) {
+                0 -> notifyItemChanged(1)
+                fileList.lastIndex -> notifyItemChanged(fileList.size - 2)
             }
         }
     }
@@ -132,11 +180,10 @@ open class FileAdapter(
         fileList.removeAt(position)
         notifyItemRemoved(position)
 
-        if (viewHolderType == DisplayType.LIST) {
-            if (position == 0 && fileList.size > 0) {
-                notifyItemChanged(0)
-            } else if (position == fileList.size && fileList.size > 0) {
-                notifyItemChanged(fileList.size - 1)
+        if (viewHolderType == DisplayType.LIST && fileList.isNotEmpty()) {
+            when (position) {
+                0 -> notifyItemChanged(0)
+                fileList.size -> notifyItemChanged(fileList.lastIndex)
             }
         }
     }
@@ -157,7 +204,7 @@ open class FileAdapter(
         }
     }
 
-    fun indexOf(fileId: Int) = fileList.indexOfFirst { it.id == fileId }
+    private fun indexOf(fileId: Int) = fileList.indexOfFirst { it.id == fileId }
     fun indexOf(fileName: String) = fileList.indexOfFirst { it.name == fileName }
 
     fun notifyFileChanged(fileId: Int, onChange: ((file: File) -> Unit)? = null) {
