@@ -152,7 +152,7 @@ open class File(
         return when (convertedType) {
             ConvertedType.ARCHIVE.value -> ConvertedType.ARCHIVE
             ConvertedType.AUDIO.value -> ConvertedType.AUDIO
-            ConvertedType.CODE.value -> ConvertedType.CODE
+            ConvertedType.CODE.value -> if (isBookmark()) ConvertedType.URL else ConvertedType.CODE
             ConvertedType.FONT.value -> ConvertedType.FONT
             ConvertedType.IMAGE.value -> ConvertedType.IMAGE
             ConvertedType.PDF.value -> ConvertedType.PDF
@@ -205,6 +205,9 @@ open class File(
             it.initRightIds()
         }
     }
+
+
+    fun isBookmark() = name.endsWith(".url") || name.endsWith(".webloc")
 
     fun isPendingUploadFolder() = isFromUploads && (isFolder() || isDrive())
 
@@ -352,6 +355,7 @@ open class File(
         SPREADSHEET("spreadsheet", R.drawable.ic_file_sheets),
         TEXT("text", R.drawable.ic_file_text),
         UNKNOWN("unknown", R.drawable.ic_file),
+        URL("url", R.drawable.url),
         VIDEO("video", R.drawable.ic_file_video),
     }
 

@@ -40,6 +40,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.DisplayMetrics
+import android.util.Patterns
 import android.util.Size
 import android.view.View
 import android.view.ViewGroup
@@ -295,6 +296,7 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
         }
         else -> {
             when {
+                file.isBookmark() -> filePreview.loadGlide(R.drawable.url)
                 file.hasThumbnail && (isGrid || file.getFileType() == File.ConvertedType.IMAGE
                         || file.getFileType() == File.ConvertedType.VIDEO) -> {
                     filePreview.loadGlideUrl(file.thumbnail(), file.getFileType().icon)
@@ -318,6 +320,8 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
         }
     }
 }
+
+fun String.isValidUrl(): Boolean = Patterns.WEB_URL.matcher(this).matches()
 
 fun View.setupFileProgress(file: File, containsProgress: Boolean = false) {
     val progress = file.currentProgress
