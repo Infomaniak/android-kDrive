@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.fileList
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -102,6 +101,11 @@ open class FileAdapter(
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
         this.recyclerView = recyclerView
+
+        if (!hasFileAdapterObserver) {
+            registerAdapterDataObserver(fileAdapterObserver)
+            hasFileAdapterObserver = true
+        }
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -135,10 +139,6 @@ open class FileAdapter(
 
     fun updateFileList(newFileList: OrderedRealmCollection<File>) {
         fileList = newFileList
-        if (!hasFileAdapterObserver) {
-            registerAdapterDataObserver(fileAdapterObserver)
-            hasFileAdapterObserver = true
-        }
         super.updateData(newFileList)
     }
 
@@ -164,28 +164,9 @@ open class FileAdapter(
         notifyItemRangeInserted(beforeItemCount, newItemList.count())
     }
 
-    fun addAt(position: Int, newFile: File) {
-        fileList.add(position, newFile)
-        notifyItemInserted(position)
-
-        if (viewHolderType == DisplayType.LIST && fileList.count() > 1) {
-            when (position) {
-                0 -> notifyItemChanged(1)
-                fileList.lastIndex -> notifyItemChanged(fileList.size - 2)
-            }
-        }
-    }
-
     fun deleteAt(position: Int) {
         fileList.removeAt(position)
         notifyItemRemoved(position)
-
-        if (viewHolderType == DisplayType.LIST && fileList.isNotEmpty()) {
-            when (position) {
-                0 -> notifyItemChanged(0)
-                fileList.size -> notifyItemChanged(fileList.lastIndex)
-            }
-        }
     }
 
     fun getFileObjectsList(realm: Realm?): ArrayList<File> {
