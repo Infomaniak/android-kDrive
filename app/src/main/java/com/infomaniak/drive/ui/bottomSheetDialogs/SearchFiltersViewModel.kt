@@ -25,22 +25,19 @@ import com.infomaniak.drive.data.models.drive.Category
 
 class SearchFiltersViewModel : ViewModel() {
 
-    var date: SearchDateFilter? = DEFAULT_DATE_VALUE
-    var type: ConvertedType? = DEFAULT_TYPE_VALUE
-    var categories: List<Category>? = DEFAULT_CATEGORIES_VALUE
+    var date: SearchDateFilter? = null
+    var type: ConvertedType? = null
+    var categories: List<Category>? = null
     var categoriesOwnership: CategoriesOwnershipFilter = DEFAULT_CATEGORIES_OWNERSHIP_VALUE
 
     fun clearFilters() {
-        date = DEFAULT_DATE_VALUE
-        type = DEFAULT_TYPE_VALUE
-        categories = DEFAULT_CATEGORIES_VALUE
+        date = null
+        type = null
+        categories = null
         categoriesOwnership = DEFAULT_CATEGORIES_OWNERSHIP_VALUE
     }
 
     companion object {
-        private val DEFAULT_DATE_VALUE = null
-        private val DEFAULT_TYPE_VALUE = null
-        private val DEFAULT_CATEGORIES_VALUE = null
         val DEFAULT_CATEGORIES_OWNERSHIP_VALUE = CategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES
     }
 }

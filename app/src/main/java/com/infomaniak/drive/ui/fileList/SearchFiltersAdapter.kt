@@ -35,19 +35,18 @@ class SearchFiltersAdapter(
 
     var filters = arrayListOf<SearchFilter>()
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_search_filter, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_search_filter, parent, false))
+    }
 
     override fun getItemCount() = filters.size
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        with(holder.itemView) {
-            val filter = filters[position]
-            setLayouts(position)
-            setData(filter)
-            setStates(filter)
-            setListeners(filter)
-        }
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView) {
+        val filter = filters[position]
+        setLayouts(position)
+        setData(filter)
+        setStates(filter)
+        setListeners(filter)
     }
 
     private fun View.setLayouts(position: Int) {
@@ -56,10 +55,10 @@ class SearchFiltersAdapter(
         }
     }
 
-    private fun View.setData(filter: SearchFilter) {
-        filter.icon?.let { filterIcon.setImageResource(it) }
-        filter.tint?.let { roundIcon.setBackgroundColor(Color.parseColor(it)) }
-        filterName.text = filter.text
+    private fun View.setData(filter: SearchFilter) = with(filter) {
+        icon?.let { filterIcon.setImageResource(it) }
+        tint?.let { roundIcon.setBackgroundColor(Color.parseColor(it)) }
+        filterName.text = text
     }
 
     private fun View.setStates(filter: SearchFilter) {
@@ -79,7 +78,7 @@ class SearchFiltersAdapter(
         }
     }
 
-    fun setAll(newFilters: List<SearchFilter>) {
+    fun setItems(newFilters: List<SearchFilter>) {
         filters = ArrayList(newFilters)
         notifyItemRangeChanged(0, itemCount)
     }

@@ -86,16 +86,8 @@ class CreateOrEditCategoryFragment : Fragment() {
         configCategoriesLayoutManager()
     }
 
-    private fun setCategoryName() = with(navigationArgs) {
-        categoryNameValueInput.apply {
-            setText(categoryName)
-            addTextChangedListener { saveButton.isEnabled = it.toString().isNotEmpty() }
-        }
-        categoryNameValueLayout.isGone = categoryIsPredefined
-    }
-
-    private fun configureColorsAdapter() {
-        colorsAdapter.apply {
+    private fun configureAdapter() {
+		colorsAdapter.apply {
             selectedPosition = COLORS.indexOfFirst { it == navigationArgs.categoryColor }.let { if (it == -1) 0 else it }
             configCategoriesLayoutManager()
             categoriesRecyclerView.adapter = this

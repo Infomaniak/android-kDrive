@@ -39,32 +39,33 @@ open class SearchFilterFileTypeBottomSheetDialog : BottomSheetDialogFragment() {
         return inflater.inflate(R.layout.fragment_bottom_sheet_search_filter_file_type, container, false)
     }
 
-    @SuppressLint("InflateParams")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        getSortedTypes().forEach { searchTypeFilerContainer.addView(createTypeView(it)) }
+    }
 
-        val types = listOf(
-            Pair(ConvertedType.ARCHIVE, R.drawable.ic_file_zip),
-            Pair(ConvertedType.AUDIO, R.drawable.ic_file_audio),
-            Pair(ConvertedType.CODE, R.drawable.ic_file_code),
-            Pair(ConvertedType.FOLDER, R.drawable.ic_folder_filled),
-            Pair(ConvertedType.IMAGE, R.drawable.ic_file_image),
-            Pair(ConvertedType.PDF, R.drawable.ic_file_pdf),
-            Pair(ConvertedType.PRESENTATION, R.drawable.ic_file_presentation),
-            Pair(ConvertedType.SPREADSHEET, R.drawable.ic_file_grids),
-            Pair(ConvertedType.TEXT, R.drawable.ic_file_text),
-            Pair(ConvertedType.VIDEO, R.drawable.ic_file_video),
+    private fun getSortedTypes(): List<Pair<ConvertedType, Int>> {
+        return listOf(
+            ConvertedType.ARCHIVE to R.drawable.ic_file_zip,
+            ConvertedType.AUDIO to R.drawable.ic_file_audio,
+            ConvertedType.CODE to R.drawable.ic_file_code,
+            ConvertedType.FOLDER to R.drawable.ic_folder_filled,
+            ConvertedType.IMAGE to R.drawable.ic_file_image,
+            ConvertedType.PDF to R.drawable.ic_file_pdf,
+            ConvertedType.PRESENTATION to R.drawable.ic_file_presentation,
+            ConvertedType.SPREADSHEET to R.drawable.ic_file_grids,
+            ConvertedType.TEXT to R.drawable.ic_file_text,
+            ConvertedType.VIDEO to R.drawable.ic_file_video,
         ).sortedBy { getString(it.first.searchFilterName) }
+    }
 
-        types.forEach { type ->
-            searchTypeFilerContainer.addView(
-                layoutInflater.inflate(R.layout.view_search_filter_type, null).apply {
-                    typeFilterStartIcon.setImageResource(type.second)
-                    typeFilterText.setText(type.first.searchFilterName)
-                    typeFilterEndIcon.isVisible = type.first.value == navigationArgs.type?.value
-                    setOnClickListener { setBackNavigationResult(SEARCH_FILTER_TYPE_NAV_KEY, type.first) }
-                }
-            )
+    @SuppressLint("InflateParams")
+    private fun createTypeView(type: Pair<ConvertedType, Int>): View {
+        return layoutInflater.inflate(R.layout.view_search_filter_type, null).apply {
+            typeFilterStartIcon.setImageResource(type.second)
+            typeFilterText.setText(type.first.searchFilterName)
+            typeFilterEndIcon.isVisible = type.first.value == navigationArgs.type?.value
+            setOnClickListener { setBackNavigationResult(SEARCH_FILTER_TYPE_NAV_KEY, type.first) }
         }
     }
 

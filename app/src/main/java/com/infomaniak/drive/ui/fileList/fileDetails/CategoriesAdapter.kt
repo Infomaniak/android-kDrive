@@ -106,10 +106,7 @@ class CategoriesAdapter(
     }
 
     fun deleteCategory(categoryId: Int) {
-        allCategories.apply {
-            val index = indexOfFirst { it.id == categoryId }
-            removeAt(index)
-        }
+        allCategories.apply { removeAt(indexOfFirst { it.id == categoryId }) }
         filterCategories()
     }
 

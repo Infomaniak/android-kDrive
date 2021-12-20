@@ -37,13 +37,11 @@ class RecentSearchesAdapter(
 
     override fun getItemCount() = searches.size
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        with(holder.itemView.searchResultCard) {
-            val search = searches[position]
-            setLayouts(position)
-            setData(search)
-            setListeners(search)
-        }
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView.searchResultCard) {
+        val search = searches[position]
+        setLayouts(position)
+        setData(search)
+        setListeners(search)
     }
 
     private fun MaterialCardView.setLayouts(position: Int) {
@@ -69,7 +67,7 @@ class RecentSearchesAdapter(
         setOnClickListener { onSearchClicked(search) }
     }
 
-    fun setAll(newSearches: List<String>) {
+    fun setItems(newSearches: List<String>) {
         searches = ArrayList(newSearches)
         notifyItemRangeChanged(0, itemCount)
     }

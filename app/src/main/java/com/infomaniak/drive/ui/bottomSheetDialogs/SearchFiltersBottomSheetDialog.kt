@@ -54,46 +54,73 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setData()
+        setStates()
+        setListeners()
+        setBackActionHandlers()
+    }
+
+    private fun setData() = with(searchFiltersViewModel) {
+        date = navigationArgs.date
+        type = navigationArgs.type?.let { ConvertedType.valueOf(it) }
+        categories = navigationArgs.categories?.let { DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray()) }
+        categoriesOwnership = navigationArgs.categoriesOwnership ?: SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_VALUE
+        updateDateUI()
+        updateTypeUI()
+        updateCategoriesUI()
+        updateCategoriesOwnershipUI()
+    }
+
+    private fun setStates() {
+        if (rights?.canReadCategoryOnFile == true) {
+            categoriesTitle.isVisible = true
+            chooseCategoriesFilter.isVisible = true
+            belongToAllCategoriesFilter.isVisible = true
+            belongToOneCategoryFilter.isVisible = true
+        } else {
+            categoriesTitle.isGone = true
+            chooseCategoriesFilter.isGone = true
+            belongToAllCategoriesFilter.isGone = true
+            belongToOneCategoryFilter.isGone = true
+        }
+    }
+
+    private fun setListeners() = with(searchFiltersViewModel) {
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
-        configureFilters()
-        configureClearButton()
-        configureSaveButton()
-        setupBackActionHandler()
-    }
 
-    private fun configureFilters() {
-        configureDateUI()
-        configureTypeUI()
-        configureCategoriesUI()
-        configureCategoriesOwnershipUI()
-    }
+        modificationDateFilter.setOnClickListener { safeNavigate(R.id.searchFilterDateDialog, bundleOf("date" to date)) }
+        fileTypeFilter.setOnClickListener { safeNavigate(R.id.searchFilterFileTypeDialog, bundleOf("type" to type)) }
 
-    private fun configureClearButton() {
+        belongToAllCategoriesFilter.setOnClickListener {
+            categoriesOwnership = CategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES
+            updateCategoriesOwnershipUI()
+        }
+        belongToOneCategoryFilter.setOnClickListener {
+            categoriesOwnership = CategoriesOwnershipFilter.BELONG_TO_ONE_CATEGORY
+            updateCategoriesOwnershipUI()
+        }
+
         clearButton.setOnClickListener {
-            searchFiltersViewModel.clearFilters()
+            clearFilters()
             updateDateUI()
             updateTypeUI()
             updateCategoriesUI()
             updateCategoriesOwnershipUI()
         }
-    }
 
-    private fun configureSaveButton() {
         saveButton.setOnClickListener {
-            with(searchFiltersViewModel) {
-                setBackNavigationResult(
-                    SEARCH_FILTERS_NAV_KEY, bundleOf(
-                        SEARCH_FILTERS_DATE_BUNDLE_KEY to date,
-                        SEARCH_FILTERS_TYPE_BUNDLE_KEY to type,
-                        SEARCH_FILTERS_CATEGORIES_BUNDLE_KEY to categories?.map { it.id }?.toIntArray(),
-                        SEARCH_FILTERS_CATEGORIES_OWNERSHIP_BUNDLE_KEY to categoriesOwnership,
-                    )
+            setBackNavigationResult(
+                SEARCH_FILTERS_NAV_KEY, bundleOf(
+                    SEARCH_FILTERS_DATE_BUNDLE_KEY to date,
+                    SEARCH_FILTERS_TYPE_BUNDLE_KEY to type,
+                    SEARCH_FILTERS_CATEGORIES_BUNDLE_KEY to categories?.map { it.id }?.toIntArray(),
+                    SEARCH_FILTERS_CATEGORIES_OWNERSHIP_BUNDLE_KEY to categoriesOwnership,
                 )
-            }
+            )
         }
     }
 
-    private fun setupBackActionHandler() {
+    private fun setBackActionHandlers() {
         getBackNavigationResult<Parcelable>(SearchFilterDateBottomSheetDialog.SEARCH_FILTER_DATE_NAV_KEY) {
             searchFiltersViewModel.date = it as SearchDateFilter
             updateDateUI()
@@ -113,59 +140,9 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
         }
     }
 
-    private fun configureDateUI() {
-        searchFiltersViewModel.date = navigationArgs.date
-        updateDateUI()
-        modificationDateFilter.setOnClickListener {
-            safeNavigate(R.id.searchFilterDateDialog, bundleOf("date" to searchFiltersViewModel.date))
-        }
-    }
-
-    private fun configureTypeUI() {
-        searchFiltersViewModel.type = navigationArgs.type?.let { ConvertedType.valueOf(it) }
-        updateTypeUI()
-        fileTypeFilter.setOnClickListener {
-            safeNavigate(R.id.searchFilterFileTypeDialog, bundleOf("type" to searchFiltersViewModel.type))
-        }
-    }
-
-    private fun configureCategoriesUI() {
-        searchFiltersViewModel.categories =
-            navigationArgs.categories?.let { DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray()) }
-        updateCategoriesUI()
-        if (rights?.canReadCategoryOnFile == true) {
-            categoriesTitle.isVisible = true
-            chooseCategoriesFilter.isVisible = true
-            belongToAllCategoriesFilter.isVisible = true
-            belongToOneCategoryFilter.isVisible = true
-        } else {
-            categoriesTitle.isGone = true
-            chooseCategoriesFilter.isGone = true
-            belongToAllCategoriesFilter.isGone = true
-            belongToOneCategoryFilter.isGone = true
-        }
-    }
-
-    private fun configureCategoriesOwnershipUI() {
-        with(searchFiltersViewModel) {
-            categoriesOwnership = navigationArgs.categoriesOwnership ?: SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_VALUE
-            updateCategoriesOwnershipUI()
-            belongToAllCategoriesFilter.setOnClickListener {
-                categoriesOwnership = CategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES
-                updateCategoriesOwnershipUI()
-            }
-            belongToOneCategoryFilter.setOnClickListener {
-                categoriesOwnership = CategoriesOwnershipFilter.BELONG_TO_ONE_CATEGORY
-                updateCategoriesOwnershipUI()
-            }
-        }
-    }
-
-    private fun updateDateUI() {
-        with(modificationDateFilterText) {
-            searchFiltersViewModel.date?.let { text = it.text }
-                ?: run { setText(R.string.searchFiltersSelectDate) }
-        }
+    private fun updateDateUI() = with(modificationDateFilterText) {
+        searchFiltersViewModel.date?.let { text = it.text }
+            ?: run { setText(R.string.searchFiltersSelectDate) }
     }
 
     private fun updateTypeUI() {

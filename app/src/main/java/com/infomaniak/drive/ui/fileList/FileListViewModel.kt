@@ -49,11 +49,11 @@ class FileListViewModel : ViewModel() {
         searchFiles(input, sortType, currentPage)
     }
 
-    var dateFilter: Pair<FilterKey, SearchDateFilter?> = Pair(FilterKey.DATE, null)
-    var typeFilter: Pair<FilterKey, ConvertedType?> = Pair(FilterKey.TYPE, null)
-    var categoriesFilter: Pair<FilterKey, List<Category>?> = Pair(FilterKey.CATEGORIES, null)
+    var dateFilter: Pair<FilterKey, SearchDateFilter?> = FilterKey.DATE to null
+    var typeFilter: Pair<FilterKey, ConvertedType?> = FilterKey.TYPE to null
+    var categoriesFilter: Pair<FilterKey, List<Category>?> = FilterKey.CATEGORIES to null
     var categoriesOwnershipFilter: Pair<FilterKey, CategoriesOwnershipFilter> =
-        Pair(FilterKey.CATEGORIES_OWNERSHIP, SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_VALUE)
+        FilterKey.CATEGORIES_OWNERSHIP to SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_VALUE
 
     var isSharedWithMe = false
 
@@ -142,24 +142,15 @@ class FileListViewModel : ViewModel() {
         getFilesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
-            val categories = categoriesFilter.second?.joinToString(
-                separator =
-                if (categoriesOwnershipFilter.second == CategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES) {
-                    "%26"
-                } else {
-                    "|"
-                }
-            ) { it.id.toString() }
-
             val apiResponse = ApiRepository.searchFiles(
                 AccountUtils.currentDriveId,
                 query,
                 order.order,
                 order.orderBy,
                 page,
-                dateFilter.second?.let { Pair((it.start.time / 1_000L).toString(), (it.end.time / 1_000L).toString()) },
-                typeFilter.second?.name?.lowercase(Locale.ROOT),
-                categories
+                formatDate(),
+                formatType(),
+                formatCategories()
             )
 
             when {
@@ -168,6 +159,18 @@ class FileListViewModel : ViewModel() {
                 else -> emit(apiResponse)
             }
         }
+    }
+
+    private fun formatDate(): Pair<String, String>? {
+        return dateFilter.second?.let { (it.start.time / 1_000L).toString() to (it.end.time / 1_000L).toString() }
+    }
+
+    private fun formatType() = typeFilter.second?.name?.lowercase(Locale.ROOT)
+
+    private fun formatCategories(): String? {
+        return categoriesFilter.second?.joinToString(
+            separator = if (categoriesOwnershipFilter.second == CategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES) "%26" else "|"
+        ) { it.id.toString() }
     }
 
     fun getPendingFilesCount(folderID: Int) = liveData(Dispatchers.IO) {

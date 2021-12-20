@@ -56,9 +56,21 @@ class SearchFragment : FileListFragment() {
 
     @SuppressLint("InflateParams")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        searchFiltersAdapter = SearchFiltersAdapter { key, categoryId -> removeFilter(key, categoryId) }
-        filtersLayout.adapter = searchFiltersAdapter
+        setViewModels()
+        setSearchFiltersAdapter()
+        downloadFiles = DownloadFiles()
+        setLayouts()
+        super.onViewCreated(view, savedInstanceState)
+        setUI()
+        setSearchView()
+        setFileAdapter()
+        setRecentSearchesAdapter()
+        setToolbar()
+        observeSearchResult()
+        setBackActionHandlers()
+    }
 
+    private fun setViewModels() {
         fileListViewModel.sortType = SortType.RECENT
 
         // Get preview List if needed
@@ -66,32 +78,43 @@ class SearchFragment : FileListFragment() {
             fileListViewModel.searchOldFileList = RealmList(*mainViewModel.currentPreviewFileList.values.toTypedArray())
             mainViewModel.currentPreviewFileList = LinkedHashMap()
         }
+    }
 
-        downloadFiles = DownloadFiles()
+    private fun setLayouts() {
         setNoFilesLayout = SetNoFilesLayout()
         recentSearchesView = layoutInflater.inflate(R.layout.recent_searches, null)
-        super.onViewCreated(view, savedInstanceState)
+    }
 
+    private fun setUI() {
         collapsingToolbarLayout.title = getString(R.string.searchTitle)
         searchViewCard.isVisible = true
         fileListLayout.addView(recentSearchesView, 1)
-
         clearButton.setOnClickListener { searchView.text = null }
+    }
 
-        searchView.hint = getString(R.string.searchViewHint)
-        searchView.addTextChangedListener(DebouncingTextWatcher(lifecycle) {
+    private fun setSearchView() = with(searchView) {
+        hint = getString(R.string.searchViewHint)
+        addTextChangedListener(DebouncingTextWatcher(lifecycle) {
             clearButton?.isInvisible = it.isNullOrEmpty()
             fileListViewModel.currentPage = 1
             downloadFiles(true, false)
         })
-        searchView.setOnEditorActionListener { _, actionId, _ ->
+        setOnEditorActionListener { _, actionId, _ ->
             if (EditorInfo.IME_ACTION_SEARCH == actionId) {
                 fileListViewModel.currentPage = 1
                 downloadFiles(true, false)
                 true
             } else false
         }
+    }
 
+    private fun setSearchFiltersAdapter() {
+        searchFiltersAdapter = SearchFiltersAdapter { key, categoryId -> removeFilter(key, categoryId) }.apply {
+            filtersLayout.adapter = this
+        }
+    }
+
+    private fun setFileAdapter() {
         fileRecyclerView.setPagination({
             if (!fileAdapter.isComplete && !isDownloading) {
                 fileAdapter.showLoading()
@@ -106,9 +129,7 @@ class SearchFragment : FileListFragment() {
             onFileClicked = { file ->
                 if (file.isFolder()) {
                     fileListViewModel.cancelDownloadFiles()
-                    safeNavigate(
-                        SearchFragmentDirections.actionSearchFragmentToFileListFragment(file.id, file.name)
-                    )
+                    safeNavigate(SearchFragmentDirections.actionSearchFragmentToFileListFragment(file.id, file.name))
                 } else {
                     val fileList = getFileObjectsList(null)
                     Utils.displayFile(mainViewModel, findNavController(), file, fileList)
@@ -116,21 +137,14 @@ class SearchFragment : FileListFragment() {
             }
         }
 
-        if (fileAdapter.fileList.isEmpty() && searchFiltersAdapter.filters.isEmpty()) {
-            showRecentSearchesLayout(true)
-        }
-
-        setRecentSearchesAdapter()
-        setToolbar()
-        observeSearchResult()
-        setBackActionHandlers()
+        if (fileAdapter.fileList.isEmpty() && searchFiltersAdapter.filters.isEmpty()) showRecentSearchesLayout(true)
     }
 
     private fun setRecentSearchesAdapter() {
         recentSearchesAdapter = RecentSearchesAdapter { searchView.setText(it) }.apply {
-            setAll(AppSettings.mostRecentSearches)
+            setItems(AppSettings.mostRecentSearches)
+            recentSearchesList.adapter = this
         }
-        recentSearchesList.adapter = recentSearchesAdapter
     }
 
     private fun setToolbar() = with(toolbar) {
@@ -150,7 +164,7 @@ class SearchFragment : FileListFragment() {
             true
         }
 
-        toolbar.menu.findItem(R.id.selectFilters).isVisible = true
+        menu.findItem(R.id.selectFilters).isVisible = true
     }
 
     override fun onResume() {
@@ -215,21 +229,20 @@ class SearchFragment : FileListFragment() {
     }
 
     private fun setDateFilter(filter: SearchDateFilter?) {
-        fileListViewModel.dateFilter = Pair(FilterKey.DATE, filter)
+        fileListViewModel.dateFilter = FilterKey.DATE to filter
     }
 
     private fun setTypeFilter(type: ConvertedType?) {
-        fileListViewModel.typeFilter = Pair(FilterKey.TYPE, type)
+        fileListViewModel.typeFilter = FilterKey.TYPE to type
     }
 
     private fun setCategoriesFilter(categories: IntArray?) {
-        fileListViewModel.categoriesFilter = Pair(
-            FilterKey.CATEGORIES,
-            categories?.let { DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray()) })
+        fileListViewModel.categoriesFilter =
+            FilterKey.CATEGORIES to categories?.let { DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray()) }
     }
 
     private fun setCategoriesOwnershipFilter(categoriesOwnership: CategoriesOwnershipFilter?) {
-        categoriesOwnership?.let { fileListViewModel.categoriesOwnershipFilter = Pair(FilterKey.CATEGORIES_OWNERSHIP, it) }
+        categoriesOwnership?.let { fileListViewModel.categoriesOwnershipFilter = FilterKey.CATEGORIES_OWNERSHIP to it }
     }
 
     private fun updateMostRecentSearches() {
@@ -247,52 +260,46 @@ class SearchFragment : FileListFragment() {
             }
             .filterIndexed { index, _ -> index < MAX_MOST_RECENT_SEARCHES }
         AppSettings.mostRecentSearches = RealmList(*newSearches.toTypedArray())
-        recentSearchesAdapter.setAll(newSearches)
+        recentSearchesAdapter.setItems(newSearches)
     }
 
-    private fun updateFilters() {
-        with(fileListViewModel) {
-            val filters = mutableListOf<SearchFilter>().apply {
-                dateFilter.second?.let {
-                    add(SearchFilter(key = dateFilter.first, text = it.text, icon = R.drawable.ic_calendar))
-                }
-                typeFilter.second?.let {
-                    add(SearchFilter(key = typeFilter.first, text = getString(it.searchFilterName), icon = it.icon))
-                }
-                categoriesFilter.second?.forEach {
-                    add(SearchFilter(categoriesFilter.first, it.getName(requireContext()), tint = it.color, categoryId = it.id))
-                }
+    private fun updateFilters() = with(fileListViewModel) {
+        val filters = mutableListOf<SearchFilter>().apply {
+            dateFilter.second?.let {
+                add(SearchFilter(key = dateFilter.first, text = it.text, icon = R.drawable.ic_calendar))
             }
-            searchFiltersAdapter.setAll(filters)
-            showRecentSearchesLayout(filters.isEmpty() && searchView.text.toString().isBlank())
-            currentPage = 1
-            downloadFiles(true, false)
+            typeFilter.second?.let {
+                add(SearchFilter(key = typeFilter.first, text = getString(it.searchFilterName), icon = it.icon))
+            }
+            categoriesFilter.second?.forEach {
+                add(SearchFilter(categoriesFilter.first, it.getName(requireContext()), tint = it.color, categoryId = it.id))
+            }
         }
+        searchFiltersAdapter.setItems(filters)
+        showRecentSearchesLayout(filters.isEmpty() && searchView.text.toString().isBlank())
+        currentPage = 1
+        downloadFiles(true, false)
     }
 
-    private fun removeFilter(filter: FilterKey, categoryId: Int?) {
-        with(fileListViewModel) {
-            when (filter) {
-                FilterKey.DATE -> {
-                    dateFilter = Pair(FilterKey.DATE, null)
-                }
-                FilterKey.TYPE -> {
-                    typeFilter = Pair(FilterKey.TYPE, null)
-                }
-                FilterKey.CATEGORIES -> {
-                    if (categoryId != null) {
-                        categoriesFilter.second?.let { categories ->
-                            val cats = categories.filter { it.id != categoryId }
-                            categoriesFilter = Pair(FilterKey.CATEGORIES, if (cats.isEmpty()) null else cats)
-                        }
+    private fun removeFilter(filter: FilterKey, categoryId: Int?) = with(fileListViewModel) {
+        when (filter) {
+            FilterKey.DATE -> {
+                dateFilter = FilterKey.DATE to null
+            }
+            FilterKey.TYPE -> {
+                typeFilter = FilterKey.TYPE to null
+            }
+            FilterKey.CATEGORIES -> {
+                if (categoryId != null) {
+                    categoriesFilter.second?.let { categories ->
+                        val filteredCategories = categories.filter { it.id != categoryId }
+                        categoriesFilter = FilterKey.CATEGORIES to if (filteredCategories.isEmpty()) null else filteredCategories
                     }
                 }
-                FilterKey.CATEGORIES_OWNERSHIP -> {
-                    categoriesOwnershipFilter = Pair(
-                        FilterKey.CATEGORIES_OWNERSHIP,
-                        SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_VALUE,
-                    )
-                }
+            }
+            FilterKey.CATEGORIES_OWNERSHIP -> {
+                categoriesOwnershipFilter =
+                    FilterKey.CATEGORIES_OWNERSHIP to SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_VALUE
             }
         }
 
