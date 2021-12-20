@@ -51,9 +51,9 @@ class FileListViewModel : ViewModel() {
 
     var dateFilter: Pair<FilterKey, SearchDateFilter?> = Pair(FilterKey.DATE, null)
     var typeFilter: Pair<FilterKey, ConvertedType?> = Pair(FilterKey.TYPE, null)
-    var categoriesFilter: Pair<FilterKey, List<Category>?> = Pair(FilterKey.CATEGORIES_FILTER, null)
-    var categoriesOwnershipFilter: Pair<FilterKey, Int> =
-        Pair(FilterKey.CATEGORIES_OWNERSHIP_FILTER, SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_FILTER_VALUE)
+    var categoriesFilter: Pair<FilterKey, List<Category>?> = Pair(FilterKey.CATEGORIES, null)
+    var categoriesOwnershipFilter: Pair<FilterKey, CategoriesOwnershipFilter> =
+        Pair(FilterKey.CATEGORIES_OWNERSHIP, SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_VALUE)
 
     var isSharedWithMe = false
 
@@ -144,7 +144,7 @@ class FileListViewModel : ViewModel() {
         return liveData(Dispatchers.IO + getFilesJob) {
             val categories = categoriesFilter.second?.joinToString(
                 separator =
-                if (categoriesOwnershipFilter.second == SearchFiltersViewModel.BELONG_TO_ALL_CATEGORIES_FILTER) {
+                if (categoriesOwnershipFilter.second == CategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES) {
                     "%26"
                 } else {
                     "|"

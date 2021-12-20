@@ -208,7 +208,7 @@ class SearchFragment : FileListFragment() {
                 setDateFilter(getParcelable(SearchFiltersBottomSheetDialog.SEARCH_FILTERS_DATE_BUNDLE_KEY))
                 setTypeFilter(getParcelable(SearchFiltersBottomSheetDialog.SEARCH_FILTERS_TYPE_BUNDLE_KEY))
                 setCategoriesFilter(getIntArray(SearchFiltersBottomSheetDialog.SEARCH_FILTERS_CATEGORIES_BUNDLE_KEY))
-                setCategoriesOwnershipFilter(getInt(SearchFiltersBottomSheetDialog.SEARCH_FILTERS_CATEGORIES_OWNERSHIP_BUNDLE_KEY))
+                setCategoriesOwnershipFilter(getParcelable(SearchFiltersBottomSheetDialog.SEARCH_FILTERS_CATEGORIES_OWNERSHIP_BUNDLE_KEY))
             }
             updateFilters()
         }
@@ -224,12 +224,12 @@ class SearchFragment : FileListFragment() {
 
     private fun setCategoriesFilter(categories: IntArray?) {
         fileListViewModel.categoriesFilter = Pair(
-            FilterKey.CATEGORIES_FILTER,
+            FilterKey.CATEGORIES,
             categories?.let { DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray()) })
     }
 
-    private fun setCategoriesOwnershipFilter(categoriesOwnership: Int) {
-        fileListViewModel.categoriesOwnershipFilter = Pair(FilterKey.CATEGORIES_OWNERSHIP_FILTER, categoriesOwnership)
+    private fun setCategoriesOwnershipFilter(categoriesOwnership: CategoriesOwnershipFilter?) {
+        categoriesOwnership?.let { fileListViewModel.categoriesOwnershipFilter = Pair(FilterKey.CATEGORIES_OWNERSHIP, it) }
     }
 
     private fun updateMostRecentSearches() {
@@ -279,18 +279,18 @@ class SearchFragment : FileListFragment() {
                 FilterKey.TYPE -> {
                     typeFilter = Pair(FilterKey.TYPE, null)
                 }
-                FilterKey.CATEGORIES_FILTER -> {
+                FilterKey.CATEGORIES -> {
                     if (categoryId != null) {
                         categoriesFilter.second?.let { categories ->
                             val cats = categories.filter { it.id != categoryId }
-                            categoriesFilter = Pair(FilterKey.CATEGORIES_FILTER, if (cats.isEmpty()) null else cats)
+                            categoriesFilter = Pair(FilterKey.CATEGORIES, if (cats.isEmpty()) null else cats)
                         }
                     }
                 }
-                FilterKey.CATEGORIES_OWNERSHIP_FILTER -> {
+                FilterKey.CATEGORIES_OWNERSHIP -> {
                     categoriesOwnershipFilter = Pair(
-                        FilterKey.CATEGORIES_OWNERSHIP_FILTER,
-                        SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_FILTER_VALUE,
+                        FilterKey.CATEGORIES_OWNERSHIP,
+                        SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_VALUE,
                     )
                 }
             }

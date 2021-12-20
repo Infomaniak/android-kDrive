@@ -31,6 +31,7 @@ import androidx.navigation.fragment.navArgs
 import com.google.android.material.card.MaterialCardView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.models.CategoriesOwnershipFilter
 import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.SearchDateFilter
 import com.infomaniak.drive.utils.getBackNavigationResult
@@ -147,16 +148,14 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     private fun configureCategoriesOwnershipUI() {
         with(searchFiltersViewModel) {
-            categoriesOwnership = if (navigationArgs.categoriesOwnership != -1) {
-                navigationArgs.categoriesOwnership
-            } else SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_FILTER_VALUE
+            categoriesOwnership = navigationArgs.categoriesOwnership ?: SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_VALUE
             updateCategoriesOwnershipUI()
             belongToAllCategoriesFilter.setOnClickListener {
-                categoriesOwnership = SearchFiltersViewModel.BELONG_TO_ALL_CATEGORIES_FILTER
+                categoriesOwnership = CategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES
                 updateCategoriesOwnershipUI()
             }
             belongToOneCategoryFilter.setOnClickListener {
-                categoriesOwnership = SearchFiltersViewModel.BELONG_TO_ONE_CATEGORY_FILTER
+                categoriesOwnership = CategoriesOwnershipFilter.BELONG_TO_ONE_CATEGORY
                 updateCategoriesOwnershipUI()
             }
         }
@@ -200,7 +199,7 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
     }
 
     private fun updateCategoriesOwnershipUI() {
-        if (searchFiltersViewModel.categoriesOwnership == SearchFiltersViewModel.BELONG_TO_ALL_CATEGORIES_FILTER) {
+        if (searchFiltersViewModel.categoriesOwnership == CategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES) {
             belongToOneCategoryFilter.setupSelection(false)
             belongToAllCategoriesFilter.setupSelection(true)
         } else {

@@ -32,8 +32,8 @@ data class SearchFilter(
 enum class FilterKey {
     DATE,
     TYPE,
-    CATEGORIES_FILTER,
-    CATEGORIES_OWNERSHIP_FILTER,
+    CATEGORIES,
+    CATEGORIES_OWNERSHIP,
 }
 
 @Parcelize
@@ -50,4 +50,10 @@ enum class SearchDateFilterType : Parcelable {
     YESTERDAY,
     LAST_SEVEN_DAYS,
     CUSTOM,
+}
+
+@Parcelize
+enum class CategoriesOwnershipFilter : Parcelable {
+    BELONG_TO_ALL_CATEGORIES,
+    BELONG_TO_ONE_CATEGORY,
 }

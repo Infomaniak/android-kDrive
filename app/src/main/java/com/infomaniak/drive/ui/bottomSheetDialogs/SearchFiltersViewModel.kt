@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import androidx.lifecycle.ViewModel
+import com.infomaniak.drive.data.models.CategoriesOwnershipFilter
 import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.SearchDateFilter
 import com.infomaniak.drive.data.models.drive.Category
@@ -27,22 +28,19 @@ class SearchFiltersViewModel : ViewModel() {
     var date: SearchDateFilter? = DEFAULT_DATE_VALUE
     var type: ConvertedType? = DEFAULT_TYPE_VALUE
     var categories: List<Category>? = DEFAULT_CATEGORIES_VALUE
-    var categoriesOwnership = DEFAULT_CATEGORIES_OWNERSHIP_FILTER_VALUE
+    var categoriesOwnership: CategoriesOwnershipFilter = DEFAULT_CATEGORIES_OWNERSHIP_VALUE
 
     fun clearFilters() {
         date = DEFAULT_DATE_VALUE
         type = DEFAULT_TYPE_VALUE
         categories = DEFAULT_CATEGORIES_VALUE
-        categoriesOwnership = DEFAULT_CATEGORIES_OWNERSHIP_FILTER_VALUE
+        categoriesOwnership = DEFAULT_CATEGORIES_OWNERSHIP_VALUE
     }
 
     companion object {
-        const val BELONG_TO_ALL_CATEGORIES_FILTER = 1
-        const val BELONG_TO_ONE_CATEGORY_FILTER = 2
-
         private val DEFAULT_DATE_VALUE = null
         private val DEFAULT_TYPE_VALUE = null
         private val DEFAULT_CATEGORIES_VALUE = null
-        const val DEFAULT_CATEGORIES_OWNERSHIP_FILTER_VALUE = BELONG_TO_ALL_CATEGORIES_FILTER
+        val DEFAULT_CATEGORIES_OWNERSHIP_VALUE = CategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES
     }
 }

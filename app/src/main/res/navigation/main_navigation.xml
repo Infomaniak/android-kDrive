@@ -529,7 +529,8 @@
             app:nullable="true" />
         <argument
             android:name="categoriesOwnership"
-            app:argType="integer" />
+            app:argType="com.infomaniak.drive.data.models.CategoriesOwnershipFilter"
+            app:nullable="true" />
         <action
             android:id="@+id/action_searchFiltersBottomSheetDialog_to_selectCategoriesBottomSheetDialog"
             app:destination="@id/selectCategoriesBottomSheetDialog" />
