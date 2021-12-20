@@ -71,8 +71,8 @@ class PicturesFragment(
         picturesAdapter.numberItemLoader = numberItemLoader
         picturesAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT
 
-        configPicturesLayoutManager()
         picturesRecyclerView.adapter = picturesAdapter
+        configPicturesLayoutManager()
 
         getPictures()
     }

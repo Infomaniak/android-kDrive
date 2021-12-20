@@ -38,7 +38,9 @@ class HomeOfflineFragment : OfflineFileFragment() {
         homeTabTitle.isVisible = true
         swipeRefreshLayout.isEnabled = false
 
-        sortLayout.setMargin(top = resources.getDimension(R.dimen.marginStandardMedium).toInt())
+        val marginStandard = resources.getDimension(R.dimen.marginStandard).toInt()
+        val marginStandardMedium = resources.getDimension(R.dimen.marginStandardMedium).toInt()
+        sortLayout.setMargin(left = marginStandard, right = marginStandard, top = marginStandardMedium)
     }
 
     override fun homeClassName(): String = javaClass.name

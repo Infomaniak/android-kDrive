@@ -278,10 +278,13 @@ object FileController {
         realm: Realm? = null
     ) {
         val block: (Realm) -> Unit = { currentRealm ->
-            val mySharesFolder = currentRealm.where(File::class.java).equalTo(File::id.name, folder.id).findFirst()
             currentRealm.executeTransaction { realm ->
-                val newMySharesFolder = if (replaceOldData) realm.copyToRealmOrUpdate(folder)
-                else mySharesFolder ?: realm.copyToRealmOrUpdate(folder)
+                val newMySharesFolder = if (replaceOldData) {
+                    realm.copyToRealmOrUpdate(folder)
+                } else {
+                    currentRealm.where(File::class.java).equalTo(File::id.name, folder.id).findFirst()
+                        ?: realm.copyToRealmOrUpdate(folder)
+                }
                 newMySharesFolder?.children?.addAll(realm, files)
             }
         }
