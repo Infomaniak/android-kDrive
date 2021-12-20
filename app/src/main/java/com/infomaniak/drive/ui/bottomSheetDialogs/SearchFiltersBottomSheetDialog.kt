@@ -164,7 +164,6 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
                 try {
                     findNavController().navigate(
                         SearchFiltersBottomSheetDialogDirections.actionSearchFiltersBottomSheetDialogToSelectCategoriesBottomSheetDialog(
-                            fileId = -1,
                             categories = categories.map { it.id }.toIntArray(),
                         )
                     )

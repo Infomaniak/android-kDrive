@@ -26,7 +26,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
-import com.infomaniak.drive.ui.bottomSheetDialogs.SelectCategoriesBottomSheetDialog
+import com.infomaniak.drive.ui.bottomSheetDialogs.SelectCategoriesBottomSheetDialog.UsageMode
 import com.infomaniak.drive.utils.sortFileCategories
 import com.infomaniak.drive.utils.sortSearchCategories
 import com.infomaniak.lib.core.views.ViewHolder
@@ -112,16 +112,11 @@ class CategoriesAdapter(
 
     fun selectCategory(categoryId: Int, isSelected: Boolean, usageMode: Int) {
         with(allCategories) {
-            val index = indexOfFirst { it.id == categoryId }
-            this[index].apply {
+            this[indexOfFirst { it.id == categoryId }].apply {
                 this.isSelected = isSelected
                 this.addedToFileAt = if (isSelected) Date() else null
             }
-            allCategories = ArrayList(
-                if (usageMode == SelectCategoriesBottomSheetDialog.SELECTED_CATEGORIES_USAGE_MODE) {
-                    sortSearchCategories()
-                } else sortFileCategories()
-            )
+            allCategories = ArrayList(if (usageMode == UsageMode.SELECTED_CATEGORIES) sortSearchCategories() else sortFileCategories())
         }
         filterCategories()
     }

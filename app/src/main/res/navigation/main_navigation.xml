@@ -796,6 +796,7 @@
         tools:layout="@layout/fragment_select_categories">
         <argument
             android:name="fileId"
+            android:defaultValue="-1"
             app:argType="integer" />
         <argument
             android:name="categories"
