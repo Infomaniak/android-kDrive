@@ -17,7 +17,35 @@
  */
 package com.infomaniak.drive.ui.home
 
-import androidx.fragment.app.Fragment
+import android.os.Bundle
+import android.view.View
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
+import com.infomaniak.drive.R
+import com.infomaniak.drive.ui.menu.OfflineFileFragment
+import com.infomaniak.drive.utils.setMargin
+import kotlinx.android.synthetic.main.fragment_file_list.*
 
-class HomeOfflineFragment : Fragment() {
+class HomeOfflineFragment : OfflineFileFragment() {
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        //TODO - Change linearLayoutManager as new home v2 design
+
+        appBar.isGone = true
+        sortButton.isGone = true
+        homeTabTitle.isVisible = true
+        swipeRefreshLayout.isEnabled = false
+
+        val marginStandard = resources.getDimension(R.dimen.marginStandard).toInt()
+        val marginStandardMedium = resources.getDimension(R.dimen.marginStandardMedium).toInt()
+        sortLayout.setMargin(left = marginStandard, right = marginStandard, top = marginStandardMedium)
+    }
+
+    override fun homeClassName(): String = javaClass.name
+
+    fun reloadOffline() {
+        if (isResumed) onRefresh()
+    }
 }

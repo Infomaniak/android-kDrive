@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -97,9 +98,12 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
         }
 
+        val offlineFragment = HomeOfflineFragment().apply {
+            arguments = bundleOf("folderID" to 1, "folderName" to "")
+        }
         val tabsHome = arrayListOf(
             TabViewPagerUtils.FragmentTab(HomeActivitiesFragment(), R.id.homeActivitiesButton),
-            TabViewPagerUtils.FragmentTab(HomeOfflineFragment(), R.id.homeOfflineButton),
+            TabViewPagerUtils.FragmentTab(offlineFragment, R.id.homeOfflineButton),
             TabViewPagerUtils.FragmentTab(PicturesFragment(), R.id.homePicturesButton)
         )
 
@@ -123,6 +127,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         AccountUtils.getCurrentDrive()?.let { currentDrive ->
             val downloadRequired = forceDownload || mustRefreshUi
             (homeViewPager.getFragment(0) as? HomeActivitiesFragment)?.getLastActivities(currentDrive.id, downloadRequired)
+            (homeViewPager.getFragment(1) as? HomeOfflineFragment)?.reloadOffline()
             (homeViewPager.getFragment(2) as? PicturesFragment)?.reloadPictures()
 
             setDriveHeader(currentDrive)

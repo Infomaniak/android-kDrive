@@ -98,7 +98,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private var isLoadingActivities = false
     private var retryLoadingActivities = false
 
-    protected lateinit var showLoadingTimer: CountDownTimer
+    protected val showLoadingTimer: CountDownTimer by lazy { createRefreshTimer { swipeRefreshLayout?.isRefreshing = true } }
     protected open var downloadFiles: (ignoreCache: Boolean, isNewSort: Boolean) -> Unit = DownloadFiles()
     protected open var sortFiles: () -> Unit = SortFiles()
     protected open var setNoFilesLayout: () -> Unit = SetNoFilesLayout()
@@ -137,8 +137,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        showLoadingTimer = createRefreshTimer { swipeRefreshLayout?.isRefreshing = true }
 
         activitiesRefreshTimer = createRefreshTimer(ACTIVITIES_REFRESH_DELAY) {
             isLoadingActivities = false
@@ -181,11 +179,13 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            if (fileAdapter.multiSelectMode) {
-                closeMultiSelect()
-            } else {
-                findNavController().popBackStack()
+        if (homeClassName() == null) {
+            requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+                if (fileAdapter.multiSelectMode) {
+                    closeMultiSelect()
+                } else {
+                    findNavController().popBackStack()
+                }
             }
         }
 
@@ -492,7 +492,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 "file" to fileObject,
                 "userDrive" to UserDrive(driveId = file.driveId, sharedWithMe = fileListViewModel.isSharedWithMe)
             )
-            safeNavigate(R.id.fileInfoActionsBottomSheetDialog, bundle)
+            safeNavigate(R.id.fileInfoActionsBottomSheetDialog, bundle, currentClassName = homeClassName())
         }
 
         onBackNavigationResult()
@@ -511,6 +511,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
         }
     }
+
+    protected open fun homeClassName(): String? = null
 
     private fun openFolder(file: File) {
         if (file.isDisabled()) {

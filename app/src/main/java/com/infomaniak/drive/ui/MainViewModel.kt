@@ -269,9 +269,13 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
                             val apiResponse = ApiRepository.getFileDetails(file)
                             apiResponse.data?.let { remoteFile ->
                                 remoteFile.isOffline = true
+
                                 if (offlineFile.lastModified() > file.getLastModifiedInMilliSecond()) {
                                     uploadFile(file, remoteFile, offlineFile, userDrive, realm)
-                                } else downloadOfflineFile(file, remoteFile, offlineFile, userDrive, realm)
+                                } else {
+                                    downloadOfflineFile(file, remoteFile, offlineFile, userDrive, realm)
+                                }
+
                             } ?: let {
                                 if (apiResponse.error?.code?.equals("object_not_found") == true) offlineFile.delete()
                             }

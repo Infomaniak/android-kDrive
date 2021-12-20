@@ -31,12 +31,19 @@
         android:paddingBottom="@dimen/recyclerViewPaddingBottom"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager" />
 
-    <com.infomaniak.drive.views.NoItemsLayoutView
-        android:id="@+id/noPicturesLayout"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:orientation="vertical"
-        android:visibility="gone" />
+        android:fillViewport="true">
+
+        <com.infomaniak.drive.views.NoItemsLayoutView
+            android:id="@+id/noPicturesLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:orientation="vertical"
+            android:visibility="gone" />
+    </androidx.core.widget.NestedScrollView>
+
 
 </LinearLayout>
