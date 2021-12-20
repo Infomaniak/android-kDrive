@@ -738,7 +738,8 @@
     <dialog
         android:id="@+id/selectCategoriesBottomSheetDialog"
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SelectCategoriesBottomSheetDialog"
-        android:label="SelectCategoriesBottomSheetDialog">
+        android:label="SelectCategoriesBottomSheetDialog"
+        tools:layout="@layout/fragment_select_categories">
         <argument
             android:name="fileId"
             app:argType="integer" />
@@ -775,7 +776,8 @@
     <dialog
         android:id="@+id/createOrEditCategoryBottomSheetDialog"
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.CreateOrEditCategoryBottomSheetDialog"
-        android:label="CreateOrEditCategoryBottomSheetDialog">
+        android:label="CreateOrEditCategoryBottomSheetDialog"
+        tools:layout="@layout/fragment_create_category">
         <argument
             android:name="fileId"
             app:argType="integer" />

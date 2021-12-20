@@ -206,7 +206,6 @@ class FileShareLinkSettingsFragment : Fragment() {
         saveButton.initProgress(this)
         saveButton.setOnClickListener {
             saveButton.showProgress()
-            val file = File(id = navigationArgs.fileId, driveId = navigationArgs.driveId)
 
             var isValid = true
             if (addPasswordSwitch.isChecked) {
@@ -227,6 +226,7 @@ class FileShareLinkSettingsFragment : Fragment() {
             if (!isValid) {
                 saveButton?.hideProgress(R.string.buttonSave)
             } else {
+                val file = File(id = navigationArgs.fileId, driveId = navigationArgs.driveId)
                 shareViewModel.editFileShareLink(file, shareLink).observe(viewLifecycleOwner) { apiResponse ->
                     if (apiResponse.data == true) {
                         findNavController().popBackStack()
