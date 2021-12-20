@@ -67,32 +67,32 @@ open class FileAdapter(
 
     var isComplete = false
     private var showLoading = false
+    private var fileAdapterObserver: RecyclerView.AdapterDataObserver? = null
 
-    private var hasFileAdapterObserver = false
-    private var recyclerView: RecyclerView? = null
+    private fun createFileAdapterObserver(recyclerView: RecyclerView): RecyclerView.AdapterDataObserver {
+        return object : RecyclerView.AdapterDataObserver() {
 
-    private val fileAdapterObserver = object : RecyclerView.AdapterDataObserver() {
-
-        private fun notifyChanged(position: Int) {
-            recyclerView?.post {
-                if (fileList.isNotEmpty() && position < fileList.count()) notifyItemChanged(position)
-            }
-        }
-
-        override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
-            if (viewHolderType == DisplayType.LIST && fileList.isNotEmpty()) {
-                when {
-                    positionStart == 0 -> notifyChanged(0)
-                    positionStart >= fileList.count() -> notifyChanged(fileList.lastIndex)
+            private fun notifyChanged(position: Int) {
+                recyclerView.post {
+                    if (fileList.isNotEmpty() && position < fileList.count()) notifyItemChanged(position)
                 }
             }
-        }
 
-        override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-            if (viewHolderType == DisplayType.LIST && fileList.count() > 1) {
-                when {
-                    positionStart == 0 -> notifyChanged(itemCount)
-                    positionStart + itemCount == fileList.count() -> notifyChanged(fileList.lastIndex - itemCount)
+            override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+                if (viewHolderType == DisplayType.LIST && fileList.isNotEmpty()) {
+                    when {
+                        positionStart == 0 -> notifyChanged(0)
+                        positionStart >= fileList.count() -> notifyChanged(fileList.lastIndex)
+                    }
+                }
+            }
+
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                if (viewHolderType == DisplayType.LIST && fileList.count() > 1) {
+                    when {
+                        positionStart == 0 -> notifyChanged(itemCount)
+                        positionStart + itemCount == fileList.count() -> notifyChanged(fileList.lastIndex - itemCount)
+                    }
                 }
             }
         }
@@ -100,19 +100,20 @@ open class FileAdapter(
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
-        this.recyclerView = recyclerView
 
-        if (!hasFileAdapterObserver) {
-            registerAdapterDataObserver(fileAdapterObserver)
-            hasFileAdapterObserver = true
+        if (fileAdapterObserver == null) {
+            createFileAdapterObserver(recyclerView).also {
+                fileAdapterObserver = it
+                registerAdapterDataObserver(it)
+            }
         }
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
-        if (hasFileAdapterObserver) kotlin.runCatching {
-            unregisterAdapterDataObserver(fileAdapterObserver)
-            hasFileAdapterObserver = false
+        kotlin.runCatching {
+            fileAdapterObserver?.let(::unregisterAdapterDataObserver)
+            fileAdapterObserver = null
         }
     }
 
