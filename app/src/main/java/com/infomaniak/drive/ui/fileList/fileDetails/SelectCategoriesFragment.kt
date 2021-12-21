@@ -43,6 +43,7 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.SelectCategoriesBottomSheetDia
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter
 import com.infomaniak.drive.ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.UICategory
+import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment.UsageMode.*
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.DebouncingTextWatcher
 import kotlinx.android.synthetic.main.fragment_select_categories.*
@@ -116,9 +117,8 @@ class SelectCategoriesFragment : Fragment() {
                 SELECTED_CATEGORIES -> updateSelectedCategoriesModeUI()
                 else -> updateFileCategoriesModeUI()
             }
+            categoriesRecyclerView.adapter = this
         }
-
-        categoriesRecyclerView.adapter = categoriesAdapter
     }
 
     private fun setAddCategoryButton(canCreateCategory: Boolean) {

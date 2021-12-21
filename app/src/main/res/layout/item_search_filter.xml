@@ -21,7 +21,8 @@
     style="@style/CardViewInfomaniak"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginEnd="@dimen/marginStandardSmall">
+    android:layout_marginEnd="@dimen/marginStandardSmall"
+    tools:context=".ui.fileList.SearchFiltersAdapter">
 
     <LinearLayout
         android:layout_width="wrap_content"

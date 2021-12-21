@@ -35,9 +35,8 @@ class SearchFiltersAdapter(
 
     var filters = arrayListOf<SearchFilter>()
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_search_filter, parent, false))
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
+        ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_search_filter, parent, false))
 
     override fun getItemCount() = filters.size
 
@@ -56,7 +55,7 @@ class SearchFiltersAdapter(
     }
 
     private fun View.setData(filter: SearchFilter) = with(filter) {
-        icon?.let { filterIcon.setImageResource(it) }
+        icon?.let(filterIcon::setImageResource)
         tint?.let { roundIcon.setBackgroundColor(Color.parseColor(it)) }
         filterName.text = text
     }

@@ -34,6 +34,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.CategoriesOwnershipFilter
 import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.SearchDateFilter
+import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.getBackNavigationResult
 import com.infomaniak.drive.utils.safeNavigate
 import com.infomaniak.drive.utils.setBackNavigationResult
@@ -48,9 +49,8 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     private val rights = DriveInfosController.getCategoryRights()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.fragment_bottom_sheet_search_filters, container, false)
-    }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+        inflater.inflate(R.layout.fragment_bottom_sheet_search_filters, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -62,7 +62,7 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     private fun setData() = with(searchFiltersViewModel) {
         date = navigationArgs.date
-        type = navigationArgs.type?.let { ConvertedType.valueOf(it) }
+        type = navigationArgs.type?.let(ConvertedType::valueOf)
         categories = navigationArgs.categories?.let { DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray()) }
         categoriesOwnership = navigationArgs.categoriesOwnership ?: SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_VALUE
         updateDateUI()
@@ -131,8 +131,8 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
             updateTypeUI()
         }
 
-        getBackNavigationResult<Bundle>(SelectCategoriesBottomSheetDialog.SELECT_CATEGORIES_NAV_KEY) { bundle ->
-            val ids = bundle.getIntArray(SelectCategoriesBottomSheetDialog.CATEGORIES_BUNDLE_KEY)?.toTypedArray()
+        getBackNavigationResult<Bundle>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) { bundle ->
+            val ids = bundle.getIntArray(SelectCategoriesFragment.CATEGORIES_BUNDLE_KEY)?.toTypedArray()
             searchFiltersViewModel.categories = if (ids?.isNotEmpty() == true) {
                 DriveInfosController.getCurrentDriveCategoriesFromIds(ids)
             } else null
@@ -161,14 +161,12 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
             categories = categories,
             canPutCategoryOnFile = rights?.canPutCategoryOnFile ?: false,
             onClicked = {
-                try {
+                runCatching {
                     findNavController().navigate(
-                        SearchFiltersBottomSheetDialogDirections.actionSearchFiltersBottomSheetDialogToSelectCategoriesBottomSheetDialog(
+                        SearchFiltersBottomSheetDialogDirections.actionSearchFiltersBottomSheetDialogToSelectCategoriesFragment(
                             categories = categories.map { it.id }.toIntArray(),
                         )
                     )
-                } catch (_: IllegalArgumentException) {
-                    // No-op
                 }
             }
         )

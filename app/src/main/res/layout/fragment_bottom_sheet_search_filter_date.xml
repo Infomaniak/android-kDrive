@@ -21,7 +21,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.bottomSheetDialogs.SearchFilterFileTypeBottomSheetDialog">
+    tools:context=".ui.bottomSheetDialogs.SearchFilterDateBottomSheetDialog">
 
     <View
         android:layout_width="26dp"

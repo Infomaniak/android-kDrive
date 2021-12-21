@@ -26,7 +26,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
-import com.infomaniak.drive.ui.bottomSheetDialogs.SelectCategoriesBottomSheetDialog.UsageMode
+import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment.UsageMode
 import com.infomaniak.drive.utils.sortFileCategories
 import com.infomaniak.drive.utils.sortSearchCategories
 import com.infomaniak.lib.core.views.ViewHolder
@@ -126,9 +126,7 @@ class CategoriesAdapter(
         filterCategories()
     }
 
-    fun doesCategoryExist(query: String): Boolean {
-        return !filteredCategories.none { it.name.equals(query, true) }
-    }
+    fun doesCategoryExist(query: String): Boolean = filteredCategories.any { it.name.equals(query, true) }
 
     private fun filterCategories() {
         filteredCategories = ArrayList(allCategories.filter { it.name.contains(filterQuery, true) })

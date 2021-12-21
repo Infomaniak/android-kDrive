@@ -23,7 +23,8 @@
     android:layout_height="wrap_content"
     app:cardBackgroundColor="@color/appBar"
     app:cardCornerRadius="0dp"
-    app:cardElevation="0dp">
+    app:cardElevation="0dp"
+    tools:context=".ui.fileList.RecentSearchesAdapter">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

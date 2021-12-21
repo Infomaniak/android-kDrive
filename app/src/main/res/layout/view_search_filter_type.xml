@@ -23,7 +23,8 @@
     android:layout_height="wrap_content"
     android:background="?selectableItemBackground"
     android:paddingHorizontal="@dimen/marginStandard"
-    android:paddingVertical="@dimen/marginStandardMedium">
+    android:paddingVertical="@dimen/marginStandardMedium"
+    tools:context=".ui.bottomSheetDialogs.SearchFilterFileTypeBottomSheetDialog">
 
     <ImageView
         android:id="@+id/typeFilterStartIcon"
