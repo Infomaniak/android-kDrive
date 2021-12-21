@@ -35,13 +35,13 @@ class SelectCategoriesViewModel : ViewModel() {
     private var addCategoryJob = Job()
     private var removeCategoryJob = Job()
 
-    fun addCategory(fileId: Int, driveId: Int, categoryId: Int): LiveData<ApiResponse<Unit>> {
+    fun addCategory(file: File, categoryId: Int): LiveData<ApiResponse<Unit>> {
         addCategoryJob.cancel()
         addCategoryJob = Job()
         return liveData(Dispatchers.IO + addCategoryJob) {
-            with(ApiRepository.addCategory(fileId, driveId, categoryId)) {
+            with(ApiRepository.addCategory(file, categoryId)) {
                 if (isSuccess()) {
-                    FileController.updateFile(fileId) {
+                    FileController.updateFile(file.id) {
                         it.categories.add(FileCategory(categoryId, userId = AccountUtils.currentUserId, addedToFileAt = Date()))
                     }
                 }

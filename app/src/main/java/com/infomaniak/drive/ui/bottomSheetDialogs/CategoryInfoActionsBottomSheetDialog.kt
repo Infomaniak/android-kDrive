@@ -75,13 +75,10 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun setListeners() = with(navigationArgs) {
-        val driveId = AccountUtils.currentDriveId
-
         editCategory.setOnClickListener {
             safeNavigate(
                 CategoryInfoActionsBottomSheetDialogDirections.actionCategoryInfoActionsBottomSheetDialogToCreateOrEditCategoryFragment(
                     fileId = fileId,
-                    driveId = driveId,
                     categoryIsPredefined = categoryIsPredefined,
                     categoryId = categoryId,
                     categoryName = if (categoryIsPredefined) "" else categoryName,
@@ -92,13 +89,13 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
         deleteCategory.setOnClickListener {
             Utils.confirmCategoryDeletion(requireContext(), categoryName) { dialog ->
-                deleteCategory(driveId, categoryId) { dialog.dismiss() }
+                deleteCategory(categoryId) { dialog.dismiss() }
             }
         }
     }
 
-    private fun deleteCategory(driveId: Int, categoryId: Int, dismissDialog: () -> Unit) {
-        categoryInfoActionViewModel.deleteCategory(driveId, categoryId).observe(viewLifecycleOwner) { apiResponse ->
+    private fun deleteCategory(categoryId: Int, dismissDialog: () -> Unit) {
+        categoryInfoActionViewModel.deleteCategory(categoryId).observe(viewLifecycleOwner) { apiResponse ->
             dismissDialog()
             if (apiResponse.isSuccess()) {
                 setBackNavigationResult(DELETE_CATEGORY_NAV_KEY, categoryId)
@@ -110,11 +107,11 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
         private var deleteCategoryJob = Job()
 
-        fun deleteCategory(driveId: Int, categoryId: Int): LiveData<ApiResponse<Boolean>> {
+        fun deleteCategory(categoryId: Int): LiveData<ApiResponse<Boolean>> {
             deleteCategoryJob.cancel()
             deleteCategoryJob = Job()
             return liveData(Dispatchers.IO + deleteCategoryJob) {
-                with(ApiRepository.deleteCategory(driveId, categoryId)) {
+                with(ApiRepository.deleteCategory(AccountUtils.currentDriveId, categoryId)) {
                     val response = if (isSuccess() || isAlreadyDeleted(this)) {
                         DriveInfosController.updateDrive { localDrive ->
                             val category = localDrive.categories.find { it.id == categoryId }

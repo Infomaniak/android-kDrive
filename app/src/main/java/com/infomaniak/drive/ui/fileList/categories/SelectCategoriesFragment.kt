@@ -166,7 +166,6 @@ class SelectCategoriesFragment : Fragment() {
             safeNavigate(
                 SelectCategoriesFragmentDirections.actionSelectCategoriesFragmentToCreateOrEditCategoryFragment(
                     fileId = file.id,
-                    driveId = file.driveId,
                     categoryId = CreateOrEditCategoryFragment.CREATE_CATEGORY_ID,
                     categoryName = text.toString(),
                     categoryColor = null,
@@ -202,7 +201,7 @@ class SelectCategoriesFragment : Fragment() {
     }
 
     private fun addCategory(categoryId: Int) {
-        selectCategoriesViewModel.addCategory(file.id, file.driveId, categoryId).observe(viewLifecycleOwner) { apiResponse ->
+        selectCategoriesViewModel.addCategory(file, categoryId).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 adapter.updateCategory(categoryId, true)
             } else Utils.showSnackbar(requireView(), apiResponse.translateError())

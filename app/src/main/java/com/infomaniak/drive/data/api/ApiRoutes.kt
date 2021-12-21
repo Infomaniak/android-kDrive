@@ -28,7 +28,6 @@ object ApiRoutes {
     private const val with = "with=children,rights,collaborative_folder,favorite,mobile,share_link,categories"
 
     private fun fileURL(file: File) = "${DRIVE_API}${file.driveId}/file/${file.id}"
-    private fun fileURL(fileId: Int, driveId: Int) = "${DRIVE_API}${driveId}/file/${fileId}"
 
     private fun trashURL(file: File) = "${DRIVE_API}${file.driveId}/file/trash/${file.id}"
 
@@ -124,7 +123,7 @@ object ApiRoutes {
 
     fun updateCategory(driveId: Int, categoryId: Int) = "${DRIVE_API}$driveId/category/$categoryId"
 
-    fun addCategory(fileId: Int, driveId: Int) = "${fileURL(fileId, driveId)}/category"
+    fun addCategory(file: File) = "${fileURL(file)}/category"
 
     fun removeCategory(file: File, categoryId: Int) = "${fileURL(file)}/category/$categoryId"
 

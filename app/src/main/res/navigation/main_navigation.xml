@@ -782,9 +782,6 @@
             android:name="fileId"
             app:argType="integer" />
         <argument
-            android:name="driveId"
-            app:argType="integer" />
-        <argument
             android:name="categoryIsPredefined"
             android:defaultValue="false"
             app:argType="boolean" />

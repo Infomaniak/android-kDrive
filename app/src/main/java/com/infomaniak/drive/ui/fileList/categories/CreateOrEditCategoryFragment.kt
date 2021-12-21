@@ -37,6 +37,8 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.fileList.categories.CreateOrEditCategoryAdapter.Companion.COLORS
 import com.infomaniak.drive.utils.*
@@ -57,12 +59,19 @@ class CreateOrEditCategoryFragment : Fragment() {
     private val navigationArgs: CreateOrEditCategoryFragmentArgs by navArgs()
 
     private val colorsAdapter: CreateOrEditCategoryAdapter by lazy { CreateOrEditCategoryAdapter() }
+    private lateinit var file: File
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         inflater.inflate(R.layout.fragment_create_or_edit_category, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(navigationArgs) {
         super.onViewCreated(view, savedInstanceState)
+
+        file = FileController.getFileById(fileId) ?: run {
+            findNavController().popBackStack()
+            return
+        }
+
         configureAdapter()
         val isCreateCategory = categoryId == CREATE_CATEGORY_ID
         setData(isCreateCategory)
@@ -120,13 +129,15 @@ class CreateOrEditCategoryFragment : Fragment() {
     }
 
     private fun createCategory() {
-        val name = categoryNameValueInput.text.toString()
-        val color = COLORS[colorsAdapter.selectedPosition]
-        createOrEditCategoryViewModel.createCategory(navigationArgs.driveId, name, color)
+        createOrEditCategoryViewModel.createCategory(
+            driveId = file.driveId,
+            name = categoryNameValueInput.text.toString(),
+            color = COLORS[colorsAdapter.selectedPosition],
+        )
             .observe(viewLifecycleOwner) { apiResponse ->
                 with(apiResponse) {
                     if (isSuccess()) {
-                        data?.id?.let { addCategory(it, name, color) }
+                        data?.id?.let(::addCategory)
                     } else {
                         saveButton.hideProgress(R.string.buttonSave)
                         Utils.showSnackbar(requireView(), translateError())
@@ -135,8 +146,8 @@ class CreateOrEditCategoryFragment : Fragment() {
             }
     }
 
-    private fun addCategory(categoryId: Int, name: String, color: String) {
-        selectCategoriesViewModel.addCategory(navigationArgs.fileId, navigationArgs.driveId, categoryId)
+    private fun addCategory(categoryId: Int) {
+        selectCategoriesViewModel.addCategory(file, categoryId)
             .observe(viewLifecycleOwner) { apiResponse ->
                 with(apiResponse) {
                     if (isSuccess()) {
@@ -150,10 +161,12 @@ class CreateOrEditCategoryFragment : Fragment() {
     }
 
     private fun editCategory(categoryId: Int) {
-        val name = categoryNameValueInput.text.toString().let { if (it.isEmpty()) null else it }
-        val color = COLORS[colorsAdapter.selectedPosition]
-        val driveId = navigationArgs.driveId
-        createOrEditCategoryViewModel.editCategory(driveId, categoryId, name, color).observe(viewLifecycleOwner) { apiResponse ->
+        createOrEditCategoryViewModel.editCategory(
+            driveId = file.driveId,
+            categoryId = categoryId,
+            name = categoryNameValueInput.text.toString().let { if (it.isEmpty()) null else it },
+            color = COLORS[colorsAdapter.selectedPosition],
+        ).observe(viewLifecycleOwner) { apiResponse ->
             with(apiResponse) {
                 if (isSuccess()) {
                     findNavController().popBackStack()

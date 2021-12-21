@@ -273,9 +273,9 @@ object ApiRepository {
         return callApi(ApiRoutes.updateCategory(driveId, categoryId), DELETE)
     }
 
-    fun addCategory(fileId: Int, driveId: Int, categoryId: Int): ApiResponse<Unit> {
+    fun addCategory(file: File, categoryId: Int): ApiResponse<Unit> {
         val body = mapOf("id" to categoryId)
-        return callApi(ApiRoutes.addCategory(fileId, driveId), POST, body)
+        return callApi(ApiRoutes.addCategory(file), POST, body)
     }
 
     fun removeCategory(file: File, categoryId: Int): ApiResponse<Unit> {
