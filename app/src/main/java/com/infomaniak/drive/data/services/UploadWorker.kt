@@ -238,14 +238,21 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                     } else UploadFile.deleteIfExists(uri)
                 }
             }
-        } catch (e: SecurityException) {
-            e.printStackTrace()
-            UploadFile.deleteIfExists(uri)
-        } catch (exception: IllegalStateException) {
-            UploadFile.deleteIfExists(uri)
-            Sentry.withScope { scope ->
-                scope.setExtra("data", ApiController.gson.toJson(uploadFile))
-                Sentry.captureMessage("The file is either partially downloaded or corrupted")
+        } catch (exception: Exception) {
+            when (exception) {
+                is SecurityException, is IllegalStateException, is IllegalArgumentException -> {
+                    UploadFile.deleteIfExists(uri)
+
+                    if (exception is IllegalStateException) {
+                        Sentry.withScope { scope ->
+                            scope.setExtra("data", ApiController.gson.toJson(uploadFile))
+                            Sentry.captureMessage("The file is either partially downloaded or corrupted")
+                        }
+                    } else {
+                        Sentry.captureException(exception)
+                    }
+                }
+                else -> throw exception
             }
         }
     }
