@@ -60,7 +60,6 @@ import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.*
-import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.*
 
@@ -287,7 +286,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     private fun fileDescriptorSize(uri: Uri): Long? {
         return try {
             contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize }
-        } catch (exception: FileNotFoundException) {
+        } catch (exception: Exception) {
             null
         }
     }
