@@ -23,7 +23,8 @@
     android:layout_height="wrap_content"
     android:animateLayoutChanges="true"
     android:background="?selectableItemBackground"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".views.CategoriesContainerView">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/titleContainer"

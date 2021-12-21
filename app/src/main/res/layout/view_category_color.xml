@@ -30,4 +30,5 @@
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent"
     tools:backgroundTint="@color/red"
+    tools:context=".ui.fileList.categories.CreateOrEditCategoryAdapter"
     tools:iconTint="@color/white" />

@@ -21,7 +21,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingHorizontal="@dimen/marginStandard"
-    tools:background="@color/appBar">
+    tools:background="@color/appBar"
+    tools:context=".ui.bottomSheetDialogs.CategoriesInformationBottomSheetDialog">
 
     <ImageView
         android:id="@+id/illu"
