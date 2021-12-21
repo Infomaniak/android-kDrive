@@ -73,7 +73,7 @@ class FileMigration : RealmMigration {
             }
             schema.get(Rights::class.java.simpleName)?.apply {
                 removePrimaryKey()
-                transform {
+                transform { // apply for each right
                     val fileId = it.getInt("fileId")
                     val file = realm.where(File::class.java.simpleName).equalTo(File::id.name, fileId).findFirst()
                     if (file == null) it.deleteFromRealm() // Delete if it's orphan
