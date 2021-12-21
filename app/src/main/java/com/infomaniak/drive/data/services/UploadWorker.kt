@@ -310,28 +310,30 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             customSelection = "$selection AND $IMAGES_BUCKET_ID = ? $isNotPending"
             customArgs = args + mediaFolder.id.toString()
 
-            val getLastImagesOperation = getLocalLastMediasAsync(
-                syncSettings = syncSettings,
-                contentUri = MediaFoldersProvider.imagesExternalUri,
-                selection = customSelection,
-                args = customArgs,
-                mediaFolder = mediaFolder
-            )
-            jobs.add(getLastImagesOperation)
-
-            if (syncSettings.syncVideo) {
-                isNotPending = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-                    "AND ${MediaStore.Video.Media.IS_PENDING} = 0" else ""
-                customSelection = "$selection AND $VIDEO_BUCKET_ID = ? $isNotPending"
-
-                val getLastVideosOperation = getLocalLastMediasAsync(
+            runCatching {
+                val getLastImagesOperation = getLocalLastMediasAsync(
                     syncSettings = syncSettings,
-                    contentUri = MediaFoldersProvider.videosExternalUri,
+                    contentUri = MediaFoldersProvider.imagesExternalUri,
                     selection = customSelection,
                     args = customArgs,
                     mediaFolder = mediaFolder
                 )
-                jobs.add(getLastVideosOperation)
+                jobs.add(getLastImagesOperation)
+
+                if (syncSettings.syncVideo) {
+                    isNotPending = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                        "AND ${MediaStore.Video.Media.IS_PENDING} = 0" else ""
+                    customSelection = "$selection AND $VIDEO_BUCKET_ID = ? $isNotPending"
+
+                    val getLastVideosOperation = getLocalLastMediasAsync(
+                        syncSettings = syncSettings,
+                        contentUri = MediaFoldersProvider.videosExternalUri,
+                        selection = customSelection,
+                        args = customArgs,
+                        mediaFolder = mediaFolder
+                    )
+                    jobs.add(getLastVideosOperation)
+                }
             }
         }
 
