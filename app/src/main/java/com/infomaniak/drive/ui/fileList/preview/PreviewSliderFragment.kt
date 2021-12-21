@@ -42,8 +42,8 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.ui.bottomSheetDialogs.SelectCategoriesBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
+import com.infomaniak.drive.ui.fileList.categories.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntent
@@ -145,7 +145,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             context?.openWith(currentPreviewFile, userDrive)
         }
 
-        getBackNavigationResult<Bundle>(SelectCategoriesBottomSheetDialog.SELECT_CATEGORIES_NAV_KEY) {
+        getBackNavigationResult<Bundle>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
             bottomSheetFileInfos.refreshBottomSheetUi(currentPreviewFile)
         }
     }
@@ -324,7 +324,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun manageCategoriesClicked(fileId: Int) {
-        safeNavigate(PreviewSliderFragmentDirections.actionPreviewSliderFragmentToSelectCategoriesBottomSheetDialog(fileId))
+        safeNavigate(PreviewSliderFragmentDirections.actionPreviewSliderFragmentToSelectCategoriesFragment(fileId))
     }
 
     override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) {

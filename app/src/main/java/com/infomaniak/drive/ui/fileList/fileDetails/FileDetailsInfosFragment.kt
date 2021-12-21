@@ -37,8 +37,8 @@ import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.data.models.Share
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.drive.Category
-import com.infomaniak.drive.ui.bottomSheetDialogs.SelectCategoriesBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
+import com.infomaniak.drive.ui.fileList.categories.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.ShareLinkContainerView
 import com.infomaniak.drive.views.UserAvatarView
@@ -109,8 +109,8 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
             }
         }
 
-        getBackNavigationResult<Bundle>(SelectCategoriesBottomSheetDialog.SELECT_CATEGORIES_NAV_KEY) { bundle ->
-            val ids = bundle.getParcelableArrayList(SelectCategoriesBottomSheetDialog.CATEGORIES_BUNDLE_KEY)
+        getBackNavigationResult<Bundle>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) { bundle ->
+            val ids = bundle.getParcelableArrayList(SelectCategoriesFragment.CATEGORIES_BUNDLE_KEY)
                 ?: emptyList<Int>()
             val file = fileDetailsViewModel.currentFile.value
             setupCategoriesContainer(
@@ -191,12 +191,10 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
             with(categoriesContainer) {
                 isVisible = true
                 setup(categories, rights.canPutCategoryOnFile, onClicked = {
-                    try {
+                    runCatching {
                         findNavController().navigate(
-                            FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectCategoriesBottomSheetDialog(fileId)
+                            FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectCategoriesFragment(fileId)
                         )
-                    } catch (_: IllegalArgumentException) {
-                        // No-op
                     }
                 })
             }

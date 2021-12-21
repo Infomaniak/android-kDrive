@@ -43,9 +43,8 @@ class CategoriesAdapter(
     var filteredCategories: ArrayList<UICategory> = arrayListOf()
     private var filterQuery: String = ""
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cardview_category, parent, false))
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
+        ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cardview_category, parent, false))
 
     override fun getItemCount() = filteredCategories.size
 
@@ -101,35 +100,8 @@ class CategoriesAdapter(
         menuButton.setOnClickListener { onMenuClicked?.invoke(category) }
     }
 
-    fun setAll(newCategories: List<UICategory>) {
+    fun setItems(newCategories: List<UICategory>) {
         allCategories = ArrayList(newCategories)
-        filterCategories()
-    }
-
-    fun addCategory(id: Int, name: String, color: String) {
-        with(allCategories.toMutableList()) {
-            add(
-                UICategory(
-                    id = id,
-                    name = name,
-                    color = color,
-                    isPredefined = false,
-                    isSelected = true,
-                    userUsageCount = 1,
-                    addedToFileAt = Date(),
-                )
-            )
-            allCategories = ArrayList(sortCategoriesList())
-        }
-        filterCategories()
-    }
-
-    fun editCategory(id: Int, name: String?, color: String?) {
-        val index = allCategories.indexOfFirst { it.id == id }
-        with(allCategories[index]) {
-            this.name = name ?: this.name
-            this.color = color ?: this.color
-        }
         filterCategories()
     }
 

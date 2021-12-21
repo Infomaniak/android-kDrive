@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.ui.bottomSheetDialogs
+package com.infomaniak.drive.ui.fileList.categories
 
 import android.content.res.ColorStateList
 import android.view.LayoutInflater
@@ -31,9 +31,8 @@ class CreateOrEditCategoryAdapter : RecyclerView.Adapter<ViewHolder>() {
 
     var selectedPosition = 0
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.view_category_color, parent, false))
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
+        ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.view_category_color, parent, false))
 
     override fun getItemCount(): Int = COLORS.size
 

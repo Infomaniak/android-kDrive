@@ -135,7 +135,7 @@
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_CategoryInfoActionsBottomSheetDialog_to_CreateOrEditCategoryBottomSheetDialog">
+                            <entry key="action_CategoryInfoActionsBottomSheetDialog_to_CreateOrEditCategoryFragment">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -204,7 +204,7 @@
                       </LayoutPositions>
                     </value>
                   </entry>
-                  <entry key="createOrEditCategoryBottomSheetDialog">
+                  <entry key="createOrEditCategoryFragment">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">
@@ -339,7 +339,7 @@
                                 <LayoutPositions />
                               </value>
                             </entry>
-                            <entry key="action_fileDetailsFragment_to_selectCategoriesBottomSheetDialog">
+                            <entry key="action_fileDetailsFragment_to_selectCategoriesFragment">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -390,7 +390,7 @@
                                 <LayoutPositions />
                               </value>
                             </entry>
-                            <entry key="action_fileInfoActionsBottomSheetDialog_to_selectCategoriesBottomSheetDialog">
+                            <entry key="action_fileInfoActionsBottomSheetDialog_to_selectCategoriesFragment">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -806,7 +806,7 @@
                                 <LayoutPositions />
                               </value>
                             </entry>
-                            <entry key="action_previewSliderFragment_to_selectCategoriesBottomSheetDialog">
+                            <entry key="action_previewSliderFragment_to_selectCategoriesFragment">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -861,7 +861,7 @@
                       </LayoutPositions>
                     </value>
                   </entry>
-                  <entry key="selectCategoriesBottomSheetDialog">
+                  <entry key="selectCategoriesFragment">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">
@@ -872,7 +872,7 @@
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_SelectCategoriesBottomSheetDialog_to_CreateOrEditCategoryBottomSheetDialog">
+                            <entry key="action_SelectCategoriesFragment_to_CreateOrEditCategoryFragment">
                               <value>
                                 <LayoutPositions />
                               </value>

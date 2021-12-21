@@ -33,7 +33,10 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.safeNavigate
+import com.infomaniak.drive.utils.setBackNavigationResult
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_category_info_actions.*
 import kotlinx.coroutines.Dispatchers
@@ -41,19 +44,17 @@ import kotlinx.coroutines.Job
 
 class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
-    private val navigationArgs: CategoryInfoActionsBottomSheetDialogArgs by navArgs()
     private val categoryInfoActionViewModel: CategoryInfoActionViewModel by viewModels()
+    private val navigationArgs: CategoryInfoActionsBottomSheetDialogArgs by navArgs()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.fragment_bottom_sheet_category_info_actions, container, false)
-    }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+        inflater.inflate(R.layout.fragment_bottom_sheet_category_info_actions, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(navigationArgs) {
         super.onViewCreated(view, savedInstanceState)
         setData()
         setStates()
         setListeners()
-        setBackActionHandlers()
     }
 
     private fun setData() = with(navigationArgs) {
@@ -78,7 +79,7 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
         editCategory.setOnClickListener {
             safeNavigate(
-                CategoryInfoActionsBottomSheetDialogDirections.actionCategoryInfoActionsBottomSheetDialogToCreateOrEditCategoryBottomSheetDialog(
+                CategoryInfoActionsBottomSheetDialogDirections.actionCategoryInfoActionsBottomSheetDialogToCreateOrEditCategoryFragment(
                     fileId = fileId,
                     driveId = driveId,
                     categoryIsPredefined = categoryIsPredefined,
@@ -93,12 +94,6 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
             Utils.confirmCategoryDeletion(requireContext(), categoryName) { dialog ->
                 deleteCategory(driveId, categoryId) { dialog.dismiss() }
             }
-        }
-    }
-
-    private fun setBackActionHandlers() {
-        getBackNavigationResult<Bundle>(CreateOrEditCategoryBottomSheetDialog.EDIT_CATEGORY_NAV_KEY) { bundle ->
-            setBackNavigationResult(CreateOrEditCategoryBottomSheetDialog.EDIT_CATEGORY_NAV_KEY, bundle)
         }
     }
 

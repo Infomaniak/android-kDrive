@@ -15,16 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.ui.bottomSheetDialogs
+package com.infomaniak.drive.ui.fileList.categories
 
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
@@ -38,29 +38,28 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.drive.Category
-import com.infomaniak.drive.ui.bottomSheetDialogs.CreateOrEditCategoryAdapter.Companion.COLORS
+import com.infomaniak.drive.ui.fileList.categories.CreateOrEditCategoryAdapter.Companion.COLORS
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress
 import com.infomaniak.lib.core.utils.toDp
-import kotlinx.android.synthetic.main.fragment_create_category.*
+import kotlinx.android.synthetic.main.fragment_create_or_edit_category.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlin.math.max
 
-class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
+class CreateOrEditCategoryFragment : Fragment() {
 
-    private val navigationArgs: CreateOrEditCategoryBottomSheetDialogArgs by navArgs()
     private val createOrEditCategoryViewModel: CreateOrEditCategoryViewModel by viewModels()
     private val selectCategoriesViewModel: SelectCategoriesViewModel by viewModels()
+    private val navigationArgs: CreateOrEditCategoryFragmentArgs by navArgs()
+
     private val colorsAdapter: CreateOrEditCategoryAdapter by lazy { CreateOrEditCategoryAdapter() }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.fragment_create_category, container, false)
-    }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+        inflater.inflate(R.layout.fragment_create_or_edit_category, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(navigationArgs) {
         super.onViewCreated(view, savedInstanceState)
@@ -100,7 +99,7 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
     private fun setData(isCreateCategory: Boolean) = with(navigationArgs) {
         appBarTitle.title = getString(if (isCreateCategory) R.string.createCategoryTitle else R.string.editCategoryTitle)
         categoryNameValueInput.setText(categoryName)
-        saveButton.initProgress(this@CreateOrEditCategoryBottomSheetDialog)
+        saveButton.initProgress(this@CreateOrEditCategoryFragment)
     }
 
     private fun setStates(isCreateCategory: Boolean) = with(navigationArgs) {
@@ -141,13 +140,7 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
             .observe(viewLifecycleOwner) { apiResponse ->
                 with(apiResponse) {
                     if (isSuccess()) {
-                        setBackNavigationResult(
-                            CREATE_CATEGORY_NAV_KEY, bundleOf(
-                                CATEGORY_ID_BUNDLE_KEY to categoryId,
-                                CATEGORY_NAME_BUNDLE_KEY to name,
-                                CATEGORY_COLOR_BUNDLE_KEY to color,
-                            )
-                        )
+                        findNavController().popBackStack()
                     } else {
                         saveButton.hideProgress(R.string.buttonSave)
                         Utils.showSnackbar(requireView(), translateError())
@@ -163,13 +156,7 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
         createOrEditCategoryViewModel.editCategory(driveId, categoryId, name, color).observe(viewLifecycleOwner) { apiResponse ->
             with(apiResponse) {
                 if (isSuccess()) {
-                    setBackNavigationResult(
-                        EDIT_CATEGORY_NAV_KEY, bundleOf(
-                            CATEGORY_ID_BUNDLE_KEY to categoryId,
-                            CATEGORY_NAME_BUNDLE_KEY to name,
-                            CATEGORY_COLOR_BUNDLE_KEY to color,
-                        )
-                    )
+                    findNavController().popBackStack()
                 } else {
                     saveButton.hideProgress(R.string.buttonSave)
                     Utils.showSnackbar(requireView(), translateError())
@@ -219,11 +206,6 @@ class CreateOrEditCategoryBottomSheetDialog : FullScreenBottomSheetDialog() {
     }
 
     companion object {
-        const val CREATE_CATEGORY_NAV_KEY = "create_category_nav_key"
-        const val EDIT_CATEGORY_NAV_KEY = "edit_category_nav_key"
-        const val CATEGORY_ID_BUNDLE_KEY = "category_id_bundle_key"
-        const val CATEGORY_NAME_BUNDLE_KEY = "category_name_bundle_key"
-        const val CATEGORY_COLOR_BUNDLE_KEY = "category_color_bundle_key"
         const val CREATE_CATEGORY_ID = -1
     }
 }
