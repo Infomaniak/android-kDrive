@@ -506,15 +506,15 @@
             android:id="@+id/action_searchFragment_to_fileListFragment"
             app:destination="@id/fileListFragment" />
         <action
-            android:id="@+id/action_searchFragment_to_searchFiltersBottomSheetDialog"
-            app:destination="@id/searchFiltersBottomSheetDialog" />
+            android:id="@+id/action_searchFragment_to_searchFiltersFragment"
+            app:destination="@id/searchFiltersFragment" />
     </fragment>
 
-    <dialog
-        android:id="@+id/searchFiltersBottomSheetDialog"
-        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SearchFiltersBottomSheetDialog"
-        android:label="SearchFiltersBottomSheetDialog"
-        tools:layout="@layout/fragment_bottom_sheet_search_filters">
+    <fragment
+        android:id="@+id/searchFiltersFragment"
+        android:name="com.infomaniak.drive.ui.fileList.SearchFiltersFragment"
+        android:label="SearchFiltersFragment"
+        tools:layout="@layout/fragment_search_filters">
         <argument
             android:name="date"
             app:argType="com.infomaniak.drive.data.models.SearchDateFilter"
@@ -532,9 +532,9 @@
             app:argType="com.infomaniak.drive.data.models.CategoriesOwnershipFilter"
             app:nullable="true" />
         <action
-            android:id="@+id/action_searchFiltersBottomSheetDialog_to_selectCategoriesFragment"
+            android:id="@+id/action_searchFiltersFragment_to_selectCategoriesFragment"
             app:destination="@id/selectCategoriesFragment" />
-    </dialog>
+    </fragment>
 
     <dialog
         android:id="@+id/searchFilterDateDialog"

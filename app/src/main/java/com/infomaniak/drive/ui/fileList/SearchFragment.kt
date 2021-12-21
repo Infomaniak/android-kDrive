@@ -152,7 +152,7 @@ class SearchFragment : FileListFragment() {
             if (menuItem.itemId == R.id.selectFilters) {
                 with(fileListViewModel) {
                     safeNavigate(
-                        SearchFragmentDirections.actionSearchFragmentToSearchFiltersBottomSheetDialog(
+                        SearchFragmentDirections.actionSearchFragmentToSearchFiltersFragment(
                             date = dateFilter.second,
                             type = typeFilter.second?.name,
                             categories = categoriesFilter.second?.map { it.id }?.toIntArray(),
@@ -217,12 +217,12 @@ class SearchFragment : FileListFragment() {
     }
 
     private fun setBackActionHandlers() {
-        getBackNavigationResult<Bundle>(SearchFiltersBottomSheetDialog.SEARCH_FILTERS_NAV_KEY) { bundle ->
+        getBackNavigationResult<Bundle>(SearchFiltersFragment.SEARCH_FILTERS_NAV_KEY) { bundle ->
             with(bundle) {
-                setDateFilter(getParcelable(SearchFiltersBottomSheetDialog.SEARCH_FILTERS_DATE_BUNDLE_KEY))
-                setTypeFilter(getParcelable(SearchFiltersBottomSheetDialog.SEARCH_FILTERS_TYPE_BUNDLE_KEY))
-                setCategoriesFilter(getIntArray(SearchFiltersBottomSheetDialog.SEARCH_FILTERS_CATEGORIES_BUNDLE_KEY))
-                setCategoriesOwnershipFilter(getParcelable(SearchFiltersBottomSheetDialog.SEARCH_FILTERS_CATEGORIES_OWNERSHIP_BUNDLE_KEY))
+                setDateFilter(getParcelable(SearchFiltersFragment.SEARCH_FILTERS_DATE_BUNDLE_KEY))
+                setTypeFilter(getParcelable(SearchFiltersFragment.SEARCH_FILTERS_TYPE_BUNDLE_KEY))
+                setCategoriesFilter(getIntArray(SearchFiltersFragment.SEARCH_FILTERS_CATEGORIES_BUNDLE_KEY))
+                setCategoriesOwnershipFilter(getParcelable(SearchFiltersFragment.SEARCH_FILTERS_CATEGORIES_OWNERSHIP_BUNDLE_KEY))
             }
             updateFilters()
         }

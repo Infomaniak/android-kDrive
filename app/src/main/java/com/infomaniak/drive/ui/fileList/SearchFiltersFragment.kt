@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.ui.bottomSheetDialogs
+package com.infomaniak.drive.ui.fileList
 
 import android.os.Bundle
 import android.os.Parcelable
@@ -25,6 +25,7 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -34,23 +35,24 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.CategoriesOwnershipFilter
 import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.SearchDateFilter
+import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterDateBottomSheetDialog
+import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterFileTypeBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.getBackNavigationResult
 import com.infomaniak.drive.utils.safeNavigate
 import com.infomaniak.drive.utils.setBackNavigationResult
-import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.lib.core.utils.toPx
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_search_filters.*
+import kotlinx.android.synthetic.main.fragment_search_filters.*
 
-class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
+class SearchFiltersFragment : Fragment() {
 
     private val searchFiltersViewModel: SearchFiltersViewModel by viewModels()
-    private val navigationArgs: SearchFiltersBottomSheetDialogArgs by navArgs()
+    private val navigationArgs: SearchFiltersFragmentArgs by navArgs()
 
     private val rights = DriveInfosController.getCategoryRights()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        inflater.inflate(R.layout.fragment_bottom_sheet_search_filters, container, false)
+        inflater.inflate(R.layout.fragment_search_filters, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -163,7 +165,7 @@ class SearchFiltersBottomSheetDialog : FullScreenBottomSheetDialog() {
             onClicked = {
                 runCatching {
                     findNavController().navigate(
-                        SearchFiltersBottomSheetDialogDirections.actionSearchFiltersBottomSheetDialogToSelectCategoriesFragment(
+                        SearchFiltersFragmentDirections.actionSearchFiltersFragmentToSelectCategoriesFragment(
                             categories = categories.map { it.id }.toIntArray(),
                         )
                     )

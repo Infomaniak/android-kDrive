@@ -22,6 +22,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import androidx.activity.addCallback
 import androidx.core.os.bundleOf
 import androidx.core.text.HtmlCompat
 import androidx.core.view.isGone
@@ -139,6 +140,10 @@ class SelectCategoriesFragment : Fragment() {
                     categoriesAdapter.allCategories.filter { it.isSelected }.map { it.id },
                 )
             }
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            setBackNavResult()
         }
 
         createCategoryRow.setOnClickListener { navigateToCreateCategory() }
