@@ -245,6 +245,7 @@
     <string name="errorDuplicate">Erreur lors de la duplication</string>
     <string name="errorFileCreate">Erreur lors de la création du fichier. Vérifiez le nom du fichier et vos droits sur le dossier.</string>
     <string name="errorFileLocked">Le fichier est actuellement ouvert par un utilisateur et ne peut être modifié</string>
+    <string name="errorGetBookmarkURL">Lien non récupérable</string>
     <string name="errorLeaveShare">Erreur lors de l’abandon du partage</string>
     <string name="errorLoadingOfficeEditor">Impossible de charger l’éditeur de document</string>
     <string name="errorModification">Erreur lors de la modification</string>
@@ -659,5 +660,4 @@
     <string name="userPermissionRemove">L’utilisateur n’aura plus accès à ce fichier.</string>
     <string name="userPermissionWrite">Peut modifier</string>
     <string name="userPermissionWriteDescription">Modification du fichier\nTéléchargement\nAjout de commentaire\nAjout et création de fichier / dossier\nSuppression du fichier</string>
-    <string name="errorGetBookmarkURL">Lien non récupérable</string>
 </resources>
