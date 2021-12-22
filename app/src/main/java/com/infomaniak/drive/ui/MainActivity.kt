@@ -289,7 +289,7 @@ class MainActivity : BaseActivity() {
 
     private fun displayInformationPanel() {
         if (!hasDisplayedInformationPanel) {
-            with(UISettings(this)) {
+            UISettings(this).apply {
                 val destinationId = when {
                     !hasDisplayedSyncDialog && !AccountUtils.isEnableAppSync() -> {
                         hasDisplayedSyncDialog = true

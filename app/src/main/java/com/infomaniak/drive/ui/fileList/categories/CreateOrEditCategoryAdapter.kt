@@ -36,21 +36,18 @@ class CreateOrEditCategoryAdapter : RecyclerView.Adapter<ViewHolder>() {
 
     override fun getItemCount(): Int = COLORS.size
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        with(holder.itemView.categoryColorView) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView.categoryColorView) {
+        val color = ColorStateList.valueOf(COLORS[position].toColorInt())
+        val white = ContextCompat.getColorStateList(context, R.color.white)
 
-            val color = ColorStateList.valueOf(COLORS[position].toColorInt())
-            val white = ContextCompat.getColorStateList(context, R.color.white)
+        backgroundTintList = color
+        iconTint = if (position == selectedPosition) white else color
 
-            backgroundTintList = color
-            iconTint = if (position == selectedPosition) white else color
-
-            setOnClickListener {
-                iconTint = white
-                val previousSelectedPosition = selectedPosition
-                selectedPosition = position
-                notifyItemChanged(previousSelectedPosition)
-            }
+        setOnClickListener {
+            iconTint = white
+            val previousSelectedPosition = selectedPosition
+            selectedPosition = position
+            notifyItemChanged(previousSelectedPosition)
         }
     }
 

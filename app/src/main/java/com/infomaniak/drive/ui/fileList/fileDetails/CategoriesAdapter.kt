@@ -48,14 +48,12 @@ class CategoriesAdapter(
 
     override fun getItemCount() = filteredCategories.size
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        with(holder.itemView.categoryCard) {
-            val category = filteredCategories[position]
-            setLayouts(position)
-            setData(category)
-            setStates(category)
-            setListeners(category)
-        }
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView.categoryCard) {
+        val category = filteredCategories[position]
+        setLayouts(position)
+        setData(category)
+        setStates(category)
+        setListeners(category)
     }
 
     private fun MaterialCardView.setLayouts(position: Int) {
@@ -106,7 +104,7 @@ class CategoriesAdapter(
     }
 
     fun deleteCategory(categoryId: Int) {
-        with(allCategories) {
+        allCategories.apply {
             val index = indexOfFirst { it.id == categoryId }
             removeAt(index)
         }
@@ -116,7 +114,7 @@ class CategoriesAdapter(
     fun updateCategory(categoryId: Int, isSelected: Boolean) {
         with(allCategories) {
             val index = indexOfFirst { it.id == categoryId }
-            with(this[index]) {
+            this[index].apply {
                 this.isSelected = isSelected
                 this.addedToFileAt = if (isSelected) Date() else null
             }

@@ -188,7 +188,7 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         val rights = DriveInfosController.getCategoryRights()
         if (hasFile && rights?.canReadCategoryOnFile == true) {
             categoriesDivider.isVisible = true
-            with(categoriesContainer) {
+            categoriesContainer.apply {
                 isVisible = true
                 setup(categories, rights.canPutCategoryOnFile, onClicked = {
                     runCatching {

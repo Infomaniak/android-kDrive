@@ -124,7 +124,7 @@ class SelectCategoriesFragment : Fragment() {
     }
 
     private fun setListeners() {
-        with(toolbar) {
+        toolbar.apply {
             setOnMenuItemClickListener { menuItem ->
                 if (menuItem.itemId == R.id.addCategory) {
                     navigateToCreateCategory()
@@ -136,7 +136,7 @@ class SelectCategoriesFragment : Fragment() {
 
         createCategoryRow.setOnClickListener { navigateToCreateCategory() }
 
-        with(searchView) {
+        searchView.apply {
             clearButton.setOnClickListener { text = null }
             addTextChangedListener(DebouncingTextWatcher(lifecycle) {
                 if (isAtLeastResumed()) {
@@ -180,7 +180,7 @@ class SelectCategoriesFragment : Fragment() {
             Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT)
         } else Html.fromHtml(text)
 
-        with(createCategoryRow) {
+        createCategoryRow.apply {
             var topCornerRadius = 0.0f
             if (adapter.filteredCategories.isEmpty()) {
                 topCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)

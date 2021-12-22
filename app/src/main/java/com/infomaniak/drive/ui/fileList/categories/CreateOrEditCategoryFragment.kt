@@ -69,7 +69,7 @@ class CreateOrEditCategoryFragment : Fragment() {
 
         file = FileController.getFileById(fileId) ?: run {
             findNavController().popBackStack()
-            return
+            return@with
         }
 
         configureAdapter()
@@ -85,7 +85,7 @@ class CreateOrEditCategoryFragment : Fragment() {
     }
 
     private fun configureAdapter() {
-        with(colorsAdapter) {
+        colorsAdapter.apply {
             selectedPosition = COLORS.indexOfFirst { it == navigationArgs.categoryColor }.let { if (it == -1) 0 else it }
             configCategoriesLayoutManager()
             categoriesRecyclerView.adapter = this
@@ -120,7 +120,7 @@ class CreateOrEditCategoryFragment : Fragment() {
     private fun setListeners() = with(navigationArgs) {
         categoryNameValueInput.addTextChangedListener { saveButton.isEnabled = it.toString().isNotEmpty() }
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
-        with(saveButton) {
+        saveButton.apply {
             setOnClickListener {
                 showProgress()
                 if (categoryId == CREATE_CATEGORY_ID) createCategory() else editCategory(categoryId)
