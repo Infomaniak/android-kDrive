@@ -252,7 +252,7 @@ object Utils {
         }
     }
 
-    fun Fragment.openUrl(url: String) {
+    fun Fragment.openUrlIntent(url: String) {
         if (url.isValidUrl()) {
             startActivity(Intent.createChooser(Intent(Intent.ACTION_VIEW, Uri.parse(url)), url))
         } else {

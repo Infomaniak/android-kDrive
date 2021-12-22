@@ -87,14 +87,12 @@ class DownloadProgressDialog : DialogFragment() {
     class DownloadViewModel : ViewModel() {
 
         fun downloadFile(context: Context, file: File, userDrive: UserDrive) = liveData(Dispatchers.IO) {
-            val outputFile =
-                if (file.isOffline) file.getOfflineFile(context, userDrive.userId)
-                else file.getCacheFile(context, userDrive)
+            val outputFile = file.getLocalStorageFile(context, userDrive)
             if (outputFile == null) {
                 emit(null)
                 return@liveData
             }
-            if (outputFile.length() != file.size || file.isObsolete(outputFile)) {
+            if (file.isObsoleteOrNotIntact(outputFile)) {
                 try {
                     val response = DownloadWorker.downloadFileResponse(ApiRoutes.downloadFile(file)) { progress ->
                         runBlocking { emit(progress to false) }

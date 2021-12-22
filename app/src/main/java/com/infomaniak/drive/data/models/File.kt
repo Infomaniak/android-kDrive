@@ -221,6 +221,18 @@ open class File(
         return dataFile.length() == size
     }
 
+    fun isObsoleteOrNotIntact(dataFile: java.io.File): Boolean {
+        return isObsolete(dataFile) || !isIntactFile(dataFile)
+    }
+
+    fun getLocalStorageFile(context: Context, userDrive: UserDrive = UserDrive()): java.io.File? {
+        return if (isOffline) getOfflineFile(context, userDrive.userId) else getCacheFile(context, userDrive)
+    }
+
+    fun canUseLocalStorageFile(context: Context, userDrive: UserDrive = UserDrive()): Boolean {
+        return getLocalStorageFile(context, userDrive)?.let(::isObsoleteOrNotIntact) == false
+    }
+
     fun isOfflineFile(context: Context, userId: Int = AccountUtils.currentUserId, checkLocalFile: Boolean = true): Boolean {
         return isOffline || (checkLocalFile && !isFolder() && getOfflineFile(context, userId)?.exists() == true)
     }

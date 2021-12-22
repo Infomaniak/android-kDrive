@@ -65,7 +65,7 @@ import com.infomaniak.drive.utils.BulkOperationsUtils.generateWorkerData
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.drive.utils.Utils.openUrl
+import com.infomaniak.drive.utils.Utils.openUrlIntent
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
@@ -278,16 +278,17 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         getBackNavigationResult<Int>(DownloadProgressDialog.OPEN_BOOKMARK) { fileId ->
-            FileController.getFileProxyById(fileId, customRealm = mainViewModel.realm)?.let { file ->
-                kotlin.runCatching {
-                    if (file.name.endsWith(".url")) openUrl(getUrlFromUrlFile(file.getUri(requireContext()).second))
-                    else openUrl(getUrlFromWebloc(file.getUri(requireContext()).second))
-                }.onFailure {
-                    requireActivity()
-                        .showSnackbar(getString(R.string.errorGetBookmarkURL), anchorView = requireActivity().mainFab)
-                }
-            }
+            FileController.getFileProxyById(fileId, customRealm = mainViewModel.realm)?.openBookmarkIntent()
+        }
+    }
 
+    private fun File.openBookmarkIntent() {
+        kotlin.runCatching {
+            if (name.endsWith(".url")) openUrlIntent(getUrlFromUrlFile(getUri(requireContext()).second))
+            else openUrlIntent(getUrlFromWebloc(getUri(requireContext()).second))
+        }.onFailure {
+            requireActivity()
+                .showSnackbar(getString(R.string.errorGetBookmarkURL), anchorView = requireActivity().mainFab)
         }
     }
 
@@ -574,11 +575,15 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun File.openBookmark() {
-        safeNavigate(
-            FileListFragmentDirections.actionFileListFragmentToDownloadProgressDialog(
-                fileID = id, fileName = name, userDrive = UserDrive(), isOpenBookmark = true
+        if (canUseLocalStorageFile(requireContext())) {
+            openBookmarkIntent()
+        } else {
+            safeNavigate(
+                FileListFragmentDirections.actionFileListFragmentToDownloadProgressDialog(
+                    fileID = id, fileName = name, userDrive = UserDrive(), isOpenBookmark = true
+                )
             )
-        )
+        }
     }
 
     private fun File.displayFile() {
@@ -610,7 +615,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             val cacheFile = file.getCacheFile(requireContext())
             val offlineFile = file.getOfflineFile(requireContext())
 
-            if (offlineFile != null && !file.isObsolete(cacheFile) && file.isIntactFile(cacheFile)) {
+            if (offlineFile != null && !file.isObsoleteOrNotIntact(cacheFile)) {
                 Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
                 runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
 
