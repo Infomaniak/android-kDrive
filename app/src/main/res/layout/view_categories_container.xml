@@ -15,7 +15,7 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/categoriesContainerView"
@@ -44,22 +44,15 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="ContentDescription" />
 
-        <View
-            android:id="@+id/titleSeparator"
-            android:layout_width="@dimen/marginStandardMedium"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="@id/categoryTitle"
-            app:layout_constraintStart_toEndOf="@id/categoryIcon"
-            app:layout_constraintTop_toTopOf="@id/categoryTitle" />
-
         <TextView
             android:id="@+id/categoryTitle"
             style="@style/Subtitle2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/marginStandardMedium"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/categorySwitch"
-            app:layout_constraintStart_toEndOf="@id/titleSeparator"
+            app:layout_constraintStart_toEndOf="@id/categoryIcon"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="@string/addCategoriesTitle" />
 
@@ -87,4 +80,4 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/titleContainer" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
