@@ -19,11 +19,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/categoryCard"
+    style="@style/CardViewInfomaniak"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardBackgroundColor="@color/appBar"
     app:cardCornerRadius="0dp"
-    app:cardElevation="0dp"
     tools:context=".ui.fileList.fileDetails.CategoriesAdapter">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -41,7 +40,7 @@
             app:shapeAppearanceOverlay="@style/CircleImageView"
             tools:background="@color/red" />
 
-        <com.google.android.material.imageview.ShapeableImageView
+        <ImageView
             android:id="@+id/checkIcon"
             android:layout_width="12dp"
             android:layout_height="12dp"
@@ -51,7 +50,6 @@
             app:layout_constraintEnd_toEndOf="@id/categoryIcon"
             app:layout_constraintStart_toStartOf="@id/categoryIcon"
             app:layout_constraintTop_toTopOf="@id/categoryIcon"
-            app:shapeAppearanceOverlay="@style/CircleImageView"
             tools:visibility="visible" />
 
         <ProgressBar
