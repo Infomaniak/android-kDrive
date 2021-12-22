@@ -88,7 +88,14 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
         }
 
         deleteCategory.setOnClickListener {
-            Utils.confirmCategoryDeletion(requireContext(), categoryName) { dialog ->
+            Utils.createConfirmation(
+                context = requireContext(),
+                title = getString(R.string.buttonDelete),
+                message = getString(R.string.modalDeleteCategoryDescription, categoryName),
+                autoDismiss = false,
+                isDeletion = true,
+                buttonText = getString(R.string.buttonDelete),
+            ) { dialog ->
                 deleteCategory(categoryId) { dialog.dismiss() }
             }
         }
