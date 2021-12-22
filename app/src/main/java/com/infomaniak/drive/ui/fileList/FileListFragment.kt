@@ -561,8 +561,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     protected open fun homeClassName(): String? = null
 
-    private fun openFolder(file: File) {
-        if (file.isDisabled()) {
+    private fun File.openFolder() {
+        if (isDisabled()) {
             safeNavigate(
                 FileListFragmentDirections.actionFileListFragmentToAccessDeniedBottomSheetFragment(
                     AccountUtils.getCurrentDrive()?.isUserAdmin() ?: false, id
