@@ -207,8 +207,10 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         val userList = DriveInfosController.getUsers(userIds = userIds)
         if (userList.isEmpty()) {
             users.isGone = true
+            usersDivider.isGone = true
         } else {
             users.isVisible = true
+            usersDivider.isVisible = true
             userListLayout.forEachIndexed { index, view ->
                 (view as UserAvatarView).apply {
                     if (index < MAX_DISPLAYED_USERS) {
