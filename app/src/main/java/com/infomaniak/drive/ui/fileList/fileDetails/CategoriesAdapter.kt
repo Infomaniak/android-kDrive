@@ -27,8 +27,6 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment.UsageMode
-import com.infomaniak.drive.utils.sortFileCategories
-import com.infomaniak.drive.utils.sortSearchCategories
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_category.view.*
 import java.util.*
@@ -100,8 +98,8 @@ class CategoriesAdapter(
         menuButton.setOnClickListener { onMenuClicked?.invoke(category) }
     }
 
-    fun setItems(newCategories: List<UICategory>) {
-        allCategories = ArrayList(newCategories)
+    fun setItems(newCategories: List<UICategory>, usageMode: UsageMode) {
+        allCategories = ArrayList(newCategories.sortedCategories(usageMode))
         filterCategories()
     }
 
@@ -110,13 +108,13 @@ class CategoriesAdapter(
         filterCategories()
     }
 
-    fun selectCategory(categoryId: Int, isSelected: Boolean, usageMode: Int) {
+    fun selectCategory(categoryId: Int, isSelected: Boolean, usageMode: UsageMode) {
         with(allCategories) {
             this[indexOfFirst { it.id == categoryId }].apply {
                 this.isSelected = isSelected
                 this.addedToFileAt = if (isSelected) Date() else null
             }
-            allCategories = ArrayList(if (usageMode == UsageMode.SELECTED_CATEGORIES) sortSearchCategories() else sortFileCategories())
+            allCategories = ArrayList(sortedCategories(usageMode))
         }
         filterCategories()
     }
@@ -131,6 +129,22 @@ class CategoriesAdapter(
     private fun filterCategories() {
         filteredCategories = ArrayList(allCategories.filter { it.name.contains(filterQuery, true) })
         notifyDataSetChanged()
+    }
+
+    private fun List<UICategory>.sortedCategories(usageMode: UsageMode): List<UICategory> {
+        return if (usageMode == UsageMode.SELECTED_CATEGORIES) sortedSearchCategories() else sortedFileCategories()
+
+    }
+
+    private fun List<UICategory>.sortedFileCategories(): List<UICategory> {
+        return sortedByDescending { it.userUsageCount }
+            .sortedBy { it.addedToFileAt }
+            .sortedByDescending { it.isSelected }
+    }
+
+    private fun List<UICategory>.sortedSearchCategories(): List<UICategory> {
+        return sortedBy { it.name }
+            .sortedByDescending { it.isSelected }
     }
 
     data class UICategory(

@@ -185,7 +185,7 @@ class SelectCategoriesFragment : Fragment() {
                 addedToFileAt = fileCategory?.addedToFileAt,
             )
         }
-        setItems(uiCategories.sortFileCategories())
+        setItems(uiCategories, usageMode)
 
         onMenuClicked = { category ->
             safeNavigate(
@@ -213,7 +213,7 @@ class SelectCategoriesFragment : Fragment() {
                 addedToFileAt = null,
             )
         }
-        setItems(uiCategories.sortSearchCategories())
+        setItems(uiCategories, usageMode)
     }
 
     private fun navigateToCreateCategory() {
