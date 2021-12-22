@@ -29,7 +29,7 @@ open class Category(
     @SerializedName("created_at")
     var createdAt: Date = Date(),
     @SerializedName("is_predefined")
-    var isPredefined: Boolean = false,
+    var isPredefined: Boolean = true,
     var name: String = "",
     @SerializedName("user_usage_count")
     var userUsageCount: Int = 0,

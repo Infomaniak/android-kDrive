@@ -45,7 +45,7 @@ open class Drive(
     var sharedWithMe: Boolean = false,
     var userId: Int = 0,
     @SerializedName("category_rights")
-    var categoryRights: CategoryRights = CategoryRights(),
+    private var _categoryRights: CategoryRights? = CategoryRights(),
 
     /**
      * Drive data
@@ -77,6 +77,9 @@ open class Drive(
 
     val preferences: DrivePreferences
         get() = _preferences ?: DrivePreferences()
+
+    val categoryRights: CategoryRights
+        get() = _categoryRights ?: CategoryRights()
 
     val users: DriveUsersCategories
         get() = _users ?: DriveUsersCategories()
