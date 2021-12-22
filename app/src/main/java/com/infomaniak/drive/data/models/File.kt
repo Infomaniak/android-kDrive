@@ -314,8 +314,7 @@ open class File(
             categories.sort()
         } else {
             FileController.getRealmInstance().use { realm ->
-                FileController.getFileProxyById(id, customRealm = realm)
-                    ?.categories?.sort() ?: emptyList()
+                FileController.getFileProxyById(id, customRealm = realm)?.categories?.sort() ?: emptyList()
             }
         }
     }

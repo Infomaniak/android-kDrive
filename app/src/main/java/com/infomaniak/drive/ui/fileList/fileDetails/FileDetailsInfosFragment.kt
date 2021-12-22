@@ -59,7 +59,7 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) { currentFile ->
 
             setupShareLinkContainer(currentFile, fileDetailsViewModel.currentFileShare.value)
-            setupCategoriesContainer(currentFile != null, currentFile.id, currentFile.getCategories())
+            setupCategoriesContainer(currentFile?.id, currentFile.getCategories())
             displayUsersAvatars(currentFile)
             setupShareButton(currentFile)
 
@@ -110,12 +110,10 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         }
 
         getBackNavigationResult<Bundle>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) { bundle ->
-            val ids = bundle.getParcelableArrayList(SelectCategoriesFragment.CATEGORIES_BUNDLE_KEY)
-                ?: emptyList<Int>()
+            val ids = bundle.getParcelableArrayList(SelectCategoriesFragment.CATEGORIES_BUNDLE_KEY) ?: emptyList<Int>()
             val file = fileDetailsViewModel.currentFile.value
             setupCategoriesContainer(
-                hasFile = file != null,
-                fileId = file?.id ?: -1,
+                fileId = file?.id,
                 categories = DriveInfosController.getCurrentDriveCategoriesFromIds(ids.toTypedArray()),
             )
         }
@@ -184,9 +182,9 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         }
     }
 
-    private fun setupCategoriesContainer(hasFile: Boolean, fileId: Int, categories: List<Category>) {
+    private fun setupCategoriesContainer(fileId: Int?, categories: List<Category>) {
         val rights = DriveInfosController.getCategoryRights()
-        if (hasFile && rights?.canReadCategoryOnFile == true) {
+        if (fileId?.isPositive() == true && rights?.canReadCategoryOnFile == true) {
             categoriesDivider.isVisible = true
             categoriesContainer.apply {
                 isVisible = true

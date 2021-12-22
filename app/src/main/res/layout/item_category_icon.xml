@@ -18,17 +18,18 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="14dp"
-    android:layout_height="14dp"
+    android:layout_width="16dp"
+    android:layout_height="16dp"
     tools:context=".views.CategoryIconView">
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/categoryImageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:padding="0.5dp"
         app:shapeAppearanceOverlay="@style/CircleImageView"
         app:strokeColor="@color/background"
-        app:strokeWidth="1dp"
+        app:strokeWidth="0.5dp"
         tools:background="@color/red" />
 
     <TextView

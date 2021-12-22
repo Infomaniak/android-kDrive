@@ -25,10 +25,6 @@
     android:layout_margin="@dimen/marginStandardSmall"
     app:icon="@drawable/ic_big_check"
     app:iconSize="12dp"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
     tools:backgroundTint="@color/red"
     tools:context=".ui.fileList.categories.CreateOrEditCategoryAdapter"
     tools:iconTint="@color/white" />
