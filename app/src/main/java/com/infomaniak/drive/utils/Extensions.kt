@@ -49,6 +49,7 @@ import android.view.animation.RotateAnimation
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
+import android.widget.LinearLayout
 import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.biometric.BiometricManager
@@ -326,7 +327,7 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
 
     val canReadCategoryOnFile = DriveInfosController.getCategoryRights()?.canReadCategoryOnFile ?: false
     val categories = file.getCategories()
-    categoriesLayout.apply {
+    (categoriesLayout as LinearLayout).apply {
         if (!canReadCategoryOnFile || categories.isEmpty()) {
             isGone = true
         } else {

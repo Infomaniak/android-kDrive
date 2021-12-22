@@ -102,8 +102,9 @@
         app:layout_constraintTop_toTopOf="@id/fileNameLayout"
         tools:visibility="visible" />
 
-    <LinearLayout
+    <include
         android:id="@+id/categoriesLayout"
+        layout="@layout/item_categories_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -112,29 +113,7 @@
         app:layout_constraintEnd_toStartOf="@id/endIconLayout"
         app:layout_constraintStart_toEndOf="@id/fileFavorite"
         app:layout_constraintTop_toTopOf="@id/fileNameLayout"
-        tools:visibility="visible">
-
-        <com.infomaniak.drive.views.CategoryIconView
-            android:id="@+id/categoryIcon1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <com.infomaniak.drive.views.CategoryIconView
-            android:id="@+id/categoryIcon2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/categoryIconOverlap"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-        <com.infomaniak.drive.views.CategoryIconView
-            android:id="@+id/categoryIconRemaining"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/categoryIconOverlap"
-            android:visibility="gone"
-            tools:visibility="visible" />
-    </LinearLayout>
+        tools:visibility="visible" />
 
     <FrameLayout
         android:id="@+id/progressLayout"
