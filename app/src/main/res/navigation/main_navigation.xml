@@ -88,6 +88,9 @@
         <action
             android:id="@+id/action_fileListFragment_to_dropBoxResultBottomSheetDialog"
             app:destination="@id/dropBoxResultBottomSheetDialog" />
+        <action
+            android:id="@+id/action_fileListFragment_to_downloadProgressDialog"
+            app:destination="@id/downloadProgressDialog" />
     </fragment>
     <fragment
         android:id="@+id/previewSliderFragment"
@@ -748,6 +751,10 @@
         <argument
             android:name="userDrive"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
+        <argument
+            android:name="isOpenBookmark"
+            app:argType="boolean"
+            android:defaultValue="false" />
     </dialog>
     <fragment
         android:id="@+id/menuPicturesFragment"

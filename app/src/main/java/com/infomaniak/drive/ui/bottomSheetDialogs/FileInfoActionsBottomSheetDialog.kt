@@ -73,7 +73,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         fileInfoActionsView.init(this, this, navigationArgs.userDrive.sharedWithMe)
         fileInfoActionsView.updateCurrentFile(currentFile)
 
-        getBackNavigationResult<Boolean>(DownloadProgressDialog.OPEN_WITH) {
+        getBackNavigationResult<Int>(DownloadProgressDialog.OPEN_WITH) {
             context?.openWith(currentFile)
         }
     }

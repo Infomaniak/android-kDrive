@@ -294,9 +294,9 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
             filePreview.loadGlide(R.drawable.ic_drive)
             filePreview.setColorFilter(Color.parseColor(file.driveColor))
         }
+        file.isBookmark() -> filePreview.loadGlide(R.drawable.url)
         else -> {
             when {
-                file.isBookmark() -> filePreview.loadGlide(R.drawable.url)
                 file.hasThumbnail && (isGrid || file.getFileType() == File.ConvertedType.IMAGE
                         || file.getFileType() == File.ConvertedType.VIDEO) -> {
                     filePreview.loadGlideUrl(file.thumbnail(), file.getFileType().icon)

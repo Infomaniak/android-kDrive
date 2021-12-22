@@ -18,15 +18,18 @@
 package com.infomaniak.drive.data.models
 
 import android.content.Context
+import android.net.Uri
 import android.os.Parcelable
 import android.webkit.MimeTypeMap
 import androidx.annotation.DrawableRes
+import androidx.core.content.FileProvider
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmListParceler.FileRealmListParceler
 import com.infomaniak.drive.utils.RealmListParceler.IntRealmListParceler
@@ -206,7 +209,6 @@ open class File(
         }
     }
 
-
     fun isBookmark() = name.endsWith(".url") || name.endsWith(".webloc")
 
     fun isPendingUploadFolder() = isFromUploads && (isFolder() || isDrive())
@@ -234,6 +236,15 @@ open class File(
         val folder = java.io.File(context.cacheDir, "converted_pdf/${userDrive.userId}/${userDrive.driveId}")
         if (!folder.exists()) folder.mkdirs()
         return java.io.File(folder, id.toString())
+    }
+
+    fun getUri(context: Context, userDrive: UserDrive = UserDrive()): Pair<Uri, Uri> {
+        val cloudUri = CloudStorageProvider.createShareFileUri(context, this, userDrive)!!
+        val offlineFile = getOfflineFile(context, userDrive.userId)
+
+        return cloudUri to if (isOffline && offlineFile != null) {
+            FileProvider.getUriForFile(context, context.getString(R.string.FILE_AUTHORITY), offlineFile)
+        } else cloudUri
     }
 
     fun getOfflineFile(context: Context, userId: Int = AccountUtils.currentUserId): java.io.File? {

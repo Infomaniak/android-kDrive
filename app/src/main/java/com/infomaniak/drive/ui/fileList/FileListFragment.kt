@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.fileList
 
 import android.app.Dialog
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
@@ -42,6 +43,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.WorkInfo
+import com.dd.plist.NSDictionary
+import com.dd.plist.NSString
+import com.dd.plist.PropertyListParser
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
@@ -61,6 +65,7 @@ import com.infomaniak.drive.utils.BulkOperationsUtils.generateWorkerData
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.drive.utils.Utils.openUrl
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
@@ -79,6 +84,9 @@ import kotlinx.android.synthetic.main.fragment_select_permission.*
 import kotlinx.android.synthetic.main.item_file.*
 import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.coroutines.*
+import java.io.BufferedInputStream
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.util.*
 
 open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
@@ -268,6 +276,40 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         getBackNavigationResult<Int>(REFRESH_FAVORITE_FILE) {
             mainViewModel.refreshActivities.value = true
         }
+
+        getBackNavigationResult<Int>(DownloadProgressDialog.OPEN_BOOKMARK) { fileId ->
+            FileController.getFileProxyById(fileId, customRealm = mainViewModel.realm)?.let { file ->
+                kotlin.runCatching {
+                    if (file.name.endsWith(".url")) openUrl(getUrlFromUrlFile(file.getUri(requireContext()).second))
+                    else openUrl(getUrlFromWebloc(file.getUri(requireContext()).second))
+                }.onFailure {
+                    requireActivity()
+                        .showSnackbar(getString(R.string.errorGetBookmarkURL), anchorView = requireActivity().mainFab)
+                }
+            }
+
+        }
+    }
+
+    private fun getUrlFromUrlFile(uri: Uri): String {
+        return requireContext().contentResolver.openInputStream(uri)?.use {
+            BufferedReader(InputStreamReader(it)).useLines { lines ->
+                lines.forEach { line ->
+                    if (line.contains("URL=")) {
+                        return@useLines line.substringAfter("URL=")
+                    }
+                }
+                ""
+            }
+        } ?: ""
+    }
+
+    private fun getUrlFromWebloc(uri: Uri): String {
+        return requireContext().contentResolver.openInputStream(uri)?.use { inputStream ->
+            with(PropertyListParser.parse(BufferedInputStream(inputStream)) as NSDictionary) {
+                (this["URL"] as NSString).toString()
+            }
+        } ?: ""
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -476,7 +518,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         fileAdapter.onFileClicked = { file ->
             if (file.isUsable()) {
-                if (file.isFolder()) openFolder(file) else displayFile(file)
+                when {
+                    file.isFolder() -> file.openFolder()
+                    file.isBookmark() -> file.openBookmark()
+                    else -> file.displayFile()
+                }
             } else {
                 refreshActivities()
             }
@@ -518,23 +564,26 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         if (file.isDisabled()) {
             safeNavigate(
                 FileListFragmentDirections.actionFileListFragmentToAccessDeniedBottomSheetFragment(
-                    AccountUtils.getCurrentDrive()?.isUserAdmin() ?: false,
-                    file.id
+                    AccountUtils.getCurrentDrive()?.isUserAdmin() ?: false, id
                 )
             )
         } else {
             fileListViewModel.cancelDownloadFiles()
-            safeNavigate(
-                FileListFragmentDirections.fileListFragmentToFileListFragment(
-                    file.id, file.name
-                )
-            )
+            safeNavigate(FileListFragmentDirections.fileListFragmentToFileListFragment(id, name))
         }
     }
 
-    private fun displayFile(file: File) {
+    private fun File.openBookmark() {
+        safeNavigate(
+            FileListFragmentDirections.actionFileListFragmentToDownloadProgressDialog(
+                fileID = id, fileName = name, userDrive = UserDrive(), isOpenBookmark = true
+            )
+        )
+    }
+
+    private fun File.displayFile() {
         val fileList = fileAdapter.getFileObjectsList(mainViewModel.realm)
-        Utils.displayFile(mainViewModel, findNavController(), file, fileList)
+        Utils.displayFile(mainViewModel, findNavController(), this, fileList)
     }
 
     private fun onBackNavigationResult() {

@@ -93,7 +93,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             userDrive = previewSliderViewModel.userDrive
         }
 
-        getBackNavigationResult<Boolean>(DownloadProgressDialog.OPEN_WITH) {
+        getBackNavigationResult<Int>(DownloadProgressDialog.OPEN_WITH) {
             context?.openWith(currentPreviewFile, userDrive)
         }
 
