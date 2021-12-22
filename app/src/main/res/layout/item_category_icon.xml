@@ -28,7 +28,7 @@
         android:layout_height="match_parent"
         android:padding="0.5dp"
         app:shapeAppearanceOverlay="@style/CircleImageView"
-        app:strokeColor="@color/background"
+        app:strokeColor="@color/backgroundCardview"
         app:strokeWidth="0.5dp"
         tools:background="@color/red" />
 
