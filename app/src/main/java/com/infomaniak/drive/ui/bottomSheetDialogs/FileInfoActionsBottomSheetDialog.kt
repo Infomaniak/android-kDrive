@@ -86,11 +86,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             context?.openWith(currentFile)
         }
 
-        getBackNavigationResult<Bundle>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) { bundle ->
-            val hasCategoryBeenModified = bundle.getBoolean(SelectCategoriesFragment.MODIFIED_CATEGORY_BUNDLE_KEY)
-            if (hasCategoryBeenModified) {
-                findNavController().previousBackStackEntry?.savedStateHandle?.set(UPDATE_CATEGORIES_NAV_KEY, currentFile.id)
-            }
+        getBackNavigationResult<Bundle>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
             lifecycleScope.launchWhenResumed { fileInfoActionsView.refreshBottomSheetUi(currentFile) }
         }
     }
@@ -340,9 +336,5 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     private fun transmitActionAndPopBack(message: String, action: CancellableAction? = null) {
         val bundle = bundleOf(CANCELLABLE_TITLE_KEY to message, CANCELLABLE_ACTION_KEY to action)
         setBackNavigationResult(CANCELLABLE_MAIN_KEY, bundle)
-    }
-
-    companion object {
-        const val UPDATE_CATEGORIES_NAV_KEY = "update_categories_nav_key"
     }
 }

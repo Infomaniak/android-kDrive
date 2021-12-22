@@ -271,10 +271,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         getBackNavigationResult<Int>(REFRESH_FAVORITE_FILE) {
             mainViewModel.refreshActivities.value = true
         }
-
-        getBackNavigationResult<Int>(FileInfoActionsBottomSheetDialog.UPDATE_CATEGORIES_NAV_KEY) { fileId ->
-            fileAdapter.notifyFileChanged(fileId)
-        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

@@ -324,25 +324,23 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
         }
     }
 
-    if (!isGrid) {
-        val canReadCategoryOnFile = DriveInfosController.getCategoryRights()?.canReadCategoryOnFile ?: false
-        val categories = file.getCategories()
-        categoriesLayout.apply {
-            if (!canReadCategoryOnFile || categories.isEmpty()) {
-                isGone = true
-            } else {
-                forEachIndexed { index, view ->
-                    with(view as CategoryIconView) {
-                        val category = categories.getOrNull(index)
-                        if (index < MAX_DISPLAYED_CATEGORIES) {
-                            setCategoryIconOrHide(category)
-                        } else {
-                            setRemainingCategoriesNumber(categories.size - MAX_DISPLAYED_CATEGORIES - 1, category)
-                        }
+    val canReadCategoryOnFile = DriveInfosController.getCategoryRights()?.canReadCategoryOnFile ?: false
+    val categories = file.getCategories()
+    categoriesLayout.apply {
+        if (!canReadCategoryOnFile || categories.isEmpty()) {
+            isGone = true
+        } else {
+            forEachIndexed { index, view ->
+                with(view as CategoryIconView) {
+                    val category = categories.getOrNull(index)
+                    if (index < MAX_DISPLAYED_CATEGORIES) {
+                        setCategoryIconOrHide(category)
+                    } else {
+                        setRemainingCategoriesNumber(category, categories.size - MAX_DISPLAYED_CATEGORIES - 1)
                     }
                 }
-                isVisible = true
             }
+            isVisible = true
         }
     }
 }

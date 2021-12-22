@@ -52,7 +52,7 @@ class SelectCategoriesFragment : Fragment() {
     private val selectCategoriesViewModel: SelectCategoriesViewModel by viewModels()
     private val navigationArgs: SelectCategoriesFragmentArgs by navArgs()
 
-    private lateinit var adapter: CategoriesAdapter
+    private lateinit var categoriesAdapter: CategoriesAdapter
     private lateinit var file: File
     private var hasCategoryBeenModified: Boolean = false
 
@@ -77,7 +77,7 @@ class SelectCategoriesFragment : Fragment() {
     }
 
     private fun setCategoriesAdapter(canEditCategory: Boolean, canDeleteCategory: Boolean) {
-        adapter = CategoriesAdapter(
+        categoriesAdapter = CategoriesAdapter(
             onCategoryChanged = { categoryId, isSelected ->
                 if (isSelected) addCategory(categoryId) else removeCategory(categoryId)
             }
@@ -112,7 +112,7 @@ class SelectCategoriesFragment : Fragment() {
             }
         }
 
-        categoriesRecyclerView.adapter = adapter
+        categoriesRecyclerView.adapter = categoriesAdapter
     }
 
     private fun setData() {
@@ -141,13 +141,13 @@ class SelectCategoriesFragment : Fragment() {
             addTextChangedListener(DebouncingTextWatcher(lifecycle) {
                 if (isAtLeastResumed()) {
                     clearButton.isInvisible = it.isNullOrEmpty()
-                    adapter.updateFilter(text.toString())
+                    categoriesAdapter.updateFilter(text.toString())
                     handleCreateCategoryRow(it?.trim())
                 }
             })
             setOnEditorActionListener { _, actionId, _ ->
                 if (EditorInfo.IME_ACTION_SEARCH == actionId) {
-                    adapter.updateFilter(text.toString())
+                    categoriesAdapter.updateFilter(text.toString())
                     true
                 } else false
             }
@@ -157,7 +157,7 @@ class SelectCategoriesFragment : Fragment() {
     private fun setBackActionHandlers() {
         getBackNavigationResult<Int>(CategoryInfoActionsBottomSheetDialog.DELETE_CATEGORY_NAV_KEY) { categoryId ->
             hasCategoryBeenModified = true
-            adapter.deleteCategory(categoryId)
+            categoriesAdapter.deleteCategory(categoryId)
         }
     }
 
@@ -182,7 +182,7 @@ class SelectCategoriesFragment : Fragment() {
 
         createCategoryRow.apply {
             var topCornerRadius = 0.0f
-            if (adapter.filteredCategories.isEmpty()) {
+            if (categoriesAdapter.filteredCategories.isEmpty()) {
                 topCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
                 createCategoryRowSeparator.isGone = true
             } else createCategoryRowSeparator.isVisible = true
@@ -196,14 +196,14 @@ class SelectCategoriesFragment : Fragment() {
                 .setBottomRightCorner(CornerFamily.ROUNDED, bottomCornerRadius)
                 .build()
 
-            isVisible = categoryName?.isNotBlank() == true && !adapter.doesCategoryExist(categoryName)
+            isVisible = categoryName?.isNotBlank() == true && !categoriesAdapter.doesCategoryExist(categoryName)
         }
     }
 
     private fun addCategory(categoryId: Int) {
         selectCategoriesViewModel.addCategory(file, categoryId).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
-                adapter.updateCategory(categoryId, true)
+                categoriesAdapter.updateCategory(categoryId, true)
             } else Utils.showSnackbar(requireView(), apiResponse.translateError())
         }
     }
@@ -211,7 +211,7 @@ class SelectCategoriesFragment : Fragment() {
     private fun removeCategory(categoryId: Int) {
         selectCategoriesViewModel.removeCategory(file, categoryId).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
-                adapter.updateCategory(categoryId, false)
+                categoriesAdapter.updateCategory(categoryId, false)
             } else Utils.showSnackbar(requireView(), apiResponse.translateError())
         }
     }
@@ -219,8 +219,7 @@ class SelectCategoriesFragment : Fragment() {
     private fun setBackNavResult() {
         setBackNavigationResult(
             SELECT_CATEGORIES_NAV_KEY, bundleOf(
-                CATEGORIES_BUNDLE_KEY to adapter.allCategories.filter { it.isSelected }.map { it.id },
-                MODIFIED_CATEGORY_BUNDLE_KEY to hasCategoryBeenModified,
+                CATEGORIES_BUNDLE_KEY to categoriesAdapter.allCategories.filter { it.isSelected }.map { it.id }
             )
         )
     }
@@ -232,6 +231,5 @@ class SelectCategoriesFragment : Fragment() {
     companion object {
         const val SELECT_CATEGORIES_NAV_KEY = "select_categories_nav_key"
         const val CATEGORIES_BUNDLE_KEY = "categories_bundle_key"
-        const val MODIFIED_CATEGORY_BUNDLE_KEY = "modified_category_bundle_key"
     }
 }
