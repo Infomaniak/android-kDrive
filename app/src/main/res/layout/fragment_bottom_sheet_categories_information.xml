@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_marginVertical="@dimen/marginStandard"
         android:maxHeight="270dp"
-        android:src="@drawable/img_categories"
+        android:src="@drawable/new_feature_categories"
         app:layout_constraintBottom_toTopOf="@id/title"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -306,6 +306,7 @@ open class File(
         return DriveInfosController.getCurrentDriveCategoriesFromIds(fileCategoriesIds.toTypedArray())
     }
 
+    // TODO This function is called in the FileAdapter, for each File, and is getting the RealmInstance each time. This is not very efficient.
     private fun getSortedCategoriesIds(): List<Int> {
         fun RealmList<FileCategory>.sort() = sort(FileCategory::addedToFileAt.name).map { it.id }
 

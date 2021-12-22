@@ -91,7 +91,7 @@ class SelectCategoriesFragment : Fragment() {
                     id = category.id,
                     name = category.getName(requireContext()),
                     color = category.color,
-                    isPredefined = category.isPredefined ?: true,
+                    isPredefined = category.isPredefined,
                     isSelected = fileCategory != null,
                     userUsageCount = category.userUsageCount,
                     addedToFileAt = fileCategory?.addedToFileAt,

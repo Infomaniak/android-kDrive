@@ -45,7 +45,7 @@ open class Drive(
     var sharedWithMe: Boolean = false,
     var userId: Int = 0,
     @SerializedName("category_rights")
-    var categoryRights: CategoryRights? = CategoryRights(),
+    var categoryRights: CategoryRights = CategoryRights(),
 
     /**
      * Drive data
@@ -70,7 +70,6 @@ open class Drive(
     @SerializedName("teams")
     private var _teams: DriveTeamsCategories? = DriveTeamsCategories(),
     var categories: RealmList<Category> = RealmList(),
-
 ) : RealmObject() {
 
     val packFunctionality: DrivePackFunctionality
