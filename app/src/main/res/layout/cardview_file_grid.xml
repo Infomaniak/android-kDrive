@@ -165,6 +165,7 @@
                     layout="@layout/item_categories_layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/marginStandardSmall"
                     android:orientation="horizontal"
                     android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="@id/fileNameLayout"
