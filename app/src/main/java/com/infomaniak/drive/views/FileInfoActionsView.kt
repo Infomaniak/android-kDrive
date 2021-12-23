@@ -323,7 +323,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
             currentFile.currentProgress = progress
             // Check isOffline because progressing to 100 doesn't necessarily mean it's finish
-            if (progress == 100 && workInfo.state.isFinished) {
+            if (progress == 100 && workInfo.state.isFinished && currentFile.isOfflineFile(context)) {
                 updateFile?.invoke(fileId)
                 currentFile.isOffline = true
                 refreshBottomSheetUi(currentFile)
