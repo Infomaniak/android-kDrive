@@ -334,10 +334,10 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
             forEachIndexed { index, view ->
                 with(view as CategoryIconView) {
                     val category = categories.getOrNull(index)
-                    if (index < MAX_DISPLAYED_CATEGORIES) {
+                    if (index < MAX_DISPLAYED_CATEGORIES - 1) {
                         setCategoryIconOrHide(category)
                     } else {
-                        setRemainingCategoriesNumber(category, categories.size - MAX_DISPLAYED_CATEGORIES - 1)
+                        setRemainingCategoriesNumber(category, categories.size - MAX_DISPLAYED_CATEGORIES)
                     }
                 }
             }

@@ -118,8 +118,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         const val CANCELLABLE_ACTION_KEY = "cancellable_action"
         const val SORT_TYPE_OPTION_KEY = "sort_type_option"
 
-        const val ACTIVITIES_REFRESH_DELAY = 5000L
-        const val MAX_DISPLAYED_CATEGORIES = 2
+        const val ACTIVITIES_REFRESH_DELAY = 5_000L
+        const val MAX_DISPLAYED_CATEGORIES = 3 // Beware, if this value is modified, the Categories' layouts should be modified accordingly.
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
