@@ -25,13 +25,13 @@ import com.infomaniak.drive.data.models.Team
 
 object ApiRoutes {
 
-    private const val with = "with=children,rights,collaborative_folder,favorite,mobile,share_link"
+    private const val with = "with=children,rights,collaborative_folder,favorite,mobile,share_link,categories"
 
     private fun fileURL(file: File) = "${DRIVE_API}${file.driveId}/file/${file.id}"
 
     private fun trashURL(file: File) = "${DRIVE_API}${file.driveId}/file/trash/${file.id}"
 
-    fun getAllDrivesData() = "${DRIVE_API}init?with=drives,users,teams,ips"
+    fun getAllDrivesData() = "${DRIVE_API}init?with=drives,users,teams,ips,categories"
 
     fun getUserProfile() = "${INFOMANIAK_API}profile"
 
@@ -81,8 +81,8 @@ object ApiRoutes {
 
     fun unLikeCommentFile(file: File, commentId: Int) = "${fileURL(file)}/comment/$commentId/unlike"
 
-    fun getFileDetails(file: File) =
-        "${fileURL(file)}?with=user,teams,children,parent,rights,favorite,version,extras,share_link,collaborative_folder,mobile,conversion"
+    fun getFileDetails(file: File) = "${fileURL(file)}?with=user,teams,children,parent,rights,favorite,version,extras," +
+            "share_link,collaborative_folder,mobile,conversion,categories"
 
     fun getFileCount(file: File) = "${fileURL(file)}/count"
 
@@ -107,7 +107,8 @@ object ApiRoutes {
     fun dropBox(file: File) = "${fileURL(file)}/collaborate"
 
     fun getLastActivities(driveId: Int) =
-        "${DRIVE_API}$driveId/file/activity?with=file,rights,collaborative_folder,favorite,mobile,share_link&depth=unlimited" +
+        "${DRIVE_API}$driveId/file/activity?with=file,rights,collaborative_folder,favorite,mobile,share_link,categories" +
+                "&depth=unlimited" +
                 "&actions[]=file_create" +
                 "&actions[]=file_update" +
                 "&actions[]=file_restore" +
@@ -117,6 +118,14 @@ object ApiRoutes {
     fun getLastModifiedFiles(driveId: Int) = "${DRIVE_API}$driveId/file/last_modified?$with"
 
     fun shareLink(file: File) = "${fileURL(file)}/link"
+
+    fun createCategory(driveId: Int) = "${DRIVE_API}$driveId/category"
+
+    fun updateCategory(driveId: Int, categoryId: Int) = "${DRIVE_API}$driveId/category/$categoryId"
+
+    fun addCategory(file: File) = "${fileURL(file)}/category"
+
+    fun removeCategory(file: File, categoryId: Int) = "${fileURL(file)}/category/$categoryId"
 
     fun getLastPictures(driveId: Int) =
         "${DRIVE_API}$driveId/file/search?order=desc&order_by=last_modified_at&converted_type=image&$with"

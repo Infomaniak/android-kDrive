@@ -50,6 +50,7 @@ import android.view.animation.RotateAnimation
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
+import android.widget.LinearLayout
 import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.biometric.BiometricManager
@@ -58,6 +59,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
+import androidx.core.view.forEachIndexed
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -83,21 +85,29 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialog.Companion.FILE_ID
+import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED_CATEGORIES
+import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.*
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.drive.views.CategoryIconView
 import com.infomaniak.lib.core.models.User
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.UtilsUi.getInitials
 import com.infomaniak.lib.core.utils.format
+import io.realm.RealmList
 import io.sentry.Sentry
 import kotlinx.android.synthetic.main.cardview_file_grid.view.*
+import kotlinx.android.synthetic.main.fragment_file_details_infos.*
 import kotlinx.android.synthetic.main.item_file.view.*
+import kotlinx.android.synthetic.main.item_file.view.categoriesLayout
 import kotlinx.android.synthetic.main.item_file.view.fileFavorite
 import kotlinx.android.synthetic.main.item_file.view.fileName
 import kotlinx.android.synthetic.main.item_file.view.fileOffline
@@ -110,7 +120,6 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.abs
 import kotlin.math.roundToInt
-
 
 typealias FileId = Int
 typealias IsComplete = Boolean
@@ -314,6 +323,26 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
             }
             filePreview2?.loadGlide(file.getFileType().icon)
             setupFileProgress(file)
+        }
+    }
+
+    val canReadCategoryOnFile = DriveInfosController.getCategoryRights()?.canReadCategoryOnFile ?: false
+    val categories = file.getCategories()
+    (categoriesLayout as LinearLayout).apply {
+        if (!canReadCategoryOnFile || categories.isEmpty()) {
+            isGone = true
+        } else {
+            forEachIndexed { index, view ->
+                with(view as CategoryIconView) {
+                    val category = categories.getOrNull(index)
+                    if (index < MAX_DISPLAYED_CATEGORIES - 1) {
+                        setCategoryIconOrHide(category)
+                    } else {
+                        setRemainingCategoriesNumber(category, categories.size - MAX_DISPLAYED_CATEGORIES)
+                    }
+                }
+            }
+            isVisible = true
         }
     }
 }
@@ -756,4 +785,34 @@ fun Context.shareText(text: String) {
         type = "text/plain"
     }
     ContextCompat.startActivity(this, Intent.createChooser(intent, null), null)
+}
+
+fun Category.getName(context: Context): String = when (name) {
+    "PREDEF_CAT_BANKING" -> context.getString(R.string.categoryBanking)
+    "PREDEF_CAT_BILL" -> context.getString(R.string.categoryBill)
+    "PREDEF_CAT_CONTRACT" -> context.getString(R.string.categoryContract)
+    "PREDEF_CAT_FORM" -> context.getString(R.string.categoryForm)
+    "PREDEF_CAT_HOBBIES" -> context.getString(R.string.categoryHobbies)
+    "PREDEF_CAT_ID" -> context.getString(R.string.categoryID)
+    "PREDEF_CAT_INSURANCE" -> context.getString(R.string.categoryInsurance)
+    "PREDEF_CAT_QUOTATION" -> context.getString(R.string.categoryQuotation)
+    "PREDEF_CAT_TAXATION" -> context.getString(R.string.categoryTaxation)
+    "PREDEF_CAT_TRANSPORTATION" -> context.getString(R.string.categoryTransportation)
+    "PREDEF_CAT_WARRANTY" -> context.getString(R.string.categoryWarranty)
+    "PREDEF_CAT_WORK" -> context.getString(R.string.categoryWork)
+    else -> name
+}
+
+fun List<UICategory>.sortCategoriesList(): List<UICategory> {
+    return sortedByDescending { it.userUsageCount }
+        .sortedBy { it.addedToFileAt }
+        .sortedByDescending { it.isSelected }
+}
+
+fun RealmList<Category>.find(id: Int): Category? {
+    return where().equalTo(Category::id.name, id).findFirst()
+}
+
+fun RealmList<FileCategory>.find(id: Int): FileCategory? {
+    return where().equalTo(FileCategory::id.name, id).findFirst()
 }

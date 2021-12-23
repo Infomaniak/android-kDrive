@@ -36,7 +36,9 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.data.models.Share
 import com.infomaniak.drive.data.models.ShareLink
+import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
+import com.infomaniak.drive.ui.fileList.categories.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.ShareLinkContainerView
 import com.infomaniak.drive.views.UserAvatarView
@@ -55,7 +57,9 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) { currentFile ->
+
             setupShareLinkContainer(currentFile, fileDetailsViewModel.currentFileShare.value)
+            setupCategoriesContainer(currentFile?.id, currentFile.getCategories())
             displayUsersAvatars(currentFile)
             setupShareButton(currentFile)
 
@@ -89,10 +93,13 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
             setupShareLinkContainer(currentFile, share)
         }
 
+        setBackActionHandlers()
+    }
+
+    private fun setBackActionHandlers() {
         getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.SELECT_PERMISSION_NAV_KEY) { bundle ->
             val permission = bundle.getParcelable<Permission>(SelectPermissionBottomSheetDialog.PERMISSION_BUNDLE_KEY)
             val isPublic = isPublicPermission(permission)
-
             fileDetailsViewModel.currentFile.value?.let { currentFile ->
                 if ((isPublic && shareLink == null) || (!isPublic && shareLink != null)) {
                     mainViewModel.apply {
@@ -100,6 +107,14 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
                     }
                 }
             }
+        }
+
+        getBackNavigationResult<List<Int>>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
+            val file = fileDetailsViewModel.currentFile.value
+            setupCategoriesContainer(
+                fileId = file?.id,
+                categories = DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray()),
+            )
         }
     }
 
@@ -116,7 +131,7 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
             shareButton.isVisible = true
             shareButton.setOnClickListener {
                 parentFragment?.safeNavigate(
-                    FileDetailsFragmentDirections.actionFileDetailsFragmentToFileShareDetailsFragment(file = currentFile)
+                    FileDetailsFragmentDirections.actionFileDetailsFragmentToFileShareDetailsFragment(fileId = currentFile.id)
                 )
             }
         } else {
@@ -128,8 +143,7 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
 
         if (file?.rights?.canBecomeLink == true || file?.shareLink?.isNotBlank() == true) {
             shareLinkContainer.isVisible = true
-            topShareDivider.isVisible = true
-            botShareDivider.isVisible = true
+            shareLinkDivider.isVisible = true
             shareLinkContainer.setup(
                 shareLink = share?.link,
                 file = file,
@@ -163,8 +177,27 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
 
         } else {
             shareLinkContainer.isGone = true
-            topShareDivider.isGone = true
-            botShareDivider.isGone = true
+            shareLinkDivider.isGone = true
+        }
+    }
+
+    private fun setupCategoriesContainer(fileId: Int?, categories: List<Category>) {
+        val rights = DriveInfosController.getCategoryRights()
+        if (fileId?.isPositive() == true && rights?.canReadCategoryOnFile == true) {
+            categoriesDivider.isVisible = true
+            categoriesContainer.apply {
+                isVisible = true
+                setup(categories, rights.canPutCategoryOnFile, onClicked = {
+                    runCatching {
+                        findNavController().navigate(
+                            FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectCategoriesFragment(fileId)
+                        )
+                    }
+                })
+            }
+        } else {
+            categoriesDivider.isGone = true
+            categoriesContainer.isGone = true
         }
     }
 
@@ -173,8 +206,10 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         val userList = DriveInfosController.getUsers(userIds = userIds)
         if (userList.isEmpty()) {
             users.isGone = true
+            usersDivider.isGone = true
         } else {
             users.isVisible = true
+            usersDivider.isVisible = true
             userListLayout.forEachIndexed { index, view ->
                 (view as UserAvatarView).apply {
                     if (index < MAX_DISPLAYED_USERS) {
@@ -198,20 +233,22 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
 
     private fun createShareLink(currentFile: File) {
         mainViewModel.postFileShareLink(currentFile).observe(viewLifecycleOwner) { apiResponse ->
-            if (apiResponse.isSuccess())
+            if (apiResponse.isSuccess()) {
                 shareLinkContainer.update(apiResponse.data)
-            else
+            } else {
                 requireActivity().showSnackbar(getString(R.string.errorShareLink))
+            }
         }
     }
 
     private fun deleteShareLink(currentFile: File) {
         mainViewModel.deleteFileShareLink(currentFile).observe(viewLifecycleOwner) { apiResponse ->
             val success = apiResponse.data == true
-            if (success)
+            if (success) {
                 shareLinkContainer.update(null)
-            else
+            } else {
                 requireActivity().showSnackbar(apiResponse.translateError())
+            }
         }
     }
 

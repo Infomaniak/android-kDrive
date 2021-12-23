@@ -141,9 +141,9 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
                     setBackNavigationResult(
                         SELECT_PERMISSION_NAV_KEY,
                         bundleOf(
-                            PERMISSIONS_GROUP_BUNDLE_KEY to navigationArgs.permissionsGroup,
                             PERMISSION_BUNDLE_KEY to selectPermissionViewModel.currentPermission,
-                            SHAREABLE_BUNDLE_KEY to navigationArgs.currentShareable
+                            SHAREABLE_BUNDLE_KEY to navigationArgs.currentShareable,
+                            PERMISSIONS_GROUP_BUNDLE_KEY to navigationArgs.permissionsGroup
                         )
                     )
                 }
@@ -243,10 +243,10 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
     }
 
     companion object {
-        const val SELECT_PERMISSION_NAV_KEY = "permission_dialog_key"
+        const val SELECT_PERMISSION_NAV_KEY = "select_permission_nav_key"
         const val PERMISSION_BUNDLE_KEY = "permission_bundle_key"
         const val SHAREABLE_BUNDLE_KEY = "shareable_bundle_key"
-        const val PERMISSIONS_GROUP_BUNDLE_KEY = "permissions_group_bundle"
+        const val PERMISSIONS_GROUP_BUNDLE_KEY = "permissions_group_bundle_key"
     }
 
     @Parcelize

@@ -20,12 +20,12 @@ package com.infomaniak.drive.data.models
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
-import io.realm.annotations.PrimaryKey
+import io.realm.annotations.RealmClass
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
+@RealmClass(embedded = true)
 open class Rights(
-    @PrimaryKey var fileId: Int = 0,
     @SerializedName("can_become_collab") var canBecomeCollab: Boolean = false,
     @SerializedName("can_become_link") var canBecomeLink: Boolean = false,
     @SerializedName("can_favorite") var canFavorite: Boolean = false,
@@ -54,5 +54,4 @@ open class Rights(
         ACCESS_UNDEFINED("undefined"),
         ACCESS_PRIVATE("private"),
     }
-
 }

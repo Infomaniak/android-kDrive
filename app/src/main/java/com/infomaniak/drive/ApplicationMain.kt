@@ -35,9 +35,7 @@ import com.facebook.stetho.okhttp3.StethoInterceptor
 import com.infomaniak.drive.BuildConfig.DRIVE_API
 import com.infomaniak.drive.BuildConfig.INFOMANIAK_API
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
-import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UISettings
-import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.data.sync.UploadNotifications.pendingIntentFlags
 import com.infomaniak.drive.ui.LaunchActivity
@@ -51,7 +49,6 @@ import com.infomaniak.lib.core.auth.TokenInterceptorListener
 import com.infomaniak.lib.core.models.User
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
-import com.infomaniak.lib.core.utils.ApiController
 import com.infomaniak.lib.login.ApiToken
 import io.sentry.SentryEvent
 import io.sentry.SentryOptions
@@ -61,9 +58,7 @@ import kotlinx.coroutines.*
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import org.eclipse.paho.client.mqttv3.*
-import java.lang.reflect.Type
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class ApplicationMain : Application(), ImageLoaderFactory {
@@ -100,13 +95,6 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         AccountUtils.reloadApp = {
             startActivity(Intent(this, LaunchActivity::class.java).clearStack())
         }
-
-        val deserializerList = ArrayList<Pair<Type, Any>>().apply {
-            add(Pair(Drive::class.java, DriveDeserializer))
-            add(Pair(File::class.java, FileDeserializer))
-        }
-
-        ApiController.init(deserializerList)
 
         InfomaniakCore.init(
             appVersionName = BuildConfig.VERSION_NAME,

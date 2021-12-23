@@ -42,21 +42,15 @@
             tools:ignore="ContentDescription"
             tools:src="@drawable/ic_lock" />
 
-        <View
-            android:id="@+id/titleSeparator"
-            android:layout_width="@dimen/marginStandardMedium"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="@id/shareLinkTitle"
-            app:layout_constraintStart_toEndOf="@id/shareLinkIcon"
-            app:layout_constraintTop_toTopOf="@id/shareLinkTitle" />
-
         <TextView
             android:id="@+id/shareLinkTitle"
             style="@style/Subtitle2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintStart_toEndOf="@id/titleSeparator"
+            android:layout_marginStart="@dimen/marginStandardMedium"
+            app:layout_constraintStart_toEndOf="@id/shareLinkIcon"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_goneMarginStart="0dp"
             tools:text="@string/restrictedSharedLinkTitle" />
 
         <ImageView

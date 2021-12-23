@@ -18,13 +18,16 @@
 package com.infomaniak.drive.data.cache
 
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.FileCategory
+import com.infomaniak.drive.data.models.Rights
 import io.realm.DynamicRealm
 import io.realm.FieldAttribute
 import io.realm.RealmMigration
+import java.util.*
 
 class FileMigration : RealmMigration {
     companion object {
-        const val bddVersion = 1L // Must be bumped when the schema changes
+        const val bddVersion = 2L // Must be bumped when the schema changes
     }
 
     override fun migrate(realm: DynamicRealm, oldVersion: Long, newVersion: Long) {
@@ -50,6 +53,36 @@ class FileMigration : RealmMigration {
             }
             oldVersionTemp++
         }
+
+        // Migrated to version 2:
+        // - Added new field (FileCategory list) in File table
+        // - Modified field (Rights) in File table (remove PrimaryKey & ID, and switched to Embedded)
+        if (oldVersionTemp == 1L) {
+            val fileCategorySchema = schema.create(FileCategory::class.java.simpleName).apply {
+                addField(FileCategory::id.name, Int::class.java, FieldAttribute.REQUIRED)
+                addField(FileCategory::iaCategoryUserValidation.name, String::class.java, FieldAttribute.REQUIRED)
+                addField(FileCategory::isGeneratedByIa.name, Boolean::class.java, FieldAttribute.REQUIRED)
+                addField(FileCategory::userId.name, Int::class.java).setNullable(FileCategory::userId.name, true)
+                addField(FileCategory::addedToFileAt.name, Date::class.java, FieldAttribute.REQUIRED)
+            }
+            schema.get(File::class.java.simpleName)?.apply {
+                addRealmListField(File::categories.name, fileCategorySchema)
+            }
+            schema.get(FileCategory::class.java.simpleName)?.apply {
+                isEmbedded = true
+            }
+            schema.get(Rights::class.java.simpleName)?.apply {
+                removePrimaryKey()
+                transform { // apply for each right
+                    val fileId = it.getInt("fileId")
+                    val file = realm.where(File::class.java.simpleName).equalTo(File::id.name, fileId).findFirst()
+                    if (file == null) it.deleteFromRealm() // Delete if it's orphan
+                }
+                removeField("fileId")
+                isEmbedded = true
+            }
+            oldVersionTemp++
+        }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -61,6 +94,4 @@ class FileMigration : RealmMigration {
     override fun hashCode(): Int {
         return javaClass.hashCode()
     }
-
-
 }

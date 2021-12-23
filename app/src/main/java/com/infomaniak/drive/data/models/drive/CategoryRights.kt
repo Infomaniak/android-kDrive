@@ -15,24 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.utils
+package com.infomaniak.drive.data.models.drive
 
-import com.google.gson.*
-import com.infomaniak.drive.data.models.drive.Drive
-import com.infomaniak.lib.core.utils.CustomDateTypeAdapter
-import java.lang.reflect.Type
-import java.util.*
+import com.google.gson.annotations.SerializedName
+import io.realm.RealmObject
+import io.realm.annotations.RealmClass
 
-object DriveDeserializer : JsonDeserializer<Drive> {
-
-    private var gson: Gson = GsonBuilder()
-        .registerTypeAdapter(Date::class.java, CustomDateTypeAdapter())
-        .create()
-
-    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): Drive {
-        val drive = gson.fromJson(json, Drive::class.java)
-        drive.initIds()
-        return drive
-    }
-
-}
+@RealmClass(embedded = true)
+open class CategoryRights(
+    @SerializedName("can_create_category")
+    var canCreateCategory: Boolean = false,
+    @SerializedName("can_delete_category")
+    var canDeleteCategory: Boolean = false,
+    @SerializedName("can_edit_category")
+    var canEditCategory: Boolean = false,
+    @SerializedName("can_put_category_on_file")
+    var canPutCategoryOnFile: Boolean = false,
+    @SerializedName("can_read_category_on_file")
+    var canReadCategoryOnFile: Boolean = false,
+) : RealmObject()

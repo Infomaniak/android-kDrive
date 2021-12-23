@@ -36,6 +36,7 @@ import androidx.work.*
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.CancellableAction
@@ -86,8 +87,9 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     fun updateCurrentFile(file: File) {
         currentFile = file
-
         refreshBottomSheetUi(currentFile)
+        manageCategories.isVisible = DriveInfosController.getCategoryRights()?.canPutCategoryOnFile ?: false
+
         if (currentFile.isFromActivities) {
             quickActionsLayout.isGone = true
             actionListLayout.isGone = true
@@ -183,19 +185,16 @@ class FileInfoActionsView @JvmOverloads constructor(
         copyPublicLink.setOnClickListener { onItemClickListener.copyPublicLink() }
         openWith.setOnClickListener { onItemClickListener.openWithClicked() }
         downloadFile.setOnClickListener { onItemClickListener.downloadFileClicked() }
+        manageCategories.setOnClickListener { onItemClickListener.manageCategoriesClicked(currentFile.id) }
         addFavorites.setOnClickListener {
             addFavorites.isEnabled = false
             onItemClickListener.addFavoritesClicked()
         }
         leaveShare.setOnClickListener { onItemClickListener.leaveShare(context, currentFile) }
-
         availableOfflineSwitch.setOnCheckedChangeListener { _, isChecked ->
             onItemClickListener.availableOfflineSwitched(this, currentFile, isChecked)
         }
-        availableOffline.setOnClickListener {
-            availableOfflineSwitch.performClick()
-        }
-
+        availableOffline.setOnClickListener { availableOfflineSwitch.performClick() }
         moveFile.setOnClickListener {
             val currentFolder = FileController.getParentFile(currentFile.id)?.id ?: -42
             onItemClickListener.moveFileClicked(ownerFragment, currentFolder)
@@ -206,7 +205,6 @@ class FileInfoActionsView @JvmOverloads constructor(
                 currentFile
             )
         }
-
         renameFile.setOnClickListener {
             onItemClickListener.renameFileClicked(
                 ownerFragment.requireContext(),
@@ -325,7 +323,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
             currentFile.currentProgress = progress
             // Check isOffline because progressing to 100 doesn't necessarily mean it's finish
-            if (progress == 100 && workInfo.state.isFinished) {
+            if (progress == 100 && workInfo.state.isFinished && currentFile.isOfflineFile(context)) {
                 updateFile?.invoke(fileId)
                 currentFile.isOffline = true
                 refreshBottomSheetUi(currentFile)
@@ -401,6 +399,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun copyPublicLink()
         fun displayInfoClicked()
         fun downloadFileClicked()
+        fun manageCategoriesClicked(fileId: Int)
         fun dropBoxClicked(isDropBox: Boolean) = Unit
         fun fileRightsClicked()
         fun onCacheAddedToOffline() = Unit

@@ -23,7 +23,7 @@ import io.realm.annotations.RealmModule
 
 object RealmModules {
 
-    @RealmModule(classes = [File::class, Rights::class, FileActivity::class])
+    @RealmModule(classes = [File::class, Rights::class, FileActivity::class, FileCategory::class])
     class LocalFilesModule
 
     @RealmModule(classes = [UploadFile::class, SyncSettings::class, MediaFolder::class])
@@ -32,7 +32,12 @@ object RealmModules {
     @RealmModule(classes = [AppSettings::class])
     class AppSettingsModule
 
-    @RealmModule(classes = [Drive::class, DrivePackFunctionality::class, DrivePreferences::class, DriveUsersCategories::class, DriveUser::class, Team::class, TeamDetails::class, DriveTeamsCategories::class])
+    @RealmModule(
+        classes = [
+            Drive::class, DrivePackFunctionality::class, DrivePreferences::class, DriveUsersCategories::class, DriveUser::class,
+            Team::class, TeamDetails::class, DriveTeamsCategories::class, Category::class, CategoryRights::class
+        ]
+    )
     class DriveFilesModule
 
 }

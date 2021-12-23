@@ -23,6 +23,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
@@ -61,11 +62,61 @@ open class FileAdapter(
     var showShareFileButton: Boolean = true
     var viewHolderType: DisplayType = DisplayType.LIST
 
-    var pendingWifiConnection: Boolean = false
     var uploadInProgress: Boolean = false
 
-    private var showLoading = false
     var isComplete = false
+
+    private var pendingWifiConnection: Boolean = false
+    private var showLoading = false
+    private var fileAdapterObserver: RecyclerView.AdapterDataObserver? = null
+
+    private fun createFileAdapterObserver(recyclerView: RecyclerView): RecyclerView.AdapterDataObserver {
+        return object : RecyclerView.AdapterDataObserver() {
+
+            private fun notifyChanged(position: Int) {
+                recyclerView.post {
+                    if (fileList.isNotEmpty() && position < fileList.count()) notifyItemChanged(position)
+                }
+            }
+
+            override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+                if (viewHolderType == DisplayType.LIST && fileList.isNotEmpty()) {
+                    when {
+                        positionStart == 0 -> notifyChanged(0)
+                        positionStart >= fileList.count() -> notifyChanged(fileList.lastIndex)
+                    }
+                }
+            }
+
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                if (viewHolderType == DisplayType.LIST && fileList.count() > 1) {
+                    when {
+                        positionStart == 0 -> notifyChanged(itemCount)
+                        positionStart + itemCount == fileList.count() -> notifyChanged(fileList.lastIndex - itemCount)
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+
+        if (fileAdapterObserver == null) {
+            createFileAdapterObserver(recyclerView).also {
+                fileAdapterObserver = it
+                registerAdapterDataObserver(it)
+            }
+        }
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        kotlin.runCatching {
+            fileAdapterObserver?.let(::unregisterAdapterDataObserver)
+            fileAdapterObserver = null
+        }
+    }
 
     private fun getFile(position: Int) = fileList[position]
 
@@ -122,30 +173,9 @@ open class FileAdapter(
         }
     }
 
-    fun addAt(position: Int, newFile: File) {
-        fileList.add(position, newFile)
-        notifyItemInserted(position)
-
-        if (viewHolderType == DisplayType.LIST) {
-            if (position == 0 && fileList.size > 1) {
-                notifyItemChanged(1)
-            } else if (position == fileList.size - 1 && fileList.size > 1) {
-                notifyItemChanged(fileList.size - 2)
-            }
-        }
-    }
-
     fun deleteAt(position: Int) {
         fileList.removeAt(position)
         notifyItemRemoved(position)
-
-        if (viewHolderType == DisplayType.LIST) {
-            if (position == 0 && fileList.size > 0) {
-                notifyItemChanged(0)
-            } else if (position == fileList.size && fileList.size > 0) {
-                notifyItemChanged(fileList.size - 1)
-            }
-        }
     }
 
     fun getFileObjectsList(realm: Realm?): ArrayList<File> {

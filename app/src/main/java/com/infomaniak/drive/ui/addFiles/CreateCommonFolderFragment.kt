@@ -64,7 +64,7 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
                     if (currentPermission == SPECIFIC_USERS) {
                         safeNavigate(
                             CreateCommonFolderFragmentDirections.actionCreateCommonFolderFragmentToFileShareDetailsFragment(
-                                file = file, ignoreCreateFolderStack = true
+                                fileId = file.id, ignoreCreateFolderStack = true
                             )
                         )
                     } else {

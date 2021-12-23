@@ -97,8 +97,21 @@
         android:src="@drawable/ic_star_filled"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/fileNameLayout"
-        app:layout_constraintEnd_toStartOf="@id/endIconLayout"
+        app:layout_constraintEnd_toStartOf="@id/categoriesLayout"
         app:layout_constraintStart_toEndOf="@id/fileNameLayout"
+        app:layout_constraintTop_toTopOf="@id/fileNameLayout"
+        tools:visibility="visible" />
+
+    <include
+        android:id="@+id/categoriesLayout"
+        layout="@layout/item_categories_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/fileNameLayout"
+        app:layout_constraintEnd_toStartOf="@id/endIconLayout"
+        app:layout_constraintStart_toEndOf="@id/fileFavorite"
         app:layout_constraintTop_toTopOf="@id/fileNameLayout"
         tools:visibility="visible" />
 

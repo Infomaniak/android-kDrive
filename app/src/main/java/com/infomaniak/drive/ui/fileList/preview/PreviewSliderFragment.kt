@@ -43,6 +43,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
+import com.infomaniak.drive.ui.fileList.categories.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntent
@@ -93,12 +94,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             userDrive = previewSliderViewModel.userDrive
         }
 
-        getBackNavigationResult<Int>(DownloadProgressDialog.OPEN_WITH) {
-            context?.openWith(currentPreviewFile, userDrive)
-        }
+        setBackActionHandlers()
 
         drivePermissions = DrivePermissions()
-        drivePermissions.registerPermissions(this) { autorized -> if (autorized) downloadFileClicked() }
+        drivePermissions.registerPermissions(this) { authorized -> if (authorized) downloadFileClicked() }
 
         previewSliderAdapter = PreviewSliderAdapter(childFragmentManager, lifecycle)
         viewPager.adapter = previewSliderAdapter
@@ -139,6 +138,16 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
 
         configureBottomSheetFileInfo()
+    }
+
+    private fun setBackActionHandlers() {
+        getBackNavigationResult<Int>(DownloadProgressDialog.OPEN_WITH) {
+            context?.openWith(currentPreviewFile, userDrive)
+        }
+
+        getBackNavigationResult<Bundle>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
+            bottomSheetFileInfos.refreshBottomSheetUi(currentPreviewFile)
+        }
     }
 
     private var showUi = false
@@ -227,11 +236,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun fileRightsClicked() {
-        currentPreviewFile.apply {
-            safeNavigate(
-                PreviewSliderFragmentDirections.actionPreviewSliderFragmentToFileShareDetailsFragment(file = this)
-            )
-        }
+        safeNavigate(PreviewSliderFragmentDirections.actionPreviewSliderFragmentToFileShareDetailsFragment(currentPreviewFile.id))
     }
 
     override fun copyPublicLink() {
@@ -316,6 +321,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         bottomSheetFileInfos.downloadFile(drivePermissions) {
             toggleBottomSheet(true)
         }
+    }
+
+    override fun manageCategoriesClicked(fileId: Int) {
+        safeNavigate(PreviewSliderFragmentDirections.actionPreviewSliderFragmentToSelectCategoriesFragment(fileId))
     }
 
     override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) {

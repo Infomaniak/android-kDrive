@@ -48,7 +48,7 @@ class CreatePrivateFolderFragment : CreateFolderFragment() {
                     if (redirectToShareDetails) {
                         safeNavigate(
                             CreatePrivateFolderFragmentDirections.actionCreatePrivateFolderFragmentToFileShareDetailsFragment(
-                                file = file, ignoreCreateFolderStack = true
+                                fileId = file.id, ignoreCreateFolderStack = true
                             )
                         )
                     } else {
