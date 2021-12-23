@@ -17,14 +17,13 @@
  */
 package com.infomaniak.drive.ui.fileList.categories
 
-import android.os.Build
 import android.os.Bundle
-import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.core.os.bundleOf
+import androidx.core.text.HtmlCompat
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -54,7 +53,6 @@ class SelectCategoriesFragment : Fragment() {
 
     private lateinit var categoriesAdapter: CategoriesAdapter
     private lateinit var file: File
-    private var hasCategoryBeenModified: Boolean = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         inflater.inflate(R.layout.fragment_select_categories, container, false)
@@ -67,13 +65,15 @@ class SelectCategoriesFragment : Fragment() {
             return
         }
 
-        with(DriveInfosController.getCategoryRights()) {
-            setCategoriesAdapter(this?.canEditCategory == true, this?.canDeleteCategory == true)
-            setData()
-            setStates(this?.canCreateCategory == true)
-            setListeners()
-            setBackActionHandlers()
+        DriveInfosController.getCategoryRights().let {
+            setCategoriesAdapter(it?.canEditCategory == true, it?.canDeleteCategory == true)
+            setAddCategoryButton(it?.canCreateCategory == true)
         }
+
+        searchView.hint = getString(R.string.searchTitle)
+
+        setListeners()
+        setBackActionHandlers()
     }
 
     private fun setCategoriesAdapter(canEditCategory: Boolean, canDeleteCategory: Boolean) {
@@ -115,11 +115,7 @@ class SelectCategoriesFragment : Fragment() {
         categoriesRecyclerView.adapter = categoriesAdapter
     }
 
-    private fun setData() {
-        searchView.hint = getString(R.string.searchTitle)
-    }
-
-    private fun setStates(canCreateCategory: Boolean) {
+    private fun setAddCategoryButton(canCreateCategory: Boolean) {
         toolbar.menu.findItem(R.id.addCategory).isVisible = canCreateCategory
     }
 
@@ -156,37 +152,33 @@ class SelectCategoriesFragment : Fragment() {
 
     private fun setBackActionHandlers() {
         getBackNavigationResult<Int>(CategoryInfoActionsBottomSheetDialog.DELETE_CATEGORY_NAV_KEY) { categoryId ->
-            hasCategoryBeenModified = true
             categoriesAdapter.deleteCategory(categoryId)
         }
     }
 
     private fun navigateToCreateCategory() {
-        with(searchView) {
-            safeNavigate(
-                SelectCategoriesFragmentDirections.actionSelectCategoriesFragmentToCreateOrEditCategoryFragment(
-                    fileId = file.id,
-                    categoryId = CreateOrEditCategoryFragment.CREATE_CATEGORY_ID,
-                    categoryName = text.toString(),
-                    categoryColor = null,
-                )
+        safeNavigate(
+            SelectCategoriesFragmentDirections.actionSelectCategoriesFragmentToCreateOrEditCategoryFragment(
+                fileId = file.id,
+                categoryId = CreateOrEditCategoryFragment.CREATE_CATEGORY_ID,
+                categoryName = searchView.text.toString(),
+                categoryColor = null,
             )
-        }
+        )
     }
 
     private fun handleCreateCategoryRow(categoryName: String?) {
         val text = getString(R.string.manageCategoriesCreateTitle, "<b>$categoryName</b>")
-        addCategoryTitle.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT)
-        } else Html.fromHtml(text)
+        addCategoryTitle.text = HtmlCompat.fromHtml(text, HtmlCompat.FROM_HTML_MODE_COMPACT)
 
         createCategoryRow.apply {
+            val bottomCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
             var topCornerRadius = 0.0f
+
             if (categoriesAdapter.filteredCategories.isEmpty()) {
                 topCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
                 createCategoryRowSeparator.isGone = true
             } else createCategoryRowSeparator.isVisible = true
-            val bottomCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
 
             shapeAppearanceModel = shapeAppearanceModel
                 .toBuilder()

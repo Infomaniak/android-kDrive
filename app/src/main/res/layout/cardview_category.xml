@@ -44,6 +44,7 @@
             android:id="@+id/checkIcon"
             android:layout_width="12dp"
             android:layout_height="12dp"
+            android:contentDescription="@string/contentDescriptionIsSelected"
             android:src="@drawable/ic_big_check"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/categoryIcon"
@@ -78,7 +79,7 @@
             app:layout_constraintEnd_toStartOf="@id/menuButton"
             app:layout_constraintStart_toEndOf="@id/categoryIcon"
             app:layout_constraintTop_toTopOf="@id/categoryIcon"
-            tools:text="@string/categoryBanking" />
+            tools:text="@string/categoryHobbies" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/menuButton"
