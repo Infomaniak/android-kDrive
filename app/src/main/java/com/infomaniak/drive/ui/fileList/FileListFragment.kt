@@ -576,7 +576,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun File.openBookmark() {
-        if (canUseLocalStorageFile(requireContext())) {
+        if (canUseStoredFile(requireContext())) {
             openBookmarkIntent()
         } else {
             safeNavigate(

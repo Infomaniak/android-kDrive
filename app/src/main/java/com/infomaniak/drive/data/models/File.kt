@@ -225,12 +225,12 @@ open class File(
         return isObsolete(dataFile) || !isIntactFile(dataFile)
     }
 
-    fun getLocalStorageFile(context: Context, userDrive: UserDrive = UserDrive()): java.io.File? {
+    fun getStoredFile(context: Context, userDrive: UserDrive = UserDrive()): java.io.File? {
         return if (isOffline) getOfflineFile(context, userDrive.userId) else getCacheFile(context, userDrive)
     }
 
-    fun canUseLocalStorageFile(context: Context, userDrive: UserDrive = UserDrive()): Boolean {
-        return getLocalStorageFile(context, userDrive)?.let(::isObsoleteOrNotIntact) == false
+    fun canUseStoredFile(context: Context, userDrive: UserDrive = UserDrive()): Boolean {
+        return getStoredFile(context, userDrive)?.let(::isObsoleteOrNotIntact) == false
     }
 
     fun isOfflineFile(context: Context, userId: Int = AccountUtils.currentUserId, checkLocalFile: Boolean = true): Boolean {

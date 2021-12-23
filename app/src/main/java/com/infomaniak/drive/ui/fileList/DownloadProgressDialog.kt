@@ -87,7 +87,7 @@ class DownloadProgressDialog : DialogFragment() {
     class DownloadViewModel : ViewModel() {
 
         fun downloadFile(context: Context, file: File, userDrive: UserDrive) = liveData(Dispatchers.IO) {
-            val outputFile = file.getLocalStorageFile(context, userDrive)
+            val outputFile = file.getStoredFile(context, userDrive)
             if (outputFile == null) {
                 emit(null)
                 return@liveData
