@@ -296,7 +296,6 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
         }
         else -> {
             when {
-                file.isBookmark() -> filePreview.loadGlide(R.drawable.url)
                 file.hasThumbnail && (isGrid || file.getFileType() == File.ConvertedType.IMAGE
                         || file.getFileType() == File.ConvertedType.VIDEO) -> {
                     filePreview.loadGlideUrl(file.thumbnail(), file.getFileType().icon)
@@ -311,9 +310,7 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
                         }
                     }
                 }
-                else -> {
-                    filePreview.loadGlide(file.getFileType().icon)
-                }
+                else -> filePreview.loadGlide(file.getFileType().icon)
             }
             filePreview2?.loadGlide(file.getFileType().icon)
             setupFileProgress(file)

@@ -163,7 +163,11 @@ open class File(
             ConvertedType.SPREADSHEET.value -> ConvertedType.SPREADSHEET
             ConvertedType.TEXT.value -> ConvertedType.TEXT
             ConvertedType.VIDEO.value -> ConvertedType.VIDEO
-            else -> if (isFolder()) ConvertedType.FOLDER else ConvertedType.UNKNOWN
+            else -> when {
+                isFolder() -> ConvertedType.FOLDER
+                isBookmark() -> ConvertedType.URL
+                else -> ConvertedType.UNKNOWN
+            }
         }
     }
 
