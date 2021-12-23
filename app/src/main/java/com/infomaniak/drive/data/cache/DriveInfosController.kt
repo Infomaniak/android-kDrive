@@ -19,8 +19,11 @@ package com.infomaniak.drive.data.cache
 
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.Team
+import com.infomaniak.drive.data.models.drive.Category
+import com.infomaniak.drive.data.models.drive.CategoryRights
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.models.drive.DriveInfo
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
 import io.realm.Realm
 import io.realm.RealmConfiguration
@@ -79,6 +82,12 @@ object DriveInfosController {
         return driveRemoved
     }
 
+    fun updateDrive(transaction: (drive: Drive) -> Unit) {
+        getRealmInstance().use { realm ->
+            getCurrentDrive(realm)?.let { drive -> realm.executeTransaction { if (drive.isValid) transaction(drive) } }
+        }
+    }
+
     fun getUsers(userIds: ArrayList<Int>? = arrayListOf()): List<DriveUser> {
         return getRealmInstance().use { realm ->
             val userList = realm.copyFromRealm(realm.where(DriveUser::class.java).apply {
@@ -128,5 +137,47 @@ object DriveInfosController {
         } as ArrayList<Team>? ?: ArrayList()
 
         return teamList.filter { drive.teams.account.contains(it.id) }
+    }
+
+    fun getCurrentDriveCategories(): List<Category> {
+        val categories = getRealmInstance().use { realm ->
+            getCurrentDrive(realm)?.categories?.let {
+                val categories = it.where()
+                    .sort(Category::userUsageCount.name, Sort.DESCENDING)
+                    .findAll()
+                realm.copyFromRealm(categories, 0)
+            }
+        } ?: emptyList()
+
+        return categories
+    }
+
+    fun getCurrentDriveCategoriesFromIds(categoriesIds: Array<Int>): List<Category> {
+        if (categoriesIds.isEmpty()) return emptyList()
+
+        val categories = getRealmInstance().use { realm ->
+            getCurrentDrive(realm)?.categories?.let {
+                val categories = it.where()
+                    .`in`(Category::id.name, categoriesIds)
+                    .findAll()
+                realm.copyFromRealm(categories, 0)
+            }
+        } ?: emptyList()
+
+        return categoriesIds.withIndex()
+            .associate { it.value to it.index }
+            .let { orderList -> categories.sortedBy { orderList[it.id] } }
+    }
+
+    fun getCategoryRights(): CategoryRights? {
+        return getRealmInstance().use { realm ->
+            getCurrentDrive(realm)?.categoryRights?.let { realm.copyFromRealm(it, 0) }
+        }
+    }
+
+    private fun getCurrentDrive(realm: Realm): Drive? {
+        return realm.where(Drive::class.java)
+            .equalTo(Drive::id.name, AccountUtils.currentDriveId)
+            .findFirst()
     }
 }

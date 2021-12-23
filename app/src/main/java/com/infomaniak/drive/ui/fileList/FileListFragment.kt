@@ -55,6 +55,7 @@ import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWork
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog.Companion.SELECT_DIALOG_ACTION
+import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.BULK_OPERATION_CUSTOM_TAG
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.generateWorkerData
@@ -71,6 +72,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.cardview_file_list.*
 import kotlinx.android.synthetic.main.empty_icon_layout.*
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_add_file.*
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_file_info_actions.*
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_new_folder.*
@@ -116,7 +118,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         const val CANCELLABLE_ACTION_KEY = "cancellable_action"
         const val SORT_TYPE_OPTION_KEY = "sort_type_option"
 
-        const val ACTIVITIES_REFRESH_DELAY = 5000L
+        const val ACTIVITIES_REFRESH_DELAY = 5_000L
+        const val MAX_DISPLAYED_CATEGORIES = 3 // Beware, if this value is modified, the Categories' layouts should be modified accordingly.
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -489,7 +492,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         fileAdapter.onMenuClicked = { file ->
             val fileObject = file.realm?.copyFromRealm(file, 1) ?: file
             val bundle = bundleOf(
-                "file" to fileObject,
+                "fileId" to fileObject.id,
                 "userDrive" to UserDrive(driveId = file.driveId, sharedWithMe = fileListViewModel.isSharedWithMe)
             )
             safeNavigate(R.id.fileInfoActionsBottomSheetDialog, bundle, currentClassName = homeClassName())

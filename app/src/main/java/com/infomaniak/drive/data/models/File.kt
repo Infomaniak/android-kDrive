@@ -26,7 +26,9 @@ import androidx.work.WorkManager
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmListParceler.FileRealmListParceler
 import com.infomaniak.drive.utils.RealmListParceler.IntRealmListParceler
@@ -40,6 +42,7 @@ import io.realm.annotations.Ignore
 import io.realm.annotations.LinkingObjects
 import io.realm.annotations.PrimaryKey
 import kotlinx.android.parcel.Parcelize
+import kotlinx.android.parcel.RawValue
 import kotlinx.android.parcel.WriteWith
 import java.util.*
 
@@ -92,6 +95,7 @@ open class File(
     var type: String = "file",
     var users: @WriteWith<IntRealmListParceler> RealmList<Int> = RealmList(),
     var visibility: String = "",
+    var categories: @RawValue RealmList<FileCategory> = RealmList(),
 
     var responseAt: Long = 0,
 
@@ -199,13 +203,6 @@ open class File(
         return if (extension == name) null else ".$extension"
     }
 
-    fun initRightIds() {
-        rights?.let { it.fileId = id }
-        children.forEach {
-            it.initRightIds()
-        }
-    }
-
     fun isPendingUploadFolder() = isFromUploads && (isFolder() || isDrive())
 
     fun isObsolete(dataFile: java.io.File): Boolean {
@@ -300,6 +297,24 @@ open class File(
                     users.size > 1 -> VisibilityType.IS_SHARED
                     else -> VisibilityType.IS_PRIVATE
                 }
+            }
+        }
+    }
+
+    fun getCategories(): List<Category> {
+        val fileCategoriesIds = getSortedCategoriesIds()
+        return DriveInfosController.getCurrentDriveCategoriesFromIds(fileCategoriesIds.toTypedArray())
+    }
+
+    // TODO This function is called in the FileAdapter, for each File, and is getting the RealmInstance each time. This is not very efficient.
+    private fun getSortedCategoriesIds(): List<Int> {
+        fun RealmList<FileCategory>.sort() = sort(FileCategory::addedToFileAt.name).map { it.id }
+
+        return if (isManaged) {
+            categories.sort()
+        } else {
+            FileController.getRealmInstance().use { realm ->
+                FileController.getFileProxyById(id, customRealm = realm)?.categories?.sort() ?: emptyList()
             }
         }
     }

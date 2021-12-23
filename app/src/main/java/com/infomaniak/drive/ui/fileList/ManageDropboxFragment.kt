@@ -76,7 +76,6 @@ open class ManageDropboxFragment : Fragment() {
             shareLinkTitle.text = getString(R.string.dropBoxLinkTitle)
             shareLinkUrl.isVisible = true
             shareLinkIcon.isGone = true
-            titleSeparator.isGone = true
             shareLinkStatus.isGone = true
             shareLinkSwitch.isGone = true
             shareLinkSettings.isGone = true

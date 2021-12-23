@@ -17,8 +17,10 @@
  */
 package com.infomaniak.drive.data.api
 
+import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.User
@@ -43,6 +45,8 @@ object ApiRepository {
             "&actions[]=file_share_delete" +
             "&actions[]=file_favorite_create" +
             "&actions[]=file_favorite_remove" +
+            "&actions[]=file_categorize" +
+            "&actions[]=file_uncategorize" +
             "&actions[]=share_link_create" +
             "&actions[]=share_link_update" +
             "&actions[]=share_link_delete" +
@@ -86,7 +90,7 @@ object ApiRepository {
 
     fun getFileActivities(okHttpClient: OkHttpClient, file: File, page: Int): ApiResponse<ArrayList<FileActivity>> {
         val url = "${ApiRoutes.getFileActivities(file)}?${pagination(page)}&depth=children&from_date=${file.responseAt}" +
-                "&with=file,rights,collaborative_folder,favorite,share_link,mobile" + ACTIONS
+                "&with=file,rights,collaborative_folder,favorite,share_link,mobile,categories" + ACTIONS
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
@@ -251,6 +255,31 @@ object ApiRepository {
 
     fun putFileShareLink(file: File, body: Map<String, Any?>): ApiResponse<Boolean> {
         return callApi(ApiRoutes.shareLink(file), PUT, body)
+    }
+
+    fun createCategory(driveId: Int, name: String, color: String): ApiResponse<Category> {
+        val body = mapOf("name" to name, "color" to color)
+        return callApi(ApiRoutes.createCategory(driveId), POST, body)
+    }
+
+    fun editCategory(driveId: Int, categoryId: Int, name: String?, color: String): ApiResponse<Category> {
+        val body = arrayMapOf("color" to color).apply {
+            name?.let { put("name", it) }
+        }
+        return callApi(ApiRoutes.updateCategory(driveId, categoryId), PATCH, body)
+    }
+
+    fun deleteCategory(driveId: Int, categoryId: Int): ApiResponse<Boolean> {
+        return callApi(ApiRoutes.updateCategory(driveId, categoryId), DELETE)
+    }
+
+    fun addCategory(file: File, categoryId: Int): ApiResponse<Unit> {
+        val body = mapOf("id" to categoryId)
+        return callApi(ApiRoutes.addCategory(file), POST, body)
+    }
+
+    fun removeCategory(file: File, categoryId: Int): ApiResponse<Unit> {
+        return callApi(ApiRoutes.removeCategory(file, categoryId), DELETE)
     }
 
     fun getLastActivities(driveId: Int, page: Int): ApiResponse<ArrayList<FileActivity>> {

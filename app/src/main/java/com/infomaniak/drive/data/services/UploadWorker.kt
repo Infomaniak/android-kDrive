@@ -60,7 +60,6 @@ import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.*
-import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.*
 
@@ -239,14 +238,21 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                     } else UploadFile.deleteIfExists(uri)
                 }
             }
-        } catch (e: SecurityException) {
-            e.printStackTrace()
-            UploadFile.deleteIfExists(uri)
-        } catch (exception: IllegalStateException) {
-            UploadFile.deleteIfExists(uri)
-            Sentry.withScope { scope ->
-                scope.setExtra("data", ApiController.gson.toJson(uploadFile))
-                Sentry.captureMessage("The file is either partially downloaded or corrupted")
+        } catch (exception: Exception) {
+            when (exception) {
+                is SecurityException, is IllegalStateException, is IllegalArgumentException -> {
+                    UploadFile.deleteIfExists(uri)
+
+                    if (exception is IllegalStateException) {
+                        Sentry.withScope { scope ->
+                            scope.setExtra("data", ApiController.gson.toJson(uploadFile))
+                            Sentry.captureMessage("The file is either partially downloaded or corrupted")
+                        }
+                    } else {
+                        Sentry.captureException(exception)
+                    }
+                }
+                else -> throw exception
             }
         }
     }
@@ -287,7 +293,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     private fun fileDescriptorSize(uri: Uri): Long? {
         return try {
             contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize }
-        } catch (exception: FileNotFoundException) {
+        } catch (exception: Exception) {
             null
         }
     }
@@ -311,28 +317,30 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             customSelection = "$selection AND $IMAGES_BUCKET_ID = ? $isNotPending"
             customArgs = args + mediaFolder.id.toString()
 
-            val getLastImagesOperation = getLocalLastMediasAsync(
-                syncSettings = syncSettings,
-                contentUri = MediaFoldersProvider.imagesExternalUri,
-                selection = customSelection,
-                args = customArgs,
-                mediaFolder = mediaFolder
-            )
-            jobs.add(getLastImagesOperation)
-
-            if (syncSettings.syncVideo) {
-                isNotPending = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-                    "AND ${MediaStore.Video.Media.IS_PENDING} = 0" else ""
-                customSelection = "$selection AND $VIDEO_BUCKET_ID = ? $isNotPending"
-
-                val getLastVideosOperation = getLocalLastMediasAsync(
+            runCatching {
+                val getLastImagesOperation = getLocalLastMediasAsync(
                     syncSettings = syncSettings,
-                    contentUri = MediaFoldersProvider.videosExternalUri,
+                    contentUri = MediaFoldersProvider.imagesExternalUri,
                     selection = customSelection,
                     args = customArgs,
                     mediaFolder = mediaFolder
                 )
-                jobs.add(getLastVideosOperation)
+                jobs.add(getLastImagesOperation)
+
+                if (syncSettings.syncVideo) {
+                    isNotPending = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                        "AND ${MediaStore.Video.Media.IS_PENDING} = 0" else ""
+                    customSelection = "$selection AND $VIDEO_BUCKET_ID = ? $isNotPending"
+
+                    val getLastVideosOperation = getLocalLastMediasAsync(
+                        syncSettings = syncSettings,
+                        contentUri = MediaFoldersProvider.videosExternalUri,
+                        selection = customSelection,
+                        args = customArgs,
+                        mediaFolder = mediaFolder
+                    )
+                    jobs.add(getLastVideosOperation)
+                }
             }
         }
 

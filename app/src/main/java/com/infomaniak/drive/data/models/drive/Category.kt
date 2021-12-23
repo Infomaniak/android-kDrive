@@ -15,24 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.utils
+package com.infomaniak.drive.data.models.drive
 
-import com.google.gson.*
-import com.infomaniak.drive.data.models.File
-import com.infomaniak.lib.core.utils.CustomDateTypeAdapter
-import java.lang.reflect.Type
+import com.google.gson.annotations.SerializedName
+import io.realm.RealmObject
+import io.realm.annotations.RealmClass
 import java.util.*
 
-object FileDeserializer : JsonDeserializer<File> {
-
-    private var gson: Gson = GsonBuilder()
-        .registerTypeAdapter(Date::class.java, CustomDateTypeAdapter())
-        .create()
-
-    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): File {
-        val file = gson.fromJson(json, File::class.java)
-        file.initRightIds()
-        return file
-    }
-
-}
+@RealmClass(embedded = true)
+open class Category(
+    var id: Int = -1,
+    var color: String = "#000000",
+    @SerializedName("created_at")
+    var createdAt: Date = Date(),
+    @SerializedName("is_predefined")
+    var isPredefined: Boolean = true,
+    var name: String = "",
+    @SerializedName("user_usage_count")
+    var userUsageCount: Int = 0,
+) : RealmObject()

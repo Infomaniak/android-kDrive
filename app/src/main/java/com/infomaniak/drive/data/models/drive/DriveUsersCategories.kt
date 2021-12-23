@@ -19,10 +19,10 @@ package com.infomaniak.drive.data.models.drive
 
 import io.realm.RealmList
 import io.realm.RealmObject
-import io.realm.annotations.PrimaryKey
+import io.realm.annotations.RealmClass
 
+@RealmClass(embedded = true)
 open class DriveUsersCategories(
-    @PrimaryKey var driveId: Int = -1,
     var account: RealmList<Int> = RealmList(),
     var drive: RealmList<Int> = RealmList(),
     var internal: RealmList<Int> = RealmList(),

@@ -113,7 +113,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <View
-            android:id="@+id/topShareDivider"
+            android:id="@+id/usersDivider"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginTop="@dimen/marginStandard"
@@ -129,10 +129,23 @@
             tools:visibility="visible" />
 
         <View
-            android:id="@+id/botShareDivider"
+            android:id="@+id/shareLinkDivider"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginTop="@dimen/marginStandardMedium"
+            android:background="@color/divider" />
+
+        <com.infomaniak.drive.views.CategoriesContainerView
+            android:id="@+id/categoriesContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <View
+            android:id="@+id/categoriesDivider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
             android:background="@color/divider" />
 
         <androidx.constraintlayout.widget.ConstraintLayout

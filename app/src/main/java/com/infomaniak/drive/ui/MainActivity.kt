@@ -81,6 +81,7 @@ class MainActivity : BaseActivity() {
     private var lastCloseApp = Date()
     private var updateAvailableShow = false
     private var uploadedFilesToDelete = arrayListOf<UploadFile>()
+    private var hasDisplayedInformationPanel: Boolean = false
 
     private lateinit var drivePermissions: DrivePermissions
     private lateinit var filesDeletionResult: ActivityResultLauncher<IntentSenderRequest>
@@ -88,6 +89,7 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         downloadReceiver = DownloadReceiver(mainViewModel)
 
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -228,10 +230,8 @@ class MainActivity : BaseActivity() {
         launchSyncOffline()
 
         AppSettings.appLaunches++
-        if (!AccountUtils.isEnableAppSync() && AppSettings.appLaunches == SYNC_DIALOG_LAUNCHES) {
-            val id = if (AppSettings.migrated) R.id.syncAfterMigrationBottomSheetDialog else R.id.syncConfigureBottomSheetDialog
-            findNavController(R.id.hostFragment).navigate(id)
-        }
+
+        displayInformationPanel()
 
         setBottomNavigationUserAvatar(this)
         startContentObserverService()
@@ -285,6 +285,28 @@ class MainActivity : BaseActivity() {
     override fun onDestroy() {
         super.onDestroy()
         LocalBroadcastManager.getInstance(this).unregisterReceiver(downloadReceiver)
+    }
+
+    private fun displayInformationPanel() {
+        if (!hasDisplayedInformationPanel) {
+            UISettings(this).apply {
+                val destinationId = when {
+                    !hasDisplayedSyncDialog && !AccountUtils.isEnableAppSync() -> {
+                        hasDisplayedSyncDialog = true
+                        if (AppSettings.migrated) R.id.syncAfterMigrationBottomSheetDialog else R.id.syncConfigureBottomSheetDialog
+                    }
+                    !hasDisplayedCategoriesInformationDialog -> {
+                        hasDisplayedCategoriesInformationDialog = true
+                        R.id.categoriesInformationBottomSheetDialog
+                    }
+                    else -> null
+                }
+                destinationId?.let {
+                    hasDisplayedInformationPanel = true
+                    findNavController(R.id.hostFragment).navigate(it)
+                }
+            }
+        }
     }
 
     @SuppressLint("RestrictedApi")
@@ -343,9 +365,7 @@ class MainActivity : BaseActivity() {
     }
 
     companion object {
-        private const val SYNC_DIALOG_LAUNCHES = 1
         private const val SYNCED_FILES_DELETION_FILES_AMOUNT = 10
-
         private const val SECURITY_APP_TOLERANCE = 1 * 60 * 1000 // 1min (ms)
         const val INTENT_SHOW_PROGRESS = "intent_folder_id_progress"
     }

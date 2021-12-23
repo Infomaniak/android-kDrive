@@ -194,7 +194,6 @@ object FileController {
                 Sentry.captureException(exception)
             }
         }
-
     }
 
     fun updateOfflineStatus(fileId: Int, isOffline: Boolean) {
@@ -803,6 +802,8 @@ object FileController {
             FileActivity.FileActivityType.FILE_FAVORITE_CREATE,
             FileActivity.FileActivityType.FILE_FAVORITE_REMOVE,
             FileActivity.FileActivityType.FILE_RENAME,
+            FileActivity.FileActivityType.FILE_CATEGORIZE,
+            FileActivity.FileActivityType.FILE_UNCATEGORIZE,
             FileActivity.FileActivityType.FILE_SHARE_CREATE,
             FileActivity.FileActivityType.FILE_SHARE_DELETE,
             FileActivity.FileActivityType.FILE_SHARE_UPDATE,

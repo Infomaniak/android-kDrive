@@ -66,7 +66,7 @@ class DateInputView @JvmOverloads constructor(
     private fun showDatePicker(fragmentManager: FragmentManager, defaultDate: Date, onDateSet: (timestamp: Long) -> Unit) {
 
         val startDate = Date().time
-        // FIXME before the year 2038: https://en.wikipedia.org/wiki/Year_2038_problem
+        // TODO before the year 2038: https://en.wikipedia.org/wiki/Year_2038_problem
         val endDate = Calendar.getInstance().apply { set(2038, 0, 0) }.timeInMillis
 
         val calendarConstraints = CalendarConstraints.Builder()
