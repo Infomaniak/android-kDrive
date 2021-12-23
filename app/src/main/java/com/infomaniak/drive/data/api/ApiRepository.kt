@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.data.api
 
+import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.drive.Category
@@ -262,9 +263,8 @@ object ApiRepository {
     }
 
     fun editCategory(driveId: Int, categoryId: Int, name: String?, color: String): ApiResponse<Category> {
-        val body = mutableMapOf<String, Any>().apply {
+        val body = arrayMapOf("color" to color).apply {
             name?.let { put("name", it) }
-            put("color", color)
         }
         return callApi(ApiRoutes.updateCategory(driveId, categoryId), PATCH, body)
     }

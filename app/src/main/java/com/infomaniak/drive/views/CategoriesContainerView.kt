@@ -43,13 +43,13 @@ class CategoriesContainerView @JvmOverloads constructor(
     }
 
     fun setup(categories: List<Category>, canPutCategoryOnFile: Boolean, onClicked: () -> Unit) {
-        setData(canPutCategoryOnFile, categories)
+        setCategoryTitle(canPutCategoryOnFile, categories)
         setStates(canPutCategoryOnFile, categories)
         setListeners(canPutCategoryOnFile, onClicked)
         setCategories(categories, onClicked)
     }
 
-    private fun setData(canPutCategoryOnFile: Boolean, categories: List<Category>) {
+    private fun setCategoryTitle(canPutCategoryOnFile: Boolean, categories: List<Category>) {
         categoryTitle.setText(
             if (canPutCategoryOnFile) {
                 if (categories.isEmpty()) R.string.addCategoriesTitle else R.string.manageCategoriesTitle

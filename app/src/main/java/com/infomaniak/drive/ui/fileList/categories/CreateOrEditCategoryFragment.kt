@@ -49,7 +49,6 @@ import com.infomaniak.lib.core.utils.showProgress
 import com.infomaniak.lib.core.utils.toDp
 import kotlinx.android.synthetic.main.fragment_create_or_edit_category.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlin.math.max
 
 class CreateOrEditCategoryFragment : Fragment() {
@@ -133,17 +132,16 @@ class CreateOrEditCategoryFragment : Fragment() {
             driveId = file.driveId,
             name = categoryNameValueInput.text.toString(),
             color = COLORS[colorsAdapter.selectedPosition],
-        )
-            .observe(viewLifecycleOwner) { apiResponse ->
-                with(apiResponse) {
-                    if (isSuccess()) {
-                        data?.id?.let(::addCategory)
-                    } else {
-                        saveButton.hideProgress(R.string.buttonSave)
-                        Utils.showSnackbar(requireView(), translateError())
-                    }
+        ).observe(viewLifecycleOwner) { apiResponse ->
+            with(apiResponse) {
+                if (isSuccess()) {
+                    data?.id?.let(::addCategory)
+                } else {
+                    saveButton.hideProgress(R.string.buttonSave)
+                    Utils.showSnackbar(requireView(), translateError())
                 }
             }
+        }
     }
 
     private fun addCategory(categoryId: Int) {
@@ -180,13 +178,8 @@ class CreateOrEditCategoryFragment : Fragment() {
 
     internal class CreateOrEditCategoryViewModel : ViewModel() {
 
-        private var createCategoryJob = Job()
-        private var editCategoryJob = Job()
-
         fun createCategory(driveId: Int, name: String, color: String): LiveData<ApiResponse<Category>> {
-            createCategoryJob.cancel()
-            createCategoryJob = Job()
-            return liveData(Dispatchers.IO + createCategoryJob) {
+            return liveData(Dispatchers.IO) {
                 with(ApiRepository.createCategory(driveId, name, color)) {
                     if (isSuccess()) DriveInfosController.updateDrive { it.categories.add(data) }
                     emit(this)
@@ -195,9 +188,7 @@ class CreateOrEditCategoryFragment : Fragment() {
         }
 
         fun editCategory(driveId: Int, categoryId: Int, name: String?, color: String): LiveData<ApiResponse<Category>> {
-            editCategoryJob.cancel()
-            editCategoryJob = Job()
-            return liveData(Dispatchers.IO + editCategoryJob) {
+            return liveData(Dispatchers.IO) {
                 with(ApiRepository.editCategory(driveId, categoryId, name, color)) {
                     if (isSuccess()) {
                         DriveInfosController.updateDrive { localDrive ->
@@ -209,12 +200,6 @@ class CreateOrEditCategoryFragment : Fragment() {
                     emit(this)
                 }
             }
-        }
-
-        override fun onCleared() {
-            super.onCleared()
-            createCategoryJob.cancel()
-            editCategoryJob.cancel()
         }
     }
 

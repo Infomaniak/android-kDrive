@@ -40,7 +40,6 @@ import com.infomaniak.drive.utils.setBackNavigationResult
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_category_info_actions.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 
 class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
@@ -64,13 +63,13 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun setStates() = with(navigationArgs) {
         val rights = DriveInfosController.getCategoryRights()
-        with(rights?.canEditCategory ?: false) {
-            disabledEditCategory.isGone = this
-            editCategory.isEnabled = this
+        (rights?.canEditCategory ?: false).let {
+            disabledEditCategory.isGone = it
+            editCategory.isEnabled = it
         }
-        with(rights?.canDeleteCategory ?: false && !categoryIsPredefined) {
-            deleteCategory.isEnabled = this
-            disabledDeleteCategory.isGone = this
+        (rights?.canDeleteCategory ?: false && !categoryIsPredefined).let {
+            deleteCategory.isEnabled = it
+            disabledDeleteCategory.isGone = it
         }
     }
 
@@ -112,12 +111,8 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
     internal class CategoryInfoActionViewModel : ViewModel() {
 
-        private var deleteCategoryJob = Job()
-
         fun deleteCategory(categoryId: Int): LiveData<ApiResponse<Boolean>> {
-            deleteCategoryJob.cancel()
-            deleteCategoryJob = Job()
-            return liveData(Dispatchers.IO + deleteCategoryJob) {
+            return liveData(Dispatchers.IO) {
                 with(ApiRepository.deleteCategory(AccountUtils.currentDriveId, categoryId)) {
                     val response = if (isSuccess() || isAlreadyDeleted(this)) {
                         DriveInfosController.updateDrive { localDrive ->
@@ -133,17 +128,11 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
         private fun isAlreadyDeleted(apiResponse: ApiResponse<Boolean>): Boolean {
             return apiResponse.result == ApiResponse.Status.ERROR &&
-                    apiResponse.error?.code?.equals(CATEGORY_ALREADY_DELETED, true) == true
-        }
-
-        override fun onCleared() {
-            super.onCleared()
-            deleteCategoryJob.cancel()
+                    apiResponse.error?.code?.equals("object_not_found", true) == true
         }
     }
 
     companion object {
         const val DELETE_CATEGORY_NAV_KEY = "delete_category_nav_key"
-        private const val CATEGORY_ALREADY_DELETED = "object_not_found"
     }
 }

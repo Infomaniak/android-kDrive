@@ -56,10 +56,12 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/marginStandardMedium"
+                android:maxLines="2"
                 app:layout_constraintBottom_toBottomOf="@id/categoryIcon"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/categoryIcon"
                 app:layout_constraintTop_toTopOf="@id/categoryIcon"
-                tools:text="@string/categoryBanking" />
+                tools:text="@string/categoryHobbies" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -168,14 +170,6 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/deleteCategoryIcon" />
 
-                    <View
-                        android:id="@+id/disabledSendCopy"
-                        style="@style/DisabledView"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="@color/background"
-                        android:visibility="gone" />
-
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <View
@@ -189,7 +183,5 @@
             </com.google.android.material.card.MaterialCardView>
 
         </GridLayout>
-
     </LinearLayout>
-
 </androidx.core.widget.NestedScrollView>
