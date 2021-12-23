@@ -27,18 +27,12 @@ import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import java.util.*
 
 class SelectCategoriesViewModel : ViewModel() {
 
-    private var addCategoryJob = Job()
-    private var removeCategoryJob = Job()
-
     fun addCategory(file: File, categoryId: Int): LiveData<ApiResponse<Unit>> {
-        addCategoryJob.cancel()
-        addCategoryJob = Job()
-        return liveData(Dispatchers.IO + addCategoryJob) {
+        return liveData(Dispatchers.IO) {
             with(ApiRepository.addCategory(file, categoryId)) {
                 if (isSuccess()) {
                     FileController.updateFile(file.id) {
@@ -51,9 +45,7 @@ class SelectCategoriesViewModel : ViewModel() {
     }
 
     fun removeCategory(file: File, categoryId: Int): LiveData<ApiResponse<Unit>> {
-        removeCategoryJob.cancel()
-        removeCategoryJob = Job()
-        return liveData(Dispatchers.IO + removeCategoryJob) {
+        return liveData(Dispatchers.IO) {
             with(ApiRepository.removeCategory(file, categoryId)) {
                 if (isSuccess()) {
                     FileController.updateFile(file.id) { localFile ->
@@ -65,11 +57,5 @@ class SelectCategoriesViewModel : ViewModel() {
                 emit(this)
             }
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        addCategoryJob.cancel()
-        removeCategoryJob.cancel()
     }
 }
