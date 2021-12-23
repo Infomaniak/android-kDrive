@@ -111,7 +111,7 @@ class CategoriesAdapter(
         filterCategories()
     }
 
-    fun updateCategory(categoryId: Int, isSelected: Boolean) {
+    fun selectCategory(categoryId: Int, isSelected: Boolean) {
         with(allCategories) {
             val index = indexOfFirst { it.id == categoryId }
             this[index].apply {

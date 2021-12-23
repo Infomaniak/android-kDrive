@@ -192,9 +192,10 @@ class CreateOrEditCategoryFragment : Fragment() {
                 with(ApiRepository.editCategory(driveId, categoryId, name, color)) {
                     if (isSuccess()) {
                         DriveInfosController.updateDrive { localDrive ->
-                            val category = localDrive.categories.find { it.id == categoryId }
-                            localDrive.categories.remove(category)
-                            localDrive.categories.add(data)
+                            localDrive.categories.apply {
+                                find(categoryId)?.deleteFromRealm()
+                                add(data)
+                            }
                         }
                     }
                     emit(this)

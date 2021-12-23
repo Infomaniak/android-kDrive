@@ -109,12 +109,11 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
             }
         }
 
-        getBackNavigationResult<Bundle>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) { bundle ->
-            val ids = bundle.getParcelableArrayList(SelectCategoriesFragment.CATEGORIES_BUNDLE_KEY) ?: emptyList<Int>()
+        getBackNavigationResult<List<Int>>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
             val file = fileDetailsViewModel.currentFile.value
             setupCategoriesContainer(
                 fileId = file?.id,
-                categories = DriveInfosController.getCurrentDriveCategoriesFromIds(ids.toTypedArray()),
+                categories = DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray()),
             )
         }
     }

@@ -127,7 +127,12 @@ class SelectCategoriesFragment : Fragment() {
                     true
                 } else false
             }
-            setNavigationOnClickListener { setBackNavResult() }
+            setNavigationOnClickListener {
+                setBackNavigationResult(
+                    SELECT_CATEGORIES_NAV_KEY,
+                    categoriesAdapter.allCategories.filter { it.isSelected }.map { it.id },
+                )
+            }
         }
 
         createCategoryRow.setOnClickListener { navigateToCreateCategory() }
@@ -194,26 +199,26 @@ class SelectCategoriesFragment : Fragment() {
 
     private fun addCategory(categoryId: Int) {
         selectCategoriesViewModel.addCategory(file, categoryId).observe(viewLifecycleOwner) { apiResponse ->
-            if (apiResponse.isSuccess()) {
-                categoriesAdapter.updateCategory(categoryId, true)
-            } else Utils.showSnackbar(requireView(), apiResponse.translateError())
+            val isSelected = if (apiResponse.isSuccess()) {
+                true
+            } else {
+                Utils.showSnackbar(requireView(), apiResponse.translateError())
+                false
+            }
+            categoriesAdapter.selectCategory(categoryId, isSelected)
         }
     }
 
     private fun removeCategory(categoryId: Int) {
         selectCategoriesViewModel.removeCategory(file, categoryId).observe(viewLifecycleOwner) { apiResponse ->
-            if (apiResponse.isSuccess()) {
-                categoriesAdapter.updateCategory(categoryId, false)
-            } else Utils.showSnackbar(requireView(), apiResponse.translateError())
+            val isSelected = if (apiResponse.isSuccess()) {
+                false
+            } else {
+                Utils.showSnackbar(requireView(), apiResponse.translateError())
+                true
+            }
+            categoriesAdapter.selectCategory(categoryId, isSelected)
         }
-    }
-
-    private fun setBackNavResult() {
-        setBackNavigationResult(
-            SELECT_CATEGORIES_NAV_KEY, bundleOf(
-                CATEGORIES_BUNDLE_KEY to categoriesAdapter.allCategories.filter { it.isSelected }.map { it.id }
-            )
-        )
     }
 
     private fun isAtLeastResumed(): Boolean {
@@ -222,6 +227,5 @@ class SelectCategoriesFragment : Fragment() {
 
     companion object {
         const val SELECT_CATEGORIES_NAV_KEY = "select_categories_nav_key"
-        const val CATEGORIES_BUNDLE_KEY = "categories_bundle_key"
     }
 }

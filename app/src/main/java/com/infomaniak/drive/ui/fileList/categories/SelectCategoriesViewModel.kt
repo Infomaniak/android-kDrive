@@ -25,6 +25,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.find
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.coroutines.Dispatchers
 import java.util.*
@@ -49,9 +50,7 @@ class SelectCategoriesViewModel : ViewModel() {
             with(ApiRepository.removeCategory(file, categoryId)) {
                 if (isSuccess()) {
                     FileController.updateFile(file.id) { localFile ->
-                        val categories = localFile.categories
-                        val category = categories.find { it.id == categoryId }
-                        categories.remove(category)
+                        localFile.categories.find(categoryId)?.deleteFromRealm()
                     }
                 }
                 emit(this)

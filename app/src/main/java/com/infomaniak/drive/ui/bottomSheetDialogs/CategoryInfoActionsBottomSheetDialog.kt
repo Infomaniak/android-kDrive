@@ -33,10 +33,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.safeNavigate
-import com.infomaniak.drive.utils.setBackNavigationResult
+import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_category_info_actions.*
 import kotlinx.coroutines.Dispatchers
@@ -116,8 +113,7 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
                 with(ApiRepository.deleteCategory(AccountUtils.currentDriveId, categoryId)) {
                     val response = if (isSuccess() || isAlreadyDeleted(this)) {
                         DriveInfosController.updateDrive { localDrive ->
-                            val category = localDrive.categories.find { it.id == categoryId }
-                            localDrive.categories.remove(category)
+                            localDrive.categories.find(categoryId)?.deleteFromRealm()
                         }
                         ApiResponse(result = ApiResponse.Status.SUCCESS)
                     } else this

@@ -84,6 +84,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
@@ -100,6 +101,7 @@ import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.UtilsUi.getInitials
 import com.infomaniak.lib.core.utils.format
+import io.realm.RealmList
 import io.sentry.Sentry
 import kotlinx.android.synthetic.main.cardview_file_grid.view.*
 import kotlinx.android.synthetic.main.fragment_file_details_infos.*
@@ -808,4 +810,12 @@ fun List<UICategory>.sortCategoriesList(): List<UICategory> {
     return sortedByDescending { it.userUsageCount }
         .sortedBy { it.addedToFileAt }
         .sortedByDescending { it.isSelected }
+}
+
+fun RealmList<Category>.find(id: Int): Category? {
+    return where().equalTo(Category::id.name, id).findFirst()
+}
+
+fun RealmList<FileCategory>.find(id: Int): FileCategory? {
+    return where().equalTo(FileCategory::id.name, id).findFirst()
 }
