@@ -52,14 +52,14 @@ class DownloadProgressDialog : DialogFragment() {
 
     private val dialogView: View by lazy { View.inflate(context, R.layout.dialog_download_progress, null) }
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = with(navigationArgs) {
         isCancelable = false
-        FileController.getFileById(navigationArgs.fileID, navigationArgs.userDrive)?.let { file ->
+        FileController.getFileById(fileID, userDrive)?.let { file ->
             dialogView.icon.setImageResource(file.getFileType().icon)
-            downloadViewModel.downloadFile(requireContext(), file, navigationArgs.userDrive).observe(this) {
+            downloadViewModel.downloadFile(requireContext(), file, userDrive).observe(this@DownloadProgressDialog) {
                 it?.let { (progress, isComplete) ->
                     if (isComplete) {
-                        setBackNavigationResult(OPEN_WITH, true)
+                        setBackNavigationResult(if (isOpenBookmark) OPEN_BOOKMARK else OPEN_WITH, fileID)
                     } else {
                         downloadProgress.progress = progress
                     }
@@ -71,7 +71,7 @@ class DownloadProgressDialog : DialogFragment() {
         }
 
         return MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
-            .setTitle(navigationArgs.fileName)
+            .setTitle(fileName)
             .setView(dialogView)
             .setOnKeyListener { _, keyCode, event ->
                 if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_DOWN) {
@@ -87,14 +87,12 @@ class DownloadProgressDialog : DialogFragment() {
     class DownloadViewModel : ViewModel() {
 
         fun downloadFile(context: Context, file: File, userDrive: UserDrive) = liveData(Dispatchers.IO) {
-            val outputFile =
-                if (file.isOffline) file.getOfflineFile(context, userDrive.userId)
-                else file.getCacheFile(context, userDrive)
+            val outputFile = file.getStoredFile(context, userDrive)
             if (outputFile == null) {
                 emit(null)
                 return@liveData
             }
-            if (outputFile.length() != file.size || file.isObsolete(outputFile)) {
+            if (file.isObsoleteOrNotIntact(outputFile)) {
                 try {
                     val response = DownloadWorker.downloadFileResponse(ApiRoutes.downloadFile(file)) { progress ->
                         runBlocking { emit(progress to false) }
@@ -127,6 +125,7 @@ class DownloadProgressDialog : DialogFragment() {
 
     companion object {
         const val OPEN_WITH = "open_with"
+        const val OPEN_BOOKMARK = "open_bookmark"
     }
 
 }

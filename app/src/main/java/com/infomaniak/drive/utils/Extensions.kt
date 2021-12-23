@@ -40,6 +40,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.DisplayMetrics
+import android.util.Patterns
 import android.util.Size
 import android.view.View
 import android.view.ViewGroup
@@ -318,9 +319,7 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
                         }
                     }
                 }
-                else -> {
-                    filePreview.loadGlide(file.getFileType().icon)
-                }
+                else -> filePreview.loadGlide(file.getFileType().icon)
             }
             filePreview2?.loadGlide(file.getFileType().icon)
             setupFileProgress(file)
@@ -347,6 +346,8 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
         }
     }
 }
+
+fun String.isValidUrl(): Boolean = Patterns.WEB_URL.matcher(this).matches()
 
 fun View.setupFileProgress(file: File, containsProgress: Boolean = false) {
     val progress = file.currentProgress
@@ -384,10 +385,6 @@ fun View.setUserView(user: User, showChevron: Boolean = true, onItemClicked: (us
     userAvatar.loadAvatar(user)
     chevron.isVisible = showChevron
     setOnClickListener { onItemClicked(user) }
-}
-
-fun Long.toApiDate(): Date {
-    return Date(this / 1000)
 }
 
 fun Date.endOfTheDay(): Date =

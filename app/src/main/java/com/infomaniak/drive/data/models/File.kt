@@ -18,9 +18,11 @@
 package com.infomaniak.drive.data.models
 
 import android.content.Context
+import android.net.Uri
 import android.os.Parcelable
 import android.webkit.MimeTypeMap
 import androidx.annotation.DrawableRes
+import androidx.core.content.FileProvider
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.google.gson.annotations.SerializedName
@@ -29,6 +31,7 @@ import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.drive.Category
+import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmListParceler.FileRealmListParceler
 import com.infomaniak.drive.utils.RealmListParceler.IntRealmListParceler
@@ -156,7 +159,7 @@ open class File(
         return when (convertedType) {
             ConvertedType.ARCHIVE.value -> ConvertedType.ARCHIVE
             ConvertedType.AUDIO.value -> ConvertedType.AUDIO
-            ConvertedType.CODE.value -> ConvertedType.CODE
+            ConvertedType.CODE.value -> if (isBookmark()) ConvertedType.URL else ConvertedType.CODE
             ConvertedType.FONT.value -> ConvertedType.FONT
             ConvertedType.IMAGE.value -> ConvertedType.IMAGE
             ConvertedType.PDF.value -> ConvertedType.PDF
@@ -164,7 +167,11 @@ open class File(
             ConvertedType.SPREADSHEET.value -> ConvertedType.SPREADSHEET
             ConvertedType.TEXT.value -> ConvertedType.TEXT
             ConvertedType.VIDEO.value -> ConvertedType.VIDEO
-            else -> if (isFolder()) ConvertedType.FOLDER else ConvertedType.UNKNOWN
+            else -> when {
+                isFolder() -> ConvertedType.FOLDER
+                isBookmark() -> ConvertedType.URL
+                else -> ConvertedType.UNKNOWN
+            }
         }
     }
 
@@ -203,6 +210,8 @@ open class File(
         return if (extension == name) null else ".$extension"
     }
 
+    fun isBookmark() = name.endsWith(".url") || name.endsWith(".webloc")
+
     fun isPendingUploadFolder() = isFromUploads && (isFolder() || isDrive())
 
     fun isObsolete(dataFile: java.io.File): Boolean {
@@ -211,6 +220,18 @@ open class File(
 
     fun isIntactFile(dataFile: java.io.File): Boolean {
         return dataFile.length() == size
+    }
+
+    fun isObsoleteOrNotIntact(dataFile: java.io.File): Boolean {
+        return isObsolete(dataFile) || !isIntactFile(dataFile)
+    }
+
+    fun getStoredFile(context: Context, userDrive: UserDrive = UserDrive()): java.io.File? {
+        return if (isOffline) getOfflineFile(context, userDrive.userId) else getCacheFile(context, userDrive)
+    }
+
+    fun canUseStoredFile(context: Context, userDrive: UserDrive = UserDrive()): Boolean {
+        return getStoredFile(context, userDrive)?.let(::isObsoleteOrNotIntact) == false
     }
 
     fun isOfflineFile(context: Context, userId: Int = AccountUtils.currentUserId, checkLocalFile: Boolean = true): Boolean {
@@ -228,6 +249,15 @@ open class File(
         val folder = java.io.File(context.cacheDir, "converted_pdf/${userDrive.userId}/${userDrive.driveId}")
         if (!folder.exists()) folder.mkdirs()
         return java.io.File(folder, id.toString())
+    }
+
+    fun getUri(context: Context, userDrive: UserDrive = UserDrive()): Pair<Uri, Uri> {
+        val cloudUri = CloudStorageProvider.createShareFileUri(context, this, userDrive)!!
+        val offlineFile = getOfflineFile(context, userDrive.userId)
+
+        return cloudUri to if (isOffline && offlineFile != null) {
+            FileProvider.getUriForFile(context, context.getString(R.string.FILE_AUTHORITY), offlineFile)
+        } else cloudUri
     }
 
     fun getOfflineFile(context: Context, userId: Int = AccountUtils.currentUserId): java.io.File? {
@@ -367,6 +397,7 @@ open class File(
         SPREADSHEET("spreadsheet", R.drawable.ic_file_sheets),
         TEXT("text", R.drawable.ic_file_text),
         UNKNOWN("unknown", R.drawable.ic_file),
+        URL("url", R.drawable.url),
         VIDEO("video", R.drawable.ic_file_video),
     }
 

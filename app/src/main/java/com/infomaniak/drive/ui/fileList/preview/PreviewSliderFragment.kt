@@ -141,7 +141,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     private fun setBackActionHandlers() {
-        getBackNavigationResult<Boolean>(DownloadProgressDialog.OPEN_WITH) {
+        getBackNavigationResult<Int>(DownloadProgressDialog.OPEN_WITH) {
             context?.openWith(currentPreviewFile, userDrive)
         }
 

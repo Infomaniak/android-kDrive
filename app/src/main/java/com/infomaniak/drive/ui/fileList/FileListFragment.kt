@@ -60,6 +60,8 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.BULK_OPER
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.generateWorkerData
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
+import com.infomaniak.drive.utils.FilePresenter.openBookmark
+import com.infomaniak.drive.utils.FilePresenter.openBookmarkIntent
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
@@ -271,6 +273,13 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         getBackNavigationResult<Int>(REFRESH_FAVORITE_FILE) {
             mainViewModel.refreshActivities.value = true
         }
+
+        getBackNavigationResult<Int>(DownloadProgressDialog.OPEN_BOOKMARK) { fileId ->
+            FileController.getFileProxyById(fileId, customRealm = mainViewModel.realm)?.let {
+                openBookmarkIntent(it)
+            }
+
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -479,7 +488,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         fileAdapter.onFileClicked = { file ->
             if (file.isUsable()) {
-                if (file.isFolder()) openFolder(file) else displayFile(file)
+                when {
+                    file.isFolder() -> file.openFolder()
+                    file.isBookmark() -> openBookmark(file)
+                    else -> file.displayFile()
+                }
             } else {
                 refreshActivities()
             }
@@ -517,27 +530,22 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     protected open fun homeClassName(): String? = null
 
-    private fun openFolder(file: File) {
-        if (file.isDisabled()) {
+    private fun File.openFolder() {
+        if (isDisabled()) {
             safeNavigate(
                 FileListFragmentDirections.actionFileListFragmentToAccessDeniedBottomSheetFragment(
-                    AccountUtils.getCurrentDrive()?.isUserAdmin() ?: false,
-                    file.id
+                    AccountUtils.getCurrentDrive()?.isUserAdmin() ?: false, id
                 )
             )
         } else {
             fileListViewModel.cancelDownloadFiles()
-            safeNavigate(
-                FileListFragmentDirections.fileListFragmentToFileListFragment(
-                    file.id, file.name
-                )
-            )
+            safeNavigate(FileListFragmentDirections.fileListFragmentToFileListFragment(id, name))
         }
     }
 
-    private fun displayFile(file: File) {
+    private fun File.displayFile() {
         val fileList = fileAdapter.getFileObjectsList(mainViewModel.realm)
-        Utils.displayFile(mainViewModel, findNavController(), file, fileList)
+        Utils.displayFile(mainViewModel, findNavController(), this, fileList)
     }
 
     private fun onBackNavigationResult() {
@@ -564,7 +572,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             val cacheFile = file.getCacheFile(requireContext())
             val offlineFile = file.getOfflineFile(requireContext())
 
-            if (offlineFile != null && !file.isObsolete(cacheFile) && file.isIntactFile(cacheFile)) {
+            if (offlineFile != null && !file.isObsoleteOrNotIntact(cacheFile)) {
                 Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
                 runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
 
