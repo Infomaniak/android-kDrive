@@ -324,7 +324,6 @@ class SearchFragment : FileListFragment() {
             changeNoFilesLayoutVisibility(!swipeRefreshLayout.isRefreshing, false)
             recentSearchesView.isGone = true
         }
-
     }
 
     private inner class SetNoFilesLayout : () -> Unit {

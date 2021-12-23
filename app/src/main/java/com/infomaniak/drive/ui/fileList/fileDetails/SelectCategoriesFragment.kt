@@ -134,17 +134,10 @@ class SelectCategoriesFragment : Fragment() {
                     true
                 } else false
             }
-            setNavigationOnClickListener {
-                setBackNavigationResult(
-                    SELECT_CATEGORIES_NAV_KEY,
-                    categoriesAdapter.allCategories.filter { it.isSelected }.map { it.id },
-                )
-            }
+            setNavigationOnClickListener { setBackNavResult() }
         }
 
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            setBackNavResult()
-        }
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { setBackNavResult() }
 
         createCategoryRow.setOnClickListener { navigateToCreateCategory() }
 
@@ -256,7 +249,7 @@ class SelectCategoriesFragment : Fragment() {
 
     private fun addCategory(categoryId: Int) {
         if (usageMode == SELECTED_CATEGORIES) {
-            adapter.updateCategory(categoryId, true, usageMode)
+            categoriesAdapter.selectCategory(categoryId, true, usageMode)
             return
         }
 
@@ -272,9 +265,8 @@ class SelectCategoriesFragment : Fragment() {
     }
 
     private fun removeCategory(categoryId: Int) {
-
         if (usageMode == SELECTED_CATEGORIES) {
-            adapter.updateCategory(categoryId, false, usageMode)
+            categoriesAdapter.selectCategory(categoryId, false, usageMode)
             return
         }
 
@@ -287,6 +279,13 @@ class SelectCategoriesFragment : Fragment() {
             }
             categoriesAdapter.selectCategory(categoryId, isSelected, usageMode)
         }
+    }
+
+    private fun setBackNavResult() {
+        setBackNavigationResult(
+            SELECT_CATEGORIES_NAV_KEY,
+            categoriesAdapter.allCategories.filter { it.isSelected }.map { it.id },
+        )
     }
 
     private fun isAtLeastResumed(): Boolean {

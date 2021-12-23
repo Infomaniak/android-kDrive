@@ -852,7 +852,7 @@
                       </LayoutPositions>
                     </value>
                   </entry>
-                  <entry key="searchFiltersBottomSheetDialog">
+                  <entry key="searchFiltersFragment">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">
@@ -863,7 +863,7 @@
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_searchFiltersBottomSheetDialog_to_selectCategoriesBottomSheetDialog">
+                            <entry key="action_searchFiltersFragment_to_selectCategoriesFragment">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -889,7 +889,7 @@
                                 <LayoutPositions />
                               </value>
                             </entry>
-                            <entry key="action_searchFragment_to_searchFiltersBottomSheetDialog">
+                            <entry key="action_searchFragment_to_searchFiltersFragment">
                               <value>
                                 <LayoutPositions />
                               </value>

@@ -133,10 +133,9 @@ class SearchFiltersFragment : Fragment() {
             updateTypeUI()
         }
 
-        getBackNavigationResult<Bundle>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) { bundle ->
-            val ids = bundle.getIntArray(SelectCategoriesFragment.CATEGORIES_BUNDLE_KEY)?.toTypedArray()
-            searchFiltersViewModel.categories = if (ids?.isNotEmpty() == true) {
-                DriveInfosController.getCurrentDriveCategoriesFromIds(ids)
+        getBackNavigationResult<List<Int>>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
+            searchFiltersViewModel.categories = if (it.isNotEmpty()) {
+                DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray())
             } else null
             updateCategoriesUI()
         }
