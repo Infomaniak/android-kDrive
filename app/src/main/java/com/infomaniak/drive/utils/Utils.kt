@@ -53,6 +53,7 @@ import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment
+import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.dialog_download_progress.view.*
 import kotlinx.android.synthetic.main.dialog_name_prompt.view.*
@@ -249,14 +250,6 @@ object Utils {
                         Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
             )
             setDataAndType(uri, contentResolver.getType(cloudUri))
-        }
-    }
-
-    fun Fragment.openUrlIntent(url: String) {
-        if (url.isValidUrl()) {
-            startActivity(Intent.createChooser(Intent(Intent.ACTION_VIEW, Uri.parse(url)), url))
-        } else {
-            requireActivity().showSnackbar(getString(R.string.errorGetBookmarkURL), anchorView = requireActivity().mainFab)
         }
     }
 

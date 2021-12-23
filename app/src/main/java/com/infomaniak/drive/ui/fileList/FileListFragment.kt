@@ -65,8 +65,8 @@ import com.infomaniak.drive.utils.BulkOperationsUtils.generateWorkerData
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.drive.utils.Utils.openUrlIntent
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
+import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.setPagination
@@ -286,7 +286,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         runCatching {
             val storedFileUri = getUri(requireContext()).second
             val url = if (name.endsWith(".url")) getUrlFromUrlFile(storedFileUri) else getUrlFromWebloc(storedFileUri)
-            openUrlIntent(url)
+
+            if (url.isValidUrl()) requireContext().openUrl(url) else Exception("It's not a valid url")
         }.onFailure {
             requireActivity()
                 .showSnackbar(getString(R.string.errorGetBookmarkURL), anchorView = requireActivity().mainFab)
