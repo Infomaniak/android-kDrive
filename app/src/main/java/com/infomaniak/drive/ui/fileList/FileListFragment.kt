@@ -283,9 +283,10 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun File.openBookmarkIntent() {
-        kotlin.runCatching {
-            if (name.endsWith(".url")) openUrlIntent(getUrlFromUrlFile(getUri(requireContext()).second))
-            else openUrlIntent(getUrlFromWebloc(getUri(requireContext()).second))
+        runCatching {
+            val storedFileUri = getUri(requireContext()).second
+            val url = if (name.endsWith(".url")) getUrlFromUrlFile(storedFileUri) else getUrlFromWebloc(storedFileUri)
+            openUrlIntent(url)
         }.onFailure {
             requireActivity()
                 .showSnackbar(getString(R.string.errorGetBookmarkURL), anchorView = requireActivity().mainFab)
