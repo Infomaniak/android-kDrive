@@ -142,7 +142,7 @@ class SearchFragment : FileListFragment() {
 
     private fun setRecentSearchesAdapter() {
         recentSearchesAdapter = RecentSearchesAdapter { searchView.setText(it) }.apply {
-            setItems(AppSettings.mostRecentSearches)
+            setItems(UISettings(requireContext()).recentSearches)
             recentSearchesList.adapter = this
         }
     }
@@ -249,17 +249,11 @@ class SearchFragment : FileListFragment() {
         val newSearch = searchView.text.toString().trim()
         if (newSearch.isEmpty()) return
 
-        val recentSearches = AppSettings.mostRecentSearches
-        val newSearches = recentSearches
-            .apply {
-                if (contains(newSearch)) {
-                    move(recentSearches.indexOf(newSearch), 0)
-                } else {
-                    add(0, newSearch)
-                }
-            }
+        val recentSearches = UISettings(requireContext()).recentSearches
+        val newSearches = (listOf(newSearch) + recentSearches).distinct()
             .filterIndexed { index, _ -> index < MAX_MOST_RECENT_SEARCHES }
-        AppSettings.mostRecentSearches = RealmList(*newSearches.toTypedArray())
+
+        UISettings(requireContext()).recentSearches = newSearches
         recentSearchesAdapter.setItems(newSearches)
     }
 

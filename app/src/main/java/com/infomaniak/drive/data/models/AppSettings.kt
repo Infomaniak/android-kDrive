@@ -17,11 +17,9 @@
  */
 package com.infomaniak.drive.data.models
 
-import com.infomaniak.drive.data.cache.AppSettingsMigration
 import com.infomaniak.drive.utils.RealmModules
 import io.realm.Realm
 import io.realm.RealmConfiguration
-import io.realm.RealmList
 import io.realm.RealmObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -33,16 +31,13 @@ open class AppSettings(
     var _currentDriveId: Int = -1,
     var _currentUserId: Int = -1,
     var _migrated: Boolean = false,
-    var _mostRecentSearches: RealmList<String> = RealmList(),
     var _onlyWifiSync: Boolean = false,
 ) : RealmObject() {
 
     companion object {
         private const val DB_NAME = "AppSettings.realm"
         private val realmConfiguration: RealmConfiguration = RealmConfiguration.Builder().name(DB_NAME)
-            .schemaVersion(AppSettingsMigration.bddVersion)
             .modules(RealmModules.AppSettingsModule())
-            .migration(AppSettingsMigration())
             .build()
 
         private fun getRealmInstance() = Realm.getInstance(realmConfiguration)
@@ -99,14 +94,6 @@ open class AppSettings(
                 field = value
                 GlobalScope.launch(Dispatchers.IO) {
                     updateAppSettings { appSettings -> appSettings._migrated = value }
-                }
-            }
-
-        var mostRecentSearches: RealmList<String> = getAppSettings()._mostRecentSearches
-            set(value) {
-                field = value
-                GlobalScope.launch(Dispatchers.IO) {
-                    updateAppSettings { appSettings -> appSettings._mostRecentSearches = value }
                 }
             }
 

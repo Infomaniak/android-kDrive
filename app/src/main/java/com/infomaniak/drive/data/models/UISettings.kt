@@ -20,6 +20,8 @@ package com.infomaniak.drive.data.models
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.infomaniak.drive.R
 
 class UISettings(val context: Context) {
@@ -102,6 +104,18 @@ class UISettings(val context: Context) {
         set(value) {
             with(getUISettings().edit()) {
                 putInt("nightMode", value)
+                apply()
+            }
+        }
+
+    var recentSearches: List<String>
+        get() = Gson().fromJson(
+            getUISettings().getString("recentSearches", null),
+            object : TypeToken<List<String>>() {}.type,
+        ) ?: emptyList()
+        set(value) {
+            with(getUISettings().edit()) {
+                putString("recentSearches", Gson().toJson(value))
                 apply()
             }
         }
