@@ -43,11 +43,11 @@ open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setStates()
-        setListeners()
+        setEndIconsVisibility()
+        setFiltersOnClickListeners()
     }
 
-    private fun setStates() {
+    private fun setEndIconsVisibility() {
         when (navigationArgs.date?.type) {
             SearchDateFilterType.TODAY -> todayFilterEndIcon.isVisible = true
             SearchDateFilterType.YESTERDAY -> yesterdayFilterEndIcon.isVisible = true
@@ -62,7 +62,7 @@ open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun setListeners() {
+    private fun setFiltersOnClickListeners() {
         todayFilterLayout.setOnClickListener {
             with(Date()) {
                 setBackNavResult(SearchDateFilterType.TODAY, startOfTheDay(), endOfTheDay(), getString(R.string.allToday))

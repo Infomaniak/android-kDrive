@@ -50,13 +50,23 @@ class CategoriesAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView.categoryCard) {
         val category = filteredCategories[position]
-        setLayouts(position)
-        setData(category)
-        setStates(category)
-        setListeners(category)
+        categoryIcon.setBackgroundColor(Color.parseColor(category.color))
+        categoryTitle.text = category.name
+        categoryProgressBar.isGone = true
+        checkIcon.isVisible = category.isSelected
+        isCheckable = false
+        isEnabled = true
+        setOnClickListener {
+            categoryProgressBar.isVisible = true
+            checkIcon.isGone = true
+            isEnabled = false
+            onCategoryChanged(category.id, !category.isSelected)
+        }
+        setCornersRadius(position)
+        setMenuButton(category)
     }
 
-    private fun MaterialCardView.setLayouts(position: Int) {
+    private fun MaterialCardView.setCornersRadius(position: Int) {
         var topCornerRadius = 0.0f
         var bottomCornerRadius = 0.0f
         if (position == 0) topCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
@@ -74,27 +84,8 @@ class CategoriesAdapter(
             .build()
     }
 
-    private fun MaterialCardView.setData(category: UICategory) {
-        categoryIcon.setBackgroundColor(Color.parseColor(category.color))
-        categoryTitle.text = category.name
-    }
-
-    private fun MaterialCardView.setStates(category: UICategory) {
-        categoryProgressBar.isGone = true
-        checkIcon.isVisible = category.isSelected
-        isCheckable = false
-        isEnabled = true
+    private fun MaterialCardView.setMenuButton(category: UICategory) {
         menuButton.isVisible = canEditCategory || (canDeleteCategory && !category.isPredefined)
-    }
-
-    private fun MaterialCardView.setListeners(category: UICategory) {
-        setOnClickListener {
-            categoryProgressBar.isVisible = true
-            checkIcon.isGone = true
-            isEnabled = false
-            onCategoryChanged(category.id, !category.isSelected)
-        }
-
         menuButton.setOnClickListener { onMenuClicked?.invoke(category) }
     }
 

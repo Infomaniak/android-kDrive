@@ -42,30 +42,34 @@ class SearchFiltersAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView) {
         val filter = filters[position]
-        setLayouts(position)
-        setData(filter)
-        setStates(filter)
-        setListeners(filter)
+        setMarginEnd(position)
+        setIcon(filter)
+        setTint(filter)
+        setName(filter)
+        setCloseButton(filter)
     }
 
-    private fun View.setLayouts(position: Int) {
+    private fun View.setMarginEnd(position: Int) {
         layoutParams = (layoutParams as ViewGroup.MarginLayoutParams).apply {
             marginEnd = if (position == filters.size - 1) 0 else resources.getDimensionPixelSize(R.dimen.marginStandardSmall)
         }
     }
 
-    private fun View.setData(filter: SearchFilter) = with(filter) {
-        icon?.let(filterIcon::setImageResource)
-        tint?.let { roundIcon.setBackgroundColor(Color.parseColor(it)) }
-        filterName.text = text
+    private fun View.setIcon(filter: SearchFilter) {
+        filter.icon?.let(filterIcon::setImageResource)
+        filterIcon.isVisible = filter.icon != null
     }
 
-    private fun View.setStates(filter: SearchFilter) {
-        filterIcon.isVisible = filter.icon != null
+    private fun View.setTint(filter: SearchFilter) {
+        filter.tint?.let { roundIcon.setBackgroundColor(Color.parseColor(it)) }
         roundIcon.isVisible = filter.tint != null
     }
 
-    private fun View.setListeners(filter: SearchFilter) {
+    private fun View.setName(filter: SearchFilter) {
+        filterName.text = filter.text
+    }
+
+    private fun View.setCloseButton(filter: SearchFilter) {
         filterClose.setOnClickListener {
             val index = filters.indexOf(filter)
             if (index > -1) {

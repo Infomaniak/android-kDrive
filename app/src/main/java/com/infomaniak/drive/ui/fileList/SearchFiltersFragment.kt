@@ -56,13 +56,13 @@ class SearchFiltersFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setData()
-        setStates()
-        setListeners()
+        initializeFilters()
+        handleRights()
+        setOnClickListeners()
         setBackActionHandlers()
     }
 
-    private fun setData() = with(searchFiltersViewModel) {
+    private fun initializeFilters() = with(searchFiltersViewModel) {
         date = navigationArgs.date
         type = navigationArgs.type?.let(ConvertedType::valueOf)
         categories = navigationArgs.categories?.let { DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray()) }
@@ -70,7 +70,7 @@ class SearchFiltersFragment : Fragment() {
         updateAllFiltersUI()
     }
 
-    private fun setStates() {
+    private fun handleRights() {
         if (rights?.canReadCategoryOnFile == true) {
             categoriesTitle.isVisible = true
             chooseCategoriesFilter.isVisible = true
@@ -84,7 +84,7 @@ class SearchFiltersFragment : Fragment() {
         }
     }
 
-    private fun setListeners() = with(searchFiltersViewModel) {
+    private fun setOnClickListeners() = with(searchFiltersViewModel) {
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
         modificationDateFilter.setOnClickListener { safeNavigate(R.id.searchFilterDateDialog, bundleOf("date" to date)) }

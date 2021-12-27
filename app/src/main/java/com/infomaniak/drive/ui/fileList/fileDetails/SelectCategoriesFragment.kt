@@ -85,7 +85,7 @@ class SelectCategoriesFragment : Fragment() {
 
         searchView.hint = getString(R.string.searchTitle)
 
-        setListeners()
+        setOnClickListeners()
         setBackActionHandlers()
     }
 
@@ -126,7 +126,7 @@ class SelectCategoriesFragment : Fragment() {
         toolbar.menu.findItem(R.id.addCategory).isVisible = canCreateCategory
     }
 
-    private fun setListeners() {
+    private fun setOnClickListeners() {
         toolbar.apply {
             setOnMenuItemClickListener { menuItem ->
                 if (menuItem.itemId == R.id.addCategory) {

@@ -39,12 +39,12 @@ class RecentSearchesAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView.searchResultCard) {
         val search = searches[position]
-        setLayouts(position)
-        setData(search)
-        setListeners(search)
+        setCornersRadius(position)
+        searchResultText.text = search
+        setOnClickListener { onSearchClicked(search) }
     }
 
-    private fun MaterialCardView.setLayouts(position: Int) {
+    private fun MaterialCardView.setCornersRadius(position: Int) {
         var topCornerRadius = 0.0f
         var bottomCornerRadius = 0.0f
         if (position == 0) topCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
@@ -57,14 +57,6 @@ class RecentSearchesAdapter(
             .setBottomLeftCorner(CornerFamily.ROUNDED, bottomCornerRadius)
             .setBottomRightCorner(CornerFamily.ROUNDED, bottomCornerRadius)
             .build()
-    }
-
-    private fun MaterialCardView.setData(search: String) {
-        searchResultText.text = search
-    }
-
-    private fun MaterialCardView.setListeners(search: String) {
-        setOnClickListener { onSearchClicked(search) }
     }
 
     fun setItems(newSearches: List<String>) {

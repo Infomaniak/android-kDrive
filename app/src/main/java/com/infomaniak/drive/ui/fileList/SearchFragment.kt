@@ -59,9 +59,11 @@ class SearchFragment : FileListFragment() {
         setViewModels()
         setSearchFiltersAdapter()
         downloadFiles = DownloadFiles()
-        setLayouts()
+        setNoFilesLayout = SetNoFilesLayout()
+        recentSearchesView = layoutInflater.inflate(R.layout.recent_searches, null)
         super.onViewCreated(view, savedInstanceState)
-        setUI()
+        fileListLayout.addView(recentSearchesView, 1)
+        clearButton.setOnClickListener { searchView.text = null }
         setSearchView()
         setFileAdapter()
         setRecentSearchesAdapter()
@@ -80,37 +82,29 @@ class SearchFragment : FileListFragment() {
         }
     }
 
-    private fun setLayouts() {
-        setNoFilesLayout = SetNoFilesLayout()
-        recentSearchesView = layoutInflater.inflate(R.layout.recent_searches, null)
-    }
-
-    private fun setUI() {
-        collapsingToolbarLayout.title = getString(R.string.searchTitle)
-        searchViewCard.isVisible = true
-        fileListLayout.addView(recentSearchesView, 1)
-        clearButton.setOnClickListener { searchView.text = null }
-    }
-
-    private fun setSearchView() = with(searchView) {
-        hint = getString(R.string.searchViewHint)
-        addTextChangedListener(DebouncingTextWatcher(lifecycle) {
-            clearButton?.isInvisible = it.isNullOrEmpty()
-            fileListViewModel.currentPage = 1
-            downloadFiles(true, false)
-        })
-        setOnEditorActionListener { _, actionId, _ ->
-            if (EditorInfo.IME_ACTION_SEARCH == actionId) {
-                fileListViewModel.currentPage = 1
-                downloadFiles(true, false)
-                true
-            } else false
-        }
-    }
-
     private fun setSearchFiltersAdapter() {
         searchFiltersAdapter = SearchFiltersAdapter { key, categoryId -> removeFilter(key, categoryId) }.apply {
             filtersLayout.adapter = this
+        }
+    }
+
+    private fun setSearchView() {
+        searchViewCard.isVisible = true
+
+        with(searchView) {
+            hint = getString(R.string.searchViewHint)
+            addTextChangedListener(DebouncingTextWatcher(lifecycle) {
+                clearButton?.isInvisible = it.isNullOrEmpty()
+                fileListViewModel.currentPage = 1
+                downloadFiles(true, false)
+            })
+            setOnEditorActionListener { _, actionId, _ ->
+                if (EditorInfo.IME_ACTION_SEARCH == actionId) {
+                    fileListViewModel.currentPage = 1
+                    downloadFiles(true, false)
+                    true
+                } else false
+            }
         }
     }
 
@@ -147,29 +141,28 @@ class SearchFragment : FileListFragment() {
         }
     }
 
-    private fun setToolbar() = with(toolbar) {
-        setOnMenuItemClickListener { menuItem ->
-            if (menuItem.itemId == R.id.selectFilters) {
-                with(fileListViewModel) {
-                    safeNavigate(
-                        SearchFragmentDirections.actionSearchFragmentToSearchFiltersFragment(
-                            date = dateFilter.second,
-                            type = typeFilter.second?.name,
-                            categories = categoriesFilter.second?.map { it.id }?.toIntArray(),
-                            categoriesOwnership = categoriesOwnershipFilter.second,
+    private fun setToolbar() {
+        collapsingToolbarLayout.title = getString(R.string.searchTitle)
+
+        with(toolbar) {
+            setOnMenuItemClickListener { menuItem ->
+                if (menuItem.itemId == R.id.selectFilters) {
+                    with(fileListViewModel) {
+                        safeNavigate(
+                            SearchFragmentDirections.actionSearchFragmentToSearchFiltersFragment(
+                                date = dateFilter.second,
+                                type = typeFilter.second?.name,
+                                categories = categoriesFilter.second?.map { it.id }?.toIntArray(),
+                                categoriesOwnership = categoriesOwnershipFilter.second,
+                            )
                         )
-                    )
+                    }
                 }
+                true
             }
-            true
+
+            menu.findItem(R.id.selectFilters).isVisible = true
         }
-
-        menu.findItem(R.id.selectFilters).isVisible = true
-    }
-
-    override fun onResume() {
-        super.onResume()
-        updateFilters()
     }
 
     private fun observeSearchResult() {
@@ -226,6 +219,11 @@ class SearchFragment : FileListFragment() {
             }
             updateFilters()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateFilters()
     }
 
     private fun setDateFilter(filter: SearchDateFilter?) {
