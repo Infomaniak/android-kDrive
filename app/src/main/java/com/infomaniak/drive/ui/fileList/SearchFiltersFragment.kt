@@ -67,10 +67,7 @@ class SearchFiltersFragment : Fragment() {
         type = navigationArgs.type?.let(ConvertedType::valueOf)
         categories = navigationArgs.categories?.let { DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray()) }
         categoriesOwnership = navigationArgs.categoriesOwnership ?: SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_VALUE
-        updateDateUI()
-        updateTypeUI()
-        updateCategoriesUI()
-        updateCategoriesOwnershipUI()
+        updateAllFiltersUI()
     }
 
     private fun setStates() {
@@ -104,10 +101,7 @@ class SearchFiltersFragment : Fragment() {
 
         clearButton.setOnClickListener {
             clearFilters()
-            updateDateUI()
-            updateTypeUI()
-            updateCategoriesUI()
-            updateCategoriesOwnershipUI()
+            updateAllFiltersUI()
         }
 
         saveButton.setOnClickListener {
@@ -134,11 +128,20 @@ class SearchFiltersFragment : Fragment() {
         }
 
         getBackNavigationResult<List<Int>>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
+            searchFiltersViewModel.restoreCurrentFilters(requireContext())
             searchFiltersViewModel.categories = if (it.isNotEmpty()) {
                 DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray())
             } else null
-            updateCategoriesUI()
+            updateAllFiltersUI()
         }
+    }
+
+    private fun updateAllFiltersUI() {
+        updateDateUI()
+        updateTypeUI()
+        updateCategoriesUI()
+        updateCategoriesOwnershipUI()
+
     }
 
     private fun updateDateUI() = with(modificationDateFilterText) {
@@ -162,6 +165,7 @@ class SearchFiltersFragment : Fragment() {
             categories = categories,
             canPutCategoryOnFile = rights?.canPutCategoryOnFile ?: false,
             onClicked = {
+                searchFiltersViewModel.backupCurrentFilters(requireContext())
                 runCatching {
                     findNavController().navigate(
                         SearchFiltersFragmentDirections.actionSearchFiltersFragmentToSelectCategoriesFragment(

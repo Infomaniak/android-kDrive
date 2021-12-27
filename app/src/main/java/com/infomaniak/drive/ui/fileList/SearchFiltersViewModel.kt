@@ -17,10 +17,12 @@
  */
 package com.infomaniak.drive.ui.fileList
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.infomaniak.drive.data.models.CategoriesOwnershipFilter
 import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.SearchDateFilter
+import com.infomaniak.drive.data.models.SearchFiltersBackup
 import com.infomaniak.drive.data.models.drive.Category
 
 class SearchFiltersViewModel : ViewModel() {
@@ -35,6 +37,22 @@ class SearchFiltersViewModel : ViewModel() {
         type = null
         categories = null
         categoriesOwnership = DEFAULT_CATEGORIES_OWNERSHIP_VALUE
+    }
+
+    fun backupCurrentFilters(context: Context) {
+        val filters = SearchFiltersBackup(context)
+        filters.date = date
+        filters.type = type
+        filters.categories = categories
+        filters.categoriesOwnership = categoriesOwnership
+    }
+
+    fun restoreCurrentFilters(context: Context) {
+        val filters = SearchFiltersBackup(context)
+        date = filters.date
+        type = filters.type
+        categories = filters.categories
+        categoriesOwnership = filters.categoriesOwnership
     }
 
     companion object {
