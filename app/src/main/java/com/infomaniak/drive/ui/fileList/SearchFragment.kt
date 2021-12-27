@@ -58,12 +58,16 @@ class SearchFragment : FileListFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setViewModels()
         setSearchFiltersAdapter()
+
         downloadFiles = DownloadFiles()
         setNoFilesLayout = SetNoFilesLayout()
         recentSearchesView = layoutInflater.inflate(R.layout.recent_searches, null)
+
         super.onViewCreated(view, savedInstanceState)
+
         fileListLayout.addView(recentSearchesView, 1)
         clearButton.setOnClickListener { searchView.text = null }
+
         setSearchView()
         setFileAdapter()
         setRecentSearchesAdapter()
@@ -83,8 +87,8 @@ class SearchFragment : FileListFragment() {
     }
 
     private fun setSearchFiltersAdapter() {
-        searchFiltersAdapter = SearchFiltersAdapter { key, categoryId -> removeFilter(key, categoryId) }.apply {
-            filtersLayout.adapter = this
+        searchFiltersAdapter = SearchFiltersAdapter { key, categoryId -> removeFilter(key, categoryId) }.also {
+            filtersLayout.adapter = it
         }
     }
 
@@ -247,16 +251,17 @@ class SearchFragment : FileListFragment() {
         val newSearch = searchView.text.toString().trim()
         if (newSearch.isEmpty()) return
 
-        val recentSearches = UISettings(requireContext()).recentSearches
-        val newSearches = (listOf(newSearch) + recentSearches).distinct()
-            .filterIndexed { index, _ -> index < MAX_MOST_RECENT_SEARCHES }
+        val uiSettings = UISettings(requireContext())
 
-        UISettings(requireContext()).recentSearches = newSearches
-        recentSearchesAdapter.setItems(newSearches)
+        val newSearches = (listOf(newSearch) + uiSettings.recentSearches).distinct()
+            .filterIndexed { index, _ -> index < MAX_MOST_RECENT_SEARCHES }
+            .also(recentSearchesAdapter::setItems)
+
+        uiSettings.recentSearches = newSearches
     }
 
     private fun updateFilters() = with(fileListViewModel) {
-        val filters = mutableListOf<SearchFilter>().apply {
+        mutableListOf<SearchFilter>().apply {
             dateFilter.second?.let {
                 add(SearchFilter(key = dateFilter.first, text = it.text, icon = R.drawable.ic_calendar))
             }
@@ -266,9 +271,10 @@ class SearchFragment : FileListFragment() {
             categoriesFilter.second?.forEach {
                 add(SearchFilter(categoriesFilter.first, it.getName(requireContext()), tint = it.color, categoryId = it.id))
             }
+        }.also {
+            searchFiltersAdapter.setItems(it)
+            showRecentSearchesLayout(it.isEmpty() && searchView.text.toString().isBlank())
         }
-        searchFiltersAdapter.setItems(filters)
-        showRecentSearchesLayout(filters.isEmpty() && searchView.text.toString().isBlank())
         currentPage = 1
         downloadFiles(true, false)
     }

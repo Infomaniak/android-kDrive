@@ -53,6 +53,7 @@ class SearchFiltersViewModel : ViewModel() {
         type = filters.type
         categories = filters.categories
         categoriesOwnership = filters.categoriesOwnership
+        filters.removeBackup()
     }
 
     companion object {

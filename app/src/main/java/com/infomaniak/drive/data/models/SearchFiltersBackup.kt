@@ -27,31 +27,38 @@ import java.util.*
 
 class SearchFiltersBackup(val context: Context) {
 
-    private fun getSearchFiltersBackup(): SharedPreferences {
+    private fun getBackup(): SharedPreferences {
         return context.getSharedPreferences("SearchFilters", Context.MODE_PRIVATE)
+    }
+
+    fun removeBackup() {
+        with(getBackup().edit()) {
+            clear()
+            apply()
+        }
     }
 
     var date: SearchDateFilter?
         get() {
-            with(getSearchFiltersBackup()) {
-                val type = when (getString("dateType", null)) {
-                    SearchDateFilterType.TODAY.name -> SearchDateFilterType.TODAY
-                    SearchDateFilterType.YESTERDAY.name -> SearchDateFilterType.YESTERDAY
-                    SearchDateFilterType.LAST_SEVEN_DAYS.name -> SearchDateFilterType.LAST_SEVEN_DAYS
-                    SearchDateFilterType.CUSTOM.name -> SearchDateFilterType.CUSTOM
+            with(getBackup()) {
+                val key = when (getString("dateKey", null)) {
+                    DateFilterKey.TODAY.name -> DateFilterKey.TODAY
+                    DateFilterKey.YESTERDAY.name -> DateFilterKey.YESTERDAY
+                    DateFilterKey.LAST_SEVEN_DAYS.name -> DateFilterKey.LAST_SEVEN_DAYS
+                    DateFilterKey.CUSTOM.name -> DateFilterKey.CUSTOM
                     else -> null
                 }
                 val start = getLong("dateStart", -1L)
                 val end = getLong("dateEnd", -1L)
                 val text = getString("dateText", "")
-                return if (type != null) {
-                    SearchDateFilter(type, Date(start), Date(end), text!!)
+                return if (key != null) {
+                    SearchDateFilter(key, Date(start), Date(end), text!!)
                 } else null
             }
         }
         set(value) {
-            with(getSearchFiltersBackup().edit()) {
-                putString("dateType", value?.type?.name)
+            with(getBackup().edit()) {
+                putString("dateKey", value?.key?.name)
                 putLong("dateStart", value?.start?.time ?: -1L)
                 putLong("dateEnd", value?.end?.time ?: -1L)
                 putString("dateText", value?.text)
@@ -61,7 +68,7 @@ class SearchFiltersBackup(val context: Context) {
 
     var type: ConvertedType?
         get() {
-            return when (getSearchFiltersBackup().getString("type", null)) {
+            return when (getBackup().getString("type", null)) {
                 ConvertedType.ARCHIVE.name -> ConvertedType.ARCHIVE
                 ConvertedType.AUDIO.name -> ConvertedType.AUDIO
                 ConvertedType.CODE.name -> ConvertedType.CODE
@@ -76,7 +83,7 @@ class SearchFiltersBackup(val context: Context) {
             }
         }
         set(value) {
-            with(getSearchFiltersBackup().edit()) {
+            with(getBackup().edit()) {
                 putString("type", value?.name)
                 apply()
             }
@@ -84,11 +91,11 @@ class SearchFiltersBackup(val context: Context) {
 
     var categories: List<Category>?
         get() = Gson().fromJson(
-            getSearchFiltersBackup().getString("categories", null),
+            getBackup().getString("categories", null),
             object : TypeToken<List<Category>>() {}.type,
         )
         set(value) {
-            with(getSearchFiltersBackup().edit()) {
+            with(getBackup().edit()) {
                 putString("categories", Gson().toJson(value))
                 apply()
             }
@@ -96,7 +103,7 @@ class SearchFiltersBackup(val context: Context) {
 
     var categoriesOwnership: CategoriesOwnershipFilter
         get() {
-            val name = getSearchFiltersBackup().getString(
+            val name = getBackup().getString(
                 "categoriesOwnership",
                 SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_VALUE.name
             )
@@ -107,7 +114,7 @@ class SearchFiltersBackup(val context: Context) {
             }
         }
         set(value) {
-            with(getSearchFiltersBackup().edit()) {
+            with(getBackup().edit()) {
                 putString("categoriesOwnership", value.name)
                 apply()
             }

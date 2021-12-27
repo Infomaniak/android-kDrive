@@ -43,8 +43,8 @@ class SearchFiltersAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView) {
         val filter = filters[position]
         setMarginEnd(position)
-        setIcon(filter)
-        setTint(filter)
+        configureIcon(filter)
+        configureTint(filter)
         setName(filter)
         setCloseButton(filter)
     }
@@ -55,12 +55,12 @@ class SearchFiltersAdapter(
         }
     }
 
-    private fun View.setIcon(filter: SearchFilter) {
+    private fun View.configureIcon(filter: SearchFilter) {
         filter.icon?.let(filterIcon::setImageResource)
         filterIcon.isVisible = filter.icon != null
     }
 
-    private fun View.setTint(filter: SearchFilter) {
+    private fun View.configureTint(filter: SearchFilter) {
         filter.tint?.let { roundIcon.setBackgroundColor(Color.parseColor(it)) }
         roundIcon.isVisible = filter.tint != null
     }

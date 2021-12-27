@@ -179,8 +179,8 @@ class SearchFiltersFragment : Fragment() {
 
     private fun updateCategoriesOwnershipUI() {
         if (searchFiltersViewModel.categoriesOwnership == CategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES) {
-            belongToOneCategoryFilter.setupSelection(false)
             belongToAllCategoriesFilter.setupSelection(true)
+            belongToOneCategoryFilter.setupSelection(false)
         } else {
             belongToAllCategoriesFilter.setupSelection(false)
             belongToOneCategoryFilter.setupSelection(true)

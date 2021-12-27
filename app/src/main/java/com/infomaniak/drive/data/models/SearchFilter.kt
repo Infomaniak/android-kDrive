@@ -38,14 +38,14 @@ enum class FilterKey {
 
 @Parcelize
 data class SearchDateFilter(
-    val type: SearchDateFilterType,
+    val key: DateFilterKey,
     val start: Date,
     val end: Date,
     val text: String,
 ) : Parcelable
 
 @Parcelize
-enum class SearchDateFilterType : Parcelable {
+enum class DateFilterKey : Parcelable {
     TODAY,
     YESTERDAY,
     LAST_SEVEN_DAYS,

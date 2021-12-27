@@ -27,8 +27,8 @@ import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.DateFilterKey
 import com.infomaniak.drive.data.models.SearchDateFilter
-import com.infomaniak.drive.data.models.SearchDateFilterType
 import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_search_filter_date.*
@@ -44,15 +44,18 @@ open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setEndIconsVisibility()
-        setFiltersOnClickListeners()
+        setTodayOnClickListener()
+        setYesterdayOnClickListener()
+        setLastSevenDaysOnClickListener()
+        setCustomOnClickListener()
     }
 
     private fun setEndIconsVisibility() {
-        when (navigationArgs.date?.type) {
-            SearchDateFilterType.TODAY -> todayFilterEndIcon.isVisible = true
-            SearchDateFilterType.YESTERDAY -> yesterdayFilterEndIcon.isVisible = true
-            SearchDateFilterType.LAST_SEVEN_DAYS -> lastSevenDaysFilterEndIcon.isVisible = true
-            SearchDateFilterType.CUSTOM -> customFilterEndIcon.isVisible = true
+        when (navigationArgs.date?.key) {
+            DateFilterKey.TODAY -> todayFilterEndIcon.isVisible = true
+            DateFilterKey.YESTERDAY -> yesterdayFilterEndIcon.isVisible = true
+            DateFilterKey.LAST_SEVEN_DAYS -> lastSevenDaysFilterEndIcon.isVisible = true
+            DateFilterKey.CUSTOM -> customFilterEndIcon.isVisible = true
             null -> {
                 todayFilterEndIcon.isGone = true
                 yesterdayFilterEndIcon.isGone = true
@@ -62,33 +65,42 @@ open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun setFiltersOnClickListeners() {
+    private fun setTodayOnClickListener() {
         todayFilterLayout.setOnClickListener {
             with(Date()) {
-                setBackNavResult(SearchDateFilterType.TODAY, startOfTheDay(), endOfTheDay(), getString(R.string.allToday))
-            }
-        }
-        yesterdayFilterLayout.setOnClickListener {
-            with(Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }.time) {
-                setBackNavResult(SearchDateFilterType.YESTERDAY, startOfTheDay(), endOfTheDay(), getString(R.string.allYesterday))
-            }
-        }
-        lastSevenDaysFilterLayout.setOnClickListener {
-            val start = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -6) }.time.startOfTheDay()
-            val end = Date().endOfTheDay()
-            setBackNavResult(SearchDateFilterType.LAST_SEVEN_DAYS, start, end, dateIntervalText(start, end))
-        }
-        customFilterLayout.setOnClickListener {
-            showDateRangePicker { startTime, endTime ->
-                val start = Date(startTime).startOfTheDay()
-                val end = Date(endTime).endOfTheDay()
-                setBackNavResult(SearchDateFilterType.CUSTOM, start, end, dateIntervalText(start, end))
+                setBackNavResult(DateFilterKey.TODAY, startOfTheDay(), endOfTheDay(), getString(R.string.allToday))
             }
         }
     }
 
-    private fun setBackNavResult(type: SearchDateFilterType, start: Date, end: Date, text: String) {
-        setBackNavigationResult(SEARCH_FILTER_DATE_NAV_KEY, SearchDateFilter(type, start, end, text))
+    private fun setYesterdayOnClickListener() {
+        yesterdayFilterLayout.setOnClickListener {
+            with(Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }.time) {
+                setBackNavResult(DateFilterKey.YESTERDAY, startOfTheDay(), endOfTheDay(), getString(R.string.allYesterday))
+            }
+        }
+    }
+
+    private fun setLastSevenDaysOnClickListener() {
+        lastSevenDaysFilterLayout.setOnClickListener {
+            val start = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -6) }.time.startOfTheDay()
+            val end = Date().endOfTheDay()
+            setBackNavResult(DateFilterKey.LAST_SEVEN_DAYS, start, end, dateIntervalText(start, end))
+        }
+    }
+
+    private fun setCustomOnClickListener() {
+        customFilterLayout.setOnClickListener {
+            showDateRangePicker { startTime, endTime ->
+                val start = Date(startTime).startOfTheDay()
+                val end = Date(endTime).endOfTheDay()
+                setBackNavResult(DateFilterKey.CUSTOM, start, end, dateIntervalText(start, end))
+            }
+        }
+    }
+
+    private fun setBackNavResult(key: DateFilterKey, start: Date, end: Date, text: String) {
+        setBackNavigationResult(SEARCH_FILTER_DATE_NAV_KEY, SearchDateFilter(key, start, end, text))
     }
 
     private fun dateIntervalText(start: Date, end: Date): String {

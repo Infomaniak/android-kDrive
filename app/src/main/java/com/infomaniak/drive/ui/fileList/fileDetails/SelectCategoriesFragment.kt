@@ -221,7 +221,7 @@ class SelectCategoriesFragment : Fragment() {
     }
 
     private fun handleCreateCategoryRow(categoryName: String?) {
-        if (usageMode == SELECTED_CATEGORIES) return
+        if (usageMode != FILE_CATEGORIES) return
 
         val text = getString(R.string.manageCategoriesCreateTitle, "<b>$categoryName</b>")
         addCategoryTitle.text = HtmlCompat.fromHtml(text, HtmlCompat.FROM_HTML_MODE_COMPACT)
