@@ -81,6 +81,5 @@ class RecentSearchesAdapter(
                 else -> true
             }
         }
-
     }
 }

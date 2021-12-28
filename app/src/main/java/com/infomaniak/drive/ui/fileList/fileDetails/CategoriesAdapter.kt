@@ -22,6 +22,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.CornerFamily
@@ -30,17 +31,17 @@ import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment.Usa
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_category.view.*
 import java.util.*
-import kotlin.collections.ArrayList
 
 class CategoriesAdapter(
-    private val onCategoryChanged: (categoryID: Int, isSelected: Boolean) -> Unit
+    private val onCategoryChanged: (id: Int, isSelected: Boolean) -> Unit
 ) : RecyclerView.Adapter<ViewHolder>() {
 
     var canEditCategory: Boolean = false
     var canDeleteCategory: Boolean = false
+    var isCreateRowVisible: Boolean = false
     var onMenuClicked: ((category: UICategory) -> Unit)? = null
-    var allCategories: ArrayList<UICategory> = arrayListOf()
-    var filteredCategories: ArrayList<UICategory> = arrayListOf()
+    var allCategories: List<UICategory> = listOf()
+    var filteredCategories: List<UICategory> = listOf()
     private var filterQuery: String = ""
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
@@ -50,26 +51,19 @@ class CategoriesAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView.categoryCard) {
         val category = filteredCategories[position]
-        categoryIcon.setBackgroundColor(Color.parseColor(category.color))
-        categoryTitle.text = category.name
-        categoryProgressBar.isGone = true
-        checkIcon.isVisible = category.isSelected
         isCheckable = false
         isEnabled = true
-        setOnClickListener {
-            categoryProgressBar.isVisible = true
-            checkIcon.isGone = true
-            isEnabled = false
-            onCategoryChanged(category.id, !category.isSelected)
-        }
+        categoryIcon.setBackgroundColor(Color.parseColor(category.color))
+        categoryTitle.text = category.name
         setCornersRadius(position)
         setMenuButton(category)
+        handleSelectedState(category)
+        setClickOnCategoryListener(category)
     }
 
     private fun MaterialCardView.setCornersRadius(position: Int) {
-        val trimmedQuery = filterQuery.trim()
         val topCornerRadius = if (position == 0) resources.getDimension(R.dimen.cardViewRadius) else 0.0f
-        val bottomCornerRadius = if (position == itemCount - 1 && (trimmedQuery.isBlank() || doesCategoryExist(trimmedQuery))) {
+        val bottomCornerRadius = if (position == itemCount - 1 && !isCreateRowVisible) {
             resources.getDimension(R.dimen.cardViewRadius)
         } else 0.0f
         shapeAppearanceModel = shapeAppearanceModel
@@ -86,52 +80,90 @@ class CategoriesAdapter(
         menuButton.setOnClickListener { onMenuClicked?.invoke(category) }
     }
 
-    fun setItems(newCategories: List<UICategory>, usageMode: UsageMode) {
-        allCategories = ArrayList(newCategories.sortedCategories(usageMode))
-        filterCategories()
+    private fun MaterialCardView.handleSelectedState(category: UICategory) {
+        category.selectedState.let {
+            categoryProgressBar.isVisible = it == SelectedState.PROCESSING
+            checkIcon.isVisible = it == SelectedState.SELECTED
+        }
+    }
+
+    private fun MaterialCardView.setClickOnCategoryListener(category: UICategory) {
+        setOnClickListener {
+            isEnabled = false
+            categoryProgressBar.isVisible = true
+            checkIcon.isGone = true
+            val isSelected = category.selectedState == SelectedState.NOT_SELECTED
+            category.selectedState = SelectedState.PROCESSING
+            onCategoryChanged(category.id, isSelected)
+        }
+    }
+
+    fun setItems(categories: List<UICategory>, usageMode: UsageMode) {
+        val oldCategories = filteredCategories.toDiffUtilCategories()
+        allCategories = categories.sorted(usageMode)
+        filteredCategories = allCategories.filtered()
+        val newCategories = filteredCategories.toDiffUtilCategories()
+        notifyAdapter(oldCategories, newCategories)
     }
 
     fun deleteCategory(categoryId: Int) {
-        allCategories.apply { removeAt(indexOfFirst { it.id == categoryId }) }
-        filterCategories()
+        val oldCategories = filteredCategories.toDiffUtilCategories()
+        allCategories = allCategories.filter { it.id != categoryId }
+        filteredCategories = allCategories.filtered()
+        val newCategories = filteredCategories.toDiffUtilCategories()
+        notifyAdapter(oldCategories, newCategories)
     }
 
     fun selectCategory(categoryId: Int, isSelected: Boolean, usageMode: UsageMode) {
+        val oldCategories = filteredCategories.toDiffUtilCategories()
+
         with(allCategories) {
             this[indexOfFirst { it.id == categoryId }].apply {
-                this.isSelected = isSelected
+                this.selectedState = if (isSelected) SelectedState.SELECTED else SelectedState.NOT_SELECTED
                 this.addedToFileAt = if (isSelected) Date() else null
             }
-            allCategories = ArrayList(sortedCategories(usageMode))
+            allCategories = sorted(usageMode)
         }
-        filterCategories()
+
+        filteredCategories = allCategories.filtered()
+        val newCategories = filteredCategories.toDiffUtilCategories()
+
+        notifyAdapter(oldCategories, newCategories)
     }
 
     fun updateFilter(query: String) {
+        val oldCategories = filteredCategories.toDiffUtilCategories()
         filterQuery = query
-        filterCategories()
+        filteredCategories = allCategories.filtered()
+        val newCategories = filteredCategories.toDiffUtilCategories()
+        notifyAdapter(oldCategories, newCategories)
     }
 
     fun doesCategoryExist(query: String): Boolean = filteredCategories.any { it.name.equals(query, true) }
 
-    private fun filterCategories() {
-        filteredCategories = ArrayList(allCategories.filter { it.name.contains(filterQuery, true) })
-        notifyDataSetChanged()
+    private fun notifyAdapter(oldItems: List<DiffUtilCategory>, newItems: List<DiffUtilCategory>) {
+        DiffUtil.calculateDiff(DiffCallbacks(oldItems, newItems, isCreateRowVisible)).dispatchUpdatesTo(this)
     }
 
-    private fun List<UICategory>.sortedCategories(usageMode: UsageMode): List<UICategory> {
+    private fun List<UICategory>.filtered(): List<UICategory> = filter { it.name.contains(filterQuery, true) }
+
+    private fun List<UICategory>.sorted(usageMode: UsageMode): List<UICategory> {
         return if (usageMode == UsageMode.SELECTED_CATEGORIES) sortedSearchCategories() else sortedFileCategories()
     }
 
     private fun List<UICategory>.sortedFileCategories(): List<UICategory> {
         return sortedByDescending { it.userUsageCount }
             .sortedBy { it.addedToFileAt }
-            .sortedByDescending { it.isSelected }
+            .sortedByDescending { it.selectedState == SelectedState.SELECTED }
     }
 
     private fun List<UICategory>.sortedSearchCategories(): List<UICategory> {
         return sortedBy { it.name }
-            .sortedByDescending { it.isSelected }
+            .sortedByDescending { it.selectedState == SelectedState.SELECTED }
+    }
+
+    private fun List<UICategory>.toDiffUtilCategories(): List<DiffUtilCategory> {
+        return map { DiffUtilCategory(it.id, it.selectedState) }
     }
 
     data class UICategory(
@@ -139,8 +171,47 @@ class CategoriesAdapter(
         var name: String,
         var color: String,
         val isPredefined: Boolean,
-        var isSelected: Boolean,
+        var selectedState: SelectedState,
         val userUsageCount: Int,
         var addedToFileAt: Date?,
     )
+
+    enum class SelectedState {
+        SELECTED,
+        NOT_SELECTED,
+        PROCESSING,
+    }
+
+    private data class DiffUtilCategory(
+        val id: Int,
+        var selectedState: SelectedState,
+    )
+
+    private class DiffCallbacks(
+        private val oldItems: List<DiffUtilCategory>,
+        private val newItems: List<DiffUtilCategory>,
+        private val isCreateRowVisible: Boolean,
+    ) : DiffUtil.Callback() {
+
+        override fun getOldListSize(): Int = oldItems.size
+
+        override fun getNewListSize(): Int = newItems.size
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldItems[oldItemPosition].id == newItems[newItemPosition].id
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return when {
+                oldItemPosition == 0 && newItemPosition != 0 -> false
+                oldItemPosition != 0 && newItemPosition == 0 -> false
+                oldItemPosition == oldListSize - 1 && newItemPosition != newListSize - 1 -> false
+                oldItemPosition != oldListSize - 1 && newItemPosition == newListSize - 1 -> false
+                oldItems[oldItemPosition].selectedState != newItems[newItemPosition].selectedState -> false
+                oldItemPosition == oldListSize - 1 && newItemPosition == newListSize - 1 && isCreateRowVisible -> false
+                newItemPosition == newListSize - 1 && !isCreateRowVisible -> false
+                else -> true
+            }
+        }
+    }
 }

@@ -25,7 +25,6 @@ import android.view.inputmethod.EditorInfo
 import androidx.activity.addCallback
 import androidx.core.os.bundleOf
 import androidx.core.text.HtmlCompat
-import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -44,6 +43,7 @@ import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectCategoriesBottomSheetDialog.UsageMode.*
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter
 import com.infomaniak.drive.ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialog
+import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.SelectedState
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.UICategory
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment.UsageMode.*
 import com.infomaniak.drive.utils.*
@@ -109,8 +109,8 @@ class SelectCategoriesFragment : Fragment() {
 
     private fun setCategoriesAdapter(canEditCategory: Boolean, canDeleteCategory: Boolean) {
         categoriesAdapter = CategoriesAdapter(
-            onCategoryChanged = { categoryId, isSelected ->
-                if (isSelected) addCategory(categoryId) else removeCategory(categoryId)
+            onCategoryChanged = { id, isSelected ->
+                if (isSelected) addCategory(id) else removeCategory(id)
             }
         ).apply {
             this.canEditCategory = canEditCategory
@@ -174,7 +174,7 @@ class SelectCategoriesFragment : Fragment() {
                 name = category.getName(requireContext()),
                 color = category.color,
                 isPredefined = category.isPredefined,
-                isSelected = fileCategory != null,
+                selectedState = if (fileCategory != null) SelectedState.SELECTED else SelectedState.NOT_SELECTED,
                 userUsageCount = category.userUsageCount,
                 addedToFileAt = fileCategory?.addedToFileAt,
             )
@@ -202,7 +202,7 @@ class SelectCategoriesFragment : Fragment() {
                 name = category.getName(requireContext()),
                 color = category.color,
                 isPredefined = category.isPredefined,
-                isSelected = selectedCategory != null,
+                selectedState = if (selectedCategory != null) SelectedState.SELECTED else SelectedState.NOT_SELECTED,
                 userUsageCount = category.userUsageCount,
                 addedToFileAt = null,
             )
@@ -224,17 +224,17 @@ class SelectCategoriesFragment : Fragment() {
     private fun handleCreateCategoryRow(categoryName: String?) {
         if (usageMode != FILE_CATEGORIES) return
 
-        createCategoryRowSeparator.isGone = categoriesAdapter.filteredCategories.isEmpty()
-
         addCategoryTitle.text = HtmlCompat.fromHtml(
             getString(R.string.manageCategoriesCreateTitle, "<b>$categoryName</b>"),
             HtmlCompat.FROM_HTML_MODE_COMPACT,
         )
 
-        createCategoryRow.apply {
-            setCornersRadius()
-            isVisible = categoryName?.isNotBlank() == true && !categoriesAdapter.doesCategoryExist(categoryName)
-        }
+        createCategoryRow.setCornersRadius()
+
+        val isVisible = categoryName?.isNotBlank() == true && !categoriesAdapter.doesCategoryExist(categoryName)
+        categoriesAdapter.isCreateRowVisible = isVisible
+        createCategoryRow.isVisible = isVisible
+        createCategoryRowSeparator.isVisible = isVisible && categoriesAdapter.filteredCategories.isNotEmpty()
     }
 
     private fun MaterialCardView.setCornersRadius() {
@@ -288,7 +288,7 @@ class SelectCategoriesFragment : Fragment() {
     private fun setBackNavResult() {
         setBackNavigationResult(
             SELECT_CATEGORIES_NAV_KEY,
-            categoriesAdapter.allCategories.filter { it.isSelected }.map { it.id },
+            categoriesAdapter.allCategories.filter { it.selectedState == SelectedState.SELECTED }.map { it.id },
         )
     }
 
