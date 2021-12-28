@@ -121,7 +121,6 @@ class CategoriesAdapter(
 
     private fun List<UICategory>.sortedCategories(usageMode: UsageMode): List<UICategory> {
         return if (usageMode == UsageMode.SELECTED_CATEGORIES) sortedSearchCategories() else sortedFileCategories()
-
     }
 
     private fun List<UICategory>.sortedFileCategories(): List<UICategory> {

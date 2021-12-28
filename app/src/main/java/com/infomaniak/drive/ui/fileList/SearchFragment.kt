@@ -56,7 +56,7 @@ class SearchFragment : FileListFragment() {
 
     @SuppressLint("InflateParams")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        setViewModels()
+        configureViewModels()
         setSearchFiltersAdapter()
 
         downloadFiles = DownloadFiles()
@@ -76,7 +76,7 @@ class SearchFragment : FileListFragment() {
         setBackActionHandlers()
     }
 
-    private fun setViewModels() {
+    private fun configureViewModels() {
         fileListViewModel.sortType = SortType.RECENT
 
         // Get preview List if needed
@@ -139,7 +139,7 @@ class SearchFragment : FileListFragment() {
     }
 
     private fun setRecentSearchesAdapter() {
-        recentSearchesAdapter = RecentSearchesAdapter { searchView.setText(it) }.apply {
+        recentSearchesAdapter = RecentSearchesAdapter(searchView::setText).apply {
             setItems(UISettings(requireContext()).recentSearches)
             recentSearchesList.adapter = this
         }
@@ -240,7 +240,7 @@ class SearchFragment : FileListFragment() {
 
     private fun setCategoriesFilter(categories: IntArray?) {
         fileListViewModel.categoriesFilter =
-            FilterKey.CATEGORIES to categories?.let { DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray()) }
+            FilterKey.CATEGORIES to categories?.toTypedArray()?.let(DriveInfosController::getCurrentDriveCategoriesFromIds)
     }
 
     private fun setCategoriesOwnershipFilter(categoriesOwnership: CategoriesOwnershipFilter?) {
@@ -262,15 +262,9 @@ class SearchFragment : FileListFragment() {
 
     private fun updateFilters(shouldUpdateAdapter: Boolean = true) = with(fileListViewModel) {
         mutableListOf<SearchFilter>().apply {
-            dateFilter.second?.let {
-                add(SearchFilter(key = dateFilter.first, text = it.text, icon = R.drawable.ic_calendar))
-            }
-            typeFilter.second?.let {
-                add(SearchFilter(key = typeFilter.first, text = getString(it.searchFilterName), icon = it.icon))
-            }
-            categoriesFilter.second?.forEach {
-                add(SearchFilter(categoriesFilter.first, it.getName(requireContext()), tint = it.color, categoryId = it.id))
-            }
+            createDateFilter()?.let(::add)
+            createTypeFilter()?.let(::add)
+            createCategoriesFilter()?.let(::addAll)
         }.also {
             if (shouldUpdateAdapter) searchFiltersAdapter.setItems(it)
             showRecentSearchesLayout(it.isEmpty() && searchView.text.toString().isBlank())
@@ -279,26 +273,36 @@ class SearchFragment : FileListFragment() {
         downloadFiles(true, false)
     }
 
+    private fun createDateFilter(): SearchFilter? = with(fileListViewModel) {
+        return dateFilter.second?.let {
+            SearchFilter(key = dateFilter.first, text = it.text, icon = R.drawable.ic_calendar)
+        }
+    }
+
+    private fun createTypeFilter(): SearchFilter? = with(fileListViewModel) {
+        return typeFilter.second?.let {
+            SearchFilter(key = typeFilter.first, text = getString(it.searchFilterName), icon = it.icon)
+        }
+    }
+
+    private fun createCategoriesFilter(): List<SearchFilter>? = with(fileListViewModel) {
+        return categoriesFilter.second?.map {
+            SearchFilter(categoriesFilter.first, it.getName(requireContext()), tint = it.color, categoryId = it.id)
+        }
+    }
+
     private fun removeFilter(filter: FilterKey, categoryId: Int?) = with(fileListViewModel) {
         when (filter) {
-            FilterKey.DATE -> {
-                dateFilter = FilterKey.DATE to null
-            }
-            FilterKey.TYPE -> {
-                typeFilter = FilterKey.TYPE to null
-            }
-            FilterKey.CATEGORIES -> {
-                if (categoryId != null) {
-                    categoriesFilter.second?.let { categories ->
-                        val filteredCategories = categories.filter { it.id != categoryId }
-                        categoriesFilter = FilterKey.CATEGORIES to if (filteredCategories.isEmpty()) null else filteredCategories
-                    }
+            FilterKey.DATE -> dateFilter = FilterKey.DATE to null
+            FilterKey.TYPE -> typeFilter = FilterKey.TYPE to null
+            FilterKey.CATEGORIES -> if (categoryId != null) {
+                categoriesFilter.second?.let { categories ->
+                    val filteredCategories = categories.filter { it.id != categoryId }
+                    categoriesFilter = FilterKey.CATEGORIES to if (filteredCategories.isEmpty()) null else filteredCategories
                 }
             }
-            FilterKey.CATEGORIES_OWNERSHIP -> {
-                categoriesOwnershipFilter =
-                    FilterKey.CATEGORIES_OWNERSHIP to SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_VALUE
-            }
+            FilterKey.CATEGORIES_OWNERSHIP -> categoriesOwnershipFilter =
+                FilterKey.CATEGORIES_OWNERSHIP to SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_VALUE
         }
 
         updateFilters(shouldUpdateAdapter = false)

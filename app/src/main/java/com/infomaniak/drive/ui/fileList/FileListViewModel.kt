@@ -143,14 +143,14 @@ class FileListViewModel : ViewModel() {
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
             val apiResponse = ApiRepository.searchFiles(
-                AccountUtils.currentDriveId,
-                query,
-                order.order,
-                order.orderBy,
-                page,
-                formatDate(),
-                formatType(),
-                formatCategories()
+                driveId = AccountUtils.currentDriveId,
+                query = query,
+                order = order.order,
+                orderBy = order.orderBy,
+                page = page,
+                date = formatDate(),
+                type = formatType(),
+                categories = formatCategories(),
             )
 
             when {

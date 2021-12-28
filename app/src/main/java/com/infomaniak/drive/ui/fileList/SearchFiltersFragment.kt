@@ -65,7 +65,7 @@ class SearchFiltersFragment : Fragment() {
     private fun initializeFilters() = with(searchFiltersViewModel) {
         date = navigationArgs.date
         type = navigationArgs.type?.let(ConvertedType::valueOf)
-        categories = navigationArgs.categories?.let { DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray()) }
+        categories = navigationArgs.categories?.toTypedArray()?.let(DriveInfosController::getCurrentDriveCategoriesFromIds)
         categoriesOwnership = navigationArgs.categoriesOwnership ?: SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_VALUE
         updateAllFiltersUI()
     }
@@ -141,7 +141,6 @@ class SearchFiltersFragment : Fragment() {
         updateTypeUI()
         updateCategoriesUI()
         updateCategoriesOwnershipUI()
-
     }
 
     private fun updateDateUI() = with(dateFilterText) {
