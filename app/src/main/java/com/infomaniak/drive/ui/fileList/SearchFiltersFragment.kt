@@ -164,6 +164,7 @@ class SearchFiltersFragment : Fragment() {
         categoriesContainer.setup(
             categories = categories,
             canPutCategoryOnFile = rights?.canPutCategoryOnFile ?: false,
+            layoutInflater = layoutInflater,
             onClicked = {
                 searchFiltersViewModel.backupCurrentFilters(requireContext())
                 runCatching {
