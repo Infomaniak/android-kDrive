@@ -36,13 +36,13 @@
             android:layout_height="wrap_content"
             android:text="@string/searchLastTitle"
             android:textColor="@color/primaryText"
-            app:layout_constraintBottom_toTopOf="@id/recentSearchesList"
+            app:layout_constraintBottom_toTopOf="@id/recentSearchesRecyclerView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recentSearchesList"
+            android:id="@+id/recentSearchesRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/marginStandardMedium"

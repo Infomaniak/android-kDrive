@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.fileList
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.CornerFamily
@@ -57,7 +58,29 @@ class RecentSearchesAdapter(
     }
 
     fun setItems(newSearches: List<String>) {
+        DiffUtil.calculateDiff(DiffCallbacks(searches, newSearches)).dispatchUpdatesTo(this)
         searches = ArrayList(newSearches)
-        notifyItemRangeChanged(0, itemCount)
+    }
+
+    private class DiffCallbacks(private val oldItems: List<String>, private val newItems: List<String>) : DiffUtil.Callback() {
+
+        override fun getOldListSize(): Int = oldItems.size
+
+        override fun getNewListSize(): Int = newItems.size
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldItems[oldItemPosition].equals(newItems[newItemPosition], true)
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return when {
+                oldItemPosition == 0 && newItemPosition != 0 -> false
+                oldItemPosition != 0 && newItemPosition == 0 -> false
+                oldItemPosition == oldListSize - 1 && newItemPosition != newListSize - 1 -> false
+                oldItemPosition != oldListSize - 1 && newItemPosition == newListSize - 1 -> false
+                else -> true
+            }
+        }
+
     }
 }

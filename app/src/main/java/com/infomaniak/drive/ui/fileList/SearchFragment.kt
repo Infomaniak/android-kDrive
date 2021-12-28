@@ -141,7 +141,7 @@ class SearchFragment : FileListFragment() {
     private fun setRecentSearchesAdapter() {
         recentSearchesAdapter = RecentSearchesAdapter(searchView::setText).apply {
             setItems(UISettings(requireContext()).recentSearches)
-            recentSearchesList.adapter = this
+            recentSearchesRecyclerView.adapter = this
         }
     }
 
