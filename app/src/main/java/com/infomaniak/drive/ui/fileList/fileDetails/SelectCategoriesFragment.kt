@@ -33,6 +33,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
@@ -223,28 +224,31 @@ class SelectCategoriesFragment : Fragment() {
     private fun handleCreateCategoryRow(categoryName: String?) {
         if (usageMode != FILE_CATEGORIES) return
 
-        val text = getString(R.string.manageCategoriesCreateTitle, "<b>$categoryName</b>")
-        addCategoryTitle.text = HtmlCompat.fromHtml(text, HtmlCompat.FROM_HTML_MODE_COMPACT)
+        createCategoryRowSeparator.isGone = categoriesAdapter.filteredCategories.isEmpty()
+
+        addCategoryTitle.text = HtmlCompat.fromHtml(
+            getString(R.string.manageCategoriesCreateTitle, "<b>$categoryName</b>"),
+            HtmlCompat.FROM_HTML_MODE_COMPACT,
+        )
 
         createCategoryRow.apply {
-            val bottomCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
-            var topCornerRadius = 0.0f
-
-            if (categoriesAdapter.filteredCategories.isEmpty()) {
-                topCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
-                createCategoryRowSeparator.isGone = true
-            } else createCategoryRowSeparator.isVisible = true
-
-            shapeAppearanceModel = shapeAppearanceModel
-                .toBuilder()
-                .setTopLeftCorner(CornerFamily.ROUNDED, topCornerRadius)
-                .setTopRightCorner(CornerFamily.ROUNDED, topCornerRadius)
-                .setBottomLeftCorner(CornerFamily.ROUNDED, bottomCornerRadius)
-                .setBottomRightCorner(CornerFamily.ROUNDED, bottomCornerRadius)
-                .build()
-
+            setCornersRadius()
             isVisible = categoryName?.isNotBlank() == true && !categoriesAdapter.doesCategoryExist(categoryName)
         }
+    }
+
+    private fun MaterialCardView.setCornersRadius() {
+        val topCornerRadius = if (categoriesAdapter.filteredCategories.isEmpty()) {
+            resources.getDimension(R.dimen.cardViewRadius)
+        } else 0.0f
+        val bottomCornerRadius = resources.getDimension(R.dimen.cardViewRadius)
+        shapeAppearanceModel = shapeAppearanceModel
+            .toBuilder()
+            .setTopLeftCorner(CornerFamily.ROUNDED, topCornerRadius)
+            .setTopRightCorner(CornerFamily.ROUNDED, topCornerRadius)
+            .setBottomLeftCorner(CornerFamily.ROUNDED, bottomCornerRadius)
+            .setBottomRightCorner(CornerFamily.ROUNDED, bottomCornerRadius)
+            .build()
     }
 
     private fun addCategory(categoryId: Int) {

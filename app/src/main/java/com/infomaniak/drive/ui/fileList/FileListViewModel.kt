@@ -162,7 +162,8 @@ class FileListViewModel : ViewModel() {
     }
 
     private fun formatDate(): Pair<String, String>? {
-        return dateFilter.second?.let { (it.start.time / 1_000L).toString() to (it.end.time / 1_000L).toString() }
+        fun Date.timestamp(): String = (time / 1_000L).toString()
+        return dateFilter.second?.let { it.start.timestamp() to it.end.timestamp() }
     }
 
     private fun formatType() = typeFilter.second?.name?.lowercase(Locale.ROOT)

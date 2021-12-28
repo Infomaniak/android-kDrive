@@ -45,11 +45,8 @@ class RecentSearchesAdapter(
     }
 
     private fun MaterialCardView.setCornersRadius(position: Int) {
-        var topCornerRadius = 0.0f
-        var bottomCornerRadius = 0.0f
-        if (position == 0) topCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
-        if (position == itemCount - 1) bottomCornerRadius = context.resources.getDimension(R.dimen.cardViewRadius)
-
+        val topCornerRadius = if (position == 0) resources.getDimension(R.dimen.cardViewRadius) else 0.0f
+        val bottomCornerRadius = if (position == itemCount - 1) resources.getDimension(R.dimen.cardViewRadius) else 0.0f
         shapeAppearanceModel = shapeAppearanceModel
             .toBuilder()
             .setTopLeftCorner(CornerFamily.ROUNDED, topCornerRadius)
