@@ -28,7 +28,7 @@ import java.util.*
 class SearchFiltersBackup(val context: Context) {
 
     private fun getBackup(): SharedPreferences {
-        return context.getSharedPreferences("SearchFilters", Context.MODE_PRIVATE)
+        return context.getSharedPreferences("SearchFiltersBackup", Context.MODE_PRIVATE)
     }
 
     fun removeBackup() {
@@ -50,9 +50,9 @@ class SearchFiltersBackup(val context: Context) {
                 }
                 val start = getLong("dateStart", -1L)
                 val end = getLong("dateEnd", -1L)
-                val text = getString("dateText", "")
+                val text = getString("dateText", "") ?: ""
                 return if (key != null) {
-                    SearchDateFilter(key, Date(start), Date(end), text!!)
+                    SearchDateFilter(key, Date(start), Date(end), text)
                 } else null
             }
         }

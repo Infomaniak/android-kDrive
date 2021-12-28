@@ -548,10 +548,10 @@
     </dialog>
 
     <dialog
-        android:id="@+id/searchFilterFileTypeDialog"
-        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterFileTypeBottomSheetDialog"
-        android:label="SearchFilterFileTypeBottomSheetDialog"
-        tools:layout="@layout/fragment_bottom_sheet_search_filter_file_type">
+        android:id="@+id/searchFilterTypeDialog"
+        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterTypeBottomSheetDialog"
+        android:label="SearchFilterTypeBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_search_filter_type">
         <argument
             android:name="type"
             app:argType="com.infomaniak.drive.data.models.ConvertedType"

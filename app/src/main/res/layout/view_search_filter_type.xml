@@ -24,10 +24,10 @@
     android:background="?selectableItemBackground"
     android:paddingHorizontal="@dimen/marginStandard"
     android:paddingVertical="@dimen/marginStandardMedium"
-    tools:context=".ui.bottomSheetDialogs.SearchFilterFileTypeBottomSheetDialog">
+    tools:context=".ui.bottomSheetDialogs.SearchFilterTypeBottomSheetDialog">
 
     <ImageView
-        android:id="@+id/typeFilterStartIcon"
+        android:id="@+id/typeStartIcon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -37,19 +37,19 @@
         tools:src="@drawable/ic_file_image" />
 
     <TextView
-        android:id="@+id/typeFilterText"
+        android:id="@+id/typeText"
         style="@style/Subtitle1"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/marginStandardMedium"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/typeFilterEndIcon"
-        app:layout_constraintStart_toEndOf="@id/typeFilterStartIcon"
+        app:layout_constraintEnd_toStartOf="@id/typeEndIcon"
+        app:layout_constraintStart_toEndOf="@id/typeStartIcon"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="@string/allPictures" />
 
     <ImageView
-        android:id="@+id/typeFilterEndIcon"
+        android:id="@+id/typeEndIcon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_check"

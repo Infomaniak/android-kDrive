@@ -36,7 +36,7 @@ import com.infomaniak.drive.data.models.CategoriesOwnershipFilter
 import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.SearchDateFilter
 import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterDateBottomSheetDialog
-import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterFileTypeBottomSheetDialog
+import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterTypeBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.getBackNavigationResult
 import com.infomaniak.drive.utils.safeNavigate
@@ -87,8 +87,8 @@ class SearchFiltersFragment : Fragment() {
     private fun setOnClickListeners() = with(searchFiltersViewModel) {
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        modificationDateFilter.setOnClickListener { safeNavigate(R.id.searchFilterDateDialog, bundleOf("date" to date)) }
-        fileTypeFilter.setOnClickListener { safeNavigate(R.id.searchFilterFileTypeDialog, bundleOf("type" to type)) }
+        dateFilter.setOnClickListener { safeNavigate(R.id.searchFilterDateDialog, bundleOf("date" to date)) }
+        typeFilter.setOnClickListener { safeNavigate(R.id.searchFilterTypeDialog, bundleOf("type" to type)) }
 
         belongToAllCategoriesFilter.setOnClickListener {
             categoriesOwnership = CategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES
@@ -122,7 +122,7 @@ class SearchFiltersFragment : Fragment() {
             updateDateUI()
         }
 
-        getBackNavigationResult<Parcelable>(SearchFilterFileTypeBottomSheetDialog.SEARCH_FILTER_TYPE_NAV_KEY) {
+        getBackNavigationResult<Parcelable>(SearchFilterTypeBottomSheetDialog.SEARCH_FILTER_TYPE_NAV_KEY) {
             searchFiltersViewModel.type = it as ConvertedType
             updateTypeUI()
         }
@@ -144,18 +144,18 @@ class SearchFiltersFragment : Fragment() {
 
     }
 
-    private fun updateDateUI() = with(modificationDateFilterText) {
+    private fun updateDateUI() = with(dateFilterText) {
         searchFiltersViewModel.date?.let { text = it.text }
             ?: run { setText(R.string.searchFiltersSelectDate) }
     }
 
     private fun updateTypeUI() {
         searchFiltersViewModel.type?.let {
-            fileTypeFilterStartIcon.setImageResource(it.icon)
-            fileTypeFilterText.setText(it.searchFilterName)
+            typeFilterStartIcon.setImageResource(it.icon)
+            typeFilterText.setText(it.searchFilterName)
         } ?: run {
-            fileTypeFilterStartIcon.setImageResource(R.drawable.ic_file)
-            fileTypeFilterText.setText(R.string.searchFiltersSelectType)
+            typeFilterStartIcon.setImageResource(R.drawable.ic_file)
+            typeFilterText.setText(R.string.searchFiltersSelectType)
         }
     }
 

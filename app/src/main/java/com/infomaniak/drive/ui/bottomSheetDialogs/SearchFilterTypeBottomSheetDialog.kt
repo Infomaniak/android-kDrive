@@ -28,19 +28,19 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.utils.setBackNavigationResult
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_search_filter_file_type.*
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_search_filter_type.*
 import kotlinx.android.synthetic.main.view_search_filter_type.view.*
 
-open class SearchFilterFileTypeBottomSheetDialog : BottomSheetDialogFragment() {
+open class SearchFilterTypeBottomSheetDialog : BottomSheetDialogFragment() {
 
-    private val navigationArgs: SearchFilterFileTypeBottomSheetDialogArgs by navArgs()
+    private val navigationArgs: SearchFilterTypeBottomSheetDialogArgs by navArgs()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        inflater.inflate(R.layout.fragment_bottom_sheet_search_filter_file_type, container, false)
+        inflater.inflate(R.layout.fragment_bottom_sheet_search_filter_type, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        getSortedTypes().forEach { searchTypeFilerContainer.addView(createTypeView(it)) }
+        getSortedTypes().forEach { searchTypeContainer.addView(createTypeView(it)) }
     }
 
     private fun getSortedTypes(): List<Pair<ConvertedType, Int>> {
@@ -61,9 +61,9 @@ open class SearchFilterFileTypeBottomSheetDialog : BottomSheetDialogFragment() {
     @SuppressLint("InflateParams")
     private fun createTypeView(type: Pair<ConvertedType, Int>): View {
         return layoutInflater.inflate(R.layout.view_search_filter_type, null).apply {
-            typeFilterStartIcon.setImageResource(type.second)
-            typeFilterText.setText(type.first.searchFilterName)
-            typeFilterEndIcon.isVisible = type.first.value == navigationArgs.type?.value
+            typeStartIcon.setImageResource(type.second)
+            typeText.setText(type.first.searchFilterName)
+            typeEndIcon.isVisible = type.first.value == navigationArgs.type?.value
             setOnClickListener { setBackNavigationResult(SEARCH_FILTER_TYPE_NAV_KEY, type.first) }
         }
     }

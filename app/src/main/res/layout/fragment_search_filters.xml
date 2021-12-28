@@ -59,26 +59,26 @@
             android:layout_height="match_parent">
 
             <TextView
-                android:id="@+id/modificationDateTitle"
+                android:id="@+id/dateTitle"
                 style="@style/Subtitle2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/modificationDateFilterTitle"
-                app:layout_constraintBottom_toTopOf="@id/modificationDateFilter"
+                app:layout_constraintBottom_toTopOf="@id/dateFilter"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/modificationDateFilter"
+                android:id="@+id/dateFilter"
                 style="@style/CardViewInfomaniak"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/marginStandardSmall"
-                app:layout_constraintBottom_toTopOf="@id/fileTypeTitle"
+                app:layout_constraintBottom_toTopOf="@id/typeTitle"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/modificationDateTitle">
+                app:layout_constraintTop_toBottomOf="@id/dateTitle">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -87,7 +87,7 @@
                     android:paddingVertical="@dimen/marginStandardMedium">
 
                     <ImageView
-                        android:id="@+id/modificationDateFilterStartIcon"
+                        android:id="@+id/dateFilterStartIcon"
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:src="@drawable/ic_calendar"
@@ -97,7 +97,7 @@
                         tools:ignore="ContentDescription" />
 
                     <TextView
-                        android:id="@+id/modificationDateFilterText"
+                        android:id="@+id/dateFilterText"
                         style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -107,12 +107,12 @@
                         android:maxLines="1"
                         android:text="@string/searchFiltersSelectDate"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/modificationDateFilterEndIcon"
-                        app:layout_constraintStart_toEndOf="@id/modificationDateFilterStartIcon"
+                        app:layout_constraintEnd_toStartOf="@id/dateFilterEndIcon"
+                        app:layout_constraintStart_toEndOf="@id/dateFilterStartIcon"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ImageView
-                        android:id="@+id/modificationDateFilterEndIcon"
+                        android:id="@+id/dateFilterEndIcon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:src="@drawable/ic_chevron_right"
@@ -124,19 +124,19 @@
             </com.google.android.material.card.MaterialCardView>
 
             <TextView
-                android:id="@+id/fileTypeTitle"
+                android:id="@+id/typeTitle"
                 style="@style/Subtitle2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/marginStandard"
                 android:text="@string/fileTypeFilterTitle"
-                app:layout_constraintBottom_toTopOf="@id/fileTypeFilter"
+                app:layout_constraintBottom_toTopOf="@id/typeFilter"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/modificationDateFilter" />
+                app:layout_constraintTop_toBottomOf="@id/dateFilter" />
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/fileTypeFilter"
+                android:id="@+id/typeFilter"
                 style="@style/CardViewInfomaniak"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -144,7 +144,7 @@
                 app:layout_constraintBottom_toTopOf="@id/categoriesTitle"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/fileTypeTitle">
+                app:layout_constraintTop_toBottomOf="@id/typeTitle">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -153,7 +153,7 @@
                     android:paddingVertical="@dimen/marginStandardMedium">
 
                     <ImageView
-                        android:id="@+id/fileTypeFilterStartIcon"
+                        android:id="@+id/typeFilterStartIcon"
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:src="@drawable/ic_file"
@@ -163,7 +163,7 @@
                         tools:ignore="ContentDescription" />
 
                     <TextView
-                        android:id="@+id/fileTypeFilterText"
+                        android:id="@+id/typeFilterText"
                         style="@style/Subtitle2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -173,12 +173,12 @@
                         android:maxLines="1"
                         android:text="@string/searchFiltersSelectType"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/fileTypeFilterEndIcon"
-                        app:layout_constraintStart_toEndOf="@id/fileTypeFilterStartIcon"
+                        app:layout_constraintEnd_toStartOf="@id/typeFilterEndIcon"
+                        app:layout_constraintStart_toEndOf="@id/typeFilterStartIcon"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ImageView
-                        android:id="@+id/fileTypeFilterEndIcon"
+                        android:id="@+id/typeFilterEndIcon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:src="@drawable/ic_chevron_right"
@@ -199,7 +199,7 @@
                 app:layout_constraintBottom_toTopOf="@id/chooseCategoriesFilter"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/fileTypeFilter" />
+                app:layout_constraintTop_toBottomOf="@id/typeFilter" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/chooseCategoriesFilter"
