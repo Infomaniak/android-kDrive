@@ -19,15 +19,14 @@ package com.infomaniak.drive.ui.fileList
 
 import android.graphics.Color
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.chip.Chip
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.FilterKey
 import com.infomaniak.drive.data.models.SearchFilter
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.item_search_filter.view.*
 
 class SearchFiltersAdapter(
     private val onFilterRemoved: (key: FilterKey, categoryId: Int?) -> Unit
@@ -36,41 +35,43 @@ class SearchFiltersAdapter(
     var filters = arrayListOf<SearchFilter>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_search_filter, parent, false))
+        ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_search_filter_chip, parent, false))
 
     override fun getItemCount() = filters.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView) {
         val filter = filters[position]
+        this as Chip
         setMarginEnd(position)
         configureIcon(filter)
-        configureTint(filter)
         setName(filter)
-        setCloseButton(filter)
+        setClickListener(this, filter)
     }
 
-    private fun View.setMarginEnd(position: Int) {
+    private fun Chip.setMarginEnd(position: Int) {
         layoutParams = (layoutParams as ViewGroup.MarginLayoutParams).apply {
-            marginEnd = if (position == filters.size - 1) 0 else resources.getDimensionPixelSize(R.dimen.marginStandardSmall)
+            marginEnd = if (position == this@SearchFiltersAdapter.filters.size - 1) {
+                0
+            } else resources.getDimensionPixelSize(R.dimen.marginStandardSmall)
         }
     }
 
-    private fun View.configureIcon(filter: SearchFilter) {
-        filter.icon?.let(filterIcon::setImageResource)
-        filterIcon.isVisible = filter.icon != null
+    private fun Chip.configureIcon(filter: SearchFilter) {
+        chipIcon = if (filter.icon != null) {
+            ContextCompat.getDrawable(context, filter.icon)
+        } else {
+            ContextCompat.getDrawable(context, R.drawable.round_empty)?.apply {
+                setTint(Color.parseColor(filter.tint))
+            }
+        }
     }
 
-    private fun View.configureTint(filter: SearchFilter) {
-        filter.tint?.let { roundIcon.setBackgroundColor(Color.parseColor(it)) }
-        roundIcon.isVisible = filter.tint != null
+    private fun Chip.setName(filter: SearchFilter) {
+        text = filter.text
     }
 
-    private fun View.setName(filter: SearchFilter) {
-        filterName.text = filter.text
-    }
-
-    private fun View.setCloseButton(filter: SearchFilter) {
-        filterClose.setOnClickListener {
+    private fun setClickListener(chip: Chip, filter: SearchFilter) {
+        chip.setOnClickListener {
             val index = filters.indexOf(filter)
             if (index > -1) {
                 filters.removeAt(index)

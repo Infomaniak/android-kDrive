@@ -260,7 +260,7 @@ class SearchFragment : FileListFragment() {
         uiSettings.recentSearches = newSearches
     }
 
-    private fun updateFilters() = with(fileListViewModel) {
+    private fun updateFilters(shouldUpdateAdapter: Boolean = true) = with(fileListViewModel) {
         mutableListOf<SearchFilter>().apply {
             dateFilter.second?.let {
                 add(SearchFilter(key = dateFilter.first, text = it.text, icon = R.drawable.ic_calendar))
@@ -272,7 +272,7 @@ class SearchFragment : FileListFragment() {
                 add(SearchFilter(categoriesFilter.first, it.getName(requireContext()), tint = it.color, categoryId = it.id))
             }
         }.also {
-            searchFiltersAdapter.setItems(it)
+            if (shouldUpdateAdapter) searchFiltersAdapter.setItems(it)
             showRecentSearchesLayout(it.isEmpty() && searchView.text.toString().isBlank())
         }
         currentPage = 1
@@ -301,7 +301,7 @@ class SearchFragment : FileListFragment() {
             }
         }
 
-        updateFilters()
+        updateFilters(shouldUpdateAdapter = false)
     }
 
     override fun onPause() {
