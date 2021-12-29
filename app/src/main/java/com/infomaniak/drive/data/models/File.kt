@@ -411,7 +411,6 @@ open class File(
     }
 
     companion object {
-
         fun File.getCloudAndFileUris(context: Context, userDrive: UserDrive = UserDrive()): Pair<Uri, Uri> {
             val cloudUri = CloudStorageProvider.createShareFileUri(context, this, userDrive)!!
             val offlineFile = getOfflineFile(context, userDrive.userId)

@@ -23,8 +23,6 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.*
 import com.infomaniak.drive.data.models.drive.Category
-import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFiltersViewModel
-import com.infomaniak.drive.data.models.File.*
 import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
@@ -170,7 +168,11 @@ class FileListViewModel : ViewModel() {
 
     private fun formatCategories(): String? {
         return categoriesFilter.second?.joinToString(
-            separator = if (categoriesOwnershipFilter.second == CategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES) "%26" else "|"
+            separator = if (categoriesOwnershipFilter.second == CategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES) {
+                SEPARATOR_BELONG_TO_ALL_CATEGORIES
+            } else {
+                SEPARATOR_BELONG_TO_ONE_CATEGORY
+            }
         ) { it.id.toString() }
     }
 
@@ -260,7 +262,9 @@ class FileListViewModel : ViewModel() {
         cancelDownloadFiles()
     }
 
-    companion object {
-        private val mutex = Mutex()
+    private companion object {
+        val mutex = Mutex()
+        const val SEPARATOR_BELONG_TO_ALL_CATEGORIES = "%26"
+        const val SEPARATOR_BELONG_TO_ONE_CATEGORY = "|"
     }
 }

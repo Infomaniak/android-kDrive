@@ -47,13 +47,11 @@ class SearchFiltersBackup(val context: Context) {
                     DateFilterKey.LAST_SEVEN_DAYS.name -> DateFilterKey.LAST_SEVEN_DAYS
                     DateFilterKey.CUSTOM.name -> DateFilterKey.CUSTOM
                     else -> null
-                }
+                } ?: return null
                 val start = getLong("dateStart", -1L)
                 val end = getLong("dateEnd", -1L)
                 val text = getString("dateText", "") ?: ""
-                return if (key != null) {
-                    SearchDateFilter(key, Date(start), Date(end), text)
-                } else null
+                return SearchDateFilter(key, Date(start), Date(end), text)
             }
         }
         set(value) {

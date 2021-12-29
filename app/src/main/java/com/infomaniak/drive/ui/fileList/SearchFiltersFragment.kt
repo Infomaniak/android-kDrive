@@ -128,22 +128,20 @@ class SearchFiltersFragment : Fragment() {
         }
     }
 
-    private fun setBackActionHandlers() {
+    private fun setBackActionHandlers() = with(searchFiltersViewModel) {
         getBackNavigationResult<Parcelable>(SearchFilterDateBottomSheetDialog.SEARCH_FILTER_DATE_NAV_KEY) {
-            searchFiltersViewModel.date = it as SearchDateFilter
+            date = it as SearchDateFilter
             updateDateUI()
         }
 
         getBackNavigationResult<Parcelable>(SearchFilterTypeBottomSheetDialog.SEARCH_FILTER_TYPE_NAV_KEY) {
-            searchFiltersViewModel.type = it as ConvertedType
+            type = it as ConvertedType
             updateTypeUI()
         }
 
         getBackNavigationResult<List<Int>>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
-            searchFiltersViewModel.restoreCurrentFilters(requireContext())
-            searchFiltersViewModel.categories = if (it.isNotEmpty()) {
-                DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray())
-            } else null
+            restoreCurrentFilters(requireContext())
+            categories = if (it.isEmpty()) null else DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray())
             updateAllFiltersUI()
         }
     }

@@ -51,7 +51,6 @@
         android:layout_height="match_parent"
         android:layout_marginHorizontal="@dimen/marginStandard"
         android:layout_marginTop="@dimen/marginStandard"
-        android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.constraintlayout.widget.ConstraintLayout

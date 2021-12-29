@@ -43,14 +43,14 @@ open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEndIconsVisibility()
-        setTodayClickListener()
-        setYesterdayClickListener()
-        setLastSevenDaysClickListener()
-        setCustomClickListener()
+        setCheckIconsVisibility()
+        setTodayClick()
+        setYesterdayClick()
+        setLastSevenDaysClick()
+        setCustomDateClick()
     }
 
-    private fun setEndIconsVisibility() {
+    private fun setCheckIconsVisibility() {
         when (navigationArgs.date?.key) {
             DateFilterKey.TODAY -> todayFilterEndIcon.isVisible = true
             DateFilterKey.YESTERDAY -> yesterdayFilterEndIcon.isVisible = true
@@ -65,7 +65,7 @@ open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun setTodayClickListener() {
+    private fun setTodayClick() {
         todayFilterLayout.setOnClickListener {
             with(Date()) {
                 setBackNavResult(DateFilterKey.TODAY, startOfTheDay(), endOfTheDay(), getString(R.string.allToday))
@@ -73,7 +73,7 @@ open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun setYesterdayClickListener() {
+    private fun setYesterdayClick() {
         yesterdayFilterLayout.setOnClickListener {
             with(Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }.time) {
                 setBackNavResult(DateFilterKey.YESTERDAY, startOfTheDay(), endOfTheDay(), getString(R.string.allYesterday))
@@ -81,7 +81,7 @@ open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun setLastSevenDaysClickListener() {
+    private fun setLastSevenDaysClick() {
         lastSevenDaysFilterLayout.setOnClickListener {
             val start = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -6) }.time.startOfTheDay()
             val end = Date().endOfTheDay()
@@ -89,7 +89,7 @@ open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun setCustomClickListener() {
+    private fun setCustomDateClick() {
         customFilterLayout.setOnClickListener {
             showDateRangePicker { startTime, endTime ->
                 val start = Date(startTime).startOfTheDay()
@@ -119,9 +119,9 @@ open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
                     .setTheme(R.style.MaterialCalendarThemeBackground)
                     .build()
             ) {
-                show(fragmentManager, toString())
                 addOnNegativeButtonClickListener { dismiss() }
                 addOnPositiveButtonClickListener { onPositiveButtonClicked(it.first, it.second) }
+                show(fragmentManager, toString())
             }
         }
     }

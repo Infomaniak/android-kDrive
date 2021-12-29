@@ -20,14 +20,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     tools:context=".ui.fileList.SearchFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/marginStandard"
-        android:paddingTop="@dimen/marginStandardSmall">
+        android:paddingTop="@dimen/marginStandardSmall"
+        android:paddingBottom="@dimen/marginStandardMedium">
 
         <TextView
             android:id="@+id/recentSearchesTitle"

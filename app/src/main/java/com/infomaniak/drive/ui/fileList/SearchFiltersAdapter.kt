@@ -42,27 +42,27 @@ class SearchFiltersAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView) {
         val filter = filters[position]
         this as Chip
-        setMarginEnd(position)
-        configureIcon(filter)
+        setEndMargin(position)
+        setIcon(filter)
         setName(filter)
         setClickListener(this, filter)
     }
 
-    private fun Chip.setMarginEnd(position: Int) {
+    private fun Chip.setEndMargin(position: Int) {
         layoutParams = (layoutParams as ViewGroup.MarginLayoutParams).apply {
             marginEnd = if (position == this@SearchFiltersAdapter.filters.size - 1) {
                 0
-            } else resources.getDimensionPixelSize(R.dimen.marginStandardSmall)
+            } else {
+                resources.getDimensionPixelSize(R.dimen.marginStandardSmall)
+            }
         }
     }
 
-    private fun Chip.configureIcon(filter: SearchFilter) {
+    private fun Chip.setIcon(filter: SearchFilter) {
         chipIcon = if (filter.icon != null) {
             ContextCompat.getDrawable(context, filter.icon)
         } else {
-            ContextCompat.getDrawable(context, R.drawable.round_empty)?.apply {
-                setTint(Color.parseColor(filter.tint))
-            }
+            ContextCompat.getDrawable(context, R.drawable.round_empty)?.apply { setTint(Color.parseColor(filter.tint)) }
         }
     }
 

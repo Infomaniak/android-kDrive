@@ -65,7 +65,9 @@ class CategoriesAdapter(
         val topCornerRadius = if (position == 0) resources.getDimension(R.dimen.cardViewRadius) else 0.0f
         val bottomCornerRadius = if (position == itemCount - 1 && !isCreateRowVisible) {
             resources.getDimension(R.dimen.cardViewRadius)
-        } else 0.0f
+        } else {
+            0.0f
+        }
         shapeAppearanceModel = shapeAppearanceModel
             .toBuilder()
             .setTopLeftCorner(CornerFamily.ROUNDED, topCornerRadius)
@@ -76,8 +78,10 @@ class CategoriesAdapter(
     }
 
     private fun MaterialCardView.setMenuButton(category: UICategory) {
-        menuButton.isVisible = canEditCategory || (canDeleteCategory && !category.isPredefined)
-        menuButton.setOnClickListener { onMenuClicked?.invoke(category) }
+        menuButton.apply {
+            isVisible = canEditCategory || (canDeleteCategory && !category.isPredefined)
+            setOnClickListener { onMenuClicked?.invoke(category) }
+        }
     }
 
     private fun MaterialCardView.handleSelectedState(category: UICategory) {

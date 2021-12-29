@@ -19,23 +19,26 @@ package com.infomaniak.drive.ui.fileList
 
 import androidx.recyclerview.widget.DiffUtil
 
-class SearchesDiffCallback(private val oldList: List<String>, private val newList: List<String>) : DiffUtil.Callback() {
+class SearchesDiffCallback(
+    private val oldList: List<String>,
+    private val newList: List<String>,
+) : DiffUtil.Callback() {
 
     override fun getOldListSize(): Int = oldList.size
 
     override fun getNewListSize(): Int = newList.size
 
-    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        return oldList[oldItemPosition].equals(newList[newItemPosition], true)
+    override fun areItemsTheSame(oldIndex: Int, newIndex: Int): Boolean {
+        return oldList[oldIndex].equals(newList[newIndex], true)
     }
 
-    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+    override fun areContentsTheSame(oldIndex: Int, newIndex: Int): Boolean {
         return when {
-            oldItemPosition == 0 && newItemPosition != 0 -> false // Remove top corners radius
-            oldItemPosition != 0 && newItemPosition == 0 -> false // Add top Corners radius
-            oldItemPosition == oldListSize - 1 && newItemPosition != newListSize - 1 -> false // Remove bot corners radius
-            oldItemPosition != oldListSize - 1 && newItemPosition == newListSize - 1 -> false // Add bot corners radius
-            else -> true
+            oldIndex == 0 && newIndex != 0 -> false // Remove top corners radius
+            oldIndex != 0 && newIndex == 0 -> false // Add top Corners radius
+            oldIndex == oldListSize - 1 && newIndex != newListSize - 1 -> false // Remove bot corners radius
+            oldIndex != oldListSize - 1 && newIndex == newListSize - 1 -> false // Add bot corners radius
+            else -> true // Don't update
         }
     }
 }

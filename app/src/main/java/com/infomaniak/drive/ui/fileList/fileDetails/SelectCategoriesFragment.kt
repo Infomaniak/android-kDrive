@@ -40,16 +40,16 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.drive.Category
-import com.infomaniak.drive.ui.bottomSheetDialogs.SelectCategoriesBottomSheetDialog.UsageMode.*
-import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter
 import com.infomaniak.drive.ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.SelectedState
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.UICategory
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment.UsageMode.*
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.DebouncingTextWatcher
+import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.android.synthetic.main.fragment_select_categories.*
 import kotlinx.android.synthetic.main.item_search_view.*
+import java.util.*
 
 class SelectCategoriesFragment : Fragment() {
 
@@ -86,7 +86,10 @@ class SelectCategoriesFragment : Fragment() {
 
         searchView.hint = getString(R.string.searchTitle)
 
-        setOnClickListeners()
+        configureToolbar()
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { setBackNavResult() }
+        createCategoryRow.setOnClickListener { navigateToCreateCategory() }
+        configureSearchView()
         setBackActionHandlers()
     }
 
@@ -94,11 +97,11 @@ class SelectCategoriesFragment : Fragment() {
         with(navigationArgs) {
             val tempFile = FileController.getFileById(fileId)
             usageMode = if (fileId == -1 || tempFile == null) {
-                if (categories != null) {
+                if (categories == null) {
+                    NO_CATEGORIES
+                } else {
                     selectedCategories = DriveInfosController.getCurrentDriveCategoriesFromIds(categories?.toTypedArray()!!)
                     SELECTED_CATEGORIES
-                } else {
-                    NO_CATEGORIES
                 }
             } else {
                 file = tempFile
@@ -109,9 +112,7 @@ class SelectCategoriesFragment : Fragment() {
 
     private fun setCategoriesAdapter(canEditCategory: Boolean, canDeleteCategory: Boolean) {
         categoriesAdapter = CategoriesAdapter(
-            onCategoryChanged = { id, isSelected ->
-                if (isSelected) addCategory(id) else removeCategory(id)
-            }
+            onCategoryChanged = { id, isSelected -> if (isSelected) addCategory(id) else removeCategory(id) }
         ).apply {
             this.canEditCategory = canEditCategory
             this.canDeleteCategory = canDeleteCategory
@@ -127,35 +128,41 @@ class SelectCategoriesFragment : Fragment() {
         toolbar.menu.findItem(R.id.addCategory).isVisible = canCreateCategory
     }
 
-    private fun setOnClickListeners() {
-        toolbar.apply {
-            setOnMenuItemClickListener { menuItem ->
-                if (menuItem.itemId == R.id.addCategory) {
-                    navigateToCreateCategory()
-                    true
-                } else false
+    private fun configureToolbar() = with(toolbar) {
+        setOnMenuItemClickListener { menuItem ->
+            if (menuItem.itemId == R.id.addCategory) {
+                navigateToCreateCategory()
+                true
+            } else {
+                false
             }
-            setNavigationOnClickListener { setBackNavResult() }
         }
+        setNavigationOnClickListener { setBackNavResult() }
+    }
 
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { setBackNavResult() }
+    private fun configureSearchView() {
+        clearButton.setOnClickListener { searchView.text = null }
+        setSearchViewTextChangedListener()
+        setSearchViewEditorActionListener()
+    }
 
-        createCategoryRow.setOnClickListener { navigateToCreateCategory() }
+    private fun setSearchViewTextChangedListener() = with(searchView) {
+        addTextChangedListener(DebouncingTextWatcher(lifecycle) {
+            if (isAtLeastResumed()) {
+                clearButton.isInvisible = it.isNullOrEmpty()
+                categoriesAdapter.updateFilter(text.toString())
+                handleCreateCategoryRow(it?.trim())
+            }
+        })
+    }
 
-        searchView.apply {
-            clearButton.setOnClickListener { text = null }
-            addTextChangedListener(DebouncingTextWatcher(lifecycle) {
-                if (isAtLeastResumed()) {
-                    clearButton.isInvisible = it.isNullOrEmpty()
-                    categoriesAdapter.updateFilter(text.toString())
-                    handleCreateCategoryRow(it?.trim())
-                }
-            })
-            setOnEditorActionListener { _, actionId, _ ->
-                if (EditorInfo.IME_ACTION_SEARCH == actionId) {
-                    categoriesAdapter.updateFilter(text.toString())
-                    true
-                } else false
+    private fun setSearchViewEditorActionListener() = with(searchView) {
+        setOnEditorActionListener { _, actionId, _ ->
+            if (EditorInfo.IME_ACTION_SEARCH == actionId) {
+                categoriesAdapter.updateFilter(text.toString())
+                true
+            } else {
+                false
             }
         }
     }
@@ -169,16 +176,13 @@ class SelectCategoriesFragment : Fragment() {
     private fun CategoriesAdapter.updateFileCategoriesModeUI() {
         val uiCategories = DriveInfosController.getCurrentDriveCategories().map { category ->
             val fileCategory = file.categories.find { it.id == category.id }
-            UICategory(
-                id = category.id,
-                name = category.getName(requireContext()),
-                color = category.color,
-                isPredefined = category.isPredefined,
+            createUICategory(
+                category = category,
                 selectedState = if (fileCategory != null) SelectedState.SELECTED else SelectedState.NOT_SELECTED,
-                userUsageCount = category.userUsageCount,
                 addedToFileAt = fileCategory?.addedToFileAt,
             )
         }
+
         setItems(uiCategories, usageMode)
 
         onMenuClicked = { category ->
@@ -197,17 +201,25 @@ class SelectCategoriesFragment : Fragment() {
     private fun CategoriesAdapter.updateSelectedCategoriesModeUI() {
         val uiCategories = DriveInfosController.getCurrentDriveCategories().map { category ->
             val selectedCategory = selectedCategories.find { it.id == category.id }
-            UICategory(
-                id = category.id,
-                name = category.getName(requireContext()),
-                color = category.color,
-                isPredefined = category.isPredefined,
+            createUICategory(
+                category = category,
                 selectedState = if (selectedCategory != null) SelectedState.SELECTED else SelectedState.NOT_SELECTED,
-                userUsageCount = category.userUsageCount,
-                addedToFileAt = null,
             )
         }
+
         setItems(uiCategories, usageMode)
+    }
+
+    private fun createUICategory(category: Category, selectedState: SelectedState, addedToFileAt: Date? = null): UICategory {
+        return UICategory(
+            id = category.id,
+            name = category.getName(requireContext()),
+            color = category.color,
+            isPredefined = category.isPredefined,
+            selectedState = selectedState,
+            userUsageCount = category.userUsageCount,
+            addedToFileAt = addedToFileAt,
+        )
     }
 
     private fun navigateToCreateCategory() {
@@ -240,7 +252,9 @@ class SelectCategoriesFragment : Fragment() {
     private fun MaterialCardView.setCornersRadius() {
         val topCornerRadius = if (categoriesAdapter.filteredCategories.isEmpty()) {
             resources.getDimension(R.dimen.cardViewRadius)
-        } else 0.0f
+        } else {
+            0.0f
+        }
         val bottomCornerRadius = resources.getDimension(R.dimen.cardViewRadius)
         shapeAppearanceModel = shapeAppearanceModel
             .toBuilder()
@@ -251,38 +265,36 @@ class SelectCategoriesFragment : Fragment() {
             .build()
     }
 
-    private fun addCategory(categoryId: Int) {
+    private fun addCategory(id: Int) {
         if (usageMode == SELECTED_CATEGORIES) {
-            categoriesAdapter.selectCategory(categoryId, true, usageMode)
+            categoriesAdapter.selectCategory(id, true, usageMode)
             return
         }
 
-        selectCategoriesViewModel.addCategory(file, categoryId).observe(viewLifecycleOwner) { apiResponse ->
-            val isSelected = if (apiResponse.isSuccess()) {
-                true
-            } else {
-                Utils.showSnackbar(requireView(), apiResponse.translateError())
-                false
-            }
-            categoriesAdapter.selectCategory(categoryId, isSelected, usageMode)
+        selectCategoriesViewModel.addCategory(file, id).observe(viewLifecycleOwner) { apiResponse ->
+            updateAdapterAfterAddingOrRemovingCategory(id, apiResponse, true)
         }
     }
 
-    private fun removeCategory(categoryId: Int) {
+    private fun removeCategory(id: Int) {
         if (usageMode == SELECTED_CATEGORIES) {
-            categoriesAdapter.selectCategory(categoryId, false, usageMode)
+            categoriesAdapter.selectCategory(id, false, usageMode)
             return
         }
 
-        selectCategoriesViewModel.removeCategory(file, categoryId).observe(viewLifecycleOwner) { apiResponse ->
-            val isSelected = if (apiResponse.isSuccess()) {
-                false
-            } else {
-                Utils.showSnackbar(requireView(), apiResponse.translateError())
-                true
-            }
-            categoriesAdapter.selectCategory(categoryId, isSelected, usageMode)
+        selectCategoriesViewModel.removeCategory(file, id).observe(viewLifecycleOwner) { apiResponse ->
+            updateAdapterAfterAddingOrRemovingCategory(id, apiResponse, false)
         }
+    }
+
+    private fun updateAdapterAfterAddingOrRemovingCategory(id: Int, apiResponse: ApiResponse<Unit>, isAdding: Boolean) {
+        val isSelected = if (apiResponse.isSuccess()) {
+            isAdding
+        } else {
+            Utils.showSnackbar(requireView(), apiResponse.translateError())
+            !isAdding
+        }
+        categoriesAdapter.selectCategory(id, isSelected, usageMode)
     }
 
     private fun setBackNavResult() {
@@ -292,9 +304,7 @@ class SelectCategoriesFragment : Fragment() {
         )
     }
 
-    private fun isAtLeastResumed(): Boolean {
-        return lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
-    }
+    private fun isAtLeastResumed(): Boolean = lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
 
     enum class UsageMode {
         FILE_CATEGORIES,

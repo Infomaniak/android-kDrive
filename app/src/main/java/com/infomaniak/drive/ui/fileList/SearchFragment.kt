@@ -21,6 +21,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.widget.EditText
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -31,9 +32,6 @@ import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.*
-import com.infomaniak.drive.ui.bottomSheetDialogs.SearchDateFilter
-import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFiltersBottomSheetDialog
-import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFiltersViewModel
 import com.infomaniak.drive.ui.fileList.FileListViewModel.*
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.DebouncingTextWatcher
@@ -49,7 +47,7 @@ class SearchFragment : FileListFragment() {
 
     override var enabledMultiSelectMode: Boolean = false
 
-    private lateinit var searchFiltersAdapter: SearchFiltersAdapter
+    private lateinit var filtersAdapter: SearchFiltersAdapter
     private lateinit var recentSearchesAdapter: RecentSearchesAdapter
     private lateinit var recentSearchesView: View
     private var isDownloading = false
@@ -57,7 +55,7 @@ class SearchFragment : FileListFragment() {
     @SuppressLint("InflateParams")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         configureViewModels()
-        setSearchFiltersAdapter()
+        setFiltersAdapter()
 
         downloadFiles = DownloadFiles()
         setNoFilesLayout = SetNoFilesLayout()
@@ -68,11 +66,11 @@ class SearchFragment : FileListFragment() {
         fileListLayout.addView(recentSearchesView, 1)
         clearButton.setOnClickListener { searchView.text = null }
 
-        setSearchView()
-        setFileAdapter()
+        configureSearchView()
+        configureFileAdapter()
         setRecentSearchesAdapter()
-        setToolbar()
-        observeSearchResult()
+        configureToolbar()
+        observeSearchResults()
         setBackActionHandlers()
     }
 
@@ -86,33 +84,46 @@ class SearchFragment : FileListFragment() {
         }
     }
 
-    private fun setSearchFiltersAdapter() {
-        searchFiltersAdapter = SearchFiltersAdapter { key, categoryId -> removeFilter(key, categoryId) }.also {
+    private fun setFiltersAdapter() {
+        filtersAdapter = SearchFiltersAdapter { key, categoryId -> removeFilter(key, categoryId) }.also {
             filtersLayout.adapter = it
         }
     }
 
-    private fun setSearchView() {
+    private fun configureSearchView() {
         searchViewCard.isVisible = true
-
         with(searchView) {
             hint = getString(R.string.searchViewHint)
-            addTextChangedListener(DebouncingTextWatcher(lifecycle) {
-                clearButton?.isInvisible = it.isNullOrEmpty()
-                fileListViewModel.currentPage = 1
-                downloadFiles(true, false)
-            })
-            setOnEditorActionListener { _, actionId, _ ->
-                if (EditorInfo.IME_ACTION_SEARCH == actionId) {
-                    fileListViewModel.currentPage = 1
-                    downloadFiles(true, false)
-                    true
-                } else false
-            }
+            addTextChangedListener()
+            setOnEditorActionListener()
         }
     }
 
-    private fun setFileAdapter() {
+    private fun EditText.addTextChangedListener() {
+        addTextChangedListener(DebouncingTextWatcher(lifecycle) {
+            clearButton?.isInvisible = it.isNullOrEmpty()
+            fileListViewModel.currentPage = 1
+            downloadFiles(true, false)
+        })
+    }
+
+    private fun EditText.setOnEditorActionListener() {
+        setOnEditorActionListener { _, actionId, _ ->
+            if (EditorInfo.IME_ACTION_SEARCH == actionId) {
+                fileListViewModel.currentPage = 1
+                downloadFiles(true, false)
+                true
+            } else false
+        }
+    }
+
+    private fun configureFileAdapter() {
+        setFileRecyclerPagination()
+        setFileAdapterListener()
+        if (fileAdapter.fileList.isEmpty() && filtersAdapter.filters.isEmpty()) showRecentSearchesLayout(true)
+    }
+
+    private fun setFileRecyclerPagination() {
         fileRecyclerView.setPagination({
             if (!fileAdapter.isComplete && !isDownloading) {
                 fileAdapter.showLoading()
@@ -120,7 +131,9 @@ class SearchFragment : FileListFragment() {
                 downloadFiles(true, false)
             }
         })
+    }
 
+    private fun setFileAdapterListener() {
         fileAdapter.apply {
             onEmptyList = { changeNoFilesLayoutVisibility(hideFileList = true, changeControlsVisibility = false) }
 
@@ -134,8 +147,6 @@ class SearchFragment : FileListFragment() {
                 }
             }
         }
-
-        if (fileAdapter.fileList.isEmpty() && searchFiltersAdapter.filters.isEmpty()) showRecentSearchesLayout(true)
     }
 
     private fun setRecentSearchesAdapter() {
@@ -145,31 +156,31 @@ class SearchFragment : FileListFragment() {
         }
     }
 
-    private fun setToolbar() {
+    private fun configureToolbar() {
         collapsingToolbarLayout.title = getString(R.string.searchTitle)
+        setToolbarListener()
+        toolbar.menu.findItem(R.id.selectFilters).isVisible = true
+    }
 
-        with(toolbar) {
-            setOnMenuItemClickListener { menuItem ->
-                if (menuItem.itemId == R.id.selectFilters) {
-                    with(fileListViewModel) {
-                        safeNavigate(
-                            SearchFragmentDirections.actionSearchFragmentToSearchFiltersFragment(
-                                date = dateFilter.second,
-                                type = typeFilter.second?.name,
-                                categories = categoriesFilter.second?.map { it.id }?.toIntArray(),
-                                categoriesOwnership = categoriesOwnershipFilter.second,
-                            )
+    private fun setToolbarListener() {
+        toolbar.setOnMenuItemClickListener { menuItem ->
+            if (menuItem.itemId == R.id.selectFilters) {
+                with(fileListViewModel) {
+                    safeNavigate(
+                        SearchFragmentDirections.actionSearchFragmentToSearchFiltersFragment(
+                            date = dateFilter.second,
+                            type = typeFilter.second?.name,
+                            categories = categoriesFilter.second?.map { it.id }?.toIntArray(),
+                            categoriesOwnership = categoriesOwnershipFilter.second,
                         )
-                    }
+                    )
                 }
-                true
             }
-
-            menu.findItem(R.id.selectFilters).isVisible = true
+            true
         }
     }
 
-    private fun observeSearchResult() {
+    private fun observeSearchResults() {
         fileListViewModel.searchResults.observe(viewLifecycleOwner) {
 
             if (!swipeRefreshLayout.isRefreshing) return@observe
@@ -240,8 +251,10 @@ class SearchFragment : FileListFragment() {
     }
 
     private fun setCategoriesFilter(categories: IntArray?) {
-        fileListViewModel.categoriesFilter =
-            FilterKey.CATEGORIES to categories?.toTypedArray()?.let(DriveInfosController::getCurrentDriveCategoriesFromIds)
+        fileListViewModel.categoriesFilter = Pair(
+            FilterKey.CATEGORIES,
+            categories?.toTypedArray()?.let(DriveInfosController::getCurrentDriveCategoriesFromIds),
+        )
     }
 
     private fun setCategoriesOwnershipFilter(categoriesOwnership: CategoriesOwnershipFilter?) {
@@ -267,7 +280,7 @@ class SearchFragment : FileListFragment() {
             createTypeFilter()?.let(::add)
             createCategoriesFilter()?.let(::addAll)
         }.also {
-            if (shouldUpdateAdapter) searchFiltersAdapter.setItems(it)
+            if (shouldUpdateAdapter) filtersAdapter.setItems(it)
             showRecentSearchesLayout(it.isEmpty() && searchView.text.toString().isBlank())
         }
         currentPage = 1
@@ -292,21 +305,35 @@ class SearchFragment : FileListFragment() {
         }
     }
 
-    private fun removeFilter(filter: FilterKey, categoryId: Int?) = with(fileListViewModel) {
+    private fun removeFilter(filter: FilterKey, categoryId: Int?) {
         when (filter) {
-            FilterKey.DATE -> dateFilter = FilterKey.DATE to null
-            FilterKey.TYPE -> typeFilter = FilterKey.TYPE to null
-            FilterKey.CATEGORIES -> if (categoryId != null) {
-                categoriesFilter.second?.let { categories ->
-                    val filteredCategories = categories.filter { it.id != categoryId }
-                    categoriesFilter = FilterKey.CATEGORIES to if (filteredCategories.isEmpty()) null else filteredCategories
-                }
-            }
-            FilterKey.CATEGORIES_OWNERSHIP -> categoriesOwnershipFilter =
-                FilterKey.CATEGORIES_OWNERSHIP to SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_VALUE
+            FilterKey.DATE -> removeDateFilter()
+            FilterKey.TYPE -> removeTypeFilter()
+            FilterKey.CATEGORIES -> removeCategoryFilter(categoryId)
+            FilterKey.CATEGORIES_OWNERSHIP -> removeCategoriesOwnershipFilter()
         }
-
         updateFilters(shouldUpdateAdapter = false)
+    }
+
+    private fun removeDateFilter() = with(fileListViewModel) {
+        dateFilter = FilterKey.DATE to null
+    }
+
+    private fun removeTypeFilter() = with(fileListViewModel) {
+        typeFilter = FilterKey.TYPE to null
+    }
+
+    private fun removeCategoryFilter(categoryId: Int?) = with(fileListViewModel) {
+        if (categoryId != null) {
+            categoriesFilter.second?.let { categories ->
+                val filteredCategories = categories.filter { it.id != categoryId }
+                categoriesFilter = FilterKey.CATEGORIES to if (filteredCategories.isEmpty()) null else filteredCategories
+            }
+        }
+    }
+
+    private fun removeCategoriesOwnershipFilter() = with(fileListViewModel) {
+        categoriesOwnershipFilter = FilterKey.CATEGORIES_OWNERSHIP to SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_VALUE
     }
 
     override fun onPause() {
@@ -323,7 +350,7 @@ class SearchFragment : FileListFragment() {
             noFilesLayout.isGone = true
             recentSearchesView.isVisible = true
         } else {
-            if (searchFiltersAdapter.filters.isNotEmpty()) filtersLayout.isVisible = true
+            if (filtersAdapter.filters.isNotEmpty()) filtersLayout.isVisible = true
             changeNoFilesLayoutVisibility(!swipeRefreshLayout.isRefreshing, false)
             recentSearchesView.isGone = true
         }
@@ -344,7 +371,7 @@ class SearchFragment : FileListFragment() {
 
             val currentQuery = searchView?.text?.toString()?.trim()
 
-            if (currentQuery.isNullOrEmpty() && searchFiltersAdapter.filters.isEmpty()) {
+            if (currentQuery.isNullOrEmpty() && filtersAdapter.filters.isEmpty()) {
                 fileAdapter.setFiles(arrayListOf())
                 showRecentSearchesLayout(true)
                 swipeRefreshLayout.isRefreshing = false

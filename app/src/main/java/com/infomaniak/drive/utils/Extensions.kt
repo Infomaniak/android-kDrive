@@ -298,11 +298,12 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
         }
         else -> {
             when {
-                file.hasThumbnail && (isGrid || file.getFileType() == ConvertedType.IMAGE
-                        || file.getFileType() == ConvertedType.VIDEO) -> {
+                file.hasThumbnail &&
+                        (isGrid || file.getFileType() == ConvertedType.IMAGE || file.getFileType() == ConvertedType.VIDEO) -> {
                     filePreview.loadGlideUrl(file.thumbnail(), file.getFileType().icon)
                 }
-                file.isFromUploads && (file.getMimeType().startsWith("image/") || file.getMimeType().startsWith("video/")) -> {
+                file.isFromUploads &&
+                        (file.getMimeType().startsWith("image/") || file.getMimeType().startsWith("video/")) -> {
                     CoroutineScope(Dispatchers.IO).launch {
                         val bitmap = context.getLocalThumbnail(file)
                         withContext(Dispatchers.Main) {

@@ -69,7 +69,9 @@ class CategoriesContainerView @JvmOverloads constructor(
                 isVisible = true
                 removeAllViews()
                 categories.forEach { addView(createChip(it, layoutInflater, onClicked)) }
-            } else isGone = true
+            } else {
+                isGone = true
+            }
         }
     }
 

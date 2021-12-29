@@ -43,28 +43,28 @@ open class SearchFilterTypeBottomSheetDialog : BottomSheetDialogFragment() {
         getSortedTypes().forEach { searchTypeContainer.addView(createTypeView(it)) }
     }
 
-    private fun getSortedTypes(): List<Pair<ConvertedType, Int>> {
+    private fun getSortedTypes(): List<ConvertedType> {
         return listOf(
-            ConvertedType.ARCHIVE to R.drawable.ic_file_zip,
-            ConvertedType.AUDIO to R.drawable.ic_file_audio,
-            ConvertedType.CODE to R.drawable.ic_file_code,
-            ConvertedType.FOLDER to R.drawable.ic_folder_filled,
-            ConvertedType.IMAGE to R.drawable.ic_file_image,
-            ConvertedType.PDF to R.drawable.ic_file_pdf,
-            ConvertedType.PRESENTATION to R.drawable.ic_file_presentation,
-            ConvertedType.SPREADSHEET to R.drawable.ic_file_grids,
-            ConvertedType.TEXT to R.drawable.ic_file_text,
-            ConvertedType.VIDEO to R.drawable.ic_file_video,
-        ).sortedBy { getString(it.first.searchFilterName) }
+            ConvertedType.ARCHIVE,
+            ConvertedType.AUDIO,
+            ConvertedType.CODE,
+            ConvertedType.FOLDER,
+            ConvertedType.IMAGE,
+            ConvertedType.PDF,
+            ConvertedType.PRESENTATION,
+            ConvertedType.SPREADSHEET,
+            ConvertedType.TEXT,
+            ConvertedType.VIDEO,
+        ).sortedBy { getString(it.searchFilterName) }
     }
 
     @SuppressLint("InflateParams")
-    private fun createTypeView(type: Pair<ConvertedType, Int>): View {
+    private fun createTypeView(type: ConvertedType): View {
         return layoutInflater.inflate(R.layout.view_search_filter_type, null).apply {
-            typeStartIcon.setImageResource(type.second)
-            typeText.setText(type.first.searchFilterName)
-            typeEndIcon.isVisible = type.first.value == navigationArgs.type?.value
-            setOnClickListener { setBackNavigationResult(SEARCH_FILTER_TYPE_NAV_KEY, type.first) }
+            typeStartIcon.setImageResource(type.icon)
+            typeText.setText(type.searchFilterName)
+            typeEndIcon.isVisible = type.value == navigationArgs.type?.value
+            setOnClickListener { setBackNavigationResult(SEARCH_FILTER_TYPE_NAV_KEY, type) }
         }
     }
 
