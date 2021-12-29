@@ -35,7 +35,8 @@
         style="@style/Subtitle2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/marginStandardMedium"
+        android:layout_marginStart="@dimen/marginStandard"
+        android:layout_marginBottom="@dimen/marginStandardMedium"
         android:text="@string/modificationDateFilterTitle" />
 
     <View
@@ -46,16 +47,14 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/todayFilterLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?selectableItemBackground"
-        android:paddingVertical="@dimen/marginStandardMedium"
-        android:paddingStart="@dimen/marginStandardMedium"
-        android:paddingEnd="@dimen/marginStandard">
+        android:layout_height="@dimen/buttonHeight"
+        android:background="?selectableItemBackground">
 
         <TextView
-            style="@style/Subtitle1"
+            style="@style/Subtitle2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/marginStandard"
             android:layout_marginEnd="@dimen/marginStandardMedium"
             android:text="@string/allToday"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -67,6 +66,7 @@
             android:id="@+id/todayFilterEndIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/marginStandard"
             android:src="@drawable/ic_check"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -80,16 +80,14 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/yesterdayFilterLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?selectableItemBackground"
-        android:paddingVertical="@dimen/marginStandardMedium"
-        android:paddingStart="@dimen/marginStandardMedium"
-        android:paddingEnd="@dimen/marginStandard">
+        android:layout_height="@dimen/buttonHeight"
+        android:background="?selectableItemBackground">
 
         <TextView
-            style="@style/Subtitle1"
+            style="@style/Subtitle2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/marginStandard"
             android:layout_marginEnd="@dimen/marginStandardMedium"
             android:text="@string/allYesterday"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -101,6 +99,7 @@
             android:id="@+id/yesterdayFilterEndIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/marginStandard"
             android:src="@drawable/ic_check"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -114,16 +113,14 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/lastSevenDaysFilterLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?selectableItemBackground"
-        android:paddingVertical="@dimen/marginStandardMedium"
-        android:paddingStart="@dimen/marginStandardMedium"
-        android:paddingEnd="@dimen/marginStandard">
+        android:layout_height="@dimen/buttonHeight"
+        android:background="?selectableItemBackground">
 
         <TextView
-            style="@style/Subtitle1"
+            style="@style/Subtitle2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/marginStandard"
             android:layout_marginEnd="@dimen/marginStandardMedium"
             android:text="@string/allLast7Days"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -135,6 +132,7 @@
             android:id="@+id/lastSevenDaysFilterEndIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/marginStandard"
             android:src="@drawable/ic_check"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -148,16 +146,14 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/customFilterLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?selectableItemBackground"
-        android:paddingVertical="@dimen/marginStandardMedium"
-        android:paddingStart="@dimen/marginStandardMedium"
-        android:paddingEnd="@dimen/marginStandard">
+        android:layout_height="@dimen/buttonHeight"
+        android:background="?selectableItemBackground">
 
         <TextView
-            style="@style/Subtitle1"
+            style="@style/Subtitle2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/marginStandard"
             android:layout_marginEnd="@dimen/marginStandardMedium"
             android:text="@string/allDateCustom"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -169,6 +165,7 @@
             android:id="@+id/customFilterEndIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/marginStandard"
             android:src="@drawable/ic_check"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"

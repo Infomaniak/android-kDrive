@@ -19,26 +19,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/searchResultCard"
+    style="@style/CardViewInfomaniak"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    app:cardBackgroundColor="@color/appBar"
-    app:cardCornerRadius="0dp"
-    app:cardElevation="0dp"
+    android:layout_height="50dp"
     tools:context=".ui.fileList.RecentSearchesAdapter">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="@dimen/marginStandard"
-        android:paddingVertical="@dimen/marginStandardMedium">
+        android:layout_height="match_parent">
 
         <ImageView
             android:id="@+id/searchResultIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="@dimen/marginStandardMedium"
             android:src="@drawable/ic_clock"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/searchResultText"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="ContentDescription" />
@@ -47,9 +43,10 @@
             android:id="@+id/searchResultText"
             style="@style/Subtitle2"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_marginHorizontal="@dimen/marginStandardMedium"
             android:ellipsize="end"
+            android:gravity="center_vertical"
             android:maxLines="1"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

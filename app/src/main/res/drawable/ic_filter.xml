@@ -16,12 +16,12 @@
       ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp"
+    android:width="20dp"
+    android:height="20dp"
     android:tint="@color/primary"
     android:viewportWidth="24"
     android:viewportHeight="24">
     <path
-        android:fillColor="#000000"
+        android:fillColor="#fff"
         android:pathData="M23.894,0.552C23.7245,0.2137 23.3785,0 23,0L1,0C0.6212,0 0.275,0.214 0.1056,0.5528C-0.0638,0.8916 -0.0273,1.297 0.2,1.6L9,13.423L9,22C9.0082,23.1012 9.8988,23.9918 11,24C11.4328,24.0005 11.8541,23.8601 12.2,23.6L14.2,22.1C14.7028,21.7216 14.9989,21.1293 15,20.5L15,13.423L23.8,1.6C24.0275,1.2967 24.0639,0.8909 23.894,0.552ZM5.417,2.2L9.356,7.45C9.4209,7.5366 9.456,7.6418 9.456,7.75L9.456,9C9.456,9.2152 9.3183,9.4063 9.1141,9.4743C8.91,9.5424 8.6851,9.4722 8.556,9.3L3.62,2.8C3.5064,2.6485 3.4881,2.4458 3.5728,2.2764C3.6575,2.107 3.8306,2 4.02,2L5.02,2C5.1763,2.0009 5.3232,2.0749 5.417,2.2Z" />
 </vector>

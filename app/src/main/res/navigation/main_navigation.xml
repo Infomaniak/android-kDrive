@@ -183,7 +183,8 @@
     <dialog
         android:id="@+id/actionMultiSelectBottomSheetDialog"
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog"
-        android:label="ActionMultiSelectBottomSheetDialog">
+        android:label="ActionMultiSelectBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_action_multi_select">
         <argument
             android:name="fileIds"
             app:argType="integer[]" />
@@ -766,12 +767,14 @@
     <fragment
         android:id="@+id/recentChangesFragment"
         android:name="com.infomaniak.drive.ui.menu.RecentChangesFragment"
-        android:label="RecentChangesFragment" />
+        android:label="RecentChangesFragment"
+        tools:layout="@layout/fragment_file_list" />
 
     <dialog
         android:id="@+id/selectPermissionBottomSheetDialog"
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog"
-        android:label="SelectPermissionBottomSheetDialog">
+        android:label="SelectPermissionBottomSheetDialog"
+        tools:layout="@layout/fragment_select_permission">
         <argument
             android:name="currentShareable"
             android:defaultValue="@null"
