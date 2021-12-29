@@ -142,7 +142,7 @@ class CategoriesAdapter(
     fun doesCategoryExist(query: String): Boolean = filteredCategories.any { it.name.equals(query, true) }
 
     private fun notifyAdapter(oldItems: List<DiffUtilCategory>, newItems: List<DiffUtilCategory>) {
-        DiffUtil.calculateDiff(DiffCallbacks(oldItems, newItems, isCreateRowVisible)).dispatchUpdatesTo(this)
+        DiffUtil.calculateDiff(CategoriesDiffCallback(oldItems, newItems, isCreateRowVisible)).dispatchUpdatesTo(this)
     }
 
     private fun List<UICategory>.filtered(): List<UICategory> = filter { it.name.contains(filterQuery, true) }
@@ -180,38 +180,5 @@ class CategoriesAdapter(
         SELECTED,
         NOT_SELECTED,
         PROCESSING,
-    }
-
-    private data class DiffUtilCategory(
-        val id: Int,
-        var selectedState: SelectedState,
-    )
-
-    private class DiffCallbacks(
-        private val oldItems: List<DiffUtilCategory>,
-        private val newItems: List<DiffUtilCategory>,
-        private val isCreateRowVisible: Boolean,
-    ) : DiffUtil.Callback() {
-
-        override fun getOldListSize(): Int = oldItems.size
-
-        override fun getNewListSize(): Int = newItems.size
-
-        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-            return oldItems[oldItemPosition].id == newItems[newItemPosition].id
-        }
-
-        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-            return when {
-                oldItemPosition == 0 && newItemPosition != 0 -> false
-                oldItemPosition != 0 && newItemPosition == 0 -> false
-                oldItemPosition == oldListSize - 1 && newItemPosition != newListSize - 1 -> false
-                oldItemPosition != oldListSize - 1 && newItemPosition == newListSize - 1 -> false
-                oldItems[oldItemPosition].selectedState != newItems[newItemPosition].selectedState -> false
-                oldItemPosition == oldListSize - 1 && newItemPosition == newListSize - 1 && isCreateRowVisible -> false
-                newItemPosition == newListSize - 1 && !isCreateRowVisible -> false
-                else -> true
-            }
-        }
     }
 }

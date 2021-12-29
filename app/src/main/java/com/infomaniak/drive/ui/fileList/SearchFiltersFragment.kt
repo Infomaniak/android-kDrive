@@ -58,7 +58,11 @@ class SearchFiltersFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initializeFilters()
         handleRights()
-        setOnClickListeners()
+        setToolbar()
+        setDateAndTypeFilters()
+        setCategoriesOwnershipFilters()
+        setClearButton()
+        setSaveButton()
         setBackActionHandlers()
     }
 
@@ -84,12 +88,16 @@ class SearchFiltersFragment : Fragment() {
         }
     }
 
-    private fun setOnClickListeners() = with(searchFiltersViewModel) {
+    private fun setToolbar() {
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+    }
 
+    private fun setDateAndTypeFilters() = with(searchFiltersViewModel) {
         dateFilter.setOnClickListener { safeNavigate(R.id.searchFilterDateDialog, bundleOf("date" to date)) }
         typeFilter.setOnClickListener { safeNavigate(R.id.searchFilterTypeDialog, bundleOf("type" to type)) }
+    }
 
+    private fun setCategoriesOwnershipFilters() = with(searchFiltersViewModel) {
         belongToAllCategoriesFilter.setOnClickListener {
             categoriesOwnership = CategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES
             updateCategoriesOwnershipUI()
@@ -98,12 +106,16 @@ class SearchFiltersFragment : Fragment() {
             categoriesOwnership = CategoriesOwnershipFilter.BELONG_TO_ONE_CATEGORY
             updateCategoriesOwnershipUI()
         }
+    }
 
+    private fun setClearButton() = with(searchFiltersViewModel) {
         clearButton.setOnClickListener {
             clearFilters()
             updateAllFiltersUI()
         }
+    }
 
+    private fun setSaveButton() = with(searchFiltersViewModel) {
         saveButton.setOnClickListener {
             setBackNavigationResult(
                 SEARCH_FILTERS_NAV_KEY, bundleOf(
