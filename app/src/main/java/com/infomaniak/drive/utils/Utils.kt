@@ -30,6 +30,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.core.view.isGone
@@ -44,6 +45,7 @@ import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
@@ -236,6 +238,15 @@ object Utils {
         } catch (e: ActivityNotFoundException) {
             Toast.makeText(this, R.string.allActivityNotFoundError, Toast.LENGTH_LONG).show()
         }
+    }
+
+    fun File.getUri(context: Context, userDrive: UserDrive = UserDrive()): Pair<Uri, Uri> {
+        val cloudUri = CloudStorageProvider.createShareFileUri(context, this, userDrive)!!
+        val offlineFile: java.io.File? = getOfflineFile(context, userDrive.userId)
+
+        return cloudUri to if (isOffline && offlineFile != null) {
+            FileProvider.getUriForFile(context, context.getString(R.string.FILE_AUTHORITY), offlineFile)
+        } else cloudUri
     }
 
     fun Context.openWithIntent(file: File, userDrive: UserDrive = UserDrive()): Intent {
