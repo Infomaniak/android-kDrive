@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.DialogInterface.OnCancelListener
 import android.content.DialogInterface.OnDismissListener
+import android.content.res.Configuration
 import android.text.SpannableStringBuilder
 import android.text.format.DateFormat.is24HourFormat
 import android.util.AttributeSet
@@ -110,9 +111,17 @@ class TimeInputView @JvmOverloads constructor(
 
         // TODO : Waiting https://github.com/material-components/material-components-android/issues/366 (icon padding issue)
         TimePickerDialog.newInstance(this, hours, minutes, is24HourFormat(context)).apply {
+            isThemeDark = isNightModeEnabled()
             setSelectableTimes(acceptableTimes)
             dismissOnPause(true)
             show(fragmentManager, this@TimeInputView.toString())
+        }
+    }
+
+    private fun isNightModeEnabled(): Boolean {
+        return when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+            Configuration.UI_MODE_NIGHT_YES -> true
+            else -> false
         }
     }
 
