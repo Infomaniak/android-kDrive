@@ -302,8 +302,8 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
         }
         else -> {
             when {
-                file.hasThumbnail && (isGrid || file.getFileType() == File.ConvertedType.IMAGE
-                        || file.getFileType() == File.ConvertedType.VIDEO) -> {
+                file.hasThumbnail && (isGrid || file.getFileType() == ConvertedType.IMAGE
+                        || file.getFileType() == ConvertedType.VIDEO) -> {
                     filePreview.loadGlideUrl(file.thumbnail(), file.getFileType().icon)
                 }
                 file.isFromUploads && (file.getMimeType().startsWith("image/") || file.getMimeType().startsWith("video/")) -> {

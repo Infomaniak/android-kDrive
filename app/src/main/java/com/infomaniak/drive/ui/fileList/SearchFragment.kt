@@ -31,6 +31,7 @@ import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
+import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.safeNavigate
@@ -106,16 +107,16 @@ class SearchFragment : FileListFragment() {
         }
 
         filterLayoutView.apply {
-            imagefilterLayout.setOnClickListener { updateFilter(it, File.ConvertedType.IMAGE) }
-            videoFilterLayout.setOnClickListener { updateFilter(it, File.ConvertedType.VIDEO) }
-            audioFilterLayout.setOnClickListener { updateFilter(it, File.ConvertedType.AUDIO) }
-            pdfFilterLayout.setOnClickListener { updateFilter(it, File.ConvertedType.PDF) }
-            docsFilterLayout.setOnClickListener { updateFilter(it, File.ConvertedType.TEXT) }
-            pointsfilterLayout.setOnClickListener { updateFilter(it, File.ConvertedType.PRESENTATION) }
-            gridsFilterLayout.setOnClickListener { updateFilter(it, File.ConvertedType.SPREADSHEET) }
-            folderFilterLayout.setOnClickListener { updateFilter(it, File.ConvertedType.FOLDER) }
-            archiveFilterLayout.setOnClickListener { updateFilter(it, File.ConvertedType.ARCHIVE) }
-            codeFilterLayout.setOnClickListener { updateFilter(it, File.ConvertedType.CODE) }
+            imagefilterLayout.setOnClickListener { updateFilter(it, ConvertedType.IMAGE) }
+            videoFilterLayout.setOnClickListener { updateFilter(it, ConvertedType.VIDEO) }
+            audioFilterLayout.setOnClickListener { updateFilter(it, ConvertedType.AUDIO) }
+            pdfFilterLayout.setOnClickListener { updateFilter(it, ConvertedType.PDF) }
+            docsFilterLayout.setOnClickListener { updateFilter(it, ConvertedType.TEXT) }
+            pointsfilterLayout.setOnClickListener { updateFilter(it, ConvertedType.PRESENTATION) }
+            gridsFilterLayout.setOnClickListener { updateFilter(it, ConvertedType.SPREADSHEET) }
+            folderFilterLayout.setOnClickListener { updateFilter(it, ConvertedType.FOLDER) }
+            archiveFilterLayout.setOnClickListener { updateFilter(it, ConvertedType.ARCHIVE) }
+            codeFilterLayout.setOnClickListener { updateFilter(it, ConvertedType.CODE) }
         }
 
         convertedTypeClose.setOnClickListener {
@@ -177,7 +178,7 @@ class SearchFragment : FileListFragment() {
         }
     }
 
-    private fun updateFilter(view: View, type: File.ConvertedType) {
+    private fun updateFilter(view: View, type: ConvertedType) {
         val cardView = view as ConstraintLayout
         fileListViewModel.currentConvertedTypeDrawable = (cardView[0] as ImageView).drawable
         fileListViewModel.currentConvertedTypeText = (cardView[1] as TextView).text?.toString()
