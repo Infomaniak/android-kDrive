@@ -71,11 +71,14 @@ class CreateOrEditCategoryFragment : Fragment() {
             return@with
         }
 
-        configureAdapter()
+        setCategoryName()
+        configureColorsAdapter()
+        toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+
         val isCreateCategory = categoryId == CREATE_CATEGORY_ID
-        setData(isCreateCategory)
-        setStates(isCreateCategory)
-        setListeners()
+        appBarTitle.title = getString(if (isCreateCategory) R.string.createCategoryTitle else R.string.editCategoryTitle)
+        editCategoryWarning.isGone = isCreateCategory
+        setSaveButton(isCreateCategory)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -83,12 +86,31 @@ class CreateOrEditCategoryFragment : Fragment() {
         configCategoriesLayoutManager()
     }
 
-    private fun configureAdapter() {
+    private fun setCategoryName() = with(navigationArgs) {
+        categoryNameValueInput.apply {
+            setText(categoryName)
+            addTextChangedListener { saveButton.isEnabled = it.toString().isNotEmpty() }
+        }
+        categoryNameValueLayout.isGone = categoryIsPredefined
+    }
+
+    private fun configureColorsAdapter() {
         colorsAdapter.apply {
             selectedPosition = COLORS.indexOfFirst { it == navigationArgs.categoryColor }.let { if (it == -1) 0 else it }
             configCategoriesLayoutManager()
             categoriesRecyclerView.adapter = this
             stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+        }
+    }
+
+    private fun setSaveButton(isCreateCategory: Boolean) = with(navigationArgs) {
+        saveButton.apply {
+            initProgress(this@CreateOrEditCategoryFragment)
+            isEnabled = categoryIsPredefined || !isCreateCategory || categoryName.isNotEmpty()
+            setOnClickListener {
+                showProgress()
+                if (categoryId == CREATE_CATEGORY_ID) createCategory() else editCategory(categoryId)
+            }
         }
     }
 
@@ -102,29 +124,6 @@ class CreateOrEditCategoryFragment : Fragment() {
         val screenWidth = requireActivity().getScreenSizeInDp().x
         val margins = resources.getDimensionPixelSize(R.dimen.marginStandardSmall).toDp() * 2
         return max(minColumns, (screenWidth - margins) / expectedItemSize)
-    }
-
-    private fun setData(isCreateCategory: Boolean) = with(navigationArgs) {
-        appBarTitle.title = getString(if (isCreateCategory) R.string.createCategoryTitle else R.string.editCategoryTitle)
-        categoryNameValueInput.setText(categoryName)
-        saveButton.initProgress(this@CreateOrEditCategoryFragment)
-    }
-
-    private fun setStates(isCreateCategory: Boolean) = with(navigationArgs) {
-        categoryNameValueLayout.isGone = categoryIsPredefined
-        editCategoryWarning.isGone = isCreateCategory
-        saveButton.isEnabled = categoryIsPredefined || !isCreateCategory || categoryName.isNotEmpty()
-    }
-
-    private fun setListeners() = with(navigationArgs) {
-        categoryNameValueInput.addTextChangedListener { saveButton.isEnabled = it.toString().isNotEmpty() }
-        toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
-        saveButton.apply {
-            setOnClickListener {
-                showProgress()
-                if (categoryId == CREATE_CATEGORY_ID) createCategory() else editCategory(categoryId)
-            }
-        }
     }
 
     private fun createCategory() {

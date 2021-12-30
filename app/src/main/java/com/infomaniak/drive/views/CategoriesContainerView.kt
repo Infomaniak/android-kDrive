@@ -17,14 +17,14 @@
  */
 package com.infomaniak.drive.views
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.util.AttributeSet
-import android.util.TypedValue
+import android.view.LayoutInflater
 import android.widget.FrameLayout
-import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.toColorInt
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.google.android.material.chip.Chip
 import com.infomaniak.drive.R
@@ -42,11 +42,11 @@ class CategoriesContainerView @JvmOverloads constructor(
         inflate(context, R.layout.view_categories_container, this)
     }
 
-    fun setup(categories: List<Category>, canPutCategoryOnFile: Boolean, onClicked: () -> Unit) {
+    fun setup(categories: List<Category>, canPutCategoryOnFile: Boolean, layoutInflater: LayoutInflater, onClicked: () -> Unit) {
+        categorySwitch.isVisible = canPutCategoryOnFile
         setCategoryTitle(canPutCategoryOnFile, categories)
-        setStates(canPutCategoryOnFile, categories)
-        setListeners(canPutCategoryOnFile, onClicked)
-        setCategories(categories, onClicked)
+        setClickListener(canPutCategoryOnFile, onClicked)
+        setCategories(categories, layoutInflater, onClicked)
     }
 
     private fun setCategoryTitle(canPutCategoryOnFile: Boolean, categories: List<Category>) {
@@ -57,34 +57,28 @@ class CategoriesContainerView @JvmOverloads constructor(
         )
     }
 
-    private fun setStates(canPutCategoryOnFile: Boolean, categories: List<Category>) {
-        categorySwitch.isVisible = canPutCategoryOnFile
-        categoriesGroup.isVisible = categories.isNotEmpty()
-    }
-
-    private fun setListeners(canPutCategoryOnFile: Boolean, onClicked: () -> Unit) {
+    private fun setClickListener(canPutCategoryOnFile: Boolean, onClicked: () -> Unit) {
         if (canPutCategoryOnFile) {
             categoriesContainerView.setOnClickListener { onClicked() }
         }
     }
 
-    private fun setCategories(categories: List<Category>, onClicked: () -> Unit) {
-        if (categories.isNotEmpty()) {
-            with(categoriesGroup) {
+    private fun setCategories(categories: List<Category>, layoutInflater: LayoutInflater, onClicked: () -> Unit) {
+        with(categoriesGroup) {
+            if (categories.isNotEmpty()) {
+                isVisible = true
                 removeAllViews()
-                categories.forEach { category ->
-                    addView(
-                        Chip(context).apply {
-                            text = category.getName(context)
-                            setTextSize(TypedValue.COMPLEX_UNIT_SP, 14.0f)
-                            setTextColor(ContextCompat.getColor(context, R.color.white))
-                            typeface = ResourcesCompat.getFont(context, R.font.suisseintl_medium)
-                            chipBackgroundColor = ColorStateList.valueOf(category.color.toColorInt())
-                            setOnClickListener { onClicked() }
-                        }
-                    )
-                }
-            }
+                categories.forEach { addView(createChip(it, layoutInflater, onClicked)) }
+            } else isGone = true
+        }
+    }
+
+    @SuppressLint("InflateParams")
+    private fun createChip(category: Category, layoutInflater: LayoutInflater, onClicked: () -> Unit): Chip {
+        return (layoutInflater.inflate(R.layout.chip_category, null) as Chip).apply {
+            text = category.getName(context)
+            chipBackgroundColor = ColorStateList.valueOf(category.color.toColorInt())
+            setOnClickListener { onClicked() }
         }
     }
 }

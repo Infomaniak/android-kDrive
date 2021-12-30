@@ -186,7 +186,7 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
             categoriesDivider.isVisible = true
             categoriesContainer.apply {
                 isVisible = true
-                setup(categories, rights.canPutCategoryOnFile, onClicked = {
+                setup(categories, rights.canPutCategoryOnFile, layoutInflater, onClicked = {
                     runCatching {
                         findNavController().navigate(
                             FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectCategoriesFragment(fileId)
