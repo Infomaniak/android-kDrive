@@ -21,7 +21,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.fileList.categories.CreateOrEditCategoryFragment">
+    tools:context=".ui.fileList.fileDetails.CreateOrEditCategoryFragment">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBar"
@@ -123,9 +123,9 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/chooseCategory"
-                tools:spanCount="7"
                 tools:itemCount="14"
-                tools:listitem="@layout/view_category_color" />
+                tools:listitem="@layout/view_category_color"
+                tools:spanCount="7" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/saveButton"

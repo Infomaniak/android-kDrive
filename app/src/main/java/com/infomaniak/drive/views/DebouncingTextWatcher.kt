@@ -29,7 +29,7 @@ class DebouncingTextWatcher(
     lifecycle: Lifecycle,
     private val onDebouncingQueryTextChange: (String?) -> Unit
 ) : TextWatcher {
-    private val corountineScope = lifecycle.coroutineScope
+    private val coroutineScope = lifecycle.coroutineScope
     private var searchJob: Job? = null
 
     companion object {
@@ -46,7 +46,7 @@ class DebouncingTextWatcher(
 
     private fun search(query: String?): Boolean {
         searchJob?.cancel()
-        searchJob = corountineScope.launch {
+        searchJob = coroutineScope.launch {
             query?.let {
                 delay(DEBOUNCE_DELAY)
                 onDebouncingQueryTextChange(query)

@@ -26,5 +26,5 @@
     app:icon="@drawable/ic_big_check"
     app:iconSize="12dp"
     tools:backgroundTint="@color/red"
-    tools:context=".ui.fileList.categories.CreateOrEditCategoryAdapter"
+    tools:context=".ui.fileList.fileDetails.CreateOrEditCategoryAdapter"
     tools:iconTint="@color/white" />

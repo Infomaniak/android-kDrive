@@ -36,7 +36,7 @@ class FileMigration : RealmMigration {
         // DynamicRealm exposes an editable schema
         val schema = realm.schema
 
-        // Migrate to version 1
+        // Migrated to version 1
         if (oldVersionTemp == 0L) {
             schema.get(File::class.java.simpleName)?.apply {
                 removeField("order")

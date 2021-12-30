@@ -436,7 +436,6 @@ object FileController {
         }
     }
 
-
     fun getActivities(): ArrayList<FileActivity> {
         val activityResults = arrayListOf<FileActivity>()
         getRealmInstance().use { realm ->

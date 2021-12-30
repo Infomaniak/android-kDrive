@@ -83,10 +83,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.models.DriveUser
-import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.FileCategory
-import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.OnlyOfficeActivity
@@ -392,7 +389,7 @@ fun Date.endOfTheDay(): Date =
         time = this@endOfTheDay
         set(Calendar.HOUR_OF_DAY, 23)
         set(Calendar.MINUTE, 59)
-        set(Calendar.SECOND, 0)
+        set(Calendar.SECOND, 59)
     }.time
 
 fun Date.year(): Int =

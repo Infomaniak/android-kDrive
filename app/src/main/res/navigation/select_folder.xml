@@ -207,7 +207,8 @@
     <dialog
         android:id="@+id/selectPermissionBottomSheetDialog"
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog"
-        android:label="SelectPermissionBottomSheetDialog">
+        android:label="SelectPermissionBottomSheetDialog"
+        tools:layout="@layout/fragment_select_permission">
         <argument
             android:name="currentShareable"
             android:defaultValue="@null"

@@ -47,6 +47,7 @@
     <string name="allAudio">Audios</string>
     <string name="allCancellationInProgress">Cancellation in progress…</string>
     <string name="allCode">Code</string>
+    <string name="allDateCustom">Custom</string>
     <string name="allDeletedFilePattern">\'Deleted on \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Disabled</string>
     <string name="allDuplicateFileName">%1$s - Copy%2$s</string>
@@ -99,6 +100,7 @@
     <string name="buttonAvailableOffline">Available offline</string>
     <string name="buttonBack">Back</string>
     <string name="buttonCancel">Cancel</string>
+    <string name="buttonChangeFolderColor">Change folder colour</string>
     <string name="buttonClear">Clear</string>
     <string name="buttonClearFilters">Clear filters</string>
     <string name="buttonClose">Close</string>
@@ -172,7 +174,7 @@
     <string name="categoryBanking">Banking</string>
     <string name="categoryBill">Bill</string>
     <string name="categoryColorTitle">Category colour</string>
-    <string name="categoryContract">Contrat</string>
+    <string name="categoryContract">Contract</string>
     <string name="categoryForm">Form</string>
     <string name="categoryHobbies">Hobbies</string>
     <string name="categoryID">ID documents</string>
@@ -410,6 +412,8 @@
     <string name="fileShareLinkSettingsTitle">Advanced sharing link settings</string>
     <string name="fileTypeFilterTitle">File type</string>
     <string name="filtersTitle">Filters</string>
+    <string name="folderColorDescription">Change the colour of your folders to personalise and better organise your kDrive to your liking.</string>
+    <string name="folderColorTitle">Folder Colour</string>
     <string name="folderDescription">Private or shared folder</string>
     <string name="hintInputDirName">Folder name</string>
     <string name="hintInputFileName">File name</string>
@@ -534,7 +538,7 @@
     <string name="selectFolderTitle">Select a folder</string>
     <string name="selectMediaFoldersDescription">Select the folders on your device that should be automatically saved to your kDrive.</string>
     <string name="selectMediaFoldersTitle">Folders to save</string>
-    <string name="settingsOnlyWifiSyncDescription">Automatic backup of photos/videos and updating of offline files will only be done with a Wi-Fi connection.</string>
+    <string name="settingsOnlyWifiSyncDescription">Uploads and updates of offline files will only be done with a Wi-Fi connection.</string>
     <string name="settingsOnlyWifiSyncTitle">WiFi-only transfer</string>
     <string name="settingsTitle">Settings</string>
     <string name="shareFileInputUserAndEmail">Invite a user or an email address…</string>
@@ -580,6 +584,10 @@
     <string name="sharedWithMeNoFile">No files shared with me</string>
     <string name="sharedWithMeTitle">Shared with me</string>
     <string name="snackBarCategoryDeleted">Category successfully deleted</string>
+    <plurals name="snackBarUploadError">
+        <item quantity="one">A file could not be imported</item>
+        <item quantity="other">%d files could not be imported</item>
+    </plurals>
     <plurals name="snackbarDeleteConfirmation">
         <item quantity="one">%s deleted permanently</item>
         <item quantity="other">%d items deleted permanently</item>
@@ -616,6 +624,8 @@
     <string name="syncSettingsButtonSyncVideo">Upload videos</string>
     <string name="syncSettingsDescription">Automatically save the photos and videos taken with your device to your kDrive.</string>
     <string name="syncSettingsSaveDateAllPictureValue">All photos</string>
+    <string name="syncSettingsSaveDateFromDateValue">from date</string>
+    <string name="syncSettingsSaveDateFromDateValue2">From date</string>
     <string name="syncSettingsSaveDateNowValue">from now on</string>
     <string name="syncSettingsSaveDateNowValue2">New photos only (from now on)</string>
     <string name="syncSettingsSaveOn">Save to</string>

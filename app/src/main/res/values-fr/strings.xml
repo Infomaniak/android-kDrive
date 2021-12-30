@@ -38,6 +38,7 @@
     <string name="allAudio">Audios</string>
     <string name="allCancellationInProgress">Annulation en cours…</string>
     <string name="allCode">Code</string>
+    <string name="allDateCustom">Personnalisé</string>
     <string name="allDeletedFilePattern">\'Supprimé le \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Désactivé</string>
     <string name="allDuplicateFileName">%1$s - Copie%2$s</string>
@@ -90,6 +91,7 @@
     <string name="buttonAvailableOffline">Disponible hors ligne</string>
     <string name="buttonBack">Retour</string>
     <string name="buttonCancel">Annuler</string>
+    <string name="buttonChangeFolderColor">Modifier la couleur du dossier</string>
     <string name="buttonClear">Effacer</string>
     <string name="buttonClearFilters">Effacer les filtres</string>
     <string name="buttonClose">Fermer</string>
@@ -397,10 +399,12 @@
     <string name="fileShareDetailsUsersAccesTitle">Utilisateurs ayant accès</string>
     <string name="fileShareFileTitle">Partager le fichier</string>
     <string name="fileShareFolderTitle">Partager le dossier</string>
-    <string name="fileShareLinkSettingsAccessRightTitle">Droits d‘édition</string>
+    <string name="fileShareLinkSettingsAccessRightTitle">Droits d’édition</string>
     <string name="fileShareLinkSettingsTitle">Paramètres avancés du lien de partage</string>
     <string name="fileTypeFilterTitle">Type de fichier</string>
     <string name="filtersTitle">Filtres</string>
+    <string name="folderColorDescription">Changer la couleur de vos dossiers pour personnaliser et mieux organiser votre kDrive selon vos envies.</string>
+    <string name="folderColorTitle">Couleurs des dossiers</string>
     <string name="folderDescription">Dossier privé ou partagé</string>
     <string name="hintInputDirName">Nom du dossier</string>
     <string name="hintInputFileName">Nom du fichier</string>
@@ -415,7 +419,7 @@
     <string name="homeSeeAllImages">Voir toutes mes images</string>
     <string name="homeTitle">Accueil</string>
     <string name="inputExpirationDate">Date d’expiration</string>
-    <string name="inputExpirationTime">Heure d‘expiration</string>
+    <string name="inputExpirationTime">Heure d’expiration</string>
     <string name="lastEditsTitle">Dernières modifications</string>
     <string name="locateButton">Localiser</string>
     <string name="lockAppTitle">Application verrouillée</string>
@@ -525,7 +529,7 @@
     <string name="selectFolderTitle">Sélectionner un dossier</string>
     <string name="selectMediaFoldersDescription">Sélectionnez les dossiers de votre appareil qui doivent être sauvegardés automatiquement dans votre kDrive.</string>
     <string name="selectMediaFoldersTitle">Dossiers à sauvegarder</string>
-    <string name="settingsOnlyWifiSyncDescription">La sauvegarde automatique des photos/vidéos et la mise à jour des fichiers hors ligne seront uniquement effectuées avec une connexion Wifi.</string>
+    <string name="settingsOnlyWifiSyncDescription">Les importations et la mise à jour des fichiers hors ligne seront uniquement effectuées avec une connexion Wi-Fi.</string>
     <string name="settingsOnlyWifiSyncTitle">Transfert uniquement en Wi-Fi</string>
     <string name="settingsTitle">Paramètres</string>
     <string name="shareFileInputUserAndEmail">Invitez un utilisateur ou une adresse mail…</string>
@@ -571,6 +575,10 @@
     <string name="sharedWithMeNoFile">Aucun fichier partagé avec moi</string>
     <string name="sharedWithMeTitle">Partagés avec moi</string>
     <string name="snackBarCategoryDeleted">Catégorie supprimée avec succès</string>
+    <plurals name="snackBarUploadError">
+        <item quantity="one">Un fichier n’a pas pu être importé</item>
+        <item quantity="other">%d fichiers n’ont pas pu être importés</item>
+    </plurals>
     <plurals name="snackbarDeleteConfirmation">
         <item quantity="one">%s supprimé définitivement</item>
         <item quantity="other">%d éléments supprimés définitivement</item>
@@ -607,6 +615,8 @@
     <string name="syncSettingsButtonSyncVideo">Importer les vidéos</string>
     <string name="syncSettingsDescription">Sauvegardez automatiquement vos photos, et vidéos prises avec votre appareil dans votre kDrive.</string>
     <string name="syncSettingsSaveDateAllPictureValue">Toutes les photos</string>
+    <string name="syncSettingsSaveDateFromDateValue">à partir de la date</string>
+    <string name="syncSettingsSaveDateFromDateValue2">À partir d’une date</string>
     <string name="syncSettingsSaveDateNowValue">à partir de maintenant</string>
     <string name="syncSettingsSaveDateNowValue2">Nouvelles photos uniquement (à partir de maintenant)</string>
     <string name="syncSettingsSaveOn">Enregistrer sur</string>

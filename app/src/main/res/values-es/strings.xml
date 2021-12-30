@@ -38,6 +38,7 @@
     <string name="allAudio">Audios</string>
     <string name="allCancellationInProgress">Anulación en curso…</string>
     <string name="allCode">Código</string>
+    <string name="allDateCustom">Personalizado</string>
     <string name="allDeletedFilePattern">\'Eliminado el \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Desactivado</string>
     <string name="allDuplicateFileName">%1$s - Copiado%2$s</string>
@@ -90,6 +91,7 @@
     <string name="buttonAvailableOffline">Disponible sin conexión</string>
     <string name="buttonBack">Volver</string>
     <string name="buttonCancel">Anular</string>
+    <string name="buttonChangeFolderColor">Cambiar el color de la carpeta</string>
     <string name="buttonClear">Borrar</string>
     <string name="buttonClearFilters">Borrar los filtros</string>
     <string name="buttonClose">Cerrar</string>
@@ -401,6 +403,8 @@
     <string name="fileShareLinkSettingsTitle">Parámetros avanzados del enlace de uso compartido</string>
     <string name="fileTypeFilterTitle">Tipo de archivo</string>
     <string name="filtersTitle">Filtros</string>
+    <string name="folderColorDescription">Cambia el color de tus carpetas para personalizar y organizar mejor tu kDrive a tu gusto.</string>
+    <string name="folderColorTitle">Color de los respaldos</string>
     <string name="folderDescription">Carpeta privada o compartida</string>
     <string name="hintInputDirName">Nombre de la carpeta</string>
     <string name="hintInputFileName">Nombre del archivo</string>
@@ -525,7 +529,7 @@
     <string name="selectFolderTitle">Seleccionar una carpeta</string>
     <string name="selectMediaFoldersDescription">Selecciona las carpetas de tu dispositivo de las que debe hacerse una copia de seguridad automática en tu kDrive.</string>
     <string name="selectMediaFoldersTitle">Archivos a guardar</string>
-    <string name="settingsOnlyWifiSyncDescription">La copia de seguridad automática de las fotos/vídeos y la actualización de los archivos sin conexión sólo se realizará con una conexión Wifi.</string>
+    <string name="settingsOnlyWifiSyncDescription">Las cargas y actualizaciones de archivos sin conexión sólo se harán con una conexión Wi-Fi.</string>
     <string name="settingsOnlyWifiSyncTitle">Transferencia sólo con WiFi</string>
     <string name="settingsTitle">Parámetros</string>
     <string name="shareFileInputUserAndEmail">Invita a un usuario o una dirección de correo electrónico…</string>
@@ -571,6 +575,10 @@
     <string name="sharedWithMeNoFile">No hay archivos compartidos conmigo</string>
     <string name="sharedWithMeTitle">Usos compartidos conmigo</string>
     <string name="snackBarCategoryDeleted">Categoría eliminada correctamente</string>
+    <plurals name="snackBarUploadError">
+        <item quantity="one">No se ha podido importar un archivo</item>
+        <item quantity="other">No se han podido importar %d archivos</item>
+    </plurals>
     <plurals name="snackbarDeleteConfirmation">
         <item quantity="one">%s eliminado definitivamente</item>
         <item quantity="other">%d elementos eliminados definitivamente</item>
@@ -607,6 +615,8 @@
     <string name="syncSettingsButtonSyncVideo">Importar los vídeos</string>
     <string name="syncSettingsDescription">Haz copia de seguridad automáticamente de tus fotos y vídeos tomados con tu dispositivo en tu kDrive.</string>
     <string name="syncSettingsSaveDateAllPictureValue">Todas las fotos</string>
+    <string name="syncSettingsSaveDateFromDateValue">a partir de la fecha</string>
+    <string name="syncSettingsSaveDateFromDateValue2">De una fecha</string>
     <string name="syncSettingsSaveDateNowValue">a partir de ahora</string>
     <string name="syncSettingsSaveDateNowValue2">Sólo fotos nuevas (a partir de ahora)</string>
     <string name="syncSettingsSaveOn">Guardar en</string>

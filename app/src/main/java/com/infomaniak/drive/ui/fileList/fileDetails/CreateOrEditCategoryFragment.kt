@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.ui.fileList.categories
+package com.infomaniak.drive.ui.fileList.fileDetails
 
 import android.content.res.Configuration
 import android.os.Bundle
@@ -40,7 +40,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.drive.Category
-import com.infomaniak.drive.ui.fileList.categories.CreateOrEditCategoryAdapter.Companion.COLORS
+import com.infomaniak.drive.ui.fileList.fileDetails.CreateOrEditCategoryAdapter.Companion.COLORS
 import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.hideProgress
