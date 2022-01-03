@@ -55,7 +55,6 @@ import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWork
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog.Companion.SELECT_DIALOG_ACTION
-import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.BULK_OPERATION_CUSTOM_TAG
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.generateWorkerData
@@ -121,7 +120,9 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         const val SORT_TYPE_OPTION_KEY = "sort_type_option"
 
         const val ACTIVITIES_REFRESH_DELAY = 5_000L
-        const val MAX_DISPLAYED_CATEGORIES = 3 // Beware, if this value is modified, the Categories' layouts should be modified accordingly.
+
+        // Beware, if this value is modified, the Categories' layouts should be modified accordingly.
+        const val MAX_DISPLAYED_CATEGORIES = 3
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

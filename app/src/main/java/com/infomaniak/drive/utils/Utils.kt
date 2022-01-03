@@ -47,6 +47,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.File.Companion.getCloudAndFileUris
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.data.services.UploadWorker
@@ -239,7 +240,7 @@ object Utils {
     }
 
     fun Context.openWithIntent(file: File, userDrive: UserDrive = UserDrive()): Intent {
-        val (cloudUri, uri) = file.getUri(this, userDrive)
+        val (cloudUri, uri) = file.getCloudAndFileUris(this, userDrive)
         return Intent().apply {
             action = Intent.ACTION_VIEW
             addFlags(

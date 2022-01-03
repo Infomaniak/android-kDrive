@@ -25,6 +25,7 @@ import com.dd.plist.NSString
 import com.dd.plist.PropertyListParser
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.File.Companion.getCloudAndFileUris
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.fileList.FileListFragmentDirections
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
@@ -53,7 +54,7 @@ object FilePresenter {
 
     fun Fragment.openBookmarkIntent(file: File) {
         runCatching {
-            val storedFileUri = file.getUri(requireContext()).second
+            val storedFileUri = file.getCloudAndFileUris(requireContext()).second
             val url =
                 if (file.name.endsWith(".url")) getUrlFromUrlFile(requireContext(), storedFileUri)
                 else getUrlFromWebloc(requireContext(), storedFileUri)
