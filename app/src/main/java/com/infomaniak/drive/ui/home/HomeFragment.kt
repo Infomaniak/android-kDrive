@@ -31,6 +31,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.AppBarLayout
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.UISettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive
@@ -39,6 +40,7 @@ import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWork
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.menu.PicturesFragment
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils.currentUser
 import com.infomaniak.drive.utils.TabViewPagerUtils.getFragment
 import com.infomaniak.drive.utils.TabViewPagerUtils.setup
 import kotlinx.android.synthetic.main.activity_main.*
@@ -67,9 +69,13 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
             noNetworkCard.isGone = isInternetAvailable
         }
-
+        currentUser?.let { currentUser ->
+            if (DriveInfosController.getDrives(currentUser.id).size == 1) {
+                switchDriveButton.isEnabled = false
+                switchDriveButton.icon = null
+            }
+        }
         switchDriveButton.setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
-
         searchView.isGone = true
         searchViewText.isVisible = true
         ViewCompat.requestApplyInsets(homeCoordinator)

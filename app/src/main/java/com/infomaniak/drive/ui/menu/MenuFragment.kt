@@ -76,7 +76,7 @@ class MenuFragment : Fragment() {
             }
 
             userImage.loadAvatar(currentUser)
-
+            driveIcon.isVisible = DriveInfosController.getDrives(currentUser.id).size != 1
             driveIcon.setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
 
             sharedWithMeFiles.isVisible =
