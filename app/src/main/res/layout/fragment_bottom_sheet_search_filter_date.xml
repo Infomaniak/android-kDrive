@@ -15,165 +15,170 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".ui.bottomSheetDialogs.SearchFilterDateBottomSheetDialog">
 
-    <View
-        android:layout_width="26dp"
-        android:layout_height="@dimen/marginStandardVerySmall"
-        android:layout_gravity="center"
-        android:layout_marginVertical="@dimen/marginStandardMedium"
-        android:background="@drawable/background_bottom_sheet_anchor" />
-
-    <TextView
-        android:id="@+id/selectTitle"
-        style="@style/Subtitle2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/marginStandard"
-        android:layout_marginBottom="@dimen/marginStandardMedium"
-        android:text="@string/modificationDateFilterTitle" />
-
-    <View
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/divider" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/todayFilterLayout"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground">
+        <View
+            android:layout_width="26dp"
+            android:layout_height="@dimen/marginStandardVerySmall"
+            android:layout_gravity="center"
+            android:layout_marginVertical="@dimen/marginStandardMedium"
+            android:background="@drawable/background_bottom_sheet_anchor" />
 
         <TextView
+            android:id="@+id/selectTitle"
             style="@style/Subtitle2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:layout_marginEnd="@dimen/marginStandardMedium"
-            android:text="@string/allToday"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/todayFilterEndIcon"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/todayFilterEndIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:src="@drawable/ic_check"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/iconColor"
-            tools:ignore="ContentDescription"
-            tools:visibility="visible" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/yesterdayFilterLayout"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground">
-
-        <TextView
-            style="@style/Subtitle2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandard"
-            android:layout_marginEnd="@dimen/marginStandardMedium"
-            android:text="@string/allYesterday"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/yesterdayFilterEndIcon"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_marginBottom="@dimen/marginStandardMedium"
+            android:text="@string/modificationDateFilterTitle" />
 
-        <ImageView
-            android:id="@+id/yesterdayFilterEndIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:src="@drawable/ic_check"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/iconColor"
-            tools:ignore="ContentDescription"
-            tools:visibility="visible" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/divider" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/lastSevenDaysFilterLayout"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/todayFilterLayout"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/buttonHeight"
+            android:background="?selectableItemBackground">
 
-        <TextView
-            style="@style/Subtitle2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:layout_marginEnd="@dimen/marginStandardMedium"
-            android:text="@string/allLast7Days"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/lastSevenDaysFilterEndIcon"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            <TextView
+                style="@style/Subtitle2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/marginStandard"
+                android:layout_marginEnd="@dimen/marginStandardMedium"
+                android:text="@string/allToday"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/todayFilterEndIcon"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/lastSevenDaysFilterEndIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:src="@drawable/ic_check"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/iconColor"
-            tools:ignore="ContentDescription"
-            tools:visibility="visible" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <ImageView
+                android:id="@+id/todayFilterEndIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/marginStandard"
+                android:src="@drawable/ic_check"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/iconColor"
+                tools:ignore="ContentDescription"
+                tools:visibility="visible" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/customFilterLayout"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/yesterdayFilterLayout"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/buttonHeight"
+            android:background="?selectableItemBackground">
 
-        <TextView
-            style="@style/Subtitle2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:layout_marginEnd="@dimen/marginStandardMedium"
-            android:text="@string/allDateCustom"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/customFilterEndIcon"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            <TextView
+                style="@style/Subtitle2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/marginStandard"
+                android:layout_marginEnd="@dimen/marginStandardMedium"
+                android:text="@string/allYesterday"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/yesterdayFilterEndIcon"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/customFilterEndIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:src="@drawable/ic_check"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/iconColor"
-            tools:ignore="ContentDescription"
-            tools:visibility="visible" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <ImageView
+                android:id="@+id/yesterdayFilterEndIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/marginStandard"
+                android:src="@drawable/ic_check"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/iconColor"
+                tools:ignore="ContentDescription"
+                tools:visibility="visible" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-</LinearLayout>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/lastSevenDaysFilterLayout"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/buttonHeight"
+            android:background="?selectableItemBackground">
+
+            <TextView
+                style="@style/Subtitle2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/marginStandard"
+                android:layout_marginEnd="@dimen/marginStandardMedium"
+                android:text="@string/allLast7Days"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/lastSevenDaysFilterEndIcon"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/lastSevenDaysFilterEndIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/marginStandard"
+                android:src="@drawable/ic_check"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/iconColor"
+                tools:ignore="ContentDescription"
+                tools:visibility="visible" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/customFilterLayout"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/buttonHeight"
+            android:background="?selectableItemBackground">
+
+            <TextView
+                style="@style/Subtitle2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/marginStandard"
+                android:layout_marginEnd="@dimen/marginStandardMedium"
+                android:text="@string/allDateCustom"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/customFilterEndIcon"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/customFilterEndIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/marginStandard"
+                android:src="@drawable/ic_check"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/iconColor"
+                tools:ignore="ContentDescription"
+                tools:visibility="visible" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
