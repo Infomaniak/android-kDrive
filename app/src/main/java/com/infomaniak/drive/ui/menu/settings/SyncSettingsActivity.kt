@@ -74,14 +74,14 @@ class SyncSettingsActivity : BaseActivity() {
 
         oldSyncSettings = UploadFile.getAppSyncSettings()
 
-        with(selectDriveViewModel) {
+        selectDriveViewModel.apply {
             selectedUserId.value = oldSyncSettings?.userId
             selectedDrive.value = oldSyncSettings?.run {
                 DriveInfosController.getDrives(userId, driveId).firstOrNull()
             }
         }
 
-        with(syncSettingsViewModel) {
+        syncSettingsViewModel.apply {
             syncIntervalType.value = oldSyncSettings?.getIntervalType() ?: SyncSettings.IntervalType.IMMEDIATELY
             syncFolder.value = oldSyncSettings?.syncFolder
         }
@@ -90,12 +90,12 @@ class SyncSettingsActivity : BaseActivity() {
             if (users.size > 1) {
                 activeSelectDrive()
             } else {
-                if (DriveInfosController.getDrivesCount(AccountUtils.currentUserId) > 1) {
+                val currentUserDrives = DriveInfosController.getDrives(AccountUtils.currentUserId)
+                if (currentUserDrives.size > 1) {
                     activeSelectDrive()
                 } else {
                     selectDriveViewModel.selectedUserId.value = AccountUtils.currentUserId
-                    selectDriveViewModel.selectedDrive.value =
-                        DriveInfosController.getDrives(AccountUtils.currentUserId).firstOrNull()
+                    selectDriveViewModel.selectedDrive.value = currentUserDrives.firstOrNull()
                 }
             }
         }
