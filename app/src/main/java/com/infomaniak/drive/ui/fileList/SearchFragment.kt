@@ -120,7 +120,7 @@ class SearchFragment : FileListFragment() {
     private fun configureFileAdapter() {
         setFileRecyclerPagination()
         setFileAdapterListener()
-        if (fileAdapter.fileList.isEmpty() && filtersAdapter.filters.isEmpty()) showRecentSearchesLayout(true)
+        if (fileAdapter.fileList.isEmpty() && filtersAdapter.filters.isEmpty()) changeRecentSearchesLayoutVisibility(true)
     }
 
     private fun setFileRecyclerPagination() {
@@ -281,7 +281,7 @@ class SearchFragment : FileListFragment() {
             createCategoriesFilter()?.let(::addAll)
         }.also {
             if (shouldUpdateAdapter) filtersAdapter.setItems(it)
-            showRecentSearchesLayout(it.isEmpty() && searchView.text.toString().isBlank())
+            changeRecentSearchesLayoutVisibility(it.isEmpty() && searchView.text.toString().isBlank())
         }
         currentPage = 1
         downloadFiles(true, false)
@@ -342,8 +342,8 @@ class SearchFragment : FileListFragment() {
         super.onPause()
     }
 
-    private fun showRecentSearchesLayout(isShown: Boolean) {
-        if (isShown) {
+    private fun changeRecentSearchesLayoutVisibility(shouldDisplay: Boolean) {
+        if (shouldDisplay) {
             filtersLayout.isGone = true
             sortLayout.isGone = true
             fileRecyclerView.isGone = true
@@ -351,7 +351,8 @@ class SearchFragment : FileListFragment() {
             recentSearchesView.isVisible = true
         } else {
             if (filtersAdapter.filters.isNotEmpty()) filtersLayout.isVisible = true
-            changeNoFilesLayoutVisibility(!swipeRefreshLayout.isRefreshing, false)
+            val shouldDisplayNoFilesLayout = !swipeRefreshLayout.isRefreshing
+            if (shouldDisplayNoFilesLayout) changeNoFilesLayoutVisibility(hideFileList = true, changeControlsVisibility = false)
             recentSearchesView.isGone = true
         }
     }
@@ -373,7 +374,7 @@ class SearchFragment : FileListFragment() {
 
             if (currentQuery.isNullOrEmpty() && filtersAdapter.filters.isEmpty()) {
                 fileAdapter.setFiles(arrayListOf())
-                showRecentSearchesLayout(true)
+                changeRecentSearchesLayoutVisibility(true)
                 swipeRefreshLayout.isRefreshing = false
                 return
             }
@@ -382,14 +383,14 @@ class SearchFragment : FileListFragment() {
             if (oldList?.isNotEmpty() == true && fileAdapter.getFiles().isEmpty()) {
                 fileAdapter.setFiles(oldList)
                 fileListViewModel.searchOldFileList = null
-                showRecentSearchesLayout(false)
+                changeRecentSearchesLayoutVisibility(false)
                 swipeRefreshLayout.isRefreshing = false
                 return
             }
 
             swipeRefreshLayout.isRefreshing = true
             isDownloading = true
-            showRecentSearchesLayout(false)
+            changeRecentSearchesLayoutVisibility(false)
             fileListViewModel.searchFileByName.value = currentQuery
         }
     }
