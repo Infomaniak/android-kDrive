@@ -180,8 +180,9 @@ class SearchFragment : FileListFragment() {
 
                     updateMostRecentSearches()
 
-                    val searchList = (apiResponse.data ?: arrayListOf())
-                        .apply { map { file -> file.isFromSearch = true } }
+                    val searchList = (apiResponse.data ?: arrayListOf()).apply {
+                        map { file -> file.isFromSearch = true }
+                    }
 
                     when {
                         fileListViewModel.currentPage == 1 -> {
