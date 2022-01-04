@@ -27,6 +27,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
 import io.realm.Realm
 import io.realm.RealmConfiguration
+import io.realm.RealmQuery
 import io.realm.Sort
 import io.realm.kotlin.oneOf
 
@@ -58,8 +59,8 @@ object DriveInfosController {
         driveId: Int?,
         sharedWithMe: Boolean?,
         maintenance: Boolean?
-    ): io.realm.RealmQuery<Drive> =
-        realm.where(Drive::class.java)
+    ): RealmQuery<Drive> {
+        return realm.where(Drive::class.java)
             .sort(Drive::id.name, Sort.ASCENDING)
             .equalTo(Drive::userId.name, userId)
             .apply {
@@ -67,7 +68,7 @@ object DriveInfosController {
                 sharedWithMe?.let { equalTo(Drive::sharedWithMe.name, it) }
                 maintenance?.let { equalTo(Drive::maintenance.name, it) }
             }
-
+    }
 
     fun storeDriveInfos(userId: Int, driveInfo: DriveInfo): List<Drive> {
         val driveList = arrayListOf<Drive>()
