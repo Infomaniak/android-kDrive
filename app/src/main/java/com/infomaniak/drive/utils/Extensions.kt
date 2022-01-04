@@ -27,6 +27,7 @@ import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -194,17 +195,12 @@ fun Number.isPositive(): Boolean {
     return toLong() > 0
 }
 
+fun Resources.isNightModeEnabled() = configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+
 fun Activity.setColorStatusBar(appBar: Boolean = false) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         window.statusBarColor = ContextCompat.getColor(this, if (appBar) R.color.appBar else R.color.background)
-        when (resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)) {
-            Configuration.UI_MODE_NIGHT_YES -> {
-                window.lightStatusBar(false)
-            }
-            else -> {
-                window.lightStatusBar(true)
-            }
-        }
+        window.lightStatusBar(!resources.isNightModeEnabled())
     } else {
         window.statusBarColor = Color.BLACK
     }
