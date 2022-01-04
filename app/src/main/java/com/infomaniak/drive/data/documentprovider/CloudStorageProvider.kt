@@ -51,6 +51,7 @@ import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.isPositive
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.ApiController
 import io.realm.Realm
@@ -182,8 +183,7 @@ class CloudStorageProvider : DocumentsProvider() {
                 var name = context?.getString(R.string.mySharesTitle) ?: "My Shares"
                 cursor.addFile(null, documentId, name)
 
-                val sharesWithMe = DriveInfosController.getDrives(userId = userId, sharedWithMe = true).isNotEmpty()
-                if (sharesWithMe) {
+                if (DriveInfosController.getDrivesCount(userId = userId, sharedWithMe = true).isPositive()) {
                     documentId = parentDocumentId + SEPARATOR + SHARED_WITHME_FOLDER_ID
                     name = context?.getString(R.string.sharedWithMeTitle) ?: "Shared with me"
                     cursor.addFile(null, documentId, name)

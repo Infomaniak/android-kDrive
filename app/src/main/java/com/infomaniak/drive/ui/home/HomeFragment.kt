@@ -31,6 +31,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.AppBarLayout
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.UISettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive
@@ -67,8 +68,14 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
             noNetworkCard.isGone = isInternetAvailable
         }
-
-        switchDriveButton.setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
+        switchDriveButton.apply {
+            if (DriveInfosController.getDrivesCount(AccountUtils.currentUserId) == 1L) {
+                icon = null
+                isEnabled = false
+            } else {
+                setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
+            }
+        }
 
         searchView.isGone = true
         searchViewText.isVisible = true

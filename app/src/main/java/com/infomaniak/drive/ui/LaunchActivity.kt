@@ -46,7 +46,7 @@ class LaunchActivity : AppCompatActivity() {
                     startActivity(Intent(this@LaunchActivity, LockActivity::class.java))
                 }
                 else -> {
-                    if (DriveInfosController.getDrives(AccountUtils.currentUserId).firstOrNull() == null) {
+                    if (DriveInfosController.getDrivesCount(AccountUtils.currentUserId) == 0L) {
                         AccountUtils.updateCurrentUserAndDrives(this@LaunchActivity)
                     }
                     if (DriveInfosController.getDrives(AccountUtils.currentUserId).all { it.maintenance }) {
