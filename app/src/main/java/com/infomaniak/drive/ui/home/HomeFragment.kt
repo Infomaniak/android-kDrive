@@ -77,7 +77,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
             }
         }
-        
+
         searchView.isGone = true
         searchViewText.isVisible = true
         ViewCompat.requestApplyInsets(homeCoordinator)

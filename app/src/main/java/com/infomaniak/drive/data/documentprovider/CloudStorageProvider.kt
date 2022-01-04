@@ -182,7 +182,7 @@ class CloudStorageProvider : DocumentsProvider() {
                 var name = context?.getString(R.string.mySharesTitle) ?: "My Shares"
                 cursor.addFile(null, documentId, name)
 
-                if (DriveInfosController.getDrivesCount(userId = userId, sharedWithMe = true) > 0) {
+                if (DriveInfosController.getDrivesCount(userId = userId, sharedWithMe = true).isPositive()) {
                     documentId = parentDocumentId + SEPARATOR + SHARED_WITHME_FOLDER_ID
                     name = context?.getString(R.string.sharedWithMeTitle) ?: "Shared with me"
                     cursor.addFile(null, documentId, name)
