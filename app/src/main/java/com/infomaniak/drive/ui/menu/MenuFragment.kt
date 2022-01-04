@@ -76,19 +76,21 @@ class MenuFragment : Fragment() {
             }
 
             userImage.loadAvatar(currentUser)
-            if (DriveInfosController.getDrivesCount(currentUser.id) == 1L) {
-                driveIcon.isVisible = false;
-            } else {
-                driveIcon.setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
-            }
-
-            if (DriveInfosController.getDrivesCount(userId = AccountUtils.currentUserId, sharedWithMe = true) > 0L) {
-                sharedWithMeFiles.isVisible = false
-            } else {
-                sharedWithMeFiles.setOnClickListener {
-                    safeNavigate(MenuFragmentDirections.actionMenuFragmentToSharedWithMeFragment())
+            driveIcon.apply {
+                if (DriveInfosController.getDrivesCount(currentUser.id) == 1L) {
+                    isVisible = false
+                } else {
+                    setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
                 }
             }
+            sharedWithMeFiles.apply {
+                if (DriveInfosController.getDrivesCount(userId = AccountUtils.currentUserId, sharedWithMe = true) > 0L) {
+                    isVisible = false
+                } else {
+                    setOnClickListener { safeNavigate(MenuFragmentDirections.actionMenuFragmentToSharedWithMeFragment()) }
+                }
+            }
+
 
             recentChanges.setOnClickListener {
                 safeNavigate(MenuFragmentDirections.actionMenuFragmentToRecentChangesFragment())

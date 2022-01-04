@@ -63,15 +63,9 @@ object DriveInfosController {
             .sort(Drive::id.name, Sort.ASCENDING)
             .equalTo(Drive::userId.name, userId)
             .apply {
-                driveId?.let {
-                    equalTo(Drive::id.name, it)
-                }
-                sharedWithMe?.let {
-                    equalTo(Drive::sharedWithMe.name, it)
-                }
-                maintenance?.let {
-                    equalTo(Drive::maintenance.name, it)
-                }
+                driveId?.let { equalTo(Drive::id.name, it) }
+                sharedWithMe?.let { equalTo(Drive::sharedWithMe.name, it) }
+                maintenance?.let { equalTo(Drive::maintenance.name, it) }
             }
 
 

@@ -69,13 +69,15 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
             noNetworkCard.isGone = isInternetAvailable
         }
-        if (DriveInfosController.getDrivesCount(AccountUtils.currentUserId) == 1L) {
-            switchDriveButton.icon = null
-            switchDriveButton.isEnabled = false
-        } else {
-            switchDriveButton.setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
+        switchDriveButton.apply {
+            if (DriveInfosController.getDrivesCount(AccountUtils.currentUserId) == 1L) {
+                icon = null
+                isEnabled = false
+            } else {
+                setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
+            }
         }
-
+        
         searchView.isGone = true
         searchViewText.isVisible = true
         ViewCompat.requestApplyInsets(homeCoordinator)
