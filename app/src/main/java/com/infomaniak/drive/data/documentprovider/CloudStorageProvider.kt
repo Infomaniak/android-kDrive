@@ -178,12 +178,11 @@ class CloudStorageProvider : DocumentsProvider() {
             isRootFolder -> {
                 cursor.addRootDrives(userId, isRootFolder = true)
 
-                var documentId = parentDocumentId + SEPARATOR + MY_SHARES_FOLDER_ID
-                var name = context?.getString(R.string.mySharesTitle) ?: "My Shares"
+                val documentId = parentDocumentId + SEPARATOR + MY_SHARES_FOLDER_ID
+                val name = context?.getString(R.string.mySharesTitle) ?: "My Shares"
                 cursor.addFile(null, documentId, name)
 
-                val sharesWithMe = DriveInfosController.getDrives(userId = userId, sharedWithMe = true).isNotEmpty()
-                if (sharesWithMe) {
+                if (DriveInfosController.getDrivesCount(userId = userId, sharedWithMe = true) > 0) {
                     documentId = parentDocumentId + SEPARATOR + SHARED_WITHME_FOLDER_ID
                     name = context?.getString(R.string.sharedWithMeTitle) ?: "Shared with me"
                     cursor.addFile(null, documentId, name)

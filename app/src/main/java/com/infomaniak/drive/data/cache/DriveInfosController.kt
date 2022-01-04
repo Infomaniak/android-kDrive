@@ -52,6 +52,29 @@ object DriveInfosController {
         add(drive)
     }
 
+    private fun getDrivesQuery(
+        realm: Realm,
+        userId: Int,
+        driveId: Int?,
+        sharedWithMe: Boolean?,
+        maintenance: Boolean?
+    ): io.realm.RealmQuery<Drive> =
+        realm.where(Drive::class.java)
+            .sort(Drive::id.name, Sort.ASCENDING)
+            .equalTo(Drive::userId.name, userId)
+            .apply {
+                driveId?.let {
+                    equalTo(Drive::id.name, it)
+                }
+                sharedWithMe?.let {
+                    equalTo(Drive::sharedWithMe.name, it)
+                }
+                maintenance?.let {
+                    equalTo(Drive::maintenance.name, it)
+                }
+            }
+
+
     fun storeDriveInfos(userId: Int, driveInfo: DriveInfo): List<Drive> {
         val driveList = arrayListOf<Drive>()
         for (drive in driveInfo.drives.main) {
@@ -106,26 +129,17 @@ object DriveInfosController {
         maintenance: Boolean? = null
     ): ArrayList<Drive> {
         return getRealmInstance().use { realm ->
-            val driveList = realm.copyFromRealm(
-                realm.where(Drive::class.java)
-                    .sort(Drive::id.name, Sort.ASCENDING)
-                    .equalTo(Drive::userId.name, userId)
-                    .apply {
-                        driveId?.let {
-                            equalTo(Drive::id.name, it)
-                        }
-                        sharedWithMe?.let {
-                            equalTo(Drive::sharedWithMe.name, it)
-                        }
-                        maintenance?.let {
-                            equalTo(Drive::maintenance.name, it)
-                        }
-                    }
-                    .findAll(), 1
-            )
+            val driveList = realm.copyFromRealm(getDrivesQuery(realm, userId, driveId, sharedWithMe, maintenance).findAll(), 1)
             driveList?.let { ArrayList(it) } ?: ArrayList()
         }
     }
+
+    fun getDrivesCount(
+        userId: Int,
+        driveId: Int? = null,
+        sharedWithMe: Boolean? = false,
+        maintenance: Boolean? = null
+    ) = getRealmInstance().use { getDrivesQuery(it, userId, driveId, sharedWithMe, maintenance).count() }
 
     fun getTeams(drive: Drive): List<Team> {
         val teamList = getRealmInstance().use { realm ->

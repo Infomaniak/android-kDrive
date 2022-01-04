@@ -76,14 +76,18 @@ class MenuFragment : Fragment() {
             }
 
             userImage.loadAvatar(currentUser)
-            driveIcon.isVisible = DriveInfosController.getDrives(currentUser.id).size != 1
-            driveIcon.setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
+            if (DriveInfosController.getDrivesCount(currentUser.id) == 1L) {
+                driveIcon.isVisible = false;
+            } else {
+                driveIcon.setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
+            }
 
-            sharedWithMeFiles.isVisible =
-                DriveInfosController.getDrives(userId = AccountUtils.currentUserId, sharedWithMe = true).isNotEmpty()
-
-            sharedWithMeFiles.setOnClickListener {
-                safeNavigate(MenuFragmentDirections.actionMenuFragmentToSharedWithMeFragment())
+            if (DriveInfosController.getDrivesCount(userId = AccountUtils.currentUserId, sharedWithMe = true) > 0L) {
+                sharedWithMeFiles.isVisible = false
+            } else {
+                sharedWithMeFiles.setOnClickListener {
+                    safeNavigate(MenuFragmentDirections.actionMenuFragmentToSharedWithMeFragment())
+                }
             }
 
             recentChanges.setOnClickListener {

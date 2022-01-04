@@ -85,12 +85,12 @@ class SyncSettingsActivity : BaseActivity() {
             if (users.size > 1) {
                 activeSelectDrive()
             } else {
-                val currentUserDrives = DriveInfosController.getDrives(AccountUtils.currentUserId)
-                if (currentUserDrives.size > 1) {
+                if (DriveInfosController.getDrivesCount(AccountUtils.currentUserId) > 1) {
                     activeSelectDrive()
                 } else {
                     selectDriveViewModel.selectedUserId.value = AccountUtils.currentUserId
-                    selectDriveViewModel.selectedDrive.value = currentUserDrives.firstOrNull()
+                    selectDriveViewModel.selectedDrive.value =
+                        DriveInfosController.getDrives(AccountUtils.currentUserId).firstOrNull()
                 }
             }
         }
