@@ -40,7 +40,6 @@ import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWork
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.menu.PicturesFragment
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.AccountUtils.currentUser
 import com.infomaniak.drive.utils.TabViewPagerUtils.getFragment
 import com.infomaniak.drive.utils.TabViewPagerUtils.setup
 import kotlinx.android.synthetic.main.activity_main.*
