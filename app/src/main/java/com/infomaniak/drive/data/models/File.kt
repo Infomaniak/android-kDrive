@@ -380,8 +380,10 @@ open class File(
         RECENT_TRASHED("desc", "deleted_at", R.string.sortRecent),
         SMALLER("asc", "files.size", R.string.sortSmaller),
         BIGGER("desc", "files.size", R.string.sortBigger),
-        //EXTENSION("asc", "extension", R.string.sortExtension); // TODO : Awaiting API
+        // EXTENSION("asc", "extension", R.string.sortExtension); // TODO: Awaiting API
     }
+
+    enum class SortTypeUsage { FILE_LIST, TRASH }
 
     @Parcelize
     enum class FolderPermission(

@@ -24,6 +24,8 @@ import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.File.SortType
+import com.infomaniak.drive.data.models.File.SortTypeUsage
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import kotlinx.android.synthetic.main.fragment_file_list.*
@@ -32,8 +34,10 @@ class TrashFragment : FileSubTypeListFragment() {
 
     val trashViewModel: TrashViewModel by navGraphViewModels(R.id.trashFragment)
 
+    override var sortTypeUsage = SortTypeUsage.TRASH
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        fileListViewModel.sortType = File.SortType.RECENT_TRASHED
+        fileListViewModel.sortType = SortType.RECENT_TRASHED
         sortFiles = SortFiles()
         downloadFiles =
             DownloadFiles(
@@ -98,10 +102,10 @@ class TrashFragment : FileSubTypeListFragment() {
 
     private inner class SortFiles : () -> Unit {
         override fun invoke() {
-            getBackNavigationResult<File.SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
+            getBackNavigationResult<SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
                 fileListViewModel.sortType = when (newSortType) {
-                    File.SortType.OLDER -> File.SortType.OLDER_TRASHED
-                    File.SortType.RECENT -> File.SortType.RECENT_TRASHED
+                    SortType.OLDER -> SortType.OLDER_TRASHED
+                    SortType.RECENT -> SortType.RECENT_TRASHED
                     else -> newSortType
                 }
                 sortButton.setText(fileListViewModel.sortType.translation)

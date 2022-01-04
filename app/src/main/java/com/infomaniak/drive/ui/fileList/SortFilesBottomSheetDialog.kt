@@ -21,7 +21,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.utils.setBackNavigationResult
 import com.infomaniak.drive.views.SelectBottomSheetDialog
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_select.*
@@ -30,17 +30,13 @@ class SortFilesBottomSheetDialog : SelectBottomSheetDialog() {
 
     private val navigationArgs: SortFilesBottomSheetDialogArgs by navArgs()
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(navigationArgs) {
         super.onViewCreated(view, savedInstanceState)
-
         selectTitle.setText(R.string.sortTitle)
-
-        selectRecyclerView.adapter = SortFilesBottomSheetAdapter(navigationArgs.sortType) {
-            onSortTypeClicked(it)
-        }
+        selectRecyclerView.adapter = SortFilesBottomSheetAdapter(sortType, sortTypeUsage) { onSortTypeClicked(it) }
     }
 
-    private fun onSortTypeClicked(sortType: File.SortType) {
+    private fun onSortTypeClicked(sortType: SortType) {
         setBackNavigationResult(FileListFragment.SORT_TYPE_OPTION_KEY, sortType)
     }
 }

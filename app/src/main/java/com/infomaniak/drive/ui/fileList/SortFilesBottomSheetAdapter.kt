@@ -22,13 +22,15 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.File.SortType
+import com.infomaniak.drive.data.models.File.SortTypeUsage
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.*
 
 class SortFilesBottomSheetAdapter(
-    private val selectedSortType: File.SortType,
-    private val onItemClicked: (sortType: File.SortType) -> Unit
+    private val selectedType: SortType,
+    private val usage: SortTypeUsage,
+    private val onItemClicked: (sortType: SortType) -> Unit
 ) : RecyclerView.Adapter<ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -36,14 +38,29 @@ class SortFilesBottomSheetAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        File.SortType.values()[position].let { sortType ->
+        usage.types()[position].let { sortType ->
             holder.itemView.apply {
                 itemSelectText.setText(sortType.translation)
-                itemSelectActiveIcon.isVisible = selectedSortType == sortType
+                itemSelectActiveIcon.isVisible = selectedType == sortType
                 setOnClickListener { onItemClicked(sortType) }
             }
         }
     }
 
-    override fun getItemCount() = File.SortType.values().size
+    override fun getItemCount() = usage.types().size
+
+    private fun SortTypeUsage.types(): Array<SortType> {
+        return when (this) {
+            SortTypeUsage.FILE_LIST -> SortType.values().fileListTypes()
+            SortTypeUsage.TRASH -> SortType.values().trashTypes()
+        }
+    }
+
+    private fun Array<SortType>.fileListTypes(): Array<SortType> {
+        return filter { it != SortType.OLDER_TRASHED && it != SortType.RECENT_TRASHED }.toTypedArray()
+    }
+
+    private fun Array<SortType>.trashTypes(): Array<SortType> {
+        return filter { it != SortType.OLDER && it != SortType.RECENT }.toTypedArray()
+    }
 }
