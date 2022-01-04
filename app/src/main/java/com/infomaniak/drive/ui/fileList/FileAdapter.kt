@@ -262,10 +262,9 @@ open class FileAdapter(
                 val isGrid = viewHolderType == DisplayType.GRID
 
                 if (!isGrid) {
-                    val topCornerRadius = if (position == 0) resources.getDimension(R.dimen.cardViewRadius) else 0.0f
-                    val bottomCornerRadius = if (position == itemCount - 1) {
-                        resources.getDimension(R.dimen.cardViewRadius)
-                    } else 0.0f
+                    val topCornerRadius = if (position == 0) resources.getDimension(R.dimen.cardViewRadius) else 0F
+                    val bottomCornerRadius = if (position == itemCount - 1) resources.getDimension(R.dimen.cardViewRadius) else 0F
+
                     fileCardView.shapeAppearanceModel = fileCardView.shapeAppearanceModel
                         .toBuilder()
                         .setTopLeftCorner(CornerFamily.ROUNDED, topCornerRadius)
