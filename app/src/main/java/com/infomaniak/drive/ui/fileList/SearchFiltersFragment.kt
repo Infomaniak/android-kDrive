@@ -37,6 +37,7 @@ import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.SearchDateFilter
 import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterDateBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterTypeBottomSheetDialog
+import com.infomaniak.drive.ui.fileList.SearchFiltersViewModel.Companion.DEFAULT_CATEGORIES_OWNERSHIP_VALUE
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.getBackNavigationResult
 import com.infomaniak.drive.utils.safeNavigate
@@ -67,10 +68,14 @@ class SearchFiltersFragment : Fragment() {
     }
 
     private fun initializeFilters() = with(searchFiltersViewModel) {
-        date = navigationArgs.date
-        type = navigationArgs.type?.let(ConvertedType::valueOf)
-        categories = navigationArgs.categories?.toTypedArray()?.let(DriveInfosController::getCurrentDriveCategoriesFromIds)
-        categoriesOwnership = navigationArgs.categoriesOwnership ?: SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_VALUE
+        if (date == null) date = navigationArgs.date
+        if (type == null) type = navigationArgs.type?.let(ConvertedType::valueOf)
+        if (categories == null) {
+            categories = navigationArgs.categories?.toTypedArray()?.let(DriveInfosController::getCurrentDriveCategoriesFromIds)
+        }
+        if (categoriesOwnership == DEFAULT_CATEGORIES_OWNERSHIP_VALUE) {
+            categoriesOwnership = navigationArgs.categoriesOwnership ?: DEFAULT_CATEGORIES_OWNERSHIP_VALUE
+        }
         updateAllFiltersUI()
     }
 
@@ -140,7 +145,6 @@ class SearchFiltersFragment : Fragment() {
         }
 
         getBackNavigationResult<List<Int>>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
-            restoreCurrentFilters(requireContext())
             categories = if (it.isEmpty()) null else DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray())
             updateAllFiltersUI()
         }
@@ -175,14 +179,11 @@ class SearchFiltersFragment : Fragment() {
             canPutCategoryOnFile = rights?.canPutCategoryOnFile ?: false,
             layoutInflater = layoutInflater,
             onClicked = {
-                searchFiltersViewModel.backupCurrentFilters(requireContext())
-                runCatching {
-                    findNavController().navigate(
-                        SearchFiltersFragmentDirections.actionSearchFiltersFragmentToSelectCategoriesFragment(
-                            categories = categories.map { it.id }.toIntArray(),
-                        )
+                safeNavigate(
+                    SearchFiltersFragmentDirections.actionSearchFiltersFragmentToSelectCategoriesFragment(
+                        categories = categories.map { it.id }.toIntArray(),
                     )
-                }
+                )
             }
         )
     }
