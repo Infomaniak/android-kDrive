@@ -105,7 +105,7 @@ object FileController {
     }
 
     private fun generatePath(file: File, userDrive: UserDrive): String {
-        // id > 0 for exclude other root parents, home root has priority
+        // id > 0 to exclude other root parents, home root has priority
         val folder = file.localParent?.createSnapshot()?.firstOrNull { it.id > 0 }
         return when {
             folder == null -> ""
@@ -854,7 +854,6 @@ object FileController {
     ): ArrayList<File> {
         val block: (Realm) -> ArrayList<File> = { currRealm ->
             currRealm.where(File::class.java).like(File::name.name, "*$query*").findAll()?.let { files ->
-                Log.e("files size", files?.size.toString() + files[0]?.name)
                 getLocalSortedFolderFiles(null, order, files, currRealm)
             } ?: arrayListOf()
         }

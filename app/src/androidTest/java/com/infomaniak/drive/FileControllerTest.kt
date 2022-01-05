@@ -3,6 +3,7 @@ package com.infomaniak.drive
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.cache.FileController.getFileById
 import com.infomaniak.drive.data.models.CreateFile
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.Env
@@ -174,6 +175,14 @@ class FileControllerTest : KDriveTest() {
         // Check that all root files are deleted
         val realmResult = realm.where(File::class.java).findAll()
         Assert.assertTrue("Realm must not contain any files", realmResult.isNullOrEmpty())
+    }
+
+    @Test
+    fun findGeneratedFilesById() {
+        val remoteFile = createAndStoreOfficeFile()
+        val findedFile = getFileById(remoteFile.id, userDrive)
+        Assert.assertEquals("Files should be identical", remoteFile, findedFile)
+        deleteTestFile(remoteFile)
     }
 
     private fun getAndSaveRemoteRootFiles(): Pair<File, ArrayList<File>>? {
