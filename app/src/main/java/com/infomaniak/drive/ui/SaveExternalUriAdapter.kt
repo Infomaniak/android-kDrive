@@ -30,6 +30,7 @@ import io.sentry.SentryLevel
 import kotlinx.android.synthetic.main.item_file_name.view.*
 
 class SaveExternalUriAdapter(val uris: ArrayList<Uri>) : RecyclerView.Adapter<ViewHolder>() {
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             LayoutInflater.from(parent.context).inflate(R.layout.item_file_name, parent, false)
