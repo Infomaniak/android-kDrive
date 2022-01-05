@@ -812,3 +812,13 @@ fun RealmList<Category>.find(id: Int): Category? {
 fun RealmList<FileCategory>.find(id: Int): FileCategory? {
     return where().equalTo(FileCategory::id.name, id).findFirst()
 }
+
+fun MaterialCardView.setCornersRadius(topCornerRadius: Float, bottomCornerRadius: Float) {
+    shapeAppearanceModel = shapeAppearanceModel
+        .toBuilder()
+        .setTopLeftCorner(CornerFamily.ROUNDED, topCornerRadius)
+        .setTopRightCorner(CornerFamily.ROUNDED, topCornerRadius)
+        .setBottomLeftCorner(CornerFamily.ROUNDED, bottomCornerRadius)
+        .setBottomRightCorner(CornerFamily.ROUNDED, bottomCornerRadius)
+        .build()
+}

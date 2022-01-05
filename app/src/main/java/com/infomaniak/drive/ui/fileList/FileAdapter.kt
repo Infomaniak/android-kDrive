@@ -24,12 +24,13 @@ import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.shape.CornerFamily
+import com.google.android.material.card.MaterialCardView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.setCornersRadius
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.utils.setupFileProgress
 import com.infomaniak.lib.core.views.LoaderAdapter.Companion.VIEW_TYPE_LOADING
@@ -261,22 +262,10 @@ open class FileAdapter(
         if (getItemViewType(position) != VIEW_TYPE_LOADING) {
             val file = getFile(position)
 
-            holder.itemView.apply {
+            holder.itemView.fileCardView.apply {
                 val isGrid = viewHolderType == DisplayType.GRID
 
-                if (!isGrid) {
-                    val radius = resources.getDimension(R.dimen.cardViewRadius)
-                    val topCornerRadius = if (position == 0) radius else 0.0f
-                    val bottomCornerRadius = if (position == itemCount - 1) radius else 0.0f
-
-                    fileCardView.shapeAppearanceModel = fileCardView.shapeAppearanceModel
-                        .toBuilder()
-                        .setTopLeftCorner(CornerFamily.ROUNDED, topCornerRadius)
-                        .setTopRightCorner(CornerFamily.ROUNDED, topCornerRadius)
-                        .setBottomLeftCorner(CornerFamily.ROUNDED, bottomCornerRadius)
-                        .setBottomRightCorner(CornerFamily.ROUNDED, bottomCornerRadius)
-                        .build()
-                }
+                if (!isGrid) setCorners(position, itemCount)
 
                 setFileItem(file, isGrid)
 
@@ -412,5 +401,14 @@ open class FileAdapter(
         GRID(R.layout.cardview_file_grid),
         GRID_FOLDER(R.layout.cardview_folder_grid),
         LIST(R.layout.cardview_file_list)
+    }
+
+    companion object {
+        fun MaterialCardView.setCorners(position: Int, itemCount: Int) {
+            val radius = resources.getDimension(R.dimen.cardViewRadius)
+            val topCornerRadius = if (position == 0) radius else 0.0f
+            val bottomCornerRadius = if (position == itemCount - 1) radius else 0.0f
+            setCornersRadius(topCornerRadius, bottomCornerRadius)
+        }
     }
 }

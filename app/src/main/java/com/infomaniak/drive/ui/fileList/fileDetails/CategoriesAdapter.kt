@@ -25,9 +25,9 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
-import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment.UsageMode
+import com.infomaniak.drive.utils.setCornersRadius
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_category.view.*
 import java.util.*
@@ -55,23 +55,17 @@ class CategoriesAdapter(
         isEnabled = true
         categoryIcon.setBackgroundColor(Color.parseColor(category.color))
         categoryTitle.text = category.name
-        setCornersRadius(position)
+        setCorners(position)
         setMenuButton(category)
         handleSelectedState(category)
         setClickOnCategoryListener(category)
     }
 
-    private fun MaterialCardView.setCornersRadius(position: Int) {
+    private fun MaterialCardView.setCorners(position: Int) {
         val radius = resources.getDimension(R.dimen.cardViewRadius)
         val topCornerRadius = if (position == 0) radius else 0.0f
         val bottomCornerRadius = if (position == itemCount - 1 && !isCreateRowVisible) radius else 0.0f
-        shapeAppearanceModel = shapeAppearanceModel
-            .toBuilder()
-            .setTopLeftCorner(CornerFamily.ROUNDED, topCornerRadius)
-            .setTopRightCorner(CornerFamily.ROUNDED, topCornerRadius)
-            .setBottomLeftCorner(CornerFamily.ROUNDED, bottomCornerRadius)
-            .setBottomRightCorner(CornerFamily.ROUNDED, bottomCornerRadius)
-            .build()
+        setCornersRadius(topCornerRadius, bottomCornerRadius)
     }
 
     private fun MaterialCardView.setMenuButton(category: UICategory) {

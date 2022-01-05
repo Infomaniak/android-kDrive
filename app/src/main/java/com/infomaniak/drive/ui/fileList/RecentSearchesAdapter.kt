@@ -21,9 +21,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.card.MaterialCardView
-import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
+import com.infomaniak.drive.ui.fileList.FileAdapter.Companion.setCorners
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_search_result.view.*
 
@@ -40,22 +39,9 @@ class RecentSearchesAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView.searchResultCard) {
         val search = searches[position]
-        setCornersRadius(position)
+        setCorners(position, itemCount)
         searchResultText.text = search
         setOnClickListener { onSearchClicked(search) }
-    }
-
-    private fun MaterialCardView.setCornersRadius(position: Int) {
-        val radius = resources.getDimension(R.dimen.cardViewRadius)
-        val topCornerRadius = if (position == 0) radius else 0.0f
-        val bottomCornerRadius = if (position == itemCount - 1) radius else 0.0f
-        shapeAppearanceModel = shapeAppearanceModel
-            .toBuilder()
-            .setTopLeftCorner(CornerFamily.ROUNDED, topCornerRadius)
-            .setTopRightCorner(CornerFamily.ROUNDED, topCornerRadius)
-            .setBottomLeftCorner(CornerFamily.ROUNDED, bottomCornerRadius)
-            .setBottomRightCorner(CornerFamily.ROUNDED, bottomCornerRadius)
-            .build()
     }
 
     fun setItems(newSearches: List<String>) {

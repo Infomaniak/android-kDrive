@@ -33,7 +33,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.card.MaterialCardView
-import com.google.android.material.shape.CornerFamily
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -241,7 +240,7 @@ class SelectCategoriesFragment : Fragment() {
             HtmlCompat.FROM_HTML_MODE_COMPACT,
         )
 
-        createCategoryRow.setCornersRadius()
+        createCategoryRow.setCorners()
 
         val isVisible = categoryName?.isNotBlank() == true && !categoriesAdapter.doesCategoryExist(categoryName)
         categoriesAdapter.isCreateRowVisible = isVisible
@@ -249,16 +248,10 @@ class SelectCategoriesFragment : Fragment() {
         createCategoryRowSeparator.isVisible = isVisible && categoriesAdapter.filteredCategories.isNotEmpty()
     }
 
-    private fun MaterialCardView.setCornersRadius() {
+    private fun MaterialCardView.setCorners() {
         val radius = resources.getDimension(R.dimen.cardViewRadius)
         val topCornerRadius = if (categoriesAdapter.filteredCategories.isEmpty()) radius else 0.0f
-        shapeAppearanceModel = shapeAppearanceModel
-            .toBuilder()
-            .setTopLeftCorner(CornerFamily.ROUNDED, topCornerRadius)
-            .setTopRightCorner(CornerFamily.ROUNDED, topCornerRadius)
-            .setBottomLeftCorner(CornerFamily.ROUNDED, radius)
-            .setBottomRightCorner(CornerFamily.ROUNDED, radius)
-            .build()
+        setCornersRadius(topCornerRadius, radius)
     }
 
     private fun addCategory(id: Int) {
