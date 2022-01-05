@@ -9,6 +9,7 @@ import com.infomaniak.drive.utils.Env
 import com.infomaniak.drive.utils.Utils
 import io.realm.Realm
 import kotlinx.android.parcel.RawValue
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -53,6 +54,10 @@ class FileControllerTest : KDriveTest() {
 
     @Test
     fun getFavoriteFiles_CanGetRemoteSavedFilesFromRealm() {
+
+        // Create a test file and store it in favorite
+        val remoteFile = createAndStoreOfficeFile()
+        ApiRepository.postFavoriteFile(remoteFile)
         // Get remote favorite files
         val remoteResult = ApiRepository.getFavoriteFiles(Env.DRIVE_ID, File.SortType.NAME_AZ, 1)
         Assert.assertTrue("get favorite files request must pass successfully", remoteResult.isSuccess())
@@ -80,30 +85,32 @@ class FileControllerTest : KDriveTest() {
         // Compare remote files and local files
         Assert.assertTrue(parent?.id == FileController.FAVORITES_FILE_ID)
         Assert.assertTrue("local files and remote files cannot be different", files?.size == remoteFavoriteFiles.size)
+        // Delete Test file
+        deleteTestFile(remoteFile)
     }
 
     @Test
-    fun getMySharedFiles_CanGetRemoteSavedFilesFromRealm() {
+    fun getMySharedFiles_CanGetRemoteSavedFilesFromRealm() = runBlocking {
         // Get remote files
         val remoteFiles = arrayListOf<File>()
         var isCompletedRemoteFiles = false
-        FileController.getMySharedFiles(userDrive, File.SortType.NAME_AZ, realm = realm) { files, isComplete ->
+        FileController.getMySharedFiles(userDrive, File.SortType.NAME_AZ) { files, isComplete ->
             remoteFiles.addAll(files)
             isCompletedRemoteFiles = isComplete
         }
 
-        Assert.assertTrue("remote my shares data cannot be null", remoteFiles.isNotEmpty())
+        Assert.assertNotNull("remote my shares data cannot be null", remoteFiles)
         Assert.assertTrue("remote my shares data must be complete", isCompletedRemoteFiles)
 
         // Get local files
         val localFiles = arrayListOf<File>()
         var isCompletedLocaleFiles = false
-        FileController.getMySharedFiles(userDrive, File.SortType.NAME_AZ, 1, true, realm = realm) { files, isComplete ->
+        FileController.getMySharedFiles(userDrive, File.SortType.NAME_AZ, 1, true) { files, isComplete ->
             localFiles.addAll(files)
             isCompletedLocaleFiles = isComplete
         }
 
-        Assert.assertTrue("local my shares data cannot be null", localFiles.isNotEmpty())
+        Assert.assertNotNull("local my shares data cannot be null", localFiles)
         Assert.assertTrue("local my shares data must be complete", isCompletedLocaleFiles)
 
         // Compare remote files and local files
@@ -163,7 +170,7 @@ class FileControllerTest : KDriveTest() {
         Assert.assertNotNull("local root files cannot be null", localResult)
         Assert.assertFalse("local root files cannot be empty", localResult?.second.isNullOrEmpty())
         // Delete root files
-        FileController.removeFileCascade(Utils.ROOT_ID, realm = realm)
+        FileController.removeFile(Utils.ROOT_ID, customRealm = realm)
         // Check that all root files are deleted
         val realmResult = realm.where(File::class.java).findAll()
         Assert.assertTrue("Realm must not contain any files", realmResult.isNullOrEmpty())

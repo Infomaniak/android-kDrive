@@ -18,6 +18,7 @@
 package com.infomaniak.drive.data.cache
 
 import android.content.Context
+import android.util.Log
 import androidx.collection.ArrayMap
 import androidx.collection.arrayMapOf
 import com.infomaniak.drive.data.api.ApiRepository
@@ -246,8 +247,8 @@ object FileController {
         }
     }
 
-    fun saveFavoritesFiles(files: List<File>, replaceOldData: Boolean = false) {
-        saveFiles(FAVORITES_FILE, files, replaceOldData)
+    fun saveFavoritesFiles(files: List<File>, replaceOldData: Boolean = false, realm: Realm? = null) {
+        saveFiles(FAVORITES_FILE, files, replaceOldData, realm)
     }
 
     private fun saveMySharesFiles(files: ArrayList<File>, replaceOldData: Boolean) {
@@ -721,10 +722,11 @@ object FileController {
     private fun getLocalSortedFolderFiles(
         localFolder: File?,
         order: File.SortType,
-        localChildren: RealmResults<File>? = null
+        localChildren: RealmResults<File>? = null,
+        currRealm: Realm? = null
     ): ArrayList<File> {
         val files = getRealmLiveSortedFiles(localFolder, order, localChildren = localChildren)?.let { realmFiles ->
-            localFolder?.realm?.copyFromRealm(realmFiles, 1)
+            localFolder?.realm?.copyFromRealm(realmFiles, 1) ?: currRealm?.copyFromRealm(realmFiles, 1)
         }
         return files?.let { ArrayList(it) } ?: arrayListOf()
     }
@@ -852,7 +854,8 @@ object FileController {
     ): ArrayList<File> {
         val block: (Realm) -> ArrayList<File> = { currRealm ->
             currRealm.where(File::class.java).like(File::name.name, "*$query*").findAll()?.let { files ->
-                getLocalSortedFolderFiles(null, order, files)
+                Log.e("files size", files?.size.toString() + files[0]?.name)
+                getLocalSortedFolderFiles(null, order, files, currRealm)
             } ?: arrayListOf()
         }
         return customRealm?.let(block) ?: getRealmInstance(userDrive).use(block)
