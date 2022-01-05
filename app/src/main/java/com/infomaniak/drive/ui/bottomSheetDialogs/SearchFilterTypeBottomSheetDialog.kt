@@ -17,30 +17,25 @@
  */
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
-import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.navigation.fragment.navArgs
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.utils.setBackNavigationResult
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_search_filter_type.*
-import kotlinx.android.synthetic.main.view_search_filter_type.view.*
+import com.infomaniak.drive.views.SelectBottomSheetDialog
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_select.*
 
-open class SearchFilterTypeBottomSheetDialog : BottomSheetDialogFragment() {
+open class SearchFilterTypeBottomSheetDialog : SelectBottomSheetDialog() {
 
     private val navigationArgs: SearchFilterTypeBottomSheetDialogArgs by navArgs()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        inflater.inflate(R.layout.fragment_bottom_sheet_search_filter_type, container, false)
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        getSortedTypes().forEach { searchTypeContainer.addView(createTypeView(it)) }
+        selectRecyclerView.adapter = SearchFilterTypeBottomSheetAdapter(
+            getSortedTypes(),
+            navigationArgs.type,
+            onTypeClicked = { setBackNavigationResult(SEARCH_FILTER_TYPE_NAV_KEY, it) },
+        )
     }
 
     private fun getSortedTypes(): List<ConvertedType> {
@@ -56,16 +51,6 @@ open class SearchFilterTypeBottomSheetDialog : BottomSheetDialogFragment() {
             ConvertedType.TEXT,
             ConvertedType.VIDEO,
         ).sortedBy { getString(it.searchFilterName) }
-    }
-
-    @SuppressLint("InflateParams")
-    private fun createTypeView(type: ConvertedType): View {
-        return layoutInflater.inflate(R.layout.view_search_filter_type, null).apply {
-            typeStartIcon.setImageResource(type.icon)
-            typeText.setText(type.searchFilterName)
-            typeEndIcon.isVisible = type.value == navigationArgs.type?.value
-            setOnClickListener { setBackNavigationResult(SEARCH_FILTER_TYPE_NAV_KEY, type) }
-        }
     }
 
     companion object {
