@@ -62,12 +62,9 @@ class CategoriesAdapter(
     }
 
     private fun MaterialCardView.setCornersRadius(position: Int) {
-        val topCornerRadius = if (position == 0) resources.getDimension(R.dimen.cardViewRadius) else 0.0f
-        val bottomCornerRadius = if (position == itemCount - 1 && !isCreateRowVisible) {
-            resources.getDimension(R.dimen.cardViewRadius)
-        } else {
-            0.0f
-        }
+        val radius = resources.getDimension(R.dimen.cardViewRadius)
+        val topCornerRadius = if (position == 0) radius else 0.0f
+        val bottomCornerRadius = if (position == itemCount - 1 && !isCreateRowVisible) radius else 0.0f
         shapeAppearanceModel = shapeAppearanceModel
             .toBuilder()
             .setTopLeftCorner(CornerFamily.ROUNDED, topCornerRadius)

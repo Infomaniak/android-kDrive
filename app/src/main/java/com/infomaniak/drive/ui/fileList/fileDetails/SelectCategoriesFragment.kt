@@ -250,18 +250,14 @@ class SelectCategoriesFragment : Fragment() {
     }
 
     private fun MaterialCardView.setCornersRadius() {
-        val topCornerRadius = if (categoriesAdapter.filteredCategories.isEmpty()) {
-            resources.getDimension(R.dimen.cardViewRadius)
-        } else {
-            0.0f
-        }
-        val bottomCornerRadius = resources.getDimension(R.dimen.cardViewRadius)
+        val radius = resources.getDimension(R.dimen.cardViewRadius)
+        val topCornerRadius = if (categoriesAdapter.filteredCategories.isEmpty()) radius else 0.0f
         shapeAppearanceModel = shapeAppearanceModel
             .toBuilder()
             .setTopLeftCorner(CornerFamily.ROUNDED, topCornerRadius)
             .setTopRightCorner(CornerFamily.ROUNDED, topCornerRadius)
-            .setBottomLeftCorner(CornerFamily.ROUNDED, bottomCornerRadius)
-            .setBottomRightCorner(CornerFamily.ROUNDED, bottomCornerRadius)
+            .setBottomLeftCorner(CornerFamily.ROUNDED, radius)
+            .setBottomRightCorner(CornerFamily.ROUNDED, radius)
             .build()
     }
 
