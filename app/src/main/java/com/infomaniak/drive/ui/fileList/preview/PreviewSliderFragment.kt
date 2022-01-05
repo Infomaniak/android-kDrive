@@ -43,7 +43,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
-import com.infomaniak.drive.ui.fileList.categories.SelectCategoriesFragment
+import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntent
@@ -145,7 +145,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             context?.openWith(currentPreviewFile, userDrive)
         }
 
-        getBackNavigationResult<Bundle>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
+        getBackNavigationResult<Any>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
             bottomSheetFileInfos.refreshBottomSheetUi(currentPreviewFile)
         }
     }

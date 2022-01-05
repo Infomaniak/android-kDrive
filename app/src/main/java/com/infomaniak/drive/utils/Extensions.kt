@@ -27,6 +27,7 @@ import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -83,10 +84,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.models.DriveUser
-import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.FileCategory
-import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.OnlyOfficeActivity
@@ -197,17 +195,12 @@ fun Number.isPositive(): Boolean {
     return toLong() > 0
 }
 
+fun Resources.isNightModeEnabled() = configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+
 fun Activity.setColorStatusBar(appBar: Boolean = false) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         window.statusBarColor = ContextCompat.getColor(this, if (appBar) R.color.appBar else R.color.background)
-        when (resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)) {
-            Configuration.UI_MODE_NIGHT_YES -> {
-                window.lightStatusBar(false)
-            }
-            else -> {
-                window.lightStatusBar(true)
-            }
-        }
+        window.lightStatusBar(!resources.isNightModeEnabled())
     } else {
         window.statusBarColor = Color.BLACK
     }
@@ -305,8 +298,8 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
         }
         else -> {
             when {
-                file.hasThumbnail && (isGrid || file.getFileType() == File.ConvertedType.IMAGE
-                        || file.getFileType() == File.ConvertedType.VIDEO) -> {
+                file.hasThumbnail && (isGrid || file.getFileType() == ConvertedType.IMAGE
+                        || file.getFileType() == ConvertedType.VIDEO) -> {
                     filePreview.loadGlideUrl(file.thumbnail(), file.getFileType().icon)
                 }
                 file.isFromUploads && (file.getMimeType().startsWith("image/") || file.getMimeType().startsWith("video/")) -> {
@@ -392,7 +385,7 @@ fun Date.endOfTheDay(): Date =
         time = this@endOfTheDay
         set(Calendar.HOUR_OF_DAY, 23)
         set(Calendar.MINUTE, 59)
-        set(Calendar.SECOND, 0)
+        set(Calendar.SECOND, 59)
     }.time
 
 fun Date.year(): Int =

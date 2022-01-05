@@ -22,6 +22,7 @@ import androidx.lifecycle.*
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.File.*
 import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
@@ -38,7 +39,7 @@ class FileListViewModel : ViewModel() {
     private var getFilesJob: Job = Job()
     private var getFolderActivitiesJob: Job = Job()
 
-    lateinit var sortType: File.SortType
+    lateinit var sortType: SortType
 
     val searchFileByName = MutableLiveData<String>()
     val searchResults = Transformations.switchMap(searchFileByName) { input ->
@@ -63,7 +64,7 @@ class FileListViewModel : ViewModel() {
         parentId: Int,
         page: Int = 1,
         ignoreCache: Boolean,
-        order: File.SortType,
+        order: SortType,
         ignoreCloud: Boolean = false,
         userDrive: UserDrive? = null
     ): LiveData<FolderFilesResult?> {
@@ -100,7 +101,7 @@ class FileListViewModel : ViewModel() {
         }
     }
 
-    fun getFavoriteFiles(order: File.SortType): LiveData<FolderFilesResult?> {
+    fun getFavoriteFiles(order: SortType): LiveData<FolderFilesResult?> {
         getFilesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
@@ -132,10 +133,9 @@ class FileListViewModel : ViewModel() {
         }
     }
 
-    private fun searchFiles(query: String, order: File.SortType, page: Int): LiveData<ApiResponse<ArrayList<File>>> {
+    private fun searchFiles(query: String, order: SortType, page: Int): LiveData<ApiResponse<ArrayList<File>>> {
         getFilesJob.cancel()
         getFilesJob = Job()
-
         return liveData(Dispatchers.IO + getFilesJob) {
             val type = currentConvertedType
             val apiResponse =
@@ -161,7 +161,7 @@ class FileListViewModel : ViewModel() {
         }
     }
 
-    fun getMySharedFiles(sortType: File.SortType): LiveData<Pair<ArrayList<File>, Boolean>?> {
+    fun getMySharedFiles(sortType: SortType): LiveData<Pair<ArrayList<File>, Boolean>?> {
         getFilesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
@@ -178,7 +178,7 @@ class FileListViewModel : ViewModel() {
     }
 
     @Synchronized
-    fun getFolderActivities(folder: File, userDrive: UserDrive? = null): LiveData<Map<out Int, File.LocalFileActivity>> {
+    fun getFolderActivities(folder: File, userDrive: UserDrive? = null): LiveData<Map<out Int, LocalFileActivity>> {
         getFolderActivitiesJob.cancel()
         getFolderActivitiesJob = Job()
         return liveData(Dispatchers.IO + getFolderActivitiesJob) {
@@ -194,7 +194,7 @@ class FileListViewModel : ViewModel() {
     val currentAdapterPendingFiles = MutableLiveData<ArrayList<File>>()
     val indexUploadToDelete = Transformations.switchMap(currentAdapterPendingFiles) { files ->
         val adapterPendingFileIds = files.map { it.id }
-        val isFileType = files.firstOrNull()?.type == File.Type.FILE.value
+        val isFileType = files.firstOrNull()?.type == Type.FILE.value
         pendingFilesToDelete(adapterPendingFileIds, isFileType)
     }
 

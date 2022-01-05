@@ -21,7 +21,6 @@ import android.content.Context
 import android.net.Uri
 import android.os.Parcelable
 import android.webkit.MimeTypeMap
-import androidx.annotation.DrawableRes
 import androidx.core.content.FileProvider
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -374,22 +373,6 @@ open class File(
         POINTS(ConvertedType.PRESENTATION, "pptx"),
         GRIDS(ConvertedType.SPREADSHEET, "xlsx"),
         TXT(ConvertedType.TEXT, "txt")
-    }
-
-    enum class ConvertedType(val value: String, @DrawableRes val icon: Int) {
-        ARCHIVE("archive", R.drawable.ic_file_zip),
-        AUDIO("audio", R.drawable.ic_file_audio),
-        CODE("code", R.drawable.ic_file_code),
-        FOLDER("dir", R.drawable.ic_folder_filled),
-        FONT("font", R.drawable.ic_file),
-        IMAGE("image", R.drawable.ic_file_image),
-        PDF("pdf", R.drawable.ic_file_pdf),
-        PRESENTATION("presentation", R.drawable.ic_file_presentation),
-        SPREADSHEET("spreadsheet", R.drawable.ic_file_sheets),
-        TEXT("text", R.drawable.ic_file_text),
-        UNKNOWN("unknown", R.drawable.ic_file),
-        URL("url", R.drawable.url),
-        VIDEO("video", R.drawable.ic_file_video),
     }
 
     enum class SortType(val order: String, val orderBy: String, val translation: Int) {

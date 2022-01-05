@@ -22,6 +22,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.File
 
 class PreviewSliderAdapter(manager: FragmentManager, lifecycle: Lifecycle) : FragmentStateAdapter(manager, lifecycle) {
@@ -35,10 +36,10 @@ class PreviewSliderAdapter(manager: FragmentManager, lifecycle: Lifecycle) : Fra
         val file = getFile(position)
         val args = bundleOf(PreviewFragment.FILE_ID_TAG to file.id)
         return when (file.getFileType()) {
-            File.ConvertedType.IMAGE -> PreviewPictureFragment().apply { arguments = args }
-            File.ConvertedType.VIDEO -> PreviewVideoFragment().apply { arguments = args }
-            File.ConvertedType.AUDIO -> PreviewMusicFragment().apply { arguments = args }
-            File.ConvertedType.PDF -> PreviewPDFFragment().apply { arguments = args }
+            ConvertedType.IMAGE -> PreviewPictureFragment().apply { arguments = args }
+            ConvertedType.VIDEO -> PreviewVideoFragment().apply { arguments = args }
+            ConvertedType.AUDIO -> PreviewMusicFragment().apply { arguments = args }
+            ConvertedType.PDF -> PreviewPDFFragment().apply { arguments = args }
             else -> {
                 if (file.isOnlyOfficePreview()) PreviewPDFFragment().apply { arguments = args }
                 else PreviewOtherFragment().apply { arguments = args }

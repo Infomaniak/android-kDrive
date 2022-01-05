@@ -48,29 +48,9 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(navigationArgs) {
         super.onViewCreated(view, savedInstanceState)
-        setData()
-        setStates()
-        setListeners()
-    }
-
-    private fun setData() = with(navigationArgs) {
         categoryIcon.setBackgroundColor(Color.parseColor(categoryColor))
         categoryTitle.text = categoryName
-    }
-
-    private fun setStates() = with(navigationArgs) {
-        val rights = DriveInfosController.getCategoryRights()
-        (rights?.canEditCategory ?: false).let {
-            disabledEditCategory.isGone = it
-            editCategory.isEnabled = it
-        }
-        (rights?.canDeleteCategory ?: false && !categoryIsPredefined).let {
-            deleteCategory.isEnabled = it
-            disabledDeleteCategory.isGone = it
-        }
-    }
-
-    private fun setListeners() = with(navigationArgs) {
+        handleRights()
         editCategory.setOnClickListener {
             safeNavigate(
                 CategoryInfoActionsBottomSheetDialogDirections.actionCategoryInfoActionsBottomSheetDialogToCreateOrEditCategoryFragment(
@@ -82,7 +62,6 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
                 )
             )
         }
-
         deleteCategory.setOnClickListener {
             Utils.createConfirmation(
                 context = requireContext(),
@@ -94,6 +73,18 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
             ) { dialog ->
                 deleteCategory(categoryId) { dialog.dismiss() }
             }
+        }
+    }
+
+    private fun handleRights() {
+        val rights = DriveInfosController.getCategoryRights()
+        (rights?.canEditCategory ?: false).let {
+            disabledEditCategory.isGone = it
+            editCategory.isEnabled = it
+        }
+        (rights?.canDeleteCategory ?: false && !navigationArgs.categoryIsPredefined).let {
+            disabledDeleteCategory.isGone = it
+            deleteCategory.isEnabled = it
         }
     }
 

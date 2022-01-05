@@ -740,7 +740,7 @@
 
     <fragment
         android:id="@+id/selectCategoriesFragment"
-        android:name="com.infomaniak.drive.ui.fileList.categories.SelectCategoriesFragment"
+        android:name="com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment"
         android:label="SelectCategoriesFragment"
         tools:layout="@layout/fragment_select_categories">
         <argument
@@ -778,7 +778,7 @@
 
     <fragment
         android:id="@+id/createOrEditCategoryFragment"
-        android:name="com.infomaniak.drive.ui.fileList.categories.CreateOrEditCategoryFragment"
+        android:name="com.infomaniak.drive.ui.fileList.fileDetails.CreateOrEditCategoryFragment"
         android:label="CreateOrEditCategoryFragment"
         tools:layout="@layout/fragment_create_or_edit_category">
         <argument
@@ -842,8 +842,8 @@
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
         <argument
             android:name="isOpenBookmark"
-            app:argType="boolean"
-            android:defaultValue="false" />
+            android:defaultValue="false"
+            app:argType="boolean" />
     </dialog>
 
     <fragment

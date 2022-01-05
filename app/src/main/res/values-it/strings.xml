@@ -38,6 +38,7 @@
     <string name="allAudio">Audio</string>
     <string name="allCancellationInProgress">Cancellazione in corso…</string>
     <string name="allCode">Codice</string>
+    <string name="allDateCustom">Personalizzato</string>
     <string name="allDeletedFilePattern">\'Cancellato il \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Disattivato</string>
     <string name="allDuplicateFileName">%1$s - Copia%2$s</string>
@@ -90,6 +91,7 @@
     <string name="buttonAvailableOffline">Disponibile offline</string>
     <string name="buttonBack">Indietro</string>
     <string name="buttonCancel">Annulla</string>
+    <string name="buttonChangeFolderColor">Cambia il colore della cartella</string>
     <string name="buttonClear">Cancella</string>
     <string name="buttonClearFilters">Elimina i filtri</string>
     <string name="buttonClose">Chiudi</string>
@@ -159,7 +161,7 @@
     <string name="buttonValid">Convalida</string>
     <string name="categoriesFilterTitle">Categorie</string>
     <string name="categoriesPanelDescription">kDrive ora ti permette di classificare i tuoi documenti con categorie personalizzate. La ricerca permette poi di trovare i file secondo le categorie di vostra scelta.</string>
-    <string name="categoriesPanelTitle">Novità: semplificare l‘archiviazione con le categorie!</string>
+    <string name="categoriesPanelTitle">Novità: semplificare l’archiviazione con le categorie!</string>
     <string name="categoryBanking">Banca</string>
     <string name="categoryBill">Fattura</string>
     <string name="categoryColorTitle">Colore della categoria</string>
@@ -207,7 +209,7 @@
     <string name="createFolderTitle">Crea una cartella</string>
     <string name="createFolderValidUntilDescription">Dopo tale data, gli utenti non potranno più trasferire i file.</string>
     <string name="createPrivateFolderSucces">Cartella creata con successo</string>
-    <string name="deletePicturesDescription">L‘applicazione ti chiederà regolarmente di cancellare le foto dal tuo dispositivo che sono già sincronizzate sul tuo kDrive. Dovrai autorizzare manualmente la cancellazione</string>
+    <string name="deletePicturesDescription">L’applicazione ti chiederà regolarmente di cancellare le foto dal tuo dispositivo che sono già sincronizzate sul tuo kDrive. Dovrai autorizzare manualmente la cancellazione</string>
     <string name="deletePicturesTitle">Cancellare le foto (Beta)</string>
     <plurals name="driveBlockedDescription">
         <item quantity="one">Il prodotto è scaduto dal %s. Rinnovalo per gestirlo e accedere ai suoi dati.</item>
@@ -401,6 +403,8 @@
     <string name="fileShareLinkSettingsTitle">Impostazioni avanzate del link di condivisione</string>
     <string name="fileTypeFilterTitle">Tipo di file</string>
     <string name="filtersTitle">Filtri</string>
+    <string name="folderColorDescription">Cambia il colore delle tue cartelle per personalizzare e organizzare meglio il tuo kDrive a tuo piacimento.</string>
+    <string name="folderColorTitle">Colore delle cartelle</string>
     <string name="folderDescription">Cartella personale o condivisa</string>
     <string name="hintInputDirName">Nome della cartella</string>
     <string name="hintInputFileName">Nome del file</string>
@@ -525,7 +529,7 @@
     <string name="selectFolderTitle">Selezionare una cartella</string>
     <string name="selectMediaFoldersDescription">Seleziona le cartelle sul tuo dispositivo che devono essere automaticamente salvate sul tuo kDrive.</string>
     <string name="selectMediaFoldersTitle">File da salvare</string>
-    <string name="settingsOnlyWifiSyncDescription">Il backup automatico delle foto/video e l’aggiornamento dei file offline saranno effettuati solo con una connessione Wifi.</string>
+    <string name="settingsOnlyWifiSyncDescription">I caricamenti e gli aggiornamenti dei file offline saranno effettuati solo con una connessione Wi-Fi.</string>
     <string name="settingsOnlyWifiSyncTitle">Trasferimento solo tramite Wi-Fi</string>
     <string name="settingsTitle">Impostazioni</string>
     <string name="shareFileInputUserAndEmail">Invita un utente o un indirizzo e-mail…</string>
@@ -571,6 +575,10 @@
     <string name="sharedWithMeNoFile">Nessun file condiviso con me</string>
     <string name="sharedWithMeTitle">Condivisi con me</string>
     <string name="snackBarCategoryDeleted">Categoria eliminata con successo</string>
+    <plurals name="snackBarUploadError">
+        <item quantity="one">Non è stato possibile importare un file</item>
+        <item quantity="other">%d file non possono essere importati</item>
+    </plurals>
     <plurals name="snackbarDeleteConfirmation">
         <item quantity="one">%s eliminato definitivamente</item>
         <item quantity="other">%d elementi eliminati definitivamente</item>
@@ -607,6 +615,8 @@
     <string name="syncSettingsButtonSyncVideo">Importa i video</string>
     <string name="syncSettingsDescription">Effettua il backup automatico delle foto e dei video effettuati con il tuo dispositivo nel tuo kDrive.</string>
     <string name="syncSettingsSaveDateAllPictureValue">Tutte le foto</string>
+    <string name="syncSettingsSaveDateFromDateValue">dalla data</string>
+    <string name="syncSettingsSaveDateFromDateValue2">Da una data</string>
     <string name="syncSettingsSaveDateNowValue">a partire da adesso</string>
     <string name="syncSettingsSaveDateNowValue2">Soltanto le nuove foto (a partire da adesso)</string>
     <string name="syncSettingsSaveOn">Salva su</string>

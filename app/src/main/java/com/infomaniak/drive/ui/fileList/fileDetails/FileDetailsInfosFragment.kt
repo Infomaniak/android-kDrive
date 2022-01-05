@@ -38,7 +38,6 @@ import com.infomaniak.drive.data.models.Share
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
-import com.infomaniak.drive.ui.fileList.categories.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.ShareLinkContainerView
 import com.infomaniak.drive.views.UserAvatarView
@@ -187,7 +186,7 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
             categoriesDivider.isVisible = true
             categoriesContainer.apply {
                 isVisible = true
-                setup(categories, rights.canPutCategoryOnFile, onClicked = {
+                setup(categories, rights.canPutCategoryOnFile, layoutInflater, onClicked = {
                     runCatching {
                         findNavController().navigate(
                             FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectCategoriesFragment(fileId)

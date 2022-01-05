@@ -59,7 +59,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
         // cannot be null, if null, settings will not appear
         shareLinkSettings.setOnClickListener { onSettingsClicked(this.shareLink!!, currentFile) }
 
-        shareLinkButton.setOnClickListener { this.shareLink?.url?.let { context.shareText(it) } }
+        shareLinkButton.setOnClickListener { this.shareLink?.url?.let(context::shareText) }
     }
 
     fun update(shareLink: ShareLink? = null) {

@@ -60,7 +60,6 @@ import okhttp3.OkHttpClient
 import org.eclipse.paho.client.mqttv3.*
 import java.util.*
 
-
 class ApplicationMain : Application(), ImageLoaderFactory {
 
     override fun onCreate() {

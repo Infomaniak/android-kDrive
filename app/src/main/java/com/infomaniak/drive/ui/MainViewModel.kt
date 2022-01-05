@@ -101,7 +101,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         emit(apiResponse)
     }
 
-
     fun getDropBox(file: File) = liveData(Dispatchers.IO) {
         emit(ApiRepository.getDropBox(file))
     }
