@@ -177,14 +177,6 @@ class FileControllerTest : KDriveTest() {
         Assert.assertTrue("Realm must not contain any files", realmResult.isNullOrEmpty())
     }
 
-    @Test
-    fun findGeneratedFilesById() {
-        val remoteFile = createAndStoreOfficeFile()
-        val findedFile = getFileById(remoteFile.id, userDrive)
-        Assert.assertEquals("Files should be identical", remoteFile, findedFile)
-        deleteTestFile(remoteFile)
-    }
-
     private fun getAndSaveRemoteRootFiles(): Pair<File, ArrayList<File>>? {
         // Get and save remote root files in realm db test
         val remoteResult =
