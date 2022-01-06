@@ -210,6 +210,10 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         emit(FileController.renameFile(file, newName))
     }
 
+    fun updateFolderColor(file: File,color: String) = liveData(Dispatchers.IO) {
+        emit(FileController.updateFolderColor(file, color))
+    }
+
     fun deleteFile(file: File, userDrive: UserDrive? = null, onSuccess: ((fileID: Int) -> Unit)? = null) =
         liveData(Dispatchers.IO) {
             emit(FileController.deleteFile(file, userDrive = userDrive, context = getContext(), onSuccess = onSuccess))

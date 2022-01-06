@@ -170,6 +170,10 @@ object ApiRepository {
         return callApi(ApiRoutes.renameFile(file), POST, mapOf("name" to newName))
     }
 
+    fun updateFolderColor(file: File, color: String): ApiResponse<Boolean?> {
+        return callApi(ApiRoutes.updateFolderColor(file), POST, mapOf("color" to color))
+    }
+
     fun duplicateFile(file: File, copyName: String?, folderId: Int): ApiResponse<File> {
         val body = if (copyName == null) mapOf() else mapOf("name" to copyName)
         return callApi(ApiRoutes.duplicateFile(file, folderId), POST, body)

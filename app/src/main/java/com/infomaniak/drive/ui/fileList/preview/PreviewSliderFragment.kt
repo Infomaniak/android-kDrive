@@ -156,6 +156,21 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         getBackNavigationResult<Any>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
             bottomSheetFileInfos.refreshBottomSheetUi(currentPreviewFile)
         }
+
+        getBackNavigationResult<String>(ColorFolderBottomSheetDialog.COLOR_FOLDER_NAV_KEY) {
+            updateFolderColor(it)
+        }
+    }
+
+    private fun updateFolderColor(color: String) {
+        if (isResumed) {
+            mainViewModel.updateFolderColor(currentPreviewFile, color).observe(viewLifecycleOwner) { apiResponse ->
+                findNavController().popBackStack()
+                if (!apiResponse.isSuccess()) {
+                    requireActivity().showSnackbar(apiResponse.translatedError)
+                }
+            }
+        }
     }
 
     private var showUi = false
