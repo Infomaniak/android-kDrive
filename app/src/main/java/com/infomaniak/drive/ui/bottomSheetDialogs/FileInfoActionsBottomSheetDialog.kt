@@ -90,6 +90,21 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         getBackNavigationResult<Any>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
             lifecycleScope.launchWhenResumed { fileInfoActionsView.refreshBottomSheetUi(currentFile) }
         }
+
+        getBackNavigationResult<String>(ColorFolderBottomSheetDialog.COLOR_FOLDER_NAV_KEY) {
+            updateFolderColor(it)
+        }
+    }
+
+    private fun updateFolderColor(color: String) {
+        if (isResumed) {
+            mainViewModel.updateFolderColor(currentFile, color).observe(viewLifecycleOwner) { apiResponse ->
+                findNavController().popBackStack()
+                if (!apiResponse.isSuccess()) {
+                    requireActivity().showSnackbar(apiResponse.translatedError)
+                }
+            }
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
