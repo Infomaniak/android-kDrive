@@ -81,6 +81,11 @@ class CreateOrEditCategoryFragment : Fragment() {
         setSaveButton(isCreateCategory)
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (findNavController().currentDestination?.id != R.id.createOrEditCategoryFragment) return
+    }
+
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         configCategoriesLayoutManager()
