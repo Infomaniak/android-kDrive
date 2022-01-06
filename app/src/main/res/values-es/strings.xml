@@ -369,6 +369,10 @@
         <item quantity="one">Un archivo disponible sin conexión</item>
         <item quantity="other">%d archivos disponibles sin conexión</item>
     </plurals>
+    <plurals name="fileListColorFolderConfirmationSnackbar">
+        <item quantity="one">Una carpeta coloreada con éxito</item>
+        <item quantity="other">%d carpetas coloreadas con éxito</item>
+    </plurals>
     <string name="fileListCopyDoneSnackbar">Copias finalizadas correctamente</string>
     <string name="fileListCopyInProgressSnackbar">Copias en curso: %1$d/%2$d</string>
     <string name="fileListCopyStartedSnackbar">Comienzan las copias</string>

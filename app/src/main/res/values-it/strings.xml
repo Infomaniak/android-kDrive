@@ -369,6 +369,10 @@
         <item quantity="one">Un file è disponibile offline</item>
         <item quantity="other">%d file sono disponibili offline</item>
     </plurals>
+    <plurals name="fileListColorFolderConfirmationSnackbar">
+        <item quantity="one">Una cartella colorata con successo</item>
+        <item quantity="other">%d cartelle colorate con successo</item>
+    </plurals>
     <string name="fileListCopyDoneSnackbar">Copie concluse con successo</string>
     <string name="fileListCopyInProgressSnackbar">Copie in corso: %1$d/%2$d</string>
     <string name="fileListCopyStartedSnackbar">Inizio delle copie</string>

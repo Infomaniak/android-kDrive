@@ -369,6 +369,10 @@
         <item quantity="one">Datei offline verfügbar</item>
         <item quantity="other">%d Dateien offline verfügbar</item>
     </plurals>
+    <plurals name="fileListColorFolderConfirmationSnackbar">
+        <item quantity="one">Ordner erfolgreich eingefärbt</item>
+        <item quantity="other">%d Ordner erfolgreich eingefärbt</item>
+    </plurals>
     <string name="fileListCopyDoneSnackbar">Kopian erfolgreich abgeschlossen</string>
     <string name="fileListCopyInProgressSnackbar">Kopian werden ausgeführt: %1$d/%2$d</string>
     <string name="fileListCopyStartedSnackbar">Beginn der Kopien</string>
