@@ -103,7 +103,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         viewPager.adapter = previewSliderAdapter
         viewPager.offscreenPageLimit = 1
 
-        bottomSheetFileInfos.init(this, this, userDrive.sharedWithMe)
+        bottomSheetFileInfos.init(this, mainViewModel, this, userDrive.sharedWithMe)
         bottomSheetFileInfos.updateCurrentFile(currentPreviewFile)
         bottomSheetFileInfos.setOnTouchListener { _, _ -> true }
 

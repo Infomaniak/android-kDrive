@@ -31,7 +31,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModelProvider
 import androidx.work.*
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -77,11 +76,16 @@ class FileInfoActionsView @JvmOverloads constructor(
         inflate(context, R.layout.view_file_info_actions, this)
     }
 
-    fun init(ownerFragment: Fragment, onItemClickListener: OnItemClickListener, isSharedWithMe: Boolean = false) {
-        this.ownerFragment = ownerFragment
-        this.onItemClickListener = onItemClickListener
+    fun init(
+        ownerFragment: Fragment,
+        mainViewModel: MainViewModel,
+        onItemClickListener: OnItemClickListener,
+        isSharedWithMe: Boolean = false
+    ) {
         this.isSharedWithMe = isSharedWithMe
-        mainViewModel = ViewModelProvider(ownerFragment.requireActivity())[MainViewModel::class.java]
+        this.mainViewModel = mainViewModel
+        this.onItemClickListener = onItemClickListener
+        this.ownerFragment = ownerFragment
         initOnClickListeners()
     }
 

@@ -75,7 +75,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         drivePermissions = DrivePermissions()
         drivePermissions.registerPermissions(this) { authorized -> if (authorized) downloadFileClicked() }
 
-        fileInfoActionsView.init(this, this, navigationArgs.userDrive.sharedWithMe)
+        fileInfoActionsView.init(this, mainViewModel, this, navigationArgs.userDrive.sharedWithMe)
         fileInfoActionsView.updateCurrentFile(currentFile)
 
         setupBackActionHandler()
