@@ -42,6 +42,6 @@ class DropBoxBottomSheetDialog : InformationBottomSheetDialog() {
         }
 
         packAvailability.isVisible = true
-        packAvailability.text = getString(R.string.allPackAvailability, "Team & Pro")
+        packAvailability.text = getString(R.string.allPackAvailability, getString(R.string.packs_team_pro))
     }
 }
