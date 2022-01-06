@@ -41,6 +41,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
@@ -356,7 +357,11 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun colorFolderClicked(color: String) {
-        safeNavigate(PreviewSliderFragmentDirections.actionPreviewSliderFragmentToColorFolderBottomSheetDialog(color))
+        if (AccountUtils.getCurrentDrive()?.pack == Drive.DrivePack.FREE.value) {
+            safeNavigate(R.id.colorFolderUpgradeBottomSheetDialog)
+        } else {
+            safeNavigate(PreviewSliderFragmentDirections.actionPreviewSliderFragmentToColorFolderBottomSheetDialog(color))
+        }
     }
 
     override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) {
