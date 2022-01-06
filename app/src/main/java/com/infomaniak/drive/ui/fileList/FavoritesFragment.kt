@@ -50,7 +50,7 @@ class FavoritesFragment : FileListFragment() {
                     fileListViewModel.cancelDownloadFiles()
                     safeNavigate(FavoritesFragmentDirections.actionFavoritesFragmentSelf(file.id, file.name))
                 } else {
-                    val fileList = fileAdapter.getFileObjectsList(mainViewModel.realm)
+                    val fileList = getFileObjectsList(mainViewModel.realm)
                     Utils.displayFile(mainViewModel, findNavController(), file, fileList)
                 }
             }
@@ -80,7 +80,7 @@ class FavoritesFragment : FileListFragment() {
                             order = fileListViewModel.sortType,
                             parentId = FileController.FAVORITES_FILE_ID,
                             realm = mainViewModel.realm,
-                            withVisibilitySort = false,
+                            withVisibilitySort = false
                         )
                         fileAdapter.updateFileList(realmFiles)
                         changeNoFilesLayoutVisibility(realmFiles.isEmpty(), false)

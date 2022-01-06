@@ -81,8 +81,9 @@ open class FileAdapter(
             }
 
             override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
-                if (fileList.isEmpty()) onEmptyList?.invoke()
-                else if (viewHolderType == DisplayType.LIST && fileList.isNotEmpty()) {
+                if (fileList.isEmpty()) {
+                    onEmptyList?.invoke()
+                } else if (viewHolderType == DisplayType.LIST && fileList.isNotEmpty()) {
                     when {
                         positionStart == 0 -> notifyChanged(0)
                         positionStart >= fileList.count() -> notifyChanged(fileList.lastIndex)
