@@ -48,6 +48,7 @@ open class FileAdapter(
 
     var itemsSelected: OrderedRealmCollection<File> = RealmList()
 
+    var onEmptyList: (() -> Unit)? = null
     var onFileClicked: ((file: File) -> Unit)? = null
     var onMenuClicked: ((selectedFile: File) -> Unit)? = null
     var onStopUploadButtonClicked: ((index: Int, fileName: String) -> Unit)? = null
@@ -80,6 +81,7 @@ open class FileAdapter(
             }
 
             override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+                if (fileList.isEmpty()) onEmptyList?.invoke()
                 if (viewHolderType == DisplayType.LIST && fileList.isNotEmpty()) {
                     when {
                         positionStart == 0 -> notifyChanged(0)

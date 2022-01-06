@@ -94,15 +94,19 @@ class SearchFragment : FileListFragment() {
             }
         })
 
-        fileAdapter.onFileClicked = { file ->
-            if (file.isFolder()) {
-                fileListViewModel.cancelDownloadFiles()
-                safeNavigate(
-                    SearchFragmentDirections.actionSearchFragmentToFileListFragment(file.id, file.name)
-                )
-            } else {
-                val fileList = fileAdapter.getFileObjectsList(null)
-                Utils.displayFile(mainViewModel, findNavController(), file, fileList)
+        fileAdapter.apply {
+            onEmptyList = { changeNoFilesLayoutVisibility(hideFileList = true, changeControlsVisibility = false) }
+
+            onFileClicked = { file ->
+                if (file.isFolder()) {
+                    fileListViewModel.cancelDownloadFiles()
+                    safeNavigate(
+                        SearchFragmentDirections.actionSearchFragmentToFileListFragment(file.id, file.name)
+                    )
+                } else {
+                    val fileList = fileAdapter.getFileObjectsList(null)
+                    Utils.displayFile(mainViewModel, findNavController(), file, fileList)
+                }
             }
         }
 

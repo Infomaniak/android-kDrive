@@ -41,15 +41,21 @@ class FavoritesFragment : FileListFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         collapsingToolbarLayout.title = getString(R.string.favoritesTitle)
-        fileAdapter.onFileClicked = { file ->
-            if (file.isFolder()) {
-                fileListViewModel.cancelDownloadFiles()
-                safeNavigate(FavoritesFragmentDirections.actionFavoritesFragmentSelf(file.id, file.name))
-            } else {
-                val fileList = fileAdapter.getFileObjectsList(mainViewModel.realm)
-                Utils.displayFile(mainViewModel, findNavController(), file, fileList)
+
+        fileAdapter.apply {
+            onEmptyList = { changeNoFilesLayoutVisibility(hideFileList = true, changeControlsVisibility = false) }
+
+            onFileClicked = { file ->
+                if (file.isFolder()) {
+                    fileListViewModel.cancelDownloadFiles()
+                    safeNavigate(FavoritesFragmentDirections.actionFavoritesFragmentSelf(file.id, file.name))
+                } else {
+                    val fileList = fileAdapter.getFileObjectsList(mainViewModel.realm)
+                    Utils.displayFile(mainViewModel, findNavController(), file, fileList)
+                }
             }
         }
+
     }
 
     private inner class SetNoFilesLayout : () -> Unit {
