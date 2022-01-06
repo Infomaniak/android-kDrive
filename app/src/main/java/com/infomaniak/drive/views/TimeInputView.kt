@@ -21,7 +21,6 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.DialogInterface.OnCancelListener
 import android.content.DialogInterface.OnDismissListener
-import android.content.res.Configuration
 import android.text.SpannableStringBuilder
 import android.text.format.DateFormat.is24HourFormat
 import android.util.AttributeSet
