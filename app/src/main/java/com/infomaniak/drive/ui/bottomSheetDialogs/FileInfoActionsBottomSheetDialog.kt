@@ -98,6 +98,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun onResume() {
         super.onResume()
+        if (findNavController().currentDestination?.id != R.id.fileInfoActionsBottomSheetDialog) return
         fileInfoActionsView.updateAvailableOfflineItem()
         fileInfoActionsView.observeOfflineProgression(this) {}
     }
