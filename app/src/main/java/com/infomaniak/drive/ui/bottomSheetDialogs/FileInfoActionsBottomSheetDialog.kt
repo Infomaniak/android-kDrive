@@ -101,9 +101,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         if (isResumed) {
             mainViewModel.updateFolderColor(currentFile, color).observe(viewLifecycleOwner) { apiResponse ->
                 findNavController().popBackStack()
-                if (!apiResponse.isSuccess()) {
-                    requireActivity().showSnackbar(apiResponse.translatedError)
-                }
+                if (!apiResponse.isSuccess()) requireActivity().showSnackbar(apiResponse.translatedError)
             }
         }
     }

@@ -167,9 +167,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         if (isResumed) {
             mainViewModel.updateFolderColor(currentPreviewFile, color).observe(viewLifecycleOwner) { apiResponse ->
                 findNavController().popBackStack()
-                if (!apiResponse.isSuccess()) {
-                    requireActivity().showSnackbar(apiResponse.translatedError)
-                }
+                if (!apiResponse.isSuccess()) requireActivity().showSnackbar(apiResponse.translatedError)
             }
         }
     }

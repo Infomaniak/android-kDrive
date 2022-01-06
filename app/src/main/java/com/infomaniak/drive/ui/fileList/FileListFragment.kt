@@ -314,8 +314,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
 
 
-
-
 private fun performBulkOperation(type: BulkOperationType, destinationFolder: File? = null, color: String? = null) {
 
     val selectedFiles = fileAdapter.getValidItemsSelected()
@@ -631,7 +629,7 @@ private fun handleBulkActionResult(success: Int, type: BulkOperationType, destin
                         putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
                         putExtra(
                             SelectFolderActivity.CUSTOM_ARGS_TAG,
-                            bundleOf(BULK_OPERATION_CUSTOM_TAG to BulkOperationType.COPY)
+                            bundleOf(BULK_OPERATION_CUSTOM_TAG to BulkOperationType.COPY),
                         )
                     }
                     startActivityForResult(intent, SelectFolderActivity.SELECT_FOLDER_REQUEST)
