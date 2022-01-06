@@ -104,7 +104,7 @@ class SearchFragment : FileListFragment() {
                         SearchFragmentDirections.actionSearchFragmentToFileListFragment(file.id, file.name)
                     )
                 } else {
-                    val fileList = fileAdapter.getFileObjectsList(null)
+                    val fileList = getFileObjectsList(null)
                     Utils.displayFile(mainViewModel, findNavController(), file, fileList)
                 }
             }
