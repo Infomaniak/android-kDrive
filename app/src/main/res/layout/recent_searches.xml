@@ -22,39 +22,32 @@
     android:layout_height="wrap_content"
     tools:context=".ui.fileList.SearchFragment">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/marginStandard"
-        android:paddingTop="@dimen/marginStandardSmall"
-        android:paddingBottom="@dimen/marginStandardMedium">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingTop="@dimen/marginStandardSmall">
 
         <TextView
             android:id="@+id/recentSearchesTitle"
             style="@style/Subtitle2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/marginStandard"
             android:text="@string/searchLastTitle"
-            android:textColor="@color/primaryText"
-            app:layout_constraintBottom_toTopOf="@id/recentSearchesRecyclerView"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:textColor="@color/primaryText" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recentSearchesRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/marginStandardMedium"
             android:orientation="vertical"
             android:overScrollMode="never"
+            android:paddingHorizontal="@dimen/marginStandard"
+            android:paddingVertical="@dimen/marginStandardMedium"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/recentSearchesTitle"
             tools:itemCount="5"
             tools:listitem="@layout/item_search_result" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 </androidx.core.widget.NestedScrollView>
