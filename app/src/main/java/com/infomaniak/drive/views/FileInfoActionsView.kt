@@ -156,7 +156,9 @@ class FileInfoActionsView @JvmOverloads constructor(
                 sendCopyText.setText(R.string.buttonAdd)
                 availableOffline.isGone = true
                 openWith.isGone = true
-                coloredFolder.isVisible = true
+                coloredFolder.isVisible = !currentFile.isDisabled()
+                        && currentFile.getVisibilityType() != IS_SHARED_SPACE
+                        && currentFile.getVisibilityType() != IS_TEAM_SPACE
             }
         }
     }
