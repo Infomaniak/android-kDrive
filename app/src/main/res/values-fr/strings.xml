@@ -369,6 +369,10 @@
         <item quantity="one">Un fichier disponible hors ligne</item>
         <item quantity="other">%d fichiers disponibles hors ligne</item>
     </plurals>
+    <plurals name="fileListColorFolderConfirmationSnackbar">
+        <item quantity="one">Un dossier coloré avec succès</item>
+        <item quantity="other">%d dossiers colorés avec succès</item>
+    </plurals>
     <string name="fileListCopyDoneSnackbar">Copies terminées avec succès</string>
     <string name="fileListCopyInProgressSnackbar">Copies en cours : %1$d/%2$d</string>
     <string name="fileListCopyStartedSnackbar">Début des copies</string>
