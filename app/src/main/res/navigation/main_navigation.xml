@@ -94,6 +94,9 @@
         <action
             android:id="@+id/action_fileListFragment_to_downloadProgressDialog"
             app:destination="@id/downloadProgressDialog" />
+        <action
+            android:id="@+id/action_fileList_to_colorFolder"
+            app:destination="@id/colorFolderBottomSheetDialog" />
     </fragment>
 
     <fragment
@@ -818,7 +821,8 @@
         tools:layout="@layout/fragment_bottom_sheet_color_folder">
         <argument
             android:name="color"
-            app:argType="string" />
+            app:argType="string"
+            app:nullable="true" />
     </dialog>
 
     <dialog

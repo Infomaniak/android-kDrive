@@ -32,7 +32,9 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.BulkOperationType
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.*
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_action_multi_select.*
 import kotlinx.coroutines.Dispatchers
@@ -67,6 +69,23 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
             if (drivePermissions.checkWriteStoragePermission()) downloadFileArchive()
         }
         downloadFile.isVisible = navigationArgs.fileIds.isNotEmpty()
+
+        coloredFolder.apply {
+            isVisible = computeColoredFolderVisibility(navigationArgs.fileIds)
+            setOnClickListener { onActionSelected(SelectDialogAction.COLOR_FOLDER) }
+        }
+    }
+
+    private fun computeColoredFolderVisibility(fileIds: IntArray): Boolean {
+        fileIds.forEach {
+            val file = FileController.getFileById(it)
+            if (file == null
+                || file.isDisabled()
+                || file.getVisibilityType() == File.VisibilityType.IS_SHARED_SPACE
+                || file.getVisibilityType() == File.VisibilityType.IS_TEAM_SPACE
+            ) return false
+        }
+        return true
     }
 
     private fun downloadFileArchive() {
@@ -88,6 +107,7 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
             SelectDialogAction.ADD_FAVORITES -> BulkOperationType.ADD_FAVORITES
             SelectDialogAction.OFFLINE -> BulkOperationType.SET_OFFLINE
             SelectDialogAction.DUPLICATE -> BulkOperationType.COPY
+            SelectDialogAction.COLOR_FOLDER -> BulkOperationType.COLOR_FOLDER
             else -> null
         }
 
@@ -102,7 +122,7 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     enum class SelectDialogAction {
-        ADD_FAVORITES, OFFLINE, DUPLICATE
+        ADD_FAVORITES, OFFLINE, DUPLICATE, COLOR_FOLDER
     }
 
     companion object {
