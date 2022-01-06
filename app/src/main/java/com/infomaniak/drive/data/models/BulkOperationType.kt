@@ -33,6 +33,8 @@ enum class BulkOperationType(@StringRes val title: Int, @PluralsRes val successM
     TRASH(R.string.fileListDeletionInProgressSnackbar, R.plurals.snackbarMoveTrashConfirmation),
     MOVE(R.string.fileListMoveInProgressSnackbar, R.plurals.fileListMoveFileConfirmationSnackbar),
     COPY(R.string.fileListCopyInProgressSnackbar, R.plurals.fileListDuplicationConfirmationSnackbar),
+    // TODO: change these strings
+    COLOR_FOLDER(R.string.fileListCopyInProgressSnackbar, R.plurals.fileListDuplicationConfirmationSnackbar),
 
     SET_OFFLINE(0, successMessage = R.plurals.fileListAddOfflineConfirmationSnackbar),
     ADD_FAVORITES(0, successMessage = R.plurals.fileListAddFavorisConfirmationSnackbar);
