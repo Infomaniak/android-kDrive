@@ -28,7 +28,7 @@ import java.util.*
 
 class FileMigration : RealmMigration {
     companion object {
-        const val bddVersion = 2L // Must be bumped when the schema changes
+        const val bddVersion = 3L // Must be bumped when the schema changes
     }
 
     override fun migrate(realm: DynamicRealm, oldVersion: Long, newVersion: Long) {
@@ -96,6 +96,15 @@ class FileMigration : RealmMigration {
                 }
             }
 
+            oldVersionTemp++
+        }
+
+        // Migrated to version 3:
+        // - Added new field (Folder Color) in File table
+        if (oldVersionTemp == 2L) {
+            schema.get(File::class.java.simpleName)?.apply {
+                addField("_color", String::class.java)
+            }
             oldVersionTemp++
         }
     }

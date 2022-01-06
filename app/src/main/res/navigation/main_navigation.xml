@@ -116,6 +116,9 @@
         <action
             android:id="@+id/action_previewSliderFragment_to_selectCategoriesFragment"
             app:destination="@id/selectCategoriesFragment" />
+        <action
+            android:id="@+id/action_previewSliderFragment_to_colorFolderBottomSheetDialog"
+            app:destination="@id/colorFolderBottomSheetDialog" />
     </fragment>
 
     <fragment
@@ -182,6 +185,9 @@
         <action
             android:id="@+id/action_fileInfoActionsBottomSheetDialog_to_selectCategoriesFragment"
             app:destination="@id/selectCategoriesFragment" />
+        <action
+            android:id="@+id/action_fileInfoActionsBottomSheetDialog_to_colorFolderBottomSheetDialog"
+            app:destination="@id/colorFolderBottomSheetDialog" />
     </dialog>
 
     <dialog
@@ -804,6 +810,16 @@
             android:id="@+id/action_SelectCategoriesFragment_to_CreateOrEditCategoryFragment"
             app:destination="@id/createOrEditCategoryFragment" />
     </fragment>
+
+    <dialog
+        android:id="@+id/colorFolderBottomSheetDialog"
+        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderBottomSheetDialog"
+        android:label="ColorFolderBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_color_folder">
+        <argument
+            android:name="color"
+            app:argType="string" />
+    </dialog>
 
     <dialog
         android:id="@+id/categoryInfoActionsBottomSheetDialog"

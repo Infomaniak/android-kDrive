@@ -41,6 +41,7 @@ import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.*
+import com.infomaniak.drive.data.models.File.Companion.getColor
 import com.infomaniak.drive.data.models.File.VisibilityType.*
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.ui.MainViewModel
@@ -155,6 +156,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                 sendCopyText.setText(R.string.buttonAdd)
                 availableOffline.isGone = true
                 openWith.isGone = true
+                coloredFolder.isVisible = true
             }
         }
     }
@@ -189,6 +191,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         openWith.setOnClickListener { onItemClickListener.openWithClicked() }
         downloadFile.setOnClickListener { onItemClickListener.downloadFileClicked() }
         manageCategories.setOnClickListener { onItemClickListener.manageCategoriesClicked(currentFile.id) }
+        coloredFolder.setOnClickListener { onItemClickListener.colorFolderClicked(currentFile.getColor(context)) }
         addFavorites.setOnClickListener {
             addFavorites.isEnabled = false
             onItemClickListener.addFavoritesClicked()
@@ -403,6 +406,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun displayInfoClicked()
         fun downloadFileClicked()
         fun manageCategoriesClicked(fileId: Int)
+        fun colorFolderClicked(color: String)
         fun dropBoxClicked(isDropBox: Boolean) = Unit
         fun fileRightsClicked()
         fun onCacheAddedToOffline() = Unit
