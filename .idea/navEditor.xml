@@ -157,6 +157,18 @@
                       </LayoutPositions>
                     </value>
                   </entry>
+                  <entry key="colorFolderUpgradeBottomSheetDialog">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="3672" />
+                            <option name="y" value="12" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
                   <entry key="convertToDropBoxFragment">
                     <value>
                       <LayoutPositions>
@@ -314,7 +326,7 @@
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="3692" />
+                            <option name="x" value="3936" />
                             <option name="y" value="12" />
                           </Point>
                         </option>
@@ -377,11 +389,6 @@
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_fileInfoActionsBottomSheetDialog_to_colorFolderBottomSheetDialog">
-                              <value>
-                                <LayoutPositions />
-                              </value>
-                            </entry>
                             <entry key="action_fileInfoActionsBottomSheetDialog_to_convertToDropBoxFragment">
                               <value>
                                 <LayoutPositions />
@@ -408,6 +415,11 @@
                               </value>
                             </entry>
                             <entry key="action_fileInfoActionsBottomSheetDialog_to_selectCategoriesFragment">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
+                            <entry key="action_fileInfoActions_to_colorFolder">
                               <value>
                                 <LayoutPositions />
                               </value>
