@@ -2,11 +2,15 @@ package com.infomaniak.drive
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.api.ApiRepository.getFileListForFolder
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.cache.FileController.getFileById
-import com.infomaniak.drive.data.models.CreateFile
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.utils.ApiTestUtils
+import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponse
+import com.infomaniak.drive.utils.ApiTestUtils.createFileForTest
+import com.infomaniak.drive.utils.ApiTestUtils.deleteTestFile
 import com.infomaniak.drive.utils.Env
+import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.Utils
 import io.realm.Realm
 import kotlinx.android.parcel.RawValue
@@ -40,6 +44,19 @@ class FileControllerTest : KDriveTest() {
     }
 
     @Test
+    fun createTestFolder(): Unit = runBlocking {
+        val okHttpClient = userDrive.userId.let { KDriveHttpClient.getHttpClient(it) }
+        val folderName = "TestFolder"
+        // Create a folder under root
+        val apiRes = ApiRepository.createFolder(okHttpClient, userDrive.driveId, Utils.ROOT_ID, folderName, true)
+        ApiTestUtils.assertApiResponse(apiRes)
+        Assert.assertEquals("The name should correspond", folderName, apiRes.data?.name)
+
+        // Delete the test folder
+        apiRes.data?.let { deleteTestFile(it) }
+    }
+
+    @Test
     fun getRootFiles_CanGetRemoteSavedFilesFromRealm() {
         val remoteResult = getAndSaveRemoteRootFiles()
 
@@ -51,6 +68,21 @@ class FileControllerTest : KDriveTest() {
             "the size of the local and remote files must be identical",
             remoteResult?.second?.size == localResult?.second?.size
         )
+    }
+
+    @Test
+    fun deleteAddedFileFromAPI() {
+        // Create a file
+        val remoteFile = createAndStoreOfficeFile()
+        val order = File.SortType.NAME_AZ
+
+        // Delete the file
+        deleteTestFile(remoteFile)
+
+        // Search the deleted file
+        val apiSearchResponse = ApiRepository.searchFiles(userDrive.driveId, remoteFile.name, order.order, order.orderBy, 1)
+        Assert.assertTrue("Api response must be a success", apiSearchResponse.isSuccess())
+        Assert.assertTrue("Founded files should be empty", apiSearchResponse.data.isNullOrEmpty())
     }
 
     @Test
@@ -177,6 +209,16 @@ class FileControllerTest : KDriveTest() {
         Assert.assertTrue("Realm must not contain any files", realmResult.isNullOrEmpty())
     }
 
+    @Test
+    fun getTestFileListForFolder() = runBlocking {
+        val okHttpClient = userDrive.userId.let { KDriveHttpClient.getHttpClient(it) }
+        val fileListResponse = getFileListForFolder(okHttpClient, userDrive.driveId, Utils.ROOT_ID, order = File.SortType.NAME_AZ)
+        assertApiResponse(fileListResponse)
+        // Use non null assertion because data nullability has been checked in assertApiResponse()
+        Assert.assertTrue("Root folder should contains files", fileListResponse.data!!.children.isNotEmpty())
+    }
+
+
     private fun getAndSaveRemoteRootFiles(): Pair<File, ArrayList<File>>? {
         // Get and save remote root files in realm db test
         val remoteResult =
@@ -189,20 +231,11 @@ class FileControllerTest : KDriveTest() {
         FileController.getFilesFromCacheOrDownload(Utils.ROOT_ID, 1, false, userDrive = userDrive, customRealm = realm)
 
     private fun createAndStoreOfficeFile(transaction: ((remoteFile: File) -> Unit)? = null): @RawValue File {
-        val createFile = CreateFile("offline doc ${UUID.randomUUID()}", File.Office.DOCS.extension)
-        val apiResponse = ApiRepository.createOfficeFile(Env.DRIVE_ID, Utils.ROOT_ID, createFile)
-        Assert.assertTrue("create office file request must pass", apiResponse.isSuccess())
-        Assert.assertNotNull("create office api response data cannot be null", apiResponse.data)
-
-        // Save and set file as offline file
-        val remoteFile = apiResponse.data!!
+        val remoteFile = createFileForTest()
+        // Save the file as offline file
         transaction?.invoke(remoteFile)
         realm.executeTransaction { realm.insert(remoteFile) }
         return remoteFile
     }
 
-    private fun deleteTestFile(remoteFile: File) {
-        val deleteResponse = ApiRepository.deleteFile(remoteFile)
-        Assert.assertTrue("created file couldn't be deleted from the remote", deleteResponse.isSuccess())
-    }
 }
