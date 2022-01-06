@@ -178,6 +178,12 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         )
     }
 
+    override fun colorFolderClicked(color: String) {
+        safeNavigate(
+            FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToColorFolderBottomSheetDialog(color)
+        )
+    }
+
     override fun addFavoritesClicked() {
         currentFile.apply {
             val observer: Observer<ApiResponse<Boolean>> = Observer { apiResponse ->

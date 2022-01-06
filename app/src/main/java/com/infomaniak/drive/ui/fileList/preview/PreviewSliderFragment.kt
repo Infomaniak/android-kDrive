@@ -42,6 +42,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
@@ -337,6 +338,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 categoriesUsageMode = CategoriesUsageMode.MANAGED_CATEGORIES,
             )
         )
+    }
+
+    override fun colorFolderClicked(color: String) {
+        safeNavigate(PreviewSliderFragmentDirections.actionPreviewSliderFragmentToColorFolderBottomSheetDialog(color))
     }
 
     override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) {

@@ -21,6 +21,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Parcelable
 import android.webkit.MimeTypeMap
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -54,6 +55,8 @@ open class File(
     var children: @WriteWith<FileRealmListParceler> RealmList<File> = RealmList(),
     @SerializedName("collaborative_folder")
     var collaborativeFolder: String? = null,
+    @SerializedName("color")
+    private var _color: String? = null,
     @SerializedName("converted_type")
     var convertedType: String = "",
     @SerializedName("created_at")
@@ -421,6 +424,14 @@ open class File(
         fun getOfflineFolder(context: Context): java.io.File {
             val mediaFolder = context.externalMediaDirs?.firstOrNull() ?: context.filesDir
             return java.io.File(mediaFolder, context.getString(R.string.EXPOSED_OFFLINE_DIR))
+        }
+
+        fun File.getColor(context: Context): String {
+            return _color ?: String.format("#%06x", ContextCompat.getColor(context, R.color.secondaryText) and 0xffffff)
+        }
+
+        fun File.setColor(color: String) {
+            _color = color
         }
     }
 }
