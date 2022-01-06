@@ -25,6 +25,9 @@
     <string name="notification_channel_id_upload_download" translatable="false">upload_download_channel_id</string>
     <string name="notification_channel_id_upload_service" translatable="false">sync_service_channel_id</string>
 
+    <string name="packs_solo_team_pro" translatable="false">Solo, Team &amp; Pro</string>
+    <string name="packs_team_pro" translatable="false">Team &amp; Pro</string>
+
     <string name="aboutAppVersionTitle">kDrive application</string>
     <string name="aboutLicenseDescription">GNU General Public Licence, version 3</string>
     <string name="aboutLicenseTitle">Licence</string>
