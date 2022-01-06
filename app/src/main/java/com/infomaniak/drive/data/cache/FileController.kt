@@ -172,13 +172,9 @@ object FileController {
     }
 
     fun updateFolderColor(file: File, color: String, realm: Realm? = null): ApiResponse<Boolean?> {
-        val apiResponse = ApiRepository.updateFolderColor(file, color)
-        if (apiResponse.isSuccess()) {
-            updateFile(file.id, realm) { localFile ->
-                localFile.setColor(color)
-            }
+        return ApiRepository.updateFolderColor(file, color).also {
+            if (it.isSuccess()) updateFile(file.id, realm) { localFile -> localFile.setColor(color) }
         }
-        return apiResponse
     }
 
     fun deleteFile(
