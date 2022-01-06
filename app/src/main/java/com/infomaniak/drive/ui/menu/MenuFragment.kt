@@ -77,6 +77,7 @@ class MenuFragment : Fragment() {
             }
 
             userImage.loadAvatar(currentUser)
+
             driveIcon.apply {
                 if (DriveInfosController.getDrivesCount(currentUser.id) == 1L) {
                     isGone = true
@@ -84,6 +85,7 @@ class MenuFragment : Fragment() {
                     setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
                 }
             }
+
             sharedWithMeFiles.apply {
                 if (DriveInfosController.getDrivesCount(userId = AccountUtils.currentUserId, sharedWithMe = true).isPositive()) {
                     setOnClickListener { safeNavigate(MenuFragmentDirections.actionMenuFragmentToSharedWithMeFragment()) }
@@ -91,7 +93,6 @@ class MenuFragment : Fragment() {
                     isGone = true
                 }
             }
-
 
             recentChanges.setOnClickListener {
                 safeNavigate(MenuFragmentDirections.actionMenuFragmentToRecentChangesFragment())
