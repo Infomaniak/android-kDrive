@@ -51,7 +51,6 @@ import io.sentry.SentryLevel
 import kotlinx.android.synthetic.main.activity_save_external_file.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.util.*
 
@@ -65,7 +64,6 @@ class SaveExternalFilesActivity : BaseActivity() {
     private var isMultiple = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        runBlocking { AccountUtils.requestCurrentUser() }
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_save_external_file)
 
