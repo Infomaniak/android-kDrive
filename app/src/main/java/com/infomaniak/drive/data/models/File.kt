@@ -321,6 +321,7 @@ open class File(
         }
     }
 
+    // TODO This function is called in the FileAdapter, for each File, and is getting the RealmInstance each time. This is not very efficient.
     fun getCategories(): List<Category> {
         val fileCategoriesIds = getSortedCategoriesIds()
         return DriveInfosController.getCurrentDriveCategoriesFromIds(fileCategoriesIds.toTypedArray())
