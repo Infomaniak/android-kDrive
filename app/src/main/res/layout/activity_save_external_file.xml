@@ -73,6 +73,7 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Disabled NestedScrolling to fix URIs with Xiaomi phones -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/fileNames"
             android:layout_width="0dp"
