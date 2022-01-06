@@ -80,6 +80,7 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
         fileIds.forEach {
             val file = FileController.getFileById(it)
             if (file == null
+                || !file.isFolder()
                 || file.isDisabled()
                 || file.getVisibilityType() == File.VisibilityType.IS_SHARED_SPACE
                 || file.getVisibilityType() == File.VisibilityType.IS_TEAM_SPACE
