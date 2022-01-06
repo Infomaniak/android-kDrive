@@ -182,7 +182,7 @@ class FileShareDetailsFragment : Fragment() {
                         file.onlyoffice,
                         this.shareLink != null
                     )
-                    findNavController().navigate(
+                    safeNavigate(
                         FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToSelectPermissionBottomSheetDialog(
                             currentFileId = currentFileId,
                             currentPermission = currentPermission,
@@ -192,7 +192,7 @@ class FileShareDetailsFragment : Fragment() {
                 },
                 onSettingsClicked = { newShareLink, currentFile ->
                     this.shareLink = newShareLink
-                    findNavController().navigate(
+                    safeNavigate(
                         FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToFileShareLinkSettings(
                             fileId = currentFile.id,
                             driveId = currentFile.driveId,
