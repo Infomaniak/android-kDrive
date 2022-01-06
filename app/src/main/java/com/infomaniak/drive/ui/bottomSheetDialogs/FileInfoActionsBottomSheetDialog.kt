@@ -67,7 +67,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        currentFile = FileController.getFileById(navigationArgs.fileId) ?: run {
+        currentFile = FileController.getFileById(navigationArgs.fileId, navigationArgs.userDrive) ?: run {
             findNavController().popBackStack()
             return
         }
