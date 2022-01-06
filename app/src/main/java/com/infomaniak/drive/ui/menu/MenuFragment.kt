@@ -85,9 +85,9 @@ class MenuFragment : Fragment() {
             }
             sharedWithMeFiles.apply {
                 if (DriveInfosController.getDrivesCount(userId = AccountUtils.currentUserId, sharedWithMe = true).isPositive()) {
-                    isVisible = false
-                } else {
                     setOnClickListener { safeNavigate(MenuFragmentDirections.actionMenuFragmentToSharedWithMeFragment()) }
+                } else {
+                    isVisible = false
                 }
             }
 
