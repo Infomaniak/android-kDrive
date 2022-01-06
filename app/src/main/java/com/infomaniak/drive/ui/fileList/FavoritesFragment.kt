@@ -70,10 +70,11 @@ class FavoritesFragment : FileListFragment() {
                 it?.let { result ->
                     if (fileAdapter.itemCount == 0 || result.page == 1 || isNewSort) {
                         val realmFiles = FileController.getRealmLiveFiles(
+                            isFavorite = true,
                             order = fileListViewModel.sortType,
                             parentId = FileController.FAVORITES_FILE_ID,
                             realm = mainViewModel.realm,
-                            withVisibilitySort = false
+                            withVisibilitySort = false,
                         )
                         fileAdapter.updateFileList(realmFiles)
                         changeNoFilesLayoutVisibility(realmFiles.isEmpty(), false)

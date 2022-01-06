@@ -550,11 +550,12 @@ object FileController {
         parentId: Int,
         realm: Realm,
         order: File.SortType?,
-        withVisibilitySort: Boolean = true
+        withVisibilitySort: Boolean = true,
+        isFavorite: Boolean = false
     ): RealmResults<File> {
         realm.refresh()
-        val realmLiveSortedFiles = getRealmLiveSortedFiles(getFileById(realm, parentId), order, withVisibilitySort)
-        return realmLiveSortedFiles ?: emptyList(realm)
+        return getRealmLiveSortedFiles(getFileById(realm, parentId), order, withVisibilitySort, isFavorite = isFavorite)
+            ?: emptyList(realm)
     }
 
     fun getFilesFromCacheOrDownload(
@@ -692,13 +693,15 @@ object FileController {
         localFolder: File?,
         order: File.SortType?,
         withVisibilitySort: Boolean = true,
-        localChildren: RealmResults<File>? = null
+        localChildren: RealmResults<File>? = null,
+        isFavorite: Boolean = false
     ): RealmResults<File>? {
         val children = localChildren ?: localFolder?.children
         return children?.where()
             ?.apply {
                 order?.let {
                     getSortQueryByOrder(it)
+                    if (isFavorite) equalTo(File::isFavorite.name, true)
                     if (withVisibilitySort) sort(File::visibility.name, Sort.DESCENDING)
                     sort(File::type.name, Sort.ASCENDING)
                     distinct(File::id.name)
