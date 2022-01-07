@@ -176,4 +176,37 @@ class CategoriesAdapter(
         NOT_SELECTED,
         PROCESSING,
     }
+
+    private data class DiffUtilCategory(
+        val id: Int,
+        val selectedState: SelectedState,
+    )
+
+    private class CategoriesDiffCallback(
+        private val oldList: List<DiffUtilCategory>,
+        private val newList: List<DiffUtilCategory>,
+        private val isCreateRowVisible: Boolean,
+    ) : DiffUtil.Callback() {
+
+        override fun getOldListSize(): Int = oldList.size
+
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(oldIndex: Int, newIndex: Int): Boolean {
+            return oldList[oldIndex].id == newList[newIndex].id
+        }
+
+        override fun areContentsTheSame(oldIndex: Int, newIndex: Int): Boolean {
+            return when {
+                oldIndex == 0 && newIndex != 0 -> false // Remove top corners radius
+                oldIndex != 0 && newIndex == 0 -> false // Add top Corners radius
+                oldIndex == oldListSize - 1 && newIndex != newListSize - 1 -> false // Remove bot corners radius
+                oldIndex != oldListSize - 1 && newIndex == newListSize - 1 -> false // Add bot corners radius
+                oldList[oldIndex].selectedState != newList[newIndex].selectedState -> false // Update progress bar
+                oldIndex == oldListSize - 1 && newIndex == newListSize - 1 && isCreateRowVisible -> false // Remove bot corners radius
+                newIndex == newListSize - 1 && !isCreateRowVisible -> false // Add bot corners radius
+                else -> true // Don't update
+            }
+        }
+    }
 }

@@ -48,4 +48,28 @@ class RecentSearchesAdapter(
         DiffUtil.calculateDiff(SearchesDiffCallback(searches, newSearches)).dispatchUpdatesTo(this)
         searches = ArrayList(newSearches)
     }
+
+    private class SearchesDiffCallback(
+        private val oldList: List<String>,
+        private val newList: List<String>,
+    ) : DiffUtil.Callback() {
+
+        override fun getOldListSize(): Int = oldList.size
+
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(oldIndex: Int, newIndex: Int): Boolean {
+            return oldList[oldIndex].equals(newList[newIndex], true)
+        }
+
+        override fun areContentsTheSame(oldIndex: Int, newIndex: Int): Boolean {
+            return when {
+                oldIndex == 0 && newIndex != 0 -> false // Remove top corners radius
+                oldIndex != 0 && newIndex == 0 -> false // Add top Corners radius
+                oldIndex == oldListSize - 1 && newIndex != newListSize - 1 -> false // Remove bot corners radius
+                oldIndex != oldListSize - 1 && newIndex == newListSize - 1 -> false // Add bot corners radius
+                else -> true // Don't update
+            }
+        }
+    }
 }
