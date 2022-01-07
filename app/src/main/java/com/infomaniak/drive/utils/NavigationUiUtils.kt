@@ -62,40 +62,30 @@ object NavigationUiUtils {
      * Navigation actions on this NavController will be reflected in the
      * selected item in the NavigationBarView.
      */
-    private fun setupWithNavController(
-        navigationBarView: NavigationBarView,
-        navController: NavController
-    ) {
+    private fun setupWithNavController(navigationBarView: NavigationBarView, navController: NavController) {
         navigationBarView.setOnItemSelectedListener { item ->
             item.isChecked = true
-            onNavDestinationSelected(
-                item,
-                navController
-            )
+            onNavDestinationSelected(item, navController)
         }
+
         val weakReference = WeakReference(navigationBarView)
-        navController.addOnDestinationChangedListener(
-            object : NavController.OnDestinationChangedListener {
-                override fun onDestinationChanged(
-                    controller: NavController,
-                    destination: NavDestination,
-                    arguments: Bundle?
-                ) {
-                    val view = weakReference.get()
-                    if (view == null) {
-                        navController.removeOnDestinationChangedListener(this)
-                        return
-                    }
-                    view.menu.forEach { item ->
-                        if (destination.matchDestination(item.itemId)) {
-                            if (!item.isChecked) item.isChecked = true
-                        }
+        navController.addOnDestinationChangedListener(object : NavController.OnDestinationChangedListener {
+
+            override fun onDestinationChanged(controller: NavController, destination: NavDestination, arguments: Bundle?) {
+                val view = weakReference.get()
+                if (view == null) {
+                    navController.removeOnDestinationChangedListener(this)
+                    return
+                }
+                view.menu.forEach { item ->
+                    if (destination.matchDestination(item.itemId) && !item.isChecked) {
+                        item.isChecked = true
                     }
                 }
-            })
+            }
+
+        })
     }
 
-    private fun NavDestination.matchDestination(@IdRes destId: Int): Boolean {
-        return hierarchy.any { it.id == destId }
-    }
+    private fun NavDestination.matchDestination(@IdRes destId: Int) = hierarchy.any { it.id == destId }
 }
