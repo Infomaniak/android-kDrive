@@ -552,7 +552,7 @@
         android:id="@+id/searchFilterTypeDialog"
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterTypeBottomSheetDialog"
         android:label="SearchFilterTypeBottomSheetDialog"
-        tools:layout="@layout/fragment_bottom_sheet_search_filter_type">
+        tools:layout="@layout/fragment_bottom_sheet_select">
         <argument
             android:name="type"
             app:argType="com.infomaniak.drive.data.models.ConvertedType"

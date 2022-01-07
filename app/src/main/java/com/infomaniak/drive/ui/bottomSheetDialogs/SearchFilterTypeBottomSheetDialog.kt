@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 import android.os.Bundle
 import android.view.View
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.utils.setBackNavigationResult
 import com.infomaniak.drive.views.SelectBottomSheetDialog
@@ -31,6 +32,7 @@ open class SearchFilterTypeBottomSheetDialog : SelectBottomSheetDialog() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        selectTitle.text = getString(R.string.fileTypeFilterTitle)
         selectRecyclerView.adapter = SearchFilterTypeBottomSheetAdapter(
             getSortedTypes(),
             navigationArgs.type,
