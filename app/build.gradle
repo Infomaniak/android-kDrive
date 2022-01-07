@@ -109,6 +109,7 @@ dependencies {
     implementation 'com.github.MikeOrtiz:TouchImageView:3.1.1'
     implementation 'com.tbuonomo.andrui:viewpagerdotsindicator:4.1.2'
     implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
+    implementation 'com.github.rubensousa:gravitysnaphelper:2.2.2'
 
     def coil_version = '1.4.0'
     implementation "io.coil-kt:coil:$coil_version"

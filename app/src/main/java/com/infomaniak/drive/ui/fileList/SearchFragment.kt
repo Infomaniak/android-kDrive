@@ -84,7 +84,7 @@ class SearchFragment : FileListFragment() {
 
     private fun setFiltersAdapter() {
         filtersAdapter = SearchFiltersAdapter { key, categoryId -> removeFilter(key, categoryId) }.also {
-            filtersLayout.adapter = it
+            filtersRecyclerView.adapter = it
         }
     }
 
@@ -346,13 +346,13 @@ class SearchFragment : FileListFragment() {
 
     private fun changeRecentSearchesLayoutVisibility(shouldDisplay: Boolean) {
         if (shouldDisplay) {
-            filtersLayout.isGone = true
+            filtersRecyclerView.isGone = true
             sortLayout.isGone = true
             fileRecyclerView.isGone = true
             noFilesLayout.isGone = true
             recentSearchesView.isVisible = true
         } else {
-            if (filtersAdapter.filters.isNotEmpty()) filtersLayout.isVisible = true
+            if (filtersAdapter.filters.isNotEmpty()) filtersRecyclerView.isVisible = true
             val shouldDisplayNoFilesLayout = !swipeRefreshLayout.isRefreshing
             if (shouldDisplayNoFilesLayout) changeNoFilesLayoutVisibility(hideFileList = true, changeControlsVisibility = false)
             recentSearchesView.isGone = true

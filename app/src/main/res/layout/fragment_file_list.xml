@@ -168,16 +168,19 @@
                 android:visibility="gone"
                 tools:visibility="visible" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/filtersLayout"
+            <com.github.rubensousa.gravitysnaphelper.GravitySnapRecyclerView
+                android:id="@+id/filtersRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/marginStandard"
-                android:layout_marginVertical="@dimen/marginStandardSmall"
+                android:clipToPadding="false"
                 android:orientation="horizontal"
                 android:overScrollMode="never"
+                android:paddingHorizontal="@dimen/marginStandard"
+                android:paddingVertical="@dimen/marginStandardSmall"
                 android:visibility="gone"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:snapGravity="start"
+                app:snapToPadding="true"
                 tools:itemCount="5"
                 tools:listitem="@layout/item_search_filter_chip"
                 tools:visibility="visible" />
