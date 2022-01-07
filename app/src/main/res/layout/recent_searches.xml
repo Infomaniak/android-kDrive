@@ -23,6 +23,7 @@
     tools:context=".ui.fileList.SearchFragment">
 
     <LinearLayout
+        android:id="@+id/recentSearchesContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"

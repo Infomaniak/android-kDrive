@@ -63,12 +63,10 @@ class SearchFragment : FileListFragment() {
 
         super.onViewCreated(view, savedInstanceState)
 
-        fileListLayout.addView(recentSearchesView, 1)
         clearButton.setOnClickListener { searchView.text = null }
-
         configureSearchView()
         configureFileAdapter()
-        setRecentSearchesAdapter()
+        configureRecentSearches()
         configureToolbar()
         observeSearchResults()
         setBackActionHandlers()
@@ -149,7 +147,10 @@ class SearchFragment : FileListFragment() {
         }
     }
 
-    private fun setRecentSearchesAdapter() {
+    private fun configureRecentSearches() {
+        fileListLayout.addView(recentSearchesView, 1)
+        recentSearchesContainer.isGone = UISettings(requireContext()).recentSearches.isEmpty()
+
         recentSearchesAdapter = RecentSearchesAdapter(searchView::setText).apply {
             setItems(UISettings(requireContext()).recentSearches)
             recentSearchesRecyclerView.adapter = this
@@ -271,6 +272,7 @@ class SearchFragment : FileListFragment() {
             .filterIndexed { index, _ -> index < MAX_MOST_RECENT_SEARCHES }
             .also(recentSearchesAdapter::setItems)
 
+        recentSearchesContainer.isGone = newSearches.isEmpty()
         uiSettings.recentSearches = newSearches
     }
 
