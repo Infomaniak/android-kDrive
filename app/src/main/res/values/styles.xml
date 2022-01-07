@@ -269,6 +269,10 @@
         <item name="iconTint">@color/title</item>
     </style>
 
+    <style name="ButtonInfomaniak.Light2" parent="ButtonInfomaniak.Light">
+        <item name="android:backgroundTint">@color/backgroundCardview</item>
+    </style>
+
     <style name="TextButton" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:letterSpacing">0</item>
         <item name="android:textSize">14sp</item>

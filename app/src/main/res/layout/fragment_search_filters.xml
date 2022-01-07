@@ -283,7 +283,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/clearButton"
-                style="@style/ButtonInfomaniak.Light"
+                style="@style/ButtonInfomaniak.Light2"
                 android:layout_width="0dp"
                 android:layout_marginTop="@dimen/marginStandard"
                 android:text="@string/buttonClearFilters"
@@ -298,7 +298,7 @@
                 android:layout_width="0dp"
                 android:layout_marginTop="@dimen/marginStandardSmall"
                 android:layout_marginBottom="@dimen/marginStandard"
-                android:text="@string/buttonSave"
+                android:text="@string/buttonApplyFilters"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
