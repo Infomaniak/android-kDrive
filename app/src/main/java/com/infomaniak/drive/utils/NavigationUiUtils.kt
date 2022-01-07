@@ -31,36 +31,35 @@ import com.google.android.material.navigationrail.NavigationRailView
 import java.lang.ref.WeakReference
 
 /**
- * It's a custom of [androidx.navigation.ui.NavigationUI]
- * Currently, when we go to the shared space with me, for example,and return to the fileList from the bottom navigation,
- * we cannot reselect the menu item from the bottom navigation.
+ * Custom version of [androidx.navigation.ui.NavigationUI].
+ *
+ * Currently, when we go to "Shared with me" for example, and return to the file list from
+ * the bottom navigation, we cannot reselect the menu item from the bottom navigation.
+ *
  * @see [issue](https://issuetracker.google.com/issues/206147604)
  */
 object NavigationUiUtils {
 
     /**
-     * Sets up a [NavigationBarView] for use with a [NavController]. This will call
+     * Sets up a [NavigationBarView] to use with a [NavController]. This will call
      * [android.view.MenuItem.onNavDestinationSelected] when a menu item is selected.
      *
-     * The selected item in the NavigationView will automatically be updated when the destination
-     * changes.
+     * The selected item in the NavigationView will automatically be updated when the destination changes.
      */
     fun NavigationBarView.setupWithNavControllerCustom(navController: NavController) {
         setupWithNavController(this, navController)
     }
 
     /**
-     * Sets up a [NavigationBarView] for use with a [NavController]. This will call
-     * [onNavDestinationSelected] when a menu item is selected. The
-     * selected item in the NavigationBarView will automatically be updated when the destination
-     * changes.
+     * Sets up a [NavigationBarView] to use with a [NavController]. This
+     * will call [onNavDestinationSelected] when a menu item is selected.
+     *
+     * The selected item in the NavigationBarView will automatically be updated when the destination changes.
      *
      * @param navigationBarView The NavigationBarView ([BottomNavigationView] or
-     * [NavigationRailView])
-     * that should be kept in sync with changes to the NavController.
-     * @param navController The NavController that supplies the primary menu.
-     * Navigation actions on this NavController will be reflected in the
-     * selected item in the NavigationBarView.
+     * [NavigationRailView]) that should be kept in sync with changes to the NavController.
+     * @param navController The NavController that supplies the primary menu. Navigation actions
+     * on this NavController will be reflected in the selected item in the NavigationBarView.
      */
     private fun setupWithNavController(navigationBarView: NavigationBarView, navController: NavController) {
         navigationBarView.setOnItemSelectedListener { item ->
