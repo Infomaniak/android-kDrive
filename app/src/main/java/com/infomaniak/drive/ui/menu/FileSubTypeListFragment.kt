@@ -17,6 +17,8 @@
  */
 package com.infomaniak.drive.ui.menu
 
+import android.os.Bundle
+import android.view.View
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
@@ -32,6 +34,12 @@ open class FileSubTypeListFragment : FileListFragment() {
 
     override var enabledMultiSelectMode: Boolean = false
     override var hideBackButtonWhenRoot: Boolean = false
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        fileAdapter.onEmptyList = { changeNoFilesLayoutVisibility(hideFileList = true, changeControlsVisibility = true) }
+    }
 
     protected fun populateFileList(
         files: ArrayList<File>,

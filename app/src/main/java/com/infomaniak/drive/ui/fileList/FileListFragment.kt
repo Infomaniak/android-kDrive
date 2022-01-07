@@ -483,33 +483,36 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             noNetwork.isGone = isInternetAvailable
         }
 
-        fileAdapter = FileAdapter(FileController.emptyList(mainViewModel.realm))
-        fileAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
-        fileAdapter.setHasStableIds(true)
+        fileAdapter = FileAdapter(FileController.emptyList(mainViewModel.realm)).apply {
+            stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+            setHasStableIds(true)
 
-        fileAdapter.onFileClicked = { file ->
-            if (file.isUsable()) {
-                when {
-                    file.isFolder() -> file.openFolder()
-                    file.isBookmark() -> openBookmark(file)
-                    else -> file.displayFile()
+            onEmptyList = { checkIfNoFiles() }
+
+            onFileClicked = { file ->
+                if (file.isUsable()) {
+                    when {
+                        file.isFolder() -> file.openFolder()
+                        file.isBookmark() -> openBookmark(file)
+                        else -> file.displayFile()
+                    }
+                } else {
+                    refreshActivities()
                 }
-            } else {
-                refreshActivities()
             }
-        }
 
-        fileAdapter.openMultiSelectMode = { openMultiSelect() }
+            openMultiSelectMode = { openMultiSelect() }
 
-        fileAdapter.updateMultiSelectMode = { onUpdateMultiSelect() }
+            updateMultiSelectMode = { onUpdateMultiSelect() }
 
-        fileAdapter.onMenuClicked = { file ->
-            val fileObject = file.realm?.copyFromRealm(file, 1) ?: file
-            val bundle = bundleOf(
-                "fileId" to fileObject.id,
-                "userDrive" to UserDrive(driveId = file.driveId, sharedWithMe = fileListViewModel.isSharedWithMe)
-            )
-            safeNavigate(R.id.fileInfoActionsBottomSheetDialog, bundle, currentClassName = homeClassName())
+            onMenuClicked = { file ->
+                val fileObject = file.realm?.copyFromRealm(file, 1) ?: file
+                val bundle = bundleOf(
+                    "fileId" to fileObject.id,
+                    "userDrive" to UserDrive(driveId = file.driveId, sharedWithMe = fileListViewModel.isSharedWithMe)
+                )
+                safeNavigate(R.id.fileInfoActionsBottomSheetDialog, bundle, currentClassName = homeClassName())
+            }
         }
 
         onBackNavigationResult()
