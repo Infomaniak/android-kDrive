@@ -45,7 +45,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupWithNavController
 import coil.ImageLoader
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
@@ -60,6 +59,7 @@ import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.launchInAppReview
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.Utils.getRootName
@@ -100,7 +100,7 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        bottomNavigation.setupWithNavController(navController)
+        bottomNavigation.setupWithNavControllerCustom(navController)
         bottomNavigation.itemIconTintList = ContextCompat.getColorStateList(this, R.color.item_icon_tint_bottom)
         bottomNavigation.selectedItemId = UISettings(this).bottomNavigationSelectedItem
         bottomNavigation.setOnItemReselectedListener { item ->
