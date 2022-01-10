@@ -58,7 +58,7 @@ class CategoriesAdapter(
         setCorners(position)
         setMenuButton(category)
         handleSelectedState(category)
-        setClickOnCategoryListener(category)
+        setClickOnCategory(category)
     }
 
     private fun MaterialCardView.setCorners(position: Int) {
@@ -82,7 +82,7 @@ class CategoriesAdapter(
         }
     }
 
-    private fun MaterialCardView.setClickOnCategoryListener(category: UICategory) {
+    private fun MaterialCardView.setClickOnCategory(category: UICategory) {
         setOnClickListener {
             isEnabled = false
             categoryProgressBar.isVisible = true

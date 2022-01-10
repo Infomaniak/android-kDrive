@@ -45,7 +45,7 @@ class SearchFiltersAdapter(
         setEndMargin(position)
         setIcon(filter)
         setName(filter)
-        setClickListener(this, filter)
+        setClick(this, filter)
     }
 
     private fun Chip.setEndMargin(position: Int) {
@@ -70,7 +70,7 @@ class SearchFiltersAdapter(
         text = filter.text
     }
 
-    private fun setClickListener(chip: Chip, filter: SearchFilter) {
+    private fun setClick(chip: Chip, filter: SearchFilter) {
         chip.setOnClickListener {
             val index = filters.indexOf(filter)
             if (index > -1) {
