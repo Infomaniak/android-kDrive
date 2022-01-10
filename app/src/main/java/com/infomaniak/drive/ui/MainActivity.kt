@@ -43,6 +43,7 @@ import androidx.core.view.get
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import coil.ImageLoader
@@ -58,6 +59,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.launchInAppReview
+import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
@@ -149,26 +151,14 @@ class MainActivity : BaseActivity() {
             }
         })
 
-        navController.addOnDestinationChangedListener { _, destination, _ ->
+        navController.addOnDestinationChangedListener { _, destination, navigationArgs ->
             Sentry.addBreadcrumb(Breadcrumb().apply {
                 category = "Navigation"
                 message = "Accessed to destination : ${destination.displayName}"
                 level = SentryLevel.INFO
             })
 
-            val isVisible = when (destination.id) {
-                R.id.addFileBottomSheetDialog,
-                R.id.favoritesFragment,
-                R.id.fileInfoActionsBottomSheetDialog,
-                R.id.fileListFragment,
-                R.id.homeFragment,
-                R.id.menuFragment,
-                R.id.sharedWithMeFragment -> true
-                else -> false
-            }
-            mainFab.isVisible = isVisible
-            bottomNavigation.isVisible = isVisible
-            bottomNavigationBackgroundView.isVisible = isVisible
+            handleBottomNavigationVisibility(destination, navigationArgs)
 
             when (destination.id) {
                 R.id.favoritesFragment,
@@ -265,6 +255,26 @@ class MainActivity : BaseActivity() {
                 }
             }
         }
+    }
+
+    private fun handleBottomNavigationVisibility(destination: NavDestination, navigationArgs: Bundle?) {
+        val fileListArgs = navigationArgs?.let(FileListFragmentArgs::fromBundle)
+
+        val isVisible = when {
+            fileListArgs?.shouldHideBottomNavigation == true -> false
+            destination.id == R.id.addFileBottomSheetDialog
+                    || destination.id == R.id.favoritesFragment
+                    || destination.id == R.id.fileInfoActionsBottomSheetDialog
+                    || destination.id == R.id.fileListFragment
+                    || destination.id == R.id.homeFragment
+                    || destination.id == R.id.menuFragment
+                    || destination.id == R.id.sharedWithMeFragment -> true
+            else -> false
+        }
+
+        mainFab.isVisible = isVisible
+        bottomNavigation.isVisible = isVisible
+        bottomNavigationBackgroundView.isVisible = isVisible
     }
 
     private fun launchSyncOffline() {

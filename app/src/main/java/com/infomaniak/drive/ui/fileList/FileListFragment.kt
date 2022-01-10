@@ -538,12 +538,19 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         if (isDisabled()) {
             safeNavigate(
                 FileListFragmentDirections.actionFileListFragmentToAccessDeniedBottomSheetFragment(
-                    AccountUtils.getCurrentDrive()?.isUserAdmin() ?: false, id
+                    isAdmin = AccountUtils.getCurrentDrive()?.isUserAdmin() ?: false,
+                    fileId = id,
                 )
             )
         } else {
             fileListViewModel.cancelDownloadFiles()
-            safeNavigate(FileListFragmentDirections.fileListFragmentToFileListFragment(id, name))
+            safeNavigate(
+                FileListFragmentDirections.fileListFragmentToFileListFragment(
+                    folderID = id,
+                    folderName = name,
+                    shouldHideBottomNavigation = navigationArgs.shouldHideBottomNavigation,
+                )
+            )
         }
     }
 

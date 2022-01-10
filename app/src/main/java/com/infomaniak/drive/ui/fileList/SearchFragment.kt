@@ -138,7 +138,13 @@ class SearchFragment : FileListFragment() {
             onFileClicked = { file ->
                 if (file.isFolder()) {
                     fileListViewModel.cancelDownloadFiles()
-                    safeNavigate(SearchFragmentDirections.actionSearchFragmentToFileListFragment(file.id, file.name))
+                    safeNavigate(
+                        SearchFragmentDirections.actionSearchFragmentToFileListFragment(
+                            folderID = file.id,
+                            folderName = file.name,
+                            shouldHideBottomNavigation = true,
+                        )
+                    )
                 } else {
                     val fileList = getFileObjectsList(null)
                     Utils.displayFile(mainViewModel, findNavController(), file, fileList)
