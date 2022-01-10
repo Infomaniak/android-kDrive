@@ -27,8 +27,8 @@ import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.DateFilterKey
 import com.infomaniak.drive.data.models.SearchDateFilter
+import com.infomaniak.drive.data.models.SearchDateFilter.DateFilterKey
 import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_search_filter_date.*

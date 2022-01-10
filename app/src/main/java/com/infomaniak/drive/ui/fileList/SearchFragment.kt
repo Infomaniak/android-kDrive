@@ -32,6 +32,7 @@ import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.*
+import com.infomaniak.drive.data.models.SearchFilter.*
 import com.infomaniak.drive.ui.fileList.FileListViewModel.*
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.DebouncingTextWatcher

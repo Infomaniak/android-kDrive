@@ -17,18 +17,23 @@
  */
 package com.infomaniak.drive.data.models
 
-data class SearchFilter(
-    val key: FilterKey,
-    val text: String,
-    val icon: Int? = null,
-    val tint: String? = null,
-    val categoryId: Int? = null,
-) {
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+import java.util.*
 
-    enum class FilterKey {
-        DATE,
-        TYPE,
-        CATEGORIES,
-        CATEGORIES_OWNERSHIP,
+@Parcelize
+data class SearchDateFilter(
+    val key: DateFilterKey,
+    val start: Date,
+    val end: Date,
+    val text: String,
+) : Parcelable {
+
+    @Parcelize
+    enum class DateFilterKey : Parcelable {
+        TODAY,
+        YESTERDAY,
+        LAST_SEVEN_DAYS,
+        CUSTOM,
     }
 }

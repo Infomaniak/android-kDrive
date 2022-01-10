@@ -17,18 +17,11 @@
  */
 package com.infomaniak.drive.data.models
 
-data class SearchFilter(
-    val key: FilterKey,
-    val text: String,
-    val icon: Int? = null,
-    val tint: String? = null,
-    val categoryId: Int? = null,
-) {
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 
-    enum class FilterKey {
-        DATE,
-        TYPE,
-        CATEGORIES,
-        CATEGORIES_OWNERSHIP,
-    }
+@Parcelize
+enum class CategoriesOwnershipFilter : Parcelable {
+    BELONG_TO_ALL_CATEGORIES,
+    BELONG_TO_ONE_CATEGORY,
 }
