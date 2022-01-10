@@ -21,10 +21,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.util.Pair
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.SearchDateFilter
@@ -104,26 +107,38 @@ open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun dateIntervalText(start: Date, end: Date): String {
-        return if (start.day() == end.day()) {
-            start.format(FORMAT_LONG)
-        } else {
-            "${start.format(if (start.month() == end.month()) FORMAT_SHORT else FORMAT_MEDIUM)} - ${end.format(FORMAT_LONG)}"
+        val startFormat = when {
+            start.year() != end.year() -> "${start.format(FORMAT_LONG)} - "
+            start.month() != end.month() -> "${start.format(FORMAT_MEDIUM)} - "
+            start.day() != end.day() -> "${start.format(FORMAT_SHORT)} - "
+            else -> ""
         }
+        return startFormat + end.format(FORMAT_LONG)
     }
 
     private fun showDateRangePicker(onPositiveButtonClicked: (Long, Long) -> Unit) {
         activity?.supportFragmentManager?.let { fragmentManager ->
-            with(
-                MaterialDatePicker.Builder
-                    .dateRangePicker()
-                    .setTheme(R.style.MaterialCalendarThemeBackground)
-                    .build()
-            ) {
+            with(dateRangePicker()) {
                 addOnNegativeButtonClickListener { dismiss() }
                 addOnPositiveButtonClickListener { onPositiveButtonClicked(it.first, it.second) }
                 show(fragmentManager, toString())
             }
         }
+    }
+
+    private fun dateRangePicker(): MaterialDatePicker<Pair<Long, Long>> {
+        return MaterialDatePicker.Builder
+            .dateRangePicker()
+            .setTheme(R.style.MaterialCalendarThemeBackground)
+            .setCalendarConstraints(constraintsUntilNow())
+            .build()
+    }
+
+    private fun constraintsUntilNow(): CalendarConstraints {
+        return CalendarConstraints.Builder()
+            .setEnd(Date().time)
+            .setValidator(DateValidatorPointBackward.now())
+            .build()
     }
 
     companion object {
