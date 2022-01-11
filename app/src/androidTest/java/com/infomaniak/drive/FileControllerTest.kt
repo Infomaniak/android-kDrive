@@ -5,7 +5,6 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRepository.getFileListForFolder
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.utils.ApiTestUtils
 import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponse
 import com.infomaniak.drive.utils.ApiTestUtils.createFileForTest
 import com.infomaniak.drive.utils.ApiTestUtils.deleteTestFile
@@ -49,7 +48,7 @@ class FileControllerTest : KDriveTest() {
         val folderName = "TestFolder"
         // Create a folder under root
         val apiRes = ApiRepository.createFolder(okHttpClient, userDrive.driveId, Utils.ROOT_ID, folderName, true)
-        ApiTestUtils.assertApiResponse(apiRes)
+        assertApiResponse(apiRes)
         Assert.assertEquals("The name should correspond", folderName, apiRes.data?.name)
 
         // Delete the test folder

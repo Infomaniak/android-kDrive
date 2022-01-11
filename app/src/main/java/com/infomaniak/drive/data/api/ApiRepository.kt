@@ -221,6 +221,10 @@ object ApiRepository {
         return callApi(ApiRoutes.unLikeCommentFile(file, commentId), POST)
     }
 
+    fun getShareLink(file: File): ApiResponse<ShareLink> {
+        return callApi(ApiRoutes.shareLink(file), GET)
+    }
+
     fun postFileShareLink(file: File, body: Map<String, String>): ApiResponse<ShareLink> {
         return callApi(ApiRoutes.shareLink(file), POST, body)
     }
@@ -259,6 +263,10 @@ object ApiRepository {
 
     fun putFileShareLink(file: File, body: Map<String, Any?>): ApiResponse<Boolean> {
         return callApi(ApiRoutes.shareLink(file), PUT, body)
+    }
+
+    fun getCategory(driveId: Int): ApiResponse<Array<Category>> {
+        return callApi(ApiRoutes.createCategory(driveId), GET)
     }
 
     fun createCategory(driveId: Int, name: String, color: String): ApiResponse<Category> {
