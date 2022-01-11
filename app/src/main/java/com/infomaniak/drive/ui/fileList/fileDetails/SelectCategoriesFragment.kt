@@ -32,7 +32,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.google.android.material.card.MaterialCardView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -150,7 +149,7 @@ class SelectCategoriesFragment : Fragment() {
             if (isAtLeastResumed()) {
                 clearButton.isInvisible = it.isNullOrEmpty()
                 categoriesAdapter.updateFilter(text.toString())
-                handleCreateCategoryRow(it?.trim())
+                configureCreateCategoryRow(it?.trim())
             }
         })
     }
@@ -232,26 +231,33 @@ class SelectCategoriesFragment : Fragment() {
         )
     }
 
-    private fun handleCreateCategoryRow(categoryName: String?) {
+    private fun configureCreateCategoryRow(categoryName: String?) {
         if (usageMode != FILE_CATEGORIES) return
+        setCreateCategoryRowTitle(categoryName)
+        setCreateCategoryRowCorners()
+        setCreateCategoryRowVisibility(categoryName)
+    }
 
-        addCategoryTitle.text = HtmlCompat.fromHtml(
-            getString(R.string.manageCategoriesCreateTitle, "<b>$categoryName</b>"),
-            HtmlCompat.FROM_HTML_MODE_COMPACT,
-        )
+    private fun setCreateCategoryRowTitle(categoryName: String?) {
+        categoryName?.let {
+            addCategoryTitle.text = HtmlCompat.fromHtml(
+                getString(R.string.manageCategoriesCreateTitle, "<b>$it</b>"),
+                HtmlCompat.FROM_HTML_MODE_COMPACT,
+            )
+        }
+    }
 
-        createCategoryRow.setCorners()
+    private fun setCreateCategoryRowCorners() {
+        val radius = resources.getDimension(R.dimen.cardViewRadius)
+        val topCornerRadius = if (categoriesAdapter.filteredCategories.isEmpty()) radius else 0.0f
+        createCategoryRow.setCornersRadius(topCornerRadius, radius)
+    }
 
+    private fun setCreateCategoryRowVisibility(categoryName: String?) {
         val isVisible = categoryName?.isNotBlank() == true && !categoriesAdapter.doesCategoryExist(categoryName)
         categoriesAdapter.isCreateRowVisible = isVisible
         createCategoryRow.isVisible = isVisible
         createCategoryRowSeparator.isVisible = isVisible && categoriesAdapter.filteredCategories.isNotEmpty()
-    }
-
-    private fun MaterialCardView.setCorners() {
-        val radius = resources.getDimension(R.dimen.cardViewRadius)
-        val topCornerRadius = if (categoriesAdapter.filteredCategories.isEmpty()) radius else 0.0f
-        setCornersRadius(topCornerRadius, radius)
     }
 
     private fun addCategory(id: Int) {
