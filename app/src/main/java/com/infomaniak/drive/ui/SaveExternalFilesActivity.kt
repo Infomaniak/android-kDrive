@@ -307,12 +307,13 @@ class SaveExternalFilesActivity : BaseActivity() {
             if (outputFile.createNewFile()) {
                 outputFile.setLastModified(lastModified.time)
 
-                if (extension == ".url") {
+                if (extension == ".url") { // Create url file
+                    // See URL format http://www.lyberty.com/encyc/articles/tech/dot_url_format_-_an_unofficial_guide.html
                     outputFile.outputStream().use { output ->
                         output.write("[InternetShortcut]".toByteArray())
                         output.write("URL=$text".toByteArray())
                     }
-                } else {
+                } else { // Create text file
                     outputFile.writeText(text)
                 }
 
