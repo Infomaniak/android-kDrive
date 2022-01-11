@@ -21,19 +21,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.util.Pair
+import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.android.material.datepicker.CalendarConstraints
-import com.google.android.material.datepicker.DateValidatorPointBackward
-import com.google.android.material.datepicker.MaterialDatePicker
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.SearchDateFilter
 import com.infomaniak.drive.data.models.SearchDateFilter.DateFilterKey
-import com.infomaniak.drive.utils.*
-import com.infomaniak.lib.core.utils.format
+import com.infomaniak.drive.utils.intervalAsText
+import com.infomaniak.drive.utils.endOfTheDay
+import com.infomaniak.drive.utils.setBackNavigationResult
+import com.infomaniak.drive.utils.startOfTheDay
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_search_filter_date.*
 import java.util.*
 
@@ -88,63 +86,32 @@ open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
         lastSevenDaysFilterLayout.setOnClickListener {
             val start = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -6) }.time.startOfTheDay()
             val end = Date().endOfTheDay()
-            setBackNavResult(DateFilterKey.LAST_SEVEN_DAYS, start, end, dateIntervalText(start, end))
+            setBackNavResult(DateFilterKey.LAST_SEVEN_DAYS, start, end, start.intervalAsText(end))
         }
     }
 
     private fun setCustomDateClick() {
         customFilterLayout.setOnClickListener {
-            showDateRangePicker { startTime, endTime ->
-                val start = Date(startTime).startOfTheDay()
-                val end = Date(endTime).endOfTheDay()
-                setBackNavResult(DateFilterKey.CUSTOM, start, end, dateIntervalText(start, end))
-            }
+            setBackNavResult(DateFilterKey.CUSTOM)
         }
     }
 
-    private fun setBackNavResult(key: DateFilterKey, start: Date, end: Date, text: String) {
-        setBackNavigationResult(SEARCH_FILTER_DATE_NAV_KEY, SearchDateFilter(key, start, end, text))
-    }
-
-    private fun dateIntervalText(start: Date, end: Date): String {
-        val startFormat = when {
-            start.year() != end.year() -> "${start.format(FORMAT_LONG)} - "
-            start.month() != end.month() -> "${start.format(FORMAT_MEDIUM)} - "
-            start.day() != end.day() -> "${start.format(FORMAT_SHORT)} - "
-            else -> ""
-        }
-        return startFormat + end.format(FORMAT_LONG)
-    }
-
-    private fun showDateRangePicker(onPositiveButtonClicked: (Long, Long) -> Unit) {
-        activity?.supportFragmentManager?.let { fragmentManager ->
-            with(dateRangePicker()) {
-                addOnNegativeButtonClickListener { dismiss() }
-                addOnPositiveButtonClickListener { onPositiveButtonClicked(it.first, it.second) }
-                show(fragmentManager, toString())
-            }
-        }
-    }
-
-    private fun dateRangePicker(): MaterialDatePicker<Pair<Long, Long>> {
-        return MaterialDatePicker.Builder
-            .dateRangePicker()
-            .setTheme(R.style.MaterialCalendarThemeBackground)
-            .setCalendarConstraints(constraintsUntilNow())
-            .build()
-    }
-
-    private fun constraintsUntilNow(): CalendarConstraints {
-        return CalendarConstraints.Builder()
-            .setEnd(Date().time)
-            .setValidator(DateValidatorPointBackward.now())
-            .build()
+    private fun setBackNavResult(key: DateFilterKey, start: Date? = null, end: Date? = null, text: String? = null) {
+        setBackNavigationResult(
+            SEARCH_FILTER_DATE_NAV_KEY, bundleOf(
+                SEARCH_FILTER_DATE_KEY_BUNDLE_KEY to key,
+                SEARCH_FILTER_DATE_START_BUNDLE_KEY to start?.time,
+                SEARCH_FILTER_DATE_END_BUNDLE_KEY to end?.time,
+                SEARCH_FILTER_DATE_TEXT_BUNDLE_KEY to text,
+            )
+        )
     }
 
     companion object {
         const val SEARCH_FILTER_DATE_NAV_KEY = "search_filter_date_nav_key"
-        private const val FORMAT_LONG = "d MMM yyyy"
-        private const val FORMAT_MEDIUM = "d MMM"
-        private const val FORMAT_SHORT = "d"
+        const val SEARCH_FILTER_DATE_KEY_BUNDLE_KEY = "search_filter_date_key_bundle_key"
+        const val SEARCH_FILTER_DATE_START_BUNDLE_KEY = "search_filter_date_start_bundle_key"
+        const val SEARCH_FILTER_DATE_END_BUNDLE_KEY = "search_filter_date_end_bundle_key"
+        const val SEARCH_FILTER_DATE_TEXT_BUNDLE_KEY = "search_filter_date_text_bundle_key"
     }
 }

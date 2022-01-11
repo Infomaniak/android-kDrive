@@ -30,20 +30,24 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.DateValidatorPointBackward
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.CategoriesOwnershipFilter
 import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.SearchDateFilter
+import com.infomaniak.drive.data.models.SearchDateFilter.DateFilterKey
 import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterDateBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterTypeBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.SearchFiltersViewModel.Companion.DEFAULT_CATEGORIES_OWNERSHIP_VALUE
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
-import com.infomaniak.drive.utils.getBackNavigationResult
-import com.infomaniak.drive.utils.safeNavigate
-import com.infomaniak.drive.utils.setBackNavigationResult
+import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.utils.toPx
 import kotlinx.android.synthetic.main.fragment_search_filters.*
+import java.util.*
+import androidx.core.util.Pair as AndroidPair
 
 class SearchFiltersFragment : Fragment() {
 
@@ -134,9 +138,13 @@ class SearchFiltersFragment : Fragment() {
     }
 
     private fun setBackActionHandlers() = with(searchFiltersViewModel) {
-        getBackNavigationResult<Parcelable>(SearchFilterDateBottomSheetDialog.SEARCH_FILTER_DATE_NAV_KEY) {
-            date = it as SearchDateFilter
-            updateDateUI()
+        getBackNavigationResult<Bundle>(SearchFilterDateBottomSheetDialog.SEARCH_FILTER_DATE_NAV_KEY) {
+            val key: DateFilterKey? = it.getParcelable(SearchFilterDateBottomSheetDialog.SEARCH_FILTER_DATE_KEY_BUNDLE_KEY)
+            if (key == DateFilterKey.CUSTOM) {
+                handleCustomSearchDateFilter()
+            } else {
+                handleGenericSearchDateFilter(it)
+            }
         }
 
         getBackNavigationResult<Parcelable>(SearchFilterTypeBottomSheetDialog.SEARCH_FILTER_TYPE_NAV_KEY) {
@@ -148,6 +156,54 @@ class SearchFiltersFragment : Fragment() {
             categories = if (it.isEmpty()) null else DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray())
             updateAllFiltersUI()
         }
+    }
+
+    private fun handleCustomSearchDateFilter() {
+        showDateRangePicker { startTime, endTime ->
+            val key = DateFilterKey.CUSTOM
+            val start = Date(startTime).startOfTheDay()
+            val end = Date(endTime).endOfTheDay()
+            val text = start.intervalAsText(end)
+            updateSearchDateFilter(key, start, end, text)
+        }
+    }
+
+    private fun handleGenericSearchDateFilter(bundle: Bundle) = with(bundle) {
+        val key = getParcelable<DateFilterKey>(SearchFilterDateBottomSheetDialog.SEARCH_FILTER_DATE_KEY_BUNDLE_KEY) ?: return
+        val start = getLong(SearchFilterDateBottomSheetDialog.SEARCH_FILTER_DATE_START_BUNDLE_KEY)
+        val end = getLong(SearchFilterDateBottomSheetDialog.SEARCH_FILTER_DATE_END_BUNDLE_KEY)
+        val text = getString(SearchFilterDateBottomSheetDialog.SEARCH_FILTER_DATE_TEXT_BUNDLE_KEY) ?: return
+        updateSearchDateFilter(key, Date(start), Date(end), text)
+    }
+
+    private fun updateSearchDateFilter(key: DateFilterKey, start: Date, end: Date, text: String) {
+        searchFiltersViewModel.date = SearchDateFilter(key, start, end, text)
+        updateDateUI()
+    }
+
+    private fun showDateRangePicker(onPositiveButtonClicked: (Long, Long) -> Unit) {
+        activity?.supportFragmentManager?.let { fragmentManager ->
+            with(dateRangePicker()) {
+                addOnNegativeButtonClickListener { dismiss() }
+                addOnPositiveButtonClickListener { onPositiveButtonClicked(it.first, it.second) }
+                show(fragmentManager, toString())
+            }
+        }
+    }
+
+    private fun dateRangePicker(): MaterialDatePicker<AndroidPair<Long, Long>> {
+        return MaterialDatePicker.Builder
+            .dateRangePicker()
+            .setTheme(R.style.MaterialCalendarThemeBackground)
+            .setCalendarConstraints(constraintsUntilNow())
+            .build()
+    }
+
+    private fun constraintsUntilNow(): CalendarConstraints {
+        return CalendarConstraints.Builder()
+            .setEnd(Date().time)
+            .setValidator(DateValidatorPointBackward.now())
+            .build()
     }
 
     private fun updateAllFiltersUI() {
