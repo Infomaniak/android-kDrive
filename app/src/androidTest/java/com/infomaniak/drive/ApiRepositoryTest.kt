@@ -17,22 +17,29 @@
  */
 package com.infomaniak.drive
 
+import androidx.collection.arrayMapOf
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.gson.JsonObject
 import com.infomaniak.drive.data.api.ApiRepository.addCategory
 import com.infomaniak.drive.data.api.ApiRepository.createCategory
+import com.infomaniak.drive.data.api.ApiRepository.createFolder
 import com.infomaniak.drive.data.api.ApiRepository.deleteCategory
+import com.infomaniak.drive.data.api.ApiRepository.deleteDropBox
 import com.infomaniak.drive.data.api.ApiRepository.deleteFavoriteFile
 import com.infomaniak.drive.data.api.ApiRepository.deleteFileComment
 import com.infomaniak.drive.data.api.ApiRepository.deleteFileShareLink
 import com.infomaniak.drive.data.api.ApiRepository.editCategory
 import com.infomaniak.drive.data.api.ApiRepository.getAllDrivesData
 import com.infomaniak.drive.data.api.ApiRepository.getCategory
+import com.infomaniak.drive.data.api.ApiRepository.getDropBox
 import com.infomaniak.drive.data.api.ApiRepository.getFavoriteFiles
 import com.infomaniak.drive.data.api.ApiRepository.getFileActivities
 import com.infomaniak.drive.data.api.ApiRepository.getFileComments
 import com.infomaniak.drive.data.api.ApiRepository.getFileDetails
+import com.infomaniak.drive.data.api.ApiRepository.getLastActivities
 import com.infomaniak.drive.data.api.ApiRepository.getShareLink
 import com.infomaniak.drive.data.api.ApiRepository.getUserProfile
+import com.infomaniak.drive.data.api.ApiRepository.postDropBox
 import com.infomaniak.drive.data.api.ApiRepository.postFavoriteFile
 import com.infomaniak.drive.data.api.ApiRepository.postFileComment
 import com.infomaniak.drive.data.api.ApiRepository.postFileCommentLike
@@ -42,12 +49,15 @@ import com.infomaniak.drive.data.api.ApiRepository.postFileShareLink
 import com.infomaniak.drive.data.api.ApiRepository.putFileComment
 import com.infomaniak.drive.data.api.ApiRepository.putFileShareLink
 import com.infomaniak.drive.data.api.ApiRepository.removeCategory
+import com.infomaniak.drive.data.api.ApiRepository.updateDropBox
 import com.infomaniak.drive.data.api.ApiRoutes.postFileShare
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponse
 import com.infomaniak.drive.utils.ApiTestUtils.createFileForTest
 import com.infomaniak.drive.utils.ApiTestUtils.deleteTestFile
 import com.infomaniak.drive.utils.KDriveHttpClient
+import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.lib.core.networking.HttpClient.okHttpClient
 import io.realm.Realm
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -313,5 +323,63 @@ class ApiRepositoryTest : KDriveTest() {
         // Delete the test category and file
         deleteCategory(userDrive.driveId, category.id)
         deleteTestFile(file)
+    }
+
+    @Test
+    fun getLastActivityTest() {
+        getLastActivities(userDrive.driveId, 1).also {
+            assertApiResponse(it)
+            Assert.assertTrue("Last activities shouldn't be empty or null", it.data!!.isNotEmpty())
+        }
+    }
+
+    @Test
+    fun manageDropboxLifecycle() {
+        // Create a folder to convert it in dropbox
+        val folder = createFolder(okHttpClient, userDrive.driveId, ROOT_ID, "test", false).data
+        Assert.assertNotNull(folder)
+        // No dropbox yet
+        assertApiResponse(getDropBox(folder!!), false)
+
+        val maxSize = 16384L
+        val body = arrayMapOf(
+            "email_when_finished" to true,
+            "limit_file_size" to maxSize,
+            "password" to "password"
+        )
+        // Add a dropBox
+        val dropboxId = postDropBox(folder, body).let {
+            assertApiResponse(it)
+            Assert.assertTrue("Email when finished must be true", it.data!!.emailWhenFinished)
+            Assert.assertEquals("Limit file size should be $maxSize", maxSize, it.data!!.limitFileSize)
+            it.data!!.id
+        }
+
+        getDropBox(folder).also {
+            assertApiResponse(it)
+            Assert.assertEquals("Dropbox name should be 'test'", "test", it.data!!.alias)
+            Assert.assertEquals("Dropbox id should be $dropboxId", dropboxId, it.data!!.id)
+        }
+        val data = JsonObject().apply {
+            addProperty("email_when_finished", false)
+            addProperty("limit_file_size", maxSize * 2)
+        }
+
+        updateDropBox(folder, data).also {
+            assertApiResponse(it)
+            Assert.assertTrue(it.data!!)
+        }
+
+        getDropBox(folder).also {
+            assertApiResponse(it)
+            Assert.assertEquals("Dropbox id should be $dropboxId", dropboxId, it.data!!.id)
+            Assert.assertEquals("Email when finished should be false", false, it.data!!.emailWhenFinished)
+            Assert.assertEquals("Limit file size should be ${maxSize * 2}", maxSize * 2, it.data!!.limitFileSize)
+        }
+
+        assertApiResponse(deleteDropBox(folder))
+        // No dropbox left
+        assertApiResponse(getDropBox(folder), false)
+
     }
 }
