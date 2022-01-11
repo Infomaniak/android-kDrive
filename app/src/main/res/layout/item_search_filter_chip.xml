@@ -20,8 +20,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:fontFamily="@font/suisseintl_medium"
-    android:maxLines="1"
     android:textColor="@color/title"
     app:chipBackgroundColor="@color/backgroundCardview"
     app:chipCornerRadius="@dimen/cardViewRadius"
