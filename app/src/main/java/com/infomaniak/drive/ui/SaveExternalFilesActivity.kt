@@ -59,6 +59,10 @@ class SaveExternalFilesActivity : BaseActivity() {
     private val selectDriveViewModel: SelectDriveViewModel by viewModels()
     private val saveExternalFilesViewModel: SaveExternalFilesViewModel by viewModels()
 
+    private val sharedFolder: java.io.File by lazy {
+        java.io.File(cacheDir, SHARED_FILE_FOLDER).apply { if (!exists()) mkdirs() }
+    }
+
     private lateinit var drivePermissions: DrivePermissions
     private var currentUri: Uri? = null
     private var isMultiple = false
@@ -162,8 +166,8 @@ class SaveExternalFilesActivity : BaseActivity() {
         if (currentUri == null && !isMultiple) {
             try {
                 when (intent?.action) {
-                    Intent.ACTION_SEND -> handleSendSingle(intent)
-                    Intent.ACTION_SEND_MULTIPLE -> handleSendMultiple(intent)
+                    Intent.ACTION_SEND -> handleSendSingle()
+                    Intent.ACTION_SEND_MULTIPLE -> handleSendMultiple()
                 }
             } catch (exception: Exception) {
                 exception.printStackTrace()
@@ -212,19 +216,31 @@ class SaveExternalFilesActivity : BaseActivity() {
         return true
     }
 
-    private fun handleSendSingle(intent: Intent) {
-        (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let { uri ->
-            currentUri = uri
-            fileNameEditLayout.isVisible = true
-            fileNameEdit.addTextChangedListener {
-                fileNameEdit.showOrHideEmptyError()
-                checkEnabledSaveButton()
-            }
-            fileNameEdit.setText(uri.fileName())
+    private fun handleSendSingle() {
+        fileNameEdit.addTextChangedListener {
+            fileNameEdit.showOrHideEmptyError()
+            checkEnabledSaveButton()
         }
+
+        var showEditText = false
+
+        if (intent.hasExtra(Intent.EXTRA_TEXT)) {
+            fileNameEdit.setText(intent.getStringExtra(Intent.EXTRA_SUBJECT) ?: "")
+            showEditText = true
+
+        } else {
+            (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let { uri ->
+                currentUri = uri
+                showEditText = true
+                fileNameEdit.setText(uri.fileName())
+            }
+        }
+
+        fileNameEditLayout.isVisible = showEditText
+
     }
 
-    private fun handleSendMultiple(intent: Intent) {
+    private fun handleSendMultiple() {
         val uris = intent.getParcelableArrayListExtra<Parcelable>(Intent.EXTRA_STREAM)?.map { it as Uri } ?: arrayListOf()
         fileNames.adapter = SaveExternalUriAdapter(uris as ArrayList<Uri>)
         isMultiple = true
@@ -256,16 +272,19 @@ class SaveExternalFilesActivity : BaseActivity() {
         }
     }
 
-    private fun storeFiles(userID: Int, driveID: Int, folderID: Int): Boolean {
+    private fun storeFiles(userId: Int, driveId: Int, folderId: Int): Boolean {
         return try {
-            if (isMultiple) {
-                val adapter = fileNames.adapter as SaveExternalUriAdapter
-                adapter.uris.forEach { currentUri ->
-                    if (!store(uri = currentUri, userId = userID, driveId = driveID, folderId = folderID)) return false
+            when {
+                isMultiple -> {
+                    val adapter = fileNames.adapter as SaveExternalUriAdapter
+                    adapter.uris.forEach { currentUri ->
+                        if (!store(uri = currentUri, userId = userId, driveId = driveId, folderId = folderId)) return false
+                    }
+                    true
                 }
-                true
-            } else {
-                store(currentUri!!, fileNameEdit.text.toString(), userID, driveID, folderID)
+                intent.hasExtra(Intent.EXTRA_TEXT) -> storeText(userId, driveId, folderId)
+                else -> store(currentUri!!, fileNameEdit.text.toString(), userId, driveId, folderId)
+
             }
         } catch (exception: Exception) {
             exception.printStackTrace()
@@ -278,9 +297,44 @@ class SaveExternalFilesActivity : BaseActivity() {
         }
     }
 
-    private fun store(uri: Uri, name: String? = null, userId: Int, driveId: Int, folderId: Int): Boolean {
-        val folder = java.io.File(cacheDir, SHARED_FILE_FOLDER).apply { if (!exists()) mkdirs() }
+    private fun storeText(userId: Int, driveId: Int, folderId: Int): Boolean {
+        intent.getStringExtra(Intent.EXTRA_TEXT)?.let { text ->
+            val extension = if (text.isValidUrl()) ".url" else ".txt"
+            val fileName = fileNameEdit.text.toString() + extension
+            val lastModified = Date()
+            val outputFile = java.io.File(sharedFolder, fileName).also { if (it.exists()) it.delete() }
 
+            if (outputFile.createNewFile()) {
+                outputFile.setLastModified(lastModified.time)
+
+                if (extension == ".url") {
+                    outputFile.outputStream().use { output ->
+                        output.write("[InternetShortcut]".toByteArray())
+                        output.write("URL=$text".toByteArray())
+                    }
+                } else {
+                    outputFile.writeText(text)
+                }
+
+                UploadFile(
+                    uri = outputFile.toUri().toString(),
+                    userId = userId,
+                    driveId = driveId,
+                    remoteFolder = folderId,
+                    type = UploadFile.Type.SHARED_FILE.name,
+                    fileSize = outputFile.length(),
+                    fileName = fileName,
+                    fileCreatedAt = lastModified,
+                    fileModifiedAt = lastModified
+                ).store()
+
+                return true
+            }
+        }
+        return false
+    }
+
+    private fun store(uri: Uri, name: String? = null, userId: Int, driveId: Int, folderId: Int): Boolean {
         contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
@@ -290,7 +344,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 try {
                     if (fileName == null) return false
 
-                    val outputFile = java.io.File(folder, fileName).also { if (it.exists()) it.delete() }
+                    val outputFile = java.io.File(sharedFolder, fileName).also { if (it.exists()) it.delete() }
 
                     if (outputFile.createNewFile()) {
                         outputFile.setLastModified(fileModifiedAt.time)
