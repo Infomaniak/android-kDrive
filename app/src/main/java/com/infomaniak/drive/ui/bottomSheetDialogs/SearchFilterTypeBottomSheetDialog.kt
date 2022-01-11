@@ -20,14 +20,16 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 import android.os.Bundle
 import android.view.View
 import androidx.navigation.fragment.navArgs
+import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ConvertedType
-import com.infomaniak.drive.utils.setBackNavigationResult
+import com.infomaniak.drive.ui.fileList.SearchFiltersViewModel
 import com.infomaniak.drive.views.SelectBottomSheetDialog
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_select.*
 
 open class SearchFilterTypeBottomSheetDialog : SelectBottomSheetDialog() {
 
+    private val searchFiltersViewModel: SearchFiltersViewModel by navGraphViewModels(R.id.searchFiltersFragment)
     private val navigationArgs: SearchFilterTypeBottomSheetDialogArgs by navArgs()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -36,7 +38,10 @@ open class SearchFilterTypeBottomSheetDialog : SelectBottomSheetDialog() {
         selectRecyclerView.adapter = SearchFilterTypeBottomSheetAdapter(
             getSortedTypes(),
             navigationArgs.type,
-            onTypeClicked = { setBackNavigationResult(SEARCH_FILTER_TYPE_NAV_KEY, it) },
+            onTypeClicked = {
+                searchFiltersViewModel.type.value = it
+                dismiss()
+            },
         )
     }
 
@@ -53,9 +58,5 @@ open class SearchFilterTypeBottomSheetDialog : SelectBottomSheetDialog() {
             ConvertedType.TEXT,
             ConvertedType.VIDEO,
         ).sortedBy { getString(it.searchFilterName) }
-    }
-
-    companion object {
-        const val SEARCH_FILTER_TYPE_NAV_KEY = "search_filter_type_nav_key"
     }
 }

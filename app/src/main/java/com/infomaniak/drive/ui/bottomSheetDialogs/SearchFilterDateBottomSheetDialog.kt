@@ -21,22 +21,28 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.navArgs
+import androidx.navigation.navGraphViewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.DateValidatorPointBackward
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.SearchDateFilter
 import com.infomaniak.drive.data.models.SearchDateFilter.DateFilterKey
-import com.infomaniak.drive.utils.intervalAsText
+import com.infomaniak.drive.ui.fileList.SearchFiltersViewModel
 import com.infomaniak.drive.utils.endOfTheDay
-import com.infomaniak.drive.utils.setBackNavigationResult
+import com.infomaniak.drive.utils.intervalAsText
 import com.infomaniak.drive.utils.startOfTheDay
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_search_filter_date.*
 import java.util.*
+import androidx.core.util.Pair as AndroidPair
 
 open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
 
+    private val searchFiltersViewModel: SearchFiltersViewModel by navGraphViewModels(R.id.searchFiltersFragment)
     private val navigationArgs: SearchFilterDateBottomSheetDialogArgs by navArgs()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
@@ -69,7 +75,7 @@ open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
     private fun setTodayClick() {
         todayFilterLayout.setOnClickListener {
             with(Date()) {
-                setBackNavResult(DateFilterKey.TODAY, startOfTheDay(), endOfTheDay(), getString(R.string.allToday))
+                setDateFilter(DateFilterKey.TODAY, startOfTheDay(), endOfTheDay(), getString(R.string.allToday))
             }
         }
     }
@@ -77,7 +83,7 @@ open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
     private fun setYesterdayClick() {
         yesterdayFilterLayout.setOnClickListener {
             with(Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }.time) {
-                setBackNavResult(DateFilterKey.YESTERDAY, startOfTheDay(), endOfTheDay(), getString(R.string.allYesterday))
+                setDateFilter(DateFilterKey.YESTERDAY, startOfTheDay(), endOfTheDay(), getString(R.string.allYesterday))
             }
         }
     }
@@ -86,32 +92,68 @@ open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
         lastSevenDaysFilterLayout.setOnClickListener {
             val start = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -6) }.time.startOfTheDay()
             val end = Date().endOfTheDay()
-            setBackNavResult(DateFilterKey.LAST_SEVEN_DAYS, start, end, start.intervalAsText(end))
+            setDateFilter(DateFilterKey.LAST_SEVEN_DAYS, start, end, start.intervalAsText(end))
         }
     }
 
     private fun setCustomDateClick() {
         customFilterLayout.setOnClickListener {
-            setBackNavResult(DateFilterKey.CUSTOM)
+            setDateFilter(DateFilterKey.CUSTOM)
         }
     }
 
-    private fun setBackNavResult(key: DateFilterKey, start: Date? = null, end: Date? = null, text: String? = null) {
-        setBackNavigationResult(
-            SEARCH_FILTER_DATE_NAV_KEY, bundleOf(
-                SEARCH_FILTER_DATE_KEY_BUNDLE_KEY to key,
-                SEARCH_FILTER_DATE_START_BUNDLE_KEY to start?.time,
-                SEARCH_FILTER_DATE_END_BUNDLE_KEY to end?.time,
-                SEARCH_FILTER_DATE_TEXT_BUNDLE_KEY to text,
-            )
+    private fun setDateFilter(key: DateFilterKey, start: Date? = null, end: Date? = null, text: String? = null) {
+        if (key == DateFilterKey.CUSTOM) {
+            handleCustomDateFilter()
+        } else {
+            handleGenericDateFilter(key, start, end, text)
+        }
+    }
+
+    private fun handleCustomDateFilter() {
+        showDateRangePicker { startTime, endTime ->
+            val key = DateFilterKey.CUSTOM
+            val start = Date(startTime).startOfTheDay()
+            val end = Date(endTime).endOfTheDay()
+            val text = start.intervalAsText(end)
+            updateDateFilter(key, start, end, text)
+        }
+    }
+
+    private fun handleGenericDateFilter(key: DateFilterKey, start: Date?, end: Date?, text: String?) {
+        updateDateFilter(
+            key = key,
+            start = start ?: return,
+            end = end ?: return,
+            text = text ?: return,
         )
     }
 
-    companion object {
-        const val SEARCH_FILTER_DATE_NAV_KEY = "search_filter_date_nav_key"
-        const val SEARCH_FILTER_DATE_KEY_BUNDLE_KEY = "search_filter_date_key_bundle_key"
-        const val SEARCH_FILTER_DATE_START_BUNDLE_KEY = "search_filter_date_start_bundle_key"
-        const val SEARCH_FILTER_DATE_END_BUNDLE_KEY = "search_filter_date_end_bundle_key"
-        const val SEARCH_FILTER_DATE_TEXT_BUNDLE_KEY = "search_filter_date_text_bundle_key"
+    private fun updateDateFilter(key: DateFilterKey, start: Date, end: Date, text: String) {
+        searchFiltersViewModel.date.value = SearchDateFilter(key, start, end, text)
+        dismiss()
+    }
+
+    private fun showDateRangePicker(onPositiveButtonClicked: (Long, Long) -> Unit) {
+        with(dateRangePicker()) {
+            addOnNegativeButtonClickListener { dismiss() }
+            addOnPositiveButtonClickListener { onPositiveButtonClicked(it.first, it.second) }
+            show(this@SearchFilterDateBottomSheetDialog.childFragmentManager, toString())
+        }
+    }
+
+    private fun dateRangePicker(): MaterialDatePicker<AndroidPair<Long, Long>> {
+        return MaterialDatePicker.Builder
+            .dateRangePicker()
+            .setTheme(R.style.MaterialCalendarThemeBackground)
+            .setCalendarConstraints(constraintsUntilNow())
+            .build()
+    }
+
+    private fun constraintsUntilNow(): CalendarConstraints {
+        return CalendarConstraints.Builder()
+            .setEnd(Date().time)
+            .setValidator(DateValidatorPointBackward.now())
+            .build()
     }
 }

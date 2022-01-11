@@ -22,17 +22,18 @@ import com.infomaniak.drive.data.models.CategoriesOwnershipFilter
 import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.SearchDateFilter
 import com.infomaniak.drive.data.models.drive.Category
+import com.infomaniak.drive.utils.SingleLiveEvent
 
 class SearchFiltersViewModel : ViewModel() {
 
-    var date: SearchDateFilter? = null
-    var type: ConvertedType? = null
+    var date = SingleLiveEvent<SearchDateFilter?>()
+    var type = SingleLiveEvent<ConvertedType?>()
     var categories: List<Category>? = null
     var categoriesOwnership: CategoriesOwnershipFilter = DEFAULT_CATEGORIES_OWNERSHIP_VALUE
 
     fun clearFilters() {
-        date = null
-        type = null
+        date.value = null
+        type.value = null
         categories = null
         categoriesOwnership = DEFAULT_CATEGORIES_OWNERSHIP_VALUE
     }
