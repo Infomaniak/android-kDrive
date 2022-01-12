@@ -152,34 +152,7 @@ class MainActivity : BaseActivity() {
         })
 
         navController.addOnDestinationChangedListener { _, destination, navigationArgs ->
-            Sentry.addBreadcrumb(Breadcrumb().apply {
-                category = "Navigation"
-                message = "Accessed to destination : ${destination.displayName}"
-                level = SentryLevel.INFO
-            })
-
-            handleBottomNavigationVisibility(destination, navigationArgs)
-
-            when (destination.id) {
-                R.id.favoritesFragment,
-                R.id.homeFragment,
-                R.id.menuFragment -> {
-                    // Defining default root folder
-                    mainViewModel.currentFolder.value = AccountUtils.getCurrentDrive()?.convertToFile(getRootName(this))
-                }
-            }
-
-            when (destination.id) {
-                R.id.fileDetailsFragment, R.id.fileShareLinkSettingsFragment -> {
-                    setColorStatusBar(destination.id == R.id.fileShareLinkSettingsFragment)
-                    setColorNavigationBar(true)
-                }
-                R.id.downloadProgressDialog, R.id.previewSliderFragment -> Unit
-                else -> {
-                    setColorStatusBar()
-                    setColorNavigationBar()
-                }
-            }
+            onDestinationChanged(destination, navigationArgs)
         }
 
         mainFab.setOnClickListener { navController.navigate(R.id.addFileBottomSheetDialog) }
@@ -257,18 +230,49 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun handleBottomNavigationVisibility(destination: NavDestination, navigationArgs: Bundle?) {
-        val fileListArgs = navigationArgs?.let(FileListFragmentArgs::fromBundle)
+    private fun onDestinationChanged(destination: NavDestination, navigationArgs: Bundle?) {
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = "Navigation"
+            message = "Accessed to destination : ${destination.displayName}"
+            level = SentryLevel.INFO
+        })
 
-        val isVisible = when {
-            fileListArgs?.shouldHideBottomNavigation == true -> false
-            destination.id == R.id.addFileBottomSheetDialog
-                    || destination.id == R.id.favoritesFragment
-                    || destination.id == R.id.fileInfoActionsBottomSheetDialog
-                    || destination.id == R.id.fileListFragment
-                    || destination.id == R.id.homeFragment
-                    || destination.id == R.id.menuFragment
-                    || destination.id == R.id.sharedWithMeFragment -> true
+        val shouldHideBottomNavigation = navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldHideBottomNavigation
+
+        handleBottomNavigationVisibility(destination.id, shouldHideBottomNavigation)
+
+        when (destination.id) {
+            R.id.favoritesFragment,
+            R.id.homeFragment,
+            R.id.menuFragment -> {
+                // Defining default root folder
+                mainViewModel.currentFolder.value = AccountUtils.getCurrentDrive()?.convertToFile(getRootName(this))
+            }
+        }
+
+        when (destination.id) {
+            R.id.fileDetailsFragment, R.id.fileShareLinkSettingsFragment -> {
+                setColorStatusBar(destination.id == R.id.fileShareLinkSettingsFragment)
+                setColorNavigationBar(true)
+            }
+            R.id.downloadProgressDialog, R.id.previewSliderFragment -> Unit
+            else -> {
+                setColorStatusBar()
+                setColorNavigationBar()
+            }
+        }
+    }
+
+    private fun handleBottomNavigationVisibility(destinationId: Int, shouldHideBottomNavigation: Boolean?) {
+
+        val isVisible = when (destinationId) {
+            R.id.addFileBottomSheetDialog,
+            R.id.favoritesFragment,
+            R.id.fileInfoActionsBottomSheetDialog,
+            R.id.fileListFragment,
+            R.id.homeFragment,
+            R.id.menuFragment,
+            R.id.sharedWithMeFragment -> shouldHideBottomNavigation != true
             else -> false
         }
 
