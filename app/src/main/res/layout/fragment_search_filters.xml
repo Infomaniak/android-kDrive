@@ -48,34 +48,48 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginHorizontal="@dimen/marginStandard"
-        android:layout_marginTop="@dimen/marginStandard"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/recyclerViewPaddingBottom">
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/start"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_begin="@dimen/marginStandard" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/end"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_end="@dimen/marginStandard" />
 
             <TextView
                 android:id="@+id/dateTitle"
                 style="@style/Subtitle2"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/marginStandard"
                 android:text="@string/modificationDateFilterTitle"
                 app:layout_constraintBottom_toTopOf="@id/dateFilter"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/end"
+                app:layout_constraintStart_toEndOf="@id/start"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/dateFilter"
                 style="@style/CardViewInfomaniak"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/marginStandardSmall"
                 app:layout_constraintBottom_toTopOf="@id/typeTitle"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/end"
+                app:layout_constraintStart_toEndOf="@id/start"
                 app:layout_constraintTop_toBottomOf="@id/dateTitle">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -126,24 +140,24 @@
             <TextView
                 android:id="@+id/typeTitle"
                 style="@style/Subtitle2"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/marginStandard"
                 android:text="@string/fileTypeFilterTitle"
                 app:layout_constraintBottom_toTopOf="@id/typeFilter"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/end"
+                app:layout_constraintStart_toEndOf="@id/start"
                 app:layout_constraintTop_toBottomOf="@id/dateFilter" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/typeFilter"
                 style="@style/CardViewInfomaniak"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/marginStandardSmall"
                 app:layout_constraintBottom_toTopOf="@id/categoriesTitle"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/end"
+                app:layout_constraintStart_toEndOf="@id/start"
                 app:layout_constraintTop_toBottomOf="@id/typeTitle">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -193,24 +207,24 @@
             <TextView
                 android:id="@+id/categoriesTitle"
                 style="@style/Subtitle2"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/marginStandard"
                 android:text="@string/categoriesFilterTitle"
                 app:layout_constraintBottom_toTopOf="@id/chooseCategoriesFilter"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/end"
+                app:layout_constraintStart_toEndOf="@id/start"
                 app:layout_constraintTop_toBottomOf="@id/typeFilter" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/chooseCategoriesFilter"
                 style="@style/CardViewInfomaniak"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/marginStandardSmall"
                 app:layout_constraintBottom_toTopOf="@id/belongToAllCategoriesFilter"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/end"
+                app:layout_constraintStart_toEndOf="@id/start"
                 app:layout_constraintTop_toBottomOf="@id/categoriesTitle">
 
                 <com.infomaniak.drive.views.CategoriesContainerView
@@ -222,14 +236,14 @@
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/belongToAllCategoriesFilter"
                 style="@style/CardViewInfomaniak"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/marginStandardSmall"
                 android:background="@color/backgroundCardview"
                 android:visibility="gone"
                 app:layout_constraintBottom_toTopOf="@id/belongToOneCategoryFilter"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/end"
+                app:layout_constraintStart_toEndOf="@id/start"
                 app:layout_constraintTop_toBottomOf="@id/chooseCategoriesFilter"
                 app:strokeColor="@color/primary"
                 tools:visibility="visible">
@@ -255,13 +269,13 @@
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/belongToOneCategoryFilter"
                 style="@style/CardViewInfomaniak"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/marginStandardSmall"
                 android:visibility="gone"
                 app:layout_constraintBottom_toTopOf="@id/clearButton"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/end"
+                app:layout_constraintStart_toEndOf="@id/start"
                 app:layout_constraintTop_toBottomOf="@id/belongToAllCategoriesFilter"
                 app:strokeColor="@color/primary"
                 tools:visibility="visible">
@@ -291,8 +305,8 @@
                 android:layout_marginTop="@dimen/marginStandard"
                 android:text="@string/buttonClearFilters"
                 app:layout_constraintBottom_toTopOf="@id/saveButton"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/end"
+                app:layout_constraintStart_toEndOf="@id/start"
                 app:layout_constraintTop_toBottomOf="@id/belongToOneCategoryFilter" />
 
             <com.google.android.material.button.MaterialButton
@@ -300,11 +314,10 @@
                 style="@style/ButtonInfomaniak"
                 android:layout_width="0dp"
                 android:layout_marginTop="@dimen/marginStandardSmall"
-                android:layout_marginBottom="@dimen/marginStandard"
                 android:text="@string/buttonApplyFilters"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/end"
+                app:layout_constraintStart_toEndOf="@id/start"
                 app:layout_constraintTop_toBottomOf="@id/clearButton" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
