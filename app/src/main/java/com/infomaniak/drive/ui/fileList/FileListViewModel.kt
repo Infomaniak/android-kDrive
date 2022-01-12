@@ -51,8 +51,7 @@ class FileListViewModel : ViewModel() {
     var dateFilter: Pair<FilterKey, SearchDateFilter?> = FilterKey.DATE to null
     var typeFilter: Pair<FilterKey, ConvertedType?> = FilterKey.TYPE to null
     var categoriesFilter: Pair<FilterKey, List<Category>?> = FilterKey.CATEGORIES to null
-    var categoriesOwnershipFilter: Pair<FilterKey, CategoriesOwnershipFilter> =
-        FilterKey.CATEGORIES_OWNERSHIP to SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_VALUE
+    var categoriesOwnershipFilter: Pair<FilterKey, SearchCategoriesOwnershipFilter?> = FilterKey.CATEGORIES_OWNERSHIP to null
 
     var isSharedWithMe = false
 
@@ -169,10 +168,10 @@ class FileListViewModel : ViewModel() {
 
     private fun formatCategories(): String? {
         return categoriesFilter.second?.joinToString(
-            separator = if (categoriesOwnershipFilter.second == CategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES) {
-                SEPARATOR_BELONG_TO_ALL_CATEGORIES
-            } else {
-                SEPARATOR_BELONG_TO_ONE_CATEGORY
+            separator = when (categoriesOwnershipFilter.second) {
+                SearchCategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES -> SEPARATOR_BELONG_TO_ALL_CATEGORIES
+                SearchCategoriesOwnershipFilter.BELONG_TO_ONE_CATEGORY -> SEPARATOR_BELONG_TO_ONE_CATEGORY
+                null -> return null
             }
         ) { it.id.toString() }
     }

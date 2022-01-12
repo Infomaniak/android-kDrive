@@ -534,7 +534,7 @@
             app:nullable="true" />
         <argument
             android:name="categoriesOwnership"
-            app:argType="com.infomaniak.drive.data.models.CategoriesOwnershipFilter"
+            app:argType="com.infomaniak.drive.data.models.SearchCategoriesOwnershipFilter"
             app:nullable="true" />
         <action
             android:id="@+id/action_searchFiltersFragment_to_selectCategoriesFragment"

@@ -265,8 +265,8 @@ class SearchFragment : FileListFragment() {
         )
     }
 
-    private fun setCategoriesOwnershipFilter(categoriesOwnership: CategoriesOwnershipFilter?) {
-        categoriesOwnership?.let { fileListViewModel.categoriesOwnershipFilter = FilterKey.CATEGORIES_OWNERSHIP to it }
+    private fun setCategoriesOwnershipFilter(categoriesOwnership: SearchCategoriesOwnershipFilter?) {
+        fileListViewModel.categoriesOwnershipFilter = FilterKey.CATEGORIES_OWNERSHIP to categoriesOwnership
     }
 
     private fun updateMostRecentSearches() {
@@ -342,7 +342,7 @@ class SearchFragment : FileListFragment() {
     }
 
     private fun removeCategoriesOwnershipFilter() = with(fileListViewModel) {
-        categoriesOwnershipFilter = FilterKey.CATEGORIES_OWNERSHIP to SearchFiltersViewModel.DEFAULT_CATEGORIES_OWNERSHIP_VALUE
+        categoriesOwnershipFilter = FilterKey.CATEGORIES_OWNERSHIP to null
     }
 
     override fun onPause() {

@@ -22,7 +22,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -31,9 +30,8 @@ import androidx.navigation.navGraphViewModels
 import com.google.android.material.card.MaterialCardView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.models.CategoriesOwnershipFilter
 import com.infomaniak.drive.data.models.ConvertedType
-import com.infomaniak.drive.ui.fileList.SearchFiltersViewModel.Companion.DEFAULT_CATEGORIES_OWNERSHIP_VALUE
+import com.infomaniak.drive.data.models.SearchCategoriesOwnershipFilter
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.getBackNavigationResult
 import com.infomaniak.drive.utils.safeNavigate
@@ -69,24 +67,14 @@ class SearchFiltersFragment : Fragment() {
         if (categories == null) {
             categories = navigationArgs.categories?.toTypedArray()?.let(DriveInfosController::getCurrentDriveCategoriesFromIds)
         }
-        if (categoriesOwnership == DEFAULT_CATEGORIES_OWNERSHIP_VALUE) {
-            categoriesOwnership = navigationArgs.categoriesOwnership ?: DEFAULT_CATEGORIES_OWNERSHIP_VALUE
-        }
+        if (categoriesOwnership == null) categoriesOwnership = navigationArgs.categoriesOwnership
         updateAllFiltersUI()
     }
 
     private fun handleRights() {
-        if (rights?.canReadCategoryOnFile == true) {
-            categoriesTitle.isVisible = true
-            chooseCategoriesFilter.isVisible = true
-            belongToAllCategoriesFilter.isVisible = true
-            belongToOneCategoryFilter.isVisible = true
-        } else {
-            categoriesTitle.isGone = true
-            chooseCategoriesFilter.isGone = true
-            belongToAllCategoriesFilter.isGone = true
-            belongToOneCategoryFilter.isGone = true
-        }
+        val isVisible = rights?.canReadCategoryOnFile == true
+        categoriesTitle.isVisible = isVisible
+        chooseCategoriesFilter.isVisible = isVisible
     }
 
     private fun setToolbar() {
@@ -100,11 +88,11 @@ class SearchFiltersFragment : Fragment() {
 
     private fun setCategoriesOwnershipFilters() = with(searchFiltersViewModel) {
         belongToAllCategoriesFilter.setOnClickListener {
-            categoriesOwnership = CategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES
+            categoriesOwnership = SearchCategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES
             updateCategoriesOwnershipUI()
         }
         belongToOneCategoryFilter.setOnClickListener {
-            categoriesOwnership = CategoriesOwnershipFilter.BELONG_TO_ONE_CATEGORY
+            categoriesOwnership = SearchCategoriesOwnershipFilter.BELONG_TO_ONE_CATEGORY
             updateCategoriesOwnershipUI()
         }
     }
@@ -177,14 +165,14 @@ class SearchFiltersFragment : Fragment() {
         )
     }
 
-    private fun updateCategoriesOwnershipUI() {
-        if (searchFiltersViewModel.categoriesOwnership == CategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES) {
-            belongToAllCategoriesFilter.setupSelection(true)
-            belongToOneCategoryFilter.setupSelection(false)
-        } else {
-            belongToAllCategoriesFilter.setupSelection(false)
-            belongToOneCategoryFilter.setupSelection(true)
-        }
+    private fun updateCategoriesOwnershipUI() = with(searchFiltersViewModel) {
+        val isVisible = categories?.isNotEmpty() == true
+        belongToAllCategoriesFilter.isVisible = isVisible
+        belongToOneCategoryFilter.isVisible = isVisible
+
+        val belongToAll = categoriesOwnership == SearchCategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES
+        belongToAllCategoriesFilter.setupSelection(belongToAll)
+        belongToOneCategoryFilter.setupSelection(!belongToAll)
     }
 
     private fun MaterialCardView.setupSelection(enabled: Boolean) {
