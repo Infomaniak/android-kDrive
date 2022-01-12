@@ -422,21 +422,6 @@ fun Date.minutes(): Int =
         time = this@minutes
     }.get(Calendar.MINUTE)
 
-fun Date.intervalAsText(end: Date): String {
-    val longDate = "d MMM yyyy"
-    val mediumDate = "d MMM"
-    val shortDate = "d"
-    val separator = " - "
-    val start = this
-    val startFormat = when {
-        start.year() != end.year() -> start.format(longDate) + separator
-        start.month() != end.month() -> start.format(mediumDate) + separator
-        start.day() != end.day() -> start.format(shortDate) + separator
-        else -> ""
-    }
-    return startFormat + end.format(longDate)
-}
-
 fun ImageView.animateRotation(isDeployed: Boolean = false) {
     val startDeg = if (isDeployed) 0.0f else 90.0f
     val endDeg = if (isDeployed) 90.0f else 0.0f

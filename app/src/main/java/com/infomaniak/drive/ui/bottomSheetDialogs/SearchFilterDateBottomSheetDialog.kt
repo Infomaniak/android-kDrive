@@ -33,9 +33,8 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.SearchDateFilter
 import com.infomaniak.drive.data.models.SearchDateFilter.DateFilterKey
 import com.infomaniak.drive.ui.fileList.SearchFiltersViewModel
-import com.infomaniak.drive.utils.endOfTheDay
-import com.infomaniak.drive.utils.intervalAsText
-import com.infomaniak.drive.utils.startOfTheDay
+import com.infomaniak.drive.utils.*
+import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_search_filter_date.*
 import java.util.*
 import androidx.core.util.Pair as AndroidPair
@@ -75,7 +74,7 @@ open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
     private fun setTodayClick() {
         todayFilterLayout.setOnClickListener {
             with(Date()) {
-                setDateFilter(DateFilterKey.TODAY, startOfTheDay(), endOfTheDay(), getString(R.string.allToday))
+                updateDateFilter(DateFilterKey.TODAY, startOfTheDay(), endOfTheDay(), getString(R.string.allToday))
             }
         }
     }
@@ -83,7 +82,7 @@ open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
     private fun setYesterdayClick() {
         yesterdayFilterLayout.setOnClickListener {
             with(Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }.time) {
-                setDateFilter(DateFilterKey.YESTERDAY, startOfTheDay(), endOfTheDay(), getString(R.string.allYesterday))
+                updateDateFilter(DateFilterKey.YESTERDAY, startOfTheDay(), endOfTheDay(), getString(R.string.allYesterday))
             }
         }
     }
@@ -92,41 +91,18 @@ open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
         lastSevenDaysFilterLayout.setOnClickListener {
             val start = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -6) }.time.startOfTheDay()
             val end = Date().endOfTheDay()
-            setDateFilter(DateFilterKey.LAST_SEVEN_DAYS, start, end, start.intervalAsText(end))
+            updateDateFilter(DateFilterKey.LAST_SEVEN_DAYS, start, end, intervalAsText(start, end))
         }
     }
 
     private fun setCustomDateClick() {
         customFilterLayout.setOnClickListener {
-            setDateFilter(DateFilterKey.CUSTOM)
+            showDateRangePicker { startTime, endTime ->
+                val start = Date(startTime).startOfTheDay()
+                val end = Date(endTime).endOfTheDay()
+                updateDateFilter(DateFilterKey.CUSTOM, start, end, intervalAsText(start, end))
+            }
         }
-    }
-
-    private fun setDateFilter(key: DateFilterKey, start: Date? = null, end: Date? = null, text: String? = null) {
-        if (key == DateFilterKey.CUSTOM) {
-            handleCustomDateFilter()
-        } else {
-            handleGenericDateFilter(key, start, end, text)
-        }
-    }
-
-    private fun handleCustomDateFilter() {
-        showDateRangePicker { startTime, endTime ->
-            val key = DateFilterKey.CUSTOM
-            val start = Date(startTime).startOfTheDay()
-            val end = Date(endTime).endOfTheDay()
-            val text = start.intervalAsText(end)
-            updateDateFilter(key, start, end, text)
-        }
-    }
-
-    private fun handleGenericDateFilter(key: DateFilterKey, start: Date?, end: Date?, text: String?) {
-        updateDateFilter(
-            key = key,
-            start = start ?: return,
-            end = end ?: return,
-            text = text ?: return,
-        )
     }
 
     private fun updateDateFilter(key: DateFilterKey, start: Date, end: Date, text: String) {
@@ -155,5 +131,18 @@ open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
             .setEnd(Date().time)
             .setValidator(DateValidatorPointBackward.now())
             .build()
+    }
+
+    private fun intervalAsText(start: Date, end: Date): String {
+        val longDate = "d MMM yyyy"
+        val separator = " - "
+        val startFormat = when {
+            start.year() != end.year() -> start.format(longDate) + separator
+            start.month() != end.month() -> start.format("d MMM") + separator
+            start.day() != end.day() -> start.format("d") + separator
+            else -> ""
+        }
+
+        return startFormat + end.format(longDate)
     }
 }
