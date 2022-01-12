@@ -307,6 +307,8 @@
     <string name="fileDetailsActivitiesTitle">Actividad</string>
     <string name="fileDetailsActivityFileAccess">ha consultado el archivo</string>
     <string name="fileDetailsActivityFileCategorize">ha añadido una categoría al elemento</string>
+    <string name="fileDetailsActivityFileColorDelete">eliminar el color de una carpeta</string>
+    <string name="fileDetailsActivityFileColorUpdate">cambiar el color de una carpeta</string>
     <string name="fileDetailsActivityFileCommentCreate">ha comentado el archivo</string>
     <string name="fileDetailsActivityFileCommentDelete">ha eliminado su comentario</string>
     <string name="fileDetailsActivityFileCommentLike">le ha gustado un comentario</string>

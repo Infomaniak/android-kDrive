@@ -319,6 +319,8 @@
     <string name="fileDetailsActivitiesTitle">Activity</string>
     <string name="fileDetailsActivityFileAccess">accessed the file</string>
     <string name="fileDetailsActivityFileCategorize">added a category to the element</string>
+    <string name="fileDetailsActivityFileColorDelete">deleted the colour of a folder</string>
+    <string name="fileDetailsActivityFileColorUpdate">changed the colour of a folder</string>
     <string name="fileDetailsActivityFileCommentCreate">commented the file</string>
     <string name="fileDetailsActivityFileCommentDelete">deleted their comment</string>
     <string name="fileDetailsActivityFileCommentLike">liked a comment</string>
