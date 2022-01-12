@@ -3,6 +3,8 @@ package com.infomaniak.drive
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRepository.getFileListForFolder
+import com.infomaniak.drive.data.api.ApiRepository.getLastModifiedFiles
+import com.infomaniak.drive.data.api.ApiRepository.renameFile
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponse
@@ -217,6 +219,19 @@ class FileControllerTest : KDriveTest() {
         Assert.assertTrue("Root folder should contains files", fileListResponse.data!!.children.isNotEmpty())
     }
 
+    @Test
+    fun renameTestFile() {
+        val file = createFileForTest()
+        val newName = "renamed file"
+        assertApiResponse(renameFile(file, newName))
+        val lastModifiedFilesResponse = getLastModifiedFiles(userDrive.driveId)
+        lastModifiedFilesResponse.also {
+            assertApiResponse(it)
+            Assert.assertEquals("Last modified file should have id ${file.id}", file.id, it.data!!.first().id)
+            Assert.assertEquals("File should be named '$newName'", newName, it.data!!.first().name)
+        }
+        deleteTestFile(file)
+    }
 
     private fun getAndSaveRemoteRootFiles(): Pair<File, ArrayList<File>>? {
         // Get and save remote root files in realm db test

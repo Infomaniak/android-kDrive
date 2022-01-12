@@ -20,25 +20,36 @@ package com.infomaniak.drive
 import androidx.collection.arrayMapOf
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.gson.JsonObject
+import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRepository.addCategory
 import com.infomaniak.drive.data.api.ApiRepository.createCategory
 import com.infomaniak.drive.data.api.ApiRepository.createFolder
+import com.infomaniak.drive.data.api.ApiRepository.createTeamFolder
 import com.infomaniak.drive.data.api.ApiRepository.deleteCategory
 import com.infomaniak.drive.data.api.ApiRepository.deleteDropBox
 import com.infomaniak.drive.data.api.ApiRepository.deleteFavoriteFile
 import com.infomaniak.drive.data.api.ApiRepository.deleteFileComment
 import com.infomaniak.drive.data.api.ApiRepository.deleteFileShareLink
+import com.infomaniak.drive.data.api.ApiRepository.deleteTrashFile
+import com.infomaniak.drive.data.api.ApiRepository.duplicateFile
 import com.infomaniak.drive.data.api.ApiRepository.editCategory
+import com.infomaniak.drive.data.api.ApiRepository.emptyTrash
 import com.infomaniak.drive.data.api.ApiRepository.getAllDrivesData
 import com.infomaniak.drive.data.api.ApiRepository.getCategory
+import com.infomaniak.drive.data.api.ApiRepository.getDriveTrash
 import com.infomaniak.drive.data.api.ApiRepository.getDropBox
 import com.infomaniak.drive.data.api.ApiRepository.getFavoriteFiles
 import com.infomaniak.drive.data.api.ApiRepository.getFileActivities
 import com.infomaniak.drive.data.api.ApiRepository.getFileComments
+import com.infomaniak.drive.data.api.ApiRepository.getFileCount
 import com.infomaniak.drive.data.api.ApiRepository.getFileDetails
+import com.infomaniak.drive.data.api.ApiRepository.getFileShare
 import com.infomaniak.drive.data.api.ApiRepository.getLastActivities
+import com.infomaniak.drive.data.api.ApiRepository.getMySharedFiles
 import com.infomaniak.drive.data.api.ApiRepository.getShareLink
+import com.infomaniak.drive.data.api.ApiRepository.getTrashFile
 import com.infomaniak.drive.data.api.ApiRepository.getUserProfile
+import com.infomaniak.drive.data.api.ApiRepository.moveFile
 import com.infomaniak.drive.data.api.ApiRepository.postDropBox
 import com.infomaniak.drive.data.api.ApiRepository.postFavoriteFile
 import com.infomaniak.drive.data.api.ApiRepository.postFileComment
@@ -46,9 +57,12 @@ import com.infomaniak.drive.data.api.ApiRepository.postFileCommentLike
 import com.infomaniak.drive.data.api.ApiRepository.postFileCommentUnlike
 import com.infomaniak.drive.data.api.ApiRepository.postFileShareCheck
 import com.infomaniak.drive.data.api.ApiRepository.postFileShareLink
+import com.infomaniak.drive.data.api.ApiRepository.postFolderAccess
+import com.infomaniak.drive.data.api.ApiRepository.postRestoreTrashFile
 import com.infomaniak.drive.data.api.ApiRepository.putFileComment
 import com.infomaniak.drive.data.api.ApiRepository.putFileShareLink
 import com.infomaniak.drive.data.api.ApiRepository.removeCategory
+import com.infomaniak.drive.data.api.ApiRepository.renameFile
 import com.infomaniak.drive.data.api.ApiRepository.updateDropBox
 import com.infomaniak.drive.data.api.ApiRoutes.postFileShare
 import com.infomaniak.drive.data.models.File
@@ -60,10 +74,8 @@ import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.networking.HttpClient.okHttpClient
 import io.realm.Realm
 import kotlinx.coroutines.runBlocking
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import okhttp3.OkHttpClient
+import org.junit.*
 import org.junit.runner.RunWith
 
 /**
@@ -192,6 +204,54 @@ class ApiRepositoryTest : KDriveTest() {
     }
 
     @Test
+    fun duplicateTestFile() {
+        val copyName = "test copy"
+        val copyFile = duplicateFile(testFile, copyName, ROOT_ID).also {
+            assertApiResponse(it)
+            Assert.assertEquals("The copy name should be equal to $copyName", copyName, it.data?.name)
+            Assert.assertNotEquals("The id should be different from the original file", testFile.id, it.data?.id)
+            Assert.assertEquals(testFile.driveColor, it.data?.driveColor)
+
+        }.data!!
+
+        // Duplicate one more time with same name and location
+        duplicateFile(testFile, copyName, ROOT_ID).also {
+            assertApiResponse(it)
+            Assert.assertEquals("The copy name should be equal to $copyName (1)", "$copyName (1)", it.data?.name)
+            deleteTestFile(it.data!!)
+        }
+
+        deleteTestFile(copyFile)
+    }
+
+    @Test
+    fun moveFileToAnotherFolder() {
+        val folderName = "f"
+        val file = createFileForTest()
+        createFolder(OkHttpClient(), userDrive.driveId, ROOT_ID, folderName).also {
+            Assert.assertNotNull(it.data)
+            assertApiResponse(moveFile(file, it.data!!))
+            val folderFileCount = getFileCount(it.data!!)
+            assertApiResponse(folderFileCount)
+            Assert.assertEquals("There should be 1 file in the folder", 1, folderFileCount.data?.count)
+
+            val folderData = getFileDetails(it.data!!).data
+            Assert.assertNotNull(folderData)
+            Assert.assertTrue(folderData!!.children.contains(file))
+            deleteTestFile(folderData)
+        }
+    }
+
+    @Test
+    fun createTeamTestFolder() {
+        createTeamFolder(OkHttpClient(), userDrive.driveId, "teamFolder", true).also {
+            assertApiResponse(it)
+            Assert.assertTrue("visibility should be 'is_team_space_folder", it.data!!.visibility.contains("is_team_space_folder"))
+            deleteTestFile(it.data!!)
+        }
+    }
+
+    @Test
     fun shareLinkTest() {
         val body = mapOf(
             "permission" to "public",
@@ -212,6 +272,11 @@ class ApiRepositoryTest : KDriveTest() {
             Assert.assertFalse("show stats should be false", it.data!!.showStats)
             Assert.assertFalse("block comments should be false", it.data!!.blockDownloads)
             Assert.assertFalse("Block information should be false", it.data!!.blockInformation)
+        }
+
+        getFileShare(OkHttpClient(), testFile).also {
+            assertApiResponse(it)
+            Assert.assertEquals("Path should be the name of the file", "/${testFile.name}", it.data!!.path)
         }
 
         val response = putFileShareLink(
@@ -333,10 +398,21 @@ class ApiRepositoryTest : KDriveTest() {
         }
     }
 
+    @Ignore("Don't know the wanted api behaviour")
+    @Test
+    fun postTestFolderAccess() {
+        val folder = createFolder(OkHttpClient(), userDrive.driveId, ROOT_ID, "folder").data
+        Assert.assertNotNull("test folder must not be null", folder)
+        val postResponse = postFolderAccess(folder!!)
+        assertApiResponse(postResponse)
+        deleteTestFile(folder)
+    }
+
     @Test
     fun manageDropboxLifecycle() {
         // Create a folder to convert it in dropbox
-        val folder = createFolder(okHttpClient, userDrive.driveId, ROOT_ID, "test", false).data
+        val name = "testFold"
+        val folder = createFolder(okHttpClient, userDrive.driveId, ROOT_ID, name, false).data
         Assert.assertNotNull(folder)
         // No dropbox yet
         assertApiResponse(getDropBox(folder!!), false)
@@ -357,7 +433,7 @@ class ApiRepositoryTest : KDriveTest() {
 
         getDropBox(folder).also {
             assertApiResponse(it)
-            Assert.assertEquals("Dropbox name should be 'test'", "test", it.data!!.alias)
+            Assert.assertEquals("Dropbox name should be '$name'", name, it.data!!.alias)
             Assert.assertEquals("Dropbox id should be $dropboxId", dropboxId, it.data!!.id)
         }
         val data = JsonObject().apply {
@@ -380,6 +456,63 @@ class ApiRepositoryTest : KDriveTest() {
         assertApiResponse(deleteDropBox(folder))
         // No dropbox left
         assertApiResponse(getDropBox(folder), false)
+        deleteTestFile(folder)
+    }
 
+    @Test
+    fun manageTrashLifecycle() {
+        createFileForTest().also { file ->
+            val newName = "Trash test"
+            renameFile(file, newName)
+            val modifiedFile = ApiRepository.getLastModifiedFiles(userDrive.driveId).data?.first()
+            Assert.assertNotNull(modifiedFile)
+            deleteTestFile(modifiedFile!!)
+            getTrashFile(modifiedFile, File.SortType.RECENT).also {
+                assertApiResponse(it)
+                Assert.assertEquals("file id should be the same", it.data?.id, file.id)
+                Assert.assertEquals("file name should be updated to 'Trash test'", newName, it.data?.name)
+            }
+
+            getDriveTrash(userDrive.driveId, File.SortType.RECENT, 1, 30).also {
+                assertApiResponse(it)
+                Assert.assertTrue("Trash should not be empty", it.data!!.isNotEmpty())
+                Assert.assertEquals("Last file trashed should be 'trash test'", file.id, it.data?.first()?.id)
+            }
+
+            // Restore the file from the trash
+            assertApiResponse(postRestoreTrashFile(modifiedFile, mapOf("destination_folder_id" to ROOT_ID)))
+            getDriveTrash(userDrive.driveId, File.SortType.RECENT, 1, 30).also {
+                assertApiResponse(it)
+                if (it.data!!.isNotEmpty()) {
+                    Assert.assertNotEquals("Last file trashed should not be 'trash test'", file.id, it.data?.first()?.id)
+                }
+            }
+            deleteTestFile(modifiedFile)
+        }
+
+        // Clean the trash to make sure nothing is left in
+        assertApiResponse(emptyTrash(userDrive.driveId, 30))
+        getDriveTrash(userDrive.driveId, File.SortType.NAME_ZA, 1, 30).also {
+            assertApiResponse(it)
+            Assert.assertTrue("Trash should be empty", it.data!!.isEmpty())
+        }
+
+        // Create a new file, put it in trash then permanently delete it
+        createFileForTest().apply {
+            deleteTestFile(this)
+            deleteTrashFile(this)
+        }
+
+        // Trash should still be empty
+        getDriveTrash(userDrive.driveId, File.SortType.NAME_ZA, 1, 30).also {
+            assertApiResponse(it)
+            Assert.assertTrue("Trash should be empty", it.data!!.isEmpty())
+        }
+    }
+
+    @Test
+    fun mySharedFileTest() {
+        val order = File.SortType.BIGGER
+        assertApiResponse(getMySharedFiles(OkHttpClient(), userDrive.driveId, order.order, order.orderBy, 1))
     }
 }
