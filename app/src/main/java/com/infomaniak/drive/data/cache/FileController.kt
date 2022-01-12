@@ -720,7 +720,7 @@ object FileController {
         return files?.let { ArrayList(it) } ?: arrayListOf()
     }
 
-    fun getFolderActivities(folder: File, page: Int, userDrive: UserDrive? = null): Map<out Int, File.LocalFileActivity> {
+    fun getFolderActivities(folder: File, page: Int, userDrive: UserDrive? = null): Map<out Int, FileActivity> {
         return getRealmInstance(userDrive).use { realm ->
             getFolderActivitiesRec(realm, folder, page, userDrive)
         }
@@ -731,11 +731,11 @@ object FileController {
         folder: File,
         page: Int,
         userDrive: UserDrive? = null
-    ): Map<out Int, File.LocalFileActivity> {
+    ): Map<out Int, FileActivity> {
         val okHttpClient = runBlocking {
             userDrive?.userId?.let { KDriveHttpClient.getHttpClient(it) } ?: HttpClient.okHttpClient
         }
-        val returnResponse = arrayMapOf<Int, File.LocalFileActivity>()
+        val returnResponse = arrayMapOf<Int, FileActivity>()
         val apiResponse = ApiRepository.getFileActivities(okHttpClient, folder, page)
         if (!apiResponse.isSuccess()) return returnResponse
 
@@ -769,22 +769,20 @@ object FileController {
         }
     }
 
-    private fun FileActivity.applyFileActivity(
-        realm: Realm,
-        returnResponse: ArrayMap<Int, File.LocalFileActivity>,
-        currentFolder: File
-    ) {
+    private fun FileActivity.applyFileActivity(realm: Realm, returnResponse: ArrayMap<Int, FileActivity>, currentFolder: File) {
         val fileId = this.fileId
         when (this.getAction()) {
             FileActivity.FileActivityType.FILE_DELETE,
             FileActivity.FileActivityType.FILE_MOVE_OUT,
-            FileActivity.FileActivityType.FILE_TRASH -> if (returnResponse[this.fileId] == null) {
-                getParentFile(fileId = fileId, realm = realm)?.let { parent ->
-                    if (parent.id == currentFolder.id) {
-                        removeFile(fileId, customRealm = realm, recursive = false)
+            FileActivity.FileActivityType.FILE_TRASH -> {
+                if (returnResponse[this.fileId] == null || returnResponse[this.fileId]?.createdAt?.time == this.createdAt.time) {
+                    getParentFile(fileId = fileId, realm = realm)?.let { parent ->
+                        if (parent.id == currentFolder.id) {
+                            removeFile(fileId, customRealm = realm, recursive = false)
+                        }
                     }
+                    returnResponse[this.fileId] = this
                 }
-                returnResponse[this.fileId] = File.LocalFileActivity.IS_DELETE
             }
             FileActivity.FileActivityType.FILE_CREATE,
             FileActivity.FileActivityType.FILE_MOVE_IN,
@@ -792,9 +790,10 @@ object FileController {
                 realm.where(File::class.java).equalTo(File::id.name, currentFolder.id).findFirst()?.let { realmFolder ->
                     if (!realmFolder.children.contains(this.file)) {
                         addChild(realm, realmFolder, this.file!!)
-                        returnResponse[this.fileId] = File.LocalFileActivity.IS_NEW
+                        returnResponse[this.fileId] = this
                     } else {
-                        updateFileFromActivity(realm, returnResponse, this, realmFolder.id)
+                        returnResponse[fileId] = this
+                        updateFileFromActivity(realm, this, realmFolder.id)
                     }
                 }
             }
@@ -812,9 +811,10 @@ object FileController {
             FileActivity.FileActivityType.FILE_UPDATE -> if (returnResponse[this.fileId] == null) {
                 if (this.file == null) {
                     removeFile(fileId, customRealm = realm, recursive = false)
-                    returnResponse[this.fileId] = File.LocalFileActivity.IS_DELETE
+                    returnResponse[this.fileId] = this
                 } else {
-                    updateFileFromActivity(realm, returnResponse, this, currentFolder.id)
+                    returnResponse[fileId] = this
+                    updateFileFromActivity(realm, this, currentFolder.id)
                 }
             }
             else -> Unit
@@ -852,18 +852,10 @@ object FileController {
         return customRealm?.let(block) ?: getRealmInstance(userDrive).use(block)
     }
 
-    private fun updateFileFromActivity(
-        realm: Realm,
-        returnResponse: ArrayMap<Int, File.LocalFileActivity>,
-        fileActivity: FileActivity,
-        folderId: Int
-    ) {
-        returnResponse[fileActivity.fileId] = File.LocalFileActivity.IS_UPDATE
-
+    private fun updateFileFromActivity(realm: Realm, fileActivity: FileActivity, folderId: Int) {
         getFileProxyById(fileActivity.fileId, customRealm = realm)?.let { file ->
             insertOrUpdateFile(realm, fileActivity.file!!, file)
         } ?: also {
-            returnResponse[fileActivity.fileId] = File.LocalFileActivity.IS_NEW
             realm.executeTransaction {
                 realm.where(File::class.java).equalTo(File::id.name, folderId).findFirst()?.children?.add(fileActivity.file)
             }

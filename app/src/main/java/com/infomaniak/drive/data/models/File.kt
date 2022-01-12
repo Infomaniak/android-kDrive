@@ -353,10 +353,6 @@ open class File(
         return result
     }
 
-    enum class LocalFileActivity {
-        IS_NEW, IS_UPDATE, IS_DELETE
-    }
-
     enum class VisibilityType {
         ROOT,
         IS_PRIVATE,

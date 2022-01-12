@@ -22,7 +22,8 @@ import androidx.lifecycle.*
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.data.models.File.*
+import com.infomaniak.drive.data.models.File.SortType
+import com.infomaniak.drive.data.models.File.Type
 import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
@@ -178,14 +179,14 @@ class FileListViewModel : ViewModel() {
     }
 
     @Synchronized
-    fun getFolderActivities(folder: File, userDrive: UserDrive? = null): LiveData<Map<out Int, LocalFileActivity>> {
+    fun getFolderActivities(folder: File, userDrive: UserDrive? = null): LiveData<Boolean> {
         getFolderActivitiesJob.cancel()
         getFolderActivitiesJob = Job()
         return liveData(Dispatchers.IO + getFolderActivitiesJob) {
             mutex.withLock {
                 getFolderActivitiesJob.ensureActive()
                 val activities = FileController.getFolderActivities(folder, 1, userDrive)
-                if (activities.isNotEmpty()) emit(activities)
+                emit(activities.isNotEmpty())
             }
         }
     }
