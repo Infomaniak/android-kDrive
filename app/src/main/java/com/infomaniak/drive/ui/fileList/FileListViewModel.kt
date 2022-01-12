@@ -168,11 +168,7 @@ class FileListViewModel : ViewModel() {
 
     private fun formatCategories(): String? {
         return categoriesFilter.second?.joinToString(
-            separator = when (categoriesOwnershipFilter.second) {
-                SearchCategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES -> SEPARATOR_BELONG_TO_ALL_CATEGORIES
-                SearchCategoriesOwnershipFilter.BELONG_TO_ONE_CATEGORY -> SEPARATOR_BELONG_TO_ONE_CATEGORY
-                null -> return null
-            }
+            separator = categoriesOwnershipFilter.second?.apiSeparator ?: return null
         ) { it.id.toString() }
     }
 
@@ -264,7 +260,5 @@ class FileListViewModel : ViewModel() {
 
     private companion object {
         val mutex = Mutex()
-        const val SEPARATOR_BELONG_TO_ALL_CATEGORIES = "%26"
-        const val SEPARATOR_BELONG_TO_ONE_CATEGORY = "|"
     }
 }

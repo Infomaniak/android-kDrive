@@ -21,7 +21,7 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-enum class SearchCategoriesOwnershipFilter : Parcelable {
-    BELONG_TO_ALL_CATEGORIES,
-    BELONG_TO_ONE_CATEGORY,
+enum class SearchCategoriesOwnershipFilter(val apiSeparator: CharSequence) : Parcelable {
+    BELONG_TO_ALL_CATEGORIES("%26"),
+    BELONG_TO_ONE_CATEGORY("|"),
 }
