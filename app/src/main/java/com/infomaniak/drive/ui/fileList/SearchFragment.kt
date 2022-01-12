@@ -71,6 +71,7 @@ class SearchFragment : FileListFragment() {
         configureToolbar()
         observeSearchResults()
         setBackActionHandlers()
+        updateFilters()
     }
 
     private fun configureViewModels() {
@@ -84,7 +85,9 @@ class SearchFragment : FileListFragment() {
     }
 
     private fun setFiltersAdapter() {
-        filtersAdapter = SearchFiltersAdapter { key, categoryId -> removeFilter(key, categoryId) }.also {
+        filtersAdapter = SearchFiltersAdapter(
+            onFilterRemoved = { key, categoryId -> removeFilter(key, categoryId) }
+        ).also {
             filtersRecyclerView.adapter = it
         }
     }
@@ -245,11 +248,6 @@ class SearchFragment : FileListFragment() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        updateFilters()
-    }
-
     private fun setDateFilter(filter: SearchDateFilter?) {
         fileListViewModel.dateFilter = FilterKey.DATE to filter
     }
@@ -284,7 +282,7 @@ class SearchFragment : FileListFragment() {
     }
 
     private fun updateFilters(shouldUpdateAdapter: Boolean = true) = with(fileListViewModel) {
-        mutableListOf<SearchFilter>().apply {
+        arrayListOf<SearchFilter>().apply {
             createDateFilter()?.let(::add)
             createTypeFilter()?.let(::add)
             createCategoriesFilter()?.let(::addAll)
@@ -319,7 +317,9 @@ class SearchFragment : FileListFragment() {
             FilterKey.DATE -> removeDateFilter()
             FilterKey.TYPE -> removeTypeFilter()
             FilterKey.CATEGORIES -> removeCategoryFilter(categoryId)
-            FilterKey.CATEGORIES_OWNERSHIP -> removeCategoriesOwnershipFilter()
+            FilterKey.CATEGORIES_OWNERSHIP -> {
+                // It's impossible to remove this filter by clicking on it
+            }
         }
         updateFilters(shouldUpdateAdapter = false)
     }
@@ -339,10 +339,6 @@ class SearchFragment : FileListFragment() {
                 categoriesFilter = FilterKey.CATEGORIES to if (filteredCategories.isEmpty()) null else filteredCategories
             }
         }
-    }
-
-    private fun removeCategoriesOwnershipFilter() = with(fileListViewModel) {
-        categoriesOwnershipFilter = FilterKey.CATEGORIES_OWNERSHIP to null
     }
 
     override fun onPause() {

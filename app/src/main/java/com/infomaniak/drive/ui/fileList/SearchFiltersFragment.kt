@@ -44,7 +44,7 @@ class SearchFiltersFragment : Fragment() {
     private val searchFiltersViewModel: SearchFiltersViewModel by navGraphViewModels(R.id.searchFiltersFragment)
     private val navigationArgs: SearchFiltersFragmentArgs by navArgs()
 
-    private val rights = DriveInfosController.getCategoryRights()
+    private val categoryRights = DriveInfosController.getCategoryRights()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         inflater.inflate(R.layout.fragment_search_filters, container, false)
@@ -52,7 +52,7 @@ class SearchFiltersFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initializeFilters()
-        handleRights()
+        handleCategoryRights()
         setToolbar()
         setDateAndTypeFilters()
         setCategoriesOwnershipFilters()
@@ -68,11 +68,12 @@ class SearchFiltersFragment : Fragment() {
             categories = navigationArgs.categories?.toTypedArray()?.let(DriveInfosController::getCurrentDriveCategoriesFromIds)
         }
         if (categoriesOwnership == null) categoriesOwnership = navigationArgs.categoriesOwnership
+
         updateAllFiltersUI()
     }
 
-    private fun handleRights() {
-        val isVisible = rights?.canReadCategoryOnFile == true
+    private fun handleCategoryRights() {
+        val isVisible = categoryRights?.canReadCategoryOnFile == true
         categoriesTitle.isVisible = isVisible
         chooseCategoriesFilter.isVisible = isVisible
     }
@@ -123,7 +124,8 @@ class SearchFiltersFragment : Fragment() {
 
         getBackNavigationResult<List<Int>>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
             categories = if (it.isEmpty()) null else DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray())
-            updateAllFiltersUI()
+            updateCategoriesUI()
+            updateCategoriesOwnershipUI()
         }
     }
 
@@ -153,7 +155,7 @@ class SearchFiltersFragment : Fragment() {
         val categories = searchFiltersViewModel.categories ?: emptyList()
         categoriesContainer.setup(
             categories = categories,
-            canPutCategoryOnFile = rights?.canPutCategoryOnFile ?: false,
+            canPutCategoryOnFile = categoryRights?.canPutCategoryOnFile ?: false,
             layoutInflater = layoutInflater,
             onClicked = {
                 safeNavigate(
@@ -170,9 +172,11 @@ class SearchFiltersFragment : Fragment() {
         belongToAllCategoriesFilter.isVisible = isVisible
         belongToOneCategoryFilter.isVisible = isVisible
 
-        val belongToAll = categoriesOwnership == SearchCategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES
-        belongToAllCategoriesFilter.setupSelection(belongToAll)
-        belongToOneCategoryFilter.setupSelection(!belongToAll)
+        if (isVisible) {
+            val belongToOne = categoriesOwnership == SearchCategoriesOwnershipFilter.BELONG_TO_ONE_CATEGORY
+            belongToAllCategoriesFilter.setupSelection(!belongToOne)
+            belongToOneCategoryFilter.setupSelection(belongToOne)
+        }
     }
 
     private fun MaterialCardView.setupSelection(enabled: Boolean) {

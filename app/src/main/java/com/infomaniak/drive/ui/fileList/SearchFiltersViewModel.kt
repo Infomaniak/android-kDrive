@@ -26,8 +26,8 @@ import com.infomaniak.drive.utils.SingleLiveEvent
 
 class SearchFiltersViewModel : ViewModel() {
 
-    var date = SingleLiveEvent<SearchDateFilter?>()
-    var type = SingleLiveEvent<ConvertedType?>()
+    val date = SingleLiveEvent<SearchDateFilter?>()
+    val type = SingleLiveEvent<ConvertedType?>()
     var categories: List<Category>? = null
     var categoriesOwnership: SearchCategoriesOwnershipFilter? = null
 
@@ -35,6 +35,5 @@ class SearchFiltersViewModel : ViewModel() {
         date.value = null
         type.value = null
         categories = null
-        categoriesOwnership = null
     }
 }

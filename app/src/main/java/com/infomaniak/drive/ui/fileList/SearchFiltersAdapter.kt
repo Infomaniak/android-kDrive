@@ -82,8 +82,8 @@ class SearchFiltersAdapter(
         }
     }
 
-    fun setItems(newFilters: List<SearchFilter>) {
-        filters = ArrayList(newFilters)
+    fun setItems(newFilters: ArrayList<SearchFilter>) {
+        filters = newFilters
         notifyItemRangeChanged(0, itemCount)
     }
 }
