@@ -22,7 +22,6 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.*
-import com.infomaniak.drive.data.models.SearchFilter.FilterKey
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.drive.utils.AccountUtils
@@ -48,10 +47,10 @@ class FileListViewModel : ViewModel() {
         searchFiles(input, sortType, currentPage)
     }
 
-    var dateFilter: Pair<FilterKey, SearchDateFilter?> = FilterKey.DATE to null
-    var typeFilter: Pair<FilterKey, ConvertedType?> = FilterKey.TYPE to null
-    var categoriesFilter: Pair<FilterKey, List<Category>?> = FilterKey.CATEGORIES to null
-    var categoriesOwnershipFilter: Pair<FilterKey, SearchCategoriesOwnershipFilter?> = FilterKey.CATEGORIES_OWNERSHIP to null
+    var dateFilter: SearchDateFilter? = null
+    var typeFilter: ConvertedType? = null
+    var categoriesFilter: List<Category>? = null
+    var categoriesOwnershipFilter: SearchCategoriesOwnershipFilter? = null
 
     var isSharedWithMe = false
 
@@ -161,14 +160,14 @@ class FileListViewModel : ViewModel() {
 
     private fun formatDate(): Pair<String, String>? {
         fun Date.timestamp(): String = (time / 1_000L).toString()
-        return dateFilter.second?.let { it.start.timestamp() to it.end.timestamp() }
+        return dateFilter?.let { it.start.timestamp() to it.end.timestamp() }
     }
 
-    private fun formatType() = typeFilter.second?.name?.lowercase(Locale.ROOT)
+    private fun formatType() = typeFilter?.name?.lowercase(Locale.ROOT)
 
     private fun formatCategories(): String? {
-        return categoriesFilter.second?.joinToString(
-            separator = categoriesOwnershipFilter.second?.apiSeparator ?: return null
+        return categoriesFilter?.joinToString(
+            separator = categoriesOwnershipFilter?.apiSeparator ?: return null
         ) { it.id.toString() }
     }
 

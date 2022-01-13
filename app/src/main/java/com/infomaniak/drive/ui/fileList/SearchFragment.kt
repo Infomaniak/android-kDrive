@@ -179,10 +179,10 @@ class SearchFragment : FileListFragment() {
                 with(fileListViewModel) {
                     safeNavigate(
                         SearchFragmentDirections.actionSearchFragmentToSearchFiltersFragment(
-                            date = dateFilter.second,
-                            type = typeFilter.second?.name,
-                            categories = categoriesFilter.second?.map { it.id }?.toIntArray(),
-                            categoriesOwnership = categoriesOwnershipFilter.second,
+                            date = dateFilter,
+                            type = typeFilter?.name,
+                            categories = categoriesFilter?.map { it.id }?.toIntArray(),
+                            categoriesOwnership = categoriesOwnershipFilter,
                         )
                     )
                 }
@@ -249,22 +249,20 @@ class SearchFragment : FileListFragment() {
     }
 
     private fun setDateFilter(filter: SearchDateFilter?) {
-        fileListViewModel.dateFilter = FilterKey.DATE to filter
+        fileListViewModel.dateFilter = filter
     }
 
     private fun setTypeFilter(type: ConvertedType?) {
-        fileListViewModel.typeFilter = FilterKey.TYPE to type
+        fileListViewModel.typeFilter = type
     }
 
     private fun setCategoriesFilter(categories: IntArray?) {
-        fileListViewModel.categoriesFilter = Pair(
-            FilterKey.CATEGORIES,
-            categories?.toTypedArray()?.let(DriveInfosController::getCurrentDriveCategoriesFromIds),
-        )
+        fileListViewModel.categoriesFilter =
+            categories?.toTypedArray()?.let(DriveInfosController::getCurrentDriveCategoriesFromIds)
     }
 
     private fun setCategoriesOwnershipFilter(categoriesOwnership: SearchCategoriesOwnershipFilter?) {
-        fileListViewModel.categoriesOwnershipFilter = FilterKey.CATEGORIES_OWNERSHIP to categoriesOwnership
+        fileListViewModel.categoriesOwnershipFilter = categoriesOwnership
     }
 
     private fun updateMostRecentSearches() {
@@ -295,20 +293,16 @@ class SearchFragment : FileListFragment() {
     }
 
     private fun createDateFilter(): SearchFilter? = with(fileListViewModel) {
-        return dateFilter.second?.let {
-            SearchFilter(key = dateFilter.first, text = it.text, icon = R.drawable.ic_calendar)
-        }
+        return dateFilter?.let { SearchFilter(key = FilterKey.DATE, text = it.text, icon = R.drawable.ic_calendar) }
     }
 
     private fun createTypeFilter(): SearchFilter? = with(fileListViewModel) {
-        return typeFilter.second?.let {
-            SearchFilter(key = typeFilter.first, text = getString(it.searchFilterName), icon = it.icon)
-        }
+        return typeFilter?.let { SearchFilter(key = FilterKey.TYPE, text = getString(it.searchFilterName), icon = it.icon) }
     }
 
     private fun createCategoriesFilter(): List<SearchFilter>? = with(fileListViewModel) {
-        return categoriesFilter.second?.map {
-            SearchFilter(categoriesFilter.first, it.getName(requireContext()), tint = it.color, categoryId = it.id)
+        return categoriesFilter?.map {
+            SearchFilter(key = FilterKey.CATEGORIES, text = it.getName(requireContext()), tint = it.color, categoryId = it.id)
         }
     }
 
@@ -324,19 +318,19 @@ class SearchFragment : FileListFragment() {
         updateFilters(shouldUpdateAdapter = false)
     }
 
-    private fun removeDateFilter() = with(fileListViewModel) {
-        dateFilter = FilterKey.DATE to null
+    private fun removeDateFilter() {
+        fileListViewModel.dateFilter = null
     }
 
-    private fun removeTypeFilter() = with(fileListViewModel) {
-        typeFilter = FilterKey.TYPE to null
+    private fun removeTypeFilter() {
+        fileListViewModel.typeFilter = null
     }
 
     private fun removeCategoryFilter(categoryId: Int?) = with(fileListViewModel) {
         if (categoryId != null) {
-            categoriesFilter.second?.let { categories ->
+            categoriesFilter?.let { categories ->
                 val filteredCategories = categories.filter { it.id != categoryId }
-                categoriesFilter = FilterKey.CATEGORIES to if (filteredCategories.isEmpty()) null else filteredCategories
+                categoriesFilter = if (filteredCategories.isEmpty()) null else filteredCategories
             }
         }
     }
