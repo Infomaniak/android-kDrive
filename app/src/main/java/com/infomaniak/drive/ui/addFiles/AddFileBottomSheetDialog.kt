@@ -42,12 +42,13 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import com.infomaniak.lib.core.utils.FORMAT_NEW_FILE
+import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_add_file.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
-import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -292,7 +293,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun createMediaFile(isVideo: Boolean): Uri {
         val date = Date()
-        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH).format(date)
+        val timeStamp: String = date.format(FORMAT_NEW_FILE)
         val fileName = "${timeStamp}.${if (isVideo) "mp4" else "jpg"}"
 
         val fileData = java.io.File(createExposedTempUploadDir(), fileName).apply {
