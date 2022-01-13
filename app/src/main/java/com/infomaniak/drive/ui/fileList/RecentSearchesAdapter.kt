@@ -27,10 +27,9 @@ import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_search_result.view.*
 
 class RecentSearchesAdapter(
-    private val onSearchClicked: (search: String) -> Unit
+    var searches: ArrayList<String>,
+    private val onSearchClicked: (search: String) -> Unit,
 ) : RecyclerView.Adapter<ViewHolder>() {
-
-    private var searches = arrayListOf<String>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_search_result, parent, false))

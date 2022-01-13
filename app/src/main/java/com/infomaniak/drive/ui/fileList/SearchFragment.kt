@@ -74,6 +74,17 @@ class SearchFragment : FileListFragment() {
         updateFilters()
     }
 
+    override fun onPause() {
+        fileListViewModel.searchOldFileList = fileAdapter.getFiles()
+        searchView.isFocusable = false
+        super.onPause()
+    }
+
+    override fun onStop() {
+        UISettings(requireContext()).recentSearches = recentSearchesAdapter.searches
+        super.onStop()
+    }
+
     private fun configureViewModels() {
         fileListViewModel.sortType = SortType.RECENT
 
@@ -159,10 +170,14 @@ class SearchFragment : FileListFragment() {
 
     private fun configureRecentSearches() {
         fileListLayout.addView(recentSearchesView, 1)
-        recentSearchesContainer.isGone = UISettings(requireContext()).recentSearches.isEmpty()
 
-        recentSearchesAdapter = RecentSearchesAdapter(searchView::setText).apply {
-            setItems(UISettings(requireContext()).recentSearches)
+        val recentSearches = UISettings(requireContext()).recentSearches
+        recentSearchesContainer.isGone = recentSearches.isEmpty()
+
+        recentSearchesAdapter = RecentSearchesAdapter(
+            searches = ArrayList(recentSearches),
+            onSearchClicked = searchView::setText,
+        ).apply {
             recentSearchesRecyclerView.adapter = this
         }
     }
@@ -269,14 +284,11 @@ class SearchFragment : FileListFragment() {
         val newSearch = searchView.text.toString().trim()
         if (newSearch.isEmpty()) return
 
-        val uiSettings = UISettings(requireContext())
-
-        val newSearches = (listOf(newSearch) + uiSettings.recentSearches).distinct()
-            .filterIndexed { index, _ -> index < MAX_MOST_RECENT_SEARCHES }
+        val newSearches = (listOf(newSearch) + recentSearchesAdapter.searches).distinct()
+            .take(MAX_MOST_RECENT_SEARCHES)
             .also(recentSearchesAdapter::setItems)
 
         recentSearchesContainer.isGone = newSearches.isEmpty()
-        uiSettings.recentSearches = newSearches
     }
 
     private fun updateFilters(shouldUpdateAdapter: Boolean = true) = with(fileListViewModel) {
@@ -333,12 +345,6 @@ class SearchFragment : FileListFragment() {
                 categoriesFilter = if (filteredCategories.isEmpty()) null else filteredCategories
             }
         }
-    }
-
-    override fun onPause() {
-        fileListViewModel.searchOldFileList = fileAdapter.getFiles()
-        searchView.isFocusable = false
-        super.onPause()
     }
 
     private fun changeRecentSearchesLayoutVisibility(shouldDisplay: Boolean) {
