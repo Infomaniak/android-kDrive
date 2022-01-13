@@ -87,20 +87,18 @@ class SearchFiltersFragment : Fragment() {
         typeFilter.setOnClickListener { safeNavigate(R.id.searchFilterTypeDialog, bundleOf("type" to type.value)) }
     }
 
-    private fun setCategoriesOwnershipFilters() = with(searchFiltersViewModel) {
-        belongToAllCategoriesFilter.setOnClickListener {
-            categoriesOwnership = SearchCategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES
+    private fun setCategoriesOwnershipFilters() {
+        fun update(categoriesOwnershipFilter: SearchCategoriesOwnershipFilter) {
+            searchFiltersViewModel.categoriesOwnership = categoriesOwnershipFilter
             updateCategoriesOwnershipUI()
         }
-        belongToOneCategoryFilter.setOnClickListener {
-            categoriesOwnership = SearchCategoriesOwnershipFilter.BELONG_TO_ONE_CATEGORY
-            updateCategoriesOwnershipUI()
-        }
+        belongToAllCategoriesFilter.setOnClickListener { update(SearchCategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES) }
+        belongToOneCategoryFilter.setOnClickListener { update(SearchCategoriesOwnershipFilter.BELONG_TO_ONE_CATEGORY) }
     }
 
-    private fun setClearButton() = with(searchFiltersViewModel) {
+    private fun setClearButton() {
         clearButton.setOnClickListener {
-            clearFilters()
+            searchFiltersViewModel.clearFilters()
             updateAllFiltersUI()
         }
     }
