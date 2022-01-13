@@ -200,14 +200,14 @@ class FileListViewModel : ViewModel() {
     }
 
     @Synchronized
-    fun getFolderActivities(folder: File, userDrive: UserDrive? = null): LiveData<Map<out Int, LocalFileActivity>> {
+    fun getFolderActivities(folder: File, userDrive: UserDrive? = null): LiveData<Boolean> {
         getFolderActivitiesJob.cancel()
         getFolderActivitiesJob = Job()
         return liveData(Dispatchers.IO + getFolderActivitiesJob) {
             mutex.withLock {
                 getFolderActivitiesJob.ensureActive()
                 val activities = FileController.getFolderActivities(folder, 1, userDrive)
-                if (activities.isNotEmpty()) emit(activities)
+                emit(activities.isNotEmpty())
             }
         }
     }

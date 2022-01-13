@@ -766,8 +766,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun downloadFolderActivities(currentFolder: File) {
-        fileListViewModel.getFolderActivities(currentFolder, userDrive).observe(viewLifecycleOwner) { activities ->
-            if (activities?.isNotEmpty() == true) {
+        fileListViewModel.getFolderActivities(currentFolder, userDrive).observe(viewLifecycleOwner) { isNotEmpty ->
+            if (isNotEmpty == true) {
                 getFolderFiles(
                     ignoreCache = false,
                     onFinish = {
