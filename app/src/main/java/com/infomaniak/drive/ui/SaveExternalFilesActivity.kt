@@ -43,9 +43,7 @@ import com.infomaniak.drive.ui.menu.settings.SelectDriveDialog
 import com.infomaniak.drive.ui.menu.settings.SelectDriveViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.lib.core.utils.hideProgress
-import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.showProgress
+import com.infomaniak.lib.core.utils.*
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.android.synthetic.main.activity_save_external_file.*
@@ -225,7 +223,13 @@ class SaveExternalFilesActivity : BaseActivity() {
         var showEditText = false
 
         if (intent.hasExtra(Intent.EXTRA_TEXT)) {
-            fileNameEdit.setText(intent.getStringExtra(Intent.EXTRA_SUBJECT) ?: "")
+            val extension = if (intent.getStringExtra(Intent.EXTRA_TEXT)?.isValidUrl() == true) ".url" else ".txt"
+            val name = (intent.getStringExtra(Intent.EXTRA_SUBJECT) ?: "").let {
+                if (it.isEmpty()) Date().format(FORMAT_NEW_FILE)
+                else it
+            } + extension
+
+            fileNameEdit.setText(name)
             showEditText = true
 
         } else {
@@ -299,15 +303,14 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private fun storeText(userId: Int, driveId: Int, folderId: Int): Boolean {
         intent.getStringExtra(Intent.EXTRA_TEXT)?.let { text ->
-            val extension = if (text.isValidUrl()) ".url" else ".txt"
-            val fileName = fileNameEdit.text.toString() + extension
+            val fileName = fileNameEdit.text.toString()
             val lastModified = Date()
             val outputFile = java.io.File(sharedFolder, fileName).also { if (it.exists()) it.delete() }
 
             if (outputFile.createNewFile()) {
                 outputFile.setLastModified(lastModified.time)
 
-                if (extension == ".url") { // Create url file
+                if (fileName.endsWith(".url")) { // Create url file
                     // See URL format http://www.lyberty.com/encyc/articles/tech/dot_url_format_-_an_unofficial_guide.html
                     outputFile.outputStream().use { output ->
                         output.write("[InternetShortcut]".toByteArray())
