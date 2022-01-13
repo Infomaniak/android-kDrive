@@ -39,9 +39,8 @@ class SearchFiltersAdapter(
 
     override fun getItemCount() = filters.size
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView) {
-        val filter = filters[position]
-        this as Chip
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView as Chip) {
+        val filter = this@SearchFiltersAdapter.filters[position]
         setEndMargin(position)
         setIcon(filter)
         setName(filter)
@@ -59,10 +58,10 @@ class SearchFiltersAdapter(
     }
 
     private fun Chip.setIcon(filter: SearchFilter) {
-        chipIcon = if (filter.icon != null) {
-            ContextCompat.getDrawable(context, filter.icon)
-        } else {
+        chipIcon = if (filter.icon == null) {
             ContextCompat.getDrawable(context, R.drawable.round_empty)?.apply { setTint(Color.parseColor(filter.tint)) }
+        } else {
+            ContextCompat.getDrawable(context, filter.icon)
         }
     }
 
