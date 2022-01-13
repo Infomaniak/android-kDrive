@@ -98,6 +98,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun onResume() {
         super.onResume()
+        // Fix the popBackStack in onViewCreated because onResume is still called
         if (findNavController().currentDestination?.id != R.id.fileInfoActionsBottomSheetDialog) return
         fileInfoActionsView.updateAvailableOfflineItem()
         fileInfoActionsView.observeOfflineProgression(this) {}

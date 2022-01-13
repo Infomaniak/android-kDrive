@@ -318,6 +318,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     override fun onDestroy() {
         super.onDestroy()
+        // Fix the popBackStack in onViewCreated because onResume is still called
         if (findNavController().currentDestination?.id == R.id.addFileBottomSheetDialog) findNavController().popBackStack()
         deleteExposedTempUploadDir()
     }
