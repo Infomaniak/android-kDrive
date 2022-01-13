@@ -68,7 +68,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        currentFile = FileController.getFileById(navigationArgs.fileId) ?: run {
+        currentFile = FileController.getFileById(navigationArgs.fileId, navigationArgs.userDrive) ?: run {
             findNavController().popBackStack()
             return
         }
@@ -76,7 +76,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         drivePermissions = DrivePermissions()
         drivePermissions.registerPermissions(this) { authorized -> if (authorized) downloadFileClicked() }
 
-        fileInfoActionsView.init(this, this, navigationArgs.userDrive.sharedWithMe)
+        fileInfoActionsView.init(this, mainViewModel, this, navigationArgs.userDrive.sharedWithMe)
         fileInfoActionsView.updateCurrentFile(currentFile)
 
         setupBackActionHandler()
@@ -99,6 +99,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun onResume() {
         super.onResume()
+        // Fix the popBackStack in onViewCreated because onResume is still called
+        if (findNavController().currentDestination?.id != R.id.fileInfoActionsBottomSheetDialog) return
         fileInfoActionsView.updateAvailableOfflineItem()
         fileInfoActionsView.observeOfflineProgression(this) {}
     }

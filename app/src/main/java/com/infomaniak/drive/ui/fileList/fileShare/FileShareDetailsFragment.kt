@@ -137,6 +137,12 @@ class FileShareDetailsFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Fix the popBackStack in onViewCreated because onResume is still called
+        if (findNavController().currentDestination?.id != R.id.fileShareDetailsFragment) return
+    }
+
     private fun refreshUi() {
         fileShareViewModel.currentFile.value?.let { file ->
             sharedItemsAdapter = SharedItemsAdapter(file) { shareable -> openSelectPermissionDialog(shareable) }
