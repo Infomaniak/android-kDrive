@@ -28,7 +28,6 @@ import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
@@ -126,14 +125,14 @@ class SelectCategoriesFragment : Fragment() {
     }
 
     private fun configureSearchView() {
-        clearButton.setOnClickListener { searchView.text = null }
+        clearButton.setOnClickListener { searchView.setText("") }
         setSearchViewTextChangedListener()
         setSearchViewEditorActionListener()
     }
 
     private fun setSearchViewTextChangedListener() = with(searchView) {
         addTextChangedListener(DebouncingTextWatcher(lifecycle) {
-            if (isAtLeastResumed()) {
+            if (isResumed) {
                 clearButton.isInvisible = it.isNullOrEmpty()
                 categoriesAdapter.updateFilter(text.toString())
                 configureCreateCategoryRow(it?.trim())
@@ -163,7 +162,7 @@ class SelectCategoriesFragment : Fragment() {
             val fileCategory = file.categories.find { it.id == category.id }
             createUICategory(
                 category = category,
-                selectedState = if (fileCategory != null) SelectedState.SELECTED else SelectedState.NOT_SELECTED,
+                selectedState = if (fileCategory == null) SelectedState.NOT_SELECTED else SelectedState.SELECTED,
                 addedToFileAt = fileCategory?.addedToFileAt,
             )
         }
@@ -191,7 +190,7 @@ class SelectCategoriesFragment : Fragment() {
             val selectedCategory = selectedCategories.find { it.id == category.id }
             createUICategory(
                 category = category,
-                selectedState = if (selectedCategory != null) SelectedState.SELECTED else SelectedState.NOT_SELECTED,
+                selectedState = if (selectedCategory == null) SelectedState.NOT_SELECTED else SelectedState.SELECTED,
             )
         }
 
@@ -288,8 +287,6 @@ class SelectCategoriesFragment : Fragment() {
             categoriesAdapter.allCategories.filter { it.selectedState == SelectedState.SELECTED }.map { it.id },
         )
     }
-
-    private fun isAtLeastResumed(): Boolean = lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
 
     companion object {
         const val SELECT_CATEGORIES_NAV_KEY = "select_categories_nav_key"

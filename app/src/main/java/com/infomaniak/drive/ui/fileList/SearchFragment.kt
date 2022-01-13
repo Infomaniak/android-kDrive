@@ -64,7 +64,7 @@ class SearchFragment : FileListFragment() {
 
         super.onViewCreated(view, savedInstanceState)
 
-        clearButton.setOnClickListener { searchView.text = null }
+        clearButton.setOnClickListener { searchView.setText("") }
         configureSearchView()
         configureFileAdapter()
         configureRecentSearches()
