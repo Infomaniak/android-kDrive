@@ -124,10 +124,10 @@ dependencies {
 
     implementation "io.realm:android-adapters:4.0.0"
 
-    standardImplementation 'com.google.android.play:core:1.10.2'
+    standardImplementation 'com.google.android.play:core:1.10.3'
     standardImplementation 'com.google.firebase:firebase-messaging-ktx:23.0.0'
 
-    implementation 'com.github.hannesa2:paho.mqtt.android:3.3.3'
+    implementation 'com.github.hannesa2:paho.mqtt.android:3.3.4'
 
     implementation 'io.sentry:sentry-android:5.5.2'
 
