@@ -226,10 +226,12 @@ class ApiRepositoryTest : KDriveTest() {
 
     @Test
     fun moveFileToAnotherFolder() {
-        val folderName = "f"
         val file = createFileForTest()
+        // Create test folder
+        val folderName = "f"
         createFolder(OkHttpClient(), userDrive.driveId, ROOT_ID, folderName).also {
             Assert.assertNotNull(it.data)
+            // Move file in the test folder
             assertApiResponse(moveFile(file, it.data!!))
             val folderFileCount = getFileCount(it.data!!)
             assertApiResponse(folderFileCount)
@@ -253,6 +255,7 @@ class ApiRepositoryTest : KDriveTest() {
 
     @Test
     fun shareLinkTest() {
+        // TODO Changes for api-v2 : boolean instead of "true", "false", and can_edit instead of canEdit
         val body = mapOf(
             "permission" to "public",
             "block_downloads" to "false",
@@ -267,10 +270,10 @@ class ApiRepositoryTest : KDriveTest() {
         ).also {
             assertApiResponse(it)
             Assert.assertEquals("Permission should be public", "public", it.data!!.permission.name.lowercase())
-            Assert.assertFalse("block downloads should be false", it.data!!.blockDownloads)
-            Assert.assertFalse("can edit should be false", it.data!!.canEdit)
-            Assert.assertFalse("show stats should be false", it.data!!.showStats)
-            Assert.assertFalse("block comments should be false", it.data!!.blockDownloads)
+            Assert.assertFalse("Block downloads should be false", it.data!!.blockDownloads)
+            Assert.assertFalse("Can edit should be false", it.data!!.canEdit)
+            Assert.assertFalse("Show stats should be false", it.data!!.showStats)
+            Assert.assertFalse("Block comments should be false", it.data!!.blockDownloads)
             Assert.assertFalse("Block information should be false", it.data!!.blockInformation)
         }
 
@@ -282,11 +285,11 @@ class ApiRepositoryTest : KDriveTest() {
         val response = putFileShareLink(
             testFile, mapOf(
                 "permission" to "public",
-                "block_downloads" to "true",
-                "canEdit" to "true",
-                "show_stats" to "true",
-                "block_comments" to "true",
-                "block_information" to "true"
+                "block_downloads" to true,
+                "can_edit" to true,
+                "show_stats" to true,
+                "block_comments" to true,
+                "block_information" to true
             )
         )
         assertApiResponse(response)

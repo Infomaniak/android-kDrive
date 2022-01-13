@@ -92,7 +92,8 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     fun postFileShareLink(
         file: File,
-        body: Map<String, String> = mapOf("permission" to "public", "block_downloads" to "false", "can_edit" to "false")
+        // TODO Changes for api-v2 : boolean instead of "true", "false", and can_edit instead of canEdit
+        body: Map<String, String> = mapOf("permission" to "public", "block_downloads" to "false", "canEdit" to "false")
     ) = liveData(Dispatchers.IO) {
         val apiResponse = ApiRepository.postFileShareLink(file, body)
         if (apiResponse.isSuccess()) {
