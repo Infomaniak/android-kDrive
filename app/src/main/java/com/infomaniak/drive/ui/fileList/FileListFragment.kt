@@ -55,6 +55,7 @@ import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWork
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog.Companion.SELECT_DIALOG_ACTION
+import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.BULK_OPERATION_CUSTOM_TAG
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.generateWorkerData
@@ -464,9 +465,14 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
         fileListViewModel.isListMode.value = UISettings(requireContext()).listMode
 
-        sortButton.setText(fileListViewModel.sortType.translation)
-        sortButton.setOnClickListener {
-            safeNavigate(R.id.sortFilesBottomSheetDialog, bundleOf("sortType" to fileListViewModel.sortType))
+        sortButton.apply {
+            setText(fileListViewModel.sortType.translation)
+            setOnClickListener {
+                safeNavigate(
+                    R.id.sortFilesBottomSheetDialog,
+                    SortFilesBottomSheetDialogArgs(sortType = fileListViewModel.sortType).toBundle()
+                )
+            }
         }
 
         uploadFileInProgress.setUploadFileInProgress(R.string.uploadInThisFolderTitle) {
@@ -504,10 +510,10 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
             onMenuClicked = { file ->
                 val fileObject = file.realm?.copyFromRealm(file, 1) ?: file
-                val bundle = bundleOf(
-                    "fileId" to fileObject.id,
-                    "userDrive" to UserDrive(driveId = file.driveId, sharedWithMe = fileListViewModel.isSharedWithMe)
-                )
+                val bundle = FileInfoActionsBottomSheetDialogArgs(
+                    fileId = fileObject.id,
+                    userDrive = UserDrive(driveId = file.driveId, sharedWithMe = fileListViewModel.isSharedWithMe),
+                ).toBundle()
                 safeNavigate(R.id.fileInfoActionsBottomSheetDialog, bundle, currentClassName = homeClassName())
             }
         }
@@ -685,10 +691,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun goToUploadInProgress(folderId: Int) {
         safeNavigate(
-            R.id.uploadInProgressFragment, bundleOf(
-                "folderID" to folderId,
-                "folderName" to getString(R.string.uploadInProgressTitle)
-            )
+            R.id.uploadInProgressFragment,
+            UploadInProgressFragmentArgs(folderID = folderId, folderName = getString(R.string.uploadInProgressTitle)).toBundle(),
         )
     }
 

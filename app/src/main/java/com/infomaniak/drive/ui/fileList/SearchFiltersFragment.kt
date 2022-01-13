@@ -32,6 +32,8 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.SearchCategoriesOwnershipFilter
+import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterDateBottomSheetDialogArgs
+import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterTypeBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.getBackNavigationResult
 import com.infomaniak.drive.utils.safeNavigate
@@ -83,8 +85,12 @@ class SearchFiltersFragment : Fragment() {
     }
 
     private fun setDateAndTypeFilters() = with(searchFiltersViewModel) {
-        dateFilter.setOnClickListener { safeNavigate(R.id.searchFilterDateDialog, bundleOf("date" to date.value)) }
-        typeFilter.setOnClickListener { safeNavigate(R.id.searchFilterTypeDialog, bundleOf("type" to type.value)) }
+        dateFilter.setOnClickListener {
+            safeNavigate(R.id.searchFilterDateDialog, SearchFilterDateBottomSheetDialogArgs(date = date.value).toBundle())
+        }
+        typeFilter.setOnClickListener {
+            safeNavigate(R.id.searchFilterTypeDialog, SearchFilterTypeBottomSheetDialogArgs(type = type.value).toBundle())
+        }
     }
 
     private fun setCategoriesOwnershipFilters() {

@@ -90,6 +90,7 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialog.Companion.FILE_ID
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED_CATEGORIES
+import com.infomaniak.drive.ui.fileList.UploadInProgressFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.*
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -639,10 +640,11 @@ fun Fragment.safeNavigate(
 
 fun Fragment.navigateToUploadView(folderId: Int, folderName: String? = null) {
     safeNavigate(
-        R.id.uploadInProgressFragment, bundleOf(
-            "folderID" to folderId,
-            "folderName" to (folderName ?: getString(R.string.uploadInProgressTitle))
-        )
+        R.id.uploadInProgressFragment,
+        UploadInProgressFragmentArgs(
+            folderID = folderId,
+            folderName = folderName ?: getString(R.string.uploadInProgressTitle),
+        ).toBundle(),
     )
 }
 

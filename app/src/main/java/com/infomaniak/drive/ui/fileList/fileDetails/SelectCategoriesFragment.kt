@@ -23,7 +23,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.activity.addCallback
-import androidx.core.os.bundleOf
 import androidx.core.text.HtmlCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -39,6 +38,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialog
+import com.infomaniak.drive.ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.SelectedState
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.UICategory
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment.UsageMode.*
@@ -184,15 +184,18 @@ class SelectCategoriesFragment : Fragment() {
         setItems(uiCategories, usageMode)
 
         onMenuClicked = { category ->
-            safeNavigate(
-                R.id.categoryInfoActionsBottomSheetDialog, bundleOf(
-                    "fileId" to file.id,
-                    "categoryId" to category.id,
-                    "categoryName" to category.name,
-                    "categoryColor" to category.color,
-                    "categoryIsPredefined" to category.isPredefined,
+            with(category) {
+                safeNavigate(
+                    R.id.categoryInfoActionsBottomSheetDialog,
+                    CategoryInfoActionsBottomSheetDialogArgs(
+                        fileId = file.id,
+                        categoryId = id,
+                        categoryName = name,
+                        categoryColor = color,
+                        categoryIsPredefined = isPredefined,
+                    ).toBundle(),
                 )
-            )
+            }
         }
     }
 
