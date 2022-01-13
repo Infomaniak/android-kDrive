@@ -43,6 +43,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
+import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
@@ -324,7 +325,12 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun manageCategoriesClicked(fileId: Int) {
-        safeNavigate(PreviewSliderFragmentDirections.actionPreviewSliderFragmentToSelectCategoriesFragment(fileId))
+        safeNavigate(
+            PreviewSliderFragmentDirections.actionPreviewSliderFragmentToSelectCategoriesFragment(
+                fileId = fileId,
+                categoriesUsageMode = CategoriesUsageMode.MANAGED_CATEGORIES,
+            )
+        )
     }
 
     override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) {

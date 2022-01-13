@@ -321,21 +321,17 @@ open class File(
         }
     }
 
+    // TODO This function is called in the FileAdapter, for each File, and is getting the RealmInstance each time. This is not very efficient.
     fun getCategories(): List<Category> {
         val fileCategoriesIds = getSortedCategoriesIds()
         return DriveInfosController.getCurrentDriveCategoriesFromIds(fileCategoriesIds.toTypedArray())
     }
 
-    // TODO This function is called in the FileAdapter, for each File, and is getting the RealmInstance each time. This is not very efficient.
     private fun getSortedCategoriesIds(): List<Int> {
-        fun RealmList<FileCategory>.sort() = sort(FileCategory::addedToFileAt.name).map { it.id }
-
         return if (isManaged) {
-            categories.sort()
+            categories.sort(FileCategory::addedToFileAt.name).map { it.id }
         } else {
-            FileController.getRealmInstance().use { realm ->
-                FileController.getFileProxyById(id, customRealm = realm)?.categories?.sort() ?: emptyList()
-            }
+            categories.sortedBy { it.addedToFileAt }.map { it.id }
         }
     }
 
@@ -416,7 +412,6 @@ open class File(
     }
 
     companion object {
-
         fun File.getCloudAndFileUris(context: Context, userDrive: UserDrive = UserDrive()): Pair<Uri, Uri> {
             val cloudUri = CloudStorageProvider.createShareFileUri(context, this, userDrive)!!
             val offlineFile = getOfflineFile(context, userDrive.userId)

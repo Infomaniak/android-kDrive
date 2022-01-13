@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2021 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/searchFiltersContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.fileList.SearchFiltersFragment">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/appBarHeight"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:id="@+id/appBarTitle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:title="@string/filtersTitle">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin" />
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/recyclerViewPaddingBottom">
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/start"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_begin="@dimen/marginStandard" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/end"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_end="@dimen/marginStandard" />
+
+            <TextView
+                android:id="@+id/dateTitle"
+                style="@style/Subtitle2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/marginStandard"
+                android:text="@string/modificationDateFilterTitle"
+                app:layout_constraintBottom_toTopOf="@id/dateFilter"
+                app:layout_constraintEnd_toStartOf="@id/end"
+                app:layout_constraintStart_toEndOf="@id/start"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/dateFilter"
+                style="@style/CardViewInfomaniak"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/marginStandardSmall"
+                app:layout_constraintBottom_toTopOf="@id/typeTitle"
+                app:layout_constraintEnd_toStartOf="@id/end"
+                app:layout_constraintStart_toEndOf="@id/start"
+                app:layout_constraintTop_toBottomOf="@id/dateTitle">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="@dimen/marginStandard"
+                    android:paddingVertical="@dimen/marginStandardMedium">
+
+                    <ImageView
+                        android:id="@+id/dateFilterStartIcon"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_calendar"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="@color/secondaryText"
+                        tools:ignore="ContentDescription" />
+
+                    <TextView
+                        android:id="@+id/dateFilterText"
+                        style="@style/Subtitle2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/marginStandardMedium"
+                        android:layout_marginEnd="@dimen/marginStandard"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="@string/searchFiltersSelectDate"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/dateFilterEndIcon"
+                        app:layout_constraintStart_toEndOf="@id/dateFilterStartIcon"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageView
+                        android:id="@+id/dateFilterEndIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_chevron_right"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="@color/iconColor"
+                        tools:ignore="ContentDescription" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:id="@+id/typeTitle"
+                style="@style/Subtitle2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/marginStandard"
+                android:text="@string/fileTypeFilterTitle"
+                app:layout_constraintBottom_toTopOf="@id/typeFilter"
+                app:layout_constraintEnd_toStartOf="@id/end"
+                app:layout_constraintStart_toEndOf="@id/start"
+                app:layout_constraintTop_toBottomOf="@id/dateFilter" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/typeFilter"
+                style="@style/CardViewInfomaniak"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/marginStandardSmall"
+                app:layout_constraintBottom_toTopOf="@id/categoriesTitle"
+                app:layout_constraintEnd_toStartOf="@id/end"
+                app:layout_constraintStart_toEndOf="@id/start"
+                app:layout_constraintTop_toBottomOf="@id/typeTitle">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="@dimen/marginStandard"
+                    android:paddingVertical="@dimen/marginStandardMedium">
+
+                    <ImageView
+                        android:id="@+id/typeFilterStartIcon"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_file"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="ContentDescription" />
+
+                    <TextView
+                        android:id="@+id/typeFilterText"
+                        style="@style/Subtitle2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/marginStandardMedium"
+                        android:layout_marginEnd="@dimen/marginStandard"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="@string/searchFiltersSelectType"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/typeFilterEndIcon"
+                        app:layout_constraintStart_toEndOf="@id/typeFilterStartIcon"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageView
+                        android:id="@+id/typeFilterEndIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_chevron_right"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="@color/iconColor"
+                        tools:ignore="ContentDescription" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:id="@+id/categoriesTitle"
+                style="@style/Subtitle2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/marginStandard"
+                android:text="@string/categoriesFilterTitle"
+                app:layout_constraintBottom_toTopOf="@id/chooseCategoriesFilter"
+                app:layout_constraintEnd_toStartOf="@id/end"
+                app:layout_constraintStart_toEndOf="@id/start"
+                app:layout_constraintTop_toBottomOf="@id/typeFilter" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/chooseCategoriesFilter"
+                style="@style/CardViewInfomaniak"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/marginStandardSmall"
+                app:layout_constraintBottom_toTopOf="@id/belongToAllCategoriesFilter"
+                app:layout_constraintEnd_toStartOf="@id/end"
+                app:layout_constraintStart_toEndOf="@id/start"
+                app:layout_constraintTop_toBottomOf="@id/categoriesTitle">
+
+                <com.infomaniak.drive.views.CategoriesContainerView
+                    android:id="@+id/categoriesContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/belongToAllCategoriesFilter"
+                style="@style/CardViewInfomaniak"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/marginStandardSmall"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@id/belongToOneCategoryFilter"
+                app:layout_constraintEnd_toStartOf="@id/end"
+                app:layout_constraintStart_toEndOf="@id/start"
+                app:layout_constraintTop_toBottomOf="@id/chooseCategoriesFilter"
+                app:strokeColor="@color/primary"
+                tools:visibility="visible">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="@dimen/marginStandard"
+                    android:paddingVertical="@dimen/marginStandardMedium">
+
+                    <TextView
+                        style="@style/Subtitle2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/belongToAllCategoriesFilterDescription"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/belongToOneCategoryFilter"
+                style="@style/CardViewInfomaniak"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/marginStandardSmall"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@id/clearButton"
+                app:layout_constraintEnd_toStartOf="@id/end"
+                app:layout_constraintStart_toEndOf="@id/start"
+                app:layout_constraintTop_toBottomOf="@id/belongToAllCategoriesFilter"
+                app:strokeColor="@color/primary"
+                tools:visibility="visible">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="@dimen/marginStandard"
+                    android:paddingVertical="@dimen/marginStandardMedium">
+
+                    <TextView
+                        style="@style/Subtitle2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/belongToOneCategoryFilterDescription"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/clearButton"
+                style="@style/ButtonInfomaniak.Light2"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/marginStandard"
+                android:text="@string/buttonClearFilters"
+                app:layout_constraintBottom_toTopOf="@id/saveButton"
+                app:layout_constraintEnd_toStartOf="@id/end"
+                app:layout_constraintStart_toEndOf="@id/start"
+                app:layout_constraintTop_toBottomOf="@id/belongToOneCategoryFilter" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/saveButton"
+                style="@style/ButtonInfomaniak"
+                android:layout_width="0dp"
+                android:layout_marginTop="@dimen/marginStandardSmall"
+                android:text="@string/buttonApplyFilters"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/end"
+                app:layout_constraintStart_toEndOf="@id/start"
+                app:layout_constraintTop_toBottomOf="@id/clearButton" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

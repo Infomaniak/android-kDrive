@@ -79,7 +79,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/disableButton"
-                style="@style/ButtonInfomaniak.Light"
+                style="@style/ButtonInfomaniak.Light2"
                 android:layout_width="match_parent"
                 android:layout_marginHorizontal="@dimen/marginStandard"
                 android:layout_marginBottom="@dimen/marginStandard"

@@ -111,7 +111,7 @@ class TimeInputView @JvmOverloads constructor(
 
         // TODO : Waiting https://github.com/material-components/material-components-android/issues/366 (icon padding issue)
         TimePickerDialog.newInstance(this, hours, minutes, is24HourFormat(context)).apply {
-            isThemeDark = resources.isNightModeEnabled()
+            isThemeDark = this@TimeInputView.resources.isNightModeEnabled()
             setSelectableTimes(acceptableTimes)
             dismissOnPause(true)
             show(fragmentManager, this@TimeInputView.toString())

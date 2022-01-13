@@ -90,6 +90,7 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialog.Companion.FILE_ID
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED_CATEGORIES
+import com.infomaniak.drive.ui.fileList.UploadInProgressFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.*
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -298,11 +299,12 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
         }
         else -> {
             when {
-                file.hasThumbnail && (isGrid || file.getFileType() == ConvertedType.IMAGE
-                        || file.getFileType() == ConvertedType.VIDEO) -> {
+                file.hasThumbnail &&
+                        (isGrid || file.getFileType() == ConvertedType.IMAGE || file.getFileType() == ConvertedType.VIDEO) -> {
                     filePreview.loadGlideUrl(file.thumbnail(), file.getFileType().icon)
                 }
-                file.isFromUploads && (file.getMimeType().startsWith("image/") || file.getMimeType().startsWith("video/")) -> {
+                file.isFromUploads &&
+                        (file.getMimeType().startsWith("image/") || file.getMimeType().startsWith("video/")) -> {
                     CoroutineScope(Dispatchers.IO).launch {
                         val bitmap = context.getLocalThumbnail(file)
                         withContext(Dispatchers.Main) {
@@ -379,6 +381,14 @@ fun View.setUserView(user: User, showChevron: Boolean = true, onItemClicked: (us
     chevron.isVisible = showChevron
     setOnClickListener { onItemClicked(user) }
 }
+
+fun Date.startOfTheDay(): Date =
+    Calendar.getInstance().apply {
+        time = this@startOfTheDay
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+    }.time
 
 fun Date.endOfTheDay(): Date =
     Calendar.getInstance().apply {
@@ -630,10 +640,11 @@ fun Fragment.safeNavigate(
 
 fun Fragment.navigateToUploadView(folderId: Int, folderName: String? = null) {
     safeNavigate(
-        R.id.uploadInProgressFragment, bundleOf(
-            "folderID" to folderId,
-            "folderName" to (folderName ?: getString(R.string.uploadInProgressTitle))
-        )
+        R.id.uploadInProgressFragment,
+        UploadInProgressFragmentArgs(
+            folderID = folderId,
+            folderName = folderName ?: getString(R.string.uploadInProgressTitle),
+        ).toBundle(),
     )
 }
 
@@ -796,16 +807,20 @@ fun Category.getName(context: Context): String = when (name) {
     else -> name
 }
 
-fun List<UICategory>.sortCategoriesList(): List<UICategory> {
-    return sortedByDescending { it.userUsageCount }
-        .sortedBy { it.addedToFileAt }
-        .sortedByDescending { it.isSelected }
-}
-
 fun RealmList<Category>.find(id: Int): Category? {
     return where().equalTo(Category::id.name, id).findFirst()
 }
 
 fun RealmList<FileCategory>.find(id: Int): FileCategory? {
     return where().equalTo(FileCategory::id.name, id).findFirst()
+}
+
+fun MaterialCardView.setCornersRadius(topCornerRadius: Float, bottomCornerRadius: Float) {
+    shapeAppearanceModel = shapeAppearanceModel
+        .toBuilder()
+        .setTopLeftCorner(CornerFamily.ROUNDED, topCornerRadius)
+        .setTopRightCorner(CornerFamily.ROUNDED, topCornerRadius)
+        .setBottomLeftCorner(CornerFamily.ROUNDED, bottomCornerRadius)
+        .setBottomRightCorner(CornerFamily.ROUNDED, bottomCornerRadius)
+        .build()
 }

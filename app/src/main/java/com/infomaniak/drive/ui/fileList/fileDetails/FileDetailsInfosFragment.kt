@@ -189,7 +189,10 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
                 setup(categories, rights.canPutCategoryOnFile, layoutInflater, onClicked = {
                     runCatching {
                         findNavController().navigate(
-                            FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectCategoriesFragment(fileId)
+                            FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectCategoriesFragment(
+                                fileId = fileId,
+                                categoriesUsageMode = CategoriesUsageMode.MANAGED_CATEGORIES,
+                            )
                         )
                     }
                 })

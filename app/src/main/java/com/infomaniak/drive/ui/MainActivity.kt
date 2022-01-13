@@ -43,6 +43,7 @@ import androidx.core.view.get
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import coil.ImageLoader
@@ -58,6 +59,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.launchInAppReview
+import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
@@ -149,47 +151,8 @@ class MainActivity : BaseActivity() {
             }
         })
 
-        navController.addOnDestinationChangedListener { _, destination, _ ->
-            Sentry.addBreadcrumb(Breadcrumb().apply {
-                category = "Navigation"
-                message = "Accessed to destination : ${destination.displayName}"
-                level = SentryLevel.INFO
-            })
-
-            val isVisible = when (destination.id) {
-                R.id.addFileBottomSheetDialog,
-                R.id.favoritesFragment,
-                R.id.fileInfoActionsBottomSheetDialog,
-                R.id.fileListFragment,
-                R.id.homeFragment,
-                R.id.menuFragment,
-                R.id.sharedWithMeFragment -> true
-                else -> false
-            }
-            mainFab.isVisible = isVisible
-            bottomNavigation.isVisible = isVisible
-            bottomNavigationBackgroundView.isVisible = isVisible
-
-            when (destination.id) {
-                R.id.favoritesFragment,
-                R.id.homeFragment,
-                R.id.menuFragment -> {
-                    // Defining default root folder
-                    mainViewModel.currentFolder.value = AccountUtils.getCurrentDrive()?.convertToFile(getRootName(this))
-                }
-            }
-
-            when (destination.id) {
-                R.id.fileDetailsFragment, R.id.fileShareLinkSettingsFragment -> {
-                    setColorStatusBar(destination.id == R.id.fileShareLinkSettingsFragment)
-                    setColorNavigationBar(true)
-                }
-                R.id.downloadProgressDialog, R.id.previewSliderFragment -> Unit
-                else -> {
-                    setColorStatusBar()
-                    setColorNavigationBar()
-                }
-            }
+        navController.addOnDestinationChangedListener { _, destination, navigationArgs ->
+            onDestinationChanged(destination, navigationArgs)
         }
 
         mainFab.setOnClickListener { navController.navigate(R.id.addFileBottomSheetDialog) }
@@ -265,6 +228,57 @@ class MainActivity : BaseActivity() {
                 }
             }
         }
+    }
+
+    private fun onDestinationChanged(destination: NavDestination, navigationArgs: Bundle?) {
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = "Navigation"
+            message = "Accessed to destination : ${destination.displayName}"
+            level = SentryLevel.INFO
+        })
+
+        val shouldHideBottomNavigation = navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldHideBottomNavigation
+
+        handleBottomNavigationVisibility(destination.id, shouldHideBottomNavigation)
+
+        when (destination.id) {
+            R.id.favoritesFragment,
+            R.id.homeFragment,
+            R.id.menuFragment -> {
+                // Defining default root folder
+                mainViewModel.currentFolder.value = AccountUtils.getCurrentDrive()?.convertToFile(getRootName(this))
+            }
+        }
+
+        when (destination.id) {
+            R.id.fileDetailsFragment, R.id.fileShareLinkSettingsFragment -> {
+                setColorStatusBar(destination.id == R.id.fileShareLinkSettingsFragment)
+                setColorNavigationBar(true)
+            }
+            R.id.downloadProgressDialog, R.id.previewSliderFragment -> Unit
+            else -> {
+                setColorStatusBar()
+                setColorNavigationBar()
+            }
+        }
+    }
+
+    private fun handleBottomNavigationVisibility(destinationId: Int, shouldHideBottomNavigation: Boolean?) {
+
+        val isVisible = when (destinationId) {
+            R.id.addFileBottomSheetDialog,
+            R.id.favoritesFragment,
+            R.id.fileInfoActionsBottomSheetDialog,
+            R.id.fileListFragment,
+            R.id.homeFragment,
+            R.id.menuFragment,
+            R.id.sharedWithMeFragment -> shouldHideBottomNavigation != true
+            else -> false
+        }
+
+        mainFab.isVisible = isVisible
+        bottomNavigation.isVisible = isVisible
+        bottomNavigationBackgroundView.isVisible = isVisible
     }
 
     private fun launchSyncOffline() {

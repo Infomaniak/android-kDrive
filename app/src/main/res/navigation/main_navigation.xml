@@ -58,6 +58,10 @@
             android:name="folderName"
             android:defaultValue="/"
             app:argType="string" />
+        <argument
+            android:name="shouldHideBottomNavigation"
+            android:defaultValue="false"
+            app:argType="boolean" />
         <action
             android:id="@+id/action_fileListFragment_to_previewSliderFragment"
             app:destination="@id/previewSliderFragment" />
@@ -183,7 +187,8 @@
     <dialog
         android:id="@+id/actionMultiSelectBottomSheetDialog"
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog"
-        android:label="ActionMultiSelectBottomSheetDialog">
+        android:label="ActionMultiSelectBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_action_multi_select">
         <argument
             android:name="fileIds"
             app:argType="integer[]" />
@@ -505,7 +510,58 @@
         <action
             android:id="@+id/action_searchFragment_to_fileListFragment"
             app:destination="@id/fileListFragment" />
+        <action
+            android:id="@+id/action_searchFragment_to_searchFiltersFragment"
+            app:destination="@id/searchFiltersFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/searchFiltersFragment"
+        android:name="com.infomaniak.drive.ui.fileList.SearchFiltersFragment"
+        android:label="SearchFiltersFragment"
+        tools:layout="@layout/fragment_search_filters">
+        <argument
+            android:name="date"
+            app:argType="com.infomaniak.drive.data.models.SearchDateFilter"
+            app:nullable="true" />
+        <argument
+            android:name="type"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="categories"
+            app:argType="integer[]"
+            app:nullable="true" />
+        <argument
+            android:name="categoriesOwnership"
+            app:argType="com.infomaniak.drive.data.models.SearchCategoriesOwnershipFilter"
+            app:nullable="true" />
+        <action
+            android:id="@+id/action_searchFiltersFragment_to_selectCategoriesFragment"
+            app:destination="@id/selectCategoriesFragment" />
+    </fragment>
+
+    <dialog
+        android:id="@+id/searchFilterDateDialog"
+        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterDateBottomSheetDialog"
+        android:label="SearchFilterDateBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_search_filter_date">
+        <argument
+            android:name="date"
+            app:argType="com.infomaniak.drive.data.models.SearchDateFilter"
+            app:nullable="true" />
+    </dialog>
+
+    <dialog
+        android:id="@+id/searchFilterTypeDialog"
+        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterTypeBottomSheetDialog"
+        android:label="SearchFilterTypeBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_select">
+        <argument
+            android:name="type"
+            app:argType="com.infomaniak.drive.data.models.ConvertedType"
+            app:nullable="true" />
+    </dialog>
 
     <dialog
         android:id="@+id/accessDeniedBottomSheetFragment"
@@ -715,12 +771,14 @@
     <fragment
         android:id="@+id/recentChangesFragment"
         android:name="com.infomaniak.drive.ui.menu.RecentChangesFragment"
-        android:label="RecentChangesFragment" />
+        android:label="RecentChangesFragment"
+        tools:layout="@layout/fragment_file_list" />
 
     <dialog
         android:id="@+id/selectPermissionBottomSheetDialog"
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog"
-        android:label="SelectPermissionBottomSheetDialog">
+        android:label="SelectPermissionBottomSheetDialog"
+        tools:layout="@layout/fragment_select_permission">
         <argument
             android:name="currentShareable"
             android:defaultValue="@null"
@@ -745,10 +803,19 @@
         tools:layout="@layout/fragment_select_categories">
         <argument
             android:name="fileId"
+            android:defaultValue="-1"
             app:argType="integer" />
+        <argument
+            android:name="categories"
+            android:defaultValue="@null"
+            app:argType="integer[]"
+            app:nullable="true" />
         <action
             android:id="@+id/action_SelectCategoriesFragment_to_CreateOrEditCategoryFragment"
             app:destination="@id/createOrEditCategoryFragment" />
+        <argument
+            android:name="categoriesUsageMode"
+            app:argType="com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode" />
     </fragment>
 
     <dialog
