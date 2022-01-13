@@ -64,7 +64,7 @@ class CategoriesAdapter(
     private fun MaterialCardView.setCorners(position: Int) {
         val radius = resources.getDimension(R.dimen.cardViewRadius)
         val topCornerRadius = if (position == 0) radius else 0.0f
-        val bottomCornerRadius = if (position == itemCount - 1 && !isCreateRowVisible) radius else 0.0f
+        val bottomCornerRadius = if (position == filteredCategories.lastIndex && !isCreateRowVisible) radius else 0.0f
         setCornersRadius(topCornerRadius, bottomCornerRadius)
     }
 
@@ -200,11 +200,11 @@ class CategoriesAdapter(
             return when {
                 oldIndex == 0 && newIndex != 0 -> false // Remove top corners radius
                 oldIndex != 0 && newIndex == 0 -> false // Add top Corners radius
-                oldIndex == oldListSize - 1 && newIndex != newListSize - 1 -> false // Remove bot corners radius
-                oldIndex != oldListSize - 1 && newIndex == newListSize - 1 -> false // Add bot corners radius
+                oldIndex == oldList.lastIndex && newIndex != newList.lastIndex -> false // Remove bot corners radius
+                oldIndex != oldList.lastIndex && newIndex == newList.lastIndex -> false // Add bot corners radius
                 oldList[oldIndex].selectedState != newList[newIndex].selectedState -> false // Update progress bar
-                oldIndex == oldListSize - 1 && newIndex == newListSize - 1 && isCreateRowVisible -> false // Remove bot corners radius
-                newIndex == newListSize - 1 && !isCreateRowVisible -> false // Add bot corners radius
+                oldIndex == oldList.lastIndex && newIndex == newList.lastIndex && isCreateRowVisible -> false // Remove bot corners radius
+                newIndex == newList.lastIndex && !isCreateRowVisible -> false // Add bot corners radius
                 else -> true // Don't update
             }
         }

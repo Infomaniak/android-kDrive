@@ -65,8 +65,8 @@ class RecentSearchesAdapter(
             return when {
                 oldIndex == 0 && newIndex != 0 -> false // Remove top corners radius
                 oldIndex != 0 && newIndex == 0 -> false // Add top Corners radius
-                oldIndex == oldListSize - 1 && newIndex != newListSize - 1 -> false // Remove bot corners radius
-                oldIndex != oldListSize - 1 && newIndex == newListSize - 1 -> false // Add bot corners radius
+                oldIndex == oldList.lastIndex && newIndex != newList.lastIndex -> false // Remove bottom corners radius
+                oldIndex != oldList.lastIndex && newIndex == newList.lastIndex -> false // Add bottom corners radius
                 else -> true // Don't update
             }
         }

@@ -50,7 +50,7 @@ class SearchFiltersAdapter(
 
     private fun Chip.setEndMargin(position: Int) {
         layoutParams = (layoutParams as ViewGroup.MarginLayoutParams).apply {
-            marginEnd = if (position == this@SearchFiltersAdapter.filters.size - 1) {
+            marginEnd = if (position == this@SearchFiltersAdapter.filters.lastIndex) {
                 0
             } else {
                 resources.getDimensionPixelSize(R.dimen.marginStandardSmall)
