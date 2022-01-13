@@ -160,6 +160,9 @@
             android:name="sortType"
             android:defaultValue="NAME_AZ"
             app:argType="com.infomaniak.drive.data.models.File$SortType" />
+        <argument
+            android:name="sortTypeUsage"
+            app:argType="com.infomaniak.drive.data.models.File$SortTypeUsage" />
     </dialog>
 
     <dialog

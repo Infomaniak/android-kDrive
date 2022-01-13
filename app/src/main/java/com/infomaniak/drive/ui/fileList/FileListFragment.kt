@@ -47,6 +47,7 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.File.*
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.data.services.UploadWorker
@@ -110,6 +111,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     protected open var hideBackButtonWhenRoot: Boolean = true
     protected open var showPendingFiles = true
     protected open var allowCancellation = true
+    protected open var sortTypeUsage = SortTypeUsage.FILE_LIST
 
     protected var userDrive: UserDrive? = null
 
@@ -455,29 +457,39 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun setupDisplay() {
+        setupToggleDisplayButton()
+        setupListMode()
+        setupSortButton()
+        uploadFileInProgress.setUploadFileInProgress(R.string.uploadInThisFolderTitle) { goToUploadInProgress(folderID) }
+    }
+
+    private fun setupToggleDisplayButton() {
         toggleDisplayButton.setOnClickListener {
             val newListMode = !UISettings(requireContext()).listMode
             UISettings(requireContext()).listMode = newListMode
             fileListViewModel.isListMode.value = newListMode
         }
-        fileListViewModel.isListMode.observe(viewLifecycleOwner) {
-            setupDisplayMode(it)
-        }
-        fileListViewModel.isListMode.value = UISettings(requireContext()).listMode
+    }
 
+    private fun setupListMode() {
+        fileListViewModel.isListMode.apply {
+            observe(viewLifecycleOwner) { setupDisplayMode(it) }
+            value = UISettings(requireContext()).listMode
+        }
+    }
+
+    private fun setupSortButton() {
         sortButton.apply {
             setText(fileListViewModel.sortType.translation)
-            setOnClickListener {
-                safeNavigate(
-                    R.id.sortFilesBottomSheetDialog,
-                    SortFilesBottomSheetDialogArgs(sortType = fileListViewModel.sortType).toBundle()
-                )
-            }
+            setOnClickListener { navigateToSortFilesDialog() }
         }
+    }
 
-        uploadFileInProgress.setUploadFileInProgress(R.string.uploadInThisFolderTitle) {
-            goToUploadInProgress(folderID)
-        }
+    private fun navigateToSortFilesDialog() {
+        safeNavigate(
+            R.id.sortFilesBottomSheetDialog,
+            SortFilesBottomSheetDialogArgs(sortType = fileListViewModel.sortType, sortTypeUsage = sortTypeUsage).toBundle(),
+        )
     }
 
     protected open fun setupFileAdapter() {
@@ -797,7 +809,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private inner class SortFiles : () -> Unit {
         override fun invoke() {
-            getBackNavigationResult<File.SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
+            getBackNavigationResult<SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
                 fileListViewModel.sortType = newSortType
                 sortButton?.setText(fileListViewModel.sortType.translation)
 

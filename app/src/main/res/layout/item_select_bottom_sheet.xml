@@ -20,7 +20,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/buttonHeight"
-    android:background="?selectableItemBackground">
+    android:background="?selectableItemBackground"
+    tools:context=".ui.fileList.SortFilesBottomSheetDialog">
 
     <ImageView
         android:id="@+id/itemSelectIcon"
