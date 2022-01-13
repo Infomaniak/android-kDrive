@@ -770,31 +770,29 @@ object FileController {
     }
 
     private fun FileActivity.applyFileActivity(realm: Realm, returnResponse: ArrayMap<Int, FileActivity>, currentFolder: File) {
-        val fileId = this.fileId
         when (this.getAction()) {
             FileActivity.FileActivityType.FILE_DELETE,
             FileActivity.FileActivityType.FILE_MOVE_OUT,
             FileActivity.FileActivityType.FILE_TRASH -> {
-                if (returnResponse[this.fileId] == null || returnResponse[this.fileId]?.createdAt?.time == this.createdAt.time) {
+                if (returnResponse[fileId] == null || returnResponse[fileId]?.createdAt?.time == this.createdAt.time) { // Api fix
                     getParentFile(fileId = fileId, realm = realm)?.let { parent ->
                         if (parent.id == currentFolder.id) {
                             removeFile(fileId, customRealm = realm, recursive = false)
                         }
                     }
-                    returnResponse[this.fileId] = this
+                    returnResponse[fileId] = this
                 }
             }
             FileActivity.FileActivityType.FILE_CREATE,
             FileActivity.FileActivityType.FILE_MOVE_IN,
-            FileActivity.FileActivityType.FILE_RESTORE -> if (returnResponse[this.fileId] == null && this.file != null) {
+            FileActivity.FileActivityType.FILE_RESTORE -> if (returnResponse[fileId] == null && this.file != null) {
                 realm.where(File::class.java).equalTo(File::id.name, currentFolder.id).findFirst()?.let { realmFolder ->
                     if (!realmFolder.children.contains(this.file)) {
                         addChild(realm, realmFolder, this.file!!)
-                        returnResponse[this.fileId] = this
                     } else {
-                        returnResponse[fileId] = this
                         updateFileFromActivity(realm, this, realmFolder.id)
                     }
+                    returnResponse[fileId] = this
                 }
             }
             FileActivity.FileActivityType.COLLABORATIVE_FOLDER_CREATE,
@@ -808,14 +806,13 @@ object FileController {
             FileActivity.FileActivityType.FILE_SHARE_CREATE,
             FileActivity.FileActivityType.FILE_SHARE_DELETE,
             FileActivity.FileActivityType.FILE_SHARE_UPDATE,
-            FileActivity.FileActivityType.FILE_UPDATE -> if (returnResponse[this.fileId] == null) {
+            FileActivity.FileActivityType.FILE_UPDATE -> if (returnResponse[fileId] == null) {
                 if (this.file == null) {
                     removeFile(fileId, customRealm = realm, recursive = false)
-                    returnResponse[this.fileId] = this
                 } else {
-                    returnResponse[fileId] = this
                     updateFileFromActivity(realm, this, currentFolder.id)
                 }
+                returnResponse[fileId] = this
             }
             else -> Unit
         }
