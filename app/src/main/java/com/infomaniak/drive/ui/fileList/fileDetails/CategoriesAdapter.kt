@@ -26,7 +26,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.infomaniak.drive.R
-import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment.UsageMode
 import com.infomaniak.drive.utils.setCornersRadius
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_category.view.*
@@ -93,7 +92,7 @@ class CategoriesAdapter(
         }
     }
 
-    fun setItems(categories: List<UICategory>, usageMode: UsageMode) {
+    fun setItems(categories: List<UICategory>, usageMode: CategoriesUsageMode) {
         val oldCategories = filteredCategories.toDiffUtilCategories()
         allCategories = categories.sorted(usageMode)
         filteredCategories = allCategories.filtered()
@@ -109,7 +108,7 @@ class CategoriesAdapter(
         notifyAdapter(oldCategories, newCategories)
     }
 
-    fun selectCategory(categoryId: Int, isSelected: Boolean, usageMode: UsageMode) {
+    fun selectCategory(categoryId: Int, isSelected: Boolean, usageMode: CategoriesUsageMode) {
         val oldCategories = filteredCategories.toDiffUtilCategories()
 
         with(allCategories) {
@@ -142,8 +141,8 @@ class CategoriesAdapter(
 
     private fun List<UICategory>.filtered(): List<UICategory> = filter { it.name.contains(filterQuery, true) }
 
-    private fun List<UICategory>.sorted(usageMode: UsageMode): List<UICategory> {
-        return if (usageMode == UsageMode.SELECTED_CATEGORIES) sortedSearchCategories() else sortedFileCategories()
+    private fun List<UICategory>.sorted(usageMode: CategoriesUsageMode): List<UICategory> {
+        return if (usageMode == CategoriesUsageMode.SELECTED_CATEGORIES) sortedSearchCategories() else sortedFileCategories()
     }
 
     private fun List<UICategory>.sortedFileCategories(): List<UICategory> {

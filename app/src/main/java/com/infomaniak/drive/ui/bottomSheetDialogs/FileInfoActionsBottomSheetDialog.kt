@@ -40,6 +40,7 @@ import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_A
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_MAIN_KEY
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_TITLE_KEY
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.REFRESH_FAVORITE_FILE
+import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
@@ -168,7 +169,10 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun manageCategoriesClicked(fileId: Int) {
         safeNavigate(
-            FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToSelectCategoriesFragment(fileId)
+            FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToSelectCategoriesFragment(
+                fileId = fileId,
+                categoriesUsageMode = CategoriesUsageMode.MANAGED_CATEGORIES,
+            )
         )
     }
 

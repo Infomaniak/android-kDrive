@@ -323,9 +323,7 @@ class SearchFragment : FileListFragment() {
             FilterKey.DATE -> removeDateFilter()
             FilterKey.TYPE -> removeTypeFilter()
             FilterKey.CATEGORIES -> removeCategoryFilter(categoryId)
-            FilterKey.CATEGORIES_OWNERSHIP -> {
-                // It's impossible to remove this filter by clicking on it
-            }
+            FilterKey.CATEGORIES_OWNERSHIP -> Unit // It's impossible to remove this filter by clicking on it
         }
         updateFilters(shouldUpdateAdapter = false)
     }

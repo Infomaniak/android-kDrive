@@ -34,6 +34,7 @@ import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.SearchCategoriesOwnershipFilter
 import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterDateBottomSheetDialogArgs
 import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterTypeBottomSheetDialogArgs
+import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.getBackNavigationResult
 import com.infomaniak.drive.utils.safeNavigate
@@ -165,6 +166,7 @@ class SearchFiltersFragment : Fragment() {
                 safeNavigate(
                     SearchFiltersFragmentDirections.actionSearchFiltersFragmentToSelectCategoriesFragment(
                         categories = categories.map { it.id }.toIntArray(),
+                        categoriesUsageMode = CategoriesUsageMode.SELECTED_CATEGORIES,
                     )
                 )
             }

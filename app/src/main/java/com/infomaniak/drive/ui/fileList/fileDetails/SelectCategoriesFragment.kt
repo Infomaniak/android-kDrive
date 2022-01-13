@@ -37,11 +37,13 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.drive.Category
+import com.infomaniak.drive.data.models.drive.CategoryRights
 import com.infomaniak.drive.ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.SelectedState
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.UICategory
-import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment.UsageMode.*
+import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode.MANAGED_CATEGORIES
+import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode.SELECTED_CATEGORIES
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.DebouncingTextWatcher
 import com.infomaniak.lib.core.models.ApiResponse
@@ -55,7 +57,7 @@ class SelectCategoriesFragment : Fragment() {
     private val navigationArgs: SelectCategoriesFragmentArgs by navArgs()
 
     private lateinit var categoriesAdapter: CategoriesAdapter
-    private lateinit var usageMode: UsageMode
+    private lateinit var usageMode: CategoriesUsageMode
     private lateinit var file: File
     private lateinit var selectedCategories: List<Category>
 
@@ -65,19 +67,21 @@ class SelectCategoriesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initializeData()
-        if (usageMode == NO_CATEGORIES) {
-            findNavController().popBackStack()
-            return
+        with(navigationArgs) {
+            usageMode = categoriesUsageMode
+
+            if (usageMode == SELECTED_CATEGORIES) {
+                selectedCategories =
+                    DriveInfosController.getCurrentDriveCategoriesFromIds(categories?.toTypedArray() ?: arrayOf())
+            } else {
+                file = FileController.getFileById(fileId) ?: run {
+                    findNavController().popBackStack()
+                    return
+                }
+            }
         }
 
-        DriveInfosController.getCategoryRights()?.apply {
-            if (usageMode == SELECTED_CATEGORIES) {
-                canCreateCategory = false
-                canDeleteCategory = false
-                canEditCategory = false
-            }
-        }.let {
+        (if (usageMode == SELECTED_CATEGORIES) CategoryRights() else DriveInfosController.getCategoryRights()).let {
             setCategoriesAdapter(it?.canEditCategory == true, it?.canDeleteCategory == true)
             setAddCategoryButton(it?.canCreateCategory == true)
         }
@@ -89,23 +93,6 @@ class SelectCategoriesFragment : Fragment() {
         createCategoryRow.setOnClickListener { navigateToCreateCategory() }
         configureSearchView()
         setBackActionHandlers()
-    }
-
-    private fun initializeData() {
-        with(navigationArgs) {
-            val tempFile = FileController.getFileById(fileId)
-            usageMode = if (fileId == -1 || tempFile == null) {
-                if (categories == null) {
-                    NO_CATEGORIES
-                } else {
-                    selectedCategories = DriveInfosController.getCurrentDriveCategoriesFromIds(categories?.toTypedArray()!!)
-                    SELECTED_CATEGORIES
-                }
-            } else {
-                file = tempFile
-                FILE_CATEGORIES
-            }
-        }
     }
 
     private fun setCategoriesAdapter(canEditCategory: Boolean, canDeleteCategory: Boolean) {
@@ -235,7 +222,7 @@ class SelectCategoriesFragment : Fragment() {
     }
 
     private fun configureCreateCategoryRow(categoryName: String?) {
-        if (usageMode != FILE_CATEGORIES) return
+        if (usageMode != MANAGED_CATEGORIES) return
         setCreateCategoryRowTitle(categoryName)
         setCreateCategoryRowCorners()
         setCreateCategoryRowVisibility(categoryName)
@@ -303,12 +290,6 @@ class SelectCategoriesFragment : Fragment() {
     }
 
     private fun isAtLeastResumed(): Boolean = lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
-
-    enum class UsageMode {
-        FILE_CATEGORIES,
-        SELECTED_CATEGORIES,
-        NO_CATEGORIES,
-    }
 
     companion object {
         const val SELECT_CATEGORIES_NAV_KEY = "select_categories_nav_key"
