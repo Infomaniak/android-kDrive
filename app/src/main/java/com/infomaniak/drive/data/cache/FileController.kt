@@ -585,11 +585,11 @@ object FileController {
             val hasDuplicatesFiles = folderProxy?.children?.where()?.let(::hasDuplicatesFiles) ?: false
 
             val needToDownload = ignoreCache
-                        || folderProxy == null
-                        || folderProxy.children.isNullOrEmpty()
-                        || !folderProxy.isComplete
-                        || hasDuplicatesFiles
-                        || minDateToIgnoreCache >= folderProxy.responseAt
+                    || folderProxy == null
+                    || folderProxy.children.isNullOrEmpty()
+                    || !folderProxy.isComplete
+                    || hasDuplicatesFiles
+                    || minDateToIgnoreCache >= folderProxy.responseAt
 
             if (needToDownload && !ignoreCloud) {
                 result = downloadAndSaveFiles(
