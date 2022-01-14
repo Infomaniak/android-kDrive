@@ -203,7 +203,7 @@ class UploadTask(
                         scope.setExtra("fileSize", "$fileSize")
                         Sentry.captureMessage("Max chunk size exceeded, file size exceed ${TOTAL_CHUNKS * CHUNK_MAX_SIZE}")
                     }
-                    throw Exception("Max chunk size exceeded, file size exceed ${TOTAL_CHUNKS * CHUNK_MAX_SIZE}")
+                    throw AllowedFileSizeExceededException()
                 }
             }
         }
@@ -273,7 +273,7 @@ class UploadTask(
                 "UploadWorker",
                 "progress >> ${uploadFile.fileName} exceed with ${uploadFile.fileSize}/${previousChunkBytesWritten}"
             )
-            throw ChunksSizeExceededException()
+            throw WrittenBytesExceededException()
         }
 
         onProgress?.invoke(progress)
@@ -351,12 +351,13 @@ class UploadTask(
 
     fun lastProgress() = currentProgress
 
-    class ChunksSizeExceededException : Exception()
+    class AllowedFileSizeExceededException : Exception()
     class FolderNotFoundException : Exception()
     class LockErrorException : Exception()
     class NotAuthorizedException : Exception()
     class QuotaExceededException : Exception()
     class UploadErrorException : Exception()
+    class WrittenBytesExceededException : Exception()
 
     companion object {
         private val progressMutex = Mutex()

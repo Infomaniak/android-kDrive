@@ -642,6 +642,7 @@
     <string name="uploadCancelDescription">Der Import wurde vom Benutzer abgebrochen</string>
     <string name="uploadCancelTitle">Import abgebrochen</string>
     <string name="uploadErrorTitle">Fehler beim Import</string>
+    <string name="uploadFileSizeExceeded">Die zulässige Gesamtgröße der Datei wurde überschritten.</string>
     <string name="uploadFolderNotFoundError">Ordner gelöscht oder inexistent</string>
     <string name="uploadFolderNotFoundSyncDisabledError">Die automatische Sicherung wurde deaktiviert, da der Zielordner nicht mehr existiert</string>
     <string name="uploadInProgressCancelAllUploadTitle">Importe abbrechen</string>

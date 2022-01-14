@@ -642,6 +642,7 @@
     <string name="uploadCancelDescription">L’importation a été annulée par l’utilisateur</string>
     <string name="uploadCancelTitle">Importation annulée</string>
     <string name="uploadErrorTitle">Erreur d’importation</string>
+    <string name="uploadFileSizeExceeded">La taille totale autorisée du fichier a été dépassée.</string>
     <string name="uploadFolderNotFoundError">Dossier supprimé ou inexistant</string>
     <string name="uploadFolderNotFoundSyncDisabledError">La sauvegarde automatique a été désactivée car le dossier de destination n’existe plus</string>
     <string name="uploadInProgressCancelAllUploadTitle">Annuler les imports</string>
