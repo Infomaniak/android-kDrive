@@ -167,7 +167,7 @@ object DriveInfosController {
         val categories = getRealmInstance().use { realm ->
             getCurrentDrive(realm)?.categories?.let {
                 val categories = it.where()
-                    .`in`(Category::id.name, categoriesIds)
+                    .oneOf(Category::id.name, categoriesIds)
                     .findAll()
                 realm.copyFromRealm(categories, 0)
             }

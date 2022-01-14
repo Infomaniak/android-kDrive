@@ -32,6 +32,7 @@ import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.lib.core.utils.format
 import io.realm.*
 import io.realm.annotations.PrimaryKey
+import io.realm.kotlin.oneOf
 import java.io.File
 import java.net.URLEncoder
 import java.util.*
@@ -125,7 +126,7 @@ open class UploadFile(
             return realm.where(UploadFile::class.java).apply {
                 folderId?.let { equalTo(UploadFile::remoteFolder.name, it) }
                 if (onlyCurrentUser) equalTo(UploadFile::userId.name, AccountUtils.currentUserId)
-                driveIds?.let { `in`(UploadFile::driveId.name, it) }
+                driveIds?.let { oneOf(UploadFile::driveId.name, it) }
                 isNull(UploadFile::uploadAt.name)
                 isNull(UploadFile::deletedAt.name)
             }

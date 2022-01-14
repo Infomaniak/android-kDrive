@@ -32,6 +32,7 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import io.realm.*
+import io.realm.kotlin.oneOf
 import io.sentry.Sentry
 import kotlinx.android.parcel.RawValue
 import kotlinx.coroutines.CoroutineScope
@@ -604,7 +605,7 @@ object FileController {
 
     fun getFilesFromIdList(realm: Realm, idList: Array<Int>, order: File.SortType = File.SortType.NAME_AZ): RealmResults<File>? {
         return realm.where(File::class.java)
-            .`in`(File::id.name, idList)
+            .oneOf(File::id.name, idList)
             .getSortQueryByOrder(order)
             .findAll()
     }
