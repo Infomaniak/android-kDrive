@@ -188,9 +188,13 @@ class UploadTask(
     }
 
     private fun initChunkSize(fileSize: Long) {
-        val fileChunkSize = ceil(fileSize.toDouble() / TOTAL_CHUNKS).toInt()
-        if (fileChunkSize > chunkSize) {
-            chunkSize = fileChunkSize
+        val fileChunkSize = ceil(fileSize.toDouble() / TOTAL_CHUNKS).toLong()
+
+        if (fileChunkSize in chunkSize..CHUNK_MAX_SIZE) {
+            chunkSize = fileChunkSize.toInt()
+        } else if (fileChunkSize > CHUNK_MAX_SIZE) {
+            //TODO a specific notif ??
+            throw Exception("Max chunk size exceeded, file size exceed ${TOTAL_CHUNKS * CHUNK_MAX_SIZE}")
         }
     }
 
@@ -339,8 +343,10 @@ class UploadTask(
     class UploadErrorException : Exception()
 
     companion object {
-        var chunkSize: Int = 1 * 1024 * 1024 // Chunk 1 Mo
         private val progressMutex = Mutex()
+
+        var chunkSize: Int = 1 * 1024 * 1024 // Chunk 1 Mo
+        private const val CHUNK_MAX_SIZE: Int = 100 * 1024 * 1024 // 100 Mo and max file size to upload 800Gb
         private const val TOTAL_CHUNKS = 8000
 
         enum class ConflictOption {
