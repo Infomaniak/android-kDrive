@@ -65,12 +65,15 @@ class SearchFiltersFragment : Fragment() {
     }
 
     private fun initializeFilters() = with(searchFiltersViewModel) {
-        if (date.value == null) date.value = navigationArgs.date
-        if (type.value == null) type.value = navigationArgs.type?.let(ConvertedType::valueOf)
-        if (categories == null) {
-            categories = navigationArgs.categories?.toTypedArray()?.let(DriveInfosController::getCurrentDriveCategoriesFromIds)
+        if (useInitialValues) {
+            if (date.value == null) date.value = navigationArgs.date
+            if (type.value == null) type.value = navigationArgs.type?.let(ConvertedType::valueOf)
+            if (categories == null) {
+                categories = navigationArgs.categories?.toTypedArray()
+                    ?.let(DriveInfosController::getCurrentDriveCategoriesFromIds)
+            }
+            if (categoriesOwnership == null) categoriesOwnership = navigationArgs.categoriesOwnership
         }
-        if (categoriesOwnership == null) categoriesOwnership = navigationArgs.categoriesOwnership
 
         updateAllFiltersUI()
     }
@@ -128,7 +131,13 @@ class SearchFiltersFragment : Fragment() {
         type.observe(viewLifecycleOwner) { updateTypeUI() }
 
         getBackNavigationResult<List<Int>>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
-            categories = if (it.isEmpty()) null else DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray())
+            if (it.isEmpty()) {
+                categories = null
+                categoriesOwnership = null
+            } else {
+                categories = DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray())
+                if (categoriesOwnership == null) categoriesOwnership = SearchCategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES
+            }
             updateCategoriesUI()
             updateCategoriesOwnershipUI()
         }

@@ -26,12 +26,14 @@ import com.infomaniak.drive.utils.SingleLiveEvent
 
 class SearchFiltersViewModel : ViewModel() {
 
+    var useInitialValues: Boolean = true
     val date = SingleLiveEvent<SearchDateFilter?>()
     val type = SingleLiveEvent<ConvertedType?>()
     var categories: List<Category>? = null
     var categoriesOwnership: SearchCategoriesOwnershipFilter? = null
 
     fun clearFilters() {
+        useInitialValues = false
         date.value = null
         type.value = null
         categories = null
