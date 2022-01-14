@@ -57,7 +57,7 @@ object FileController {
     private val PICTURES_FILE = File(PICTURES_FILE_ID, name = "Pictures")
     private val RECENT_CHANGES_FILE = File(RECENT_CHANGES_FILE_ID, name = "Recent changes")
 
-    private val minDateToIgnoreCache = Calendar.getInstance().apply { add(Calendar.MONTH, -5) }.get(Calendar.MONTH) // 6 month
+    private val minDateToIgnoreCache = Calendar.getInstance().apply { add(Calendar.MONTH, -2) }.get(Calendar.MONTH) // 3 month
 
     private fun getFileById(realm: Realm, fileId: Int) = realm.where(File::class.java).equalTo("id", fileId).findFirst()
 
