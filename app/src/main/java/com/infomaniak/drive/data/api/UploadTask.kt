@@ -200,6 +200,7 @@ class UploadTask(
                     chunkSize = CHUNK_MAX_SIZE
                 } else {
                     Sentry.withScope { scope ->
+                        scope.level = SentryLevel.WARNING
                         scope.setExtra("fileSize", "$fileSize")
                         Sentry.captureMessage("Max chunk size exceeded, file size exceed ${TOTAL_CHUNKS * CHUNK_MAX_SIZE}")
                     }
