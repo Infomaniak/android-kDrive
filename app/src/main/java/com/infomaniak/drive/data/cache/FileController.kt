@@ -40,6 +40,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
+import java.util.*
+import kotlin.collections.ArrayList
 
 object FileController {
     private const val REALM_DB_FILE = "kDrive-%s-%s.realm"
@@ -54,6 +56,8 @@ object FileController {
     private val MY_SHARES_FILE = File(MY_SHARES_FILE_ID, name = "My Shares")
     private val PICTURES_FILE = File(PICTURES_FILE_ID, name = "Pictures")
     private val RECENT_CHANGES_FILE = File(RECENT_CHANGES_FILE_ID, name = "Recent changes")
+
+    private val minDateToIgnoreCache = Calendar.getInstance().apply { add(Calendar.MONTH, -5) }.get(Calendar.MONTH) // 6 month
 
     private fun getFileById(realm: Realm, fileId: Int) = realm.where(File::class.java).equalTo("id", fileId).findFirst()
 
@@ -576,17 +580,18 @@ object FileController {
 
         val operation: (Realm) -> Pair<File, ArrayList<File>>? = { realm ->
             var result: Pair<File, ArrayList<File>>? = null
-            val localFolder = getFileById(realm, parentId)
-            val localFolderWithoutChildren = localFolder?.let { realm.copyFromRealm(it, 1) }
-            val hasDuplicatesFiles = localFolder?.children?.where()?.let(::hasDuplicatesFiles) ?: false
+            val folderProxy = getFileById(realm, parentId)
+            val localFolderWithoutChildren = folderProxy?.let { realm.copyFromRealm(it, 1) }
+            val hasDuplicatesFiles = folderProxy?.children?.where()?.let(::hasDuplicatesFiles) ?: false
 
-            if (
-                (ignoreCache || localFolder == null || localFolder.children.isNullOrEmpty() || !localFolder.isComplete || hasDuplicatesFiles)
-                && !ignoreCloud
-            ) {
+            val needToDownload =
+                ignoreCache || folderProxy == null || folderProxy.children.isNullOrEmpty() || !folderProxy.isComplete || hasDuplicatesFiles
+                        || minDateToIgnoreCache >= folderProxy.responseAt
+
+            if (needToDownload && !ignoreCloud) {
                 result = downloadAndSaveFiles(
                     currentRealm = realm,
-                    localFolder = localFolder,
+                    localFolder = folderProxy,
                     localFolderWithoutChildren = localFolderWithoutChildren,
                     order = order,
                     page = page,
@@ -595,7 +600,7 @@ object FileController {
                     withChildren = withChildren
                 )
             } else if (page == 1 && localFolderWithoutChildren != null) {
-                val localSortedFolderFiles = if (withChildren) getLocalSortedFolderFiles(localFolder, order) else arrayListOf()
+                val localSortedFolderFiles = if (withChildren) getLocalSortedFolderFiles(folderProxy, order) else arrayListOf()
                 result = (localFolderWithoutChildren to localSortedFolderFiles)
             }
             result
