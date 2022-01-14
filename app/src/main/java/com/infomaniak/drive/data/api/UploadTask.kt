@@ -188,13 +188,29 @@ class UploadTask(
     }
 
     private fun initChunkSize(fileSize: Long) {
-        val fileChunkSize = ceil(fileSize.toDouble() / TOTAL_CHUNKS).toLong()
+        val fileChunkSize = ceil(fileSize.toDouble() / OPTIMAL_TOTAL_CHUNKS).toInt()
 
-        if (fileChunkSize in chunkSize..CHUNK_MAX_SIZE) {
-            chunkSize = fileChunkSize.toInt()
-        } else if (fileChunkSize > CHUNK_MAX_SIZE) {
-            //TODO a specific notif ??
-            throw Exception("Max chunk size exceeded, file size exceed ${TOTAL_CHUNKS * CHUNK_MAX_SIZE}")
+        when {
+            fileChunkSize in chunkSize..CHUNK_MAX_SIZE -> {
+                chunkSize = fileChunkSize
+            }
+            fileChunkSize > CHUNK_MAX_SIZE -> {
+                val totalChunks = ceil(fileSize.toDouble() / CHUNK_MAX_SIZE)
+                if (totalChunks <= TOTAL_CHUNKS) {
+                    chunkSize = CHUNK_MAX_SIZE
+                } else {
+                    Sentry.withScope { scope ->
+                        scope.setExtra("fileSize", "$fileSize")
+                        Sentry.captureMessage("Max chunk size exceeded, file size exceed ${TOTAL_CHUNKS * CHUNK_MAX_SIZE}")
+                    }
+                    throw Exception("Max chunk size exceeded, file size exceed ${TOTAL_CHUNKS * CHUNK_MAX_SIZE}")
+                }
+            }
+        }
+
+        val availableMemory = context.getAvailableMemory().availMem
+        if (chunkSize >= availableMemory) {
+            chunkSize = ceil(availableMemory.toDouble() / 4).toInt()
         }
     }
 
@@ -346,8 +362,9 @@ class UploadTask(
         private val progressMutex = Mutex()
 
         var chunkSize: Int = 1 * 1024 * 1024 // Chunk 1 Mo
-        private const val CHUNK_MAX_SIZE: Int = 100 * 1024 * 1024 // 100 Mo and max file size to upload 800Gb
-        private const val TOTAL_CHUNKS = 8000
+        private const val CHUNK_MAX_SIZE: Int = 50 * 1024 * 1024 // 50 Mo and max file size to upload 500Gb
+        private const val OPTIMAL_TOTAL_CHUNKS = 200
+        private const val TOTAL_CHUNKS = 10_000
 
         enum class ConflictOption {
             ERROR,
