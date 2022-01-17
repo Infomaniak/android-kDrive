@@ -34,15 +34,15 @@ import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.*
 import com.infomaniak.drive.data.models.SearchFilter.*
 import com.infomaniak.drive.ui.fileList.FileListViewModel.*
+import com.infomaniak.drive.ui.fileList.SearchViewModel.*
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.DebouncingTextWatcher
+import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.setPagination
-import io.realm.RealmList
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.item_search_view.*
 import kotlinx.android.synthetic.main.recent_searches.*
 import java.util.*
-import kotlin.collections.LinkedHashMap
 
 class SearchFragment : FileListFragment() {
 
@@ -57,22 +57,30 @@ class SearchFragment : FileListFragment() {
 
     @SuppressLint("InflateParams")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        configureViewModels()
-        setFiltersAdapter()
-
         downloadFiles = DownloadFiles()
         setNoFilesLayout = SetNoFilesLayout()
         recentSearchesView = layoutInflater.inflate(R.layout.recent_searches, null)
 
+        configureFileListViewModel()
+        configureFiltersAdapter()
+        configureFilters()
+
         super.onViewCreated(view, savedInstanceState)
 
-        clearButton.setOnClickListener { searchView.setText("") }
+        observeVisibilityModeUpdates()
+        configureClearButtonListener()
         configureSearchView()
-        configureFileAdapter()
+        configureFileRecyclerPagination()
+        configureFileAdapterListener()
         configureRecentSearches()
         configureToolbar()
         observeSearchResults()
-        updateFilters()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateClearButton(searchView.text.toString())
+        triggerSearch()
     }
 
     override fun onPause() {
@@ -82,26 +90,57 @@ class SearchFragment : FileListFragment() {
     }
 
     override fun onStop() {
+        searchViewModel.previousSearch = searchView.text.toString()
         UISettings(requireContext()).recentSearches = recentSearchesAdapter.searches
         super.onStop()
     }
 
-    private fun configureViewModels() {
+    private fun configureFileListViewModel() {
         fileListViewModel.sortType = SortType.RECENT
-
-        // Get preview List if needed
-        if (mainViewModel.currentPreviewFileList.isNotEmpty()) {
-            searchViewModel.searchOldFileList = RealmList(*mainViewModel.currentPreviewFileList.values.toTypedArray())
-            mainViewModel.currentPreviewFileList = LinkedHashMap()
-        }
     }
 
-    private fun setFiltersAdapter() {
+    private fun configureFiltersAdapter() {
         filtersAdapter = SearchFiltersAdapter(
             onFilterRemoved = { key, categoryId -> removeFilter(key, categoryId) }
         ).also {
             filtersRecyclerView.adapter = it
         }
+    }
+
+    private fun configureFilters() = with(searchViewModel) {
+        filtersAdapter.setItems(
+            arrayListOf<SearchFilter>().apply {
+                uiDateFilter()?.let(::add)
+                uiTypeFilter()?.let(::add)
+                uiCategoriesFilter()?.let(::addAll)
+            }
+        )
+    }
+
+    private fun SearchViewModel.uiDateFilter(): SearchFilter? {
+        return dateFilter?.let {
+            SearchFilter(key = FilterKey.DATE, text = it.text, icon = R.drawable.ic_calendar)
+        }
+    }
+
+    private fun SearchViewModel.uiTypeFilter(): SearchFilter? {
+        return typeFilter?.let {
+            SearchFilter(key = FilterKey.TYPE, text = getString(it.searchFilterName), icon = it.icon)
+        }
+    }
+
+    private fun SearchViewModel.uiCategoriesFilter(): List<SearchFilter>? {
+        return categoriesFilter?.map {
+            SearchFilter(key = FilterKey.CATEGORIES, text = it.getName(requireContext()), tint = it.color, categoryId = it.id)
+        }
+    }
+
+    private fun observeVisibilityModeUpdates() {
+        searchViewModel.visibilityMode.observe(viewLifecycleOwner) { updateUI(it) }
+    }
+
+    private fun configureClearButtonListener() {
+        clearButton.setOnClickListener { searchView.setText("") }
     }
 
     private fun configureSearchView() {
@@ -115,29 +154,26 @@ class SearchFragment : FileListFragment() {
 
     private fun EditText.addTextChangedListener() {
         addTextChangedListener(DebouncingTextWatcher(lifecycle) {
-            clearButton?.isInvisible = it.isNullOrEmpty()
-            searchViewModel.currentPage = 1
-            downloadFiles(true, false)
+            if (searchViewModel.previousSearch != null) {
+                searchViewModel.previousSearch = null
+                return@DebouncingTextWatcher
+            }
+            updateClearButton(it)
+            triggerSearch()
         })
     }
 
     private fun EditText.setOnEditorActionListener() {
         setOnEditorActionListener { _, actionId, _ ->
-            if (EditorInfo.IME_ACTION_SEARCH == actionId) {
-                searchViewModel.currentPage = 1
-                downloadFiles(true, false)
-                true
-            } else false
+            (EditorInfo.IME_ACTION_SEARCH == actionId).also { if (it) triggerSearch() }
         }
     }
 
-    private fun configureFileAdapter() {
-        setFileRecyclerPagination()
-        setFileAdapterListener()
-        if (fileAdapter.fileList.isEmpty() && filtersAdapter.filters.isEmpty()) changeRecentSearchesLayoutVisibility(true)
+    private fun updateClearButton(text: String?) {
+        clearButton.isInvisible = text.isNullOrEmpty()
     }
 
-    private fun setFileRecyclerPagination() {
+    private fun configureFileRecyclerPagination() {
         fileRecyclerView.setPagination({
             if (!fileAdapter.isComplete && !isDownloading) {
                 fileAdapter.showLoading()
@@ -147,24 +183,20 @@ class SearchFragment : FileListFragment() {
         })
     }
 
-    private fun setFileAdapterListener() {
-        fileAdapter.apply {
-            onEmptyList = { changeNoFilesLayoutVisibility(hideFileList = true, changeControlsVisibility = false) }
-
-            onFileClicked = { file ->
-                if (file.isFolder()) {
-                    searchViewModel.cancelDownloadFiles()
-                    safeNavigate(
-                        SearchFragmentDirections.actionSearchFragmentToFileListFragment(
-                            folderID = file.id,
-                            folderName = file.name,
-                            shouldHideBottomNavigation = true,
-                        )
+    private fun configureFileAdapterListener() {
+        fileAdapter.onFileClicked = { file ->
+            if (file.isFolder()) {
+                searchViewModel.cancelDownloadFiles()
+                safeNavigate(
+                    SearchFragmentDirections.actionSearchFragmentToFileListFragment(
+                        folderID = file.id,
+                        folderName = file.name,
+                        shouldHideBottomNavigation = true,
                     )
-                } else {
-                    val fileList = getFileObjectsList(null)
-                    Utils.displayFile(mainViewModel, findNavController(), file, fileList)
-                }
+                )
+            } else {
+                val fileList = fileAdapter.getFileObjectsList(null)
+                Utils.displayFile(mainViewModel, findNavController(), file, fileList)
             }
         }
     }
@@ -173,7 +205,6 @@ class SearchFragment : FileListFragment() {
         fileListLayout.addView(recentSearchesView, 1)
 
         val recentSearches = UISettings(requireContext()).recentSearches
-        recentSearchesContainer.isGone = recentSearches.isEmpty()
 
         recentSearchesAdapter = RecentSearchesAdapter(
             searches = ArrayList(recentSearches),
@@ -191,13 +222,51 @@ class SearchFragment : FileListFragment() {
 
     private fun setToolbarListener() {
         toolbar.setOnMenuItemClickListener { menuItem ->
-            (menuItem.itemId == R.id.selectFilters).also {
-                if (it) safeNavigate(R.id.searchFiltersFragment)
-            }
+            (menuItem.itemId == R.id.selectFilters).also { if (it) safeNavigate(R.id.searchFiltersFragment) }
         }
     }
 
     private fun observeSearchResults() {
+
+        fun handleLiveDataTriggerWhenInitialized() {
+            fileAdapter.isComplete = true
+        }
+
+        fun handleApiCallFailure(apiResponse: ApiResponse<ArrayList<File>>) {
+            searchViewModel.visibilityMode.value = VisibilityMode.NO_RESULTS
+            requireActivity().showSnackbar(apiResponse.translateError())
+        }
+
+        fun getSearchResults(data: ArrayList<File>?): ArrayList<File> {
+            return (data ?: arrayListOf()).apply {
+                map { file -> file.isFromSearch = true }
+            }
+        }
+
+        fun handleFirstResult(searchList: ArrayList<File>) {
+            fileAdapter.setFiles(searchList)
+            fileRecyclerView.scrollTo(0, 0)
+            searchViewModel.visibilityMode.value = if (searchList.isEmpty()) VisibilityMode.NO_RESULTS else VisibilityMode.RESULTS
+        }
+
+        fun handleNoResult() {
+            fileAdapter.apply {
+                hideLoading()
+                isComplete = true
+            }
+        }
+
+        fun handleLastPage(searchList: ArrayList<File>) {
+            fileAdapter.apply {
+                addFileList(searchList)
+                isComplete = true
+            }
+        }
+
+        fun handleNewPage(searchList: ArrayList<File>) {
+            fileAdapter.addFileList(searchList)
+        }
+
         searchViewModel.searchResults.observe(viewLifecycleOwner) {
 
             if (!swipeRefreshLayout.isRefreshing) return@observe
@@ -205,37 +274,20 @@ class SearchFragment : FileListFragment() {
             it?.let { apiResponse ->
 
                 if (apiResponse.isSuccess()) {
-
                     updateMostRecentSearches()
-
-                    val searchList = (apiResponse.data ?: arrayListOf()).apply {
-                        map { file -> file.isFromSearch = true }
-                    }
+                    val searchList = getSearchResults(apiResponse.data)
 
                     when {
-                        searchViewModel.currentPage == 1 -> {
-                            fileAdapter.setFiles(searchList)
-                            changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, false)
-                            fileRecyclerView.scrollTo(0, 0)
-                        }
-                        searchList.isEmpty() || searchList.size < ApiRepository.PER_PAGE -> {
-                            fileAdapter.addFileList(searchList)
-                            fileAdapter.isComplete = true
-                        }
-                        else -> {
-                            fileAdapter.addFileList(searchList)
-                        }
+                        searchViewModel.currentPage == 1 -> handleFirstResult(searchList)
+                        searchList.isEmpty() -> handleNoResult()
+                        searchList.size < ApiRepository.PER_PAGE -> handleLastPage(searchList)
+                        else -> handleNewPage(searchList)
                     }
-
                 } else {
-                    changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, false)
-                    requireActivity().showSnackbar(apiResponse.translateError())
+                    handleApiCallFailure(apiResponse)
                 }
 
-            } ?: let {
-                fileAdapter.isComplete = true
-                changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, false)
-            }
+            } ?: handleLiveDataTriggerWhenInitialized()
 
             isDownloading = false
             swipeRefreshLayout.isRefreshing = false
@@ -246,42 +298,17 @@ class SearchFragment : FileListFragment() {
         val newSearch = searchView.text.toString().trim()
         if (newSearch.isEmpty()) return
 
-        val newSearches = (listOf(newSearch) + recentSearchesAdapter.searches).distinct()
+        val newSearches = (listOf(newSearch) + recentSearchesAdapter.searches)
+            .distinct()
             .take(MAX_MOST_RECENT_SEARCHES)
             .also(recentSearchesAdapter::setItems)
 
         recentSearchesContainer.isGone = newSearches.isEmpty()
     }
 
-    private fun updateFilters(shouldUpdateAdapter: Boolean = true) {
-        arrayListOf<SearchFilter>().apply {
-            createDateFilter()?.let(::add)
-            createTypeFilter()?.let(::add)
-            createCategoriesFilter()?.let(::addAll)
-        }.also {
-            if (shouldUpdateAdapter) filtersAdapter.setItems(it)
-            changeRecentSearchesLayoutVisibility(it.isEmpty() && searchView.text.toString().isBlank())
-        }
+    private fun triggerSearch() {
         searchViewModel.currentPage = 1
         downloadFiles(true, false)
-    }
-
-    private fun createDateFilter(): SearchFilter? {
-        return searchViewModel.dateFilter?.let {
-            SearchFilter(key = FilterKey.DATE, text = it.text, icon = R.drawable.ic_calendar)
-        }
-    }
-
-    private fun createTypeFilter(): SearchFilter? {
-        return searchViewModel.typeFilter?.let {
-            SearchFilter(key = FilterKey.TYPE, text = getString(it.searchFilterName), icon = it.icon)
-        }
-    }
-
-    private fun createCategoriesFilter(): List<SearchFilter>? {
-        return searchViewModel.categoriesFilter?.map {
-            SearchFilter(key = FilterKey.CATEGORIES, text = it.getName(requireContext()), tint = it.color, categoryId = it.id)
-        }
     }
 
     private fun removeFilter(filter: FilterKey, categoryId: Int?) {
@@ -291,7 +318,7 @@ class SearchFragment : FileListFragment() {
             FilterKey.CATEGORIES -> removeCategoryFilter(categoryId)
             FilterKey.CATEGORIES_OWNERSHIP -> Unit // It's impossible to remove this filter by clicking on it
         }
-        updateFilters(shouldUpdateAdapter = false)
+        triggerSearch()
     }
 
     private fun removeDateFilter() {
@@ -311,23 +338,34 @@ class SearchFragment : FileListFragment() {
         }
     }
 
-    private fun changeRecentSearchesLayoutVisibility(shouldDisplay: Boolean) {
-        if (shouldDisplay) {
-            filtersRecyclerView.isGone = true
-            sortLayout.isGone = true
-            fileRecyclerView.isGone = true
-            noFilesLayout.isGone = true
-            recentSearchesView.isVisible = true
-        } else {
-            if (filtersAdapter.filters.isNotEmpty()) filtersRecyclerView.isVisible = true
-            val shouldDisplayNoFilesLayout = !swipeRefreshLayout.isRefreshing
-            if (shouldDisplayNoFilesLayout) {
-                changeNoFilesLayoutVisibility(hideFileList = true, changeControlsVisibility = false)
-            } else {
-                noFilesLayout.isGone = true
-            }
-            recentSearchesView.isGone = true
+    private fun updateUI(mode: VisibilityMode) {
+        when (mode) {
+            VisibilityMode.RECENT_SEARCHES -> displayRecentSearches()
+            VisibilityMode.LOADING -> displayLoadingView()
+            VisibilityMode.NO_RESULTS, VisibilityMode.RESULTS -> displaySearchResult(mode)
         }
+    }
+
+    private fun displayRecentSearches() {
+        recentSearchesView.isVisible = true
+        filtersRecyclerView.isGone = true
+        noFilesLayout.isGone = true
+        sortLayout.isGone = true
+        fileRecyclerView.isGone = true
+    }
+
+    private fun displayLoadingView() {
+        recentSearchesView.isGone = true
+        filtersRecyclerView.isGone = filtersAdapter.filters.isEmpty()
+        noFilesLayout.isGone = true
+        sortLayout.isGone = true
+        fileRecyclerView.isGone = true
+    }
+
+    private fun displaySearchResult(mode: VisibilityMode) {
+        recentSearchesView.isGone = true
+        filtersRecyclerView.isGone = filtersAdapter.filters.isEmpty()
+        changeNoFilesLayoutVisibility(mode == VisibilityMode.NO_RESULTS, false)
     }
 
     private inner class SetNoFilesLayout : () -> Unit {
@@ -335,7 +373,7 @@ class SearchFragment : FileListFragment() {
             noFilesLayout.setup(
                 icon = R.drawable.ic_search_grey,
                 title = R.string.searchNoFile,
-                initialListView = fileRecyclerView
+                initialListView = fileRecyclerView,
             )
         }
     }
@@ -347,7 +385,7 @@ class SearchFragment : FileListFragment() {
 
             if (currentQuery.isEmpty() && filtersAdapter.filters.isEmpty()) {
                 fileAdapter.setFiles(arrayListOf())
-                changeRecentSearchesLayoutVisibility(true)
+                searchViewModel.visibilityMode.value = VisibilityMode.RECENT_SEARCHES
                 swipeRefreshLayout.isRefreshing = false
                 return
             }
@@ -356,16 +394,19 @@ class SearchFragment : FileListFragment() {
             if (oldList?.isNotEmpty() == true && fileAdapter.getFiles().isEmpty()) {
                 fileAdapter.setFiles(oldList)
                 searchViewModel.searchOldFileList = null
-                changeRecentSearchesLayoutVisibility(false)
+                searchViewModel.visibilityMode.value = VisibilityMode.RESULTS
                 swipeRefreshLayout.isRefreshing = false
                 return
             }
 
             swipeRefreshLayout.isRefreshing = true
             isDownloading = true
-            changeRecentSearchesLayoutVisibility(false)
             searchViewModel.searchFileByName.value = currentQuery to fileListViewModel.sortType
         }
+    }
+
+    enum class VisibilityMode {
+        RECENT_SEARCHES, LOADING, NO_RESULTS, RESULTS
     }
 
     private companion object {

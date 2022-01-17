@@ -26,6 +26,7 @@ import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.SearchCategoriesOwnershipFilter
 import com.infomaniak.drive.data.models.SearchDateFilter
 import com.infomaniak.drive.data.models.drive.Category
+import com.infomaniak.drive.ui.fileList.SearchFragment.VisibilityMode
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.models.ApiResponse
 import io.realm.OrderedRealmCollection
@@ -38,10 +39,16 @@ class SearchViewModel : ViewModel() {
 
     private var searchFilesJob: Job = Job()
 
+    val visibilityMode = MutableLiveData(VisibilityMode.RECENT_SEARCHES)
+
     val searchFileByName = MutableLiveData<Pair<String, SortType>>()
     val searchResults = Transformations.switchMap(searchFileByName) { (query, sortType) ->
         searchFiles(query, sortType, currentPage)
     }
+
+    // Adding a TextChangedListener on an EditText makes it trigger immediately,
+    // so we need this boolean to know if we really want to trigger it, or not.
+    var previousSearch: String? = null
 
     var dateFilter: SearchDateFilter? = null
     var typeFilter: ConvertedType? = null
