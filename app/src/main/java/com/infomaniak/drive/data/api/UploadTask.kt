@@ -188,9 +188,30 @@ class UploadTask(
     }
 
     private fun initChunkSize(fileSize: Long) {
-        val fileChunkSize = ceil(fileSize.toDouble() / TOTAL_CHUNKS).toInt()
-        if (fileChunkSize > chunkSize) {
-            chunkSize = fileChunkSize
+        val fileChunkSize = ceil(fileSize.toDouble() / OPTIMAL_TOTAL_CHUNKS).toInt()
+
+        when {
+            fileChunkSize in chunkSize..CHUNK_MAX_SIZE -> {
+                chunkSize = fileChunkSize
+            }
+            fileChunkSize > CHUNK_MAX_SIZE -> {
+                val totalChunks = ceil(fileSize.toDouble() / CHUNK_MAX_SIZE)
+                if (totalChunks <= TOTAL_CHUNKS) {
+                    chunkSize = CHUNK_MAX_SIZE
+                } else {
+                    Sentry.withScope { scope ->
+                        scope.level = SentryLevel.WARNING
+                        scope.setExtra("fileSize", "$fileSize")
+                        Sentry.captureMessage("Max chunk size exceeded, file size exceed ${TOTAL_CHUNKS * CHUNK_MAX_SIZE}")
+                    }
+                    throw AllowedFileSizeExceededException()
+                }
+            }
+        }
+
+        val availableMemory = context.getAvailableMemory().availMem
+        if (chunkSize >= availableMemory) {
+            chunkSize = ceil(availableMemory.toDouble() / 4).toInt()
         }
     }
 
@@ -253,7 +274,7 @@ class UploadTask(
                 "UploadWorker",
                 "progress >> ${uploadFile.fileName} exceed with ${uploadFile.fileSize}/${previousChunkBytesWritten}"
             )
-            throw ChunksSizeExceededException()
+            throw WrittenBytesExceededException()
         }
 
         onProgress?.invoke(progress)
@@ -331,17 +352,21 @@ class UploadTask(
 
     fun lastProgress() = currentProgress
 
-    class ChunksSizeExceededException : Exception()
+    class AllowedFileSizeExceededException : Exception()
     class FolderNotFoundException : Exception()
     class LockErrorException : Exception()
     class NotAuthorizedException : Exception()
     class QuotaExceededException : Exception()
     class UploadErrorException : Exception()
+    class WrittenBytesExceededException : Exception()
 
     companion object {
-        var chunkSize: Int = 1 * 1024 * 1024 // Chunk 1 Mo
         private val progressMutex = Mutex()
-        private const val TOTAL_CHUNKS = 8000
+
+        var chunkSize: Int = 1 * 1024 * 1024 // Chunk 1 Mo
+        private const val CHUNK_MAX_SIZE: Int = 50 * 1024 * 1024 // 50 Mo and max file size to upload 500Gb
+        private const val OPTIMAL_TOTAL_CHUNKS = 200
+        private const val TOTAL_CHUNKS = 10_000
 
         enum class ConflictOption {
             ERROR,

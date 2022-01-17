@@ -651,6 +651,7 @@
     <string name="uploadCancelDescription">Upload cancelled by the user</string>
     <string name="uploadCancelTitle">Upload cancelled</string>
     <string name="uploadErrorTitle">Upload error</string>
+    <string name="uploadFileSizeExceeded">The total allowed file size has been exceeded.</string>
     <string name="uploadFolderNotFoundError">Deleted or non-existent folder</string>
     <string name="uploadFolderNotFoundSyncDisabledError">Automatic backup has been disabled because the destination folder no longer exists</string>
     <string name="uploadInProgressCancelAllUploadTitle">Cancel uploads</string>

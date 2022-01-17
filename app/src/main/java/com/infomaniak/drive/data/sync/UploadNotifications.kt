@@ -21,6 +21,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.infomaniak.drive.R
@@ -55,12 +56,10 @@ object UploadNotifications {
     }
 
     fun UploadFile.networkErrorNotification(context: Context) {
-        showNotification(
+        uploadInterruptedNotification(
             context = context,
-            title = context.getString(R.string.uploadNetworkErrorTitle),
-            description = context.getString(R.string.uploadNetworkErrorDescription),
-            notificationId = NotificationUtils.UPLOAD_STATUS_ID,
-            contentIntent = progressPendingIntent(context)
+            titleRes = R.string.uploadNetworkErrorTitle,
+            messageRes = R.string.uploadNetworkErrorDescription
         )
     }
 
@@ -90,34 +89,20 @@ object UploadNotifications {
         )
     }
 
+    fun UploadFile.allowedFileSizeExceededNotification(context: Context) {
+        uploadInterruptedNotification(context, R.string.uploadFileSizeExceeded)
+    }
+
     fun UploadFile.quotaExceededNotification(context: Context) {
-        showNotification(
-            context = context,
-            title = context.getString(R.string.uploadInterruptedErrorTitle),
-            description = context.getString(R.string.notEnoughStorageDescription1),
-            notificationId = NotificationUtils.UPLOAD_STATUS_ID,
-            contentIntent = progressPendingIntent(context)
-        )
+        uploadInterruptedNotification(context, R.string.notEnoughStorageDescription1)
     }
 
     fun UploadFile.outOfMemoryNotification(context: Context) {
-        showNotification(
-            context = context,
-            title = context.getString(R.string.uploadInterruptedErrorTitle),
-            description = context.getString(R.string.uploadOutOfMemoryError),
-            notificationId = NotificationUtils.UPLOAD_STATUS_ID,
-            contentIntent = progressPendingIntent(context)
-        )
+        uploadInterruptedNotification(context, R.string.uploadOutOfMemoryError)
     }
 
     fun UploadFile.lockErrorNotification(context: Context) {
-        showNotification(
-            context = context,
-            title = context.getString(R.string.uploadInterruptedErrorTitle),
-            description = context.getString(R.string.errorFileLocked),
-            notificationId = NotificationUtils.UPLOAD_STATUS_ID,
-            contentIntent = progressPendingIntent(context)
-        )
+        uploadInterruptedNotification(context, R.string.errorFileLocked)
     }
 
     fun permissionErrorNotification(context: Context) {
@@ -135,12 +120,10 @@ object UploadNotifications {
     }
 
     fun UploadFile.exceptionNotification(context: Context) {
-        showNotification(
+        uploadInterruptedNotification(
             context = context,
-            title = context.getString(R.string.uploadErrorTitle),
-            description = context.getString(R.string.anErrorHasOccurred),
-            notificationId = NotificationUtils.UPLOAD_STATUS_ID,
-            contentIntent = progressPendingIntent(context)
+            titleRes = R.string.uploadErrorTitle,
+            messageRes = R.string.anErrorHasOccurred
         )
     }
 
@@ -183,6 +166,20 @@ object UploadNotifications {
             setContentIntent(contentIntent)
             notificationManagerCompat.notify(notificationId, this.build())
         }
+    }
+
+    private fun UploadFile.uploadInterruptedNotification(
+        context: Context,
+        @StringRes messageRes: Int,
+        @StringRes titleRes: Int = R.string.uploadInterruptedErrorTitle
+    ) {
+        showNotification(
+            context = context,
+            title = context.getString(titleRes),
+            description = context.getString(messageRes),
+            notificationId = NotificationUtils.UPLOAD_STATUS_ID,
+            contentIntent = progressPendingIntent(context)
+        )
     }
 
     private fun UploadFile.progressPendingIntent(context: Context): PendingIntent? {

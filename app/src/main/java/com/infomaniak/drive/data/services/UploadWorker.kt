@@ -35,6 +35,7 @@ import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.sync.UploadNotifications
+import com.infomaniak.drive.data.sync.UploadNotifications.allowedFileSizeExceededNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.exceptionNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.folderNotFoundNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.lockErrorNotification
@@ -126,6 +127,10 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             currentUploadFile?.quotaExceededNotification(applicationContext)
             Result.failure()
 
+        } catch (exception: UploadTask.AllowedFileSizeExceededException) {
+            currentUploadFile?.allowedFileSizeExceededNotification(applicationContext)
+            Result.failure()
+
         } catch (exception: OutOfMemoryError) {
             currentUploadFile?.outOfMemoryNotification(applicationContext)
             Result.retry()
@@ -141,7 +146,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         } catch (exception: Exception) {
             when {
-                exception is UploadTask.ChunksSizeExceededException
+                exception is UploadTask.WrittenBytesExceededException
                         || exception is UploadTask.NotAuthorizedException
                         || exception is UploadTask.UploadErrorException -> Result.retry()
 
