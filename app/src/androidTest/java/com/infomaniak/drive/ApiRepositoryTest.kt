@@ -413,7 +413,7 @@ class ApiRepositoryTest : KDriveTest() {
         val folder = createFolder(okHttpClient, userDrive.driveId, ROOT_ID, name, false).data
         Assert.assertNotNull(folder)
         // No dropbox yet
-        assertApiResponse(getDropBox(folder!!))
+        Assert.assertNull("not dropbox should be returned, data should be null", getDropBox(folder!!).data)
 
         val maxSize = 16384L
         val body = arrayMapOf(
@@ -453,7 +453,7 @@ class ApiRepositoryTest : KDriveTest() {
 
         assertApiResponse(deleteDropBox(folder))
         // No dropbox left
-        assertApiResponse(getDropBox(folder))
+        Assert.assertNull("not dropbox should be returned, data should be null", getDropBox(folder).data)
         deleteTestFile(folder)
     }
 
