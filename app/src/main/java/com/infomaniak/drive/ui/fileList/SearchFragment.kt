@@ -191,11 +191,8 @@ class SearchFragment : FileListFragment() {
 
     private fun setToolbarListener() {
         toolbar.setOnMenuItemClickListener { menuItem ->
-            if (menuItem.itemId == R.id.selectFilters) {
-                safeNavigate(R.id.searchFiltersFragment)
-                true
-            } else {
-                false
+            (menuItem.itemId == R.id.selectFilters).also {
+                if (it) safeNavigate(R.id.searchFiltersFragment)
             }
         }
     }
