@@ -21,9 +21,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.uiautomator.UiScrollable
 import androidx.test.uiautomator.UiSelector
 import com.infomaniak.drive.utils.UiTestUtils
+import com.infomaniak.drive.utils.UiTestUtils.deleteFile
 import com.infomaniak.drive.utils.UiTestUtils.device
+import com.infomaniak.drive.utils.UiTestUtils.findFileInList
 import com.infomaniak.drive.utils.UiTestUtils.getViewIdentifier
 import com.infomaniak.drive.utils.UiTestUtils.startApp
+import junit.framework.Assert.assertNotNull
+import junit.framework.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -42,16 +46,15 @@ class FileListUiTest {
     }
 
     @Test
-    fun testCreateFolder() {
+    fun testCreateAndDeleteFolder() {
         val fileRecyclerView = UiScrollable(UiSelector().resourceId(getViewIdentifier("fileRecyclerView")))
-        val initialFileNumber = fileRecyclerView.childCount
         val randomFolderName = "UI-Test-${UUID.randomUUID()}"
 
         UiTestUtils.createPrivateFolder(randomFolderName)
         device.waitForWindowUpdate(null, 5000)
-        assert(fileRecyclerView.childCount == initialFileNumber + 1)
+        assertNotNull("File must be found", findFileInList(fileRecyclerView, randomFolderName))
 
-        UiTestUtils.deleteFile(fileRecyclerView, randomFolderName)
-        assert(fileRecyclerView.childCount == initialFileNumber)
+        deleteFile(fileRecyclerView, randomFolderName)
+        assertNull("File must not be found", findFileInList(fileRecyclerView, randomFolderName))
     }
 }

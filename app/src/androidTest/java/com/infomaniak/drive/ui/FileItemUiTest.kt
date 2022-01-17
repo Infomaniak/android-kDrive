@@ -47,7 +47,9 @@ class FileItemUiTest {
         val randomFolderName = "UI-Test-${UUID.randomUUID()}"
         val fileRecyclerView = UiScrollable(UiSelector().resourceId(getViewIdentifier("fileRecyclerView")))
 
+        // Create the folder then returns to main view
         UiTestUtils.createPrivateFolder(randomFolderName)
+        // Go to fileList view
         UiTestUtils.openFileShareDetails(fileRecyclerView, randomFolderName)
 
         device.apply {
