@@ -27,10 +27,10 @@ import java.util.*
 
 object ApiTestUtils {
 
-    fun assertApiResponse(response: ApiResponse<*>, dataShouldNotBeNull: Boolean = true) {
+    fun assertApiResponse(response: ApiResponse<*>) {
         Assert.assertTrue("This should succeed", response.isSuccess())
         Assert.assertNull("There should be no error", response.error)
-        if (dataShouldNotBeNull) Assert.assertNotNull("The data cannot be null", response.data)
+        Assert.assertNotNull("The data cannot be null", response.data)
     }
 
     fun deleteTestFile(remoteFile: File) {

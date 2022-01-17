@@ -722,10 +722,10 @@ object FileController {
         localFolder: File?,
         order: File.SortType,
         localChildren: RealmResults<File>? = null,
-        currRealm: Realm? = null
+        currentRealm: Realm? = null
     ): ArrayList<File> {
         val files = getRealmLiveSortedFiles(localFolder, order, localChildren = localChildren)?.let { realmFiles ->
-            localFolder?.realm?.copyFromRealm(realmFiles, 1) ?: currRealm?.copyFromRealm(realmFiles, 1)
+            localFolder?.realm?.copyFromRealm(realmFiles, 1) ?: currentRealm?.copyFromRealm(realmFiles, 1)
         }
         return files?.let { ArrayList(it) } ?: arrayListOf()
     }

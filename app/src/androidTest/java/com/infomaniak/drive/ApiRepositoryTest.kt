@@ -72,7 +72,6 @@ import com.infomaniak.drive.utils.ApiTestUtils.deleteTestFile
 import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.networking.HttpClient.okHttpClient
-import io.realm.Realm
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import org.junit.*
@@ -83,13 +82,11 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class ApiRepositoryTest : KDriveTest() {
-    private lateinit var realm: Realm
     private lateinit var testFile: File
 
     @Before
     @Throws(Exception::class)
     fun setUp() {
-        realm = Realm.getInstance(getConfig())
         testFile = createFileForTest()
     }
 
@@ -97,8 +94,6 @@ class ApiRepositoryTest : KDriveTest() {
     @Throws(Exception::class)
     fun tearDown() {
         deleteTestFile(testFile)
-        if (!realm.isClosed) realm.close()
-        Realm.deleteRealm(getConfig())
     }
 
     @Test
@@ -165,14 +160,14 @@ class ApiRepositoryTest : KDriveTest() {
         // Likes the second comment
         postFileCommentLike(testFile, commentID2).also {
             assertApiResponse(it)
-            Assert.assertTrue(it.data!!)
+            Assert.assertTrue(it.data ?: false)
         }
 
         // Get new comments
         getFileComments(testFile, 1).also {
             assertApiResponse(it)
             Assert.assertEquals("There should be 2 comments on the test file", 2, it.data?.size)
-            it.data?.find { comment -> comment.id == commentID2 }?.liked?.let { it1 -> Assert.assertTrue(it1) }
+            Assert.assertNotNull(it.data?.find { comment -> comment.id == commentID2 }?.liked?.let { it1 -> Assert.assertTrue(it1) })
         }
         // Delete first comment
         deleteFileComment(testFile, commentID)
@@ -181,12 +176,12 @@ class ApiRepositoryTest : KDriveTest() {
         // Put second comment
         val putCommentResponse = putFileComment(testFile, commentID2, "42")
         assertApiResponse(putCommentResponse)
-        putCommentResponse.data?.let { Assert.assertTrue(it) }
+        Assert.assertTrue(putCommentResponse.data ?: false)
 
         // Unlike the comment
         postFileCommentUnlike(testFile, commentID2).also {
             assertApiResponse(it)
-            Assert.assertTrue(it.data!!)
+            Assert.assertTrue(it.data ?: false)
         }
 
         // Make sure data has been updated
@@ -369,7 +364,7 @@ class ApiRepositoryTest : KDriveTest() {
         deleteCategory(userDrive.driveId, category.id)
         getFileDetails(file).also {
             assertApiResponse(it)
-            Assert.assertTrue("The test file should not have category", it.data?.categories.isNullOrEmpty())
+            Assert.assertTrue("The test file should not have category", it.data!!.categories.isNullOrEmpty())
         }
         deleteTestFile(file)
     }
@@ -386,7 +381,7 @@ class ApiRepositoryTest : KDriveTest() {
         removeCategory(file, category.id)
         getFileDetails(file).also {
             assertApiResponse(it)
-            Assert.assertTrue("The test file should not have a category", it.data?.categories.isNullOrEmpty())
+            Assert.assertTrue("The test file should not have a category", it.data!!.categories.isNullOrEmpty())
         }
         // Delete the test category and file
         deleteCategory(userDrive.driveId, category.id)
@@ -418,7 +413,7 @@ class ApiRepositoryTest : KDriveTest() {
         val folder = createFolder(okHttpClient, userDrive.driveId, ROOT_ID, name, false).data
         Assert.assertNotNull(folder)
         // No dropbox yet
-        assertApiResponse(getDropBox(folder!!), false)
+        assertApiResponse(getDropBox(folder!!))
 
         val maxSize = 16384L
         val body = arrayMapOf(
@@ -446,7 +441,7 @@ class ApiRepositoryTest : KDriveTest() {
 
         updateDropBox(folder, data).also {
             assertApiResponse(it)
-            Assert.assertTrue(it.data!!)
+            Assert.assertTrue(it.data ?: false)
         }
 
         getDropBox(folder).also {
@@ -458,7 +453,7 @@ class ApiRepositoryTest : KDriveTest() {
 
         assertApiResponse(deleteDropBox(folder))
         // No dropbox left
-        assertApiResponse(getDropBox(folder), false)
+        assertApiResponse(getDropBox(folder))
         deleteTestFile(folder)
     }
 
@@ -472,7 +467,7 @@ class ApiRepositoryTest : KDriveTest() {
             deleteTestFile(modifiedFile!!)
             getTrashFile(modifiedFile, File.SortType.RECENT).also {
                 assertApiResponse(it)
-                Assert.assertEquals("file id should be the same", it.data?.id, file.id)
+                Assert.assertEquals("file id should be the same", file.id, it.data?.id)
                 Assert.assertEquals("file name should be updated to 'Trash test'", newName, it.data?.name)
             }
 
