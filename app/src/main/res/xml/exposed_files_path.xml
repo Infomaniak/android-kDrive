@@ -20,6 +20,6 @@
         name="@string/EXPOSED_UPLOAD_DIR"
         path="upload_media/" />
     <external-media-path
-        name="offline_storage"
+        name="@string/EXPOSED_OFFLINE_DIR"
         path="offline_storage/" />
 </paths>
