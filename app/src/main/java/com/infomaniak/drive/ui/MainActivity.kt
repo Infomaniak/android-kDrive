@@ -30,6 +30,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Build
 import android.os.Bundle
+import android.os.FileObserver
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
@@ -54,6 +55,7 @@ import com.google.android.material.navigation.NavigationBarItemView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.checkUpdateIsAvailable
 import com.infomaniak.drive.data.models.AppSettings
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UISettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
@@ -88,11 +90,22 @@ class MainActivity : BaseActivity() {
     private lateinit var drivePermissions: DrivePermissions
     private lateinit var filesDeletionResult: ActivityResultLauncher<IntentSenderRequest>
 
+    private val fileObserver: FileObserver by lazy {
+        object : FileObserver(File.getOfflineFolder(this)) {
+            override fun onEvent(event: Int, path: String?) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    mainViewModel.syncOfflineFiles()
+                }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         downloadReceiver = DownloadReceiver(mainViewModel)
+        fileObserver.startWatching()
 
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
 
@@ -298,6 +311,7 @@ class MainActivity : BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        fileObserver.stopWatching()
         LocalBroadcastManager.getInstance(this).unregisterReceiver(downloadReceiver)
     }
 
