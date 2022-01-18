@@ -58,7 +58,7 @@ open class ColorFolderBottomSheetDialog : BottomSheetDialogFragment() {
         colorsAdapter = ColorFolderAdapter(
             onColorSelected = { color: String -> setBackNavigationResult(COLOR_FOLDER_NAV_KEY, color) }
         ).apply {
-            selectedPosition = COLORS.indexOfFirst { it == navigationArgs.color }.let { if (it == -1) 0 else it }
+            selectedPosition = COLORS.indexOfFirst { it == navigationArgs.color }
             configCategoriesLayoutManager()
             colorsRecyclerView.adapter = this
             stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
