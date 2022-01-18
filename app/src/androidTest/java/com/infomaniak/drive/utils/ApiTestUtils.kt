@@ -18,9 +18,13 @@
 package com.infomaniak.drive.utils
 
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.CreateFile
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.ShareLink
+import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.utils.ApiController
 import kotlinx.android.parcel.RawValue
 import org.junit.Assert
 import java.util.*
@@ -43,5 +47,13 @@ object ApiTestUtils {
         val apiResponse = ApiRepository.createOfficeFile(Env.DRIVE_ID, Utils.ROOT_ID, createFile)
         assertApiResponse(apiResponse)
         return apiResponse.data!!
+    }
+
+    fun getShareLink(file: File): ApiResponse<ShareLink> {
+        return ApiController.callApi(ApiRoutes.shareLink(file), ApiController.ApiMethod.GET)
+    }
+
+    fun getCategory(driveId: Int): ApiResponse<Array<Category>> {
+        return ApiController.callApi(ApiRoutes.createCategory(driveId), ApiController.ApiMethod.GET)
     }
 }

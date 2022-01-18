@@ -20,7 +20,6 @@ package com.infomaniak.drive
 import androidx.collection.arrayMapOf
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.gson.JsonObject
-import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRepository.addCategory
 import com.infomaniak.drive.data.api.ApiRepository.createCategory
 import com.infomaniak.drive.data.api.ApiRepository.createFolder
@@ -35,7 +34,6 @@ import com.infomaniak.drive.data.api.ApiRepository.duplicateFile
 import com.infomaniak.drive.data.api.ApiRepository.editCategory
 import com.infomaniak.drive.data.api.ApiRepository.emptyTrash
 import com.infomaniak.drive.data.api.ApiRepository.getAllDrivesData
-import com.infomaniak.drive.data.api.ApiRepository.getCategory
 import com.infomaniak.drive.data.api.ApiRepository.getDriveTrash
 import com.infomaniak.drive.data.api.ApiRepository.getDropBox
 import com.infomaniak.drive.data.api.ApiRepository.getFavoriteFiles
@@ -45,8 +43,8 @@ import com.infomaniak.drive.data.api.ApiRepository.getFileCount
 import com.infomaniak.drive.data.api.ApiRepository.getFileDetails
 import com.infomaniak.drive.data.api.ApiRepository.getFileShare
 import com.infomaniak.drive.data.api.ApiRepository.getLastActivities
+import com.infomaniak.drive.data.api.ApiRepository.getLastModifiedFiles
 import com.infomaniak.drive.data.api.ApiRepository.getMySharedFiles
-import com.infomaniak.drive.data.api.ApiRepository.getShareLink
 import com.infomaniak.drive.data.api.ApiRepository.getTrashFile
 import com.infomaniak.drive.data.api.ApiRepository.getUserProfile
 import com.infomaniak.drive.data.api.ApiRepository.moveFile
@@ -66,10 +64,11 @@ import com.infomaniak.drive.data.api.ApiRepository.renameFile
 import com.infomaniak.drive.data.api.ApiRepository.updateDropBox
 import com.infomaniak.drive.data.api.ApiRoutes.postFileShare
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponse
 import com.infomaniak.drive.utils.ApiTestUtils.createFileForTest
 import com.infomaniak.drive.utils.ApiTestUtils.deleteTestFile
+import com.infomaniak.drive.utils.ApiTestUtils.getCategory
+import com.infomaniak.drive.utils.ApiTestUtils.getShareLink
 import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.networking.HttpClient.okHttpClient
@@ -463,7 +462,7 @@ class ApiRepositoryTest : KDriveTest() {
         createFileForTest().also { file ->
             val newName = "Trash test"
             renameFile(file, newName)
-            val modifiedFile = ApiRepository.getLastModifiedFiles(userDrive.driveId).data?.first()
+            val modifiedFile = getLastModifiedFiles(userDrive.driveId).data?.first()
             Assert.assertNotNull(modifiedFile)
             deleteTestFile(modifiedFile!!)
             getTrashFile(modifiedFile, File.SortType.RECENT, 1).also {
