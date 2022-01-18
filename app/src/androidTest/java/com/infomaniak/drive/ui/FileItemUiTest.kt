@@ -21,6 +21,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.uiautomator.UiScrollable
 import androidx.test.uiautomator.UiSelector
 import com.infomaniak.drive.utils.UiTestUtils
+import com.infomaniak.drive.utils.UiTestUtils.createPublicShareLink
+import com.infomaniak.drive.utils.UiTestUtils.deleteFile
 import com.infomaniak.drive.utils.UiTestUtils.device
 import com.infomaniak.drive.utils.UiTestUtils.getDeviceViewById
 import com.infomaniak.drive.utils.UiTestUtils.getViewIdentifier
@@ -54,10 +56,10 @@ class FileItemUiTest {
 
         device.apply {
             findObject(UiSelector().resourceId(getViewIdentifier("shareLinkSwitch"))).clickAndWaitForNewWindow()
-            findObject(UiSelector().resourceId(getViewIdentifier("urlValue"))).let {
-                assert(it.exists())
-                assert(it.text.isNotEmpty())
-            }
+            createPublicShareLink(UiScrollable(UiSelector().resourceId(getViewIdentifier("permissionsRecyclerView"))))
+            pressBack()
+            findObject(UiSelector().resourceId(getViewIdentifier("closeButton"))).clickAndWaitForNewWindow()
         }
+        deleteFile(fileRecyclerView, randomFolderName)
     }
 }

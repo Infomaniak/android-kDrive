@@ -26,8 +26,8 @@ import com.infomaniak.drive.utils.UiTestUtils.device
 import com.infomaniak.drive.utils.UiTestUtils.findFileInList
 import com.infomaniak.drive.utils.UiTestUtils.getViewIdentifier
 import com.infomaniak.drive.utils.UiTestUtils.startApp
-import junit.framework.Assert.assertNotNull
-import junit.framework.Assert.assertNull
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -42,7 +42,7 @@ class FileListUiTest {
     @Before
     fun init() {
         startApp()
-        UiTestUtils.getDeviceViewById("fileListFragment")?.click()
+        UiTestUtils.getDeviceViewById("fileListFragment").click()
     }
 
     @Test

@@ -52,7 +52,7 @@ object UiTestUtils {
     }
 
     fun createPrivateFolder(folderName: String) {
-        getDeviceViewById("mainFab")?.clickAndWaitForNewWindow()
+        getDeviceViewById("mainFab").clickAndWaitForNewWindow()
 
         UiCollection(UiSelector().resourceId(getViewIdentifier("addFileBottomSheetLayout"))).getChildByText(
             UiSelector().resourceId(getViewIdentifier("folderCreateText")),
@@ -83,11 +83,11 @@ object UiTestUtils {
     fun deleteFile(fileRecyclerView: UiScrollable, fileName: String) {
         (fileRecyclerView.getChildByText(UiSelector().resourceId(getViewIdentifier("fileCardView")), fileName)).apply {
             fileRecyclerView.scrollIntoView(this)
-            val fileInfoMenu = this.getChild(UiSelector().resourceId(getViewIdentifier("menuButton")))
-            fileInfoMenu.click()
-            val menuView = UiScrollable(UiSelector().resourceId(getViewIdentifier("scrollView")))
-            menuView.scrollForward()
-            menuView.getChild(UiSelector().resourceId(getViewIdentifier("deleteFile"))).click()
+            getChild(UiSelector().resourceId(getViewIdentifier("menuButton"))).click()
+            UiScrollable(UiSelector().resourceId(getViewIdentifier("scrollView"))).apply {
+                scrollForward()
+                getChild(UiSelector().resourceId(getViewIdentifier("deleteFile"))).click()
+            }
         }
         device.findObject(UiSelector().text(context.getString(R.string.buttonMove))).clickAndWaitForNewWindow()
     }
@@ -95,20 +95,29 @@ object UiTestUtils {
     fun openFileShareDetails(fileRecyclerView: UiScrollable, fileName: String) {
         (fileRecyclerView.getChildByText(UiSelector().resourceId(getViewIdentifier("fileCardView")), fileName)).apply {
             fileRecyclerView.scrollIntoView(this)
-            swipeLeft(3)
-            getChild((UiSelector().resourceId(getViewIdentifier("menuButton")))).clickAndWaitForNewWindow()
+            getChild((UiSelector().resourceId(getViewIdentifier("menuButton")))).click()
         }
-
-        getDeviceViewById("fileRights")?.clickAndWaitForNewWindow()
+        getDeviceViewById("fileRights").clickAndWaitForNewWindow()
     }
 
-    fun getDeviceViewById(id: String): UiObject? = device.findObject(UiSelector().resourceId(getViewIdentifier(id)))
+    fun getDeviceViewById(id: String): UiObject = device.findObject(UiSelector().resourceId(getViewIdentifier(id)))
 
     fun findFileInList(fileRecyclerView: UiScrollable, fileName: String): UiObject? {
         return try {
             fileRecyclerView.getChildByText(UiSelector().resourceId(getViewIdentifier("fileCardView")), fileName)
         } catch (exception: UiObjectNotFoundException) {
             null
+        }
+    }
+
+    fun createPublicShareLink(recyclerView: UiScrollable) {
+        recyclerView.getChildByText(
+            UiSelector().resourceId(getViewIdentifier("permissionTitle")),
+            context.getString(R.string.shareLinkPublicRightTitle)
+        ).click()
+        device.apply {
+            findObject(UiSelector().resourceId(getViewIdentifier("saveButton"))).clickAndWaitForNewWindow()
+            findObject(UiSelector().resourceId(getViewIdentifier("shareLinkButton"))).clickAndWaitForNewWindow()
         }
     }
 }

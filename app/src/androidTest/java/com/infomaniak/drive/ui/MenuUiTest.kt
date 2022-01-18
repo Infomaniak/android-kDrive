@@ -23,6 +23,7 @@ import android.widget.EditText
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.uiautomator.By
+import androidx.test.uiautomator.UiObjectNotFoundException
 import androidx.test.uiautomator.UiSelector
 import androidx.test.uiautomator.Until
 import com.infomaniak.drive.R
@@ -34,7 +35,6 @@ import com.infomaniak.drive.utils.UiTestUtils.getDeviceViewById
 import org.hamcrest.CoreMatchers
 import org.junit.Before
 import org.junit.Test
-import java.lang.Thread.sleep
 
 class MenuUiTest {
     @Before
@@ -50,37 +50,38 @@ class MenuUiTest {
         }
         context.startActivity(intent)
         device.wait(Until.hasObject(By.pkg(UiTestUtils.APP_PACKAGE).depth(0)), UiTestUtils.LAUNCH_TIMEOUT)
-        getDeviceViewById("menuFragment")?.clickAndWaitForNewWindow()
+        getDeviceViewById("menuFragment").clickAndWaitForNewWindow()
     }
 
     @Test
     fun testAddUser() {
-        getDeviceViewById("changeUser")?.clickAndWaitForNewWindow()
-        getDeviceViewById("addUser")?.clickAndWaitForNewWindow()
-        getDeviceViewById("nextButton")?.click()
-        getDeviceViewById("nextButton")?.click()
-        getDeviceViewById("connectButton")?.clickAndWaitForNewWindow()
+        getDeviceViewById("changeUserIcon").clickAndWaitForNewWindow()
+        getDeviceViewById("addUser").clickAndWaitForNewWindow()
+        getDeviceViewById("nextButton").click()
+        getDeviceViewById("nextButton").click()
+        getDeviceViewById("connectButton").clickAndWaitForNewWindow()
 
-        // Username
-        device.findObject(UiSelector().instance(0).className(EditText::class.java)).text = Env.NEW_USER_NAME
+        with(device) {
+            // Username
+            findObject(UiSelector().instance(0).className(EditText::class.java)).text = Env.NEW_USER_NAME
 
-        // Password
-        device.findObject(UiSelector().text("Mot de passe")).text = Env.NEW_USER_PASSWORD
-        device.findObject(UiSelector().text("CONNEXION")).clickAndWaitForNewWindow()
+            // Password
+            findObject(UiSelector().instance(1).className(EditText::class.java)).text = Env.NEW_USER_PASSWORD
 
-        sleep(6000)
+            // Save button
+            try {
+                findObject(UiSelector().text("CONNECTION")).clickAndWaitForNewWindow(6000)
+            } catch (exception: UiObjectNotFoundException) {
+                findObject(UiSelector().text("CONNEXION")).clickAndWaitForNewWindow(6000)
+            }
 
-        assert(AccountUtils.currentUserId == Env.NEW_USER_ID)
-        getDeviceViewById("menuFragment")?.clickAndWaitForNewWindow()
-        // Cheat to scroll to bottom of screen
-        device.swipe(
-            device.displayWidth * 3 / 4,
-            device.displayHeight * 9 / 10,
-            device.displayWidth * 3 / 4,
-            device.displayHeight * 1 / 10,
-            10
-        )
-        getDeviceViewById("logout")?.clickAndWaitForNewWindow()
-        device.findObject(UiSelector().text(UiTestUtils.context.getString(R.string.buttonConfirm))).clickAndWaitForNewWindow()
+            assert(AccountUtils.currentUserId == Env.NEW_USER_ID) { "User Id should be ${Env.NEW_USER_ID} but is ${AccountUtils.currentUserId}" }
+            getDeviceViewById("menuFragment").clickAndWaitForNewWindow(2000)
+
+            // Cheat to scroll down because nestedScrollView doesn't want to scroll
+            swipe(displayWidth / 4, displayHeight - 20, displayWidth / 4, displayHeight / 4, 5)
+            getDeviceViewById("logout").clickAndWaitForNewWindow()
+            findObject(UiSelector().text(UiTestUtils.context.getString(R.string.buttonConfirm))).clickAndWaitForNewWindow()
+        }
     }
 }
