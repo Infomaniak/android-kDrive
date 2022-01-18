@@ -25,20 +25,21 @@ import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.ApiController
-import org.junit.Assert
+import kotlinx.android.parcel.RawValue
+import org.junit.jupiter.api.Assertions
 import java.util.*
 
 object ApiTestUtils {
 
     fun assertApiResponse(response: ApiResponse<*>) {
-        Assert.assertTrue("This should succeed", response.isSuccess())
-        Assert.assertNull("There should be no error", response.error)
-        Assert.assertNotNull("The data cannot be null", response.data)
+        Assertions.assertTrue(response.isSuccess(), "This should succeed")
+        Assertions.assertNull(response.error, "There should be no error")
+        Assertions.assertNotNull(response.data, "The data cannot be null")
     }
 
     fun deleteTestFile(remoteFile: File) {
         val deleteResponse = ApiRepository.deleteFile(remoteFile)
-        Assert.assertTrue("created file couldn't be deleted from the remote", deleteResponse.isSuccess())
+        Assertions.assertTrue(deleteResponse.isSuccess(), "created file couldn't be deleted from the remote")
     }
 
     fun createFileForTest(): File {

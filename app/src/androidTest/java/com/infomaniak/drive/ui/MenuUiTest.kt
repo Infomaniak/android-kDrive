@@ -33,11 +33,11 @@ import com.infomaniak.drive.utils.UiTestUtils
 import com.infomaniak.drive.utils.UiTestUtils.device
 import com.infomaniak.drive.utils.UiTestUtils.getDeviceViewById
 import org.hamcrest.CoreMatchers
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 class MenuUiTest {
-    @Before
+    @BeforeEach
     fun startApp() {
         device.pressHome()
 

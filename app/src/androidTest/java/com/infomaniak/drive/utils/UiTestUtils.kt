@@ -29,8 +29,6 @@ import org.hamcrest.CoreMatchers
 object UiTestUtils {
     const val APP_PACKAGE = "com.infomaniak.drive"
     const val LAUNCH_TIMEOUT = 5000L
-    const val DEFAULT_DRIVE_NAME = "infomaniak"
-    const val DEFAULT_DRIVE_ID = 100338
 
     var context: Context = ApplicationProvider.getApplicationContext()
     var device: UiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
@@ -119,5 +117,11 @@ object UiTestUtils {
             findObject(UiSelector().resourceId(getViewIdentifier("saveButton"))).clickAndWaitForNewWindow()
             findObject(UiSelector().resourceId(getViewIdentifier("shareLinkButton"))).clickAndWaitForNewWindow()
         }
+    }
+
+    fun selectDriveInList(instance: Int) {
+        UiCollection(UiSelector().resourceId(getViewIdentifier("selectRecyclerView"))).getChildByInstance(
+            UiSelector().resourceId(getViewIdentifier("itemSelectText")), instance
+        ).clickAndWaitForNewWindow()
     }
 }

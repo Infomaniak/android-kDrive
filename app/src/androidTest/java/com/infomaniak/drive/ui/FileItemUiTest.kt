@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.uiautomator.UiScrollable
 import androidx.test.uiautomator.UiSelector
 import com.infomaniak.drive.utils.UiTestUtils
@@ -27,21 +26,19 @@ import com.infomaniak.drive.utils.UiTestUtils.device
 import com.infomaniak.drive.utils.UiTestUtils.getDeviceViewById
 import com.infomaniak.drive.utils.UiTestUtils.getViewIdentifier
 import com.infomaniak.drive.utils.UiTestUtils.startApp
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.util.*
 
 /**
  * UI Tests relative to a file item (sharing, comments, details, activities)
  */
-@RunWith(AndroidJUnit4::class)
 class FileItemUiTest {
 
-    @Before
+    @BeforeEach
     fun init() {
         startApp()
-        getDeviceViewById("fileListFragment")?.click()
+        getDeviceViewById("fileListFragment").click()
     }
 
     @Test

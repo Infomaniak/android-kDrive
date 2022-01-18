@@ -32,9 +32,8 @@ import com.infomaniak.lib.login.ApiToken
 import io.realm.RealmConfiguration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import okhttp3.OkHttpClient
-import org.junit.AfterClass
-import org.junit.BeforeClass
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 
 open class KDriveTest {
     companion object {
@@ -43,7 +42,7 @@ open class KDriveTest {
         internal lateinit var userDrive: UserDrive
         internal lateinit var okHttpClient: OkHttpClient
 
-        @BeforeClass
+        @BeforeAll
         @JvmStatic
         fun beforeAll() {
             if (Env.USE_CURRENT_USER) {
@@ -65,7 +64,7 @@ open class KDriveTest {
             okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(user.id) }
         }
 
-        @AfterClass
+        @AfterAll
         @JvmStatic
         fun afterAll() {
             if (!Env.USE_CURRENT_USER) {

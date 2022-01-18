@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.uiautomator.UiScrollable
 import androidx.test.uiautomator.UiSelector
 import com.infomaniak.drive.utils.UiTestUtils
@@ -26,20 +25,18 @@ import com.infomaniak.drive.utils.UiTestUtils.device
 import com.infomaniak.drive.utils.UiTestUtils.findFileInList
 import com.infomaniak.drive.utils.UiTestUtils.getViewIdentifier
 import com.infomaniak.drive.utils.UiTestUtils.startApp
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.util.*
 
 /**
  * UI Tests relative to file list (quick operations, file creation, upload, import, ...)
  */
-@RunWith(AndroidJUnit4::class)
 class FileListUiTest {
 
-    @Before
+    @BeforeEach
     fun init() {
         startApp()
         UiTestUtils.getDeviceViewById("fileListFragment").click()
@@ -52,9 +49,9 @@ class FileListUiTest {
 
         UiTestUtils.createPrivateFolder(randomFolderName)
         device.waitForWindowUpdate(null, 5000)
-        assertNotNull("File must be found", findFileInList(fileRecyclerView, randomFolderName))
+        assertNotNull(findFileInList(fileRecyclerView, randomFolderName), "File must be found")
 
         deleteFile(fileRecyclerView, randomFolderName)
-        assertNull("File must not be found", findFileInList(fileRecyclerView, randomFolderName))
+        assertNull(findFileInList(fileRecyclerView, randomFolderName), "File must not be found")
     }
 }
