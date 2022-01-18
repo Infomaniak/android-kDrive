@@ -324,32 +324,18 @@ object ApiRepository {
         return callApi(ApiRoutes.convertFile(file), POST)
     }
 
-    fun getDriveTrash(driveId: Int, order: File.SortType, page: Int, timeout: Long = 5): ApiResponse<ArrayList<File>> {
-        return callApi(
-            "${ApiRoutes.getDriveFileTrashedListForFolder(driveId, order)}&${pagination(page)}",
-            GET,
-            okHttpClient = OkHttpClient()
-                .newBuilder()
-                .connectTimeout(timeout, TimeUnit.SECONDS).readTimeout(timeout, TimeUnit.SECONDS)
-                .build()
-        )
+    fun getDriveTrash(driveId: Int, order: File.SortType, page: Int): ApiResponse<ArrayList<File>> {
+        return callApi("${ApiRoutes.getDriveFileTrashedListForFolder(driveId, order)}&${pagination(page)}", GET)
     }
 
-    fun getTrashFile(file: File, order: File.SortType, page: Int = 1): ApiResponse<File> {
+    fun getTrashFile(file: File, order: File.SortType, page:Int): ApiResponse<File> {
         return callApi("${ApiRoutes.getFileTrashedListForFolder(file, order)}&${pagination(page)}", GET)
     }
 
     fun postRestoreTrashFile(file: File, body: Map<String, Int>?): ApiResponse<Any> =
         callApi(ApiRoutes.restoreTrashFile(file), POST, body)
 
-    fun emptyTrash(driveId: Int, timeout: Long = 5): ApiResponse<Boolean> = callApi(
-        ApiRoutes.emptyTrash(driveId),
-        DELETE,
-        okHttpClient = OkHttpClient()
-            .newBuilder()
-            .connectTimeout(timeout, TimeUnit.SECONDS).readTimeout(timeout, TimeUnit.SECONDS)
-            .build()
-    )
+    fun emptyTrash(driveId: Int): ApiResponse<Boolean> = callApi(ApiRoutes.emptyTrash(driveId), DELETE)
 
     fun deleteTrashFile(file: File): ApiResponse<Any> = callApi(ApiRoutes.deleteTrashFile(file), DELETE)
 

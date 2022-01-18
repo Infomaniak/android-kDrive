@@ -851,9 +851,9 @@ object FileController {
         userDrive: UserDrive = UserDrive(),
         customRealm: Realm? = null
     ): ArrayList<File> {
-        val block: (Realm) -> ArrayList<File> = { currRealm ->
-            currRealm.where(File::class.java).like(File::name.name, "*$query*").findAll()?.let { files ->
-                getLocalSortedFolderFiles(null, order, files, currRealm)
+        val block: (Realm) -> ArrayList<File> = { currentRealm ->
+            currentRealm.where(File::class.java).like(File::name.name, "*$query*").findAll()?.let { files ->
+                getLocalSortedFolderFiles(null, order, files, currentRealm)
             } ?: arrayListOf()
         }
         return customRealm?.let(block) ?: getRealmInstance(userDrive).use(block)

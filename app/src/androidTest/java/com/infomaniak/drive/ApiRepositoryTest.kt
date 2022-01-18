@@ -66,6 +66,7 @@ import com.infomaniak.drive.data.api.ApiRepository.renameFile
 import com.infomaniak.drive.data.api.ApiRepository.updateDropBox
 import com.infomaniak.drive.data.api.ApiRoutes.postFileShare
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponse
 import com.infomaniak.drive.utils.ApiTestUtils.createFileForTest
 import com.infomaniak.drive.utils.ApiTestUtils.deleteTestFile
@@ -465,13 +466,13 @@ class ApiRepositoryTest : KDriveTest() {
             val modifiedFile = ApiRepository.getLastModifiedFiles(userDrive.driveId).data?.first()
             Assert.assertNotNull(modifiedFile)
             deleteTestFile(modifiedFile!!)
-            getTrashFile(modifiedFile, File.SortType.RECENT).also {
+            getTrashFile(modifiedFile, File.SortType.RECENT, 1).also {
                 assertApiResponse(it)
                 Assert.assertEquals("file id should be the same", file.id, it.data?.id)
                 Assert.assertEquals("file name should be updated to 'Trash test'", newName, it.data?.name)
             }
 
-            getDriveTrash(userDrive.driveId, File.SortType.RECENT, 1, 30).also {
+            getDriveTrash(userDrive.driveId, File.SortType.RECENT, 1).also {
                 assertApiResponse(it)
                 Assert.assertTrue("Trash should not be empty", it.data!!.isNotEmpty())
                 Assert.assertEquals("Last file trashed should be 'trash test'", file.id, it.data?.first()?.id)
@@ -479,7 +480,7 @@ class ApiRepositoryTest : KDriveTest() {
 
             // Restore the file from the trash
             assertApiResponse(postRestoreTrashFile(modifiedFile, mapOf("destination_folder_id" to ROOT_ID)))
-            getDriveTrash(userDrive.driveId, File.SortType.RECENT, 1, 30).also {
+            getDriveTrash(userDrive.driveId, File.SortType.RECENT, 1).also {
                 assertApiResponse(it)
                 if (it.data!!.isNotEmpty()) {
                     Assert.assertNotEquals("Last file trashed should not be 'trash test'", file.id, it.data?.first()?.id)
@@ -489,8 +490,8 @@ class ApiRepositoryTest : KDriveTest() {
         }
 
         // Clean the trash to make sure nothing is left in
-        assertApiResponse(emptyTrash(userDrive.driveId, 30))
-        getDriveTrash(userDrive.driveId, File.SortType.NAME_ZA, 1, 30).also {
+        assertApiResponse(emptyTrash(userDrive.driveId))
+        getDriveTrash(userDrive.driveId, File.SortType.NAME_ZA, 1).also {
             assertApiResponse(it)
             Assert.assertTrue("Trash should be empty", it.data!!.isEmpty())
         }
@@ -502,7 +503,7 @@ class ApiRepositoryTest : KDriveTest() {
         }
 
         // Trash should still be empty
-        getDriveTrash(userDrive.driveId, File.SortType.NAME_ZA, 1, 30).also {
+        getDriveTrash(userDrive.driveId, File.SortType.NAME_ZA, 1).also {
             assertApiResponse(it)
             Assert.assertTrue("Trash should be empty", it.data!!.isEmpty())
         }
