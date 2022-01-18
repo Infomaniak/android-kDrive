@@ -374,4 +374,11 @@ object Utils {
             }
         }.show()
     }
+
+    fun isFileAllowedToBeColored(file: File): Boolean {
+        return (!file.isDisabled()
+                && file.isFolder()
+                && file.getVisibilityType() != File.VisibilityType.IS_SHARED_SPACE
+                && file.getVisibilityType() != File.VisibilityType.IS_TEAM_SPACE)
+    }
 }
