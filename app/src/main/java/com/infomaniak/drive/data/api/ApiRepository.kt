@@ -183,8 +183,8 @@ object ApiRepository {
         return callApi(ApiRoutes.getFileShare(file), GET, okHttpClient = okHttpClient)
     }
 
-    fun getFileDetails(file: File): ApiResponse<File> {
-        return callApi(ApiRoutes.getFileDetails(file), GET)
+    fun getFileDetails(fileId: Int, driveId: Int): ApiResponse<File> {
+        return callApi(ApiRoutes.getFileDetails(fileId, driveId), GET)
     }
 
     fun getFileCount(file: File): ApiResponse<FileCount> {

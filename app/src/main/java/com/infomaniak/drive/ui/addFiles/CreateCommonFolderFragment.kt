@@ -62,11 +62,14 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
                 file?.let {
                     requireActivity().showSnackbar(R.string.createCommonFolderSucces)
                     if (currentPermission == SPECIFIC_USERS) {
-                        safeNavigate(
-                            CreateCommonFolderFragmentDirections.actionCreateCommonFolderFragmentToFileShareDetailsFragment(
-                                fileId = file.id, ignoreCreateFolderStack = true
+                        if (isResumed) {
+                            safeNavigate(
+                                CreateCommonFolderFragmentDirections.actionCreateCommonFolderFragmentToFileShareDetailsFragment(
+                                    fileId = file.id,
+                                    ignoreCreateFolderStack = true,
+                                )
                             )
-                        )
+                        }
                     } else {
                         findNavController().popBackStack(R.id.newFolderFragment, true)
                     }

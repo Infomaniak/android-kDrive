@@ -244,12 +244,87 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-
     suspend fun syncOfflineFiles() {
         syncOfflineFilesJob.cancel()
         syncOfflineFilesJob = Job()
         runInterruptible(Dispatchers.IO + syncOfflineFilesJob) {
             SyncOfflineUtils.startSyncOffline(getContext(), syncOfflineFilesJob)
+        }
+    }
+
+    suspend fun syncOfflineFiles() {
+        syncOfflineFilesJob.cancel()
+        syncOfflineFilesJob = Job()
+        runInterruptible(Dispatchers.IO + syncOfflineFilesJob) {
+            DriveInfosController.getDrives(AccountUtils.currentUserId).forEach { drive ->
+                val userDrive = UserDrive(driveId = drive.id)
+
+                FileController.getRealmInstance(userDrive).use { realm ->
+                    FileController.getOfflineFiles(null, customRealm = realm).forEach loopFiles@{ file ->
+                        if (file.isPendingOffline(getContext())) return@loopFiles
+
+                        file.getOfflineFile(getContext(), userDrive.userId)?.let { offlineFile ->
+                            migrateOfflineIfNeeded(file, offlineFile, userDrive)
+
+                            val apiResponse = ApiRepository.getFileDetails(file.id, file.driveId)
+                            apiResponse.data?.let { remoteFile ->
+                                remoteFile.isOffline = true
+
+                                if (offlineFile.lastModified() > file.getLastModifiedInMilliSecond()) {
+                                    uploadFile(file, remoteFile, offlineFile, userDrive, realm)
+                                } else {
+                                    downloadOfflineFile(file, remoteFile, offlineFile, userDrive, realm)
+                                }
+
+                            } ?: let {
+                                if (apiResponse.error?.code?.equals("object_not_found") == true) offlineFile.delete()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun uploadFile(file: File, remoteFile: File, offlineFile: java.io.File, userDrive: UserDrive, realm: Realm) {
+        val uri = Uri.fromFile(offlineFile)
+        val fileModifiedAt = Date(offlineFile.lastModified())
+        if (UploadFile.canUpload(uri, fileModifiedAt)) {
+            remoteFile.lastModifiedAt = offlineFile.lastModified() / 1000
+            remoteFile.size = offlineFile.length()
+            FileController.updateExistingFile(newFile = remoteFile, realm = realm)
+            UploadFile(
+                uri = uri.toString(),
+                driveId = userDrive.driveId,
+                fileModifiedAt = fileModifiedAt,
+                fileName = file.name,
+                fileSize = offlineFile.length(),
+                remoteFolder = FileController.getParentFile(file.id, realm = realm)!!.id,
+                type = UploadFile.Type.SYNC_OFFLINE.name,
+                userId = userDrive.userId,
+            ).store()
+            getContext().syncImmediately()
+        }
+    }
+
+    private fun downloadOfflineFile(
+        file: File,
+        remoteFile: File,
+        offlineFile: java.io.File,
+        userDrive: UserDrive,
+        realm: Realm
+    ) {
+        val remoteOfflineFile = remoteFile.getOfflineFile(getContext(), userDrive.userId) ?: return
+
+        val pathChanged = offlineFile.path != remoteOfflineFile.path
+        if (pathChanged) {
+            if (file.isMedia()) file.deleteInMediaScan(getContext(), userDrive)
+            offlineFile.delete()
+        }
+
+        if (!file.isPendingOffline(getContext()) && (!remoteFile.isOfflineAndIntact(remoteOfflineFile) || pathChanged)) {
+            FileController.updateExistingFile(newFile = remoteFile, realm = realm)
+            Utils.downloadAsOfflineFile(getContext(), remoteFile, userDrive)
         }
     }
 

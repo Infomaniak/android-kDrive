@@ -22,9 +22,11 @@ import android.view.View
 import android.widget.CompoundButton
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.FolderPermission.*
@@ -33,6 +35,9 @@ import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
 import kotlinx.android.synthetic.main.fragment_create_folder.*
 import kotlinx.android.synthetic.main.item_dropbox_settings.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.internal.toLongOrDefault
 
 class CreateDropBoxFolderFragment : CreateFolderFragment() {
@@ -67,11 +72,20 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
                 if (currentPermission == ONLY_ME) {
                     findNavController().popBackStack(R.id.newFolderFragment, true)
                 } else {
-                    safeNavigate(
-                        CreateDropBoxFolderFragmentDirections.actionCreateDropBoxFolderFragmentToFileShareDetailsFragment(
-                            fileId = file.id, ignoreCreateFolderStack = true
-                        )
-                    )
+                    lifecycleScope.launch(Dispatchers.IO) {
+
+                        FileController.addFileTo(newFolderViewModel.currentFolderId.value!!, file)
+
+                        if (isResumed) {
+                            withContext(Dispatchers.Main) {
+                                safeNavigate(
+                                    CreateDropBoxFolderFragmentDirections.actionCreateDropBoxFolderFragmentToFileShareDetailsFragment(
+                                        fileId = file.id, ignoreCreateFolderStack = true
+                                    )
+                                )
+                            }
+                        }
+                    }
                 }
             }, onError = { translatedError ->
                 requireActivity().showSnackbar(translatedError)

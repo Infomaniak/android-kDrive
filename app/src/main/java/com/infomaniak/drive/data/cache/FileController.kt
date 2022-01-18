@@ -348,7 +348,7 @@ object FileController {
 
     fun getFileDetails(fileId: Int, userDrive: UserDrive): File? {
         return getRealmInstance(userDrive).use { realm ->
-            val apiResponse = ApiRepository.getFileDetails(File(id = fileId, driveId = userDrive.driveId))
+            val apiResponse = ApiRepository.getFileDetails(fileId, userDrive.driveId)
             if (apiResponse.isSuccess()) {
                 apiResponse.data?.let { remoteFile ->
                     insertOrUpdateFile(realm, remoteFile, getFileProxyById(fileId, customRealm = realm))
