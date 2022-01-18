@@ -31,7 +31,7 @@ class ColorFolderAdapter(
     private val onColorSelected: (color: String) -> Unit
 ) : RecyclerView.Adapter<ViewHolder>() {
 
-    var selectedPosition = 0
+    var selectedPosition = -1
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.view_color_round_button, parent, false))
@@ -45,13 +45,7 @@ class ColorFolderAdapter(
         backgroundTintList = color
         iconTint = if (position == selectedPosition) white else color
 
-        setOnClickListener {
-            iconTint = white
-            val previousSelectedPosition = selectedPosition
-            selectedPosition = position
-            notifyItemChanged(previousSelectedPosition)
-            onColorSelected(COLORS[position])
-        }
+        setOnClickListener { onColorSelected(COLORS[position]) }
     }
 
     companion object {
