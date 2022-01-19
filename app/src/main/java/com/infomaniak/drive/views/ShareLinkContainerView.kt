@@ -45,21 +45,33 @@ class ShareLinkContainerView @JvmOverloads constructor(
     fun setup(
         file: File,
         shareLink: ShareLink? = null,
-        onTitleClicked: (shareLink: ShareLink?, currentFileId: Int) -> Unit,
-        onSettingsClicked: (shareLink: ShareLink, currentFile: File) -> Unit
+        onTitleClicked: ((shareLink: ShareLink?, currentFileId: Int) -> Unit)? = null,
+        onSettingsClicked: ((shareLink: ShareLink, currentFile: File) -> Unit)? = null,
     ) {
         currentFile = file
         this.shareLink = shareLink
         isVisible = true
         urlValue = file.shareLink ?: ""
 
+        if (file.isDropBox()) {
+            setDropBoxUi()
+            return
+        }
+
         updateUi()
 
-        titleContainer.setOnClickListener { onTitleClicked(this.shareLink, currentFile.id) }
+        titleContainer.setOnClickListener { onTitleClicked?.invoke(this.shareLink, currentFile.id) }
         // cannot be null, if null, settings will not appear
-        shareLinkSettings.setOnClickListener { onSettingsClicked(this.shareLink!!, currentFile) }
-
+        shareLinkSettings.setOnClickListener { onSettingsClicked?.invoke(this.shareLink!!, currentFile) }
         shareLinkButton.setOnClickListener { this.shareLink?.url?.let(context::shareText) }
+    }
+
+    private fun setDropBoxUi() {
+        shareLinkIcon.setImageResource(R.drawable.ic_folder_dropbox)
+        shareLinkTitle.setText(R.string.dropboxSharedLinkTitle)
+        shareLinkSwitch.isGone = true
+        shareLinkBottomContainer.isGone = true
+        shareLinkStatus.setText(R.string.dropboxSharedLinkDescription)
     }
 
     fun update(shareLink: ShareLink? = null) {

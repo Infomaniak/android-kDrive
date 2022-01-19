@@ -95,8 +95,15 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
                 mainViewModel.createDropBoxFolder(file, emailWhenFinished, limitFileSize, password, validUntil)
                     .observe(viewLifecycleOwner) { apiResponse ->
                         when (apiResponse?.result) {
-                            ApiResponse.Status.SUCCESS -> apiResponse.data?.let { onDropBoxCreated(file, it) }
-                            else -> onError(getString(apiResponse.translateError()))
+                            ApiResponse.Status.SUCCESS -> {
+                                apiResponse.data?.let { dropBox ->
+                                    file.collaborativeFolder = dropBox.url
+                                    onDropBoxCreated(file, dropBox)
+                                }
+                            }
+                            else -> {
+                                onError(getString(apiResponse.translateError()))
+                            }
                         }
                     }
             }

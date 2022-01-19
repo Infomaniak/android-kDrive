@@ -183,11 +183,22 @@ class FileShareDetailsFragment : Fragment() {
     }
 
     private fun setupShareLinkContainer(file: File, shareLink: ShareLink? = null) {
-        if (file.rights?.canBecomeLink == true || file.shareLink?.isNotBlank() == true) {
-            showShareLinkView(file, shareLink)
-        } else {
-            hideShareLinkView()
+        when {
+            file.isDropBox() -> {
+                showDropBoxShareLinkView(file)
+            }
+            file.rights?.canBecomeLink == true || file.shareLink?.isNotBlank() == true -> {
+                showShareLinkView(file, shareLink)
+            }
+            else -> {
+                hideShareLinkView()
+            }
         }
+    }
+
+    private fun showDropBoxShareLinkView(file: File) {
+        shareLinkLayout.isVisible = true
+        shareLinkContainer.setup(file)
     }
 
     private fun showShareLinkView(file: File, shareLink: ShareLink?) {
