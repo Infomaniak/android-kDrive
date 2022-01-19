@@ -68,7 +68,7 @@ class FileShareLinkSettingsFragment : Fragment() {
 
         shareLink.validUntil?.let { defaultCalendarTimestamp = it }
 
-        getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.SELECT_PERMISSION_NAV_KEY) { bundle ->
+        getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.OFFICE_EDITING_RIGHTS_NAV_KEY) { bundle ->
             officePermission = bundle.getParcelable(PERMISSION_BUNDLE_KEY)!!
             shareLink.canEdit = officePermission.apiValue
             setupShareLinkSettingsUi()

@@ -105,7 +105,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
             )
         }
 
-        getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.SELECT_PERMISSION_NAV_KEY) { bundle ->
+        getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.ADD_USERS_RIGHTS_NAV_KEY) { bundle ->
             selectedPermission = bundle.getParcelable(PERMISSION_BUNDLE_KEY)!!
         }
 

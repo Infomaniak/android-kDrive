@@ -96,7 +96,7 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
     }
 
     private fun setBackActionHandlers() {
-        getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.SELECT_PERMISSION_NAV_KEY) { bundle ->
+        getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.SHARE_LINK_ACCESS_NAV_KEY) { bundle ->
             val permission = bundle.getParcelable<Permission>(SelectPermissionBottomSheetDialog.PERMISSION_BUNDLE_KEY)
             val isPublic = isPublicPermission(permission)
             fileDetailsViewModel.currentFile.value?.let { currentFile ->
@@ -146,30 +146,30 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
             shareLinkContainer.setup(
                 shareLink = share?.link,
                 file = file,
-                onTitleClicked = { shareLink, currentFileId ->
-                    this.shareLink = shareLink
+                onTitleClicked = { newShareLink, currentFileId ->
+                    shareLink = newShareLink
                     val (permissionsGroup, currentPermission) = selectPermissions(
-                        file.isFolder(),
-                        file.onlyoffice,
-                        shareLink != null
+                        isFolder = file.isFolder(),
+                        isOnlyOffice = file.onlyoffice,
+                        shareLinkExist = newShareLink != null,
                     )
                     findNavController().navigate(
                         FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectPermissionBottomSheetDialog(
                             currentFileId = currentFileId,
                             currentPermission = currentPermission,
-                            permissionsGroup = permissionsGroup
+                            permissionsGroup = permissionsGroup,
                         )
                     )
                 },
-                onSettingsClicked = { shareLink, currentFile ->
-                    this.shareLink = shareLink
+                onSettingsClicked = { newShareLink, currentFile ->
+                    shareLink = newShareLink
                     findNavController().navigate(
                         FileDetailsFragmentDirections.actionFileDetailsFragmentToFileShareLinkSettings(
                             fileId = currentFile.id,
                             driveId = currentFile.driveId,
-                            shareLink = this.shareLink!!, // cannot be null, if null, settings will not appear
+                            shareLink = newShareLink,
                             isOnlyOfficeFile = currentFile.onlyoffice,
-                            isFolder = currentFile.isFolder()
+                            isFolder = currentFile.isFolder(),
                         )
                     )
                 })

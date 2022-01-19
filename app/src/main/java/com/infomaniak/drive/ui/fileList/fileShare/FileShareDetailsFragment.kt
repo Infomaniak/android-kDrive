@@ -36,9 +36,9 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
-import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSIONS_GROUP_BUNDLE_KEY
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.SHAREABLE_BUNDLE_KEY
+import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.PermissionsGroup
 import com.infomaniak.drive.ui.fileList.fileDetails.FileDetailsInfosFragment
 import com.infomaniak.drive.ui.fileList.fileShare.FileShareAddUserDialog.Companion.SHARE_SELECTION_KEY
 import com.infomaniak.drive.utils.*
@@ -89,52 +89,8 @@ class FileShareDetailsFragment : Fragment() {
         sharedUsersTitle.isGone = true
         setupShareLinkContainer(currentFile, null)
         refreshUi()
-
-        getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.SELECT_PERMISSION_NAV_KEY) { bundle ->
-            val permission = bundle.getParcelable<Permission>(PERMISSION_BUNDLE_KEY)
-            val shareable = bundle.getParcelable<Shareable>(SHAREABLE_BUNDLE_KEY)
-            val permissionsType =
-                bundle.getParcelable<SelectPermissionBottomSheetDialog.PermissionsGroup>(PERMISSIONS_GROUP_BUNDLE_KEY)
-
-            // Determine if we come back from users permission selection or share link office
-            if (permissionsType == SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_FILE_SETTINGS ||
-                permissionsType == SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_FOLDER_SETTINGS
-            ) {
-                val isPublic = FileDetailsInfosFragment.isPublicPermission(permission)
-
-                fileShareViewModel.currentFile.value?.let { currentFile ->
-                    if ((isPublic && shareLink == null) || (!isPublic && shareLink != null)) {
-                        mainViewModel.apply {
-                            if (isPublic) createShareLink(currentFile) else deleteShareLink(currentFile)
-                        }
-                    }
-                }
-            } else {
-                shareable?.let { shareableItem ->
-                    if (permission == Shareable.ShareablePermission.DELETE) {
-                        sharedItemsAdapter.removeItem(shareableItem)
-                        availableShareableItemsAdapter.removeFromNotShareables(shareableItem)
-                    } else {
-                        sharedItemsAdapter.updateItemPermission(shareableItem, permission as Shareable.ShareablePermission)
-                    }
-                }
-            }
-        }
-
-        getBackNavigationResult<ShareableItems>(SHARE_SELECTION_KEY) { (users, emails, teams, invitations) ->
-            sharedItemsAdapter.putAll(ArrayList(invitations + teams + users))
-            refreshUi()
-        }
-
-        toolbar.setNavigationOnClickListener {
-            onBackPressed()
-        }
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            onBackPressed()
-        }
-        closeButton.setOnClickListener {
-            onBackPressed()
-        }
+        setBackActionHandlers()
+        setBackPressedHandlers()
     }
 
     override fun onResume() {
@@ -169,6 +125,46 @@ class FileShareDetailsFragment : Fragment() {
         }
     }
 
+    private fun setBackActionHandlers() {
+        getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.SHARE_LINK_ACCESS_NAV_KEY) { bundle ->
+            val permission = bundle.getParcelable<Permission>(PERMISSION_BUNDLE_KEY)
+            val isPublic = FileDetailsInfosFragment.isPublicPermission(permission)
+            fileShareViewModel.currentFile.value?.let { currentFile ->
+                if (isPublic && shareLink == null) {
+                    createShareLink(currentFile)
+                } else if (!isPublic && shareLink != null) {
+                    deleteShareLink(currentFile)
+                }
+            }
+        }
+
+        getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.UPDATE_USERS_RIGHTS_NAV_KEY) { bundle ->
+            with(bundle) {
+                val permission = getParcelable<Permission>(PERMISSION_BUNDLE_KEY)
+                val shareable = getParcelable<Shareable>(SHAREABLE_BUNDLE_KEY)
+                shareable?.let { shareableItem ->
+                    if (permission == Shareable.ShareablePermission.DELETE) {
+                        sharedItemsAdapter.removeItem(shareableItem)
+                        availableShareableItemsAdapter.removeFromNotShareables(shareableItem)
+                    } else {
+                        sharedItemsAdapter.updateItemPermission(shareableItem, permission as Shareable.ShareablePermission)
+                    }
+                }
+            }
+        }
+
+        getBackNavigationResult<ShareableItems>(SHARE_SELECTION_KEY) { (users, _, teams, invitations) ->
+            sharedItemsAdapter.putAll(ArrayList(invitations + teams + users))
+            refreshUi()
+        }
+    }
+
+    private fun setBackPressedHandlers() {
+        toolbar.setNavigationOnClickListener { onBackPressed() }
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { onBackPressed() }
+        closeButton.setOnClickListener { onBackPressed() }
+    }
+
     private fun onBackPressed() {
         view?.hideKeyboard()
         Utils.ignoreCreateFolderBackStack(findNavController(), navigationArgs.ignoreCreateFolderStack)
@@ -184,15 +180,15 @@ class FileShareDetailsFragment : Fragment() {
                 onTitleClicked = { newShareLink, currentFileId ->
                     this.shareLink = newShareLink
                     val (permissionsGroup, currentPermission) = FileDetailsInfosFragment.selectPermissions(
-                        file.isFolder(),
-                        file.onlyoffice,
-                        this.shareLink != null
+                        isFolder = file.isFolder(),
+                        isOnlyOffice = file.onlyoffice,
+                        shareLinkExist = this.shareLink != null,
                     )
                     safeNavigate(
                         FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToSelectPermissionBottomSheetDialog(
                             currentFileId = currentFileId,
                             currentPermission = currentPermission,
-                            permissionsGroup = permissionsGroup
+                            permissionsGroup = permissionsGroup,
                         )
                     )
                 },
@@ -204,7 +200,7 @@ class FileShareDetailsFragment : Fragment() {
                             driveId = currentFile.driveId,
                             shareLink = newShareLink,
                             isOnlyOfficeFile = currentFile.onlyoffice,
-                            isFolder = currentFile.isFolder()
+                            isFolder = currentFile.isFolder(),
                         )
                     )
                 })
@@ -216,30 +212,30 @@ class FileShareDetailsFragment : Fragment() {
 
     private fun createShareLink(currentFile: File) {
         mainViewModel.postFileShareLink(currentFile).observe(viewLifecycleOwner) { apiResponse ->
-            if (apiResponse.isSuccess())
+            if (apiResponse.isSuccess()) {
                 shareLinkContainer.update(apiResponse.data)
-            else
+            } else {
                 requireActivity().showSnackbar(getString(R.string.errorShareLink))
+            }
         }
     }
 
     private fun deleteShareLink(currentFile: File) {
         mainViewModel.deleteFileShareLink(currentFile).observe(viewLifecycleOwner) { apiResponse ->
             val success = apiResponse.data == true
-            if (success)
+            if (success) {
                 shareLinkContainer.update(null)
-            else
+            } else {
                 requireActivity().showSnackbar(apiResponse.translateError())
+            }
         }
     }
 
     private fun openSelectPermissionDialog(shareable: Shareable) {
 
         val permissionsGroup = when {
-            shareable is Invitation || (shareable is DriveUser && shareable.isExternalUser()) ->
-                SelectPermissionBottomSheetDialog.PermissionsGroup.EXTERNAL_USERS_RIGHTS
-            else ->
-                SelectPermissionBottomSheetDialog.PermissionsGroup.USERS_RIGHTS
+            shareable is Invitation || (shareable is DriveUser && shareable.isExternalUser()) -> PermissionsGroup.EXTERNAL_USERS_RIGHTS
+            else -> PermissionsGroup.USERS_RIGHTS
         }
 
         safeNavigate(
@@ -252,13 +248,13 @@ class FileShareDetailsFragment : Fragment() {
         )
     }
 
-    private fun openAddUserDialog(element: Shareable) {
+    private fun openAddUserDialog(element: Shareable) = with(availableShareableItemsAdapter) {
         safeNavigate(
             FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToFileShareAddUserDialog(
                 sharedItem = element,
-                notShareableUserIds = availableShareableItemsAdapter.notShareableUserIds.toIntArray(),
-                notShareableEmails = availableShareableItemsAdapter.notShareableEmails.toTypedArray(),
-                notShareableTeamIds = availableShareableItemsAdapter.notShareableTeamIds.toIntArray()
+                notShareableUserIds = notShareableUserIds.toIntArray(),
+                notShareableEmails = notShareableEmails.toTypedArray(),
+                notShareableTeamIds = notShareableTeamIds.toIntArray()
             )
         )
     }
