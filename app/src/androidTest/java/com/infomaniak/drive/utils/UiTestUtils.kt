@@ -67,9 +67,9 @@ object UiTestUtils {
             permissionsRecyclerView.getChildByText(
                 UiSelector().resourceId(getViewIdentifier("permissionCard")),
                 context.getString(R.string.createFolderMeOnly)
-            ).apply {
+            ).run {
                 permissionsRecyclerView.scrollIntoView(this)
-                this.click()
+                click()
             }
             getChildByText(
                 UiSelector().resourceId(getViewIdentifier("createFolderButton")),
