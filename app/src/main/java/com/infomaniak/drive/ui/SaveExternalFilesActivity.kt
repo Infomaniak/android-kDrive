@@ -43,6 +43,7 @@ import com.infomaniak.drive.ui.menu.settings.SelectDriveDialog
 import com.infomaniak.drive.ui.menu.settings.SelectDriveViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.*
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -56,6 +57,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private val selectDriveViewModel: SelectDriveViewModel by viewModels()
     private val saveExternalFilesViewModel: SaveExternalFilesViewModel by viewModels()
+    private lateinit var saveExternalUriAdapter: SaveExternalUriAdapter
 
     private val sharedFolder: java.io.File by lazy {
         java.io.File(cacheDir, SHARED_FILE_FOLDER).apply { if (!exists()) mkdirs() }
@@ -246,10 +248,24 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private fun handleSendMultiple() {
         val uris = intent.getParcelableArrayListExtra<Parcelable>(Intent.EXTRA_STREAM)?.map { it as Uri } ?: arrayListOf()
-        fileNames.adapter = SaveExternalUriAdapter(uris as ArrayList<Uri>)
-        isMultiple = true
 
+        saveExternalUriAdapter = SaveExternalUriAdapter(uris as ArrayList<Uri>, onItemClicked = { position, file ->
+            Utils.createPromptNameDialog(
+                context = this,
+                title = R.string.buttonRename,
+                fieldName = R.string.hintInputFileName,
+                positiveButton = R.string.buttonSave,
+                fieldValue = file.name,
+                selectedRange = file.getFileName().count()
+            ) { dialog, name ->
+                saveExternalUriAdapter.updateFileName(position, name)
+                dialog.dismiss()
+            }
+        })
+
+        fileNames.adapter = saveExternalUriAdapter
         fileNames.isVisible = true
+        isMultiple = true
         checkEnabledSaveButton()
     }
 
@@ -281,8 +297,8 @@ class SaveExternalFilesActivity : BaseActivity() {
             when {
                 isMultiple -> {
                     val adapter = fileNames.adapter as SaveExternalUriAdapter
-                    adapter.uris.forEach { currentUri ->
-                        if (!store(uri = currentUri, userId = userId, driveId = driveId, folderId = folderId)) return false
+                    adapter.uris.forEach { uri ->
+                        if (!store(uri, saveExternalUriAdapter.getFileName(uri), userId, driveId, folderId)) return false
                     }
                     true
                 }
@@ -338,11 +354,10 @@ class SaveExternalFilesActivity : BaseActivity() {
         return false
     }
 
-    private fun store(uri: Uri, name: String? = null, userId: Int, driveId: Int, folderId: Int): Boolean {
+    private fun store(uri: Uri, fileName: String?, userId: Int, driveId: Int, folderId: Int): Boolean {
         contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
-                val fileName = name ?: SyncUtils.getFileName(cursor)
                 val fileSize = SyncUtils.getFileSize(cursor)
 
                 try {

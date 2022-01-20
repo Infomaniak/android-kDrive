@@ -87,7 +87,7 @@
             app:layout_constraintStart_toEndOf="@id/start"
             app:layout_constraintTop_toBottomOf="@id/fileNameEditLayout"
             tools:itemCount="3"
-            tools:listitem="@layout/item_file_name"
+            tools:listitem="@layout/cardview_file_list"
             tools:visibility="visible" />
 
         <TextView

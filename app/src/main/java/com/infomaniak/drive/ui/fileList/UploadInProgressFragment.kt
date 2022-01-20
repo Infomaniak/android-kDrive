@@ -48,7 +48,6 @@ import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.fragment_file_list.toolbar
 import kotlinx.android.synthetic.main.fragment_new_folder.*
 import kotlinx.android.synthetic.main.item_file.*
-import kotlinx.android.synthetic.main.item_file_name.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

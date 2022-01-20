@@ -52,7 +52,6 @@ import kotlinx.android.synthetic.main.fragment_menu.view.*
 import kotlinx.android.synthetic.main.fragment_preview_slider.*
 import kotlinx.android.synthetic.main.fragment_preview_slider.view.*
 import kotlinx.android.synthetic.main.item_file.view.*
-import kotlinx.android.synthetic.main.item_file_name.view.*
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.android.synthetic.main.view_share_link_container.view.*
 import kotlinx.android.synthetic.main.view_url_display.view.*
