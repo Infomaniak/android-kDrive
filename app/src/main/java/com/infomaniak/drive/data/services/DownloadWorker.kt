@@ -45,7 +45,6 @@ import okhttp3.Request
 import okhttp3.Response
 import java.io.BufferedInputStream
 
-
 class DownloadWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
 
     private var notificationManagerCompat: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)

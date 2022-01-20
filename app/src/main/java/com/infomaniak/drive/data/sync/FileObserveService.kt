@@ -34,7 +34,6 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import io.sentry.Sentry
 import kotlinx.coroutines.*
 
-
 class FileObserveService : Service() {
     private lateinit var tableObserver: TableObserver
     private var syncJob: Job? = null

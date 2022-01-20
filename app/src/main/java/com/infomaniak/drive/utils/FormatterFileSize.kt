@@ -22,7 +22,6 @@ import android.content.res.Resources
 import android.text.format.Formatter
 import kotlin.math.roundToLong
 
-
 object FormatterFileSize {
 
     private const val FLAG_SHORTER = 1 shl 0
@@ -119,5 +118,4 @@ object FormatterFileSize {
         val units = res.getString(suffix)
         return BytesResult(roundedString, units, roundedBytes)
     }
-
 }

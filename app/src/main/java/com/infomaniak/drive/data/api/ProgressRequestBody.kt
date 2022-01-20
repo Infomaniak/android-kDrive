@@ -25,7 +25,6 @@ import okio.buffer
 import okio.sink
 import java.io.IOException
 
-
 class ProgressRequestBody(
     private val requestBody: RequestBody,
     private val onProgress: (currentBytes: Int, bytesWritten: Long, contentLength: Long) -> Unit
