@@ -32,6 +32,8 @@ import com.infomaniak.drive.utils.isKeyguardSecure
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.matomo.sdk.extra.MatomoApplication
+import org.matomo.sdk.extra.TrackHelper
 
 class LaunchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,6 +65,7 @@ class LaunchActivity : AppCompatActivity() {
                 }
             }
         }
+        TrackHelper.track().screen("/LaunchActivity").title("Launch").with((application as MatomoApplication).tracker)
     }
 
     override fun onPause() {

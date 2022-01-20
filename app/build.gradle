@@ -94,6 +94,8 @@ sentry {
 }
 
 dependencies {
+    implementation 'com.github.matomo-org:matomo-sdk-android:4.1.4'
+
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation project(path: ':Core')
 

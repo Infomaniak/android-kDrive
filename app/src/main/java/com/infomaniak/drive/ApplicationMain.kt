@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive
 
-import android.app.Application
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
@@ -62,9 +61,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import org.eclipse.paho.client.mqttv3.*
+import org.matomo.sdk.TrackerBuilder
+import org.matomo.sdk.extra.DownloadTracker.Extra
+import org.matomo.sdk.extra.MatomoApplication
+import org.matomo.sdk.extra.TrackHelper
 import java.util.*
 
-class ApplicationMain : Application(), ImageLoaderFactory {
+
+class ApplicationMain : MatomoApplication(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
@@ -113,7 +118,12 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         initNotificationChannel()
         HttpClient.init(tokenInterceptorListener())
         MqttClientWrapper.init(applicationContext)
+
+        onInitTracker()
     }
+
+    override fun onCreateTrackerConfig() =
+        TrackerBuilder("https://analytics.infomaniak.com/matomo.php", 8, "AndroidTracker")
 
     override fun newImageLoader(): ImageLoader {
         return ImageLoader.Builder(applicationContext)
@@ -167,6 +177,12 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         override suspend fun getApiToken(): ApiToken {
             return AccountUtils.currentUser!!.apiToken
         }
+    }
+
+    private fun onInitTracker() {
+        tracker.userId = AccountUtils.currentUserId.toString()
+        TrackHelper.track().download().identifier(Extra.ApkChecksum(this)).with(tracker)
+        TrackHelper.track().screen("/ApplicationMain").title("Application").with(tracker)
     }
 
 }
