@@ -142,17 +142,18 @@ class ApiRepositoryTest : KDriveTest() {
     @Test
     fun manageTestFileCommentLifeCycle() {
         // Get comments
-        getFileComments(testFile, 1).also {
-            assertApiResponse(it)
-            Assert.assertTrue("Test file should not have comments", it.data.isNullOrEmpty())
+        with(getFileComments(testFile, 1)) {
+            assertApiResponse(this)
+            Assert.assertTrue("Test file should not have comments", data.isNullOrEmpty())
         }
 
         // Post 2 comments
         val commentBody = "Hello world"
-        val commentID = postFileComment(testFile, commentBody).also {
+        val commentID = postFileComment(testFile, commentBody).let {
             assertApiResponse(it)
             Assert.assertEquals(commentBody, it.data?.body)
-        }.data!!.id
+            it.data!!.id
+        }
 
         val commentID2 = postFileComment(testFile, commentBody).also { assertApiResponse(it) }.data!!.id
         Assert.assertNotEquals("Comments id should be different", commentID, commentID2)

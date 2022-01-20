@@ -224,11 +224,10 @@ class FileControllerTest : KDriveTest() {
         val file = createFileForTest()
         val newName = "renamed file"
         assertApiResponse(renameFile(file, newName))
-        val lastModifiedFilesResponse = getLastModifiedFiles(userDrive.driveId)
-        lastModifiedFilesResponse.also {
-            assertApiResponse(it)
-            Assert.assertEquals("Last modified file should have id ${file.id}", file.id, it.data!!.first().id)
-            Assert.assertEquals("File should be named '$newName'", newName, it.data!!.first().name)
+        with(getLastModifiedFiles(userDrive.driveId)) {
+            assertApiResponse(this)
+            Assert.assertEquals("Last modified file should have id ${file.id}", file.id, data!!.first().id)
+            Assert.assertEquals("File should be named '$newName'", newName, data!!.first().name)
         }
         deleteTestFile(file)
     }
