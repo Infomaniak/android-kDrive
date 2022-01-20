@@ -27,11 +27,14 @@ import kotlinx.android.synthetic.main.fragment_preview_others.*
 class PreviewOtherFragment : PreviewFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return if (noFileFound()) null else inflater.inflate(R.layout.fragment_preview_others, container, false)
+        return inflater.inflate(R.layout.fragment_preview_others, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        if (noCurrentFile()) return
+
         container?.layoutTransition?.setAnimateParentHierarchy(false)
 
         fileIcon.setImageResource(file.getFileType().icon)

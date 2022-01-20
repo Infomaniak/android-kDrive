@@ -18,10 +18,12 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.os.Bundle
+import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
@@ -37,7 +39,7 @@ open class PreviewFragment : Fragment() {
     private val previewViewModel: PreviewViewModel by viewModels()
     protected val previewSliderViewModel: PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         if (previewViewModel.currentFile == null) {
 
             arguments?.let {
@@ -47,8 +49,11 @@ open class PreviewFragment : Fragment() {
                 }
             }
         }
-        previewViewModel.currentFile?.let { file = it } ?: run { findNavController().popBackStack() }
-        super.onCreate(savedInstanceState)
+
+        previewViewModel.currentFile?.let { file = it }
+            ?: lifecycleScope.launchWhenResumed { findNavController().popBackStack() }
+
+        super.onViewCreated(view, savedInstanceState)
     }
 
     private fun getCurrentFile(fileId: Int) = try {
@@ -67,7 +72,7 @@ open class PreviewFragment : Fragment() {
         null
     }
 
-    protected fun noFileFound() = previewViewModel.currentFile == null
+    protected fun noCurrentFile() = previewViewModel.currentFile == null
 
     protected class PreviewViewModel : ViewModel() {
         var currentFile: File? = null

@@ -50,11 +50,14 @@ open class PreviewVideoFragment : PreviewFragment() {
     private lateinit var exoPlayer: ExoPlayer
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return if (noFileFound()) null else inflater.inflate(R.layout.fragment_preview_video, container, false)
+        return inflater.inflate(R.layout.fragment_preview_video, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        if (noCurrentFile()) return
+
         fileIcon.setImageResource(file.getFileType().icon)
         container?.layoutTransition?.setAnimateParentHierarchy(false)
         fileName.text = file.name
