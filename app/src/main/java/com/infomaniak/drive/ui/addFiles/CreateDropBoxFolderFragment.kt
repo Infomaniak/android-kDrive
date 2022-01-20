@@ -147,7 +147,6 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
         val password = passwordTextInput.text.toString()
         val limitFileSize = Utils.convertGigaByteToBytes(limitStorageValue.text.toString().toLongOrDefault(1))
 
-
         createFolder(false) { file, _ ->
             file?.let {
                 mainViewModel.createDropBoxFolder(file, emailWhenFinished, limitFileSize, password, validUntil)

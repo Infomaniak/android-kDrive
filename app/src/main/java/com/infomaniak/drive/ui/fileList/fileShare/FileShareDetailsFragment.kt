@@ -67,27 +67,10 @@ class FileShareDetailsFragment : Fragment() {
                 return
             }
 
-        allUserList = AccountUtils.getCurrentDrive().getDriveUsers()
-        allTeams = DriveInfosController.getTeams(AccountUtils.getCurrentDrive()!!)
-
-        fileShareViewModel.availableShareableItems.value = ArrayList(allUserList)
-        availableShareableItemsAdapter =
-            userAutoCompleteTextView.setupAvailableShareableItems(
-                context = requireContext(),
-                itemList = allUserList
-            ) { selectedElement ->
-                userAutoCompleteTextView.setText("")
-                openAddUserDialog(selectedElement)
-            }
-        availableShareableItemsAdapter.notShareableUserIds.addAll(currentFile.users)
-
-        fileShareCollapsingToolbarLayout.title = getString(
-            if (currentFile.type == File.Type.FOLDER.value) R.string.fileShareDetailsFolderTitle else R.string.fileShareDetailsFileTitle,
-            currentFile.name
-        )
-
+        setAvailableShareableItems(currentFile)
+        setToolbarTitle(currentFile)
         sharedUsersTitle.isGone = true
-        setupShareLinkContainer(currentFile, null)
+        setupShareLinkContainer(currentFile)
         refreshUi()
         setBackActionHandlers()
         setBackPressedHandlers()
@@ -97,6 +80,33 @@ class FileShareDetailsFragment : Fragment() {
         super.onResume()
         // Fix the popBackStack in onViewCreated because onResume is still called
         if (findNavController().currentDestination?.id != R.id.fileShareDetailsFragment) return
+    }
+
+    private fun setAvailableShareableItems(currentFile: File) {
+        allUserList = AccountUtils.getCurrentDrive().getDriveUsers()
+        allTeams = DriveInfosController.getTeams(AccountUtils.getCurrentDrive()!!)
+
+        fileShareViewModel.availableShareableItems.value = ArrayList(allUserList)
+        availableShareableItemsAdapter = userAutoCompleteTextView.setupAvailableShareableItems(
+            context = requireContext(),
+            itemList = allUserList,
+            onDataPassed = { selectedElement ->
+                userAutoCompleteTextView.setText("")
+                openAddUserDialog(selectedElement)
+            },
+        )
+        availableShareableItemsAdapter.notShareableUserIds.addAll(currentFile.users)
+    }
+
+    private fun setToolbarTitle(currentFile: File) {
+        fileShareCollapsingToolbarLayout.title = getString(
+            if (currentFile.type == File.Type.FOLDER.value) {
+                R.string.fileShareDetailsFolderTitle
+            } else {
+                R.string.fileShareDetailsFileTitle
+            },
+            currentFile.name,
+        )
     }
 
     private fun refreshUi() {
@@ -170,44 +180,50 @@ class FileShareDetailsFragment : Fragment() {
         Utils.ignoreCreateFolderBackStack(findNavController(), navigationArgs.ignoreCreateFolderStack)
     }
 
-    private fun setupShareLinkContainer(file: File, shareLink: ShareLink?) {
-
+    private fun setupShareLinkContainer(file: File, shareLink: ShareLink? = null) {
         if (file.rights?.canBecomeLink == true || file.shareLink?.isNotBlank() == true) {
-            shareLinkLayout.isVisible = true
-            shareLinkContainer.setup(
-                shareLink = shareLink,
-                file = file,
-                onTitleClicked = { newShareLink, currentFileId ->
-                    this.shareLink = newShareLink
-                    val (permissionsGroup, currentPermission) = FileDetailsInfosFragment.selectPermissions(
-                        isFolder = file.isFolder(),
-                        isOnlyOffice = file.onlyoffice,
-                        shareLinkExist = this.shareLink != null,
-                    )
-                    safeNavigate(
-                        FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToSelectPermissionBottomSheetDialog(
-                            currentFileId = currentFileId,
-                            currentPermission = currentPermission,
-                            permissionsGroup = permissionsGroup,
-                        )
-                    )
-                },
-                onSettingsClicked = { newShareLink, currentFile ->
-                    this.shareLink = newShareLink
-                    safeNavigate(
-                        FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToFileShareLinkSettings(
-                            fileId = currentFile.id,
-                            driveId = currentFile.driveId,
-                            shareLink = newShareLink,
-                            isOnlyOfficeFile = currentFile.onlyoffice,
-                            isFolder = currentFile.isFolder(),
-                        )
-                    )
-                })
-
+            showShareLinkView(file, shareLink)
         } else {
-            shareLinkLayout.isGone = true
+            hideShareLinkView()
         }
+    }
+
+    private fun showShareLinkView(file: File, shareLink: ShareLink?) {
+        shareLinkLayout.isVisible = true
+        shareLinkContainer.setup(
+            file = file,
+            shareLink = shareLink,
+            onTitleClicked = { newShareLink, currentFileId ->
+                this.shareLink = newShareLink
+                val (permissionsGroup, currentPermission) = FileDetailsInfosFragment.selectPermissions(
+                    isFolder = file.isFolder(),
+                    isOnlyOffice = file.onlyoffice,
+                    shareLinkExist = this.shareLink != null,
+                )
+                safeNavigate(
+                    FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToSelectPermissionBottomSheetDialog(
+                        currentFileId = currentFileId,
+                        currentPermission = currentPermission,
+                        permissionsGroup = permissionsGroup,
+                    )
+                )
+            },
+            onSettingsClicked = { newShareLink, currentFile ->
+                this.shareLink = newShareLink
+                safeNavigate(
+                    FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToFileShareLinkSettings(
+                        fileId = currentFile.id,
+                        driveId = currentFile.driveId,
+                        shareLink = newShareLink,
+                        isOnlyOfficeFile = currentFile.onlyoffice,
+                        isFolder = currentFile.isFolder(),
+                    )
+                )
+            })
+    }
+
+    private fun hideShareLinkView() {
+        shareLinkLayout.isGone = true
     }
 
     private fun createShareLink(currentFile: File) {
@@ -234,8 +250,12 @@ class FileShareDetailsFragment : Fragment() {
     private fun openSelectPermissionDialog(shareable: Shareable) {
 
         val permissionsGroup = when {
-            shareable is Invitation || (shareable is DriveUser && shareable.isExternalUser()) -> PermissionsGroup.EXTERNAL_USERS_RIGHTS
-            else -> PermissionsGroup.USERS_RIGHTS
+            shareable is Invitation || (shareable is DriveUser && shareable.isExternalUser()) -> {
+                PermissionsGroup.EXTERNAL_USERS_RIGHTS
+            }
+            else -> {
+                PermissionsGroup.USERS_RIGHTS
+            }
         }
 
         safeNavigate(
@@ -243,7 +263,7 @@ class FileShareDetailsFragment : Fragment() {
                 currentShareable = shareable,
                 currentFileId = fileShareViewModel.currentFile.value?.id!!,
                 currentPermission = shareable.getFilePermission(),
-                permissionsGroup = permissionsGroup
+                permissionsGroup = permissionsGroup,
             )
         )
     }
@@ -254,7 +274,7 @@ class FileShareDetailsFragment : Fragment() {
                 sharedItem = element,
                 notShareableUserIds = notShareableUserIds.toIntArray(),
                 notShareableEmails = notShareableEmails.toTypedArray(),
-                notShareableTeamIds = notShareableTeamIds.toIntArray()
+                notShareableTeamIds = notShareableTeamIds.toIntArray(),
             )
         )
     }

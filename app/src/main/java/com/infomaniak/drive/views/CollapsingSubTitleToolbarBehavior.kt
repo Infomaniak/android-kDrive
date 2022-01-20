@@ -35,7 +35,6 @@ import kotlinx.android.synthetic.main.fragment_file_details.view.*
 import kotlinx.android.synthetic.main.view_subtitle_toolbar.view.*
 import kotlin.math.abs
 
-
 class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(
     private val context: Context,
     attrs: AttributeSet? = null

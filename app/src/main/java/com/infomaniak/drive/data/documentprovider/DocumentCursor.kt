@@ -30,7 +30,6 @@ class DocumentCursor(projection: Array<out String>?) : MatrixCursor(projection) 
 
     val job: Job = Job()
 
-
     override fun getExtras(): Bundle {
         return _extras
     }

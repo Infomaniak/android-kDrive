@@ -37,13 +37,10 @@ class SharedItemsAdapter(
     private val onItemClicked: (item: Shareable) -> Unit
 ) : RecyclerView.Adapter<ViewHolder>() {
 
-    var itemList: ArrayList<Shareable> = ArrayList()
+    private var itemList: ArrayList<Shareable> = ArrayList()
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(
-            LayoutInflater.from(parent.context).inflate(R.layout.item_shareable_item, parent, false)
-        )
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
+        ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_shareable_item, parent, false))
 
     override fun getItemCount() = itemList.size
 

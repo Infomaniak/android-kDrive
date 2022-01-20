@@ -23,7 +23,10 @@ import androidx.collection.arrayMapOf
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.File.SortType
+import com.infomaniak.drive.data.models.File.Type
 import com.infomaniak.drive.data.models.FileActivity
+import com.infomaniak.drive.data.models.FileActivity.FileActivityType
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.KDriveHttpClient
@@ -332,11 +335,7 @@ object FileController {
         }
     }
 
-    fun getFilesFromCache(
-        folderID: Int,
-        userDrive: UserDrive? = null,
-        order: File.SortType = File.SortType.NAME_AZ
-    ): ArrayList<File> {
+    fun getFilesFromCache(folderID: Int, userDrive: UserDrive? = null, order: SortType = SortType.NAME_AZ): ArrayList<File> {
         return getRealmInstance(userDrive).use { currentRealm ->
             currentRealm
                 .where(File::class.java)
@@ -364,7 +363,7 @@ object FileController {
     fun getCloudStorageFiles(
         parentId: Int,
         userDrive: UserDrive,
-        sortType: File.SortType,
+        sortType: SortType,
         page: Int = 1,
         transaction: (files: ArrayList<File>) -> Unit
     ) {
@@ -382,7 +381,7 @@ object FileController {
 
     suspend fun getMySharedFiles(
         userDrive: UserDrive,
-        sortType: File.SortType,
+        sortType: SortType,
         page: Int = 1,
         ignoreCloud: Boolean = false,
         transaction: (files: ArrayList<File>, isComplete: Boolean) -> Unit
@@ -417,7 +416,7 @@ object FileController {
         onResponse: (files: ArrayList<File>) -> Unit,
         page: Int = 1
     ) {
-        val order = File.SortType.NAME_AZ
+        val order = SortType.NAME_AZ
         val apiResponse = ApiRepository.searchFiles(
             userDrive.driveId,
             query,
@@ -554,7 +553,7 @@ object FileController {
     fun getRealmLiveFiles(
         parentId: Int,
         realm: Realm,
-        order: File.SortType?,
+        order: SortType?,
         withVisibilitySort: Boolean = true,
         isFavorite: Boolean = false
     ): RealmResults<File> {
@@ -568,7 +567,7 @@ object FileController {
         page: Int,
         ignoreCache: Boolean = false,
         ignoreCloud: Boolean = false,
-        order: File.SortType = File.SortType.NAME_AZ,
+        order: SortType = SortType.NAME_AZ,
         userDrive: UserDrive?,
         customRealm: Realm? = null,
         withChildren: Boolean = true
@@ -611,7 +610,7 @@ object FileController {
         return customRealm?.let(operation) ?: getRealmInstance(userDrive).use(operation)
     }
 
-    fun getFilesFromIdList(realm: Realm, idList: Array<Int>, order: File.SortType = File.SortType.NAME_AZ): RealmResults<File>? {
+    fun getFilesFromIdList(realm: Realm, idList: Array<Int>, order: SortType = SortType.NAME_AZ): RealmResults<File>? {
         return realm.where(File::class.java)
             .oneOf(File::id.name, idList)
             .getSortQueryByOrder(order)
@@ -622,7 +621,7 @@ object FileController {
         currentRealm: Realm,
         localFolder: File?,
         localFolderWithoutChildren: File?,
-        order: File.SortType,
+        order: SortType,
         page: Int,
         parentId: Int,
         userDrive: UserDrive?,
@@ -700,7 +699,7 @@ object FileController {
 
     private fun getRealmLiveSortedFiles(
         localFolder: File?,
-        order: File.SortType?,
+        order: SortType?,
         withVisibilitySort: Boolean = true,
         localChildren: RealmResults<File>? = null,
         isFavorite: Boolean = false
@@ -720,7 +719,7 @@ object FileController {
 
     private fun getLocalSortedFolderFiles(
         localFolder: File?,
-        order: File.SortType,
+        order: SortType,
         localChildren: RealmResults<File>? = null
     ): ArrayList<File> {
         val files = getRealmLiveSortedFiles(localFolder, order, localChildren = localChildren)?.let { realmFiles ->
@@ -779,11 +778,11 @@ object FileController {
     }
 
     private fun FileActivity.applyFileActivity(realm: Realm, returnResponse: ArrayMap<Int, FileActivity>, currentFolder: File) {
-        when (this.getAction()) {
-            FileActivity.FileActivityType.FILE_DELETE,
-            FileActivity.FileActivityType.FILE_MOVE_OUT,
-            FileActivity.FileActivityType.FILE_TRASH -> {
-                if (returnResponse[fileId] == null || returnResponse[fileId]?.createdAt?.time == this.createdAt.time) { // Api fix
+        when (getAction()) {
+            FileActivityType.FILE_DELETE,
+            FileActivityType.FILE_MOVE_OUT,
+            FileActivityType.FILE_TRASH -> {
+                if (returnResponse[fileId] == null || returnResponse[fileId]?.createdAt?.time == createdAt.time) { // Api fix
                     getParentFile(fileId = fileId, realm = realm)?.let { parent ->
                         if (parent.id == currentFolder.id) {
                             removeFile(fileId, customRealm = realm, recursive = false)
@@ -792,50 +791,54 @@ object FileController {
                     returnResponse[fileId] = this
                 }
             }
-            FileActivity.FileActivityType.FILE_CREATE,
-            FileActivity.FileActivityType.FILE_MOVE_IN,
-            FileActivity.FileActivityType.FILE_RESTORE -> if (returnResponse[fileId] == null && this.file != null) {
-                realm.where(File::class.java).equalTo(File::id.name, currentFolder.id).findFirst()?.let { realmFolder ->
-                    if (!realmFolder.children.contains(this.file)) {
-                        addChild(realm, realmFolder, this.file!!)
+            FileActivityType.FILE_CREATE,
+            FileActivityType.FILE_MOVE_IN,
+            FileActivityType.FILE_RESTORE -> {
+                if (returnResponse[fileId] == null && file != null) {
+                    realm.where(File::class.java).equalTo(File::id.name, currentFolder.id).findFirst()?.let { realmFolder ->
+                        if (!realmFolder.children.contains(file)) {
+                            addChild(realm, realmFolder, file!!)
+                        } else {
+                            updateFileFromActivity(realm, this, realmFolder.id)
+                        }
+                        returnResponse[fileId] = this
+                    }
+                }
+            }
+            FileActivityType.COLLABORATIVE_FOLDER_CREATE,
+            FileActivityType.COLLABORATIVE_FOLDER_DELETE,
+            FileActivityType.COLLABORATIVE_FOLDER_UPDATE,
+            FileActivityType.FILE_FAVORITE_CREATE,
+            FileActivityType.FILE_FAVORITE_REMOVE,
+            FileActivityType.FILE_RENAME,
+            FileActivityType.FILE_CATEGORIZE,
+            FileActivityType.FILE_UNCATEGORIZE,
+            FileActivityType.FILE_SHARE_CREATE,
+            FileActivityType.FILE_SHARE_DELETE,
+            FileActivityType.FILE_SHARE_UPDATE,
+            FileActivityType.FILE_UPDATE -> {
+                if (returnResponse[fileId] == null) {
+                    if (file == null) {
+                        removeFile(fileId, customRealm = realm, recursive = false)
                     } else {
-                        updateFileFromActivity(realm, this, realmFolder.id)
+                        updateFileFromActivity(realm, this, currentFolder.id)
                     }
                     returnResponse[fileId] = this
                 }
-            }
-            FileActivity.FileActivityType.COLLABORATIVE_FOLDER_CREATE,
-            FileActivity.FileActivityType.COLLABORATIVE_FOLDER_DELETE,
-            FileActivity.FileActivityType.COLLABORATIVE_FOLDER_UPDATE,
-            FileActivity.FileActivityType.FILE_FAVORITE_CREATE,
-            FileActivity.FileActivityType.FILE_FAVORITE_REMOVE,
-            FileActivity.FileActivityType.FILE_RENAME,
-            FileActivity.FileActivityType.FILE_CATEGORIZE,
-            FileActivity.FileActivityType.FILE_UNCATEGORIZE,
-            FileActivity.FileActivityType.FILE_SHARE_CREATE,
-            FileActivity.FileActivityType.FILE_SHARE_DELETE,
-            FileActivity.FileActivityType.FILE_SHARE_UPDATE,
-            FileActivity.FileActivityType.FILE_UPDATE -> if (returnResponse[fileId] == null) {
-                if (this.file == null) {
-                    removeFile(fileId, customRealm = realm, recursive = false)
-                } else {
-                    updateFileFromActivity(realm, this, currentFolder.id)
-                }
-                returnResponse[fileId] = this
             }
             else -> Unit
         }
     }
 
     fun getOfflineFiles(
-        order: File.SortType?,
+        order: SortType?,
         userDrive: UserDrive = UserDrive(),
         customRealm: Realm? = null
     ): RealmResults<File> {
         val block: (Realm) -> RealmResults<File> = { realm ->
             realm.where(File::class.java)
                 .equalTo(File::isOffline.name, true)
-                .notEqualTo(File::type.name, File.Type.FOLDER.value)
+                .notEqualTo(File::type.name, Type.FOLDER.value)
                 .findAll()?.let { files ->
                     if (order == null) files
                     else getRealmLiveSortedFiles(localFolder = null, order = order, localChildren = files)
@@ -846,7 +849,7 @@ object FileController {
 
     fun searchFiles(
         query: String,
-        order: File.SortType,
+        order: SortType,
         userDrive: UserDrive = UserDrive(),
         customRealm: Realm? = null
     ): ArrayList<File> {
@@ -868,7 +871,7 @@ object FileController {
         }
     }
 
-    fun addFileTo(parentFolderID: Int, file: File, userDrive: UserDrive?) {
+    fun addFileTo(parentFolderID: Int, file: File, userDrive: UserDrive? = null) {
         getRealmInstance(userDrive).use { realm ->
             val localFolder = realm.where(File::class.java).equalTo(File::id.name, parentFolderID).findFirst()
             if (localFolder != null) {
@@ -892,23 +895,25 @@ object FileController {
     }
 
     private fun keepOldLocalFilesData(managedFile: File, remoteFile: File) {
-        remoteFile.children = managedFile.children
-        remoteFile.isComplete = managedFile.isComplete
-        remoteFile.responseAt = managedFile.responseAt
-        remoteFile.isOffline = managedFile.isOffline
+        remoteFile.apply {
+            children = managedFile.children
+            isComplete = managedFile.isComplete
+            responseAt = managedFile.responseAt
+            isOffline = managedFile.isOffline
+        }
     }
 
-    private fun RealmQuery<File>.getSortQueryByOrder(order: File.SortType): RealmQuery<File> {
+    private fun RealmQuery<File>.getSortQueryByOrder(order: SortType): RealmQuery<File> {
         return when (order) {
-            File.SortType.NAME_AZ -> this.sort(File::nameNaturalSorting.name, Sort.ASCENDING)
-            File.SortType.NAME_ZA -> this.sort(File::nameNaturalSorting.name, Sort.DESCENDING)
-            File.SortType.OLDER -> this.sort(File::lastModifiedAt.name, Sort.ASCENDING)
-            File.SortType.RECENT -> this.sort(File::lastModifiedAt.name, Sort.DESCENDING)
-            File.SortType.OLDER_TRASHED -> this.sort(File::deletedAt.name, Sort.ASCENDING)
-            File.SortType.RECENT_TRASHED -> this.sort(File::deletedAt.name, Sort.DESCENDING)
-            File.SortType.SMALLER -> this.sort(File::size.name, Sort.ASCENDING)
-            File.SortType.BIGGER -> this.sort(File::size.name, Sort.DESCENDING)
-            //File.SortType.EXTENSION -> this.sort(File::convertedType.name, Sort.ASCENDING) // TODO implement
+            SortType.NAME_AZ -> sort(File::nameNaturalSorting.name, Sort.ASCENDING)
+            SortType.NAME_ZA -> sort(File::nameNaturalSorting.name, Sort.DESCENDING)
+            SortType.OLDER -> sort(File::lastModifiedAt.name, Sort.ASCENDING)
+            SortType.RECENT -> sort(File::lastModifiedAt.name, Sort.DESCENDING)
+            SortType.OLDER_TRASHED -> sort(File::deletedAt.name, Sort.ASCENDING)
+            SortType.RECENT_TRASHED -> sort(File::deletedAt.name, Sort.DESCENDING)
+            SortType.SMALLER -> sort(File::size.name, Sort.ASCENDING)
+            SortType.BIGGER -> sort(File::size.name, Sort.DESCENDING)
+            // SortType.EXTENSION -> sort(File::convertedType.name, Sort.ASCENDING) // TODO implement
         }
     }
 }
