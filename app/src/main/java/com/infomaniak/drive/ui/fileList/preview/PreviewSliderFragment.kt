@@ -69,6 +69,11 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
+        if (mainViewModel.currentPreviewFileList.isEmpty()) {
+            findNavController().popBackStack()
+            return null
+        }
+
         if (previewSliderViewModel.currentPreview == null) {
             val isSharedWithMe = arguments?.getBoolean(PREVIEW_IS_SHARED_WITH_ME, false) ?: false
             val driveId = arguments?.getInt(PREVIEW_FILE_DRIVE_ID, 0) ?: 0

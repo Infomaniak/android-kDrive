@@ -67,7 +67,7 @@ open class PreviewFragment : Fragment() {
             scope.setExtra("destination lifecycle", "${backStackEntry?.lifecycle?.currentState}")
             scope.setExtra("previous", previousName ?: "")
             scope.setExtra("exception", exception.stackTraceToString())
-            Sentry.captureMessage("Get file from preview fragment 🤔")
+            Sentry.captureException(exception)
         }
         null
     }
