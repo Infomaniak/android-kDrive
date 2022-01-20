@@ -65,7 +65,10 @@ class LaunchActivity : AppCompatActivity() {
                 }
             }
         }
-        TrackHelper.track().screen("/LaunchActivity").title("Launch").with((application as MatomoApplication).tracker)
+        (application as MatomoApplication).tracker.apply {
+            userId = AccountUtils.currentUserId.toString()
+            TrackHelper.track().screen("/LaunchActivity").title("Launch").with(this)
+        }
     }
 
     override fun onPause() {

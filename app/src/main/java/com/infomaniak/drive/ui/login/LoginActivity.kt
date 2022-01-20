@@ -51,6 +51,7 @@ import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.matomo.sdk.extra.MatomoApplication
 
 class LoginActivity : AppCompatActivity() {
 
@@ -118,7 +119,10 @@ class LoginActivity : AppCompatActivity() {
                 onSuccess = {
                     lifecycleScope.launch(Dispatchers.IO) {
                         when (val user = authenticateUser(this@LoginActivity, it)) {
-                            is User -> launchMainActivity()
+                            is User -> {
+                                (application as MatomoApplication).tracker.userId = user.id.toString()
+                                launchMainActivity()
+                            }
                             is ApiResponse<*> -> withContext(Dispatchers.Main) {
                                 if (user.error?.code?.equals("no_drive") == true) {
                                     launchNoDriveActivity()
