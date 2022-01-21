@@ -89,7 +89,6 @@
         app:layout_constraintBottom_toBottomOf="@id/rightsValue"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/name"
-        app:tint="@color/iconColor"
         tools:ignore="ContentDescription" />
 
     <TextView
