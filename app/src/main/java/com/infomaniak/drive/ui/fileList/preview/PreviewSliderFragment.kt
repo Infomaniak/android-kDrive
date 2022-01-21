@@ -68,12 +68,11 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     private lateinit var userDrive: UserDrive
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_preview_slider, container, false)
-    }
 
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        if (mainViewModel.currentPreviewFileList.isEmpty()) {
+            findNavController().popBackStack()
+            return null
+        }
 
         if (previewSliderViewModel.currentPreview == null) {
             val isSharedWithMe = arguments?.getBoolean(PREVIEW_IS_SHARED_WITH_ME, false) ?: false
@@ -94,6 +93,13 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             previewSliderViewModel.currentPreview?.let { currentPreviewFile = it }
             userDrive = previewSliderViewModel.userDrive
         }
+
+        return inflater.inflate(R.layout.fragment_preview_slider, container, false)
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         setBackActionHandlers()
 

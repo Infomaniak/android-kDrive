@@ -52,11 +52,14 @@ class PreviewPDFFragment : PreviewFragment() {
     private var isDownloading = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return if (noFileFound()) null else inflater.inflate(R.layout.fragment_preview_pdf, container, false)
+        return inflater.inflate(R.layout.fragment_preview_pdf, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        if (noCurrentFile()) return
+
         container?.layoutTransition?.setAnimateParentHierarchy(false)
 
         fileIcon.setImageResource(file.getFileType().icon)
