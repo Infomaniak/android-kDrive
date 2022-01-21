@@ -21,12 +21,16 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     tools:background="@color/previewBackground"
     tools:context=".ui.fileList.preview.PreviewOtherFragment">
 
     <View
+        android:id="@+id/view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="122dp"
+        tools:layout_editor_absoluteY="25dp" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/start"
@@ -66,6 +70,7 @@
         app:layout_constraintEnd_toStartOf="@id/end"
         app:layout_constraintStart_toEndOf="@id/start"
         app:layout_constraintTop_toBottomOf="@id/fileIcon"
+        app:layout_goneMarginBottom="0dp"
         tools:text="guide-kdrive.doc" />
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
@@ -91,9 +96,27 @@
         android:gravity="center"
         android:text="@string/previewNoPreview"
         android:textColor="#C3C3C3"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/openWithButton"
         app:layout_constraintEnd_toStartOf="@id/end"
         app:layout_constraintStart_toEndOf="@id/start"
-        app:layout_constraintTop_toBottomOf="@id/downloadProgress" />
+        app:layout_constraintTop_toBottomOf="@id/downloadProgress"
+        app:layout_goneMarginTop="@dimen/marginStandardMedium" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/openWithButton"
+        style="@style/ButtonInfomaniak"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/marginStandard"
+        android:padding="16dp"
+        android:text="@string/buttonOpenWith"
+        app:icon="@drawable/ic_open_with"
+        app:iconGravity="start"
+        app:iconSize="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/end"
+        app:layout_constraintStart_toStartOf="@+id/start"
+        app:layout_constraintTop_toBottomOf="@+id/previewDescription"
+        tools:text="Open with" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
