@@ -53,7 +53,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-
 class UploadInProgressFragment : FileListFragment() {
 
     private val drivePermissions: DrivePermissions by lazy { DrivePermissions() }
@@ -212,7 +211,6 @@ class UploadInProgressFragment : FileListFragment() {
             }
         }
     }
-
 
     private fun isPendingFolders() = folderID == Utils.OTHER_ROOT_ID
 

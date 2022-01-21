@@ -139,45 +139,51 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
     }
 
     private fun setupShareLinkContainer(file: File?, share: Share?) {
-
         if (file?.rights?.canBecomeLink == true || file?.shareLink?.isNotBlank() == true) {
-            shareLinkContainer.isVisible = true
-            shareLinkDivider.isVisible = true
-            shareLinkContainer.setup(
-                shareLink = share?.link,
-                file = file,
-                onTitleClicked = { newShareLink, currentFileId ->
-                    shareLink = newShareLink
-                    val (permissionsGroup, currentPermission) = selectPermissions(
-                        isFolder = file.isFolder(),
-                        isOnlyOffice = file.onlyoffice,
-                        shareLinkExist = newShareLink != null,
-                    )
-                    findNavController().navigate(
-                        FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectPermissionBottomSheetDialog(
-                            currentFileId = currentFileId,
-                            currentPermission = currentPermission,
-                            permissionsGroup = permissionsGroup,
-                        )
-                    )
-                },
-                onSettingsClicked = { newShareLink, currentFile ->
-                    shareLink = newShareLink
-                    findNavController().navigate(
-                        FileDetailsFragmentDirections.actionFileDetailsFragmentToFileShareLinkSettings(
-                            fileId = currentFile.id,
-                            driveId = currentFile.driveId,
-                            shareLink = newShareLink,
-                            isOnlyOfficeFile = currentFile.onlyoffice,
-                            isFolder = currentFile.isFolder(),
-                        )
-                    )
-                })
-
+            showShareLinkView(file, share)
         } else {
-            shareLinkContainer.isGone = true
-            shareLinkDivider.isGone = true
+            hideShareLinkView()
         }
+    }
+
+    private fun showShareLinkView(file: File, share: Share?) {
+        shareLinkContainer.isVisible = true
+        shareLinkDivider.isVisible = true
+        shareLinkContainer.setup(
+            file = file,
+            shareLink = share?.link,
+            onTitleClicked = { newShareLink, currentFileId ->
+                shareLink = newShareLink
+                val (permissionsGroup, currentPermission) = selectPermissions(
+                    isFolder = file.isFolder(),
+                    isOnlyOffice = file.onlyoffice,
+                    shareLinkExist = newShareLink != null,
+                )
+                findNavController().navigate(
+                    FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectPermissionBottomSheetDialog(
+                        currentFileId = currentFileId,
+                        currentPermission = currentPermission,
+                        permissionsGroup = permissionsGroup,
+                    )
+                )
+            },
+            onSettingsClicked = { newShareLink, currentFile ->
+                shareLink = newShareLink
+                findNavController().navigate(
+                    FileDetailsFragmentDirections.actionFileDetailsFragmentToFileShareLinkSettings(
+                        fileId = currentFile.id,
+                        driveId = currentFile.driveId,
+                        shareLink = newShareLink,
+                        isOnlyOfficeFile = currentFile.onlyoffice,
+                        isFolder = currentFile.isFolder(),
+                    )
+                )
+            })
+    }
+
+    private fun hideShareLinkView() {
+        shareLinkContainer.isGone = true
+        shareLinkDivider.isGone = true
     }
 
     private fun setupCategoriesContainer(fileId: Int?, categories: List<Category>) {

@@ -50,7 +50,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
-
 class MigrationActivity : AppCompatActivity() {
 
     private val oldNotificationChannel = arrayListOf(

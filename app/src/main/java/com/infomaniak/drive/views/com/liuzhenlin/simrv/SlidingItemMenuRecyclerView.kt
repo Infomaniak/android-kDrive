@@ -105,7 +105,6 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(context: Context, at
      */
     private var fullyOpenedItem: ViewGroup? = null
 
-
     private fun childHasMenu(itemView: ViewGroup): Boolean {
         if (itemView.isGone) return false
 
@@ -673,5 +672,4 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(context: Context, at
         private val sViscousFluidInterpolator: Interpolator = ViscousFluidInterpolator(6.66f)
         private val sOvershootInterpolator: Interpolator = OvershootInterpolator(1.0f)
     }
-
 }

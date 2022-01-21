@@ -43,8 +43,8 @@ class ShareLinkContainerView @JvmOverloads constructor(
     }
 
     fun setup(
-        shareLink: ShareLink?,
         file: File,
+        shareLink: ShareLink? = null,
         onTitleClicked: (shareLink: ShareLink?, currentFileId: Int) -> Unit,
         onSettingsClicked: (shareLink: ShareLink, currentFile: File) -> Unit
     ) {
@@ -69,41 +69,44 @@ class ShareLinkContainerView @JvmOverloads constructor(
     }
 
     private fun updateUi() {
-        val title = if (shareLink == null && urlValue.isBlank()) {
+        if (shareLink == null && urlValue.isBlank()) {
             shareLinkIcon.setImageResource(R.drawable.ic_lock)
             shareLinkTitle.setText(R.string.restrictedSharedLinkTitle)
             shareLinkBottomContainer.isGone = true
-            context.getString(R.string.shareLinkRestrictedRightDescription, currentFile.getTypeName(context))
+            shareLinkStatus.text =
+                context.getString(R.string.shareLinkRestrictedRightDescription, currentFile.getTypeName(context))
         } else {
             shareLinkIcon.setImageResource(R.drawable.ic_unlock)
             shareLinkTitle.setText(R.string.publicSharedLinkTitle)
             shareLinkBottomContainer.isVisible = true
+            shareLinkStatus.text = getShareLinkPublicRightDescription()
+        }
+    }
 
-            context.getString(
+    private fun getShareLinkPublicRightDescription(): String {
 
-                R.string.shareLinkPublicRightDescription,
+        val resId = R.string.shareLinkPublicRightDescription
 
-                context.getString(
-                    if (shareLink?.canEdit == true) R.string.shareLinkOfficePermissionWriteTitle
-                    else R.string.shareLinkOfficePermissionReadTitle
-                ).lowercase(),
+        val permission = context.getString(
+            if (shareLink?.canEdit == true) R.string.shareLinkOfficePermissionWriteTitle
+            else R.string.shareLinkOfficePermissionReadTitle
+        ).lowercase()
 
-                currentFile.getTypeName(context),
+        val fileName = currentFile.getTypeName(context)
 
-                if (shareLink?.permission == ShareLink.ShareLinkFilePermission.PASSWORD) {
-                    context.getString(R.string.shareLinkPublicRightDescriptionPassword)
-                } else "",
-
-                if (shareLink?.validUntil != null) {
-                    context.getString(
-                        R.string.shareLinkPublicRightDescriptionDate,
-                        shareLink?.validUntil?.format(formatFullDate)
-                    )
-                } else ""
-            )
+        val password = if (shareLink?.permission == ShareLink.ShareLinkFilePermission.PASSWORD) {
+            context.getString(R.string.shareLinkPublicRightDescriptionPassword)
+        } else {
+            ""
         }
 
-        shareLinkStatus.text = title
+        val validityDate = if (shareLink?.validUntil != null) {
+            context.getString(R.string.shareLinkPublicRightDescriptionDate, shareLink?.validUntil?.format(formatFullDate))
+        } else {
+            ""
+        }
+
+        return context.getString(resId, permission, fileName, password, validityDate)
     }
 
     private fun File.getTypeName(context: Context): String = context.getString(getTypeName(isFolder(), onlyoffice))

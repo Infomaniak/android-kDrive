@@ -39,7 +39,6 @@ import com.infomaniak.lib.core.utils.startAppSettingsConfig
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 
-
 class DrivePermissions {
 
     companion object {
@@ -82,7 +81,6 @@ class DrivePermissions {
                 .show()
         }
     }
-
 
     /**
      * Check if the sync has all permissions to work

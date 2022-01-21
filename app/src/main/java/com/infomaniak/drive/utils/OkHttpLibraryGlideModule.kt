@@ -31,7 +31,6 @@ import com.infomaniak.lib.core.networking.HttpUtils
 import okhttp3.Call
 import java.io.InputStream
 
-
 @GlideModule
 class OkHttpLibraryGlideModule : AppGlideModule() {
 

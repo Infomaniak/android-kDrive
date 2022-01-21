@@ -20,7 +20,6 @@ package com.infomaniak.drive.data.api
 import okhttp3.ResponseBody
 import okio.*
 
-
 class ProgressResponseBody(val responseBody: ResponseBody, val progressListener: ProgressListener) : ResponseBody() {
 
     private val bufferedSource: BufferedSource by lazy { source(responseBody.source()).buffer() }
