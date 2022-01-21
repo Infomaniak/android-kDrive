@@ -209,8 +209,9 @@ class SearchFragment : FileListFragment() {
         recentSearchesAdapter = RecentSearchesAdapter(
             searches = ArrayList(recentSearches),
             onSearchClicked = searchView::setText,
-        ).apply {
-            recentSearchesRecyclerView.adapter = this
+        ).also {
+            recentSearchesRecyclerView.adapter = it
+            recentSearchesContainer.isGone = recentSearches.isEmpty()
         }
     }
 
@@ -312,6 +313,24 @@ class SearchFragment : FileListFragment() {
     }
 
     private fun removeFilter(filter: FilterKey, categoryId: Int?) {
+
+        fun removeDateFilter() {
+            searchViewModel.dateFilter = null
+        }
+
+        fun removeTypeFilter() {
+            searchViewModel.typeFilter = null
+        }
+
+        fun removeCategoryFilter(categoryId: Int?) = with(searchViewModel) {
+            if (categoryId != null) {
+                categoriesFilter?.let { categories ->
+                    val filteredCategories = categories.filter { it.id != categoryId }
+                    categoriesFilter = if (filteredCategories.isEmpty()) null else filteredCategories
+                }
+            }
+        }
+
         when (filter) {
             FilterKey.DATE -> removeDateFilter()
             FilterKey.TYPE -> removeTypeFilter()
@@ -321,51 +340,35 @@ class SearchFragment : FileListFragment() {
         triggerSearch()
     }
 
-    private fun removeDateFilter() {
-        searchViewModel.dateFilter = null
-    }
-
-    private fun removeTypeFilter() {
-        searchViewModel.typeFilter = null
-    }
-
-    private fun removeCategoryFilter(categoryId: Int?) = with(searchViewModel) {
-        if (categoryId != null) {
-            categoriesFilter?.let { categories ->
-                val filteredCategories = categories.filter { it.id != categoryId }
-                categoriesFilter = if (filteredCategories.isEmpty()) null else filteredCategories
-            }
-        }
-    }
-
     private fun updateUI(mode: VisibilityMode) {
+
+        fun displayRecentSearches() {
+            recentSearchesView.isVisible = true
+            filtersRecyclerView.isGone = true
+            noFilesLayout.isGone = true
+            sortLayout.isGone = true
+            fileRecyclerView.isGone = true
+        }
+
+        fun displayLoadingView() {
+            recentSearchesView.isGone = true
+            filtersRecyclerView.isGone = filtersAdapter.filters.isEmpty()
+            noFilesLayout.isGone = true
+            sortLayout.isGone = true
+            fileRecyclerView.isGone = true
+        }
+
+        fun displaySearchResult(mode: VisibilityMode) {
+            recentSearchesView.isGone = true
+            filtersRecyclerView.isGone = filtersAdapter.filters.isEmpty()
+            changeNoFilesLayoutVisibility(mode == VisibilityMode.NO_RESULTS, false)
+        }
+
         when (mode) {
             VisibilityMode.RECENT_SEARCHES -> displayRecentSearches()
             VisibilityMode.LOADING -> displayLoadingView()
             VisibilityMode.NO_RESULTS, VisibilityMode.RESULTS -> displaySearchResult(mode)
         }
-    }
-
-    private fun displayRecentSearches() {
-        recentSearchesView.isVisible = true
-        filtersRecyclerView.isGone = true
-        noFilesLayout.isGone = true
-        sortLayout.isGone = true
-        fileRecyclerView.isGone = true
-    }
-
-    private fun displayLoadingView() {
-        recentSearchesView.isGone = true
-        filtersRecyclerView.isGone = filtersAdapter.filters.isEmpty()
-        noFilesLayout.isGone = true
-        sortLayout.isGone = true
-        fileRecyclerView.isGone = true
-    }
-
-    private fun displaySearchResult(mode: VisibilityMode) {
-        recentSearchesView.isGone = true
-        filtersRecyclerView.isGone = filtersAdapter.filters.isEmpty()
-        changeNoFilesLayoutVisibility(mode == VisibilityMode.NO_RESULTS, false)
     }
 
     private inner class SetNoFilesLayout : () -> Unit {
