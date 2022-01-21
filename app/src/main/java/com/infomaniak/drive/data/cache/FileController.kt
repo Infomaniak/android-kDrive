@@ -23,9 +23,9 @@ import androidx.collection.arrayMapOf
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.File.Companion.setColor
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.Type
-import com.infomaniak.drive.data.models.File.Companion.setColor
 import com.infomaniak.drive.data.models.FileActivity
 import com.infomaniak.drive.data.models.FileActivity.FileActivityType
 import com.infomaniak.drive.data.models.UserDrive

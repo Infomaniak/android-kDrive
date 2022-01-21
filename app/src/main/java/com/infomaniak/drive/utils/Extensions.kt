@@ -87,6 +87,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.File.*
 import com.infomaniak.drive.data.models.File.Companion.getColor
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
@@ -141,6 +142,10 @@ fun Context.isKeyguardSecure(): Boolean {
 }
 
 fun ImageView.loadGlide(@DrawableRes drawable: Int) {
+    Glide.with(this).load(drawable).into(this)
+}
+
+fun ImageView.loadGlide(drawable: Drawable?) {
     Glide.with(this).load(drawable).into(this)
 }
 
@@ -281,34 +286,29 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
 
     filePreview.scaleType = ImageView.ScaleType.CENTER
 
-    fun ImageView.tintFolderIcon() {
-        imageTintList = ColorStateList.valueOf(file.getColor(context).toColorInt())
+    fun tintedDrawable(@IdRes iconId: Int, color: String? = null): Drawable? {
+        return ContextCompat.getDrawable(context, iconId)?.apply {
+            setTintList(ColorStateList.valueOf((color ?: file.getColor(context)).toColorInt()))
+        }
     }
 
     when {
         file.isFolder() -> {
             when (file.getVisibilityType()) {
-                File.VisibilityType.IS_TEAM_SPACE -> filePreview.loadGlide(R.drawable.ic_folder_common_documents)
-                File.VisibilityType.IS_SHARED_SPACE -> filePreview.loadGlide(R.drawable.ic_folder_shared)
-                File.VisibilityType.IS_COLLABORATIVE_FOLDER -> filePreview.apply {
-                    loadGlide(R.drawable.ic_folder_dropbox)
-                    tintFolderIcon()
-                }
+                VisibilityType.IS_TEAM_SPACE -> filePreview.loadGlide(R.drawable.ic_folder_common_documents)
+                VisibilityType.IS_SHARED_SPACE -> filePreview.loadGlide(R.drawable.ic_folder_shared)
+                VisibilityType.IS_COLLABORATIVE_FOLDER -> filePreview.loadGlide(tintedDrawable(R.drawable.ic_folder_dropbox))
                 else -> {
                     if (file.isDisabled()) {
                         filePreview.loadGlide(R.drawable.ic_folder_disable)
                     } else {
-                        filePreview.apply {
-                            loadGlide(R.drawable.ic_folder_filled)
-                            tintFolderIcon()
-                        }
+                        filePreview.loadGlide(tintedDrawable(R.drawable.ic_folder_filled))
                     }
                 }
             }
         }
         file.isDrive() -> {
-            filePreview.loadGlide(R.drawable.ic_drive)
-            filePreview.setColorFilter(Color.parseColor(file.driveColor))
+            filePreview.loadGlide(tintedDrawable(R.drawable.ic_drive, file.driveColor))
         }
         else -> {
             when {

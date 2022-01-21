@@ -196,6 +196,7 @@ open class FileAdapter(
     }
 
     private fun indexOf(fileId: Int) = fileList.indexOfFirst { it.id == fileId }
+
     fun indexOf(fileName: String) = fileList.indexOfFirst { it.name == fileName }
 
     fun notifyFileChanged(fileId: Int, onChange: ((file: File) -> Unit)? = null) {
