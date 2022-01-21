@@ -193,6 +193,7 @@ object DriveInfosController {
     private fun getCurrentDrive(customRealm: Realm? = null): Drive? {
         val block: (Realm) -> Drive? = { realm ->
             realm.where(Drive::class.java)
+                .equalTo(Drive::userId.name, AccountUtils.currentUserId)
                 .equalTo(Drive::id.name, AccountUtils.currentDriveId)
                 .findFirst()
         }
