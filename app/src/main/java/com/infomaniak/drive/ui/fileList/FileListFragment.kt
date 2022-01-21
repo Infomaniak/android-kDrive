@@ -713,10 +713,12 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         val navController = findNavController()
         fileRecyclerView.layoutManager = createLayoutManager(isListMode, navController)
 
-        toggleDisplayButton.icon = ContextCompat.getDrawable(
-            requireContext(),
-            if (isListMode) R.drawable.ic_list else R.drawable.ic_grid
-        )
+        val listModeIconRes = when {
+            isListMode -> R.drawable.ic_list
+            fileAdapter.isHomeOffline -> R.drawable.ic_largelist
+            else -> R.drawable.ic_grid
+        }
+        toggleDisplayButton.icon = ContextCompat.getDrawable(requireContext(), listModeIconRes)
         fileAdapter.viewHolderType = if (isListMode) FileAdapter.DisplayType.LIST else FileAdapter.DisplayType.GRID
         fileRecyclerView.adapter = fileAdapter
     }
