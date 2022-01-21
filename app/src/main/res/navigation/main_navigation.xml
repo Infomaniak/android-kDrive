@@ -523,22 +523,6 @@
         android:name="com.infomaniak.drive.ui.fileList.SearchFiltersFragment"
         android:label="SearchFiltersFragment"
         tools:layout="@layout/fragment_search_filters">
-        <argument
-            android:name="date"
-            app:argType="com.infomaniak.drive.data.models.SearchDateFilter"
-            app:nullable="true" />
-        <argument
-            android:name="type"
-            app:argType="string"
-            app:nullable="true" />
-        <argument
-            android:name="categories"
-            app:argType="integer[]"
-            app:nullable="true" />
-        <argument
-            android:name="categoriesOwnership"
-            app:argType="com.infomaniak.drive.data.models.SearchCategoriesOwnershipFilter"
-            app:nullable="true" />
         <action
             android:id="@+id/action_searchFiltersFragment_to_selectCategoriesFragment"
             app:destination="@id/selectCategoriesFragment" />
