@@ -15,70 +15,62 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
     tools:context=".ui.bottomSheetDialogs.ColorFolderBottomSheetDialog">
 
-    <LinearLayout
+    <View
+        android:layout_width="26dp"
+        android:layout_height="@dimen/marginStandardVerySmall"
+        android:layout_gravity="center"
+        android:layout_marginVertical="@dimen/marginStandardMedium"
+        android:background="@drawable/background_bottom_sheet_anchor" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/marginStandard"
+        android:layout_marginBottom="@dimen/marginStandardMedium">
 
-        <View
-            android:layout_width="26dp"
-            android:layout_height="@dimen/marginStandardVerySmall"
-            android:layout_gravity="center"
-            android:layout_marginVertical="@dimen/marginStandardMedium"
-            android:background="@drawable/background_bottom_sheet_anchor" />
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/coloredFolderIcon"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:layout_marginBottom="@dimen/marginStandardMedium">
+            android:src="@drawable/ic_color_bucket"
+            android:tint="@color/iconColor"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/coloredFolderIcon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_color_bucket"
-                android:tint="@color/iconColor"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/coloredFolderText"
-                style="@style/Subtitle2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/marginStandardMedium"
-                android:text="@string/buttonChangeFolderColor"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/coloredFolderIcon"
-                app:layout_constraintTop_toTopOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/divider" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/colorsRecyclerView"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/coloredFolderText"
+            style="@style/Subtitle2"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/marginStandardMedium"
-            android:layout_marginTop="@dimen/marginStandardSmall"
-            android:overScrollMode="never"
-            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-            tools:itemCount="17"
-            tools:listitem="@layout/view_color_round_button"
-            tools:spanCount="6" />
+            android:layout_marginStart="@dimen/marginStandardMedium"
+            android:text="@string/buttonChangeFolderColor"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/coloredFolderIcon"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/colorsRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/marginStandardSmall"
+        android:overScrollMode="never"
+        android:paddingHorizontal="@dimen/marginStandardMedium"
+        tools:itemCount="17"
+        tools:listitem="@layout/view_color_round_button"
+        tools:spanCount="6" />
+</LinearLayout>
