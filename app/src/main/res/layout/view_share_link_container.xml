@@ -39,7 +39,6 @@
             app:layout_constraintBottom_toBottomOf="@id/shareLinkTitle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/shareLinkTitle"
-            app:tint="@color/secondaryText"
             tools:ignore="ContentDescription"
             tools:src="@drawable/ic_lock" />
 
@@ -62,7 +61,6 @@
             app:layout_constraintBottom_toBottomOf="@id/shareLinkTitle"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/shareLinkTitle"
-            app:tint="@color/iconColor"
             tools:ignore="ContentDescription" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
