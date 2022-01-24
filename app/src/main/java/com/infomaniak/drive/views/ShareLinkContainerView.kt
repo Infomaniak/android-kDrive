@@ -53,12 +53,9 @@ class ShareLinkContainerView @JvmOverloads constructor(
         isVisible = true
         urlValue = file.shareLink ?: ""
 
-        if (file.isDropBox()) {
-            setDropBoxUi()
-            return
-        }
+        selectUI(file.isDropBox())
 
-        updateUi()
+        if (file.isDropBox()) return
 
         titleContainer.setOnClickListener { onTitleClicked?.invoke(this.shareLink, currentFile.id) }
         // cannot be null, if null, settings will not appear
@@ -66,33 +63,59 @@ class ShareLinkContainerView @JvmOverloads constructor(
         shareLinkButton.setOnClickListener { this.shareLink?.url?.let(context::shareText) }
     }
 
-    private fun setDropBoxUi() {
-        shareLinkIcon.setImageResource(R.drawable.ic_folder_dropbox)
-        shareLinkTitle.setText(R.string.dropboxSharedLinkTitle)
-        shareLinkSwitch.isGone = true
-        shareLinkBottomContainer.isGone = true
-        shareLinkStatus.setText(R.string.dropboxSharedLinkDescription)
-    }
-
     fun update(shareLink: ShareLink? = null) {
         this.shareLink = shareLink
         if (shareLink == null) urlValue = ""
-        updateUi()
+        selectUI()
     }
 
-    private fun updateUi() {
-        if (shareLink == null && urlValue.isBlank()) {
-            shareLinkIcon.setImageResource(R.drawable.ic_lock)
-            shareLinkTitle.setText(R.string.restrictedSharedLinkTitle)
-            shareLinkBottomContainer.isGone = true
-            shareLinkStatus.text =
-                context.getString(R.string.shareLinkRestrictedRightDescription, currentFile.getTypeName(context))
-        } else {
-            shareLinkIcon.setImageResource(R.drawable.ic_unlock)
-            shareLinkTitle.setText(R.string.publicSharedLinkTitle)
-            shareLinkBottomContainer.isVisible = true
-            shareLinkStatus.text = getShareLinkPublicRightDescription()
+    private fun selectUI(isDropbox: Boolean = false) {
+        when {
+            isDropbox -> {
+                setDropboxUI()
+                shareLinkSwitch.isGone = true
+            }
+            shareLink == null && urlValue.isBlank() -> {
+                setRestrictedUI()
+            }
+            else -> {
+                setPublicUI()
+            }
         }
+    }
+
+    private fun setDropboxUI() {
+        setUI(
+            iconId = R.drawable.ic_folder_dropbox,
+            title = context.getString(R.string.dropboxSharedLinkTitle),
+            containerVisibility = false,
+            status = context.getString(R.string.dropboxSharedLinkDescription),
+        )
+    }
+
+    private fun setRestrictedUI() {
+        setUI(
+            iconId = R.drawable.ic_lock,
+            title = context.getString(R.string.restrictedSharedLinkTitle),
+            containerVisibility = false,
+            status = context.getString(R.string.shareLinkRestrictedRightDescription, currentFile.getTypeName(context)),
+        )
+    }
+
+    private fun setPublicUI() {
+        setUI(
+            iconId = R.drawable.ic_unlock,
+            title = context.getString(R.string.publicSharedLinkTitle),
+            containerVisibility = true,
+            status = getShareLinkPublicRightDescription(),
+        )
+    }
+
+    private fun setUI(iconId: Int, title: String, containerVisibility: Boolean, status: String) {
+        shareLinkIcon.setImageResource(iconId)
+        shareLinkTitle.text = title
+        shareLinkBottomContainer.isVisible = containerVisibility
+        shareLinkStatus.text = status
     }
 
     private fun getShareLinkPublicRightDescription(): String {
