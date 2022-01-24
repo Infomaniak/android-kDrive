@@ -58,7 +58,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) { currentFile ->
 
             setupShareLinkContainer(currentFile, fileDetailsViewModel.currentFileShare.value)
-            setupCategoriesContainer(currentFile, currentFile.getCategories())
+            setupCategoriesContainer(currentFile.id, currentFile.isDisabled(), currentFile.getCategories())
             displayUsersAvatars(currentFile)
             setupShareButton(currentFile)
 
@@ -112,7 +112,8 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         getBackNavigationResult<List<Int>>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
             fileDetailsViewModel.currentFile.value?.let { file ->
                 setupCategoriesContainer(
-                    file = file,
+                    fileId = file.id,
+                    isDisabled = file.isDisabled(),
                     categories = DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray()),
                 )
             }
@@ -197,31 +198,34 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         shareLinkDivider.isGone = true
     }
 
-    private fun setupCategoriesContainer(file: File, categories: List<Category>) {
+    private fun setupCategoriesContainer(fileId: Int, isDisabled: Boolean, categories: List<Category>) {
         val rights = DriveInfosController.getCategoryRights()
-        if (file.id.isPositive() && rights?.canReadCategoryOnFile == true) {
+
+        if (fileId.isPositive() && rights?.canReadCategoryOnFile == true) {
             categoriesDivider.isVisible = true
             categoriesContainer.apply {
                 isVisible = true
                 setup(
                     categories = categories,
-                    canPutCategoryOnFile = rights.canPutCategoryOnFile && !file.isDisabled(),
+                    canPutCategoryOnFile = rights.canPutCategoryOnFile && !isDisabled,
                     layoutInflater = layoutInflater,
-                    onClicked = {
-                        runCatching {
-                            findNavController().navigate(
-                                FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectCategoriesFragment(
-                                    fileId = file.id,
-                                    categoriesUsageMode = CategoriesUsageMode.MANAGED_CATEGORIES,
-                                )
-                            )
-                        }
-                    },
+                    onClicked = { onCategoriesClicked(fileId) },
                 )
             }
+
         } else {
             categoriesDivider.isGone = true
             categoriesContainer.isGone = true
+        }
+    }
+
+    private fun onCategoriesClicked(fileId: Int) {
+        runCatching {
+            findNavController().navigate(
+                FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectCategoriesFragment(
+                    fileId = fileId, categoriesUsageMode = CategoriesUsageMode.MANAGED_CATEGORIES
+                )
+            )
         }
     }
 
