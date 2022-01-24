@@ -184,12 +184,6 @@ object DriveInfosController {
         }
     }
 
-    fun getCurrentDriveId(): Int? {
-        return getRealmInstance().use { realm ->
-            getCurrentDrive(realm)?.id
-        }
-    }
-
     private fun getCurrentDrive(customRealm: Realm? = null): Drive? {
         val block: (Realm) -> Drive? = { realm ->
             realm.where(Drive::class.java)
