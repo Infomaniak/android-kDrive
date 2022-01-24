@@ -28,9 +28,7 @@
     <View
         android:id="@+id/view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="122dp"
-        tools:layout_editor_absoluteY="25dp" />
+        android:layout_height="match_parent"/>
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/start"
