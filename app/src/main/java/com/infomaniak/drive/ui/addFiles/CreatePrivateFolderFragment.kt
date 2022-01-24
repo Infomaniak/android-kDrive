@@ -40,20 +40,23 @@ class CreatePrivateFolderFragment : CreateFolderFragment() {
             }
         }
 
-        createFolderButton.setOnClickListener {
-            createFolder(currentPermission == ONLY_ME) { file, redirectToShareDetails ->
-                file?.let {
-                    saveNewFolder(file)
-                    requireActivity().showSnackbar(R.string.createPrivateFolderSucces, anchorView = requireActivity().mainFab)
-                    if (redirectToShareDetails) {
-                        safeNavigate(
-                            CreatePrivateFolderFragmentDirections.actionCreatePrivateFolderFragmentToFileShareDetailsFragment(
-                                fileId = file.id, ignoreCreateFolderStack = true
-                            )
+        createFolderButton.setOnClickListener { createPrivateFolder() }
+    }
+
+    private fun createPrivateFolder() {
+        createFolder(currentPermission == ONLY_ME) { file, redirectToShareDetails ->
+            file?.let {
+                saveNewFolder(file)
+                requireActivity().showSnackbar(R.string.createPrivateFolderSucces, anchorView = requireActivity().mainFab)
+                if (redirectToShareDetails) {
+                    safeNavigate(
+                        CreatePrivateFolderFragmentDirections.actionCreatePrivateFolderFragmentToFileShareDetailsFragment(
+                            fileId = file.id,
+                            ignoreCreateFolderStack = true,
                         )
-                    } else {
-                        findNavController().popBackStack(R.id.newFolderFragment, true)
-                    }
+                    )
+                } else {
+                    findNavController().popBackStack(R.id.newFolderFragment, true)
                 }
             }
         }

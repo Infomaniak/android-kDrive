@@ -48,6 +48,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 
 open class CreateFolderFragment : Fragment() {
+
     protected val newFolderViewModel: NewFolderViewModel by navGraphViewModels(R.id.newFolderFragment)
     protected val mainViewModel: MainViewModel by activityViewModels()
     protected lateinit var adapter: PermissionsAdapter

@@ -244,7 +244,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-
     suspend fun syncOfflineFiles() {
         syncOfflineFilesJob.cancel()
         syncOfflineFilesJob = Job()

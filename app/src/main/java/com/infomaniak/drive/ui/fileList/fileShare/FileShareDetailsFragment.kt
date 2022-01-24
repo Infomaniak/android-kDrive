@@ -32,7 +32,6 @@ import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
@@ -45,11 +44,14 @@ import com.infomaniak.drive.utils.*
 import kotlinx.android.synthetic.main.fragment_file_share_details.*
 
 class FileShareDetailsFragment : Fragment() {
-    private lateinit var availableShareableItemsAdapter: AvailableShareableItemsAdapter
-    private lateinit var sharedItemsAdapter: SharedItemsAdapter
+
     private val fileShareViewModel: FileShareViewModel by navGraphViewModels(R.id.fileShareDetailsFragment)
     private val mainViewModel: MainViewModel by activityViewModels()
     private val navigationArgs: FileShareDetailsFragmentArgs by navArgs()
+
+    private lateinit var availableShareableItemsAdapter: AvailableShareableItemsAdapter
+    private lateinit var sharedItemsAdapter: SharedItemsAdapter
+
     private lateinit var allUserList: List<DriveUser>
     private lateinit var allTeams: List<Team>
     private var shareLink: ShareLink? = null
@@ -60,20 +62,20 @@ class FileShareDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val currentFile = FileController.getFileById(navigationArgs.fileId)
-            ?.apply { fileShareViewModel.currentFile.value = this }
-            ?: run {
+        fileShareViewModel.fetchCurrentFile(navigationArgs.fileId).observe(viewLifecycleOwner) { file ->
+            file?.let { fileShareViewModel.currentFile.value = it } ?: run {
                 findNavController().popBackStack()
-                return
+                return@observe
             }
 
-        setAvailableShareableItems(currentFile)
-        setToolbarTitle(currentFile)
-        sharedUsersTitle.isGone = true
-        setupShareLinkContainer(currentFile)
-        refreshUi()
-        setBackActionHandlers()
-        setBackPressedHandlers()
+            setAvailableShareableItems(file)
+            setToolbarTitle(file)
+            sharedUsersTitle.isGone = true
+            setupShareLinkContainer(file)
+            refreshUi()
+            setBackActionHandlers()
+            setBackPressedHandlers()
+        }
     }
 
     override fun onResume() {
@@ -82,7 +84,7 @@ class FileShareDetailsFragment : Fragment() {
         if (findNavController().currentDestination?.id != R.id.fileShareDetailsFragment) return
     }
 
-    private fun setAvailableShareableItems(currentFile: File) {
+    private fun setAvailableShareableItems(file: File) {
         allUserList = AccountUtils.getCurrentDrive().getDriveUsers()
         allTeams = DriveInfosController.getTeams(AccountUtils.getCurrentDrive()!!)
 
@@ -95,17 +97,17 @@ class FileShareDetailsFragment : Fragment() {
                 openAddUserDialog(selectedElement)
             },
         )
-        availableShareableItemsAdapter.notShareableUserIds.addAll(currentFile.users)
+        availableShareableItemsAdapter.notShareableUserIds.addAll(file.users)
     }
 
-    private fun setToolbarTitle(currentFile: File) {
+    private fun setToolbarTitle(file: File) {
         fileShareCollapsingToolbarLayout.title = getString(
-            if (currentFile.type == File.Type.FOLDER.value) {
+            if (file.type == File.Type.FOLDER.value) {
                 R.string.fileShareDetailsFolderTitle
             } else {
                 R.string.fileShareDetailsFileTitle
             },
-            currentFile.name,
+            file.name,
         )
     }
 
@@ -250,12 +252,8 @@ class FileShareDetailsFragment : Fragment() {
     private fun openSelectPermissionDialog(shareable: Shareable) {
 
         val permissionsGroup = when {
-            shareable is Invitation || (shareable is DriveUser && shareable.isExternalUser()) -> {
-                PermissionsGroup.EXTERNAL_USERS_RIGHTS
-            }
-            else -> {
-                PermissionsGroup.USERS_RIGHTS
-            }
+            shareable is Invitation || (shareable is DriveUser && shareable.isExternalUser()) -> PermissionsGroup.EXTERNAL_USERS_RIGHTS
+            else -> PermissionsGroup.USERS_RIGHTS
         }
 
         safeNavigate(

@@ -57,40 +57,43 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
 
         adapter.setAll(arrayListOf(ALL_DRIVE_USERS, SPECIFIC_USERS))
 
-        createFolderButton.setOnClickListener {
-            createCommonFolder { file ->
-                file?.let {
-                    requireActivity().showSnackbar(R.string.createCommonFolderSucces)
-                    if (currentPermission == SPECIFIC_USERS) {
-                        safeNavigate(
-                            CreateCommonFolderFragmentDirections.actionCreateCommonFolderFragmentToFileShareDetailsFragment(
-                                fileId = file.id, ignoreCreateFolderStack = true
-                            )
-                        )
-                    } else {
-                        findNavController().popBackStack(R.id.newFolderFragment, true)
-                    }
-                }
-            }
-        }
+        createFolderButton.setOnClickListener { createCommonFolder() }
     }
 
-    private fun createCommonFolder(onFolderCreated: (newFolder: File?) -> Unit) {
+    private fun createCommonFolder() {
         folderNameValueInput.hideKeyboard()
         createFolderButton.showProgress()
+
         newFolderViewModel.createCommonFolder(
-            folderNameValueInput.text.toString(),
-            currentPermission == ALL_DRIVE_USERS
+            name = folderNameValueInput.text.toString(),
+            forAllUsers = currentPermission == ALL_DRIVE_USERS,
         ).observe(viewLifecycleOwner) { apiResponse ->
+
             if (apiResponse.isSuccess()) {
-                onFolderCreated(apiResponse.data)
+                apiResponse.data?.let(::whenFolderCreated)
             } else {
                 if (apiResponse.error?.code == ErrorCode.DESTINATION_ALREADY_EXISTS.code) {
                     folderNameValueLayout.error = getString(apiResponse.translateError())
                 }
                 requireActivity().showSnackbar(apiResponse.translateError())
             }
+
             createFolderButton.hideProgress(R.string.createFolderTitle)
+        }
+    }
+
+    private fun whenFolderCreated(file: File) {
+        requireActivity().showSnackbar(R.string.createCommonFolderSucces)
+
+        if (currentPermission == SPECIFIC_USERS) {
+            safeNavigate(
+                CreateCommonFolderFragmentDirections.actionCreateCommonFolderFragmentToFileShareDetailsFragment(
+                    fileId = file.id,
+                    ignoreCreateFolderStack = true,
+                )
+            )
+        } else {
+            findNavController().popBackStack(R.id.newFolderFragment, true)
         }
     }
 }

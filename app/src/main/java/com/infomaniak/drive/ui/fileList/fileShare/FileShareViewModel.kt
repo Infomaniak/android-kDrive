@@ -21,14 +21,24 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.utils.AccountUtils
 import kotlinx.coroutines.Dispatchers
 
 class FileShareViewModel : ViewModel() {
+
     val currentFile = MutableLiveData<File>()
     val availableShareableItems = MutableLiveData<List<Shareable>>()
+
+    fun fetchCurrentFile(fileId: Int) = liveData(Dispatchers.IO) {
+        emit(
+            FileController.getFileById(fileId)
+                ?: ApiRepository.getFileDetails(File(id = fileId, driveId = AccountUtils.currentDriveId)).data
+        )
+    }
 
     fun postFileShareCheck(file: File, body: Map<String, Any>) = liveData(Dispatchers.IO) {
         emit(ApiRepository.postFileShareCheck(file, body))

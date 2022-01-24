@@ -184,9 +184,13 @@ object DriveInfosController {
         }
     }
 
-    private fun getCurrentDrive(realm: Realm): Drive? {
-        return realm.where(Drive::class.java)
-            .equalTo(Drive::id.name, AccountUtils.currentDriveId)
-            .findFirst()
+    private fun getCurrentDrive(customRealm: Realm? = null): Drive? {
+        val block: (Realm) -> Drive? = { realm ->
+            realm.where(Drive::class.java)
+                .equalTo(Drive::userId.name, AccountUtils.currentUserId)
+                .equalTo(Drive::id.name, AccountUtils.currentDriveId)
+                .findFirst()
+        }
+        return customRealm?.let(block) ?: getRealmInstance().use(block)
     }
 }
