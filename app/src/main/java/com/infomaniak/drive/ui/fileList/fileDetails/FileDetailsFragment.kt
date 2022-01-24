@@ -102,7 +102,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
     private fun setupTabLayout(isFolder: Boolean) {
         if (tabsViewPager.adapter == null) {
             val tabs = arrayListOf(
-                TabViewPagerUtils.FragmentTab(FileDetailsInfosFragment(), R.id.fileInfo),
+                TabViewPagerUtils.FragmentTab(FileDetailsInfoFragment(), R.id.fileInfo),
                 TabViewPagerUtils.FragmentTab(FileDetailsActivitiesFragment(), R.id.fileActivities),
             )
 
