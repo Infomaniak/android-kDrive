@@ -40,7 +40,7 @@ import com.infomaniak.drive.data.models.drive.CategoryRights
 import com.infomaniak.drive.ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.SelectedState
-import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.UICategory
+import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.UiCategory
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode.MANAGED_CATEGORIES
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode.SELECTED_CATEGORIES
 import com.infomaniak.drive.utils.*
@@ -100,8 +100,8 @@ class SelectCategoriesFragment : Fragment() {
             this.canEditCategory = canEditCategory
             this.canDeleteCategory = canDeleteCategory
             when (usageMode) {
-                SELECTED_CATEGORIES -> updateSelectedCategoriesModeUI()
-                else -> updateFileCategoriesModeUI()
+                SELECTED_CATEGORIES -> updateSelectedCategoriesModeUi()
+                else -> updateFileCategoriesModeUi()
             }
             categoriesRecyclerView.adapter = this
         }
@@ -157,10 +157,10 @@ class SelectCategoriesFragment : Fragment() {
         }
     }
 
-    private fun CategoriesAdapter.updateFileCategoriesModeUI() {
+    private fun CategoriesAdapter.updateFileCategoriesModeUi() {
         val uiCategories = DriveInfosController.getCurrentDriveCategories().map { category ->
             val fileCategory = file.categories.find { it.id == category.id }
-            createUICategory(
+            createUiCategory(
                 category = category,
                 selectedState = if (fileCategory == null) SelectedState.NOT_SELECTED else SelectedState.SELECTED,
                 addedToFileAt = fileCategory?.addedToFileAt,
@@ -185,10 +185,10 @@ class SelectCategoriesFragment : Fragment() {
         }
     }
 
-    private fun CategoriesAdapter.updateSelectedCategoriesModeUI() {
+    private fun CategoriesAdapter.updateSelectedCategoriesModeUi() {
         val uiCategories = DriveInfosController.getCurrentDriveCategories().map { category ->
             val selectedCategory = selectedCategories.find { it.id == category.id }
-            createUICategory(
+            createUiCategory(
                 category = category,
                 selectedState = if (selectedCategory == null) SelectedState.NOT_SELECTED else SelectedState.SELECTED,
             )
@@ -197,8 +197,8 @@ class SelectCategoriesFragment : Fragment() {
         setItems(uiCategories, usageMode)
     }
 
-    private fun createUICategory(category: Category, selectedState: SelectedState, addedToFileAt: Date? = null): UICategory {
-        return UICategory(
+    private fun createUiCategory(category: Category, selectedState: SelectedState, addedToFileAt: Date? = null): UiCategory {
+        return UiCategory(
             id = category.id,
             name = category.getName(requireContext()),
             color = category.color,

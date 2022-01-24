@@ -38,9 +38,9 @@ class CategoriesAdapter(
     var canEditCategory: Boolean = false
     var canDeleteCategory: Boolean = false
     var isCreateRowVisible: Boolean = false
-    var onMenuClicked: ((category: UICategory) -> Unit)? = null
-    var allCategories: List<UICategory> = listOf()
-    var filteredCategories: List<UICategory> = listOf()
+    var onMenuClicked: ((category: UiCategory) -> Unit)? = null
+    var allCategories: List<UiCategory> = listOf()
+    var filteredCategories: List<UiCategory> = listOf()
     private var filterQuery: String = ""
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
@@ -67,21 +67,21 @@ class CategoriesAdapter(
         setCornersRadius(topCornerRadius, bottomCornerRadius)
     }
 
-    private fun MaterialCardView.setMenuButton(category: UICategory) {
+    private fun MaterialCardView.setMenuButton(category: UiCategory) {
         menuButton.apply {
             isVisible = canEditCategory || (canDeleteCategory && !category.isPredefined)
             setOnClickListener { onMenuClicked?.invoke(category) }
         }
     }
 
-    private fun MaterialCardView.handleSelectedState(category: UICategory) {
+    private fun MaterialCardView.handleSelectedState(category: UiCategory) {
         category.selectedState.let {
             categoryProgressBar.isVisible = it == SelectedState.PROCESSING
             checkIcon.isVisible = it == SelectedState.SELECTED
         }
     }
 
-    private fun MaterialCardView.setClickOnCategory(category: UICategory) {
+    private fun MaterialCardView.setClickOnCategory(category: UiCategory) {
         setOnClickListener {
             isEnabled = false
             categoryProgressBar.isVisible = true
@@ -92,7 +92,7 @@ class CategoriesAdapter(
         }
     }
 
-    fun setItems(categories: List<UICategory>, usageMode: CategoriesUsageMode) {
+    fun setItems(categories: List<UiCategory>, usageMode: CategoriesUsageMode) {
         val oldCategories = filteredCategories.toDiffUtilCategories()
         allCategories = categories.sorted(usageMode)
         filteredCategories = allCategories.filtered()
@@ -139,28 +139,28 @@ class CategoriesAdapter(
         DiffUtil.calculateDiff(CategoriesDiffCallback(oldItems, newItems, isCreateRowVisible)).dispatchUpdatesTo(this)
     }
 
-    private fun List<UICategory>.filtered(): List<UICategory> = filter { it.name.contains(filterQuery, true) }
+    private fun List<UiCategory>.filtered(): List<UiCategory> = filter { it.name.contains(filterQuery, true) }
 
-    private fun List<UICategory>.sorted(usageMode: CategoriesUsageMode): List<UICategory> {
+    private fun List<UiCategory>.sorted(usageMode: CategoriesUsageMode): List<UiCategory> {
         return if (usageMode == CategoriesUsageMode.SELECTED_CATEGORIES) sortedSearchCategories() else sortedFileCategories()
     }
 
-    private fun List<UICategory>.sortedFileCategories(): List<UICategory> {
+    private fun List<UiCategory>.sortedFileCategories(): List<UiCategory> {
         return sortedByDescending { it.userUsageCount }
             .sortedBy { it.addedToFileAt }
             .sortedByDescending { it.selectedState == SelectedState.SELECTED }
     }
 
-    private fun List<UICategory>.sortedSearchCategories(): List<UICategory> {
+    private fun List<UiCategory>.sortedSearchCategories(): List<UiCategory> {
         return sortedBy { it.name }
             .sortedByDescending { it.selectedState == SelectedState.SELECTED }
     }
 
-    private fun List<UICategory>.toDiffUtilCategories(): List<DiffUtilCategory> {
+    private fun List<UiCategory>.toDiffUtilCategories(): List<DiffUtilCategory> {
         return map { DiffUtilCategory(it.id, it.selectedState) }
     }
 
-    data class UICategory(
+    data class UiCategory(
         val id: Int,
         var name: String,
         var color: String,

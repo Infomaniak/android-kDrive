@@ -47,7 +47,7 @@ class ConvertToDropBoxFragment : ManageDropboxFragment() {
         disableButton.isGone = true
 
         FileController.getFileById(navigationArgs.fileId)?.let { file ->
-            updateUI(file, null)
+            updateUi(file, null)
 
             expirationDateInput.init(fragmentManager = parentFragmentManager)
 

@@ -24,21 +24,21 @@ import com.google.gson.reflect.TypeToken
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.utils.ApiController
 
-class UISettings(val context: Context) {
+class UiSettings(val context: Context) {
 
-    private fun getUISettings(): SharedPreferences {
+    private fun getUiSettings(): SharedPreferences {
         return context.getSharedPreferences("UISettings", Context.MODE_PRIVATE)
     }
 
     fun removeUiSettings() {
-        with(getUISettings().edit()) {
+        with(getUiSettings().edit()) {
             clear()
             apply()
         }
     }
 
     fun getSaveExternalFilesPref(): Triple<Int, Int, Int> {
-        val uiSettings = getUISettings()
+        val uiSettings = getUiSettings()
         val userId = uiSettings.getInt("saveExternalFilesPref_userId", -1)
         val driveId = uiSettings.getInt("saveExternalFilesPref_driveId", -1)
         val folderId = uiSettings.getInt("saveExternalFilesPref_folderId", -1)
@@ -46,7 +46,7 @@ class UISettings(val context: Context) {
     }
 
     fun setSaveExternalFilesPref(userId: Int, driveId: Int, folderId: Int) {
-        with(getUISettings().edit()) {
+        with(getUiSettings().edit()) {
             putInt("saveExternalFilesPref_userId", userId)
             putInt("saveExternalFilesPref_driveId", driveId)
             putInt("saveExternalFilesPref_folderId", folderId)
@@ -55,54 +55,54 @@ class UISettings(val context: Context) {
     }
 
     var bottomNavigationSelectedItem: Int
-        get() = getUISettings().getInt("bottomNavigationSelectedItem", R.id.hostFragment)
+        get() = getUiSettings().getInt("bottomNavigationSelectedItem", R.id.hostFragment)
         set(value) {
-            with(getUISettings().edit()) {
+            with(getUiSettings().edit()) {
                 putInt("bottomNavigationSelectedItem", value)
                 apply()
             }
         }
 
     var hasDisplayedCategoriesInformationDialog: Boolean
-        get() = getUISettings().getBoolean("hasDisplayedCategoriesInformationDialog", false)
+        get() = getUiSettings().getBoolean("hasDisplayedCategoriesInformationDialog", false)
         set(value) {
-            with(getUISettings().edit()) {
+            with(getUiSettings().edit()) {
                 putBoolean("hasDisplayedCategoriesInformationDialog", value)
                 apply()
             }
         }
 
     var hasDisplayedSyncDialog: Boolean
-        get() = getUISettings().getBoolean("hasDisplayedSyncDialog", false)
+        get() = getUiSettings().getBoolean("hasDisplayedSyncDialog", false)
         set(value) {
-            with(getUISettings().edit()) {
+            with(getUiSettings().edit()) {
                 putBoolean("hasDisplayedSyncDialog", value)
                 apply()
             }
         }
 
     var lastHomeSelectedTab: Int
-        get() = getUISettings().getInt("lastHomeSelectedTab", 0)
+        get() = getUiSettings().getInt("lastHomeSelectedTab", 0)
         set(value) {
-            with(getUISettings().edit()) {
+            with(getUiSettings().edit()) {
                 putInt("lastHomeSelectedTab", value)
                 apply()
             }
         }
 
     var listMode: Boolean
-        get() = getUISettings().getBoolean("listMode", true)
+        get() = getUiSettings().getBoolean("listMode", true)
         set(value) {
-            with(getUISettings().edit()) {
+            with(getUiSettings().edit()) {
                 putBoolean("listMode", value)
                 apply()
             }
         }
 
     var nightMode: Int
-        get() = getUISettings().getInt("nightMode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        get() = getUiSettings().getInt("nightMode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         set(value) {
-            with(getUISettings().edit()) {
+            with(getUiSettings().edit()) {
                 putInt("nightMode", value)
                 apply()
             }
@@ -110,11 +110,11 @@ class UISettings(val context: Context) {
 
     var recentSearches: List<String>
         get() = ApiController.gson.fromJson(
-            getUISettings().getString("recentSearches", null),
+            getUiSettings().getString("recentSearches", null),
             object : TypeToken<List<String>>() {}.type,
         ) ?: emptyList()
         set(value) {
-            with(getUISettings().edit()) {
+            with(getUiSettings().edit()) {
                 putString("recentSearches", ApiController.gson.toJson(value))
                 apply()
             }
@@ -122,7 +122,7 @@ class UISettings(val context: Context) {
 
     var sortType: File.SortType
         get() {
-            return when (getUISettings().getString("sortType", File.SortType.NAME_AZ.name)) {
+            return when (getUiSettings().getString("sortType", File.SortType.NAME_AZ.name)) {
                 File.SortType.NAME_AZ.name -> File.SortType.NAME_AZ
                 File.SortType.NAME_ZA.name -> File.SortType.NAME_ZA
                 File.SortType.OLDER.name -> File.SortType.OLDER
@@ -134,16 +134,16 @@ class UISettings(val context: Context) {
             }
         }
         set(value) {
-            with(getUISettings().edit()) {
+            with(getUiSettings().edit()) {
                 putString("sortType", value.name)
                 apply()
             }
         }
 
     var updateLater: Boolean
-        get() = getUISettings().getBoolean("updateLater", false)
+        get() = getUiSettings().getBoolean("updateLater", false)
         set(value) {
-            with(getUISettings().edit()) {
+            with(getUiSettings().edit()) {
                 putBoolean("updateLater", value)
                 apply()
             }

@@ -35,7 +35,7 @@ import com.facebook.stetho.okhttp3.StethoInterceptor
 import com.infomaniak.drive.BuildConfig.DRIVE_API
 import com.infomaniak.drive.BuildConfig.INFOMANIAK_API
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
-import com.infomaniak.drive.data.models.UISettings
+import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.data.sync.UploadNotifications.pendingIntentFlags
 import com.infomaniak.drive.ui.LaunchActivity
@@ -65,7 +65,7 @@ class ApplicationMain : Application(), ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
 
-        AppCompatDelegate.setDefaultNightMode(UISettings(this).nightMode)
+        AppCompatDelegate.setDefaultNightMode(UiSettings(this).nightMode)
 
         if (BuildConfig.DEBUG) {
             Stetho.initializeWithDefaults(this)

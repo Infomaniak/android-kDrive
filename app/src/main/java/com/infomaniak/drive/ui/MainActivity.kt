@@ -56,7 +56,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.checkUpdateIsAvailable
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.UISettings
+import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.data.services.UploadWorker
@@ -129,7 +129,7 @@ class MainActivity : BaseActivity() {
 
         bottomNavigation.setupWithNavControllerCustom(navController)
         bottomNavigation.itemIconTintList = ContextCompat.getColorStateList(this, R.color.item_icon_tint_bottom)
-        bottomNavigation.selectedItemId = UISettings(this).bottomNavigationSelectedItem
+        bottomNavigation.selectedItemId = UiSettings(this).bottomNavigationSelectedItem
         bottomNavigation.setOnItemReselectedListener { item ->
             when (item.itemId) {
                 R.id.fileListFragment,
@@ -191,7 +191,7 @@ class MainActivity : BaseActivity() {
 
         if (AppSettings.appLaunches == 20 || (AppSettings.appLaunches != 0 && AppSettings.appLaunches % 100 == 0)) launchInAppReview()
 
-        if (!UISettings(this).updateLater || AppSettings.appLaunches % 10 == 0) {
+        if (!UiSettings(this).updateLater || AppSettings.appLaunches % 10 == 0) {
             checkUpdateIsAvailable { updateIsAvailable ->
                 if (!updateAvailableShow && updateIsAvailable) {
                     navController.navigate(R.id.updateAvailableBottomSheetDialog)
@@ -318,7 +318,7 @@ class MainActivity : BaseActivity() {
     }
 
     fun saveLastNavigationItemSelected() {
-        UISettings(this).bottomNavigationSelectedItem = bottomNavigation.selectedItemId
+        UiSettings(this).bottomNavigationSelectedItem = bottomNavigation.selectedItemId
     }
 
     override fun onDestroy() {
@@ -329,7 +329,7 @@ class MainActivity : BaseActivity() {
 
     private fun displayInformationPanel() {
         if (!hasDisplayedInformationPanel) {
-            UISettings(this).apply {
+            UiSettings(this).apply {
                 val destinationId = when {
                     !hasDisplayedSyncDialog && !AccountUtils.isEnableAppSync() -> {
                         hasDisplayedSyncDialog = true

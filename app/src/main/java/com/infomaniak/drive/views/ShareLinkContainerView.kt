@@ -53,7 +53,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
         isVisible = true
         urlValue = file.shareLink ?: ""
 
-        selectUI(file.isDropBox())
+        selectUi(file.isDropBox())
 
         if (!file.isDropBox()) {
             titleContainer.setOnClickListener { onTitleClicked?.invoke(this.shareLink) }
@@ -65,26 +65,26 @@ class ShareLinkContainerView @JvmOverloads constructor(
     fun update(shareLink: ShareLink? = null) {
         this.shareLink = shareLink
         if (shareLink == null) urlValue = ""
-        selectUI()
+        selectUi()
     }
 
-    private fun selectUI(isDropbox: Boolean = false) {
+    private fun selectUi(isDropbox: Boolean = false) {
         when {
             isDropbox -> {
-                setDropboxUI()
+                setDropboxUi()
                 shareLinkSwitch.isGone = true
             }
             shareLink == null && urlValue.isBlank() -> {
-                setRestrictedUI()
+                setRestrictedUi()
             }
             else -> {
-                setPublicUI()
+                setPublicUi()
             }
         }
     }
 
-    private fun setDropboxUI() {
-        setUI(
+    private fun setDropboxUi() {
+        setUi(
             iconId = R.drawable.ic_folder_dropbox,
             title = context.getString(R.string.dropboxSharedLinkTitle),
             containerVisibility = false,
@@ -92,8 +92,8 @@ class ShareLinkContainerView @JvmOverloads constructor(
         )
     }
 
-    private fun setRestrictedUI() {
-        setUI(
+    private fun setRestrictedUi() {
+        setUi(
             iconId = R.drawable.ic_lock,
             title = context.getString(R.string.restrictedSharedLinkTitle),
             containerVisibility = false,
@@ -101,8 +101,8 @@ class ShareLinkContainerView @JvmOverloads constructor(
         )
     }
 
-    private fun setPublicUI() {
-        setUI(
+    private fun setPublicUi() {
+        setUi(
             iconId = R.drawable.ic_unlock,
             title = context.getString(R.string.publicSharedLinkTitle),
             containerVisibility = true,
@@ -110,7 +110,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
         )
     }
 
-    private fun setUI(iconId: Int, title: String, containerVisibility: Boolean, status: String) {
+    private fun setUi(iconId: Int, title: String, containerVisibility: Boolean, status: String) {
         shareLinkIcon.setImageResource(iconId)
         shareLinkTitle.text = title
         shareLinkBottomContainer.isVisible = containerVisibility

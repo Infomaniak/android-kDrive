@@ -34,7 +34,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
-import com.infomaniak.drive.data.models.UISettings
+import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
@@ -107,7 +107,7 @@ class SettingsFragment : Fragment() {
                 defaultNightMode = nightMode[which]!!
             }
             .setPositiveButton(R.string.buttonConfirm) { _, _ ->
-                UISettings(requireContext()).nightMode = defaultNightMode
+                UiSettings(requireContext()).nightMode = defaultNightMode
                 AppCompatDelegate.setDefaultNightMode(defaultNightMode)
                 setThemeSettingsVelue()
             }

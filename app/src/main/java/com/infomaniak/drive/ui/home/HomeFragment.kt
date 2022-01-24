@@ -31,7 +31,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.AppBarLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.models.UISettings
+import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.UploadWorker
@@ -115,8 +115,8 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         )
 
         lifecycleScope.launchWhenResumed {
-            setup(homeViewPager, tabsHomeGroup, tabsHome) { UISettings(requireContext()).lastHomeSelectedTab = it }
-            homeViewPager.currentItem = UISettings(requireContext()).lastHomeSelectedTab
+            setup(homeViewPager, tabsHomeGroup, tabsHome) { UiSettings(requireContext()).lastHomeSelectedTab = it }
+            homeViewPager.currentItem = UiSettings(requireContext()).lastHomeSelectedTab
         }
     }
 
