@@ -78,11 +78,11 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun handleRights() {
         val rights = DriveInfosController.getCategoryRights()
-        (rights?.canEditCategory ?: false).let {
+        rights.canEditCategory.let {
             disabledEditCategory.isGone = it
             editCategory.isEnabled = it
         }
-        (rights?.canDeleteCategory ?: false && !navigationArgs.categoryIsPredefined).let {
+        (rights.canDeleteCategory && !navigationArgs.categoryIsPredefined).let {
             disabledDeleteCategory.isGone = it
             deleteCategory.isEnabled = it
         }

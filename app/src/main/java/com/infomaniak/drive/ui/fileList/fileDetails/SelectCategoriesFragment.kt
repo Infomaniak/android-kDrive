@@ -80,17 +80,15 @@ class SelectCategoriesFragment : Fragment() {
             }
         }
 
-        (if (usageMode == SELECTED_CATEGORIES) CategoryRights() else DriveInfosController.getCategoryRights()).let {
-            setCategoriesAdapter(it?.canEditCategory == true, it?.canDeleteCategory == true)
-            setAddCategoryButton(it?.canCreateCategory == true)
+        (if (usageMode == MANAGED_CATEGORIES) DriveInfosController.getCategoryRights() else CategoryRights()).let {
+            setCategoriesAdapter(it.canEditCategory, it.canDeleteCategory)
+            setAddCategoryButton(it.canCreateCategory)
+            configureSearchView(it.canCreateCategory)
         }
-
-        searchView.hint = getString(R.string.searchTitle)
 
         configureToolbar()
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { setBackNavResult() }
         createCategoryRow.setOnClickListener { navigateToCreateCategory() }
-        configureSearchView()
         setBackActionHandlers()
     }
 
@@ -124,18 +122,19 @@ class SelectCategoriesFragment : Fragment() {
         setNavigationOnClickListener { setBackNavResult() }
     }
 
-    private fun configureSearchView() {
+    private fun configureSearchView(canCreateCategory: Boolean) {
+        searchView.hint = getString(R.string.searchTitle)
         clearButton.setOnClickListener { searchView.setText("") }
-        setSearchViewTextChangedListener()
+        setSearchViewTextChangedListener(canCreateCategory)
         setSearchViewEditorActionListener()
     }
 
-    private fun setSearchViewTextChangedListener() = with(searchView) {
+    private fun setSearchViewTextChangedListener(canCreateCategory: Boolean) = with(searchView) {
         addTextChangedListener(DebouncingTextWatcher(lifecycle) {
             if (isResumed) {
                 clearButton.isInvisible = it.isNullOrEmpty()
                 categoriesAdapter.updateFilter(text.toString())
-                configureCreateCategoryRow(it?.trim())
+                configureCreateCategoryRow(canCreateCategory, it?.trim())
             }
         })
     }
@@ -220,11 +219,12 @@ class SelectCategoriesFragment : Fragment() {
         )
     }
 
-    private fun configureCreateCategoryRow(categoryName: String?) {
-        if (usageMode != MANAGED_CATEGORIES) return
-        setCreateCategoryRowTitle(categoryName)
-        setCreateCategoryRowCorners()
-        setCreateCategoryRowVisibility(categoryName)
+    private fun configureCreateCategoryRow(canCreateCategory: Boolean, categoryName: String?) {
+        if (usageMode == MANAGED_CATEGORIES && canCreateCategory) {
+            setCreateCategoryRowTitle(categoryName)
+            setCreateCategoryRowCorners()
+            setCreateCategoryRowVisibility(categoryName)
+        }
     }
 
     private fun setCreateCategoryRowTitle(categoryName: String?) {

@@ -73,7 +73,7 @@ class SearchFiltersFragment : Fragment() {
     }
 
     private fun handleCategoryRights() {
-        val isVisible = categoryRights?.canReadCategoryOnFile == true
+        val isVisible = categoryRights.canReadCategoryOnFile
         categoriesTitle.isVisible = isVisible
         chooseCategoriesFilter.isVisible = isVisible
     }
@@ -163,7 +163,7 @@ class SearchFiltersFragment : Fragment() {
         val categories = searchFiltersViewModel.categories ?: emptyList()
         categoriesContainer.setup(
             categories = categories,
-            canPutCategoryOnFile = categoryRights?.canPutCategoryOnFile ?: false,
+            canPutCategoryOnFile = categoryRights.canPutCategoryOnFile,
             layoutInflater = layoutInflater,
             onClicked = {
                 safeNavigate(
