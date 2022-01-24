@@ -94,42 +94,42 @@ class ApiRepositoryTest : KDriveTest() {
     @Throws(Exception::class)
     fun tearDown() {
         deleteTestFile(testFile)
+        emptyTrash(userDrive.driveId)
     }
 
     @Test
     fun getDriveData(): Unit = runBlocking {
         val okHttpClient = userDrive.userId.let { KDriveHttpClient.getHttpClient(it) }
-        val drivesDataResponse = getAllDrivesData(okHttpClient)
-        assertApiResponse(drivesDataResponse)
+        assertApiResponse(getAllDrivesData(okHttpClient))
     }
 
     @Test
     fun getTestUserProfile(): Unit = runBlocking {
         val okHttpClient = userDrive.userId.let { KDriveHttpClient.getHttpClient(it) }
-        val userProfileResponse = getUserProfile(okHttpClient)
-        assertApiResponse(userProfileResponse)
-        Assert.assertEquals("User ids should be the same", userDrive.userId, userProfileResponse.data?.id)
+        with(getUserProfile(okHttpClient)) {
+            assertApiResponse(this)
+            Assert.assertEquals("User ids should be the same", userDrive.userId, data?.id)
+        }
     }
 
     @Test
     fun manageFavoriteFileLifecycle(): Unit = runBlocking {
-        // Make the file a favorite
-        val postFavoriteFileResponse = postFavoriteFile(testFile)
-        assertApiResponse(postFavoriteFileResponse)
-        // Get the favorite files
-        var getFavoriteResponse = getFavoriteFiles(userDrive.driveId, File.SortType.NAME_AZ, 1)
-        assertApiResponse(getFavoriteResponse)
-        Assert.assertTrue("Favorite file should exists", getFavoriteResponse.data!!.isNotEmpty())
-        val favoriteFileCount = getFavoriteResponse.data!!.size
-        // Delete the favorite file
-        val deleteFavoriteFileResponse = deleteFavoriteFile(testFile)
-        assertApiResponse(deleteFavoriteFileResponse)
-        getFavoriteResponse = getFavoriteFiles(userDrive.driveId, File.SortType.NAME_AZ, 1)
-        Assert.assertEquals(
-            "The number of favorite files should be lowered by 1",
-            favoriteFileCount - 1,
-            getFavoriteResponse.data?.size
-        )
+        assertApiResponse(postFavoriteFile(testFile))
+
+        val favoriteFileCount = getFavoriteFiles(userDrive.driveId, File.SortType.NAME_AZ, 1).let { favoriteFile ->
+            assertApiResponse(favoriteFile)
+            Assert.assertTrue("Favorite file should exists", favoriteFile.data!!.isNotEmpty())
+            favoriteFile.data!!.size
+        }
+
+        assertApiResponse(deleteFavoriteFile(testFile))
+        with(getFavoriteFiles(userDrive.driveId, File.SortType.NAME_AZ, 1)) {
+            Assert.assertEquals(
+                "The number of favorite files should be lowered by 1",
+                favoriteFileCount - 1,
+                data?.size
+            )
+        }
     }
 
     @Test
@@ -155,40 +155,44 @@ class ApiRepositoryTest : KDriveTest() {
             it.data!!.id
         }
 
-        val commentID2 = postFileComment(testFile, commentBody).also { assertApiResponse(it) }.data!!.id
+        val commentID2 = postFileComment(testFile, commentBody).let {
+            assertApiResponse(it)
+            it.data!!.id
+        }
         Assert.assertNotEquals("Comments id should be different", commentID, commentID2)
 
         // Likes the second comment
-        postFileCommentLike(testFile, commentID2).also {
-            assertApiResponse(it)
-            Assert.assertTrue(it.data ?: false)
+        with(postFileCommentLike(testFile, commentID2)) {
+            assertApiResponse(this)
+            Assert.assertTrue(data ?: false)
         }
 
         // Get new comments
-        getFileComments(testFile, 1).also {
-            assertApiResponse(it)
-            Assert.assertEquals("There should be 2 comments on the test file", 2, it.data?.size)
-            Assert.assertNotNull(it.data?.find { comment -> comment.id == commentID2 }?.liked?.let { it1 -> Assert.assertTrue(it1) })
+        with(getFileComments(testFile, 1)) {
+            assertApiResponse(this)
+            Assert.assertEquals("There should be 2 comments on the test file", 2, data?.size)
+            Assert.assertNotNull(data?.find { comment -> comment.id == commentID2 }?.liked?.let { it -> Assert.assertTrue(it) })
         }
         // Delete first comment
         deleteFileComment(testFile, commentID)
         Assert.assertEquals("There should be 1 comment on the test file", 1, getFileComments(testFile, 1).data?.size)
 
         // Put second comment
-        val putCommentResponse = putFileComment(testFile, commentID2, "42")
-        assertApiResponse(putCommentResponse)
-        Assert.assertTrue(putCommentResponse.data ?: false)
+        with(putFileComment(testFile, commentID2, "42")) {
+            assertApiResponse(this)
+            Assert.assertTrue(data ?: false)
+        }
 
         // Unlike the comment
-        postFileCommentUnlike(testFile, commentID2).also {
-            assertApiResponse(it)
-            Assert.assertTrue(it.data ?: false)
+        with(postFileCommentUnlike(testFile, commentID2)) {
+            assertApiResponse(this)
+            Assert.assertTrue(data ?: false)
         }
 
         // Make sure data has been updated
-        getFileComments(testFile, 1).also {
-            val comment = it.data?.find { commentRes -> commentRes.id == commentID2 }
-            assertApiResponse(it)
+        with(getFileComments(testFile, 1)) {
+            val comment = data?.find { commentRes -> commentRes.id == commentID2 }
+            assertApiResponse(this)
             Assert.assertEquals(
                 "Comment should be equal to 42",
                 "42",
@@ -202,19 +206,19 @@ class ApiRepositoryTest : KDriveTest() {
     @Test
     fun duplicateTestFile() {
         val copyName = "test copy"
-        val copyFile = duplicateFile(testFile, copyName, ROOT_ID).also {
+        val copyFile = duplicateFile(testFile, copyName, ROOT_ID).let {
             assertApiResponse(it)
             Assert.assertEquals("The copy name should be equal to $copyName", copyName, it.data?.name)
             Assert.assertNotEquals("The id should be different from the original file", testFile.id, it.data?.id)
             Assert.assertEquals(testFile.driveColor, it.data?.driveColor)
-
-        }.data!!
+            it.data!!
+        }
 
         // Duplicate one more time with same name and location
-        duplicateFile(testFile, copyName, ROOT_ID).also {
-            assertApiResponse(it)
-            Assert.assertEquals("The copy name should be equal to $copyName (1)", "$copyName (1)", it.data?.name)
-            deleteTestFile(it.data!!)
+        with(duplicateFile(testFile, copyName, ROOT_ID)) {
+            assertApiResponse(this)
+            Assert.assertEquals("The copy name should be equal to $copyName (1)", "$copyName (1)", data?.name)
+            deleteTestFile(data!!)
         }
 
         deleteTestFile(copyFile)
@@ -225,15 +229,15 @@ class ApiRepositoryTest : KDriveTest() {
         val file = createFileForTest()
         // Create test folder
         val folderName = "f"
-        createFolder(OkHttpClient(), userDrive.driveId, ROOT_ID, folderName).also {
-            Assert.assertNotNull(it.data)
+        with(createFolder(OkHttpClient(), userDrive.driveId, ROOT_ID, folderName)) {
+            Assert.assertNotNull(data)
             // Move file in the test folder
-            assertApiResponse(moveFile(file, it.data!!))
-            val folderFileCount = getFileCount(it.data!!)
+            assertApiResponse(moveFile(file, data!!))
+            val folderFileCount = getFileCount(data!!)
             assertApiResponse(folderFileCount)
             Assert.assertEquals("There should be 1 file in the folder", 1, folderFileCount.data?.count)
 
-            val folderData = getFileDetails(it.data!!).data
+            val folderData = getFileDetails(data!!).data
             Assert.assertNotNull(folderData)
             Assert.assertTrue(folderData!!.children.contains(file))
             deleteTestFile(folderData)
@@ -242,10 +246,10 @@ class ApiRepositoryTest : KDriveTest() {
 
     @Test
     fun createTeamTestFolder() {
-        createTeamFolder(OkHttpClient(), userDrive.driveId, "teamFolder", true).also {
-            assertApiResponse(it)
-            Assert.assertTrue("visibility should be 'is_team_space_folder", it.data!!.visibility.contains("is_team_space_folder"))
-            deleteTestFile(it.data!!)
+        with(createTeamFolder(OkHttpClient(), userDrive.driveId, "teamFolder", true)) {
+            assertApiResponse(this)
+            Assert.assertTrue("visibility should be 'is_team_space_folder", data!!.visibility.contains("is_team_space_folder"))
+            deleteTestFile(data!!)
         }
     }
 
@@ -260,22 +264,19 @@ class ApiRepositoryTest : KDriveTest() {
             "block_comments" to "false",
             "block_information" to "false"
         )
-        postFileShareLink(
-            testFile,
-            body
-        ).also {
-            assertApiResponse(it)
-            Assert.assertEquals("Permission should be public", "public", it.data!!.permission.name.lowercase())
-            Assert.assertFalse("Block downloads should be false", it.data!!.blockDownloads)
-            Assert.assertFalse("Can edit should be false", it.data!!.canEdit)
-            Assert.assertFalse("Show stats should be false", it.data!!.showStats)
-            Assert.assertFalse("Block comments should be false", it.data!!.blockDownloads)
-            Assert.assertFalse("Block information should be false", it.data!!.blockInformation)
+        with(postFileShareLink(testFile, body)) {
+            assertApiResponse(this)
+            Assert.assertEquals("Permission should be public", "public", data!!.permission.name.lowercase())
+            Assert.assertFalse("Block downloads should be false", data!!.blockDownloads)
+            Assert.assertFalse("Can edit should be false", data!!.canEdit)
+            Assert.assertFalse("Show stats should be false", data!!.showStats)
+            Assert.assertFalse("Block comments should be false", data!!.blockDownloads)
+            Assert.assertFalse("Block information should be false", data!!.blockInformation)
         }
 
-        getFileShare(OkHttpClient(), testFile).also {
-            assertApiResponse(it)
-            Assert.assertEquals("Path should be the name of the file", "/${testFile.name}", it.data!!.path)
+        with(getFileShare(OkHttpClient(), testFile)) {
+            assertApiResponse(this)
+            Assert.assertEquals("Path should be the name of the file", "/${testFile.name}", data!!.path)
         }
 
         val response = putFileShareLink(
@@ -290,19 +291,19 @@ class ApiRepositoryTest : KDriveTest() {
         )
         assertApiResponse(response)
 
-        getShareLink(testFile).also {
-            assertApiResponse(it)
-            Assert.assertEquals("Permission should be public", "public", it.data!!.permission.name.lowercase())
-            Assert.assertTrue("block downloads should be true", it.data!!.blockDownloads)
-            Assert.assertTrue("can edit should be true", it.data!!.canEdit)
-            Assert.assertTrue("show stats should be true", it.data!!.showStats)
-            Assert.assertTrue("block comments should be true", it.data!!.blockDownloads)
-            Assert.assertTrue("Block information should be true", it.data!!.blockInformation)
+        with(getShareLink(testFile)) {
+            assertApiResponse(this)
+            Assert.assertEquals("Permission should be public", "public", data!!.permission.name.lowercase())
+            Assert.assertTrue("block downloads should be true", data!!.blockDownloads)
+            Assert.assertTrue("can edit should be true", data!!.canEdit)
+            Assert.assertTrue("show stats should be true", data!!.showStats)
+            Assert.assertTrue("block comments should be true", data!!.blockDownloads)
+            Assert.assertTrue("Block information should be true", data!!.blockInformation)
         }
 
-        deleteFileShareLink(testFile).also {
-            assertApiResponse(it)
-            Assert.assertTrue(it.data!!)
+        with(deleteFileShareLink(testFile)) {
+            assertApiResponse(this)
+            Assert.assertTrue(data!!)
         }
         Assert.assertFalse(postFileShareCheck(testFile, body).isSuccess())
     }
@@ -318,27 +319,27 @@ class ApiRepositoryTest : KDriveTest() {
 
     @Test
     fun manageCategoryLifecycle() {
-        val categoryResponse = createCategory(userDrive.driveId, "category tests", "#0000FF").also {
+        val categoryId = createCategory(userDrive.driveId, "category tests", "#0000FF").let {
             assertApiResponse(it)
             Assert.assertEquals("Name of the category should be equals to 'category tests'", "category tests", it.data?.name)
             Assert.assertEquals("Color of the category should be equals to blue", "#0000FF", it.data?.color)
+            it.data!!.id
         }
-        val categoryId = categoryResponse.data!!.id
 
         // Create again the same category should fail
-        createCategory(userDrive.driveId, "category tests", "#0000FF").also {
-            Assert.assertFalse(it.isSuccess())
+        with(createCategory(userDrive.driveId, "category tests", "#0000FF")) {
+            Assert.assertFalse(isSuccess())
             Assert.assertEquals(
                 "Error description should be 'category already exist error'",
                 "Category already exist error",
-                it.error?.description
+                error?.description
             )
         }
 
-        editCategory(userDrive.driveId, categoryId, "update cat", "#FF0000").also {
-            assertApiResponse(it)
-            Assert.assertEquals("Name of the category should be equals to 'update cat'", "update cat", it.data?.name)
-            Assert.assertEquals("Color of the category should be equals to red", "#FF0000", it.data?.color)
+        with(editCategory(userDrive.driveId, categoryId, "update cat", "#FF0000")) {
+            assertApiResponse(this)
+            Assert.assertEquals("Name of the category should be equals to 'update cat'", "update cat", data?.name)
+            Assert.assertEquals("Color of the category should be equals to red", "#FF0000", data?.color)
         }
 
         assertApiResponse(deleteCategory(userDrive.driveId, categoryId))
@@ -355,17 +356,17 @@ class ApiRepositoryTest : KDriveTest() {
         Assert.assertNotNull(category)
         // Add the category to the test file
         addCategory(file, category!!.id)
-        getFileDetails(file).also {
-            assertApiResponse(it)
+        with(getFileDetails(file)) {
+            assertApiResponse(this)
             Assert.assertNotNull(
                 "The test category should be found",
-                it.data!!.categories.find { cat -> cat.id == category.id })
+                data!!.categories.find { cat -> cat.id == category.id })
         }
         // Delete the category before removing it from the test file
         deleteCategory(userDrive.driveId, category.id)
-        getFileDetails(file).also {
-            assertApiResponse(it)
-            Assert.assertTrue("The test file should not have category", it.data!!.categories.isNullOrEmpty())
+        with(getFileDetails(file)) {
+            assertApiResponse(this)
+            Assert.assertTrue("The test file should not have category", data!!.categories.isNullOrEmpty())
         }
         deleteTestFile(file)
     }
@@ -380,9 +381,9 @@ class ApiRepositoryTest : KDriveTest() {
         addCategory(file, category!!.id)
         // Remove the category
         removeCategory(file, category.id)
-        getFileDetails(file).also {
-            assertApiResponse(it)
-            Assert.assertTrue("The test file should not have a category", it.data!!.categories.isNullOrEmpty())
+        with(getFileDetails(file)) {
+            assertApiResponse(this)
+            Assert.assertTrue("The test file should not have a category", data!!.categories.isNullOrEmpty())
         }
         // Delete the test category and file
         deleteCategory(userDrive.driveId, category.id)
@@ -391,9 +392,9 @@ class ApiRepositoryTest : KDriveTest() {
 
     @Test
     fun getLastActivityTest() {
-        getLastActivities(userDrive.driveId, 1).also {
-            assertApiResponse(it)
-            Assert.assertTrue("Last activities shouldn't be empty or null", it.data!!.isNotEmpty())
+        with(getLastActivities(userDrive.driveId, 1)) {
+            assertApiResponse(this)
+            Assert.assertTrue("Last activities shouldn't be empty or null", data!!.isNotEmpty())
         }
     }
 
@@ -430,26 +431,26 @@ class ApiRepositoryTest : KDriveTest() {
             it.data!!.id
         }
 
-        getDropBox(folder).also {
-            assertApiResponse(it)
-            Assert.assertEquals("Dropbox name should be '$name'", name, it.data!!.alias)
-            Assert.assertEquals("Dropbox id should be $dropboxId", dropboxId, it.data!!.id)
+        with(getDropBox(folder)) {
+            assertApiResponse(this)
+            Assert.assertEquals("Dropbox name should be '$name'", name, data!!.alias)
+            Assert.assertEquals("Dropbox id should be $dropboxId", dropboxId, data!!.id)
         }
-        val data = JsonObject().apply {
+        val updateBody = JsonObject().apply {
             addProperty("email_when_finished", false)
             addProperty("limit_file_size", maxSize * 2)
         }
 
-        updateDropBox(folder, data).also {
-            assertApiResponse(it)
-            Assert.assertTrue(it.data ?: false)
+        with(updateDropBox(folder, updateBody)) {
+            assertApiResponse(this)
+            Assert.assertTrue(data ?: false)
         }
 
-        getDropBox(folder).also {
-            assertApiResponse(it)
-            Assert.assertEquals("Dropbox id should be $dropboxId", dropboxId, it.data!!.id)
-            Assert.assertEquals("Email when finished should be false", false, it.data!!.emailWhenFinished)
-            Assert.assertEquals("Limit file size should be ${maxSize * 2}", maxSize * 2, it.data!!.limitFileSize)
+        with(getDropBox(folder)) {
+            assertApiResponse(this)
+            Assert.assertEquals("Dropbox id should be $dropboxId", dropboxId, data!!.id)
+            Assert.assertEquals("Email when finished should be false", false, data!!.emailWhenFinished)
+            Assert.assertEquals("Limit file size should be ${maxSize * 2}", maxSize * 2, data!!.limitFileSize)
         }
 
         assertApiResponse(deleteDropBox(folder))
@@ -460,30 +461,30 @@ class ApiRepositoryTest : KDriveTest() {
 
     @Test
     fun manageTrashLifecycle() {
-        createFileForTest().also { file ->
+        createFileForTest().let { file ->
             val newName = "Trash test"
             renameFile(file, newName)
             val modifiedFile = getLastModifiedFiles(userDrive.driveId).data?.first()
             Assert.assertNotNull(modifiedFile)
             deleteTestFile(modifiedFile!!)
-            getTrashFile(modifiedFile, File.SortType.RECENT, 1).also {
-                assertApiResponse(it)
-                Assert.assertEquals("file id should be the same", file.id, it.data?.id)
-                Assert.assertEquals("file name should be updated to 'Trash test'", newName, it.data?.name)
+            with(getTrashFile(modifiedFile, File.SortType.RECENT, 1)) {
+                assertApiResponse(this)
+                Assert.assertEquals("file id should be the same", file.id, data?.id)
+                Assert.assertEquals("file name should be updated to '$newName'", newName, data?.name)
             }
 
-            getDriveTrash(userDrive.driveId, File.SortType.RECENT, 1).also {
-                assertApiResponse(it)
-                Assert.assertTrue("Trash should not be empty", it.data!!.isNotEmpty())
-                Assert.assertEquals("Last file trashed should be 'trash test'", file.id, it.data?.first()?.id)
+            with(getDriveTrash(userDrive.driveId, File.SortType.RECENT, 1)) {
+                assertApiResponse(this)
+                Assert.assertTrue("Trash should not be empty", data!!.isNotEmpty())
+                Assert.assertEquals("Last trash file's id should be ${file.id}", file.id, data?.first()?.id)
             }
 
             // Restore the file from the trash
             assertApiResponse(postRestoreTrashFile(modifiedFile, mapOf("destination_folder_id" to ROOT_ID)))
-            getDriveTrash(userDrive.driveId, File.SortType.RECENT, 1).also {
-                assertApiResponse(it)
-                if (it.data!!.isNotEmpty()) {
-                    Assert.assertNotEquals("Last file trashed should not be 'trash test'", file.id, it.data?.first()?.id)
+            with(getDriveTrash(userDrive.driveId, File.SortType.RECENT, 1)) {
+                assertApiResponse(this)
+                if (data!!.isNotEmpty()) {
+                    Assert.assertNotEquals("Last trash file's id should not be ${file.id}", file.id, data?.first()?.id)
                 }
             }
             deleteTestFile(modifiedFile)
@@ -491,21 +492,21 @@ class ApiRepositoryTest : KDriveTest() {
 
         // Clean the trash to make sure nothing is left in
         assertApiResponse(emptyTrash(userDrive.driveId))
-        getDriveTrash(userDrive.driveId, File.SortType.NAME_ZA, 1).also {
-            assertApiResponse(it)
-            Assert.assertTrue("Trash should be empty", it.data!!.isEmpty())
+        with(getDriveTrash(userDrive.driveId, File.SortType.NAME_ZA, 1)) {
+            assertApiResponse(this)
+            Assert.assertTrue("Trash should be empty", data!!.isEmpty())
         }
 
         // Create a new file, put it in trash then permanently delete it
-        createFileForTest().apply {
+        with(createFileForTest()) {
             deleteTestFile(this)
             deleteTrashFile(this)
         }
 
         // Trash should still be empty
-        getDriveTrash(userDrive.driveId, File.SortType.NAME_ZA, 1).also {
-            assertApiResponse(it)
-            Assert.assertTrue("Trash should be empty", it.data!!.isEmpty())
+        with(getDriveTrash(userDrive.driveId, File.SortType.NAME_ZA, 1)) {
+            assertApiResponse(this)
+            Assert.assertTrue("Trash should be empty", data!!.isEmpty())
         }
     }
 
