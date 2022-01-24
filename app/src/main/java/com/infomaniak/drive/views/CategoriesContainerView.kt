@@ -71,12 +71,12 @@ class CategoriesContainerView @JvmOverloads constructor(
         layoutInflater: LayoutInflater,
         onClicked: () -> Unit,
     ) = with(categoriesGroup) {
-        if (categories.isNotEmpty()) {
+        if (categories.isEmpty()) {
+            isGone = true
+        } else {
             isVisible = true
             removeAllViews()
             categories.forEach { addView(createChip(canPutCategoryOnFile, it, layoutInflater, onClicked)) }
-        } else {
-            isGone = true
         }
     }
 
