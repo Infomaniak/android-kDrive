@@ -49,7 +49,7 @@ object SyncOfflineUtils {
                     file.getOfflineFile(context, userDrive.userId)?.let { offlineFile ->
                         migrateOfflineIfNeeded(context, file, offlineFile, userDrive)
 
-                        val apiResponse = ApiRepository.getFileDetails(file.id, file.driveId)
+                        val apiResponse = ApiRepository.getFileDetails(file)
                         apiResponse.data?.let { remoteFile ->
                             remoteFile.isOffline = true
                             updateFile(offlineFile, file, context, remoteFile, userDrive, realm)

@@ -27,9 +27,7 @@ object ApiRoutes {
 
     private const val with = "with=children,rights,collaborative_folder,favorite,mobile,share_link,categories"
 
-    private fun fileURL(fileId: Int, driveId: Int) = "${DRIVE_API}${driveId}/file/${fileId}"
-
-    private fun fileURL(file: File) = fileURL(file.id, file.driveId)
+    private fun fileURL(file: File) = "${DRIVE_API}${file.driveId}/file/${file.id}"
 
     private fun trashURL(file: File) = "${DRIVE_API}${file.driveId}/file/trash/${file.id}"
 
@@ -83,8 +81,8 @@ object ApiRoutes {
 
     fun unLikeCommentFile(file: File, commentId: Int) = "${fileURL(file)}/comment/$commentId/unlike"
 
-    fun getFileDetails(fileId: Int, driveId: Int) = "${fileURL(fileId, driveId)}?with=user,teams,children,parent,rights," +
-            "favorite,version,extras,share_link,collaborative_folder,mobile,conversion,categories"
+    fun getFileDetails(file: File) = "${fileURL(file)}?with=user,teams,children,parent,rights,favorite,version,extras," +
+            "share_link,collaborative_folder,mobile,conversion,categories"
 
     fun getFileCount(file: File) = "${fileURL(file)}/count"
 

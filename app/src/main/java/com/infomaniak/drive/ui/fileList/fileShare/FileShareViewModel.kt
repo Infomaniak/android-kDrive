@@ -34,7 +34,10 @@ class FileShareViewModel : ViewModel() {
     val availableShareableItems = MutableLiveData<List<Shareable>>()
 
     fun fetchCurrentFile(fileId: Int) = liveData(Dispatchers.IO) {
-        emit(FileController.getFileById(fileId) ?: ApiRepository.getFileDetails(fileId, AccountUtils.currentDriveId).data)
+        emit(
+            FileController.getFileById(fileId)
+                ?: ApiRepository.getFileDetails(File(id = fileId, driveId = AccountUtils.currentDriveId)).data
+        )
     }
 
     fun postFileShareCheck(file: File, body: Map<String, Any>) = liveData(Dispatchers.IO) {
