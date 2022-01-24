@@ -17,35 +17,64 @@
  */
 package com.infomaniak.drive.ui
 
+import android.database.Cursor
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import androidx.collection.arrayMapOf
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.ui.fileList.FileAdapter.Companion.setCorners
 import com.infomaniak.drive.utils.SyncUtils
+import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.setFileItem
+import com.infomaniak.drive.utils.setMargin
 import com.infomaniak.lib.core.views.ViewHolder
 import io.sentry.Sentry
 import io.sentry.SentryLevel
-import kotlinx.android.synthetic.main.item_file_name.view.*
+import kotlinx.android.synthetic.main.cardview_file_list.view.*
+import kotlinx.android.synthetic.main.item_file.view.*
+import java.util.*
 
 class SaveExternalUriAdapter(val uris: ArrayList<Uri>) : RecyclerView.Adapter<ViewHolder>() {
 
+    private var fileNames = arrayMapOf<Uri, String>()
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
-            LayoutInflater.from(parent.context).inflate(R.layout.item_file_name, parent, false)
+            LayoutInflater.from(parent.context).inflate(R.layout.cardview_file_list, parent, false)
         )
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val uri = uris[position]
+
         with(holder.itemView) {
-            val uri = uris[position]
             try {
                 context?.contentResolver?.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
-                    if (cursor.moveToFirst()) name.text = SyncUtils.getFileName(cursor)
+                    if (cursor.moveToFirst()) {
+                        val name = initAndGetFileName(uri, cursor)
+                        val file = File(
+                            id = uri.hashCode(),
+                            isFromUploads = true,
+                            name = name,
+                            path = uri.toString()
+                        )
+
+                        fileName.text = name
+
+                        setFileItem(file)
+                        initView(position)
+                        setOnClickListener { onItemClicked(file, position) }
+                    }
                 }
             } catch (exception: Exception) {
-                name.setText(R.string.anErrorHasOccurred)
+                fileName.setText(R.string.anErrorHasOccurred)
                 Sentry.withScope { scope ->
                     scope.level = SentryLevel.WARNING
                     scope.setExtra("uri", uri.toString())
@@ -56,4 +85,46 @@ class SaveExternalUriAdapter(val uris: ArrayList<Uri>) : RecyclerView.Adapter<Vi
     }
 
     override fun getItemCount() = uris.size
+
+    fun getFileName(uri: Uri) = fileNames[uri]
+
+    private fun updateFileName(position: Int, newName: String) {
+        fileNames[uris[position]] = newName
+        notifyItemChanged(position)
+    }
+
+    private fun initAndGetFileName(uri: Uri, cursor: Cursor): String {
+        return (fileNames[uri] ?: SyncUtils.getFileName(cursor) ?: throw Exception("Name not found from $uri")).also { name ->
+            if (fileNames[uri] == null) fileNames[uri] = name
+        }
+    }
+
+    private fun View.initView(position: Int) {
+        fileSize.isGone = true
+        fileDate.isGone = true
+
+        fileCardView.setMargin(left = 0, right = 0)
+        fileCardView.setCorners(position, itemCount)
+
+        menuButton.apply {
+            isVisible = true
+            isEnabled = false
+            isClickable = false
+            setIconResource(R.drawable.ic_edit)
+        }
+    }
+
+    private fun View.onItemClicked(file: File, position: Int) {
+        Utils.createPromptNameDialog(
+            context = context,
+            title = R.string.buttonRename,
+            fieldName = R.string.hintInputFileName,
+            positiveButton = R.string.buttonSave,
+            fieldValue = file.name,
+            selectedRange = file.getFileName().count()
+        ) { dialog, name ->
+            updateFileName(position, name)
+            dialog.dismiss()
+        }
+    }
 }
