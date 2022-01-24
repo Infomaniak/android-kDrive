@@ -45,7 +45,7 @@ import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.fragment_file_details.*
 import kotlinx.android.synthetic.main.fragment_file_details_infos.*
 
-class FileDetailsInfosFragment : FileDetailsSubFragment() {
+class FileDetailsInfoFragment : FileDetailsSubFragment() {
 
     private var shareLink: ShareLink? = null
 

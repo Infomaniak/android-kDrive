@@ -38,7 +38,7 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDia
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.SHAREABLE_BUNDLE_KEY
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.PermissionsGroup
-import com.infomaniak.drive.ui.fileList.fileDetails.FileDetailsInfosFragment
+import com.infomaniak.drive.ui.fileList.fileDetails.FileDetailsInfoFragment
 import com.infomaniak.drive.ui.fileList.fileShare.FileShareAddUserDialog.Companion.SHARE_SELECTION_KEY
 import com.infomaniak.drive.utils.*
 import kotlinx.android.synthetic.main.fragment_file_share_details.*
@@ -140,7 +140,7 @@ class FileShareDetailsFragment : Fragment() {
     private fun setBackActionHandlers() {
         getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.SHARE_LINK_ACCESS_NAV_KEY) { bundle ->
             val permission = bundle.getParcelable<Permission>(PERMISSION_BUNDLE_KEY)
-            val isPublic = FileDetailsInfosFragment.isPublicPermission(permission)
+            val isPublic = FileDetailsInfoFragment.isPublicPermission(permission)
             fileShareViewModel.currentFile.value?.let { currentFile ->
                 if (isPublic && shareLink == null) {
                     createShareLink(currentFile)
@@ -202,7 +202,7 @@ class FileShareDetailsFragment : Fragment() {
             shareLink = shareLink,
             onTitleClicked = { newShareLink, currentFileId ->
                 this.shareLink = newShareLink
-                val (permissionsGroup, currentPermission) = FileDetailsInfosFragment.selectPermissions(
+                val (permissionsGroup, currentPermission) = FileDetailsInfoFragment.selectPermissions(
                     isFolder = file.isFolder(),
                     isOnlyOffice = file.onlyoffice,
                     shareLinkExist = this.shareLink != null,
