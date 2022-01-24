@@ -23,6 +23,8 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Env
+import com.infomaniak.drive.utils.KDriveHttpClient
+import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.models.User
 import com.infomaniak.lib.core.networking.HttpClient
@@ -30,6 +32,7 @@ import com.infomaniak.lib.login.ApiToken
 import io.realm.RealmConfiguration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
 import org.junit.AfterClass
 import org.junit.BeforeClass
 
@@ -38,6 +41,7 @@ open class KDriveTest {
         internal val context = ApplicationProvider.getApplicationContext<Context>()
         internal lateinit var user: User
         internal lateinit var userDrive: UserDrive
+        internal lateinit var okHttpClient: OkHttpClient
 
         @BeforeClass
         @JvmStatic
@@ -45,19 +49,20 @@ open class KDriveTest {
             if (Env.USE_CURRENT_USER) {
                 user = runBlocking(Dispatchers.IO) { AccountUtils.requestCurrentUser() }!!
                 InfomaniakCore.bearerToken = user.apiToken.accessToken
-                userDrive = UserDrive(user.id, Env.DRIVE_ID)
+
             } else {
                 InfomaniakCore.bearerToken = Env.TOKEN
 
                 val apiResponse = ApiRepository.getUserProfile(HttpClient.okHttpClientNoInterceptor)
                 user = apiResponse.data!!
-                userDrive = UserDrive(user.id, Env.DRIVE_ID)
                 runBlocking {
                     user.apiToken = ApiToken(Env.TOKEN, "", "Bearer", userId = user.id, expiresAt = null)
                     user.organizations = arrayListOf()
                     AccountUtils.addUser(user)
                 }
             }
+            userDrive = UserDrive(user.id, Env.DRIVE_ID)
+            okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(user.id) }
         }
 
         @AfterClass
@@ -66,8 +71,13 @@ open class KDriveTest {
             if (!Env.USE_CURRENT_USER) {
                 runBlocking { AccountUtils.removeUser(context, user) }
             }
+            ApiRepository.emptyTrash(userDrive.driveId)
         }
 
-        internal fun getConfig() = RealmConfiguration.Builder().inMemory().name("KDrive-test.realm").build()
+        internal fun getConfig() = RealmConfiguration.Builder().inMemory()
+            .name("KDrive-test.realm")
+            .deleteRealmIfMigrationNeeded()
+            .modules(RealmModules.LocalFilesModule())
+            .build()
     }
 }

@@ -107,7 +107,7 @@ object FileController {
     }
 
     private fun generatePath(file: File, userDrive: UserDrive): String {
-        // id > 0 for exclude other root parents, home root has priority
+        // id > 0 to exclude other root parents, home root has priority
         val folder = file.localParent?.createSnapshot()?.firstOrNull { it.id > 0 }
         return when {
             folder == null -> ""
@@ -249,8 +249,8 @@ object FileController {
         }
     }
 
-    fun saveFavoritesFiles(files: List<File>, replaceOldData: Boolean = false) {
-        saveFiles(FAVORITES_FILE, files, replaceOldData)
+    fun saveFavoritesFiles(files: List<File>, replaceOldData: Boolean = false, realm: Realm? = null) {
+        saveFiles(FAVORITES_FILE, files, replaceOldData, realm)
     }
 
     private fun saveMySharesFiles(files: ArrayList<File>, replaceOldData: Boolean) {
@@ -720,10 +720,11 @@ object FileController {
     private fun getLocalSortedFolderFiles(
         localFolder: File?,
         order: SortType,
-        localChildren: RealmResults<File>? = null
+        localChildren: RealmResults<File>? = null,
+        currentRealm: Realm? = null
     ): ArrayList<File> {
         val files = getRealmLiveSortedFiles(localFolder, order, localChildren = localChildren)?.let { realmFiles ->
-            localFolder?.realm?.copyFromRealm(realmFiles, 1)
+            localFolder?.realm?.copyFromRealm(realmFiles, 1) ?: currentRealm?.copyFromRealm(realmFiles, 1)
         }
         return files?.let { ArrayList(it) } ?: arrayListOf()
     }
@@ -853,9 +854,9 @@ object FileController {
         userDrive: UserDrive = UserDrive(),
         customRealm: Realm? = null
     ): ArrayList<File> {
-        val block: (Realm) -> ArrayList<File> = { currRealm ->
-            currRealm.where(File::class.java).like(File::name.name, "*$query*").findAll()?.let { files ->
-                getLocalSortedFolderFiles(null, order, files)
+        val block: (Realm) -> ArrayList<File> = { currentRealm ->
+            currentRealm.where(File::class.java).like(File::name.name, "*$query*").findAll()?.let { files ->
+                getLocalSortedFolderFiles(null, order, files, currentRealm)
             } ?: arrayListOf()
         }
         return customRealm?.let(block) ?: getRealmInstance(userDrive).use(block)
