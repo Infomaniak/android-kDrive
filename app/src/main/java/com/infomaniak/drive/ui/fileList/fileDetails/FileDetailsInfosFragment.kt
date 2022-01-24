@@ -87,9 +87,10 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         }
 
         fileDetailsViewModel.currentFileShare.observe(viewLifecycleOwner) { share ->
-            val currentFile = fileDetailsViewModel.currentFile.value
-            setPath(currentFile?.driveId ?: AccountUtils.currentDriveId, share.path)
-            setupShareLinkContainer(currentFile, share)
+            fileDetailsViewModel.currentFile.value?.let { file ->
+                setPath(file.driveId, share.path)
+                setupShareLinkContainer(file, share)
+            }
         }
 
         setBackActionHandlers()
@@ -138,17 +139,11 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         }
     }
 
-    private fun setupShareLinkContainer(file: File?, share: Share?) {
+    private fun setupShareLinkContainer(file: File, share: Share?) {
         when {
-            file?.isDropBox() == true -> {
-                showDropBoxShareLinkView(file)
-            }
-            file?.rights?.canBecomeLink == true || file?.shareLink?.isNotBlank() == true -> {
-                showShareLinkView(file, share)
-            }
-            else -> {
-                hideShareLinkView()
-            }
+            file.isDropBox() -> showDropBoxShareLinkView(file)
+            file.rights?.canBecomeLink == true || file.shareLink?.isNotBlank() == true -> showShareLinkView(file, share)
+            else -> hideShareLinkView()
         }
     }
 
