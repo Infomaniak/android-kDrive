@@ -23,6 +23,7 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Env
+import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.models.User
@@ -31,6 +32,7 @@ import com.infomaniak.lib.login.ApiToken
 import io.realm.RealmConfiguration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
 import org.junit.AfterClass
 import org.junit.BeforeClass
 
@@ -39,6 +41,7 @@ open class KDriveTest {
         internal val context = ApplicationProvider.getApplicationContext<Context>()
         internal lateinit var user: User
         internal lateinit var userDrive: UserDrive
+        internal lateinit var okHttpClient: OkHttpClient
 
         @BeforeClass
         @JvmStatic
@@ -59,6 +62,7 @@ open class KDriveTest {
                 }
             }
             userDrive = UserDrive(user.id, Env.DRIVE_ID)
+            okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(user.id) }
         }
 
         @AfterClass

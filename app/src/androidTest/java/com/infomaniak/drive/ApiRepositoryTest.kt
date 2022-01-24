@@ -69,11 +69,7 @@ import com.infomaniak.drive.utils.ApiTestUtils.createFileForTest
 import com.infomaniak.drive.utils.ApiTestUtils.deleteTestFile
 import com.infomaniak.drive.utils.ApiTestUtils.getCategory
 import com.infomaniak.drive.utils.ApiTestUtils.getShareLink
-import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.lib.core.networking.HttpClient.okHttpClient
-import kotlinx.coroutines.runBlocking
-import okhttp3.OkHttpClient
 import org.junit.*
 import org.junit.runner.RunWith
 
@@ -98,14 +94,12 @@ class ApiRepositoryTest : KDriveTest() {
     }
 
     @Test
-    fun getDriveData(): Unit = runBlocking {
-        val okHttpClient = userDrive.userId.let { KDriveHttpClient.getHttpClient(it) }
+    fun getDriveData() {
         assertApiResponse(getAllDrivesData(okHttpClient))
     }
 
     @Test
-    fun getTestUserProfile(): Unit = runBlocking {
-        val okHttpClient = userDrive.userId.let { KDriveHttpClient.getHttpClient(it) }
+    fun getTestUserProfile() {
         with(getUserProfile(okHttpClient)) {
             assertApiResponse(this)
             Assert.assertEquals("User ids should be the same", userDrive.userId, data?.id)
@@ -113,7 +107,7 @@ class ApiRepositoryTest : KDriveTest() {
     }
 
     @Test
-    fun manageFavoriteFileLifecycle(): Unit = runBlocking {
+    fun manageFavoriteFileLifecycle() {
         assertApiResponse(postFavoriteFile(testFile))
 
         val favoriteFileCount = getFavoriteFiles(userDrive.driveId, File.SortType.NAME_AZ, 1).let { favoriteFile ->
@@ -229,7 +223,7 @@ class ApiRepositoryTest : KDriveTest() {
         val file = createFileForTest()
         // Create test folder
         val folderName = "f"
-        with(createFolder(OkHttpClient(), userDrive.driveId, ROOT_ID, folderName)) {
+        with(createFolder(okHttpClient, userDrive.driveId, ROOT_ID, folderName)) {
             Assert.assertNotNull(data)
             // Move file in the test folder
             assertApiResponse(moveFile(file, data!!))
@@ -246,7 +240,7 @@ class ApiRepositoryTest : KDriveTest() {
 
     @Test
     fun createTeamTestFolder() {
-        with(createTeamFolder(OkHttpClient(), userDrive.driveId, "teamFolder", true)) {
+        with(createTeamFolder(okHttpClient, userDrive.driveId, "teamFolder", true)) {
             assertApiResponse(this)
             Assert.assertTrue("visibility should be 'is_team_space_folder", data!!.visibility.contains("is_team_space_folder"))
             deleteTestFile(data!!)
@@ -274,7 +268,7 @@ class ApiRepositoryTest : KDriveTest() {
             Assert.assertFalse("Block information should be false", data!!.blockInformation)
         }
 
-        with(getFileShare(OkHttpClient(), testFile)) {
+        with(getFileShare(okHttpClient, testFile)) {
             assertApiResponse(this)
             Assert.assertEquals("Path should be the name of the file", "/${testFile.name}", data!!.path)
         }
@@ -401,7 +395,7 @@ class ApiRepositoryTest : KDriveTest() {
     @Ignore("Don't know the wanted api behaviour")
     @Test
     fun postTestFolderAccess() {
-        val folder = createFolder(OkHttpClient(), userDrive.driveId, ROOT_ID, "folder").data
+        val folder = createFolder(okHttpClient, userDrive.driveId, ROOT_ID, "folder").data
         Assert.assertNotNull("test folder must not be null", folder)
         val postResponse = postFolderAccess(folder!!)
         assertApiResponse(postResponse)
@@ -411,7 +405,7 @@ class ApiRepositoryTest : KDriveTest() {
     @Test
     fun manageDropboxLifecycle() {
         // Create a folder to convert it in dropbox
-        val name = "testFold"
+        val name = "testFolder"
         val folder = createFolder(okHttpClient, userDrive.driveId, ROOT_ID, name, false).data
         Assert.assertNotNull(folder)
         // No dropbox yet
@@ -513,6 +507,6 @@ class ApiRepositoryTest : KDriveTest() {
     @Test
     fun mySharedFileTest() {
         val order = File.SortType.BIGGER
-        assertApiResponse(getMySharedFiles(OkHttpClient(), userDrive.driveId, order.order, order.orderBy, 1))
+        assertApiResponse(getMySharedFiles(okHttpClient, userDrive.driveId, order.order, order.orderBy, 1))
     }
 }

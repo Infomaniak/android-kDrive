@@ -17,7 +17,6 @@ import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponse
 import com.infomaniak.drive.utils.ApiTestUtils.createFileForTest
 import com.infomaniak.drive.utils.ApiTestUtils.deleteTestFile
 import com.infomaniak.drive.utils.Env
-import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.Utils
 import io.realm.Realm
 import kotlinx.android.parcel.RawValue
@@ -51,8 +50,7 @@ class FileControllerTest : KDriveTest() {
     }
 
     @Test
-    fun createTestFolder(): Unit = runBlocking {
-        val okHttpClient = userDrive.userId.let { KDriveHttpClient.getHttpClient(it) }
+    fun createTestFolder() {
         val folderName = "TestFolder"
         // Create a folder under root
         with(ApiRepository.createFolder(okHttpClient, userDrive.driveId, Utils.ROOT_ID, folderName, true)) {
@@ -226,8 +224,7 @@ class FileControllerTest : KDriveTest() {
     }
 
     @Test
-    fun getTestFileListForFolder() = runBlocking {
-        val okHttpClient = userDrive.userId.let { KDriveHttpClient.getHttpClient(it) }
+    fun getTestFileListForFolder() {
         with(getFileListForFolder(okHttpClient, userDrive.driveId, Utils.ROOT_ID, order = File.SortType.NAME_AZ)) {
             assertApiResponse(this)
             // Use non null assertion because data nullability has been checked in assertApiResponse()
