@@ -89,7 +89,6 @@ class ApiRepositoryTest : KDriveTest() {
     @Throws(Exception::class)
     fun tearDown() {
         deleteTestFile(testFile)
-        emptyTrash(userDrive.driveId)
     }
 
     @Test
@@ -98,7 +97,7 @@ class ApiRepositoryTest : KDriveTest() {
     }
 
     @Test
-    fun getTestUserProfile() {
+    fun getUserProfile() {
         with(getUserProfile(okHttpClient)) {
             assertApiResponse(this)
             Assert.assertEquals("User ids should be the same", userDrive.userId, data?.id)
@@ -126,14 +125,12 @@ class ApiRepositoryTest : KDriveTest() {
     }
 
     @Test
-    fun getTestFileActivities() {
-        val file = createFileForTest()
-        assertApiResponse(getFileActivities(file, 1))
-        deleteTestFile(file)
+    fun getFileActivities() {
+        assertApiResponse(getFileActivities(testFile, 1))
     }
 
     @Test
-    fun manageTestFileCommentLifeCycle() {
+    fun manageFileCommentLifeCycle() {
         // Get comments
         with(getFileComments(testFile, 1)) {
             assertApiResponse(this)
@@ -164,7 +161,9 @@ class ApiRepositoryTest : KDriveTest() {
         with(getFileComments(testFile, 1)) {
             assertApiResponse(this)
             Assert.assertEquals("There should be 2 comments on the test file", 2, data?.size)
-            Assert.assertNotNull(data?.find { comment -> comment.id == commentID2 }?.liked?.let { it -> Assert.assertTrue(it) })
+            val likedComment = data?.find { comment -> comment.id == commentID2 }?.liked
+            Assert.assertNotNull("Liked comment should not be null", likedComment)
+            Assert.assertTrue("Comment should be liked", likedComment!!)
         }
         // Delete first comment
         deleteFileComment(testFile, commentID)
@@ -197,7 +196,7 @@ class ApiRepositoryTest : KDriveTest() {
     }
 
     @Test
-    fun duplicateTestFile() {
+    fun duplicateFile() {
         val copyName = "test copy"
         val copyFile = duplicateFile(testFile, copyName, ROOT_ID).let {
             assertApiResponse(it)
@@ -221,7 +220,7 @@ class ApiRepositoryTest : KDriveTest() {
     fun moveFileToAnotherFolder() {
         val file = createFileForTest()
         // Create test folder
-        val folderName = "f"
+        val folderName = "folder"
         with(createFolder(okHttpClient, userDrive.driveId, ROOT_ID, folderName)) {
             Assert.assertNotNull(data)
             // Move file in the test folder
@@ -238,7 +237,7 @@ class ApiRepositoryTest : KDriveTest() {
     }
 
     @Test
-    fun createTeamTestFolder() {
+    fun createTeamFolder() {
         with(createTeamFolder(okHttpClient, userDrive.driveId, "teamFolder", true)) {
             assertApiResponse(this)
             Assert.assertTrue("visibility should be 'is_team_space_folder", data!!.visibility.contains("is_team_space_folder"))
@@ -343,13 +342,12 @@ class ApiRepositoryTest : KDriveTest() {
 
     @Test
     fun addCategoryToFile() {
-        val file = createFileForTest()
         // Create a test category
         val category = createCategory(userDrive.driveId, "test cat", "#FFF").data
         Assert.assertNotNull(category)
         // Add the category to the test file
-        addCategory(file, category!!.id)
-        with(getFileDetails(file)) {
+        addCategory(testFile, category!!.id)
+        with(getFileDetails(testFile)) {
             assertApiResponse(this)
             Assert.assertNotNull(
                 "The test category should be found",
@@ -357,30 +355,27 @@ class ApiRepositoryTest : KDriveTest() {
         }
         // Delete the category before removing it from the test file
         deleteCategory(userDrive.driveId, category.id)
-        with(getFileDetails(file)) {
+        with(getFileDetails(testFile)) {
             assertApiResponse(this)
             Assert.assertTrue("The test file should not have category", data!!.categories.isNullOrEmpty())
         }
-        deleteTestFile(file)
     }
 
     @Test
     fun removeCategoryToFile() {
-        val file = createFileForTest()
         // Create a test category
         val category = createCategory(userDrive.driveId, "test cat", "#000").data
         Assert.assertNotNull(category)
         // Add the category to the test file
-        addCategory(file, category!!.id)
+        addCategory(testFile, category!!.id)
         // Remove the category
-        removeCategory(file, category.id)
-        with(getFileDetails(file)) {
+        removeCategory(testFile, category.id)
+        with(getFileDetails(testFile)) {
             assertApiResponse(this)
             Assert.assertTrue("The test file should not have a category", data!!.categories.isNullOrEmpty())
         }
         // Delete the test category and file
         deleteCategory(userDrive.driveId, category.id)
-        deleteTestFile(file)
     }
 
     @Test
@@ -454,35 +449,37 @@ class ApiRepositoryTest : KDriveTest() {
 
     @Test
     fun manageTrashLifecycle() {
-        createFileForTest().let { file ->
-            val newName = "Trash test"
-            renameFile(file, newName)
-            val modifiedFile = getLastModifiedFiles(userDrive.driveId).data?.first()
-            Assert.assertNotNull(modifiedFile)
-            deleteTestFile(modifiedFile!!)
-            with(getTrashFile(modifiedFile, File.SortType.RECENT, 1)) {
-                assertApiResponse(this)
-                Assert.assertEquals("file id should be the same", file.id, data?.id)
-                Assert.assertEquals("file name should be updated to '$newName'", newName, data?.name)
-            }
-
-            with(getDriveTrash(userDrive.driveId, File.SortType.RECENT, 1)) {
-                assertApiResponse(this)
-                Assert.assertTrue("Trash should not be empty", data!!.isNotEmpty())
-                Assert.assertEquals("Last trash file's id should be ${file.id}", file.id, data?.first()?.id)
-            }
-
-            // Restore the file from the trash
-            assertApiResponse(postRestoreTrashFile(modifiedFile, mapOf("destination_folder_id" to ROOT_ID)))
-            with(getDriveTrash(userDrive.driveId, File.SortType.RECENT, 1)) {
-                assertApiResponse(this)
-                if (data!!.isNotEmpty()) {
-                    Assert.assertNotEquals("Last trash file's id should not be ${file.id}", file.id, data?.first()?.id)
-                }
-            }
-            deleteTestFile(modifiedFile)
+        val file = createFileForTest()
+        val newName = "Trash test"
+        renameFile(file, newName)
+        val modifiedFile = getLastModifiedFiles(userDrive.driveId).data?.first()
+        Assert.assertNotNull("Modified file should not be null", modifiedFile)
+        deleteTestFile(modifiedFile!!)
+        with(getTrashFile(modifiedFile, File.SortType.RECENT, 1)) {
+            assertApiResponse(this)
+            Assert.assertEquals("file id should be the same", file.id, data?.id)
+            Assert.assertEquals("file name should be updated to '$newName'", newName, data?.name)
         }
 
+        with(getDriveTrash(userDrive.driveId, File.SortType.RECENT, 1)) {
+            assertApiResponse(this)
+            Assert.assertTrue("Trash should not be empty", data!!.isNotEmpty())
+            Assert.assertEquals("Last trash file's id should be ${file.id}", file.id, data?.first()?.id)
+        }
+
+        // Restore the file from the trash
+        assertApiResponse(postRestoreTrashFile(modifiedFile, mapOf("destination_folder_id" to ROOT_ID)))
+        with(getDriveTrash(userDrive.driveId, File.SortType.RECENT, 1)) {
+            assertApiResponse(this)
+            if (data!!.isNotEmpty()) {
+                Assert.assertNotEquals("Last trash file's id should not be ${file.id}", file.id, data?.first()?.id)
+            }
+        }
+        deleteTestFile(modifiedFile)
+    }
+
+    @Test
+    fun permanentlyDeleteFile() {
         // Clean the trash to make sure nothing is left in
         assertApiResponse(emptyTrash(userDrive.driveId))
         with(getDriveTrash(userDrive.driveId, File.SortType.NAME_ZA, 1)) {
@@ -502,6 +499,7 @@ class ApiRepositoryTest : KDriveTest() {
             Assert.assertTrue("Trash should be empty", data!!.isEmpty())
         }
     }
+
 
     @Test
     fun mySharedFileTest() {

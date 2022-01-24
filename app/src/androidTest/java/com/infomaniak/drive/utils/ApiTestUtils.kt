@@ -42,7 +42,7 @@ object ApiTestUtils {
         Assert.assertTrue("created file couldn't be deleted from the remote", deleteResponse.isSuccess())
     }
 
-    fun createFileForTest(): @RawValue File {
+    fun createFileForTest(): File {
         val createFile = CreateFile("offline doc ${UUID.randomUUID()}", File.Office.DOCS.extension)
         val apiResponse = ApiRepository.createOfficeFile(Env.DRIVE_ID, Utils.ROOT_ID, createFile)
         assertApiResponse(apiResponse)

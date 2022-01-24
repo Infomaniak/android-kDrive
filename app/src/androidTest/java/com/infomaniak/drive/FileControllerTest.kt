@@ -93,7 +93,6 @@ class FileControllerTest : KDriveTest() {
 
     @Test
     fun getFavoriteFiles_CanGetRemoteSavedFilesFromRealm() {
-
         // Create a test file and store it in favorite
         val remoteFile = createAndStoreOfficeFile()
         ApiRepository.postFavoriteFile(remoteFile)
@@ -175,7 +174,6 @@ class FileControllerTest : KDriveTest() {
             // Compare remote pictures with local pictures
             Assert.assertTrue("remote files and local files are different", size == apiResponseData.size)
         }
-
     }
 
     @Test
@@ -184,6 +182,7 @@ class FileControllerTest : KDriveTest() {
         val file = createAndStoreOfficeFile { remoteFile ->
             remoteFile.isOffline = true
         }
+
         // Get offline files
         with(FileController.getOfflineFiles(null, customRealm = realm)) {
             Assert.assertTrue("local offline files cannot be null", isNotEmpty())
@@ -192,6 +191,7 @@ class FileControllerTest : KDriveTest() {
 
         // Delete remote offline test files
         deleteTestFile(file)
+
     }
 
     @Test
@@ -223,6 +223,7 @@ class FileControllerTest : KDriveTest() {
 
     @Test
     fun getTestFileListForFolder() {
+        // Get the file list of root folder
         with(getFileListForFolder(okHttpClient, userDrive.driveId, Utils.ROOT_ID, order = File.SortType.NAME_AZ)) {
             assertApiResponse(this)
             // Use non null assertion because data nullability has been checked in assertApiResponse()
@@ -261,5 +262,4 @@ class FileControllerTest : KDriveTest() {
         realm.executeTransaction { realm.insert(remoteFile) }
         return remoteFile
     }
-
 }

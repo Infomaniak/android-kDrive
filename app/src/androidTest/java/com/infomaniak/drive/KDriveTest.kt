@@ -71,6 +71,7 @@ open class KDriveTest {
             if (!Env.USE_CURRENT_USER) {
                 runBlocking { AccountUtils.removeUser(context, user) }
             }
+            ApiRepository.emptyTrash(userDrive.driveId)
         }
 
         internal fun getConfig() = RealmConfiguration.Builder().inMemory()
