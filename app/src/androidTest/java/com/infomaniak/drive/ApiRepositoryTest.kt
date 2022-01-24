@@ -36,7 +36,6 @@ import com.infomaniak.drive.data.api.ApiRepository.emptyTrash
 import com.infomaniak.drive.data.api.ApiRepository.getAllDrivesData
 import com.infomaniak.drive.data.api.ApiRepository.getDriveTrash
 import com.infomaniak.drive.data.api.ApiRepository.getDropBox
-import com.infomaniak.drive.data.api.ApiRepository.getFavoriteFiles
 import com.infomaniak.drive.data.api.ApiRepository.getFileActivities
 import com.infomaniak.drive.data.api.ApiRepository.getFileComments
 import com.infomaniak.drive.data.api.ApiRepository.getFileCount
@@ -108,21 +107,21 @@ class ApiRepositoryTest : KDriveTest() {
 
     @Test
     fun manageFavoriteFileLifecycle() {
+        // Create favorite
         assertApiResponse(postFavoriteFile(testFile))
 
-        val favoriteFileCount = getFavoriteFiles(userDrive.driveId, File.SortType.NAME_AZ, 1).let { favoriteFile ->
-            assertApiResponse(favoriteFile)
-            Assert.assertTrue("Favorite file should exists", favoriteFile.data!!.isNotEmpty())
-            favoriteFile.data!!.size
+        // File must be a favorite
+        with(getFileDetails(testFile)) {
+            assertApiResponse(this)
+            Assert.assertTrue(data!!.isFavorite)
         }
 
+        // Delete created Favorite
         assertApiResponse(deleteFavoriteFile(testFile))
-        with(getFavoriteFiles(userDrive.driveId, File.SortType.NAME_AZ, 1)) {
-            Assert.assertEquals(
-                "The number of favorite files should be lowered by 1",
-                favoriteFileCount - 1,
-                data?.size
-            )
+        // File must not be a favorite
+        with(getFileDetails(testFile)) {
+            assertApiResponse(this)
+            Assert.assertFalse(data!!.isFavorite)
         }
     }
 
