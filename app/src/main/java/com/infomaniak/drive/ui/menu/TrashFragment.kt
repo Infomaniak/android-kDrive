@@ -41,7 +41,7 @@ class TrashFragment : FileSubTypeListFragment() {
         sortFiles = SortFiles()
         downloadFiles =
             DownloadFiles(
-                if (folderID != ROOT_ID) File(id = folderID, name = folderName, driveId = AccountUtils.currentDriveId) else null
+                if (folderId != ROOT_ID) File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId) else null
             )
         setNoFilesLayout = SetNoFilesLayout()
 
@@ -68,7 +68,7 @@ class TrashFragment : FileSubTypeListFragment() {
             }
         }
 
-        if (folderID == ROOT_ID) collapsingToolbarLayout.title = getString(R.string.trashTitle)
+        if (folderId == ROOT_ID) collapsingToolbarLayout.title = getString(R.string.trashTitle)
 
         fileAdapter.apply {
             showShareFileButton = false

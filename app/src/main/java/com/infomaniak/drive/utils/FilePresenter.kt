@@ -46,7 +46,7 @@ object FilePresenter {
         } else {
             safeNavigate(
                 FileListFragmentDirections.actionFileListFragmentToDownloadProgressDialog(
-                    fileID = file.id, fileName = file.name, userDrive = UserDrive(), isOpenBookmark = true
+                    fileId = file.id, fileName = file.name, userDrive = UserDrive(), isOpenBookmark = true
                 )
             )
         }

@@ -46,7 +46,7 @@ class SelectFolderFragment : FileListFragment() {
         userDrive = saveExternalViewModel.userDrive
         super.onViewCreated(view, savedInstanceState)
 
-        folderName = if (folderID == ROOT_ID) saveExternalViewModel.currentDrive?.name ?: "/" else navigationArgs.folderName
+        folderName = if (folderId == ROOT_ID) saveExternalViewModel.currentDrive?.name ?: "/" else navigationArgs.folderName
 
         collapsingToolbarLayout.title = getString(R.string.selectFolderTitle)
 
@@ -54,11 +54,11 @@ class SelectFolderFragment : FileListFragment() {
             findItem(R.id.addFolderItem).apply {
                 setOnMenuItemClickListener {
                     val selectFolderActivity = requireActivity() as? SelectFolderActivity
-                    if (FileController.getFileById(folderID, userDrive)?.rights?.newFolder == true) {
+                    if (FileController.getFileById(folderId, userDrive)?.rights?.newFolder == true) {
                         selectFolderActivity?.hideSaveButton()
                         safeNavigate(
                             SelectFolderFragmentDirections.actionSelectFolderFragmentToNewFolderFragment(
-                                parentFolderId = folderID,
+                                parentFolderId = folderId,
                                 userDrive = userDrive
                             )
                         )
@@ -87,7 +87,7 @@ class SelectFolderFragment : FileListFragment() {
                         fileListViewModel.cancelDownloadFiles()
                         safeNavigate(
                             SelectFolderFragmentDirections.fileListFragmentToFileListFragment(
-                                folderID = file.id,
+                                folderId = file.id,
                                 folderName = file.name
                             )
                         )
@@ -99,15 +99,15 @@ class SelectFolderFragment : FileListFragment() {
             val selectFolderActivity = requireActivity() as SelectFolderActivity
             selectFolderActivity.showSaveButton()
 
-            val currentFolder = FileController.getFileById(folderID, userDrive)
-            val enable = folderID != saveExternalViewModel.disableSelectedFolder &&
+            val currentFolder = FileController.getFileById(folderId, userDrive)
+            val enable = folderId != saveExternalViewModel.disableSelectedFolder &&
                     (currentFolder?.rights?.moveInto != false || currentFolder.rights?.newFile != false)
             selectFolderActivity.enableSaveButton(enable)
         }
     }
 
     private fun onBackPressed() {
-        if (folderID == ROOT_ID) {
+        if (folderId == ROOT_ID) {
             requireActivity().finish()
         } else Utils.ignoreCreateFolderBackStack(findNavController(), true)
 

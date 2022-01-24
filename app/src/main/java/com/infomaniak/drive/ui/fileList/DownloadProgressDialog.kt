@@ -54,12 +54,12 @@ class DownloadProgressDialog : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = with(navigationArgs) {
         isCancelable = false
-        FileController.getFileById(fileID, userDrive)?.let { file ->
+        FileController.getFileById(fileId, userDrive)?.let { file ->
             dialogView.icon.setImageResource(file.getFileType().icon)
             downloadViewModel.downloadFile(requireContext(), file, userDrive).observe(this@DownloadProgressDialog) {
                 it?.let { (progress, isComplete) ->
                     if (isComplete) {
-                        setBackNavigationResult(if (isOpenBookmark) OPEN_BOOKMARK else OPEN_WITH, fileID)
+                        setBackNavigationResult(if (isOpenBookmark) OPEN_BOOKMARK else OPEN_WITH, fileId)
                     } else {
                         downloadProgress.progress = progress
                     }

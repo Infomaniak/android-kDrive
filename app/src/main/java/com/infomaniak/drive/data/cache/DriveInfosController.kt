@@ -80,12 +80,12 @@ object DriveInfosController {
         }
 
         val driveRemoved = getDrives(userId, sharedWithMe = null).filterNot { driveList.contains(it) }
-        val driveRemovedID = driveRemoved.map(Drive::objectId)
+        val driveRemovedId = driveRemoved.map(Drive::objectId)
 
         getRealmInstance().use {
             it.executeTransaction { realm ->
                 realm.where(Drive::class.java)
-                    .oneOf(Drive::objectId.name, driveRemovedID.toTypedArray())
+                    .oneOf(Drive::objectId.name, driveRemovedId.toTypedArray())
                     .findAll()
                     .deleteAllFromRealm()
 

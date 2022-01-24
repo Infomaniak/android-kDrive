@@ -98,7 +98,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private val navigationArgs: FileListFragmentArgs by navArgs()
 
-    internal var folderID = ROOT_ID
+    internal var folderId = ROOT_ID
     internal var folderName: String = "/"
     private var currentFolder: File? = null
 
@@ -140,8 +140,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        folderID = navigationArgs.folderID
-        folderName = if (folderID == ROOT_ID) AccountUtils.getCurrentDrive()?.name ?: "/" else navigationArgs.folderName
+        folderId = navigationArgs.folderId
+        folderName = if (folderId == ROOT_ID) AccountUtils.getCurrentDrive()?.name ?: "/" else navigationArgs.folderName
         return inflater.inflate(R.layout.fragment_file_list, container, false)
     }
 
@@ -178,7 +178,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         setNoFilesLayout()
 
-        if ((folderID == ROOT_ID || folderID == OTHER_ROOT_ID) && hideBackButtonWhenRoot) toolbar.navigationIcon = null
+        if ((folderId == ROOT_ID || folderId == OTHER_ROOT_ID) && hideBackButtonWhenRoot) toolbar.navigationIcon = null
         toolbar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.searchItem -> safeNavigate(FileListFragmentDirections.actionFileListFragmentToSearchFragment())
@@ -218,10 +218,10 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             val isUploaded = workInfo.progress.getBoolean(UploadWorker.IS_UPLOADED, false)
             val remoteFolderId = workInfo.progress.getInt(UploadWorker.REMOTE_FOLDER_ID, 0)
 
-            if (remoteFolderId == folderID && isUploaded) {
+            if (remoteFolderId == folderId && isUploaded) {
                 when {
                     findNavController().currentDestination?.id == R.id.sharedWithMeFragment
-                            && folderID == ROOT_ID -> downloadFiles(true, false)
+                            && folderId == ROOT_ID -> downloadFiles(true, false)
                     else -> refreshActivities()
                 }
             }
@@ -398,8 +398,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         color: String?,
     ) {
 
-        val onSuccess: (Int) -> Unit = { fileID ->
-            runBlocking(Dispatchers.Main) { fileAdapter.deleteByFileId(fileID) }
+        val onSuccess: (Int) -> Unit = { fileId ->
+            runBlocking(Dispatchers.Main) { fileAdapter.deleteByFileId(fileId) }
         }
 
         when (type) {
@@ -473,7 +473,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         fileAdapter.enabledMultiSelectMode = true
         closeButtonMultiSelect.setOnClickListener { closeMultiSelect() }
         deleteButtonMultiSelect.setOnClickListener { performBulkOperation(BulkOperationType.TRASH) }
-        moveButtonMultiSelect.setOnClickListener { Utils.moveFileClicked(this, folderID) }
+        moveButtonMultiSelect.setOnClickListener { Utils.moveFileClicked(this, folderId) }
         menuButtonMultiSelect.setOnClickListener {
             safeNavigate(
                 FileListFragmentDirections.actionFileListFragmentToActionMultiSelectBottomSheetDialog(
@@ -510,7 +510,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         setupToggleDisplayButton()
         setupListMode()
         setupSortButton()
-        uploadFileInProgress.setUploadFileInProgress(R.string.uploadInThisFolderTitle) { goToUploadInProgress(folderID) }
+        uploadFileInProgress.setUploadFileInProgress(R.string.uploadInThisFolderTitle) { goToUploadInProgress(folderId) }
     }
 
     private fun setupToggleDisplayButton() {
@@ -611,7 +611,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             fileListViewModel.cancelDownloadFiles()
             safeNavigate(
                 FileListFragmentDirections.fileListFragmentToFileListFragment(
-                    folderID = id,
+                    folderId = id,
                     folderName = name,
                     shouldHideBottomNavigation = navigationArgs.shouldHideBottomNavigation,
                 )
@@ -687,7 +687,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun checkIfNoFiles() {
         changeNoFilesLayoutVisibility(
             hideFileList = fileAdapter.itemCount == 0,
-            changeControlsVisibility = folderID != ROOT_ID && folderID != OTHER_ROOT_ID,
+            changeControlsVisibility = folderId != ROOT_ID && folderId != OTHER_ROOT_ID,
             ignoreOffline = true
         )
     }
@@ -695,7 +695,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun refreshActivities() {
         val isUploadInProgressNavigation = findNavController().currentDestination?.id == R.id.uploadInProgressFragment
 
-        if (folderID == OTHER_ROOT_ID || isUploadInProgressNavigation || !fileAdapter.isComplete) return
+        if (folderId == OTHER_ROOT_ID || isUploadInProgressNavigation || !fileAdapter.isComplete) return
 
         if (isLoadingActivities) {
             retryLoadingActivities = true
@@ -752,9 +752,9 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun showPendingFiles() {
-        val isNotCurrentDriveRoot = folderID == ROOT_ID && findNavController().currentDestination?.id != R.id.fileListFragment
+        val isNotCurrentDriveRoot = folderId == ROOT_ID && findNavController().currentDestination?.id != R.id.fileListFragment
         if (!showPendingFiles || isNotCurrentDriveRoot) return
-        fileListViewModel.getPendingFilesCount(folderID).observe(viewLifecycleOwner) { pendingFilesCount ->
+        fileListViewModel.getPendingFilesCount(folderId).observe(viewLifecycleOwner) { pendingFilesCount ->
             uploadFileInProgress.updateUploadFileInProgress(pendingFilesCount)
         }
     }
@@ -762,7 +762,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun goToUploadInProgress(folderId: Int) {
         safeNavigate(
             R.id.uploadInProgressFragment,
-            UploadInProgressFragmentArgs(folderID = folderId, folderName = getString(R.string.uploadInProgressTitle)).toBundle(),
+            UploadInProgressFragmentArgs(folderId = folderId, folderName = getString(R.string.uploadInProgressTitle)).toBundle(),
         )
     }
 
@@ -851,7 +851,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     ) {
         showPendingFiles()
         fileListViewModel.getFiles(
-            folderID,
+            folderId,
             ignoreCache = ignoreCache,
             ignoreCloud = mainViewModel.isInternetAvailable.value == false,
             order = fileListViewModel.sortType,
@@ -906,7 +906,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     if (fileAdapter.itemCount == 0 || result.page == 1 || isNewSort) {
 
                         FileController.getRealmLiveFiles(
-                            parentId = folderID,
+                            parentId = folderId,
                             order = fileListViewModel.sortType,
                             realm = mainViewModel.realm
                         ).apply { fileAdapter.updateFileList(this) }
@@ -931,7 +931,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 } ?: run {
                     changeNoFilesLayoutVisibility(
                         hideFileList = fileAdapter.itemCount == 0,
-                        changeControlsVisibility = folderID != ROOT_ID
+                        changeControlsVisibility = folderId != ROOT_ID
                     )
                     fileAdapter.isComplete = true
                 }

@@ -106,7 +106,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         val offlineFragment = HomeOfflineFragment().apply {
-            arguments = bundleOf("folderID" to 1, "folderName" to "")
+            arguments = bundleOf("folderId" to 1, "folderName" to "")
         }
         val tabsHome = arrayListOf(
             TabViewPagerUtils.FragmentTab(HomeActivitiesFragment(), R.id.homeActivitiesButton),

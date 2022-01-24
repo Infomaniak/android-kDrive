@@ -97,7 +97,7 @@ class ApplicationMain : Application(), ImageLoaderFactory {
 
         InfomaniakCore.init(
             appVersionName = BuildConfig.VERSION_NAME,
-            clientID = BuildConfig.CLIENT_ID,
+            clientId = BuildConfig.CLIENT_ID,
             credentialManager = null,
             isDebug = BuildConfig.DEBUG
         )

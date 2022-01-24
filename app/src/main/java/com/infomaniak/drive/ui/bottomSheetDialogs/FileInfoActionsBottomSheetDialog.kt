@@ -313,7 +313,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             safeNavigate(
                 FileInfoActionsBottomSheetDialogDirections
                     .actionFileInfoActionsBottomSheetDialogToDownloadProgressDialog(
-                        fileID = currentFile.id,
+                        fileId = currentFile.id,
                         fileName = currentFile.name,
                         userDrive = navigationArgs.userDrive
                     )

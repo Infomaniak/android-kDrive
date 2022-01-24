@@ -37,10 +37,8 @@ class UserAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val layoutID = if (viewType == VIEW_TYPE_CARDVIEW) R.layout.cardview_user else R.layout.item_user
-        return ViewHolder(
-            LayoutInflater.from(parent.context).inflate(layoutID, parent, false)
-        )
+        val layoutId = if (viewType == VIEW_TYPE_CARDVIEW) R.layout.cardview_user else R.layout.item_user
+        return ViewHolder(LayoutInflater.from(parent.context).inflate(layoutId, parent, false))
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {

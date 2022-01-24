@@ -250,7 +250,7 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     override fun querySearchDocuments(rootId: String, query: String, projection: Array<out String>?): Cursor {
-        Log.d(TAG, "querySearchDocuments(), rootID=$rootId, query=$query, projection=$projection, $currentParentDocumentId")
+        Log.d(TAG, "querySearchDocuments(), rootId=$rootId, query=$query, projection=$projection, $currentParentDocumentId")
 
         val cursor = DocumentCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION)
 
@@ -607,7 +607,7 @@ class CloudStorageProvider : DocumentsProvider() {
             ) {
 
                 // Cancel previous notification
-                context.cancelNotification(syncPermissionNotifID)
+                context.cancelNotification(syncPermissionNotifId)
 
                 // Display new notification
                 context.showGeneralNotification(context.getString(R.string.uploadPermissionError)).apply {
@@ -623,7 +623,7 @@ class CloudStorageProvider : DocumentsProvider() {
                             UploadNotifications.pendingIntentFlags
                         )
                     )
-                    NotificationManagerCompat.from(context).notify(syncPermissionNotifID, build())
+                    NotificationManagerCompat.from(context).notify(syncPermissionNotifId, build())
                 }
             }
         }
@@ -646,7 +646,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
     private fun MatrixCursor.addRootDrives(
         userId: Int,
-        shareFolderID: Int? = null,
+        shareFolderId: Int? = null,
         shareWithMe: Boolean = false,
         isRootFolder: Boolean = false
     ) {
@@ -654,8 +654,8 @@ class CloudStorageProvider : DocumentsProvider() {
             DriveInfosController.getDrives(userId, sharedWithMe = shareWithMe).forEach { drive ->
                 val driveDocument = "${drive.name}$DRIVE_SEPARATOR${drive.id}"
                 val documentId =
-                    if (shareFolderID == null) "$userId$SEPARATOR$driveDocument$SEPARATOR${Utils.ROOT_ID}"
-                    else "$userId$SEPARATOR$shareFolderID$SEPARATOR$driveDocument$SEPARATOR${Utils.ROOT_ID}"
+                    if (shareFolderId == null) "$userId$SEPARATOR$driveDocument$SEPARATOR${Utils.ROOT_ID}"
+                    else "$userId$SEPARATOR$shareFolderId$SEPARATOR$driveDocument$SEPARATOR${Utils.ROOT_ID}"
                 addFile(null, documentId, drive.name, isRootFolder)
             }
         }
@@ -701,13 +701,13 @@ class CloudStorageProvider : DocumentsProvider() {
         var position = 0
         while (cursor.moveToPosition(position)) {
             newRow().apply {
-                val docID = cursor.getString(cursor.getColumnIndex(DocumentsContract.Document.COLUMN_DOCUMENT_ID))
+                val docId = cursor.getString(cursor.getColumnIndex(DocumentsContract.Document.COLUMN_DOCUMENT_ID))
                 val mimetype = cursor.getString(cursor.getColumnIndex(DocumentsContract.Document.COLUMN_MIME_TYPE))
                 val displayName = cursor.getString(cursor.getColumnIndex(DocumentsContract.Document.COLUMN_DISPLAY_NAME))
                 val lastModified = cursor.getLong(cursor.getColumnIndex(DocumentsContract.Document.COLUMN_LAST_MODIFIED))
                 val size = cursor.getLong(cursor.getColumnIndex(DocumentsContract.Document.COLUMN_SIZE))
                 val flags = cursor.getInt(cursor.getColumnIndex(DocumentsContract.Document.COLUMN_FLAGS))
-                add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, docID)
+                add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, docId)
                 add(DocumentsContract.Document.COLUMN_MIME_TYPE, mimetype)
                 add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, displayName)
                 add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, lastModified)
@@ -742,7 +742,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
         private var needRefresh: Boolean = false
 
-        private val syncPermissionNotifID = UUID.randomUUID().hashCode()
+        private val syncPermissionNotifId = UUID.randomUUID().hashCode()
 
         private val DEFAULT_ROOT_PROJECTION = arrayOf(
             DocumentsContract.Root.COLUMN_ROOT_ID,

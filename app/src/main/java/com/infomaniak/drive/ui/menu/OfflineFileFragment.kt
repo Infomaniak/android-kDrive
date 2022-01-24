@@ -31,7 +31,7 @@ open class OfflineFileFragment : FileSubTypeListFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         downloadFiles = DownloadFiles()
         setNoFilesLayout = SetNoFilesLayout()
-        folderID = Utils.OTHER_ROOT_ID
+        folderId = Utils.OTHER_ROOT_ID
         super.onViewCreated(view, savedInstanceState)
 
         collapsingToolbarLayout.title = getString(R.string.offlineFileTitle)
