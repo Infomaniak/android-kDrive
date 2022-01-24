@@ -181,29 +181,27 @@ class FileControllerTest : KDriveTest() {
     @Test
     fun getOfflineFiles() {
         // Create offline test file
-        createAndStoreOfficeFile { remoteFile ->
+        val file = createAndStoreOfficeFile { remoteFile ->
             remoteFile.isOffline = true
-        }.let { file ->
-            // Get offline files
-            with(FileController.getOfflineFiles(null, customRealm = realm)) {
-                Assert.assertTrue("local offline files cannot be null", isNotEmpty())
-                Assert.assertNotNull("stored file was not found in realm db", firstOrNull { it.id == file.id })
-            }
-
-            // Delete remote offline test files
-            deleteTestFile(file)
         }
+        // Get offline files
+        with(FileController.getOfflineFiles(null, customRealm = realm)) {
+            Assert.assertTrue("local offline files cannot be null", isNotEmpty())
+            Assert.assertNotNull("stored file was not found in realm db", firstOrNull { it.id == file.id })
+        }
+
+        // Delete remote offline test files
+        deleteTestFile(file)
     }
 
     @Test
     fun searchFile_FromRealm_IsCorrect() {
-        createAndStoreOfficeFile().let { file ->
-            with(searchFiles(file.name, File.SortType.NAME_AZ, customRealm = realm)) {
-                Assert.assertTrue("the list of search results must contain results", isNotEmpty())
-                Assert.assertTrue("the search result must match", first().name.contains(file.name))
-            }
-            deleteTestFile(file)
+        val file = createAndStoreOfficeFile()
+        with(searchFiles(file.name, File.SortType.NAME_AZ, customRealm = realm)) {
+            Assert.assertTrue("the list of search results must contain results", isNotEmpty())
+            Assert.assertTrue("the search result must match", first().name.contains(file.name))
         }
+        deleteTestFile(file)
     }
 
     @Test
@@ -235,15 +233,15 @@ class FileControllerTest : KDriveTest() {
     @Test
     fun renameTestFile() {
         val newName = "renamed file"
-        createFileForTest().let { file ->
-            assertApiResponse(renameFile(file, newName))
-            with(getLastModifiedFiles(userDrive.driveId)) {
-                assertApiResponse(this)
-                Assert.assertEquals("Last modified file should have id ${file.id}", file.id, data!!.first().id)
-                Assert.assertEquals("File should be named '$newName'", newName, data!!.first().name)
-            }
-            deleteTestFile(file)
+        val file = createFileForTest()
+        assertApiResponse(renameFile(file, newName))
+        with(getLastModifiedFiles(userDrive.driveId)) {
+            assertApiResponse(this)
+            Assert.assertEquals("Last modified file should have id ${file.id}", file.id, data!!.first().id)
+            Assert.assertEquals("File should be named '$newName'", newName, data!!.first().name)
         }
+        deleteTestFile(file)
+
     }
 
     private fun getAndSaveRemoteRootFiles(): Pair<File, ArrayList<File>>? {
