@@ -4,13 +4,15 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRepository.getFileListForFolder
 import com.infomaniak.drive.data.api.ApiRepository.getLastModifiedFiles
 import com.infomaniak.drive.data.api.ApiRepository.renameFile
-import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.cache.FileController.FAVORITES_FILE_ID
 import com.infomaniak.drive.data.cache.FileController.getFilesFromCacheOrDownload
 import com.infomaniak.drive.data.cache.FileController.getMySharedFiles
+import com.infomaniak.drive.data.cache.FileController.getOfflineFiles
+import com.infomaniak.drive.data.cache.FileController.getPicturesDrive
 import com.infomaniak.drive.data.cache.FileController.removeFile
 import com.infomaniak.drive.data.cache.FileController.saveFavoritesFiles
 import com.infomaniak.drive.data.cache.FileController.searchFiles
+import com.infomaniak.drive.data.cache.FileController.storePicturesDrive
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponse
 import com.infomaniak.drive.utils.ApiTestUtils.createFileForTest
@@ -84,7 +86,7 @@ class FileControllerTest : KDriveTest() {
         // Search the deleted file
         with(ApiRepository.searchFiles(userDrive.driveId, remoteFile.name, order.order, order.orderBy, 1)) {
             assertTrue(isSuccess(), "Api response must be a success")
-        assertTrue(data.isNullOrEmpty(), "Founded files should be empty")
+            assertTrue(data.isNullOrEmpty(), "Founded files should be empty")
         }
     }
 
@@ -157,15 +159,15 @@ class FileControllerTest : KDriveTest() {
         // Get remote pictures
         val apiResponseData = ApiRepository.getLastPictures(Env.DRIVE_ID, 1).let {
             assertTrue(it.isSuccess(), "get pictures request must pass")
-        	assertFalse(it.data.isNullOrEmpty(), "get pictures response data cannot be null or empty")
+            assertFalse(it.data.isNullOrEmpty(), "get pictures response data cannot be null or empty")
             it.data!!
         }
 
         // Store remote pictures
-        FileController.storePicturesDrive(apiResponseData, customRealm = realm)
+        storePicturesDrive(apiResponseData, customRealm = realm)
 
         // Get saved remote files from realm
-        with(FileController.getPicturesDrive(realm)) {
+        with(getPicturesDrive(realm)) {
             assertTrue(isNotEmpty(), "local pictures cannot be empty ")
 
             // Compare remote pictures with local pictures
@@ -207,7 +209,7 @@ class FileControllerTest : KDriveTest() {
         with(getLocalRootFiles()) {
             // Check if remote files are stored
             assertNotNull(this, "local root files cannot be null")
-        	assertFalse(this?.second.isNullOrEmpty(), "local root files cannot be empty")
+            assertFalse(this?.second.isNullOrEmpty(), "local root files cannot be empty")
         }
 
         // Delete root files

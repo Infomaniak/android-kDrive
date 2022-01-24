@@ -32,21 +32,26 @@ import java.util.*
 object ApiTestUtils {
 
     fun assertApiResponse(response: ApiResponse<*>) {
-        Assertions.assertTrue(response.isSuccess(), "This should succeed")
-        Assertions.assertNull(response.error, "There should be no error")
-        Assertions.assertNotNull(response.data, "The data cannot be null")
+        with(response) {
+            Assertions.assertTrue(isSuccess(), "This should succeed")
+            Assertions.assertNull(error, "There should be no error")
+            Assertions.assertNotNull(data, "The data cannot be null")
+        }
     }
 
     fun deleteTestFile(remoteFile: File) {
-        val deleteResponse = ApiRepository.deleteFile(remoteFile)
-        Assertions.assertTrue(deleteResponse.isSuccess(), "created file couldn't be deleted from the remote")
+        Assertions.assertTrue(
+            ApiRepository.deleteFile(remoteFile).isSuccess(),
+            "created file couldn't be deleted from the remote"
+        )
     }
 
     fun createFileForTest(): File {
         val createFile = CreateFile("offline doc ${UUID.randomUUID()}", File.Office.DOCS.extension)
-        val apiResponse = ApiRepository.createOfficeFile(Env.DRIVE_ID, Utils.ROOT_ID, createFile)
-        assertApiResponse(apiResponse)
-        return apiResponse.data!!
+        return ApiRepository.createOfficeFile(Env.DRIVE_ID, Utils.ROOT_ID, createFile).let {
+            assertApiResponse(it)
+            it.data!!
+        }
     }
 
     fun getShareLink(file: File): ApiResponse<ShareLink> {

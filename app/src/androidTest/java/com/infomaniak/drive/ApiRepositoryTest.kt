@@ -103,9 +103,9 @@ class ApiRepositoryTest : KDriveTest() {
     @Test
     fun getUserProfile() {
         with(getUserProfile(okHttpClient)) {
-        	assertApiResponse(this)
-       		assertEquals(userDrive.userId, data?.id, "User ids should be the same")
-		}
+            assertApiResponse(this)
+            assertEquals(userDrive.userId, data?.id, "User ids should be the same")
+        }
     }
 
     @Test
@@ -322,7 +322,7 @@ class ApiRepositoryTest : KDriveTest() {
             assertApiResponse(it)
             assertEquals("category tests", it.data?.name, "Name of the category should be equals to 'category tests'")
             assertEquals("#0000FF", it.data?.color, "Color of the category should be equals to blue")
-			it.data!!.id
+            it.data!!.id
         }
 
         // Create again the same category should fail
@@ -330,8 +330,9 @@ class ApiRepositoryTest : KDriveTest() {
             assertFalse(isSuccess())
             assertEquals(
                 "Category already exist error",
-                error?.description, 
-				"Error description should be 'category already exist error'")
+                error?.description,
+                "Error description should be 'category already exist error'"
+            )
         }
 
         name = "update cat"
@@ -359,7 +360,8 @@ class ApiRepositoryTest : KDriveTest() {
         with(getFileDetails(testFile)) {
             assertApiResponse(this)
             assertNotNull(
-                data!!.categories.find { cat -> cat.id == category.id }, "The test category should be found")
+                data!!.categories.find { cat -> cat.id == category.id }, "The test category should be found"
+            )
         }
         // Delete the category before removing it from the test file
         deleteCategory(userDrive.driveId, category.id)
@@ -461,12 +463,12 @@ class ApiRepositoryTest : KDriveTest() {
         val newName = "Trash test"
         renameFile(file, newName)
         val modifiedFile = getLastModifiedFiles(userDrive.driveId).data?.first()
-        Assert.assertNotNull("Modified file should not be null", modifiedFile)
+        assertNotNull(modifiedFile, "Modified file should not be null")
         deleteTestFile(modifiedFile!!)
         with(getTrashFile(modifiedFile, File.SortType.RECENT, 1)) {
             assertApiResponse(this)
-            Assert.assertEquals("file id should be the same", file.id, data?.id)
-            Assert.assertEquals("file name should be updated to '$newName'", newName, data?.name)
+            assertEquals(file.id, data?.id, "file id should be the same")
+            assertEquals(newName, data?.name, "file name should be updated to '$newName'")
         }
 
         with(getDriveTrash(userDrive.driveId, File.SortType.RECENT, 1)) {
