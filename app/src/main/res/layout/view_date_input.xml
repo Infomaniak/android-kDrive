@@ -26,7 +26,6 @@
         style="@style/TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/marginStandardMedium"
         android:hint="@string/inputExpirationDate"
         app:endIconDrawable="@drawable/ic_calendar"
         app:endIconMode="custom">
@@ -37,7 +36,6 @@
             android:layout_height="wrap_content"
             android:inputType="date"
             tools:text="18.10.2021" />
-
     </com.google.android.material.textfield.TextInputLayout>
 
 </FrameLayout>

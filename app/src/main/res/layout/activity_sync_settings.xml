@@ -432,15 +432,15 @@
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/syncDate"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="?selectableItemBackground"
-                        android:padding="@dimen/marginStandard">
+                        android:layout_height="@dimen/buttonHeight"
+                        android:background="?selectableItemBackground">
 
                         <TextView
                             android:id="@+id/syncDateTitle"
                             style="@style/Subtitle2"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/marginStandard"
                             android:text="@string/syncSettingsButtonSaveDate"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toStartOf="@id/syncDateValue"
@@ -451,10 +451,23 @@
                             android:id="@+id/syncDateValue"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/marginStandardMedium"
                             android:text="@string/syncSettingsSaveDateNowValue"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:visibility="gone" />
+
+                        <com.infomaniak.drive.views.DateInputView
+                            android:id="@+id/backupDateInput"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/marginStandard"
+                            android:visibility="gone"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:visibility="visible" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 

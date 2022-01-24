@@ -26,7 +26,6 @@
         style="@style/TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/marginStandardMedium"
         android:hint="@string/inputExpirationTime"
         app:endIconDrawable="@drawable/ic_clock"
         app:endIconMode="custom">
@@ -37,7 +36,6 @@
             android:layout_height="wrap_content"
             android:inputType="date"
             tools:text="16:42" />
-
     </com.google.android.material.textfield.TextInputLayout>
 
 </FrameLayout>

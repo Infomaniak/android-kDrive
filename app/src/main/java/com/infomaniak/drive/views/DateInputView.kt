@@ -41,7 +41,11 @@ class DateInputView @JvmOverloads constructor(
         inflate(context, R.layout.view_date_input, this)
     }
 
-    fun init(fragmentManager: FragmentManager, defaultDate: Date = Date(), onDateSet: ((timestamp: Long) -> Unit)? = null) {
+    fun init(
+        fragmentManager: FragmentManager,
+        defaultDate: Date = Date(),
+        onDateSet: ((timestamp: Long) -> Unit)? = null,
+    ) {
         currentCalendarDate = defaultDate
 
         dateValueInput.apply {

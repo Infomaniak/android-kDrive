@@ -21,6 +21,8 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
@@ -38,14 +40,13 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
-import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.android.synthetic.main.activity_sync_settings.*
+import kotlinx.android.synthetic.main.view_date_input.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -84,7 +85,26 @@ class SyncSettingsActivity : BaseActivity() {
         syncSettingsViewModel.apply {
             syncIntervalType.value = oldSyncSettings?.getIntervalType() ?: SyncSettings.IntervalType.IMMEDIATELY
             syncFolder.value = oldSyncSettings?.syncFolder
+            saveOldPictures.value = SyncSettings.SavePicturesDate.SINCE_NOW
         }
+
+        backupDateInput.dateValueLayout.setHint(R.string.syncSettingsSaveDateFromDateValue)
+        backupDateInput.init(
+            fragmentManager = supportFragmentManager,
+            defaultDate = Date(),
+            onDateSet = {
+                val validUntil = Calendar.getInstance().apply {
+                    val date = Date(it)
+                    set(
+                        date.year(),
+                        date.month(),
+                        date.day(),
+                        date.hours(),
+                        date.minutes()
+                    )
+                }.time
+            },
+        )
 
         AccountUtils.getAllUsers().observe(this) { users ->
             if (users.size > 1) {
@@ -145,18 +165,21 @@ class SyncSettingsActivity : BaseActivity() {
         }
 
         syncSettingsViewModel.saveOldPictures.observe(this) {
-            syncDateValue.text = if (it == true) {
-                getString(R.string.syncSettingsSaveDateAllPictureValue).lowercase(Locale.ROOT)
-            } else {
-                getString(R.string.syncSettingsSaveDateNowValue)
-            }
             changeSaveButtonStatus()
+            syncDateValue.text = getString(it.shortTitle).lowercase()
+            if (it == SyncSettings.SavePicturesDate.SINCE_DATE) {
+                syncDateValue.visibility = GONE
+                backupDateInput.visibility = VISIBLE
+            } else {
+                syncDateValue.visibility = VISIBLE
+                backupDateInput.visibility = GONE
+            }
         }
 
         syncSettingsViewModel.syncIntervalType.observe(this) {
             if (syncSettingsViewModel.syncIntervalType.value != oldSyncSettings?.getIntervalType()) editNumber++
             changeSaveButtonStatus()
-            syncPeriodicityValue.setText(it.title)
+            syncPeriodicityValue.text = getString(it.title).lowercase()
         }
 
         val syncVideoDefaultValue = true
@@ -193,22 +216,7 @@ class SyncSettingsActivity : BaseActivity() {
         }
 
         syncDate.setOnClickListener {
-            var syncOldMedia = syncSettingsViewModel.saveOldPictures.value == true
-            val items = arrayOf(
-                getString(R.string.syncSettingsSaveDateNowValue2),
-                getString(R.string.syncSettingsSaveDateAllPictureValue)
-            )
-            val checkedItem = if (syncOldMedia) 1 else 0
-            MaterialAlertDialogBuilder(this, R.style.DialogStyle)
-                .setTitle(getString(R.string.syncSettingsButtonSaveDate))
-                .setSingleChoiceItems(items, checkedItem) { _, which ->
-                    syncOldMedia = which == 1
-                }
-                .setPositiveButton(R.string.buttonConfirm) { _, _ ->
-                    syncSettingsViewModel.saveOldPictures.value = syncOldMedia
-                }
-                .setNegativeButton(R.string.buttonCancel) { _, _ -> }
-                .setCancelable(false).show()
+            SelectSaveDateBottomSheetDialog().show(supportFragmentManager, "SyncSettingsSaveDateBottomSheetDialog")
         }
 
         syncPeriodicity.setOnClickListener {
@@ -279,13 +287,17 @@ class SyncSettingsActivity : BaseActivity() {
     private fun saveSettings() {
         saveButton.showProgress()
         lifecycleScope.launch(Dispatchers.IO) {
-            val saveOldPictures = syncSettingsViewModel.saveOldPictures.value == true
+            val date = when (syncSettingsViewModel.saveOldPictures.value!!) {
+                SyncSettings.SavePicturesDate.SINCE_NOW -> Date()
+                SyncSettings.SavePicturesDate.SINCE_FOREVER -> Date(0)
+                SyncSettings.SavePicturesDate.SINCE_DATE -> Date(1234567890)
+            }
 
             if (activateSyncSwitch.isChecked) {
                 val syncSettings = SyncSettings(
                     userId = selectDriveViewModel.selectedUserId.value!!,
                     driveId = selectDriveViewModel.selectedDrive.value!!.id,
-                    lastSync = if (saveOldPictures) Date(0) else Date(),
+                    lastSync = date,
                     syncFolder = syncSettingsViewModel.syncFolder.value!!,
                     syncVideo = syncVideoSwitch.isChecked,
                     createDatedSubFolders = createDatedSubFoldersSwitch.isChecked,
@@ -305,7 +317,7 @@ class SyncSettingsActivity : BaseActivity() {
     }
 
     class SyncSettingsViewModel : ViewModel() {
-        val saveOldPictures = MutableLiveData<Boolean>()
+        val saveOldPictures = MutableLiveData<SyncSettings.SavePicturesDate>()
         val syncIntervalType = MutableLiveData<SyncSettings.IntervalType>()
         val syncFolder = MutableLiveData<Int?>()
     }
