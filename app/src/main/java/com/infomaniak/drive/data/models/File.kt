@@ -252,8 +252,7 @@ open class File(
 
     fun getOfflineFile(context: Context, userId: Int = AccountUtils.currentUserId): java.io.File? {
         val userDrive = UserDrive(userId, driveId)
-        val mediaFolder = context.externalMediaDirs?.firstOrNull() ?: context.filesDir
-        val rootFolder = java.io.File(mediaFolder, "offline_storage/${userId}/$driveId")
+        val rootFolder = java.io.File(getOfflineFolder(context), "${userId}/$driveId")
         val path = getRemotePath(userDrive)
 
         if (path.isEmpty()) return null
@@ -417,6 +416,11 @@ open class File(
             return cloudUri to if (isOffline && offlineFile != null) {
                 FileProvider.getUriForFile(context, context.getString(R.string.FILE_AUTHORITY), offlineFile)
             } else cloudUri
+        }
+
+        fun getOfflineFolder(context: Context): java.io.File {
+            val mediaFolder = context.externalMediaDirs?.firstOrNull() ?: context.filesDir
+            return java.io.File(mediaFolder, context.getString(R.string.EXPOSED_OFFLINE_DIR))
         }
     }
 }

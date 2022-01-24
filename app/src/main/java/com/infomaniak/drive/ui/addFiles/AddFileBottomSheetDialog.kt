@@ -51,7 +51,6 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.*
 
-
 class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private lateinit var currentFolderFile: File

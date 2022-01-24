@@ -32,7 +32,6 @@ import com.infomaniak.drive.ui.MainViewModel
 import kotlinx.android.synthetic.main.activity_select_folder.*
 import java.util.*
 
-
 class SelectFolderActivity : BaseActivity() {
 
     private val saveExternalViewModel: SaveExternalViewModel by viewModels()
@@ -95,4 +94,3 @@ class SelectFolderActivity : BaseActivity() {
         var disableSelectedFolder: Int? = null
     }
 }
-

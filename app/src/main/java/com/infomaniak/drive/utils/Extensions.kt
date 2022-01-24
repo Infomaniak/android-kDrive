@@ -512,7 +512,7 @@ fun Array<Int>.getNearestValue(number: Int): Int {
     return this[finalIndex]
 }
 
-fun String.isEmail(): Boolean = android.util.Patterns.EMAIL_ADDRESS.matcher(this).matches()
+fun String.isEmail(): Boolean = Patterns.EMAIL_ADDRESS.matcher(this).matches()
 
 fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
     context: Context,

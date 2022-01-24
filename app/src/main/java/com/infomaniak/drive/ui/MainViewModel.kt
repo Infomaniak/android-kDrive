@@ -20,7 +20,6 @@ package com.infomaniak.drive.ui
 import android.app.Application
 import android.content.ContentResolver
 import android.content.Context
-import android.net.Uri
 import android.provider.MediaStore
 import androidx.collection.arrayMapOf
 import androidx.lifecycle.*
@@ -30,7 +29,6 @@ import androidx.work.WorkQuery
 import com.google.gson.JsonObject
 import com.infomaniak.drive.ApplicationMain
 import com.infomaniak.drive.data.api.ApiRepository
-import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.services.DownloadWorker
@@ -39,7 +37,6 @@ import com.infomaniak.drive.ui.home.HomeViewModel.Companion.DOWNLOAD_INTERVAL
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
 import com.infomaniak.drive.utils.MediaUtils.isMedia
-import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import io.realm.Realm
@@ -247,84 +244,12 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    private fun migrateOfflineIfNeeded(file: File, offlineFile: java.io.File, userDrive: UserDrive) {
-        val oldPath = java.io.File(getContext().filesDir, "offline_storage/${userDrive.userId}/${userDrive.driveId}/${file.id}")
-        if (oldPath.exists()) oldPath.renameTo(offlineFile)
-    }
 
     suspend fun syncOfflineFiles() {
         syncOfflineFilesJob.cancel()
         syncOfflineFilesJob = Job()
         runInterruptible(Dispatchers.IO + syncOfflineFilesJob) {
-            DriveInfosController.getDrives(AccountUtils.currentUserId).forEach { drive ->
-                val userDrive = UserDrive(driveId = drive.id)
-
-                FileController.getRealmInstance(userDrive).use { realm ->
-                    FileController.getOfflineFiles(null, customRealm = realm).forEach loopFiles@{ file ->
-                        if (file.isPendingOffline(getContext())) return@loopFiles
-
-                        file.getOfflineFile(getContext(), userDrive.userId)?.let { offlineFile ->
-                            migrateOfflineIfNeeded(file, offlineFile, userDrive)
-
-                            val apiResponse = ApiRepository.getFileDetails(file)
-                            apiResponse.data?.let { remoteFile ->
-                                remoteFile.isOffline = true
-
-                                if (offlineFile.lastModified() > file.getLastModifiedInMilliSecond()) {
-                                    uploadFile(file, remoteFile, offlineFile, userDrive, realm)
-                                } else {
-                                    downloadOfflineFile(file, remoteFile, offlineFile, userDrive, realm)
-                                }
-
-                            } ?: let {
-                                if (apiResponse.error?.code?.equals("object_not_found") == true) offlineFile.delete()
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun uploadFile(file: File, remoteFile: File, offlineFile: java.io.File, userDrive: UserDrive, realm: Realm) {
-        val uri = Uri.fromFile(offlineFile)
-        val fileModifiedAt = Date(offlineFile.lastModified())
-        if (UploadFile.canUpload(uri, fileModifiedAt)) {
-            remoteFile.lastModifiedAt = offlineFile.lastModified() / 1000
-            remoteFile.size = offlineFile.length()
-            FileController.updateExistingFile(newFile = remoteFile, realm = realm)
-            UploadFile(
-                uri = uri.toString(),
-                driveId = userDrive.driveId,
-                fileModifiedAt = fileModifiedAt,
-                fileName = file.name,
-                fileSize = offlineFile.length(),
-                remoteFolder = FileController.getParentFile(file.id, realm = realm)!!.id,
-                type = UploadFile.Type.SYNC_OFFLINE.name,
-                userId = userDrive.userId,
-            ).store()
-            getContext().syncImmediately()
-        }
-    }
-
-    private fun downloadOfflineFile(
-        file: File,
-        remoteFile: File,
-        offlineFile: java.io.File,
-        userDrive: UserDrive,
-        realm: Realm
-    ) {
-        val remoteOfflineFile = remoteFile.getOfflineFile(getContext(), userDrive.userId) ?: return
-
-        val pathChanged = offlineFile.path != remoteOfflineFile.path
-        if (pathChanged) {
-            if (file.isMedia()) file.deleteInMediaScan(getContext(), userDrive)
-            offlineFile.delete()
-        }
-
-        if (!file.isPendingOffline(getContext()) && (!remoteFile.isOfflineAndIntact(remoteOfflineFile) || pathChanged)) {
-            FileController.updateExistingFile(newFile = remoteFile, realm = realm)
-            Utils.downloadAsOfflineFile(getContext(), remoteFile, userDrive)
+            SyncOfflineUtils.startSyncOffline(getContext(), syncOfflineFilesJob)
         }
     }
 

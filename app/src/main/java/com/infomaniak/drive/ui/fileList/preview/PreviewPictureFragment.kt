@@ -42,12 +42,14 @@ import kotlinx.coroutines.withContext
 class PreviewPictureFragment : PreviewFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return if (noFileFound()) null else inflater.inflate(R.layout.fragment_preview_picture, container, false)
+        return inflater.inflate(R.layout.fragment_preview_picture, container, false)
     }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        if (noCurrentFile()) return
 
         val timer = createRefreshTimer(milliseconds = 400) { noThumbnailLayout?.isVisible = true }.start()
         previewDescription.isGone = true
@@ -72,6 +74,7 @@ class PreviewPictureFragment : PreviewFragment() {
                     }
                 )
                 .build()
+
             lifecycleScope.launch(Dispatchers.IO) {
                 imageLoader.execute(previewRequest).drawable?.let { drawable ->
                     if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()

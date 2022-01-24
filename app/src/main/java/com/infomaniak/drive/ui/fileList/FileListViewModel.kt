@@ -21,7 +21,8 @@ import androidx.lifecycle.*
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.data.models.File.*
+import com.infomaniak.drive.data.models.File.SortType
+import com.infomaniak.drive.data.models.File.Type
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.drive.utils.AccountUtils
@@ -42,20 +43,8 @@ class FileListViewModel : ViewModel() {
 
     lateinit var sortType: SortType
 
-    val searchFileByName = MutableLiveData<String>()
-    val searchResults = Transformations.switchMap(searchFileByName) { input ->
-        searchFiles(input, sortType, currentPage)
-    }
-
-    var dateFilter: SearchDateFilter? = null
-    var typeFilter: ConvertedType? = null
-    var categoriesFilter: List<Category>? = null
-    var categoriesOwnershipFilter: SearchCategoriesOwnershipFilter? = null
-
     var isSharedWithMe = false
 
-    var currentPage = 1
-    var searchOldFileList: OrderedRealmCollection<File>? = null
     val isListMode = SingleLiveEvent<Boolean>()
 
     var lastItemCount: FileCount? = null
@@ -133,42 +122,6 @@ class FileListViewModel : ViewModel() {
             }
             recursive(1)
         }
-    }
-
-    private fun searchFiles(query: String, order: SortType, page: Int): LiveData<ApiResponse<ArrayList<File>>> {
-        getFilesJob.cancel()
-        getFilesJob = Job()
-        return liveData(Dispatchers.IO + getFilesJob) {
-            val apiResponse = ApiRepository.searchFiles(
-                driveId = AccountUtils.currentDriveId,
-                query = query,
-                order = order.order,
-                orderBy = order.orderBy,
-                page = page,
-                date = formatDate(),
-                type = formatType(),
-                categories = formatCategories(),
-            )
-
-            when {
-                apiResponse.isSuccess() -> emit(apiResponse)
-                page == 1 -> emit(ApiResponse(ApiResponse.Status.SUCCESS, FileController.searchFiles(query, order)))
-                else -> emit(apiResponse)
-            }
-        }
-    }
-
-    private fun formatDate(): Pair<String, String>? {
-        fun Date.timestamp(): String = (time / 1_000L).toString()
-        return dateFilter?.let { it.start.timestamp() to it.end.timestamp() }
-    }
-
-    private fun formatType() = typeFilter?.name?.lowercase(Locale.ROOT)
-
-    private fun formatCategories(): String? {
-        return categoriesFilter?.joinToString(
-            separator = categoriesOwnershipFilter?.apiSeparator ?: return null
-        ) { it.id.toString() }
     }
 
     fun getPendingFilesCount(folderID: Int) = liveData(Dispatchers.IO) {
