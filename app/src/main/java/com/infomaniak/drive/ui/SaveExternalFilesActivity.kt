@@ -249,19 +249,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     private fun handleSendMultiple() {
         val uris = intent.getParcelableArrayListExtra<Parcelable>(Intent.EXTRA_STREAM)?.map { it as Uri } ?: arrayListOf()
 
-        saveExternalUriAdapter = SaveExternalUriAdapter(uris as ArrayList<Uri>, onItemClicked = { position, file ->
-            Utils.createPromptNameDialog(
-                context = this,
-                title = R.string.buttonRename,
-                fieldName = R.string.hintInputFileName,
-                positiveButton = R.string.buttonSave,
-                fieldValue = file.name,
-                selectedRange = file.getFileName().count()
-            ) { dialog, name ->
-                saveExternalUriAdapter.updateFileName(position, name)
-                dialog.dismiss()
-            }
-        })
+        saveExternalUriAdapter = SaveExternalUriAdapter(uris as ArrayList<Uri>)
 
         fileNames.adapter = saveExternalUriAdapter
         fileNames.isVisible = true

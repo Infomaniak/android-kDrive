@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui
 
+import android.database.Cursor
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.view.LayoutInflater
@@ -30,6 +31,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.FileAdapter.Companion.setCorners
 import com.infomaniak.drive.utils.SyncUtils
+import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.utils.setMargin
 import com.infomaniak.lib.core.views.ViewHolder
@@ -39,7 +41,7 @@ import kotlinx.android.synthetic.main.cardview_file_list.view.*
 import kotlinx.android.synthetic.main.item_file.view.*
 import java.util.*
 
-class SaveExternalUriAdapter(val uris: ArrayList<Uri>, private val onItemClicked: (position: Int, file: File) -> Unit) :
+class SaveExternalUriAdapter(val uris: ArrayList<Uri>) :
     RecyclerView.Adapter<ViewHolder>() {
 
     private var fileNames = arrayMapOf<Uri, String>()
@@ -57,7 +59,7 @@ class SaveExternalUriAdapter(val uris: ArrayList<Uri>, private val onItemClicked
             try {
                 context?.contentResolver?.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
                     if (cursor.moveToFirst()) {
-                        val name = fileNames[uri] ?: SyncUtils.getFileName(cursor) ?: throw Exception("Name not found from $uri")
+                        val name = initAndGetFileName(uri, cursor)
                         val file = File(
                             id = uri.hashCode(),
                             isFromUploads = true,
@@ -65,13 +67,11 @@ class SaveExternalUriAdapter(val uris: ArrayList<Uri>, private val onItemClicked
                             path = uri.toString()
                         )
 
-                        if (fileNames[uri] == null) fileNames[uri] = name
-
                         fileName.text = name
 
                         setFileItem(file)
                         initView(position)
-                        setOnClickListener { onItemClicked(position, file) }
+                        setOnClickListener { onItemClicked(file, position) }
                     }
                 }
             } catch (exception: Exception) {
@@ -89,9 +89,15 @@ class SaveExternalUriAdapter(val uris: ArrayList<Uri>, private val onItemClicked
 
     fun getFileName(uri: Uri) = fileNames[uri]
 
-    fun updateFileName(position: Int, newName: String) {
+    private fun updateFileName(position: Int, newName: String) {
         fileNames[uris[position]] = newName
         notifyItemChanged(position)
+    }
+
+    private fun initAndGetFileName(uri: Uri, cursor: Cursor): String {
+        return (fileNames[uri] ?: SyncUtils.getFileName(cursor) ?: throw Exception("Name not found from $uri")).also { name ->
+            if (fileNames[uri] == null) fileNames[uri] = name
+        }
     }
 
     private fun View.initView(position: Int) {
@@ -106,6 +112,20 @@ class SaveExternalUriAdapter(val uris: ArrayList<Uri>, private val onItemClicked
             isEnabled = false
             isClickable = false
             setIconResource(R.drawable.ic_edit)
+        }
+    }
+
+    private fun View.onItemClicked(file: File, position: Int) {
+        Utils.createPromptNameDialog(
+            context = context,
+            title = R.string.buttonRename,
+            fieldName = R.string.hintInputFileName,
+            positiveButton = R.string.buttonSave,
+            fieldValue = file.name,
+            selectedRange = file.getFileName().count()
+        ) { dialog, name ->
+            updateFileName(position, name)
+            dialog.dismiss()
         }
     }
 }
