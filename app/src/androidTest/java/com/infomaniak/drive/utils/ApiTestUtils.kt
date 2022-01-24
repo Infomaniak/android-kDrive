@@ -17,15 +17,20 @@
  */
 package com.infomaniak.drive.utils
 
+import androidx.collection.arrayMapOf
+import com.infomaniak.drive.KDriveTest.Companion.okHttpClient
+import com.infomaniak.drive.KDriveTest.Companion.userDrive
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.api.ApiRepository.createFolder
+import com.infomaniak.drive.data.api.ApiRepository.postDropBox
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.CreateFile
+import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.ApiController
-import kotlinx.android.parcel.RawValue
 import org.junit.jupiter.api.Assertions
 import java.util.*
 
@@ -60,5 +65,27 @@ object ApiTestUtils {
 
     fun getCategory(driveId: Int): ApiResponse<Array<Category>> {
         return ApiController.callApi(ApiRoutes.createCategory(driveId), ApiController.ApiMethod.GET)
+    }
+
+    fun putNewFileInTrash() =
+        // Creates a file, puts it in trash and returns it
+        createFileForTest().also { deleteTestFile(it) }
+
+    fun createFolderWithName(name: String) =
+        createFolder(okHttpClient, userDrive.driveId, Utils.ROOT_ID, name).let {
+            assertApiResponse(it)
+            it.data!!
+        }
+
+    fun createDropBoxForTest(folder: File, maxSize: Long): DropBox {
+        val body = arrayMapOf(
+            "email_when_finished" to true,
+            "limit_file_size" to maxSize,
+            "password" to "password"
+        )
+        return postDropBox(folder, body).let {
+            assertApiResponse(it)
+            it.data!!
+        }
     }
 }

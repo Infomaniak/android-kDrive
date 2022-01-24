@@ -170,7 +170,8 @@ class FileControllerTest : KDriveTest() {
             assertTrue(isNotEmpty(), "local pictures cannot be empty ")
 
             // Compare remote pictures with local pictures
-            assertTrue(size == apiResponseData.size, "remote files and local files are different")        }
+            assertTrue(size == apiResponseData.size, "remote files and local files are different")
+        }
 
     }
 
@@ -182,9 +183,9 @@ class FileControllerTest : KDriveTest() {
         }
 
         // Get offline files
-        with(FileController.getOfflineFiles(null, customRealm = realm)) {
-            Assert.assertTrue("local offline files cannot be null", isNotEmpty())
-            Assert.assertNotNull("stored file was not found in realm db", firstOrNull { it.id == file.id })
+        with(getOfflineFiles(null, customRealm = realm)) {
+            assertTrue(isNotEmpty(), "local offline files cannot be null")
+            assertNotNull(firstOrNull { it.id == file.id }, "stored file was not found in realm db")
         }
 
         // Delete remote offline test files
