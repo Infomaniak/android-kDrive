@@ -41,8 +41,7 @@ import kotlinx.android.synthetic.main.cardview_file_list.view.*
 import kotlinx.android.synthetic.main.item_file.view.*
 import java.util.*
 
-class SaveExternalUriAdapter(val uris: ArrayList<Uri>) :
-    RecyclerView.Adapter<ViewHolder>() {
+class SaveExternalUriAdapter(val uris: ArrayList<Uri>) : RecyclerView.Adapter<ViewHolder>() {
 
     private var fileNames = arrayMapOf<Uri, String>()
 
