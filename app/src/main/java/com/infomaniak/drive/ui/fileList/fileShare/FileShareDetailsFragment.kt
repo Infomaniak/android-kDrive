@@ -252,12 +252,8 @@ class FileShareDetailsFragment : Fragment() {
     private fun openSelectPermissionDialog(shareable: Shareable) {
 
         val permissionsGroup = when {
-            shareable is Invitation || (shareable is DriveUser && shareable.isExternalUser()) -> {
-                PermissionsGroup.EXTERNAL_USERS_RIGHTS
-            }
-            else -> {
-                PermissionsGroup.USERS_RIGHTS
-            }
+            shareable is Invitation || (shareable is DriveUser && shareable.isExternalUser()) -> PermissionsGroup.EXTERNAL_USERS_RIGHTS
+            else -> PermissionsGroup.USERS_RIGHTS
         }
 
         safeNavigate(

@@ -60,21 +60,6 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
         createFolderButton.setOnClickListener { createCommonFolder() }
     }
 
-    private fun whenFolderCreated(file: File) {
-        requireActivity().showSnackbar(R.string.createCommonFolderSucces)
-
-        if (currentPermission == SPECIFIC_USERS) {
-            safeNavigate(
-                CreateCommonFolderFragmentDirections.actionCreateCommonFolderFragmentToFileShareDetailsFragment(
-                    fileId = file.id,
-                    ignoreCreateFolderStack = true,
-                )
-            )
-        } else {
-            findNavController().popBackStack(R.id.newFolderFragment, true)
-        }
-    }
-
     private fun createCommonFolder() {
         folderNameValueInput.hideKeyboard()
         createFolderButton.showProgress()
@@ -94,6 +79,21 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
             }
 
             createFolderButton.hideProgress(R.string.createFolderTitle)
+        }
+    }
+
+    private fun whenFolderCreated(file: File) {
+        requireActivity().showSnackbar(R.string.createCommonFolderSucces)
+
+        if (currentPermission == SPECIFIC_USERS) {
+            safeNavigate(
+                CreateCommonFolderFragmentDirections.actionCreateCommonFolderFragmentToFileShareDetailsFragment(
+                    fileId = file.id,
+                    ignoreCreateFolderStack = true,
+                )
+            )
+        } else {
+            findNavController().popBackStack(R.id.newFolderFragment, true)
         }
     }
 }
