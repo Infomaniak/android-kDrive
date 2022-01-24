@@ -20,7 +20,6 @@ import com.infomaniak.drive.utils.ApiTestUtils.deleteTestFile
 import com.infomaniak.drive.utils.Env
 import com.infomaniak.drive.utils.Utils
 import io.realm.Realm
-import kotlinx.android.parcel.RawValue
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
@@ -254,7 +253,7 @@ class FileControllerTest : KDriveTest() {
     private fun getLocalRootFiles() =
         getFilesFromCacheOrDownload(Utils.ROOT_ID, 1, false, userDrive = userDrive, customRealm = realm)
 
-    private fun createAndStoreOfficeFile(transaction: ((remoteFile: File) -> Unit)? = null): @RawValue File {
+    private fun createAndStoreOfficeFile(transaction: ((remoteFile: File) -> Unit)? = null): File {
         val remoteFile = createFileForTest()
         // Save the file as offline file
         transaction?.invoke(remoteFile)

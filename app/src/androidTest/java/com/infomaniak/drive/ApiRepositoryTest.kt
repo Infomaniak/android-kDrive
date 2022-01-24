@@ -68,8 +68,6 @@ import com.infomaniak.drive.utils.ApiTestUtils.deleteTestFile
 import com.infomaniak.drive.utils.ApiTestUtils.getCategory
 import com.infomaniak.drive.utils.ApiTestUtils.getShareLink
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.lib.core.networking.HttpClient.okHttpClient
-import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
