@@ -22,11 +22,9 @@ import android.view.View
 import android.widget.CompoundButton
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
-import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.FolderPermission.*
@@ -36,11 +34,11 @@ import kotlinx.android.synthetic.main.empty_icon_layout.view.*
 import kotlinx.android.synthetic.main.fragment_create_folder.*
 import kotlinx.android.synthetic.main.item_dropbox_settings.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.runBlocking
 import okhttp3.internal.toLongOrDefault
 
 class CreateDropBoxFolderFragment : CreateFolderFragment() {
+
     var showAdvancedSettings = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -62,36 +60,59 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
         }
 
         advancedSettingsCardView.isVisible = true
-        advancedSettings.setOnClickListener {
-            toggleShowAdvancedSettings()
-        }
+        advancedSettings.setOnClickListener { toggleShowAdvancedSettings() }
 
-        createFolderButton.setOnClickListener {
-            createDropBox(onDropBoxCreated = { file, dropBox ->
-                mainViewModel.createDropBoxSuccess.value = dropBox
-                if (currentPermission == ONLY_ME) {
-                    findNavController().popBackStack(R.id.newFolderFragment, true)
-                } else {
-                    lifecycleScope.launch(Dispatchers.IO) {
+        createFolderButton.setOnClickListener { createDropBoxFolder() }
+    }
 
-                        FileController.addFileTo(newFolderViewModel.currentFolderId.value!!, file)
+    private fun createDropBoxFolder() {
+        createDropBox(onDropBoxCreated = { file, dropBox ->
+            mainViewModel.createDropBoxSuccess.value = dropBox
+            if (currentPermission == ONLY_ME) {
+                findNavController().popBackStack(R.id.newFolderFragment, true)
+            } else {
+                navigateToFileShareDetails(file)
+            }
+        }, onError = { translatedError ->
+            requireActivity().showSnackbar(translatedError)
+            findNavController().popBackStack(R.id.newFolderFragment, true)
+        })
+    }
 
-                        if (isResumed) {
-                            withContext(Dispatchers.Main) {
-                                safeNavigate(
-                                    CreateDropBoxFolderFragmentDirections.actionCreateDropBoxFolderFragmentToFileShareDetailsFragment(
-                                        fileId = file.id, ignoreCreateFolderStack = true
-                                    )
-                                )
-                            }
+    private fun createDropBox(
+        onDropBoxCreated: (file: File, dropBox: DropBox) -> Unit,
+        onError: (translatedError: String) -> Unit,
+    ) {
+        if (!isValid()) return
+
+        val emailWhenFinished = emailWhenFinishedSwitch.isChecked
+        val validUntil = if (expirationDateSwitch.isChecked) expirationDateInput.getCurrentTimestampValue() else null
+        val password = passwordTextInput.text.toString()
+        val limitFileSize = Utils.convertGigaByteToBytes(limitStorageValue.text.toString().toLongOrDefault(1))
+
+        createFolder(false) { file, _ ->
+            file?.let {
+                mainViewModel.createDropBoxFolder(file, emailWhenFinished, limitFileSize, password, validUntil)
+                    .observe(viewLifecycleOwner) { apiResponse ->
+                        when (apiResponse?.result) {
+                            ApiResponse.Status.SUCCESS -> apiResponse.data?.let { onDropBoxCreated(file, it) }
+                            else -> onError(getString(apiResponse.translateError()))
                         }
                     }
-                }
-            }, onError = { translatedError ->
-                requireActivity().showSnackbar(translatedError)
-                findNavController().popBackStack(R.id.newFolderFragment, true)
-            })
+            }
         }
+    }
+
+    private fun navigateToFileShareDetails(file: File) {
+        runBlocking(Dispatchers.IO) {
+            newFolderViewModel.saveNewFolder(newFolderViewModel.currentFolderId.value!!, file)
+        }
+
+        safeNavigate(
+            CreateDropBoxFolderFragmentDirections.actionCreateDropBoxFolderFragmentToFileShareDetailsFragment(
+                fileId = file.id, ignoreCreateFolderStack = true
+            )
+        )
     }
 
     /**
@@ -148,31 +169,5 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
         }
 
         return result
-    }
-
-    private fun createDropBox(
-        onDropBoxCreated: (file: File, dropBox: DropBox) -> Unit,
-        onError: (translatedError: String) -> Unit
-    ) {
-        if (!isValid()) return
-
-        val emailWhenFinished = emailWhenFinishedSwitch.isChecked
-        val validUntil = if (expirationDateSwitch.isChecked) expirationDateInput.getCurrentTimestampValue() else null
-        val password = passwordTextInput.text.toString()
-        val limitFileSize = Utils.convertGigaByteToBytes(limitStorageValue.text.toString().toLongOrDefault(1))
-
-        createFolder(false) { file, _ ->
-            file?.let {
-                mainViewModel.createDropBoxFolder(file, emailWhenFinished, limitFileSize, password, validUntil)
-                    .observe(viewLifecycleOwner) { apiResponse ->
-                        when (apiResponse?.result) {
-                            ApiResponse.Status.SUCCESS -> apiResponse.data?.let { dropBox ->
-                                onDropBoxCreated(file, dropBox)
-                            }
-                            else -> onError(getString(apiResponse.translateError()))
-                        }
-                    }
-            }
-        }
     }
 }
