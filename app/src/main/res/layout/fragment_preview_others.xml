@@ -113,7 +113,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/end"
         app:layout_constraintStart_toStartOf="@+id/start"
-        app:layout_constraintTop_toBottomOf="@+id/previewDescription"
-        tools:text="Open with" />
+        app:layout_constraintTop_toBottomOf="@+id/previewDescription" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
