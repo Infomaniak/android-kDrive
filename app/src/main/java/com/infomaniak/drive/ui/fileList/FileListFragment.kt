@@ -312,157 +312,158 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         super.onStop()
     }
 
+    private fun performBulkOperation(type: BulkOperationType, destinationFolder: File? = null, color: String? = null) {
 
+        val selectedFiles = fileAdapter.getValidItemsSelected()
 
-private fun performBulkOperation(type: BulkOperationType, destinationFolder: File? = null, color: String? = null) {
-
-    val selectedFiles = fileAdapter.getValidItemsSelected()
-
-    val fileCount = if (fileAdapter.allSelected) {
-        fileListViewModel.lastItemCount?.count ?: fileAdapter.itemCount
-    } else {
-        selectedFiles.size
-    }
-
-    val sendActions: (dialog: Dialog?) -> Unit = sendActions(fileCount, selectedFiles, type, destinationFolder, color)
-
-    if (type == BulkOperationType.TRASH) {
-        Utils.createConfirmation(
-            context = requireContext(),
-            title = getString(R.string.modalMoveTrashTitle),
-            message = resources.getQuantityString(R.plurals.modalMoveTrashDescription, fileCount, fileCount),
-            isDeletion = true,
-            onConfirmation = sendActions,
-        )
-    } else {
-        sendActions(null)
-    }
-}
-
-private fun sendActions(
-    fileCount: Int,
-    selectedFiles: List<File>,
-    type: BulkOperationType,
-    destinationFolder: File?,
-    color: String?,
-): (Dialog?) -> Unit = {
-
-    if (fileAdapter.allSelected
-        && fileCount > BulkOperationsUtils.MIN_SELECTED
-        || selectedFiles.size > BulkOperationsUtils.MIN_SELECTED
-    ) {
-        sendBulkAction(fileCount, BulkOperation(
-            action = type,
-            fileIds = if (!fileAdapter.allSelected) selectedFiles.map { it.id } else null,
-            parent = currentFolder!!,
-            destinationFolderId = destinationFolder?.id
-        ))
-
-    } else {
-        val mediator = mainViewModel.createMultiSelectMediator()
-        enableButtonMultiSelect(false)
-
-        selectedFiles.reversed().forEach {
-            val file = when {
-                it.isManagedAndValidByRealm() -> it.realm.copyFromRealm(it, 0)
-                it.isNotManagedByRealm() -> it
-                else -> return@forEach
-            }
-            sendAction(file, type, mediator, destinationFolder, color)
+        val fileCount = if (fileAdapter.allSelected) {
+            fileListViewModel.lastItemCount?.count ?: fileAdapter.itemCount
+        } else {
+            selectedFiles.size
         }
 
-        mediator.observe(viewLifecycleOwner) { (success, total) ->
-            if (total == fileCount) handleBulkActionResult(success, type, destinationFolder)
+        val sendActions: (dialog: Dialog?) -> Unit = sendActions(fileCount, selectedFiles, type, destinationFolder, color)
+
+        if (type == BulkOperationType.TRASH) {
+            Utils.createConfirmation(
+                context = requireContext(),
+                title = getString(R.string.modalMoveTrashTitle),
+                message = resources.getQuantityString(R.plurals.modalMoveTrashDescription, fileCount, fileCount),
+                isDeletion = true,
+                onConfirmation = sendActions,
+            )
+        } else {
+            sendActions(null)
         }
     }
-}
 
-private fun sendBulkAction(fileCount: Int = 0, bulkOperation: BulkOperation) {
-    MqttClientWrapper.start {
-        fileListViewModel.performCancellableBulkOperation(bulkOperation).observe(viewLifecycleOwner) { apiResponse ->
-            if (apiResponse.isSuccess()) {
-                apiResponse.data?.let { cancellableAction ->
-                    requireContext().launchBulkOperationWorker(
-                        generateWorkerData(cancellableAction.cancelId, fileCount, bulkOperation.action)
-                    )
+    private fun sendActions(
+        fileCount: Int,
+        selectedFiles: List<File>,
+        type: BulkOperationType,
+        destinationFolder: File?,
+        color: String?,
+    ): (Dialog?) -> Unit = {
+
+        if (fileAdapter.allSelected
+            && fileCount > BulkOperationsUtils.MIN_SELECTED
+            || selectedFiles.size > BulkOperationsUtils.MIN_SELECTED
+        ) {
+            sendBulkAction(fileCount, BulkOperation(
+                action = type,
+                fileIds = if (fileAdapter.allSelected) null else selectedFiles.map { it.id },
+                parent = currentFolder!!,
+                destinationFolderId = destinationFolder?.id,
+            ))
+
+        } else {
+            val mediator = mainViewModel.createMultiSelectMediator()
+            enableButtonMultiSelect(false)
+
+            selectedFiles.reversed().forEach {
+                val file = when {
+                    it.isManagedAndValidByRealm() -> it.realm.copyFromRealm(it, 0)
+                    it.isNotManagedByRealm() -> it
+                    else -> return@forEach
                 }
-            } else requireActivity().showSnackbar(apiResponse.translateError())
-            closeMultiSelect()
+                sendAction(file, type, mediator, destinationFolder, color)
+            }
+
+            mediator.observe(viewLifecycleOwner) { (success, total) ->
+                if (total == fileCount) handleBulkActionResult(success, type, destinationFolder)
+            }
         }
     }
-}
 
-private fun sendAction(
-    file: File,
-    type: BulkOperationType,
-    mediator: MediatorLiveData<Pair<Int, Int>>,
-    destinationFolder: File?,
-    color: String?,
-) {
-
-    val onSuccess: (Int) -> Unit = { fileID ->
-        runBlocking(Dispatchers.Main) { fileAdapter.deleteByFileId(fileID) }
+    private fun sendBulkAction(fileCount: Int = 0, bulkOperation: BulkOperation) {
+        MqttClientWrapper.start {
+            fileListViewModel.performCancellableBulkOperation(bulkOperation).observe(viewLifecycleOwner) { apiResponse ->
+                if (apiResponse.isSuccess()) {
+                    apiResponse.data?.let { cancellableAction ->
+                        requireContext().launchBulkOperationWorker(
+                            generateWorkerData(cancellableAction.cancelId, fileCount, bulkOperation.action)
+                        )
+                    }
+                } else requireActivity().showSnackbar(apiResponse.translateError())
+                closeMultiSelect()
+            }
+        }
     }
 
-    when (type) {
-        BulkOperationType.TRASH -> {
-            mediator.addSource(
-                mainViewModel.deleteFile(file, onSuccess = onSuccess),
-                mainViewModel.updateMultiSelectMediator(mediator)
-            )
+    private fun sendAction(
+        file: File,
+        type: BulkOperationType,
+        mediator: MediatorLiveData<Pair<Int, Int>>,
+        destinationFolder: File?,
+        color: String?,
+    ) {
+
+        val onSuccess: (Int) -> Unit = { fileID ->
+            runBlocking(Dispatchers.Main) { fileAdapter.deleteByFileId(fileID) }
         }
-        BulkOperationType.MOVE -> {
-            mediator.addSource(
-                mainViewModel.moveFile(file, destinationFolder!!, onSuccess),
-                mainViewModel.updateMultiSelectMediator(mediator)
-            )
-        }
-        BulkOperationType.COPY -> {
-            val fileName = file.getFileName()
-            mediator.addSource(
-                mainViewModel.duplicateFile(
-                    file,
-                    destinationFolder!!.id,
-                    requireContext().getString(R.string.allDuplicateFileName, fileName, file.getFileExtension())
-                ),
-                mainViewModel.updateMultiSelectMediator(mediator)
-            )
-        }
-        BulkOperationType.COLOR_FOLDER -> {
-            if (color != null && file.isAllowedToBeColored()) {
+
+        when (type) {
+            BulkOperationType.TRASH -> {
                 mediator.addSource(
-                    mainViewModel.updateFolderColor(file, color),
+                    mainViewModel.deleteFile(file, onSuccess = onSuccess),
                     mainViewModel.updateMultiSelectMediator(mediator),
                 )
-            } else {
-                mediator.value = (mediator.value?.first ?: 0) to (mediator.value?.second?.plus(1) ?: 1)
+            }
+            BulkOperationType.MOVE -> {
+                mediator.addSource(
+                    mainViewModel.moveFile(file, destinationFolder!!, onSuccess),
+                    mainViewModel.updateMultiSelectMediator(mediator),
+                )
+            }
+            BulkOperationType.COPY -> {
+                val fileName = file.getFileName()
+                mediator.addSource(
+                    mainViewModel.duplicateFile(
+                        file,
+                        destinationFolder!!.id,
+                        requireContext().getString(R.string.allDuplicateFileName, fileName, file.getFileExtension()),
+                    ),
+                    mainViewModel.updateMultiSelectMediator(mediator),
+                )
+            }
+            BulkOperationType.COLOR_FOLDER -> {
+                if (color != null && file.isAllowedToBeColored()) {
+                    mediator.addSource(
+                        mainViewModel.updateFolderColor(file, color),
+                        mainViewModel.updateMultiSelectMediator(mediator),
+                    )
+                } else {
+                    mediator.value = (mediator.value?.first ?: 0) to (mediator.value?.second?.plus(1) ?: 1)
+                }
+            }
+            BulkOperationType.SET_OFFLINE -> {
+                addSelectedFilesToOffline(file)
+            }
+            BulkOperationType.ADD_FAVORITES -> {
+                mediator.addSource(
+                    mainViewModel.addFileToFavorites(file) {
+                        runBlocking(Dispatchers.Main) {
+                            fileAdapter.notifyFileChanged(file.id) { file ->
+                                if (!file.isManaged) file.isFavorite = true
+                            }
+                        }
+                    },
+                    mainViewModel.updateMultiSelectMediator(mediator),
+                )
             }
         }
-        BulkOperationType.SET_OFFLINE -> {
-            addSelectedFilesToOffline(file)
-        }
-        BulkOperationType.ADD_FAVORITES -> {
-            mediator.addSource(mainViewModel.addFileToFavorites(file) {
-                runBlocking(Dispatchers.Main) {
-                    fileAdapter.notifyFileChanged(file.id) { file ->
-                        if (!file.isManaged) file.isFavorite = true
-                    }
-                }
-            }, mainViewModel.updateMultiSelectMediator(mediator))
-        }
     }
-}
 
-private fun handleBulkActionResult(success: Int, type: BulkOperationType, destinationFolder: File?) {
-    val title = if (success == 0) {
-        getString(R.string.anErrorHasOccurred)
-    } else {
-        resources.getQuantityString(type.successMessage, success, success, destinationFolder?.name + "/")
+    private fun handleBulkActionResult(success: Int, type: BulkOperationType, destinationFolder: File?) {
+        val title = if (success == 0) {
+            getString(R.string.anErrorHasOccurred)
+        } else {
+            resources.getQuantityString(type.successMessage, success, success, destinationFolder?.name + "/")
+        }
+        requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
+        refreshActivities()
+        closeMultiSelect()
     }
-    requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
-    refreshActivities()
-    closeMultiSelect()
-}
 
     private fun setupMultiSelect() {
         fileAdapter.enabledMultiSelectMode = true

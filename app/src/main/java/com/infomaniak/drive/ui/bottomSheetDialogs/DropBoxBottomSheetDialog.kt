@@ -30,18 +30,22 @@ class DropBoxBottomSheetDialog : InformationBottomSheetDialog() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         title.setText(R.string.dropBoxTitle)
         description.setText(R.string.dropBoxDescription)
-
         illu.setAnimation(R.raw.illu_drop_box)
 
-        actionButton.setText(R.string.buttonUpgradeOffer)
-        actionButton.setOnClickListener {
-            requireContext().openUrl(ApiRoutes.upgradeDrive(AccountUtils.currentDriveId))
-            dismiss()
+        actionButton.apply {
+            setText(R.string.buttonUpgradeOffer)
+            setOnClickListener {
+                requireContext().openUrl(ApiRoutes.upgradeDrive(AccountUtils.currentDriveId))
+                dismiss()
+            }
         }
 
-        packAvailability.isVisible = true
-        packAvailability.text = getString(R.string.allPackAvailability, getString(R.string.packs_team_pro))
+        packAvailability.apply {
+            isVisible = true
+            text = getString(R.string.allPackAvailability, getString(R.string.packs_team_pro))
+        }
     }
 }
