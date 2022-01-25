@@ -46,14 +46,16 @@ class CategoriesContainerView @JvmOverloads constructor(
         categorySwitch.isVisible = canPutCategoryOnFile
         setCategoryTitle(canPutCategoryOnFile, categories)
         setClickListener(canPutCategoryOnFile, onClicked)
-        setCategories(categories, layoutInflater, onClicked)
+        setCategories(canPutCategoryOnFile, categories, layoutInflater, onClicked)
     }
 
     private fun setCategoryTitle(canPutCategoryOnFile: Boolean, categories: List<Category>) {
         categoryTitle.setText(
             if (canPutCategoryOnFile) {
                 if (categories.isEmpty()) R.string.addCategoriesTitle else R.string.manageCategoriesTitle
-            } else R.string.categoriesFilterTitle
+            } else {
+                R.string.categoriesFilterTitle
+            }
         )
     }
 
@@ -63,24 +65,32 @@ class CategoriesContainerView @JvmOverloads constructor(
         }
     }
 
-    private fun setCategories(categories: List<Category>, layoutInflater: LayoutInflater, onClicked: () -> Unit) {
-        with(categoriesGroup) {
-            if (categories.isNotEmpty()) {
-                isVisible = true
-                removeAllViews()
-                categories.forEach { addView(createChip(it, layoutInflater, onClicked)) }
-            } else {
-                isGone = true
-            }
+    private fun setCategories(
+        canPutCategoryOnFile: Boolean,
+        categories: List<Category>,
+        layoutInflater: LayoutInflater,
+        onClicked: () -> Unit,
+    ) = with(categoriesGroup) {
+        if (categories.isEmpty()) {
+            isGone = true
+        } else {
+            isVisible = true
+            removeAllViews()
+            categories.forEach { addView(createChip(canPutCategoryOnFile, it, layoutInflater, onClicked)) }
         }
     }
 
     @SuppressLint("InflateParams")
-    private fun createChip(category: Category, layoutInflater: LayoutInflater, onClicked: () -> Unit): Chip {
+    private fun createChip(
+        canPutCategoryOnFile: Boolean,
+        category: Category,
+        layoutInflater: LayoutInflater,
+        onClicked: () -> Unit,
+    ): Chip {
         return (layoutInflater.inflate(R.layout.chip_category, null) as Chip).apply {
             text = category.getName(context)
             chipBackgroundColor = ColorStateList.valueOf(category.color.toColorInt())
-            setOnClickListener { onClicked() }
+            if (canPutCategoryOnFile) setOnClickListener { onClicked() }
         }
     }
 }

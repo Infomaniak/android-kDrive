@@ -45,7 +45,7 @@ import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.fragment_file_details.*
 import kotlinx.android.synthetic.main.fragment_file_details_infos.*
 
-class FileDetailsInfosFragment : FileDetailsSubFragment() {
+class FileDetailsInfoFragment : FileDetailsSubFragment() {
 
     private var shareLink: ShareLink? = null
 
@@ -58,7 +58,7 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) { currentFile ->
 
             setupShareLinkContainer(currentFile, fileDetailsViewModel.currentFileShare.value)
-            setupCategoriesContainer(currentFile?.id, currentFile.getCategories())
+            setupCategoriesContainer(currentFile.id, currentFile.isDisabled(), currentFile.getCategories())
             displayUsersAvatars(currentFile)
             setupShareButton(currentFile)
 
@@ -110,11 +110,13 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         }
 
         getBackNavigationResult<List<Int>>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
-            val file = fileDetailsViewModel.currentFile.value
-            setupCategoriesContainer(
-                fileId = file?.id,
-                categories = DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray()),
-            )
+            fileDetailsViewModel.currentFile.value?.let { file ->
+                setupCategoriesContainer(
+                    fileId = file.id,
+                    isDisabled = file.isDisabled(),
+                    categories = DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray()),
+                )
+            }
         }
     }
 
@@ -196,26 +198,34 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         shareLinkDivider.isGone = true
     }
 
-    private fun setupCategoriesContainer(fileId: Int?, categories: List<Category>) {
+    private fun setupCategoriesContainer(fileId: Int, isDisabled: Boolean, categories: List<Category>) {
         val rights = DriveInfosController.getCategoryRights()
-        if (fileId?.isPositive() == true && rights?.canReadCategoryOnFile == true) {
+
+        if (fileId.isPositive() && rights?.canReadCategoryOnFile == true) {
             categoriesDivider.isVisible = true
             categoriesContainer.apply {
                 isVisible = true
-                setup(categories, rights.canPutCategoryOnFile, layoutInflater, onClicked = {
-                    runCatching {
-                        findNavController().navigate(
-                            FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectCategoriesFragment(
-                                fileId = fileId,
-                                categoriesUsageMode = CategoriesUsageMode.MANAGED_CATEGORIES,
-                            )
-                        )
-                    }
-                })
+                setup(
+                    categories = categories,
+                    canPutCategoryOnFile = rights.canPutCategoryOnFile && !isDisabled,
+                    layoutInflater = layoutInflater,
+                    onClicked = { onCategoriesClicked(fileId) },
+                )
             }
+
         } else {
             categoriesDivider.isGone = true
             categoriesContainer.isGone = true
+        }
+    }
+
+    private fun onCategoriesClicked(fileId: Int) {
+        runCatching {
+            findNavController().navigate(
+                FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectCategoriesFragment(
+                    fileId = fileId, categoriesUsageMode = CategoriesUsageMode.MANAGED_CATEGORIES
+                )
+            )
         }
     }
 
