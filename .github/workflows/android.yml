@@ -1,0 +1,64 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master, android-ci ]
+
+jobs:
+
+  build:
+
+    runs-on: self-hosted
+    
+    env:
+        ENV_PATH: "app/src/androidTest/java/com/infomaniak/drive/utils/Env.kt"
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        INVITE_USER_NAME: ${{ secrets.INVITE_USER_NAME }}
+        NEW_USER_NAME: ${{ secrets.NEW_USER_NAME }}
+        NEW_USER_PASSWORD: ${{ secrets.NEW_USER_PASSWORD }}
+
+    steps:
+    - name: Cancel Previous Runs
+      uses: styfle/cancel-workflow-action@0.9.1
+      with:
+        access_token: ${{ github.token }}
+        
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.MY_REPO_PAT }}
+        submodules: recursive
+        
+    - name: set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: 11
+        distribution: 'zulu'
+        cache: gradle
+    
+    - name: Create test env
+      run: |
+        touch $ENV_PATH
+        echo "object Env { const val USE_CURRENT_USER = false; const val TOKEN: String = \"$ACCESS_TOKEN\";  const val DRIVE_ID = 140946; const val INVITE_USER_NAME: String = \"$INVITE_USER_NAME\"; const val NEW_USER_ID = 1048949; const val NEW_USER_NAME: String = \"$NEW_USER_NAME\"; const val NEW_USER_PASSWORD: String = \"$NEW_USER_PASSWORD\" }" > $ENV_PATH
+    
+    # Setup Gradle and Run tests
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build project
+      run: ./gradlew assembleStandard --stacktrace
+    - name: Run Unit tests
+      run: ./gradlew testDebugUnitTest --stacktrace
+    
+    - name: Run instrumentation tests
+      uses: ReactiveCircus/android-emulator-runner@v2.22.0
+      with:
+        api-level: 31
+        arch: x86_64
+        profile: pixel_4
+        avd-name: test
+        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
+        disable-animations: true
+        script: ./gradlew clean :app:connectedStandardDebugAndroidTest --stacktrace
+    
