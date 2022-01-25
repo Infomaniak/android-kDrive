@@ -21,6 +21,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
@@ -67,6 +68,7 @@ open class FileAdapter(
     var uploadInProgress: Boolean = false
 
     var isComplete = false
+    var isHomeOffline = false
 
     private var pendingWifiConnection: Boolean = false
     private var showLoading = false
@@ -266,6 +268,10 @@ open class FileAdapter(
                 val isGrid = viewHolderType == DisplayType.GRID
 
                 if (!isGrid) setCorners(position, itemCount)
+
+                if (isGrid && isHomeOffline) {
+                    (layoutParams as ConstraintLayout.LayoutParams).dimensionRatio = "2:1"
+                }
 
                 setFileItem(file, isGrid)
 

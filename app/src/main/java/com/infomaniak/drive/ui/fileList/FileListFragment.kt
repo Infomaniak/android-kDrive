@@ -36,6 +36,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -710,16 +711,21 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun setupDisplayMode(isListMode: Boolean) {
         val navController = findNavController()
-        fileRecyclerView.layoutManager =
-            if (isListMode) SentryLinearLayoutManager(navController, requireContext())
-            else SentryGridLayoutManager(navController, requireContext(), 2)
+        fileRecyclerView.layoutManager = createLayoutManager(isListMode, navController)
 
-        toggleDisplayButton.icon = ContextCompat.getDrawable(
-            requireContext(),
-            if (isListMode) R.drawable.ic_list else R.drawable.ic_grid
-        )
+        val listModeIconRes = when {
+            isListMode -> R.drawable.ic_list
+            fileAdapter.isHomeOffline -> R.drawable.ic_largelist
+            else -> R.drawable.ic_grid
+        }
+        toggleDisplayButton.icon = ContextCompat.getDrawable(requireContext(), listModeIconRes)
         fileAdapter.viewHolderType = if (isListMode) FileAdapter.DisplayType.LIST else FileAdapter.DisplayType.GRID
         fileRecyclerView.adapter = fileAdapter
+    }
+
+    protected open fun createLayoutManager(isListMode: Boolean, navController: NavController): LinearLayoutManager {
+        return if (isListMode) SentryLinearLayoutManager(navController, requireContext())
+        else SentryGridLayoutManager(navController, requireContext(), 2)
     }
 
     private fun openMultiSelect() {

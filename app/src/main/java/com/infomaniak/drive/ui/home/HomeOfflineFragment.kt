@@ -17,12 +17,17 @@
  */
 package com.infomaniak.drive.ui.home
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.navigation.NavController
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.menu.OfflineFileFragment
+import com.infomaniak.drive.utils.SentryLinearLayoutManager
 import com.infomaniak.drive.utils.setMargin
 import kotlinx.android.synthetic.main.fragment_file_list.*
 
@@ -30,8 +35,6 @@ class HomeOfflineFragment : OfflineFileFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        //TODO - Change linearLayoutManager as new home v2 design
 
         appBar.isGone = true
         sortButton.isGone = true
@@ -41,6 +44,20 @@ class HomeOfflineFragment : OfflineFileFragment() {
         val marginStandard = resources.getDimension(R.dimen.marginStandard).toInt()
         val marginStandardMedium = resources.getDimension(R.dimen.marginStandardMedium).toInt()
         sortLayout.setMargin(left = marginStandard, right = marginStandard, top = marginStandardMedium)
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        fileRecyclerView.adapter = fileAdapter
+    }
+
+    override fun setupFileAdapter() {
+        super.setupFileAdapter()
+        fileAdapter.isHomeOffline = true
+    }
+
+    override fun createLayoutManager(isListMode: Boolean, navController: NavController): LinearLayoutManager {
+        return SentryLinearLayoutManager(findNavController(), requireContext())
     }
 
     override fun homeClassName(): String = javaClass.name
