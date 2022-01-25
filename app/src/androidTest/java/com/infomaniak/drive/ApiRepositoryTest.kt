@@ -67,172 +67,27 @@ import com.infomaniak.drive.utils.ApiTestUtils.getCategory
 import com.infomaniak.drive.utils.ApiTestUtils.getShareLink
 import com.infomaniak.drive.utils.ApiTestUtils.putNewFileInTrash
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
-import org.junit.jupiter.api.Test
 
 /**
  * Logging activity testing class
  */
 class ApiRepositoryTest : KDriveTest() {
-    private lateinit var testFile: File
-
-    @BeforeEach
-    @Throws(Exception::class)
-    fun setUp() {
-        testFile = createFileForTest()
-    }
-
-    @AfterEach
-    @Throws(Exception::class)
-    fun tearDown() {
-        deleteTestFile(testFile)
-    }
 
     @Test
+    @DisplayName("Check if remote drive data are correctly retrieved")
     fun getDriveData() {
         assertApiResponse(getAllDrivesData(okHttpClient))
     }
 
     @Test
+    @DisplayName("Check if remote user profile is correctly retrieved")
     fun getUserProfile() {
         with(getUserProfile(okHttpClient)) {
             assertApiResponse(this)
             assertEquals(userDrive.userId, data?.id, "User ids should be the same")
         }
-    }
-
-    @Test
-    fun manageFavoriteFileLifecycle() {
-        // Creates favorite
-        assertApiResponse(postFavoriteFile(testFile))
-
-        // File must be a favorite
-        with(getFileDetails(testFile)) {
-            assertApiResponse(this)
-            assertTrue(data!!.isFavorite, "File must be a favorite")
-        }
-
-        // Deletes created Favorite
-        assertApiResponse(deleteFavoriteFile(testFile))
-        // File must not be a favorite
-        with(getFileDetails(testFile)) {
-            assertApiResponse(this)
-            assertFalse(data!!.isFavorite, "File must not be a favorite")
-        }
-    }
-
-    @Test
-    fun getFileActivities() {
-        renameFile(testFile, "new name")
-        assertApiResponse(getFileActivities(testFile, 1))
-    }
-
-    @Test
-    fun createCommentOnFile() {
-        // Posts 2 comments
-        val commentBody = "Hello world"
-        with(postFileComment(testFile, commentBody)) {
-            assertApiResponse(this)
-            assertEquals(commentBody, data!!.body)
-        }
-
-        // Gets comments
-        with(getFileComments(testFile, 1)) {
-            assertApiResponse(this)
-            assertTrue(data!!.isNotEmpty(), "Test file should have 1 comment")
-            assertEquals(commentBody, data!![0].body, "Comment body should be $commentBody")
-        }
-    }
-
-    @Test
-    fun updateCommentOnFile() {
-        val commentId = postFileComment(testFile, "Hello world").let {
-            assertApiResponse(it)
-            it.data!!.id
-        }
-        // Updates the comment
-        with(putFileComment(testFile, commentId, "42")) {
-            assertApiResponse(this)
-            assertTrue(data ?: false)
-        }
-
-        // Makes sure comment has been updated
-        with(getFileComments(testFile, 1)) {
-            assertApiResponse(this)
-            assertEquals("42", data!![0].body, "Comment body should be 42")
-        }
-    }
-
-    @Test
-    fun deleteCommentOnFile() {
-        // Adds a comment on file then deletes it
-        with(postFileComment(testFile, "Hello world")) {
-            assertApiResponse(this)
-            // Delete the comment
-            deleteFileComment(testFile, data!!.id)
-            assertTrue(getFileComments(testFile, 1).data.isNullOrEmpty(), "There should not be comment on the test file")
-        }
-    }
-
-    @Test
-    fun likesCommentOnFile() {
-        val commentBody = "Hello world"
-        val commentID = postFileComment(testFile, commentBody).let {
-            assertApiResponse(it)
-            it.data!!.id
-        }
-
-        // Likes the comment
-        with(postFileCommentLike(testFile, commentID)) {
-            assertApiResponse(this)
-            assertTrue(data ?: false)
-        }
-
-        // Gets the comment
-        with(getFileComments(testFile, 1)) {
-            assertApiResponse(this)
-            val comment = data!!.find { comment -> comment.id == commentID }
-            assertNotNull(comment, "Comment should not be null")
-            assertTrue(comment?.liked ?: false, "Comment should be liked")
-        }
-
-        // Unlike the comment
-        with(postFileCommentUnlike(testFile, commentID)) {
-            assertApiResponse(this)
-            assertTrue(data ?: false)
-        }
-
-        // Make sure data has been updated
-        with(getFileComments(testFile, 1)) {
-            val comment = data?.find { commentRes -> commentRes.id == commentID }
-            assertNotNull(comment, "Comment should not be null")
-            assertFalse(comment?.liked ?: true, "Comment should not be liked anymore")
-        }
-    }
-
-    @Test
-    fun duplicateFile() {
-        val copyName = "test copy"
-        val copyFile = duplicateFile(testFile, copyName, ROOT_ID).let {
-            assertApiResponse(it)
-            assertEquals(copyName, it.data?.name, "The copy name should be equal to $copyName")
-            assertNotEquals(testFile.id, it.data?.id, "The id should be different from the original file")
-            assertEquals(testFile.driveColor, it.data?.driveColor)
-            it.data!!
-        }
-
-        // Duplicate one more time with same name and location
-        with(duplicateFile(testFile, copyName, ROOT_ID)) {
-            assertApiResponse(this)
-            assertEquals("$copyName (1)", data?.name, "The copy name should be equal to $copyName (1)")
-            deleteTestFile(data!!)
-        }
-
-        // Delete the copy
-        deleteTestFile(copyFile)
     }
 
     @Test
@@ -267,78 +122,6 @@ class ApiRepositoryTest : KDriveTest() {
             assertTrue(data!!.visibility.contains("is_team_space_folder"), "visibility should be 'is_team_space_folder'")
             deleteTestFile(data!!)
         }
-    }
-
-    @Test
-    fun shareLinkTest() {
-        // TODO Changes for api-v2 : boolean instead of "true", "false", and can_edit instead of canEdit
-        val body = mapOf(
-            "permission" to "public",
-            "block_downloads" to "false",
-            "canEdit" to "false",
-            "show_stats" to "false",
-            "block_comments" to "false",
-            "block_information" to "false"
-        )
-
-        // Creates the share link
-        with(postFileShareLink(testFile, body)) {
-            assertApiResponse(this)
-            assertEquals("public", data!!.permission.name.lowercase(), "Permission should be public")
-            assertFalse(data!!.blockDownloads, "Block downloads should be false")
-            assertFalse(data!!.canEdit, "Can edit should be false")
-            assertFalse(data!!.showStats, "Show stats should be false")
-            assertFalse(data!!.blockDownloads, "Block comments should be false")
-            assertFalse(data!!.blockInformation, "Block information should be false")
-        }
-
-        // Get the share link
-        with(getFileShare(okHttpClient, testFile)) {
-            assertApiResponse(this)
-            assertEquals("/${testFile.name}", data!!.path, "Path should be the name of the file")
-        }
-
-        // Modifies the share link
-        with(
-            putFileShareLink(
-                testFile, mapOf(
-                    "permission" to "public",
-                    "block_downloads" to true,
-                    "can_edit" to true,
-                    "show_stats" to true,
-                    "block_comments" to true,
-                    "block_information" to true
-                )
-            )
-        ) { assertApiResponse(this) }
-
-        // Makes sure modification has been made
-        with(getShareLink(testFile)) {
-            assertApiResponse(this)
-            assertEquals("public", data!!.permission.name.lowercase(), "Permission should be public")
-            assertTrue(data!!.blockDownloads, "block downloads should be true")
-            assertTrue(data!!.canEdit, "can edit should be true")
-            assertTrue(data!!.showStats, "show stats should be true")
-            assertTrue(data!!.blockDownloads, "block comments should be true")
-            assertTrue(data!!.blockInformation, "Block information should be true")
-        }
-
-        // Delete the shareLink
-        with(deleteFileShareLink(testFile)) {
-            assertApiResponse(this)
-            assertTrue(data!!)
-        }
-
-        assertFalse(postFileShareCheck(testFile, body).isSuccess(), "Share link check should fail")
-    }
-
-    @Test
-    fun shareLink() {
-        val fileShareLink = postFileShare(testFile)
-        assertTrue(
-            fileShareLink.contains("https://drive.infomaniak.com/drive/[0-9]+/file/[0-9]+/share".toRegex()),
-            "Link should match regex 'https://drive.infomaniak.com/drive/[0-9]+/file/[0-9]+/share/'",
-        )
     }
 
     @Test
@@ -391,47 +174,9 @@ class ApiRepositoryTest : KDriveTest() {
         deleteCategory(userDrive.driveId, categoryId)
     }
 
-    @Test
-    fun addCategoryToFile() {
-        // Create a test category
-        val category = createCategory(userDrive.driveId, "test category", "#FFF").data
-        assertNotNull(category)
-
-        // Add the category to the test file
-        addCategory(testFile, category!!.id)
-        with(getFileDetails(testFile)) {
-            assertApiResponse(this)
-            assertNotNull(data!!.categories.find { it.id == category.id }, "The test category should be found")
-        }
-
-        // Delete the category before removing it from the test file
-        deleteCategory(userDrive.driveId, category.id)
-        with(getFileDetails(testFile)) {
-            assertApiResponse(this)
-            assertTrue(data!!.categories.isNullOrEmpty(), "The test file should not have category")
-        }
-    }
 
     @Test
-    fun removeCategoryToFile() {
-        // Create a test category
-        val category = createCategory(userDrive.driveId, "test cat", "#000").data
-        assertNotNull(category, "Category should not be null")
-        // Add the category to the test file
-        addCategory(testFile, category!!.id)
-        // Remove the category
-        removeCategory(testFile, category.id)
-        // Make sure the category is removed
-        with(getFileDetails(testFile)) {
-            assertApiResponse(this)
-            assertTrue(data!!.categories.isNullOrEmpty(), "The test file should not have a category")
-        }
-        // Delete the test category
-        deleteCategory(userDrive.driveId, category.id)
-    }
-
-    @Test
-    fun getLastActivityTest() {
+    fun getLastActivity() {
         with(getLastActivities(userDrive.driveId, 1)) {
             assertApiResponse(this)
             assertTrue(data!!.isNotEmpty(), "Last activities shouldn't be empty or null")
@@ -554,7 +299,6 @@ class ApiRepositoryTest : KDriveTest() {
         deleteTestFile(file)
     }
 
-
     @Test
     fun permanentlyDeleteFiles() {
         // Clean the trash to make sure nothing is left in
@@ -574,10 +318,273 @@ class ApiRepositoryTest : KDriveTest() {
         }
     }
 
-
     @Test
     fun mySharedFileTest() {
         val order = File.SortType.BIGGER
         assertApiResponse(getMySharedFiles(okHttpClient, userDrive.driveId, order.order, order.orderBy, 1))
+    }
+
+    @Nested
+    @DisplayName("Class for tests needing testFile")
+    private inner class ShareTestFile {
+
+        private lateinit var testFile: File
+
+        @BeforeEach
+        @Throws(Exception::class)
+        fun setUp() {
+            testFile = createFileForTest()
+        }
+
+        @AfterEach
+        @Throws(Exception::class)
+        fun tearDown() {
+            deleteTestFile(testFile)
+        }
+
+        @Test
+        @DisplayName("Check if a file can be added the deleted from favorite")
+        fun manageFavoriteFileLifecycle() {
+            // Creates favorite
+            assertApiResponse(postFavoriteFile(testFile))
+
+            // File must be a favorite
+            with(getFileDetails(testFile)) {
+                assertApiResponse(this)
+                assertTrue(data!!.isFavorite, "File must be a favorite")
+            }
+
+            // Deletes created Favorite
+            assertApiResponse(deleteFavoriteFile(testFile))
+            // File must not be a favorite
+            with(getFileDetails(testFile)) {
+                assertApiResponse(this)
+                assertFalse(data!!.isFavorite, "File must not be a favorite")
+            }
+        }
+
+        @Test
+        @DisplayName("Check if the file activities are correctly retrieved")
+        fun getFileActivities() {
+            renameFile(testFile, "new name")
+            assertApiResponse(getFileActivities(testFile, 1))
+        }
+
+        @Test
+        @DisplayName("Check the creation of comment on a file")
+        fun createCommentOnFile() {
+            // Posts 2 comments
+            val commentBody = "Hello world"
+            with(postFileComment(testFile, commentBody)) {
+                assertApiResponse(this)
+                assertEquals(commentBody, data!!.body)
+            }
+
+            // Gets comments
+            with(getFileComments(testFile, 1)) {
+                assertApiResponse(this)
+                assertTrue(data!!.isNotEmpty(), "Test file should have 1 comment")
+                assertEquals(commentBody, data!![0].body, "Comment body should be $commentBody")
+            }
+        }
+
+        @Test
+        fun updateCommentOnFile() {
+            val commentId = postFileComment(testFile, "Hello world").let {
+                assertApiResponse(it)
+                it.data!!.id
+            }
+            // Updates the comment
+            with(putFileComment(testFile, commentId, "42")) {
+                assertApiResponse(this)
+                assertTrue(data ?: false)
+            }
+
+            // Makes sure comment has been updated
+            with(getFileComments(testFile, 1)) {
+                assertApiResponse(this)
+                assertEquals("42", data!![0].body, "Comment body should be 42")
+            }
+        }
+
+        @Test
+        fun deleteCommentOnFile() {
+            // Adds a comment on file then deletes it
+            with(postFileComment(testFile, "Hello world")) {
+                assertApiResponse(this)
+                // Delete the comment
+                deleteFileComment(testFile, data!!.id)
+                assertTrue(getFileComments(testFile, 1).data.isNullOrEmpty(), "There should not be comment on the test file")
+            }
+        }
+
+        @Test
+        fun likesCommentOnFile() {
+            val commentBody = "Hello world"
+            val commentID = postFileComment(testFile, commentBody).let {
+                assertApiResponse(it)
+                it.data!!.id
+            }
+
+            // Likes the comment
+            with(postFileCommentLike(testFile, commentID)) {
+                assertApiResponse(this)
+                assertTrue(data ?: false)
+            }
+
+            // Gets the comment
+            with(getFileComments(testFile, 1)) {
+                assertApiResponse(this)
+                val comment = data!!.find { comment -> comment.id == commentID }
+                assertNotNull(comment, "Comment should not be null")
+                assertTrue(comment?.liked ?: false, "Comment should be liked")
+            }
+
+            // Unlike the comment
+            with(postFileCommentUnlike(testFile, commentID)) {
+                assertApiResponse(this)
+                assertTrue(data ?: false)
+            }
+
+            // Make sure data has been updated
+            with(getFileComments(testFile, 1)) {
+                val comment = data?.find { commentRes -> commentRes.id == commentID }
+                assertNotNull(comment, "Comment should not be null")
+                assertFalse(comment?.liked ?: true, "Comment should not be liked anymore")
+            }
+        }
+
+        @Test
+        fun duplicateFile() {
+            val copyName = "test copy"
+            val copyFile = duplicateFile(testFile, copyName, ROOT_ID).let {
+                assertApiResponse(it)
+                assertEquals(copyName, it.data?.name, "The copy name should be equal to $copyName")
+                assertNotEquals(testFile.id, it.data?.id, "The id should be different from the original file")
+                assertEquals(testFile.driveColor, it.data?.driveColor)
+                it.data!!
+            }
+
+            // Duplicate one more time with same name and location
+            with(duplicateFile(testFile, copyName, ROOT_ID)) {
+                assertApiResponse(this)
+                assertEquals("$copyName (1)", data?.name, "The copy name should be equal to $copyName (1)")
+                deleteTestFile(data!!)
+            }
+
+            // Delete the copy
+            deleteTestFile(copyFile)
+        }
+
+        @Test
+        fun shareLinkTest() {
+            // TODO Changes for api-v2 : boolean instead of "true", "false", and can_edit instead of canEdit
+            val body = mapOf(
+                "permission" to "public",
+                "block_downloads" to "false",
+                "canEdit" to "false",
+                "show_stats" to "false",
+                "block_comments" to "false",
+                "block_information" to "false"
+            )
+
+            // Creates the share link
+            with(postFileShareLink(testFile, body)) {
+                assertApiResponse(this)
+                assertEquals("public", data!!.permission.name.lowercase(), "Permission should be public")
+                assertFalse(data!!.blockDownloads, "Block downloads should be false")
+                assertFalse(data!!.canEdit, "Can edit should be false")
+                assertFalse(data!!.showStats, "Show stats should be false")
+                assertFalse(data!!.blockDownloads, "Block comments should be false")
+                assertFalse(data!!.blockInformation, "Block information should be false")
+            }
+
+            // Get the share link
+            with(getFileShare(okHttpClient, testFile)) {
+                assertApiResponse(this)
+                assertEquals("/${testFile.name}", data!!.path, "Path should be the name of the file")
+            }
+
+            // Modifies the share link
+            with(
+                putFileShareLink(
+                    testFile, mapOf(
+                        "permission" to "public",
+                        "block_downloads" to true,
+                        "can_edit" to true,
+                        "show_stats" to true,
+                        "block_comments" to true,
+                        "block_information" to true
+                    )
+                )
+            ) { assertApiResponse(this) }
+
+            // Makes sure modification has been made
+            with(getShareLink(testFile)) {
+                assertApiResponse(this)
+                assertEquals("public", data!!.permission.name.lowercase(), "Permission should be public")
+                assertTrue(data!!.blockDownloads, "block downloads should be true")
+                assertTrue(data!!.canEdit, "can edit should be true")
+                assertTrue(data!!.showStats, "show stats should be true")
+                assertTrue(data!!.blockDownloads, "block comments should be true")
+                assertTrue(data!!.blockInformation, "Block information should be true")
+            }
+
+            // Delete the shareLink
+            with(deleteFileShareLink(testFile)) {
+                assertApiResponse(this)
+                assertTrue(data!!)
+            }
+
+            assertFalse(postFileShareCheck(testFile, body).isSuccess(), "Share link check should fail")
+        }
+
+        @Test
+        fun shareLink() {
+            val fileShareLink = postFileShare(testFile)
+            assertTrue(
+                fileShareLink.contains("https://drive.infomaniak.com/drive/[0-9]+/file/[0-9]+/share".toRegex()),
+                "Link should match regex 'https://drive.infomaniak.com/drive/[0-9]+/file/[0-9]+/share/'",
+            )
+        }
+
+        @Test
+        fun addCategoryToFile() {
+            // Create a test category
+            val category = createCategory(userDrive.driveId, "test category", "#FFF").data
+            assertNotNull(category)
+
+            // Add the category to the test file
+            addCategory(testFile, category!!.id)
+            with(getFileDetails(testFile)) {
+                assertApiResponse(this)
+                assertNotNull(data!!.categories.find { it.id == category.id }, "The test category should be found")
+            }
+
+            // Delete the category before removing it from the test file
+            deleteCategory(userDrive.driveId, category.id)
+            with(getFileDetails(testFile)) {
+                assertApiResponse(this)
+                assertTrue(data!!.categories.isNullOrEmpty(), "The test file should not have category")
+            }
+        }
+
+        @Test
+        fun removeCategoryToFile() {
+            // Create a test category
+            val category = createCategory(userDrive.driveId, "test cat", "#000").data
+            assertNotNull(category, "Category should not be null")
+            // Add the category to the test file
+            addCategory(testFile, category!!.id)
+            // Remove the category
+            removeCategory(testFile, category.id)
+            // Make sure the category is removed
+            with(getFileDetails(testFile)) {
+                assertApiResponse(this)
+                assertTrue(data!!.categories.isNullOrEmpty(), "The test file should not have a category")
+            }
+            // Delete the test category
+            deleteCategory(userDrive.driveId, category.id)
+        }
     }
 }
