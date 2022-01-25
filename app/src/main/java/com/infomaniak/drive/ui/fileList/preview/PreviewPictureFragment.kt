@@ -53,6 +53,7 @@ class PreviewPictureFragment : PreviewFragment() {
 
         val timer = createRefreshTimer(milliseconds = 400) { noThumbnailLayout?.isVisible = true }.start()
         previewDescription.isGone = true
+        openWithButton.isGone = true
         fileIcon.setImageResource(file.getFileType().icon)
 
         val imageViewDisposable = imageView.load(file.thumbnail()) { placeholder(R.drawable.coil_hack) }
@@ -67,7 +68,11 @@ class PreviewPictureFragment : PreviewFragment() {
             val previewRequest = ImageRequest.Builder(requireContext())
                 .data(file.imagePreview())
                 .listener(
-                    onError = { _, _ -> previewDescription?.isVisible = true },
+                    onError = { _, _ ->
+                        fileName?.text = file.name
+                        previewDescription?.isVisible = true
+                        openWithButton?.isVisible = true
+                    },
                     onSuccess = { _, _ ->
                         timer.cancel()
                         noThumbnailLayout?.isGone = true

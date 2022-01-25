@@ -58,6 +58,8 @@ open class PreviewVideoFragment : PreviewFragment() {
 
         if (noCurrentFile()) return
 
+        openWithButton?.isGone = true
+
         fileIcon.setImageResource(file.getFileType().icon)
         container?.layoutTransition?.setAnimateParentHierarchy(false)
         fileName.text = file.name
@@ -93,6 +95,7 @@ open class PreviewVideoFragment : PreviewFragment() {
                     playerView?.isGone = true
                     previewDescription?.isVisible = true
                     errorLayout?.isVisible = true
+                    openWithButton?.isVisible = true
                 }
             })
         }
