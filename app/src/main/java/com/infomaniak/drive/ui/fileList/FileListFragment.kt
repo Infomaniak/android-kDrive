@@ -339,16 +339,16 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         destinationFolder: File?,
     ): (Dialog?) -> Unit = {
 
-        if (fileAdapter.allSelected
-            && fileCount > BulkOperationsUtils.MIN_SELECTED
-            || selectedFiles.size > BulkOperationsUtils.MIN_SELECTED
-        ) {
-            sendBulkAction(fileCount, BulkOperation(
-                action = type,
-                fileIds = if (!fileAdapter.allSelected) selectedFiles.map { it.id } else null,
-                parent = currentFolder!!,
-                destinationFolderId = destinationFolder?.id,
-            ))
+        val canBulkAllSelectedFiles = fileAdapter.allSelected && fileCount > BulkOperationsUtils.MIN_SELECTED
+        if (canBulkAllSelectedFiles || selectedFiles.size > BulkOperationsUtils.MIN_SELECTED) {
+            sendBulkAction(
+                fileCount, BulkOperation(
+                    action = type,
+                    fileIds = if (fileAdapter.allSelected) null else selectedFiles.map { it.id },
+                    parent = currentFolder!!,
+                    destinationFolderId = destinationFolder?.id,
+                )
+            )
 
         } else {
             val mediator = mainViewModel.createMultiSelectMediator()
