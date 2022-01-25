@@ -838,3 +838,10 @@ fun MaterialCardView.setCornersRadius(topCornerRadius: Float, bottomCornerRadius
         .setBottomRightCorner(CornerFamily.ROUNDED, bottomCornerRadius)
         .build()
 }
+
+fun File.isAllowedToBeColored(): Boolean {
+    return !isDisabled()
+            && isFolder()
+            && getVisibilityType() != VisibilityType.IS_SHARED_SPACE
+            && getVisibilityType() != VisibilityType.IS_TEAM_SPACE
+}

@@ -97,7 +97,7 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
     private fun computeColoredFolderAvailability(fileIds: IntArray): Boolean {
         fileIds.forEach {
             val file = FileController.getFileById(it)
-            if (file != null && Utils.isFileAllowedToBeColored(file)) return true
+            if (file?.isAllowedToBeColored() == true) return true
         }
         return false
     }
