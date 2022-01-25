@@ -432,17 +432,19 @@
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/syncDate"
                         android:layout_width="match_parent"
-                        android:layout_height="@dimen/buttonHeight"
-                        android:background="?selectableItemBackground">
+                        android:layout_height="wrap_content"
+                        android:animateLayoutChanges="true"
+                        android:background="?selectableItemBackground"
+                        android:paddingHorizontal="@dimen/marginStandard"
+                        android:paddingTop="@dimen/marginStandard"
+                        android:paddingBottom="@dimen/marginStandardMedium">
 
                         <TextView
                             android:id="@+id/syncDateTitle"
                             style="@style/Subtitle2"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/marginStandard"
                             android:text="@string/syncSettingsButtonSaveDate"
-                            app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toStartOf="@id/syncDateValue"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent" />
@@ -451,22 +453,24 @@
                             android:id="@+id/syncDateValue"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="@dimen/marginStandardMedium"
-                            android:text="@string/syncSettingsSaveDateNowValue"
-                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:layout_marginBottom="@dimen/marginStandardSmall"
+                            app:layout_constraintBottom_toTopOf="@id/syncDatePicker"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
-                            tools:visibility="gone" />
+                            tools:text="@string/syncSettingsSaveDateNowValue" />
 
-                        <com.infomaniak.drive.views.DateInputView
-                            android:id="@+id/backupDateInput"
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/syncDatePicker"
+                            style="@style/ButtonInfomaniak"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="@dimen/marginStandard"
+                            android:backgroundTint="@color/backgroundSecondary"
+                            android:textColor="@color/title"
                             android:visibility="gone"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/syncDateValue"
+                            tools:text="25 janv. 2022"
                             tools:visibility="visible" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>

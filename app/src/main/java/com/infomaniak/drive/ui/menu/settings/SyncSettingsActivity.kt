@@ -21,8 +21,6 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
@@ -30,7 +28,9 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.DateValidatorPointBackward
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
@@ -43,10 +43,9 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
-import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.showProgress
+import com.infomaniak.drive.utils.Utils
+import com.infomaniak.lib.core.utils.*
 import kotlinx.android.synthetic.main.activity_sync_settings.*
-import kotlinx.android.synthetic.main.view_date_input.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -58,6 +57,7 @@ class SyncSettingsActivity : BaseActivity() {
     private val selectDriveViewModel: SelectDriveViewModel by viewModels()
     private var oldSyncSettings: SyncSettings? = null
     private var editNumber = 0
+    private var customDate = Date().startOfTheDay()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,24 +87,6 @@ class SyncSettingsActivity : BaseActivity() {
             syncFolder.value = oldSyncSettings?.syncFolder
             saveOldPictures.value = SyncSettings.SavePicturesDate.SINCE_NOW
         }
-
-        backupDateInput.dateValueLayout.setHint(R.string.syncSettingsSaveDateFromDateValue)
-        backupDateInput.init(
-            fragmentManager = supportFragmentManager,
-            defaultDate = Date(),
-            onDateSet = {
-                val validUntil = Calendar.getInstance().apply {
-                    val date = Date(it)
-                    set(
-                        date.year(),
-                        date.month(),
-                        date.day(),
-                        date.hours(),
-                        date.minutes()
-                    )
-                }.time
-            },
-        )
 
         AccountUtils.getAllUsers().observe(this) { users ->
             if (users.size > 1) {
@@ -168,12 +150,15 @@ class SyncSettingsActivity : BaseActivity() {
             changeSaveButtonStatus()
             syncDateValue.text = getString(it.shortTitle).lowercase()
             if (it == SyncSettings.SavePicturesDate.SINCE_DATE) {
-                syncDateValue.visibility = GONE
-                backupDateInput.visibility = VISIBLE
+                syncDatePicker.isVisible = true
+                syncDatePicker.text = customDate.format(FORMAT_DATE_CLEAR_MONTH)
             } else {
-                syncDateValue.visibility = VISIBLE
-                backupDateInput.visibility = GONE
+                syncDatePicker.isGone = true
             }
+        }
+
+        syncDatePicker.setOnClickListener {
+            showDatePicker()
         }
 
         syncSettingsViewModel.syncIntervalType.observe(this) {
@@ -271,7 +256,7 @@ class SyncSettingsActivity : BaseActivity() {
                 || (selectDriveViewModel.selectedUserId.value != oldSyncSettings?.userId)
                 || (selectDriveViewModel.selectedDrive.value?.id != oldSyncSettings?.driveId)
                 || (syncSettingsViewModel.syncFolder.value != oldSyncSettings?.syncFolder)
-                || (syncSettingsViewModel.saveOldPictures.value != null)
+                || (syncSettingsViewModel.saveOldPictures.value != SyncSettings.SavePicturesDate.SINCE_NOW)
                 || allSyncedFoldersCount > 0
         saveButton.isVisible = isEdited
 
@@ -290,7 +275,7 @@ class SyncSettingsActivity : BaseActivity() {
             val date = when (syncSettingsViewModel.saveOldPictures.value!!) {
                 SyncSettings.SavePicturesDate.SINCE_NOW -> Date()
                 SyncSettings.SavePicturesDate.SINCE_FOREVER -> Date(0)
-                SyncSettings.SavePicturesDate.SINCE_DATE -> Date(1234567890)
+                SyncSettings.SavePicturesDate.SINCE_DATE -> customDate
             }
 
             if (activateSyncSwitch.isChecked) {
@@ -314,6 +299,26 @@ class SyncSettingsActivity : BaseActivity() {
                 onBackPressed()
             }
         }
+    }
+
+    private fun showDatePicker() {
+        val calendarConstraints = CalendarConstraints.Builder()
+            .setEnd(Date().time)
+            .setValidator(DateValidatorPointBackward.now())
+            .build()
+
+        val datePicker = MaterialDatePicker.Builder.datePicker()
+            .setTheme(R.style.MaterialCalendarThemeBackground)
+            .setSelection(customDate.time)
+            .setCalendarConstraints(calendarConstraints)
+            .build()
+
+        datePicker.addOnPositiveButtonClickListener {
+            customDate = Date(it).startOfTheDay()
+            syncDatePicker.text = customDate.format(FORMAT_DATE_CLEAR_MONTH)
+        }
+
+        datePicker.show(supportFragmentManager, "syncDate");
     }
 
     class SyncSettingsViewModel : ViewModel() {
