@@ -87,9 +87,10 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         }
 
         fileDetailsViewModel.currentFileShare.observe(viewLifecycleOwner) { share ->
-            val currentFile = fileDetailsViewModel.currentFile.value
-            setPath(currentFile?.driveId ?: AccountUtils.currentDriveId, share.path)
-            setupShareLinkContainer(currentFile, share)
+            fileDetailsViewModel.currentFile.value?.let { file ->
+                setPath(file.driveId, share.path)
+                setupShareLinkContainer(file, share)
+            }
         }
 
         setBackActionHandlers()
@@ -138,17 +139,21 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
         }
     }
 
-    private fun setupShareLinkContainer(file: File?, share: Share?) {
-        if (file?.rights?.canBecomeLink == true || file?.shareLink?.isNotBlank() == true) {
-            showShareLinkView(file, share)
-        } else {
-            hideShareLinkView()
+    private fun setupShareLinkContainer(file: File, share: Share?) {
+        when {
+            file.isDropBox() -> setupDropBoxShareLink(file)
+            file.rights?.canBecomeLink == true || file.shareLink?.isNotBlank() == true -> setupShareLink(file, share)
+            else -> hideShareLinkView()
         }
     }
 
-    private fun showShareLinkView(file: File, share: Share?) {
-        shareLinkContainer.isVisible = true
-        shareLinkDivider.isVisible = true
+    private fun setupDropBoxShareLink(file: File) {
+        showShareLinkView()
+        shareLinkContainer.setup(file)
+    }
+
+    private fun setupShareLink(file: File, share: Share?) {
+        showShareLinkView()
         shareLinkContainer.setup(
             file = file,
             shareLink = share?.link,
@@ -179,6 +184,11 @@ class FileDetailsInfosFragment : FileDetailsSubFragment() {
                     )
                 )
             })
+    }
+
+    private fun showShareLinkView() {
+        shareLinkContainer.isVisible = true
+        shareLinkDivider.isVisible = true
     }
 
     private fun hideShareLinkView() {
