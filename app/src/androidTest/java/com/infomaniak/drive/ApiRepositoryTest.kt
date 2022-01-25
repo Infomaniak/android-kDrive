@@ -83,7 +83,7 @@ class ApiRepositoryTest : KDriveTest() {
 
     @Test
     @DisplayName("Check if remote user profile is correctly retrieved")
-    fun getUserProfile() {
+    fun getUserProfileFromRemote() {
         with(getUserProfile(okHttpClient)) {
             assertApiResponse(this)
             assertEquals(userDrive.userId, data?.id, "User ids should be the same")
@@ -91,6 +91,7 @@ class ApiRepositoryTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("Create a file under root then move it to a created folder")
     fun moveFileToAnotherFolder() {
         val file = createFileForTest()
         // Creates test folder
@@ -116,6 +117,7 @@ class ApiRepositoryTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("Create a folder with team space visibility")
     fun createTeamFolder() {
         with(createTeamFolder(okHttpClient, userDrive.driveId, "teamFolder", true)) {
             assertApiResponse(this)
@@ -125,6 +127,7 @@ class ApiRepositoryTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("Create a category then delete it")
     fun createCategory() {
         val color = "#0000FF"
         val name = "category tests"
@@ -154,6 +157,7 @@ class ApiRepositoryTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("Update a created category then delete it")
     fun updateCategory() {
         var color = "#0000FF"
         var name = "category tests"
@@ -176,6 +180,7 @@ class ApiRepositoryTest : KDriveTest() {
 
 
     @Test
+    @DisplayName("Retrieve recent activities from remote")
     fun getLastActivity() {
         with(getLastActivities(userDrive.driveId, 1)) {
             assertApiResponse(this)
@@ -194,8 +199,9 @@ class ApiRepositoryTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("Create a folder then convert it to dropbox")
     fun createDropboxFromFolder() {
-        // Create a folder to convert it in dropbox
+        // Create a folder to convert it to dropbox
         val name = "testFolder"
         val folder = createFolderWithName(name)
         // No dropbox yet
@@ -221,6 +227,7 @@ class ApiRepositoryTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("Update the properties of a dropbox")
     fun updateDropBox() {
         val folder = createFolderWithName("testFolder")
 
@@ -248,6 +255,7 @@ class ApiRepositoryTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("Convert a dropbox back to a normal folder")
     fun deleteDropbox() {
         val folder = createFolderWithName("folder")
         // Convert the folder to dropbox
@@ -260,6 +268,7 @@ class ApiRepositoryTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("Put a file in trash then find it trash files")
     fun getTrashFiles() {
         // Create File to put it in trash
         val fileToDelete = putNewFileInTrash()
@@ -271,6 +280,7 @@ class ApiRepositoryTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("")
     fun getAllDriveTrashFiles() {
         // Create File to put it in trash
         val fileToDelete = putNewFileInTrash()
