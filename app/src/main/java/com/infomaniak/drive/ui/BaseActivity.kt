@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.MatomoUtils.trackScreen
 import kotlinx.coroutines.runBlocking
 import org.matomo.sdk.extra.MatomoApplication
 import org.matomo.sdk.extra.TrackHelper
@@ -33,7 +34,6 @@ open class BaseActivity : AppCompatActivity() {
             runBlocking { AccountUtils.requestCurrentUser() }
         }
         val path = this::class.java.name
-        TrackHelper.track().screen(path).title(path.substringAfter("com.infomaniak.drive."))
-            .with((application as MatomoApplication).tracker)
+        application.trackScreen(path, path.substringAfter("com.infomaniak.drive."))
     }
 }

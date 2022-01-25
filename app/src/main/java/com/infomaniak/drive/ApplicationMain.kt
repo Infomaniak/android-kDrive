@@ -17,11 +17,13 @@
  */
 package com.infomaniak.drive
 
+import android.app.Application
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
+import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationManagerCompat
 import coil.ImageLoader
@@ -40,6 +42,11 @@ import com.infomaniak.drive.data.sync.UploadNotifications.pendingIntentFlags
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.KDriveHttpClient
+import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.MatomoUtils.buildTracker
+import com.infomaniak.drive.utils.MatomoUtils.trackCurrentUserId
+import com.infomaniak.drive.utils.MatomoUtils.trackDownloads
+import com.infomaniak.drive.utils.MatomoUtils.trackScreen
 import com.infomaniak.drive.utils.NotificationUtils.initNotificationChannel
 import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.clearStack
@@ -62,10 +69,9 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import org.eclipse.paho.client.mqttv3.*
+import org.matomo.sdk.Tracker
 import org.matomo.sdk.TrackerBuilder
-import org.matomo.sdk.extra.DownloadTracker.Extra
 import org.matomo.sdk.extra.MatomoApplication
-import org.matomo.sdk.extra.TrackHelper
 import java.util.*
 
 
@@ -122,8 +128,8 @@ class ApplicationMain : MatomoApplication(), ImageLoaderFactory {
         onInitTracker()
     }
 
-    override fun onCreateTrackerConfig() =
-        TrackerBuilder("https://analytics.infomaniak.com/matomo.php", 8, "AndroidTracker")
+    override fun onCreateTrackerConfig() = buildTracker()
+
 
     override fun newImageLoader(): ImageLoader {
         return ImageLoader.Builder(applicationContext)
@@ -180,9 +186,19 @@ class ApplicationMain : MatomoApplication(), ImageLoaderFactory {
     }
 
     private fun onInitTracker() {
-        tracker.userId = AccountUtils.currentUserId.toString()
-        TrackHelper.track().download().identifier(Extra.ApkChecksum(this)).with(tracker)
-        TrackHelper.track().screen("/ApplicationMain").title("Application").with(tracker)
+        trackCurrentUserId()
+        trackDownloads()
+
+        tracker.addTrackingCallback { trackMe ->
+            trackMe.apply {
+                toMap().forEach() { if (it.key == "action_name") Log.d("TRACKER", it.value) }
+            }
+        }
+        trackScreen("/ApplicationMain", "Application")
+    }
+
+    companion object {
+        inline val Application.tracker: Tracker get() = (this as MatomoApplication).tracker
     }
 
 }

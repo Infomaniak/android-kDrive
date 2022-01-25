@@ -28,12 +28,12 @@ import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.login.MigrationActivity
 import com.infomaniak.drive.ui.login.MigrationActivity.Companion.getOldkDriveUser
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.MatomoUtils.trackCurrentUserId
+import com.infomaniak.drive.utils.MatomoUtils.trackScreen
 import com.infomaniak.drive.utils.isKeyguardSecure
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.matomo.sdk.extra.MatomoApplication
-import org.matomo.sdk.extra.TrackHelper
 
 class LaunchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,9 +65,9 @@ class LaunchActivity : AppCompatActivity() {
                 }
             }
         }
-        (application as MatomoApplication).tracker.apply {
-            userId = AccountUtils.currentUserId.toString()
-            TrackHelper.track().screen("/LaunchActivity").title("Launch").with(this)
+        with(application) {
+            trackCurrentUserId()
+            trackScreen("/LaunchActivity", "Launch")
         }
     }
 

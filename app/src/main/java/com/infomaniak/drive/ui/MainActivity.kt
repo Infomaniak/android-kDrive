@@ -64,6 +64,7 @@ import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.launchInAppReview
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.MatomoUtils.trackScreen
 import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
@@ -76,8 +77,6 @@ import io.sentry.SentryLevel
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.coroutines.*
-import org.matomo.sdk.extra.MatomoApplication
-import org.matomo.sdk.extra.TrackHelper
 import java.util.*
 
 class MainActivity : BaseActivity() {
@@ -289,8 +288,7 @@ class MainActivity : BaseActivity() {
                 setColorNavigationBar()
             }
         }
-        TrackHelper.track().screen(destination.displayName.substringAfter("com.infomaniak.drive:id"))
-            .title(destination.label.toString()).with((application as MatomoApplication).tracker)
+        application.trackScreen(destination.displayName.substringAfter("com.infomaniak.drive:id"), destination.label.toString())
     }
 
     private fun handleBottomNavigationVisibility(destinationId: Int, shouldHideBottomNavigation: Boolean?) {
