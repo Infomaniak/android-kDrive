@@ -24,6 +24,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.util.*
 
@@ -48,6 +49,7 @@ class FileControllerTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("Create a folder at the drive's root")
     fun createTestFolder() {
         val folderName = "TestFolder"
         // Create a folder under root
@@ -60,6 +62,7 @@ class FileControllerTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("Check if remote and local files are the same")
     fun getRootFiles_CanGetRemoteSavedFilesFromRealm() {
         val remoteResult = getAndSaveRemoteRootFiles()
 
@@ -74,6 +77,7 @@ class FileControllerTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("Create a file then put it to trash")
     fun deleteAddedFileFromAPI() {
         // Create a file
         val remoteFile = createAndStoreOfficeFile()
@@ -90,6 +94,7 @@ class FileControllerTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("Make a file favorite then store it in realm and compare results")
     fun getFavoriteFiles_CanGetRemoteSavedFilesFromRealm() {
         // Create a test file and store it in favorite
         val remoteFile = createAndStoreOfficeFile()
@@ -126,6 +131,7 @@ class FileControllerTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("Get shared files from remote then get local shared files and compare them")
     fun getMySharedFiles_CanGetRemoteSavedFilesFromRealm() = runBlocking {
         // Get remote files
         val remoteFiles = arrayListOf<File>()
@@ -154,11 +160,11 @@ class FileControllerTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("Retrieve remote picture then store it in realm and compare results")
     fun getPictures_CanGetRemoteSavedFilesFromRealm() {
         // Get remote pictures
         val apiResponseData = ApiRepository.getLastPictures(Env.DRIVE_ID, 1).let {
-            assertTrue(it.isSuccess(), "get pictures request must pass")
-            assertFalse(it.data.isNullOrEmpty(), "get pictures response data cannot be null or empty")
+            assertApiResponse(it)
             it.data!!
         }
 
@@ -176,6 +182,7 @@ class FileControllerTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("Store a file offline then retrieve it with realm")
     fun getOfflineFiles() {
         // Create offline test file
         val file = createAndStoreOfficeFile { remoteFile ->
@@ -194,6 +201,7 @@ class FileControllerTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("Store a file then check if search results are correct")
     fun searchFile_FromRealm_IsCorrect() {
         val file = createAndStoreOfficeFile()
         with(searchFiles(file.name, File.SortType.NAME_AZ, customRealm = realm)) {
@@ -204,6 +212,7 @@ class FileControllerTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("Check if removing realm's root remove all files")
     fun removeFileCascade_IsCorrect() {
         getAndSaveRemoteRootFiles()
         with(getLocalRootFiles()) {
@@ -221,6 +230,7 @@ class FileControllerTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("Check if realm root contains files")
     fun getTestFileListForFolder() {
         // Get the file list of root folder
         with(getFileListForFolder(okHttpClient, userDrive.driveId, Utils.ROOT_ID, order = File.SortType.NAME_AZ)) {
@@ -231,6 +241,7 @@ class FileControllerTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("Check if renaming file's results are correct")
     fun renameTestFile() {
         val newName = "renamed file"
         val file = createFileForTest()

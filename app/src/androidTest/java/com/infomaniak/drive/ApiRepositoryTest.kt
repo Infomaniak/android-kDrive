@@ -190,6 +190,7 @@ class ApiRepositoryTest : KDriveTest() {
 
     @Disabled("Don't know the wanted api behaviour")
     @Test
+    @DisplayName("Create a folder and post its access permissions")
     fun postTestFolderAccess() {
         val folder = createFolderWithName("folder")
         assertNotNull(folder, "test folder must not be null")
@@ -268,8 +269,8 @@ class ApiRepositoryTest : KDriveTest() {
     }
 
     @Test
-    @DisplayName("Put a file in trash then find it trash files")
-    fun getTrashFiles() {
+    @DisplayName("Put a file in trash then get it from here")
+    fun getGivenTrashFile() {
         // Create File to put it in trash
         val fileToDelete = putNewFileInTrash()
         // Get the deleted File from the trash, info should be the same
@@ -280,7 +281,7 @@ class ApiRepositoryTest : KDriveTest() {
     }
 
     @Test
-    @DisplayName("")
+    @DisplayName("Put a file in trash then get all files in trash")
     fun getAllDriveTrashFiles() {
         // Create File to put it in trash
         val fileToDelete = putNewFileInTrash()
@@ -293,6 +294,7 @@ class ApiRepositoryTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("Put a file in trash then restore it to root folder")
     fun restoreFileFromTrash() {
         // Create File and put it in trash
         val file = putNewFileInTrash()
@@ -310,6 +312,7 @@ class ApiRepositoryTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("Delete all trashed files, then delete one created file specifically")
     fun permanentlyDeleteFiles() {
         // Clean the trash to make sure nothing is left in
         assertApiResponse(emptyTrash(userDrive.driveId))
@@ -329,14 +332,15 @@ class ApiRepositoryTest : KDriveTest() {
     }
 
     @Test
+    @DisplayName("Retrieve shared remote file")
     fun mySharedFileTest() {
         val order = File.SortType.BIGGER
         assertApiResponse(getMySharedFiles(okHttpClient, userDrive.driveId, order.order, order.orderBy, 1))
     }
 
     @Nested
-    @DisplayName("Class for tests needing testFile")
-    private inner class ShareTestFile {
+    @DisplayName("Given test file")
+    inner class ShareTestFile {
 
         private lateinit var testFile: File
 
@@ -353,7 +357,7 @@ class ApiRepositoryTest : KDriveTest() {
         }
 
         @Test
-        @DisplayName("Check if a file can be added the deleted from favorite")
+        @DisplayName("Add a file to favorite, then remove it")
         fun manageFavoriteFileLifecycle() {
             // Creates favorite
             assertApiResponse(postFavoriteFile(testFile))
@@ -399,6 +403,7 @@ class ApiRepositoryTest : KDriveTest() {
         }
 
         @Test
+        @DisplayName("Create a comment on a file then update it")
         fun updateCommentOnFile() {
             val commentId = postFileComment(testFile, "Hello world").let {
                 assertApiResponse(it)
@@ -418,6 +423,7 @@ class ApiRepositoryTest : KDriveTest() {
         }
 
         @Test
+        @DisplayName("Create a comment on a file then delete it")
         fun deleteCommentOnFile() {
             // Adds a comment on file then deletes it
             with(postFileComment(testFile, "Hello world")) {
@@ -429,6 +435,7 @@ class ApiRepositoryTest : KDriveTest() {
         }
 
         @Test
+        @DisplayName("Like a file's comment then unlike it")
         fun likesCommentOnFile() {
             val commentBody = "Hello world"
             val commentID = postFileComment(testFile, commentBody).let {
@@ -465,6 +472,7 @@ class ApiRepositoryTest : KDriveTest() {
         }
 
         @Test
+        @DisplayName("Copy the test file to root folder")
         fun duplicateFile() {
             val copyName = "test copy"
             val copyFile = duplicateFile(testFile, copyName, ROOT_ID).let {
@@ -487,6 +495,7 @@ class ApiRepositoryTest : KDriveTest() {
         }
 
         @Test
+        @DisplayName("Create a custom share link, update it then delete it")
         fun shareLinkTest() {
             // TODO Changes for api-v2 : boolean instead of "true", "false", and can_edit instead of canEdit
             val body = mapOf(
@@ -550,6 +559,7 @@ class ApiRepositoryTest : KDriveTest() {
         }
 
         @Test
+        @DisplayName("Create a default share link on test file")
         fun shareLink() {
             val fileShareLink = postFileShare(testFile)
             assertTrue(
@@ -559,6 +569,7 @@ class ApiRepositoryTest : KDriveTest() {
         }
 
         @Test
+        @DisplayName("Add a category to the test file, then delete this category")
         fun addCategoryToFile() {
             // Create a test category
             val category = createCategory(userDrive.driveId, "test category", "#FFF").data
@@ -580,6 +591,7 @@ class ApiRepositoryTest : KDriveTest() {
         }
 
         @Test
+        @DisplayName("Add a category to the test file, then remove this category from the file")
         fun removeCategoryToFile() {
             // Create a test category
             val category = createCategory(userDrive.driveId, "test cat", "#000").data

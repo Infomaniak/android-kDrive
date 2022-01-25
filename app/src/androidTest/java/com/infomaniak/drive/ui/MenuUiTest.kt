@@ -34,6 +34,7 @@ import com.infomaniak.drive.utils.UiTestUtils.device
 import com.infomaniak.drive.utils.UiTestUtils.getDeviceViewById
 import org.hamcrest.CoreMatchers
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 class MenuUiTest {
@@ -54,6 +55,7 @@ class MenuUiTest {
     }
 
     @Test
+    @DisplayName("Check UI to add a new kdrive user then log him off")
     fun testAddUser() {
         getDeviceViewById("changeUserIcon").clickAndWaitForNewWindow()
         getDeviceViewById("addUser").clickAndWaitForNewWindow()

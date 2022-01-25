@@ -27,6 +27,7 @@ import com.infomaniak.drive.utils.UiTestUtils.getDeviceViewById
 import com.infomaniak.drive.utils.UiTestUtils.getViewIdentifier
 import com.infomaniak.drive.utils.UiTestUtils.startApp
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.util.*
 
@@ -42,6 +43,7 @@ class FileItemUiTest {
     }
 
     @Test
+    @DisplayName("Check UI to create a folder then create a share link for it")
     fun testCreateFileShareLink() {
         val randomFolderName = "UI-Test-${UUID.randomUUID()}"
         val fileRecyclerView = UiScrollable(UiSelector().resourceId(getViewIdentifier("fileRecyclerView")))

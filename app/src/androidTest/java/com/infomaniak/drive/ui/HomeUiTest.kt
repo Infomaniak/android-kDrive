@@ -34,6 +34,7 @@ import com.infomaniak.drive.utils.UiTestUtils.selectDriveInList
 import org.hamcrest.CoreMatchers.notNullValue
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 /**
@@ -57,6 +58,7 @@ class HomeUiTest {
     }
 
     @Test
+    @DisplayName("Check UI to switch drive from home then user menu")
     fun testSwitchDrive() {
         // Change drive from homeFragment
         getDeviceViewById("homeFragment").clickAndWaitForNewWindow()
