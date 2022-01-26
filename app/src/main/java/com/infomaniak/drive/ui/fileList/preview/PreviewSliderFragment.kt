@@ -41,9 +41,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
@@ -156,19 +154,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
         getBackNavigationResult<Any>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
             bottomSheetFileInfos.refreshBottomSheetUi(currentPreviewFile)
-        }
-
-        getBackNavigationResult<String>(ColorFolderBottomSheetDialog.COLOR_FOLDER_NAV_KEY) {
-            updateFolderColor(it)
-        }
-    }
-
-    private fun updateFolderColor(color: String) {
-        if (isResumed) {
-            mainViewModel.updateFolderColor(currentPreviewFile, color).observe(viewLifecycleOwner) { apiResponse ->
-                findNavController().popBackStack()
-                if (!apiResponse.isSuccess()) requireActivity().showSnackbar(apiResponse.translatedError)
-            }
         }
     }
 
@@ -355,11 +340,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun colorFolderClicked(color: String) {
-        if (AccountUtils.getCurrentDrive()?.pack == Drive.DrivePack.FREE.value) {
-            safeNavigate(R.id.colorFolderUpgradeBottomSheetDialog)
-        } else {
-            safeNavigate(PreviewSliderFragmentDirections.actionPreviewSliderFragmentToColorFolderBottomSheetDialog(color))
-        }
+        // No-op
     }
 
     override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) {

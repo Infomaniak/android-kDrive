@@ -119,9 +119,6 @@
         <action
             android:id="@+id/action_previewSliderFragment_to_selectCategoriesFragment"
             app:destination="@id/selectCategoriesFragment" />
-        <action
-            android:id="@+id/action_previewSliderFragment_to_colorFolderBottomSheetDialog"
-            app:destination="@id/colorFolderBottomSheetDialog" />
     </fragment>
 
     <fragment
