@@ -171,6 +171,7 @@
                         android:src="@drawable/ic_folder_dropbox"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
+                        app:tint="@color/secondaryText"
                         tools:ignore="ContentDescription" />
 
                     <TextView

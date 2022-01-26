@@ -35,6 +35,7 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterTypeBottomSheetDia
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.getBackNavigationResult
+import com.infomaniak.drive.utils.getTintedDrawable
 import com.infomaniak.drive.utils.safeNavigate
 import com.infomaniak.lib.core.utils.toPx
 import kotlinx.android.synthetic.main.fragment_search_filters.*
@@ -150,9 +151,10 @@ class SearchFiltersFragment : Fragment() {
             typeFilterStartIcon.setImageResource(it.icon)
             typeFilterText.setText(it.searchFilterName)
         } ?: run {
-            val icFile = ContextCompat.getDrawable(requireContext(), R.drawable.ic_file)?.apply {
-                setTint(ContextCompat.getColor(requireContext(), R.color.iconColor))
-            }
+            val icFile = requireContext().getTintedDrawable(
+                drawableId = R.drawable.ic_file,
+                colorInt = ContextCompat.getColor(requireContext(), R.color.iconColor),
+            )
             typeFilterStartIcon.setImageDrawable(icFile)
             typeFilterText.setText(R.string.searchFiltersSelectType)
         }
@@ -171,7 +173,7 @@ class SearchFiltersFragment : Fragment() {
                         categoriesUsageMode = CategoriesUsageMode.SELECTED_CATEGORIES,
                     )
                 )
-            }
+            },
         )
     }
 
