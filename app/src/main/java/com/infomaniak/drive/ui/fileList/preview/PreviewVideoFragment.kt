@@ -58,7 +58,10 @@ open class PreviewVideoFragment : PreviewFragment() {
 
         if (noCurrentFile()) return
 
-        openWithButton?.isGone = true
+        bigOpenWithButton.apply {
+            isGone = true
+            setOnClickListener { (parentFragment as? PreviewSliderFragment)?.openWithClicked() }
+        }
 
         fileIcon.setImageResource(file.getFileType().icon)
         container?.layoutTransition?.setAnimateParentHierarchy(false)
@@ -95,7 +98,7 @@ open class PreviewVideoFragment : PreviewFragment() {
                     playerView?.isGone = true
                     previewDescription?.isVisible = true
                     errorLayout?.isVisible = true
-                    openWithButton?.isVisible = true
+                    bigOpenWithButton?.isVisible = true
                 }
             })
         }

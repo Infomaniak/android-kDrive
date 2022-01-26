@@ -93,14 +93,14 @@
         android:gravity="center"
         android:text="@string/previewNoPreview"
         android:textColor="#C3C3C3"
-        app:layout_constraintBottom_toTopOf="@id/openWithButton"
+        app:layout_constraintBottom_toTopOf="@id/bigOpenWithButton"
         app:layout_constraintEnd_toStartOf="@id/end"
         app:layout_constraintStart_toEndOf="@id/start"
         app:layout_constraintTop_toBottomOf="@id/downloadProgress"
         app:layout_goneMarginTop="@dimen/marginStandardMedium" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/openWithButton"
+        android:id="@+id/bigOpenWithButton"
         style="@style/ButtonInfomaniak"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

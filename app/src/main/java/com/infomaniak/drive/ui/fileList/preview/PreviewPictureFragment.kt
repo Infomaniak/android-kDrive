@@ -53,8 +53,12 @@ class PreviewPictureFragment : PreviewFragment() {
 
         val timer = createRefreshTimer(milliseconds = 400) { noThumbnailLayout?.isVisible = true }.start()
         previewDescription.isGone = true
-        openWithButton.isGone = true
         fileIcon.setImageResource(file.getFileType().icon)
+
+        bigOpenWithButton.apply {
+            isGone = true
+            setOnClickListener { (parentFragment as? PreviewSliderFragment)?.openWithClicked() }
+        }
 
         val imageViewDisposable = imageView.load(file.thumbnail()) { placeholder(R.drawable.coil_hack) }
 
@@ -71,7 +75,8 @@ class PreviewPictureFragment : PreviewFragment() {
                     onError = { _, _ ->
                         fileName?.text = file.name
                         previewDescription?.isVisible = true
-                        openWithButton?.isVisible = true
+                        bigOpenWithButton?.isVisible = true
+                        imageView?.isGone = true
                     },
                     onSuccess = { _, _ ->
                         timer.cancel()

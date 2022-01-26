@@ -44,6 +44,6 @@ class PreviewOtherFragment : PreviewFragment() {
             (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
         }
 
-        openWithButton.setOnClickListener { (parentFragment as? PreviewSliderFragment)?.openWithClicked() }
+        bigOpenWithButton.setOnClickListener { (parentFragment as? PreviewSliderFragment)?.openWithClicked() }
     }
 }
