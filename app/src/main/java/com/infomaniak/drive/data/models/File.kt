@@ -337,6 +337,13 @@ open class File(
         }
     }
 
+    fun isAllowedToBeColored(): Boolean {
+        return !isDisabled()
+                && isFolder()
+                && getVisibilityType() != VisibilityType.IS_SHARED_SPACE
+                && getVisibilityType() != VisibilityType.IS_TEAM_SPACE
+    }
+
     // For applyFileActivity in FileController
     override fun equals(other: Any?): Boolean {
         if (other is File) {
