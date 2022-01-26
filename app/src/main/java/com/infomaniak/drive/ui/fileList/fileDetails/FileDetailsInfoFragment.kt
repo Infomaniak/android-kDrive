@@ -56,9 +56,9 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) { currentFile ->
+        fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) { (file, isFromApi) ->
 
-            file = currentFile
+            this.file = file
 
             setupShareLink(fileDetailsViewModel.currentFileShare.value)
             setupCategoriesContainer(file.getCategories())
@@ -87,12 +87,12 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
                 originalSizeValue.text = Formatter.formatFileSize(context, it)
                 originalSize.isVisible = true
             }
-        }
 
-        fileDetailsViewModel.currentFileShare.observe(viewLifecycleOwner) { share ->
-            if (::file.isInitialized) {
-                setPath(share.path)
-                setupShareLink(share)
+            if (isFromApi) {
+                fileDetailsViewModel.currentFileShare.observe(viewLifecycleOwner) { share ->
+                    setPath(share.path)
+                    setupShareLink(share)
+                }
             }
         }
 
@@ -101,8 +101,8 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
 
     private fun setBackActionHandlers() {
         getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.SHARE_LINK_ACCESS_NAV_KEY) { bundle ->
-            fileDetailsViewModel.currentFile.value?.let { currentFile ->
-                file = currentFile
+            fileDetailsViewModel.currentFile.value?.let {
+                file = it.first
                 val permission = bundle.getParcelable<Permission>(SelectPermissionBottomSheetDialog.PERMISSION_BUNDLE_KEY)
                 val isPublic = isPublicPermission(permission)
                 if (isPublic && shareLink == null) {
@@ -113,10 +113,10 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
             }
         }
 
-        getBackNavigationResult<List<Int>>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
-            fileDetailsViewModel.currentFile.value?.let { currentFile ->
-                file = currentFile
-                setupCategoriesContainer(DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray()))
+        getBackNavigationResult<List<Int>>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) { ids ->
+            fileDetailsViewModel.currentFile.value?.let {
+                file = it.first
+                setupCategoriesContainer(DriveInfosController.getCurrentDriveCategoriesFromIds(ids.toTypedArray()))
             }
         }
     }
