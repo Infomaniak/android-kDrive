@@ -21,7 +21,6 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
@@ -46,7 +45,7 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
 
         accessPermissionTitle.setText(R.string.createCommonFolderDescription)
         createFolderCollapsing.title = getString(R.string.createCommonFolderTitle)
-        folderCreateIcon.icon.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_folder_common_documents))
+        folderCreateIcon.icon.setImageResource(R.drawable.ic_folder_common_documents)
         pathCard.isVisible = true
         pathTitle.isVisible = true
 

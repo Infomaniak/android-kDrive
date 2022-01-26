@@ -26,7 +26,6 @@ import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.database.Cursor
@@ -285,29 +284,25 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
 
     filePreview.scaleType = ImageView.ScaleType.CENTER
 
-    fun tintedDrawable(@IdRes iconId: Int, color: String? = null): Drawable? {
-        return ContextCompat.getDrawable(context, iconId)?.apply {
-            setTintList(ColorStateList.valueOf((color ?: file.color).toColorInt()))
-        }
-    }
-
     when {
         file.isFolder() -> {
             when (file.getVisibilityType()) {
                 VisibilityType.IS_TEAM_SPACE -> filePreview.loadGlide(R.drawable.ic_folder_common_documents)
                 VisibilityType.IS_SHARED_SPACE -> filePreview.loadGlide(R.drawable.ic_folder_shared)
-                VisibilityType.IS_COLLABORATIVE_FOLDER -> filePreview.loadGlide(tintedDrawable(R.drawable.ic_folder_dropbox))
+                VisibilityType.IS_COLLABORATIVE_FOLDER -> filePreview.loadGlide(
+                    context.getTintedDrawable(R.drawable.ic_folder_dropbox, file.color)
+                )
                 else -> {
                     if (file.isDisabled()) {
                         filePreview.loadGlide(R.drawable.ic_folder_disable)
                     } else {
-                        filePreview.loadGlide(tintedDrawable(R.drawable.ic_folder_filled))
+                        filePreview.loadGlide(context.getTintedDrawable(R.drawable.ic_folder_filled, file.color))
                     }
                 }
             }
         }
         file.isDrive() -> {
-            filePreview.loadGlide(tintedDrawable(R.drawable.ic_drive, file.driveColor))
+            filePreview.loadGlide(context.getTintedDrawable(R.drawable.ic_drive, file.driveColor))
         }
         else -> {
             when {
@@ -801,6 +796,16 @@ fun Context.shareText(text: String) {
         type = "text/plain"
     }
     ContextCompat.startActivity(this, Intent.createChooser(intent, null), null)
+}
+
+fun Context.getTintedDrawable(drawableId: Int, colorString: String?): Drawable? {
+    return getTintedDrawable(drawableId, colorString?.toColorInt())
+}
+
+fun Context.getTintedDrawable(drawableId: Int, colorInt: Int? = null): Drawable? {
+    return ContextCompat.getDrawable(this, drawableId)?.apply {
+        setTint(colorInt ?: ContextCompat.getColor(this@getTintedDrawable, R.color.secondaryText))
+    }
 }
 
 fun Category.getName(context: Context): String = when (name) {

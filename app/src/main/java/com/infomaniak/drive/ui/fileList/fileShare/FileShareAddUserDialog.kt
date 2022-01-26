@@ -183,8 +183,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
             }
             is Team -> {
                 chip.text = item.name
-                chip.setChipIconResource(R.drawable.ic_circle_team)
-                chip.chipIcon?.setTint(item.getParsedColor())
+                chip.chipIcon = requireContext().getTintedDrawable(R.drawable.ic_circle_team, item.getParsedColor())
             }
         }
 

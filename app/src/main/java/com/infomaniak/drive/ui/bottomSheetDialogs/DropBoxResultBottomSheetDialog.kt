@@ -23,6 +23,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
+import com.infomaniak.drive.utils.getTintedDrawable
 import com.infomaniak.lib.core.utils.toPx
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 
@@ -37,7 +38,7 @@ class DropBoxResultBottomSheetDialog : InformationBottomSheetDialog() {
 
         illu.layoutParams.height = 80.toPx()
         illu.layoutParams.width = 80.toPx()
-        illu.setImageResource(R.drawable.ic_folder_dropbox)
+        illu.setImageDrawable(requireContext().getTintedDrawable(R.drawable.ic_folder_dropbox))
 
         urlDisplay.isVisible = true
         urlDisplay.setUrl(arguments.url)

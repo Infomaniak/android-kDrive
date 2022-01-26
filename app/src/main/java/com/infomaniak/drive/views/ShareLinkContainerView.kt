@@ -25,6 +25,7 @@ import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
+import com.infomaniak.drive.utils.getTintedDrawable
 import com.infomaniak.drive.utils.shareText
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.view_share_link_container.view.*
@@ -111,7 +112,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
     }
 
     private fun setUI(iconId: Int, title: String, containerVisibility: Boolean, status: String) {
-        shareLinkIcon.setImageResource(iconId)
+        shareLinkIcon.setImageDrawable(context.getTintedDrawable(iconId))
         shareLinkTitle.text = title
         shareLinkBottomContainer.isVisible = containerVisibility
         shareLinkStatus.text = status
