@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -44,24 +43,14 @@ open class ColorFolderBottomSheetDialog : BottomSheetDialogFragment() {
         setAdapter()
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        setLayoutManager()
-    }
-
     private fun setAdapter() {
         colorsAdapter = ColorFolderAdapter(
             onColorSelected = { color: String -> setBackNavigationResult(COLOR_FOLDER_NAV_KEY, color) }
         ).apply {
             selectedPosition = COLORS.indexOfFirst { it == navigationArgs.color }
-            setLayoutManager()
             colorsRecyclerView.adapter = this
             stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         }
-    }
-
-    private fun setLayoutManager() {
-        colorsRecyclerView.layoutManager = AutoSpanGridLayoutManager(requireContext(), 0)
     }
 
     companion object {
