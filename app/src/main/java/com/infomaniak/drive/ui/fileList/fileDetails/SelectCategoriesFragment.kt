@@ -94,12 +94,6 @@ class SelectCategoriesFragment : Fragment() {
         setBackActionHandlers()
     }
 
-    override fun onResume() {
-        super.onResume()
-        // Fix the popBackStack in onViewCreated because onResume is still called
-        if (findNavController().currentDestination?.id != R.id.selectCategoriesFragment) return
-    }
-
     private fun setCategoriesAdapter(canEditCategory: Boolean, canDeleteCategory: Boolean) {
         categoriesAdapter = CategoriesAdapter(
             onCategoryChanged = { id, isSelected -> if (isSelected) addCategory(id) else removeCategory(id) }

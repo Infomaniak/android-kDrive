@@ -65,9 +65,8 @@ class FileShareDetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         fileShareViewModel.fetchCurrentFile(navigationArgs.fileId).observe(viewLifecycleOwner) { currentFile ->
-            currentFile?.let {
+            file = currentFile?.also {
                 fileShareViewModel.currentFile.value = it
-                file = it
             } ?: run {
                 findNavController().popBackStack()
                 return@observe
@@ -81,12 +80,6 @@ class FileShareDetailsFragment : Fragment() {
             setBackActionHandlers()
             setBackPressedHandlers()
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        // Fix the popBackStack in onViewCreated because onResume is still called
-        if (findNavController().currentDestination?.id != R.id.fileShareDetailsFragment) return
     }
 
     private fun setAvailableShareableItems() {
