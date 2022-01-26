@@ -28,21 +28,18 @@ import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.*
 
 class SelectSaveDateBottomSheetAdapter(
     private val selectedSaveDate: SyncSettings.SavePicturesDate,
-    private val onItemClicked: (saveDate: SyncSettings.SavePicturesDate) -> Unit
+    private val onItemClicked: (saveDate: SyncSettings.SavePicturesDate) -> Unit,
 ) : RecyclerView.Adapter<ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_select_bottom_sheet, parent, false))
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        SyncSettings.SavePicturesDate.values()[position].let { saveDate ->
-            holder.itemView.apply {
-                itemSelectText.setText(saveDate.title)
-                itemSelectActiveIcon.isVisible = selectedSaveDate == saveDate
-                setOnClickListener { onItemClicked(saveDate) }
-            }
-        }
-    }
-
     override fun getItemCount() = SyncSettings.SavePicturesDate.values().size
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView) {
+        val saveDate = SyncSettings.SavePicturesDate.values()[position]
+        itemSelectText.setText(saveDate.title)
+        itemSelectActiveIcon.isVisible = selectedSaveDate == saveDate
+        setOnClickListener { onItemClicked(saveDate) }
+    }
 }
