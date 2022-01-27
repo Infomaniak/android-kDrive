@@ -32,7 +32,7 @@ import kotlinx.coroutines.Job
 
 class FileDetailsViewModel : ViewModel() {
 
-    val currentFile = MutableLiveData<Pair<File, Boolean>>()
+    val currentFile = MutableLiveData<File>()
     val currentFileShare = MutableLiveData<Share>()
 
     private var getFileCommentsJob = Job()

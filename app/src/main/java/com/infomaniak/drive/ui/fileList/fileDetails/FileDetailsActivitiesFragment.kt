@@ -37,7 +37,7 @@ class FileDetailsActivitiesFragment : FileDetailsSubFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) { (file, _) ->
+        fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) { file ->
             activitiesAdapter = FileActivitiesAdapter(file.isFolder()).apply {
                 isComplete = false
                 fileDetailsViewModel.getFileActivities(file).observe(viewLifecycleOwner) { apiResponse ->

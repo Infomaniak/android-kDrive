@@ -44,7 +44,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) { (file, _) ->
+        fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) { file ->
             currentFile = file
             setupView()
         }

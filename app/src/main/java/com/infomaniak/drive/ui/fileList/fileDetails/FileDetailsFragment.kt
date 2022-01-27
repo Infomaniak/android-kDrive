@@ -53,21 +53,21 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
         FileController.getFileById(navigationArgs.fileId, navigationArgs.userDrive)?.let { file ->
-            setFile(file = file, isFromApi = false)
+            setFile(file)
         }
 
         mainViewModel.getFileDetails(navigationArgs.fileId, navigationArgs.userDrive)
             .observe(viewLifecycleOwner) { fileResponse ->
-                fileResponse?.let { setFile(file = it, isFromApi = true) }
-            }
+                fileResponse?.let { setFile(it) }
 
-        mainViewModel.getFileShare(navigationArgs.fileId).observe(viewLifecycleOwner) { shareResponse ->
-            shareResponse.data?.let { fileDetailsViewModel.currentFileShare.value = it }
-        }
+                mainViewModel.getFileShare(navigationArgs.fileId).observe(viewLifecycleOwner) { shareResponse ->
+                    shareResponse.data?.let { fileDetailsViewModel.currentFileShare.value = it }
+                }
+            }
     }
 
-    private fun setFile(file: File, isFromApi: Boolean) {
-        fileDetailsViewModel.currentFile.value = file to isFromApi
+    private fun setFile(file: File) {
+        fileDetailsViewModel.currentFile.value = file
         subtitleToolbar.title.text = file.name
         subtitleToolbar.subTitle.text = file.getLastModifiedAt().format(getString(R.string.allLastModifiedFilePattern))
         setBannerThumbnail(file)
