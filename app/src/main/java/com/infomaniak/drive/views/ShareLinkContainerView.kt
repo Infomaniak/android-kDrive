@@ -45,8 +45,8 @@ class ShareLinkContainerView @JvmOverloads constructor(
     fun setup(
         file: File,
         shareLink: ShareLink? = null,
-        onTitleClicked: ((shareLink: ShareLink?, currentFileId: Int) -> Unit)? = null,
-        onSettingsClicked: ((shareLink: ShareLink, currentFile: File) -> Unit)? = null,
+        onTitleClicked: ((shareLink: ShareLink?) -> Unit)? = null,
+        onSettingsClicked: ((shareLink: ShareLink) -> Unit)? = null,
     ) {
         currentFile = file
         this.shareLink = shareLink
@@ -56,8 +56,8 @@ class ShareLinkContainerView @JvmOverloads constructor(
         selectUI(file.isDropBox())
 
         if (!file.isDropBox()) {
-            titleContainer.setOnClickListener { onTitleClicked?.invoke(this.shareLink, currentFile.id) }
-            shareLinkSettings.setOnClickListener { onSettingsClicked?.invoke(this.shareLink!!, currentFile) }
+            titleContainer.setOnClickListener { onTitleClicked?.invoke(this.shareLink) }
+            shareLinkSettings.setOnClickListener { onSettingsClicked?.invoke(this.shareLink!!) }
             shareLinkButton.setOnClickListener { this.shareLink?.url?.let(context::shareText) }
         }
     }

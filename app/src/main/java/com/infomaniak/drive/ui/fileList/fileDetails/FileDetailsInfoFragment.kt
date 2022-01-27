@@ -47,6 +47,7 @@ import kotlinx.android.synthetic.main.fragment_file_details_infos.*
 
 class FileDetailsInfoFragment : FileDetailsSubFragment() {
 
+    private lateinit var file: File
     private var shareLink: ShareLink? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
@@ -57,39 +58,41 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
 
         fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) { currentFile ->
 
-            setupShareLinkContainer(currentFile, fileDetailsViewModel.currentFileShare.value)
-            setupCategoriesContainer(currentFile.id, currentFile.isDisabled(), currentFile.getCategories())
-            displayUsersAvatars(currentFile)
-            setupShareButton(currentFile)
+            file = currentFile
 
-            if (currentFile.createdAt.isPositive()) {
-                addedDateValue.text = currentFile.getCreatedAt().format(ShareLinkContainerView.formatFullDate)
+            setupShareLink(fileDetailsViewModel.currentFileShare.value)
+            setupCategoriesContainer(file.getCategories())
+            displayUsersAvatars()
+            setupShareButton()
+
+            if (file.createdAt.isPositive()) {
+                addedDateValue.text = file.getCreatedAt().format(ShareLinkContainerView.formatFullDate)
                 addedDate.isVisible = true
             }
 
-            if (currentFile.fileCreatedAt.isPositive()) {
-                creationDateValue.text = currentFile.getFileCreatedAt().format(ShareLinkContainerView.formatFullDate)
+            if (file.fileCreatedAt.isPositive()) {
+                creationDateValue.text = file.getFileCreatedAt().format(ShareLinkContainerView.formatFullDate)
                 creationDate.isVisible = true
             }
 
-            displayFileOwner(currentFile)
+            displayFileOwner()
 
-            if (currentFile.path.isNotBlank()) setPath(currentFile.driveId, currentFile.path)
+            if (file.path.isNotBlank()) setPath(file.path)
 
-            currentFile.sizeWithVersions?.let {
+            file.sizeWithVersions?.let {
                 totalSizeValue.text = Formatter.formatFileSize(context, it)
                 totalSize.isVisible = true
             }
-            currentFile.size?.let {
+            file.size?.let {
                 originalSizeValue.text = Formatter.formatFileSize(context, it)
                 originalSize.isVisible = true
             }
         }
 
         fileDetailsViewModel.currentFileShare.observe(viewLifecycleOwner) { share ->
-            fileDetailsViewModel.currentFile.value?.let { file ->
-                setPath(file.driveId, share.path)
-                setupShareLinkContainer(file, share)
+            if (::file.isInitialized) {
+                setPath(share.path)
+                setupShareLink(share)
             }
         }
 
@@ -98,42 +101,40 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
 
     private fun setBackActionHandlers() {
         getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.SHARE_LINK_ACCESS_NAV_KEY) { bundle ->
-            val permission = bundle.getParcelable<Permission>(SelectPermissionBottomSheetDialog.PERMISSION_BUNDLE_KEY)
-            val isPublic = isPublicPermission(permission)
             fileDetailsViewModel.currentFile.value?.let { currentFile ->
-                if ((isPublic && shareLink == null) || (!isPublic && shareLink != null)) {
-                    mainViewModel.apply {
-                        if (isPublic) createShareLink(currentFile) else deleteShareLink(currentFile)
-                    }
+                file = currentFile
+                val permission = bundle.getParcelable<Permission>(SelectPermissionBottomSheetDialog.PERMISSION_BUNDLE_KEY)
+                val isPublic = isPublicPermission(permission)
+                if (isPublic && shareLink == null) {
+                    createShareLink()
+                } else if (!isPublic && shareLink != null) {
+                    deleteShareLink()
                 }
             }
         }
 
         getBackNavigationResult<List<Int>>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
-            fileDetailsViewModel.currentFile.value?.let { file ->
-                setupCategoriesContainer(
-                    fileId = file.id,
-                    isDisabled = file.isDisabled(),
-                    categories = DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray()),
-                )
+            fileDetailsViewModel.currentFile.value?.let { currentFile ->
+                file = currentFile
+                setupCategoriesContainer(DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray()))
             }
         }
     }
 
     @SuppressLint("SetTextI18n")
-    private fun setPath(driveId: Int, path: String) {
-        val drive = DriveInfosController.getDrives(AccountUtils.currentUserId, driveId = driveId).first()
+    private fun setPath(path: String) {
+        val drive = DriveInfosController.getDrives(AccountUtils.currentUserId, driveId = file.driveId).first()
         driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(drive.preferences.color))
         pathValue.text = "${drive.name}$path"
         pathView.isVisible = true
     }
 
-    private fun setupShareButton(currentFile: File) {
-        if (currentFile.rights?.share == true) {
+    private fun setupShareButton() {
+        if (file.rights?.share == true) {
             shareButton.isVisible = true
             shareButton.setOnClickListener {
                 parentFragment?.safeNavigate(
-                    FileDetailsFragmentDirections.actionFileDetailsFragmentToFileShareDetailsFragment(fileId = currentFile.id)
+                    FileDetailsFragmentDirections.actionFileDetailsFragmentToFileShareDetailsFragment(fileId = file.id)
                 )
             }
         } else {
@@ -141,51 +142,55 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         }
     }
 
-    private fun setupShareLinkContainer(file: File, share: Share?) {
+    private fun setupShareLink(share: Share?) {
         when {
-            file.isDropBox() -> setupDropBoxShareLink(file)
-            file.rights?.canBecomeLink == true || file.shareLink?.isNotBlank() == true -> setupShareLink(file, share)
+            file.isDropBox() -> setupDropBoxShareLink()
+            file.rights?.canBecomeLink == true || file.shareLink?.isNotBlank() == true -> setupNormalShareLink(share)
             else -> hideShareLinkView()
         }
     }
 
-    private fun setupDropBoxShareLink(file: File) {
+    private fun setupDropBoxShareLink() {
         showShareLinkView()
         shareLinkContainer.setup(file)
     }
 
-    private fun setupShareLink(file: File, share: Share?) {
+    private fun setupNormalShareLink(share: Share?) {
         showShareLinkView()
         shareLinkContainer.setup(
             file = file,
             shareLink = share?.link,
-            onTitleClicked = { newShareLink, currentFileId ->
-                shareLink = newShareLink
-                val (permissionsGroup, currentPermission) = selectPermissions(
-                    isFolder = file.isFolder(),
-                    isOnlyOffice = file.onlyoffice,
-                    shareLinkExist = newShareLink != null,
-                )
-                findNavController().navigate(
-                    FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectPermissionBottomSheetDialog(
-                        currentFileId = currentFileId,
-                        currentPermission = currentPermission,
-                        permissionsGroup = permissionsGroup,
-                    )
-                )
-            },
-            onSettingsClicked = { newShareLink, currentFile ->
-                shareLink = newShareLink
-                findNavController().navigate(
-                    FileDetailsFragmentDirections.actionFileDetailsFragmentToFileShareLinkSettings(
-                        fileId = currentFile.id,
-                        driveId = currentFile.driveId,
-                        shareLink = newShareLink,
-                        isOnlyOfficeFile = currentFile.onlyoffice,
-                        isFolder = currentFile.isFolder(),
-                    )
-                )
-            })
+            onTitleClicked = { newShareLink -> handleOnShareLinkTitleClicked(newShareLink) },
+            onSettingsClicked = { newShareLink -> handleOnShareLinkSettingsClicked(newShareLink) })
+    }
+
+    private fun handleOnShareLinkTitleClicked(newShareLink: ShareLink?) {
+        shareLink = newShareLink
+        val (permissionsGroup, currentPermission) = selectPermissions(
+            isFolder = file.isFolder(),
+            isOnlyOffice = file.onlyoffice,
+            shareLinkExist = newShareLink != null,
+        )
+        findNavController().navigate(
+            FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectPermissionBottomSheetDialog(
+                currentFileId = file.id,
+                currentPermission = currentPermission,
+                permissionsGroup = permissionsGroup,
+            )
+        )
+    }
+
+    private fun handleOnShareLinkSettingsClicked(newShareLink: ShareLink) {
+        shareLink = newShareLink
+        findNavController().navigate(
+            FileDetailsFragmentDirections.actionFileDetailsFragmentToFileShareLinkSettings(
+                fileId = file.id,
+                driveId = file.driveId,
+                shareLink = newShareLink,
+                isOnlyOfficeFile = file.onlyoffice,
+                isFolder = file.isFolder(),
+            )
+        )
     }
 
     private fun showShareLinkView() {
@@ -198,18 +203,18 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         shareLinkDivider.isGone = true
     }
 
-    private fun setupCategoriesContainer(fileId: Int, isDisabled: Boolean, categories: List<Category>) {
+    private fun setupCategoriesContainer(categories: List<Category>) {
         val rights = DriveInfosController.getCategoryRights()
 
-        if (fileId.isPositive() && rights?.canReadCategoryOnFile == true) {
+        if (file.id.isPositive() && rights?.canReadCategoryOnFile == true) {
             categoriesDivider.isVisible = true
             categoriesContainer.apply {
                 isVisible = true
                 setup(
                     categories = categories,
-                    canPutCategoryOnFile = rights.canPutCategoryOnFile && !isDisabled,
+                    canPutCategoryOnFile = !file.isDisabled() && rights.canPutCategoryOnFile,
                     layoutInflater = layoutInflater,
-                    onClicked = { onCategoriesClicked(fileId) },
+                    onClicked = { onCategoriesClicked(file.id) },
                 )
             }
 
@@ -229,7 +234,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         }
     }
 
-    private fun displayUsersAvatars(file: File) {
+    private fun displayUsersAvatars() {
         val userIds = if (file.users.isEmpty()) arrayListOf(file.createdBy) else ArrayList(file.users)
         val userList = DriveInfosController.getUsers(userIds = userIds)
         if (userList.isEmpty()) {
@@ -250,7 +255,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         }
     }
 
-    private fun displayFileOwner(file: File) {
+    private fun displayFileOwner() {
         val userList = DriveInfosController.getUsers(arrayListOf(file.createdBy))
         userList.firstOrNull()?.apply {
             owner.isVisible = true
@@ -259,8 +264,8 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         }
     }
 
-    private fun createShareLink(currentFile: File) {
-        mainViewModel.postFileShareLink(currentFile).observe(viewLifecycleOwner) { apiResponse ->
+    private fun createShareLink() {
+        mainViewModel.postFileShareLink(file).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 shareLinkContainer.update(apiResponse.data)
             } else {
@@ -269,8 +274,8 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         }
     }
 
-    private fun deleteShareLink(currentFile: File) {
-        mainViewModel.deleteFileShareLink(currentFile).observe(viewLifecycleOwner) { apiResponse ->
+    private fun deleteShareLink() {
+        mainViewModel.deleteFileShareLink(file).observe(viewLifecycleOwner) { apiResponse ->
             val success = apiResponse.data == true
             if (success) {
                 shareLinkContainer.update(null)
