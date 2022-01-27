@@ -59,7 +59,7 @@ class SearchFiltersAdapter(
 
     private fun Chip.setIcon(filter: SearchFilter) {
         chipIcon = if (filter.icon == null) {
-            context.getTintedDrawable(R.drawable.round_empty, filter.tint)
+            context.getTintedDrawable(R.drawable.round_empty, filter.tint!!)
         } else {
             ContextCompat.getDrawable(context, filter.icon)
         }

@@ -46,7 +46,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
         advancedSettings.isVisible = true
         createFolderButton.setText(R.string.createDropBoxTitle)
         createFolderCollapsing.title = getString(R.string.createDropBoxTitle)
-        folderCreateIcon.icon.setImageDrawable(requireContext().getTintedDrawable(R.drawable.ic_folder_dropbox))
+        folderCreateIcon.icon.setImageResource(R.drawable.ic_folder_dropbox)
         folderNameValueLayout.hint = getString(R.string.createDropBoxHint)
         setupAdvancedSettings()
 
