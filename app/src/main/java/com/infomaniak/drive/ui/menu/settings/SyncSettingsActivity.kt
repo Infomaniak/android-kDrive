@@ -57,7 +57,6 @@ class SyncSettingsActivity : BaseActivity() {
     private val selectDriveViewModel: SelectDriveViewModel by viewModels()
     private var oldSyncSettings: SyncSettings? = null
     private var editNumber = 0
-//    private var customDate = Date().startOfTheDay()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
