@@ -112,9 +112,13 @@ class HomeActivitiesFragment : Fragment() {
                 }
                 clean()
             }
+
             showLoading()
+
             isComplete = false
+
             isDownloadingActivities = true
+
             homeViewModel.getLastActivities(driveId, forceDownload).observe(viewLifecycleOwner) {
                 stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
                 it?.let { (apiResponse, mergedActivities) ->
@@ -127,6 +131,7 @@ class HomeActivitiesFragment : Fragment() {
                 }
                 isDownloadingActivities = false
             }
+
         }
     }
 

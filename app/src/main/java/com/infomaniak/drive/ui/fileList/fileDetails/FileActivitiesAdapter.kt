@@ -28,6 +28,7 @@ import com.infomaniak.drive.data.models.FileActivity
 import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.drive.utils.loadGlide
 import com.infomaniak.lib.core.views.LoaderAdapter
+import com.infomaniak.lib.core.views.LoaderCardView
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_file_activity.view.*
 import java.text.SimpleDateFormat
@@ -42,28 +43,38 @@ class FileActivitiesAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val currentFileActivity = itemList[position]
+
+
         holder.itemView.apply {
-            activityAction.setText(currentFileActivity.translation(isFolder))
-            activityHour.text = currentFileActivity.getHour()
+            if (getItemViewType(position) == VIEW_TYPE_LOADING) {
+                activityDateCardView.startLoading()
 
-            currentFileActivity.user?.let { driveUser ->
-                activityUserName.text = driveUser.displayName
-                activityUserAvatar.loadAvatar(driveUser)
-            } ?: run {
-                activityUserName.setText(R.string.allUserAnonymous)
-                activityUserAvatar.loadGlide(R.drawable.ic_account)
-            }
-
-            if (position == 0 || !isSameDay(currentFileActivity.createdAt, itemList[position - 1].createdAt)) {
-                activityDate.text = currentFileActivity.getDay(context)
-                line1.isInvisible = position == 0
-                line2.isVisible = true
-                activityDateCardView.isVisible = true
             } else {
-                line1.isGone = true
-                line2.isGone = true
-                activityDateCardView.isGone = true
+                activityDateCardView.stopLoading()
+
+                val currentFileActivity = itemList[position]
+
+                activityAction.setText(currentFileActivity.translation(isFolder))
+                activityHour.text = currentFileActivity.getHour()
+
+                currentFileActivity.user?.let { driveUser ->
+                    activityUserName.text = driveUser.displayName
+                    activityUserAvatar.loadAvatar(driveUser)
+                } ?: run {
+                    activityUserName.setText(R.string.allUserAnonymous)
+                    activityUserAvatar.loadGlide(R.drawable.ic_account)
+                }
+
+                if (position == 0 || !isSameDay(currentFileActivity.createdAt, itemList[position - 1].createdAt)) {
+                    activityDate.text = currentFileActivity.getDay(context)
+                    line1.isInvisible = position == 0
+                    line2.isVisible = true
+                    activityDateCardView.isVisible = true
+                } else {
+                    line1.isGone = true
+                    line2.isGone = true
+                    activityDateCardView.isGone = true
+                }
             }
         }
     }

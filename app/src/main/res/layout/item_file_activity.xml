@@ -32,7 +32,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.google.android.material.card.MaterialCardView
+    <com.infomaniak.lib.core.views.LoaderCardView
         android:id="@+id/activityDateCardView"
         style="@style/CardViewInfomaniak"
         android:layout_width="wrap_content"
@@ -52,7 +52,7 @@
             android:layout_marginEnd="@dimen/marginStandard"
             android:layout_marginBottom="@dimen/marginStandardSmall"
             tools:text="@string/allToday" />
-    </com.google.android.material.card.MaterialCardView>
+    </com.infomaniak.lib.core.views.LoaderCardView>
 
     <View
         android:id="@+id/line2"
@@ -80,13 +80,14 @@
             android:id="@+id/activityUserAvatar"
             android:layout_width="36dp"
             android:layout_height="36dp"
+            android:src="@drawable/placeholder"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:shapeAppearanceOverlay="@style/CircleImageView"
-            tools:srcCompat="@tools:sample/avatars" />
+            tools:src="@tools:sample/avatars" />
 
-        <TextView
+        <com.infomaniak.lib.core.views.LoaderTextView
             android:id="@+id/activityUserName"
             style="@style/Subtitle2"
             android:layout_width="0dp"
@@ -99,7 +100,7 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:text="@tools:sample/full_names" />
 
-        <TextView
+        <com.infomaniak.lib.core.views.LoaderTextView
             android:id="@+id/activityAction"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -129,11 +130,12 @@
                 android:src="@drawable/ic_clock"
                 tools:ignore="ContentDescription" />
 
-            <TextView
+            <com.infomaniak.lib.core.views.LoaderTextView
                 android:id="@+id/activityHour"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/marginStandardVerySmall"
+                android:minWidth="@dimen/marginStandard"
                 android:textSize="12sp"
                 tools:text="10:10" />
 
