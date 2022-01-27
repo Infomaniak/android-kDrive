@@ -91,7 +91,6 @@ import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialog.Companion.FILE_ID
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED_CATEGORIES
 import com.infomaniak.drive.ui.fileList.UploadInProgressFragmentArgs
-import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.*
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.views.CategoryIconView
@@ -104,7 +103,6 @@ import com.infomaniak.lib.core.utils.format
 import io.realm.RealmList
 import io.sentry.Sentry
 import kotlinx.android.synthetic.main.cardview_file_grid.view.*
-import kotlinx.android.synthetic.main.fragment_file_details_infos.*
 import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.android.synthetic.main.item_file.view.categoriesLayout
 import kotlinx.android.synthetic.main.item_file.view.fileFavorite
@@ -114,9 +112,11 @@ import kotlinx.android.synthetic.main.item_file.view.fileOfflineProgression
 import kotlinx.android.synthetic.main.item_file.view.filePreview
 import kotlinx.android.synthetic.main.item_file.view.progressLayout
 import kotlinx.android.synthetic.main.item_user.view.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -612,6 +612,7 @@ fun Fragment.openOnlyOfficeDocument(file: File) {
 fun Context.openOnlyOfficeActivity(file: File) {
     startActivity(Intent(this, OnlyOfficeActivity::class.java).apply {
         putExtra(OnlyOfficeActivity.ONLYOFFICE_URL_TAG, file.onlyOfficeUrl())
+        putExtra(OnlyOfficeActivity.ONLYOFFICE_FILENAME_TAG, file.name)
     })
 }
 
