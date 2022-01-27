@@ -39,7 +39,7 @@ import kotlinx.android.synthetic.main.fragment_bottom_sheet_search_filter_date.*
 import java.util.*
 import androidx.core.util.Pair as AndroidPair
 
-open class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
+class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
 
     private val searchFiltersViewModel: SearchFiltersViewModel by navGraphViewModels(R.id.searchFiltersFragment)
     private val navigationArgs: SearchFilterDateBottomSheetDialogArgs by navArgs()

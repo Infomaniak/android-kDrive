@@ -40,10 +40,9 @@ class ColorFolderAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView.colorButtonView) {
         val color = ColorStateList.valueOf(COLORS[position].toColorInt())
-        val white = ContextCompat.getColorStateList(context, R.color.white)
 
         backgroundTintList = color
-        iconTint = if (position == selectedPosition) white else color
+        iconTint = if (position == selectedPosition) ContextCompat.getColorStateList(context, R.color.white) else color
 
         setOnClickListener { onColorSelected(COLORS[position]) }
     }
