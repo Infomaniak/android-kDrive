@@ -33,8 +33,9 @@ class SwitchDriveBottomSheetAdapter(
     private val onItemClicked: (drive: Drive) -> Unit,
 ) : RecyclerView.Adapter<ViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_select_bottom_sheet, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_select_bottom_sheet, parent, false))
+    }
 
     override fun getItemCount() = driveList.size
 

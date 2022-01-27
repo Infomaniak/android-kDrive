@@ -86,14 +86,13 @@ import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.data.models.File.*
+import com.infomaniak.drive.data.models.File.VisibilityType
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialog.Companion.FILE_ID
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED_CATEGORIES
 import com.infomaniak.drive.ui.fileList.UploadInProgressFragmentArgs
-import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.*
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.views.CategoryIconView
@@ -106,7 +105,6 @@ import com.infomaniak.lib.core.utils.format
 import io.realm.RealmList
 import io.sentry.Sentry
 import kotlinx.android.synthetic.main.cardview_file_grid.view.*
-import kotlinx.android.synthetic.main.fragment_file_details_infos.*
 import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.android.synthetic.main.item_file.view.categoriesLayout
 import kotlinx.android.synthetic.main.item_file.view.fileFavorite
@@ -116,9 +114,11 @@ import kotlinx.android.synthetic.main.item_file.view.fileOfflineProgression
 import kotlinx.android.synthetic.main.item_file.view.filePreview
 import kotlinx.android.synthetic.main.item_file.view.progressLayout
 import kotlinx.android.synthetic.main.item_user.view.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -301,9 +301,7 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
                 }
             }
         }
-        file.isDrive() -> {
-            filePreview.loadGlide(context.getTintedDrawable(R.drawable.ic_drive, file.driveColor))
-        }
+        file.isDrive() -> filePreview.loadGlide(context.getTintedDrawable(R.drawable.ic_drive, file.driveColor))
         else -> {
             when {
                 file.hasThumbnail &&
@@ -805,9 +803,7 @@ fun Context.getTintedDrawable(drawableId: Int, colorString: String): Drawable? {
 fun Context.getTintedDrawable(drawableId: Int, colorInt: Int): Drawable? {
     return ContextCompat.getDrawable(this, drawableId)
         ?.mutate() // Mutate the drawable, so it won't change the tint when we use the same resource elsewhere.
-        ?.apply {
-            setTint(colorInt)
-        }
+        ?.apply { setTint(colorInt) }
 }
 
 fun Category.getName(context: Context): String = when (name) {
