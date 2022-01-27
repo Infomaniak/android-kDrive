@@ -349,12 +349,14 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             && fileCount > BulkOperationsUtils.MIN_SELECTED
             || selectedFiles.size > BulkOperationsUtils.MIN_SELECTED
         ) {
-            sendBulkAction(fileCount, BulkOperation(
-                action = type,
-                fileIds = if (fileAdapter.allSelected) null else selectedFiles.map { it.id },
-                parent = currentFolder!!,
-                destinationFolderId = destinationFolder?.id,
-            ))
+            sendBulkAction(
+                fileCount, BulkOperation(
+                    action = type,
+                    fileIds = if (fileAdapter.allSelected) null else selectedFiles.map { it.id },
+                    parent = currentFolder!!,
+                    destinationFolderId = destinationFolder?.id,
+                )
+            )
 
         } else {
             val mediator = mainViewModel.createMultiSelectMediator()
@@ -433,7 +435,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                         mainViewModel.updateMultiSelectMediator(mediator),
                     )
                 } else {
-                    mediator.value = (mediator.value?.first ?: 0) to (mediator.value?.second?.plus(1) ?: 1)
+                    mediator.apply {
+                        val success = value?.first ?: 0
+                        val total = (value?.second ?: 0) + 1
+                        value = success to total
+                    }
                 }
             }
             BulkOperationType.SET_OFFLINE -> {
@@ -642,9 +648,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                         safeNavigate(FileListFragmentDirections.actionFileListToColorFolder(null))
                     }
                 }
-                else -> {
-                    performBulkOperation(type)
-                }
+                else -> performBulkOperation(type)
             }
         }
     }

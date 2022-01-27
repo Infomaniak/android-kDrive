@@ -22,14 +22,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderAdapter.Companion.COLORS
 import com.infomaniak.drive.utils.setBackNavigationResult
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_color_folder.*
 
-open class ColorFolderBottomSheetDialog : BottomSheetDialogFragment() {
+class ColorFolderBottomSheetDialog : BottomSheetDialogFragment() {
 
     private val navigationArgs: ColorFolderBottomSheetDialogArgs by navArgs()
 
@@ -49,7 +48,6 @@ open class ColorFolderBottomSheetDialog : BottomSheetDialogFragment() {
         ).apply {
             selectedPosition = COLORS.indexOfFirst { it == navigationArgs.color }
             colorsRecyclerView.adapter = this
-            stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         }
     }
 
