@@ -88,7 +88,6 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.*
-import com.infomaniak.drive.data.models.File.Companion.getColor
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.OnlyOfficeActivity
@@ -288,7 +287,7 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
 
     fun tintedDrawable(@IdRes iconId: Int, color: String? = null): Drawable? {
         return ContextCompat.getDrawable(context, iconId)?.apply {
-            setTintList(ColorStateList.valueOf((color ?: file.getColor(context)).toColorInt()))
+            setTintList(ColorStateList.valueOf((color ?: file.color).toColorInt()))
         }
     }
 

@@ -23,7 +23,6 @@ import androidx.collection.arrayMapOf
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.File.Companion.setColor
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.Type
 import com.infomaniak.drive.data.models.FileActivity
@@ -171,9 +170,9 @@ object FileController {
         return apiResponse
     }
 
-    fun updateFolderColor(file: File, color: String, realm: Realm? = null): ApiResponse<Boolean?> {
+    fun updateFolderColor(file: File, color: String, realm: Realm? = null): ApiResponse<Boolean> {
         return ApiRepository.updateFolderColor(file, color).also {
-            if (it.isSuccess()) updateFile(file.id, realm) { localFile -> localFile.setColor(color) }
+            if (it.isSuccess()) updateFile(file.id, realm) { localFile -> localFile.color = color }
         }
     }
 
