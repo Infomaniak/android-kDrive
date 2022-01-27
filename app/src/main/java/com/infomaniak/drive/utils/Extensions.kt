@@ -86,7 +86,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.data.models.File.*
+import com.infomaniak.drive.data.models.File.VisibilityType
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.OnlyOfficeActivity
@@ -301,9 +301,7 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
                 }
             }
         }
-        file.isDrive() -> {
-            filePreview.loadGlide(context.getTintedDrawable(R.drawable.ic_drive, file.driveColor))
-        }
+        file.isDrive() -> filePreview.loadGlide(context.getTintedDrawable(R.drawable.ic_drive, file.driveColor))
         else -> {
             when {
                 file.hasThumbnail &&
@@ -806,9 +804,7 @@ fun Context.getTintedDrawable(drawableId: Int, colorString: String): Drawable? {
 fun Context.getTintedDrawable(drawableId: Int, colorInt: Int): Drawable? {
     return ContextCompat.getDrawable(this, drawableId)
         ?.mutate() // Mutate the drawable, so it won't change the tint when we use the same resource elsewhere.
-        ?.apply {
-            setTint(colorInt)
-        }
+        ?.apply { setTint(colorInt) }
 }
 
 fun Category.getName(context: Context): String = when (name) {
