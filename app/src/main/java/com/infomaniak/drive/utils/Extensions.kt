@@ -321,7 +321,7 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
         }
     }
 
-    val canReadCategoryOnFile = DriveInfosController.getCategoryRights()?.canReadCategoryOnFile ?: false
+    val canReadCategoryOnFile = DriveInfosController.getCategoryRights().canReadCategoryOnFile
     val categories = file.getCategories()
     (categoriesLayout as LinearLayout).apply {
         if (!canReadCategoryOnFile || categories.isEmpty()) {

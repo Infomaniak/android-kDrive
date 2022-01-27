@@ -178,10 +178,10 @@ object DriveInfosController {
             .let { orderList -> categories.sortedBy { orderList[it.id] } }
     }
 
-    fun getCategoryRights(): CategoryRights? {
+    fun getCategoryRights(): CategoryRights {
         return getRealmInstance().use { realm ->
             getCurrentDrive(realm)?.categoryRights?.let { realm.copyFromRealm(it, 0) }
-        }
+        } ?: CategoryRights()
     }
 
     private fun getCurrentDrive(customRealm: Realm? = null): Drive? {

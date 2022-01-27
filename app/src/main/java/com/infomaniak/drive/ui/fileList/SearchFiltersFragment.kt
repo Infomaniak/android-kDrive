@@ -72,10 +72,9 @@ class SearchFiltersFragment : Fragment() {
         updateAllFiltersUI()
     }
 
-    private fun handleCategoryRights() {
-        val isVisible = categoryRights?.canReadCategoryOnFile == true
-        categoriesTitle.isVisible = isVisible
-        chooseCategoriesFilter.isVisible = isVisible
+    private fun handleCategoryRights() = with(categoryRights.canReadCategoryOnFile) {
+        categoriesTitle.isVisible = this
+        chooseCategoriesFilter.isVisible = this
     }
 
     private fun setToolbar() {
@@ -163,7 +162,7 @@ class SearchFiltersFragment : Fragment() {
         val categories = searchFiltersViewModel.categories ?: emptyList()
         categoriesContainer.setup(
             categories = categories,
-            canPutCategoryOnFile = categoryRights?.canPutCategoryOnFile ?: false,
+            canPutCategoryOnFile = categoryRights.canPutCategoryOnFile,
             layoutInflater = layoutInflater,
             onClicked = {
                 safeNavigate(

@@ -797,12 +797,12 @@
             android:defaultValue="@null"
             app:argType="integer[]"
             app:nullable="true" />
-        <action
-            android:id="@+id/action_SelectCategoriesFragment_to_CreateOrEditCategoryFragment"
-            app:destination="@id/createOrEditCategoryFragment" />
         <argument
             android:name="categoriesUsageMode"
             app:argType="com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode" />
+        <action
+            android:id="@+id/action_SelectCategoriesFragment_to_CreateOrEditCategoryFragment"
+            app:destination="@id/createOrEditCategoryFragment" />
     </fragment>
 
     <dialog
