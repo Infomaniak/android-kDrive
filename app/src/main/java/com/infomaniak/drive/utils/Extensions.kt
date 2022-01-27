@@ -799,14 +799,16 @@ fun Context.shareText(text: String) {
     ContextCompat.startActivity(this, Intent.createChooser(intent, null), null)
 }
 
-fun Context.getTintedDrawable(drawableId: Int, colorString: String?): Drawable? {
-    return getTintedDrawable(drawableId, colorString?.toColorInt())
+fun Context.getTintedDrawable(drawableId: Int, colorString: String): Drawable? {
+    return getTintedDrawable(drawableId, colorString.toColorInt())
 }
 
-fun Context.getTintedDrawable(drawableId: Int, colorInt: Int? = null): Drawable? {
-    return ContextCompat.getDrawable(this, drawableId)?.apply {
-        setTint(colorInt ?: ContextCompat.getColor(this@getTintedDrawable, R.color.secondaryText))
-    }
+fun Context.getTintedDrawable(drawableId: Int, colorInt: Int): Drawable? {
+    return ContextCompat.getDrawable(this, drawableId)
+        ?.mutate() // Mutate the drawable, so it won't change the tint when we use the same resource elsewhere.
+        ?.apply {
+            setTint(colorInt)
+        }
 }
 
 fun Category.getName(context: Context): String = when (name) {
