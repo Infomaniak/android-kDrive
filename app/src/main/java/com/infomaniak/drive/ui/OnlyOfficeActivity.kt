@@ -24,7 +24,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.InfomaniakCore
+import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import kotlinx.android.synthetic.main.activity_only_office.*
+
 
 class OnlyOfficeActivity : AppCompatActivity() {
 
@@ -62,6 +64,8 @@ class OnlyOfficeActivity : AppCompatActivity() {
                     if (newProgress == 100) progressBar.isGone = true
                 }
             }
+
+            setDownloadListener { url, _, _, _, _ -> openUrl(url) }
         }
     }
 
