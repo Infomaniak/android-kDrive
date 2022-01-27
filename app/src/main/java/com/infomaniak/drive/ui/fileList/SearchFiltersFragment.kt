@@ -72,10 +72,9 @@ class SearchFiltersFragment : Fragment() {
         updateAllFiltersUI()
     }
 
-    private fun handleCategoryRights() {
-        val isVisible = categoryRights.canReadCategoryOnFile
-        categoriesTitle.isVisible = isVisible
-        chooseCategoriesFilter.isVisible = isVisible
+    private fun handleCategoryRights() = with(categoryRights.canReadCategoryOnFile) {
+        categoriesTitle.isVisible = this
+        chooseCategoriesFilter.isVisible = this
     }
 
     private fun setToolbar() {

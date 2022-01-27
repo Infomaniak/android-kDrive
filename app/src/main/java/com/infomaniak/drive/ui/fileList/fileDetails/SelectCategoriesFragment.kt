@@ -80,10 +80,11 @@ class SelectCategoriesFragment : Fragment() {
             }
         }
 
-        (if (usageMode == MANAGED_CATEGORIES) DriveInfosController.getCategoryRights() else CategoryRights()).let {
-            setCategoriesAdapter(it.canEditCategory, it.canDeleteCategory)
-            setAddCategoryButton(it.canCreateCategory)
-            configureSearchView(it.canCreateCategory)
+        val categoryRights = if (usageMode == MANAGED_CATEGORIES) DriveInfosController.getCategoryRights() else CategoryRights()
+        with(categoryRights) {
+            setCategoriesAdapter(canEditCategory, canDeleteCategory)
+            setAddCategoryButton(canCreateCategory)
+            configureSearchView(canCreateCategory)
         }
 
         configureToolbar()
