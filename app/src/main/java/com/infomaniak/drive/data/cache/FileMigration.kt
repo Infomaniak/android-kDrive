@@ -23,6 +23,7 @@ import com.infomaniak.drive.data.models.Rights
 import io.realm.DynamicRealm
 import io.realm.FieldAttribute
 import io.realm.RealmMigration
+import io.sentry.Sentry
 import java.util.*
 
 class FileMigration : RealmMigration {
@@ -71,16 +72,30 @@ class FileMigration : RealmMigration {
             schema.get(FileCategory::class.java.simpleName)?.apply {
                 isEmbedded = true
             }
-            schema.get(Rights::class.java.simpleName)?.apply {
-                transform { // apply for each right
+            // Rights migration with sentry logs
+            val sentryLogs = arrayListOf<Pair<Int, String>>()
+            runCatching {
+                schema.get(Rights::class.java.simpleName)?.transform { // apply for each right
                     val fileId = it.getInt("fileId")
                     val file = realm.where(File::class.java.simpleName).equalTo(File::id.name, fileId).findFirst()
                     if (file == null) it.deleteFromRealm() // Delete if it's orphan
+                    sentryLogs.add(fileId to "right is orphan ${file == null}")
+                }?.apply {
+                    removePrimaryKey()
+                    removeField("fileId")
+                    isEmbedded = true
                 }
-                removePrimaryKey()
-                removeField("fileId")
-                isEmbedded = true
+            }.onFailure { exception ->
+                exception.printStackTrace()
+                // On some clients, it happens that isEmbedded is added in an orphan file without knowing why
+                // So we add these sentry logs to have more info
+                Sentry.withScope { scope ->
+                    scope.setExtra("oldVersion", "$oldVersion")
+                    scope.setExtra("logs", sentryLogs.toString())
+                    Sentry.captureException(exception)
+                }
             }
+
             oldVersionTemp++
         }
     }
