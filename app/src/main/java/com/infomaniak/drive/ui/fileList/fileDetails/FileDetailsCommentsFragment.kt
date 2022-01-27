@@ -33,6 +33,7 @@ import kotlinx.android.synthetic.main.fragment_file_details.*
 import kotlinx.android.synthetic.main.fragment_file_details_comments.*
 
 class FileDetailsCommentsFragment : FileDetailsSubFragment() {
+
     private lateinit var commentsAdapter: FileCommentsAdapter
     private lateinit var currentFile: File
 
@@ -43,8 +44,8 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) {
-            currentFile = it
+        fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) { file ->
+            currentFile = file
             setupView()
         }
     }

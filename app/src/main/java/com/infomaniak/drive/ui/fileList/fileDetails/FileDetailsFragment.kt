@@ -50,9 +50,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
-        }
+        toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
         FileController.getFileById(navigationArgs.fileId, navigationArgs.userDrive)?.let { file ->
             setFile(file)
@@ -60,16 +58,12 @@ class FileDetailsFragment : FileDetailsSubFragment() {
 
         mainViewModel.getFileDetails(navigationArgs.fileId, navigationArgs.userDrive)
             .observe(viewLifecycleOwner) { fileResponse ->
-                fileResponse?.let { file ->
-                    setFile(file)
+                fileResponse?.let { setFile(it) }
+
+                mainViewModel.getFileShare(navigationArgs.fileId).observe(viewLifecycleOwner) { shareResponse ->
+                    shareResponse.data?.let { fileDetailsViewModel.currentFileShare.value = it }
                 }
             }
-
-        mainViewModel.getFileShare(navigationArgs.fileId).observe(viewLifecycleOwner) { shareResponse ->
-            shareResponse.data?.let { share ->
-                fileDetailsViewModel.currentFileShare.value = share
-            }
-        }
     }
 
     private fun setFile(file: File) {

@@ -37,10 +37,10 @@ class FileDetailsActivitiesFragment : FileDetailsSubFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) { currentFile ->
-            activitiesAdapter = FileActivitiesAdapter(currentFile.isFolder()).apply {
+        fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) { file ->
+            activitiesAdapter = FileActivitiesAdapter(file.isFolder()).apply {
                 isComplete = false
-                fileDetailsViewModel.getFileActivities(currentFile).observe(viewLifecycleOwner) { apiResponse ->
+                fileDetailsViewModel.getFileActivities(file).observe(viewLifecycleOwner) { apiResponse ->
                     apiResponse?.data?.let { activities ->
                         addAll(activities)
                         isComplete = apiResponse.page == apiResponse.pages

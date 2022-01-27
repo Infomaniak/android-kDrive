@@ -31,8 +31,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 
 class FileDetailsViewModel : ViewModel() {
+
     val currentFile = MutableLiveData<File>()
     val currentFileShare = MutableLiveData<Share>()
+
     private var getFileCommentsJob = Job()
     private var getFileActivitiesJob = Job()
 
