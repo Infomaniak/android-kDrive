@@ -36,6 +36,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
+import com.infomaniak.drive.data.models.SyncSettings.*
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.BaseActivity
@@ -62,9 +63,7 @@ class SyncSettingsActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sync_settings)
 
-        toolbar.setNavigationOnClickListener {
-            onBackPressed()
-        }
+        toolbar.setNavigationOnClickListener { onBackPressed() }
 
         val permission = DrivePermissions()
         permission.registerPermissions(this)
@@ -82,9 +81,9 @@ class SyncSettingsActivity : BaseActivity() {
         }
 
         syncSettingsViewModel.apply {
-            syncIntervalType.value = oldSyncSettings?.getIntervalType() ?: SyncSettings.IntervalType.IMMEDIATELY
+            syncIntervalType.value = oldSyncSettings?.getIntervalType() ?: IntervalType.IMMEDIATELY
             syncFolder.value = oldSyncSettings?.syncFolder
-            saveOldPictures.value = SyncSettings.SavePicturesDate.SINCE_NOW
+            saveOldPictures.value = SavePicturesDate.SINCE_NOW
         }
 
         AccountUtils.getAllUsers().observe(this) { users ->
@@ -101,12 +100,14 @@ class SyncSettingsActivity : BaseActivity() {
             }
         }
 
-        syncSettingsViewModel.customDate.observe(this) {
-            if (it == null) {
-                syncDatePicker.isGone = true
-            } else {
-                syncDatePicker.text = it.format(FORMAT_DATE_CLEAR_MONTH)
-                syncDatePicker.isVisible = true
+        syncSettingsViewModel.customDate.observe(this) { date ->
+            syncDatePicker.apply {
+                if (date == null) {
+                    isGone = true
+                } else {
+                    isVisible = true
+                    text = date.format(FORMAT_DATE_CLEAR_MONTH)
+                }
             }
         }
 
@@ -157,7 +158,7 @@ class SyncSettingsActivity : BaseActivity() {
         syncSettingsViewModel.saveOldPictures.observe(this) {
             changeSaveButtonStatus()
             syncDateValue.text = getString(it.shortTitle).lowercase()
-            if (it == SyncSettings.SavePicturesDate.SINCE_DATE) {
+            if (it == SavePicturesDate.SINCE_DATE) {
                 syncSettingsViewModel.customDate.value = Date().startOfTheDay()
                 syncDatePicker.text = syncSettingsViewModel.customDate.value?.format(FORMAT_DATE_CLEAR_MONTH)
             } else {
@@ -262,7 +263,7 @@ class SyncSettingsActivity : BaseActivity() {
                 || (selectDriveViewModel.selectedUserId.value != oldSyncSettings?.userId)
                 || (selectDriveViewModel.selectedDrive.value?.id != oldSyncSettings?.driveId)
                 || (syncSettingsViewModel.syncFolder.value != oldSyncSettings?.syncFolder)
-                || (syncSettingsViewModel.saveOldPictures.value != SyncSettings.SavePicturesDate.SINCE_NOW)
+                || (syncSettingsViewModel.saveOldPictures.value != SavePicturesDate.SINCE_NOW)
                 || allSyncedFoldersCount > 0
         saveButton.isVisible = isEdited
 
@@ -279,9 +280,9 @@ class SyncSettingsActivity : BaseActivity() {
         saveButton.showProgress()
         lifecycleScope.launch(Dispatchers.IO) {
             val date = when (syncSettingsViewModel.saveOldPictures.value!!) {
-                SyncSettings.SavePicturesDate.SINCE_NOW -> Date()
-                SyncSettings.SavePicturesDate.SINCE_FOREVER -> Date(0)
-                SyncSettings.SavePicturesDate.SINCE_DATE -> syncSettingsViewModel.customDate.value ?: Date()
+                SavePicturesDate.SINCE_NOW -> Date()
+                SavePicturesDate.SINCE_FOREVER -> Date(0)
+                SavePicturesDate.SINCE_DATE -> syncSettingsViewModel.customDate.value ?: Date()
             }
 
             if (activateSyncSwitch.isChecked) {
@@ -331,8 +332,8 @@ class SyncSettingsActivity : BaseActivity() {
 
     class SyncSettingsViewModel : ViewModel() {
         val customDate = MutableLiveData<Date>()
-        val saveOldPictures = MutableLiveData<SyncSettings.SavePicturesDate>()
-        val syncIntervalType = MutableLiveData<SyncSettings.IntervalType>()
+        val saveOldPictures = MutableLiveData<SavePicturesDate>()
+        val syncIntervalType = MutableLiveData<IntervalType>()
         val syncFolder = MutableLiveData<Int?>()
     }
 }
