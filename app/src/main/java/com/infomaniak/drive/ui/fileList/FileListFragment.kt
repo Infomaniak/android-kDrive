@@ -345,10 +345,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         color: String?,
     ): (Dialog?) -> Unit = {
 
-        if (fileAdapter.allSelected
-            && fileCount > BulkOperationsUtils.MIN_SELECTED
-            || selectedFiles.size > BulkOperationsUtils.MIN_SELECTED
-        ) {
+        val canBulkAllSelectedFiles = fileAdapter.allSelected && fileCount > BulkOperationsUtils.MIN_SELECTED
+        if (canBulkAllSelectedFiles || selectedFiles.size > BulkOperationsUtils.MIN_SELECTED) {
             sendBulkAction(
                 fileCount, BulkOperation(
                     action = type,

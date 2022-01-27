@@ -172,7 +172,7 @@ object ApiRepository {
         return callApi(ApiRoutes.renameFile(file), POST, mapOf("name" to newName))
     }
 
-    fun updateFolderColor(file: File, color: String): ApiResponse<Boolean?> {
+    fun updateFolderColor(file: File, color: String): ApiResponse<Boolean> {
         return callApi(ApiRoutes.updateFolderColor(file), POST, mapOf("color" to color))
     }
 

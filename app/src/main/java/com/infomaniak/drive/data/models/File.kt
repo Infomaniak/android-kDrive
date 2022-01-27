@@ -21,7 +21,6 @@ import android.content.Context
 import android.net.Uri
 import android.os.Parcelable
 import android.webkit.MimeTypeMap
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -344,6 +343,12 @@ open class File(
                 && getVisibilityType() != VisibilityType.IS_TEAM_SPACE
     }
 
+    var color: String
+        get() = _color ?: "#9F9F9F" // R.color.secondaryText
+        set(color) {
+            _color = color
+        }
+
     // For applyFileActivity in FileController
     override fun equals(other: Any?): Boolean {
         if (other is File) {
@@ -431,14 +436,6 @@ open class File(
         fun getOfflineFolder(context: Context): java.io.File {
             val mediaFolder = context.externalMediaDirs?.firstOrNull() ?: context.filesDir
             return java.io.File(mediaFolder, context.getString(R.string.EXPOSED_OFFLINE_DIR))
-        }
-
-        fun File.getColor(context: Context): String {
-            return _color ?: String.format("#%06x", ContextCompat.getColor(context, R.color.secondaryText) and 0xffffff)
-        }
-
-        fun File.setColor(color: String) {
-            _color = color
         }
     }
 }
