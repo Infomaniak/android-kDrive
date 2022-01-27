@@ -65,10 +65,19 @@ class PreviewPDFFragment : PreviewFragment() {
         fileIcon.setImageResource(file.getFileType().icon)
         fileName.text = file.name
         downloadProgress.isVisible = true
-        previewDescription.setText(R.string.previewDownloadIndication)
-        previewDescription.isVisible = true
+
+        previewDescription.apply {
+            setText(R.string.previewDownloadIndication)
+            isVisible = true
+        }
+
         downloadLayout.isVisible = true
         pdfViewRecycler.isGone = true
+
+        bigOpenWithButton.apply {
+            isGone = true
+            setOnClickListener { (parentFragment as? PreviewSliderFragment)?.openWithClicked() }
+        }
 
         previewPDFViewModel.downloadProgress.observe(viewLifecycleOwner, Observer { progress ->
             if (progress >= 100 && previewPDFViewModel.pdfJob.isCancelled) downloadPdf()
@@ -138,6 +147,7 @@ class PreviewPDFFragment : PreviewFragment() {
                     } ?: run {
                         downloadProgress.isGone = true
                         previewDescription.setText(R.string.previewNoPreview)
+                        bigOpenWithButton.isVisible = true
                     }
                     previewSliderViewModel.pdfIsDownloading.value = false
                     isDownloading = false
