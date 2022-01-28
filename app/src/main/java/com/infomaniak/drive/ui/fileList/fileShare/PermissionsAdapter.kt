@@ -42,12 +42,10 @@ import kotlinx.android.synthetic.main.cardview_permission.view.*
 import kotlinx.android.synthetic.main.item_user_avatar.view.*
 
 class PermissionsAdapter(
-    var selectionPosition: Int? = null,
+    var selectedPermission: Permission? = null,
     private var currentUser: User? = null,
     private var isExternalUser: Boolean = false,
     private var sharedUsers: ArrayList<DriveUser> = ArrayList(),
-    private var showSelectionCheckIcon: Boolean = true,
-    private var preSelectedPermission: Permission? = null,
     private val onPermissionChanged: (newPermission: Permission) -> Unit,
 ) : RecyclerView.Adapter<ViewHolder>() {
 
@@ -79,9 +77,10 @@ class PermissionsAdapter(
                 setStrokeColor(ContextCompat.getColorStateList(this.context, R.color.item_icon_tint_bottom))
                 setupSelection(position)
                 setOnClickListener {
+                    val selectionPosition = permissionList.indexOf(selectedPermission)
                     if (selectionPosition != position) {
                         onPermissionChanged(permission)
-                        selectionPosition = position
+                        selectedPermission = permission
                         notifyItemRangeChanged(0, itemCount)
                     }
                 }
@@ -142,11 +141,7 @@ class PermissionsAdapter(
     }
 
     private fun MaterialCardView.setupSelection(position: Int) {
-
-        val isSelected = position == selectionPosition
-        val isPreSelected = position == permissionList.indexOf(preSelectedPermission)
-        if (isPreSelected) preSelectedPermission = null
-        val isEnabled = isSelected || isPreSelected
+        val isEnabled = position == permissionList.indexOf(selectedPermission)
 
         strokeWidth = if (isEnabled) 2.toPx() else 0
         strokeColor = ContextCompat.getColor(context, R.color.primary)

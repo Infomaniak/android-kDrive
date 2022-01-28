@@ -82,7 +82,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
     private fun configurePermissionsAdapter() {
         permissionsRecyclerView.adapter = adapter.apply {
             setAll(getPermissions())
-            selectionPosition = permissionList.indexOf(selectPermissionViewModel.currentPermission)
+            selectedPermission = selectPermissionViewModel.currentPermission
         }
     }
 

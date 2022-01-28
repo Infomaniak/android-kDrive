@@ -92,8 +92,7 @@ open class CreateFolderFragment : Fragment() {
     private fun setupAdapter(onPermissionSelected: (permission: FolderPermission) -> Unit) {
         adapter = PermissionsAdapter(
             currentUser = AccountUtils.currentUser,
-            showSelectionCheckIcon = false,
-            preSelectedPermission = newFolderViewModel.currentPermission,
+            selectedPermission = newFolderViewModel.currentPermission,
             onPermissionChanged = {
                 onPermissionSelected(it as FolderPermission)
             },
