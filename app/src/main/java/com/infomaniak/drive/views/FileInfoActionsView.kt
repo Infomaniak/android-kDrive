@@ -405,7 +405,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun displayInfoClicked()
         fun downloadFileClicked()
         fun manageCategoriesClicked(fileId: Int)
-        fun colorFolderClicked(color: String)
+        fun colorFolderClicked(color: String) = Unit
         fun dropBoxClicked(isDropBox: Boolean) = Unit
         fun fileRightsClicked()
         fun onCacheAddedToOffline() = Unit
