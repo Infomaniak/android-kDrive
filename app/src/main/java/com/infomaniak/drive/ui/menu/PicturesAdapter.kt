@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.menu
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.infomaniak.drive.R
@@ -28,6 +29,7 @@ import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.LoaderCardView
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_picture.view.*
+import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.android.synthetic.main.title_recycler_section.view.*
 
 class PicturesAdapter(
@@ -93,9 +95,37 @@ class PicturesAdapter(
                     setOnClickListener {
                         onItemClick(file)
                     }
+
+                    // Checker par rapport au FileAdapter.kt comment c'est fait là bas le fait de gérer la multi sélection tout ça tout ça
+//                    setOnClickListener {
+//                        if (multiSelectMode) {
+//                            fileChecked.isChecked = !fileChecked.isChecked
+//                            onSelectedFile(file, fileChecked.isChecked)
+//                        } else {
+//                            onFileClicked?.invoke(file)
+//                        }
+//                    }
+//                    setOnLongClickListener {
+//                        if (enabledMultiSelectMode) {
+//                            fileChecked.isChecked = !fileChecked.isChecked
+//                            onSelectedFile(file, fileChecked.isChecked)
+//                            if (!multiSelectMode) openMultiSelectMode?.invoke()
+//                            true
+//                        } else false
+//                    }
+                    setOnLongClickListener {
+                        pictureChecked.isChecked = !pictureChecked.isChecked
+                        onSelectedFile(file, pictureChecked.isChecked)
+//                        if (!multiSelectMode) openMultiSelectMode?.invoke()
+                        true
+                    }
                 }
             }
         }
+    }
+
+    private fun onSelectedFile(file: File, isSelected: Boolean) {
+        Log.e("pic-sel", "onSelectedFile: selected: $file, $isSelected", )
     }
 
     enum class DisplayType(val layout: Int) {
