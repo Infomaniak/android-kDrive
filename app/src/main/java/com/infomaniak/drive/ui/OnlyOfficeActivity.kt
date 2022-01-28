@@ -82,6 +82,11 @@ class OnlyOfficeActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * If the file is not a correct PDF, an exception will be thrown in the main thread by PrintManager
+     * OnlyOfficeActivity will be "finish" and there is nothing we can do about it
+     * https://stackoverflow.com/questions/60508970/malformed-pdf-print-doesnt-catch-runtimeexception
+     */
     private fun sendToPrintPDF(url: String, filename: String) {
         val printDocumentAdapter: PrintDocumentAdapter = object : PrintDocumentAdapter() {
 
@@ -126,7 +131,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
         }
 
         (this.getSystemService(Context.PRINT_SERVICE) as PrintManager).apply {
-            print("PRINT_PDF_ONLYOFFICE_SERVICE", printDocumentAdapter, null)
+            print("PRINT_ONLYOFFICE_PDF_SERVICE", printDocumentAdapter, null)
         }
     }
 
