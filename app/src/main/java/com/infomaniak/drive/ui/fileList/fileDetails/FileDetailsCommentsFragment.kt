@@ -80,7 +80,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
                     fileDetailsViewModel.postFileComment(currentFile, name).observe(viewLifecycleOwner) { apiResponse ->
                         if (apiResponse.isSuccess()) {
                             apiResponse?.data?.let { comment ->
-                                commentsAdapter.addComment(comment)
+                                commentsAdapter.addAll(arrayListOf(comment))
                                 requireActivity().showSnackbar(R.string.fileDetailsCommentsConfirmationSnackbar)
                             }
                         } else {
@@ -111,7 +111,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
                 } ?: also {
                     isComplete = true
                 }
-                noCommentsLayout.toggleVisibility(itemCount == 0, showRefreshButton = false)
+                noCommentsLayout.toggleVisibility(itemList.count() == 0, showRefreshButton = false)
             }
 
             onEditClicked = { comment ->

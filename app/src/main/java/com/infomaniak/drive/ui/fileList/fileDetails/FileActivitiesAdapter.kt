@@ -28,7 +28,6 @@ import com.infomaniak.drive.data.models.FileActivity
 import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.drive.utils.loadGlide
 import com.infomaniak.lib.core.views.LoaderAdapter
-import com.infomaniak.lib.core.views.LoaderCardView
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_file_activity.view.*
 import java.text.SimpleDateFormat
@@ -43,12 +42,9 @@ class FileActivitiesAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-
-
         holder.itemView.apply {
             if (getItemViewType(position) == VIEW_TYPE_LOADING) {
                 activityDateCardView.startLoading()
-
             } else {
                 activityDateCardView.stopLoading()
 

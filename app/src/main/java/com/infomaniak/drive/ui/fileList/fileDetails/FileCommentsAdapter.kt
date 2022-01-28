@@ -59,33 +59,35 @@ class FileCommentsAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val currentComment = itemList[position]
-        holder.itemView.apply {
-            commentUserAvatar.loadAvatar(currentComment.user)
-            commentUserName.text = currentComment.user.displayName
-            commentValue.text = currentComment.body
-            commentDateValue.text = getRelativeDateTimeString(
-                context,
-                currentComment.createdAt.time,
-                DAY_IN_MILLIS,
-                2 * DAY_IN_MILLIS,
-                FORMAT_ABBREV_ALL
-            )
-            likeButton.text = currentComment.likesCount.toString()
-            likeButton.setOnClickListener {
-                onLikeButtonClicked(currentComment)
-            }
-            likeButton.setIconTintResource(if (currentComment.liked) R.color.primary else R.color.iconColor)
-            TooltipCompat.setTooltipText(
-                likeButton,
-                currentComment.likes?.joinToString(separator = "\n") { it.displayName.toString() })
+        if (getItemViewType(position) != VIEW_TYPE_LOADING) {
+            val currentComment = itemList[position]
+            holder.itemView.apply {
+                commentUserAvatar.loadAvatar(currentComment.user)
+                commentUserName.text = currentComment.user.displayName
+                commentValue.text = currentComment.body
+                commentDateValue.text = getRelativeDateTimeString(
+                    context,
+                    currentComment.createdAt.time,
+                    DAY_IN_MILLIS,
+                    2 * DAY_IN_MILLIS,
+                    FORMAT_ABBREV_ALL
+                )
+                likeButton.text = currentComment.likesCount.toString()
+                likeButton.setOnClickListener {
+                    onLikeButtonClicked(currentComment)
+                }
+                likeButton.setIconTintResource(if (currentComment.liked) R.color.primary else R.color.iconColor)
+                TooltipCompat.setTooltipText(
+                    likeButton,
+                    currentComment.likes?.joinToString(separator = "\n") { it.displayName.toString() })
 
-            editButton.setOnClickListener {
-                onEditClicked?.invoke(currentComment)
-            }
+                editButton.setOnClickListener {
+                    onEditClicked?.invoke(currentComment)
+                }
 
-            deleteButton.setOnClickListener {
-                onDeleteClicked?.invoke(currentComment)
+                deleteButton.setOnClickListener {
+                    onDeleteClicked?.invoke(currentComment)
+                }
             }
         }
     }
@@ -93,6 +95,4 @@ class FileCommentsAdapter(
     private fun getCommentIndex(comment: FileComment): Int {
         return itemList.indexOf(itemList.find { it.id == comment.id })
     }
-
-    override fun getItemCount() = itemList.size
 }
