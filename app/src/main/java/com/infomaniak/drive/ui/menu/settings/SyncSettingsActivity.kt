@@ -162,7 +162,7 @@ class SyncSettingsActivity : BaseActivity() {
             }
         }
 
-        syncDatePicker.setOnClickListener { showDatePicker() }
+        syncDatePicker.setOnClickListener { showSyncDatePicker() }
 
         syncSettingsViewModel.syncIntervalType.observe(this) {
             if (syncSettingsViewModel.syncIntervalType.value != oldSyncSettings?.getIntervalType()) editNumber++
@@ -204,7 +204,7 @@ class SyncSettingsActivity : BaseActivity() {
         }
 
         syncDate.setOnClickListener {
-            SelectSaveDateBottomSheetDialog().show(supportFragmentManager, "SyncSettingsSaveDateBottomSheetDialog")
+            SelectSaveDateBottomSheetDialog().show(supportFragmentManager, "SyncSettingsSelectSaveDateBottomSheetDialog")
         }
 
         syncPeriodicity.setOnClickListener {
@@ -304,7 +304,7 @@ class SyncSettingsActivity : BaseActivity() {
         }
     }
 
-    private fun showDatePicker() {
+    private fun showSyncDatePicker() {
         val calendarConstraints = CalendarConstraints.Builder()
             .setEnd(Date().time)
             .setValidator(DateValidatorPointBackward.now())
@@ -320,9 +320,10 @@ class SyncSettingsActivity : BaseActivity() {
                 dateToSet.time + TimeZone.getDefault().getOffset(dateToSet.time)
             )
             .setCalendarConstraints(calendarConstraints)
-            .build().apply {
+            .build()
+            .apply {
                 addOnPositiveButtonClickListener { syncSettingsViewModel.customDate.value = Date(it).startOfTheDay() }
-                show(supportFragmentManager, "syncDate")
+                show(supportFragmentManager, "syncDatePicker")
             }
     }
 
