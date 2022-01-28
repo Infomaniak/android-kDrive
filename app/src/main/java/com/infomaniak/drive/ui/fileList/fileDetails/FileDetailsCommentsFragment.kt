@@ -102,6 +102,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
         }
 
         commentsAdapter.apply {
+            showLoading()
             isComplete = false
             fileDetailsViewModel.getFileComments(currentFile).observe(viewLifecycleOwner) { apiResponse ->
                 apiResponse?.data?.let { comments ->
