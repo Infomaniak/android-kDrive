@@ -339,10 +339,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         )
     }
 
-    override fun colorFolderClicked(color: String) {
-        // No-op
-    }
-
     override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) {
         val folderID = mainViewModel.currentFolder.value?.id
         mainViewModel.duplicateFile(currentPreviewFile, folderID, result).observe(viewLifecycleOwner) { apiResponse ->

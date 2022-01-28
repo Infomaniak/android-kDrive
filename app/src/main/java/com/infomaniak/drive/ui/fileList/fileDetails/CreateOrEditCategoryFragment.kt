@@ -118,10 +118,12 @@ class CreateOrEditCategoryFragment : Fragment() {
         categoriesRecyclerView.layoutManager = gridLayoutManager
     }
 
-    private fun getNumColorsColumns(minColumns: Int = 1, expectedItemSize: Int = 56): Int {
+    private fun getNumColorsColumns(): Int {
+        val minNumberOfColumns = 1
         val screenWidth = requireActivity().getScreenSizeInDp().x
         val margins = resources.getDimensionPixelSize(R.dimen.marginStandardSmall).toDp() * 2
-        return max(minColumns, (screenWidth - margins) / expectedItemSize)
+        val expectedItemSize = resources.getDimensionPixelSize(R.dimen.coloredChipSize).toDp()
+        return max(minNumberOfColumns, (screenWidth - margins) / expectedItemSize)
     }
 
     private fun createCategory() {

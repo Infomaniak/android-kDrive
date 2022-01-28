@@ -21,7 +21,7 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.infomaniak.lib.core.utils.toPx
+import com.infomaniak.drive.R
 import kotlin.math.max
 
 class AutoSpanGridLayoutManager @JvmOverloads constructor(
@@ -31,7 +31,7 @@ class AutoSpanGridLayoutManager @JvmOverloads constructor(
     defStyleRes: Int = 0
 ) : GridLayoutManager(context, attrs, defStyle, defStyleRes) {
 
-    private val columnWidth = 56.toPx()
+    private val columnWidth = context.resources.getDimensionPixelSize(R.dimen.coloredChipSize)
 
     private var previousWidth = 0
     private var previousHeight = 0
