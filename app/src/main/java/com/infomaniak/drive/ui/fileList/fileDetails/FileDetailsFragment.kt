@@ -31,9 +31,9 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.File.Companion.getFolderIcon
 import com.infomaniak.drive.utils.TabViewPagerUtils
 import com.infomaniak.drive.utils.TabViewPagerUtils.setup
+import com.infomaniak.drive.utils.getFolderIcon
 import com.infomaniak.drive.utils.loadGlide
 import com.infomaniak.drive.utils.loadGlideUrl
 import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior

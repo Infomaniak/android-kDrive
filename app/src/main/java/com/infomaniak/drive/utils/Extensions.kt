@@ -86,7 +86,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.data.models.File.Companion.getFolderIcon
+import com.infomaniak.drive.data.models.File.*
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.OnlyOfficeActivity
@@ -824,4 +824,30 @@ fun MaterialCardView.setCornersRadius(topCornerRadius: Float, bottomCornerRadius
         .setBottomLeftCorner(CornerFamily.ROUNDED, bottomCornerRadius)
         .setBottomRightCorner(CornerFamily.ROUNDED, bottomCornerRadius)
         .build()
+}
+
+/**
+ * This method is here, and not directly a class method in the File class, because of a supposed Realm bug.
+ * When we try to put it in the File class, the app doesn't build anymore, because of a "broken method".
+ * This is not the only method in this case, search this comment in the project, and you'll see.
+ * Realm's Github issue: https://github.com/realm/realm-java/issues/7637
+ */
+fun File.getFolderIcon(context: Context): Drawable? {
+    return if (isFolder()) {
+        val icon: Any? = when (getVisibilityType()) {
+            VisibilityType.IS_TEAM_SPACE -> R.drawable.ic_folder_common_documents
+            VisibilityType.IS_SHARED_SPACE -> R.drawable.ic_folder_shared
+            VisibilityType.IS_COLLABORATIVE_FOLDER -> context.getTintedDrawable(R.drawable.ic_folder_dropbox, color)
+            else -> {
+                if (isDisabled()) {
+                    R.drawable.ic_folder_disable
+                } else {
+                    context.getTintedDrawable(R.drawable.ic_folder_filled, color)
+                }
+            }
+        }
+        if (icon is Int) ContextCompat.getDrawable(context, icon) else (icon as Drawable)
+    } else {
+        null
+    }
 }
