@@ -37,7 +37,6 @@
             android:layout_height="wrap_content"
             android:inputType="date"
             tools:text="16:42" />
-
     </com.google.android.material.textfield.TextInputLayout>
 
 </FrameLayout>

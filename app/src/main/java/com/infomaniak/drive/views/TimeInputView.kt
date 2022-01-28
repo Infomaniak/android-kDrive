@@ -56,7 +56,7 @@ class TimeInputView @JvmOverloads constructor(
     fun init(
         fragmentManager: FragmentManager,
         defaultDate: Date = Date(),
-        onDateSet: (hours: Int, minutes: Int) -> Unit
+        onDateSet: (hours: Int, minutes: Int) -> Unit,
     ) {
 
         hours = defaultDate.hours()

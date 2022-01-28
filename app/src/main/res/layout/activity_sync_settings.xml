@@ -433,8 +433,11 @@
                         android:id="@+id/syncDate"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:animateLayoutChanges="true"
                         android:background="?selectableItemBackground"
-                        android:padding="@dimen/marginStandard">
+                        android:paddingHorizontal="@dimen/marginStandard"
+                        android:paddingTop="@dimen/marginStandard"
+                        android:paddingBottom="@dimen/marginStandardMedium">
 
                         <TextView
                             android:id="@+id/syncDateTitle"
@@ -442,7 +445,6 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:text="@string/syncSettingsButtonSaveDate"
-                            app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toStartOf="@id/syncDateValue"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent" />
@@ -451,10 +453,25 @@
                             android:id="@+id/syncDateValue"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/syncSettingsSaveDateNowValue"
+                            android:layout_marginBottom="@dimen/marginStandardSmall"
+                            app:layout_constraintBottom_toTopOf="@id/syncDatePicker"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:text="@string/syncSettingsSaveDateNowValue" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/syncDatePicker"
+                            style="@style/ButtonInfomaniak"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:backgroundTint="@color/backgroundSecondary"
+                            android:textColor="@color/title"
+                            android:visibility="gone"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            app:layout_constraintTop_toBottomOf="@+id/syncDateValue"
+                            tools:text="25 janv. 2022"
+                            tools:visibility="visible" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 

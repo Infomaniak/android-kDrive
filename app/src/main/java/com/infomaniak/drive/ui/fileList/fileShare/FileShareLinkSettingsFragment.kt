@@ -135,33 +135,41 @@ class FileShareLinkSettingsFragment : Fragment() {
             )
 
             addExpirationDateSwitch.isChecked = shareLink.validUntil != null
-            expirationDateInput.init(fragmentManager = parentFragmentManager, defaultCalendarTimestamp) {
-                val validUntil = Calendar.getInstance().apply {
-                    val date = Date(it)
-                    set(
-                        date.year(),
-                        date.month(),
-                        date.day(),
-                        defaultCalendarTimestamp.hours(),
-                        defaultCalendarTimestamp.minutes()
-                    )
-                }.time
-                shareLink.validUntil = validUntil
-                defaultCalendarTimestamp = validUntil
-            }
-            expirationTimeInput.init(fragmentManager = parentFragmentManager, defaultCalendarTimestamp) { hours, minutes ->
-                val validUntil = Calendar.getInstance().apply {
-                    set(
-                        defaultCalendarTimestamp.year(),
-                        defaultCalendarTimestamp.month(),
-                        defaultCalendarTimestamp.day(),
-                        hours,
-                        minutes
-                    )
-                }.time
-                shareLink.validUntil = validUntil
-                defaultCalendarTimestamp = validUntil
-            }
+            expirationDateInput.init(
+                fragmentManager = parentFragmentManager,
+                defaultDate = defaultCalendarTimestamp,
+                onDateSet = {
+                    val validUntil = Calendar.getInstance().apply {
+                        val date = Date(it)
+                        set(
+                            date.year(),
+                            date.month(),
+                            date.day(),
+                            defaultCalendarTimestamp.hours(),
+                            defaultCalendarTimestamp.minutes(),
+                        )
+                    }.time
+                    shareLink.validUntil = validUntil
+                    defaultCalendarTimestamp = validUntil
+                },
+            )
+            expirationTimeInput.init(
+                fragmentManager = parentFragmentManager,
+                defaultDate = defaultCalendarTimestamp,
+                onDateSet = { hours, minutes ->
+                    val validUntil = Calendar.getInstance().apply {
+                        set(
+                            defaultCalendarTimestamp.year(),
+                            defaultCalendarTimestamp.month(),
+                            defaultCalendarTimestamp.day(),
+                            hours,
+                            minutes,
+                        )
+                    }.time
+                    shareLink.validUntil = validUntil
+                    defaultCalendarTimestamp = validUntil
+                },
+            )
         }
     }
 

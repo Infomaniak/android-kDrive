@@ -63,4 +63,10 @@ open class SyncSettings(
         private const val INTERVAL_QUARTER: Long = 15 * 60L
         private const val INTERVAL_FOUR_HOURS: Long = 4 * 60 * 60L
     }
+
+    enum class SavePicturesDate(val shortTitle: Int, val title: Int) {
+        SINCE_NOW(R.string.syncSettingsSaveDateNowValue, R.string.syncSettingsSaveDateNowValue2),
+        SINCE_FOREVER(R.string.syncSettingsSaveDateAllPictureValue, R.string.syncSettingsSaveDateAllPictureValue),
+        SINCE_DATE(R.string.syncSettingsSaveDateFromDateValue, R.string.syncSettingsSaveDateFromDateValue2)
+    }
 }

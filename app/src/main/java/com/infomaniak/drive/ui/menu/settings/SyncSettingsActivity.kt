@@ -28,23 +28,24 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.DateValidatorPointBackward
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
+import com.infomaniak.drive.data.models.SyncSettings.*
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.showProgress
+import com.infomaniak.lib.core.utils.*
 import kotlinx.android.synthetic.main.activity_sync_settings.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -62,9 +63,7 @@ class SyncSettingsActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sync_settings)
 
-        toolbar.setNavigationOnClickListener {
-            onBackPressed()
-        }
+        toolbar.setNavigationOnClickListener { onBackPressed() }
 
         val permission = DrivePermissions()
         permission.registerPermissions(this)
@@ -82,8 +81,9 @@ class SyncSettingsActivity : BaseActivity() {
         }
 
         syncSettingsViewModel.apply {
-            syncIntervalType.value = oldSyncSettings?.getIntervalType() ?: SyncSettings.IntervalType.IMMEDIATELY
+            syncIntervalType.value = oldSyncSettings?.getIntervalType() ?: IntervalType.IMMEDIATELY
             syncFolder.value = oldSyncSettings?.syncFolder
+            saveOldPictures.value = SavePicturesDate.SINCE_NOW
         }
 
         AccountUtils.getAllUsers().observe(this) { users ->
@@ -97,6 +97,13 @@ class SyncSettingsActivity : BaseActivity() {
                     selectDriveViewModel.selectedUserId.value = AccountUtils.currentUserId
                     selectDriveViewModel.selectedDrive.value = currentUserDrives.firstOrNull()
                 }
+            }
+        }
+
+        syncSettingsViewModel.customDate.observe(this) { date ->
+            syncDatePicker.apply {
+                isGone = date == null
+                text = date?.format(FORMAT_DATE_CLEAR_MONTH) ?: ""
             }
         }
 
@@ -145,18 +152,22 @@ class SyncSettingsActivity : BaseActivity() {
         }
 
         syncSettingsViewModel.saveOldPictures.observe(this) {
-            syncDateValue.text = if (it == true) {
-                getString(R.string.syncSettingsSaveDateAllPictureValue).lowercase(Locale.ROOT)
-            } else {
-                getString(R.string.syncSettingsSaveDateNowValue)
-            }
             changeSaveButtonStatus()
+            syncDateValue.text = getString(it.shortTitle).lowercase()
+            if (it == SavePicturesDate.SINCE_DATE) {
+                syncSettingsViewModel.customDate.value = Date().startOfTheDay()
+                syncDatePicker.text = syncSettingsViewModel.customDate.value?.format(FORMAT_DATE_CLEAR_MONTH)
+            } else {
+                syncSettingsViewModel.customDate.value = null
+            }
         }
+
+        syncDatePicker.setOnClickListener { showSyncDatePicker() }
 
         syncSettingsViewModel.syncIntervalType.observe(this) {
             if (syncSettingsViewModel.syncIntervalType.value != oldSyncSettings?.getIntervalType()) editNumber++
             changeSaveButtonStatus()
-            syncPeriodicityValue.setText(it.title)
+            syncPeriodicityValue.text = getString(it.title).lowercase()
         }
 
         val syncVideoDefaultValue = true
@@ -193,22 +204,7 @@ class SyncSettingsActivity : BaseActivity() {
         }
 
         syncDate.setOnClickListener {
-            var syncOldMedia = syncSettingsViewModel.saveOldPictures.value == true
-            val items = arrayOf(
-                getString(R.string.syncSettingsSaveDateNowValue2),
-                getString(R.string.syncSettingsSaveDateAllPictureValue)
-            )
-            val checkedItem = if (syncOldMedia) 1 else 0
-            MaterialAlertDialogBuilder(this, R.style.DialogStyle)
-                .setTitle(getString(R.string.syncSettingsButtonSaveDate))
-                .setSingleChoiceItems(items, checkedItem) { _, which ->
-                    syncOldMedia = which == 1
-                }
-                .setPositiveButton(R.string.buttonConfirm) { _, _ ->
-                    syncSettingsViewModel.saveOldPictures.value = syncOldMedia
-                }
-                .setNegativeButton(R.string.buttonCancel) { _, _ -> }
-                .setCancelable(false).show()
+            SelectSaveDateBottomSheetDialog().show(supportFragmentManager, "SyncSettingsSelectSaveDateBottomSheetDialog")
         }
 
         syncPeriodicity.setOnClickListener {
@@ -263,7 +259,7 @@ class SyncSettingsActivity : BaseActivity() {
                 || (selectDriveViewModel.selectedUserId.value != oldSyncSettings?.userId)
                 || (selectDriveViewModel.selectedDrive.value?.id != oldSyncSettings?.driveId)
                 || (syncSettingsViewModel.syncFolder.value != oldSyncSettings?.syncFolder)
-                || (syncSettingsViewModel.saveOldPictures.value != null)
+                || (syncSettingsViewModel.saveOldPictures.value != SavePicturesDate.SINCE_NOW)
                 || allSyncedFoldersCount > 0
         saveButton.isVisible = isEdited
 
@@ -279,13 +275,17 @@ class SyncSettingsActivity : BaseActivity() {
     private fun saveSettings() {
         saveButton.showProgress()
         lifecycleScope.launch(Dispatchers.IO) {
-            val saveOldPictures = syncSettingsViewModel.saveOldPictures.value == true
+            val date = when (syncSettingsViewModel.saveOldPictures.value!!) {
+                SavePicturesDate.SINCE_NOW -> Date()
+                SavePicturesDate.SINCE_FOREVER -> Date(0)
+                SavePicturesDate.SINCE_DATE -> syncSettingsViewModel.customDate.value ?: Date()
+            }
 
             if (activateSyncSwitch.isChecked) {
                 val syncSettings = SyncSettings(
                     userId = selectDriveViewModel.selectedUserId.value!!,
                     driveId = selectDriveViewModel.selectedDrive.value!!.id,
-                    lastSync = if (saveOldPictures) Date(0) else Date(),
+                    lastSync = date,
                     syncFolder = syncSettingsViewModel.syncFolder.value!!,
                     syncVideo = syncVideoSwitch.isChecked,
                     createDatedSubFolders = createDatedSubFoldersSwitch.isChecked,
@@ -304,9 +304,33 @@ class SyncSettingsActivity : BaseActivity() {
         }
     }
 
+    private fun showSyncDatePicker() {
+        val calendarConstraints = CalendarConstraints.Builder()
+            .setEnd(Date().time)
+            .setValidator(DateValidatorPointBackward.now())
+            .build()
+
+        val dateToSet = syncSettingsViewModel.customDate.value ?: Date()
+
+        MaterialDatePicker.Builder.datePicker()
+            .setTheme(R.style.MaterialCalendarThemeBackground)
+            .setSelection(
+                // Need to account for time zones as MaterialDatePicker expects GMT+0. Else setting the picker to anything between
+                // 02.01.22 00:00:00 and 02.01.22 00:59:59 results in the date picker being set to 01.01.22 instead when the device uses GMT+1
+                dateToSet.time + TimeZone.getDefault().getOffset(dateToSet.time)
+            )
+            .setCalendarConstraints(calendarConstraints)
+            .build()
+            .apply {
+                addOnPositiveButtonClickListener { syncSettingsViewModel.customDate.value = Date(it).startOfTheDay() }
+                show(supportFragmentManager, "syncDatePicker")
+            }
+    }
+
     class SyncSettingsViewModel : ViewModel() {
-        val saveOldPictures = MutableLiveData<Boolean>()
-        val syncIntervalType = MutableLiveData<SyncSettings.IntervalType>()
+        val customDate = MutableLiveData<Date>()
+        val saveOldPictures = MutableLiveData<SavePicturesDate>()
+        val syncIntervalType = MutableLiveData<IntervalType>()
         val syncFolder = MutableLiveData<Int?>()
     }
 }
