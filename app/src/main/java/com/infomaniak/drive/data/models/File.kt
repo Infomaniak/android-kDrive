@@ -18,9 +18,11 @@
 package com.infomaniak.drive.data.models
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Parcelable
 import android.webkit.MimeTypeMap
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -36,6 +38,7 @@ import com.infomaniak.drive.utils.RealmListParceler.FileRealmListParceler
 import com.infomaniak.drive.utils.RealmListParceler.IntRealmListParceler
 import com.infomaniak.drive.utils.Utils.INDETERMINATE_PROGRESS
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.drive.utils.getTintedDrawable
 import com.infomaniak.lib.core.BuildConfig
 import io.realm.RealmList
 import io.realm.RealmObject
@@ -436,6 +439,26 @@ open class File(
         fun getOfflineFolder(context: Context): java.io.File {
             val mediaFolder = context.externalMediaDirs?.firstOrNull() ?: context.filesDir
             return java.io.File(mediaFolder, context.getString(R.string.EXPOSED_OFFLINE_DIR))
+        }
+
+        fun File.getFolderIcon(context: Context): Drawable? {
+            return if (isFolder()) {
+                val icon: Any? = when (getVisibilityType()) {
+                    VisibilityType.IS_TEAM_SPACE -> R.drawable.ic_folder_common_documents
+                    VisibilityType.IS_SHARED_SPACE -> R.drawable.ic_folder_shared
+                    VisibilityType.IS_COLLABORATIVE_FOLDER -> context.getTintedDrawable(R.drawable.ic_folder_dropbox, color)
+                    else -> {
+                        if (isDisabled()) {
+                            R.drawable.ic_folder_disable
+                        } else {
+                            context.getTintedDrawable(R.drawable.ic_folder_filled, color)
+                        }
+                    }
+                }
+                if (icon is Int) ContextCompat.getDrawable(context, icon) else (icon as Drawable)
+            } else {
+                null
+            }
         }
     }
 }
