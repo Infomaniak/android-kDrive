@@ -22,6 +22,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.data.models.UserDrive
 import kotlinx.coroutines.Dispatchers
 
@@ -29,7 +30,7 @@ class NewFolderViewModel : ViewModel() {
 
     val currentFolderId = MutableLiveData<Int>()
     var userDrive: UserDrive? = null
-    var currentPermission: File.FolderPermission? = null
+    var currentPermission: Permission? = null
 
     fun createFolder(name: String, parentId: Int, onlyForMe: Boolean) = liveData(Dispatchers.IO) {
         emit(FileController.createFolder(name, parentId, onlyForMe, userDrive))

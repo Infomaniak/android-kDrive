@@ -42,7 +42,7 @@ import kotlinx.android.synthetic.main.cardview_permission.view.*
 import kotlinx.android.synthetic.main.item_user_avatar.view.*
 
 class PermissionsAdapter(
-    var selectedPermission: Permission? = null,
+    var selectionPosition: Int? = null,
     private var currentUser: User? = null,
     private var isExternalUser: Boolean = false,
     private var sharedUsers: ArrayList<DriveUser> = ArrayList(),
@@ -73,14 +73,11 @@ class PermissionsAdapter(
         val permission = permissionList[position]
         holder.itemView.apply {
             permissionCard.apply {
-                isCheckable = true
-                setStrokeColor(ContextCompat.getColorStateList(this.context, R.color.item_icon_tint_bottom))
-                setupSelection(position)
+                setupSelection(position == selectionPosition)
                 setOnClickListener {
-                    val selectionPosition = permissionList.indexOf(selectedPermission)
                     if (selectionPosition != position) {
                         onPermissionChanged(permission)
-                        selectedPermission = permission
+                        selectionPosition = position
                         notifyItemRangeChanged(0, itemCount)
                     }
                 }
@@ -140,11 +137,8 @@ class PermissionsAdapter(
         userExternalWarning.isGone = true
     }
 
-    private fun MaterialCardView.setupSelection(position: Int) {
-        val isEnabled = position == permissionList.indexOf(selectedPermission)
-
-        strokeWidth = if (isEnabled) 2.toPx() else 0
-        strokeColor = ContextCompat.getColor(context, R.color.primary)
+    private fun MaterialCardView.setupSelection(enabled: Boolean) {
+        strokeWidth = if (enabled) 2.toPx() else 0
         invalidate()
     }
 

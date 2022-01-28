@@ -62,10 +62,7 @@ open class CreateFolderFragment : Fragment() {
 
         createFolderButton.initProgress(viewLifecycleOwner)
 
-        setupAdapter { selectedPermission ->
-            newFolderViewModel.currentPermission = selectedPermission
-            toggleCreateFolderButton()
-        }
+        setupAdapter()
 
         toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
@@ -89,12 +86,12 @@ open class CreateFolderFragment : Fragment() {
         mainViewModel.currentFolder.value = newFolder
     }
 
-    private fun setupAdapter(onPermissionSelected: (permission: FolderPermission) -> Unit) {
+    private fun setupAdapter() {
         adapter = PermissionsAdapter(
             currentUser = AccountUtils.currentUser,
-            selectedPermission = newFolderViewModel.currentPermission,
             onPermissionChanged = {
-                onPermissionSelected(it as FolderPermission)
+                newFolderViewModel.currentPermission = it
+                toggleCreateFolderButton()
             },
         )
         permissionsRecyclerView.adapter = adapter

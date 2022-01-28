@@ -70,20 +70,20 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         }
 
         permissionsGroup = navigationArgs.permissionsGroup
-        adapter = PermissionsAdapter(
-            isExternalUser = permissionsGroup == PermissionsGroup.EXTERNAL_USERS_RIGHTS,
-            onPermissionChanged = { newPermission -> selectPermissionViewModel.currentPermission = newPermission },
-        )
 
         configurePermissionsAdapter()
         configureSaveButton()
     }
 
     private fun configurePermissionsAdapter() {
-        permissionsRecyclerView.adapter = adapter.apply {
+        adapter = PermissionsAdapter(
+            isExternalUser = permissionsGroup == PermissionsGroup.EXTERNAL_USERS_RIGHTS,
+            onPermissionChanged = { selectPermissionViewModel.currentPermission = it },
+        ).apply {
             setAll(getPermissions())
-            selectedPermission = selectPermissionViewModel.currentPermission
+            selectionPosition = permissionList.indexOf(selectPermissionViewModel.currentPermission)
         }
+        permissionsRecyclerView.adapter = adapter
     }
 
     private fun getPermissions(): ArrayList<Permission> {

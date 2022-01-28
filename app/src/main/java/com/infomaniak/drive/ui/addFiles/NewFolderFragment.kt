@@ -44,8 +44,12 @@ class NewFolderFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        newFolderViewModel.currentFolderId.value = arguments.parentFolderId
-        newFolderViewModel.userDrive = arguments.userDrive
+
+        newFolderViewModel.apply {
+            currentFolderId.value = arguments.parentFolderId
+            userDrive = arguments.userDrive
+            currentPermission = null
+        }
 
         toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
