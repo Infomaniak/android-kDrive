@@ -67,7 +67,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
     private fun createDropBoxFolder() {
         createDropBox(onDropBoxCreated = { file, dropBox ->
             mainViewModel.createDropBoxSuccess.value = dropBox
-            if (currentPermission == ONLY_ME) {
+            if (newFolderViewModel.currentPermission == ONLY_ME) {
                 findNavController().popBackStack(R.id.newFolderFragment, true)
             } else {
                 navigateToFileShareDetails(file)

@@ -44,7 +44,7 @@ class CreatePrivateFolderFragment : CreateFolderFragment() {
     }
 
     private fun createPrivateFolder() {
-        createFolder(currentPermission == ONLY_ME) { file, redirectToShareDetails ->
+        createFolder(newFolderViewModel.currentPermission == ONLY_ME) { file, redirectToShareDetails ->
             file?.let {
                 saveNewFolder(file)
                 requireActivity().showSnackbar(R.string.createPrivateFolderSucces, anchorView = requireActivity().mainFab)

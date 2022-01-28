@@ -47,15 +47,14 @@ class PermissionsAdapter(
     private var isExternalUser: Boolean = false,
     private var sharedUsers: ArrayList<DriveUser> = ArrayList(),
     private var showSelectionCheckIcon: Boolean = true,
+    private var preSelectedPermission: Permission? = null,
     private val onPermissionChanged: (newPermission: Permission) -> Unit,
 ) : RecyclerView.Adapter<ViewHolder>() {
 
     var permissionList: ArrayList<Permission> = ArrayList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(
-            LayoutInflater.from(parent.context).inflate(R.layout.cardview_permission, parent, false)
-        )
+        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cardview_permission, parent, false))
     }
 
     fun setAll(newPermissions: ArrayList<Permission>) {
@@ -78,7 +77,7 @@ class PermissionsAdapter(
             permissionCard.apply {
                 isCheckable = true
                 setStrokeColor(ContextCompat.getColorStateList(this.context, R.color.item_icon_tint_bottom))
-                setupSelection(position == selectionPosition)
+                setupSelection(position)
                 setOnClickListener {
                     if (selectionPosition != position) {
                         onPermissionChanged(permission)
@@ -142,9 +141,14 @@ class PermissionsAdapter(
         userExternalWarning.isGone = true
     }
 
-    private fun MaterialCardView.setupSelection(enabled: Boolean) {
-        if (showSelectionCheckIcon) isChecked = enabled
-        strokeWidth = if (enabled) 2.toPx() else 0
+    private fun MaterialCardView.setupSelection(position: Int) {
+
+        val isSelected = position == selectionPosition
+        val isPreSelected = position == permissionList.indexOf(preSelectedPermission)
+        if (isPreSelected) preSelectedPermission = null
+        val isEnabled = isSelected || isPreSelected
+
+        strokeWidth = if (isEnabled) 2.toPx() else 0
         strokeColor = ContextCompat.getColor(context, R.color.primary)
         invalidate()
     }

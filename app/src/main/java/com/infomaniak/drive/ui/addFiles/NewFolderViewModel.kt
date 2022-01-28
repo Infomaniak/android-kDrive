@@ -29,6 +29,7 @@ class NewFolderViewModel : ViewModel() {
 
     val currentFolderId = MutableLiveData<Int>()
     var userDrive: UserDrive? = null
+    var currentPermission: File.FolderPermission? = null
 
     fun createFolder(name: String, parentId: Int, onlyForMe: Boolean) = liveData(Dispatchers.IO) {
         emit(FileController.createFolder(name, parentId, onlyForMe, userDrive))

@@ -65,7 +65,7 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
 
         newFolderViewModel.createCommonFolder(
             name = folderNameValueInput.text.toString(),
-            forAllUsers = currentPermission == ALL_DRIVE_USERS,
+            forAllUsers = newFolderViewModel.currentPermission == ALL_DRIVE_USERS,
         ).observe(viewLifecycleOwner) { apiResponse ->
 
             if (apiResponse.isSuccess()) {
@@ -84,7 +84,7 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
     private fun whenFolderCreated(file: File) {
         requireActivity().showSnackbar(R.string.createCommonFolderSucces)
 
-        if (currentPermission == SPECIFIC_USERS) {
+        if (newFolderViewModel.currentPermission == SPECIFIC_USERS) {
             safeNavigate(
                 CreateCommonFolderFragmentDirections.actionCreateCommonFolderFragmentToFileShareDetailsFragment(
                     fileId = file.id,
