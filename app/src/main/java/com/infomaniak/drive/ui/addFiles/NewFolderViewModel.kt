@@ -35,7 +35,8 @@ class NewFolderViewModel : ViewModel() {
         emit(FileController.createFolder(name, parentId, onlyForMe, userDrive))
     }
 
-    fun createCommonFolder(name: String, forAllUsers: Boolean) = liveData(Dispatchers.IO) {
+    fun createCommonFolder(name: String) = liveData(Dispatchers.IO) {
+        val forAllUsers = currentPermission == File.FolderPermission.ALL_DRIVE_USERS
         emit(FileController.createCommonFolder(name, forAllUsers, userDrive))
     }
 

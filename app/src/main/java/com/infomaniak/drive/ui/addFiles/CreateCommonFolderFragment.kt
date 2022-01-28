@@ -65,7 +65,6 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
 
         newFolderViewModel.createCommonFolder(
             name = folderNameValueInput.text.toString(),
-            forAllUsers = newFolderViewModel.currentPermission == ALL_DRIVE_USERS,
         ).observe(viewLifecycleOwner) { apiResponse ->
 
             if (apiResponse.isSuccess()) {
