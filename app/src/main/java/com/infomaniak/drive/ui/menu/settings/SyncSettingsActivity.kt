@@ -102,12 +102,8 @@ class SyncSettingsActivity : BaseActivity() {
 
         syncSettingsViewModel.customDate.observe(this) { date ->
             syncDatePicker.apply {
-                if (date == null) {
-                    isGone = true
-                } else {
-                    isVisible = true
-                    text = date.format(FORMAT_DATE_CLEAR_MONTH)
-                }
+                isGone = date == null
+                text = date?.format(FORMAT_DATE_CLEAR_MONTH) ?: ""
             }
         }
 
