@@ -18,13 +18,25 @@
 package com.infomaniak.drive.ui
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
+import android.os.CancellationSignal
+import android.os.ParcelFileDescriptor
+import android.print.*
 import android.webkit.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.InfomaniakCore
+import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import kotlinx.android.synthetic.main.activity_only_office.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.io.BufferedInputStream
+import java.io.FileOutputStream
+import java.net.URL
+
 
 class OnlyOfficeActivity : AppCompatActivity() {
 
@@ -34,6 +46,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
         setContentView(R.layout.activity_only_office)
 
         val url = intent.getStringExtra(ONLYOFFICE_URL_TAG)!!
+        val filename = intent.getStringExtra(ONLYOFFICE_FILENAME_TAG)!!
         val headers = mapOf("Authorization" to "Bearer ${InfomaniakCore.bearerToken}")
 
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
@@ -62,6 +75,63 @@ class OnlyOfficeActivity : AppCompatActivity() {
                     if (newProgress == 100) progressBar.isGone = true
                 }
             }
+
+            setDownloadListener { url, _, _, _, _ ->
+                if (url.endsWith(".pdf")) sendToPrintPDF(url, filename) else openUrl(url)
+            }
+        }
+    }
+
+    /**
+     * If the file is not a correct PDF, an exception will be thrown in the main thread by PrintManager
+     * OnlyOfficeActivity will be "finish" and there is nothing we can do about it
+     * https://stackoverflow.com/questions/60508970/malformed-pdf-print-doesnt-catch-runtimeexception
+     */
+    private fun sendToPrintPDF(url: String, filename: String) {
+        val printDocumentAdapter: PrintDocumentAdapter = object : PrintDocumentAdapter() {
+
+            override fun onWrite(
+                pages: Array<PageRange>,
+                destination: ParcelFileDescriptor,
+                cancellationSignal: CancellationSignal,
+                resultCallback: WriteResultCallback
+            ) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        BufferedInputStream(URL(url).openStream()).use { input ->
+                            FileOutputStream(destination.fileDescriptor).use { output ->
+                                input.copyTo(output)
+                            }
+                        }
+                        resultCallback.onWriteFinished(arrayOf(PageRange.ALL_PAGES))
+                    } catch (e: Exception) {
+                        resultCallback.onWriteFailed(getString(R.string.anErrorHasOccurred))
+                    }
+                }
+            }
+
+            override fun onLayout(
+                oldAttributes: PrintAttributes?,
+                newAttributes: PrintAttributes?,
+                cancellationSignal: CancellationSignal,
+                callback: LayoutResultCallback,
+                extras: Bundle?
+            ) {
+                if (cancellationSignal.isCanceled) {
+                    callback.onLayoutCancelled()
+                    return
+                }
+                val printDocumentInfo = PrintDocumentInfo
+                    .Builder(filename)
+                    .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
+                    .build()
+                callback.onLayoutFinished(printDocumentInfo, true)
+            }
+
+        }
+
+        (this.getSystemService(Context.PRINT_SERVICE) as PrintManager).apply {
+            print("PRINT_ONLYOFFICE_PDF_SERVICE", printDocumentAdapter, null)
         }
     }
 
@@ -78,5 +148,6 @@ class OnlyOfficeActivity : AppCompatActivity() {
 
     companion object {
         const val ONLYOFFICE_URL_TAG = "office_url_tag"
+        const val ONLYOFFICE_FILENAME_TAG = "office_filename_tag"
     }
 }
