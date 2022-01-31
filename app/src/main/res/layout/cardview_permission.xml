@@ -23,7 +23,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="@dimen/marginStandard"
-    android:layout_marginVertical="@dimen/marginStandardSmall">
+    android:layout_marginVertical="@dimen/marginStandardSmall"
+    app:strokeColor="@color/primary">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

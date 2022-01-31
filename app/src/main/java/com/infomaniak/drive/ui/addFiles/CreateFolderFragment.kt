@@ -52,19 +52,17 @@ open class CreateFolderFragment : Fragment() {
     protected val newFolderViewModel: NewFolderViewModel by navGraphViewModels(R.id.newFolderFragment)
     protected val mainViewModel: MainViewModel by activityViewModels()
     protected lateinit var adapter: PermissionsAdapter
-    protected var currentPermission: FolderPermission? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        inflater.inflate(R.layout.fragment_create_folder, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return inflater.inflate(R.layout.fragment_create_folder, container, false)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         createFolderButton.initProgress(viewLifecycleOwner)
-        setupAdapter { selectedPermission ->
-            currentPermission = selectedPermission
-            toggleCreateFolderButton()
-        }
+
+        setupAdapter()
 
         toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
@@ -88,15 +86,19 @@ open class CreateFolderFragment : Fragment() {
         mainViewModel.currentFolder.value = newFolder
     }
 
-    private fun setupAdapter(onPermissionSelected: (permission: FolderPermission) -> Unit) {
-        adapter = PermissionsAdapter(currentUser = AccountUtils.currentUser, showSelectionCheckIcon = false) {
-            onPermissionSelected(it as FolderPermission)
-        }
+    private fun setupAdapter() {
+        adapter = PermissionsAdapter(
+            currentUser = AccountUtils.currentUser,
+            onPermissionChanged = {
+                newFolderViewModel.currentPermission = it
+                toggleCreateFolderButton()
+            },
+        )
         permissionsRecyclerView.adapter = adapter
     }
 
     private fun toggleCreateFolderButton() {
-        createFolderButton?.isEnabled = currentPermission != null && !folderNameValueInput.text.isNullOrBlank()
+        createFolderButton?.isEnabled = newFolderViewModel.currentPermission != null && !folderNameValueInput.text.isNullOrBlank()
     }
 
     protected fun getShare(onSuccess: (share: Share) -> Unit) {
@@ -120,7 +122,7 @@ open class CreateFolderFragment : Fragment() {
                 onlyForMe = onlyForMe
             ).observe(viewLifecycleOwner) { apiResponse ->
                 if (apiResponse.isSuccess()) {
-                    val redirectToShareDetails = currentPermission == FolderPermission.SPECIFIC_USERS
+                    val redirectToShareDetails = newFolderViewModel.currentPermission == FolderPermission.SPECIFIC_USERS
                     onFolderCreated(apiResponse.data, redirectToShareDetails)
                 } else {
                     if (apiResponse.formatError() == ErrorCode.DESTINATION_ALREADY_EXISTS) {

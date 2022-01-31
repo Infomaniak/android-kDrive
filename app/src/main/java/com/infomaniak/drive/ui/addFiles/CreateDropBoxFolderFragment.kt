@@ -27,6 +27,7 @@ import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.FolderPermission.*
+import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
@@ -51,10 +52,14 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
         setupAdvancedSettings()
 
         adapter.apply {
-            addItem(ONLY_ME)
             getShare {
                 setUsers(it.users)
-                addItem(if (canInherit(it.users, it.teams)) INHERIT else SPECIFIC_USERS)
+                val permissions: ArrayList<Permission> = arrayListOf(
+                    ONLY_ME,
+                    if (canInherit(it.users, it.teams)) INHERIT else SPECIFIC_USERS,
+                )
+                selectionPosition = permissions.indexOf(newFolderViewModel.currentPermission)
+                setAll(permissions)
             }
         }
 
@@ -67,7 +72,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
     private fun createDropBoxFolder() {
         createDropBox(onDropBoxCreated = { file, dropBox ->
             mainViewModel.createDropBoxSuccess.value = dropBox
-            if (currentPermission == ONLY_ME) {
+            if (newFolderViewModel.currentPermission == ONLY_ME) {
                 findNavController().popBackStack(R.id.newFolderFragment, true)
             } else {
                 navigateToFileShareDetails(file)

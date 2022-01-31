@@ -46,16 +46,13 @@ class PermissionsAdapter(
     private var currentUser: User? = null,
     private var isExternalUser: Boolean = false,
     private var sharedUsers: ArrayList<DriveUser> = ArrayList(),
-    private var showSelectionCheckIcon: Boolean = true,
     private val onPermissionChanged: (newPermission: Permission) -> Unit,
 ) : RecyclerView.Adapter<ViewHolder>() {
 
     var permissionList: ArrayList<Permission> = ArrayList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(
-            LayoutInflater.from(parent.context).inflate(R.layout.cardview_permission, parent, false)
-        )
+        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cardview_permission, parent, false))
     }
 
     fun setAll(newPermissions: ArrayList<Permission>) {
@@ -76,8 +73,6 @@ class PermissionsAdapter(
         val permission = permissionList[position]
         holder.itemView.apply {
             permissionCard.apply {
-                isCheckable = true
-                setStrokeColor(ContextCompat.getColorStateList(this.context, R.color.item_icon_tint_bottom))
                 setupSelection(position == selectionPosition)
                 setOnClickListener {
                     if (selectionPosition != position) {
@@ -143,9 +138,7 @@ class PermissionsAdapter(
     }
 
     private fun MaterialCardView.setupSelection(enabled: Boolean) {
-        if (showSelectionCheckIcon) isChecked = enabled
         strokeWidth = if (enabled) 2.toPx() else 0
-        strokeColor = ContextCompat.getColor(context, R.color.primary)
         invalidate()
     }
 

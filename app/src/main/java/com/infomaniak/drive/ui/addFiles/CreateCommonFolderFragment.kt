@@ -29,6 +29,7 @@ import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.FolderPermission.ALL_DRIVE_USERS
 import com.infomaniak.drive.data.models.File.FolderPermission.SPECIFIC_USERS
+import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.hideKeyboard
 import com.infomaniak.drive.utils.safeNavigate
@@ -54,7 +55,11 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
             pathDriveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(drive.preferences.color))
         }
 
-        adapter.setAll(arrayListOf(ALL_DRIVE_USERS, SPECIFIC_USERS))
+        adapter.apply {
+            val permissions: ArrayList<Permission> = arrayListOf(ALL_DRIVE_USERS, SPECIFIC_USERS)
+            selectionPosition = permissions.indexOf(newFolderViewModel.currentPermission)
+            setAll(permissions)
+        }
 
         createFolderButton.setOnClickListener { createCommonFolder() }
     }
@@ -65,7 +70,6 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
 
         newFolderViewModel.createCommonFolder(
             name = folderNameValueInput.text.toString(),
-            forAllUsers = currentPermission == ALL_DRIVE_USERS,
         ).observe(viewLifecycleOwner) { apiResponse ->
 
             if (apiResponse.isSuccess()) {
@@ -84,7 +88,7 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
     private fun whenFolderCreated(file: File) {
         requireActivity().showSnackbar(R.string.createCommonFolderSucces)
 
-        if (currentPermission == SPECIFIC_USERS) {
+        if (newFolderViewModel.currentPermission == SPECIFIC_USERS) {
             safeNavigate(
                 CreateCommonFolderFragmentDirections.actionCreateCommonFolderFragmentToFileShareDetailsFragment(
                     fileId = file.id,

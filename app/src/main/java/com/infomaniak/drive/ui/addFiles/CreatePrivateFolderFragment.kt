@@ -22,6 +22,7 @@ import android.view.View
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File.FolderPermission.*
+import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.utils.safeNavigate
 import com.infomaniak.drive.utils.showSnackbar
 import kotlinx.android.synthetic.main.activity_main.*
@@ -33,10 +34,14 @@ class CreatePrivateFolderFragment : CreateFolderFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         adapter.apply {
-            addItem(ONLY_ME)
             getShare {
                 setUsers(it.users)
-                addItem(if (canInherit(it.users, it.teams)) INHERIT else SPECIFIC_USERS)
+                val permissions: ArrayList<Permission> = arrayListOf(
+                    ONLY_ME,
+                    if (canInherit(it.users, it.teams)) INHERIT else SPECIFIC_USERS,
+                )
+                selectionPosition = permissions.indexOf(newFolderViewModel.currentPermission)
+                setAll(permissions)
             }
         }
 
@@ -44,7 +49,7 @@ class CreatePrivateFolderFragment : CreateFolderFragment() {
     }
 
     private fun createPrivateFolder() {
-        createFolder(currentPermission == ONLY_ME) { file, redirectToShareDetails ->
+        createFolder(newFolderViewModel.currentPermission == ONLY_ME) { file, redirectToShareDetails ->
             file?.let {
                 saveNewFolder(file)
                 requireActivity().showSnackbar(R.string.createPrivateFolderSucces, anchorView = requireActivity().mainFab)
