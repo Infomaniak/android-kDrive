@@ -82,9 +82,11 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     fun updateMultiSelectMediator(mediator: MediatorLiveData<Pair<Int, Int>>): (ApiResponse<*>) -> Unit = { apiResponse ->
         val total = mediator.value!!.second + 1
-        mediator.value =
-            if (apiResponse.isSuccess()) mediator.value!!.first + 1 to total
-            else mediator.value!!.first to total
+        mediator.value = if (apiResponse.isSuccess()) {
+            mediator.value!!.first + 1 to total
+        } else {
+            mediator.value!!.first to total
+        }
     }
 
     fun postFileShareLink(
@@ -208,6 +210,10 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     fun renameFile(file: File, newName: String) = liveData(Dispatchers.IO) {
         emit(FileController.renameFile(file, newName))
+    }
+
+    fun updateFolderColor(file: File, color: String) = liveData(Dispatchers.IO) {
+        emit(FileController.updateFolderColor(file, color))
     }
 
     fun deleteFile(file: File, userDrive: UserDrive? = null, onSuccess: ((fileID: Int) -> Unit)? = null) =

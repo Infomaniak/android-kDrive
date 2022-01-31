@@ -50,6 +50,7 @@ import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.*
+import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.data.services.UploadWorker
@@ -58,6 +59,7 @@ import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWork
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog.Companion.SELECT_DIALOG_ACTION
+import com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.BULK_OPERATION_CUSTOM_TAG
 import com.infomaniak.drive.utils.*
@@ -281,7 +283,10 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             FileController.getFileProxyById(fileId, customRealm = mainViewModel.realm)?.let {
                 openBookmarkIntent(it)
             }
+        }
 
+        getBackNavigationResult<String>(ColorFolderBottomSheetDialog.COLOR_FOLDER_NAV_KEY) {
+            performBulkOperation(type = BulkOperationType.COLOR_FOLDER, color = it)
         }
     }
 
@@ -307,7 +312,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         super.onStop()
     }
 
-    private fun performBulkOperation(type: BulkOperationType, destinationFolder: File? = null) {
+    private fun performBulkOperation(type: BulkOperationType, destinationFolder: File? = null, color: String? = null) {
 
         val selectedFiles = fileAdapter.getValidItemsSelected()
 
@@ -317,7 +322,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             selectedFiles.size
         }
 
-        val sendActions: (dialog: Dialog?) -> Unit = sendActions(fileCount, selectedFiles, type, destinationFolder)
+        val sendActions: (dialog: Dialog?) -> Unit = sendActions(fileCount, selectedFiles, type, destinationFolder, color)
 
         if (type == BulkOperationType.TRASH) {
             Utils.createConfirmation(
@@ -337,6 +342,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         selectedFiles: List<File>,
         type: BulkOperationType,
         destinationFolder: File?,
+        color: String?,
     ): (Dialog?) -> Unit = {
 
         val canBulkAllSelectedFiles = fileAdapter.allSelected && fileCount > BulkOperationsUtils.MIN_SELECTED
@@ -360,7 +366,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     it.isNotManagedByRealm() -> it
                     else -> return@forEach
                 }
-                sendAction(file, type, mediator, destinationFolder)
+                sendAction(file, type, mediator, destinationFolder, color)
             }
 
             mediator.observe(viewLifecycleOwner) { (success, total) ->
@@ -389,6 +395,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         type: BulkOperationType,
         mediator: MediatorLiveData<Pair<Int, Int>>,
         destinationFolder: File?,
+        color: String?,
     ) {
 
         val onSuccess: (Int) -> Unit = { fileID ->
@@ -418,6 +425,20 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     ),
                     mainViewModel.updateMultiSelectMediator(mediator),
                 )
+            }
+            BulkOperationType.COLOR_FOLDER -> {
+                if (color != null && file.isAllowedToBeColored()) {
+                    mediator.addSource(
+                        mainViewModel.updateFolderColor(file, color),
+                        mainViewModel.updateMultiSelectMediator(mediator),
+                    )
+                } else {
+                    mediator.apply {
+                        val success = value?.first ?: 0
+                        val total = (value?.second ?: 0) + 1
+                        value = success to total
+                    }
+                }
             }
             BulkOperationType.SET_OFFLINE -> {
                 addSelectedFilesToOffline(file)
@@ -606,18 +627,26 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun onBackNavigationResult() {
         // TODO - 2 - Implement download for multiselection !
         getBackNavigationResult<BulkOperationType>(SELECT_DIALOG_ACTION) { type ->
-            if (type == BulkOperationType.COPY) {
-                val intent = Intent(requireContext(), SelectFolderActivity::class.java).apply {
-                    putExtra(SelectFolderActivity.USER_ID_TAG, AccountUtils.currentUserId)
-                    putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
-                    putExtra(
-                        SelectFolderActivity.CUSTOM_ARGS_TAG,
-                        bundleOf(BULK_OPERATION_CUSTOM_TAG to BulkOperationType.COPY)
-                    )
+            when (type) {
+                BulkOperationType.COPY -> {
+                    val intent = Intent(requireContext(), SelectFolderActivity::class.java).apply {
+                        putExtra(SelectFolderActivity.USER_ID_TAG, AccountUtils.currentUserId)
+                        putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
+                        putExtra(
+                            SelectFolderActivity.CUSTOM_ARGS_TAG,
+                            bundleOf(BULK_OPERATION_CUSTOM_TAG to BulkOperationType.COPY),
+                        )
+                    }
+                    startActivityForResult(intent, SelectFolderActivity.SELECT_FOLDER_REQUEST)
                 }
-                startActivityForResult(intent, SelectFolderActivity.SELECT_FOLDER_REQUEST)
-            } else {
-                performBulkOperation(type)
+                BulkOperationType.COLOR_FOLDER -> {
+                    if (AccountUtils.getCurrentDrive()?.pack == Drive.DrivePack.FREE.value) {
+                        safeNavigate(R.id.colorFolderUpgradeBottomSheetDialog)
+                    } else {
+                        safeNavigate(FileListFragmentDirections.actionFileListToColorFolder(null))
+                    }
+                }
+                else -> performBulkOperation(type)
             }
         }
     }

@@ -26,14 +26,14 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 
-class DropBoxBottomSheetDialog : InformationBottomSheetDialog() {
+class ColorFolderUpgradeBottomSheetDialog : InformationBottomSheetDialog() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        title.setText(R.string.dropBoxTitle)
-        description.setText(R.string.dropBoxDescription)
-        illu.setAnimation(R.raw.illu_drop_box)
+        title.setText(R.string.folderColorTitle)
+        description.setText(R.string.folderColorDescription)
+        illu.setAnimation(R.raw.illu_upgrade)
 
         actionButton.apply {
             setText(R.string.buttonUpgradeOffer)
@@ -45,7 +45,7 @@ class DropBoxBottomSheetDialog : InformationBottomSheetDialog() {
 
         packAvailability.apply {
             isVisible = true
-            text = getString(R.string.allPackAvailability, getString(R.string.packs_team_pro))
+            text = getString(R.string.allPackAvailability, getString(R.string.packs_solo_team_pro))
         }
     }
 }

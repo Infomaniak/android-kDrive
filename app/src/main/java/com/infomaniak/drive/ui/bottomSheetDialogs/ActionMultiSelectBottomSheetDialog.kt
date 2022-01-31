@@ -23,6 +23,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.AndroidViewModel
@@ -32,6 +33,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.utils.*
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_action_multi_select.*
@@ -42,31 +44,62 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
     private val actionMultiSelectModel by viewModels<ActionMultiSelectModel>()
     private val navigationArgs: ActionMultiSelectBottomSheetDialogArgs by navArgs()
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View = inflater.inflate(R.layout.fragment_bottom_sheet_action_multi_select, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+        inflater.inflate(R.layout.fragment_bottom_sheet_action_multi_select, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        addFavorites.setOnClickListener { onActionSelected(SelectDialogAction.ADD_FAVORITES) }
-
-        availableOfflineSwitch.setOnCheckedChangeListener { _, _ -> onActionSelected(SelectDialogAction.OFFLINE) }
-        availableOffline.setOnClickListener { onActionSelected(SelectDialogAction.OFFLINE) }
-        duplicateFile.setOnClickListener { onActionSelected(SelectDialogAction.DUPLICATE) }
-
-        disabledAvailableOffline.isVisible = navigationArgs.onlyFolders
-
         val otherActionsVisibility = navigationArgs.fileIds.size in 1..BulkOperationsUtils.MIN_SELECTED
-        availableOffline.isVisible = otherActionsVisibility
-        addFavorites.isVisible = otherActionsVisibility
+        configureColoredFolder(otherActionsVisibility)
+        configureAddFavorites(otherActionsVisibility)
+        configureAvailableOffline(otherActionsVisibility)
+        configureDownloadFile()
+        configureDuplicateFile()
+    }
 
+    private fun configureColoredFolder(otherActionsVisibility: Boolean) {
+        disabledColoredFolder.isGone = computeColoredFolderAvailability(navigationArgs.fileIds)
+        coloredFolder.apply {
+            setOnClickListener { onActionSelected(SelectDialogAction.COLOR_FOLDER) }
+            isVisible = otherActionsVisibility
+        }
+    }
+
+    private fun configureAddFavorites(otherActionsVisibility: Boolean) {
+        addFavorites.apply {
+            setOnClickListener { onActionSelected(SelectDialogAction.ADD_FAVORITES) }
+            isVisible = otherActionsVisibility
+        }
+    }
+
+    private fun configureAvailableOffline(otherActionsVisibility: Boolean) {
+        availableOfflineSwitch.setOnCheckedChangeListener { _, _ -> onActionSelected(SelectDialogAction.OFFLINE) }
+        disabledAvailableOffline.isVisible = navigationArgs.onlyFolders
+        availableOffline.apply {
+            setOnClickListener { onActionSelected(SelectDialogAction.OFFLINE) }
+            isVisible = otherActionsVisibility
+        }
+    }
+
+    private fun configureDownloadFile() {
         val drivePermissions = DrivePermissions()
         drivePermissions.registerPermissions(this) { authorized -> if (authorized) downloadFileArchive() }
-        downloadFile.setOnClickListener {
-            if (drivePermissions.checkWriteStoragePermission()) downloadFileArchive()
+        downloadFile.apply {
+            setOnClickListener { if (drivePermissions.checkWriteStoragePermission()) downloadFileArchive() }
+            isVisible = navigationArgs.fileIds.isNotEmpty()
         }
-        downloadFile.isVisible = navigationArgs.fileIds.isNotEmpty()
+    }
+
+    private fun configureDuplicateFile() {
+        duplicateFile.setOnClickListener { onActionSelected(SelectDialogAction.DUPLICATE) }
+    }
+
+    private fun computeColoredFolderAvailability(fileIds: IntArray): Boolean {
+        fileIds.forEach {
+            val file = FileController.getFileById(it)
+            if (file?.isAllowedToBeColored() == true) return true
+        }
+        return false
     }
 
     private fun downloadFileArchive() {
@@ -88,11 +121,15 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
             SelectDialogAction.ADD_FAVORITES -> BulkOperationType.ADD_FAVORITES
             SelectDialogAction.OFFLINE -> BulkOperationType.SET_OFFLINE
             SelectDialogAction.DUPLICATE -> BulkOperationType.COPY
+            SelectDialogAction.COLOR_FOLDER -> BulkOperationType.COLOR_FOLDER
             else -> null
         }
 
-        if (finalType == null) setBackNavigationResult(DISABLE_SELECT_MODE, true)
-        else setBackNavigationResult(SELECT_DIALOG_ACTION, finalType)
+        if (finalType == null) {
+            setBackNavigationResult(DISABLE_SELECT_MODE, true)
+        } else {
+            setBackNavigationResult(SELECT_DIALOG_ACTION, finalType)
+        }
     }
 
     class ActionMultiSelectModel(app: Application) : AndroidViewModel(app) {
@@ -102,7 +139,7 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     enum class SelectDialogAction {
-        ADD_FAVORITES, OFFLINE, DUPLICATE
+        ADD_FAVORITES, OFFLINE, DUPLICATE, COLOR_FOLDER
     }
 
     companion object {

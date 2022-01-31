@@ -139,6 +139,8 @@ open class FileActivity(
         FileActivityType.COLLABORATIVE_FOLDER_DELETE -> R.string.fileActivityCollaborativeFolderDelete
         FileActivityType.FILE_CATEGORIZE -> R.string.fileDetailsActivityFileCategorize
         FileActivityType.FILE_UNCATEGORIZE -> R.string.fileDetailsActivityFileUncategorize
+        FileActivityType.FILE_COLOR_UPDATE -> R.string.fileDetailsActivityFileColorUpdate
+        FileActivityType.FILE_COLOR_DELETE -> R.string.fileDetailsActivityFileColorDelete
     }
 
     enum class FileActivityType {
@@ -158,6 +160,8 @@ open class FileActivity(
         FILE_SHARE_DELETE,
         FILE_CATEGORIZE,
         FILE_UNCATEGORIZE,
+        FILE_COLOR_UPDATE,
+        FILE_COLOR_DELETE,
         SHARE_LINK_CREATE,
         SHARE_LINK_UPDATE,
         SHARE_LINK_DELETE,

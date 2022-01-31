@@ -307,6 +307,8 @@
     <string name="fileDetailsActivitiesTitle">Attività</string>
     <string name="fileDetailsActivityFileAccess">ha consultato il file</string>
     <string name="fileDetailsActivityFileCategorize">ha aggiunto una categoria all’elemento</string>
+    <string name="fileDetailsActivityFileColorDelete">rimosso il colore da una cartella</string>
+    <string name="fileDetailsActivityFileColorUpdate">ha cambiato il colore di una cartella</string>
     <string name="fileDetailsActivityFileCommentCreate">ha commentato il file</string>
     <string name="fileDetailsActivityFileCommentDelete">ha eliminato il suo commento</string>
     <string name="fileDetailsActivityFileCommentLike">gli è piaciuto un commento</string>
@@ -368,6 +370,10 @@
     <plurals name="fileListAddOfflineConfirmationSnackbar">
         <item quantity="one">Un file è disponibile offline</item>
         <item quantity="other">%d file sono disponibili offline</item>
+    </plurals>
+    <plurals name="fileListColorFolderConfirmationSnackbar">
+        <item quantity="one">Una cartella colorata con successo</item>
+        <item quantity="other">%d cartelle colorate con successo</item>
     </plurals>
     <string name="fileListCopyDoneSnackbar">Copie concluse con successo</string>
     <string name="fileListCopyInProgressSnackbar">Copie in corso: %1$d/%2$d</string>

@@ -108,15 +108,12 @@ open class Drive(
         }
     }
 
-    override fun hashCode(): Int {
-        return objectId.hashCode()
-    }
+    override fun hashCode(): Int = objectId.hashCode()
 
     enum class DrivePack(val value: String) {
         FREE("free"),
         SOLO("solo"),
         TEAM("team"),
-        PRO("pro")
+        PRO("pro"),
     }
-
 }

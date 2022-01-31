@@ -29,6 +29,8 @@ object ApiRoutes {
 
     private fun fileURL(file: File) = "${DRIVE_API}${file.driveId}/file/${file.id}"
 
+    private fun fileURLv2(file: File) = "${DRIVE_API_V2}${file.driveId}/files/${file.id}"
+
     private fun trashURL(file: File) = "${DRIVE_API}${file.driveId}/file/trash/${file.id}"
 
     fun getAllDrivesData() = "${DRIVE_API}init?with=drives,users,teams,ips,categories"
@@ -89,6 +91,8 @@ object ApiRoutes {
     fun moveFile(file: File, newParentId: Int) = "${fileURL(file)}/move/$newParentId"
 
     fun renameFile(file: File) = "${fileURL(file)}/rename"
+
+    fun updateFolderColor(file: File) = "${fileURLv2(file)}/color"
 
     fun duplicateFile(file: File, folderId: Int) = "${fileURL(file)}/copy/$folderId?$with"
 

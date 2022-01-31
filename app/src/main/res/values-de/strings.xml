@@ -307,6 +307,8 @@
     <string name="fileDetailsActivitiesTitle">Aktivität</string>
     <string name="fileDetailsActivityFileAccess">hat die Datei eingesehen</string>
     <string name="fileDetailsActivityFileCategorize">dem Element eine Kategorie hinzugefügt</string>
+    <string name="fileDetailsActivityFileColorDelete">die Farbe aus einem Ordner entfernt hat</string>
+    <string name="fileDetailsActivityFileColorUpdate">die Farbe eines Ordners geändert hat</string>
     <string name="fileDetailsActivityFileCommentCreate">hat die Datei kommentiert</string>
     <string name="fileDetailsActivityFileCommentDelete">hat seinen Kommentar gelöscht</string>
     <string name="fileDetailsActivityFileCommentLike">hat einen Kommentar mit Gefällt mir markiert</string>
@@ -368,6 +370,10 @@
     <plurals name="fileListAddOfflineConfirmationSnackbar">
         <item quantity="one">Datei offline verfügbar</item>
         <item quantity="other">%d Dateien offline verfügbar</item>
+    </plurals>
+    <plurals name="fileListColorFolderConfirmationSnackbar">
+        <item quantity="one">Ordner erfolgreich eingefärbt</item>
+        <item quantity="other">%d Ordner erfolgreich eingefärbt</item>
     </plurals>
     <string name="fileListCopyDoneSnackbar">Kopian erfolgreich abgeschlossen</string>
     <string name="fileListCopyInProgressSnackbar">Kopian werden ausgeführt: %1$d/%2$d</string>

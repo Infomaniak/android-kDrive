@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.ui.fileList.fileDetails
+package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import android.content.res.ColorStateList
 import android.view.LayoutInflater
@@ -27,9 +27,11 @@ import com.infomaniak.drive.R
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.view_color_round_button.view.*
 
-class CreateOrEditCategoryAdapter : RecyclerView.Adapter<ViewHolder>() {
+class ColorFolderAdapter(
+    private val onColorSelected: (color: String) -> Unit
+) : RecyclerView.Adapter<ViewHolder>() {
 
-    var selectedPosition = 0
+    var selectedPosition = -1
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.view_color_round_button, parent, false))
@@ -38,44 +40,32 @@ class CreateOrEditCategoryAdapter : RecyclerView.Adapter<ViewHolder>() {
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView.colorButtonView) {
         val color = ColorStateList.valueOf(COLORS[position].toColorInt())
-        val white = ContextCompat.getColorStateList(context, R.color.white)
 
         backgroundTintList = color
-        iconTint = if (position == selectedPosition) white else color
+        iconTint = if (position == selectedPosition) ContextCompat.getColorStateList(context, R.color.white) else color
 
-        setOnClickListener {
-            iconTint = white
-            val previousSelectedPosition = selectedPosition
-            selectedPosition = position
-            notifyItemChanged(previousSelectedPosition)
-        }
+        setOnClickListener { onColorSelected(COLORS[position]) }
     }
 
     companion object {
         val COLORS = arrayListOf(
-            "#1ABC9C",
-            "#11806A",
-            "#2ECC71",
-            "#128040",
-            "#3498DB",
-            "#206694",
-            "#9B59B6",
-            "#71368A",
+            "#9F9F9F",
+            "#F44336",
             "#E91E63",
-            "#AD1457",
-            "#F1C40F",
-            "#C27C0E",
-            "#C45911",
-            "#44546A",
-            "#E74C3C",
-            "#992D22",
-            "#9D00FF",
-            "#00B0F0",
-            "#BE8F00",
-            "#0B4899",
-            "#009945",
-            "#2E77B5",
-            "#70AD47",
+            "#9C26B0",
+            "#673AB7",
+            "#4051B5",
+            "#4BAF50",
+            "#009688",
+            "#00BCD4",
+            "#02A9F4",
+            "#2196F3",
+            "#8BC34A",
+            "#CDDC3A",
+            "#FFC10A",
+            "#FF9802",
+            "#607D8B",
+            "#795548",
         )
     }
 }

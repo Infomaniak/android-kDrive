@@ -27,7 +27,7 @@ import com.infomaniak.drive.ui.fileList.SearchFiltersViewModel
 import com.infomaniak.drive.views.SelectBottomSheetDialog
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_select.*
 
-open class SearchFilterTypeBottomSheetDialog : SelectBottomSheetDialog() {
+class SearchFilterTypeBottomSheetDialog : SelectBottomSheetDialog() {
 
     private val searchFiltersViewModel: SearchFiltersViewModel by navGraphViewModels(R.id.searchFiltersFragment)
     private val navigationArgs: SearchFilterTypeBottomSheetDialogArgs by navArgs()

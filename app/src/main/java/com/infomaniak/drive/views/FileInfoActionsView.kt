@@ -155,6 +155,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                 sendCopyText.setText(R.string.buttonAdd)
                 availableOffline.isGone = true
                 openWith.isGone = true
+                coloredFolder.isVisible = currentFile.isAllowedToBeColored()
             }
         }
     }
@@ -189,6 +190,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         openWith.setOnClickListener { onItemClickListener.openWithClicked() }
         downloadFile.setOnClickListener { onItemClickListener.downloadFileClicked() }
         manageCategories.setOnClickListener { onItemClickListener.manageCategoriesClicked(currentFile.id) }
+        coloredFolder.setOnClickListener { onItemClickListener.colorFolderClicked(currentFile.color) }
         addFavorites.setOnClickListener {
             addFavorites.isEnabled = false
             onItemClickListener.addFavoritesClicked()
@@ -403,6 +405,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun displayInfoClicked()
         fun downloadFileClicked()
         fun manageCategoriesClicked(fileId: Int)
+        fun colorFolderClicked(color: String) = Unit
         fun dropBoxClicked(isDropBox: Boolean) = Unit
         fun fileRightsClicked()
         fun onCacheAddedToOffline() = Unit

@@ -34,6 +34,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_ACTION_KEY
@@ -89,6 +90,24 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
         getBackNavigationResult<Any>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
             lifecycleScope.launchWhenResumed { fileInfoActionsView.refreshBottomSheetUi(currentFile) }
+        }
+
+        getBackNavigationResult<String>(ColorFolderBottomSheetDialog.COLOR_FOLDER_NAV_KEY) {
+            updateFolderColor(it)
+        }
+    }
+
+    private fun updateFolderColor(color: String) {
+        if (isResumed) {
+            mainViewModel.updateFolderColor(currentFile, color).observe(viewLifecycleOwner) { apiResponse ->
+                findNavController().popBackStack()
+                val text = if (apiResponse.isSuccess()) {
+                    resources.getQuantityString(R.plurals.fileListColorFolderConfirmationSnackbar, 1)
+                } else {
+                    getString(apiResponse.translatedError)
+                }
+                requireActivity().showSnackbar(text, mainFab)
+            }
         }
     }
 
@@ -176,6 +195,14 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                 categoriesUsageMode = CategoriesUsageMode.MANAGED_CATEGORIES,
             )
         )
+    }
+
+    override fun colorFolderClicked(color: String) {
+        if (AccountUtils.getCurrentDrive()?.pack == Drive.DrivePack.FREE.value) {
+            safeNavigate(R.id.colorFolderUpgradeBottomSheetDialog)
+        } else {
+            safeNavigate(FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsToColorFolder(color))
+        }
     }
 
     override fun addFavoritesClicked() {

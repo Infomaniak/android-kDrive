@@ -54,6 +54,8 @@ open class File(
     var children: @WriteWith<FileRealmListParceler> RealmList<File> = RealmList(),
     @SerializedName("collaborative_folder")
     var collaborativeFolder: String? = null,
+    @SerializedName("color")
+    private var _color: String? = null,
     @SerializedName("converted_type")
     var convertedType: String = "",
     @SerializedName("created_at")
@@ -333,6 +335,19 @@ open class File(
             categories.sortedBy { it.addedToFileAt }.map { it.id }
         }
     }
+
+    fun isAllowedToBeColored(): Boolean {
+        return !isDisabled()
+                && isFolder()
+                && getVisibilityType() != VisibilityType.IS_SHARED_SPACE
+                && getVisibilityType() != VisibilityType.IS_TEAM_SPACE
+    }
+
+    var color: String
+        get() = _color ?: "#9F9F9F" // R.color.secondaryText
+        set(color) {
+            _color = color
+        }
 
     // For applyFileActivity in FileController
     override fun equals(other: Any?): Boolean {

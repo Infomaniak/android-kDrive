@@ -117,13 +117,13 @@
                 android:layout_marginHorizontal="@dimen/marginStandardMedium"
                 android:layout_marginTop="@dimen/marginStandardSmall"
                 android:overScrollMode="never"
-                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                 app:layout_constraintBottom_toTopOf="@id/saveButton"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/chooseCategory"
-                tools:itemCount="14"
-                tools:listitem="@layout/view_category_color"
+                tools:itemCount="23"
+                tools:layoutManager="com.infomaniak.drive.views.AutoSpanGridLayoutManager"
+                tools:listitem="@layout/view_color_round_button"
                 tools:spanCount="7" />
 
             <com.google.android.material.button.MaterialButton

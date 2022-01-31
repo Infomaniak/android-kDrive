@@ -94,6 +94,9 @@
         <action
             android:id="@+id/action_fileListFragment_to_downloadProgressDialog"
             app:destination="@id/downloadProgressDialog" />
+        <action
+            android:id="@+id/action_fileList_to_colorFolder"
+            app:destination="@id/colorFolderBottomSheetDialog" />
     </fragment>
 
     <fragment
@@ -182,6 +185,9 @@
         <action
             android:id="@+id/action_fileInfoActionsBottomSheetDialog_to_selectCategoriesFragment"
             app:destination="@id/selectCategoriesFragment" />
+        <action
+            android:id="@+id/action_fileInfoActions_to_colorFolder"
+            app:destination="@id/colorFolderBottomSheetDialog" />
     </dialog>
 
     <dialog
@@ -804,6 +810,23 @@
             android:id="@+id/action_SelectCategoriesFragment_to_CreateOrEditCategoryFragment"
             app:destination="@id/createOrEditCategoryFragment" />
     </fragment>
+
+    <dialog
+        android:id="@+id/colorFolderBottomSheetDialog"
+        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderBottomSheetDialog"
+        android:label="ColorFolderBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_color_folder">
+        <argument
+            android:name="color"
+            app:argType="string"
+            app:nullable="true" />
+    </dialog>
+
+    <dialog
+        android:id="@+id/colorFolderUpgradeBottomSheetDialog"
+        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderUpgradeBottomSheetDialog"
+        android:label="ColorFolderUpgradeBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_information" />
 
     <dialog
         android:id="@+id/categoryInfoActionsBottomSheetDialog"

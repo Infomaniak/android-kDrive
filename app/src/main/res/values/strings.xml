@@ -25,6 +25,9 @@
     <string name="notification_channel_id_upload_download" translatable="false">upload_download_channel_id</string>
     <string name="notification_channel_id_upload_service" translatable="false">sync_service_channel_id</string>
 
+    <string name="packs_solo_team_pro" translatable="false">Solo, Team &amp; Pro</string>
+    <string name="packs_team_pro" translatable="false">Team &amp; Pro</string>
+
     <string name="aboutAppVersionTitle">kDrive application</string>
     <string name="aboutLicenseDescription">GNU General Public Licence, version 3</string>
     <string name="aboutLicenseTitle">Licence</string>
@@ -316,6 +319,8 @@
     <string name="fileDetailsActivitiesTitle">Activity</string>
     <string name="fileDetailsActivityFileAccess">accessed the file</string>
     <string name="fileDetailsActivityFileCategorize">added a category to the element</string>
+    <string name="fileDetailsActivityFileColorDelete">deleted the colour of a folder</string>
+    <string name="fileDetailsActivityFileColorUpdate">changed the colour of a folder</string>
     <string name="fileDetailsActivityFileCommentCreate">commented the file</string>
     <string name="fileDetailsActivityFileCommentDelete">deleted their comment</string>
     <string name="fileDetailsActivityFileCommentLike">liked a comment</string>
@@ -377,6 +382,10 @@
     <plurals name="fileListAddOfflineConfirmationSnackbar">
         <item quantity="one">One file available offline</item>
         <item quantity="other">%d files available offline</item>
+    </plurals>
+    <plurals name="fileListColorFolderConfirmationSnackbar">
+        <item quantity="one">One folder coloured successfully</item>
+        <item quantity="other">%d folders coloured successfully</item>
     </plurals>
     <string name="fileListCopyDoneSnackbar">Copies completed successfully</string>
     <string name="fileListCopyInProgressSnackbar">Copies in progress: %1$d/%2$d</string>

@@ -16,8 +16,10 @@ android {
         versionName "4.1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
         buildConfigField 'String', 'CLIENT_ID', '"9473D73C-C20F-4971-9E10-D957C563FA68"'
         buildConfigField 'String', 'DRIVE_API', '"https://drive.infomaniak.com/drive/"'
+        buildConfigField 'String', 'DRIVE_API_V2', '"https://drive.infomaniak.com/2/drive/"'
         buildConfigField 'String', 'INFOMANIAK_API', '"https://api.infomaniak.com/1/"'
         buildConfigField 'String', 'OFFICE_URL', '"https://drive.infomaniak.com/app/office/"'
         buildConfigField 'String', 'SHOP_URL', '"https://shop.infomaniak.com/order/"'
@@ -55,6 +57,11 @@ android {
         }
         fdroid {
             dimension "distribution"
+        }
+        preprod {
+            dimension "distribution"
+            buildConfigField 'String', 'DRIVE_API', '"https://drive.preprod.dev.infomaniak.ch/drive/"'
+            buildConfigField 'String', 'DRIVE_API_V2', '"https://drive.preprod.dev.infomaniak.ch/2/drive/"'
         }
     }
 

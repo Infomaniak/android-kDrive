@@ -32,7 +32,6 @@ import androidx.lifecycle.liveData
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
@@ -99,7 +98,6 @@ class CreateOrEditCategoryFragment : Fragment() {
             selectedPosition = COLORS.indexOfFirst { it == navigationArgs.categoryColor }.let { if (it == -1) 0 else it }
             configCategoriesLayoutManager()
             categoriesRecyclerView.adapter = this
-            stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         }
     }
 
@@ -120,10 +118,12 @@ class CreateOrEditCategoryFragment : Fragment() {
         categoriesRecyclerView.layoutManager = gridLayoutManager
     }
 
-    private fun getNumColorsColumns(minColumns: Int = 1, expectedItemSize: Int = 52): Int {
+    private fun getNumColorsColumns(): Int {
+        val minNumberOfColumns = 1
         val screenWidth = requireActivity().getScreenSizeInDp().x
         val margins = resources.getDimensionPixelSize(R.dimen.marginStandardSmall).toDp() * 2
-        return max(minColumns, (screenWidth - margins) / expectedItemSize)
+        val expectedItemSize = resources.getDimensionPixelSize(R.dimen.coloredChipSize).toDp()
+        return max(minNumberOfColumns, (screenWidth - margins) / expectedItemSize)
     }
 
     private fun createCategory() {

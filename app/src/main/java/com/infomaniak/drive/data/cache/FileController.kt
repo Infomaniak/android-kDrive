@@ -170,6 +170,12 @@ object FileController {
         return apiResponse
     }
 
+    fun updateFolderColor(file: File, color: String, realm: Realm? = null): ApiResponse<Boolean> {
+        return ApiRepository.updateFolderColor(file, color).also {
+            if (it.isSuccess()) updateFile(file.id, realm) { localFile -> localFile.color = color }
+        }
+    }
+
     fun deleteFile(
         file: File,
         realm: Realm? = null,
@@ -785,9 +791,7 @@ object FileController {
             FileActivityType.FILE_TRASH -> {
                 if (returnResponse[fileId] == null || returnResponse[fileId]?.createdAt?.time == createdAt.time) { // Api fix
                     getParentFile(fileId = fileId, realm = realm)?.let { parent ->
-                        if (parent.id == currentFolder.id) {
-                            removeFile(fileId, customRealm = realm, recursive = false)
-                        }
+                        if (parent.id == currentFolder.id) removeFile(fileId, customRealm = realm, recursive = false)
                     }
                     returnResponse[fileId] = this
                 }
@@ -814,6 +818,8 @@ object FileController {
             FileActivityType.FILE_RENAME,
             FileActivityType.FILE_CATEGORIZE,
             FileActivityType.FILE_UNCATEGORIZE,
+            FileActivityType.FILE_COLOR_UPDATE,
+            FileActivityType.FILE_COLOR_DELETE,
             FileActivityType.FILE_SHARE_CREATE,
             FileActivityType.FILE_SHARE_DELETE,
             FileActivityType.FILE_SHARE_UPDATE,

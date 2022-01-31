@@ -47,6 +47,8 @@ object ApiRepository {
             "&actions[]=file_favorite_remove" +
             "&actions[]=file_categorize" +
             "&actions[]=file_uncategorize" +
+            "&actions[]=file_color_update" +
+            "&actions[]=file_color_delete" +
             "&actions[]=share_link_create" +
             "&actions[]=share_link_update" +
             "&actions[]=share_link_delete" +
@@ -168,6 +170,10 @@ object ApiRepository {
 
     fun renameFile(file: File, newName: String): ApiResponse<CancellableAction> {
         return callApi(ApiRoutes.renameFile(file), POST, mapOf("name" to newName))
+    }
+
+    fun updateFolderColor(file: File, color: String): ApiResponse<Boolean> {
+        return callApi(ApiRoutes.updateFolderColor(file), POST, mapOf("color" to color))
     }
 
     fun duplicateFile(file: File, copyName: String?, folderId: Int): ApiResponse<File> {

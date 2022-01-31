@@ -26,6 +26,7 @@ import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.database.Cursor
@@ -57,6 +58,7 @@ import androidx.annotation.IdRes
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColorInt
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
@@ -85,6 +87,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.File.*
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.OnlyOfficeActivity
@@ -138,6 +141,10 @@ fun Context.isKeyguardSecure(): Boolean {
 }
 
 fun ImageView.loadGlide(@DrawableRes drawable: Int) {
+    Glide.with(this).load(drawable).into(this)
+}
+
+fun ImageView.loadGlide(drawable: Drawable?) {
     Glide.with(this).load(drawable).into(this)
 }
 
@@ -278,24 +285,29 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
 
     filePreview.scaleType = ImageView.ScaleType.CENTER
 
+    fun tintedDrawable(@IdRes iconId: Int, color: String? = null): Drawable? {
+        return ContextCompat.getDrawable(context, iconId)?.apply {
+            setTintList(ColorStateList.valueOf((color ?: file.color).toColorInt()))
+        }
+    }
+
     when {
         file.isFolder() -> {
             when (file.getVisibilityType()) {
-                File.VisibilityType.IS_TEAM_SPACE -> filePreview.loadGlide(R.drawable.ic_folder_common_documents)
-                File.VisibilityType.IS_SHARED_SPACE -> filePreview.loadGlide(R.drawable.ic_folder_shared)
-                File.VisibilityType.IS_COLLABORATIVE_FOLDER -> filePreview.loadGlide(R.drawable.ic_folder_dropbox)
+                VisibilityType.IS_TEAM_SPACE -> filePreview.loadGlide(R.drawable.ic_folder_common_documents)
+                VisibilityType.IS_SHARED_SPACE -> filePreview.loadGlide(R.drawable.ic_folder_shared)
+                VisibilityType.IS_COLLABORATIVE_FOLDER -> filePreview.loadGlide(tintedDrawable(R.drawable.ic_folder_dropbox))
                 else -> {
                     if (file.isDisabled()) {
                         filePreview.loadGlide(R.drawable.ic_folder_disable)
                     } else {
-                        filePreview.loadGlide(R.drawable.ic_folder_filled)
+                        filePreview.loadGlide(tintedDrawable(R.drawable.ic_folder_filled))
                     }
                 }
             }
         }
         file.isDrive() -> {
-            filePreview.loadGlide(R.drawable.ic_drive)
-            filePreview.setColorFilter(Color.parseColor(file.driveColor))
+            filePreview.loadGlide(tintedDrawable(R.drawable.ic_drive, file.driveColor))
         }
         else -> {
             when {
