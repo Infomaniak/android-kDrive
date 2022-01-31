@@ -107,10 +107,11 @@ open class File(
      * Local
      */
     var isComplete: Boolean = false,
-    var isOffline: Boolean = false,
     var isFromActivities: Boolean = false,
     var isFromSearch: Boolean = false,
     var isFromUploads: Boolean = false,
+    var isOffline: Boolean = false,
+    var versionCode: Int = 0,
 ) : RealmObject(), Parcelable {
 
     @LinkingObjects("children")

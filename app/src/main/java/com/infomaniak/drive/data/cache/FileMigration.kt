@@ -101,9 +101,11 @@ class FileMigration : RealmMigration {
 
         // Migrated to version 3:
         // - Added new field (Folder Color) in File table
+        // - Added new field (Version Code) in File table
         if (oldVersionTemp == 2L) {
             schema.get(File::class.java.simpleName)?.apply {
                 addField("_color", String::class.java)
+                addField("versionCode", Int::class.java)
             }
             oldVersionTemp++
         }

@@ -20,6 +20,7 @@ package com.infomaniak.drive.data.cache
 import android.content.Context
 import androidx.collection.ArrayMap
 import androidx.collection.arrayMapOf
+import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
@@ -49,6 +50,10 @@ import kotlin.collections.ArrayList
 object FileController {
     private const val REALM_DB_FILE = "kDrive-%s-%s.realm"
     private const val REALM_DB_SHARES_WITH_ME = "kDrive-%s-%s-shares.realm"
+
+    // Bump this when we want to force-refresh files that are too old.
+    // Example: We did it when we added Categories & Colored folders, to automatically display them when updating the app.
+    private const val MIN_VERSION_CODE = 4_01_000_02
 
     const val FAVORITES_FILE_ID = -1
     const val MY_SHARES_FILE_ID = -2
@@ -232,12 +237,7 @@ object FileController {
         moreTransaction: (() -> Unit)? = null
     ) {
         realm.executeTransaction {
-            if (oldFile?.isUsable() == true) {
-                newFile.isComplete = oldFile.isComplete
-                newFile.children = oldFile.children
-                newFile.responseAt = oldFile.responseAt
-                newFile.isOffline = oldFile.isOffline
-            }
+            if (oldFile?.isUsable() == true) keepOldLocalFilesData(oldFile, newFile)
             moreTransaction?.invoke()
             it.insertOrUpdate(newFile)
         }
@@ -593,6 +593,7 @@ object FileController {
                     || folderProxy == null
                     || folderProxy.children.isNullOrEmpty()
                     || !folderProxy.isComplete
+                    || folderProxy.versionCode < MIN_VERSION_CODE
                     || hasDuplicatesFiles
                     || minDateToIgnoreCache >= folderProxy.responseAt
 
@@ -700,6 +701,7 @@ object FileController {
         insertOrUpdateFile(currentRealm, remoteFolder) {
             if (childrenSize < ApiRepository.PER_PAGE) remoteFolder.isComplete = true
             remoteFolder.responseAt = responseAt
+            remoteFolder.versionCode = BuildConfig.VERSION_CODE
         }
     }
 
@@ -901,12 +903,13 @@ object FileController {
         return ApiRepository.createTeamFolder(okHttpClient, driveId, name, forAllUsers)
     }
 
-    private fun keepOldLocalFilesData(managedFile: File, remoteFile: File) {
-        remoteFile.apply {
-            children = managedFile.children
-            isComplete = managedFile.isComplete
-            responseAt = managedFile.responseAt
-            isOffline = managedFile.isOffline
+    private fun keepOldLocalFilesData(oldFile: File, newFile: File) {
+        newFile.apply {
+            children = oldFile.children
+            isComplete = oldFile.isComplete
+            isOffline = oldFile.isOffline
+            responseAt = oldFile.responseAt
+            versionCode = oldFile.versionCode
         }
     }
 
