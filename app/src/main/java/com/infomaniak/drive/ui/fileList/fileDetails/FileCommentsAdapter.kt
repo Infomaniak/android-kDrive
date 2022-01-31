@@ -58,37 +58,36 @@ class FileCommentsAdapter(
         return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_file_comment, parent, false))
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        if (getItemViewType(position) != VIEW_TYPE_LOADING) {
-            val currentComment = itemList[position]
-            holder.itemView.apply {
-                commentUserAvatar.loadAvatar(currentComment.user)
-                commentUserName.text = currentComment.user.displayName
-                commentValue.text = currentComment.body
-                commentDateValue.text = getRelativeDateTimeString(
-                    context,
-                    currentComment.createdAt.time,
-                    DAY_IN_MILLIS,
-                    2 * DAY_IN_MILLIS,
-                    FORMAT_ABBREV_ALL
-                )
-                likeButton.text = currentComment.likesCount.toString()
-                likeButton.setOnClickListener {
-                    onLikeButtonClicked(currentComment)
-                }
-                likeButton.setIconTintResource(if (currentComment.liked) R.color.primary else R.color.iconColor)
-                TooltipCompat.setTooltipText(
-                    likeButton,
-                    currentComment.likes?.joinToString(separator = "\n") { it.displayName.toString() })
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView) {
+        if (getItemViewType(position) == VIEW_TYPE_LOADING) return
 
-                editButton.setOnClickListener {
-                    onEditClicked?.invoke(currentComment)
-                }
+        val currentComment = itemList[position]
 
-                deleteButton.setOnClickListener {
-                    onDeleteClicked?.invoke(currentComment)
-                }
-            }
+        commentUserAvatar.loadAvatar(currentComment.user)
+        commentUserName.text = currentComment.user.displayName
+        commentValue.text = currentComment.body
+        commentDateValue.text = getRelativeDateTimeString(
+            context,
+            currentComment.createdAt.time,
+            DAY_IN_MILLIS,
+            2 * DAY_IN_MILLIS,
+            FORMAT_ABBREV_ALL
+        )
+        likeButton.text = currentComment.likesCount.toString()
+        likeButton.setOnClickListener {
+            onLikeButtonClicked(currentComment)
+        }
+        likeButton.setIconTintResource(if (currentComment.liked) R.color.primary else R.color.iconColor)
+        TooltipCompat.setTooltipText(
+            likeButton,
+            currentComment.likes?.joinToString(separator = "\n") { it.displayName.toString() })
+
+        editButton.setOnClickListener {
+            onEditClicked?.invoke(currentComment)
+        }
+
+        deleteButton.setOnClickListener {
+            onDeleteClicked?.invoke(currentComment)
         }
     }
 
