@@ -26,7 +26,7 @@ data class FileComment(
     val user: User,
     var body: String,
     var liked: Boolean,
-    val likes: ArrayList<User>?,
+    var likes: ArrayList<User>?,
     @SerializedName("parent_id") val parentId: Int,
     @SerializedName("updated_at") val updatedAt: Date,
     @SerializedName("created_at") val createdAt: Date,

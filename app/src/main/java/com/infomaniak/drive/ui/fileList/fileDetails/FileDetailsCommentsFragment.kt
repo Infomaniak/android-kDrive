@@ -160,7 +160,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
             fileDetailsViewModel.postUnlike(currentFile, fileComment).observe(viewLifecycleOwner) { apiResponse ->
                 if (apiResponse.isSuccess()) {
                     fileComment.liked = false
-                    fileComment.likes?.remove(fileComment.likes.find { it.id == AccountUtils.currentUserId })
+                    fileComment.likes?.remove(fileComment.likes?.find { it.id == AccountUtils.currentUserId })
                     fileComment.likesCount = fileComment.likesCount - 1
                     commentsAdapter.updateComment(fileComment)
                 } else {
@@ -171,7 +171,9 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
             fileDetailsViewModel.postLike(currentFile, fileComment).observe(viewLifecycleOwner) { apiResponse ->
                 if (apiResponse.isSuccess()) {
                     fileComment.liked = true
-                    AccountUtils.currentUser?.let { fileComment.likes?.add(it) }
+                    AccountUtils.currentUser?.let {
+                        if (fileComment.likes == null) fileComment.likes = arrayListOf(it) else fileComment.likes?.add(it)
+                    }
                     fileComment.likesCount = fileComment.likesCount + 1
                     commentsAdapter.updateComment(fileComment)
                 } else {
