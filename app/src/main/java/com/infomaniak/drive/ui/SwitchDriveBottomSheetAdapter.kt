@@ -17,8 +17,6 @@
  */
 package com.infomaniak.drive.ui
 
-import android.content.res.ColorStateList
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -26,32 +24,30 @@ import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.getTintedDrawable
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.*
 
 class SwitchDriveBottomSheetAdapter(
     private var driveList: ArrayList<Drive>,
-    private val onItemClicked: (drive: Drive) -> Unit
+    private val onItemClicked: (drive: Drive) -> Unit,
 ) : RecyclerView.Adapter<ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_select_bottom_sheet, parent, false))
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        driveList[position].let { drive ->
-            holder.itemView.apply {
-                itemSelectIcon.apply {
-                    setImageResource(R.drawable.ic_drive)
-                    imageTintList = ColorStateList.valueOf(Color.parseColor(drive.preferences.color))
-                    isVisible = true
-                }
-                itemSelectText.text = drive.name
-                itemSelectActiveIcon.isVisible = drive.id == AccountUtils.currentDriveId
-                setOnClickListener { onItemClicked(drive) }
-            }
-        }
-    }
-
     override fun getItemCount() = driveList.size
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView) {
+        val drive = driveList[position]
+
+        itemSelectIcon.apply {
+            setImageDrawable(context.getTintedDrawable(R.drawable.ic_drive, drive.preferences.color))
+            isVisible = true
+        }
+        itemSelectText.text = drive.name
+        itemSelectActiveIcon.isVisible = drive.id == AccountUtils.currentDriveId
+        setOnClickListener { onItemClicked(drive) }
+    }
 }

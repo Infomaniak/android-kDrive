@@ -20,7 +20,6 @@ package com.infomaniak.drive.ui.addFiles
 import android.os.Bundle
 import android.view.View
 import android.widget.CompoundButton
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
@@ -47,7 +46,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
         advancedSettings.isVisible = true
         createFolderButton.setText(R.string.createDropBoxTitle)
         createFolderCollapsing.title = getString(R.string.createDropBoxTitle)
-        folderCreateIcon.icon.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.ic_folder_dropbox))
+        folderCreateIcon.icon.setImageResource(R.drawable.ic_folder_dropbox)
         folderNameValueLayout.hint = getString(R.string.createDropBoxHint)
         setupAdvancedSettings()
 

@@ -26,7 +26,6 @@ import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.database.Cursor
@@ -87,7 +86,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.data.models.File.*
+import com.infomaniak.drive.data.models.File.VisibilityType
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.OnlyOfficeActivity
@@ -285,30 +284,24 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
 
     filePreview.scaleType = ImageView.ScaleType.CENTER
 
-    fun tintedDrawable(@IdRes iconId: Int, color: String? = null): Drawable? {
-        return ContextCompat.getDrawable(context, iconId)?.apply {
-            setTintList(ColorStateList.valueOf((color ?: file.color).toColorInt()))
-        }
-    }
-
     when {
         file.isFolder() -> {
             when (file.getVisibilityType()) {
                 VisibilityType.IS_TEAM_SPACE -> filePreview.loadGlide(R.drawable.ic_folder_common_documents)
                 VisibilityType.IS_SHARED_SPACE -> filePreview.loadGlide(R.drawable.ic_folder_shared)
-                VisibilityType.IS_COLLABORATIVE_FOLDER -> filePreview.loadGlide(tintedDrawable(R.drawable.ic_folder_dropbox))
+                VisibilityType.IS_COLLABORATIVE_FOLDER -> filePreview.loadGlide(
+                    context.getTintedDrawable(R.drawable.ic_folder_dropbox, file.color)
+                )
                 else -> {
                     if (file.isDisabled()) {
                         filePreview.loadGlide(R.drawable.ic_folder_disable)
                     } else {
-                        filePreview.loadGlide(tintedDrawable(R.drawable.ic_folder_filled))
+                        filePreview.loadGlide(context.getTintedDrawable(R.drawable.ic_folder_filled, file.color))
                     }
                 }
             }
         }
-        file.isDrive() -> {
-            filePreview.loadGlide(tintedDrawable(R.drawable.ic_drive, file.driveColor))
-        }
+        file.isDrive() -> filePreview.loadGlide(context.getTintedDrawable(R.drawable.ic_drive, file.driveColor))
         else -> {
             when {
                 file.hasThumbnail &&
@@ -802,6 +795,16 @@ fun Context.shareText(text: String) {
         type = "text/plain"
     }
     ContextCompat.startActivity(this, Intent.createChooser(intent, null), null)
+}
+
+fun Context.getTintedDrawable(drawableId: Int, colorString: String): Drawable? {
+    return getTintedDrawable(drawableId, colorString.toColorInt())
+}
+
+fun Context.getTintedDrawable(drawableId: Int, colorInt: Int): Drawable? {
+    return ContextCompat.getDrawable(this, drawableId)
+        ?.mutate() // Mutate the drawable, so it won't change the tint when we use the same resource elsewhere.
+        ?.apply { setTint(colorInt) }
 }
 
 fun Category.getName(context: Context): String = when (name) {

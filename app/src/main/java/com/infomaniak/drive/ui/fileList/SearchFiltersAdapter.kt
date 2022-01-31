@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui.fileList
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
@@ -26,6 +25,7 @@ import com.google.android.material.chip.Chip
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.SearchFilter
 import com.infomaniak.drive.data.models.SearchFilter.*
+import com.infomaniak.drive.utils.getTintedDrawable
 import com.infomaniak.lib.core.views.ViewHolder
 
 class SearchFiltersAdapter(
@@ -59,7 +59,7 @@ class SearchFiltersAdapter(
 
     private fun Chip.setIcon(filter: SearchFilter) {
         chipIcon = if (filter.icon == null) {
-            ContextCompat.getDrawable(context, R.drawable.round_empty)?.apply { setTint(Color.parseColor(filter.tint)) }
+            context.getTintedDrawable(R.drawable.round_empty, filter.tint!!)
         } else {
             ContextCompat.getDrawable(context, filter.icon)
         }
