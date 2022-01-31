@@ -23,7 +23,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
-import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationManagerCompat
 import coil.ImageLoader
@@ -43,6 +42,7 @@ import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.MatomoUtils.addTrackingCallbackForDebugLog
 import com.infomaniak.drive.utils.MatomoUtils.buildTracker
 import com.infomaniak.drive.utils.MatomoUtils.trackCurrentUserId
 import com.infomaniak.drive.utils.MatomoUtils.trackDownloads
@@ -70,7 +70,6 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import org.eclipse.paho.client.mqttv3.*
 import org.matomo.sdk.Tracker
-import org.matomo.sdk.TrackerBuilder
 import org.matomo.sdk.extra.MatomoApplication
 import java.util.*
 
@@ -188,12 +187,7 @@ class ApplicationMain : MatomoApplication(), ImageLoaderFactory {
     private fun onInitTracker() {
         trackCurrentUserId()
         trackDownloads()
-
-        tracker.addTrackingCallback { trackMe ->
-            trackMe.apply {
-                toMap().forEach() { if (it.key == "action_name") Log.d("TRACKER", it.value) }
-            }
-        }
+        addTrackingCallbackForDebugLog()
         trackScreen("/ApplicationMain", "Application")
     }
 

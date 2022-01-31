@@ -18,10 +18,14 @@
 package com.infomaniak.drive.utils
 
 import android.app.Application
+import android.content.Context
+import android.util.Log
 import com.infomaniak.drive.ApplicationMain.Companion.tracker
+import com.infomaniak.drive.data.models.BulkOperationType
 import org.matomo.sdk.TrackerBuilder
 import org.matomo.sdk.extra.DownloadTracker
 import org.matomo.sdk.extra.TrackHelper
+import java.util.stream.Collectors.toMap
 
 object MatomoUtils {
 
@@ -31,8 +35,19 @@ object MatomoUtils {
         TrackHelper.track().download().identifier(DownloadTracker.Extra.ApkChecksum(this)).with(tracker)
     }
 
-    fun Application.trackEvent(category: String, action: String, name: String? = null) {
-        TrackHelper.track().event(category, action).name(name).with(tracker)
+    fun Application.trackEvent(category: String, action: String, name: String? = null, value: Float? = null) {
+        TrackHelper.track().event(category, action).name(name).value(value).with(tracker)
+    }
+
+    fun Application.trackBulkActionEvent(action: BulkOperationType, value: Int) {
+        val name = when (action) {
+            BulkOperationType.ADD_FAVORITES -> "bulkFavorite"
+            BulkOperationType.COPY -> "bulkCopy"
+            BulkOperationType.MOVE -> "bulkMove"
+            BulkOperationType.SET_OFFLINE -> "bulkOffline"
+            BulkOperationType.TRASH -> "bulkPutInTrash"
+        }
+        trackEvent("FileAction", "click", name, value.toFloat())
     }
 
     fun Application.trackScreen(path: String, title: String) {
@@ -41,5 +56,21 @@ object MatomoUtils {
 
     fun Application.trackCurrentUserId() {
         tracker.userId = AccountUtils.currentUserId.toString()
+    }
+
+    fun Application.addTrackingCallbackForDebugLog() {
+        tracker.addTrackingCallback { trackMe ->
+            trackMe.apply {
+                toMap().forEach() {
+                    when (it.key) {
+                        "action_name" -> Log.d("TRACKER_SCREEN", it.value)
+                        "e_c" -> Log.d("TRACKER_EVENT", "Category: ${it.value}")
+                        "e_a" ->  Log.d("TRACKER_EVENT", "Action: ${it.value}")
+                        "e_n" -> Log.d("TRACKER_EVENT", "Name: ${it.value}")
+                        "e_v" -> Log.d("TRACKER_EVENT", "Value: ${it.value}")
+                    }
+                }
+            }
+        }
     }
 }

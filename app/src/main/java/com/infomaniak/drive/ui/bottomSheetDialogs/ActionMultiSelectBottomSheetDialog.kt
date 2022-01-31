@@ -36,6 +36,7 @@ import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.MatomoUtils.trackBulkActionEvent
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_action_multi_select.*
 import kotlinx.coroutines.Dispatchers
 
@@ -124,10 +125,10 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
             SelectDialogAction.COLOR_FOLDER -> BulkOperationType.COLOR_FOLDER
             else -> null
         }
-
         if (finalType == null) {
             setBackNavigationResult(DISABLE_SELECT_MODE, true)
         } else {
+            activity?.application?.trackBulkActionEvent(finalType, navigationArgs.fileIds.size)
             setBackNavigationResult(SELECT_DIALOG_ACTION, finalType)
         }
     }

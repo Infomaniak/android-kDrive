@@ -41,6 +41,7 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.FORMAT_NEW_FILE
 import com.infomaniak.lib.core.utils.format
@@ -59,7 +60,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private lateinit var openCameraPermissions: DrivePermissions
     private lateinit var uploadFilesPermissions: DrivePermissions
 
-    private var currentPhotoUri: Uri? = null
     private var mediaPhotoPath = ""
     private var mediaVideoPath = ""
 
@@ -121,10 +121,10 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private fun openCamera() {
         if (openCameraPermissions.checkSyncPermissions()) {
             openCamera.isEnabled = false
+            activity?.application?.trackEvent("newElement", "click", "takePhotoOrVideo")
             try {
                 val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
-                    currentPhotoUri = createMediaFile(false)
-                    putExtra(MediaStore.EXTRA_OUTPUT, currentPhotoUri)
+                    putExtra(MediaStore.EXTRA_OUTPUT, createMediaFile(false))
                 }
                 val takeVideoIntent = Intent(MediaStore.ACTION_VIDEO_CAPTURE).apply {
                     putExtra(MediaStore.EXTRA_OUTPUT, createMediaFile(true))
@@ -149,10 +149,12 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                 addCategory(Intent.CATEGORY_OPENABLE)
             }
             startActivityForResult(Intent.createChooser(intent, getString(R.string.addFileSelectUploadFile)), SELECT_FILES_REQ)
+            activity?.application?.trackEvent("newElement", "click", "uploadFile")
         }
     }
 
     private fun scanDocuments() {
+        activity?.application?.trackEvent("newElement", "click", "scan")
         // TODO find a good lib
         dismiss()
     }
@@ -167,7 +169,17 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         dismiss()
     }
 
+    private fun File.Office.getEventName(): String {
+        return when (this) {
+            File.Office.DOCS -> "createText"
+            File.Office.POINTS -> "createPresentation"
+            File.Office.GRIDS -> "createTable"
+            File.Office.TXT -> "createNote"
+        }
+    }
+
     private fun createFile(office: File.Office) {
+        activity?.application?.trackEvent("newElement", "click", office.getEventName())
         Utils.createPromptNameDialog(
             context = requireContext(),
             title = R.string.modalCreateFileTitle,
@@ -222,7 +234,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                     photoFile.length() != 0L -> photoFile
                     else -> java.io.File(mediaVideoPath)
                 }
-
                 val fileModifiedAt = Date(file.lastModified())
                 val fileSize = file.length()
                 val applicationContext = context?.applicationContext
