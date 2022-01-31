@@ -50,6 +50,10 @@ object MatomoUtils {
         trackEvent("FileAction", "click", name, value.toFloat())
     }
 
+    fun Application.trackEventWithBooleanValue(category: String, name: String, value: Boolean) {
+        trackEvent(category, "click", name, value.toFloat())
+    }
+
     fun Application.trackScreen(path: String, title: String) {
         TrackHelper.track().screen(path).title(title).with(tracker)
     }
@@ -73,4 +77,6 @@ object MatomoUtils {
             }
         }
     }
+
+    private fun Boolean.toFloat() = if (this) 1f else 0f
 }

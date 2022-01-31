@@ -56,10 +56,11 @@ import kotlinx.coroutines.withContext
 
 class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoActionsView.OnItemClickListener {
 
-    private lateinit var currentFile: File
+    override lateinit var currentFile: File
     private lateinit var drivePermissions: DrivePermissions
     private val mainViewModel: MainViewModel by activityViewModels()
     private val navigationArgs: FileInfoActionsBottomSheetDialogArgs by navArgs()
+    override val ownerFragment = this
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_bottom_sheet_file_info_actions, container, false)
@@ -136,9 +137,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         fileInfoActionsView.removeOfflineObservations(this)
     }
 
-    override fun editDocumentClicked(ownerFragment: Fragment, currentFile: File) {
+    override fun editDocumentClicked(currentFile: File) {
         findNavController().popBackStack()
-        super.editDocumentClicked(ownerFragment, currentFile)
+        super.editDocumentClicked(currentFile)
     }
 
     override fun displayInfoClicked() {
@@ -181,6 +182,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun copyPublicLink() {
+        super.copyPublicLink()
         fileInfoActionsView.createPublicCopyLink(onSuccess = {
             requireActivity().showSnackbar(title = R.string.fileInfoLinkCopiedToClipboard, anchorView = requireActivity().mainFab)
             findNavController().popBackStack()
@@ -190,6 +192,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun downloadFileClicked() {
+        super.downloadFileClicked()
         fileInfoActionsView.downloadFile(drivePermissions) {
             findNavController().popBackStack()
         }
@@ -213,6 +216,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun addFavoritesClicked() {
+        super.addFavoritesClicked()
         currentFile.apply {
             val observer: Observer<ApiResponse<Boolean>> = Observer { apiResponse ->
                 if (apiResponse.isSuccess()) {
