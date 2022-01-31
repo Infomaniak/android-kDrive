@@ -71,6 +71,8 @@ android {
         }
     }
 
+    buildFeatures { viewBinding true }
+
     testOptions.unitTests.all {
         testLogging {
             events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'

@@ -21,6 +21,8 @@ import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.loadGlideUrl
@@ -28,6 +30,8 @@ import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.LoaderCardView
 import com.infomaniak.lib.core.views.ViewHolder
+import io.realm.OrderedRealmCollection
+import io.realm.RealmList
 import kotlinx.android.synthetic.main.cardview_picture.view.*
 import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.android.synthetic.main.title_recycler_section.view.*
@@ -36,8 +40,16 @@ class PicturesAdapter(
     private val onItemClick: (file: File) -> Unit
 ) : LoaderAdapter<Any>() {
 
+    var itemsSelected: OrderedRealmCollection<File> = RealmList()
+
     private var lastSectionTitle: String = ""
     var pictureList: ArrayList<File> = arrayListOf()
+
+    var enabledMultiSelectMode: Boolean = false
+    var multiSelectMode: Boolean = false
+    var allSelected = false
+    var openMultiSelectMode: (() -> Unit)? = null
+    var updateMultiSelectMode: (() -> Unit)? = null
 
     fun formatList(context: Context, newPictureList: ArrayList<File>): ArrayList<Any> {
         pictureList.addAll(newPictureList)
@@ -92,8 +104,23 @@ class PicturesAdapter(
                     picture.loadGlideUrl(file.thumbnail())
                     picture.contentDescription = file.name
 
+                    if (multiSelectMode) {
+                        pictureChecked.isChecked = isSelectedFile(file) || allSelected
+                        pictureChecked.isVisible = true
+                    }
+                    else {
+                        pictureChecked.isGone = true
+                    }
+
                     setOnClickListener {
-                        onItemClick(file)
+                        if (multiSelectMode) {
+                            Log.e("pic-sel", "setOnLongClickListener: before - ${pictureChecked.isChecked}", )
+                            pictureChecked.isChecked = !pictureChecked.isChecked
+                            Log.e("pic-sel", "setOnLongClickListener: after - ${pictureChecked.isChecked}", )
+                            onSelectedFile(file, pictureChecked.isChecked)
+                        } else {
+                            onItemClick(file)
+                        }
                     }
 
                     // Checker par rapport au FileAdapter.kt comment c'est fait là bas le fait de gérer la multi sélection tout ça tout ça
@@ -114,18 +141,57 @@ class PicturesAdapter(
 //                        } else false
 //                    }
                     setOnLongClickListener {
-                        pictureChecked.isChecked = !pictureChecked.isChecked
-                        onSelectedFile(file, pictureChecked.isChecked)
-//                        if (!multiSelectMode) openMultiSelectMode?.invoke()
-                        true
+                        if (enabledMultiSelectMode) {
+                            Log.e("pic-sel", "setOnLongClickListener: before - ${pictureChecked.isChecked}", )
+                            pictureChecked.isChecked = !pictureChecked.isChecked
+                            Log.e("pic-sel", "setOnLongClickListener: after - ${pictureChecked.isChecked}", )
+//                            Log.e("pic-sel", "setOnLongClickListener: selected: $file, ${pictureChecked.isChecked}")
+                            onSelectedFile(file, pictureChecked.isChecked)
+                            if (!multiSelectMode) openMultiSelectMode?.invoke()
+                            true
+                        } else false
                     }
                 }
             }
         }
     }
 
+    private fun isSelectedFile(file: File): Boolean {
+        return itemsSelected.any { it.isUsable() && it.id == file.id }
+    }
+
+    fun getValidItemsSelected() = itemsSelected.filter { it.isUsable() }
+
     private fun onSelectedFile(file: File, isSelected: Boolean) {
-        Log.e("pic-sel", "onSelectedFile: selected: $file, $isSelected", )
+        Log.e("pic-sel", "onSelectedFile: selected: $file, $isSelected")
+
+        if (file.isUsable()) {
+            when {
+                allSelected -> { // if all selected, unselect everything and only select the clicked one (like web-app)
+                    configureAllSelected(false)
+                    addSelectedFile(file)
+                }
+                isSelected -> addSelectedFile(file)
+                else -> removeSelectedFile(file)
+            }
+        } else {
+            itemsSelected = RealmList()
+        }
+        updateMultiSelectMode?.invoke()
+    }
+
+    fun configureAllSelected(isSelectedAll: Boolean) {
+        allSelected = isSelectedAll
+        itemsSelected = RealmList()
+        notifyItemRangeChanged(0, itemCount)
+    }
+
+    private fun addSelectedFile(file: File) {
+        itemsSelected.add(file)
+    }
+
+    private fun removeSelectedFile(file: File) {
+        itemsSelected.remove(file)
     }
 
     enum class DisplayType(val layout: Int) {
