@@ -34,8 +34,15 @@ object `Env-Exemple` {
 
     /**
      * The drive used for the tests
+     * 410457 for simple empty drive without collaboration (must be logged with user below)
+     * 140946 for infomaniak dev test drive
      */
     const val DRIVE_ID = 140946
+
+    /**
+     * User name used for share file invitation
+     */
+    const val INVITE_USER_NAME = "invite@infomaniak.com"
 
     /**
      * User id used for the addUser test (for assertion)

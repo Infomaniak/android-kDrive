@@ -139,8 +139,6 @@ class FileControllerTest : KDriveTest() {
         val file = createFileForTest()
         val body = mutableMapOf(
             "emails" to listOf(Env.INVITE_USER_NAME),
-            "user_ids" to ArrayList<Int>(Env.INVITE_USER_ID),
-            "team_ids" to ArrayList<Int>(),
             "permission" to Shareable.ShareablePermission.READ,
             "lang" to Locale.getDefault().language,
         )
