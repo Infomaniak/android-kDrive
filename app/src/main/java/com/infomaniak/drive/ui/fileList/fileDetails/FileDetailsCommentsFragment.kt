@@ -80,7 +80,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
                     fileDetailsViewModel.postFileComment(currentFile, name).observe(viewLifecycleOwner) { apiResponse ->
                         if (apiResponse.isSuccess()) {
                             apiResponse?.data?.let { comment ->
-                                commentsAdapter.addAll(arrayListOf(comment))
+                                commentsAdapter.addComment(comment)
                                 requireActivity().showSnackbar(R.string.fileDetailsCommentsConfirmationSnackbar)
                             }
                         } else {

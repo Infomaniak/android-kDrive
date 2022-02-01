@@ -41,36 +41,34 @@ class FileActivitiesAdapter(
         return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_file_activity, parent, false))
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.itemView.apply {
-            if (getItemViewType(position) == VIEW_TYPE_LOADING) {
-                activityDateCardView.startLoading()
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView) {
+        if (getItemViewType(position) == VIEW_TYPE_LOADING) {
+            activityDateCardView.startLoading()
+        } else {
+            activityDateCardView.stopLoading()
+
+            val currentFileActivity = itemList[position]
+
+            activityAction.setText(currentFileActivity.translation(isFolder))
+            activityHour.text = currentFileActivity.getHour()
+
+            currentFileActivity.user?.let { driveUser ->
+                activityUserName.text = driveUser.displayName
+                activityUserAvatar.loadAvatar(driveUser)
+            } ?: run {
+                activityUserName.setText(R.string.allUserAnonymous)
+                activityUserAvatar.loadGlide(R.drawable.ic_account)
+            }
+
+            if (position == 0 || !isSameDay(currentFileActivity.createdAt, itemList[position - 1].createdAt)) {
+                activityDate.text = currentFileActivity.getDay(context)
+                line1.isInvisible = position == 0
+                line2.isVisible = true
+                activityDateCardView.isVisible = true
             } else {
-                activityDateCardView.stopLoading()
-
-                val currentFileActivity = itemList[position]
-
-                activityAction.setText(currentFileActivity.translation(isFolder))
-                activityHour.text = currentFileActivity.getHour()
-
-                currentFileActivity.user?.let { driveUser ->
-                    activityUserName.text = driveUser.displayName
-                    activityUserAvatar.loadAvatar(driveUser)
-                } ?: run {
-                    activityUserName.setText(R.string.allUserAnonymous)
-                    activityUserAvatar.loadGlide(R.drawable.ic_account)
-                }
-
-                if (position == 0 || !isSameDay(currentFileActivity.createdAt, itemList[position - 1].createdAt)) {
-                    activityDate.text = currentFileActivity.getDay(context)
-                    line1.isInvisible = position == 0
-                    line2.isVisible = true
-                    activityDateCardView.isVisible = true
-                } else {
-                    line1.isGone = true
-                    line2.isGone = true
-                    activityDateCardView.isGone = true
-                }
+                line1.isGone = true
+                line2.isGone = true
+                activityDateCardView.isGone = true
             }
         }
     }
