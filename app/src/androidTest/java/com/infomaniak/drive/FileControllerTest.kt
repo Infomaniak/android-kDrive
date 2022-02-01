@@ -3,6 +3,7 @@ package com.infomaniak.drive
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRepository.getFileListForFolder
 import com.infomaniak.drive.data.api.ApiRepository.getLastModifiedFiles
+import com.infomaniak.drive.data.api.ApiRepository.postFileShare
 import com.infomaniak.drive.data.api.ApiRepository.renameFile
 import com.infomaniak.drive.data.cache.FileController.FAVORITES_FILE_ID
 import com.infomaniak.drive.data.cache.FileController.getFilesFromCacheOrDownload
@@ -14,7 +15,8 @@ import com.infomaniak.drive.data.cache.FileController.saveFavoritesFiles
 import com.infomaniak.drive.data.cache.FileController.searchFiles
 import com.infomaniak.drive.data.cache.FileController.storePicturesDrive
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponse
+import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponseData
 import com.infomaniak.drive.utils.ApiTestUtils.createFileForTest
 import com.infomaniak.drive.utils.ApiTestUtils.deleteTestFile
 import com.infomaniak.drive.utils.Env
@@ -54,7 +56,7 @@ class FileControllerTest : KDriveTest() {
         val folderName = "TestFolder"
         // Create a folder under root
         with(ApiRepository.createFolder(okHttpClient, userDrive.driveId, Utils.ROOT_ID, folderName, true)) {
-            assertApiResponse(this)
+            assertApiResponseData(this)
             assertEquals(folderName, data?.name, "The name should correspond")
             // Delete the test folder
             deleteTestFile(data!!)
@@ -133,6 +135,16 @@ class FileControllerTest : KDriveTest() {
     @Test
     @DisplayName("Get shared files from remote then get local shared files and compare them")
     fun getMySharedFiles_CanGetRemoteSavedFilesFromRealm() = runBlocking {
+        // Add a file to myShared
+        val file = createFileForTest()
+        val body = mutableMapOf(
+            "emails" to listOf(Env.INVITE_USER_NAME),
+            "user_ids" to ArrayList<Int>(Env.INVITE_USER_ID),
+            "team_ids" to ArrayList<Int>(),
+            "permission" to Shareable.ShareablePermission.READ,
+            "lang" to Locale.getDefault().language,
+        )
+        assertApiResponseData(postFileShare(file, body))
         // Get remote files
         val remoteFiles = arrayListOf<File>()
         var isCompletedRemoteFiles = false
@@ -143,6 +155,7 @@ class FileControllerTest : KDriveTest() {
 
         assertNotNull(remoteFiles, "remote my shares data cannot be null")
         assertTrue(isCompletedRemoteFiles, "remote my shares data must be complete")
+        assertFalse(remoteFiles.isEmpty(), "remote files should not be empty")
 
         // Get local files
         val localFiles = arrayListOf<File>()
@@ -164,7 +177,7 @@ class FileControllerTest : KDriveTest() {
     fun getPictures_CanGetRemoteSavedFilesFromRealm() {
         // Get remote pictures
         val apiResponseData = ApiRepository.getLastPictures(Env.DRIVE_ID, 1).let {
-            assertApiResponse(it)
+            assertApiResponseData(it)
             it.data!!
         }
 
@@ -234,7 +247,7 @@ class FileControllerTest : KDriveTest() {
     fun getTestFileListForFolder() {
         // Get the file list of root folder
         with(getFileListForFolder(okHttpClient, userDrive.driveId, Utils.ROOT_ID, order = File.SortType.NAME_AZ)) {
-            assertApiResponse(this)
+            assertApiResponseData(this)
             // Use non null assertion because data nullability has been checked in assertApiResponse()
             assertTrue(data!!.children.isNotEmpty(), "Root folder should contains files")
         }
@@ -245,9 +258,9 @@ class FileControllerTest : KDriveTest() {
     fun renameTestFile() {
         val newName = "renamed file"
         val file = createFileForTest()
-        assertApiResponse(renameFile(file, newName))
+        assertApiResponseData(renameFile(file, newName))
         with(getLastModifiedFiles(userDrive.driveId)) {
-            assertApiResponse(this)
+            assertApiResponseData(this)
             assertEquals(file.id, data!!.first().id, "Last modified file should have id ${file.id}")
             assertEquals(newName, data!!.first().name, "File should be named '$newName'")
         }

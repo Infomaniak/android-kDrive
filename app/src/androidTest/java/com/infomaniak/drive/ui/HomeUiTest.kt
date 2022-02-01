@@ -17,21 +17,14 @@
  */
 package com.infomaniak.drive.ui
 
-import android.content.Context
-import android.content.Intent
-import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.matcher.ViewMatchers.assertThat
-import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiObjectNotFoundException
-import androidx.test.uiautomator.Until
+import com.infomaniak.drive.KDriveTest
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.UiTestUtils.APP_PACKAGE
-import com.infomaniak.drive.utils.UiTestUtils.LAUNCH_TIMEOUT
-import com.infomaniak.drive.utils.UiTestUtils.device
+import com.infomaniak.drive.utils.UiTestUtils
+import com.infomaniak.drive.utils.UiTestUtils.closeBottomSheetInfoModalIfDisplayed
 import com.infomaniak.drive.utils.UiTestUtils.getDeviceViewById
 import com.infomaniak.drive.utils.UiTestUtils.selectDriveInList
-import org.hamcrest.CoreMatchers.notNullValue
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -40,21 +33,11 @@ import org.junit.jupiter.api.Test
 /**
  * UI Tests relative to a home (drive switch, drive activities, file search)
  */
-class HomeUiTest {
+class HomeUiTest : KDriveTest() {
 
     @BeforeEach
     fun startApp() {
-        device.pressHome()
-
-        val launcherPackage: String = device.launcherPackageName
-        assertThat(launcherPackage, notNullValue())
-        device.wait(Until.hasObject(By.pkg(launcherPackage).depth(0)), 3000)
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        val intent = context.packageManager.getLaunchIntentForPackage(APP_PACKAGE)?.apply {
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        }
-        context.startActivity(intent)
-        device.wait(Until.hasObject(By.pkg(APP_PACKAGE).depth(0)), LAUNCH_TIMEOUT)
+        UiTestUtils.startApp()
     }
 
     @Test
@@ -72,6 +55,8 @@ class HomeUiTest {
 
         getDeviceViewById("switchDriveButton").clickAndWaitForNewWindow()
         selectDriveInList(0)
+        // Close the bottomSheet modal displayed to have info on categories
+        closeBottomSheetInfoModalIfDisplayed(true)
 
         val driveId = AccountUtils.currentDriveId
 

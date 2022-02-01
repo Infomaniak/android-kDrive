@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui
 
 import androidx.test.uiautomator.UiScrollable
 import androidx.test.uiautomator.UiSelector
+import com.infomaniak.drive.KDriveTest
 import com.infomaniak.drive.utils.UiTestUtils
 import com.infomaniak.drive.utils.UiTestUtils.createPublicShareLink
 import com.infomaniak.drive.utils.UiTestUtils.deleteFile
@@ -34,7 +35,7 @@ import java.util.*
 /**
  * UI Tests relative to a file item (sharing, comments, details, activities)
  */
-class FileItemUiTest {
+class FileItemUiTest : KDriveTest() {
 
     @BeforeEach
     fun init() {

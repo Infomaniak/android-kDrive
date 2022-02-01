@@ -36,7 +36,7 @@ import java.util.*
 
 object ApiTestUtils {
 
-    fun assertApiResponse(response: ApiResponse<*>) {
+    fun assertApiResponseData(response: ApiResponse<*>) {
         with(response) {
             Assertions.assertTrue(isSuccess(), "This should succeed")
             Assertions.assertNull(error, "There should be no error")
@@ -54,7 +54,7 @@ object ApiTestUtils {
     fun createFileForTest(): File {
         val createFile = CreateFile("offline doc ${UUID.randomUUID()}", File.Office.DOCS.extension)
         return ApiRepository.createOfficeFile(Env.DRIVE_ID, Utils.ROOT_ID, createFile).let {
-            assertApiResponse(it)
+            assertApiResponseData(it)
             it.data!!
         }
     }
@@ -73,7 +73,7 @@ object ApiTestUtils {
 
     fun createFolderWithName(name: String) =
         createFolder(okHttpClient, userDrive.driveId, Utils.ROOT_ID, name).let {
-            assertApiResponse(it)
+            assertApiResponseData(it)
             it.data!!
         }
 
@@ -84,7 +84,7 @@ object ApiTestUtils {
             "password" to "password"
         )
         return postDropBox(folder, body).let {
-            assertApiResponse(it)
+            assertApiResponseData(it)
             it.data!!
         }
     }

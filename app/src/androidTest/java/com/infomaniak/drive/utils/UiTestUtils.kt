@@ -27,8 +27,8 @@ import com.infomaniak.drive.R
 import org.hamcrest.CoreMatchers
 
 object UiTestUtils {
-    const val APP_PACKAGE = "com.infomaniak.drive"
-    const val LAUNCH_TIMEOUT = 5000L
+    private const val APP_PACKAGE = "com.infomaniak.drive"
+    private const val LAUNCH_TIMEOUT = 5000L
 
     var context: Context = ApplicationProvider.getApplicationContext()
     var device: UiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
@@ -47,6 +47,8 @@ object UiTestUtils {
         }
         context.startActivity(intent)
         device.wait(Until.hasObject(By.pkg(APP_PACKAGE).depth(0)), LAUNCH_TIMEOUT)
+        // Close the bottomSheetModal displayed because it's the user's first connection
+        closeBottomSheetInfoModalIfDisplayed(false)
     }
 
     fun createPrivateFolder(folderName: String) {
@@ -123,5 +125,16 @@ object UiTestUtils {
         UiCollection(UiSelector().resourceId(getViewIdentifier("selectRecyclerView"))).getChildByInstance(
             UiSelector().resourceId(getViewIdentifier("itemSelectText")), instance
         ).clickAndWaitForNewWindow()
+    }
+
+    fun closeBottomSheetInfoModalIfDisplayed(isCategoryInformation: Boolean) {
+        try {
+            var id = "secondaryActionButton"
+            if (isCategoryInformation) {
+                id = "actionButton"
+            }
+            device.findObject(UiSelector().resourceId(getViewIdentifier(id))).click()
+        } catch (exception: UiObjectNotFoundException) {
+        }
     }
 }
