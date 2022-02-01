@@ -1,0 +1,27 @@
+<!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2022 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:tint="@color/secondaryText"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#fff"
+        android:pathData="M17.7708,11.0417C21.2094,11.0459 23.9958,13.8323 24,17.2708C24,20.7111 21.2111,23.5 17.7708,23.5C14.3306,23.5 11.5417,20.7111 11.5417,17.2708C11.5417,13.8306 14.3306,11.0417 17.7708,11.0417ZM17.7708,13.9251C17.6271,13.9251 17.4904,13.9874 17.3961,14.0959L17.3961,14.0959L15.4795,16.4917C15.3639,16.6356 15.3413,16.8331 15.4213,16.9993C15.5013,17.1656 15.6696,17.2712 15.8542,17.2708L15.8542,17.2708L16.5729,17.2708C16.7052,17.2708 16.8125,17.3781 16.8125,17.5104L16.8125,17.5104L16.8125,20.1458C16.8125,20.6751 17.2416,21.1042 17.7708,21.1042C18.3001,21.1042 18.7292,20.6751 18.7292,20.1458L18.7292,20.1458L18.7292,17.5104C18.7292,17.3781 18.8364,17.2708 18.9688,17.2708L18.9688,17.2708L19.6875,17.2708C19.8717,17.2709 20.0396,17.1655 20.1195,16.9996C20.1994,16.8336 20.1771,16.6366 20.0622,16.4927L20.0622,16.4927L18.1455,14.0959C18.0513,13.9874 17.9146,13.9251 17.7708,13.9251ZM7.5933,0.5C8.1388,0.4993 8.6377,0.8074 8.8813,1.2954L8.8813,1.2954L9.7889,3.1105C9.8701,3.2726 10.0359,3.375 10.2172,3.375L10.2172,3.375L19.6875,3.375C20.4814,3.375 21.125,4.0186 21.125,4.8125L21.125,4.8125L21.125,10.021C21.1253,10.1011 21.0846,10.1757 21.0172,10.2188C20.9498,10.2619 20.865,10.2676 20.7925,10.2338C19.8391,9.819 18.8106,9.6047 17.7708,9.6042C13.5386,9.6089 10.1089,13.0386 10.1042,17.2708C10.1186,17.3913 10.0812,17.5122 10.0014,17.6036C9.9215,17.6949 9.8067,17.7481 9.6854,17.75L9.6854,17.75L2.4375,17.75C1.6436,17.75 1,17.1064 1,16.3125L1,16.3125L1,1.9375C1,1.1436 1.6436,0.5 2.4375,0.5L2.4375,0.5Z" />
+</vector>

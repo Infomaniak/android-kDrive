@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.fileList.fileShare
 
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -177,13 +178,14 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                     }
                 }
             }
-            is Invitation -> {
-                chip.text = item.email
-                chip.setChipIconResource(R.drawable.ic_circle_send)
+            is Invitation -> chip.apply {
+                text = item.email
+                setChipIconResource(R.drawable.ic_circle_send)
             }
-            is Team -> {
-                chip.text = item.name
-                chip.chipIcon = requireContext().getTintedDrawable(R.drawable.ic_circle_team, item.getParsedColor())
+            is Team -> chip.apply {
+                text = item.name
+                setChipIconResource(R.drawable.ic_circle_team)
+                chipIconTint = ColorStateList.valueOf(item.getParsedColor())
             }
         }
 

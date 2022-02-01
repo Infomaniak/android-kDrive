@@ -23,14 +23,12 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.Type
-import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
 import com.infomaniak.drive.utils.Position
 import com.infomaniak.drive.utils.SingleLiveEvent
 import com.infomaniak.lib.core.models.ApiResponse
-import io.realm.OrderedRealmCollection
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
