@@ -41,9 +41,14 @@ class FileActivitiesAdapter(
         return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_file_activity, parent, false))
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val currentFileActivity = itemList[position]
-        holder.itemView.apply {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView) {
+        if (getItemViewType(position) == VIEW_TYPE_LOADING) {
+            activityDateCardView.startLoading()
+        } else {
+            activityDateCardView.stopLoading()
+
+            val currentFileActivity = itemList[position]
+
             activityAction.setText(currentFileActivity.translation(isFolder))
             activityHour.text = currentFileActivity.getHour()
 

@@ -39,6 +39,7 @@ class FileDetailsActivitiesFragment : FileDetailsSubFragment() {
 
         fileDetailsViewModel.currentFile.observe(viewLifecycleOwner) { file ->
             activitiesAdapter = FileActivitiesAdapter(file.isFolder()).apply {
+                showLoading()
                 isComplete = false
                 fileDetailsViewModel.getFileActivities(file).observe(viewLifecycleOwner) { apiResponse ->
                     apiResponse?.data?.let { activities ->
