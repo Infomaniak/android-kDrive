@@ -29,9 +29,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.TabViewPagerUtils
 import com.infomaniak.drive.utils.TabViewPagerUtils.setup
+import com.infomaniak.drive.utils.getFolderIcon
 import com.infomaniak.drive.utils.loadGlide
 import com.infomaniak.drive.utils.loadGlideUrl
 import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior
@@ -89,8 +91,18 @@ class FileDetailsFragment : FileDetailsSubFragment() {
             collapsingBackground.isGone = true
             collapsingBackgroundShadow.isGone = true
             noPreviewLayout.isVisible = true
-            noPreviewLayout.icon.loadGlide(file.getFileType().icon)
+            setNoPreviewIcon(file)
         }
+    }
+
+    private fun setNoPreviewIcon(file: File) {
+        val fileType = file.getFileType()
+        val icon = if (fileType == ConvertedType.FOLDER) {
+            file.getFolderIcon(requireContext())
+        } else {
+            ContextCompat.getDrawable(requireContext(), fileType.icon)
+        }
+        noPreviewLayout.icon.loadGlide(icon)
     }
 
     private fun setupTabLayout(isFolder: Boolean) {
