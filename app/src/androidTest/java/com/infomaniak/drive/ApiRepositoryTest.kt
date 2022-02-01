@@ -91,32 +91,6 @@ class ApiRepositoryTest : KDriveTest() {
     }
 
     @Test
-    @DisplayName("Create a file under root then move it to a created folder")
-    fun moveFileToAnotherFolder() {
-        val file = createFileForTest()
-        // Creates test folder
-        val folderName = "folder"
-        with(createFolderWithName(folderName)) {
-            // Moves file in the test folder
-            assertApiResponse(moveFile(file, this))
-
-            // Gets the count of file in the folder
-            with(getFileCount(this)) {
-                assertApiResponse(this)
-                assertEquals(1, data!!.count, "There should be 1 file in the folder")
-            }
-
-            // Makes sure the folder contains the file
-            with(getFileDetails(this)) {
-                assertNotNull(data)
-                assertTrue(data!!.children.contains(file), "The file should be contained in the test folder")
-            }
-            // Deletes the test folder
-            deleteTestFile(this)
-        }
-    }
-
-    @Test
     @DisplayName("Create a folder with team space visibility")
     fun createTeamFolder() {
         with(createTeamFolder(okHttpClient, userDrive.driveId, "teamFolder", true)) {
@@ -186,86 +160,6 @@ class ApiRepositoryTest : KDriveTest() {
             assertApiResponse(this)
             assertTrue(data!!.isNotEmpty(), "Last activities shouldn't be empty or null")
         }
-    }
-
-    @Disabled("Don't know the wanted api behaviour")
-    @Test
-    @DisplayName("Create a folder and post its access permissions")
-    fun postTestFolderAccess() {
-        val folder = createFolderWithName("folder")
-        assertNotNull(folder, "test folder must not be null")
-        val postResponse = postFolderAccess(folder)
-        assertApiResponse(postResponse)
-        deleteTestFile(folder)
-    }
-
-    @Test
-    @DisplayName("Create a folder then convert it to dropbox")
-    fun createDropboxFromFolder() {
-        // Create a folder to convert it to dropbox
-        val name = "testFolder"
-        val folder = createFolderWithName(name)
-        // No dropbox yet
-        assertNull(getDropBox(folder).data, "not dropbox should be returned, data should be null")
-
-        val maxSize = 16384L
-
-        // Add a dropBox with default body and get its id
-        val dropboxId = createDropBoxForTest(folder, maxSize).let {
-            assertTrue(it.emailWhenFinished, "Email when finished must be true")
-            assertEquals(maxSize, it.limitFileSize, "Limit file size should be $maxSize")
-            it.id
-        }
-
-        // Get the dropbox
-        with(getDropBox(folder)) {
-            assertApiResponse(this)
-            assertEquals(name, data!!.alias, "Dropbox name should be '$name'")
-            assertEquals(dropboxId, data!!.id, "Dropbox id should be $dropboxId")
-        }
-        // Delete the folder
-        deleteTestFile(folder)
-    }
-
-    @Test
-    @DisplayName("Update the properties of a dropbox")
-    fun updateDropBox() {
-        val folder = createFolderWithName("testFolder")
-
-        val maxSize = 16384L
-        createDropBoxForTest(folder, maxSize)
-
-        // Update the dropbox info
-        val updateBody = JsonObject().apply {
-            addProperty("email_when_finished", false)
-            addProperty("limit_file_size", maxSize * 2)
-        }
-        with(updateDropBox(folder, updateBody)) {
-            assertApiResponse(this)
-            assertTrue(data ?: false)
-        }
-
-        // Make sure the dropbox has been updated
-        with(getDropBox(folder)) {
-            assertFalse(data?.emailWhenFinished ?: true, "Email when finished should be false")
-            assertEquals(maxSize * 2, data?.limitFileSize, "Limit file size should be ${maxSize * 2}")
-        }
-
-        //Delete the folder
-        deleteTestFile(folder)
-    }
-
-    @Test
-    @DisplayName("Convert a dropbox back to a normal folder")
-    fun deleteDropbox() {
-        val folder = createFolderWithName("folder")
-        // Convert the folder to dropbox
-        createDropBoxForTest(folder, 16384L)
-        // Delete the dropbox
-        assertApiResponse(deleteDropBox(folder))
-        // Assert no dropbox left
-        assertNull(getDropBox(folder).data, "not dropbox should be returned, data should be null")
-        deleteTestFile(folder)
     }
 
     @Test
@@ -607,6 +501,106 @@ class ApiRepositoryTest : KDriveTest() {
             }
             // Delete the test category
             deleteCategory(userDrive.driveId, category.id)
+        }
+    }
+
+    @Nested
+    @DisplayName("Given test Folder")
+    inner class ShareTestFolder {
+
+        private lateinit var testFolder: File
+        private val folderName = "testFolder"
+
+        @BeforeEach
+        @Throws(Exception::class)
+        fun setUp() {
+            testFolder = createFolderWithName(folderName)
+        }
+
+        @AfterEach
+        @Throws(Exception::class)
+        fun tearDown() {
+            deleteTestFile(testFolder)
+        }
+
+        @Test
+        @DisplayName("Create a file under root then move it to a created folder")
+        fun moveFileToAnotherFolder() {
+            val file = createFileForTest()
+            // Creates test folder
+            with(testFolder) {
+                // Moves file in the test folder
+                assertApiResponse(moveFile(file, this))
+
+                // Gets the count of file in the folder
+                with(getFileCount(this)) {
+                    assertApiResponse(this)
+                    assertEquals(1, data!!.count, "There should be 1 file in the folder")
+                }
+
+                // Makes sure the folder contains the file
+                with(getFileDetails(this)) {
+                    assertNotNull(data)
+                    assertTrue(data!!.children.contains(file), "The file should be contained in the test folder")
+                }
+            }
+        }
+
+        @Test
+        @DisplayName("Create a folder then convert it to dropbox")
+        fun createDropboxFromFolder() {
+            // No dropbox yet
+            assertNull(getDropBox(testFolder).data, "not dropbox should be returned, data should be null")
+
+            val maxSize = 16384L
+
+            // Add a dropBox with default body and get its id
+            val dropboxId = createDropBoxForTest(testFolder, maxSize).let {
+                assertTrue(it.emailWhenFinished, "Email when finished must be true")
+                assertEquals(maxSize, it.limitFileSize, "Limit file size should be $maxSize")
+                it.id
+            }
+
+            // Get the dropbox
+            with(getDropBox(testFolder)) {
+                assertApiResponse(this)
+                assertEquals(folderName, data!!.alias, "Dropbox name should be '$folderName'")
+                assertEquals(dropboxId, data!!.id, "Dropbox id should be $dropboxId")
+            }
+        }
+
+        @Test
+        @DisplayName("Update the properties of a dropbox")
+        fun updateDropBox() {
+            val maxSize = 16384L
+            createDropBoxForTest(testFolder, maxSize)
+
+            // Update the dropbox info
+            val updateBody = JsonObject().apply {
+                addProperty("email_when_finished", false)
+                addProperty("limit_file_size", maxSize * 2)
+            }
+            with(updateDropBox(testFolder, updateBody)) {
+                assertApiResponse(this)
+                assertTrue(data ?: false)
+            }
+
+            // Make sure the dropbox has been updated
+            with(getDropBox(testFolder)) {
+                assertFalse(data?.emailWhenFinished ?: true, "Email when finished should be false")
+                assertEquals(maxSize * 2, data?.limitFileSize, "Limit file size should be ${maxSize * 2}")
+            }
+        }
+
+        @Test
+        @DisplayName("Convert a dropbox back to a normal folder")
+        fun deleteDropbox() {
+            // Convert the folder to dropbox
+            createDropBoxForTest(testFolder, 16384L)
+            // Delete the dropbox
+            assertApiResponse(deleteDropBox(testFolder))
+            // Assert no dropbox left
+            assertNull(getDropBox(testFolder).data, "not dropbox should be returned, data should be null")
         }
     }
 }
