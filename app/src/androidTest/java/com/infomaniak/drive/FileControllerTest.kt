@@ -53,7 +53,7 @@ class FileControllerTest : KDriveTest() {
     @Test
     @DisplayName("Create a folder at the drive's root")
     fun createTestFolder() {
-        val folderName = "TestFolder"
+        val folderName = "TestFolder-${UUID.randomUUID()}"
         // Create a folder under root
         with(ApiRepository.createFolder(okHttpClient, userDrive.driveId, Utils.ROOT_ID, folderName, true)) {
             assertApiResponseData(this)

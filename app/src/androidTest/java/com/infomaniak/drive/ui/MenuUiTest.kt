@@ -43,13 +43,14 @@ class MenuUiTest : KDriveTest() {
     @Test
     @DisplayName("Check UI to add a new kdrive user then log him off")
     fun testAddUser() {
+        swipeDownNestedScrollView()
         getDeviceViewById("changeUserIcon").clickAndWaitForNewWindow()
         getDeviceViewById("addUser").clickAndWaitForNewWindow()
         getDeviceViewById("nextButton").click()
         getDeviceViewById("nextButton").click()
         getDeviceViewById("connectButton").clickAndWaitForNewWindow()
-
         with(device) {
+
             // Username
             findObject(UiSelector().instance(0).className(EditText::class.java)).text = Env.NEW_USER_NAME
 
@@ -67,10 +68,16 @@ class MenuUiTest : KDriveTest() {
             // Close the bottom sheet displayed for categories information
             closeBottomSheetInfoModalIfDisplayed(true)
             getDeviceViewById("menuFragment").clickAndWaitForNewWindow(2000)
-            // Cheat to scroll down because nestedScrollView doesn't want to scroll
-            swipe(displayWidth / 4, displayHeight - 20, displayWidth / 4, displayHeight / 4, 5)
+            swipeDownNestedScrollView()
             getDeviceViewById("logout").clickAndWaitForNewWindow()
             findObject(UiSelector().text(UiTestUtils.context.getString(R.string.buttonConfirm))).clickAndWaitForNewWindow()
+        }
+    }
+
+    private fun swipeDownNestedScrollView() {
+        with(device) {
+            // Cheat to scroll down because nestedScrollView doesn't want to scroll
+            swipe(displayWidth / 4, displayHeight - 20, displayWidth / 4, displayHeight / 4, 5)
         }
     }
 }

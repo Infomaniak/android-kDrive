@@ -68,6 +68,7 @@ import com.infomaniak.drive.utils.ApiTestUtils.putNewFileInTrash
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
+import java.util.*
 
 /**
  * Logging activity testing class
@@ -508,7 +509,7 @@ class ApiRepositoryTest : KDriveTest() {
     inner class ShareTestFolder {
 
         private lateinit var testFolder: File
-        private val folderName = "testFolder"
+        private val folderName = "testFolder-${UUID.randomUUID()}"
 
         @BeforeEach
         @Throws(Exception::class)

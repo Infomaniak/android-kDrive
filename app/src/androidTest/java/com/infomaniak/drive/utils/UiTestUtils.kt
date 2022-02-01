@@ -19,6 +19,7 @@ package com.infomaniak.drive.utils
 
 import android.content.Context
 import android.content.Intent
+import android.widget.Button
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.platform.app.InstrumentationRegistry
@@ -47,6 +48,8 @@ object UiTestUtils {
         }
         context.startActivity(intent)
         device.wait(Until.hasObject(By.pkg(APP_PACKAGE).depth(0)), LAUNCH_TIMEOUT)
+        // Accept permissions modal
+        acceptPermissions()
         // Close the bottomSheetModal displayed because it's the user's first connection
         closeBottomSheetInfoModalIfDisplayed(false)
     }
@@ -134,6 +137,13 @@ object UiTestUtils {
                 id = "actionButton"
             }
             device.findObject(UiSelector().resourceId(getViewIdentifier(id))).click()
+        } catch (exception: UiObjectNotFoundException) {
+        }
+    }
+
+    private fun acceptPermissions() {
+        try {
+            device.findObject(UiSelector().instance(0).clickable(true).className(Button::class.java)).click()
         } catch (exception: UiObjectNotFoundException) {
         }
     }
