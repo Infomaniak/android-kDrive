@@ -53,7 +53,7 @@ object FileController {
 
     // Bump this when we want to force-refresh files that are too old.
     // Example: We did it when we added Categories & Colored folders, to automatically display them when updating the app.
-    private const val MIN_VERSION_CODE = 4_01_000_02
+    private const val MIN_VERSION_CODE = 4_01_000_03
 
     const val FAVORITES_FILE_ID = -1
     const val MY_SHARES_FILE_ID = -2
