@@ -196,6 +196,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         val apiResponse = ApiRepository.moveFile(file, newParent)
         if (apiResponse.isSuccess()) {
             FileController.getRealmInstance().use { realm ->
+                file.getStoredFile(getContext())?.let { if (it.exists()) it.delete() }
                 FileController.removeFile(file.id, recursive = false, customRealm = realm)
                 FileController.updateFile(newParent.id, realm) { localFolder ->
                     file.isOffline = false
