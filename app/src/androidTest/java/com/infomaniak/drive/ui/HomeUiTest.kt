@@ -25,6 +25,7 @@ import com.infomaniak.drive.utils.UiTestUtils
 import com.infomaniak.drive.utils.UiTestUtils.closeBottomSheetInfoModalIfDisplayed
 import com.infomaniak.drive.utils.UiTestUtils.getDeviceViewById
 import com.infomaniak.drive.utils.UiTestUtils.selectDriveInList
+import com.infomaniak.drive.utils.UiTestUtils.switchToDriveInstance
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -50,20 +51,16 @@ class HomeUiTest : KDriveTest() {
             Assertions.assertThrows(UiObjectNotFoundException::class.java) {
                 getDeviceViewById("switchDriveButton").clickAndWaitForNewWindow()
             }
+        } else {
+            switchToDriveInstance(0)
 
+            val driveId = AccountUtils.currentDriveId
+
+            // Change drive from menuFragment
+            getDeviceViewById("menuFragment").clickAndWaitForNewWindow()
+            getDeviceViewById("driveIcon").clickAndWaitForNewWindow()
+            selectDriveInList(1) // Switch back to dev test drive
+            assert(AccountUtils.currentDriveId != driveId) { "Drive id should be different" }
         }
-
-        getDeviceViewById("switchDriveButton").clickAndWaitForNewWindow()
-        selectDriveInList(0)
-        // Close the bottomSheet modal displayed to have info on categories
-        closeBottomSheetInfoModalIfDisplayed(true)
-
-        val driveId = AccountUtils.currentDriveId
-
-        // Change drive from menuFragment
-        getDeviceViewById("menuFragment").clickAndWaitForNewWindow()
-        getDeviceViewById("driveIcon").clickAndWaitForNewWindow()
-        selectDriveInList(1)
-        assert(AccountUtils.currentDriveId != driveId) { "Drive id should be different" }
     }
 }

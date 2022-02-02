@@ -168,6 +168,7 @@ class FileControllerTest : KDriveTest() {
 
         // Compare remote files and local files
         assertTrue(remoteFiles.size == localFiles.size, "local files and remote files cannot be different")
+        deleteTestFile(file)
     }
 
     @Test
@@ -263,7 +264,6 @@ class FileControllerTest : KDriveTest() {
             assertEquals(newName, data!!.first().name, "File should be named '$newName'")
         }
         deleteTestFile(file)
-
     }
 
     private fun getAndSaveRemoteRootFiles(): Pair<File, ArrayList<File>>? {

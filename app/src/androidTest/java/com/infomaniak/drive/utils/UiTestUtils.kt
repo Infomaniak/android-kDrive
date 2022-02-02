@@ -25,6 +25,7 @@ import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.*
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.DriveInfosController
 import org.hamcrest.CoreMatchers
 
 object UiTestUtils {
@@ -52,6 +53,8 @@ object UiTestUtils {
         acceptPermissions()
         // Close the bottomSheetModal displayed because it's the user's first connection
         closeBottomSheetInfoModalIfDisplayed(false)
+        // Change drive to avoid flooding Infomaniak
+        switchToDriveInstance(1)
     }
 
     fun createPrivateFolder(folderName: String) {
@@ -85,6 +88,7 @@ object UiTestUtils {
 
     fun deleteFile(fileRecyclerView: UiScrollable, fileName: String) {
         (fileRecyclerView.getChildByText(UiSelector().resourceId(getViewIdentifier("fileCardView")), fileName)).apply {
+            fileRecyclerView.scrollForward()
             fileRecyclerView.scrollIntoView(this)
             getChild(UiSelector().resourceId(getViewIdentifier("menuButton"))).click()
             UiScrollable(UiSelector().resourceId(getViewIdentifier("scrollView"))).apply {
@@ -138,13 +142,29 @@ object UiTestUtils {
             }
             device.findObject(UiSelector().resourceId(getViewIdentifier(id))).click()
         } catch (exception: UiObjectNotFoundException) {
+            // Continue if bottomSheet are not displayed
         }
     }
 
     private fun acceptPermissions() {
         try {
-            device.findObject(UiSelector().instance(0).clickable(true).className(Button::class.java)).click()
+            device.findObject(UiSelector().instance(0).className(Button::class.java).text("Allow")).click()
         } catch (exception: UiObjectNotFoundException) {
+            try {
+                device.findObject(UiSelector().instance(0).className(Button::class.java).text("Autoriser")).click()
+            } catch (exception: UiObjectNotFoundException) {
+                // Continue if permissions are not displayed
+            }
+        }
+    }
+
+    fun switchToDriveInstance(instanceNumero: Int) {
+        getDeviceViewById("homeFragment").clickAndWaitForNewWindow()
+        if (DriveInfosController.getDrivesCount(AccountUtils.currentUserId) > 1) {
+            getDeviceViewById("switchDriveButton").clickAndWaitForNewWindow()
+            selectDriveInList(instanceNumero) // Switch to dev test drive
+            // Close the bottomSheet modal displayed to have info on categories
+            closeBottomSheetInfoModalIfDisplayed(true)
         }
     }
 }

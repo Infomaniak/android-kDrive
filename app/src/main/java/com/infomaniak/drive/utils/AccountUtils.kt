@@ -77,7 +77,7 @@ object AccountUtils : CredentialManager {
         set(driveId) {
             field = driveId
             GlobalScope.launch(Dispatchers.IO) {
-                AppSettings.updateAppSettings { appSettings -> appSettings._currentDriveId = driveId }
+                AppSettings.updateAppSettings { appSettings -> if(appSettings.isValid) appSettings._currentDriveId = driveId }
             }
         }
 
