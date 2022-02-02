@@ -43,7 +43,6 @@ import io.realm.Realm
 import io.sentry.Sentry
 import kotlinx.coroutines.*
 import java.util.*
-import kotlin.collections.LinkedHashMap
 
 class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
@@ -200,7 +199,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
                 FileController.removeFile(file.id, recursive = false, customRealm = realm)
                 FileController.updateFile(newParent.id, realm) { localFolder ->
                     file.isOffline = false
-                    localFolder.children.add(file)
+                    runCatching { localFolder.children.add(file) }
                 }
             }
 
