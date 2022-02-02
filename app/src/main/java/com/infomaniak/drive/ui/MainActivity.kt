@@ -73,8 +73,10 @@ import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_file_list.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 
 class MainActivity : BaseActivity() {
@@ -91,11 +93,21 @@ class MainActivity : BaseActivity() {
     private lateinit var filesDeletionResult: ActivityResultLauncher<IntentSenderRequest>
 
     private val fileObserver: FileObserver by lazy {
-        object : FileObserver(File.getOfflineFolder(this)) {
-            override fun onEvent(event: Int, path: String?) {
-                CoroutineScope(Dispatchers.IO).launch {
-                    mainViewModel.syncOfflineFiles()
-                }
+        fun onEvent() {
+            CoroutineScope(Dispatchers.IO).launch {
+                mainViewModel.syncOfflineFiles()
+            }
+        }
+
+        val offlineFolder = File.getOfflineFolder(this)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            object : FileObserver(offlineFolder) {
+                override fun onEvent(event: Int, path: String?) = onEvent()
+            }
+        } else {
+            object : FileObserver(offlineFolder.path) {
+                override fun onEvent(event: Int, path: String?) = onEvent()
             }
         }
     }
