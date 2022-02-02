@@ -783,6 +783,11 @@
                         </option>
                         <option name="myPositions">
                           <map>
+                            <entry key="action_picturesFragment_to_actionMultiSelectBottomSheetDialog">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
                             <entry key="action_picturesFragment_to_previewSliderFragment">
                               <value>
                                 <LayoutPositions />
@@ -825,11 +830,6 @@
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_previewSliderFragment_to_colorFolderBottomSheetDialog">
-                              <value>
-                                <LayoutPositions />
-                              </value>
-                            </entry>
                             <entry key="action_previewSliderFragment_to_downloadProgressDialog">
                               <value>
                                 <LayoutPositions />

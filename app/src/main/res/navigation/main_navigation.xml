@@ -760,16 +760,6 @@
     </fragment>
 
     <fragment
-        android:id="@+id/picturesFragment"
-        android:name="com.infomaniak.drive.ui.menu.PicturesFragment"
-        android:label="PicturesFragment"
-        tools:layout="@layout/fragment_pictures">
-        <action
-            android:id="@+id/action_picturesFragment_to_previewSliderFragment"
-            app:destination="@id/previewSliderFragment" />
-    </fragment>
-
-    <fragment
         android:id="@+id/recentChangesFragment"
         android:name="com.infomaniak.drive.ui.menu.RecentChangesFragment"
         android:label="RecentChangesFragment"

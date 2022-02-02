@@ -33,7 +33,6 @@ import com.infomaniak.lib.core.views.ViewHolder
 import io.realm.OrderedRealmCollection
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.cardview_picture.view.*
-import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.android.synthetic.main.title_recycler_section.view.*
 
 class PicturesAdapter(
@@ -45,9 +44,8 @@ class PicturesAdapter(
     private var lastSectionTitle: String = ""
     var pictureList: ArrayList<File> = arrayListOf()
 
-    var enabledMultiSelectMode: Boolean = false
-    var multiSelectMode: Boolean = false
-    var allSelected = false
+    var enabledMultiSelectMode: Boolean = false // If the multi selection is allowed to be used
+    var multiSelectMode: Boolean = false // If the multi selection is opened
     var openMultiSelectMode: (() -> Unit)? = null
     var updateMultiSelectMode: (() -> Unit)? = null
 
@@ -105,47 +103,28 @@ class PicturesAdapter(
                     picture.contentDescription = file.name
 
                     if (multiSelectMode) {
-                        pictureChecked.isChecked = isSelectedFile(file) || allSelected
+                        pictureChecked.isChecked = isSelectedFile(file)
                         pictureChecked.isVisible = true
-                    }
-                    else {
+                    } else {
                         pictureChecked.isGone = true
                     }
 
                     setOnClickListener {
                         if (multiSelectMode) {
-                            Log.e("pic-sel", "setOnLongClickListener: before - ${pictureChecked.isChecked}", )
+                            Log.e("pic-sel", "setOnLongClickListener: before - ${pictureChecked.isChecked}")
                             pictureChecked.isChecked = !pictureChecked.isChecked
-                            Log.e("pic-sel", "setOnLongClickListener: after - ${pictureChecked.isChecked}", )
+                            Log.e("pic-sel", "setOnLongClickListener: after - ${pictureChecked.isChecked}")
                             onSelectedFile(file, pictureChecked.isChecked)
                         } else {
                             onItemClick(file)
                         }
                     }
 
-                    // Checker par rapport au FileAdapter.kt comment c'est fait là bas le fait de gérer la multi sélection tout ça tout ça
-//                    setOnClickListener {
-//                        if (multiSelectMode) {
-//                            fileChecked.isChecked = !fileChecked.isChecked
-//                            onSelectedFile(file, fileChecked.isChecked)
-//                        } else {
-//                            onFileClicked?.invoke(file)
-//                        }
-//                    }
-//                    setOnLongClickListener {
-//                        if (enabledMultiSelectMode) {
-//                            fileChecked.isChecked = !fileChecked.isChecked
-//                            onSelectedFile(file, fileChecked.isChecked)
-//                            if (!multiSelectMode) openMultiSelectMode?.invoke()
-//                            true
-//                        } else false
-//                    }
                     setOnLongClickListener {
                         if (enabledMultiSelectMode) {
-                            Log.e("pic-sel", "setOnLongClickListener: before - ${pictureChecked.isChecked}", )
+                            Log.e("pic-sel", "setOnLongClickListener: before - ${pictureChecked.isChecked}")
                             pictureChecked.isChecked = !pictureChecked.isChecked
-                            Log.e("pic-sel", "setOnLongClickListener: after - ${pictureChecked.isChecked}", )
-//                            Log.e("pic-sel", "setOnLongClickListener: selected: $file, ${pictureChecked.isChecked}")
+                            Log.e("pic-sel", "setOnLongClickListener: after - ${pictureChecked.isChecked}")
                             onSelectedFile(file, pictureChecked.isChecked)
                             if (!multiSelectMode) openMultiSelectMode?.invoke()
                             true
@@ -167,10 +146,6 @@ class PicturesAdapter(
 
         if (file.isUsable()) {
             when {
-                allSelected -> { // if all selected, unselect everything and only select the clicked one (like web-app)
-                    configureAllSelected(false)
-                    addSelectedFile(file)
-                }
                 isSelected -> addSelectedFile(file)
                 else -> removeSelectedFile(file)
             }
@@ -180,18 +155,50 @@ class PicturesAdapter(
         updateMultiSelectMode?.invoke()
     }
 
-    fun configureAllSelected(isSelectedAll: Boolean) {
-        allSelected = isSelectedAll
-        itemsSelected = RealmList()
-        notifyItemRangeChanged(0, itemCount)
-    }
-
     private fun addSelectedFile(file: File) {
         itemsSelected.add(file)
     }
 
     private fun removeSelectedFile(file: File) {
         itemsSelected.remove(file)
+    }
+
+    private fun indexOf(fileId: Int) = pictureList.indexOfFirst { it.id == fileId }
+
+    fun deleteAt(position: Int) {
+        pictureList.removeAt(position)
+        notifyItemRemoved(position)
+    }
+
+    fun deleteByFileId(fileId: Int) {
+        val position = indexOf(fileId)
+        if (position >= 0) deleteAt(position)
+    }
+
+    fun updateFileProgressByFileId(fileId: Int, progress: Int, onComplete: ((position: Int, file: File) -> Unit)? = null) {
+        updateFileProgress(indexOf(fileId), progress, onComplete)
+    }
+
+    private fun updateFileProgress(position: Int, progress: Int, onComplete: ((position: Int, file: File) -> Unit)? = null) {
+        if (position >= 0) {
+            val file = getFile(position)
+            file.currentProgress = progress
+            notifyItemChanged(position, progress)
+
+            if (progress == 100) {
+                onComplete?.invoke(position, file)
+            }
+        }
+    }
+
+    private fun getFile(position: Int) = pictureList[position]
+
+    fun notifyFileChanged(fileId: Int, onChange: ((file: File) -> Unit)? = null) {
+        val fileIndex = indexOf(fileId)
+        if (fileIndex >= 0) {
+            onChange?.invoke(getFile(fileIndex))
+            notifyItemChanged(fileIndex)
+        }
     }
 
     enum class DisplayType(val layout: Int) {

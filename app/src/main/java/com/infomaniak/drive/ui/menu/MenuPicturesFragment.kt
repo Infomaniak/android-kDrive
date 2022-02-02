@@ -36,39 +36,44 @@ class MenuPicturesFragment : Fragment(), MultiSelectParent {
 
     private lateinit var binding: FragmentMenuPicturesBinding
 
+    private val picturesFragment: PicturesFragment by lazy {
+        PicturesFragment() {
+            timer.cancel()
+            binding.swipeRefreshLayout.isRefreshing = false
+        }.apply {
+            init(this@MenuPicturesFragment)
+        }
+    }
+
     private val timer: CountDownTimer by lazy {
         createRefreshTimer { swipeRefreshLayout?.isRefreshing = true }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentMenuPicturesBinding.inflate(inflater, container, false)
+
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
+
+        binding.apply {
+            closeButtonMultiSelect.setOnClickListener { picturesFragment.onCloseMultiSelection() }
+            moveButtonMultiSelect.setOnClickListener { picturesFragment.onMove() }
+            deleteButtonMultiSelect.setOnClickListener { picturesFragment.onDelete() }
+            menuButtonMultiSelect.setOnClickListener { picturesFragment.onMenu() }
+        }
+
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            picturesFragment.reloadPictures()
+        }
+
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
-        }
-
         ViewCompat.requestApplyInsets(pictureListCoordinator)
-
-        val picturesFragment = PicturesFragment {
-            timer.cancel()
-            binding.swipeRefreshLayout.isRefreshing = false
-        }
-
-        picturesFragment.init(this)
-
-        binding.apply {
-            closeButtonMultiSelect.setOnClickListener { picturesFragment.onCloseMultiSelection() }
-            moveButtonMultiSelect.setOnClickListener { picturesFragment.onMove() }
-        }
-
-        binding.swipeRefreshLayout.setOnRefreshListener {
-            picturesFragment.reloadPictures()
-        }
 
         timer.start()
         if (childFragmentManager.findFragmentByTag("picturesFragment") == null) {
@@ -78,37 +83,37 @@ class MenuPicturesFragment : Fragment(), MultiSelectParent {
         }
     }
 
-    override fun openMultiSelectBar() {
-        binding.collapsingToolbarLayout.isGone = true
-        binding.multiSelectLayout.isVisible = true
-//        binding.selectAllButton.isVisible = true
+    override fun openMultiSelectBar() = with(binding) {
+        collapsingToolbarLayout.isGone = true
+        multiSelectLayout.isVisible = true
     }
 
-    override fun closeMultiSelectBar() {
-        binding.collapsingToolbarLayout.isVisible = true
-        binding.multiSelectLayout.isGone = true
-//        binding.selectAllButton.isGone = true
+    override fun closeMultiSelectBar() = with(binding) {
+        collapsingToolbarLayout.isVisible = true
+        multiSelectLayout.isGone = true
     }
 
-    override fun enableMultiSelectActionButtons() {
-        binding.deleteButtonMultiSelect.isEnabled = true
-        binding.moveButtonMultiSelect.isEnabled = true
-        binding.menuButtonMultiSelect.isEnabled = true
+    override fun enableMultiSelectActionButtons() = with(binding) {
+        deleteButtonMultiSelect.isEnabled = true
+        moveButtonMultiSelect.isEnabled = true
+        menuButtonMultiSelect.isEnabled = true
     }
 
-    override fun disableMultiSelectActionButtons() {
-        binding.deleteButtonMultiSelect.isEnabled = false
-        binding.moveButtonMultiSelect.isEnabled = false
-        binding.menuButtonMultiSelect.isEnabled = false
+    override fun disableMultiSelectActionButtons() = with(binding) {
+        deleteButtonMultiSelect.isEnabled = false
+        moveButtonMultiSelect.isEnabled = false
+        menuButtonMultiSelect.isEnabled = false
     }
 
     override fun setTitleMultiSelect(title: String) {
         binding.titleMultiSelect.text = title
     }
 
-//    override fun hideSelectAllProgress(resourceId: Int) {
-//        binding.selectAllButton.hideProgress(resourceId)
-//    }
+    override fun disableSwipeRefresh() {
+        binding.swipeRefreshLayout.isEnabled = false
+    }
 
-
+    override fun enableSwipeRefresh() {
+        binding.swipeRefreshLayout.isEnabled = true
+    }
 }
