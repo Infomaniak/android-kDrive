@@ -78,8 +78,8 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     private fun getContext() = getApplication<ApplicationMain>()
 
     fun navigateFileListToFolderId(navController: NavController, folderId: Int) {
-        if (folderId > Utils.ROOT_ID) navigateFileListToFolderId.value = folderId
         navController.navigate(R.id.fileListFragment)
+        if (folderId > Utils.ROOT_ID) navigateFileListToFolderId.value = folderId
     }
 
     fun createMultiSelectMediator(): MediatorLiveData<Pair<Int, Int>> {
