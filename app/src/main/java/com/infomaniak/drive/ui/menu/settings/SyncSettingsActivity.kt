@@ -44,6 +44,8 @@ import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackPhotoSyncSettings
 import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.Utils
@@ -280,13 +282,25 @@ class SyncSettingsActivity : BaseActivity() {
     private fun saveSettings() {
         saveButton.showProgress()
         lifecycleScope.launch(Dispatchers.IO) {
+            val trackingDateName: String
             val date = when (syncSettingsViewModel.saveOldPictures.value!!) {
-                SavePicturesDate.SINCE_NOW -> Date()
-                SavePicturesDate.SINCE_FOREVER -> Date(0)
-                SavePicturesDate.SINCE_DATE -> syncSettingsViewModel.customDate.value ?: Date()
+                SavePicturesDate.SINCE_NOW -> {
+                    trackingDateName = "syncNew"
+                    Date()
+                }
+                SavePicturesDate.SINCE_FOREVER -> {
+                    trackingDateName = "syncAll"
+                    Date(0)
+                }
+                SavePicturesDate.SINCE_DATE -> {
+                    trackingDateName = "syncFromDate"
+                    syncSettingsViewModel.customDate.value ?: Date()
+                }
             }
 
+            val syncActivationTrackerName: String
             if (activateSyncSwitch.isChecked) {
+                syncActivationTrackerName = "enabled"
                 val syncSettings = SyncSettings(
                     userId = selectDriveViewModel.selectedUserId.value!!,
                     driveId = selectDriveViewModel.selectedDrive.value!!.id,
@@ -296,12 +310,15 @@ class SyncSettingsActivity : BaseActivity() {
                     createDatedSubFolders = createDatedSubFoldersSwitch.isChecked,
                     deleteAfterSync = deletePicturesAfterSyncSwitch.isChecked
                 )
+                application.trackPhotoSyncSettings(syncSettings, trackingDateName)
                 syncSettings.setIntervalType(syncSettingsViewModel.syncIntervalType.value!!)
                 UploadFile.setAppSyncSettings(syncSettings)
                 activateAutoSync(syncSettings)
             } else {
+                syncActivationTrackerName = "disable"
                 disableAutoSync()
             }
+            application.trackEvent("photoSync", "click", syncActivationTrackerName)
 
             withContext(Dispatchers.Main) {
                 onBackPressed()

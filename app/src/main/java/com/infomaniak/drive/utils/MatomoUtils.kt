@@ -21,6 +21,7 @@ import android.content.Context
 import android.util.Log
 import com.infomaniak.drive.ApplicationMain.Companion.tracker
 import com.infomaniak.drive.data.models.BulkOperationType
+import com.infomaniak.drive.data.models.SyncSettings
 import org.matomo.sdk.TrackerBuilder
 import org.matomo.sdk.extra.DownloadTracker
 import org.matomo.sdk.extra.TrackHelper
@@ -38,15 +39,21 @@ object MatomoUtils {
     }
 
     fun Context.trackBulkActionEvent(action: BulkOperationType, value: Int) {
-        val name = when (action) {
-            BulkOperationType.ADD_FAVORITES -> "bulkFavorite"
-            BulkOperationType.COPY -> "bulkCopy"
-            BulkOperationType.MOVE -> "bulkMove"
-            BulkOperationType.SET_OFFLINE -> "bulkOffline"
-            BulkOperationType.TRASH -> "bulkPutInTrash"
-            BulkOperationType.COLOR_FOLDER -> "bulkColorFolder"
+        var name = "bulk"
+        if(value == 1) {
+            name += "Single"
         }
-        trackEvent("FileAction", "click", name, value.toFloat())
+
+        val trackingActionName = when (action) {
+            BulkOperationType.ADD_FAVORITES -> "Favorite"
+            BulkOperationType.COPY -> "Copy"
+            BulkOperationType.MOVE -> "Move"
+            BulkOperationType.SET_OFFLINE -> "Offline"
+            BulkOperationType.TRASH -> "PutInTrash"
+            BulkOperationType.COLOR_FOLDER -> "ColorFolder"
+        }
+
+        trackEvent("FileAction", "click", name + trackingActionName, value.toFloat())
     }
 
     fun Context.trackEventWithBooleanValue(category: String, name: String, value: Boolean) {
@@ -75,6 +82,13 @@ object MatomoUtils {
                 }
             }
         }
+    }
+
+    fun Context.trackPhotoSyncSettings(syncSettings: SyncSettings, trackingDateName: String) {
+        trackEventWithBooleanValue("photoSync", "deleteAfterImport", syncSettings.deleteAfterSync)
+        trackEventWithBooleanValue("photoSync", "createDatedFolders", syncSettings.createDatedSubFolders)
+        trackEventWithBooleanValue("photoSync", "importVideo", syncSettings.syncVideo)
+        trackEvent("photoSync", "click", trackingDateName)
     }
 
     private fun Boolean.toFloat() = if (this) 1f else 0f
