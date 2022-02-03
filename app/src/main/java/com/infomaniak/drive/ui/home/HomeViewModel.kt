@@ -29,7 +29,6 @@ import com.infomaniak.lib.core.models.ApiResponse.Status.SUCCESS
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import java.util.*
-import kotlin.collections.ArrayList
 
 class HomeViewModel : ViewModel() {
     private var lastActivityJob = Job()

@@ -32,7 +32,6 @@ import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.util.*
 
 class FileListViewModel : ViewModel() {
 

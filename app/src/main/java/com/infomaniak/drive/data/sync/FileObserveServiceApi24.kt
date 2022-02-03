@@ -38,8 +38,8 @@ import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import io.sentry.Sentry
-import kotlinx.coroutines.*
-import java.lang.Runnable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 
 @RequiresApi(api = Build.VERSION_CODES.N)
 class FileObserveServiceApi24 : JobService() {

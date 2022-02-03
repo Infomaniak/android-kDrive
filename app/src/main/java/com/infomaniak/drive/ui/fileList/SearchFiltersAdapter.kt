@@ -25,7 +25,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.Chip
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.SearchFilter
-import com.infomaniak.drive.data.models.SearchFilter.*
+import com.infomaniak.drive.data.models.SearchFilter.FilterKey
 import com.infomaniak.lib.core.views.ViewHolder
 
 class SearchFiltersAdapter(

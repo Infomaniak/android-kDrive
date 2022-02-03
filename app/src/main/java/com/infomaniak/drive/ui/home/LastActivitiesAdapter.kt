@@ -38,7 +38,6 @@ import com.infomaniak.lib.core.views.LoaderCardView
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_home_file_activity.view.*
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
-import java.util.*
 
 class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
 

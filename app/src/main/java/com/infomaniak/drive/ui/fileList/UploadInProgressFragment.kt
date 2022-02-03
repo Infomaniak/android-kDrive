@@ -43,11 +43,7 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import io.realm.Realm
 import io.sentry.Sentry
 import io.sentry.SentryLevel
-import kotlinx.android.synthetic.main.dialog_download_progress.view.*
 import kotlinx.android.synthetic.main.fragment_file_list.*
-import kotlinx.android.synthetic.main.fragment_file_list.toolbar
-import kotlinx.android.synthetic.main.fragment_new_folder.*
-import kotlinx.android.synthetic.main.item_file.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

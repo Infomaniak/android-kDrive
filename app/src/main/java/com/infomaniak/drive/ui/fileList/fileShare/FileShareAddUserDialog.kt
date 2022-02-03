@@ -50,7 +50,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.Serializable
 import java.util.*
-import kotlin.collections.ArrayList
 
 class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
     private lateinit var availableUsersAdapter: AvailableShareableItemsAdapter

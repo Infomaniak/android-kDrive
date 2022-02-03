@@ -49,7 +49,8 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.data.models.File.*
+import com.infomaniak.drive.data.models.File.SortType
+import com.infomaniak.drive.data.models.File.SortTypeUsage
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.data.services.MqttClientWrapper
@@ -76,19 +77,9 @@ import com.infomaniak.lib.core.utils.setPagination
 import com.infomaniak.lib.core.utils.showProgress
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.cardview_file_list.*
-import kotlinx.android.synthetic.main.empty_icon_layout.*
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_add_file.*
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_file_info_actions.*
 import kotlinx.android.synthetic.main.fragment_file_list.*
-import kotlinx.android.synthetic.main.fragment_home.*
-import kotlinx.android.synthetic.main.fragment_new_folder.*
 import kotlinx.android.synthetic.main.fragment_new_folder.toolbar
-import kotlinx.android.synthetic.main.fragment_select_permission.*
-import kotlinx.android.synthetic.main.item_file.*
-import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.coroutines.*
-import java.util.*
 
 open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 

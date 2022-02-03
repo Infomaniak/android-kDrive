@@ -31,7 +31,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
-import androidx.work.*
+import androidx.work.WorkInfo
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
@@ -40,22 +40,16 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.File.*
-import com.infomaniak.drive.data.models.File.VisibilityType.*
+import com.infomaniak.drive.data.models.File.VisibilityType.IS_SHARED_SPACE
+import com.infomaniak.drive.data.models.File.VisibilityType.IS_TEAM_SPACE
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.*
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_file_info_actions.*
-import kotlinx.android.synthetic.main.fragment_file_details.view.*
-import kotlinx.android.synthetic.main.fragment_menu.view.*
-import kotlinx.android.synthetic.main.fragment_preview_slider.*
-import kotlinx.android.synthetic.main.fragment_preview_slider.view.*
-import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
-import kotlinx.android.synthetic.main.view_share_link_container.view.*
-import kotlinx.android.synthetic.main.view_url_display.view.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class FileInfoActionsView @JvmOverloads constructor(
     context: Context,

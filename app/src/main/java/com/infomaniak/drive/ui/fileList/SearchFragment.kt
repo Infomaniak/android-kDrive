@@ -30,19 +30,21 @@ import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
-import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.data.models.File.*
-import com.infomaniak.drive.data.models.SearchFilter.*
-import com.infomaniak.drive.ui.fileList.FileListViewModel.*
-import com.infomaniak.drive.ui.fileList.SearchViewModel.*
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.File.SortType
+import com.infomaniak.drive.data.models.SearchFilter
+import com.infomaniak.drive.data.models.SearchFilter.FilterKey
+import com.infomaniak.drive.data.models.UiSettings
+import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.getName
+import com.infomaniak.drive.utils.safeNavigate
+import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.DebouncingTextWatcher
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.setPagination
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.item_search_view.*
 import kotlinx.android.synthetic.main.recent_searches.*
-import java.util.*
 
 class SearchFragment : FileListFragment() {
 

@@ -20,7 +20,6 @@ package com.infomaniak.drive.data.cache
 import android.content.Context
 import androidx.collection.ArrayMap
 import androidx.collection.arrayMapOf
-import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
@@ -45,7 +44,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import java.util.*
-import kotlin.collections.ArrayList
 
 object FileController {
     private const val REALM_DB_FILE = "kDrive-%s-%s.realm"

@@ -29,7 +29,6 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FormatterFileSize
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
-import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.view_not_enough_storage.view.*
 
 class NotEnoughStorageView @JvmOverloads constructor(

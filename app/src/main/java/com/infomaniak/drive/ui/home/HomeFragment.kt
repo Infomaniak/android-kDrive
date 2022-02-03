@@ -42,10 +42,7 @@ import com.infomaniak.drive.ui.menu.PicturesFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.TabViewPagerUtils.getFragment
 import com.infomaniak.drive.utils.TabViewPagerUtils.setup
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_file_details.*
 import kotlinx.android.synthetic.main.fragment_home.*
-import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.android.synthetic.main.item_search_view.*
 
 class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {

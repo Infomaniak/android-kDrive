@@ -25,7 +25,6 @@ import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.ApiController
-import kotlinx.android.parcel.RawValue
 import org.junit.Assert
 import java.util.*
 

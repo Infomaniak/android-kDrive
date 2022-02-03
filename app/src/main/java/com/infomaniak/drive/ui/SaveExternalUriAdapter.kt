@@ -39,7 +39,6 @@ import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.android.synthetic.main.cardview_file_list.view.*
 import kotlinx.android.synthetic.main.item_file.view.*
-import java.util.*
 
 class SaveExternalUriAdapter(val uris: ArrayList<Uri>) : RecyclerView.Adapter<ViewHolder>() {
 
