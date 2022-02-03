@@ -199,7 +199,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
                 FileController.removeFile(file.id, recursive = false, customRealm = realm)
                 FileController.updateFile(newParent.id, realm) { localFolder ->
                     file.isOffline = false
-                    runCatching { localFolder.children.add(file) }
+                    runCatching { localFolder.children.add(file) } // Ignore expired transactions when it's suspended
                 }
             }
 
