@@ -12,7 +12,7 @@ android {
         applicationId "com.infomaniak.drive"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 4_01_000_03
+        versionCode 4_01_000_04
         versionName "4.1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -137,7 +137,7 @@ dependencies {
 
     implementation 'com.github.hannesa2:paho.mqtt.android:3.3.5'
 
-    implementation 'io.sentry:sentry-android:5.6.0'
+    implementation 'io.sentry:sentry-android:5.6.1'
 
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.3'
     testImplementation 'io.github.serpro69:kotlin-faker:1.9.0'
