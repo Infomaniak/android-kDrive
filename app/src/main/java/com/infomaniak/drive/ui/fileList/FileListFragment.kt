@@ -316,7 +316,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         val sendActions: (dialog: Dialog?) -> Unit = sendActions(fileCount, selectedFiles, type, destinationFolder, color)
-        activity?.application?.trackBulkActionEvent(type, fileCount)
+        context?.applicationContext?.trackBulkActionEvent(type, fileCount)
 
         if (type == BulkOperationType.TRASH) {
             Utils.createConfirmation(

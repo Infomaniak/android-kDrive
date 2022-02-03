@@ -142,7 +142,7 @@ open class ManageDropboxFragment : Fragment() {
 
         disableButton.initProgress(this)
         disableButton.setOnClickListener {
-            activity?.application?.trackEvent("dropbox", "click", "convertToFolder")
+            context?.applicationContext?.trackEvent("dropbox", "click", "convertToFolder")
             disableButton.showProgress(ContextCompat.getColor(requireContext(), R.color.title))
             mainViewModel.deleteDropBox(file).observe(viewLifecycleOwner) { apiResponse ->
                 if (apiResponse.isSuccess()) {
@@ -156,7 +156,7 @@ open class ManageDropboxFragment : Fragment() {
 
         saveButton.initProgress(this)
         saveButton.setOnClickListener {
-            activity?.application?.trackEvent("dropbox", "click", "saveDropbox")
+            context?.applicationContext?.trackEvent("dropbox", "click", "saveDropbox")
             currentDropBox?.newPasswordValue = passwordTextInput.text?.toString()
             currentDropBox?.newLimitFileSize =
                 if (limitStorageSwitch.isChecked) {
@@ -190,13 +190,13 @@ open class ManageDropboxFragment : Fragment() {
             if (Utils.convertGigaByteToBytes(newSize) != currentDropBox?.limitFileSize && validationCount == 0) validationCount++
             limitStorageValue.showOrHideEmptyError()
             hasErrors = false
-            activity?.application?.trackEvent("dropbox", "input", "changeLimitStorage", newSize.toFloat())
+            context?.applicationContext?.trackEvent("dropbox", "input", "changeLimitStorage", newSize.toFloat())
         }
         enableSaveButton()
     }
 
     private fun emailSwitched(dropBox: DropBox?, isChecked: Boolean) {
-        activity?.application?.trackEventWithBooleanValue("dropbox", "switchEmailOnFileImport", isChecked)
+        context?.applicationContext?.trackEventWithBooleanValue("dropbox", "switchEmailOnFileImport", isChecked)
 
         if (dropBox?.emailWhenFinished == isChecked) validationCount-- else validationCount++
         currentDropBox?.newEmailWhenFinished = isChecked
@@ -204,7 +204,7 @@ open class ManageDropboxFragment : Fragment() {
     }
 
     private fun passwordSwitched(dropBox: DropBox?, isChecked: Boolean) {
-        activity?.application?.trackEventWithBooleanValue("dropbox", "switchProtectWithPassword", isChecked)
+        context?.applicationContext?.trackEventWithBooleanValue("dropbox", "switchProtectWithPassword", isChecked)
 
         if (dropBox?.password == isChecked) validationCount-- else validationCount++
 
@@ -216,7 +216,7 @@ open class ManageDropboxFragment : Fragment() {
     }
 
     private fun expirationDateSwitched(dropBox: DropBox?, isChecked: Boolean) {
-        activity?.application?.trackEventWithBooleanValue("dropbox", "switchExpirationDate", isChecked)
+        context?.applicationContext?.trackEventWithBooleanValue("dropbox", "switchExpirationDate", isChecked)
 
         if ((dropBox?.validUntil != null) == isChecked) validationCount-- else validationCount++
 
@@ -230,7 +230,7 @@ open class ManageDropboxFragment : Fragment() {
     }
 
     private fun limitStorageSwitched(dropBox: DropBox?, isChecked: Boolean) {
-        activity?.application?.trackEventWithBooleanValue("dropbox", "switchLimitStorageSpace", isChecked)
+        context?.applicationContext?.trackEventWithBooleanValue("dropbox", "switchLimitStorageSpace", isChecked)
 
         if ((dropBox?.limitFileSize != null) == isChecked) validationCount-- else validationCount++
         limitStorageValueLayout.isVisible = isChecked

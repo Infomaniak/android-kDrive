@@ -49,7 +49,7 @@ class CreatePrivateFolderFragment : CreateFolderFragment() {
     }
 
     private fun createPrivateFolder() {
-        activity?.application?.trackEvent("newElement", "click", "createPrivateFolder")
+        context?.applicationContext?.trackEvent("newElement", "click", "createPrivateFolder")
         createFolder(currentPermission == ONLY_ME) { file, redirectToShareDetails ->
             file?.let {
                 saveNewFolder(file)

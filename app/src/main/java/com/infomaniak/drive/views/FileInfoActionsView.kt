@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyrigh (C) 2022 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -177,7 +177,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         ownerFragment.startActivity(Intent.createChooser(shareIntent, ownerFragment.getString(R.string.buttonSendCopy)))
-        ownerFragment.activity?.application?.trackEvent("fileAction", "click", "sendFileCopy")
+        context.applicationContext.trackEvent("fileAction", "click", "sendFileCopy")
     }
 
     private fun openAddFileBottom() {
@@ -411,7 +411,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun manageCategoriesClicked(fileId: Int)
         fun dropBoxClicked(isDropBox: Boolean) =
             getApplication()?.trackEventWithBooleanValue("fileAction", "convertToDropbox", isDropBox)
-        fun colorFolderClicked(color: String) = Unit
+        fun colorFolderClicked(color: String) = getApplication()?.trackEvent("colorFolder", "click", "switch")
         fun fileRightsClicked()
         fun onCacheAddedToOffline() = Unit
         fun onDeleteFile(onApiResponse: () -> Unit)

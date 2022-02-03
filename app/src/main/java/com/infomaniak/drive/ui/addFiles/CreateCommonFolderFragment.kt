@@ -68,7 +68,7 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
     private fun createCommonFolder() {
         folderNameValueInput.hideKeyboard()
         createFolderButton.showProgress()
-        activity?.application?.trackEvent("newElement", "click", "createCommonFolder")
+        context?.applicationContext?.trackEvent("newElement", "click", "createCommonFolder")
 
         newFolderViewModel.createCommonFolder(
             name = folderNameValueInput.text.toString(),

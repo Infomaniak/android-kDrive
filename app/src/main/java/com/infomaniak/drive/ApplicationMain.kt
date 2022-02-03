@@ -19,6 +19,7 @@ package com.infomaniak.drive
 
 import android.app.Application
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.StrictMode
@@ -32,6 +33,7 @@ import coil.decode.ImageDecoderDecoder
 import coil.util.CoilUtils
 import com.facebook.stetho.Stetho
 import com.facebook.stetho.okhttp3.StethoInterceptor
+import com.infomaniak.drive.ApplicationMain.Companion.tracker
 import com.infomaniak.drive.BuildConfig.DRIVE_API
 import com.infomaniak.drive.BuildConfig.INFOMANIAK_API
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
@@ -71,6 +73,7 @@ import okhttp3.OkHttpClient
 import org.eclipse.paho.client.mqttv3.*
 import org.matomo.sdk.Tracker
 import org.matomo.sdk.extra.MatomoApplication
+import org.matomo.sdk.extra.TrackHelper
 import java.util.*
 
 
@@ -192,7 +195,6 @@ class ApplicationMain : MatomoApplication(), ImageLoaderFactory {
     }
 
     companion object {
-        inline val Application.tracker: Tracker get() = (this as MatomoApplication).tracker
+        inline val Context.tracker: Tracker get() = (this as MatomoApplication).tracker
     }
-
 }

@@ -121,7 +121,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private fun openCamera() {
         if (openCameraPermissions.checkSyncPermissions()) {
             openCamera.isEnabled = false
-            activity?.application?.trackEvent("newElement", "click", "takePhotoOrVideo")
+            context?.applicationContext?.trackEvent("newElement", "click", "takePhotoOrVideo")
             try {
                 val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
                     putExtra(MediaStore.EXTRA_OUTPUT, createMediaFile(false))
@@ -149,12 +149,12 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                 addCategory(Intent.CATEGORY_OPENABLE)
             }
             startActivityForResult(Intent.createChooser(intent, getString(R.string.addFileSelectUploadFile)), SELECT_FILES_REQ)
-            activity?.application?.trackEvent("newElement", "click", "uploadFile")
+            context?.applicationContext?.trackEvent("newElement", "click", "uploadFile")
         }
     }
 
     private fun scanDocuments() {
-        activity?.application?.trackEvent("newElement", "click", "scan")
+        context?.applicationContext?.trackEvent("newElement", "click", "scan")
         // TODO find a good lib
         dismiss()
     }
@@ -179,7 +179,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun createFile(office: File.Office) {
-        activity?.application?.trackEvent("newElement", "click", office.getEventName())
+        context?.applicationContext?.trackEvent("newElement", "click", office.getEventName())
         Utils.createPromptNameDialog(
             context = requireContext(),
             title = R.string.modalCreateFileTitle,

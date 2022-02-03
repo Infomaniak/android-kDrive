@@ -90,7 +90,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
     ) {
         if (!isValid()) return
 
-        activity?.application?.trackEvent("newElement", "click", "createDropbox")
+        context?.applicationContext?.trackEvent("newElement", "click", "createDropbox")
 
         val emailWhenFinished = emailWhenFinishedSwitch.isChecked
         val validUntil = if (expirationDateSwitch.isChecked) expirationDateInput.getCurrentTimestampValue() else null

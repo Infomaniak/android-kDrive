@@ -128,7 +128,7 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
         if (finalType == null) {
             setBackNavigationResult(DISABLE_SELECT_MODE, true)
         } else {
-            activity?.application?.trackBulkActionEvent(finalType, navigationArgs.fileIds.size)
+            context?.applicationContext?.trackBulkActionEvent(finalType, navigationArgs.fileIds.size)
             setBackNavigationResult(SELECT_DIALOG_ACTION, finalType)
         }
     }

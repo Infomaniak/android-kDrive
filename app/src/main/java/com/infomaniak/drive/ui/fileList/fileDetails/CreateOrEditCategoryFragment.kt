@@ -40,9 +40,8 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.fileList.fileDetails.CreateOrEditCategoryAdapter.Companion.COLORS
-import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.find
-import com.infomaniak.drive.utils.getScreenSizeInDp
+import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
@@ -109,7 +108,15 @@ class CreateOrEditCategoryFragment : Fragment() {
             isEnabled = categoryIsPredefined || !isCreateCategory || categoryName.isNotEmpty()
             setOnClickListener {
                 showProgress()
-                if (categoryId == CREATE_CATEGORY_ID) createCategory() else editCategory(categoryId)
+                val trackerName : String
+                if (categoryId == CREATE_CATEGORY_ID) {
+                    trackerName = "add"
+                    createCategory()
+                } else {
+                    trackerName = "edit"
+                    editCategory(categoryId)
+                }
+                context?.applicationContext?.trackEvent("categories", "click", trackerName)
             }
         }
     }
