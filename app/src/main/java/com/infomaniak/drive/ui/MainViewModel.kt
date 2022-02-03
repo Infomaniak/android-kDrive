@@ -43,7 +43,6 @@ import io.realm.Realm
 import io.sentry.Sentry
 import kotlinx.coroutines.*
 import java.util.*
-import kotlin.collections.LinkedHashMap
 
 class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
@@ -196,10 +195,15 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         val apiResponse = ApiRepository.moveFile(file, newParent)
         if (apiResponse.isSuccess()) {
             FileController.getRealmInstance().use { realm ->
+                file.getStoredFile(getContext())?.let { if (it.exists()) it.delete() }
                 FileController.removeFile(file.id, recursive = false, customRealm = realm)
                 FileController.updateFile(newParent.id, realm) { localFolder ->
                     file.isOffline = false
-                    localFolder.children.add(file)
+                    // Ignore expired transactions when it's suspended
+                    // In case the phone is slow or in standby, the transaction can create an IllegalStateException
+                    // because realm will not be available anymore, the transaction is resumed afterwards
+                    // so we ignore the cases where it fails.
+                    runCatching { localFolder.children.add(file) }
                 }
             }
 
