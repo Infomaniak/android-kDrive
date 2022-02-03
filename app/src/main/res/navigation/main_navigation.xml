@@ -51,7 +51,7 @@
             app:popEnterAnim="@anim/fragment_fade_enter"
             app:popExitAnim="@anim/fragment_fade_exit" />
         <argument
-            android:name="folderID"
+            android:name="folderId"
             android:defaultValue="1"
             app:argType="integer" />
         <argument
@@ -241,7 +241,7 @@
         android:label="@string/favoritesTitle"
         tools:layout="@layout/fragment_file_list">
         <argument
-            android:name="folderID"
+            android:name="folderId"
             android:defaultValue="1"
             app:argType="integer" />
         <argument
@@ -367,7 +367,7 @@
         android:label="TrashFragment"
         tools:layout="@layout/fragment_file_list">
         <argument
-            android:name="folderID"
+            android:name="folderId"
             android:defaultValue="1"
             app:argType="integer" />
         <argument
@@ -502,7 +502,7 @@
         android:label="OfflineFileFragment"
         tools:layout="@layout/fragment_file_list">
         <argument
-            android:name="folderID"
+            android:name="folderId"
             android:defaultValue="0"
             app:argType="integer" />
     </fragment>
@@ -513,7 +513,7 @@
         android:label="fragment_search"
         tools:layout="@layout/fragment_file_list">
         <argument
-            android:name="folderID"
+            android:name="folderId"
             android:defaultValue="0"
             app:argType="integer" />
         <action
@@ -680,7 +680,7 @@
         android:label="UploadInProgress"
         tools:layout="@layout/fragment_file_list">
         <argument
-            android:name="folderID"
+            android:name="folderId"
             android:defaultValue="1"
             app:argType="integer" />
         <argument
@@ -714,7 +714,7 @@
         android:label="SharedWithMeFragment"
         tools:layout="@layout/fragment_file_list">
         <argument
-            android:name="folderID"
+            android:name="folderId"
             android:defaultValue="1"
             app:argType="integer" />
         <argument
@@ -722,7 +722,7 @@
             android:defaultValue="/"
             app:argType="string" />
         <argument
-            android:name="driveID"
+            android:name="driveId"
             android:defaultValue="0"
             app:argType="integer" />
         <action
@@ -739,7 +739,7 @@
         android:label="MySharesFragment"
         tools:layout="@layout/fragment_file_list">
         <argument
-            android:name="folderID"
+            android:name="folderId"
             android:defaultValue="1"
             app:argType="integer" />
         <argument
@@ -909,7 +909,7 @@
         android:label="DownloadProgressDialog"
         tools:layout="@layout/dialog_download_progress">
         <argument
-            android:name="fileID"
+            android:name="fileId"
             app:argType="integer" />
         <argument
             android:name="fileName"

@@ -59,7 +59,7 @@ open class FileSubTypeListFragment : FileListFragment() {
                     else -> fileListViewModel.sortType
                 }
 
-                FileController.getRealmLiveFiles(folderId ?: this.folderID, realm, order).apply {
+                FileController.getRealmLiveFiles(folderId ?: this.folderId, realm, order).apply {
                     fileAdapter.updateFileList(this)
                 }
             }

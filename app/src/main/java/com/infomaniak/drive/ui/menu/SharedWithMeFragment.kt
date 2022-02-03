@@ -45,16 +45,16 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
     override var hideBackButtonWhenRoot: Boolean = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val inDriveList = folderID == ROOT_ID && !navigationArgs.driveID.isPositive()
-        val inDriveRoot = folderID == ROOT_ID && navigationArgs.driveID.isPositive()
+        val inDriveList = folderId == ROOT_ID && !navigationArgs.driveId.isPositive()
+        val inDriveRoot = folderId == ROOT_ID && navigationArgs.driveId.isPositive()
         mainViewModel.currentFolder.value = null
-        userDrive = UserDrive(driveId = navigationArgs.driveID, sharedWithMe = true)
+        userDrive = UserDrive(driveId = navigationArgs.driveId, sharedWithMe = true)
         realm = FileController.getRealmInstance(userDrive)
         downloadFiles = DownloadFiles(
             when {
                 inDriveList -> null
-                inDriveRoot -> File(driveId = navigationArgs.driveID, type = File.Type.DRIVE.value)
-                else -> File(id = folderID, name = folderName, driveId = navigationArgs.driveID)
+                inDriveRoot -> File(driveId = navigationArgs.driveId, type = File.Type.DRIVE.value)
+                else -> File(id = folderId, name = folderName, driveId = navigationArgs.driveId)
             }
         )
         setNoFilesLayout = SetNoFilesLayout()
@@ -99,9 +99,9 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
     private fun openSharedWithMeFolder(file: File) {
         safeNavigate(
             SharedWithMeFragmentDirections.actionSharedWithMeFragmentSelf(
-                folderID = if (file.isDrive()) ROOT_ID else file.id,
+                folderId = if (file.isDrive()) ROOT_ID else file.id,
                 folderName = file.name,
-                driveID = file.driveId
+                driveId = file.driveId
             )
         )
     }

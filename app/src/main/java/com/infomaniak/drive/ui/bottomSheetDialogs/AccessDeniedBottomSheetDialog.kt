@@ -66,7 +66,7 @@ class AccessDeniedBottomSheetDialog : InformationBottomSheetDialog() {
                             apiResponse.data?.let { file ->
                                 safeNavigate(
                                     AccessDeniedBottomSheetDialogDirections.actionAccessDeniedBottomSheetFragmentToFileListFragment(
-                                        folderID = file.id,
+                                        folderId = file.id,
                                         folderName = file.name
                                     )
                                 )

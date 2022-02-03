@@ -211,8 +211,8 @@ object AccountUtils : CredentialManager {
         }
     }
 
-    suspend fun getHttpClientUser(userID: Int, timeout: Long?, onRefreshTokenError: (user: User) -> Unit): OkHttpClient {
-        var user = getUserById(userID)
+    suspend fun getHttpClientUser(userId: Int, timeout: Long?, onRefreshTokenError: (user: User) -> Unit): OkHttpClient {
+        var user = getUserById(userId)
         return OkHttpClient.Builder().apply {
             if (BuildConfig.DEBUG) {
                 addNetworkInterceptor(StethoInterceptor())
@@ -226,7 +226,7 @@ object AccountUtils : CredentialManager {
             val tokenInterceptorListener = object : TokenInterceptorListener {
                 override suspend fun onRefreshTokenSuccess(apiToken: ApiToken) {
                     setUserToken(user, apiToken)
-                    if (currentUserId == userID) {
+                    if (currentUserId == userId) {
                         currentUser = user
                     }
                 }
@@ -238,7 +238,7 @@ object AccountUtils : CredentialManager {
                 }
 
                 override suspend fun getApiToken(): ApiToken {
-                    user = getUserById(userID)
+                    user = getUserById(userId)
                     return user?.apiToken!!
                 }
             }

@@ -186,7 +186,7 @@ object FileController {
         realm: Realm? = null,
         userDrive: UserDrive? = null,
         context: Context,
-        onSuccess: ((fileID: Int) -> Unit)? = null
+        onSuccess: ((fileId: Int) -> Unit)? = null
     ): ApiResponse<CancellableAction> {
         val apiResponse = ApiRepository.deleteFile(file)
         if (apiResponse.isSuccess()) {
@@ -325,27 +325,27 @@ object FileController {
 
     /**
      * Delete all drive data cache for ne user
-     * @param userID User ID
-     * @param driveID Drive ID (null if all user drive)
+     * @param userId User Id
+     * @param driveId Drive Id (null if all user drive)
      */
-    fun deleteUserDriveFiles(userID: Int, driveID: Int? = null) {
+    fun deleteUserDriveFiles(userId: Int, driveId: Int? = null) {
         val filesDir = Realm.getApplicationContext()!!.filesDir
         filesDir.listFiles()?.forEach { file ->
             val match = Regex("(\\d+)-(\\d+)").find(file.name)
             match?.destructured?.let {
                 val (fileUserId, fileDriveId) = it
-                if (fileUserId.toInt() == userID && (driveID == null || fileDriveId.toInt() == driveID)) {
+                if (fileUserId.toInt() == userId && (driveId == null || fileDriveId.toInt() == driveId)) {
                     if (file.isDirectory) file.deleteRecursively() else file.delete()
                 }
             }
         }
     }
 
-    fun getFilesFromCache(folderID: Int, userDrive: UserDrive? = null, order: SortType = SortType.NAME_AZ): ArrayList<File> {
+    fun getFilesFromCache(folderId: Int, userDrive: UserDrive? = null, order: SortType = SortType.NAME_AZ): ArrayList<File> {
         return getRealmInstance(userDrive).use { currentRealm ->
             currentRealm
                 .where(File::class.java)
-                .equalTo(File::id.name, folderID)
+                .equalTo(File::id.name, folderId)
                 .findFirst()?.children?.where()?.getSortQueryByOrder(order)?.findAll()?.let { children ->
                     ArrayList(currentRealm.copyFromRealm(children, 0))
                 }
@@ -880,9 +880,9 @@ object FileController {
         }
     }
 
-    fun addFileTo(parentFolderID: Int, file: File, userDrive: UserDrive? = null) {
+    fun addFileTo(parentFolderId: Int, file: File, userDrive: UserDrive? = null) {
         getRealmInstance(userDrive).use { realm ->
-            val localFolder = realm.where(File::class.java).equalTo(File::id.name, parentFolderID).findFirst()
+            val localFolder = realm.where(File::class.java).equalTo(File::id.name, parentFolderId).findFirst()
             if (localFolder != null) {
                 realm.executeTransaction {
                     localFolder.children.add(file)

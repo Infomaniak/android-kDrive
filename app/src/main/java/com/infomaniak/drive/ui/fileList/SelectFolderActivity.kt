@@ -39,9 +39,9 @@ class SelectFolderActivity : BaseActivity() {
 
     companion object {
         const val SELECT_FOLDER_REQUEST = 42
-        const val USER_ID_TAG = "userID"
-        const val USER_DRIVE_ID_TAG = "userDriveID"
-        const val FOLDER_ID_TAG = "folderID"
+        const val USER_ID_TAG = "userId"
+        const val USER_DRIVE_ID_TAG = "userDriveId"
+        const val FOLDER_ID_TAG = "folderId"
         const val FOLDER_NAME_TAG = "folderNAME"
         const val DISABLE_SELECTED_FOLDER_TAG = "disableSelectedFolder"
         const val CUSTOM_ARGS_TAG = "customArgs"
@@ -50,14 +50,14 @@ class SelectFolderActivity : BaseActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val userID = intent.extras?.getInt(USER_ID_TAG) ?: throw MissingFormatArgumentException(USER_ID_TAG)
-        val driveID = intent.extras?.getInt(USER_DRIVE_ID_TAG) ?: throw MissingFormatArgumentException(USER_DRIVE_ID_TAG)
+        val userId = intent.extras?.getInt(USER_ID_TAG) ?: throw MissingFormatArgumentException(USER_ID_TAG)
+        val driveId = intent.extras?.getInt(USER_DRIVE_ID_TAG) ?: throw MissingFormatArgumentException(USER_DRIVE_ID_TAG)
         val customArgs = intent.extras?.getBundle(CUSTOM_ARGS_TAG)
-        val userDrive = UserDrive(userID, driveID)
+        val userDrive = UserDrive(userId, driveId)
 
         mainViewModel.selectFolderUserDrive = userDrive
         saveExternalViewModel.userDrive = userDrive
-        saveExternalViewModel.currentDrive = DriveInfosController.getDrives(userID, driveID).firstOrNull()
+        saveExternalViewModel.currentDrive = DriveInfosController.getDrives(userId, driveId).firstOrNull()
         saveExternalViewModel.disableSelectedFolder = intent.extras?.getInt(DISABLE_SELECTED_FOLDER_TAG)
 
         super.onCreate(savedInstanceState)
@@ -67,7 +67,7 @@ class SelectFolderActivity : BaseActivity() {
             val currentFragment = hostFragment.childFragmentManager.fragments.first() as SelectFolderFragment
 
             val intent = Intent().apply {
-                putExtra(FOLDER_ID_TAG, currentFragment.folderID)
+                putExtra(FOLDER_ID_TAG, currentFragment.folderId)
                 putExtra(FOLDER_NAME_TAG, currentFragment.folderName)
                 putExtra(CUSTOM_ARGS_TAG, customArgs)
             }

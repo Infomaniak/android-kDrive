@@ -340,8 +340,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) {
-        val folderID = mainViewModel.currentFolder.value?.id
-        mainViewModel.duplicateFile(currentPreviewFile, folderID, result).observe(viewLifecycleOwner) { apiResponse ->
+        val folderId = mainViewModel.currentFolder.value?.id
+        mainViewModel.duplicateFile(currentPreviewFile, folderId, result).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 apiResponse.data?.let { file ->
                     mainViewModel.currentPreviewFileList[file.id] = file
@@ -401,7 +401,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             safeNavigate(
                 PreviewSliderFragmentDirections
                     .actionPreviewSliderFragmentToDownloadProgressDialog(
-                        fileID = currentPreviewFile.id,
+                        fileId = currentPreviewFile.id,
                         fileName = currentPreviewFile.name,
                         userDrive = userDrive
                     )

@@ -34,9 +34,9 @@ class MySharesFragment : FileSubTypeListFragment() {
     override var allowCancellation: Boolean = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        if (folderID == ROOT_ID) {
+        if (folderId == ROOT_ID) {
             downloadFiles = DownloadFiles()
-            folderID = OTHER_ROOT_ID
+            folderId = OTHER_ROOT_ID
         }
         setNoFilesLayout = SetNoFilesLayout()
         super.onViewCreated(view, savedInstanceState)

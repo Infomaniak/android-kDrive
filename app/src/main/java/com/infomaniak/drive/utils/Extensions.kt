@@ -640,7 +640,7 @@ fun Fragment.navigateToUploadView(folderId: Int, folderName: String? = null) {
     safeNavigate(
         R.id.uploadInProgressFragment,
         UploadInProgressFragmentArgs(
-            folderID = folderId,
+            folderId = folderId,
             folderName = folderName ?: getString(R.string.uploadInProgressTitle),
         ).toBundle(),
     )

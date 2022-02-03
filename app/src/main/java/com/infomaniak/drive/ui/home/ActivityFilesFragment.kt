@@ -90,7 +90,7 @@ class ActivityFilesFragment : FileListFragment() {
             if (file.isFolder()) {
                 safeNavigate(
                     ActivityFilesFragmentDirections.actionActivityFilesFragmentToFileListFragment(
-                        folderID = file.id,
+                        folderId = file.id,
                         folderName = file.name
                     )
                 )

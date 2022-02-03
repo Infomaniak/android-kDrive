@@ -52,8 +52,8 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
     override suspend fun doWork(): Result {
         val fileId = inputData.getInt(FILE_ID, 0)
         val userId = inputData.getInt(USER_ID, AccountUtils.currentUserId)
-        val driveID = inputData.getInt(DRIVE_ID, AccountUtils.currentDriveId)
-        val userDrive = UserDrive(userId, driveID)
+        val driveId = inputData.getInt(DRIVE_ID, AccountUtils.currentDriveId)
+        val userDrive = UserDrive(userId, driveId)
         val file = FileController.getFileById(fileId, userDrive)
         val offlineFile = file?.getOfflineFile(applicationContext, userId)
 
@@ -142,10 +142,10 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
         } else Result.failure()
     }
 
-    private fun notifyDownloadCancelled(fileID: Int) {
+    private fun notifyDownloadCancelled(fileId: Int) {
         Intent().apply {
             action = DownloadReceiver.TAG
-            putExtra(DownloadReceiver.CANCELLED_FILE_ID, fileID)
+            putExtra(DownloadReceiver.CANCELLED_FILE_ID, fileId)
             LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(this)
         }
     }

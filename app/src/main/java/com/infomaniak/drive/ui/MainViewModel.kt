@@ -191,7 +191,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    fun moveFile(file: File, newParent: File, onSuccess: ((fileID: Int) -> Unit)? = null) = liveData(Dispatchers.IO) {
+    fun moveFile(file: File, newParent: File, onSuccess: ((fileId: Int) -> Unit)? = null) = liveData(Dispatchers.IO) {
         val apiResponse = ApiRepository.moveFile(file, newParent)
         if (apiResponse.isSuccess()) {
             FileController.getRealmInstance().use { realm ->
@@ -220,7 +220,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         emit(FileController.updateFolderColor(file, color))
     }
 
-    fun deleteFile(file: File, userDrive: UserDrive? = null, onSuccess: ((fileID: Int) -> Unit)? = null) =
+    fun deleteFile(file: File, userDrive: UserDrive? = null, onSuccess: ((fileId: Int) -> Unit)? = null) =
         liveData(Dispatchers.IO) {
             emit(FileController.deleteFile(file, userDrive = userDrive, context = getContext(), onSuccess = onSuccess))
         }

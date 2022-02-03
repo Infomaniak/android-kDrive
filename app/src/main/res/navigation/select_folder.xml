@@ -27,7 +27,7 @@
         android:label="@string/app_name"
         tools:layout="@layout/fragment_file_list">
         <argument
-            android:name="folderID"
+            android:name="folderId"
             app:argType="integer" />
         <argument
             android:name="folderName"

@@ -78,9 +78,9 @@ open class CreateFolderFragment : Fragment() {
     }
 
     protected fun saveNewFolder(newFolder: File) {
-        mainViewModel.currentFolder.value?.id?.let { parentFolderID ->
+        mainViewModel.currentFolder.value?.id?.let { parentFolderId ->
             runBlocking(Dispatchers.IO) {
-                newFolderViewModel.saveNewFolder(parentFolderID, newFolder)
+                newFolderViewModel.saveNewFolder(parentFolderId, newFolder)
             }
         }
         mainViewModel.currentFolder.value = newFolder

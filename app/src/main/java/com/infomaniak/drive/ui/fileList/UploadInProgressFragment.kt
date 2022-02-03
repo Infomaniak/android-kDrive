@@ -75,7 +75,7 @@ class UploadInProgressFragment : FileListFragment() {
 
         val fromPendingFolders = findNavController().previousBackStackEntry?.destination?.id == R.id.uploadInProgressFragment
         collapsingToolbarLayout.title =
-            if (folderID > 0 && fromPendingFolders) folderName else getString(R.string.uploadInProgressTitle)
+            if (folderId > 0 && fromPendingFolders) folderName else getString(R.string.uploadInProgressTitle)
 
         requireContext().trackUploadWorkerProgress().observe(viewLifecycleOwner) {
             val workInfo = it.firstOrNull() ?: return@observe
@@ -85,7 +85,7 @@ class UploadInProgressFragment : FileListFragment() {
             val remoteFolderId = workInfo.progress.getInt(UploadWorker.REMOTE_FOLDER_ID, 0)
             val position = fileAdapter.indexOf(fileName)
 
-            if (folderID == remoteFolderId && position >= 0 || isPendingFolders()) {
+            if (folderId == remoteFolderId && position >= 0 || isPendingFolders()) {
                 if (isUploaded) {
                     if (!isPendingFolders()) whenAnUploadIsDone(position, fileAdapter.fileList[position].id)
                     fileListViewModel.currentAdapterPendingFiles.value = fileAdapter.getFileObjectsList(null)
@@ -177,7 +177,7 @@ class UploadInProgressFragment : FileListFragment() {
     override fun onCloseItemsClicked() {
         val title = getString(R.string.uploadInProgressCancelAllUploadTitle)
         Utils.createConfirmation(requireContext(), title) {
-            closeItemClicked(folderId = folderID)
+            closeItemClicked(folderId = folderId)
         }
     }
 
@@ -211,7 +211,7 @@ class UploadInProgressFragment : FileListFragment() {
         }
     }
 
-    private fun isPendingFolders() = folderID == Utils.OTHER_ROOT_ID
+    private fun isPendingFolders() = folderId == Utils.OTHER_ROOT_ID
 
     private fun popBackStack() {
         mainViewModel.refreshActivities.value = true
@@ -321,7 +321,7 @@ class UploadInProgressFragment : FileListFragment() {
         }
 
         private fun downloadPendingFilesByFolderId() {
-            UploadFile.getCurrentUserPendingUploads(realmUpload, folderID)?.let { currentUserPendingUploads ->
+            UploadFile.getCurrentUserPendingUploads(realmUpload, folderId)?.let { currentUserPendingUploads ->
                 val files = arrayListOf<File>()
                 currentUserPendingUploads.forEach { uploadFile ->
                     val uri = uploadFile.getUriObject()

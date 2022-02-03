@@ -189,7 +189,7 @@ class SearchFragment : FileListFragment() {
                 searchViewModel.cancelDownloadFiles()
                 safeNavigate(
                     SearchFragmentDirections.actionSearchFragmentToFileListFragment(
-                        folderID = file.id,
+                        folderId = file.id,
                         folderName = file.name,
                         shouldHideBottomNavigation = true,
                     )
