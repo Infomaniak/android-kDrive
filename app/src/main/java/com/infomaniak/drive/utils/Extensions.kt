@@ -285,7 +285,14 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
     filePreview.scaleType = ImageView.ScaleType.CENTER
 
     when {
-        file.isFolder() -> filePreview.loadGlide(file.getFolderIcon(context))
+        file.isFolder() -> {
+            val (icon, tint) = file.getFolderIcon()
+            if (tint == null) {
+                filePreview.loadGlide(icon)
+            } else {
+                filePreview.loadGlide(context.getTintedDrawable(icon, tint))
+            }
+        }
         file.isDrive() -> filePreview.loadGlide(context.getTintedDrawable(R.drawable.ic_drive, file.driveColor))
         else -> {
             when {
@@ -788,7 +795,6 @@ fun Context.getTintedDrawable(drawableId: Int, colorString: String): Drawable? {
 
 fun Context.getTintedDrawable(drawableId: Int, colorInt: Int): Drawable? {
     return ContextCompat.getDrawable(this, drawableId)
-        ?.mutate() // Mutate the drawable, so it won't change the tint when we use the same resource elsewhere.
         ?.apply { setTint(colorInt) }
 }
 
@@ -832,22 +838,17 @@ fun MaterialCardView.setCornersRadius(topCornerRadius: Float, bottomCornerRadius
  * This is not the only method in this case, search this comment in the project, and you'll see.
  * Realm's Github issue: https://github.com/realm/realm-java/issues/7637
  */
-fun File.getFolderIcon(context: Context): Drawable? {
-    return if (isFolder()) {
-        val icon: Any? = when (getVisibilityType()) {
-            VisibilityType.IS_TEAM_SPACE -> R.drawable.ic_folder_common_documents
-            VisibilityType.IS_SHARED_SPACE -> R.drawable.ic_folder_shared
-            VisibilityType.IS_COLLABORATIVE_FOLDER -> context.getTintedDrawable(R.drawable.ic_folder_dropbox, color)
-            else -> {
-                if (isDisabled()) {
-                    R.drawable.ic_folder_disable
-                } else {
-                    context.getTintedDrawable(R.drawable.ic_folder_filled, color)
-                }
+fun File.getFolderIcon(): Pair<Int, String?> {
+    return when (getVisibilityType()) {
+        VisibilityType.IS_TEAM_SPACE -> R.drawable.ic_folder_common_documents to null
+        VisibilityType.IS_SHARED_SPACE -> R.drawable.ic_folder_shared to null
+        VisibilityType.IS_COLLABORATIVE_FOLDER -> R.drawable.ic_folder_dropbox_tintable to color
+        else -> {
+            if (isDisabled()) {
+                R.drawable.ic_folder_disable to null
+            } else {
+                R.drawable.ic_folder_filled_tintable to color
             }
         }
-        if (icon is Int) ContextCompat.getDrawable(context, icon) else (icon as Drawable)
-    } else {
-        null
     }
 }

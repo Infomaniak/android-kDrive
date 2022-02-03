@@ -152,7 +152,7 @@ class SearchFiltersFragment : Fragment() {
             typeFilterText.setText(it.searchFilterName)
         } ?: run {
             val icFile = requireContext().getTintedDrawable(
-                drawableId = R.drawable.ic_file,
+                drawableId = R.drawable.ic_file_tintable,
                 colorInt = ContextCompat.getColor(requireContext(), R.color.iconColor),
             )
             typeFilterStartIcon.setImageDrawable(icFile)

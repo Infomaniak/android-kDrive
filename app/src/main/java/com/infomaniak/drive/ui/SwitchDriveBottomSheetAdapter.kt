@@ -17,6 +17,8 @@
  */
 package com.infomaniak.drive.ui
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -24,7 +26,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.getTintedDrawable
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.*
 
@@ -43,11 +44,14 @@ class SwitchDriveBottomSheetAdapter(
         val drive = driveList[position]
 
         itemSelectIcon.apply {
-            setImageDrawable(context.getTintedDrawable(R.drawable.ic_drive, drive.preferences.color))
+            setImageResource(R.drawable.ic_drive)
+            imageTintList = ColorStateList.valueOf(Color.parseColor(drive.preferences.color))
             isVisible = true
         }
+
         itemSelectText.text = drive.name
         itemSelectActiveIcon.isVisible = drive.id == AccountUtils.currentDriveId
+
         setOnClickListener { onItemClicked(drive) }
     }
 }

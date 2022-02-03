@@ -18,10 +18,10 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
-    android:tint="@color/secondaryText"
+    android:tint="#9E9E9E"
     android:viewportWidth="24"
     android:viewportHeight="24">
     <path
         android:fillColor="#fff"
-        android:pathData="M22.5,5H11.236a0.5,0.5 0,0 1,-0.447 -0.276l-0.947,-1.9A1.494,1.494 0,0 0,8.5 2h-7A1.5,1.5 0,0 0,0 3.5v17A1.5,1.5 0,0 0,1.5 22h21a1.5,1.5 0,0 0,1.5 -1.5v-14A1.5,1.5 0,0 0,22.5 5z" />
+        android:pathData="M15.318,2.146l4.536,4.536a0.5,0.5 0,0 1,0.146 0.353V21.5a0.5,0.5 0,0 1,-0.5 0.5h-15a0.5,0.5 0,0 1,-0.5 -0.5v-19a0.5,0.5 0,0 1,0.5 -0.5h10.465a0.5,0.5 0,0 1,0.353 0.146zM15.586,0H4a2,2 0,0 0,-2 2v20a2,2 0,0 0,2 2h16a2,2 0,0 0,2 -2V6.414a1,1 0,0 0,-0.293 -0.707L16.293,0.293A1,1 0,0 0,15.586 0z" />
 </vector>
