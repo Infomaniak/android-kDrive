@@ -21,7 +21,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -38,6 +37,7 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.ui.menu.PicturesFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.TabViewPagerUtils.getFragment
@@ -106,7 +106,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         val offlineFragment = HomeOfflineFragment().apply {
-            arguments = bundleOf("folderId" to 1, "folderName" to "")
+            arguments = FileListFragmentArgs(folderId = 1, folderName = "").toBundle()
         }
         val tabsHome = arrayListOf(
             TabViewPagerUtils.FragmentTab(HomeActivitiesFragment(), R.id.homeActivitiesButton),
