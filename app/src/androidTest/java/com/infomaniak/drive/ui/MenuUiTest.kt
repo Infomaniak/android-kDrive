@@ -64,10 +64,10 @@ class MenuUiTest : KDriveTest() {
                 findObject(UiSelector().text("CONNEXION")).clickAndWaitForNewWindow(6000)
             }
 
-            assert(AccountUtils.currentUserId == Env.NEW_USER_ID) { "User Id should be ${Env.NEW_USER_ID} but is ${AccountUtils.currentUserId}" }
             // Close the bottom sheet displayed for categories information
             closeBottomSheetInfoModalIfDisplayed(true)
             getDeviceViewById("menuFragment").clickAndWaitForNewWindow(2000)
+            assert(AccountUtils.currentUserId == Env.NEW_USER_ID) { "User Id should be ${Env.NEW_USER_ID} but is ${AccountUtils.currentUserId}" }
             swipeDownNestedScrollView()
             getDeviceViewById("logout").clickAndWaitForNewWindow()
             findObject(UiSelector().text(UiTestUtils.context.getString(R.string.buttonConfirm))).clickAndWaitForNewWindow()

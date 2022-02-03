@@ -274,7 +274,6 @@ class ApiRepositoryTest : KDriveTest() {
         @Test
         @DisplayName("Check if the file activities are correctly retrieved")
         fun getFileActivities() {
-            renameFile(testFile, "new name")
             assertApiResponseData(getFileActivities(testFile, 1))
         }
 
