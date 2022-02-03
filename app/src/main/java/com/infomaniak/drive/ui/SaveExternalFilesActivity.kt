@@ -35,7 +35,7 @@ import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.UISettings
+import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
@@ -88,7 +88,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(it.preferences.color))
                 driveName.text = it.name
                 saveButton.isEnabled = false
-                UISettings(this).getSaveExternalFilesPref().let { (userId, driveId, folderId) ->
+                UiSettings(this).getSaveExternalFilesPref().let { (userId, driveId, folderId) ->
                     saveExternalFilesViewModel.folderId.value =
                         if (userId == selectDriveViewModel.selectedUserId.value && driveId == it.id) folderId else null
                 }
@@ -140,7 +140,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 val driveId = selectDriveViewModel.selectedDrive.value?.id!!
                 val folderId = saveExternalFilesViewModel.folderId.value!!
 
-                UISettings(this).setSaveExternalFilesPref(userId, driveId, folderId)
+                UiSettings(this).setSaveExternalFilesPref(userId, driveId, folderId)
                 lifecycleScope.launch(Dispatchers.IO) {
                     if (storeFiles(userId, driveId, folderId)) {
                         syncImmediately()
@@ -195,7 +195,7 @@ class SaveExternalFilesActivity : BaseActivity() {
         val currentUserDrives = DriveInfosController.getDrives(AccountUtils.currentUserId)
         if (currentUserDrives.size > 1) activeSelectDrive()
 
-        var (userId, driveId) = UISettings(this).getSaveExternalFilesPref()
+        var (userId, driveId) = UiSettings(this).getSaveExternalFilesPref()
         var drive = DriveInfosController.getDrives(userId, driveId).firstOrNull()
         if (drive == null) {
             userId = AccountUtils.currentUserId

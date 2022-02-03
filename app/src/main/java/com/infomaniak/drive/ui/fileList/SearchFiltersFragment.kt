@@ -70,7 +70,7 @@ class SearchFiltersFragment : Fragment() {
             if (categoriesOwnership == null) categoriesOwnership = searchViewModel.categoriesOwnershipFilter
         }
 
-        updateAllFiltersUI()
+        updateAllFiltersUi()
     }
 
     private fun handleCategoryRights() = with(categoryRights.canReadCategoryOnFile) {
@@ -94,7 +94,7 @@ class SearchFiltersFragment : Fragment() {
     private fun setCategoriesOwnershipFilters() {
         fun update(categoriesOwnershipFilter: SearchCategoriesOwnershipFilter) {
             searchFiltersViewModel.categoriesOwnership = categoriesOwnershipFilter
-            updateCategoriesOwnershipUI()
+            updateCategoriesOwnershipUi()
         }
         belongToAllCategoriesFilter.setOnClickListener { update(SearchCategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES) }
         belongToOneCategoryFilter.setOnClickListener { update(SearchCategoriesOwnershipFilter.BELONG_TO_ONE_CATEGORY) }
@@ -103,7 +103,7 @@ class SearchFiltersFragment : Fragment() {
     private fun setClearButton() {
         clearButton.setOnClickListener {
             searchFiltersViewModel.clearFilters()
-            updateAllFiltersUI()
+            updateAllFiltersUi()
         }
     }
 
@@ -118,8 +118,8 @@ class SearchFiltersFragment : Fragment() {
     }
 
     private fun listenToFiltersUpdates() = with(searchFiltersViewModel) {
-        date.observe(viewLifecycleOwner) { updateDateUI() }
-        type.observe(viewLifecycleOwner) { updateTypeUI() }
+        date.observe(viewLifecycleOwner) { updateDateUi() }
+        type.observe(viewLifecycleOwner) { updateTypeUi() }
 
         getBackNavigationResult<List<Int>>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
             if (it.isEmpty()) {
@@ -129,24 +129,24 @@ class SearchFiltersFragment : Fragment() {
                 categories = DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray())
                 if (categoriesOwnership == null) categoriesOwnership = SearchCategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES
             }
-            updateCategoriesUI()
-            updateCategoriesOwnershipUI()
+            updateCategoriesUi()
+            updateCategoriesOwnershipUi()
         }
     }
 
-    private fun updateAllFiltersUI() {
-        updateDateUI()
-        updateTypeUI()
-        updateCategoriesUI()
-        updateCategoriesOwnershipUI()
+    private fun updateAllFiltersUi() {
+        updateDateUi()
+        updateTypeUi()
+        updateCategoriesUi()
+        updateCategoriesOwnershipUi()
     }
 
-    private fun updateDateUI() = with(dateFilterText) {
+    private fun updateDateUi() = with(dateFilterText) {
         searchFiltersViewModel.date.value?.let { text = it.text }
             ?: run { setText(R.string.searchFiltersSelectDate) }
     }
 
-    private fun updateTypeUI() {
+    private fun updateTypeUi() {
         searchFiltersViewModel.type.value?.let {
             typeFilterStartIcon.setImageResource(it.icon)
             typeFilterText.setText(it.searchFilterName)
@@ -160,7 +160,7 @@ class SearchFiltersFragment : Fragment() {
         }
     }
 
-    private fun updateCategoriesUI() {
+    private fun updateCategoriesUi() {
         val categories = searchFiltersViewModel.categories ?: emptyList()
         categoriesContainer.setup(
             categories = categories,
@@ -177,7 +177,7 @@ class SearchFiltersFragment : Fragment() {
         )
     }
 
-    private fun updateCategoriesOwnershipUI() = with(searchFiltersViewModel) {
+    private fun updateCategoriesOwnershipUi() = with(searchFiltersViewModel) {
         val isVisible = categories?.isNotEmpty() == true
         belongToAllCategoriesFilter.isVisible = isVisible
         belongToOneCategoryFilter.isVisible = isVisible

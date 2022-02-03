@@ -91,7 +91,7 @@ class SearchFragment : FileListFragment() {
 
     override fun onStop() {
         searchViewModel.previousSearch = searchView.text.toString()
-        UISettings(requireContext()).recentSearches = recentSearchesAdapter.searches
+        UiSettings(requireContext()).recentSearches = recentSearchesAdapter.searches
         super.onStop()
     }
 
@@ -136,7 +136,7 @@ class SearchFragment : FileListFragment() {
     }
 
     private fun observeVisibilityModeUpdates() {
-        searchViewModel.visibilityMode.observe(viewLifecycleOwner) { updateUI(it) }
+        searchViewModel.visibilityMode.observe(viewLifecycleOwner) { updateUi(it) }
     }
 
     private fun configureClearButtonListener() {
@@ -204,7 +204,7 @@ class SearchFragment : FileListFragment() {
     private fun configureRecentSearches() {
         fileListLayout.addView(recentSearchesView, 1)
 
-        val recentSearches = UISettings(requireContext()).recentSearches
+        val recentSearches = UiSettings(requireContext()).recentSearches
 
         recentSearchesAdapter = RecentSearchesAdapter(
             searches = ArrayList(recentSearches),
@@ -340,7 +340,7 @@ class SearchFragment : FileListFragment() {
         triggerSearch()
     }
 
-    private fun updateUI(mode: VisibilityMode) {
+    private fun updateUi(mode: VisibilityMode) {
 
         fun displayRecentSearches() {
             recentSearchesView.isVisible = true

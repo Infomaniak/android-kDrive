@@ -27,7 +27,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.AppSettings
-import com.infomaniak.drive.data.models.UISettings
+import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.MqttClientWrapper
@@ -270,7 +270,7 @@ object AccountUtils : CredentialManager {
     private fun resetApp(context: Context) {
         if (getAllUserCount() == 0) {
             AppSettings.removeAppSettings()
-            UISettings(context).removeUiSettings()
+            UiSettings(context).removeUiSettings()
 
             if (isEnableAppSync()) {
                 Sentry.captureMessage("AccountUtils: disableAutoSync")

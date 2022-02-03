@@ -135,7 +135,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (!fileListViewModel.sortTypeIsInitialized()) {
-            fileListViewModel.sortType = UISettings(requireContext()).sortType
+            fileListViewModel.sortType = UiSettings(requireContext()).sortType
         }
     }
 
@@ -515,8 +515,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun setupToggleDisplayButton() {
         toggleDisplayButton.setOnClickListener {
-            val newListMode = !UISettings(requireContext()).listMode
-            UISettings(requireContext()).listMode = newListMode
+            val newListMode = !UiSettings(requireContext()).listMode
+            UiSettings(requireContext()).listMode = newListMode
             fileListViewModel.isListMode.value = newListMode
         }
     }
@@ -524,7 +524,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun setupListMode() {
         fileListViewModel.isListMode.apply {
             observe(viewLifecycleOwner) { setupDisplayMode(it) }
-            value = UISettings(requireContext()).listMode
+            value = UiSettings(requireContext()).listMode
         }
     }
 
@@ -878,7 +878,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
                 downloadFiles(fileListViewModel.isSharedWithMe, true)
 
-                UISettings(requireContext()).sortType = newSortType
+                UiSettings(requireContext()).sortType = newSortType
                 refreshActivities()
             }
         }

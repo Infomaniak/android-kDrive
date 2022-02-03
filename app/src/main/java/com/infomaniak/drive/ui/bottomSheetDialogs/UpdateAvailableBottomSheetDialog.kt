@@ -20,7 +20,7 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 import android.os.Bundle
 import android.view.View
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.UISettings
+import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.lib.core.utils.gotToPlaystore
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 
@@ -33,13 +33,13 @@ class UpdateAvailableBottomSheetDialog : InformationBottomSheetDialog() {
         illu.setAnimation(R.raw.illu_upgrade)
 
         secondaryActionButton.setOnClickListener {
-            UISettings(requireContext()).updateLater = true
+            UiSettings(requireContext()).updateLater = true
             dismiss()
         }
 
         actionButton.setText(R.string.buttonUpdate)
         actionButton.setOnClickListener {
-            UISettings(requireContext()).updateLater = false
+            UiSettings(requireContext()).updateLater = false
             requireContext().gotToPlaystore()
             dismiss()
         }

@@ -92,7 +92,7 @@ open class ManageDropboxFragment : Fragment() {
 
                 mainViewModel.getDropBox(file).observe(viewLifecycleOwner) { apiResponse ->
                     if (apiResponse?.isSuccess() == true) {
-                        apiResponse.data?.let { updateUI(file, it) }
+                        apiResponse.data?.let { updateUi(file, it) }
                     } else {
                         requireActivity().showSnackbar(apiResponse.translateError())
                     }
@@ -102,7 +102,7 @@ open class ManageDropboxFragment : Fragment() {
         }
     }
 
-    protected fun updateUI(file: File, dropBox: DropBox?) {
+    protected fun updateUi(file: File, dropBox: DropBox?) {
         currentDropBox = dropBox?.apply { initLocalValue() }
 
         dropBox?.let {
