@@ -148,8 +148,7 @@ class MainActivity : BaseActivity() {
                     message = "Upload notification has been clicked"
                     level = SentryLevel.INFO
                 })
-                navController.navigate(R.id.fileListFragment)
-                mainViewModel.intentShowProgressByFolderId.value = folderId
+                mainViewModel.navigateFileListToFolderId(navController, folderId)
             }
         }
 
@@ -161,7 +160,7 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        LiveDataNetworkStatus(this).observe(this, { isAvailable ->
+        LiveDataNetworkStatus(this).observe(this) { isAvailable ->
             Log.d("Internet availability", if (isAvailable) "Available" else "Unavailable")
             Sentry.addBreadcrumb(Breadcrumb().apply {
                 category = "Network"
@@ -174,7 +173,7 @@ class MainActivity : BaseActivity() {
                     AccountUtils.updateCurrentUserAndDrives(this@MainActivity)
                 }
             }
-        })
+        }
 
         navController.addOnDestinationChangedListener { _, destination, navigationArgs ->
             onDestinationChanged(destination, navigationArgs)

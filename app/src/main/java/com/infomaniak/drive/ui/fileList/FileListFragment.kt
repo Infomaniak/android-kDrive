@@ -147,7 +147,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
         }
 
-        mainViewModel.intentShowProgressByFolderId.observe(viewLifecycleOwner) {
+        mainViewModel.navigateFileListToFolderId.observe(viewLifecycleOwner) {
             it?.let { intentFolderId ->
                 FileController.getFileById(intentFolderId)?.let { file ->
                     safeNavigate(
@@ -300,6 +300,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onStop() {
         fileAdapter.removeRealmDataListener()
+        isDownloading = false
         super.onStop()
     }
 

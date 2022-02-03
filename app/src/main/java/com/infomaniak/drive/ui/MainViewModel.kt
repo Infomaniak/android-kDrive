@@ -23,11 +23,13 @@ import android.content.Context
 import android.provider.MediaStore
 import androidx.collection.arrayMapOf
 import androidx.lifecycle.*
+import androidx.navigation.NavController
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.google.gson.JsonObject
 import com.infomaniak.drive.ApplicationMain
+import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
@@ -60,7 +62,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     val createDropBoxSuccess = SingleLiveEvent<DropBox>()
 
-    val intentShowProgressByFolderId = SingleLiveEvent<Int>()
+    val navigateFileListToFolderId = SingleLiveEvent<FileId>()
 
     val deleteFileFromHome = SingleLiveEvent<Boolean>()
     val refreshActivities = SingleLiveEvent<Boolean>()
@@ -74,6 +76,11 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     private var lastModifiedTime: Long = 0
 
     private fun getContext() = getApplication<ApplicationMain>()
+
+    fun navigateFileListToFolderId(navController: NavController, folderId: Int) {
+        navController.navigate(R.id.fileListFragment)
+        if (folderId > Utils.ROOT_ID) navigateFileListToFolderId.value = folderId
+    }
 
     fun createMultiSelectMediator(): MediatorLiveData<Pair<Int, Int>> {
         return MediatorLiveData<Pair<Int, Int>>().apply { value = /*success*/0 to /*total*/0 }

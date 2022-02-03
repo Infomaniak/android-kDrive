@@ -292,11 +292,27 @@
                 android:layout_marginHorizontal="@dimen/marginStandardVerySmall"
                 android:gravity="center_vertical"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/pathLocationButton"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toEndOf="@id/driveIcon"
                 app:layout_constraintTop_toTopOf="@id/driveIcon"
                 tools:text="/" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/pathLocationButton"
+                style="@style/IconButton"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:contentDescription="@string/allPathTitle"
+                android:visibility="gone"
+                app:icon="@drawable/ic_view"
+                app:iconSize="25dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1"
+                app:layout_constraintStart_toEndOf="@id/pathValue"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
