@@ -165,7 +165,7 @@ class FileShareDetailsFragment : Fragment() {
             }
         }
 
-        getBackNavigationResult<ShareableItems>(SHARE_SELECTION_KEY) { (users, _, teams, invitations) ->
+        getBackNavigationResult<ShareableItems>(SHARE_SELECTION_KEY) { (invitations, teams, users) ->
             fileShareViewModel.currentFile.value?.let { currentFile ->
                 file = currentFile
                 sharedItemsAdapter.putAll(ArrayList(invitations + teams + users))
