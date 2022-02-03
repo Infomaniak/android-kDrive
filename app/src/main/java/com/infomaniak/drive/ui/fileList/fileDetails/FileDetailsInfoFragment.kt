@@ -32,6 +32,7 @@ import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.data.models.Share
@@ -64,6 +65,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
             setupCategoriesContainer(file.getCategories())
             displayUsersAvatars()
             setupShareButton()
+            setupPathLocationButton()
 
             if (file.createdAt.isPositive()) {
                 addedDateValue.text = file.getCreatedAt().format(ShareLinkContainerView.formatFullDate)
@@ -123,7 +125,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
     private fun setPath(path: String) {
         val drive = DriveInfosController.getDrives(AccountUtils.currentUserId, driveId = file.driveId).first()
         driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(drive.preferences.color))
-        pathValue.text = "${drive.name}$path"
+        pathValue.text = "${drive.name}${path.substringBeforeLast("/")}"
         pathView.isVisible = true
     }
 
@@ -137,6 +139,19 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
             }
         } else {
             shareButton.isGone = true
+        }
+    }
+
+    private fun setupPathLocationButton() {
+        FileController.getParentFile(this.file.id)?.let { folder ->
+            pathLocationButton.isVisible = true
+            pathLocationButton.setOnClickListener {
+                with(findNavController()) {
+                    popBackStack(R.id.homeFragment, false)
+                    mainViewModel.navigateFileListToFolderId(this, folder.id)
+                }
+
+            }
         }
     }
 
