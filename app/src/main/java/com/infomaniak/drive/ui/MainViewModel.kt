@@ -199,7 +199,11 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
                 FileController.removeFile(file.id, recursive = false, customRealm = realm)
                 FileController.updateFile(newParent.id, realm) { localFolder ->
                     file.isOffline = false
-                    runCatching { localFolder.children.add(file) } // Ignore expired transactions when it's suspended
+                    // Ignore expired transactions when it's suspended
+                    // In case the phone is slow or in standby, the transaction can create an IllegalStateException
+                    // because realm will not be available anymore, the transaction is resumed afterwards
+                    // so we ignore the cases where it fails.
+                    runCatching { localFolder.children.add(file) }
                 }
             }
 
