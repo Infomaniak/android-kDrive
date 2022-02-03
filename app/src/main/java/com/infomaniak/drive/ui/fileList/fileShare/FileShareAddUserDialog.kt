@@ -129,19 +129,19 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                         selectedItemsChipGroup.removeView(it)
                     }
                 }
+                is Team -> {
+                    teams.add(element)
+                    createChip(element).setOnClickListener {
+                        teams.remove(element)
+                        selectedItemsChipGroup.removeView(it)
+                    }
+                }
                 is DriveUser -> {
                     users.add(element)
                     availableUsersAdapter.notShareableUserIds.add(element.id)
                     createChip(element).setOnClickListener {
                         users.remove(element)
                         availableUsersAdapter.notShareableUserIds.remove(element.id)
-                        selectedItemsChipGroup.removeView(it)
-                    }
-                }
-                is Team -> {
-                    teams.add(element)
-                    createChip(element).setOnClickListener {
-                        teams.remove(element)
                         selectedItemsChipGroup.removeView(it)
                     }
                 }
@@ -216,9 +216,9 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
     ) {
         fileShareViewModel.currentFile.value?.let { file ->
             val body = mutableMapOf(
-                "emails" to selectedItems.emails,
-                "user_ids" to ArrayList(selectedItems.users.map { user -> user.id }),
-                "team_ids" to ArrayList(selectedItems.teams.map { team -> team.id }),
+                "emails" to ArrayList(selectedItems.invitations.map { it.email }),
+                "user_ids" to ArrayList(selectedItems.users.map { it.id }),
+                "team_ids" to ArrayList(selectedItems.teams.map { it.id }),
                 "permission" to newPermission
             )
 
