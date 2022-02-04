@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.menu
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isGone
@@ -111,9 +110,7 @@ class PicturesAdapter(
 
                     setOnClickListener {
                         if (multiSelectMode) {
-                            Log.e("pic-sel", "setOnLongClickListener: before - ${pictureChecked.isChecked}")
                             pictureChecked.isChecked = !pictureChecked.isChecked
-                            Log.e("pic-sel", "setOnLongClickListener: after - ${pictureChecked.isChecked}")
                             onSelectedFile(file, pictureChecked.isChecked)
                         } else {
                             onItemClick(file)
@@ -122,9 +119,7 @@ class PicturesAdapter(
 
                     setOnLongClickListener {
                         if (enabledMultiSelectMode) {
-                            Log.e("pic-sel", "setOnLongClickListener: before - ${pictureChecked.isChecked}")
                             pictureChecked.isChecked = !pictureChecked.isChecked
-                            Log.e("pic-sel", "setOnLongClickListener: after - ${pictureChecked.isChecked}")
                             onSelectedFile(file, pictureChecked.isChecked)
                             if (!multiSelectMode) openMultiSelectMode?.invoke()
                             true
@@ -142,8 +137,6 @@ class PicturesAdapter(
     fun getValidItemsSelected() = itemsSelected.filter { it.isUsable() }
 
     private fun onSelectedFile(file: File, isSelected: Boolean) {
-        Log.e("pic-sel", "onSelectedFile: selected: $file, $isSelected")
-
         if (file.isUsable()) {
             when {
                 isSelected -> addSelectedFile(file)

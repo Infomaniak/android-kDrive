@@ -42,7 +42,6 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialogArgs
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionPicturesMultiSelectBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity

@@ -18,10 +18,8 @@
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import android.app.Application
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,8 +35,6 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.BulkOperationType
-import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.menu.PicturesFragment
 import com.infomaniak.drive.utils.*
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_action_multi_select.*
@@ -122,7 +118,6 @@ class ActionPicturesMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun onActionSelected(type: SelectDialogAction? = null) {
-        Log.e("photo", "onActionSelected: $type")
         val finalType = when (type) {
             SelectDialogAction.ADD_FAVORITES -> BulkOperationType.ADD_FAVORITES
             SelectDialogAction.OFFLINE -> BulkOperationType.SET_OFFLINE
@@ -134,10 +129,7 @@ class ActionPicturesMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
         (parentFragment as PicturesFragment).apply {
             when (finalType) {
                 null -> closeMultiSelect()
-                BulkOperationType.COPY -> {
-                    Utils.copyFileClicked(this)
-//                    performBulkOperation(finalType)
-                }
+                BulkOperationType.COPY -> Utils.copyFileClicked(this)
                 else -> performBulkOperation(finalType)
             }
         }
@@ -153,10 +145,5 @@ class ActionPicturesMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
 
     enum class SelectDialogAction {
         ADD_FAVORITES, OFFLINE, DUPLICATE, COLOR_FOLDER
-    }
-
-    companion object {
-        const val DISABLE_SELECT_MODE = "disable_select_mode"
-        const val SELECT_DIALOG_ACTION = "select_dialog_action"
     }
 }
