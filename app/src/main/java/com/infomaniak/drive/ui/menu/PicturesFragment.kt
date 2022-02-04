@@ -71,7 +71,6 @@ class PicturesFragment(
     }
 
     private var currentFolder: File? = null
-    private var enabledMultiSelectMode = true // If the multi selection is allowed to be used
     private var multiSelectParent: MultiSelectParent? = null
 
     fun init(multiSelectParent: MultiSelectParent) {
@@ -112,7 +111,7 @@ class PicturesFragment(
             updateMultiSelectMode = { onUpdateMultiSelect() }
         }
 
-        if (enabledMultiSelectMode) setupMultiSelect()
+        if (multiSelectParent != null) enableMultiSelect()
 
         picturesRecyclerView.adapter = picturesAdapter
         configPicturesLayoutManager()
@@ -327,7 +326,7 @@ class PicturesFragment(
         multiSelectParent?.enableSwipeRefresh()
     }
 
-    private fun setupMultiSelect() {
+    private fun enableMultiSelect() {
         picturesAdapter.enabledMultiSelectMode = true
     }
 
