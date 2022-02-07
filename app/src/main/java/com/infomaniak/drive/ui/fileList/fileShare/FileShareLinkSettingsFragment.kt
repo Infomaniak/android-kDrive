@@ -34,11 +34,16 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.MatomoUtils.trackShareSettings
 import com.infomaniak.drive.views.ShareLinkContainerView.Companion.getTypeName
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.android.synthetic.main.fragment_file_share_link_settings.*
+import kotlinx.android.synthetic.main.fragment_file_share_link_settings.expirationDateInput
+import kotlinx.android.synthetic.main.fragment_file_share_link_settings.newPasswordButton
+import kotlinx.android.synthetic.main.fragment_file_share_link_settings.passwordTextLayout
+import kotlinx.android.synthetic.main.item_dropbox_settings.*
 import java.util.*
 
 class FileShareLinkSettingsFragment : Fragment() {
@@ -213,9 +218,12 @@ class FileShareLinkSettingsFragment : Fragment() {
         saveButton.setOnClickListener {
             saveButton.showProgress()
 
+            context?.applicationContext?.trackShareSettings(
+                addPasswordSwitch.isChecked, expirationDateSwitch.isChecked, allowDownloadValue.isChecked
+            )
+
             var isValid = true
             if (addPasswordSwitch.isChecked) {
-
                 val hasError = passwordEditText.showOrHideEmptyError()
                 isValid = !(hasError && passwordTextLayout.isVisible)
 

@@ -38,6 +38,7 @@ import com.infomaniak.drive.data.models.ShareLink.*
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.Shareable.ShareablePermission
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setBackNavigationResult
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
@@ -48,6 +49,7 @@ import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_select_permission.*
 import kotlinx.coroutines.Dispatchers
+import java.util.*
 
 class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
     private lateinit var adapter: PermissionsAdapter
@@ -163,11 +165,15 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         saveButton.initProgress(viewLifecycleOwner)
         saveButton.showProgress()
         shareableItem?.let { shareable ->
+            val sharePermissionTrackerName: String
             if (permission == ShareablePermission.DELETE || permission == null) {
+                sharePermissionTrackerName = "deleteUser"
                 deleteShare(file, shareable, permission)
             } else {
+                sharePermissionTrackerName = permission.name.lowercase(Locale.getDefault()) + "Right"
                 editShare(file, shareable, permission)
             }
+            context?.applicationContext?.trackEvent("shareAndRights", "click", sharePermissionTrackerName)
         }
     }
 

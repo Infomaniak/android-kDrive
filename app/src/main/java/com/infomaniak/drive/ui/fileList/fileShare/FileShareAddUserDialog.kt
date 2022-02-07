@@ -37,6 +37,7 @@ import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
@@ -112,6 +113,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
         shareButton.initProgress(this)
         shareButton.setOnClickListener {
             shareButton.showProgress()
+            context?.applicationContext?.trackEvent("shareAndRights", "click", "inviteUser")
             checkShare(selectedPermission) { file, body ->
                 createShareAndCloseDialog(file, body)
             }

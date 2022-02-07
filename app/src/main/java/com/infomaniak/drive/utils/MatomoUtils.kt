@@ -40,7 +40,7 @@ object MatomoUtils {
 
     fun Context.trackBulkActionEvent(action: BulkOperationType, value: Int) {
         var name = "bulk"
-        if(value == 1) {
+        if (value == 1) {
             name += "Single"
         }
 
@@ -52,7 +52,6 @@ object MatomoUtils {
             BulkOperationType.TRASH -> "PutInTrash"
             BulkOperationType.COLOR_FOLDER -> "ColorFolder"
         }
-
         trackEvent("FileAction", "click", name + trackingActionName, value.toFloat())
     }
 
@@ -89,6 +88,12 @@ object MatomoUtils {
         trackEventWithBooleanValue("photoSync", "createDatedFolders", syncSettings.createDatedSubFolders)
         trackEventWithBooleanValue("photoSync", "importVideo", syncSettings.syncVideo)
         trackEvent("photoSync", "click", trackingDateName)
+    }
+
+    fun Context.trackShareSettings(protectWithPassword: Boolean, expirationDate: Boolean, downloadFromLink: Boolean) {
+        trackEventWithBooleanValue("shareAndRights", "protectWithPassword", protectWithPassword)
+        trackEventWithBooleanValue("shareAndRights", "expirationDateLink", expirationDate)
+        trackEventWithBooleanValue("shareAndRights", "downloadFromLink", downloadFromLink)
     }
 
     private fun Boolean.toFloat() = if (this) 1f else 0f

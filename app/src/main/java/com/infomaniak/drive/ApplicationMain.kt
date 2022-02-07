@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive
 
-import android.app.Application
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -33,7 +32,6 @@ import coil.decode.ImageDecoderDecoder
 import coil.util.CoilUtils
 import com.facebook.stetho.Stetho
 import com.facebook.stetho.okhttp3.StethoInterceptor
-import com.infomaniak.drive.ApplicationMain.Companion.tracker
 import com.infomaniak.drive.BuildConfig.DRIVE_API
 import com.infomaniak.drive.BuildConfig.INFOMANIAK_API
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
@@ -43,7 +41,6 @@ import com.infomaniak.drive.data.sync.UploadNotifications.pendingIntentFlags
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.KDriveHttpClient
-import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.addTrackingCallbackForDebugLog
 import com.infomaniak.drive.utils.MatomoUtils.buildTracker
 import com.infomaniak.drive.utils.MatomoUtils.trackCurrentUserId
@@ -70,10 +67,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import org.eclipse.paho.client.mqttv3.*
 import org.matomo.sdk.Tracker
 import org.matomo.sdk.extra.MatomoApplication
-import org.matomo.sdk.extra.TrackHelper
 import java.util.*
 
 
