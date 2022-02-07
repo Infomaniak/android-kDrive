@@ -48,7 +48,7 @@ import java.io.File
 
 open class PreviewVideoFragment : PreviewFragment() {
 
-    private lateinit var exoPlayer: ExoPlayer
+    private var exoPlayer: ExoPlayer? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_preview_video, container, false)
@@ -76,18 +76,18 @@ open class PreviewVideoFragment : PreviewFragment() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        if (!::exoPlayer.isInitialized) initializePlayer()
+    override fun onResume() {
+        super.onResume()
+        if (exoPlayer == null) initializePlayer()
     }
 
     override fun onPause() {
-        exoPlayer.pause()
+        exoPlayer?.pause()
         super.onPause()
     }
 
     override fun onDestroy() {
-        exoPlayer.release()
+        exoPlayer?.release()
         super.onDestroy()
     }
 
@@ -114,7 +114,7 @@ open class PreviewVideoFragment : PreviewFragment() {
             .setTrackSelector(trackSelector)
             .build()
 
-        exoPlayer.apply {
+        exoPlayer?.apply {
             addAnalyticsListener(EventLogger(trackSelector))
             setAudioAttributes(AudioAttributes.DEFAULT,  /* handleAudioFocus= */true)
             playWhenReady = false
@@ -130,7 +130,7 @@ open class PreviewVideoFragment : PreviewFragment() {
     }
 
     private fun addPlayerListeners() {
-        exoPlayer.addListener(object : Player.Listener {
+        exoPlayer?.addListener(object : Player.Listener {
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 super.onIsPlayingChanged(isPlaying)
