@@ -17,12 +17,13 @@
  */
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -59,7 +60,7 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
                 putExtra(SelectFolderActivity.USER_ID_TAG, AccountUtils.currentUserId)
                 putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
             }
-            startActivityForResult(intent, SelectFolderActivity.SELECT_FOLDER_REQUEST)
+            selectFolderResultLauncher.launch(intent)
         }
 
         restoreFileToOriginalPlace.setOnClickListener {
@@ -85,17 +86,18 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == SelectFolderActivity.SELECT_FOLDER_REQUEST && resultCode == AppCompatActivity.RESULT_OK) {
-            val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
-            val folderName = data?.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG)
-            folderId?.let {
-                trashViewModel.restoreTrashFile(
-                    currentTrashedFile,
-                    File(id = folderId, name = folderName.toString())
-                ).observe(this) { apiResponse ->
-                    restoreResult(apiResponse, originalPlace = false, folderName = folderName)
+    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        with(result) {
+            if (resultCode == Activity.RESULT_OK) {
+                val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
+                val folderName = data?.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG)
+                folderId?.let {
+                    trashViewModel.restoreTrashFile(
+                        currentTrashedFile,
+                        File(id = folderId, name = folderName.toString()),
+                    ).observe(this@TrashedFileActionsBottomSheetDialog) { apiResponse ->
+                        restoreResult(apiResponse, originalPlace = false, folderName = folderName)
+                    }
                 }
             }
         }
