@@ -156,10 +156,10 @@ class PicturesAdapter(
         itemsSelected.remove(file)
     }
 
-    private fun indexOf(fileId: Int) = pictureList.indexOfFirst { it.id == fileId }
+    private fun indexOf(fileId: Int) = itemList.indexOfFirst { (it as? File)?.id == fileId }
 
     fun deleteAt(position: Int) {
-        pictureList.removeAt(position)
+        itemList.removeAt(position)
         notifyItemRemoved(position)
     }
 

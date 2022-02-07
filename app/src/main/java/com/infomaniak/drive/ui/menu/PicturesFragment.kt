@@ -273,7 +273,6 @@ class PicturesFragment(
             resources.getQuantityString(type.successMessage, success, success, destinationFolder?.name + "/")
         }
         requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
-//        refreshActivities()
         closeMultiSelect()
     }
 
