@@ -44,6 +44,7 @@ import com.infomaniak.lib.core.networking.HttpUtils
 import kotlinx.android.synthetic.main.fragment_preview_others.*
 import kotlinx.android.synthetic.main.fragment_preview_video.*
 import kotlinx.android.synthetic.main.fragment_preview_video.container
+import java.io.File
 
 open class PreviewVideoFragment : PreviewFragment() {
 
@@ -66,9 +67,9 @@ open class PreviewVideoFragment : PreviewFragment() {
         fileIcon.setImageResource(file.getFileType().icon)
         container?.layoutTransition?.setAnimateParentHierarchy(false)
         fileName.text = file.name
+
         playerView.setOnClickListener {
-            if (playerView.isControllerFullyVisible)
-                (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+            if (playerView.isControllerFullyVisible) (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
         }
         errorLayout.setOnClickListener {
             (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
@@ -77,63 +78,39 @@ open class PreviewVideoFragment : PreviewFragment() {
 
     override fun onStart() {
         super.onStart()
-
-        if (!::exoPlayer.isInitialized) {
-            initializePlayer()
-
-            exoPlayer.addListener(object : Player.Listener {
-
-                override fun onIsPlayingChanged(isPlaying: Boolean) {
-                    super.onIsPlayingChanged(isPlaying)
-                    if (isPlaying) (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
-                }
-
-                override fun onPlayerError(error: PlaybackException) {
-                    super.onPlayerError(error)
-                    error.printStackTrace()
-                    when (error.message) {
-                        "Source error" -> previewDescription?.setText(R.string.previewVideoSourceError)
-                        else -> previewDescription?.setText(R.string.previewLoadError)
-                    }
-                    playerView?.isGone = true
-                    previewDescription?.isVisible = true
-                    errorLayout?.isVisible = true
-                    bigOpenWithButton?.isVisible = true
-                }
-            })
-        }
-
+        if (!::exoPlayer.isInitialized) initializePlayer()
     }
 
     override fun onPause() {
-        super.onPause()
         exoPlayer.pause()
+        super.onPause()
     }
 
     override fun onDestroy() {
+        exoPlayer.release()
         super.onDestroy()
-        if (this::exoPlayer.isInitialized) exoPlayer.release()
     }
 
     private fun initializePlayer() {
+        createPlayer()
+        addPlayerListeners()
+    }
+
+    private fun createPlayer() {
         val context = requireContext()
-        val renderersFactory: RenderersFactory = buildRenderersFactory(context)
+
         val offlineFile = if (file.isOffline) {
             val userId = previewSliderViewModel.userDrive.userId
             file.getOfflineFile(requireContext(), userId)
-        } else null
+        } else {
+            null
+        }
         val offlineIsComplete = offlineFile?.let { file.isOfflineAndIntact(offlineFile) } ?: false
 
-        val mediaSourceFactory: MediaSourceFactory =
-            if (offlineIsComplete) DefaultMediaSourceFactory(getOfflineDataSourceFactory())
-            else DefaultMediaSourceFactory(getDataSourceFactory(context))
+        val trackSelector = getTrackSelector(context)
 
-        val trackSelector = DefaultTrackSelector(context).apply {
-            setParameters(buildUponParameters().setMaxVideoSizeSd())
-        }
-
-        exoPlayer = ExoPlayer.Builder(context, renderersFactory)
-            .setMediaSourceFactory(mediaSourceFactory)
+        exoPlayer = ExoPlayer.Builder(context, getRenderersFactory(context.applicationContext))
+            .setMediaSourceFactory(getMediaSourceFactory(context, offlineIsComplete))
             .setTrackSelector(trackSelector)
             .build()
 
@@ -146,24 +123,56 @@ open class PreviewVideoFragment : PreviewFragment() {
             playerView.controllerShowTimeoutMs = 1000
             playerView.controllerHideOnTouch = false
 
-            if (offlineFile != null && offlineIsComplete) {
-                setMediaItem(MediaItem.fromUri(offlineFile.toUri()))
-            } else {
-                setMediaItem(MediaItem.fromUri(Uri.parse(ApiRoutes.downloadFile(file))))
-            }
+            setMediaItem(MediaItem.fromUri(getUri(offlineFile, offlineIsComplete)))
 
             prepare()
         }
     }
 
-    private fun buildRenderersFactory(context: Context): RenderersFactory {
-        return DefaultRenderersFactory(context.applicationContext)
-            .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
+    private fun addPlayerListeners() {
+        exoPlayer.addListener(object : Player.Listener {
+
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                super.onIsPlayingChanged(isPlaying)
+                if (isPlaying) (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+            }
+
+            override fun onPlayerError(error: PlaybackException) {
+                super.onPlayerError(error)
+                error.printStackTrace()
+                when (error.message) {
+                    "Source error" -> previewDescription?.setText(R.string.previewVideoSourceError)
+                    else -> previewDescription?.setText(R.string.previewLoadError)
+                }
+                bigOpenWithButton?.isVisible = true
+                errorLayout?.isVisible = true
+                playerView?.isGone = true
+                previewDescription?.isVisible = true
+            }
+        })
+    }
+
+    private fun getTrackSelector(context: Context): DefaultTrackSelector {
+        return DefaultTrackSelector(context).apply {
+            setParameters(buildUponParameters().setMaxVideoSizeSd())
+        }
+    }
+
+    private fun getRenderersFactory(appContext: Context): RenderersFactory {
+        return DefaultRenderersFactory(appContext).setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
+    }
+
+    private fun getMediaSourceFactory(context: Context, offlineIsComplete: Boolean): MediaSourceFactory {
+        val dataSourceFactory = if (offlineIsComplete) getOfflineDataSourceFactory() else getDataSourceFactory(context)
+        return DefaultMediaSourceFactory(dataSourceFactory)
+    }
+
+    private fun getOfflineDataSourceFactory(): DataSource.Factory {
+        return DataSource.Factory { FileDataSource() }
     }
 
     private fun getDataSourceFactory(context: Context): DataSource.Factory {
         val appContext = context.applicationContext
-
         val userAgent = Util.getUserAgent(appContext, context.getString(R.string.app_name))
         val okHttpDataSource = OkHttpDataSource.Factory(HttpClient.okHttpClient).apply {
             setUserAgent(userAgent)
@@ -172,9 +181,11 @@ open class PreviewVideoFragment : PreviewFragment() {
         return DefaultDataSource.Factory(appContext, okHttpDataSource)
     }
 
-    private fun getOfflineDataSourceFactory(): DataSource.Factory {
-        return DataSource.Factory {
-            FileDataSource()
+    private fun getUri(offlineFile: File?, offlineIsComplete: Boolean): Uri {
+        return if (offlineFile != null && offlineIsComplete) {
+            offlineFile.toUri()
+        } else {
+            Uri.parse(ApiRoutes.downloadFile(file))
         }
     }
 }

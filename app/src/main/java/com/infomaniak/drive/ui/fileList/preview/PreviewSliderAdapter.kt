@@ -52,19 +52,13 @@ class PreviewSliderAdapter(manager: FragmentManager, lifecycle: Lifecycle) : Fra
         this.filePagesIds = files.map { it.hashCode().toLong() } as ArrayList
     }
 
-    fun getPosition(file: File): Int {
-        return files.indexOfFirst { it.id == file.id }
-    }
+    fun getPosition(file: File): Int = files.indexOfFirst { it.id == file.id }
 
-    fun getFile(position: Int): File {
-        return files[position]
-    }
+    fun getFile(position: Int): File = files[position]
 
     fun updateFile(fileId: Int, transaction: (file: File) -> Unit) {
         val filePosition = files.indexOfFirst { it.id == fileId }
-        if (filePosition >= 0) {
-            transaction(files[filePosition])
-        }
+        if (filePosition >= 0) transaction(files[filePosition])
     }
 
     fun addFile(file: File) {
@@ -82,11 +76,7 @@ class PreviewSliderAdapter(manager: FragmentManager, lifecycle: Lifecycle) : Fra
         return files.isEmpty()
     }
 
-    override fun getItemId(position: Int): Long {
-        return files[position].hashCode().toLong()
-    }
+    override fun getItemId(position: Int): Long = files[position].hashCode().toLong()
 
-    override fun containsItem(itemId: Long): Boolean {
-        return filePagesIds.contains(itemId)
-    }
+    override fun containsItem(itemId: Long): Boolean = filePagesIds.contains(itemId)
 }

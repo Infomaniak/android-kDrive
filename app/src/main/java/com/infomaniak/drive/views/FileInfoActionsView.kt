@@ -73,7 +73,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         ownerFragment: Fragment,
         mainViewModel: MainViewModel,
         onItemClickListener: OnItemClickListener,
-        isSharedWithMe: Boolean = false
+        isSharedWithMe: Boolean = false,
     ) {
         this.isSharedWithMe = isSharedWithMe
         this.mainViewModel = mainViewModel
@@ -198,18 +198,8 @@ class FileInfoActionsView @JvmOverloads constructor(
             val currentFolder = FileController.getParentFile(currentFile.id)?.id ?: -42
             onItemClickListener.moveFileClicked(ownerFragment, currentFolder)
         }
-        duplicateFile.setOnClickListener {
-            onItemClickListener.duplicateFileClicked(
-                ownerFragment.requireContext(),
-                currentFile
-            )
-        }
-        renameFile.setOnClickListener {
-            onItemClickListener.renameFileClicked(
-                ownerFragment.requireContext(),
-                currentFile
-            )
-        }
+        duplicateFile.setOnClickListener { onItemClickListener.duplicateFileClicked(ownerFragment.requireContext(), currentFile) }
+        renameFile.setOnClickListener { onItemClickListener.renameFileClicked(ownerFragment.requireContext(), currentFile) }
         deleteFile.setOnClickListener { onItemClickListener.deleteFileClicked(ownerFragment.requireContext(), currentFile) }
     }
 
