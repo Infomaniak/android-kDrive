@@ -44,9 +44,7 @@ open class PreviewFragment : Fragment() {
 
             arguments?.let {
                 val fileId = it.getInt(FILE_ID_TAG)
-                if (fileId > 0) {
-                    previewViewModel.currentFile = getCurrentFile(fileId)
-                }
+                if (fileId > 0) previewViewModel.currentFile = getCurrentFile(fileId)
             }
         }
 
@@ -56,20 +54,22 @@ open class PreviewFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
     }
 
-    private fun getCurrentFile(fileId: Int) = try {
-        FileController.getFileById(fileId, previewSliderViewModel.userDrive) ?: mainViewModel.currentPreviewFileList[fileId]
-    } catch (exception: Exception) {
-        exception.printStackTrace()
-        Sentry.withScope { scope ->
-            val backStackEntry = findNavController().currentBackStackEntry
-            val previousName = findNavController().previousBackStackEntry?.destination?.displayName
-            scope.setExtra("destination", "${backStackEntry?.destination?.displayName}")
-            scope.setExtra("destination lifecycle", "${backStackEntry?.lifecycle?.currentState}")
-            scope.setExtra("previous", previousName ?: "")
-            scope.setExtra("exception", exception.stackTraceToString())
-            Sentry.captureException(exception)
+    private fun getCurrentFile(fileId: Int): File? {
+        return try {
+            FileController.getFileById(fileId, previewSliderViewModel.userDrive) ?: mainViewModel.currentPreviewFileList[fileId]
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+            Sentry.withScope { scope ->
+                val backStackEntry = findNavController().currentBackStackEntry
+                val previousName = findNavController().previousBackStackEntry?.destination?.displayName
+                scope.setExtra("destination", "${backStackEntry?.destination?.displayName}")
+                scope.setExtra("destination lifecycle", "${backStackEntry?.lifecycle?.currentState}")
+                scope.setExtra("previous", previousName ?: "")
+                scope.setExtra("exception", exception.stackTraceToString())
+                Sentry.captureException(exception)
+            }
+            null
         }
-        null
     }
 
     protected fun noCurrentFile() = previewViewModel.currentFile == null
