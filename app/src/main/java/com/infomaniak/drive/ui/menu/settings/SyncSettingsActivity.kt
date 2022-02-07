@@ -17,10 +17,12 @@
  */
 package com.infomaniak.drive.ui.menu.settings
 
+import android.app.Activity
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
@@ -141,7 +143,7 @@ class SyncSettingsActivity : BaseActivity() {
                 putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, selectDriveViewModel.selectedDrive.value?.id)
                 putExtra(SelectFolderActivity.DISABLE_SELECTED_FOLDER_TAG, Utils.ROOT_ID)
             }
-            startActivityForResult(intent, SelectFolderActivity.SELECT_FOLDER_REQUEST)
+            selectFolderResultLauncher.launch(intent)
         }
 
         syncSettingsViewModel.syncFolder.observe(this) { syncFolder ->
@@ -224,10 +226,12 @@ class SyncSettingsActivity : BaseActivity() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == SelectFolderActivity.SELECT_FOLDER_REQUEST && resultCode == RESULT_OK) {
-            syncSettingsViewModel.syncFolder.value = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
+    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        with(result) {
+            if (resultCode == Activity.RESULT_OK) {
+                val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
+                syncSettingsViewModel.syncFolder.value = folderId
+            }
         }
     }
 
