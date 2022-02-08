@@ -398,7 +398,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         val ownerFragment: Fragment
         val currentFile: File
 
-        private fun getApplication() = ownerFragment.activity?.application
+        private fun getApplication() = ownerFragment.context?.applicationContext
 
         private fun trackActionEvent(name: String, value: Float? = null) {
             getApplication()?.trackEvent("fileAction", "click", name, value)

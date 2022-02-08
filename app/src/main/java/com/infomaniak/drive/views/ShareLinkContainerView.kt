@@ -77,11 +77,11 @@ class ShareLinkContainerView @JvmOverloads constructor(
             }
             shareLink == null && urlValue.isBlank() -> {
                 context?.applicationContext?.trackEvent("shareAndRights", "click", "restrictedShareLink")
-                setRestrictedUI()
+                setRestrictedUi()
             }
             else -> {
                 context?.applicationContext?.trackEvent("shareAndRights", "click", "publicShareLink")
-                setPublicUI()
+                setPublicUi()
             }
         }
     }

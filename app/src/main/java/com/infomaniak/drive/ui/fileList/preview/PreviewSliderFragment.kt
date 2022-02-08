@@ -69,6 +69,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     private var hideActions: Boolean = false
     private var showUi = false
 
+
+    override val ownerFragment = this
+    override lateinit var currentFile: File
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
         if (mainViewModel.currentPreviewFileList.isEmpty()) {
@@ -115,7 +119,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 onItemClickListener = this@PreviewSliderFragment,
                 isSharedWithMe = userDrive.sharedWithMe,
             )
-            updateCurrentFile(currentPreviewFile)
+            updateCurrentFile(currentFile)
             setOnTouchListener { _, _ -> true }
         }
 
@@ -126,12 +130,12 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             offscreenPageLimit = 1
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
-                    currentPreviewFile = previewSliderAdapter.getFile(position)
-                    editButton.isVisible = currentPreviewFile.isOnlyOfficePreview()
-                    openWithButton.isGone = currentPreviewFile.isOnlyOfficePreview()
+                    currentFile = previewSliderAdapter.getFile(position)
+                    editButton.isVisible = currentFile.isOnlyOfficePreview()
+                    openWithButton.isGone = currentFile.isOnlyOfficePreview()
                     bottomSheetFileInfos.openWith.isVisible = true
                     lifecycleScope.launchWhenResumed {
-                        withContext(Dispatchers.Main) { bottomSheetFileInfos.updateCurrentFile(currentPreviewFile) }
+                        withContext(Dispatchers.Main) { bottomSheetFileInfos.updateCurrentFile(currentFile) }
                     }
                 }
             })
@@ -349,7 +353,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) {
         val folderId = mainViewModel.currentFolder.value?.id
-        mainViewModel.duplicateFile(currentPreviewFile, folderId, result).observe(viewLifecycleOwner) { apiResponse ->
+        mainViewModel.duplicateFile(currentFile, folderId, result).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 apiResponse.data?.let { file ->
                     mainViewModel.currentPreviewFileList[file.id] = file
@@ -409,8 +413,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         } else {
             safeNavigate(
                 PreviewSliderFragmentDirections.actionPreviewSliderFragmentToDownloadProgressDialog(
-                    fileId = currentPreviewFile.id,
-                    fileName = currentPreviewFile.name,
+                    fileId = currentFile.id,
+                    fileName = currentFile.name,
                     userDrive = userDrive
                 )
             )
