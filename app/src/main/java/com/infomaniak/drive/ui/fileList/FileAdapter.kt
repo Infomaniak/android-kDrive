@@ -29,6 +29,7 @@ import com.google.android.material.card.MaterialCardView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setCornersRadius
@@ -313,6 +314,8 @@ open class FileAdapter(
                         fileChecked.isChecked = !fileChecked.isChecked
                         onSelectedFile(file, fileChecked.isChecked)
                     } else {
+                        val trackerName = "preview" + file.convertedType[0].uppercase() + file.convertedType.substring(1)
+                        context.applicationContext?.trackEvent("preview", "click", trackerName)
                         onFileClicked?.invoke(file)
                     }
                 }

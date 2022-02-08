@@ -39,6 +39,7 @@ import com.google.android.exoplayer2.util.EventLogger
 import com.google.android.exoplayer2.util.Util
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
 import kotlinx.android.synthetic.main.fragment_preview_others.*
@@ -69,7 +70,10 @@ open class PreviewVideoFragment : PreviewFragment() {
         fileName.text = file.name
 
         playerView.setOnClickListener {
-            if (playerView.isControllerFullyVisible) (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+            if (playerView.isControllerFullyVisible) {
+                (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+                context?.applicationContext?.trackEvent("mediaPlayer", "click", "toggleFullScreen")
+            }
         }
         errorLayout.setOnClickListener {
             (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
@@ -78,15 +82,18 @@ open class PreviewVideoFragment : PreviewFragment() {
 
     override fun onResume() {
         super.onResume()
+        trackFileType(this)
         if (exoPlayer == null) initializePlayer()
     }
 
     override fun onPause() {
+        trackMediaPlayer("pause")
         exoPlayer?.pause()
         super.onPause()
     }
 
     override fun onDestroy() {
+        trackMediaPlayer("duration", exoPlayer?.duration?.toFloat())
         exoPlayer?.release()
         super.onDestroy()
     }
@@ -188,4 +195,18 @@ open class PreviewVideoFragment : PreviewFragment() {
             Uri.parse(ApiRoutes.downloadFile(file))
         }
     }
+
+    private fun trackFileType(fragment: PreviewFragment) {
+        val name = when (fragment::class) {
+            PreviewVideoFragment::class -> "playVideo"
+            PreviewMusicFragment::class -> "playMusic"
+            else -> "play"
+        }
+        trackMediaPlayer(name)
+    }
+
+    private fun trackMediaPlayer(name: String, value: Float? = null) {
+        context?.applicationContext?.trackEvent("mediaPlayer", "click", name, value)
+    }
+
 }
