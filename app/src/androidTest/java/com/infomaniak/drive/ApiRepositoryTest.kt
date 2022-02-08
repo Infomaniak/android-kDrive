@@ -473,7 +473,7 @@ class ApiRepositoryTest : KDriveTest() {
         }
 
         // Restore the file from the trash
-        assertApiResponse(postRestoreTrashFile(modifiedFile, mapOf("destination_folder_id" to ROOT_ID)))
+        assertApiResponse(postRestoreTrashFile(modifiedFile, mapOf("destination_directory_id" to ROOT_ID)))
         with(getDriveTrash(userDrive.driveId, File.SortType.RECENT, 1)) {
             assertApiResponse(this)
             if (data!!.isNotEmpty()) {
