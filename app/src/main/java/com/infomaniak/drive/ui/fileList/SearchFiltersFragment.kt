@@ -113,7 +113,7 @@ class SearchFiltersFragment : Fragment() {
             if (date.value != null) { trackSearchEvent("filterDate") }
             if (type.value != null) { trackSearchEvent("filterFileType") }
             if (categories != null) { trackSearchEvent("filterCategory") }
-            
+
             searchViewModel.dateFilter = date.value
             searchViewModel.typeFilter = type.value
             searchViewModel.categoriesFilter = categories

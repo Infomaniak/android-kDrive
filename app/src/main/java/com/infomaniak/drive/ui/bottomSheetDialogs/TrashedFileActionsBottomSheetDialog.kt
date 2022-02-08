@@ -34,6 +34,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.menu.TrashViewModel
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.utils.showSnackbar
@@ -55,6 +56,7 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
         currentFile.setFileItem(currentTrashedFile)
         restoreFileIn.setOnClickListener {
+            trackTrashEvent("restoreGiveFolder")
             val intent = Intent(requireContext(), SelectFolderActivity::class.java).apply {
                 putExtra(SelectFolderActivity.USER_ID_TAG, AccountUtils.currentUserId)
                 putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
@@ -63,6 +65,7 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
         }
 
         restoreFileToOriginalPlace.setOnClickListener {
+            trackTrashEvent("restoreOriginFolder")
             trashViewModel.restoreTrashFile(currentTrashedFile).observe(this) { apiResponse ->
                 restoreResult(apiResponse, originalPlace = true)
             }
@@ -71,6 +74,7 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
         delete.setOnClickListener {
             Utils.confirmFileDeletion(requireContext(), fileName = currentTrashedFile.name, fromTrash = true) { dialog ->
                 trashViewModel.deleteTrashFile(currentTrashedFile).observe(this) { apiResponse ->
+                    trackTrashEvent("deleteFromTrash")
                     dialog.dismiss()
                     if (apiResponse.data == true) {
                         val title = resources.getQuantityString(R.plurals.snackbarDeleteConfirmation, 1, currentTrashedFile.name)
@@ -83,6 +87,10 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
                 }
             }
         }
+    }
+
+    private fun trackTrashEvent(name: String) {
+        context?.applicationContext?.trackEvent("trash", "click", name)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

@@ -18,10 +18,7 @@
 package com.infomaniak.drive.utils
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.app.ActivityManager
-import android.app.DownloadManager
-import android.app.KeyguardManager
+import android.app.*
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context

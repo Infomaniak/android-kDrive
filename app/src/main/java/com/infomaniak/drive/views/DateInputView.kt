@@ -23,9 +23,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.widget.FrameLayout
 import androidx.fragment.app.FragmentManager
-import com.google.android.material.datepicker.CalendarConstraints
-import com.google.android.material.datepicker.DateValidatorPointForward
-import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.datepicker.*
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.view_date_input.view.*
