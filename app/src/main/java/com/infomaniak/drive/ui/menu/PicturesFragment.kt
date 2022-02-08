@@ -21,7 +21,6 @@ import android.app.Dialog
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -52,6 +51,7 @@ import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.toDp
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.cardview_picture.*
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.fragment_pictures.*
 import kotlinx.coroutines.Dispatchers
@@ -232,8 +232,7 @@ class PicturesFragment(
                         copyName = requireContext().getString(R.string.allDuplicateFileName, fileName, file.getFileExtension()),
                         onSuccess = { apiResponse ->
                             apiResponse.data?.let {
-                                Log.e("photo", "sendAction: api.response.data: $it", )
-                                picturesAdapter.pictureList.add(0, it)
+                                picturesAdapter.duplicatedList.add(0, it)
                             }
                         },
                     ),
@@ -286,16 +285,12 @@ class PicturesFragment(
             val oldTotal = picturesAdapter.itemList.size
             val oldFirstItem = picturesAdapter.itemList.firstOrNull()
 
-            val formattedList = picturesAdapter.formatList(requireContext(), picturesAdapter.pictureList)
-            val newTotal = formattedList.size
+            picturesAdapter.addDuplicatedImages(requireContext())
+            val newTotal = picturesAdapter.itemList.count()
             val newFirstItem = picturesAdapter.itemList.firstOrNull()
-
-            picturesAdapter.itemList.clear()
-            picturesAdapter.itemList.addAll(formattedList)
 
             val positionStart = if (oldFirstItem != newFirstItem) 0 else 1
             picturesAdapter.notifyItemRangeInserted(positionStart, newTotal - oldTotal)
-//            picturesAdapter.notifyDataSetChanged()
         }
     }
 

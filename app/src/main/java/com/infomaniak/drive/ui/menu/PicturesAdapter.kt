@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.menu
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isGone
@@ -42,6 +43,7 @@ class PicturesAdapter(
 
     private var lastSectionTitle: String = ""
     var pictureList: ArrayList<File> = arrayListOf()
+    var duplicatedList: ArrayList<File> = arrayListOf()
 
     var enabledMultiSelectMode: Boolean = false // If the multi selection is allowed to be used
     var multiSelectMode: Boolean = false // If the multi selection is opened
@@ -49,7 +51,9 @@ class PicturesAdapter(
     var updateMultiSelectMode: (() -> Unit)? = null
 
     fun formatList(context: Context, newPictureList: ArrayList<File>): ArrayList<Any> {
+        Log.e("photo", "formatList: About to add ${newPictureList.count()} items to the list")
         pictureList.addAll(newPictureList)
+        Log.e("photo", "formatList: new size: ${pictureList.count()}")
         val addItemList: ArrayList<Any> = arrayListOf()
 
         for (picture in newPictureList) {
@@ -65,6 +69,32 @@ class PicturesAdapter(
         }
 
         return addItemList
+    }
+
+    fun addDuplicatedImages(context: Context) {
+        var newestSectionTitle = itemList.firstOrNull()
+        var index = 1
+        for (file in duplicatedList) {
+            pictureList.add(0, file)
+
+            val month = file.getLastModifiedAt()
+                .format(context.getString(R.string.photosHeaderDateFormat))
+                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+
+            if (newestSectionTitle != month) {
+                // This case can only be hit once when adding duplicated images
+                // If we need to add a month section title, it needs to be inserted a position 0 where as if we only insert the
+                // images without creating a new month section title, it needs to be inserted at position 1 right after the
+                // existing month title
+                index = 0
+                itemList.add(index++, month)
+                newestSectionTitle = month
+            }
+
+            itemList.add(index++, file)
+        }
+
+        duplicatedList.clear()
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -159,8 +189,17 @@ class PicturesAdapter(
     private fun indexOf(fileId: Int) = itemList.indexOfFirst { (it as? File)?.id == fileId }
 
     fun deleteAt(position: Int) {
+        val previousItem = itemList.getOrNull(position - 1)
+        val nextItem = itemList.getOrNull(position + 1)
+
         itemList.removeAt(position)
-        notifyItemRemoved(position)
+
+        if (previousItem is String && nextItem is String) {
+            itemList.removeAt(position - 1)
+            notifyItemRangeRemoved(position - 1, 2)
+        } else {
+            notifyItemRemoved(position)
+        }
     }
 
     fun deleteByFileId(fileId: Int) {
