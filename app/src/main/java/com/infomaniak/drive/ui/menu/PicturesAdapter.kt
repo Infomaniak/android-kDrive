@@ -166,6 +166,8 @@ class PicturesAdapter(
     fun deleteByFileId(fileId: Int) {
         val position = indexOf(fileId)
         if (position >= 0) deleteAt(position)
+
+        pictureList.removeAt(pictureList.indexOfFirst { it.id == fileId })
     }
 
     fun updateFileProgressByFileId(fileId: Int, progress: Int, onComplete: ((position: Int, file: File) -> Unit)? = null) {

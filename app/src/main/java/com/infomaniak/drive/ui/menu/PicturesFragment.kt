@@ -21,6 +21,7 @@ import android.app.Dialog
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -148,7 +149,7 @@ class PicturesFragment(
         color: String?,
     ): (Dialog?) -> Unit = {
 
-        if (selectedFiles.size > BulkOperationsUtils.MIN_SELECTED) {
+        if (selectedFiles.size > BulkOperationsUtils.MIN_SELECTED && type != BulkOperationType.TRASH) {
             sendBulkAction(
                 fileCount, BulkOperation(
                     action = type,
@@ -206,20 +207,19 @@ class PicturesFragment(
         color: String?,
     ) {
 
-        val onSuccess: (Int) -> Unit = { fileID ->
-            runBlocking(Dispatchers.Main) { picturesAdapter.deleteByFileId(fileID) }
-        }
-
         when (type) {
             BulkOperationType.TRASH -> {
                 mediator.addSource(
-                    mainViewModel.deleteFile(file, onSuccess = onSuccess),
+                    mainViewModel.deleteFile(
+                        file,
+                        onSuccess = { fileID -> runBlocking(Dispatchers.Main) { picturesAdapter.deleteByFileId(fileID) } },
+                    ),
                     mainViewModel.updateMultiSelectMediator(mediator),
                 )
             }
             BulkOperationType.MOVE -> {
                 mediator.addSource(
-                    mainViewModel.moveFile(file, destinationFolder!!, null),
+                    mainViewModel.moveFile(file, destinationFolder!!),
                     mainViewModel.updateMultiSelectMediator(mediator),
                 )
             }
@@ -227,9 +227,15 @@ class PicturesFragment(
                 val fileName = file.getFileName()
                 mediator.addSource(
                     mainViewModel.duplicateFile(
-                        file,
-                        destinationFolder!!.id,
-                        requireContext().getString(R.string.allDuplicateFileName, fileName, file.getFileExtension()),
+                        file = file,
+                        folderId = destinationFolder!!.id,
+                        copyName = requireContext().getString(R.string.allDuplicateFileName, fileName, file.getFileExtension()),
+                        onSuccess = { apiResponse ->
+                            apiResponse.data?.let {
+                                Log.e("photo", "sendAction: api.response.data: $it", )
+                                picturesAdapter.pictureList.add(0, it)
+                            }
+                        },
                     ),
                     mainViewModel.updateMultiSelectMediator(mediator),
                 )
@@ -253,13 +259,14 @@ class PicturesFragment(
             }
             BulkOperationType.ADD_FAVORITES -> {
                 mediator.addSource(
-                    mainViewModel.addFileToFavorites(file) {
-                        runBlocking(Dispatchers.Main) {
-                            picturesAdapter.notifyFileChanged(file.id) { file ->
-                                if (!file.isManaged) file.isFavorite = true
+                    mainViewModel.addFileToFavorites(
+                        file,
+                        onSuccess = {
+                            runBlocking(Dispatchers.Main) {
+                                picturesAdapter.notifyFileChanged(file.id) { if (!it.isManaged) it.isFavorite = true }
                             }
-                        }
-                    },
+                        },
+                    ),
                     mainViewModel.updateMultiSelectMediator(mediator),
                 )
             }
@@ -274,6 +281,22 @@ class PicturesFragment(
         }
         requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
         closeMultiSelect()
+
+        if (type == BulkOperationType.COPY) {
+            val oldTotal = picturesAdapter.itemList.size
+            val oldFirstItem = picturesAdapter.itemList.firstOrNull()
+
+            val formattedList = picturesAdapter.formatList(requireContext(), picturesAdapter.pictureList)
+            val newTotal = formattedList.size
+            val newFirstItem = picturesAdapter.itemList.firstOrNull()
+
+            picturesAdapter.itemList.clear()
+            picturesAdapter.itemList.addAll(formattedList)
+
+            val positionStart = if (oldFirstItem != newFirstItem) 0 else 1
+            picturesAdapter.notifyItemRangeInserted(positionStart, newTotal - oldTotal)
+//            picturesAdapter.notifyDataSetChanged()
+        }
     }
 
     private fun addSelectedFilesToOffline(file: File) {
