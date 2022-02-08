@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.login
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isInvisible
@@ -84,29 +85,27 @@ class LoginActivity : AppCompatActivity() {
             setOnClickListener {
                 signInButton.isEnabled = false
                 showProgress()
-                infomaniakLogin.startWebViewLogin(WEB_VIEW_LOGIN_REQ)
+                infomaniakLogin.startWebViewLogin(webViewLoginResultLauncher)
             }
         }
 
         signInButton.setOnClickListener { openUrl(ApiRoutes.orderDrive()) }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == WEB_VIEW_LOGIN_REQ && resultCode == RESULT_OK) {
-            val authCode = data?.extras?.getString(InfomaniakLogin.CODE_TAG)
-            val translatedError = data?.extras?.getString(InfomaniakLogin.ERROR_TRANSLATED_TAG)
-
-            if (!translatedError.isNullOrBlank()) {
-                showError(translatedError)
-            } else if (!authCode.isNullOrBlank()) {
-                authenticateUser(authCode)
+    private val webViewLoginResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        with(result) {
+            if (resultCode == RESULT_OK) {
+                val authCode = data?.extras?.getString(InfomaniakLogin.CODE_TAG)
+                val translatedError = data?.extras?.getString(InfomaniakLogin.ERROR_TRANSLATED_TAG)
+                when {
+                    translatedError?.isNotBlank() == true -> showError(translatedError)
+                    authCode?.isNotBlank() == true -> authenticateUser(authCode)
+                    else -> showError(getString(R.string.anErrorHasOccurred))
+                }
             } else {
-                showError(getString(R.string.anErrorHasOccurred))
+                connectButton?.hideProgress(R.string.connect)
+                signInButton.isEnabled = true
             }
-        } else {
-            connectButton?.hideProgress(R.string.connect)
-            signInButton.isEnabled = true
         }
     }
 
@@ -160,8 +159,6 @@ class LoginActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val WEB_VIEW_LOGIN_REQ = 1
-
         suspend fun authenticateUser(context: Context, apiToken: ApiToken): Any {
 
             AccountUtils.getUserById(apiToken.userId)?.let {

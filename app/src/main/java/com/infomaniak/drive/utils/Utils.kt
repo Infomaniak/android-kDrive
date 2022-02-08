@@ -224,7 +224,7 @@ object Utils {
             putExtra(SelectFolderActivity.DISABLE_SELECTED_FOLDER_TAG, currentFolder)
             putExtra(
                 SelectFolderActivity.CUSTOM_ARGS_TAG,
-                bundleOf(SelectFolderActivity.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE)
+                bundleOf(SelectFolderActivity.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE),
             )
         }
         ownerFragment.startActivityForResult(intent, SelectFolderActivity.SELECT_FOLDER_REQUEST)
