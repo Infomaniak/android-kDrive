@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
 import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.menu.UserAdapter
@@ -41,7 +42,7 @@ class SwitchUserActivity : AppCompatActivity() {
             usersRecyclerView.adapter = UserAdapter(users as ArrayList<User>) { user ->
                 AccountUtils.currentUser = user
                 AccountUtils.currentDriveId = -1
-                AccountUtils.reloadApp?.invoke()
+                AccountUtils.reloadApp?.invoke(bundleOf())
             }
         }
 

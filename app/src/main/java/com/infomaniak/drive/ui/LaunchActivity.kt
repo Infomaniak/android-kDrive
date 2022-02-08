@@ -22,18 +22,24 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.login.MigrationActivity
 import com.infomaniak.drive.ui.login.MigrationActivity.Companion.getOldkDriveUser
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.isKeyguardSecure
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class LaunchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycleScope.launch {
+
+            logoutCurrentUserIfNeeded() // Rights v2 migration temporary fix
+
             when {
                 AccountUtils.requestCurrentUser() == null -> {
                     if (getOldkDriveUser().isEmpty) {
@@ -62,5 +68,14 @@ class LaunchActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+    }
+
+    private suspend fun logoutCurrentUserIfNeeded() = withContext(Dispatchers.IO) {
+        intent.extras?.getBoolean(FileMigration.LOGOUT_CURRENT_USER_TAG)?.let { needLogoutCurrentUser ->
+            if (needLogoutCurrentUser) {
+                if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
+                AccountUtils.currentUser?.let { AccountUtils.removeUser(this@LaunchActivity, it) }
+            }
+        }
     }
 }

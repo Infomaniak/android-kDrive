@@ -39,9 +39,11 @@ import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.data.sync.UploadNotifications.pendingIntentFlags
 import com.infomaniak.drive.ui.LaunchActivity
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.NotificationUtils.initNotificationChannel
 import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
+import com.infomaniak.drive.utils.clearStack
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.auth.TokenAuthenticator
 import com.infomaniak.lib.core.auth.TokenInterceptor
@@ -54,10 +56,12 @@ import io.sentry.SentryEvent
 import io.sentry.SentryOptions
 import io.sentry.android.core.SentryAndroid
 import io.sentry.android.core.SentryAndroidOptions
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import org.eclipse.paho.client.mqttv3.*
 import java.util.*
 
 class ApplicationMain : Application(), ImageLoaderFactory {
@@ -91,8 +95,11 @@ class ApplicationMain : Application(), ImageLoaderFactory {
 
         runBlocking { initRealm() }
 
-        AccountUtils.reloadApp = {
-            startActivity(Intent(this, LaunchActivity::class.java).clearStack())
+        AccountUtils.reloadApp = { bundle ->
+            val intent = Intent(this, LaunchActivity::class.java)
+                .apply { putExtras(bundle) }
+                .clearStack()
+            startActivity(intent)
         }
 
         InfomaniakCore.init(
