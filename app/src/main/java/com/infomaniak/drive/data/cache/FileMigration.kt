@@ -79,12 +79,17 @@ class FileMigration : RealmMigration {
             }
             // Rights migration with sentry logs
             val sentryLogs = arrayListOf<Pair<Int, String>>()
+            var countOfflineFiles = 0
             runCatching {
                 schema.get(Rights::class.java.simpleName)?.transform { // apply for each right
                     val fileId = it.getInt("fileId")
                     val file = realm.where(File::class.java.simpleName).equalTo(File::id.name, fileId).findFirst()
-                    if (file == null) it.deleteFromRealm() // Delete if it's orphan
-                    sentryLogs.add(fileId to "right is orphan ${file == null}")
+                    if (file == null) {
+                        it.deleteFromRealm() // Delete if it's orphan
+                        sentryLogs.add(fileId to "right is orphan true")
+                    }
+                    // Count offline files for sentry log
+                    if (file?.getBoolean(File::isOffline.name) == true) countOfflineFiles++
                 }?.apply {
                     removePrimaryKey()
                     removeField("fileId")
@@ -98,6 +103,8 @@ class FileMigration : RealmMigration {
                 // We have an issue here: https://github.com/realm/realm-java/issues/7642
                 Sentry.withScope { scope ->
                     scope.setExtra("oldVersion", "$oldVersion")
+                    scope.setExtra("count orphan files", "${sentryLogs.count()}")
+                    scope.setExtra("count offline files", "$countOfflineFiles")
                     scope.setExtra("logs", sentryLogs.toString())
                     Sentry.captureException(exception)
                 }
