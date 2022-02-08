@@ -25,15 +25,10 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
-import com.infomaniak.drive.ApplicationMain.Companion.tracker
 import com.infomaniak.drive.R
-import com.infomaniak.drive.utils.MatomoUtils
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.setCornersRadius
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_category.view.*
-import org.matomo.sdk.Matomo
-import org.matomo.sdk.extra.TrackHelper
 import java.util.*
 
 class CategoriesAdapter(

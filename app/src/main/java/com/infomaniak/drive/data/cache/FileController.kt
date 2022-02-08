@@ -18,7 +18,6 @@
 package com.infomaniak.drive.data.cache
 
 import android.content.Context
-import android.util.Log
 import androidx.collection.ArrayMap
 import androidx.collection.arrayMapOf
 import com.infomaniak.drive.BuildConfig

@@ -48,13 +48,6 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.MatomoUtils.trackEventWithBooleanValue
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_file_info_actions.*
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_file_info_actions.view.*
-import kotlinx.android.synthetic.main.fragment_file_details.view.*
-import kotlinx.android.synthetic.main.fragment_menu.view.*
-import kotlinx.android.synthetic.main.fragment_preview_slider.*
-import kotlinx.android.synthetic.main.fragment_preview_slider.view.*
-import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -404,13 +397,16 @@ class FileInfoActionsView @JvmOverloads constructor(
             getApplication()?.trackEvent("fileAction", "click", name, value)
         }
 
-        fun addFavoritesClicked() = getApplication()?.trackEventWithBooleanValue("fileAction", "favorite", !currentFile.isFavorite)
+        fun addFavoritesClicked() =
+            getApplication()?.trackEventWithBooleanValue("fileAction", "favorite", !currentFile.isFavorite)
+
         fun copyPublicLink() = trackActionEvent("copyShareLink")
         fun displayInfoClicked()
         fun downloadFileClicked() = trackActionEvent("download")
         fun manageCategoriesClicked(fileId: Int)
         fun dropBoxClicked(isDropBox: Boolean) =
             getApplication()?.trackEventWithBooleanValue("fileAction", "convertToDropbox", isDropBox)
+
         fun colorFolderClicked(color: String) = getApplication()?.trackEvent("colorFolder", "click", "switch")
         fun fileRightsClicked()
         fun onCacheAddedToOffline() = Unit

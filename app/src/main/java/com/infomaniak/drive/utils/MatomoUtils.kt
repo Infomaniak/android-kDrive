@@ -19,9 +19,11 @@ package com.infomaniak.drive.utils
 
 import android.content.Context
 import android.util.Log
+import androidx.fragment.app.Fragment
 import com.infomaniak.drive.ApplicationMain.Companion.tracker
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.SyncSettings
+import com.infomaniak.drive.ui.fileList.fileDetails.FileDetailsFragment
 import org.matomo.sdk.TrackerBuilder
 import org.matomo.sdk.extra.DownloadTracker
 import org.matomo.sdk.extra.TrackHelper
@@ -94,6 +96,29 @@ object MatomoUtils {
         trackEventWithBooleanValue("shareAndRights", "protectWithPassword", protectWithPassword)
         trackEventWithBooleanValue("shareAndRights", "expirationDateLink", expirationDate)
         trackEventWithBooleanValue("shareAndRights", "downloadFromLink", downloadFromLink)
+    }
+
+    fun Context.trackTabsView(fragment: Fragment, position: Int) {
+        val trackerName: String
+        val trackerCategory: String
+        if (fragment::class == FileDetailsFragment::class) {
+            trackerCategory = "fileInfo"
+            trackerName = when (position) {
+                0 -> "switchViewInfo"
+                1 -> "switchViewActivity"
+                2 -> "switchViewComments"
+                else -> "switchViewInfo"
+            }
+        } else {
+            trackerCategory = "home"
+            trackerName = when (position) {
+                0 -> "switchViewActivity"
+                1 -> "switchViewOffline"
+                2 -> "switchViewImages"
+                else -> "switchViewActivity"
+            }
+        }
+        trackEvent(trackerCategory, "click", trackerName)
     }
 
     private fun Boolean.toFloat() = if (this) 1f else 0f

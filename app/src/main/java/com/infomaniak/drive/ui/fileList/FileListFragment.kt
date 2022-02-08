@@ -69,6 +69,7 @@ import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
 import com.infomaniak.drive.utils.FilePresenter.openBookmark
 import com.infomaniak.drive.utils.FilePresenter.openBookmarkIntent
 import com.infomaniak.drive.utils.MatomoUtils.trackBulkActionEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
@@ -521,6 +522,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             val newListMode = !UiSettings(requireContext()).listMode
             UiSettings(requireContext()).listMode = newListMode
             fileListViewModel.isListMode.value = newListMode
+            val trackerName = if (newListMode) "viewList" else "viewGrid"
+            context?.applicationContext?.trackEvent("displayStyle", "click", trackerName)
         }
     }
 
@@ -876,6 +879,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private inner class SortFiles : () -> Unit {
         override fun invoke() {
             getBackNavigationResult<SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
+                context?.applicationContext?.trackEvent("fileList", "click", newSortType.name)
                 fileListViewModel.sortType = newSortType
                 sortButton?.setText(fileListViewModel.sortType.translation)
 
