@@ -208,57 +208,76 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     private suspend fun initUploadFile(uploadFile: UploadFile, pendingCount: Int) = withContext(Dispatchers.IO) {
         val uri = uploadFile.getUriObject()
         currentUploadFile = uploadFile
-        applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
 
-        if (notificationElapsedTime >= ELAPSED_TIME) {
-            uploadFile.setupCurrentUploadNotification(applicationContext, pendingCount)
-            notificationStartTime = Date().time
-            notificationElapsedTime = 0L
-        } else notificationElapsedTime = Date().time - notificationStartTime
+        applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
+        updateNotificationTimes(uploadFile, pendingCount)
 
         try {
             if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
-
-                val cacheFile = uri.toFile().apply {
-                    if (!exists()) {
-                        UploadFile.deleteIfExists(uri)
-                        return@withContext
-                    }
-                }
-
-                startUploadFile(uploadFile, cacheFile.length())
-                UploadFile.deleteIfExists(uri)
-
-                if (!uploadFile.isSyncOffline()) cacheFile.delete()
-
+                handleFileScheme(uri, uploadFile)
             } else {
-                SyncUtils.checkDocumentProviderPermissions(applicationContext, uri)
-
-                contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
-                    if (cursor.moveToFirst()) {
-                        val mediaSize = SyncUtils.getFileSize(cursor)
-                        val descriptorSize = fileDescriptorSize(uploadFile.getOriginalUri(applicationContext))
-                        val size = descriptorSize?.let { if (mediaSize > it) mediaSize else it } ?: mediaSize //TODO Temp solution
-                        startUploadFile(uploadFile, size)
-                    } else UploadFile.deleteIfExists(uri)
-                }
+                handleNotFileScheme(uri, uploadFile)
             }
         } catch (exception: Exception) {
-            when (exception) {
-                is SecurityException, is IllegalStateException, is IllegalArgumentException -> {
-                    UploadFile.deleteIfExists(uri)
+            handleUploadFileException(exception, uri, uploadFile)
+        }
+    }
 
-                    if (exception is IllegalStateException) {
-                        Sentry.withScope { scope ->
-                            scope.setExtra("data", ApiController.gson.toJson(uploadFile))
-                            Sentry.captureMessage("The file is either partially downloaded or corrupted")
-                        }
-                    } else {
-                        Sentry.captureException(exception)
-                    }
-                }
-                else -> throw exception
+    private fun updateNotificationTimes(uploadFile: UploadFile, pendingCount: Int) {
+        val currentTime = Date().time
+        if (notificationElapsedTime >= ELAPSED_TIME) {
+            uploadFile.setupCurrentUploadNotification(applicationContext, pendingCount)
+            notificationStartTime = currentTime
+            notificationElapsedTime = 0L
+        } else {
+            notificationElapsedTime = currentTime - notificationStartTime
+        }
+    }
+
+    private suspend fun handleFileScheme(uri: Uri, uploadFile: UploadFile) {
+        val cacheFile = uri.toFile().apply {
+            if (!exists()) {
+                UploadFile.deleteIfExists(uri)
+                return
             }
+        }
+
+        startUploadFile(uploadFile, cacheFile.length())
+        UploadFile.deleteIfExists(uri)
+
+        if (!uploadFile.isSyncOffline()) cacheFile.delete()
+    }
+
+    private suspend fun handleNotFileScheme(uri: Uri, uploadFile: UploadFile) {
+        SyncUtils.checkDocumentProviderPermissions(applicationContext, uri)
+
+        contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val mediaSize = SyncUtils.getFileSize(cursor)
+                val descriptorSize = fileDescriptorSize(uploadFile.getOriginalUri(applicationContext))
+                val size = descriptorSize?.let { if (mediaSize > it) mediaSize else it } ?: mediaSize // TODO Temporary solution
+                startUploadFile(uploadFile, size)
+            } else {
+                UploadFile.deleteIfExists(uri)
+            }
+        }
+    }
+
+    private fun handleUploadFileException(exception: Exception, uri: Uri, uploadFile: UploadFile) {
+        when (exception) {
+            is SecurityException, is IllegalStateException, is IllegalArgumentException -> {
+                UploadFile.deleteIfExists(uri)
+
+                if (exception is IllegalStateException) {
+                    Sentry.withScope { scope ->
+                        scope.setExtra("data", ApiController.gson.toJson(uploadFile))
+                        Sentry.captureMessage("The file is either partially downloaded or corrupted")
+                    }
+                } else {
+                    Sentry.captureException(exception)
+                }
+            }
+            else -> throw exception
         }
     }
 
