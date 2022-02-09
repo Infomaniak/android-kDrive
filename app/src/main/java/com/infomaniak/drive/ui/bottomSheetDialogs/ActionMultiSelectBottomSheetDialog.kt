@@ -73,7 +73,10 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun configureAvailableOffline(otherActionsVisibility: Boolean) {
-        availableOfflineSwitch.setOnCheckedChangeListener { _, _ -> onActionSelected(SelectDialogAction.OFFLINE) }
+        availableOfflineSwitch.apply {
+            isChecked = navigationArgs.onlyOffline
+            setOnCheckedChangeListener { _, _ -> onActionSelected(SelectDialogAction.OFFLINE) }
+        }
         disabledAvailableOffline.isVisible = navigationArgs.onlyFolders
         availableOffline.apply {
             setOnClickListener { onActionSelected(SelectDialogAction.OFFLINE) }
