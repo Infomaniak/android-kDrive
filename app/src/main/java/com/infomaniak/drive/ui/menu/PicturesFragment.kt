@@ -29,25 +29,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.liveData
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ApiRepository
-import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialogArgs
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionPicturesMultiSelectBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
-import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.toDp
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.activity_main.*
@@ -71,7 +64,6 @@ class PicturesFragment(
         }
     }
 
-    private var currentFolder: File? = null
     private var multiSelectParent: MultiSelectParent? = null
 
     fun init(multiSelectParent: MultiSelectParent) {
@@ -164,27 +156,6 @@ class PicturesFragment(
 
         mediator.observe(viewLifecycleOwner) { (success, total) ->
             if (total == fileCount) handleBulkActionResult(success, type, destinationFolder)
-        }
-    }
-
-    private fun performCancellableBulkOperation(bulkOperation: BulkOperation): LiveData<ApiResponse<CancellableAction>> {
-        return liveData(Dispatchers.IO) {
-            emit(ApiRepository.performCancellableBulkOperation(bulkOperation))
-        }
-    }
-
-    private fun sendBulkAction(fileCount: Int = 0, bulkOperation: BulkOperation) {
-        MqttClientWrapper.start {
-            performCancellableBulkOperation(bulkOperation).observe(viewLifecycleOwner) { apiResponse ->
-                if (apiResponse.isSuccess()) {
-                    apiResponse.data?.let { cancellableAction ->
-                        requireContext().launchBulkOperationWorker(
-                            BulkOperationsUtils.generateWorkerData(cancellableAction.cancelId, fileCount, bulkOperation.action)
-                        )
-                    }
-                } else requireActivity().showSnackbar(apiResponse.translateError())
-                closeMultiSelect()
-            }
         }
     }
 
