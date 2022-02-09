@@ -450,6 +450,12 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     mainViewModel.updateMultiSelectMediator(mediator),
                 )
             }
+            BulkOperationType.REMOVE_FAVORITES -> {
+                mediator.addSource(
+                    mainViewModel.deleteFileFromFavorites(file),
+                    mainViewModel.updateMultiSelectMediator(mediator),
+                )
+            }
         }
     }
 

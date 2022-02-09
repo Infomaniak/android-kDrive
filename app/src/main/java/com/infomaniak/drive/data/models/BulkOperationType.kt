@@ -36,7 +36,8 @@ enum class BulkOperationType(@StringRes val title: Int, @PluralsRes val successM
     COLOR_FOLDER(0, R.plurals.fileListColorFolderConfirmationSnackbar),
 
     SET_OFFLINE(0, successMessage = R.plurals.fileListAddOfflineConfirmationSnackbar),
-    ADD_FAVORITES(0, successMessage = R.plurals.fileListAddFavorisConfirmationSnackbar);
+    ADD_FAVORITES(0, successMessage = R.plurals.fileListAddFavoritesConfirmationSnackbar),
+    REMOVE_FAVORITES(0, successMessage = R.plurals.fileListRemoveFavoritesConfirmationSnackbar);
 
     fun getNotificationBuilder(context: Context): NotificationCompat.Builder {
         return when (this) {

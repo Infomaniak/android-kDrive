@@ -375,9 +375,13 @@
     <string name="fileDetailsNoComments">No comments at this time</string>
     <string name="fileInfoInputDuplicateFile">Copy name</string>
     <string name="fileInfoLinkCopiedToClipboard">Link copied to the clipboard</string>
-    <plurals name="fileListAddFavorisConfirmationSnackbar">
+    <plurals name="fileListAddFavoritesConfirmationSnackbar">
         <item quantity="one">One file successfully added to favorites</item>
         <item quantity="other">%d files successfully added to favorites</item>
+    </plurals>
+    <plurals name="fileListRemoveFavoritesConfirmationSnackbar">
+        <item quantity="one">One file successfully removed from favorites</item>
+        <item quantity="other">%d files successfully removed from favorites</item>
     </plurals>
     <plurals name="fileListAddOfflineConfirmationSnackbar">
         <item quantity="one">One file available offline</item>

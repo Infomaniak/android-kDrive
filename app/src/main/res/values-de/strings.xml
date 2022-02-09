@@ -363,9 +363,13 @@
     <string name="fileDetailsNoComments">Derzeit kein Kommentar</string>
     <string name="fileInfoInputDuplicateFile">Bezeichnung der Kopie</string>
     <string name="fileInfoLinkCopiedToClipboard">Link in Zwischenablage kopiert</string>
-    <plurals name="fileListAddFavorisConfirmationSnackbar">
+    <plurals name="fileListAddFavoritesConfirmationSnackbar">
         <item quantity="one">Datei erfolgreich zu Favoriten hinzugefügt</item>
         <item quantity="other">%d Dateien erfolgreich zu Favoriten hinzugefügt</item>
+    </plurals>
+    <plurals name="fileListRemoveFavoritesConfirmationSnackbar">
+        <item quantity="one">Datei erfolgreich aus den Favoriten entfernt</item>
+        <item quantity="other">%d Dateien erfolgreich aus den Favoriten entfernt</item>
     </plurals>
     <plurals name="fileListAddOfflineConfirmationSnackbar">
         <item quantity="one">Datei offline verfügbar</item>
