@@ -32,8 +32,9 @@ import org.matomo.sdk.extra.TrackHelper
 
 object MatomoUtils {
 
-    fun Context.buildTracker(): Tracker =
-        TrackerBuilder("https://analytics.infomaniak.com/matomo.php", 8, "AndroidTracker").build(Matomo.getInstance(this))
+    fun Context.buildTracker(): Tracker {
+        return TrackerBuilder("https://analytics.infomaniak.com/matomo.php", 8, "AndroidTracker").build(Matomo.getInstance(this))
+    }
 
     fun Context.trackDownloads() {
         TrackHelper.track().download().identifier(DownloadTracker.Extra.ApkChecksum(this)).with(tracker)
@@ -75,7 +76,7 @@ object MatomoUtils {
     fun Context.addTrackingCallbackForDebugLog() {
         tracker.addTrackingCallback { trackMe ->
             trackMe.apply {
-                toMap().forEach() {
+                toMap().forEach {
                     when (it.key) {
                         "action_name" -> Log.d("TRACKER_SCREEN", it.value)
                         "e_c" -> Log.d("TRACKER_EVENT", "Category: ${it.value}")
