@@ -34,6 +34,7 @@ import android.os.FileObserver
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
+import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -148,6 +149,8 @@ class MainActivity : BaseActivity() {
                     message = "Upload notification has been clicked"
                     level = SentryLevel.INFO
                 })
+
+                bottomNavigation.findViewById<View>(R.id.fileListFragment).performClick()
                 mainViewModel.navigateFileListToFolderId(navController, folderId)
             }
         }
