@@ -311,15 +311,17 @@ class ApiRepositoryTest : KDriveTest() {
 
     @Test
     fun manageCategoryLifecycle() {
-        val categoryId = createCategory(userDrive.driveId, "category tests", "#0000FF").let {
+        var name = "category tests"
+        var color = "#0000FF"
+        val categoryId = createCategory(userDrive.driveId, name, color).let {
             assertApiResponse(it)
-            Assert.assertEquals("Name of the category should be equals to 'category tests'", "category tests", it.data?.name)
-            Assert.assertEquals("Color of the category should be equals to blue", "#0000FF", it.data?.color)
+            Assert.assertEquals("Name of the category should be equals to '$name'", name, it.data?.name)
+            Assert.assertEquals("Color of the category should be equals to blue", color, it.data?.color)
             it.data!!.id
         }
 
         // Create again the same category should fail
-        with(createCategory(userDrive.driveId, "category tests", "#0000FF")) {
+        with(createCategory(userDrive.driveId, name, color)) {
             Assert.assertFalse(isSuccess())
             Assert.assertEquals(
                 "Error description should be 'category already exist error'",
@@ -328,16 +330,19 @@ class ApiRepositoryTest : KDriveTest() {
             )
         }
 
-        with(editCategory(userDrive.driveId, categoryId, "update cat", "#FF0000")) {
+        name = "update cat"
+        color = "#FF0000"
+        with(editCategory(userDrive.driveId, categoryId, name, color)) {
             assertApiResponse(this)
-            Assert.assertEquals("Name of the category should be equals to 'update cat'", "update cat", data?.name)
-            Assert.assertEquals("Color of the category should be equals to red", "#FF0000", data?.color)
+            Assert.assertEquals("Name of the category should be equals to '$name'", name, data?.name)
+            Assert.assertEquals("Color of the category should be equals to red", color, data?.color)
         }
 
         assertApiResponse(deleteCategory(userDrive.driveId, categoryId))
         Assert.assertNull(
             "The category shouldn't be found anymore",
-            getCategory(userDrive.driveId).data?.find { cat -> cat.id == categoryId })
+            getCategory(userDrive.driveId).data?.find { cat -> cat.id == categoryId },
+        )
     }
 
     @Test

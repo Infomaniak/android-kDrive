@@ -55,6 +55,8 @@ import java.util.concurrent.TimeUnit
 
 object AccountUtils : CredentialManager {
 
+    private const val DISABLE_AUTO_SYNC = "AccountUtils: disableAutoSync"
+
     private lateinit var userDatabase: UserDatabase
     var reloadApp: ((bundle: Bundle) -> Unit)? = null
 
@@ -124,7 +126,7 @@ object AccountUtils : CredentialManager {
                             val appSyncSettings = UploadFile.getAppSyncSettings()
                             for (driveRemoved in driveRemovedList) {
                                 if (appSyncSettings?.userId == user.id && appSyncSettings.driveId == driveRemoved.id) {
-                                    Sentry.captureMessage("AccountUtils: disableAutoSync")
+                                    Sentry.captureMessage(DISABLE_AUTO_SYNC)
                                     context.disableAutoSync()
                                 }
                                 if (currentDriveId == driveRemoved.id) {
@@ -179,7 +181,7 @@ object AccountUtils : CredentialManager {
         FileController.deleteUserDriveFiles(userRemoved.id)
 
         if (UploadFile.getAppSyncSettings()?.userId == userRemoved.id) {
-            Sentry.captureMessage("AccountUtils: disableAutoSync")
+            Sentry.captureMessage(DISABLE_AUTO_SYNC)
             context.disableAutoSync()
         }
 
@@ -275,7 +277,7 @@ object AccountUtils : CredentialManager {
             UiSettings(context).removeUiSettings()
 
             if (isEnableAppSync()) {
-                Sentry.captureMessage("AccountUtils: disableAutoSync")
+                Sentry.captureMessage(DISABLE_AUTO_SYNC)
                 context.disableAutoSync()
             }
 
