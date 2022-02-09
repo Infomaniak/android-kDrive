@@ -17,18 +17,23 @@
  */
 package com.infomaniak.drive.data.cache
 
+import androidx.core.os.bundleOf
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.Rights
+import com.infomaniak.drive.utils.AccountUtils
 import io.realm.DynamicRealm
 import io.realm.FieldAttribute
 import io.realm.RealmMigration
+import io.realm.RealmSchema
 import io.sentry.Sentry
 import java.util.*
 
 class FileMigration : RealmMigration {
     companion object {
         const val bddVersion = 3L // Must be bumped when the schema changes
+
+        const val LOGOUT_CURRENT_USER_TAG = "logout_current_user_tag"
     }
 
     override fun migrate(realm: DynamicRealm, oldVersion: Long, newVersion: Long) {
@@ -74,26 +79,37 @@ class FileMigration : RealmMigration {
             }
             // Rights migration with sentry logs
             val sentryLogs = arrayListOf<Pair<Int, String>>()
+            var countOfflineFiles = 0
             runCatching {
                 schema.get(Rights::class.java.simpleName)?.transform { // apply for each right
                     val fileId = it.getInt("fileId")
                     val file = realm.where(File::class.java.simpleName).equalTo(File::id.name, fileId).findFirst()
-                    if (file == null) it.deleteFromRealm() // Delete if it's orphan
-                    sentryLogs.add(fileId to "right is orphan ${file == null}")
+                    if (file == null) {
+                        it.deleteFromRealm() // Delete if it's orphan
+                        sentryLogs.add(fileId to "right is orphan true")
+                    }
+                    // Count offline files for sentry log
+                    if (file?.getBoolean(File::isOffline.name) == true) countOfflineFiles++
                 }?.apply {
                     removePrimaryKey()
                     removeField("fileId")
                     isEmbedded = true
                 }
+
             }.onFailure { exception ->
                 exception.printStackTrace()
                 // On some clients, it happens that isEmbedded is added in an orphan file without knowing why
                 // So we add these sentry logs to have more info
+                // We have an issue here: https://github.com/realm/realm-java/issues/7642
                 Sentry.withScope { scope ->
                     scope.setExtra("oldVersion", "$oldVersion")
+                    scope.setExtra("count orphan files", "${sentryLogs.count()}")
+                    scope.setExtra("count offline files", "$countOfflineFiles")
                     scope.setExtra("logs", sentryLogs.toString())
                     Sentry.captureException(exception)
                 }
+
+                temporaryMigrationFixToV2(realm, schema)
             }
 
             oldVersionTemp++
@@ -119,5 +135,20 @@ class FileMigration : RealmMigration {
 
     override fun hashCode(): Int {
         return javaClass.hashCode()
+    }
+
+    private fun temporaryMigrationFixToV2(realm: DynamicRealm, schema: RealmSchema) {
+        val offlineFile = realm.where(File::class.java.simpleName).equalTo(File::isOffline.name, true).findFirst()
+
+        // Delete all realm DB
+        realm.deleteAll()
+        // Continue migration
+        schema.get(Rights::class.java.simpleName)?.isEmbedded = true
+
+        // Logout the current user if there is at least one offline file
+        offlineFile?.let {
+            // Logout current user
+            AccountUtils.reloadApp?.invoke(bundleOf(LOGOUT_CURRENT_USER_TAG to true))
+        }
     }
 }

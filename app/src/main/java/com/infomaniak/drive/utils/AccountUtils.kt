@@ -18,7 +18,9 @@
 package com.infomaniak.drive.utils
 
 import android.content.Context
+import android.os.Bundle
 import android.util.Log
+import androidx.core.os.bundleOf
 import androidx.lifecycle.LiveData
 import com.facebook.stetho.okhttp3.StethoInterceptor
 import com.infomaniak.drive.BuildConfig
@@ -54,7 +56,7 @@ import java.util.concurrent.TimeUnit
 object AccountUtils : CredentialManager {
 
     private lateinit var userDatabase: UserDatabase
-    var reloadApp: (() -> Unit)? = null
+    var reloadApp: ((bundle: Bundle) -> Unit)? = null
 
     fun init(context: Context) {
         userDatabase = UserDatabase.getDatabase(context)
@@ -128,7 +130,7 @@ object AccountUtils : CredentialManager {
                                 if (currentDriveId == driveRemoved.id) {
                                     getFirstDrive()
                                     GlobalScope.launch(Dispatchers.Main) {
-                                        reloadApp?.invoke()
+                                        reloadApp?.invoke(bundleOf())
                                     }
                                 }
                                 FileController.deleteUserDriveFiles(user.id, driveRemoved.id)
@@ -137,13 +139,13 @@ object AccountUtils : CredentialManager {
                             if (fromMaintenance) {
                                 if (driveInfo.drives.main.any { drive -> !drive.maintenance }) {
                                     GlobalScope.launch(Dispatchers.Main) {
-                                        reloadApp?.invoke()
+                                        reloadApp?.invoke(bundleOf())
                                     }
                                 }
                             } else if (driveInfo.drives.main.all { drive -> drive.maintenance } ||
                                 driveInfo.drives.main.any { drive -> drive.maintenance && drive.id == currentDriveId }) {
                                 GlobalScope.launch(Dispatchers.Main) {
-                                    reloadApp?.invoke()
+                                    reloadApp?.invoke(bundleOf())
                                 }
                             }
 
@@ -187,7 +189,7 @@ object AccountUtils : CredentialManager {
 
             resetApp(context)
             GlobalScope.launch(Dispatchers.Main) {
-                reloadApp?.invoke()
+                reloadApp?.invoke(bundleOf())
             }
 
             CloudStorageProvider.notifyRootsChanged(context)

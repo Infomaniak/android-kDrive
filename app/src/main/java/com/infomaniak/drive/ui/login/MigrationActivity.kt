@@ -42,7 +42,6 @@ import com.infomaniak.lib.core.models.User
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.login.ApiToken
 import com.infomaniak.lib.login.InfomaniakLogin
-import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.activity_migration.*
 import kotlinx.android.synthetic.main.fragment_intro.view.*
 import kotlinx.coroutines.Dispatchers

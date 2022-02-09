@@ -47,7 +47,7 @@ class SwitchDriveDialog : SelectBottomSheetDialog() {
             } else {
                 AccountUtils.currentDriveId = drive.id
                 (activity as? MainActivity)?.saveLastNavigationItemSelected()
-                AccountUtils.reloadApp?.invoke()
+                AccountUtils.reloadApp?.invoke(bundleOf())
             }
         }
     }
