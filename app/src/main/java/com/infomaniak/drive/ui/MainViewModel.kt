@@ -34,7 +34,7 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.services.DownloadWorker
-import com.infomaniak.drive.ui.fileList.FileListFragment
+import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.drive.ui.home.HomeViewModel.Companion.DOWNLOAD_INTERVAL
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
@@ -315,63 +315,36 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    fun getRecentChanges(
-        driveId: Int,
-        onlyFirstPage: Boolean,
-        forceDownload: Boolean = false
-    ): LiveData<FileListFragment.FolderFilesResult?> {
+    fun getRecentChanges(driveId: Int, onlyFirstPage: Boolean, forceDownload: Boolean = false): LiveData<FolderFilesResult?> {
         getRecentChangesJob.cancel()
         getRecentChangesJob = Job()
-
         val ignoreDownload = lastModifiedTime != 0L && (Date().time - lastModifiedTime) < DOWNLOAD_INTERVAL && !forceDownload
-
         return liveData(Dispatchers.IO + getRecentChangesJob) {
             if (ignoreDownload) {
-                emit(
-                    FileListFragment.FolderFilesResult(
-                        files = FileController.getRecentChanges(),
-                        isComplete = true,
-                        page = 1
-                    )
-                )
-                return@liveData
+                emit(FolderFilesResult(files = FileController.getRecentChanges(), isComplete = true, page = 1))
+            } else {
+                getLastModifiedFilesRecursively(1, driveId, onlyFirstPage)
             }
+        }
+    }
 
-            suspend fun recursive(page: Int) {
-                val isFirstPage = page == 1
-                val apiResponse = ApiRepository.getLastModifiedFiles(driveId, page)
-                if (apiResponse.isSuccess()) {
-                    val data = apiResponse.data
-                    data?.let { FileController.storeRecentChanges(it, isFirstPage) }
-                    when {
-                        data == null -> Unit
-                        data.size < ApiRepository.PER_PAGE -> {
-                            if (isFirstPage) emit(
-                                FileListFragment.FolderFilesResult(files = data, isComplete = true, page = page)
-                            )
-                        }
-                        else -> {
-                            if (isFirstPage) {
-                                emit(
-                                    FileListFragment.FolderFilesResult(files = data, isComplete = true, page = page)
-                                )
-                            }
-                            if (!onlyFirstPage) recursive(page + 1)
-                        }
-                    }
-                } else {
-                    if (isFirstPage) {
-                        emit(
-                            FileListFragment.FolderFilesResult(
-                                files = FileController.getRecentChanges(),
-                                isComplete = true,
-                                page = 1
-                            )
-                        )
-                    } else emit(null)
+    private suspend fun LiveDataScope<FolderFilesResult?>.getLastModifiedFilesRecursively(
+        page: Int,
+        driveId: Int,
+        onlyFirstPage: Boolean,
+    ) {
+        val isFirstPage = page == 1
+        val apiResponse = ApiRepository.getLastModifiedFiles(driveId, page)
+        when {
+            apiResponse.isSuccess() -> apiResponse.data?.let { data ->
+                FileController.storeRecentChanges(data, isFirstPage)
+                if (isFirstPage) emit(FolderFilesResult(files = data, isComplete = true, page = page))
+                if (data.size >= ApiRepository.PER_PAGE && !onlyFirstPage) {
+                    getLastModifiedFilesRecursively(page + 1, driveId, onlyFirstPage)
                 }
             }
-            recursive(1)
+            isFirstPage -> emit(FolderFilesResult(files = FileController.getRecentChanges(), isComplete = true, page = 1))
+            else -> emit(null)
         }
     }
 
