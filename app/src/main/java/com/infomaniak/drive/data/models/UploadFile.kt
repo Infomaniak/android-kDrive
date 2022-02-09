@@ -246,8 +246,8 @@ open class UploadFile(
                             } else {
                                 // Delete definitively
                                 val uri = uploadFileRealm.getUriObject()
-                                if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
-                                    if (!uploadFile.isSyncOffline()) uri.toFile().apply { if (exists()) delete() }
+                                if (uri.scheme.equals(ContentResolver.SCHEME_FILE) && !uploadFile.isSyncOffline()) {
+                                    uri.toFile().apply { if (exists()) delete() }
                                 }
                                 uploadFileRealm.deleteFromRealm()
                             }
