@@ -149,32 +149,21 @@ class PicturesFragment(
         color: String?,
     ): (Dialog?) -> Unit = {
 
-        if (selectedFiles.size > BulkOperationsUtils.MIN_SELECTED && type != BulkOperationType.TRASH) {
-            sendBulkAction(
-                fileCount, BulkOperation(
-                    action = type,
-                    fileIds = selectedFiles.map { it.id },
-                    parent = currentFolder!!,
-                    destinationFolderId = destinationFolder?.id,
-                )
-            )
+        // API doesn't support bulk operations for files originating from different parent folder so we repeat the action for each file
+        val mediator = mainViewModel.createMultiSelectMediator()
+        enableButtonMultiSelect(false)
 
-        } else {
-            val mediator = mainViewModel.createMultiSelectMediator()
-            enableButtonMultiSelect(false)
-
-            selectedFiles.reversed().forEach {
-                val file = when {
-                    it.isManagedAndValidByRealm() -> it.realm.copyFromRealm(it, 0)
-                    it.isNotManagedByRealm() -> it
-                    else -> return@forEach
-                }
-                sendAction(file, type, mediator, destinationFolder, color)
+        selectedFiles.reversed().forEach {
+            val file = when {
+                it.isManagedAndValidByRealm() -> it.realm.copyFromRealm(it, 0)
+                it.isNotManagedByRealm() -> it
+                else -> return@forEach
             }
+            sendAction(file, type, mediator, destinationFolder, color)
+        }
 
-            mediator.observe(viewLifecycleOwner) { (success, total) ->
-                if (total == fileCount) handleBulkActionResult(success, type, destinationFolder)
-            }
+        mediator.observe(viewLifecycleOwner) { (success, total) ->
+            if (total == fileCount) handleBulkActionResult(success, type, destinationFolder)
         }
     }
 
