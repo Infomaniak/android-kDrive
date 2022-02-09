@@ -24,13 +24,16 @@ import com.infomaniak.drive.ApplicationMain.Companion.tracker
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.ui.fileList.fileDetails.FileDetailsFragment
+import org.matomo.sdk.Matomo
+import org.matomo.sdk.Tracker
 import org.matomo.sdk.TrackerBuilder
 import org.matomo.sdk.extra.DownloadTracker
 import org.matomo.sdk.extra.TrackHelper
 
 object MatomoUtils {
 
-    fun buildTracker() = TrackerBuilder("https://analytics.infomaniak.com/matomo.php", 8, "AndroidTracker")
+    fun Context.buildTracker(): Tracker =
+        TrackerBuilder("https://analytics.infomaniak.com/matomo.php", 8, "AndroidTracker").build(Matomo.getInstance(this))
 
     fun Context.trackDownloads() {
         TrackHelper.track().download().identifier(DownloadTracker.Extra.ApkChecksum(this)).with(tracker)

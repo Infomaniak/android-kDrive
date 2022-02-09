@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive
 
+import android.app.Application
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -68,11 +69,12 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import org.matomo.sdk.Tracker
-import org.matomo.sdk.extra.MatomoApplication
 import java.util.*
 
 
-class ApplicationMain : MatomoApplication(), ImageLoaderFactory {
+class ApplicationMain : Application(), ImageLoaderFactory {
+
+    val tracker: Tracker by lazy { buildTracker() }
 
     override fun onCreate() {
         super.onCreate()
@@ -124,9 +126,6 @@ class ApplicationMain : MatomoApplication(), ImageLoaderFactory {
 
         onInitTracker()
     }
-
-    override fun onCreateTrackerConfig() = buildTracker()
-
 
     override fun newImageLoader(): ImageLoader {
         return ImageLoader.Builder(applicationContext)
@@ -190,6 +189,6 @@ class ApplicationMain : MatomoApplication(), ImageLoaderFactory {
     }
 
     companion object {
-        inline val Context.tracker: Tracker get() = (this as MatomoApplication).tracker
+        inline val Context.tracker: Tracker get() = (this as ApplicationMain).tracker
     }
 }

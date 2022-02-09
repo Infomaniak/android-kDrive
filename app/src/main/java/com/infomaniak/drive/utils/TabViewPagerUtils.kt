@@ -49,6 +49,7 @@ object TabViewPagerUtils {
             if (isChecked) {
                 val position = (tabsViewPager.adapter as ViewPagerAdapter).tabs.indexOfFirst { it.button == checkedId }
                 tabsViewPager.setCurrentItem(position, true)
+                onCheckedButton?.invoke(position)
                 context?.applicationContext?.trackTabsView(this, position)
             }
         }

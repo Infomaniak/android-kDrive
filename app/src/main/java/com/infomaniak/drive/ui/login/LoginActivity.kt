@@ -25,6 +25,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
+import com.infomaniak.drive.ApplicationMain.Companion.tracker
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
@@ -124,7 +125,7 @@ class LoginActivity : AppCompatActivity() {
                     lifecycleScope.launch(Dispatchers.IO) {
                         when (val user = authenticateUser(this@LoginActivity, it)) {
                             is User -> {
-                                (application as MatomoApplication).tracker.userId = user.id.toString()
+                                application.tracker.userId = user.id.toString()
                                 launchMainActivity()
                             }
                             is ApiResponse<*> -> withContext(Dispatchers.Main) {
