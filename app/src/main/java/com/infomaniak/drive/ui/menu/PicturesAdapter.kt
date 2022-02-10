@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.menu
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isGone
@@ -51,9 +50,7 @@ class PicturesAdapter(
     var updateMultiSelectMode: (() -> Unit)? = null
 
     fun formatList(context: Context, newPictureList: ArrayList<File>): ArrayList<Any> {
-        Log.e("photo", "formatList: About to add ${newPictureList.count()} items to the list")
         pictureList.addAll(newPictureList)
-        Log.e("photo", "formatList: new size: ${pictureList.count()}")
         val addItemList: ArrayList<Any> = arrayListOf()
 
         for (picture in newPictureList) {
