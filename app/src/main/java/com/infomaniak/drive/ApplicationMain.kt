@@ -19,7 +19,6 @@ package com.infomaniak.drive
 
 import android.app.Application
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.StrictMode
@@ -43,9 +42,6 @@ import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.MatomoUtils.buildTracker
-import com.infomaniak.drive.utils.MatomoUtils.trackCurrentUserId
-import com.infomaniak.drive.utils.MatomoUtils.trackDownloads
-import com.infomaniak.drive.utils.MatomoUtils.trackScreen
 import com.infomaniak.drive.utils.NotificationUtils.initNotificationChannel
 import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.clearStack
@@ -73,7 +69,7 @@ import java.util.*
 
 class ApplicationMain : Application(), ImageLoaderFactory {
 
-    val tracker: Tracker by lazy { buildTracker() }
+    val matomoTracker: Tracker by lazy { buildTracker() }
 
     override fun onCreate() {
         super.onCreate()
@@ -122,8 +118,6 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         initNotificationChannel()
         HttpClient.init(tokenInterceptorListener())
         MqttClientWrapper.init(applicationContext)
-
-        onInitTracker()
     }
 
     override fun newImageLoader(): ImageLoader {
@@ -178,15 +172,5 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         override suspend fun getApiToken(): ApiToken {
             return AccountUtils.currentUser!!.apiToken
         }
-    }
-
-    private fun onInitTracker() {
-        trackCurrentUserId()
-        trackDownloads()
-        trackScreen("/ApplicationMain", "Application")
-    }
-
-    companion object {
-        inline val Context.tracker: Tracker get() = (this as ApplicationMain).tracker
     }
 }

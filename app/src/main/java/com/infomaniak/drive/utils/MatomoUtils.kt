@@ -17,13 +17,14 @@
  */
 package com.infomaniak.drive.utils
 
+import android.app.Activity
 import android.content.Context
+import android.util.Log
 import androidx.fragment.app.Fragment
-import com.infomaniak.drive.ApplicationMain.Companion.tracker
+import com.infomaniak.drive.ApplicationMain
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.SyncSettings
-import com.infomaniak.drive.ui.fileList.fileDetails.FileDetailsFragment
 import org.matomo.sdk.Matomo
 import org.matomo.sdk.Tracker
 import org.matomo.sdk.TrackerBuilder
@@ -32,12 +33,12 @@ import org.matomo.sdk.extra.TrackHelper
 
 object MatomoUtils {
 
-    fun Context.buildTracker(): Tracker {
-        return TrackerBuilder(BuildConfig.ANALYTICS, 8, "AndroidTracker").build(Matomo.getInstance(this))
-    }
+    private inline val Context.tracker: Tracker get() = (this as ApplicationMain).matomoTracker
 
-    fun Context.trackDownloads() {
-        TrackHelper.track().download().identifier(DownloadTracker.Extra.ApkChecksum(this)).with(tracker)
+    fun Context.buildTracker(): Tracker {
+        return TrackerBuilder(BuildConfig.ANALYTICS, 8, "AndroidTracker").build(Matomo.getInstance(this)).also {
+            TrackHelper.track().download().identifier(DownloadTracker.Extra.ApkChecksum(this)).with(it)
+        }
     }
 
     fun Context.trackEvent(category: String, action: String, name: String? = null, value: Float? = null) {
@@ -69,8 +70,18 @@ object MatomoUtils {
         TrackHelper.track().screen(path).title(title).with(tracker)
     }
 
+    fun Activity.trackScreen(title: String) {
+        TrackHelper.track().screen(this).title(title).with(application.tracker)
+    }
+
+    fun Fragment.trackScreen(title: String) {
+        activity?.trackScreen(title)
+    }
+
     fun Context.trackCurrentUserId() {
         tracker.userId = AccountUtils.currentUserId.toString()
+
+        Log.d("USER", tracker.userId)
     }
 
     fun Context.trackPhotoSyncSettings(syncSettings: SyncSettings, trackingDateName: String) {
@@ -84,29 +95,6 @@ object MatomoUtils {
         trackEventWithBooleanValue("shareAndRights", "protectWithPassword", protectWithPassword)
         trackEventWithBooleanValue("shareAndRights", "expirationDateLink", expirationDate)
         trackEventWithBooleanValue("shareAndRights", "downloadFromLink", downloadFromLink)
-    }
-
-    fun Context.trackTabsView(fragment: Fragment, position: Int) {
-        val trackerName: String
-        val trackerCategory: String
-        if (fragment::class == FileDetailsFragment::class) {
-            trackerCategory = "fileInfo"
-            trackerName = when (position) {
-                0 -> "switchViewInfo"
-                1 -> "switchViewActivity"
-                2 -> "switchViewComments"
-                else -> "switchViewInfo"
-            }
-        } else {
-            trackerCategory = "home"
-            trackerName = when (position) {
-                0 -> "switchViewActivity"
-                1 -> "switchViewOffline"
-                2 -> "switchViewImages"
-                else -> "switchViewActivity"
-            }
-        }
-        trackEvent(trackerCategory, "click", trackerName)
     }
 
     private fun Boolean.toFloat() = if (this) 1f else 0f

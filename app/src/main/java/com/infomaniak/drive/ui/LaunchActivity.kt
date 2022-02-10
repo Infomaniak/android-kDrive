@@ -65,10 +65,8 @@ class LaunchActivity : AppCompatActivity() {
                 }
             }
         }
-        with(application) {
-            trackCurrentUserId()
-            trackScreen("/LaunchActivity", "Launch")
-        }
+        application.trackCurrentUserId()
+        trackScreen("Launch")
     }
 
     override fun onPause() {

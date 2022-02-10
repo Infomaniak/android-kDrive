@@ -31,7 +31,6 @@ open class BaseActivity : AppCompatActivity() {
         if (AccountUtils.currentUser == null) {
             runBlocking { AccountUtils.requestCurrentUser() }
         }
-        val path = this::class.java.name
-        application.trackScreen(path, path.substringAfter("com.infomaniak.drive."))
+        trackScreen(this::class.java.name.substringAfter("com.infomaniak.drive."))
     }
 }
