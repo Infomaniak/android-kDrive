@@ -375,6 +375,10 @@
         <item quantity="one">Un archivo disponible sin conexión</item>
         <item quantity="other">%d archivos disponibles sin conexión</item>
     </plurals>
+    <plurals name="fileListRemoveOfflineConfirmationSnackbar">
+        <item quantity="one">Un archivo eliminado de la disponibilidad sin conexión</item>
+        <item quantity="other">%d archivos eliminados de la disponibilidad sin conexión</item>
+    </plurals>
     <plurals name="fileListColorFolderConfirmationSnackbar">
         <item quantity="one">Una carpeta coloreada con éxito</item>
         <item quantity="other">%d carpetas coloreadas con éxito</item>

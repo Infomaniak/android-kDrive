@@ -375,6 +375,10 @@
         <item quantity="one">Un fichier disponible hors ligne</item>
         <item quantity="other">%d fichiers disponibles hors ligne</item>
     </plurals>
+    <plurals name="fileListRemoveOfflineConfirmationSnackbar">
+        <item quantity="one">Un fichier retiré de la disponibilité hors ligne</item>
+        <item quantity="other">%d fichiers retirés de la disponibilité hors ligne</item>
+    </plurals>
     <plurals name="fileListColorFolderConfirmationSnackbar">
         <item quantity="one">Un dossier coloré avec succès</item>
         <item quantity="other">%d dossiers colorés avec succès</item>

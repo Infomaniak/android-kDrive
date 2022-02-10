@@ -375,6 +375,10 @@
         <item quantity="one">Un file è disponibile offline</item>
         <item quantity="other">%d file sono disponibili offline</item>
     </plurals>
+    <plurals name="fileListRemoveOfflineConfirmationSnackbar">
+        <item quantity="one">Un file rimosso dalla disponibilità offline</item>
+        <item quantity="other">%d file rimossi dalla disponibilità offline</item>
+    </plurals>
     <plurals name="fileListColorFolderConfirmationSnackbar">
         <item quantity="one">Una cartella colorata con successo</item>
         <item quantity="other">%d cartelle colorate con successo</item>

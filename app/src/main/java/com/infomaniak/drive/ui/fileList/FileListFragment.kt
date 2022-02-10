@@ -434,8 +434,8 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     }
                 }
             }
-            BulkOperationType.SET_OFFLINE -> {
-                addSelectedFilesToOffline(file)
+            BulkOperationType.ADD_OFFLINE, BulkOperationType.REMOVE_OFFLINE -> {
+                addOrRemoveSelectedFilesToOffline(file, type == BulkOperationType.ADD_OFFLINE)
                 closeMultiSelect()
             }
             BulkOperationType.ADD_FAVORITES -> {
@@ -660,18 +660,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
-    private fun addSelectedFilesToOffline(file: File) {
+    private fun addOrRemoveSelectedFilesToOffline(file: File, mustAdd: Boolean) {
         if (!file.isFolder()) {
             val cacheFile = file.getCacheFile(requireContext())
             val offlineFile = file.getOfflineFile(requireContext())
-            if (file.isOffline) {
-                lifecycleScope.launch {
-                    if (offlineFile != null) {
-                        mainViewModel.removeOfflineFile(file, offlineFile, cacheFile)
-                        file.isOffline = false
-                    }
-                }
-            } else {
+            if (mustAdd) {
                 if (offlineFile != null && !file.isObsoleteOrNotIntact(cacheFile)) {
                     Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
                     runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
@@ -683,6 +676,13 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                         }
                     }
                 } else Utils.downloadAsOfflineFile(requireContext(), file)
+            } else {
+                lifecycleScope.launch {
+                    if (offlineFile != null) {
+                        mainViewModel.removeOfflineFile(file, offlineFile, cacheFile)
+                        file.isOffline = false
+                    }
+                }
             }
         }
     }

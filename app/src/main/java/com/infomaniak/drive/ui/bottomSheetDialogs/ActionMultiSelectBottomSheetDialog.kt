@@ -81,15 +81,21 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun configureAvailableOffline(otherActionsVisibility: Boolean) {
-        availableOfflineSwitch.apply {
-            isChecked = navigationArgs.onlyOffline
-            setOnCheckedChangeListener { _, _ -> onActionSelected(SelectDialogAction.OFFLINE) }
+        with(navigationArgs) {
+            availableOfflineSwitch.apply {
+                isChecked = onlyOffline
+                setOnCheckedChangeListener { _, _ -> selectOfflineDialogActionCallBack(onlyOffline) }
+            }
+            disabledAvailableOffline.isVisible = onlyFolders
+            availableOffline.apply {
+                setOnClickListener { selectOfflineDialogActionCallBack(onlyOffline) }
+                isVisible = otherActionsVisibility
+            }
         }
-        disabledAvailableOffline.isVisible = navigationArgs.onlyFolders
-        availableOffline.apply {
-            setOnClickListener { onActionSelected(SelectDialogAction.OFFLINE) }
-            isVisible = otherActionsVisibility
-        }
+    }
+
+    private fun selectOfflineDialogActionCallBack(onlyOffline: Boolean) {
+        onActionSelected(if (onlyOffline) SelectDialogAction.REMOVE_OFFLINE else SelectDialogAction.ADD_OFFLINE)
     }
 
     private fun configureDownloadFile() {
@@ -131,7 +137,8 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
         val finalType = when (type) {
             SelectDialogAction.ADD_FAVORITES -> BulkOperationType.ADD_FAVORITES
             SelectDialogAction.REMOVE_FAVORITE -> BulkOperationType.REMOVE_FAVORITES
-            SelectDialogAction.OFFLINE -> BulkOperationType.SET_OFFLINE
+            SelectDialogAction.ADD_OFFLINE -> BulkOperationType.ADD_OFFLINE
+            SelectDialogAction.REMOVE_OFFLINE -> BulkOperationType.REMOVE_OFFLINE
             SelectDialogAction.DUPLICATE -> BulkOperationType.COPY
             SelectDialogAction.COLOR_FOLDER -> BulkOperationType.COLOR_FOLDER
             else -> null
@@ -151,7 +158,7 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     enum class SelectDialogAction {
-        ADD_FAVORITES, REMOVE_FAVORITE, OFFLINE, DUPLICATE, COLOR_FOLDER
+        ADD_FAVORITES, REMOVE_FAVORITE, ADD_OFFLINE, REMOVE_OFFLINE, DUPLICATE, COLOR_FOLDER
     }
 
     companion object {

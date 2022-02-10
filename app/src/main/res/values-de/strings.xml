@@ -375,6 +375,10 @@
         <item quantity="one">Datei offline verfügbar</item>
         <item quantity="other">%d Dateien offline verfügbar</item>
     </plurals>
+    <plurals name="fileListRemoveOfflineConfirmationSnackbar">
+        <item quantity="one">Datei aus der offline Verfügbarkeit entfernt</item>
+        <item quantity="other">%d Dateien aus der offline Verfügbarkeit entfernt</item>
+    </plurals>
     <plurals name="fileListColorFolderConfirmationSnackbar">
         <item quantity="one">Ordner erfolgreich eingefärbt</item>
         <item quantity="other">%d Ordner erfolgreich eingefärbt</item>
