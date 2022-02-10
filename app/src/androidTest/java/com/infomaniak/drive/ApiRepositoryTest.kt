@@ -53,7 +53,6 @@ import com.infomaniak.drive.data.api.ApiRepository.postRestoreTrashFile
 import com.infomaniak.drive.data.api.ApiRepository.putFileComment
 import com.infomaniak.drive.data.api.ApiRepository.putFileShareLink
 import com.infomaniak.drive.data.api.ApiRepository.removeCategory
-import com.infomaniak.drive.data.api.ApiRepository.renameFile
 import com.infomaniak.drive.data.api.ApiRepository.updateDropBox
 import com.infomaniak.drive.data.api.ApiRoutes.postFileShare
 import com.infomaniak.drive.data.models.File
@@ -281,7 +280,7 @@ class ApiRepositoryTest : KDriveTest() {
         @DisplayName("Check the creation of comment on a file")
         fun createCommentOnFile() {
             // Posts 2 comments
-            val commentBody = "Hello world"
+            val commentBody = helloWorld
             with(postFileComment(testFile, commentBody)) {
                 assertApiResponseData(this)
                 assertEquals(commentBody, data!!.body)
@@ -298,7 +297,7 @@ class ApiRepositoryTest : KDriveTest() {
         @Test
         @DisplayName("Create a comment on a file then update it")
         fun updateCommentOnFile() {
-            val commentId = postFileComment(testFile, "Hello world").let {
+            val commentId = postFileComment(testFile, helloWorld).let {
                 assertApiResponseData(it)
                 it.data!!.id
             }
@@ -319,7 +318,7 @@ class ApiRepositoryTest : KDriveTest() {
         @DisplayName("Create a comment on a file then delete it")
         fun deleteCommentOnFile() {
             // Adds a comment on file then deletes it
-            with(postFileComment(testFile, "Hello world")) {
+            with(postFileComment(testFile, helloWorld)) {
                 assertApiResponseData(this)
                 // Delete the comment
                 deleteFileComment(testFile, data!!.id)
@@ -330,7 +329,7 @@ class ApiRepositoryTest : KDriveTest() {
         @Test
         @DisplayName("Like a file's comment then unlike it")
         fun likesCommentOnFile() {
-            val commentBody = "Hello world"
+            val commentBody = helloWorld
             val commentID = postFileComment(testFile, commentBody).let {
                 assertApiResponseData(it)
                 it.data!!.id
@@ -601,5 +600,9 @@ class ApiRepositoryTest : KDriveTest() {
             // Assert no dropbox left
             assertNull(getDropBox(testFolder).data, "not dropbox should be returned, data should be null")
         }
+    }
+
+    companion object {
+        const val helloWorld = "Hello World"
     }
 }
