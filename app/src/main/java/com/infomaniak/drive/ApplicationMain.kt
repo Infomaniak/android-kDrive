@@ -42,7 +42,6 @@ import com.infomaniak.drive.data.sync.UploadNotifications.pendingIntentFlags
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.KDriveHttpClient
-import com.infomaniak.drive.utils.MatomoUtils.addTrackingCallbackForDebugLog
 import com.infomaniak.drive.utils.MatomoUtils.buildTracker
 import com.infomaniak.drive.utils.MatomoUtils.trackCurrentUserId
 import com.infomaniak.drive.utils.MatomoUtils.trackDownloads
@@ -184,7 +183,6 @@ class ApplicationMain : Application(), ImageLoaderFactory {
     private fun onInitTracker() {
         trackCurrentUserId()
         trackDownloads()
-        addTrackingCallbackForDebugLog()
         trackScreen("/ApplicationMain", "Application")
     }
 
