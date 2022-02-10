@@ -436,7 +436,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
             BulkOperationType.ADD_OFFLINE, BulkOperationType.REMOVE_OFFLINE -> {
                 addOrRemoveSelectedFilesToOffline(file, type == BulkOperationType.ADD_OFFLINE)
-                closeMultiSelect()
             }
             BulkOperationType.ADD_FAVORITES -> {
                 mediator.addSource(
@@ -665,24 +664,33 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             val cacheFile = file.getCacheFile(requireContext())
             val offlineFile = file.getOfflineFile(requireContext())
             if (mustAdd) {
-                if (offlineFile != null && !file.isObsoleteOrNotIntact(cacheFile)) {
-                    Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
-                    runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
-
-                    fileAdapter.updateFileProgressByFileId(file.id, 100) { _, currentFile ->
-                        if (currentFile.isNotManagedByRealm()) {
-                            currentFile.isOffline = true
-                            currentFile.currentProgress = 0
-                        }
-                    }
-                } else Utils.downloadAsOfflineFile(requireContext(), file)
+                addSelectedFileToOffline(file, offlineFile, cacheFile)
             } else {
-                lifecycleScope.launch {
-                    if (offlineFile != null) {
-                        mainViewModel.removeOfflineFile(file, offlineFile, cacheFile)
-                        file.isOffline = false
-                    }
+                removeSelectedFileFromOffline(file, offlineFile, cacheFile)
+            }
+            closeMultiSelect()
+        }
+    }
+
+    private fun addSelectedFileToOffline(file: File, offlineFile: java.io.File?, cacheFile: java.io.File) {
+        if (offlineFile != null && !file.isObsoleteOrNotIntact(cacheFile)) {
+            Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
+            runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
+
+            fileAdapter.updateFileProgressByFileId(file.id, 100) { _, currentFile ->
+                if (currentFile.isNotManagedByRealm()) {
+                    currentFile.isOffline = true
+                    currentFile.currentProgress = 0
                 }
+            }
+        } else Utils.downloadAsOfflineFile(requireContext(), file)
+    }
+
+    private fun removeSelectedFileFromOffline(file: File, offlineFile: java.io.File?, cacheFile: java.io.File) {
+        lifecycleScope.launch {
+            if (offlineFile != null) {
+                mainViewModel.removeOfflineFile(file, offlineFile, cacheFile)
+                file.isOffline = false
             }
         }
     }
