@@ -68,19 +68,16 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun configureAddFavorites(otherActionsVisibility: Boolean) {
         addFavorites.apply {
-            with(navigationArgs) {
-                addFavoritesIcon.isEnabled = onlyFavorite
-                if (onlyFavorite) {
-                    addFavoritesText.setText(R.string.buttonRemoveFavorites)
-                    setOnClickListener { onActionSelected(SelectDialogAction.REMOVE_FAVORITE) }
-                } else {
-                    addFavoritesText.setText(R.string.buttonAddFavorites)
-                    setOnClickListener { onActionSelected(SelectDialogAction.ADD_FAVORITES) }
-                }
+            addFavoritesIcon.isEnabled = navigationArgs.onlyFavorite
+            if (navigationArgs.onlyFavorite) {
+                addFavoritesText.setText(R.string.buttonRemoveFavorites)
+                setOnClickListener { onActionSelected(SelectDialogAction.REMOVE_FAVORITE) }
+            } else {
+                addFavoritesText.setText(R.string.buttonAddFavorites)
+                setOnClickListener { onActionSelected(SelectDialogAction.ADD_FAVORITES) }
             }
             isVisible = otherActionsVisibility
         }
-
     }
 
     private fun configureAvailableOffline(otherActionsVisibility: Boolean) {
