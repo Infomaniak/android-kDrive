@@ -353,19 +353,36 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         } else {
             val mediator = mainViewModel.createMultiSelectMediator()
             enableButtonMultiSelect(false)
+            sendIndividualActions(selectedFiles, type, mediator, destinationFolder, color)
+            observeMediator(mediator, fileCount, type, destinationFolder)
+        }
+    }
 
-            selectedFiles.reversed().forEach {
-                val file = when {
-                    it.isManagedAndValidByRealm() -> it.realm.copyFromRealm(it, 0)
-                    it.isNotManagedByRealm() -> it
-                    else -> return@forEach
-                }
-                sendAction(file, type, mediator, destinationFolder, color)
+    private fun sendIndividualActions(
+        selectedFiles: List<File>,
+        type: BulkOperationType,
+        mediator: MediatorLiveData<Pair<Int, Int>>,
+        destinationFolder: File?,
+        color: String?,
+    ) {
+        selectedFiles.reversed().forEach {
+            val file = when {
+                it.isManagedAndValidByRealm() -> it.realm.copyFromRealm(it, 0)
+                it.isNotManagedByRealm() -> it
+                else -> return@forEach
             }
+            sendAction(file, type, mediator, destinationFolder, color)
+        }
+    }
 
-            mediator.observe(viewLifecycleOwner) { (success, total) ->
-                if (total == fileCount) handleBulkActionResult(success, type, destinationFolder)
-            }
+    private fun observeMediator(
+        mediator: MediatorLiveData<Pair<Int, Int>>,
+        fileCount: Int,
+        type: BulkOperationType,
+        destinationFolder: File?,
+    ) {
+        mediator.observe(viewLifecycleOwner) { (success, total) ->
+            if (total == fileCount) handleBulkActionResult(success, type, destinationFolder)
         }
     }
 

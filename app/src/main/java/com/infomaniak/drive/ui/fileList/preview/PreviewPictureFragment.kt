@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.fileList.preview
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -29,6 +30,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import coil.Coil
 import coil.load
+import coil.request.Disposable
 import coil.request.ImageRequest
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
@@ -45,7 +47,6 @@ class PreviewPictureFragment : PreviewFragment() {
         return inflater.inflate(R.layout.fragment_preview_picture, container, false)
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -60,40 +61,56 @@ class PreviewPictureFragment : PreviewFragment() {
             setOnClickListener { (parentFragment as? PreviewSliderFragment)?.openWithClicked() }
         }
 
+        val offlineFile = if (file.isOffline) {
+            file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive.userId)
+        } else {
+            null
+        }
         val imageViewDisposable = imageView.load(file.thumbnail()) { placeholder(R.drawable.coil_hack) }
 
-        val offlineFile =
-            if (file.isOffline) file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive.userId) else null
         if (offlineFile != null && file.isOfflineAndIntact(offlineFile)) {
             if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
             imageView?.setImageURI(offlineFile.toUri())
         } else {
-            val imageLoader = Coil.imageLoader(requireContext())
-            val previewRequest = ImageRequest.Builder(requireContext())
-                .data(file.imagePreview())
-                .listener(
-                    onError = { _, _ ->
-                        fileName?.text = file.name
-                        previewDescription?.isVisible = true
-                        bigOpenWithButton?.isVisible = true
-                        imageView?.isGone = true
-                    },
-                    onSuccess = { _, _ ->
-                        timer.cancel()
-                        noThumbnailLayout?.isGone = true
-                    }
-                )
-                .build()
-
-            lifecycleScope.launch(Dispatchers.IO) {
-                imageLoader.execute(previewRequest).drawable?.let { drawable ->
-                    if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
-                    withContext(Dispatchers.Main) { imageView?.load(drawable) { crossfade(false) } }
-                }
-            }
+            loadImage(timer, imageViewDisposable)
         }
 
         container?.layoutTransition?.setAnimateParentHierarchy(false)
+        setupImageListeners()
+    }
+
+    private fun loadImage(timer: CountDownTimer, imageViewDisposable: Disposable) {
+        val imageLoader = Coil.imageLoader(requireContext())
+        val previewRequest = buildPreviewRequest(timer)
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            imageLoader.execute(previewRequest).drawable?.let { drawable ->
+                if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
+                withContext(Dispatchers.Main) { imageView?.load(drawable) { crossfade(false) } }
+            }
+        }
+    }
+
+    private fun buildPreviewRequest(timer: CountDownTimer): ImageRequest {
+        return ImageRequest.Builder(requireContext())
+            .data(file.imagePreview())
+            .listener(
+                onError = { _, _ ->
+                    fileName?.text = file.name
+                    previewDescription?.isVisible = true
+                    bigOpenWithButton?.isVisible = true
+                    imageView?.isGone = true
+                },
+                onSuccess = { _, _ ->
+                    timer.cancel()
+                    noThumbnailLayout?.isGone = true
+                },
+            )
+            .build()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setupImageListeners() {
         imageView.apply {
 
             setOnTouchListener { view, event ->
