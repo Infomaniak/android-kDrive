@@ -25,8 +25,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.ContextCompat
-import androidx.core.view.isGone
-import androidx.core.view.isVisible
+import androidx.core.graphics.ColorUtils
+import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
@@ -185,6 +185,13 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             header.isVisible = showUi
             toggleBottomSheet(showUi)
             showUi = !showUi
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                windowInsetsController?.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
+                if (showUi) windowInsetsController?.hide(WindowInsetsCompat.Type.statusBars())
+                else windowInsetsController?.show(WindowInsetsCompat.Type.statusBars())
+            }
         }
     }
 
@@ -217,8 +224,29 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         super.onResume()
 
         activity?.window?.apply {
-            statusBarColor = ContextCompat.getColor(requireContext(), R.color.previewBackground)
             lightStatusBar(false)
+
+            statusBarColor =
+                ColorUtils.setAlphaComponent(ContextCompat.getColor(requireContext(), R.color.previewBackground), 128)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                setDecorFitsSystemWindows(false)
+            } else {
+                // TODO : Check if this works
+                setFlags(
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+                )
+            }
+
+            ViewCompat.setOnApplyWindowInsetsListener(requireView()) { view, windowInsets ->
+                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+                // Corrects the layout so it still takes into account system bars in edge-to-edge mode
+                header.setMargin(top = insets.top)
+                view.setMargin(bottom = insets.bottom)
+
+                // Return CONSUMED if you don't want the window insets to keep being passed down to descendant views.
+                WindowInsetsCompat.CONSUMED
+            }
         }
 
         with(bottomSheetFileInfos) {
@@ -233,6 +261,18 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         super.onPause()
         previewSliderViewModel.currentPreview = currentFile
         bottomSheetFileInfos.removeOfflineObservations(this)
+
+        activity?.window?.apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                setDecorFitsSystemWindows(true)
+            } else {
+                // TODO : Check if this works
+                clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+            }
+
+//            header.setMargin(top = 0)
+//            view?.setMargin(bottom = 0)
+        }
     }
 
     override fun onDestroy() {
