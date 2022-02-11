@@ -109,7 +109,7 @@ class TrashViewModel : ViewModel() {
 
     fun restoreTrashFile(file: File, newFolder: File? = null) =
         liveData(Dispatchers.IO) {
-            val body = newFolder?.let { mapOf("destination_folder_id" to newFolder.id) }
+            val body = newFolder?.let { mapOf("destination_directory_id" to newFolder.id) }
             emit(ApiRepository.postRestoreTrashFile(file, body))
         }
 
