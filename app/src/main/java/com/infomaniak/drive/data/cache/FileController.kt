@@ -20,6 +20,7 @@ package com.infomaniak.drive.data.cache
 import android.content.Context
 import androidx.collection.ArrayMap
 import androidx.collection.arrayMapOf
+import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
