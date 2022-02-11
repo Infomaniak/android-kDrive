@@ -95,12 +95,14 @@ class PreviewPictureFragment : PreviewFragment() {
 
         container?.layoutTransition?.setAnimateParentHierarchy(false)
         imageView.apply {
+
             setOnTouchListener { view, event ->
                 var result = true
-                //can scroll horizontally checks if there's still a part of the image
-                //that can be scrolled until you reach the edge
+
+                // `canScrollHorizontally` checks if there's still a part of
+                // the image that can be scrolled until you reach the edge.
                 if (event.pointerCount >= 2 || view.canScrollHorizontally(1) && imageView.canScrollHorizontally(-1)) {
-                    //multi-touch event
+                    // Multi-touch event
                     result = when (event.action) {
                         MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
                             // Disallow RecyclerView to intercept touch events.
@@ -118,9 +120,8 @@ class PreviewPictureFragment : PreviewFragment() {
                 }
                 result
             }
-            setOnClickListener {
-                (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
-            }
+
+            setOnClickListener { (parentFragment as? PreviewSliderFragment)?.toggleFullscreen() }
         }
     }
 }

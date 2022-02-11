@@ -63,10 +63,9 @@ class UploadInProgressFragment : FileListFragment() {
         downloadFiles = DownloadFiles()
         setNoFilesLayout = SetNoFilesLayout()
         drivePermissions.registerPermissions(this) { authorized ->
-            if (!authorized) {
-                findNavController().popBackStack()
-            }
+            if (!authorized) findNavController().popBackStack()
         }
+
         super.onViewCreated(view, savedInstanceState)
 
         val fromPendingFolders = findNavController().previousBackStackEntry?.destination?.id == R.id.uploadInProgressFragment

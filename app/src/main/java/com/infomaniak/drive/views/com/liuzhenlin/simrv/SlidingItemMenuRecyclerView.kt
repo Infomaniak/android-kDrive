@@ -131,11 +131,13 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(context: Context, at
     }
 
     private fun resolveActiveItemMenuBounds() {
-        activeItem?.let {
-            val itemMenuWidth = it.getTag(TAG_ITEM_MENU_WIDTH) as Int
-            val left = it.right - itemMenuWidth
-            val right = left + itemMenuWidth
-            activeItemMenuBounds[left, activeItemBounds.top, right] = activeItemBounds.bottom
+        activeItem?.let { viewGroup ->
+            val itemMenuWidth = viewGroup.getTag(TAG_ITEM_MENU_WIDTH) as Int
+            val left = viewGroup.right - itemMenuWidth
+            val top = activeItemBounds.top
+            val right = viewGroup.right
+            val bottom = activeItemBounds.bottom
+            activeItemMenuBounds[left, top, right] = bottom
         }
     }
 

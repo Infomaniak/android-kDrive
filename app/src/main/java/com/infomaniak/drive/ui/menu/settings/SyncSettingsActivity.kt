@@ -71,8 +71,9 @@ class SyncSettingsActivity : BaseActivity() {
 
         toolbar.setNavigationOnClickListener { onBackPressed() }
 
-        val permission = DrivePermissions()
-        permission.registerPermissions(this)
+        val permission = DrivePermissions().apply {
+            registerPermissions(this@SyncSettingsActivity)
+        }
 
         activateSyncSwitch.isChecked = AccountUtils.isEnableAppSync()
         saveSettingVisibility(activateSyncSwitch.isChecked)
@@ -237,19 +238,17 @@ class SyncSettingsActivity : BaseActivity() {
 
     private fun activeSelectDrive() {
         switchDrive.isVisible = true
-        selectDrive.setOnClickListener {
-            SelectDriveDialog().show(supportFragmentManager, "SyncSettingsSelectDriveDialog")
-        }
+        selectDrive.setOnClickListener { SelectDriveDialog().show(supportFragmentManager, "SyncSettingsSelectDriveDialog") }
     }
 
     private fun saveSettingVisibility(isVisible: Boolean) {
-        mediaFoldersSettingsVisibility(if (isVisible) syncSettingsViewModel.syncFolder.value != null else false)
+        mediaFoldersSettingsVisibility(isVisible && syncSettingsViewModel.syncFolder.value != null)
         saveSettingsTitle.isVisible = isVisible
         saveSettingsLayout.isVisible = isVisible
     }
 
     private fun mediaFoldersSettingsVisibility(isVisible: Boolean) {
-        syncSettingsVisibility(if (isVisible) MediaFolder.getAllSyncedFoldersCount() > 0 else false)
+        syncSettingsVisibility(isVisible && MediaFolder.getAllSyncedFoldersCount() > 0)
         mediaFoldersSettingsTitle.isVisible = isVisible
         mediaFoldersSettingsLayout.isVisible = isVisible
     }

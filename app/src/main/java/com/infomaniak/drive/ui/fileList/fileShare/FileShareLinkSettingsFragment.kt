@@ -62,9 +62,7 @@ class FileShareLinkSettingsFragment : Fragment() {
             else -> if (shareLink.canEdit) ShareLink.OfficeFilePermission.WRITE else ShareLink.OfficeFilePermission.READ
         }
 
-        toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
-        }
+        toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
         shareLink.validUntil?.let { defaultCalendarTimestamp = it }
 
@@ -84,7 +82,7 @@ class FileShareLinkSettingsFragment : Fragment() {
                 FileShareLinkSettingsFragmentDirections.actionFileShareLinkSettingsFragmentToSelectPermissionBottomSheetDialog(
                     currentPermission = officePermission,
                     currentFileId = navigationArgs.fileId,
-                    permissionsGroup = permissionsGroup
+                    permissionsGroup = permissionsGroup,
                 )
             )
         }
