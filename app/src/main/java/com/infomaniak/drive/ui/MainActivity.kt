@@ -234,7 +234,7 @@ class MainActivity : BaseActivity() {
                         title = getString(R.string.modalDeletePhotosTitle),
                         message = getString(R.string.modalDeletePhotosNumericDescription, filesUploadedRecently.size),
                         buttonText = getString(R.string.buttonDelete),
-                        isDeletion = true
+                        isDeletion = true,
                     ) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                             val filesDeletionRequest = MediaStore.createDeleteRequest(

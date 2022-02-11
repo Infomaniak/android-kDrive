@@ -242,7 +242,6 @@ class SaveExternalFilesActivity : BaseActivity() {
         }
 
         fileNameEditLayout.isVisible = showEditText
-
     }
 
     private fun handleSendMultiple() {
@@ -274,9 +273,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private fun activeSelectDrive() {
         switchDrive.isVisible = true
-        selectDrive.setOnClickListener {
-            SelectDriveDialog().show(supportFragmentManager, "SyncSettingsSelectDriveDialog")
-        }
+        selectDrive.setOnClickListener { SelectDriveDialog().show(supportFragmentManager, "SyncSettingsSelectDriveDialog") }
     }
 
     private fun storeFiles(userId: Int, driveId: Int, folderId: Int): Boolean {

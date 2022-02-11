@@ -137,13 +137,12 @@ class SharedItemsAdapter(
         notifyItemRangeInserted(0, newItemList.size)
     }
 
-    fun putAll(itemList: ArrayList<Shareable>) {
-        itemList.forEach { newShareable ->
-            this.itemList.find { it.id == newShareable.id }?.let {
-                val index = getIndexOfShareable(newShareable.id)
-                this.itemList[index] = it
+    fun putAll(newItemsList: ArrayList<Shareable>) {
+        newItemsList.forEach { newShareable ->
+            itemList.find { it.id == newShareable.id }?.let {
+                itemList[getIndexOfShareable(newShareable.id)] = it
             } ?: run {
-                this.itemList.add(newShareable)
+                itemList.add(newShareable)
             }
         }
         notifyDataSetChanged()
