@@ -17,11 +17,11 @@
  */
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -61,6 +61,12 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     private val mainViewModel: MainViewModel by activityViewModels()
     private val navigationArgs: FileInfoActionsBottomSheetDialogArgs by navArgs()
 
+    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        with(result) {
+            if (resultCode == android.app.Activity.RESULT_OK) onSelectFolderResult(data)
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_bottom_sheet_file_info_actions, container, false)
     }
@@ -82,6 +88,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                 ownerFragment = this@FileInfoActionsBottomSheetDialog,
                 mainViewModel = mainViewModel,
                 onItemClickListener = this@FileInfoActionsBottomSheetDialog,
+                selectFolderResultLauncher = selectFolderResultLauncher,
                 isSharedWithMe = navigationArgs.userDrive.sharedWithMe,
             )
             updateCurrentFile(currentFile)
@@ -116,11 +123,6 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                 requireActivity().showSnackbar(text, mainFab)
             }
         }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        onSelectFolderResult(requestCode, resultCode, data)
     }
 
     override fun onResume() {

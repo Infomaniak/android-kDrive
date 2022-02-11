@@ -26,6 +26,7 @@ import android.os.Environment
 import android.provider.DocumentsContract
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
@@ -35,7 +36,6 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
-import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.work.*
@@ -217,8 +217,8 @@ object Utils {
         clipboard?.setPrimaryClip(ClipData.newPlainText(text, text))
     }
 
-    fun moveFileClicked(ownerFragment: Fragment, currentFolder: Int) {
-        val intent = Intent(ownerFragment.context, SelectFolderActivity::class.java).apply {
+    fun moveFileClicked(context: Context?, currentFolder: Int, selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
+        val intent = Intent(context, SelectFolderActivity::class.java).apply {
             putExtra(SelectFolderActivity.USER_ID_TAG, AccountUtils.currentUserId)
             putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
             putExtra(SelectFolderActivity.DISABLE_SELECTED_FOLDER_TAG, currentFolder)
@@ -227,7 +227,7 @@ object Utils {
                 bundleOf(SelectFolderActivity.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE),
             )
         }
-        ownerFragment.startActivityForResult(intent, SelectFolderActivity.SELECT_FOLDER_REQUEST)
+        selectFolderResultLauncher.launch(intent)
     }
 
     fun Context.openWith(file: File, userDrive: UserDrive = UserDrive()) {

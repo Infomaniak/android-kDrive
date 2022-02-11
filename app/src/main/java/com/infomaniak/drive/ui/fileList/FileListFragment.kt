@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.fileList
 
+import android.app.Activity
 import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
@@ -26,7 +27,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
@@ -281,11 +282,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        data?.let { onSelectFolderResult(requestCode, resultCode, data) }
-    }
-
     override fun onStart() {
         super.onStart()
         fileAdapter.resetRealmListener()
@@ -470,7 +466,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         deleteButtonMultiSelect.setOnClickListener { performBulkOperation(BulkOperationType.TRASH) }
 
-        moveButtonMultiSelect.setOnClickListener { Utils.moveFileClicked(this, folderId) }
+        moveButtonMultiSelect.setOnClickListener { Utils.moveFileClicked(context, folderId, selectFolderResultLauncher) }
 
         menuButtonMultiSelect.setOnClickListener {
             safeNavigate(
@@ -638,7 +634,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                             bundleOf(BULK_OPERATION_CUSTOM_TAG to BulkOperationType.COPY),
                         )
                     }
-                    startActivityForResult(intent, SelectFolderActivity.SELECT_FOLDER_REQUEST)
+                    selectFolderResultLauncher.launch(intent)
                 }
                 BulkOperationType.COLOR_FOLDER -> {
                     if (AccountUtils.getCurrentDrive()?.pack == Drive.DrivePack.FREE.value) {
@@ -648,6 +644,22 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     }
                 }
                 else -> performBulkOperation(type)
+            }
+        }
+    }
+
+    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        with(result) {
+            if (resultCode == Activity.RESULT_OK) {
+                val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)!!
+                val folderName = data?.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
+                val customArgs = data?.extras?.getBundle(SelectFolderActivity.CUSTOM_ARGS_TAG)
+                val bulkOperationType = customArgs?.getParcelable<BulkOperationType>(BULK_OPERATION_CUSTOM_TAG)!!
+
+                performBulkOperation(
+                    type = bulkOperationType,
+                    destinationFolder = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId),
+                )
             }
         }
     }
@@ -668,20 +680,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     }
                 }
             } else Utils.downloadAsOfflineFile(requireContext(), file)
-        }
-    }
-
-    private fun onSelectFolderResult(requestCode: Int, resultCode: Int, data: Intent) {
-        if (requestCode == SelectFolderActivity.SELECT_FOLDER_REQUEST && resultCode == AppCompatActivity.RESULT_OK) {
-            val folderName = data.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
-            val folderId = data.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)!!
-            val customArgs = data.extras?.getBundle(SelectFolderActivity.CUSTOM_ARGS_TAG)
-            val bulkOperationType = customArgs?.getParcelable<BulkOperationType>(BULK_OPERATION_CUSTOM_TAG)!!
-
-            performBulkOperation(
-                type = bulkOperationType,
-                destinationFolder = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId)
-            )
         }
     }
 

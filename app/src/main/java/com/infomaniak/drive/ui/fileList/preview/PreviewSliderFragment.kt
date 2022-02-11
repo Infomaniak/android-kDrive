@@ -18,12 +18,12 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -70,6 +70,12 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     private var hideActions: Boolean = false
     private var showUi = false
 
+    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        with(result) {
+            if (resultCode == android.app.Activity.RESULT_OK) onSelectFolderResult(data)
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
         if (mainViewModel.currentPreviewFileList.isEmpty()) {
@@ -114,6 +120,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 ownerFragment = this@PreviewSliderFragment,
                 mainViewModel = mainViewModel,
                 onItemClickListener = this@PreviewSliderFragment,
+                selectFolderResultLauncher = selectFolderResultLauncher,
                 isSharedWithMe = userDrive.sharedWithMe,
             )
             updateCurrentFile(currentPreviewFile)
@@ -201,11 +208,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 override fun onSlide(bottomSheet: View, slideOffset: Float) = Unit
             })
         }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        onSelectFolderResult(requestCode, resultCode, data)
     }
 
     override fun onResume() {

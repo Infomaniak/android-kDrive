@@ -24,7 +24,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.ActivityResultLauncher
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -63,6 +63,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     private lateinit var ownerFragment: Fragment
     private lateinit var onItemClickListener: OnItemClickListener
+    private lateinit var selectFolderResultLauncher: ActivityResultLauncher<Intent>
     private var isSharedWithMe = false
 
     init {
@@ -73,12 +74,14 @@ class FileInfoActionsView @JvmOverloads constructor(
         ownerFragment: Fragment,
         mainViewModel: MainViewModel,
         onItemClickListener: OnItemClickListener,
+        selectFolderResultLauncher: ActivityResultLauncher<Intent>,
         isSharedWithMe: Boolean = false,
     ) {
         this.isSharedWithMe = isSharedWithMe
         this.mainViewModel = mainViewModel
         this.onItemClickListener = onItemClickListener
         this.ownerFragment = ownerFragment
+        this.selectFolderResultLauncher = selectFolderResultLauncher
         initOnClickListeners()
     }
 
@@ -196,7 +199,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         availableOffline.setOnClickListener { availableOfflineSwitch.performClick() }
         moveFile.setOnClickListener {
             val currentFolder = FileController.getParentFile(currentFile.id)?.id ?: -42
-            onItemClickListener.moveFileClicked(ownerFragment, currentFolder)
+            onItemClickListener.moveFileClicked(ownerFragment.context, currentFolder, selectFolderResultLauncher)
         }
         duplicateFile.setOnClickListener { onItemClickListener.duplicateFileClicked(ownerFragment.requireContext(), currentFile) }
         renameFile.setOnClickListener { onItemClickListener.renameFileClicked(ownerFragment.requireContext(), currentFile) }
@@ -405,12 +408,10 @@ class FileInfoActionsView @JvmOverloads constructor(
             ownerFragment.openOnlyOfficeDocument(currentFile)
         }
 
-        fun onSelectFolderResult(requestCode: Int, resultCode: Int, data: Intent?) {
-            if (requestCode == SelectFolderActivity.SELECT_FOLDER_REQUEST && resultCode == AppCompatActivity.RESULT_OK) {
-                val folderName = data?.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
-                data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)?.let {
-                    onMoveFile(File(id = it, name = folderName, driveId = AccountUtils.currentDriveId))
-                }
+        fun onSelectFolderResult(data: Intent?) {
+            val folderName = data?.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
+            data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)?.let {
+                onMoveFile(File(id = it, name = folderName, driveId = AccountUtils.currentDriveId))
             }
         }
 
@@ -427,7 +428,9 @@ class FileInfoActionsView @JvmOverloads constructor(
             }
         }
 
-        fun moveFileClicked(ownerFragment: Fragment, idFolder: Int) = Utils.moveFileClicked(ownerFragment, idFolder)
+        fun moveFileClicked(context: Context?, idFolder: Int, selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
+            Utils.moveFileClicked(context, idFolder, selectFolderResultLauncher)
+        }
 
         fun duplicateFileClicked(context: Context, currentFile: File) {
             currentFile.apply {
