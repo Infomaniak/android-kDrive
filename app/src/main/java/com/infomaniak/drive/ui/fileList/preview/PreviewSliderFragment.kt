@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -51,6 +52,8 @@ import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntent
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.utils.toPx
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_preview_slider.*
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.Dispatchers
@@ -103,7 +106,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             userDrive = previewSliderViewModel.userDrive
         }
 
-        return inflater.inflate(R.layout.fragment_preview_slider, container, false)
+        val view = inflater.inflate(R.layout.fragment_preview_slider, container, false)
+
+        return view
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -164,6 +169,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
 
         configureBottomSheetFileInfo()
+
+        setupTransparentStatusbar()
     }
 
     private fun setBackActionHandlers() {
@@ -178,19 +185,26 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     fun toggleFullscreen() {
         previewSliderParent?.apply {
-            val transition = Slide(Gravity.TOP)
-            transition.duration = 200
-            transition.addTarget(R.id.header)
+            val transition = Slide(Gravity.TOP).apply {
+                duration = 200
+                addTarget(R.id.header)
+            }
             TransitionManager.beginDelayedTransition(this, transition)
             header.isVisible = showUi
             toggleBottomSheet(showUi)
             showUi = !showUi
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                windowInsetsController?.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
-                if (showUi) windowInsetsController?.hide(WindowInsetsCompat.Type.statusBars())
-                else windowInsetsController?.show(WindowInsetsCompat.Type.statusBars())
+            activity?.window?.let { controllerWindow ->
+                view?.let { controllerView ->
+                    WindowInsetsControllerCompat(controllerWindow, controllerView).let { controller ->
+                        controller.apply {
+                            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                            val statusBar = WindowInsetsCompat.Type.statusBars()
+                            if (showUi) hide(statusBar) else show(statusBar)
+                        }
+                    }
+                }
             }
         }
     }
@@ -220,34 +234,34 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-
+    private fun setupTransparentStatusbar() {
         activity?.window?.apply {
-            lightStatusBar(false)
-
             statusBarColor =
                 ColorUtils.setAlphaComponent(ContextCompat.getColor(requireContext(), R.color.previewBackground), 128)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                setDecorFitsSystemWindows(false)
-            } else {
-                // TODO : Check if this works
-                setFlags(
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-                )
-            }
 
-            ViewCompat.setOnApplyWindowInsetsListener(requireView()) { view, windowInsets ->
+            lightStatusBar(false)
+            toggleEdgeToEdge(true)
+        }
+
+
+        view?.let {
+            ViewCompat.setOnApplyWindowInsetsListener(it) { _, windowInsets ->
                 val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-                // Corrects the layout so it still takes into account system bars in edge-to-edge mode
-                header.setMargin(top = insets.top)
-                view.setMargin(bottom = insets.bottom)
 
-                // Return CONSUMED if you don't want the window insets to keep being passed down to descendant views.
-                WindowInsetsCompat.CONSUMED
+                header?.setMargin(top = insets.top)
+                previewSliderParent?.setPadding(insets.left, 0, insets.right, insets.bottom)
+//                viewPager?.setMargin(left = insets.left, bottom = insets.bottom, right = insets.right)
+                bottomSheetFileInfos?.setMargin(bottom = insets.bottom)
+
+                bottomSheetBehavior.peekHeight = 90.toPx() + insets.bottom
+
+                windowInsets
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
 
         with(bottomSheetFileInfos) {
             updateAvailableOfflineItem()
@@ -262,17 +276,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         previewSliderViewModel.currentPreview = currentFile
         bottomSheetFileInfos.removeOfflineObservations(this)
 
-        activity?.window?.apply {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                setDecorFitsSystemWindows(true)
-            } else {
-                // TODO : Check if this works
-                clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
-            }
-
-//            header.setMargin(top = 0)
-//            view?.setMargin(bottom = 0)
-        }
+        activity?.window?.toggleEdgeToEdge(false)
     }
 
     override fun onDestroy() {
