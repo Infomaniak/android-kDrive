@@ -78,7 +78,12 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     private fun getContext() = getApplication<ApplicationMain>()
 
     fun navigateFileListToFolderId(navController: NavController, folderId: Int) {
-        navController.navigate(R.id.fileListFragment)
+        // Clear FileListFragment stack
+        with(navController) {
+            popBackStack(R.id.homeFragment, false)
+            navigate(R.id.fileListFragment)
+        }
+        // Emit destination folder id
         if (folderId > Utils.ROOT_ID) navigateFileListToFolderId.value = folderId
     }
 
