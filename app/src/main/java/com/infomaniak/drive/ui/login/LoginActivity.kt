@@ -62,27 +62,30 @@ class LoginActivity : AppCompatActivity() {
 
         infomaniakLogin = InfomaniakLogin(context = this, appUID = BuildConfig.APPLICATION_ID, clientID = BuildConfig.CLIENT_ID)
 
-        introViewpager.adapter = IntroPagerAdapter(supportFragmentManager, lifecycle)
-        introViewpager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                super.onPageSelected(position)
-                val showConnectButton = position == 2
-                nextButton.isInvisible = showConnectButton
-                connectButton.isInvisible = !showConnectButton
-                signInButton.isInvisible = !showConnectButton
-            }
-        })
-        dotsIndicator.setViewPager2(introViewpager)
-
-        nextButton.setOnClickListener {
-            introViewpager.currentItem = introViewpager.currentItem + 1
+        introViewpager.apply {
+            adapter = IntroPagerAdapter(supportFragmentManager, lifecycle)
+            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    super.onPageSelected(position)
+                    val showConnectButton = position == 2
+                    nextButton.isInvisible = showConnectButton
+                    connectButton.isInvisible = !showConnectButton
+                    signInButton.isInvisible = !showConnectButton
+                }
+            })
         }
 
-        connectButton.initProgress(this)
-        connectButton.setOnClickListener {
-            signInButton.isEnabled = false
-            connectButton.showProgress()
-            infomaniakLogin.startWebViewLogin(WEB_VIEW_LOGIN_REQ)
+        dotsIndicator.setViewPager2(introViewpager)
+
+        nextButton.setOnClickListener { introViewpager.currentItem = introViewpager.currentItem + 1 }
+
+        connectButton.apply {
+            initProgress(this@LoginActivity)
+            setOnClickListener {
+                signInButton.isEnabled = false
+                showProgress()
+                infomaniakLogin.startWebViewLogin(WEB_VIEW_LOGIN_REQ)
+            }
         }
 
         signInButton.setOnClickListener { openUrl(ApiRoutes.orderDrive()) }
@@ -110,8 +113,8 @@ class LoginActivity : AppCompatActivity() {
     private fun authenticateUser(authCode: String) {
         lifecycleScope.launch {
             infomaniakLogin.getToken(
-                HttpClient.okHttpClientNoInterceptor,
-                authCode,
+                okHttpClient = HttpClient.okHttpClientNoInterceptor,
+                code = authCode,
                 onSuccess = {
                     lifecycleScope.launch(Dispatchers.IO) {
                         when (val user = authenticateUser(this@LoginActivity, it)) {
@@ -123,9 +126,7 @@ class LoginActivity : AppCompatActivity() {
                                     showError(getString(user.translatedError))
                                 }
                             }
-                            else -> withContext(Dispatchers.Main) {
-                                showError(getString(R.string.anErrorHasOccurred))
-                            }
+                            else -> withContext(Dispatchers.Main) { showError(getString(R.string.anErrorHasOccurred)) }
                         }
                     }
                 },
@@ -136,7 +137,8 @@ class LoginActivity : AppCompatActivity() {
                         else -> R.string.anErrorHasOccurred
                     }
                     showError(getString(error))
-                })
+                },
+            )
         }
     }
 
@@ -208,10 +210,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
         private fun getErrorResponse(@StringRes text: Int): ApiResponse<Any> {
-            return ApiResponse(
-                result = ApiResponse.Status.ERROR,
-                translatedError = text
-            )
+            return ApiResponse(result = ApiResponse.Status.ERROR, translatedError = text)
         }
     }
 }

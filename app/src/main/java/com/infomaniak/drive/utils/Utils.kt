@@ -145,9 +145,9 @@ object Utils {
         promptLayoutView.nameLayout.setHint(fieldName)
 
         iconRes?.let {
-            promptLayoutView.icon.let { iconView ->
-                iconView.setImageDrawable(ContextCompat.getDrawable(context, iconRes))
-                iconView.isVisible = true
+            promptLayoutView.icon.apply {
+                setImageDrawable(ContextCompat.getDrawable(context, it))
+                isVisible = true
             }
         }
 
@@ -158,18 +158,17 @@ object Utils {
             .setNegativeButton(R.string.buttonCancel) { _, _ -> }
             .setCancelable(false)
             .create()
-        dialog.show()
+            .also { it.show() }
 
         val buttonPositive = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-        nameEditText.doOnTextChanged { text, _, _, _ ->
-            buttonPositive.isEnabled = text?.length != 0
-        }
-        fieldValue?.let {
-            nameEditText.setText(it)
-            selectedRange?.let { range ->
-                nameEditText.setSelection(0, range)
+
+        nameEditText.apply {
+            doOnTextChanged { text, _, _, _ -> buttonPositive.isEnabled = text?.length != 0 }
+            fieldValue?.let {
+                setText(it)
+                selectedRange?.let { range -> setSelection(0, range) }
+                requestFocus()
             }
-            nameEditText.requestFocus()
         }
 
         buttonPositive.setOnClickListener {
@@ -215,7 +214,7 @@ object Utils {
 
     fun copyToClipboard(context: Context, text: String) {
         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
-        clipboard?.apply { setPrimaryClip(ClipData.newPlainText(text, text)) }
+        clipboard?.setPrimaryClip(ClipData.newPlainText(text, text))
     }
 
     fun moveFileClicked(ownerFragment: Fragment, currentFolder: Int) {
