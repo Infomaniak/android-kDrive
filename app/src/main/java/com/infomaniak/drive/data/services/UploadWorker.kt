@@ -182,45 +182,26 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     }
 
     private suspend fun startSyncFiles(): Result = withContext(Dispatchers.IO) {
-        val syncFiles = UploadFile.getAllPendingUploads()
+        val uploadFiles = UploadFile.getAllPendingUploads()
         val lastUploadedCount = inputData.getInt(LAST_UPLOADED_COUNT, 0)
-        var pendingCount = syncFiles.size
+        var pendingCount = uploadFiles.size
 
         if (pendingCount > 0) applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
 
-        Log.d(TAG, "startSyncFiles> upload for ${syncFiles.count()}")
+        Log.d(TAG, "startSyncFiles> upload for ${uploadFiles.count()}")
 
-        syncFiles.forEach { syncFile ->
-            Log.d(TAG, "startSyncFiles: upload $syncFile")
-            initUploadFile(syncFile, pendingCount)
+        uploadFiles.forEach { uploadFile ->
+            Log.d(TAG, "startSyncFiles> upload ${uploadFile.fileName}")
+            uploadFile.initUpload(pendingCount)
             pendingCount--
         }
 
-        uploadedCount = syncFiles.size - pendingCount + lastUploadedCount
+        uploadedCount = uploadFiles.size - pendingCount + lastUploadedCount
         if (uploadedCount > 0) currentUploadFile?.showUploadedFilesNotification(applicationContext, uploadedCount)
 
         Log.d(TAG, "startSyncFiles: finish with $uploadedCount uploaded")
 
         Result.success()
-    }
-
-    @Synchronized
-    private suspend fun initUploadFile(uploadFile: UploadFile, pendingCount: Int) = withContext(Dispatchers.IO) {
-        val uri = uploadFile.getUriObject()
-        currentUploadFile = uploadFile
-
-        applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
-        updateNotificationTimes(uploadFile, pendingCount)
-
-        try {
-            if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
-                handleFileScheme(uri, uploadFile)
-            } else {
-                handleNotFileScheme(uri, uploadFile)
-            }
-        } catch (exception: Exception) {
-            handleUploadFileException(exception, uri, uploadFile)
-        }
     }
 
     private fun updateNotificationTimes(uploadFile: UploadFile, pendingCount: Int) {
@@ -234,43 +215,32 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private suspend fun handleFileScheme(uri: Uri, uploadFile: UploadFile) {
-        val cacheFile = uri.toFile().apply {
-            if (!exists()) {
-                UploadFile.deleteIfExists(uri)
-                return
-            }
-        }
+    private suspend fun UploadFile.initUpload(pendingCount: Int) = withContext(Dispatchers.IO) {
+        val uri = getUriObject()
+        currentUploadFile = this@initUpload
 
-        startUploadFile(uploadFile, cacheFile.length())
-        UploadFile.deleteIfExists(uri)
+        applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
+        updateNotificationTimes(this@initUpload, pendingCount)
 
-        if (!uploadFile.isSyncOffline()) cacheFile.delete()
-    }
-
-    private suspend fun handleNotFileScheme(uri: Uri, uploadFile: UploadFile) {
-        SyncUtils.checkDocumentProviderPermissions(applicationContext, uri)
-
-        contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
-            if (cursor.moveToFirst()) {
-                val mediaSize = SyncUtils.getFileSize(cursor)
-                val descriptorSize = fileDescriptorSize(uploadFile.getOriginalUri(applicationContext))
-                val size = descriptorSize?.let { if (mediaSize > it) mediaSize else it } ?: mediaSize // TODO Temporary solution
-                startUploadFile(uploadFile, size)
+        try {
+            if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
+                initUploadSchemeFile(uri)
             } else {
-                UploadFile.deleteIfExists(uri)
+                initUploadSchemeContent(uri)
             }
+        } catch (exception: Exception) {
+            handleException(exception, uri)
         }
     }
 
-    private fun handleUploadFileException(exception: Exception, uri: Uri, uploadFile: UploadFile) {
+    private fun UploadFile.handleException(exception: Exception, uri: Uri) {
         when (exception) {
             is SecurityException, is IllegalStateException, is IllegalArgumentException -> {
                 UploadFile.deleteIfExists(uri)
 
                 if (exception is IllegalStateException) {
                     Sentry.withScope { scope ->
-                        scope.setExtra("data", ApiController.gson.toJson(uploadFile))
+                        scope.setExtra("data", ApiController.gson.toJson(this))
                         Sentry.captureMessage("The file is either partially downloaded or corrupted")
                     }
                 } else {
@@ -281,27 +251,54 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private suspend fun startUploadFile(uploadFile: UploadFile, size: Long) {
+    private suspend fun UploadFile.initUploadSchemeFile(uri: Uri) {
+        val cacheFile = uri.toFile().apply {
+            if (!exists()) {
+                UploadFile.deleteIfExists(uri)
+                return
+            }
+        }
+
+        startUploadFile(cacheFile.length())
+        UploadFile.deleteIfExists(uri)
+
+        if (!isSyncOffline()) cacheFile.delete()
+    }
+
+    private suspend fun UploadFile.initUploadSchemeContent(uri: Uri) {
+        SyncUtils.checkDocumentProviderPermissions(applicationContext, uri)
+
+        contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val mediaSize = SyncUtils.getFileSize(cursor)
+                val descriptorSize = fileDescriptorSize(getOriginalUri(applicationContext))
+                val size = descriptorSize?.let { if (mediaSize > it) mediaSize else it } ?: mediaSize // TODO Temporary solution
+                startUploadFile(size)
+            } else {
+                UploadFile.deleteIfExists(uri)
+            }
+        }
+    }
+
+    private suspend fun UploadFile.startUploadFile(size: Long) {
         if (size != 0L) {
-            if (uploadFile.fileSize != size) {
-                UploadFile.update(uploadFile.uri) {
+            if (fileSize != size) {
+                UploadFile.update(uri) {
                     it.fileSize = size
-                    uploadFile.fileSize = size
+                    fileSize = size
                 }
             }
 
-            currentUploadTask = UploadTask(
-                context = applicationContext,
-                uploadFile = uploadFile,
-                worker = this
-            ).apply { start() }
-            Log.d("kDrive", "$TAG > end upload ${uploadFile.fileName}")
+            currentUploadTask = UploadTask(context = applicationContext, uploadFile = this, worker = this@UploadWorker)
+                .apply { start() }
+
+            Log.d("kDrive", "$TAG > end upload $fileName")
         } else {
-            UploadFile.deleteIfExists(uploadFile.getUriObject())
-            Log.d("kDrive", "$TAG > ${uploadFile.fileName} deleted size:$size")
+            UploadFile.deleteIfExists(getUriObject())
+            Log.d("kDrive", "$TAG > $fileName deleted size:$size")
             Sentry.withScope { scope ->
-                scope.setExtra("data", ApiController.gson.toJson(uploadFile))
-                Sentry.captureMessage("${uploadFile.fileName} deleted size:$size")
+                scope.setExtra("data", ApiController.gson.toJson(this))
+                Sentry.captureMessage("$fileName deleted size:$size")
             }
         }
     }
