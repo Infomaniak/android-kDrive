@@ -484,8 +484,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     fileIds = fileAdapter.getValidItemsSelected().map { it.id }.toIntArray(),
                     onlyFolders = fileAdapter.getValidItemsSelected().all { it.isFolder() },
                 )
-            }
-
+            )
         }
 
         selectAllButton.apply {
@@ -663,30 +662,22 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         if (!file.isFolder()) {
             val cacheFile = file.getCacheFile(requireContext())
             val offlineFile = file.getOfflineFile(requireContext())
-            if (mustAdd) {
-                addSelectedFileToOffline(file, offlineFile, cacheFile)
-            } else {
-                removeSelectedFileFromOffline(file, offlineFile, cacheFile)
-            }
-            closeMultiSelect()
-        }
-    }
 
-    private fun addSelectedFileToOffline(file: File, offlineFile: java.io.File?, cacheFile: java.io.File) {
-        if (offlineFile != null && !file.isObsoleteOrNotIntact(cacheFile)) {
-            Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
-            runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
+            if (offlineFile != null && !file.isObsoleteOrNotIntact(cacheFile)) {
+                Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
+                runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
 
-            fileAdapter.updateFileProgressByFileId(file.id, 100) { _, currentFile ->
-                currentFile.apply {
-                    if (isNotManagedByRealm()) {
-                        isOffline = true
-                        currentProgress = 0
+                fileAdapter.updateFileProgressByFileId(file.id, 100) { _, currentFile ->
+                    currentFile.apply {
+                        if (isNotManagedByRealm()) {
+                            isOffline = true
+                            currentProgress = 0
+                        }
                     }
                 }
+            } else {
+                Utils.downloadAsOfflineFile(requireContext(), file)
             }
-        } else {
-            Utils.downloadAsOfflineFile(requireContext(), file)
         }
     }
 
