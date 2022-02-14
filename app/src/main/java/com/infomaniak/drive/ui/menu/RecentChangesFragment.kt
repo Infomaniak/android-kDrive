@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.menu
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isGone
+import androidx.fragment.app.viewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.utils.AccountUtils
@@ -28,10 +29,13 @@ import kotlinx.android.synthetic.main.fragment_file_list.*
 
 class RecentChangesFragment : FileSubTypeListFragment() {
 
+    private val recentChangesViewModel: RecentChangesViewModel by viewModels()
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         downloadFiles = DownloadFiles()
         setNoFilesLayout = SetNoFilesLayout()
         folderId = Utils.OTHER_ROOT_ID
+
         super.onViewCreated(view, savedInstanceState)
 
         sortButton.isGone = true
@@ -43,24 +47,25 @@ class RecentChangesFragment : FileSubTypeListFragment() {
             noFilesLayout.setup(
                 icon = R.drawable.ic_clock,
                 title = R.string.homeNoActivities,
-                initialListView = fileRecyclerView
+                initialListView = fileRecyclerView,
             )
         }
     }
 
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
+
         override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             showLoadingTimer.start()
             fileAdapter.isComplete = false
 
-            mainViewModel.getRecentChanges(AccountUtils.currentDriveId, false).observe(viewLifecycleOwner) { result ->
+            recentChangesViewModel.getRecentChanges(AccountUtils.currentDriveId, false).observe(viewLifecycleOwner) { result ->
                 populateFileList(
                     files = result?.files ?: arrayListOf(),
                     folderId = FileController.RECENT_CHANGES_FILE_ID,
                     ignoreOffline = true,
                     isComplete = result?.isComplete ?: true,
                     realm = mainViewModel.realm,
-                    isNewSort = isNewSort
+                    isNewSort = isNewSort,
                 )
             }
         }
