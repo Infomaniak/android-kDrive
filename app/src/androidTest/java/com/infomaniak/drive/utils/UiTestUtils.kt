@@ -136,10 +136,7 @@ object UiTestUtils {
 
     fun closeBottomSheetInfoModalIfDisplayed(isCategoryInformation: Boolean) {
         try {
-            var id = "secondaryActionButton"
-            if (isCategoryInformation) {
-                id = "actionButton"
-            }
+            val id = if (isCategoryInformation) "actionButton" else "secondaryActionButton"
             device.findObject(UiSelector().resourceId(getViewIdentifier(id))).click()
         } catch (exception: UiObjectNotFoundException) {
             // Continue if bottomSheet are not displayed
