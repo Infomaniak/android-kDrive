@@ -187,9 +187,10 @@ class MainActivity : BaseActivity() {
             mainFab.isEnabled = file?.rights?.newFile == true
         }
 
-        drivePermissions = DrivePermissions()
-        drivePermissions.registerPermissions(this)
-        drivePermissions.checkWriteStoragePermission()
+        drivePermissions = DrivePermissions().apply {
+            registerPermissions(this@MainActivity)
+            checkWriteStoragePermission()
+        }
 
         if (AppSettings.appLaunches == 20 || (AppSettings.appLaunches != 0 && AppSettings.appLaunches % 100 == 0)) launchInAppReview()
 

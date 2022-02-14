@@ -45,10 +45,9 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
     private lateinit var currentTrashedFile: File
     private val trashViewModel: TrashViewModel by navGraphViewModels(R.id.trashFragment)
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View = inflater.inflate(R.layout.fragment_bottom_sheet_trashed_file_actions, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return inflater.inflate(R.layout.fragment_bottom_sheet_trashed_file_actions, container, false)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

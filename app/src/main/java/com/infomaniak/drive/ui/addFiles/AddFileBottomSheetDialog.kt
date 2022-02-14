@@ -68,10 +68,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         const val CAPTURE_MEDIA_REQ = 3
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return (mainViewModel.currentFolderOpenAddFileBottom.value ?: mainViewModel.currentFolder.value)?.let {
             currentFolderFile = it
             inflater.inflate(R.layout.fragment_bottom_sheet_add_file, container, false)
@@ -192,7 +189,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                     dismiss()
                 }
         }
-
     }
 
     private fun onSelectFilesResult(data: Intent?) {

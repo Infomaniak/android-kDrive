@@ -465,32 +465,39 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun setupMultiSelect() {
         fileAdapter.enabledMultiSelectMode = true
+
         closeButtonMultiSelect.setOnClickListener { closeMultiSelect() }
+
         deleteButtonMultiSelect.setOnClickListener { performBulkOperation(BulkOperationType.TRASH) }
+
         moveButtonMultiSelect.setOnClickListener { Utils.moveFileClicked(this, folderId) }
+
         menuButtonMultiSelect.setOnClickListener {
             safeNavigate(
                 FileListFragmentDirections.actionFileListFragmentToActionMultiSelectBottomSheetDialog(
                     fileIds = fileAdapter.getValidItemsSelected().map { it.id }.toIntArray(),
-                    onlyFolders = fileAdapter.getValidItemsSelected().all { it.isFolder() }
+                    onlyFolders = fileAdapter.getValidItemsSelected().all { it.isFolder() },
                 )
             )
         }
-        selectAllButton.initProgress(viewLifecycleOwner)
-        selectAllButton.setOnClickListener {
-            selectAllButton.showProgress(ContextCompat.getColor(requireContext(), R.color.primary))
-            if (fileAdapter.allSelected) {
-                fileAdapter.configureAllSelected(false)
-                onUpdateMultiSelect()
-            } else {
-                fileAdapter.configureAllSelected(true)
-                enableButtonMultiSelect(false)
 
-                fileListViewModel.getFileCount(currentFolder!!).observe(viewLifecycleOwner) { fileCount ->
-                    val fileNumber = fileCount.count
-                    if (fileNumber < BulkOperationsUtils.MIN_SELECTED) fileAdapter.itemsSelected = fileAdapter.getFiles()
-                    enableButtonMultiSelect(true)
-                    onUpdateMultiSelect(fileNumber)
+        selectAllButton.apply {
+            initProgress(viewLifecycleOwner)
+            setOnClickListener {
+                showProgress(ContextCompat.getColor(requireContext(), R.color.primary))
+                if (fileAdapter.allSelected) {
+                    fileAdapter.configureAllSelected(false)
+                    onUpdateMultiSelect()
+                } else {
+                    fileAdapter.configureAllSelected(true)
+                    enableButtonMultiSelect(false)
+
+                    fileListViewModel.getFileCount(currentFolder!!).observe(viewLifecycleOwner) { fileCount ->
+                        val fileNumber = fileCount.count
+                        if (fileNumber < BulkOperationsUtils.MIN_SELECTED) fileAdapter.itemsSelected = fileAdapter.getFiles()
+                        enableButtonMultiSelect(true)
+                        onUpdateMultiSelect(fileNumber)
+                    }
                 }
             }
         }

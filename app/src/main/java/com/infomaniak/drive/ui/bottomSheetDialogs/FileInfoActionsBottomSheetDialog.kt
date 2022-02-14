@@ -61,10 +61,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     private val mainViewModel: MainViewModel by activityViewModels()
     private val navigationArgs: FileInfoActionsBottomSheetDialogArgs by navArgs()
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View = inflater.inflate(R.layout.fragment_bottom_sheet_file_info_actions, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return inflater.inflate(R.layout.fragment_bottom_sheet_file_info_actions, container, false)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -74,11 +73,19 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             return
         }
 
-        drivePermissions = DrivePermissions()
-        drivePermissions.registerPermissions(this) { authorized -> if (authorized) downloadFileClicked() }
+        drivePermissions = DrivePermissions().apply {
+            registerPermissions(this@FileInfoActionsBottomSheetDialog) { authorized -> if (authorized) downloadFileClicked() }
+        }
 
-        fileInfoActionsView.init(this, mainViewModel, this, navigationArgs.userDrive.sharedWithMe)
-        fileInfoActionsView.updateCurrentFile(currentFile)
+        fileInfoActionsView.apply {
+            init(
+                ownerFragment = this@FileInfoActionsBottomSheetDialog,
+                mainViewModel = mainViewModel,
+                onItemClickListener = this@FileInfoActionsBottomSheetDialog,
+                isSharedWithMe = navigationArgs.userDrive.sharedWithMe,
+            )
+            updateCurrentFile(currentFile)
+        }
 
         setupBackActionHandler()
     }
