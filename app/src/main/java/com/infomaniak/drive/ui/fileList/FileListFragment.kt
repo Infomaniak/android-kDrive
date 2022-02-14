@@ -678,12 +678,16 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
 
             fileAdapter.updateFileProgressByFileId(file.id, 100) { _, currentFile ->
-                if (currentFile.isNotManagedByRealm()) {
-                    currentFile.isOffline = true
-                    currentFile.currentProgress = 0
+                currentFile.apply {
+                    if (isNotManagedByRealm()) {
+                        isOffline = true
+                        currentProgress = 0
+                    }
                 }
             }
-        } else Utils.downloadAsOfflineFile(requireContext(), file)
+        } else {
+            Utils.downloadAsOfflineFile(requireContext(), file)
+        }
     }
 
     private fun removeSelectedFileFromOffline(file: File, offlineFile: java.io.File?, cacheFile: java.io.File) {

@@ -69,28 +69,26 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
     private fun configureAddFavorites(otherActionsVisibility: Boolean) {
         addFavorites.apply {
             addFavoritesIcon.isEnabled = navigationArgs.onlyFavorite
-            if (navigationArgs.onlyFavorite) {
-                addFavoritesText.setText(R.string.buttonRemoveFavorites)
-                setOnClickListener { onActionSelected(SelectDialogAction.REMOVE_FAVORITE) }
+            val (text, action) = if (navigationArgs.onlyFavorite) {
+                R.string.buttonRemoveFavorites to SelectDialogAction.REMOVE_FAVORITE
             } else {
-                addFavoritesText.setText(R.string.buttonAddFavorites)
-                setOnClickListener { onActionSelected(SelectDialogAction.ADD_FAVORITES) }
+                R.string.buttonAddFavorites to SelectDialogAction.ADD_FAVORITES
             }
+            addFavoritesText.setText(text)
+            setOnClickListener { onActionSelected(action) }
             isVisible = otherActionsVisibility
         }
     }
 
-    private fun configureAvailableOffline(otherActionsVisibility: Boolean) {
-        with(navigationArgs) {
-            availableOfflineSwitch.apply {
-                isChecked = onlyOffline
-                setOnCheckedChangeListener { _, _ -> selectOfflineDialogActionCallBack(onlyOffline) }
-            }
-            disabledAvailableOffline.isVisible = onlyFolders
-            availableOffline.apply {
-                setOnClickListener { selectOfflineDialogActionCallBack(onlyOffline) }
-                isVisible = otherActionsVisibility
-            }
+    private fun configureAvailableOffline(otherActionsVisibility: Boolean) = with(navigationArgs) {
+        availableOfflineSwitch.apply {
+            isChecked = onlyOffline
+            setOnCheckedChangeListener { _, _ -> selectOfflineDialogActionCallBack(onlyOffline) }
+        }
+        disabledAvailableOffline.isVisible = onlyFolders
+        availableOffline.apply {
+            setOnClickListener { selectOfflineDialogActionCallBack(onlyOffline) }
+            isVisible = otherActionsVisibility
         }
     }
 
