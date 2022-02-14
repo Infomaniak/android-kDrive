@@ -46,6 +46,23 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
     private lateinit var currentTrashedFile: File
     private val trashViewModel: TrashViewModel by navGraphViewModels(R.id.trashFragment)
 
+    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        with(result) {
+            if (resultCode == Activity.RESULT_OK) {
+                val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
+                val folderName = data?.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG)
+                folderId?.let {
+                    trashViewModel.restoreTrashFile(
+                        currentTrashedFile,
+                        File(id = folderId, name = folderName.toString()),
+                    ).observe(this@TrashedFileActionsBottomSheetDialog) { apiResponse ->
+                        restoreResult(apiResponse, originalPlace = false, folderName = folderName)
+                    }
+                }
+            }
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_bottom_sheet_trashed_file_actions, container, false)
     }
@@ -80,23 +97,6 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
                     } else {
                         requireActivity().showSnackbar(R.string.errorDelete)
                         findNavController().popBackStack()
-                    }
-                }
-            }
-        }
-    }
-
-    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
-        with(result) {
-            if (resultCode == Activity.RESULT_OK) {
-                val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
-                val folderName = data?.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG)
-                folderId?.let {
-                    trashViewModel.restoreTrashFile(
-                        currentTrashedFile,
-                        File(id = folderId, name = folderName.toString()),
-                    ).observe(this@TrashedFileActionsBottomSheetDialog) { apiResponse ->
-                        restoreResult(apiResponse, originalPlace = false, folderName = folderName)
                     }
                 }
             }

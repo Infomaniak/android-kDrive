@@ -67,6 +67,15 @@ class SyncSettingsActivity : BaseActivity() {
     private var oldSyncSettings: SyncSettings? = null
     private var editNumber = 0
 
+    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        with(result) {
+            if (resultCode == Activity.RESULT_OK) {
+                val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
+                syncSettingsViewModel.syncFolder.value = folderId
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sync_settings)
@@ -223,15 +232,6 @@ class SyncSettingsActivity : BaseActivity() {
         saveButton.initProgress(this)
         saveButton.setOnClickListener {
             if (permission.checkSyncPermissions()) saveSettings()
-        }
-    }
-
-    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
-        with(result) {
-            if (resultCode == Activity.RESULT_OK) {
-                val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
-                syncSettingsViewModel.syncFolder.value = folderId
-            }
         }
     }
 

@@ -64,6 +64,20 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private var mediaPhotoPath = ""
     private var mediaVideoPath = ""
 
+    private val captureMediaResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        with(result) {
+            if (resultCode == Activity.RESULT_OK) onCaptureMediaResult(data)
+        }
+        dismiss()
+    }
+
+    private val selectFilesResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        with(result) {
+            if (resultCode == Activity.RESULT_OK) onSelectFilesResult(data)
+        }
+        dismiss()
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return (mainViewModel.currentFolderOpenAddFileBottom.value ?: mainViewModel.currentFolder.value)?.let {
             currentFolderFile = it
@@ -123,13 +137,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private val captureMediaResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
-        with(result) {
-            if (resultCode == Activity.RESULT_OK) onCaptureMediaResult(data)
-        }
-        dismiss()
-    }
-
     private fun uploadFiles() {
         if (uploadFilesPermissions.checkSyncPermissions()) {
             documentUpload.isEnabled = false
@@ -143,13 +150,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             val chooserIntent = Intent.createChooser(intent, getString(R.string.addFileSelectUploadFile))
             selectFilesResultLauncher.launch(chooserIntent)
         }
-    }
-
-    private val selectFilesResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
-        with(result) {
-            if (resultCode == Activity.RESULT_OK) onSelectFilesResult(data)
-        }
-        dismiss()
     }
 
     private fun scanDocuments() {

@@ -57,6 +57,23 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var infomaniakLogin: InfomaniakLogin
 
+    private val webViewLoginResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        with(result) {
+            if (resultCode == RESULT_OK) {
+                val authCode = data?.extras?.getString(InfomaniakLogin.CODE_TAG)
+                val translatedError = data?.extras?.getString(InfomaniakLogin.ERROR_TRANSLATED_TAG)
+                when {
+                    translatedError?.isNotBlank() == true -> showError(translatedError)
+                    authCode?.isNotBlank() == true -> authenticateUser(authCode)
+                    else -> showError(getString(R.string.anErrorHasOccurred))
+                }
+            } else {
+                connectButton?.hideProgress(R.string.connect)
+                signInButton.isEnabled = true
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
@@ -90,23 +107,6 @@ class LoginActivity : AppCompatActivity() {
         }
 
         signInButton.setOnClickListener { openUrl(ApiRoutes.orderDrive()) }
-    }
-
-    private val webViewLoginResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
-        with(result) {
-            if (resultCode == RESULT_OK) {
-                val authCode = data?.extras?.getString(InfomaniakLogin.CODE_TAG)
-                val translatedError = data?.extras?.getString(InfomaniakLogin.ERROR_TRANSLATED_TAG)
-                when {
-                    translatedError?.isNotBlank() == true -> showError(translatedError)
-                    authCode?.isNotBlank() == true -> authenticateUser(authCode)
-                    else -> showError(getString(R.string.anErrorHasOccurred))
-                }
-            } else {
-                connectButton?.hideProgress(R.string.connect)
-                signInButton.isEnabled = true
-            }
-        }
     }
 
     private fun authenticateUser(authCode: String) {

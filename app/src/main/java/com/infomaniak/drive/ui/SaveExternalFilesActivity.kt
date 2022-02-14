@@ -68,6 +68,15 @@ class SaveExternalFilesActivity : BaseActivity() {
     private var currentUri: Uri? = null
     private var isMultiple = false
 
+    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        with(result) {
+            if (resultCode == Activity.RESULT_OK) {
+                val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
+                saveExternalFilesViewModel.folderId.value = folderId
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_save_external_file)
@@ -154,15 +163,6 @@ class SaveExternalFilesActivity : BaseActivity() {
                         }
                     }
                 }
-            }
-        }
-    }
-
-    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
-        with(result) {
-            if (resultCode == Activity.RESULT_OK) {
-                val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
-                saveExternalFilesViewModel.folderId.value = folderId
             }
         }
     }

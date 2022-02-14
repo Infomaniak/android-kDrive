@@ -111,6 +111,22 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     protected var userDrive: UserDrive? = null
 
+    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        with(result) {
+            if (resultCode == Activity.RESULT_OK) {
+                val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)!!
+                val folderName = data?.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
+                val customArgs = data?.extras?.getBundle(SelectFolderActivity.CUSTOM_ARGS_TAG)
+                val bulkOperationType = customArgs?.getParcelable<BulkOperationType>(BULK_OPERATION_CUSTOM_TAG)!!
+
+                performBulkOperation(
+                    type = bulkOperationType,
+                    destinationFolder = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId),
+                )
+            }
+        }
+    }
+
     companion object {
         const val REFRESH_FAVORITE_FILE = "force_list_refresh"
         const val CANCELLABLE_MAIN_KEY = "cancellable_main"
@@ -644,22 +660,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     }
                 }
                 else -> performBulkOperation(type)
-            }
-        }
-    }
-
-    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
-        with(result) {
-            if (resultCode == Activity.RESULT_OK) {
-                val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)!!
-                val folderName = data?.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
-                val customArgs = data?.extras?.getBundle(SelectFolderActivity.CUSTOM_ARGS_TAG)
-                val bulkOperationType = customArgs?.getParcelable<BulkOperationType>(BULK_OPERATION_CUSTOM_TAG)!!
-
-                performBulkOperation(
-                    type = bulkOperationType,
-                    destinationFolder = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId),
-                )
             }
         }
     }
