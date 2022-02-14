@@ -24,6 +24,7 @@ import com.infomaniak.drive.ApplicationMain
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.SyncSettings
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import org.matomo.sdk.Matomo
 import org.matomo.sdk.Tracker
 import org.matomo.sdk.TrackerBuilder
@@ -56,7 +57,7 @@ object MatomoUtils {
     }
 
     fun Fragment.trackScreen() {
-        TrackHelper.track().screen(this::class.java.name).title(this::class.java.simpleName).with(activity?.application?.tracker)
+        context?.applicationContext?.trackScreen(this::class.java.name, this::class.java.simpleName)
     }
 
     fun Context.trackEvent(category: String, action: TrackerAction, trackerName: String? = null, trackerValue: Float? = null) {
@@ -76,8 +77,8 @@ object MatomoUtils {
         trackEvent("FileAction", TrackerAction.CLICK, trackerName, modifiedFileNumber.toFloat())
     }
 
-    fun Context.trackEventWithBooleanValue(category: String, trackerName: String, trackerValue: Boolean) {
-        trackEvent(category, TrackerAction.CLICK, trackerName, trackerValue.toFloat())
+    fun Context.trackEventWithBooleanValue(category: String, trackerName: String, trackerValue: Boolean?) {
+        trackEvent(category, TrackerAction.CLICK, trackerName, trackerValue?.toFloat())
     }
 
     fun Context.trackPhotoSyncSettingsEvent(syncSettings: SyncSettings, trackingDateName: String) {
@@ -92,7 +93,7 @@ object MatomoUtils {
         trackEvent("shareAndRights", TrackerAction.CLICK, trackerName)
     }
 
-    fun Context.trackShareSettingsEvent(protectWithPassword: Boolean, expirationDate: Boolean, downloadFromLink: Boolean) {
+    fun Context.trackShareSettingsEvent(protectWithPassword: Boolean?, expirationDate: Boolean?, downloadFromLink: Boolean?) {
         val category = "shareAndRights"
         trackEventWithBooleanValue(category, "protectWithPassword", protectWithPassword)
         trackEventWithBooleanValue(category, "expirationDateLink", expirationDate)

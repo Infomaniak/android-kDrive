@@ -219,7 +219,7 @@ class FileShareLinkSettingsFragment : Fragment() {
             saveButton.showProgress()
 
             context?.applicationContext?.trackShareSettingsEvent(
-                addPasswordSwitch.isChecked, expirationDateSwitch.isChecked, allowDownloadValue.isChecked
+                addPasswordSwitch?.isChecked, expirationDateSwitch?.isChecked, allowDownloadValue?.isChecked
             )
 
             var isValid = true

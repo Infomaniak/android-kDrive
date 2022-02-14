@@ -37,6 +37,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackBulkActionEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_action_multi_select.*
 import kotlinx.coroutines.Dispatchers
 
@@ -86,7 +87,12 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
         val drivePermissions = DrivePermissions()
         drivePermissions.registerPermissions(this) { authorized -> if (authorized) downloadFileArchive() }
         downloadFile.apply {
-            setOnClickListener { if (drivePermissions.checkWriteStoragePermission()) downloadFileArchive() }
+            setOnClickListener {
+                if (drivePermissions.checkWriteStoragePermission()) {
+                    context?.applicationContext?.trackEvent("FileAction", TrackerAction.CLICK, "bulkDownload")
+                    downloadFileArchive()
+                }
+            }
             isVisible = navigationArgs.fileIds.isNotEmpty()
         }
     }
