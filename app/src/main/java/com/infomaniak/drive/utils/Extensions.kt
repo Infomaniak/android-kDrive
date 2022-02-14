@@ -52,6 +52,8 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.biometric.BiometricManager
@@ -644,6 +646,10 @@ fun Fragment.navigateToUploadView(folderId: Int, folderName: String? = null) {
             folderName = folderName ?: getString(R.string.uploadInProgressTitle),
         ).toBundle(),
     )
+}
+
+fun ActivityResult.whenResultIsOk(completion: (Intent?) -> Unit) {
+    if (resultCode == Activity.RESULT_OK) data.let(completion::invoke)
 }
 
 fun Drive?.getDriveUsers(): List<DriveUser> = this?.users?.let { categories ->

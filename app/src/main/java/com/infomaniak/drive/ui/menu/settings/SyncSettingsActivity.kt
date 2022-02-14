@@ -17,12 +17,11 @@
  */
 package com.infomaniak.drive.ui.menu.settings
 
-import android.app.Activity
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
-import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
@@ -36,20 +35,14 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.MediaFolder
-import com.infomaniak.drive.data.models.SyncSettings
+import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.SyncSettings.IntervalType
 import com.infomaniak.drive.data.models.SyncSettings.SavePicturesDate
-import com.infomaniak.drive.data.models.UploadFile
-import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
-import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.startOfTheDay
 import com.infomaniak.lib.core.utils.FORMAT_DATE_CLEAR_MONTH
 import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.utils.initProgress
@@ -67,12 +60,10 @@ class SyncSettingsActivity : BaseActivity() {
     private var oldSyncSettings: SyncSettings? = null
     private var editNumber = 0
 
-    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
-        with(result) {
-            if (resultCode == Activity.RESULT_OK) {
-                val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
-                syncSettingsViewModel.syncFolder.value = folderId
-            }
+    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
+        it.whenResultIsOk { data ->
+            val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
+            syncSettingsViewModel.syncFolder.value = folderId
         }
     }
 

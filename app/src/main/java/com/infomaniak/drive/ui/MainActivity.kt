@@ -36,7 +36,7 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import androidx.activity.result.IntentSenderRequest
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
@@ -91,10 +91,8 @@ class MainActivity : BaseActivity() {
 
     private lateinit var drivePermissions: DrivePermissions
 
-    private val filesDeletionResult = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-        if (result.resultCode == RESULT_OK) {
-            lifecycleScope.launch(Dispatchers.IO) { UploadFile.deleteAll(uploadedFilesToDelete) }
-        }
+    private val filesDeletionResult = registerForActivityResult(StartIntentSenderForResult()) {
+        it.whenResultIsOk { lifecycleScope.launch(Dispatchers.IO) { UploadFile.deleteAll(uploadedFilesToDelete) } }
     }
 
     private val fileObserver: FileObserver by lazy {

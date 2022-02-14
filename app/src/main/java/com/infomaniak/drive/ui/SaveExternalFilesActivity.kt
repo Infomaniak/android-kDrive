@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui
 
-import android.app.Activity
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -68,12 +67,10 @@ class SaveExternalFilesActivity : BaseActivity() {
     private var currentUri: Uri? = null
     private var isMultiple = false
 
-    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
-        with(result) {
-            if (resultCode == Activity.RESULT_OK) {
-                val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
-                saveExternalFilesViewModel.folderId.value = folderId
-            }
+    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
+        it.whenResultIsOk { data ->
+            val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
+            saveExternalFilesViewModel.folderId.value = folderId
         }
     }
 

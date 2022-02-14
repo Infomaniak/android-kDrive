@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui.addFiles
 
-import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
@@ -64,17 +63,13 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private var mediaPhotoPath = ""
     private var mediaVideoPath = ""
 
-    private val captureMediaResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
-        with(result) {
-            if (resultCode == Activity.RESULT_OK) onCaptureMediaResult(data)
-        }
+    private val captureMediaResultLauncher = registerForActivityResult(StartActivityForResult()) {
+        it.whenResultIsOk { data -> onCaptureMediaResult(data) }
         dismiss()
     }
 
-    private val selectFilesResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
-        with(result) {
-            if (resultCode == Activity.RESULT_OK) onSelectFilesResult(data)
-        }
+    private val selectFilesResultLauncher = registerForActivityResult(StartActivityForResult()) {
+        it.whenResultIsOk { data -> onSelectFilesResult(data) }
         dismiss()
     }
 

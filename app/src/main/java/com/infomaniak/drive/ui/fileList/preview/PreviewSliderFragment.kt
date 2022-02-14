@@ -70,10 +70,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     private var hideActions: Boolean = false
     private var showUi = false
 
-    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
-        with(result) {
-            if (resultCode == android.app.Activity.RESULT_OK) onSelectFolderResult(data)
-        }
+    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
+        it.whenResultIsOk { data -> onSelectFolderResult(data) }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

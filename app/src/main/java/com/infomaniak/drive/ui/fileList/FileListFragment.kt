@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui.fileList
 
-import android.app.Activity
 import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
@@ -27,7 +26,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
-import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
@@ -111,12 +110,12 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     protected var userDrive: UserDrive? = null
 
-    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
-        with(result) {
-            if (resultCode == Activity.RESULT_OK) {
-                val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)!!
-                val folderName = data?.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
-                val customArgs = data?.extras?.getBundle(SelectFolderActivity.CUSTOM_ARGS_TAG)
+    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
+        it.whenResultIsOk { data ->
+            with(data?.extras!!) {
+                val folderId = getInt(SelectFolderActivity.FOLDER_ID_TAG)
+                val folderName = getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
+                val customArgs = getBundle(SelectFolderActivity.CUSTOM_ARGS_TAG)
                 val bulkOperationType = customArgs?.getParcelable<BulkOperationType>(BULK_OPERATION_CUSTOM_TAG)!!
 
                 performBulkOperation(
