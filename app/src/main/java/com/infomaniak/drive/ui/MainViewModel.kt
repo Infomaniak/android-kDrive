@@ -34,8 +34,6 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.services.DownloadWorker
-import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
-import com.infomaniak.drive.ui.home.HomeViewModel.Companion.DOWNLOAD_INTERVAL
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
 import com.infomaniak.drive.utils.MediaUtils.isMedia
@@ -71,9 +69,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     private var getFileDetailsJob = Job()
     private var syncOfflineFilesJob = Job()
-    private var getRecentChangesJob = Job()
-
-    private var lastModifiedTime: Long = 0
 
     private fun getContext() = getApplication<ApplicationMain>()
 
@@ -312,39 +307,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
                 }
             }
             UploadFile.deleteAll(fileDeleted)
-        }
-    }
-
-    fun getRecentChanges(driveId: Int, onlyFirstPage: Boolean, forceDownload: Boolean = false): LiveData<FolderFilesResult?> {
-        getRecentChangesJob.cancel()
-        getRecentChangesJob = Job()
-        val ignoreDownload = lastModifiedTime != 0L && (Date().time - lastModifiedTime) < DOWNLOAD_INTERVAL && !forceDownload
-        return liveData(Dispatchers.IO + getRecentChangesJob) {
-            if (ignoreDownload) {
-                emit(FolderFilesResult(files = FileController.getRecentChanges(), isComplete = true, page = 1))
-            } else {
-                getLastModifiedFilesRecursively(1, driveId, onlyFirstPage)
-            }
-        }
-    }
-
-    private suspend fun LiveDataScope<FolderFilesResult?>.getLastModifiedFilesRecursively(
-        page: Int,
-        driveId: Int,
-        onlyFirstPage: Boolean,
-    ) {
-        val isFirstPage = page == 1
-        val apiResponse = ApiRepository.getLastModifiedFiles(driveId, page)
-        when {
-            apiResponse.isSuccess() -> apiResponse.data?.let { data ->
-                FileController.storeRecentChanges(data, isFirstPage)
-                if (isFirstPage) emit(FolderFilesResult(files = data, isComplete = true, page = page))
-                if (data.size >= ApiRepository.PER_PAGE && !onlyFirstPage) {
-                    getLastModifiedFilesRecursively(page + 1, driveId, onlyFirstPage)
-                }
-            }
-            isFirstPage -> emit(FolderFilesResult(files = FileController.getRecentChanges(), isComplete = true, page = 1))
-            else -> emit(null)
         }
     }
 

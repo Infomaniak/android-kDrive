@@ -20,11 +20,19 @@ package com.infomaniak.drive.ui.menu
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isGone
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.LiveDataScope
+import androidx.lifecycle.liveData
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.ui.home.HomeViewModel.Companion.DOWNLOAD_INTERVAL
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import kotlinx.android.synthetic.main.fragment_file_list.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import java.util.*
 
 class RecentChangesFragment : FileSubTypeListFragment() {
 
@@ -49,19 +57,56 @@ class RecentChangesFragment : FileSubTypeListFragment() {
     }
 
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
+
+        private var getRecentChangesJob = Job()
+        private var lastModifiedTime: Long = 0
+
         override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             showLoadingTimer.start()
             fileAdapter.isComplete = false
 
-            mainViewModel.getRecentChanges(AccountUtils.currentDriveId, false).observe(viewLifecycleOwner) { result ->
+            getRecentChanges(AccountUtils.currentDriveId, false).observe(viewLifecycleOwner) { result ->
                 populateFileList(
                     files = result?.files ?: arrayListOf(),
                     folderId = FileController.RECENT_CHANGES_FILE_ID,
                     ignoreOffline = true,
                     isComplete = result?.isComplete ?: true,
                     realm = mainViewModel.realm,
-                    isNewSort = isNewSort
+                    isNewSort = isNewSort,
                 )
+            }
+        }
+
+        fun getRecentChanges(driveId: Int, onlyFirstPage: Boolean, forceDownload: Boolean = false): LiveData<FolderFilesResult?> {
+            getRecentChangesJob.cancel()
+            getRecentChangesJob = Job()
+            val ignoreDownload = lastModifiedTime != 0L && (Date().time - lastModifiedTime) < DOWNLOAD_INTERVAL && !forceDownload
+            return liveData(Dispatchers.IO + getRecentChangesJob) {
+                if (ignoreDownload) {
+                    emit(FolderFilesResult(files = FileController.getRecentChanges(), isComplete = true, page = 1))
+                } else {
+                    getRecentChangesRecursive(1, driveId, onlyFirstPage)
+                }
+            }
+        }
+
+        private suspend fun LiveDataScope<FolderFilesResult?>.getRecentChangesRecursive(
+            page: Int,
+            driveId: Int,
+            onlyFirstPage: Boolean,
+        ) {
+            val isFirstPage = page == 1
+            val apiResponse = ApiRepository.getLastModifiedFiles(driveId, page)
+            when {
+                apiResponse.isSuccess() -> apiResponse.data?.let { data ->
+                    FileController.storeRecentChanges(data, isFirstPage)
+                    if (isFirstPage) emit(FolderFilesResult(files = data, isComplete = true, page = page))
+                    if (data.size >= ApiRepository.PER_PAGE && !onlyFirstPage) {
+                        getRecentChangesRecursive(page + 1, driveId, onlyFirstPage)
+                    }
+                }
+                isFirstPage -> emit(FolderFilesResult(files = FileController.getRecentChanges(), isComplete = true, page = 1))
+                else -> emit(null)
             }
         }
     }
