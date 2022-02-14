@@ -367,17 +367,9 @@
         <item quantity="one">Datei erfolgreich zu Favoriten hinzugefügt</item>
         <item quantity="other">%d Dateien erfolgreich zu Favoriten hinzugefügt</item>
     </plurals>
-    <plurals name="fileListRemoveFavoritesConfirmationSnackbar">
-        <item quantity="one">Datei erfolgreich aus den Favoriten entfernt</item>
-        <item quantity="other">%d Dateien erfolgreich aus den Favoriten entfernt</item>
-    </plurals>
     <plurals name="fileListAddOfflineConfirmationSnackbar">
         <item quantity="one">Datei offline verfügbar</item>
         <item quantity="other">%d Dateien offline verfügbar</item>
-    </plurals>
-    <plurals name="fileListRemoveOfflineConfirmationSnackbar">
-        <item quantity="one">Datei aus der offline Verfügbarkeit entfernt</item>
-        <item quantity="other">%d Dateien aus der offline Verfügbarkeit entfernt</item>
     </plurals>
     <plurals name="fileListColorFolderConfirmationSnackbar">
         <item quantity="one">Ordner erfolgreich eingefärbt</item>
@@ -403,6 +395,14 @@
     <plurals name="fileListMultiSelectedTitle">
         <item quantity="one">%d ausgewählt</item>
         <item quantity="other">%d ausgewählt</item>
+    </plurals>
+    <plurals name="fileListRemoveFavoritesConfirmationSnackbar">
+        <item quantity="one">Datei erfolgreich aus den Favoriten entfernt</item>
+        <item quantity="other">%d Dateien erfolgreich aus den Favoriten entfernt</item>
+    </plurals>
+    <plurals name="fileListRemoveOfflineConfirmationSnackbar">
+        <item quantity="one">Datei aus der offline Verfügbarkeit entfernt</item>
+        <item quantity="other">%d Dateien aus der offline Verfügbarkeit entfernt</item>
     </plurals>
     <string name="fileListTitle">Dateien</string>
     <string name="filePermissionTitle">Recht auswählen</string>

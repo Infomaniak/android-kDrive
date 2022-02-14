@@ -367,17 +367,9 @@
         <item quantity="one">Un archivo añadido a favoritos correctamente</item>
         <item quantity="other">%d archivos añadidos a favoritos correctamente</item>
     </plurals>
-    <plurals name="fileListRemoveFavoritesConfirmationSnackbar">
-        <item quantity="one">Un archivo ha sido eliminado de favoritos correctamente</item>
-        <item quantity="other">%d archivos han sido eliminados de favoritos correctamente</item>
-    </plurals>
     <plurals name="fileListAddOfflineConfirmationSnackbar">
         <item quantity="one">Un archivo disponible sin conexión</item>
         <item quantity="other">%d archivos disponibles sin conexión</item>
-    </plurals>
-    <plurals name="fileListRemoveOfflineConfirmationSnackbar">
-        <item quantity="one">Un archivo eliminado de la disponibilidad sin conexión</item>
-        <item quantity="other">%d archivos eliminados de la disponibilidad sin conexión</item>
     </plurals>
     <plurals name="fileListColorFolderConfirmationSnackbar">
         <item quantity="one">Una carpeta coloreada con éxito</item>
@@ -403,6 +395,14 @@
     <plurals name="fileListMultiSelectedTitle">
         <item quantity="one">%d seleccionado</item>
         <item quantity="other">%d seleccionados</item>
+    </plurals>
+    <plurals name="fileListRemoveFavoritesConfirmationSnackbar">
+        <item quantity="one">Un archivo ha sido eliminado de favoritos correctamente</item>
+        <item quantity="other">%d archivos han sido eliminados de favoritos correctamente</item>
+    </plurals>
+    <plurals name="fileListRemoveOfflineConfirmationSnackbar">
+        <item quantity="one">Un archivo eliminado de la disponibilidad sin conexión</item>
+        <item quantity="other">%d archivos eliminados de la disponibilidad sin conexión</item>
     </plurals>
     <string name="fileListTitle">Archivos</string>
     <string name="filePermissionTitle">Seleccionar el derecho</string>
