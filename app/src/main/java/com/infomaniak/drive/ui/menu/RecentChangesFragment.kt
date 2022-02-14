@@ -99,11 +99,11 @@ class RecentChangesFragment : FileSubTypeListFragment() {
             val apiResponse = ApiRepository.getLastModifiedFiles(driveId, page)
             when {
                 apiResponse.isSuccess() -> apiResponse.data?.let { data ->
-                    FileController.storeRecentChanges(data, isFirstPage)
                     if (isFirstPage) emit(FolderFilesResult(files = data, isComplete = true, page = page))
                     if (data.size >= ApiRepository.PER_PAGE && !onlyFirstPage) {
                         getRecentChangesRecursive(page + 1, driveId, onlyFirstPage)
                     }
+                    FileController.storeRecentChanges(data, isFirstPage)
                 }
                 isFirstPage -> emit(FolderFilesResult(files = FileController.getRecentChanges(), isComplete = true, page = 1))
                 else -> emit(null)
