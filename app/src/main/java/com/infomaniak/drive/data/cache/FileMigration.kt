@@ -27,6 +27,7 @@ import io.realm.FieldAttribute
 import io.realm.RealmMigration
 import io.realm.RealmSchema
 import io.sentry.Sentry
+import io.sentry.SentryLevel
 import java.util.*
 
 class FileMigration : RealmMigration {
@@ -102,6 +103,7 @@ class FileMigration : RealmMigration {
                 // So we add these sentry logs to have more info
                 // We have an issue here: https://github.com/realm/realm-java/issues/7642
                 Sentry.withScope { scope ->
+                    scope.level = SentryLevel.WARNING
                     scope.setExtra("oldVersion", "$oldVersion")
                     scope.setExtra("count orphan files", "${sentryLogs.count()}")
                     scope.setExtra("count offline files", "$countOfflineFiles")
