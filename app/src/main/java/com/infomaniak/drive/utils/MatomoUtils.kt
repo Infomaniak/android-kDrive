@@ -24,7 +24,6 @@ import com.infomaniak.drive.ApplicationMain
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.SyncSettings
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import org.matomo.sdk.Matomo
 import org.matomo.sdk.Tracker
 import org.matomo.sdk.TrackerBuilder
