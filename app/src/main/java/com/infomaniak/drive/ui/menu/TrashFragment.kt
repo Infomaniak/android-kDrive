@@ -27,7 +27,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.SortTypeUsage
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackTrashEvent
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import kotlinx.android.synthetic.main.fragment_file_list.*
 
@@ -58,7 +58,7 @@ class TrashFragment : FileSubTypeListFragment() {
                     isDeletion = true,
                     autoDismiss = false
                 ) { dialog ->
-                    context?.applicationContext?.trackEvent("trash", "click", "emptyTrash")
+                    trackTrashEvent("emptyTrash")
                     trashViewModel.emptyTrash(AccountUtils.currentDriveId).observe(viewLifecycleOwner) { apiResponse ->
                         dialog.dismiss()
                         if (apiResponse.data == true) {

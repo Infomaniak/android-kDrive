@@ -113,7 +113,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
         shareButton.initProgress(this)
         shareButton.setOnClickListener {
             shareButton.showProgress()
-            context?.applicationContext?.trackEvent("shareAndRights", "click", "inviteUser")
+            context?.applicationContext?.trackEvent("shareAndRights", TrackerAction.CLICK, "inviteUser")
             checkShare(selectedPermission) { file, body ->
                 createShareAndCloseDialog(file, body)
             }

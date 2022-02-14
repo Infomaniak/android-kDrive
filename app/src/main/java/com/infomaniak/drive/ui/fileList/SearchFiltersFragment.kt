@@ -35,6 +35,7 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterTypeBottomSheetDia
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.TrackerAction
 import com.infomaniak.drive.utils.getBackNavigationResult
 import com.infomaniak.drive.utils.getTintedDrawable
 import com.infomaniak.drive.utils.safeNavigate
@@ -110,9 +111,9 @@ class SearchFiltersFragment : Fragment() {
 
     private fun setSaveButton() = with(searchFiltersViewModel) {
         saveButton.setOnClickListener {
-            if (date.value != null) { trackSearchEvent("filterDate") }
-            if (type.value != null) { trackSearchEvent("filterFileType") }
-            if (categories != null) { trackSearchEvent("filterCategory") }
+            if (date.value != null) trackSearchEvent("filterDate")
+            if (type.value != null) trackSearchEvent("filterFileType")
+            if (categories != null) trackSearchEvent("filterCategory")
 
             searchViewModel.dateFilter = date.value
             searchViewModel.typeFilter = type.value
@@ -123,7 +124,7 @@ class SearchFiltersFragment : Fragment() {
     }
 
     private fun trackSearchEvent(name: String) {
-        context?.applicationContext?.trackEvent("search", "click", name)
+        trackEvent("search", TrackerAction.CLICK, name)
     }
 
     private fun listenToFiltersUpdates() = with(searchFiltersViewModel) {

@@ -25,11 +25,8 @@ import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileComment
-import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
-import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.openOnlyOfficeDocument
-import com.infomaniak.drive.utils.showSnackbar
 import kotlinx.android.synthetic.main.fragment_file_details.*
 import kotlinx.android.synthetic.main.fragment_file_details_comments.*
 
@@ -160,7 +157,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
     }
 
     private fun trackCommentAction(name: String) {
-        context?.applicationContext?.trackEvent("comment", "click", name)
+        trackEvent("comment", TrackerAction.CLICK, name)
     }
 
     private fun toggleLike(fileComment: FileComment) {

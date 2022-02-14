@@ -34,7 +34,7 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.MatomoUtils.trackShareSettings
+import com.infomaniak.drive.utils.MatomoUtils.trackShareSettingsEvent
 import com.infomaniak.drive.views.ShareLinkContainerView.Companion.getTypeName
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
@@ -218,7 +218,7 @@ class FileShareLinkSettingsFragment : Fragment() {
         saveButton.setOnClickListener {
             saveButton.showProgress()
 
-            context?.applicationContext?.trackShareSettings(
+            context?.applicationContext?.trackShareSettingsEvent(
                 addPasswordSwitch.isChecked, expirationDateSwitch.isChecked, allowDownloadValue.isChecked
             )
 

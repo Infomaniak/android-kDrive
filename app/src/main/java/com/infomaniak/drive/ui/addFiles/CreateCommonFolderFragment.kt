@@ -31,7 +31,7 @@ import com.infomaniak.drive.data.models.File.FolderPermission.ALL_DRIVE_USERS
 import com.infomaniak.drive.data.models.File.FolderPermission.SPECIFIC_USERS
 import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackNewElementEvent
 import com.infomaniak.drive.utils.hideKeyboard
 import com.infomaniak.drive.utils.safeNavigate
 import com.infomaniak.drive.utils.showSnackbar
@@ -68,7 +68,7 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
     private fun createCommonFolder() {
         folderNameValueInput.hideKeyboard()
         createFolderButton.showProgress()
-        context?.applicationContext?.trackEvent("newElement", "click", "createCommonFolder")
+        trackNewElementEvent("createCommonFolder")
 
         newFolderViewModel.createCommonFolder(
             name = folderNameValueInput.text.toString(),

@@ -34,7 +34,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.menu.TrashViewModel
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackTrashEvent
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.utils.showSnackbar
@@ -87,10 +87,6 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
                 }
             }
         }
-    }
-
-    private fun trackTrashEvent(name: String) {
-        context?.applicationContext?.trackEvent("trash", "click", name)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

@@ -27,6 +27,7 @@ import com.infomaniak.drive.utils.NotificationUtils.copyOperationProgressNotific
 import com.infomaniak.drive.utils.NotificationUtils.moveOperationProgressNotification
 import com.infomaniak.drive.utils.NotificationUtils.trashOperationProgressNotification
 import kotlinx.android.parcel.Parcelize
+import java.util.*
 
 @Parcelize
 enum class BulkOperationType(@StringRes val title: Int, @PluralsRes val successMessage: Int) : Parcelable {
@@ -44,5 +45,9 @@ enum class BulkOperationType(@StringRes val title: Int, @PluralsRes val successM
             TRASH -> context.trashOperationProgressNotification()
             else -> context.copyOperationProgressNotification()
         }
+    }
+
+    override fun toString(): String {
+        return name.lowercase(Locale.getDefault()).replaceFirstChar { it.titlecase(Locale.getDefault()) }
     }
 }

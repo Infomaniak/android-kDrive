@@ -42,14 +42,11 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
-import com.infomaniak.drive.utils.MatomoUtils.trackPhotoSyncSettings
+import com.infomaniak.drive.utils.MatomoUtils.trackPhotoSyncSettingsEvent
 import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
-import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.startOfTheDay
 import com.infomaniak.lib.core.utils.FORMAT_DATE_CLEAR_MONTH
 import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.utils.initProgress
@@ -310,7 +307,7 @@ class SyncSettingsActivity : BaseActivity() {
                     createDatedSubFolders = createDatedSubFoldersSwitch.isChecked,
                     deleteAfterSync = deletePicturesAfterSyncSwitch.isChecked
                 )
-                application.trackPhotoSyncSettings(syncSettings, trackingDateName)
+                application.trackPhotoSyncSettingsEvent(syncSettings, trackingDateName)
                 syncSettings.setIntervalType(syncSettingsViewModel.syncIntervalType.value!!)
                 UploadFile.setAppSyncSettings(syncSettings)
                 activateAutoSync(syncSettings)
@@ -318,7 +315,7 @@ class SyncSettingsActivity : BaseActivity() {
                 syncActivationTrackerName = "disable"
                 disableAutoSync()
             }
-            application.trackEvent("photoSync", "click", syncActivationTrackerName)
+            application.trackEvent("photoSync", TrackerAction.CLICK, syncActivationTrackerName)
 
             withContext(Dispatchers.Main) {
                 onBackPressed()

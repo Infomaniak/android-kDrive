@@ -34,7 +34,7 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackCategoriesEvent
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_category_info_actions.*
 import kotlinx.coroutines.Dispatchers
@@ -72,7 +72,7 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
                 isDeletion = true,
                 buttonText = getString(R.string.buttonDelete),
             ) { dialog ->
-                context?.applicationContext?.trackEvent("categories", "click", "delete")
+                trackCategoriesEvent("delete")
                 deleteCategory(categoryId) { dialog.dismiss() }
             }
         }

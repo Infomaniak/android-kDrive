@@ -35,14 +35,11 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.UiSettings
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.MatomoUtils.trackEventWithBooleanValue
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.drive.utils.isKeyguardSecure
-import com.infomaniak.drive.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_settings.*
 
 class SettingsFragment : Fragment() {
@@ -81,7 +78,7 @@ class SettingsFragment : Fragment() {
                 appSecuritySeparator.isVisible = true
                 isVisible = true
                 setOnClickListener {
-                    context?.applicationContext?.trackEvent("settings", "click", "lockApp")
+                    trackSettingsEvent("lockApp")
                     safeNavigate(R.id.appSecurityActivity, null, null)
                 }
             } else {
@@ -116,7 +113,7 @@ class SettingsFragment : Fragment() {
                 UiSettings(requireContext()).nightMode = defaultNightMode
                 AppCompatDelegate.setDefaultNightMode(defaultNightMode)
                 setThemeSettingsValue()
-                context?.applicationContext?.trackEvent("settings", "click", "theme${themeSettingsValue.text}")
+                trackSettingsEvent("theme${themeSettingsValue.text}")
             }
             .setNegativeButton(R.string.buttonCancel) { _, _ -> }
             .setCancelable(false).show()
@@ -159,5 +156,9 @@ class SettingsFragment : Fragment() {
             }
         }
         startActivity(intent)
+    }
+
+    private fun trackSettingsEvent(trackerName: String) {
+        trackEvent("settings", TrackerAction.CLICK, trackerName)
     }
 }

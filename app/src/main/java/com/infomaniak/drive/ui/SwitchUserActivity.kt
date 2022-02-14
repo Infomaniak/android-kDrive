@@ -25,7 +25,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.menu.UserAdapter
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackAccountEvent
 import com.infomaniak.lib.core.models.User
 import kotlinx.android.synthetic.main.view_switch_settings.*
 
@@ -41,7 +41,7 @@ class SwitchUserActivity : AppCompatActivity() {
 
         AccountUtils.getAllUsers().observe(this) { users ->
             usersRecyclerView.adapter = UserAdapter(users as ArrayList<User>) { user ->
-                application?.trackEvent("account", "click", "switch")
+                trackAccountEvent("switch")
                 AccountUtils.currentUser = user
                 AccountUtils.currentDriveId = -1
                 AccountUtils.reloadApp?.invoke(bundleOf())
@@ -49,7 +49,7 @@ class SwitchUserActivity : AppCompatActivity() {
         }
 
         addUser.setOnClickListener {
-            application?.trackEvent("account", "click", "add")
+            trackAccountEvent("add")
             startActivity(Intent(this, LoginActivity::class.java))
         }
     }

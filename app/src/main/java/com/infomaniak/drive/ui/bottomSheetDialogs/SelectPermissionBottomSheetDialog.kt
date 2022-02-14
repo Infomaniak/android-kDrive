@@ -38,7 +38,7 @@ import com.infomaniak.drive.data.models.ShareLink.*
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.Shareable.ShareablePermission
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackShareRightsEvent
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setBackNavigationResult
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
@@ -173,7 +173,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
                 sharePermissionTrackerName = permission.name.lowercase(Locale.getDefault()) + "Right"
                 editShare(file, shareable, permission)
             }
-            context?.applicationContext?.trackEvent("shareAndRights", "click", sharePermissionTrackerName)
+            context?.applicationContext?.trackShareRightsEvent(sharePermissionTrackerName)
         }
     }
 

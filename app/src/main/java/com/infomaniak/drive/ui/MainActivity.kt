@@ -53,6 +53,7 @@ import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.navigation.NavigationBarItemView
+import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.R
 import com.infomaniak.drive.checkUpdateIsAvailable
 import com.infomaniak.drive.data.models.AppSettings
@@ -290,7 +291,10 @@ class MainActivity : BaseActivity() {
                 setColorNavigationBar()
             }
         }
-        application.trackScreen(destination.displayName.substringAfter("com.infomaniak.drive:id"), destination.label.toString())
+        application.trackScreen(
+            destination.displayName.substringAfter("${BuildConfig.APPLICATION_ID}:id"),
+            destination.label.toString()
+        )
     }
 
     private fun handleBottomNavigationVisibility(destinationId: Int, shouldHideBottomNavigation: Boolean?) {

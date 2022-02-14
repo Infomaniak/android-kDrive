@@ -94,7 +94,7 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomShe
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED_CATEGORIES
 import com.infomaniak.drive.ui.fileList.UploadInProgressFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackShareRightsEvent
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.views.CategoryIconView
 import com.infomaniak.lib.core.models.User
@@ -782,7 +782,7 @@ fun View.updateUploadFileInProgress(pendingFilesCount: Int) {
 }
 
 fun Context.shareText(text: String) {
-    applicationContext?.trackEvent("shareAndRights", "click", "shareButton")
+    applicationContext?.trackShareRightsEvent("shareButton")
     val intent = Intent().apply {
         action = Intent.ACTION_SEND
         putExtra(Intent.EXTRA_TEXT, text)
@@ -854,3 +854,5 @@ fun File.getFolderIcon(): Pair<Int, String?> {
         }
     }
 }
+
+fun Boolean.toFloat() = if (this) 1f else 0f

@@ -40,6 +40,7 @@ import com.google.android.exoplayer2.util.Util
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.TrackerAction
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
 import kotlinx.android.synthetic.main.fragment_preview_others.*
@@ -72,7 +73,7 @@ open class PreviewVideoFragment : PreviewFragment() {
         playerView.setOnClickListener {
             if (playerView.isControllerFullyVisible) {
                 (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
-                context?.applicationContext?.trackEvent("mediaPlayer", "click", "toggleFullScreen")
+                trackMediaPlayerEvent("toggleFullScreen")
             }
         }
         errorLayout.setOnClickListener {
@@ -87,13 +88,13 @@ open class PreviewVideoFragment : PreviewFragment() {
     }
 
     override fun onPause() {
-        trackMediaPlayer("pause")
+        trackMediaPlayerEvent("pause")
         exoPlayer?.pause()
         super.onPause()
     }
 
     override fun onDestroy() {
-        trackMediaPlayer("duration", exoPlayer?.duration?.toFloat())
+        trackMediaPlayerEvent("duration", exoPlayer?.duration?.toFloat())
         exoPlayer?.release()
         super.onDestroy()
     }
@@ -202,11 +203,11 @@ open class PreviewVideoFragment : PreviewFragment() {
             PreviewMusicFragment::class -> "playMusic"
             else -> "play"
         }
-        trackMediaPlayer(name)
+        trackMediaPlayerEvent(name)
     }
 
-    private fun trackMediaPlayer(name: String, value: Float? = null) {
-        context?.applicationContext?.trackEvent("mediaPlayer", "click", name, value)
+    private fun trackMediaPlayerEvent(name: String, value: Float? = null) {
+        trackEvent("mediaPlayer", TrackerAction.CLICK, name, value)
     }
 
 }

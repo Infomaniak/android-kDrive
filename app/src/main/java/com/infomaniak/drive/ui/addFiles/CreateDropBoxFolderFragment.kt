@@ -29,7 +29,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.FolderPermission.*
 import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackNewElementEvent
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
 import kotlinx.android.synthetic.main.fragment_create_folder.*
@@ -90,7 +90,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
     ) {
         if (!isValid()) return
 
-        context?.applicationContext?.trackEvent("newElement", "click", "createDropbox")
+        trackNewElementEvent("createDropbox")
 
         val emailWhenFinished = emailWhenFinishedSwitch.isChecked
         val validUntil = if (expirationDateSwitch.isChecked) expirationDateInput.getCurrentTimestampValue() else null

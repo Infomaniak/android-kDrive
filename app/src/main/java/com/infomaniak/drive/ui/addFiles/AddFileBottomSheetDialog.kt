@@ -41,7 +41,7 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackNewElementEvent
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.FORMAT_NEW_FILE
 import com.infomaniak.lib.core.utils.format
@@ -121,7 +121,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private fun openCamera() {
         if (openCameraPermissions.checkSyncPermissions()) {
             openCamera.isEnabled = false
-            context?.applicationContext?.trackEvent("newElement", "click", "takePhotoOrVideo")
+            trackNewElementEvent("takePhotoOrVideo")
             try {
                 val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
                     putExtra(MediaStore.EXTRA_OUTPUT, createMediaFile(false))
@@ -149,12 +149,12 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                 addCategory(Intent.CATEGORY_OPENABLE)
             }
             startActivityForResult(Intent.createChooser(intent, getString(R.string.addFileSelectUploadFile)), SELECT_FILES_REQ)
-            context?.applicationContext?.trackEvent("newElement", "click", "uploadFile")
+            trackNewElementEvent("uploadFile")
         }
     }
 
     private fun scanDocuments() {
-        context?.applicationContext?.trackEvent("newElement", "click", "scan")
+        trackNewElementEvent("scan")
         // TODO find a good lib
         dismiss()
     }
@@ -179,7 +179,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun createFile(office: File.Office) {
-        context?.applicationContext?.trackEvent("newElement", "click", office.getEventName())
+        trackNewElementEvent(office.getEventName())
         Utils.createPromptNameDialog(
             context = requireContext(),
             title = R.string.modalCreateFileTitle,

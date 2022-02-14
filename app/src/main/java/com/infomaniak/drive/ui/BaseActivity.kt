@@ -31,6 +31,6 @@ open class BaseActivity : AppCompatActivity() {
         if (AccountUtils.currentUser == null) {
             runBlocking { AccountUtils.requestCurrentUser() }
         }
-        trackScreen(this::class.java.name.substringAfter("com.infomaniak.drive."))
+        trackScreen()
     }
 }

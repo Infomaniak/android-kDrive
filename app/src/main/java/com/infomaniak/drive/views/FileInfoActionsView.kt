@@ -47,7 +47,7 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
-import com.infomaniak.drive.utils.MatomoUtils.trackEventWithBooleanValue
+import com.infomaniak.drive.utils.MatomoUtils.trackFileActionEvent
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -170,7 +170,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         ownerFragment.startActivity(Intent.createChooser(shareIntent, ownerFragment.getString(R.string.buttonSendCopy)))
-        context.applicationContext.trackEvent("fileAction", "click", "sendFileCopy")
+        context.applicationContext?.trackFileActionEvent("sendFileCopy")
     }
 
     private fun openAddFileBottom() {
@@ -394,20 +394,16 @@ class FileInfoActionsView @JvmOverloads constructor(
         private fun getApplication() = ownerFragment.context?.applicationContext
 
         private fun trackActionEvent(name: String, value: Float? = null) {
-            getApplication()?.trackEvent("fileAction", "click", name, value)
+            getApplication()?.trackFileActionEvent(name, value)
         }
 
-        fun addFavoritesClicked() =
-            getApplication()?.trackEventWithBooleanValue("fileAction", "favorite", !currentFile.isFavorite)
-
+        fun addFavoritesClicked() = trackActionEvent("favorite", (!currentFile.isFavorite).toFloat())
         fun copyPublicLink() = trackActionEvent("copyShareLink")
         fun displayInfoClicked()
         fun downloadFileClicked() = trackActionEvent("download")
         fun manageCategoriesClicked(fileId: Int)
-        fun dropBoxClicked(isDropBox: Boolean) =
-            getApplication()?.trackEventWithBooleanValue("fileAction", "convertToDropbox", isDropBox)
-
-        fun colorFolderClicked(color: String) = getApplication()?.trackEvent("colorFolder", "click", "switch")
+        fun dropBoxClicked(isDropBox: Boolean) = trackActionEvent("convertToDropbox", isDropBox.toFloat())
+        fun colorFolderClicked(color: String) = getApplication()?.trackEvent("colorFolder", TrackerAction.CLICK, "switch")
         fun fileRightsClicked()
         fun onCacheAddedToOffline() = Unit
         fun onDeleteFile(onApiResponse: () -> Unit)

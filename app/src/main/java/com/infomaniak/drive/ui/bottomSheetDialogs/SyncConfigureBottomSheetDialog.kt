@@ -22,6 +22,7 @@ import android.view.View
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.TrackerAction
 import com.infomaniak.drive.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 
@@ -36,7 +37,7 @@ class SyncConfigureBottomSheetDialog : InformationBottomSheetDialog() {
 
         actionButton.setText(R.string.buttonConfigure)
         actionButton.setOnClickListener {
-            context?.applicationContext?.trackEvent("syncModal", "click", "configure")
+            trackEvent("syncModal", TrackerAction.CLICK, "configure")
             safeNavigate(R.id.syncSettingsActivity)
             dismiss()
         }

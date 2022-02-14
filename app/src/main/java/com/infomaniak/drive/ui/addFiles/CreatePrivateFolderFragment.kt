@@ -23,7 +23,7 @@ import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File.FolderPermission.*
 import com.infomaniak.drive.data.models.Permission
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackNewElementEvent
 import com.infomaniak.drive.utils.safeNavigate
 import com.infomaniak.drive.utils.showSnackbar
 import kotlinx.android.synthetic.main.activity_main.*
@@ -50,7 +50,7 @@ class CreatePrivateFolderFragment : CreateFolderFragment() {
     }
 
     private fun createPrivateFolder() {
-        context?.applicationContext?.trackEvent("newElement", "click", "createPrivateFolder")
+        trackNewElementEvent("createPrivateFolder")
         createFolder(newFolderViewModel.currentPermission == ONLY_ME) { file, redirectToShareDetails ->
             file?.let {
                 saveNewFolder(file)

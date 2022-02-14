@@ -44,7 +44,7 @@ import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.UiCategory
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode.MANAGED_CATEGORIES
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode.SELECTED_CATEGORIES
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackCategoriesEvent
 import com.infomaniak.drive.views.DebouncingTextWatcher
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.android.synthetic.main.fragment_select_categories.*
@@ -252,7 +252,7 @@ class SelectCategoriesFragment : Fragment() {
     }
 
     private fun addCategory(id: Int) {
-        context?.applicationContext?.trackEvent("categories", "click", "assign")
+        trackCategoriesEvent("assign")
         if (usageMode == SELECTED_CATEGORIES) {
             categoriesAdapter.selectCategory(id, true, usageMode)
             return
@@ -264,7 +264,7 @@ class SelectCategoriesFragment : Fragment() {
     }
 
     private fun removeCategory(id: Int) {
-        context?.applicationContext?.trackEvent("categories", "click", "remove")
+        trackCategoriesEvent("remove")
         if (usageMode == SELECTED_CATEGORIES) {
             categoriesAdapter.selectCategory(id, false, usageMode)
             return

@@ -523,7 +523,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             UiSettings(requireContext()).listMode = newListMode
             fileListViewModel.isListMode.value = newListMode
             val trackerName = if (newListMode) "viewList" else "viewGrid"
-            context?.applicationContext?.trackEvent("displayStyle", "click", trackerName)
+            trackEvent("displayStyle", TrackerAction.CLICK, trackerName)
         }
     }
 
@@ -879,7 +879,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private inner class SortFiles : () -> Unit {
         override fun invoke() {
             getBackNavigationResult<SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
-                context?.applicationContext?.trackEvent("fileList", "click", newSortType.name)
+                trackEvent("fileList", TrackerAction.CLICK, newSortType.name)
                 fileListViewModel.sortType = newSortType
                 sortButton?.setText(fileListViewModel.sortType.translation)
 

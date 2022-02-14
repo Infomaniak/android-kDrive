@@ -50,7 +50,7 @@ object TabViewPagerUtils {
                 val position = (tabsViewPager.adapter as ViewPagerAdapter).tabs.indexOfFirst { it.button == checkedId }
                 tabsViewPager.setCurrentItem(position, true)
                 onCheckedButton?.invoke(position)
-                trackScreen((tabsViewPager.adapter as ViewPagerAdapter).tabs[position].fragment::class.java.simpleName)
+                tabsViewPager.getFragment(position)?.trackScreen()
             }
         }
     }
