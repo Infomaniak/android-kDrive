@@ -120,8 +120,8 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun openCamera() {
         if (openCameraPermissions.checkSyncPermissions()) {
-            openCamera.isEnabled = false
             trackNewElementEvent("takePhotoOrVideo")
+            openCamera.isEnabled = false
             try {
                 val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
                     putExtra(MediaStore.EXTRA_OUTPUT, createMediaFile(false))
@@ -140,6 +140,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun uploadFiles() {
         if (uploadFilesPermissions.checkSyncPermissions()) {
+            trackNewElementEvent("uploadFile")
             documentUpload.isEnabled = false
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 type = "*/*"
@@ -149,7 +150,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                 addCategory(Intent.CATEGORY_OPENABLE)
             }
             startActivityForResult(Intent.createChooser(intent, getString(R.string.addFileSelectUploadFile)), SELECT_FILES_REQ)
-            trackNewElementEvent("uploadFile")
         }
     }
 

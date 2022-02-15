@@ -72,8 +72,8 @@ open class PreviewVideoFragment : PreviewFragment() {
 
         playerView.setOnClickListener {
             if (playerView.isControllerFullyVisible) {
-                (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
                 trackMediaPlayerEvent("toggleFullScreen")
+                (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
             }
         }
         errorLayout.setOnClickListener {
@@ -209,5 +209,4 @@ open class PreviewVideoFragment : PreviewFragment() {
     private fun trackMediaPlayerEvent(name: String, value: Float? = null) {
         trackEvent("mediaPlayer", TrackerAction.CLICK, name, value)
     }
-
 }

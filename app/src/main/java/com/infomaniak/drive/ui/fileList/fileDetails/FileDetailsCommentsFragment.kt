@@ -156,10 +156,6 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
         fileCommentsRecyclerView.adapter = commentsAdapter
     }
 
-    private fun trackCommentAction(name: String) {
-        trackEvent("comment", TrackerAction.CLICK, name)
-    }
-
     private fun toggleLike(fileComment: FileComment) {
         if (fileComment.liked) {
             fileDetailsViewModel.postUnlike(currentFile, fileComment).observe(viewLifecycleOwner) { apiResponse ->
@@ -192,5 +188,9 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
     override fun onResume() {
         super.onResume()
         requireParentFragment().addCommentButton.isVisible = true
+    }
+
+    private fun trackCommentAction(name: String) {
+        trackEvent("comment", TrackerAction.CLICK, name)
     }
 }

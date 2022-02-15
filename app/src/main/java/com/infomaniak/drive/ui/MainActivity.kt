@@ -267,6 +267,10 @@ class MainActivity : BaseActivity() {
             level = SentryLevel.INFO
         })
 
+        with(destination) {
+            application.trackScreen(displayName.substringAfter("${BuildConfig.APPLICATION_ID}:id"), label.toString())
+        }
+
         val shouldHideBottomNavigation = navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldHideBottomNavigation
 
         handleBottomNavigationVisibility(destination.id, shouldHideBottomNavigation)
@@ -291,10 +295,6 @@ class MainActivity : BaseActivity() {
                 setColorNavigationBar()
             }
         }
-        application.trackScreen(
-            destination.displayName.substringAfter("${BuildConfig.APPLICATION_ID}:id"),
-            destination.label.toString()
-        )
     }
 
     private fun handleBottomNavigationVisibility(destinationId: Int, shouldHideBottomNavigation: Boolean?) {

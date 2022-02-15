@@ -185,10 +185,10 @@ open class ManageDropboxFragment : Fragment() {
             }
         } else {
             val newSize = it.toString().toLong()
+            trackDropBoxEvent("changeLimitStorage", TrackerAction.INPUT, newSize.toFloat())
             if (Utils.convertGigaByteToBytes(newSize) != currentDropBox?.limitFileSize && validationCount == 0) validationCount++
             limitStorageValue.showOrHideEmptyError()
             hasErrors = false
-            trackDropBoxEvent("changeLimitStorage", TrackerAction.INPUT, newSize.toFloat())
         }
         enableSaveButton()
     }
@@ -244,7 +244,7 @@ open class ManageDropboxFragment : Fragment() {
     private fun trackDropBoxEvent(
         trackerName: String,
         trackerAction: TrackerAction = TrackerAction.CLICK,
-        trackerValue: Float? = null
+        trackerValue: Float? = null,
     ) {
         trackEvent("dropbox", trackerAction, trackerName, trackerValue)
     }

@@ -520,10 +520,10 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun setupToggleDisplayButton() {
         toggleDisplayButton.setOnClickListener {
             val newListMode = !UiSettings(requireContext()).listMode
-            UiSettings(requireContext()).listMode = newListMode
-            fileListViewModel.isListMode.value = newListMode
             val trackerName = if (newListMode) "viewList" else "viewGrid"
             trackEvent("displayStyle", TrackerAction.CLICK, trackerName)
+            UiSettings(requireContext()).listMode = newListMode
+            fileListViewModel.isListMode.value = newListMode
         }
     }
 

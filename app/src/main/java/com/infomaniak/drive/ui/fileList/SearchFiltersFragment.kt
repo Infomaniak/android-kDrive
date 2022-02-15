@@ -123,10 +123,6 @@ class SearchFiltersFragment : Fragment() {
         }
     }
 
-    private fun trackSearchEvent(name: String) {
-        trackEvent("search", TrackerAction.CLICK, name)
-    }
-
     private fun listenToFiltersUpdates() = with(searchFiltersViewModel) {
         date.observe(viewLifecycleOwner) { updateDateUi() }
         type.observe(viewLifecycleOwner) { updateTypeUi() }
@@ -202,5 +198,9 @@ class SearchFiltersFragment : Fragment() {
     private fun MaterialCardView.setupSelection(enabled: Boolean) {
         strokeWidth = if (enabled) 2.toPx() else 0
         invalidate()
+    }
+
+    private fun trackSearchEvent(name: String) {
+        trackEvent("search", TrackerAction.CLICK, name)
     }
 }

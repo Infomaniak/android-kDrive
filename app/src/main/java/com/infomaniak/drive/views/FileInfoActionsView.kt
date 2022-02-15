@@ -161,6 +161,8 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     private fun shareFile() {
+        context.applicationContext?.trackFileActionEvent("sendFileCopy")
+
         val context = ownerFragment.requireContext()
         val shareIntent = Intent().apply {
             action = Intent.ACTION_SEND
@@ -170,7 +172,6 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         ownerFragment.startActivity(Intent.createChooser(shareIntent, ownerFragment.getString(R.string.buttonSendCopy)))
-        context.applicationContext?.trackFileActionEvent("sendFileCopy")
     }
 
     private fun openAddFileBottom() {
@@ -393,9 +394,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
         private fun getApplication() = ownerFragment.context?.applicationContext
 
-        private fun trackActionEvent(name: String, value: Float? = null) {
-            getApplication()?.trackFileActionEvent(name, value)
-        }
+        private fun trackActionEvent(name: String, value: Float? = null) = getApplication()?.trackFileActionEvent(name, value)
 
         fun addFavoritesClicked() = trackActionEvent("favorite", (!currentFile.isFavorite).toFloat())
         fun copyPublicLink() = trackActionEvent("copyShareLink")
@@ -433,14 +432,14 @@ class FileInfoActionsView @JvmOverloads constructor(
                 currentFile.isOffline && isChecked -> Unit
                 !currentFile.isOffline && !isChecked -> Unit
                 isChecked -> {
-                    fileInfoActionsView.downloadAsOfflineFile()
                     trackActionEvent("offline", 1f)
+                    fileInfoActionsView.downloadAsOfflineFile()
                 }
                 else -> {
+                    trackActionEvent("offline", 0f)
                     val offlineLocalPath = currentFile.getOfflineFile(fileInfoActionsView.context)
                     val cacheFile = currentFile.getCacheFile(fileInfoActionsView.context)
                     offlineLocalPath?.let { removeOfflineFile(offlineLocalPath, cacheFile) }
-                    trackActionEvent("offline", 0f)
                 }
             }
         }
@@ -464,8 +463,8 @@ class FileInfoActionsView @JvmOverloads constructor(
                     selectedRange = fileName.length
                 ) { dialog, name ->
                     onDuplicateFile(name) {
-                        dialog.dismiss()
                         trackActionEvent("copy")
+                        dialog.dismiss()
                     }
                 }
             }
@@ -480,8 +479,8 @@ class FileInfoActionsView @JvmOverloads constructor(
                     autoDismiss = false
                 ) { dialog ->
                     onLeaveShare {
-                        dialog.dismiss()
                         trackActionEvent("stopShare")
+                        dialog.dismiss()
                     }
                 }
             }
@@ -498,8 +497,8 @@ class FileInfoActionsView @JvmOverloads constructor(
                     selectedRange = currentFile.getFileName().length
                 ) { dialog, name ->
                     onRenameFile(name) {
-                        dialog.dismiss()
                         trackActionEvent("rename")
+                        dialog.dismiss()
                     }
                 }
             }
@@ -508,8 +507,8 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun deleteFileClicked(context: Context, currentFile: File) {
             Utils.confirmFileDeletion(context, fileName = currentFile.name) { dialog ->
                 onDeleteFile {
-                    dialog.dismiss()
                     trackActionEvent("putInTrash")
+                    dialog.dismiss()
                 }
             }
         }

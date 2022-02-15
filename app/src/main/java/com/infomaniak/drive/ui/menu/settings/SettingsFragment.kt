@@ -110,10 +110,10 @@ class SettingsFragment : Fragment() {
                 defaultNightMode = nightMode[which]!!
             }
             .setPositiveButton(R.string.buttonConfirm) { _, _ ->
+                trackSettingsEvent("theme${themeSettingsValue.text}")
                 UiSettings(requireContext()).nightMode = defaultNightMode
                 AppCompatDelegate.setDefaultNightMode(defaultNightMode)
                 setThemeSettingsValue()
-                trackSettingsEvent("theme${themeSettingsValue.text}")
             }
             .setNegativeButton(R.string.buttonCancel) { _, _ -> }
             .setCancelable(false).show()
