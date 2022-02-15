@@ -30,6 +30,7 @@ enum class ConvertedType(val value: String, @DrawableRes val icon: Int, @StringR
     CODE("code", R.drawable.ic_file_code, R.string.allCode),
     FOLDER("dir", R.drawable.ic_folder_filled, R.string.allFolder),
     FONT("font", R.drawable.ic_file, -1),
+    FORM("form", R.drawable.ic_file_form, R.string.allOfficeForm),
     IMAGE("image", R.drawable.ic_file_image, R.string.allPictures),
     PDF("pdf", R.drawable.ic_file_pdf, R.string.allPdf),
     PRESENTATION("presentation", R.drawable.ic_file_presentation, R.string.allOfficePoints),

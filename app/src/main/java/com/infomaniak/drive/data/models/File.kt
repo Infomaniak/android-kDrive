@@ -379,6 +379,7 @@ open class File(
         DOCS(ConvertedType.TEXT, "docx"),
         POINTS(ConvertedType.PRESENTATION, "pptx"),
         GRIDS(ConvertedType.SPREADSHEET, "xlsx"),
+        FORM(ConvertedType.FORM, "docxf"),
         TXT(ConvertedType.TEXT, "txt")
     }
 

@@ -98,6 +98,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         docsCreate.setOnClickListener { createFile(File.Office.DOCS) }
         pointsCreate.setOnClickListener { createFile(File.Office.POINTS) }
         gridsCreate.setOnClickListener { createFile(File.Office.GRIDS) }
+        formCreate.setOnClickListener { createFile(File.Office.FORM) }
         noteCreate.setOnClickListener { createFile(File.Office.TXT) }
     }
 
