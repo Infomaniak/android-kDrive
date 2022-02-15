@@ -4,7 +4,7 @@ on:
   push:
     branches: [ master ]
   pull_request:
-    branches: [ master, android-ci ]
+    branches: [ master ]
 
 jobs:
 
@@ -28,7 +28,7 @@ jobs:
       with:
         access_token: ${{ github.token }}
         
-    - name: Checkout
+    - name: Checkout the code
       uses: actions/checkout@v2
       with:
         token: ${{ secrets.MY_REPO_PAT }}
@@ -83,11 +83,11 @@ jobs:
       uses: ReactiveCircus/android-emulator-runner@v2.22.0
       with:
         api-level: ${{ matrix.api-level }}
-        arch: x86_64
-        profile: Pixel_4
-        avd-name: avd test
+        #arch: x86_64
+        #profile: Pixel_4
+        #avd-name: avd test
         force-avd-creation: false
         emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
         disable-animations: true
-        script: ./gradlew clean :app:connectedStandardDebugAndroidTest --stacktrace
+        script: ./gradlew :app:connectedStandardDebugAndroidTest --stacktrace
     
