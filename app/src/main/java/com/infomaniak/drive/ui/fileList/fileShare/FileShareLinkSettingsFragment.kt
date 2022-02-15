@@ -146,7 +146,7 @@ class FileShareLinkSettingsFragment : Fragment() {
                 showProgress()
                 val isValid = checkPasswordStatus()
                 if (!isValid) {
-                    this?.hideProgress(R.string.buttonSave)
+                    hideProgress(R.string.buttonSave)
                 } else {
                     val file = File(id = navigationArgs.fileId, driveId = navigationArgs.driveId)
                     shareViewModel.editFileShareLink(file, shareLink).observe(viewLifecycleOwner) { apiResponse ->
@@ -155,7 +155,7 @@ class FileShareLinkSettingsFragment : Fragment() {
                         } else {
                             requireActivity().showSnackbar(R.string.errorModification)
                         }
-                        this?.hideProgress(R.string.buttonSave)
+                        saveButton?.hideProgress(R.string.buttonSave)
                     }
                 }
             }
