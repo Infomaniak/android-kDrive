@@ -13,7 +13,7 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        api-level: [31]
+        api-level: [30]
     
     env:
         ENV_PATH: "app/src/androidTest/java/com/infomaniak/drive/utils/Env.kt"
