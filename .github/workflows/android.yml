@@ -84,7 +84,7 @@ jobs:
       with:
         api-level: ${{ matrix.api-level }}
         arch: x86_64
-        profile: Nexus 6
+        profile: Pixel_4
         avd-name: avd test
         force-avd-creation: false
         emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
