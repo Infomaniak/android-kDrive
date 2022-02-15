@@ -66,10 +66,10 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun configureAddFavorites(otherActionsVisibility: Boolean) {
+    private fun configureAddFavorites(otherActionsVisibility: Boolean) = with(navigationArgs) {
         addFavorites.apply {
-            addFavoritesIcon.isEnabled = navigationArgs.onlyFavorite
-            val (text, action) = if (navigationArgs.onlyFavorite) {
+            addFavoritesIcon.isEnabled = onlyFavorite
+            val (text, action) = if (onlyFavorite) {
                 R.string.buttonRemoveFavorites to SelectDialogAction.REMOVE_FAVORITE
             } else {
                 R.string.buttonAddFavorites to SelectDialogAction.ADD_FAVORITES
