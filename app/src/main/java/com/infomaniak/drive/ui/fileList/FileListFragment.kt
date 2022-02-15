@@ -434,9 +434,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     }
                 }
             }
-            BulkOperationType.ADD_OFFLINE, BulkOperationType.REMOVE_OFFLINE -> {
-                addOrRemoveSelectedFilesToOffline(file, type == BulkOperationType.ADD_OFFLINE)
-            }
+            BulkOperationType.ADD_OFFLINE, BulkOperationType.REMOVE_OFFLINE -> addOrRemoveSelectedFilesToOffline(file, type)
             BulkOperationType.ADD_FAVORITES -> {
                 mediator.addSource(
                     mainViewModel.addFileToFavorites(file) {
@@ -669,11 +667,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
-    private fun addOrRemoveSelectedFilesToOffline(file: File, mustAdd: Boolean) {
+    private fun addOrRemoveSelectedFilesToOffline(file: File, type: BulkOperationType) {
         if (!file.isFolder()) {
             val cacheFile = file.getCacheFile(requireContext())
             val offlineFile = file.getOfflineFile(requireContext())
-            if (mustAdd) {
+            if (type == BulkOperationType.ADD_OFFLINE) {
                 addSelectedFileToOffline(file, offlineFile, cacheFile)
             } else {
                 removeSelectedFileFromOffline(file, offlineFile, cacheFile)
