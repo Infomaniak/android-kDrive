@@ -217,8 +217,8 @@ object Utils {
         clipboard?.setPrimaryClip(ClipData.newPlainText(text, text))
     }
 
-    fun moveFileClicked(context: Context?, currentFolder: Int, selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
-        val intent = Intent(context, SelectFolderActivity::class.java).apply {
+    fun Context.moveFileClicked(currentFolder: Int, selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
+        val intent = Intent(this, SelectFolderActivity::class.java).apply {
             putExtra(SelectFolderActivity.USER_ID_TAG, AccountUtils.currentUserId)
             putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
             putExtra(SelectFolderActivity.DISABLE_SELECTED_FOLDER_TAG, currentFolder)

@@ -46,6 +46,7 @@ import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.Utils.moveFileClicked
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -429,7 +430,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         fun moveFileClicked(context: Context?, idFolder: Int, selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
-            Utils.moveFileClicked(context, idFolder, selectFolderResultLauncher)
+            context?.moveFileClicked(idFolder, selectFolderResultLauncher)
         }
 
         fun duplicateFileClicked(context: Context, currentFile: File) {

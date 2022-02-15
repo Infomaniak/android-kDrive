@@ -26,7 +26,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
-import androidx.activity.result.contract.ActivityResultContracts.*
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
@@ -70,6 +70,7 @@ import com.infomaniak.drive.utils.FilePresenter.openBookmark
 import com.infomaniak.drive.utils.FilePresenter.openBookmarkIntent
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.drive.utils.Utils.moveFileClicked
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
@@ -481,7 +482,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         deleteButtonMultiSelect.setOnClickListener { performBulkOperation(BulkOperationType.TRASH) }
 
-        moveButtonMultiSelect.setOnClickListener { Utils.moveFileClicked(context, folderId, selectFolderResultLauncher) }
+        moveButtonMultiSelect.setOnClickListener { context?.moveFileClicked(folderId, selectFolderResultLauncher) }
 
         menuButtonMultiSelect.setOnClickListener {
             safeNavigate(
