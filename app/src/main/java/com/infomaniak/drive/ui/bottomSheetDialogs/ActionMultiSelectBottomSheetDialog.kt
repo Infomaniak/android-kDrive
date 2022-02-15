@@ -83,17 +83,18 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
     private fun configureAvailableOffline(otherActionsVisibility: Boolean) = with(navigationArgs) {
         availableOfflineSwitch.apply {
             isChecked = onlyOffline
-            setOnCheckedChangeListener { _, _ -> selectOfflineDialogActionCallBack(onlyOffline) }
+            setOnCheckedChangeListener { _, _ -> selectOfflineDialogActionCallBack() }
         }
         disabledAvailableOffline.isVisible = onlyFolders
         availableOffline.apply {
-            setOnClickListener { selectOfflineDialogActionCallBack(onlyOffline) }
+            setOnClickListener { selectOfflineDialogActionCallBack() }
             isVisible = otherActionsVisibility
         }
     }
 
-    private fun selectOfflineDialogActionCallBack(onlyOffline: Boolean) {
-        onActionSelected(if (onlyOffline) SelectDialogAction.REMOVE_OFFLINE else SelectDialogAction.ADD_OFFLINE)
+    private fun selectOfflineDialogActionCallBack() {
+        val action = if (navigationArgs.onlyOffline) SelectDialogAction.REMOVE_OFFLINE else SelectDialogAction.ADD_OFFLINE
+        onActionSelected(action)
     }
 
     private fun configureDownloadFile() {

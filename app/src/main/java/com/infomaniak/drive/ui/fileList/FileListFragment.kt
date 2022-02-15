@@ -479,12 +479,16 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         moveButtonMultiSelect.setOnClickListener { Utils.moveFileClicked(this, folderId) }
 
         menuButtonMultiSelect.setOnClickListener {
-            safeNavigate(
-                FileListFragmentDirections.actionFileListFragmentToActionMultiSelectBottomSheetDialog(
-                    fileIds = fileAdapter.getValidItemsSelected().map { it.id }.toIntArray(),
-                    onlyFolders = fileAdapter.getValidItemsSelected().all { it.isFolder() },
+            with(fileAdapter.getValidItemsSelected()) {
+                safeNavigate(
+                    FileListFragmentDirections.actionFileListFragmentToActionMultiSelectBottomSheetDialog(
+                        fileIds = this.map { it.id }.toIntArray(),
+                        onlyFolders = this.all { it.isFolder() },
+                        onlyFavorite = this.all { it.isFavorite },
+                        onlyOffline = this.all { it.isOffline },
+                    )
                 )
-            )
+            }
         }
 
         selectAllButton.apply {
@@ -662,22 +666,30 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         if (!file.isFolder()) {
             val cacheFile = file.getCacheFile(requireContext())
             val offlineFile = file.getOfflineFile(requireContext())
+            if (mustAdd) {
+                addSelectedFileToOffline(file, offlineFile, cacheFile)
+            } else {
+                removeSelectedFileFromOffline(file, offlineFile, cacheFile)
+            }
+            closeMultiSelect()
+        }
+    }
 
-            if (offlineFile != null && !file.isObsoleteOrNotIntact(cacheFile)) {
-                Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
-                runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
+    private fun addSelectedFileToOffline(file: File, offlineFile: java.io.File?, cacheFile: java.io.File) {
+        if (offlineFile != null && !file.isObsoleteOrNotIntact(cacheFile)) {
+            Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
+            runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
 
-                fileAdapter.updateFileProgressByFileId(file.id, 100) { _, currentFile ->
-                    currentFile.apply {
-                        if (isNotManagedByRealm()) {
-                            isOffline = true
-                            currentProgress = 0
-                        }
+            fileAdapter.updateFileProgressByFileId(file.id, 100) { _, currentFile ->
+                currentFile.apply {
+                    if (isNotManagedByRealm()) {
+                        isOffline = true
+                        currentProgress = 0
                     }
                 }
-            } else {
-                Utils.downloadAsOfflineFile(requireContext(), file)
             }
+        } else {
+            Utils.downloadAsOfflineFile(requireContext(), file)
         }
     }
 
