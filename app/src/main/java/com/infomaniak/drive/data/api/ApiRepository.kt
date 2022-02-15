@@ -139,7 +139,7 @@ object ApiRepository {
         return callApi(
             ApiRoutes.createTeamFolder(driveId),
             POST,
-            mapOf("name" to name, "for_all_users" to forAllUsers),
+            mapOf("name" to name, "for_all_user" to forAllUsers),
             okHttpClient = okHttpClient
         )
     }
