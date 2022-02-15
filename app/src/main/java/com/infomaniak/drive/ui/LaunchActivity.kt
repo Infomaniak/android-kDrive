@@ -42,29 +42,26 @@ class LaunchActivity : AppCompatActivity() {
 
             logoutCurrentUserIfNeeded() // Rights v2 migration temporary fix
 
-            when {
+            val clazz = when {
                 AccountUtils.requestCurrentUser() == null -> {
-                    if (getOldkDriveUser().isEmpty) {
-                        startActivity(Intent(this@LaunchActivity, LoginActivity::class.java))
-                    } else {
-                        startActivity(Intent(this@LaunchActivity, MigrationActivity::class.java))
-                    }
+                    if (getOldkDriveUser().isEmpty) LoginActivity::class.java else MigrationActivity::class.java
                 }
                 isKeyguardSecure() && AppSettings.appSecurityLock -> {
-                    startActivity(Intent(this@LaunchActivity, LockActivity::class.java))
+                    LockActivity::class.java
                 }
                 else -> {
                     if (DriveInfosController.getDrivesCount(AccountUtils.currentUserId) == 0L) {
                         AccountUtils.updateCurrentUserAndDrives(this@LaunchActivity)
                     }
-                    if (DriveInfosController.getDrives(AccountUtils.currentUserId).all { it.maintenance }) {
-                        startActivity(Intent(this@LaunchActivity, MaintenanceActivity::class.java))
-                    } else {
-                        startActivity(Intent(this@LaunchActivity, MainActivity::class.java))
-                    }
                     application.trackCurrentUserId()
+                    if (DriveInfosController.getDrives(AccountUtils.currentUserId).all { it.maintenance }) {
+                        MaintenanceActivity::class.java
+                    } else {
+                        MainActivity::class.java
+                    }
                 }
             }
+            startActivity(Intent(this@LaunchActivity, clazz))
         }
         trackScreen()
     }
