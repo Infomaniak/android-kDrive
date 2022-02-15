@@ -58,6 +58,7 @@
     <string name="allMinutesShort">%d min</string>
     <string name="allNoNetwork">Pas de connexion réseau</string>
     <string name="allOfficeDocs">Document</string>
+    <string name="allOfficeForm">Formulaire</string>
     <string name="allOfficeGrids">Tableau</string>
     <string name="allOfficeNote">Texte</string>
     <string name="allOfficePoints">Présentation</string>
@@ -363,7 +364,7 @@
     <string name="fileDetailsNoComments">Aucun commentaire pour le moment</string>
     <string name="fileInfoInputDuplicateFile">Nom de la copie</string>
     <string name="fileInfoLinkCopiedToClipboard">Lien copié dans le presse-papiers</string>
-    <plurals name="fileListAddFavorisConfirmationSnackbar">
+    <plurals name="fileListAddFavoritesConfirmationSnackbar">
         <item quantity="one">Un fichier ajouté aux favoris avec succès</item>
         <item quantity="other">%d fichiers ajoutés aux favoris avec succès</item>
     </plurals>
@@ -395,6 +396,14 @@
     <plurals name="fileListMultiSelectedTitle">
         <item quantity="one">%d sélectionné</item>
         <item quantity="other">%d sélectionnés</item>
+    </plurals>
+    <plurals name="fileListRemoveFavoritesConfirmationSnackbar">
+        <item quantity="one">Un fichier retiré des favoris avec succès</item>
+        <item quantity="other">%d fichiers retirés des favoris avec succès</item>
+    </plurals>
+    <plurals name="fileListRemoveOfflineConfirmationSnackbar">
+        <item quantity="one">Un fichier retiré de la disponibilité hors ligne</item>
+        <item quantity="other">%d fichiers retirés de la disponibilité hors ligne</item>
     </plurals>
     <string name="fileListTitle">Fichiers</string>
     <string name="filePermissionTitle">Sélectionner le droit</string>

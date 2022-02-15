@@ -70,6 +70,7 @@
     <string name="allMinutesShort">%d min</string>
     <string name="allNoNetwork">No network connection</string>
     <string name="allOfficeDocs">Document</string>
+    <string name="allOfficeForm">Form</string>
     <string name="allOfficeGrids">Table</string>
     <string name="allOfficeNote">Text</string>
     <string name="allOfficePoints">Presentation</string>
@@ -375,7 +376,7 @@
     <string name="fileDetailsNoComments">No comments at this time</string>
     <string name="fileInfoInputDuplicateFile">Copy name</string>
     <string name="fileInfoLinkCopiedToClipboard">Link copied to the clipboard</string>
-    <plurals name="fileListAddFavorisConfirmationSnackbar">
+    <plurals name="fileListAddFavoritesConfirmationSnackbar">
         <item quantity="one">One file successfully added to favorites</item>
         <item quantity="other">%d files successfully added to favorites</item>
     </plurals>
@@ -407,6 +408,14 @@
     <plurals name="fileListMultiSelectedTitle">
         <item quantity="one">%d selected</item>
         <item quantity="other">%d selected</item>
+    </plurals>
+    <plurals name="fileListRemoveFavoritesConfirmationSnackbar">
+        <item quantity="one">One file successfully removed from favorites</item>
+        <item quantity="other">%d files successfully removed from favorites</item>
+    </plurals>
+    <plurals name="fileListRemoveOfflineConfirmationSnackbar">
+        <item quantity="one">One file removed from offline availability</item>
+        <item quantity="other">%d files removed from offline availability</item>
     </plurals>
     <string name="fileListTitle">Files</string>
     <string name="filePermissionTitle">Select the right</string>
