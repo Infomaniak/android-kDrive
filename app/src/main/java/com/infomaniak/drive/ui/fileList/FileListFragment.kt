@@ -479,16 +479,23 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         moveButtonMultiSelect.setOnClickListener { Utils.moveFileClicked(this, folderId) }
 
         menuButtonMultiSelect.setOnClickListener {
-            with(fileAdapter.getValidItemsSelected()) {
-                safeNavigate(
-                    FileListFragmentDirections.actionFileListFragmentToActionMultiSelectBottomSheetDialog(
-                        fileIds = this.map { it.id }.toIntArray(),
-                        onlyFolders = this.all { it.isFolder() },
-                        onlyFavorite = this.all { it.isFavorite },
-                        onlyOffline = this.all { it.isOffline },
-                    )
-                )
+            val fileIds = arrayListOf<Int>()
+            var (onlyFolders, onlyFavorite, onlyOffline) = arrayOf(true, true, true)
+            fileAdapter.getValidItemsSelected().forEach {
+                fileIds.add(it.id)
+                if (!it.isFolder()) onlyFolders = false
+                if (!it.isFavorite) onlyFavorite = false
+                if (!it.isOffline) onlyOffline = false
             }
+
+            safeNavigate(
+                FileListFragmentDirections.actionFileListFragmentToActionMultiSelectBottomSheetDialog(
+                    fileIds = fileIds.toIntArray(),
+                    onlyFolders = onlyFolders,
+                    onlyFavorite = onlyFavorite,
+                    onlyOffline = onlyOffline,
+                )
+            )
         }
 
         selectAllButton.apply {
