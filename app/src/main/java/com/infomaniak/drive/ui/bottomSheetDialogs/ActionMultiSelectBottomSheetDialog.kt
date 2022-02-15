@@ -70,7 +70,7 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
         addFavorites.apply {
             addFavoritesIcon.isEnabled = onlyFavorite
             val (text, action) = if (onlyFavorite) {
-                R.string.buttonRemoveFavorites to SelectDialogAction.REMOVE_FAVORITE
+                R.string.buttonRemoveFavorites to SelectDialogAction.REMOVE_FAVORITES
             } else {
                 R.string.buttonAddFavorites to SelectDialogAction.ADD_FAVORITES
             }
@@ -135,7 +135,7 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
     private fun onActionSelected(type: SelectDialogAction? = null) {
         val finalType = when (type) {
             SelectDialogAction.ADD_FAVORITES -> BulkOperationType.ADD_FAVORITES
-            SelectDialogAction.REMOVE_FAVORITE -> BulkOperationType.REMOVE_FAVORITES
+            SelectDialogAction.REMOVE_FAVORITES -> BulkOperationType.REMOVE_FAVORITES
             SelectDialogAction.ADD_OFFLINE -> BulkOperationType.ADD_OFFLINE
             SelectDialogAction.REMOVE_OFFLINE -> BulkOperationType.REMOVE_OFFLINE
             SelectDialogAction.DUPLICATE -> BulkOperationType.COPY
@@ -157,7 +157,7 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     enum class SelectDialogAction {
-        ADD_FAVORITES, REMOVE_FAVORITE, ADD_OFFLINE, REMOVE_OFFLINE, DUPLICATE, COLOR_FOLDER
+        ADD_FAVORITES, REMOVE_FAVORITES, ADD_OFFLINE, REMOVE_OFFLINE, DUPLICATE, COLOR_FOLDER
     }
 
     companion object {
