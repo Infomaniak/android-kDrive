@@ -62,10 +62,10 @@ class LaunchActivity : AppCompatActivity() {
                     } else {
                         startActivity(Intent(this@LaunchActivity, MainActivity::class.java))
                     }
+                    application.trackCurrentUserId()
                 }
             }
         }
-        application.trackCurrentUserId()
         trackScreen()
     }
 
