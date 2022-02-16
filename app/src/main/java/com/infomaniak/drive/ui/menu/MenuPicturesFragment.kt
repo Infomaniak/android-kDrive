@@ -37,11 +37,9 @@ class MenuPicturesFragment : Fragment(), MultiSelectParent {
     private lateinit var binding: FragmentMenuPicturesBinding
 
     private val picturesFragment: PicturesFragment by lazy {
-        PicturesFragment() {
+        PicturesFragment(this@MenuPicturesFragment) {
             timer.cancel()
             binding.swipeRefreshLayout.isRefreshing = false
-        }.apply {
-            init(this@MenuPicturesFragment)
         }
     }
 
@@ -64,7 +62,7 @@ class MenuPicturesFragment : Fragment(), MultiSelectParent {
         }
 
         binding.swipeRefreshLayout.setOnRefreshListener {
-            picturesFragment.reloadPictures()
+            picturesFragment.onRefreshPictures()
         }
 
         return binding.root

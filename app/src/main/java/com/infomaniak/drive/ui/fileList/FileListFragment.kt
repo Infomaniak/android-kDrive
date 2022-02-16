@@ -470,7 +470,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             BulkOperationType.ADD_FAVORITES -> {
                 mediator.addSource(
                     mainViewModel.addFileToFavorites(file) {
-                        runBlocking(Dispatchers.Main) {
+                        lifecycleScope.launch(Dispatchers.Main) {
                             fileAdapter.notifyFileChanged(file.id) { file ->
                                 if (!file.isManaged) file.isFavorite = true
                             }

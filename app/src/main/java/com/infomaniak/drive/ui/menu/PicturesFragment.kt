@@ -25,22 +25,27 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.WorkInfo
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialogArgs
 import com.infomaniak.drive.ui.bottomSheetDialogs.ActionPicturesMultiSelectBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.Utils.moveFileClicked
 import com.infomaniak.lib.core.utils.toDp
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.activity_main.*
@@ -48,12 +53,14 @@ import kotlinx.android.synthetic.main.cardview_picture.*
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.fragment_pictures.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.math.max
 import kotlin.math.min
 
 class PicturesFragment(
-    private val onFinish: (() -> Unit)? = null,
+    private val multiSelectParent: MultiSelectParent? = null,
+    private val onFinish: (() -> Unit)? = null
 ) : Fragment(), MultiSelectListener {
 
     private val mainViewModel: MainViewModel by activityViewModels()
@@ -64,10 +71,21 @@ class PicturesFragment(
         }
     }
 
-    private var multiSelectParent: MultiSelectParent? = null
+    private val selectFolderResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        it.whenResultIsOk { data ->
+            with(data?.extras!!) {
+                val folderName = getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
+                val folderId = getInt(SelectFolderActivity.FOLDER_ID_TAG)
+                val customArgs = getBundle(SelectFolderActivity.CUSTOM_ARGS_TAG)
+                val bulkOperationType =
+                    customArgs?.getParcelable<BulkOperationType>(SelectFolderActivity.BULK_OPERATION_CUSTOM_TAG)!!
 
-    fun init(multiSelectParent: MultiSelectParent) {
-        this.multiSelectParent = multiSelectParent
+                performBulkOperation(
+                    type = bulkOperationType,
+                    destinationFolder = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId)
+                )
+            }
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -109,7 +127,64 @@ class PicturesFragment(
         picturesRecyclerView.adapter = picturesAdapter
         configPicturesLayoutManager()
 
+        mainViewModel.observeDownloadOffline(requireContext()).observe(viewLifecycleOwner) { workInfoList ->
+            if (workInfoList.isEmpty()) return@observe
+
+            val workInfo = workInfoList.firstOrNull { it.state == WorkInfo.State.RUNNING } ?: return@observe
+
+            val fileId: Int = workInfo.progress.getInt(DownloadWorker.FILE_ID, 0)
+            if (fileId == 0) return@observe
+
+            val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 100)
+
+            if(progress == 100) picturesAdapter.updateOfflineStatus(fileId)
+        }
+
         getPictures()
+    }
+
+    override fun onCloseMultiSelection() {
+        closeMultiSelect()
+    }
+
+    override fun onMove() {
+        val folderId = if (picturesAdapter.itemsSelected.count() == 1) {
+            FileController.getParentFile(picturesAdapter.itemsSelected[0].id, UserDrive(), mainViewModel.realm)?.id
+        } else {
+            null
+        }
+        requireContext().moveFileClicked(folderId, selectFolderResultLauncher)
+    }
+
+    override fun onDelete() {
+        performBulkOperation(BulkOperationType.TRASH)
+    }
+
+    override fun onMenu() {
+        val fileIds = arrayListOf<Int>()
+        var (onlyFolders, onlyFavorite, onlyOffline) = arrayOf(true, true, true)
+        picturesAdapter.itemsSelected.forEach {
+            fileIds.add(it.id)
+            if (!it.isFolder()) onlyFolders = false
+            if (!it.isFavorite) onlyFavorite = false
+            if (!it.isOffline) onlyOffline = false
+        }
+
+        ActionPicturesMultiSelectBottomSheetDialog().apply {
+            arguments = ActionMultiSelectBottomSheetDialogArgs(
+                fileIds = picturesAdapter.getValidItemsSelected().map { it.id }.toIntArray(),
+                onlyFolders = onlyFolders,
+                onlyFavorite = onlyFavorite,
+                onlyOffline = onlyOffline,
+            ).toBundle()
+        }.show(childFragmentManager, "ActionMultiSelectBottomSheetDialog")
+    }
+
+    fun onRefreshPictures() {
+        if (isResumed) {
+            picturesAdapter.clearPictures()
+            getPictures()
+        }
     }
 
     fun performBulkOperation(type: BulkOperationType, destinationFolder: File? = null, color: String? = null) {
@@ -213,18 +288,29 @@ class PicturesFragment(
                     }
                 }
             }
-            BulkOperationType.SET_OFFLINE -> {
-                addSelectedFilesToOffline(file)
-            }
+            BulkOperationType.ADD_OFFLINE, BulkOperationType.REMOVE_OFFLINE -> addOrRemoveSelectedFilesToOffline(file, type)
             BulkOperationType.ADD_FAVORITES -> {
                 mediator.addSource(
                     mainViewModel.addFileToFavorites(
                         file,
                         onSuccess = {
-                            runBlocking(Dispatchers.Main) {
-                                picturesAdapter.notifyFileChanged(file.id) { if (!it.isManaged) it.isFavorite = true }
+                            lifecycleScope.launch(Dispatchers.Main) {
+                                picturesAdapter.notifyFileChanged(file.id) { it.isFavorite = true }
                             }
                         },
+                    ),
+                    mainViewModel.updateMultiSelectMediator(mediator),
+                )
+            }
+            BulkOperationType.REMOVE_FAVORITES -> {
+                mediator.addSource(
+                    mainViewModel.deleteFileFromFavorites(
+                        file,
+                        callback = {
+                            lifecycleScope.launch(Dispatchers.Main) {
+                                picturesAdapter.notifyFileChanged(file.id) { it.isFavorite = false }
+                            }
+                        }
                     ),
                     mainViewModel.updateMultiSelectMediator(mediator),
                 )
@@ -254,53 +340,45 @@ class PicturesFragment(
         }
     }
 
-    private fun addSelectedFilesToOffline(file: File) {
-        if (!file.isOffline && !file.isFolder()) {
+    private fun addOrRemoveSelectedFilesToOffline(file: File, type: BulkOperationType) {
+        if (!file.isFolder()) {
             val cacheFile = file.getCacheFile(requireContext())
             val offlineFile = file.getOfflineFile(requireContext())
+            if (type == BulkOperationType.ADD_OFFLINE) {
+                addSelectedFileToOffline(file, offlineFile, cacheFile)
+            } else {
+                removeSelectedFileFromOffline(file, offlineFile, cacheFile)
+            }
+            closeMultiSelect()
+        }
+    }
 
-            if (offlineFile != null && !file.isObsoleteOrNotIntact(cacheFile)) {
-                Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
-                runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
+    private fun addSelectedFileToOffline(file: File, offlineFile: java.io.File?, cacheFile: java.io.File) {
+        if (offlineFile != null && !file.isObsoleteOrNotIntact(cacheFile)) {
+            Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
+            runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
 
-                picturesAdapter.updateFileProgressByFileId(file.id, 100) { _, currentFile ->
-                    if (currentFile.isNotManagedByRealm()) {
-                        currentFile.isOffline = true
-                        currentFile.currentProgress = 0
+            picturesAdapter.updateFileProgressByFileId(file.id, 100) { _, currentFile ->
+                currentFile.apply {
+                    if (isNotManagedByRealm()) {
+                        isOffline = true
+                        currentProgress = 0
                     }
                 }
-            } else Utils.downloadAsOfflineFile(requireContext(), file)
+            }
+        } else {
+            Utils.downloadAsOfflineFile(requireContext(), file)
+            file.isOffline = true
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        data?.let { onSelectFolderResult(requestCode, resultCode, data) }
-    }
-
-    private fun onSelectFolderResult(requestCode: Int, resultCode: Int, data: Intent) {
-        if (requestCode == SelectFolderActivity.SELECT_FOLDER_REQUEST && resultCode == AppCompatActivity.RESULT_OK) {
-            val folderName = data.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
-            val folderId = data.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)!!
-            val customArgs = data.extras?.getBundle(SelectFolderActivity.CUSTOM_ARGS_TAG)
-            val bulkOperationType = customArgs?.getParcelable<BulkOperationType>(SelectFolderActivity.BULK_OPERATION_CUSTOM_TAG)!!
-
-            performBulkOperation(
-                type = bulkOperationType,
-                destinationFolder = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId)
-            )
+    private fun removeSelectedFileFromOffline(file: File, offlineFile: java.io.File?, cacheFile: java.io.File) {
+        lifecycleScope.launch {
+            if (offlineFile != null) {
+                mainViewModel.removeOfflineFile(file, offlineFile, cacheFile)
+                file.isOffline = false
+            }
         }
-    }
-
-    fun closeMultiSelect() {
-        picturesAdapter.apply {
-            itemsSelected = RealmList()
-            multiSelectMode = false
-            notifyItemRangeChanged(0, itemCount)
-        }
-
-        multiSelectParent?.closeMultiSelectBar()
-        multiSelectParent?.enableSwipeRefresh()
     }
 
     private fun enableMultiSelect() {
@@ -329,13 +407,6 @@ class PicturesFragment(
         else multiSelectParent?.disableMultiSelectActionButtons()
     }
 
-    private fun openMultiSelect() {
-        picturesAdapter.multiSelectMode = true
-        picturesAdapter.notifyItemRangeChanged(0, picturesAdapter.itemCount)
-        multiSelectParent?.openMultiSelectBar()
-        multiSelectParent?.disableSwipeRefresh()
-    }
-
     private fun configPicturesLayoutManager() {
         val numPicturesColumns = getNumPicturesColumns()
         val gridLayoutManager = GridLayoutManager(requireContext(), numPicturesColumns)
@@ -350,11 +421,39 @@ class PicturesFragment(
         picturesRecyclerView.layoutManager = gridLayoutManager
     }
 
-    fun reloadPictures() {
-        if (isResumed) {
-            picturesAdapter.clearPictures()
-            getPictures()
+    private fun getNumPicturesColumns(minColumns: Int = 2, maxColumns: Int = 5, expectedItemSize: Int = 300): Int {
+        val screenWidth = requireActivity().getScreenSizeInDp().x
+        return min(max(minColumns, screenWidth / expectedItemSize.toDp()), maxColumns)
+    }
+
+    private fun openMultiSelect() {
+        picturesAdapter.multiSelectMode = true
+        picturesAdapter.notifyItemRangeChanged(0, picturesAdapter.itemCount)
+        multiSelectParent?.openMultiSelectBar()
+        multiSelectParent?.disableSwipeRefresh()
+    }
+
+    fun duplicateFiles() {
+        val intent = Intent(requireContext(), SelectFolderActivity::class.java).apply {
+            putExtra(SelectFolderActivity.USER_ID_TAG, AccountUtils.currentUserId)
+            putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
+            putExtra(
+                SelectFolderActivity.CUSTOM_ARGS_TAG,
+                bundleOf(SelectFolderActivity.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.COPY),
+            )
         }
+        selectFolderResultLauncher.launch(intent)
+    }
+
+    fun closeMultiSelect() {
+        picturesAdapter.apply {
+            itemsSelected = RealmList()
+            multiSelectMode = false
+            notifyItemRangeChanged(0, itemCount)
+        }
+
+        multiSelectParent?.closeMultiSelectBar()
+        multiSelectParent?.enableSwipeRefresh()
     }
 
     private fun getPictures() {
@@ -382,39 +481,8 @@ class PicturesFragment(
         }
     }
 
-    private fun getNumPicturesColumns(minColumns: Int = 2, maxColumns: Int = 5, expectedItemSize: Int = 300): Int {
-        val screenWidth = requireActivity().getScreenSizeInDp().x
-        return min(max(minColumns, screenWidth / expectedItemSize.toDp()), maxColumns)
-    }
-
-
     companion object {
         private const val numberItemLoader = 12
-    }
-
-    override fun onCloseMultiSelection() {
-        closeMultiSelect()
-    }
-
-    override fun onMove() {
-        val folder = when (picturesAdapter.itemsSelected.count()) {
-            1 -> FileController.getParentFile(picturesAdapter.itemsSelected[0].id, UserDrive(), mainViewModel.realm)?.id
-            else -> null
-        }
-        Utils.moveFileClicked(this, folder)
-    }
-
-    override fun onDelete() {
-        performBulkOperation(BulkOperationType.TRASH)
-    }
-
-    override fun onMenu() {
-        ActionPicturesMultiSelectBottomSheetDialog().apply {
-            arguments = ActionMultiSelectBottomSheetDialogArgs(
-                fileIds = picturesAdapter.getValidItemsSelected().map { it.id }.toIntArray(),
-                onlyFolders = picturesAdapter.getValidItemsSelected().all { it.isFolder() }
-            ).toBundle()
-        }.show(childFragmentManager, "ActionMultiSelectBottomSheetDialog")
     }
 }
 

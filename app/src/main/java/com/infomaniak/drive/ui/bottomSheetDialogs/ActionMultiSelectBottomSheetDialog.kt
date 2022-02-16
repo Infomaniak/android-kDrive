@@ -132,10 +132,10 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
                     val downloadURL = Uri.parse(ApiRoutes.downloadArchiveFiles(AccountUtils.currentDriveId, it.uuid))
                     requireContext().startDownloadFile(downloadURL, "Archive.zip")
                 }
-                onActionSelected()
             } else {
                 requireActivity().showSnackbar(apiResponse.translatedError)
             }
+            onActionSelected()
         }
     }
 

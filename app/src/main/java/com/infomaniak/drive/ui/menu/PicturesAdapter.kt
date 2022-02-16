@@ -106,12 +106,6 @@ class PicturesAdapter(
         return ViewHolder(LayoutInflater.from(parent.context).inflate(viewType, parent, false))
     }
 
-    fun clearPictures() {
-        itemList.clear()
-        pictureList.clear()
-        notifyDataSetChanged()
-    }
-
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         when {
             super.getItemViewType(position) == VIEW_TYPE_LOADING -> {
@@ -157,11 +151,17 @@ class PicturesAdapter(
         }
     }
 
-    private fun isSelectedFile(file: File): Boolean {
-        return itemsSelected.any { it.isUsable() && it.id == file.id }
+    fun clearPictures() {
+        itemList.clear()
+        pictureList.clear()
+        notifyDataSetChanged()
     }
 
     fun getValidItemsSelected() = itemsSelected.filter { it.isUsable() }
+
+    private fun isSelectedFile(file: File): Boolean {
+        return itemsSelected.any { it.isUsable() && it.id == file.id }
+    }
 
     private fun onSelectedFile(file: File, isSelected: Boolean) {
         if (file.isUsable()) {
@@ -183,7 +183,7 @@ class PicturesAdapter(
         itemsSelected.remove(file)
     }
 
-    private fun indexOf(fileId: Int) = itemList.indexOfFirst { (it as? File)?.id == fileId }
+    private fun indexOf(fileId: Int) = itemList.indexOfFirstOrNull { (it as? File)?.id == fileId }
 
     fun deleteAt(position: Int) {
         val previousItem = itemList.getOrNull(position - 1)
@@ -200,36 +200,46 @@ class PicturesAdapter(
     }
 
     fun deleteByFileId(fileId: Int) {
-        val position = indexOf(fileId)
-        if (position >= 0) deleteAt(position)
-
-        pictureList.removeAt(pictureList.indexOfFirst { it.id == fileId })
+        indexOf(fileId)?.let(::deleteAt)
+        pictureList.indexOfFirstOrNull { (it as? File)?.id == fileId }
+            ?.let(pictureList::removeAt)
     }
 
     fun updateFileProgressByFileId(fileId: Int, progress: Int, onComplete: ((position: Int, file: File) -> Unit)? = null) {
-        updateFileProgress(indexOf(fileId), progress, onComplete)
+        indexOf(fileId)?.let { position ->
+            updateFileProgress(position, progress, onComplete)
+        }
     }
 
     private fun updateFileProgress(position: Int, progress: Int, onComplete: ((position: Int, file: File) -> Unit)? = null) {
-        if (position >= 0) {
-            val file = getFile(position)
-            file.currentProgress = progress
-            notifyItemChanged(position, progress)
+        val file = getFile(position)
+        file.currentProgress = progress
+        notifyItemChanged(position, progress)
 
-            if (progress == 100) {
-                onComplete?.invoke(position, file)
-            }
+        if (progress == 100) {
+            onComplete?.invoke(position, file)
         }
     }
 
-    private fun getFile(position: Int) = pictureList[position]
+    private fun getFile(position: Int) = itemList[position] as File
+
+    fun updateOfflineStatus(fileId: Int) {
+        indexOf(fileId)?.let { position ->
+            (itemList[position] as? File)?.isOffline = true
+        }
+    }
 
     fun notifyFileChanged(fileId: Int, onChange: ((file: File) -> Unit)? = null) {
-        val fileIndex = indexOf(fileId)
-        if (fileIndex >= 0) {
-            onChange?.invoke(getFile(fileIndex))
-            notifyItemChanged(fileIndex)
+        indexOf(fileId)?.let { position ->
+            onChange?.invoke(getFile(position))
+            notifyItemChanged(position)
         }
+    }
+
+
+    private fun List<Any>.indexOfFirstOrNull(predicate: (Any) -> Boolean): Int? {
+        val index = indexOfFirst(predicate)
+        return if (index >= 0) index else null
     }
 
     enum class DisplayType(val layout: Int) {
