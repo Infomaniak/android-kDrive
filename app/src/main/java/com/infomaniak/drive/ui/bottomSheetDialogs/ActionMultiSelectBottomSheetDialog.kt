@@ -37,6 +37,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.utils.*
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_action_multi_select.*
+import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.Dispatchers
 
 class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
@@ -65,20 +66,35 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun configureAddFavorites(otherActionsVisibility: Boolean) {
+    private fun configureAddFavorites(otherActionsVisibility: Boolean) = with(navigationArgs) {
         addFavorites.apply {
-            setOnClickListener { onActionSelected(SelectDialogAction.ADD_FAVORITES) }
+            addFavoritesIcon.isEnabled = onlyFavorite
+            val (text, action) = if (onlyFavorite) {
+                R.string.buttonRemoveFavorites to SelectDialogAction.REMOVE_FAVORITES
+            } else {
+                R.string.buttonAddFavorites to SelectDialogAction.ADD_FAVORITES
+            }
+            addFavoritesText.setText(text)
+            setOnClickListener { onActionSelected(action) }
             isVisible = otherActionsVisibility
         }
     }
 
-    private fun configureAvailableOffline(otherActionsVisibility: Boolean) {
-        availableOfflineSwitch.setOnCheckedChangeListener { _, _ -> onActionSelected(SelectDialogAction.OFFLINE) }
-        disabledAvailableOffline.isVisible = navigationArgs.onlyFolders
+    private fun configureAvailableOffline(otherActionsVisibility: Boolean) = with(navigationArgs) {
+        availableOfflineSwitch.apply {
+            isChecked = onlyOffline
+            setOnCheckedChangeListener { _, _ -> selectOfflineDialogActionCallBack() }
+        }
+        disabledAvailableOffline.isVisible = onlyFolders
         availableOffline.apply {
-            setOnClickListener { onActionSelected(SelectDialogAction.OFFLINE) }
+            setOnClickListener { selectOfflineDialogActionCallBack() }
             isVisible = otherActionsVisibility
         }
+    }
+
+    private fun selectOfflineDialogActionCallBack() {
+        val action = if (navigationArgs.onlyOffline) SelectDialogAction.REMOVE_OFFLINE else SelectDialogAction.ADD_OFFLINE
+        onActionSelected(action)
     }
 
     private fun configureDownloadFile() {
@@ -119,7 +135,9 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
     private fun onActionSelected(type: SelectDialogAction? = null) {
         val finalType = when (type) {
             SelectDialogAction.ADD_FAVORITES -> BulkOperationType.ADD_FAVORITES
-            SelectDialogAction.OFFLINE -> BulkOperationType.SET_OFFLINE
+            SelectDialogAction.REMOVE_FAVORITES -> BulkOperationType.REMOVE_FAVORITES
+            SelectDialogAction.ADD_OFFLINE -> BulkOperationType.ADD_OFFLINE
+            SelectDialogAction.REMOVE_OFFLINE -> BulkOperationType.REMOVE_OFFLINE
             SelectDialogAction.DUPLICATE -> BulkOperationType.COPY
             SelectDialogAction.COLOR_FOLDER -> BulkOperationType.COLOR_FOLDER
             else -> null
@@ -139,7 +157,7 @@ class ActionMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     enum class SelectDialogAction {
-        ADD_FAVORITES, OFFLINE, DUPLICATE, COLOR_FOLDER
+        ADD_FAVORITES, REMOVE_FAVORITES, ADD_OFFLINE, REMOVE_OFFLINE, DUPLICATE, COLOR_FOLDER
     }
 
     companion object {

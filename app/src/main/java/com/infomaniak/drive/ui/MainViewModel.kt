@@ -42,7 +42,6 @@ import com.infomaniak.lib.core.networking.HttpClient
 import io.realm.Realm
 import io.sentry.Sentry
 import kotlinx.coroutines.*
-import java.util.*
 
 class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
