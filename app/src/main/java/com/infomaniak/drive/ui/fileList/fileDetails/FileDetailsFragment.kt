@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.fileList.fileDetails
 
 import android.content.res.ColorStateList
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -25,22 +26,24 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.android.material.appbar.AppBarLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.utils.TabViewPagerUtils
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.TabViewPagerUtils.setup
-import com.infomaniak.drive.utils.getFolderIcon
-import com.infomaniak.drive.utils.loadGlideUrl
 import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
 import kotlinx.android.synthetic.main.fragment_file_details.*
 import kotlinx.android.synthetic.main.view_subtitle_toolbar.view.*
+import kotlin.math.abs
 
 class FileDetailsFragment : FileDetailsSubFragment() {
     private val navigationArgs: FileDetailsFragmentArgs by navArgs()
@@ -53,6 +56,15 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+
+        // If light mode, change the color of the icons of the status to match the background
+        // If dark mode the icons stay white all along, no need to check
+        if (context?.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_NO) {
+            appBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
+                if (abs(verticalOffset) >= 0.6 * appBarLayout.totalScrollRange) activity?.window?.lightStatusBar(true)
+                else activity?.window?.lightStatusBar(false)
+            })
+        }
 
         FileController.getFileById(navigationArgs.fileId, navigationArgs.userDrive)?.let { file ->
             setFile(file)
@@ -123,9 +135,36 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        activity?.window?.apply {
+            statusBarColor = Color.TRANSPARENT
+            lightStatusBar(false)
+            toggleEdgeToEdge(true)
+
+            // Corrects the layout so it still takes into account system bars in edge-to-edge mode
+            ViewCompat.setOnApplyWindowInsetsListener(requireView()) { view, windowInsets ->
+                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+                toolbar.setMargin(top = insets.top)
+                view.setMargin(bottom = insets.bottom)
+
+                // Return CONSUMED if you don't want the window insets to keep being passed down to descendant views.
+                WindowInsetsCompat.CONSUMED
+            }
+        }
+    }
+
     override fun onPause() {
         super.onPause()
         // TODO Understand why we need to do this
         toolbar.setNavigationIconTint(ContextCompat.getColor(requireContext(), R.color.primary))
+        activity?.window?.apply {
+            toggleEdgeToEdge(false)
+
+            // If light mode
+            if (context?.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_NO) {
+                lightStatusBar(true)
+            }
+        }
     }
 }
