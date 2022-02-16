@@ -36,6 +36,7 @@ import com.infomaniak.drive.utils.RealmListParceler.FileRealmListParceler
 import com.infomaniak.drive.utils.RealmListParceler.IntRealmListParceler
 import com.infomaniak.drive.utils.Utils.INDETERMINATE_PROGRESS
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.drive.utils.contains
 import com.infomaniak.lib.core.BuildConfig
 import io.realm.RealmList
 import io.realm.RealmObject
@@ -158,7 +159,7 @@ open class File(
     fun onlyOfficeUrl() = "${BuildConfig.AUTOLOG_URL}?url=" + ApiRoutes.showOffice(this)
 
     fun getFileType(): ConvertedType {
-        return when (convertedType) {
+        return if (isFromUploads) getFileTypeFromExtension() else when (convertedType) {
             ConvertedType.ARCHIVE.value -> ConvertedType.ARCHIVE
             ConvertedType.AUDIO.value -> ConvertedType.AUDIO
             ConvertedType.CODE.value -> if (isBookmark()) ConvertedType.URL else ConvertedType.CODE
@@ -451,7 +452,7 @@ open class File(
             val mediaFolder = context.externalMediaDirs?.firstOrNull() ?: context.filesDir
             return java.io.File(mediaFolder, context.getString(R.string.EXPOSED_OFFLINE_DIR))
         }
-        
+
         /**
          * This method is here, and not directly a class method in the File class, because of a supposed Realm bug.
          * When we try to put it in the File class, the app doesn't build anymore, because of a "broken method".
@@ -459,19 +460,17 @@ open class File(
          * Realm's Github issue: https://github.com/realm/realm-java/issues/7637
          */
         fun File.getFileTypeFromExtension(): ConvertedType {
-            return getMimeType().let {
-                when {
-                    Regex("application/(zip|rar|x-tar|.*compressed|.*archive)").containsMatchIn(it) -> ConvertedType.ARCHIVE
-                    Regex("audio/").containsMatchIn(it) -> ConvertedType.AUDIO
-                    Regex("image/").containsMatchIn(it) -> ConvertedType.IMAGE
-                    Regex("/pdf").containsMatchIn(it) -> ConvertedType.PDF
-                    Regex("presentation").containsMatchIn(it) -> ConvertedType.PRESENTATION
-                    Regex("spreadsheet|excel|comma-separated-values").containsMatchIn(it) -> ConvertedType.SPREADSHEET
-                    Regex("document|text/plain|msword").containsMatchIn(it) -> ConvertedType.TEXT
-                    Regex("video/").containsMatchIn(it) -> ConvertedType.VIDEO
-                    Regex("text/|application/").containsMatchIn(it) -> ConvertedType.CODE
-                    else -> ConvertedType.UNKNOWN
-                }
+            return when (getMimeType()) {
+                in Regex("application/(zip|rar|x-tar|.*compressed|.*archive)") -> ConvertedType.ARCHIVE
+                in Regex("audio/") -> ConvertedType.AUDIO
+                in Regex("image/") -> ConvertedType.IMAGE
+                in Regex("/pdf") -> ConvertedType.PDF
+                in Regex("presentation") -> ConvertedType.PRESENTATION
+                in Regex("spreadsheet|excel|comma-separated-values") -> ConvertedType.SPREADSHEET
+                in Regex("document|text/plain|msword") -> ConvertedType.TEXT
+                in Regex("video/") -> ConvertedType.VIDEO
+                in Regex("text/|application/") -> ConvertedType.CODE
+                else -> ConvertedType.UNKNOWN
             }
         }
     }

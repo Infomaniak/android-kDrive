@@ -86,7 +86,6 @@ import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.data.models.File.Companion.getFileTypeFromExtension
 import com.infomaniak.drive.data.models.File.VisibilityType
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
@@ -296,12 +295,10 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
         }
         file.isDrive() -> filePreview.loadGlide(context.getTintedDrawable(R.drawable.ic_drive, file.driveColor))
         else -> {
-            val fileType = if (file.isFromUploads) file.getFileTypeFromExtension() else file.getFileType()
+            val fileType = file.getFileType()
             val isGraphic = fileType == ConvertedType.IMAGE || fileType == ConvertedType.VIDEO
             when {
-                file.hasThumbnail && (isGrid || isGraphic) -> {
-                    filePreview.loadGlideUrl(file.thumbnail(), fileType.icon)
-                }
+                file.hasThumbnail && (isGrid || isGraphic) -> filePreview.loadGlideUrl(file.thumbnail(), fileType.icon)
                 file.isFromUploads && isGraphic -> {
                     CoroutineScope(Dispatchers.IO).launch {
                         val bitmap = context.getLocalThumbnail(file)
@@ -853,3 +850,5 @@ fun File.getFolderIcon(): Pair<Int, String?> {
         }
     }
 }
+
+operator fun Regex.contains(input: String) = containsMatchIn(input)
