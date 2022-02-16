@@ -35,7 +35,6 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
 import androidx.activity.viewModels
@@ -92,7 +91,10 @@ class MainActivity : BaseActivity() {
     private var hasDisplayedInformationPanel: Boolean = false
 
     private lateinit var drivePermissions: DrivePermissions
-    private lateinit var filesDeletionResult: ActivityResultLauncher<IntentSenderRequest>
+
+    private val filesDeletionResult = registerForActivityResult(StartIntentSenderForResult()) {
+        it.whenResultIsOk { lifecycleScope.launch(Dispatchers.IO) { UploadFile.deleteAll(uploadedFilesToDelete) } }
+    }
 
     private val fileObserver: FileObserver by lazy {
         fun onEvent() {
@@ -124,7 +126,6 @@ class MainActivity : BaseActivity() {
 
         setupBottomNavigation(navController)
         handleShowProgressIntent(navController)
-        listenToFilesDeletion()
         listenToNetworkStatus()
 
         navController.addOnDestinationChangedListener { _, dest, args -> onDestinationChanged(dest, args) }
@@ -172,14 +173,6 @@ class MainActivity : BaseActivity() {
 
                 bottomNavigation.findViewById<View>(R.id.fileListFragment).performClick()
                 mainViewModel.navigateFileListToFolderId(navController, folderId)
-            }
-        }
-    }
-
-    private fun listenToFilesDeletion() {
-        filesDeletionResult = registerForActivityResult(StartIntentSenderForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                lifecycleScope.launch(Dispatchers.IO) { UploadFile.deleteAll(uploadedFilesToDelete) }
             }
         }
     }

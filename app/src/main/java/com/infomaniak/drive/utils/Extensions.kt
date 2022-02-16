@@ -52,6 +52,8 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.biometric.BiometricManager
@@ -295,25 +297,23 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
         }
         file.isDrive() -> filePreview.loadGlide(context.getTintedDrawable(R.drawable.ic_drive, file.driveColor))
         else -> {
+            val fileType = file.getFileType()
+            val isGraphic = fileType == ConvertedType.IMAGE || fileType == ConvertedType.VIDEO
             when {
-                file.hasThumbnail &&
-                        (isGrid || file.getFileType() == ConvertedType.IMAGE || file.getFileType() == ConvertedType.VIDEO) -> {
-                    filePreview.loadGlideUrl(file.thumbnail(), file.getFileType().icon)
-                }
-                file.isFromUploads &&
-                        (file.getMimeType().startsWith("image/") || file.getMimeType().startsWith("video/")) -> {
+                file.hasThumbnail && (isGrid || isGraphic) -> filePreview.loadGlideUrl(file.thumbnail(), fileType.icon)
+                file.isFromUploads && isGraphic -> {
                     CoroutineScope(Dispatchers.IO).launch {
                         val bitmap = context.getLocalThumbnail(file)
                         withContext(Dispatchers.Main) {
                             if (filePreview?.isVisible == true && context != null) {
-                                filePreview.loadGlide(bitmap, file.getFileType().icon)
+                                filePreview.loadGlide(bitmap, fileType.icon)
                             }
                         }
                     }
                 }
-                else -> filePreview.loadGlide(file.getFileType().icon)
+                else -> filePreview.loadGlide(fileType.icon)
             }
-            filePreview2?.loadGlide(file.getFileType().icon)
+            filePreview2?.loadGlide(fileType.icon)
             setupFileProgress(file)
         }
     }
@@ -646,6 +646,10 @@ fun Fragment.navigateToUploadView(folderId: Int, folderName: String? = null) {
     )
 }
 
+fun ActivityResult.whenResultIsOk(completion: (Intent?) -> Unit) {
+    if (resultCode == Activity.RESULT_OK) data.let(completion::invoke)
+}
+
 fun Drive?.getDriveUsers(): List<DriveUser> = this?.users?.let { categories ->
     return@let DriveInfosController.getUsers(ArrayList(categories.drive + categories.account))
 } ?: listOf()
@@ -852,3 +856,5 @@ fun File.getFolderIcon(): Pair<Int, String?> {
         }
     }
 }
+
+operator fun Regex.contains(input: String) = containsMatchIn(input)

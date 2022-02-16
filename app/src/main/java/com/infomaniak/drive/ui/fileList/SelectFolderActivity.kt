@@ -38,7 +38,6 @@ class SelectFolderActivity : BaseActivity() {
     private val mainViewModel: MainViewModel by viewModels()
 
     companion object {
-        const val SELECT_FOLDER_REQUEST = 42
         const val USER_ID_TAG = "userId"
         const val USER_DRIVE_ID_TAG = "userDriveId"
         const val FOLDER_ID_TAG = "folderId"

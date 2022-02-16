@@ -26,7 +26,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
@@ -70,6 +70,7 @@ import com.infomaniak.drive.utils.FilePresenter.openBookmark
 import com.infomaniak.drive.utils.FilePresenter.openBookmarkIntent
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.drive.utils.Utils.moveFileClicked
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
@@ -109,6 +110,22 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     protected open var sortTypeUsage = SortTypeUsage.FILE_LIST
 
     protected var userDrive: UserDrive? = null
+
+    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
+        it.whenResultIsOk { data ->
+            with(data?.extras!!) {
+                val folderId = getInt(SelectFolderActivity.FOLDER_ID_TAG)
+                val folderName = getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
+                val customArgs = getBundle(SelectFolderActivity.CUSTOM_ARGS_TAG)
+                val bulkOperationType = customArgs?.getParcelable<BulkOperationType>(BULK_OPERATION_CUSTOM_TAG)!!
+
+                performBulkOperation(
+                    type = bulkOperationType,
+                    destinationFolder = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId),
+                )
+            }
+        }
+    }
 
     companion object {
         const val REFRESH_FAVORITE_FILE = "force_list_refresh"
@@ -279,11 +296,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         getBackNavigationResult<String>(ColorFolderBottomSheetDialog.COLOR_FOLDER_NAV_KEY) {
             performBulkOperation(type = BulkOperationType.COLOR_FOLDER, color = it)
         }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        data?.let { onSelectFolderResult(requestCode, resultCode, data) }
     }
 
     override fun onStart() {
@@ -491,7 +503,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         deleteButtonMultiSelect.setOnClickListener { performBulkOperation(BulkOperationType.TRASH) }
 
-        moveButtonMultiSelect.setOnClickListener { Utils.moveFileClicked(this, folderId) }
+        moveButtonMultiSelect.setOnClickListener { context?.moveFileClicked(folderId, selectFolderResultLauncher) }
 
         menuButtonMultiSelect.setOnClickListener {
             val fileIds = arrayListOf<Int>()
@@ -670,7 +682,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                             bundleOf(BULK_OPERATION_CUSTOM_TAG to BulkOperationType.COPY),
                         )
                     }
-                    startActivityForResult(intent, SelectFolderActivity.SELECT_FOLDER_REQUEST)
+                    selectFolderResultLauncher.launch(intent)
                 }
                 BulkOperationType.COLOR_FOLDER -> {
                     if (AccountUtils.getCurrentDrive()?.pack == Drive.DrivePack.FREE.value) {
@@ -721,20 +733,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 mainViewModel.removeOfflineFile(file, offlineFile, cacheFile)
                 file.isOffline = false
             }
-        }
-    }
-
-    private fun onSelectFolderResult(requestCode: Int, resultCode: Int, data: Intent) {
-        if (requestCode == SelectFolderActivity.SELECT_FOLDER_REQUEST && resultCode == AppCompatActivity.RESULT_OK) {
-            val folderName = data.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
-            val folderId = data.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)!!
-            val customArgs = data.extras?.getBundle(SelectFolderActivity.CUSTOM_ARGS_TAG)
-            val bulkOperationType = customArgs?.getParcelable<BulkOperationType>(BULK_OPERATION_CUSTOM_TAG)!!
-
-            performBulkOperation(
-                type = bulkOperationType,
-                destinationFolder = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId)
-            )
         }
     }
 
