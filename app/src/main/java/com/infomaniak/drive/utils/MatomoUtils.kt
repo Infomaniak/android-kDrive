@@ -34,10 +34,10 @@ import java.util.*
 object MatomoUtils {
 
     private inline val Context.tracker: Tracker get() = (this as ApplicationMain).matomoTracker
-    private const val siteId = 8
+    private const val SITE_ID = 8
 
     fun Context.buildTracker(): Tracker {
-        return TrackerBuilder(BuildConfig.MATOMO_URL, siteId, "AndroidTracker").build(Matomo.getInstance(this)).also {
+        return TrackerBuilder(BuildConfig.MATOMO_URL, SITE_ID, "AndroidTracker").build(Matomo.getInstance(this)).also {
             // Track app version installs
             TrackHelper.track().download().identifier(DownloadTracker.Extra.ApkChecksum(this)).with(it)
         }
