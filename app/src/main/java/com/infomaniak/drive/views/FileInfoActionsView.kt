@@ -448,7 +448,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
         fun moveFileClicked(idFolder: Int, selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
             trackActionEvent("move")
-            ownerFragment?.moveFileClicked(idFolder, selectFolderResultLauncher)
+            ownerFragment.context?.moveFileClicked(idFolder, selectFolderResultLauncher)
         }
 
         fun duplicateFileClicked(context: Context, currentFile: File) {

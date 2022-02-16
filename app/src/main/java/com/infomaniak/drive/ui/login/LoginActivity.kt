@@ -20,7 +20,7 @@ package com.infomaniak.drive.ui.login
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.result.contract.ActivityResultContracts.*
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isInvisible
@@ -34,7 +34,11 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.ui.MainActivity
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.MatomoUtils.trackAccountEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackCurrentUserId
+import com.infomaniak.drive.utils.clearStack
+import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.models.ApiResponse

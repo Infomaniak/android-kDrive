@@ -22,7 +22,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.contract.ActivityResultContracts.*
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -34,6 +34,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.menu.TrashViewModel
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.MatomoUtils.trackTrashEvent
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_trashed_file_actions.*
 
