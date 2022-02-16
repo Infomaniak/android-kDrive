@@ -451,7 +451,13 @@ open class File(
             val mediaFolder = context.externalMediaDirs?.firstOrNull() ?: context.filesDir
             return java.io.File(mediaFolder, context.getString(R.string.EXPOSED_OFFLINE_DIR))
         }
-
+        
+        /**
+         * This method is here, and not directly a class method in the File class, because of a supposed Realm bug.
+         * When we try to put it in the File class, the app doesn't build anymore, because of a "broken method".
+         * This is not the only method in this case, search this comment in the project, and you'll see.
+         * Realm's Github issue: https://github.com/realm/realm-java/issues/7637
+         */
         fun File.getFileTypeFromExtension(): ConvertedType {
             return getMimeType().let {
                 when {
