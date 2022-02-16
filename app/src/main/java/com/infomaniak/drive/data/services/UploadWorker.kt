@@ -355,11 +355,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             }
         }
 
-        try {
-            jobs.joinAll()
-        } catch (exception: Exception) {
-            Log.e("sisi", exception.message ?: "")
-        }
+        jobs.joinAll()
     }
 
     private fun CoroutineScope.getLocalLastMediasAsync(
