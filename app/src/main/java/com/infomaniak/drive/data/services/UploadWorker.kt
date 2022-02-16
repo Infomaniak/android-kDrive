@@ -316,40 +316,50 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         Log.d(TAG, "checkLocalLastMedias> started with ${UploadFile.getLastDate(applicationContext)}")
 
         MediaFolder.getAllSyncedFolders().forEach { mediaFolder ->
+            // Add log
+            Sentry.addBreadcrumb(Breadcrumb().apply {
+                category = BREADCRUMB_TAG
+                message = "sync ${mediaFolder.name}"
+                level = SentryLevel.DEBUG
+            })
             Log.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.name}_${mediaFolder.id}")
+
+            // Sync media folder
             var isNotPending = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                 "AND ${MediaStore.Images.Media.IS_PENDING} = 0" else ""
             customSelection = "$selection AND $IMAGES_BUCKET_ID = ? $isNotPending"
             customArgs = args + mediaFolder.id.toString()
 
-            runCatching {
-                val getLastImagesOperation = getLocalLastMediasAsync(
+            val getLastImagesOperation = getLocalLastMediasAsync(
+                syncSettings = syncSettings,
+                contentUri = MediaFoldersProvider.imagesExternalUri,
+                selection = customSelection,
+                args = customArgs,
+                mediaFolder = mediaFolder
+            )
+            jobs.add(getLastImagesOperation)
+
+            if (syncSettings.syncVideo) {
+                isNotPending = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                    "AND ${MediaStore.Video.Media.IS_PENDING} = 0" else ""
+                customSelection = "$selection AND $VIDEO_BUCKET_ID = ? $isNotPending"
+
+                val getLastVideosOperation = getLocalLastMediasAsync(
                     syncSettings = syncSettings,
-                    contentUri = MediaFoldersProvider.imagesExternalUri,
+                    contentUri = MediaFoldersProvider.videosExternalUri,
                     selection = customSelection,
                     args = customArgs,
                     mediaFolder = mediaFolder
                 )
-                jobs.add(getLastImagesOperation)
-
-                if (syncSettings.syncVideo) {
-                    isNotPending = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-                        "AND ${MediaStore.Video.Media.IS_PENDING} = 0" else ""
-                    customSelection = "$selection AND $VIDEO_BUCKET_ID = ? $isNotPending"
-
-                    val getLastVideosOperation = getLocalLastMediasAsync(
-                        syncSettings = syncSettings,
-                        contentUri = MediaFoldersProvider.videosExternalUri,
-                        selection = customSelection,
-                        args = customArgs,
-                        mediaFolder = mediaFolder
-                    )
-                    jobs.add(getLastVideosOperation)
-                }
+                jobs.add(getLastVideosOperation)
             }
         }
 
-        jobs.joinAll()
+        try {
+            jobs.joinAll()
+        } catch (exception: Exception) {
+            Log.e("sisi", exception.message ?: "")
+        }
     }
 
     private fun CoroutineScope.getLocalLastMediasAsync(
@@ -364,40 +374,52 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 MediaStore.MediaColumns.DATE_ADDED + " ASC, " +
                 MediaStore.MediaColumns.DATE_MODIFIED + " ASC"
 
-        contentResolver.query(contentUri, null, selection, args, sortOrder)
-            ?.use { cursor ->
-                Log.d(TAG, "getLocalLastMediasAsync > from ${mediaFolder.name} ${cursor.count} found")
-                while (cursor.moveToNext()) {
-                    val uri = cursor.uri(contentUri)
+        runCatching {
+            contentResolver.query(contentUri, null, selection, args, sortOrder)
+                ?.use { cursor ->
+                    Log.d(TAG, "getLocalLastMediasAsync > from ${mediaFolder.name} ${cursor.count} found")
+                    while (cursor.moveToNext()) {
+                        val uri = cursor.uri(contentUri)
 
-                    val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
-                    val fileName = SyncUtils.getFileName(cursor)
-                    val fileSize = fileDescriptorSize(uri) ?: SyncUtils.getFileSize(cursor)
+                        val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
+                        val fileName = SyncUtils.getFileName(cursor)
+                        val fileSize = fileDescriptorSize(uri) ?: SyncUtils.getFileSize(cursor)
 
-                    Log.d(TAG, "getLocalLastMediasAsync > ${mediaFolder.name}/$fileName found")
+                        Log.d(TAG, "getLocalLastMediasAsync > ${mediaFolder.name}/$fileName found")
 
-                    if (fileName != null && UploadFile.canUpload(uri, fileModifiedAt) && fileSize > 0) {
-                        UploadFile.deleteIfExists(uri)
-                        UploadFile(
-                            uri = uri.toString(),
-                            driveId = syncSettings.driveId,
-                            fileCreatedAt = fileCreatedAt,
-                            fileModifiedAt = fileModifiedAt,
-                            fileName = fileName,
-                            fileSize = fileSize,
-                            remoteFolder = syncSettings.syncFolder,
-                            userId = syncSettings.userId
-                        ).apply {
-                            createSubFolder(mediaFolder.name, syncSettings.createDatedSubFolders)
-                            store()
+                        if (fileName != null && UploadFile.canUpload(uri, fileModifiedAt) && fileSize > 0) {
+                            UploadFile.deleteIfExists(uri)
+                            UploadFile(
+                                uri = uri.toString(),
+                                driveId = syncSettings.driveId,
+                                fileCreatedAt = fileCreatedAt,
+                                fileModifiedAt = fileModifiedAt,
+                                fileName = fileName,
+                                fileSize = fileSize,
+                                remoteFolder = syncSettings.syncFolder,
+                                userId = syncSettings.userId
+                            ).apply {
+                                createSubFolder(mediaFolder.name, syncSettings.createDatedSubFolders)
+                                store()
+                            }
+
+                            UploadFile.setAppSyncSettings(syncSettings.apply {
+                                if (fileModifiedAt > lastSync) lastSync = fileModifiedAt
+                            })
                         }
-
-                        UploadFile.setAppSyncSettings(syncSettings.apply {
-                            if (fileModifiedAt > lastSync) lastSync = fileModifiedAt
-                        })
                     }
                 }
+        }.onFailure { exception ->
+            // Catch Api>=29 for exception {Volume external_primary not found}, Adding logs to get more information
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && exception is IllegalArgumentException) {
+                Sentry.withScope { scope ->
+                    val volumeNames = MediaStore.getExternalVolumeNames(applicationContext).joinToString()
+                    scope.setExtra("uri", contentUri.toString())
+                    scope.setExtra("folder", mediaFolder.name)
+                    scope.setExtra("volume names", volumeNames)
+                }
             }
+        }
     }
 
     companion object {
