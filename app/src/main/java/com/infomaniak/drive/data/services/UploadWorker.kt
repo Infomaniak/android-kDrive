@@ -410,14 +410,18 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                     }
                 }
         }.onFailure { exception ->
-            // Catch Api>=29 for exception {Volume external_primary not found}, Adding logs to get more information
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && exception is IllegalArgumentException) {
-                Sentry.withScope { scope ->
-                    val volumeNames = MediaStore.getExternalVolumeNames(applicationContext).joinToString()
-                    scope.setExtra("uri", contentUri.toString())
-                    scope.setExtra("folder", mediaFolder.name)
-                    scope.setExtra("volume names", volumeNames)
-                }
+            syncMediaFolderFailure(exception, contentUri, mediaFolder)
+        }
+    }
+
+    private fun syncMediaFolderFailure(exception: Throwable, contentUri: Uri, mediaFolder: MediaFolder) {
+        // Catch Api>=29 for exception {Volume external_primary not found}, Adding logs to get more information
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && exception is IllegalArgumentException) {
+            Sentry.withScope { scope ->
+                val volumeNames = MediaStore.getExternalVolumeNames(applicationContext).joinToString()
+                scope.setExtra("uri", contentUri.toString())
+                scope.setExtra("folder", mediaFolder.name)
+                scope.setExtra("volume names", volumeNames)
             }
         }
     }
