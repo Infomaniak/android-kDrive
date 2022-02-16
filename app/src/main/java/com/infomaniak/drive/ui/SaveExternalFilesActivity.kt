@@ -24,6 +24,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import android.provider.OpenableColumns
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
@@ -66,6 +67,12 @@ class SaveExternalFilesActivity : BaseActivity() {
     private var currentUri: Uri? = null
     private var isMultiple = false
 
+    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
+        it.whenResultIsOk { data ->
+            saveExternalFilesViewModel.folderId.value = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_save_external_file)
@@ -100,7 +107,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                         putExtra(SelectFolderActivity.USER_ID_TAG, selectDriveViewModel.selectedUserId.value)
                         putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, selectDriveViewModel.selectedDrive.value?.id)
                     }
-                    startActivityForResult(intent, SelectFolderActivity.SELECT_FOLDER_REQUEST)
+                    selectFolderResultLauncher.launch(intent)
                 }
             } ?: run {
                 showSelectDrive()
@@ -177,14 +184,6 @@ class SaveExternalFilesActivity : BaseActivity() {
                 }
                 finish()
             }
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == SelectFolderActivity.SELECT_FOLDER_REQUEST && resultCode == RESULT_OK) {
-            val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
-            saveExternalFilesViewModel.folderId.value = folderId
         }
     }
 
