@@ -451,5 +451,22 @@ open class File(
             val mediaFolder = context.externalMediaDirs?.firstOrNull() ?: context.filesDir
             return java.io.File(mediaFolder, context.getString(R.string.EXPOSED_OFFLINE_DIR))
         }
+
+        fun File.getFileTypeFromExtension(): ConvertedType {
+            return getMimeType().let {
+                when {
+                    Regex("application/(zip|rar|x-tar|.*compressed|.*archive)").containsMatchIn(it) -> ConvertedType.ARCHIVE
+                    Regex("audio/").containsMatchIn(it) -> ConvertedType.AUDIO
+                    Regex("image/").containsMatchIn(it) -> ConvertedType.IMAGE
+                    Regex("/pdf").containsMatchIn(it) -> ConvertedType.PDF
+                    Regex("presentation").containsMatchIn(it) -> ConvertedType.PRESENTATION
+                    Regex("spreadsheet|excel|comma-separated-values").containsMatchIn(it) -> ConvertedType.SPREADSHEET
+                    Regex("document|text/plain|msword").containsMatchIn(it) -> ConvertedType.TEXT
+                    Regex("video/").containsMatchIn(it) -> ConvertedType.VIDEO
+                    Regex("text/|application/").containsMatchIn(it) -> ConvertedType.CODE
+                    else -> ConvertedType.UNKNOWN
+                }
+            }
+        }
     }
 }
