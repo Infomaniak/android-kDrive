@@ -410,8 +410,8 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         fun onSelectFolderResult(data: Intent?) {
-            val folderName = data?.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
             data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)?.let {
+                val folderName = data.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
                 onMoveFile(File(id = it, name = folderName, driveId = AccountUtils.currentDriveId))
             }
         }

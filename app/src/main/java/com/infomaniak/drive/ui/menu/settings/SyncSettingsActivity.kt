@@ -62,8 +62,7 @@ class SyncSettingsActivity : BaseActivity() {
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data ->
-            val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
-            syncSettingsViewModel.syncFolder.value = folderId
+            syncSettingsViewModel.syncFolder.value = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
         }
     }
 

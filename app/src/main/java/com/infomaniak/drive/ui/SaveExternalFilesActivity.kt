@@ -69,8 +69,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data ->
-            val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
-            saveExternalFilesViewModel.folderId.value = folderId
+            saveExternalFilesViewModel.folderId.value = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
         }
     }
 
