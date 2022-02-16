@@ -5,6 +5,10 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master, android-ci ]
+    
+env:
+    # Increment this to manually invalidate the cache.
+    CACHE_VERSION: 1
 
 jobs:
 
@@ -43,22 +47,41 @@ jobs:
           ~/.gradle/wrapper
         key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('**/buildSrc/**/*.kt') }}
        
-    - name: AVD cache
-      uses: actions/cache@v2
+#     - name: AVD cache
+#       uses: actions/cache@v2
+#       id: avd-cache
+#       with:
+#         path: |
+#           ~/.android/avd/*
+#           ~/.android/adb*
+#         key: avd-${{ matrix.api-level }}
+
+
+    - name: Get AVD info
+      uses: ./.github/actions/get-avd-info
+      id: avd-info
+      with:
+        api-level: ${{ matrix.api-level }}
+
+    # Retrieve the cached emulator snapshot.
+    - uses: actions/cache@v2
       id: avd-cache
       with:
         path: |
           ~/.android/avd/*
           ~/.android/adb*
-        key: avd-${{ matrix.api-level }}
+        key: ${{ runner.os }}-avd-${{ env.CACHE_VERSION }}-${{ steps.avd-info.outputs.arch }}-${{ steps.avd-info.outputs.target }}-${{ matrix.api-level }}
         
     - name: create AVD and generate snapshot for caching
       if: steps.avd-cache.outputs.cache-hit != 'true'
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: ${{ matrix.api-level }}
-        target: ${{ matrix.target }}
-        sdcard-path-or-size: 100M
+        arch: ${{ steps.avd-info.outputs.arch }}
+        target: ${{ steps.avd-info.outputs.target }}
+#         target: ${{ matrix.target }}
+#         sdcard-path-or-size: 100M
+        ram-size: 4096M
         force-avd-creation: false
         emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
         disable-animations: false
@@ -87,11 +110,14 @@ jobs:
       uses: ReactiveCircus/android-emulator-runner@v2.22.0
       with:
         api-level: ${{ matrix.api-level }}
-        target: ${{ matrix.target }}
+        arch: ${{ steps.avd-info.outputs.arch }}
+        target: ${{ steps.avd-info.outputs.target }}
+#         target: ${{ matrix.target }}
         #arch: x86_64
         #profile: Pixel_4
         #avd-name: avd test
-        sdcard-path-or-size: 100M
+        ram-size: 4096M
+#         sdcard-path-or-size: 100M
         force-avd-creation: false
         emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
         #emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -skin 500x833
