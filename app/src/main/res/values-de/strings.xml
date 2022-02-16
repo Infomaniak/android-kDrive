@@ -363,7 +363,7 @@
     <string name="fileDetailsNoComments">Derzeit kein Kommentar</string>
     <string name="fileInfoInputDuplicateFile">Bezeichnung der Kopie</string>
     <string name="fileInfoLinkCopiedToClipboard">Link in Zwischenablage kopiert</string>
-    <plurals name="fileListAddFavorisConfirmationSnackbar">
+    <plurals name="fileListAddFavoritesConfirmationSnackbar">
         <item quantity="one">Datei erfolgreich zu Favoriten hinzugefügt</item>
         <item quantity="other">%d Dateien erfolgreich zu Favoriten hinzugefügt</item>
     </plurals>
@@ -395,6 +395,14 @@
     <plurals name="fileListMultiSelectedTitle">
         <item quantity="one">%d ausgewählt</item>
         <item quantity="other">%d ausgewählt</item>
+    </plurals>
+    <plurals name="fileListRemoveFavoritesConfirmationSnackbar">
+        <item quantity="one">Datei erfolgreich aus den Favoriten entfernt</item>
+        <item quantity="other">%d Dateien erfolgreich aus den Favoriten entfernt</item>
+    </plurals>
+    <plurals name="fileListRemoveOfflineConfirmationSnackbar">
+        <item quantity="one">Datei aus der offline Verfügbarkeit entfernt</item>
+        <item quantity="other">%d Dateien aus der offline Verfügbarkeit entfernt</item>
     </plurals>
     <string name="fileListTitle">Dateien</string>
     <string name="filePermissionTitle">Recht auswählen</string>

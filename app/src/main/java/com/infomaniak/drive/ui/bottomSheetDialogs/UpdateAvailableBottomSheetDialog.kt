@@ -21,7 +21,7 @@ import android.os.Bundle
 import android.view.View
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.UiSettings
-import com.infomaniak.lib.core.utils.gotToPlaystore
+import com.infomaniak.lib.core.utils.goToPlaystore
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 
 class UpdateAvailableBottomSheetDialog : InformationBottomSheetDialog() {
@@ -40,7 +40,7 @@ class UpdateAvailableBottomSheetDialog : InformationBottomSheetDialog() {
         actionButton.setText(R.string.buttonUpdate)
         actionButton.setOnClickListener {
             UiSettings(requireContext()).updateLater = false
-            requireContext().gotToPlaystore()
+            requireContext().goToPlaystore()
             dismiss()
         }
     }

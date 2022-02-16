@@ -24,7 +24,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.ActivityResultLauncher
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -48,6 +48,7 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.MatomoUtils.trackFileActionEvent
+import com.infomaniak.drive.utils.Utils.moveFileClicked
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -65,6 +66,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     private lateinit var ownerFragment: Fragment
     private lateinit var onItemClickListener: OnItemClickListener
+    private lateinit var selectFolderResultLauncher: ActivityResultLauncher<Intent>
     private var isSharedWithMe = false
 
     init {
@@ -75,12 +77,14 @@ class FileInfoActionsView @JvmOverloads constructor(
         ownerFragment: Fragment,
         mainViewModel: MainViewModel,
         onItemClickListener: OnItemClickListener,
+        selectFolderResultLauncher: ActivityResultLauncher<Intent>,
         isSharedWithMe: Boolean = false,
     ) {
         this.isSharedWithMe = isSharedWithMe
         this.mainViewModel = mainViewModel
         this.onItemClickListener = onItemClickListener
         this.ownerFragment = ownerFragment
+        this.selectFolderResultLauncher = selectFolderResultLauncher
         initOnClickListeners()
     }
 
@@ -200,7 +204,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         availableOffline.setOnClickListener { availableOfflineSwitch.performClick() }
         moveFile.setOnClickListener {
             val currentFolder = FileController.getParentFile(currentFile.id)?.id ?: -42
-            onItemClickListener.moveFileClicked(currentFolder)
+            onItemClickListener.moveFileClicked(currentFolder, selectFolderResultLauncher)
         }
         duplicateFile.setOnClickListener { onItemClickListener.duplicateFileClicked(ownerFragment.requireContext(), currentFile) }
         renameFile.setOnClickListener { onItemClickListener.renameFileClicked(ownerFragment.requireContext(), currentFile) }
@@ -418,12 +422,10 @@ class FileInfoActionsView @JvmOverloads constructor(
             ownerFragment.openOnlyOfficeDocument(currentFile)
         }
 
-        fun onSelectFolderResult(requestCode: Int, resultCode: Int, data: Intent?) {
-            if (requestCode == SelectFolderActivity.SELECT_FOLDER_REQUEST && resultCode == AppCompatActivity.RESULT_OK) {
-                val folderName = data?.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
-                data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)?.let {
-                    onMoveFile(File(id = it, name = folderName, driveId = AccountUtils.currentDriveId))
-                }
+        fun onSelectFolderResult(data: Intent?) {
+            data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)?.let {
+                val folderName = data.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
+                onMoveFile(File(id = it, name = folderName, driveId = AccountUtils.currentDriveId))
             }
         }
 
@@ -444,9 +446,9 @@ class FileInfoActionsView @JvmOverloads constructor(
             }
         }
 
-        fun moveFileClicked(idFolder: Int) {
+        fun moveFileClicked(idFolder: Int, selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
             trackActionEvent("move")
-            Utils.moveFileClicked(ownerFragment, idFolder)
+            ownerFragment?.moveFileClicked(idFolder, selectFolderResultLauncher)
         }
 
         fun duplicateFileClicked(context: Context, currentFile: File) {

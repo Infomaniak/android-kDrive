@@ -202,6 +202,14 @@
             android:name="onlyFolders"
             android:defaultValue="false"
             app:argType="boolean" />
+        <argument
+            android:name="onlyFavorite"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="onlyOffline"
+            android:defaultValue="false"
+            app:argType="boolean" />
     </dialog>
 
     <dialog

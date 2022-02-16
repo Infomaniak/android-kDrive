@@ -26,7 +26,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
@@ -72,6 +72,7 @@ import com.infomaniak.drive.utils.MatomoUtils.trackBulkActionEvent
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.drive.utils.Utils.moveFileClicked
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
@@ -111,6 +112,22 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     protected open var sortTypeUsage = SortTypeUsage.FILE_LIST
 
     protected var userDrive: UserDrive? = null
+
+    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
+        it.whenResultIsOk { data ->
+            with(data?.extras!!) {
+                val folderId = getInt(SelectFolderActivity.FOLDER_ID_TAG)
+                val folderName = getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
+                val customArgs = getBundle(SelectFolderActivity.CUSTOM_ARGS_TAG)
+                val bulkOperationType = customArgs?.getParcelable<BulkOperationType>(BULK_OPERATION_CUSTOM_TAG)!!
+
+                performBulkOperation(
+                    type = bulkOperationType,
+                    destinationFolder = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId),
+                )
+            }
+        }
+    }
 
     companion object {
         const val REFRESH_FAVORITE_FILE = "force_list_refresh"
@@ -283,11 +300,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        data?.let { onSelectFolderResult(requestCode, resultCode, data) }
-    }
-
     override fun onStart() {
         super.onStart()
         fileAdapter.resetRealmListener()
@@ -437,9 +449,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     }
                 }
             }
-            BulkOperationType.SET_OFFLINE -> {
-                addSelectedFilesToOffline(file)
-            }
+            BulkOperationType.ADD_OFFLINE, BulkOperationType.REMOVE_OFFLINE -> addOrRemoveSelectedFilesToOffline(file, type)
             BulkOperationType.ADD_FAVORITES -> {
                 mediator.addSource(
                     mainViewModel.addFileToFavorites(file) {
@@ -449,6 +459,12 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                             }
                         }
                     },
+                    mainViewModel.updateMultiSelectMediator(mediator),
+                )
+            }
+            BulkOperationType.REMOVE_FAVORITES -> {
+                mediator.addSource(
+                    mainViewModel.deleteFileFromFavorites(file),
                     mainViewModel.updateMultiSelectMediator(mediator),
                 )
             }
@@ -473,13 +489,24 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         deleteButtonMultiSelect.setOnClickListener { performBulkOperation(BulkOperationType.TRASH) }
 
-        moveButtonMultiSelect.setOnClickListener { Utils.moveFileClicked(this, folderId) }
+        moveButtonMultiSelect.setOnClickListener { context?.moveFileClicked(folderId, selectFolderResultLauncher) }
 
         menuButtonMultiSelect.setOnClickListener {
+            val fileIds = arrayListOf<Int>()
+            var (onlyFolders, onlyFavorite, onlyOffline) = arrayOf(true, true, true)
+            fileAdapter.getValidItemsSelected().forEach {
+                fileIds.add(it.id)
+                if (!it.isFolder()) onlyFolders = false
+                if (!it.isFavorite) onlyFavorite = false
+                if (!it.isOffline) onlyOffline = false
+            }
+
             safeNavigate(
                 FileListFragmentDirections.actionFileListFragmentToActionMultiSelectBottomSheetDialog(
-                    fileIds = fileAdapter.getValidItemsSelected().map { it.id }.toIntArray(),
-                    onlyFolders = fileAdapter.getValidItemsSelected().all { it.isFolder() },
+                    fileIds = fileIds.toIntArray(),
+                    onlyFolders = onlyFolders,
+                    onlyFavorite = onlyFavorite,
+                    onlyOffline = onlyOffline,
                 )
             )
         }
@@ -643,7 +670,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                             bundleOf(BULK_OPERATION_CUSTOM_TAG to BulkOperationType.COPY),
                         )
                     }
-                    startActivityForResult(intent, SelectFolderActivity.SELECT_FOLDER_REQUEST)
+                    selectFolderResultLauncher.launch(intent)
                 }
                 BulkOperationType.COLOR_FOLDER -> {
                     if (AccountUtils.getCurrentDrive()?.pack == Drive.DrivePack.FREE.value) {
@@ -657,36 +684,43 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
-    private fun addSelectedFilesToOffline(file: File) {
-        if (!file.isOffline && !file.isFolder()) {
+    private fun addOrRemoveSelectedFilesToOffline(file: File, type: BulkOperationType) {
+        if (!file.isFolder()) {
             val cacheFile = file.getCacheFile(requireContext())
             val offlineFile = file.getOfflineFile(requireContext())
-
-            if (offlineFile != null && !file.isObsoleteOrNotIntact(cacheFile)) {
-                Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
-                runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
-
-                fileAdapter.updateFileProgressByFileId(file.id, 100) { _, currentFile ->
-                    if (currentFile.isNotManagedByRealm()) {
-                        currentFile.isOffline = true
-                        currentFile.currentProgress = 0
-                    }
-                }
-            } else Utils.downloadAsOfflineFile(requireContext(), file)
+            if (type == BulkOperationType.ADD_OFFLINE) {
+                addSelectedFileToOffline(file, offlineFile, cacheFile)
+            } else {
+                removeSelectedFileFromOffline(file, offlineFile, cacheFile)
+            }
+            closeMultiSelect()
         }
     }
 
-    private fun onSelectFolderResult(requestCode: Int, resultCode: Int, data: Intent) {
-        if (requestCode == SelectFolderActivity.SELECT_FOLDER_REQUEST && resultCode == AppCompatActivity.RESULT_OK) {
-            val folderName = data.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
-            val folderId = data.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)!!
-            val customArgs = data.extras?.getBundle(SelectFolderActivity.CUSTOM_ARGS_TAG)
-            val bulkOperationType = customArgs?.getParcelable<BulkOperationType>(BULK_OPERATION_CUSTOM_TAG)!!
+    private fun addSelectedFileToOffline(file: File, offlineFile: java.io.File?, cacheFile: java.io.File) {
+        if (offlineFile != null && !file.isObsoleteOrNotIntact(cacheFile)) {
+            Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
+            runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
 
-            performBulkOperation(
-                type = bulkOperationType,
-                destinationFolder = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId)
-            )
+            fileAdapter.updateFileProgressByFileId(file.id, 100) { _, currentFile ->
+                currentFile.apply {
+                    if (isNotManagedByRealm()) {
+                        isOffline = true
+                        currentProgress = 0
+                    }
+                }
+            }
+        } else {
+            Utils.downloadAsOfflineFile(requireContext(), file)
+        }
+    }
+
+    private fun removeSelectedFileFromOffline(file: File, offlineFile: java.io.File?, cacheFile: java.io.File) {
+        lifecycleScope.launch {
+            if (offlineFile != null) {
+                mainViewModel.removeOfflineFile(file, offlineFile, cacheFile)
+                file.isOffline = false
+            }
         }
     }
 

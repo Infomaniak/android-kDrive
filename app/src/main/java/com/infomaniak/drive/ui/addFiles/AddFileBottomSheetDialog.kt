@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui.addFiles
 
-import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
@@ -26,6 +25,7 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.activityViewModels
@@ -63,9 +63,14 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private var mediaPhotoPath = ""
     private var mediaVideoPath = ""
 
-    companion object {
-        const val SELECT_FILES_REQ = 2
-        const val CAPTURE_MEDIA_REQ = 3
+    private val captureMediaResultLauncher = registerForActivityResult(StartActivityForResult()) {
+        it.whenResultIsOk { data -> onCaptureMediaResult(data) }
+        dismiss()
+    }
+
+    private val selectFilesResultLauncher = registerForActivityResult(StartActivityForResult()) {
+        it.whenResultIsOk { data -> onSelectFilesResult(data) }
+        dismiss()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -106,18 +111,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         mainViewModel.currentFolderOpenAddFileBottom.value = null
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (resultCode == Activity.RESULT_OK) {
-            when (requestCode) {
-                SELECT_FILES_REQ -> onSelectFilesResult(data)
-                CAPTURE_MEDIA_REQ -> onCaptureMediaResult(data)
-            }
-        }
-        dismiss()
-    }
-
     private fun openCamera() {
         if (openCameraPermissions.checkSyncPermissions()) {
             trackNewElementEvent("takePhotoOrVideo")
@@ -129,9 +122,10 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                 val takeVideoIntent = Intent(MediaStore.ACTION_VIDEO_CAPTURE).apply {
                     putExtra(MediaStore.EXTRA_OUTPUT, createMediaFile(true))
                 }
-                val chooserIntent = Intent.createChooser(takePictureIntent, getString(R.string.buttonTakePhotoOrVideo))
-                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(takeVideoIntent))
-                startActivityForResult(chooserIntent, CAPTURE_MEDIA_REQ)
+                val chooserIntent = Intent.createChooser(takePictureIntent, getString(R.string.buttonTakePhotoOrVideo)).apply {
+                    putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(takeVideoIntent))
+                }
+                captureMediaResultLauncher.launch(chooserIntent)
             } catch (e: IOException) {
                 e.printStackTrace()
             }
@@ -149,7 +143,8 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                 putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
                 addCategory(Intent.CATEGORY_OPENABLE)
             }
-            startActivityForResult(Intent.createChooser(intent, getString(R.string.addFileSelectUploadFile)), SELECT_FILES_REQ)
+            val chooserIntent = Intent.createChooser(intent, getString(R.string.addFileSelectUploadFile))
+            selectFilesResultLauncher.launch(chooserIntent)
         }
     }
 
