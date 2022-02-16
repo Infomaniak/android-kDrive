@@ -93,8 +93,8 @@ jobs:
         #avd-name: avd test
         sdcard-path-or-size: 100M
         force-avd-creation: false
-        #emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -skin 500x833
+        emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+        #emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -skin 500x833
         disable-animations: true
-        script: ./gradlew connectedCheck --stacktrace
+        script: ./gradlew app:connectedStandardDebugAndroidTest --stacktrace
     
