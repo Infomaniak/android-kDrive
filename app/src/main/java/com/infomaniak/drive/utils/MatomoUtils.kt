@@ -105,5 +105,5 @@ fun Boolean.toFloat() = if (this) 1f else 0f
 enum class TrackerAction {
     CLICK, INPUT;
 
-    override fun toString() = name.lowercase(Locale.getDefault())
+    override fun toString() = name.lowercase()
 }

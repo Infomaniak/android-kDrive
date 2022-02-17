@@ -50,6 +50,6 @@ enum class BulkOperationType(@StringRes val title: Int, @PluralsRes val successM
     }
 
     override fun toString(): String {
-        return name.lowercase(Locale.getDefault()).replaceFirstChar { it.titlecase(Locale.getDefault()) }
+        return name.lowercase().replaceFirstChar { it.titlecase() }
     }
 }

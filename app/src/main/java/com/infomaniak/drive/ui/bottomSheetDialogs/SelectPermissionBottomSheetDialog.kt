@@ -170,7 +170,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
                 sharePermissionTrackerName = "deleteUser"
                 deleteShare(file, shareable, permission)
             } else {
-                sharePermissionTrackerName = permission.name.lowercase(Locale.getDefault()) + "Right"
+                sharePermissionTrackerName = permission.name.lowercase() + "Right"
                 editShare(file, shareable, permission)
             }
             context?.applicationContext?.trackShareRightsEvent(sharePermissionTrackerName)
