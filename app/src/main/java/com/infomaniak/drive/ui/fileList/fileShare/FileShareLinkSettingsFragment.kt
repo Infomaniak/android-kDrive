@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.fileList.fileShare
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -34,7 +35,7 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.MatomoUtils.trackShareSettingsEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackEventWithBooleanValue
 import com.infomaniak.drive.views.ShareLinkContainerView.Companion.getTypeName
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
@@ -174,6 +175,13 @@ class FileShareLinkSettingsFragment : Fragment() {
                 },
             )
         }
+    }
+
+    private fun Context.trackShareSettingsEvent(protectWithPassword: Boolean?, expirationDate: Boolean?, downloadFromLink: Boolean?) {
+        val category = "shareAndRights"
+        trackEventWithBooleanValue(category, "protectWithPassword", protectWithPassword)
+        trackEventWithBooleanValue(category, "expirationDateLink", expirationDate)
+        trackEventWithBooleanValue(category, "downloadFromLink", downloadFromLink)
     }
 
     private fun setupUiListeners() {

@@ -47,7 +47,6 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
-import com.infomaniak.drive.utils.MatomoUtils.trackFileActionEvent
 import com.infomaniak.drive.utils.Utils.moveFileClicked
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.CoroutineScope
@@ -516,5 +515,13 @@ class FileInfoActionsView @JvmOverloads constructor(
                 }
             }
         }
+    }
+
+    companion object {
+
+        private fun Context.trackFileActionEvent(trackerName: String, trackerValue: Float? = null) {
+            trackEvent("fileAction", TrackerAction.CLICK, trackerName, trackerValue)
+        }
+
     }
 }

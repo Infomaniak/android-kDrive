@@ -80,27 +80,8 @@ object MatomoUtils {
         trackEvent(category, TrackerAction.CLICK, trackerName, trackerValue?.toFloat())
     }
 
-    fun Context.trackPhotoSyncSettingsEvent(syncSettings: SyncSettings, trackingDateName: String) {
-        val category = "photoSync"
-        trackEventWithBooleanValue(category, "deleteAfterImport", syncSettings.deleteAfterSync)
-        trackEventWithBooleanValue(category, "createDatedFolders", syncSettings.createDatedSubFolders)
-        trackEventWithBooleanValue(category, "importVideo", syncSettings.syncVideo)
-        trackEvent(category, TrackerAction.CLICK, trackingDateName)
-    }
-
     fun Context.trackShareRightsEvent(trackerName: String) {
         trackEvent("shareAndRights", TrackerAction.CLICK, trackerName)
-    }
-
-    fun Context.trackShareSettingsEvent(protectWithPassword: Boolean?, expirationDate: Boolean?, downloadFromLink: Boolean?) {
-        val category = "shareAndRights"
-        trackEventWithBooleanValue(category, "protectWithPassword", protectWithPassword)
-        trackEventWithBooleanValue(category, "expirationDateLink", expirationDate)
-        trackEventWithBooleanValue(category, "downloadFromLink", downloadFromLink)
-    }
-
-    fun Context.trackFileActionEvent(trackerName: String, trackerValue: Float? = null) {
-        trackEvent("fileAction", TrackerAction.CLICK, trackerName, trackerValue)
     }
 
     fun Activity.trackAccountEvent(trackerName: String) {

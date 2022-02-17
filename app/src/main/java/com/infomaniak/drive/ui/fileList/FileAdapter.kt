@@ -311,7 +311,7 @@ open class FileAdapter(
                         fileChecked.isChecked = !fileChecked.isChecked
                         onSelectedFile(file, fileChecked.isChecked)
                     } else {
-                        val trackerName = "preview" + file.convertedType[0].uppercase() + file.convertedType.substring(1)
+                        val trackerName = "preview" + file.getFileType().value.replaceFirstChar { it.titlecase() }
                         context.applicationContext?.trackEvent("preview", TrackerAction.CLICK, trackerName)
                         onFileClicked?.invoke(file)
                     }

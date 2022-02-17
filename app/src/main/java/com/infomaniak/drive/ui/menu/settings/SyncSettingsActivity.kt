@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.menu.settings
 
+import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -45,7 +46,7 @@ import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
-import com.infomaniak.drive.utils.MatomoUtils.trackPhotoSyncSettingsEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackEventWithBooleanValue
 import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.lib.core.utils.FORMAT_DATE_CLEAR_MONTH
@@ -274,6 +275,14 @@ class SyncSettingsActivity : BaseActivity() {
                 && (selectDriveViewModel.selectedDrive.value != null)
                 && (syncSettingsViewModel.syncFolder.value != null)
                 && allSyncedFoldersCount > 0
+    }
+
+    private fun Context.trackPhotoSyncSettingsEvent(syncSettings: SyncSettings, trackingDateName: String) {
+        val category = "photoSync"
+        trackEventWithBooleanValue(category, "deleteAfterImport", syncSettings.deleteAfterSync)
+        trackEventWithBooleanValue(category, "createDatedFolders", syncSettings.createDatedSubFolders)
+        trackEventWithBooleanValue(category, "importVideo", syncSettings.syncVideo)
+        trackEvent(category, TrackerAction.CLICK, trackingDateName)
     }
 
     private fun saveSettings() {

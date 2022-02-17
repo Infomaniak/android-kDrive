@@ -54,7 +54,6 @@ class SwitchDriveBottomSheetAdapter(
         itemSelectText.text = drive.name
         itemSelectActiveIcon.isVisible = drive.id == AccountUtils.currentDriveId
         setOnClickListener {
-            context?.applicationContext?.trackEvent("drive", TrackerAction.CLICK, "switch")
             onItemClicked(drive)
         }
     }

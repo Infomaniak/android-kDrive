@@ -113,7 +113,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun openCamera() {
         if (openCameraPermissions.checkSyncPermissions()) {
-            trackNewElementEvent("takePhotoOrVideo")
+            trackNewElement("takePhotoOrVideo")
             openCamera.isEnabled = false
             try {
                 val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
@@ -134,7 +134,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun uploadFiles() {
         if (uploadFilesPermissions.checkSyncPermissions()) {
-            trackNewElementEvent("uploadFile")
+            trackNewElement("uploadFile")
             documentUpload.isEnabled = false
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 type = "*/*"
@@ -149,7 +149,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun scanDocuments() {
-        trackNewElementEvent("scan")
+        trackNewElement("scan")
         // TODO find a good lib
         dismiss()
     }
@@ -174,7 +174,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun createFile(office: File.Office) {
-        trackNewElementEvent(office.getEventName())
         Utils.createPromptNameDialog(
             context = requireContext(),
             title = R.string.modalCreateFileTitle,
@@ -182,6 +181,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             positiveButton = R.string.buttonCreate,
             iconRes = office.convertedType.icon
         ) { dialog, name ->
+            trackNewElement(office.getEventName())
             val createFile = CreateFile(name, office.extension)
             mainViewModel.createOffice(currentFolderFile.driveId, currentFolderFile.id, createFile)
                 .observe(viewLifecycleOwner) { apiResponse ->
@@ -316,6 +316,11 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         java.io.File(requireContext().cacheDir, getString(R.string.EXPOSED_UPLOAD_DIR)).apply {
             if (exists()) deleteRecursively()
         }
+    }
+
+    private fun trackNewElement(trackerName: String) {
+        val trackerSource = if (mainViewModel.currentFolderOpenAddFileBottom.value == null) "FromFAB" else "FromFolder"
+        trackNewElementEvent(trackerName + trackerSource)
     }
 
     override fun onDestroy() {
