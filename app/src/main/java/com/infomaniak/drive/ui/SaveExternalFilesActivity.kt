@@ -69,6 +69,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     private lateinit var drivePermissions: DrivePermissions
     private var currentUri: Uri? = null
     private var isMultiple = false
+    private var selectedFolderId: Int? = null
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data ->
@@ -166,6 +167,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 val intent = Intent(this@SaveExternalFilesActivity, SelectFolderActivity::class.java).apply {
                     putExtra(SelectFolderActivity.USER_ID_TAG, selectDriveViewModel.selectedUserId.value)
                     putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, selectDriveViewModel.selectedDrive.value?.id)
+                    putExtra(SelectFolderActivity.CURRENT_FOLDER_ID_TAG, selectedFolderId)
                 }
                 selectFolderResultLauncher.launch(intent)
             }
@@ -174,6 +176,8 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private fun fetchFolder() = with(selectDriveViewModel) {
         saveExternalFilesViewModel.folderId.observe(this@SaveExternalFilesActivity) { folderId ->
+
+            selectedFolderId = folderId
 
             val folder = if (selectedUserId.value == null || selectedDrive.value?.id == null || folderId == null) {
                 null

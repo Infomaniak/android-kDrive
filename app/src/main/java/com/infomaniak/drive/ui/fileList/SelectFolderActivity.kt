@@ -23,12 +23,15 @@ import androidx.activity.viewModels
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModel
+import androidx.navigation.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.utils.Utils
 import kotlinx.android.synthetic.main.activity_select_folder.*
 import java.util.*
 
@@ -67,6 +70,7 @@ class SelectFolderActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_select_folder)
         setSaveButton(customArgs)
+        currentFolderId?.let { initiateNavigationToCurrentFolder(it, currentUserDrive) } ?: Unit
     }
 
     private fun setSaveButton(customArgs: Bundle?) {
@@ -79,6 +83,25 @@ class SelectFolderActivity : BaseActivity() {
             }
             setResult(RESULT_OK, intent)
             finish()
+        }
+    }
+
+    private fun initiateNavigationToCurrentFolder(folderId: Int, userDrive: UserDrive) {
+        val pathSeparator = "/"
+        val path = FileController.generateAndSavePath(folderId, userDrive).removePrefix(pathSeparator)
+        val parentId = Utils.ROOT_ID
+        navigateToCurrentFolderRecursively(path, parentId, pathSeparator)
+    }
+
+    private fun navigateToCurrentFolderRecursively(path: String, parentId: Int, pathSeparator: String) {
+        val pathNames = path.split(pathSeparator)
+        val nextFolderName = pathNames.firstOrNull() ?: return
+        FileController.getFileIdByNameAndParentId(nextFolderName, parentId)?.let { nextFolderId ->
+            findNavController(R.id.hostFragment).navigate(
+                SelectFolderFragmentDirections.fileListFragmentToFileListFragment(folderId = nextFolderId)
+            )
+            val newPath = path.removePrefix("$nextFolderName$pathSeparator")
+            if (newPath != path) navigateToCurrentFolderRecursively(newPath, nextFolderId, pathSeparator)
         }
     }
 

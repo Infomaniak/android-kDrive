@@ -314,8 +314,12 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onStop() {
         fileAdapter.removeRealmDataListener()
-        isDownloading = false
         super.onStop()
+    }
+
+    override fun onDestroyView() {
+        isDownloading = false
+        super.onDestroyView()
     }
 
     private fun performBulkOperation(type: BulkOperationType, destinationFolder: File? = null, color: String? = null) {

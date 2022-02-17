@@ -65,6 +65,7 @@ class SyncSettingsActivity : BaseActivity() {
     private val selectDriveViewModel: SelectDriveViewModel by viewModels()
     private var oldSyncSettings: SyncSettings? = null
     private var editNumber = 0
+    private var selectedFolderId: Int? = null
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data ->
@@ -146,12 +147,15 @@ class SyncSettingsActivity : BaseActivity() {
             val intent = Intent(this, SelectFolderActivity::class.java).apply {
                 putExtra(SelectFolderActivity.USER_ID_TAG, selectDriveViewModel.selectedUserId.value)
                 putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, selectDriveViewModel.selectedDrive.value?.id)
-                putExtra(SelectFolderActivity.CURRENT_FOLDER_ID_TAG, Utils.ROOT_ID)
+                putExtra(SelectFolderActivity.CURRENT_FOLDER_ID_TAG, selectedFolderId)
             }
             selectFolderResultLauncher.launch(intent)
         }
 
         syncSettingsViewModel.syncFolder.observe(this) { syncFolderId ->
+
+            selectedFolderId = syncFolderId
+
             val selectedUserId = selectDriveViewModel.selectedUserId.value
             val selectedDriveId = selectDriveViewModel.selectedDrive.value?.id
             if (syncFolderId != null && selectedUserId != null && selectedDriveId != null) {
