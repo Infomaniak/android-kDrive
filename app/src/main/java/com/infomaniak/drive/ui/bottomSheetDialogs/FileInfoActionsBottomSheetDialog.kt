@@ -55,7 +55,7 @@ import kotlinx.coroutines.withContext
 
 class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoActionsView.OnItemClickListener {
 
-    override lateinit var currentFile: File
+    private lateinit var currentFile: File
     private lateinit var drivePermissions: DrivePermissions
     private val mainViewModel: MainViewModel by activityViewModels()
     private val navigationArgs: FileInfoActionsBottomSheetDialogArgs by navArgs()
@@ -215,8 +215,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
     }
 
-    override fun addFavoritesClicked() {
-        super.addFavoritesClicked()
+    override fun addFavoritesClicked(currentFile: File) {
+        super.addFavoritesClicked(currentFile)
         currentFile.apply {
             val observer: Observer<ApiResponse<Boolean>> = Observer { apiResponse ->
                 if (apiResponse.isSuccess()) {
@@ -317,6 +317,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun openWithClicked() {
+        super.openWithClicked()
         if (requireContext().openWithIntent(currentFile).resolveActivity(requireContext().packageManager) == null) {
             requireActivity().showSnackbar(R.string.allActivityNotFoundError)
             findNavController().popBackStack()

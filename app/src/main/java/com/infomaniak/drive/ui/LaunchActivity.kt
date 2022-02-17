@@ -50,10 +50,10 @@ class LaunchActivity : AppCompatActivity() {
                     LockActivity::class.java
                 }
                 else -> {
+                    application.trackCurrentUserId()
                     if (DriveInfosController.getDrivesCount(AccountUtils.currentUserId) == 0L) {
                         AccountUtils.updateCurrentUserAndDrives(this@LaunchActivity)
                     }
-                    application.trackCurrentUserId()
                     if (DriveInfosController.getDrives(AccountUtils.currentUserId).all { it.maintenance }) {
                         MaintenanceActivity::class.java
                     } else {

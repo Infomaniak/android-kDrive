@@ -195,7 +195,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         coloredFolder.setOnClickListener { onItemClickListener.colorFolderClicked(currentFile.color) }
         addFavorites.setOnClickListener {
             addFavorites.isEnabled = false
-            onItemClickListener.addFavoritesClicked()
+            onItemClickListener.addFavoritesClicked(currentFile)
         }
         leaveShare.setOnClickListener { onItemClickListener.leaveShare(context, currentFile) }
         availableOfflineSwitch.setOnCheckedChangeListener { _, isChecked ->
@@ -394,13 +394,12 @@ class FileInfoActionsView @JvmOverloads constructor(
     interface OnItemClickListener {
 
         val ownerFragment: Fragment
-        val currentFile: File
 
         private fun getApplication() = ownerFragment.context?.applicationContext
 
         private fun trackActionEvent(name: String, value: Float? = null) = getApplication()?.trackFileActionEvent(name, value)
 
-        fun addFavoritesClicked() = trackActionEvent("favorite", (!currentFile.isFavorite).toFloat())
+        fun addFavoritesClicked(currentFile: File) = trackActionEvent("favorite", (!currentFile.isFavorite).toFloat())
         fun copyPublicLink() = trackActionEvent("copyShareLink")
         fun displayInfoClicked()
         fun downloadFileClicked() = trackActionEvent("download")

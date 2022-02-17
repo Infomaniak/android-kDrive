@@ -60,21 +60,20 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     private val mainViewModel: MainViewModel by activityViewModels()
     private val previewSliderViewModel: PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
+    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
+        it.whenResultIsOk { data -> onSelectFolderResult(data) }
+    }
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     private lateinit var drivePermissions: DrivePermissions
     private lateinit var previewSliderAdapter: PreviewSliderAdapter
+    private lateinit var currentPreviewFile: File
     private lateinit var userDrive: UserDrive
 
     private var hideActions: Boolean = false
     private var showUi = false
 
     override val ownerFragment = this
-    override lateinit var currentFile: File
-
-    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
-        it.whenResultIsOk { data -> onSelectFolderResult(data) }
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
@@ -91,15 +90,15 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             userDrive = UserDrive(driveId = driveId, sharedWithMe = isSharedWithMe)
             hideActions = arguments?.getBoolean(PREVIEW_HIDE_ACTIONS, false) ?: false
 
-            currentFile = fileId?.let {
+            currentPreviewFile = fileId?.let {
                 FileController.getFileById(it, userDrive) ?: mainViewModel.currentPreviewFileList[it]
             } ?: throw Exception("No current preview found")
 
-            previewSliderViewModel.currentPreview = currentFile
+            previewSliderViewModel.currentPreview = currentPreviewFile
             previewSliderViewModel.userDrive = userDrive
 
         } else {
-            previewSliderViewModel.currentPreview?.let { currentFile = it }
+            previewSliderViewModel.currentPreview?.let { currentPreviewFile = it }
             userDrive = previewSliderViewModel.userDrive
         }
 
@@ -123,7 +122,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 selectFolderResultLauncher = selectFolderResultLauncher,
                 isSharedWithMe = userDrive.sharedWithMe,
             )
-            updateCurrentFile(currentFile)
+            updateCurrentFile(currentPreviewFile)
             setOnTouchListener { _, _ -> true }
         }
 
@@ -134,29 +133,29 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             offscreenPageLimit = 1
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
-                    currentFile = previewSliderAdapter.getFile(position)
-                    editButton.isVisible = currentFile.isOnlyOfficePreview()
-                    openWithButton.isGone = currentFile.isOnlyOfficePreview()
+                    currentPreviewFile = previewSliderAdapter.getFile(position)
+                    editButton.isVisible = currentPreviewFile.isOnlyOfficePreview()
+                    openWithButton.isGone = currentPreviewFile.isOnlyOfficePreview()
                     bottomSheetFileInfos.openWith.isVisible = true
                     lifecycleScope.launchWhenResumed {
-                        withContext(Dispatchers.Main) { bottomSheetFileInfos.updateCurrentFile(currentFile) }
+                        withContext(Dispatchers.Main) { bottomSheetFileInfos.updateCurrentFile(currentPreviewFile) }
                     }
                 }
             })
         }
 
         previewSliderViewModel.pdfIsDownloading.observe(viewLifecycleOwner) { isDownloading ->
-            if (!currentFile.isOnlyOfficePreview()) openWithButton.isGone = isDownloading
+            if (!currentPreviewFile.isOnlyOfficePreview()) openWithButton.isGone = isDownloading
             bottomSheetFileInfos.openWith.isGone = isDownloading
         }
 
-        editButton.setOnClickListener { openOnlyOfficeDocument(currentFile) }
+        editButton.setOnClickListener { openOnlyOfficeDocument(currentPreviewFile) }
         openWithButton.setOnClickListener { openWithClicked() }
         backButton.setOnClickListener { findNavController().popBackStack() }
 
         mainViewModel.currentPreviewFileList.let { files ->
             previewSliderAdapter.setFiles(ArrayList(files.values))
-            val position = previewSliderAdapter.getPosition(currentFile)
+            val position = previewSliderAdapter.getPosition(currentPreviewFile)
             viewPager.setCurrentItem(position, false)
         }
 
@@ -165,11 +164,11 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     private fun setBackActionHandlers() {
         getBackNavigationResult<Int>(DownloadProgressDialog.OPEN_WITH) {
-            context?.openWith(currentFile, userDrive)
+            context?.openWith(currentPreviewFile, userDrive)
         }
 
         getBackNavigationResult<Any>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
-            bottomSheetFileInfos.refreshBottomSheetUi(currentFile)
+            bottomSheetFileInfos.refreshBottomSheetUi(currentPreviewFile)
         }
     }
 
@@ -228,7 +227,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     override fun onPause() {
         super.onPause()
-        previewSliderViewModel.currentPreview = currentFile
+        previewSliderViewModel.currentPreview = currentPreviewFile
         bottomSheetFileInfos.removeOfflineObservations(this)
     }
 
@@ -241,12 +240,12 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        if (this::currentFile.isInitialized) outState.putInt(PREVIEW_FILE_ID_TAG, currentFile.id)
+        if (this::currentPreviewFile.isInitialized) outState.putInt(PREVIEW_FILE_ID_TAG, currentPreviewFile.id)
         super.onSaveInstanceState(outState)
     }
 
     override fun displayInfoClicked() {
-        currentFile.apply {
+        currentPreviewFile.apply {
             safeNavigate(
                 PreviewSliderFragmentDirections.actionPreviewSliderFragmentToFileDetailsFragment(
                     fileId = id,
@@ -257,12 +256,12 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun fileRightsClicked() {
-        safeNavigate(PreviewSliderFragmentDirections.actionPreviewSliderFragmentToFileShareDetailsFragment(currentFile.id))
+        safeNavigate(PreviewSliderFragmentDirections.actionPreviewSliderFragmentToFileShareDetailsFragment(currentPreviewFile.id))
     }
 
     override fun copyPublicLink() {
         bottomSheetFileInfos.createPublicCopyLink(onSuccess = { file ->
-            previewSliderAdapter.updateFile(currentFile.id) { it.shareLink = file?.shareLink }
+            previewSliderAdapter.updateFile(currentPreviewFile.id) { it.shareLink = file?.shareLink }
             requireActivity().showSnackbar(title = R.string.fileInfoLinkCopiedToClipboard)
             toggleBottomSheet(true)
         }, onError = { translatedError ->
@@ -271,8 +270,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         })
     }
 
-    override fun addFavoritesClicked() {
+    override fun addFavoritesClicked(currentFile: File) {
         currentFile.apply {
+            super.addFavoritesClicked(this)
             val observer: Observer<ApiResponse<Boolean>> = Observer { apiResponse ->
                 if (apiResponse.isSuccess()) {
                     isFavorite = !isFavorite
@@ -308,26 +308,26 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     override fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File) {
         lifecycleScope.launch {
-            mainViewModel.removeOfflineFile(currentFile, offlineLocalPath, cacheFile, userDrive)
-            previewSliderAdapter.updateFile(currentFile.id) { file -> file.isOffline = false }
+            mainViewModel.removeOfflineFile(currentPreviewFile, offlineLocalPath, cacheFile, userDrive)
+            previewSliderAdapter.updateFile(currentPreviewFile.id) { file -> file.isOffline = false }
 
             withContext(Dispatchers.Main) {
-                currentFile.isOffline = false
-                bottomSheetFileInfos.refreshBottomSheetUi(currentFile)
+                currentPreviewFile.isOffline = false
+                bottomSheetFileInfos.refreshBottomSheetUi(currentPreviewFile)
             }
         }
     }
 
     override fun onLeaveShare(onApiResponse: () -> Unit) {
-        mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { apiResponse ->
+        mainViewModel.deleteFile(currentPreviewFile).observe(viewLifecycleOwner) { apiResponse ->
             onApiResponse()
             if (apiResponse.isSuccess()) {
-                if (previewSliderAdapter.deleteFile(currentFile)) {
+                if (previewSliderAdapter.deleteFile(currentPreviewFile)) {
                     findNavController().popBackStack()
                 } else {
                     toggleBottomSheet(true)
                 }
-                mainViewModel.currentPreviewFileList.remove(currentFile.id)
+                mainViewModel.currentPreviewFileList.remove(currentPreviewFile.id)
                 requireActivity().showSnackbar(R.string.snackbarLeaveShareConfirmation)
             } else {
                 requireActivity().showSnackbar(apiResponse.translatedError)
@@ -336,6 +336,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun downloadFileClicked() {
+        super.downloadFileClicked()
         bottomSheetFileInfos.downloadFile(drivePermissions) {
             toggleBottomSheet(true)
         }
@@ -352,12 +353,12 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) {
         val folderId = mainViewModel.currentFolder.value?.id
-        mainViewModel.duplicateFile(currentFile, folderId, result).observe(viewLifecycleOwner) { apiResponse ->
+        mainViewModel.duplicateFile(currentPreviewFile, folderId, result).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 apiResponse.data?.let { file ->
                     mainViewModel.currentPreviewFileList[file.id] = file
                     previewSliderAdapter.addFile(file)
-                    requireActivity().showSnackbar(getString(R.string.allFileDuplicate, currentFile.name))
+                    requireActivity().showSnackbar(getString(R.string.allFileDuplicate, currentPreviewFile.name))
                     toggleBottomSheet(true)
                 }
             } else {
@@ -372,7 +373,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         bottomSheetFileInfos.onRenameFile(mainViewModel, newName,
             onSuccess = {
                 toggleBottomSheet(true)
-                requireActivity().showSnackbar(getString(R.string.allFileRename, currentFile.name))
+                requireActivity().showSnackbar(getString(R.string.allFileRename, currentPreviewFile.name))
                 onApiResponse()
             }, onError = { translatedError ->
                 toggleBottomSheet(true)
@@ -382,11 +383,11 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun onDeleteFile(onApiResponse: () -> Unit) {
-        mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { apiResponse ->
+        mainViewModel.deleteFile(currentPreviewFile).observe(viewLifecycleOwner) { apiResponse ->
             onApiResponse()
             if (apiResponse.isSuccess()) {
-                mainViewModel.currentPreviewFileList.remove(currentFile.id)
-                if (previewSliderAdapter.deleteFile(currentFile)) {
+                mainViewModel.currentPreviewFileList.remove(currentPreviewFile.id)
+                if (previewSliderAdapter.deleteFile(currentPreviewFile)) {
                     findNavController().popBackStack()
                 } else {
                     toggleBottomSheet(true)
@@ -394,7 +395,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 val title = resources.getQuantityString(
                     R.plurals.snackbarMoveTrashConfirmation,
                     1,
-                    currentFile.name
+                    currentPreviewFile.name
                 )
                 requireActivity().showSnackbar(title)
                 mainViewModel.deleteFileFromHome.value = true
@@ -407,13 +408,13 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     override fun openWithClicked() {
         super.openWithClicked()
         val packageManager = requireContext().packageManager
-        if (requireContext().openWithIntent(currentFile, userDrive).resolveActivity(packageManager) == null) {
+        if (requireContext().openWithIntent(currentPreviewFile, userDrive).resolveActivity(packageManager) == null) {
             requireActivity().showSnackbar(R.string.allActivityNotFoundError)
         } else {
             safeNavigate(
                 PreviewSliderFragmentDirections.actionPreviewSliderFragmentToDownloadProgressDialog(
-                    fileId = currentFile.id,
-                    fileName = currentFile.name,
+                    fileId = currentPreviewFile.id,
+                    fileName = currentPreviewFile.name,
                     userDrive = userDrive
                 )
             )
@@ -421,14 +422,14 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun onMoveFile(destinationFolder: File) {
-        mainViewModel.moveFile(currentFile, destinationFolder)
+        mainViewModel.moveFile(currentPreviewFile, destinationFolder)
             .observe(viewLifecycleOwner) { apiResponse ->
                 if (apiResponse.isSuccess()) {
                     mainViewModel.refreshActivities.value = true
                     requireActivity().showSnackbar(
                         getString(
                             R.string.allFileMove,
-                            currentFile.name,
+                            currentPreviewFile.name,
                             destinationFolder.name
                         )
                     )
