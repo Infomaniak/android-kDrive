@@ -58,7 +58,6 @@ jobs:
       with:
         api-level: ${{ matrix.api-level }}
         target: ${{ matrix.target }}
-#         sdcard-path-or-size: 100M
         ram-size: 4096M
         force-avd-creation: false
         emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
@@ -75,7 +74,7 @@ jobs:
     - name: Create test env
       run: |
         touch $ENV_PATH
-        echo "object Env { const val USE_CURRENT_USER = false; const val TOKEN: String = \"$ACCESS_TOKEN\";  const val DRIVE_ID = 140946; const val INVITE_USER_NAME: String = \"$INVITE_USER_NAME\"; const val NEW_USER_ID = 1048949; const val NEW_USER_NAME: String = \"$NEW_USER_NAME\"; const val NEW_USER_PASSWORD: String = \"$NEW_USER_PASSWORD\" }" > $ENV_PATH
+        echo "package com.infomaniak.drive.utils; object Env { const val USE_CURRENT_USER = false; const val TOKEN: String = \"$ACCESS_TOKEN\";  const val DRIVE_ID = 140946; const val INVITE_USER_NAME: String = \"$INVITE_USER_NAME\"; const val NEW_USER_ID = 1048949; const val NEW_USER_NAME: String = \"$NEW_USER_NAME\"; const val NEW_USER_PASSWORD: String = \"$NEW_USER_PASSWORD\" }" > $ENV_PATH
     
     # Setup Gradle and Run tests
     - name: Grant execute permission for gradlew
@@ -91,12 +90,9 @@ jobs:
         target: ${{ matrix.target }}
         #arch: x86_64
         #profile: Pixel_4
-        #avd-name: avd test
         ram-size: 4096M
-#         sdcard-path-or-size: 100M
         force-avd-creation: false
         emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-        #emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -skin 500x833
         disable-animations: true
         script: ./gradlew app:connectedStandardDebugAndroidTest --stacktrace
     
