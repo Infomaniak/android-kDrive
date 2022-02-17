@@ -26,6 +26,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.Rights
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity.SaveExternalViewModel
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -50,66 +51,50 @@ class SelectFolderFragment : FileListFragment() {
 
         collapsingToolbarLayout.title = getString(R.string.selectFolderTitle)
 
-        toolbar.menu.apply {
-            findItem(R.id.addFolderItem).apply {
-                setOnMenuItemClickListener {
-                    val selectFolderActivity = requireActivity() as? SelectFolderActivity
-                    if (FileController.getFileById(folderId, userDrive)?.rights?.newFolder == true) {
-                        selectFolderActivity?.hideSaveButton()
-                        safeNavigate(
-                            SelectFolderFragmentDirections.actionSelectFolderFragmentToNewFolderFragment(
-                                parentFolderId = folderId,
-                                userDrive = userDrive
-                            )
+        toolbar.menu.findItem(R.id.addFolderItem).apply {
+            setOnMenuItemClickListener {
+                val selectFolderActivity = requireActivity() as? SelectFolderActivity
+                if (FileController.getFileById(folderId, userDrive)?.rights?.newFolder == true) {
+                    selectFolderActivity?.hideSaveButton()
+                    safeNavigate(
+                        SelectFolderFragmentDirections.actionSelectFolderFragmentToNewFolderFragment(
+                            parentFolderId = folderId,
+                            userDrive = userDrive,
                         )
-                    } else {
-                        selectFolderActivity?.showSnackbar(R.string.allFileAddRightError)
-                    }
-                    true
+                    )
+                } else {
+                    selectFolderActivity?.showSnackbar(R.string.allFileAddRightError)
                 }
-                isVisible = true
+                true
             }
+            isVisible = true
         }
 
-        toolbar.setNavigationOnClickListener {
-            onBackPressed()
-        }
+        toolbar.setNavigationOnClickListener { onBackPressed() }
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { onBackPressed() }
 
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            onBackPressed()
-        }
-
-        fileAdapter.selectFolder = true
-        fileAdapter.onFileClicked = { file ->
-            when {
-                file.isFolder() -> {
-                    if (!file.isDisabled()) {
-                        fileListViewModel.cancelDownloadFiles()
-                        safeNavigate(
-                            SelectFolderFragmentDirections.fileListFragmentToFileListFragment(
-                                folderId = file.id,
-                                folderName = file.name
-                            )
-                        )
-                    }
+        fileAdapter.apply {
+            selectFolder = true
+            onFileClicked = { file ->
+                if (file.isFolder() && !file.isDisabled()) {
+                    fileListViewModel.cancelDownloadFiles()
+                    safeNavigate(SelectFolderFragmentDirections.fileListFragmentToFileListFragment(file.id, file.name))
                 }
             }
         }
+
         lifecycleScope.launchWhenResumed {
-            val selectFolderActivity = requireActivity() as SelectFolderActivity
-            selectFolderActivity.showSaveButton()
-
-            val currentFolder = FileController.getFileById(folderId, userDrive)
-            val enable = folderId != saveExternalViewModel.disableSelectedFolder &&
-                    (currentFolder?.rights?.moveInto != false || currentFolder.rights?.newFile != false)
-            selectFolderActivity.enableSaveButton(enable)
+            with(requireActivity() as SelectFolderActivity) {
+                showSaveButton()
+                val currentFolderRights = FileController.getFileById(folderId, userDrive)?.rights ?: Rights()
+                val enable = folderId != saveExternalViewModel.disableSelectedFolderId
+                        && (currentFolderRights.moveInto || currentFolderRights.newFile)
+                enableSaveButton(enable)
+            }
         }
     }
 
     private fun onBackPressed() {
-        if (folderId == ROOT_ID) {
-            requireActivity().finish()
-        } else Utils.ignoreCreateFolderBackStack(findNavController(), true)
-
+        if (folderId == ROOT_ID) requireActivity().finish() else Utils.ignoreCreateFolderBackStack(findNavController(), true)
     }
 }
