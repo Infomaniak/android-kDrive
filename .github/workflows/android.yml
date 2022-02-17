@@ -61,8 +61,9 @@ jobs:
         api-level: ${{ matrix.api-level }}
         target: ${{ matrix.target }}
         arch: x86_64
+        avd-name: kdrive-test
 #         ram-size: 4096M
-#         force-avd-creation: false
+        force-avd-creation: false
         #emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
 #         disable-animations: false
         script: echo "Generated AVD snapshot for caching."
@@ -92,9 +93,10 @@ jobs:
         api-level: ${{ matrix.api-level }}
         target: ${{ matrix.target }}
         arch: x86_64
+        avd-name: kdrive-test
 #         profile: Pixel_4
 #         ram-size: 4096M
-#         force-avd-creation: false
+        force-avd-creation: false
         #emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
 #         disable-animations: true
         script: ./gradlew app:connectedStandardDebugAndroidTest --stacktrace
