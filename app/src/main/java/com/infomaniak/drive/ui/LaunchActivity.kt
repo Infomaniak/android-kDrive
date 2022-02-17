@@ -42,7 +42,7 @@ class LaunchActivity : AppCompatActivity() {
 
             logoutCurrentUserIfNeeded() // Rights v2 migration temporary fix
 
-            val clazz = when {
+            val destinationClass = when {
                 AccountUtils.requestCurrentUser() == null -> {
                     if (getOldkDriveUser().isEmpty) LoginActivity::class.java else MigrationActivity::class.java
                 }
@@ -61,7 +61,7 @@ class LaunchActivity : AppCompatActivity() {
                     }
                 }
             }
-            startActivity(Intent(this@LaunchActivity, clazz))
+            startActivity(Intent(this@LaunchActivity, destinationClass))
         }
         trackScreen()
     }
