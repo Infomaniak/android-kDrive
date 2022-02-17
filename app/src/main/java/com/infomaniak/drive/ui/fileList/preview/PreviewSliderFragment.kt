@@ -60,20 +60,21 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     private val mainViewModel: MainViewModel by activityViewModels()
     private val previewSliderViewModel: PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
-    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
-        it.whenResultIsOk { data -> onSelectFolderResult(data) }
-    }
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
+    private lateinit var currentPreviewFile: File
     private lateinit var drivePermissions: DrivePermissions
     private lateinit var previewSliderAdapter: PreviewSliderAdapter
-    private lateinit var currentPreviewFile: File
     private lateinit var userDrive: UserDrive
 
     private var hideActions: Boolean = false
     private var showUi = false
 
     override val ownerFragment = this
+
+    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
+        it.whenResultIsOk { data -> onSelectFolderResult(data) }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
