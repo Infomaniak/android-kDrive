@@ -19,6 +19,7 @@ package com.infomaniak.drive.data.services
 
 import android.content.ContentResolver
 import android.content.Context
+import android.database.Cursor
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
@@ -205,7 +206,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
         updateUploadCountNotification(this@initUpload, pendingCount)
-        
+
         try {
             if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
                 initUploadSchemeFile(uri)
@@ -375,39 +376,44 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             contentResolver.query(contentUri, null, selection, args, sortOrder)
                 ?.use { cursor ->
                     Log.d(TAG, "getLocalLastMediasAsync > from ${mediaFolder.name} ${cursor.count} found")
+
                     while (cursor.moveToNext()) {
-                        val uri = cursor.uri(contentUri)
-
-                        val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
-                        val fileName = SyncUtils.getFileName(cursor)
-                        val fileSize = fileDescriptorSize(uri) ?: SyncUtils.getFileSize(cursor)
-
-                        Log.d(TAG, "getLocalLastMediasAsync > ${mediaFolder.name}/$fileName found")
-
-                        if (fileName != null && UploadFile.canUpload(uri, fileModifiedAt) && fileSize > 0) {
-                            UploadFile.deleteIfExists(uri)
-                            UploadFile(
-                                uri = uri.toString(),
-                                driveId = syncSettings.driveId,
-                                fileCreatedAt = fileCreatedAt,
-                                fileModifiedAt = fileModifiedAt,
-                                fileName = fileName,
-                                fileSize = fileSize,
-                                remoteFolder = syncSettings.syncFolder,
-                                userId = syncSettings.userId
-                            ).apply {
-                                createSubFolder(mediaFolder.name, syncSettings.createDatedSubFolders)
-                                store()
-                            }
-
-                            UploadFile.setAppSyncSettings(syncSettings.apply {
-                                if (fileModifiedAt > lastSync) lastSync = fileModifiedAt
-                            })
-                        }
+                        localMediaFound(cursor, contentUri, mediaFolder, syncSettings)
                     }
                 }
         }.onFailure { exception ->
             syncMediaFolderFailure(exception, contentUri, mediaFolder)
+        }
+    }
+
+    private fun localMediaFound(cursor: Cursor, contentUri: Uri, mediaFolder: MediaFolder, syncSettings: SyncSettings) {
+        val uri = cursor.uri(contentUri)
+
+        val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
+        val fileName = SyncUtils.getFileName(cursor)
+        val fileSize = fileDescriptorSize(uri) ?: SyncUtils.getFileSize(cursor)
+
+        Log.d(TAG, "getLocalLastMediasAsync > ${mediaFolder.name}/$fileName found")
+
+        if (fileName != null && UploadFile.canUpload(uri, fileModifiedAt) && fileSize > 0) {
+            UploadFile.deleteIfExists(uri)
+            UploadFile(
+                uri = uri.toString(),
+                driveId = syncSettings.driveId,
+                fileCreatedAt = fileCreatedAt,
+                fileModifiedAt = fileModifiedAt,
+                fileName = fileName,
+                fileSize = fileSize,
+                remoteFolder = syncSettings.syncFolder,
+                userId = syncSettings.userId
+            ).apply {
+                createSubFolder(mediaFolder.name, syncSettings.createDatedSubFolders)
+                store()
+            }
+
+            UploadFile.setAppSyncSettings(syncSettings.apply {
+                if (fileModifiedAt > lastSync) lastSync = fileModifiedAt
+            })
         }
     }
 
