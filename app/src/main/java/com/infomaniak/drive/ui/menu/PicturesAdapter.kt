@@ -108,45 +108,55 @@ class PicturesAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         when {
-            super.getItemViewType(position) == VIEW_TYPE_LOADING -> {
-                (holder.itemView as LoaderCardView).startLoading()
+            super.getItemViewType(position) == VIEW_TYPE_LOADING -> (holder.itemView as LoaderCardView).startLoading()
+            getItemViewType(position) == DisplayType.TITLE.layout -> holder.itemView.title.text = (itemList[position] as String)
+            getItemViewType(position) == DisplayType.PICTURE.layout -> bindPictureDisplayType(position, holder)
+        }
+    }
+
+    private fun bindPictureDisplayType(position: Int, holder: ViewHolder) = with((holder.itemView as LoaderCardView)) {
+        val file = (itemList[position] as File)
+        displayThumbnail(file)
+        handleCheckmark(file)
+        setupClickListener(file)
+        setupLongClickListener(file)
+    }
+
+    private fun LoaderCardView.displayThumbnail(file: File) {
+        stopLoading()
+        picture.loadGlideUrl(file.thumbnail())
+        picture.contentDescription = file.name
+    }
+
+    private fun LoaderCardView.handleCheckmark(file: File) {
+        if (multiSelectMode) {
+            pictureChecked.isChecked = isSelectedFile(file)
+            pictureChecked.isVisible = true
+        } else {
+            pictureChecked.isGone = true
+        }
+    }
+
+    private fun LoaderCardView.setupClickListener(file: File) {
+        setOnClickListener {
+            if (multiSelectMode) {
+                pictureChecked.isChecked = !pictureChecked.isChecked
+                onSelectedFile(file, pictureChecked.isChecked)
+            } else {
+                onItemClick(file)
             }
-            getItemViewType(position) == DisplayType.TITLE.layout -> {
-                holder.itemView.title.text = (itemList[position] as String)
-            }
-            getItemViewType(position) == DisplayType.PICTURE.layout -> {
-                val file = (itemList[position] as File)
+        }
+    }
 
-                (holder.itemView as LoaderCardView).apply {
-                    stopLoading()
-                    picture.loadGlideUrl(file.thumbnail())
-                    picture.contentDescription = file.name
-
-                    if (multiSelectMode) {
-                        pictureChecked.isChecked = isSelectedFile(file)
-                        pictureChecked.isVisible = true
-                    } else {
-                        pictureChecked.isGone = true
-                    }
-
-                    setOnClickListener {
-                        if (multiSelectMode) {
-                            pictureChecked.isChecked = !pictureChecked.isChecked
-                            onSelectedFile(file, pictureChecked.isChecked)
-                        } else {
-                            onItemClick(file)
-                        }
-                    }
-
-                    setOnLongClickListener {
-                        if (enabledMultiSelectMode) {
-                            pictureChecked.isChecked = !pictureChecked.isChecked
-                            onSelectedFile(file, pictureChecked.isChecked)
-                            if (!multiSelectMode) openMultiSelectMode?.invoke()
-                            true
-                        } else false
-                    }
-                }
+    private fun LoaderCardView.setupLongClickListener(file: File) {
+        setOnLongClickListener {
+            if (enabledMultiSelectMode) {
+                pictureChecked.isChecked = !pictureChecked.isChecked
+                onSelectedFile(file, pictureChecked.isChecked)
+                if (!multiSelectMode) openMultiSelectMode?.invoke()
+                true
+            } else {
+                false
             }
         }
     }
