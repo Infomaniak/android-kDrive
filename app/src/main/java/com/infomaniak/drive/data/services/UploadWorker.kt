@@ -204,8 +204,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         currentUploadFile = this@initUpload
 
         applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
-        setupCurrentUploadNotification(applicationContext, pendingCount)
-
+        updateUploadCountNotification(this@initUpload, pendingCount)
+        
         try {
             if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
                 initUploadSchemeFile(uri)
@@ -214,24 +214,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             }
         } catch (exception: Exception) {
             handleException(exception, uri)
-        }
-    }
-
-    private fun UploadFile.handleException(exception: Exception, uri: Uri) {
-        when (exception) {
-            is SecurityException, is IllegalStateException, is IllegalArgumentException -> {
-                UploadFile.deleteIfExists(uri)
-
-                if (exception is IllegalStateException) {
-                    Sentry.withScope { scope ->
-                        scope.setExtra("data", ApiController.gson.toJson(this))
-                        Sentry.captureMessage("The file is either partially downloaded or corrupted")
-                    }
-                } else {
-                    Sentry.captureException(exception)
-                }
-            }
-            else -> throw exception
         }
     }
 
@@ -287,19 +269,29 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
+    private fun UploadFile.handleException(exception: Exception, uri: Uri) {
+        when (exception) {
+            is SecurityException, is IllegalStateException, is IllegalArgumentException -> {
+                UploadFile.deleteIfExists(uri)
+
+                if (exception is IllegalStateException) {
+                    Sentry.withScope { scope ->
+                        scope.setExtra("data", ApiController.gson.toJson(this))
+                        Sentry.captureMessage("The file is either partially downloaded or corrupted")
+                    }
+                } else {
+                    Sentry.captureException(exception)
+                }
+            }
+            else -> throw exception
+        }
+    }
+
     private suspend fun checkIfNeedReSync(syncSettings: SyncSettings?) {
         syncSettings?.let { checkLocalLastMedias(it) }
         if (UploadFile.getAllPendingUploadsCount() > 0) {
             val data = Data.Builder().putInt(LAST_UPLOADED_COUNT, uploadedCount).build()
             applicationContext.syncImmediately(data, true)
-        }
-    }
-
-    private fun fileDescriptorSize(uri: Uri): Long? {
-        return try {
-            contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize }
-        } catch (exception: Exception) {
-            null
         }
     }
 
@@ -358,6 +350,15 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         jobs.joinAll()
     }
 
+    private fun CoroutineScope.updateUploadCountNotification(uploadFile: UploadFile, pendingCount: Int) {
+        launch {
+            // We wait a little otherwise it is too fast and the notification may not be updated
+            delay(500)
+            ensureActive()
+            uploadFile.setupCurrentUploadNotification(applicationContext, pendingCount)
+        }
+    }
+
     private fun CoroutineScope.getLocalLastMediasAsync(
         syncSettings: SyncSettings,
         contentUri: Uri,
@@ -407,6 +408,14 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 }
         }.onFailure { exception ->
             syncMediaFolderFailure(exception, contentUri, mediaFolder)
+        }
+    }
+
+    private fun fileDescriptorSize(uri: Uri): Long? {
+        return try {
+            contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize }
+        } catch (exception: Exception) {
+            null
         }
     }
 
