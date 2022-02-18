@@ -65,7 +65,7 @@ jobs:
         avd-name: kdrive-test
 #         ram-size: 4096M
         force-avd-creation: false
-        emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none
+        emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none -skin WXGA800
         #emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
 #         disable-animations: false
         script: echo "Generated AVD snapshot for caching."
@@ -99,7 +99,7 @@ jobs:
         avd-name: kdrive-test
 #         ram-size: 4096M
         force-avd-creation: false
-        emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none -skin 2220x1080
+        emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none -skin WXGA800
         #emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
 #         disable-animations: true
         script: ./gradlew app:connectedStandardDebugAndroidTest --stacktrace
