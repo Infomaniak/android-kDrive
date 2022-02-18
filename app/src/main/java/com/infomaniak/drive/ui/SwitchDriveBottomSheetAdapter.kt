@@ -26,8 +26,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
-import com.infomaniak.drive.utils.TrackerAction
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.*
 
@@ -53,8 +51,6 @@ class SwitchDriveBottomSheetAdapter(
 
         itemSelectText.text = drive.name
         itemSelectActiveIcon.isVisible = drive.id == AccountUtils.currentDriveId
-        setOnClickListener {
-            onItemClicked(drive)
-        }
+        setOnClickListener { onItemClicked(drive) }
     }
 }
