@@ -60,6 +60,7 @@ jobs:
       with:
         api-level: ${{ matrix.api-level }}
         target: ${{ matrix.target }}
+        profile: Pixel 4
         arch: x86_64
         avd-name: kdrive-test
 #         ram-size: 4096M
@@ -93,9 +94,9 @@ jobs:
       with:
         api-level: ${{ matrix.api-level }}
         target: ${{ matrix.target }}
+        profile: Pixel 4
         arch: x86_64
         avd-name: kdrive-test
-#         profile: Pixel_4
 #         ram-size: 4096M
         force-avd-creation: false
         emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none
