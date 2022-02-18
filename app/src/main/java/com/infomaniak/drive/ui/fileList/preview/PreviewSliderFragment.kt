@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.fileList.preview
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -242,6 +243,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             toggleEdgeToEdge(true)
         }
 
+        
 
         view?.let {
             ViewCompat.setOnApplyWindowInsetsListener(it) { _, windowInsets ->
@@ -250,7 +252,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 header?.setMargin(top = insets.top)
                 previewSliderParent?.setPadding(insets.left, 0, insets.right, insets.bottom)
 //                viewPager?.setMargin(left = insets.left, bottom = insets.bottom, right = insets.right)
-                bottomSheetFileInfos?.setMargin(bottom = insets.bottom)
+                bottomSheetFileInfos?.setMargin(bottom = insets.bottom) // TODO Can be removed?
 
                 bottomSheetBehavior.peekHeight = 90.toPx() + insets.bottom
 
@@ -274,8 +276,16 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         super.onPause()
         previewSliderViewModel.currentPreview = currentFile
         bottomSheetFileInfos.removeOfflineObservations(this)
+    }
 
+    override fun onDestroyView() {
+        activity?.window?.let { controllerWindow ->
+            view?.let { controllerView ->
+                WindowInsetsControllerCompat(controllerWindow, controllerView).show(WindowInsetsCompat.Type.statusBars())
+            }
+        }
         activity?.window?.toggleEdgeToEdge(false)
+        super.onDestroyView()
     }
 
     override fun onDestroy() {

@@ -40,6 +40,7 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.TabViewPagerUtils.setup
 import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior
 import com.infomaniak.lib.core.utils.format
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
 import kotlinx.android.synthetic.main.fragment_file_details.*
 import kotlinx.android.synthetic.main.view_subtitle_toolbar.view.*
@@ -158,6 +159,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         super.onPause()
         // TODO Understand why we need to do this
         toolbar.setNavigationIconTint(ContextCompat.getColor(requireContext(), R.color.primary))
+
         activity?.window?.apply {
             toggleEdgeToEdge(false)
 
