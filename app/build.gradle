@@ -56,6 +56,13 @@ android {
             dimension 'distribution'
             apply plugin: 'com.google.gms.google-services'
         }
+        demo {
+            dimension 'distribution'
+            applicationIdSuffix '.demo'
+            versionNameSuffix '-demo'
+            resValue 'string', 'CLOUD_STORAGE_AUTHORITY', 'com.infomaniak.drive.demo.documents'
+            resValue 'string', 'FILE_AUTHORITY', 'com.infomaniak.drive.demo.files'
+        }
         fdroid { dimension 'distribution' }
         preprod {
             dimension 'distribution'

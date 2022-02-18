@@ -8,23 +8,14 @@
     {
       "client_info": {
         "mobilesdk_app_id": "1:355767057795:android:910c4caef8ed905d8f0ab6",
-        "android_client_info": {
-          "package_name": "com.infomaniak.drive"
-        }
+        "android_client_info": { "package_name": "com.infomaniak.drive" }
       },
-      "oauth_client": [
-        {
+      "oauth_client": [ {
           "client_id": "355767057795-h6pmg5hq87bnjbtlrds8lvbua0o6o44n.apps.googleusercontent.com",
           "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDedMW4ViDkJUTsv4oLHRgY8LFb6GCPa8s"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
+        } ],
+      "api_key": [ { "current_key": "AIzaSyDedMW4ViDkJUTsv4oLHRgY8LFb6GCPa8s" } ],
+      "services": { "appinvite_service": {
           "other_platform_oauth_client": [
             {
               "client_id": "355767057795-h6pmg5hq87bnjbtlrds8lvbua0o6o44n.apps.googleusercontent.com",
@@ -39,8 +30,14 @@
               }
             }
           ]
-        }
-      }
+        } }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:355767057795:android:910c4caef8ed905d8f0ab6",
+        "android_client_info": { "package_name": "com.infomaniak.drive.demo" }
+      },
+      "api_key": [ { "current_key": "" } ]
     }
   ],
   "configuration_version": "1"

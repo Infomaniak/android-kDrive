@@ -43,6 +43,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withC
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.BulkOperationType
@@ -368,4 +369,6 @@ object Utils {
             }
         }.show()
     }
+
+    fun getApplicationId(): String = BuildConfig.APPLICATION_ID.removeSuffix(".demo")
 }

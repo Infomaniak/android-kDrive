@@ -35,6 +35,7 @@ import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.ui.MainActivity
+import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.clearStack
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.models.ApiResponse
@@ -67,7 +68,7 @@ class MigrationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_migration)
 
-        infomaniakLogin = InfomaniakLogin(context = this, appUID = BuildConfig.APPLICATION_ID, clientID = BuildConfig.CLIENT_ID)
+        infomaniakLogin = InfomaniakLogin(context = this, appUID = Utils.getApplicationId(), clientID = BuildConfig.CLIENT_ID)
 
         header.title.setText(R.string.migrationTitle)
         header.description.setText(R.string.migrationDescription)

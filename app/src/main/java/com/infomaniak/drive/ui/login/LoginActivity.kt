@@ -80,7 +80,7 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        infomaniakLogin = InfomaniakLogin(context = this, appUID = BuildConfig.APPLICATION_ID, clientID = BuildConfig.CLIENT_ID)
+        infomaniakLogin = InfomaniakLogin(context = this, appUID = Utils.getApplicationId(), clientID = BuildConfig.CLIENT_ID)
 
         introViewpager.apply {
             adapter = IntroPagerAdapter(supportFragmentManager, lifecycle)
