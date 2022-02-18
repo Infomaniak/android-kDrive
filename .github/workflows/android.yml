@@ -99,7 +99,7 @@ jobs:
         avd-name: kdrive-test
 #         ram-size: 4096M
         force-avd-creation: false
-        emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none
+        emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none -skin 2220x1080
         #emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
 #         disable-animations: true
         script: ./gradlew app:connectedStandardDebugAndroidTest --stacktrace
