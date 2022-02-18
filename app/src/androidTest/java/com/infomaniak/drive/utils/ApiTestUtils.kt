@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.utils
 
+import android.util.Log
 import androidx.collection.arrayMapOf
 import com.infomaniak.drive.KDriveTest.Companion.okHttpClient
 import com.infomaniak.drive.KDriveTest.Companion.userDrive
@@ -38,6 +39,9 @@ object ApiTestUtils {
 
     fun assertApiResponseData(response: ApiResponse<*>) {
         with(response) {
+            if (!isSuccess()) {
+                Log.e("ApiTestUtils", "ApiResponse> ${error?.description}")
+            }
             Assertions.assertTrue(isSuccess(), "This should succeed")
             Assertions.assertNull(error, "There should be no error")
             Assertions.assertNotNull(data, "The data cannot be null")
