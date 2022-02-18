@@ -63,10 +63,8 @@ jobs:
         profile: Pixel 4
         arch: x86_64
         avd-name: kdrive-test
-#         ram-size: 4096M
         force-avd-creation: false
-        emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -skin 1080x2220
-#         disable-animations: false
+        emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none -skin 540x1110
         script: echo "Generated AVD snapshot for caching."
     
 #     - name: set up JDK 11
@@ -96,10 +94,8 @@ jobs:
         profile: Pixel 4
         arch: x86_64
         avd-name: kdrive-test
-#         ram-size: 4096M
         force-avd-creation: false
-#         emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none -skin 1080x2220
-        emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -skin 1080x2220
-#         disable-animations: true
+        emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none -skin 540x1110
+#         emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -skin 1080x2220
         script: ./gradlew app:connectedStandardDebugAndroidTest --stacktrace
     
