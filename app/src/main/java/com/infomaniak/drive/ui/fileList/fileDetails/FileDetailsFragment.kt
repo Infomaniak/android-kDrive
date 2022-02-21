@@ -79,6 +79,22 @@ class FileDetailsFragment : FileDetailsSubFragment() {
                     shareResponse.data?.let { fileDetailsViewModel.currentFileShare.value = it }
                 }
             }
+
+        activity?.window?.apply {
+            statusBarColor = Color.TRANSPARENT
+            lightStatusBar(false)
+            toggleEdgeToEdge(true)
+
+            // Corrects the layout so it still takes into account system bars in edge-to-edge mode
+            ViewCompat.setOnApplyWindowInsetsListener(requireView()) { view, windowInsets ->
+                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+                toolbar.setMargin(top = insets.top)
+                view.setMargin(bottom = insets.bottom)
+
+                // Return CONSUMED if you don't want the window insets to keep being passed down to descendant views.
+                WindowInsetsCompat.CONSUMED
+            }
+        }
     }
 
     private fun setFile(file: File) {
@@ -138,21 +154,6 @@ class FileDetailsFragment : FileDetailsSubFragment() {
 
     override fun onResume() {
         super.onResume()
-        activity?.window?.apply {
-            statusBarColor = Color.TRANSPARENT
-            lightStatusBar(false)
-            toggleEdgeToEdge(true)
-
-            // Corrects the layout so it still takes into account system bars in edge-to-edge mode
-            ViewCompat.setOnApplyWindowInsetsListener(requireView()) { view, windowInsets ->
-                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-                toolbar.setMargin(top = insets.top)
-                view.setMargin(bottom = insets.bottom)
-
-                // Return CONSUMED if you don't want the window insets to keep being passed down to descendant views.
-                WindowInsetsCompat.CONSUMED
-            }
-        }
     }
 
     override fun onPause() {
@@ -161,7 +162,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         toolbar.setNavigationIconTint(ContextCompat.getColor(requireContext(), R.color.primary))
 
         activity?.window?.apply {
-            toggleEdgeToEdge(false)
+//            toggleEdgeToEdge(false)
 
             // If light mode
             if (context?.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_NO) {

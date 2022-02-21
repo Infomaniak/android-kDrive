@@ -211,7 +211,21 @@ fun Window.lightStatusBar(enabled: Boolean) {
 }
 
 fun Window.toggleEdgeToEdge(enabled: Boolean) {
-    WindowCompat.setDecorFitsSystemWindows(this, !enabled)
+        WindowCompat.setDecorFitsSystemWindows(this, !enabled)
+//    fun setDecorFitsSystemWindows(
+//        window: Window,
+//        decorFitsSystemWindows: Boolean
+//    ) {
+//        val decorFitsFlags = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+//                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+//                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
+//        val decorView = window.decorView
+//        val sysUiVis = decorView.systemUiVisibility
+//        decorView.systemUiVisibility =
+//            if (decorFitsSystemWindows) sysUiVis and decorFitsFlags.inv() else sysUiVis or decorFitsFlags
+//    }
+//
+//    setDecorFitsSystemWindows(this, !enabled)
 }
 
 fun Activity.setColorNavigationBar(appBar: Boolean = false) = with(window) {

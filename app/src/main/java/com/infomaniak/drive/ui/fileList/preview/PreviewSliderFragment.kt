@@ -19,7 +19,6 @@ package com.infomaniak.drive.ui.fileList.preview
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -53,7 +52,6 @@ import com.infomaniak.drive.utils.Utils.openWithIntent
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.toPx
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_preview_slider.*
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.Dispatchers
@@ -106,9 +104,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             userDrive = previewSliderViewModel.userDrive
         }
 
-        val view = inflater.inflate(R.layout.fragment_preview_slider, container, false)
-
-        return view
+        return inflater.inflate(R.layout.fragment_preview_slider, container, false)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -191,18 +187,22 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             }
             TransitionManager.beginDelayedTransition(this, transition)
             header.isVisible = showUi
+
             toggleBottomSheet(showUi)
+            toggleSystemBar(showUi)
+
             showUi = !showUi
+        }
+    }
 
-
-            activity?.window?.let { controllerWindow ->
-                view?.let { controllerView ->
-                    WindowInsetsControllerCompat(controllerWindow, controllerView).let { controller ->
-                        controller.apply {
-                            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                            val statusBar = WindowInsetsCompat.Type.statusBars()
-                            if (showUi) hide(statusBar) else show(statusBar)
-                        }
+    private fun toggleSystemBar(show: Boolean) {
+        activity?.window?.let { controllerWindow ->
+            view?.let { controllerView ->
+                WindowInsetsControllerCompat(controllerWindow, controllerView).let { controller ->
+                    controller.apply {
+                        systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                        val systemBars = WindowInsetsCompat.Type.systemBars()
+                        if (show) show(systemBars) else hide(systemBars)
                     }
                 }
             }
@@ -220,7 +220,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                     when (bottomSheetBehavior.state) {
                         BottomSheetBehavior.STATE_HIDDEN -> {
                             activity?.window?.navigationBarColor =
-                                ContextCompat.getColor(requireContext(), R.color.previewBackground)
+                                ColorUtils.setAlphaComponent(
+                                    ContextCompat.getColor(requireContext(), R.color.previewBackground),
+                                    128
+                                )
                             activity?.window?.lightNavigationBar(false)
                         }
                         else -> {
@@ -243,18 +246,13 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             toggleEdgeToEdge(true)
         }
 
-        
-
         view?.let {
             ViewCompat.setOnApplyWindowInsetsListener(it) { _, windowInsets ->
                 val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
 
                 header?.setMargin(top = insets.top)
-                previewSliderParent?.setPadding(insets.left, 0, insets.right, insets.bottom)
-//                viewPager?.setMargin(left = insets.left, bottom = insets.bottom, right = insets.right)
-                bottomSheetFileInfos?.setMargin(bottom = insets.bottom) // TODO Can be removed?
-
                 bottomSheetBehavior.peekHeight = 90.toPx() + insets.bottom
+                bottomSheetBehavior.expandedOffset = insets.top
 
                 windowInsets
             }
@@ -284,7 +282,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 WindowInsetsControllerCompat(controllerWindow, controllerView).show(WindowInsetsCompat.Type.statusBars())
             }
         }
-        activity?.window?.toggleEdgeToEdge(false)
+
         super.onDestroyView()
     }
 
@@ -293,6 +291,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         if (findNavController().previousBackStackEntry?.destination?.id != R.id.searchFragment) {
             mainViewModel.currentPreviewFileList = LinkedHashMap()
         }
+
         super.onDestroy()
     }
 
@@ -348,10 +347,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
-    private fun toggleBottomSheet(show: Boolean? = null) {
-        val mustShow = show ?: (bottomSheetBehavior.state == BottomSheetBehavior.STATE_HIDDEN)
+    private fun toggleBottomSheet(show: Boolean) {
         bottomSheetFileInfos?.scrollToTop()
-        bottomSheetBehavior.state = if (mustShow) {
+        bottomSheetBehavior.state = if (show) {
             BottomSheetBehavior.STATE_COLLAPSED
         } else {
             BottomSheetBehavior.STATE_HIDDEN
