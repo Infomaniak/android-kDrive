@@ -100,6 +100,8 @@ object MatomoUtils {
     }
 }
 
+fun Boolean.toFloat() = if (this) 1f else 0f
+
 enum class TrackerAction {
     CLICK, INPUT;
 

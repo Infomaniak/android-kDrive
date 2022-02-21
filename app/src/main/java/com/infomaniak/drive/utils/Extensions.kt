@@ -858,6 +858,4 @@ fun File.getFolderIcon(): Pair<Int, String?> {
     }
 }
 
-fun Boolean.toFloat() = if (this) 1f else 0f
-
 operator fun Regex.contains(input: String) = containsMatchIn(input)
