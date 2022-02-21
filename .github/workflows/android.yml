@@ -64,7 +64,7 @@ jobs:
         arch: x86_64
         avd-name: kdrive-test
         force-avd-creation: false
-        emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none -skin 540x1110
+        emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -skin 540x1110
         script: echo "Generated AVD snapshot for caching."
     
 #     - name: set up JDK 11
@@ -95,7 +95,7 @@ jobs:
         arch: x86_64
         avd-name: kdrive-test
         force-avd-creation: false
-        emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none -skin 540x1110
-#         emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -skin 1080x2220
+#         emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none -skin 540x1110
+        emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -skin 540x1110
         script: ./gradlew app:connectedStandardDebugAndroidTest --stacktrace
     
