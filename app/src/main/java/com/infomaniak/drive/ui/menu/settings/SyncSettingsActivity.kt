@@ -143,23 +143,23 @@ class SyncSettingsActivity : BaseActivity() {
             val intent = Intent(this, SelectFolderActivity::class.java).apply {
                 putExtra(SelectFolderActivity.USER_ID_TAG, selectDriveViewModel.selectedUserId.value)
                 putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, selectDriveViewModel.selectedDrive.value?.id)
-                putExtra(SelectFolderActivity.DISABLE_SELECTED_FOLDER_TAG, Utils.ROOT_ID)
+                putExtra(SelectFolderActivity.CURRENT_FOLDER_ID_TAG, Utils.ROOT_ID)
             }
             selectFolderResultLauncher.launch(intent)
         }
 
-        syncSettingsViewModel.syncFolder.observe(this) { syncFolder ->
+        syncSettingsViewModel.syncFolder.observe(this) { syncFolderId ->
             val selectedUserId = selectDriveViewModel.selectedUserId.value
             val selectedDriveId = selectDriveViewModel.selectedDrive.value?.id
-            if (syncFolder != null && selectedUserId != null && selectedDriveId != null) {
-                FileController.getFileById(syncFolder, UserDrive(selectedUserId, selectedDriveId))?.let {
+            if (syncFolderId != null && selectedUserId != null && selectedDriveId != null) {
+                FileController.getFileById(syncFolderId, UserDrive(selectedUserId, selectedDriveId))?.let {
                     pathName.text = it.name
                     changeSaveButtonStatus()
                 }
             } else {
                 pathName.setText(R.string.selectFolderTitle)
             }
-            mediaFoldersSettingsVisibility(syncFolder != null)
+            mediaFoldersSettingsVisibility(syncFolderId != null)
         }
 
         syncSettingsViewModel.saveOldPictures.observe(this) {

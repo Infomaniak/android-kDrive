@@ -56,8 +56,10 @@ class SettingsFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-        val drivePermissions = DrivePermissions()
-        drivePermissions.registerPermissions(this) { autorized -> if (autorized) requireActivity().syncImmediately() }
+        val drivePermissions = DrivePermissions().apply {
+            registerPermissions(this@SettingsFragment) { authorized -> if (authorized) requireActivity().syncImmediately() }
+        }
+
         onlyWifiSyncValue.isChecked = AppSettings.onlyWifiSync
         onlyWifiSyncValue.setOnCheckedChangeListener { _, isChecked ->
             AppSettings.onlyWifiSync = isChecked

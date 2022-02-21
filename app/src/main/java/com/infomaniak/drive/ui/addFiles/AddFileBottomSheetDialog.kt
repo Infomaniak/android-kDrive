@@ -87,13 +87,11 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
         currentFolder.setFileItem(currentFolderFile)
 
-        openCameraPermissions = DrivePermissions()
-        openCameraPermissions.registerPermissions(this) { autorized ->
-            if (autorized) openCamera()
+        openCameraPermissions = DrivePermissions().apply {
+            registerPermissions(this@AddFileBottomSheetDialog) { authorized -> if (authorized) openCamera() }
         }
-        uploadFilesPermissions = DrivePermissions()
-        uploadFilesPermissions.registerPermissions(this) { autorized ->
-            if (autorized) uploadFiles()
+        uploadFilesPermissions = DrivePermissions().apply {
+            registerPermissions(this@AddFileBottomSheetDialog) { authorized -> if (authorized) uploadFiles() }
         }
 
         openCamera.setOnClickListener { openCamera() }
