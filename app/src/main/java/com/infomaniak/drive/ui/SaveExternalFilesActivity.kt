@@ -73,62 +73,72 @@ class SaveExternalFilesActivity : BaseActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) = with(selectDriveViewModel) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_save_external_file)
 
-        if (!isAuth()) return
+        if (!isAuth()) return@with
 
-        drivePermissions = DrivePermissions()
-        drivePermissions.registerPermissions(this,
-            onPermissionResult = { authorized ->
-                if (authorized) getFiles()
-            }
-        )
-
-        drivePermissions.checkSyncPermissions()
-
+        setupDrivePermissions()
         activeDefaultUser()
+        fetchSelectedDrive()
+        fetchFolder()
+        setupSaveButton()
+    }
 
-        selectDriveViewModel.selectedDrive.observe(this) {
-            it?.let {
-                driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(it.preferences.color))
-                driveName.text = it.name
+    private fun setupDrivePermissions() {
+        drivePermissions = DrivePermissions().apply {
+            registerPermissions(
+                activity = this@SaveExternalFilesActivity,
+                onPermissionResult = { authorized -> if (authorized) getFiles() },
+            )
+            checkSyncPermissions()
+        }
+    }
+
+    private fun SelectDriveViewModel.fetchSelectedDrive() {
+        selectedDrive.observe(this@SaveExternalFilesActivity) {
+            it?.let { drive ->
+                driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(drive.preferences.color))
+                driveName.text = drive.name
                 saveButton.isEnabled = false
-                UiSettings(this).getSaveExternalFilesPref().let { (userId, driveId, folderId) ->
-                    saveExternalFilesViewModel.folderId.value =
-                        if (userId == selectDriveViewModel.selectedUserId.value && driveId == it.id) folderId else null
-                }
-
-                pathTitle.isVisible = true
-                selectPath.isVisible = true
-                selectPath.setOnClickListener {
-                    val intent = Intent(this, SelectFolderActivity::class.java).apply {
-                        putExtra(SelectFolderActivity.USER_ID_TAG, selectDriveViewModel.selectedUserId.value)
-                        putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, selectDriveViewModel.selectedDrive.value?.id)
+                UiSettings(this@SaveExternalFilesActivity).getSaveExternalFilesPref().let { (userId, driveId, folderId) ->
+                    saveExternalFilesViewModel.folderId.value = if (userId == selectedUserId.value && driveId == drive.id) {
+                        folderId
+                    } else {
+                        null
                     }
-                    selectFolderResultLauncher.launch(intent)
+                }
+                pathTitle.isVisible = true
+                selectPath.apply {
+                    isVisible = true
+                    setOnClickListener {
+                        val intent = Intent(this@SaveExternalFilesActivity, SelectFolderActivity::class.java).apply {
+                            putExtra(SelectFolderActivity.USER_ID_TAG, selectedUserId.value)
+                            putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, selectedDrive.value?.id)
+                        }
+                        selectFolderResultLauncher.launch(intent)
+                    }
                 }
             } ?: run {
                 showSelectDrive()
             }
         }
+    }
 
-        saveExternalFilesViewModel.folderId.observe(this) { folderId ->
-            val folder =
-                if (selectDriveViewModel.selectedUserId.value == null || selectDriveViewModel.selectedDrive.value?.id == null || folderId == null) {
-                    null
-                } else {
-                    val userDrive = UserDrive(
-                        userId = selectDriveViewModel.selectedUserId.value!!,
-                        driveId = selectDriveViewModel.selectedDrive.value!!.id
-                    )
-                    FileController.getFileById(folderId, userDrive)
-                }
+    private fun SelectDriveViewModel.fetchFolder() {
+        saveExternalFilesViewModel.folderId.observe(this@SaveExternalFilesActivity) { folderId ->
+
+            val folder = if (selectedUserId.value == null || selectedDrive.value?.id == null || folderId == null) {
+                null
+            } else {
+                val userDrive = UserDrive(userId = selectedUserId.value!!, driveId = selectedDrive.value!!.id)
+                FileController.getFileById(folderId, userDrive)
+            }
 
             folder?.let {
                 val folderName = if (folder.isRoot()) {
-                    getString(R.string.allRootName, selectDriveViewModel.selectedDrive.value?.name)
+                    getString(R.string.allRootName, selectedDrive.value?.name)
                 } else {
                     folder.name
                 }
@@ -138,24 +148,28 @@ class SaveExternalFilesActivity : BaseActivity() {
                 pathName.setText(R.string.selectFolderTitle)
             }
         }
+    }
 
-        saveButton.initProgress(this)
-        saveButton.setOnClickListener {
-            saveButton.showProgress()
-            if (drivePermissions.checkSyncPermissions()) {
-                val userId = selectDriveViewModel.selectedUserId.value!!
-                val driveId = selectDriveViewModel.selectedDrive.value?.id!!
-                val folderId = saveExternalFilesViewModel.folderId.value!!
+    private fun SelectDriveViewModel.setupSaveButton() {
+        saveButton.apply {
+            initProgress(this@SaveExternalFilesActivity)
+            setOnClickListener {
+                showProgress()
+                if (drivePermissions.checkSyncPermissions()) {
+                    val userId = selectedUserId.value!!
+                    val driveId = selectedDrive.value?.id!!
+                    val folderId = saveExternalFilesViewModel.folderId.value!!
 
-                UiSettings(this).setSaveExternalFilesPref(userId, driveId, folderId)
-                lifecycleScope.launch(Dispatchers.IO) {
-                    if (storeFiles(userId, driveId, folderId)) {
-                        syncImmediately()
-                        finish()
-                    } else {
-                        withContext(Dispatchers.Main) {
-                            saveButton?.hideProgress(R.string.buttonSave)
-                            showSnackbar(R.string.errorSave)
+                    UiSettings(this@SaveExternalFilesActivity).setSaveExternalFilesPref(userId, driveId, folderId)
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        if (storeFiles(userId, driveId, folderId)) {
+                            syncImmediately()
+                            finish()
+                        } else {
+                            withContext(Dispatchers.Main) {
+                                saveButton?.hideProgress(R.string.buttonSave)
+                                showSnackbar(R.string.errorSave)
+                            }
                         }
                     }
                 }
