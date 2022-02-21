@@ -104,12 +104,13 @@ class LoginActivity : AppCompatActivity() {
             setOnClickListener {
                 signInButton.isEnabled = false
                 showProgress()
+                trackAccountEvent("openLoginWebview")
                 infomaniakLogin.startWebViewLogin(webViewLoginResultLauncher)
             }
         }
 
         signInButton.setOnClickListener {
-            trackAccountEvent("create")
+            trackAccountEvent("openCreationWebview")
             openUrl(ApiRoutes.orderDrive())
         }
     }
@@ -124,6 +125,7 @@ class LoginActivity : AppCompatActivity() {
                         when (val user = authenticateUser(this@LoginActivity, it)) {
                             is User -> {
                                 application.trackCurrentUserId()
+                                trackAccountEvent("loggedIn")
                                 launchMainActivity()
                             }
                             is ApiResponse<*> -> withContext(Dispatchers.Main) {
