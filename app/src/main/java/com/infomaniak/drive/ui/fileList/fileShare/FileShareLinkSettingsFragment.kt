@@ -177,7 +177,11 @@ class FileShareLinkSettingsFragment : Fragment() {
         }
     }
 
-    private fun Context.trackShareSettingsEvent(protectWithPassword: Boolean?, expirationDate: Boolean?, downloadFromLink: Boolean?) {
+    private fun Context.trackShareSettingsEvent(
+        protectWithPassword: Boolean?,
+        expirationDate: Boolean?,
+        downloadFromLink: Boolean?
+    ) {
         val category = "shareAndRights"
         trackEventWithBooleanValue(category, "protectWithPassword", protectWithPassword)
         trackEventWithBooleanValue(category, "expirationDateLink", expirationDate)

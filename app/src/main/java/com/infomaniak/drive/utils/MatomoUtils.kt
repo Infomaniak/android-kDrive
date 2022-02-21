@@ -23,7 +23,6 @@ import androidx.fragment.app.Fragment
 import com.infomaniak.drive.ApplicationMain
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.models.BulkOperationType
-import com.infomaniak.drive.data.models.SyncSettings
 import org.matomo.sdk.Matomo
 import org.matomo.sdk.Tracker
 import org.matomo.sdk.TrackerBuilder
@@ -38,7 +37,7 @@ object MatomoUtils {
 
     fun Context.buildTracker(): Tracker {
         return TrackerBuilder(BuildConfig.MATOMO_URL, SITE_ID, "AndroidTracker").build(Matomo.getInstance(this)).also {
-            // Track app version installs
+            // Put a tracker on app installs to have statistics on the number of times the app is installed or updated
             TrackHelper.track().download().identifier(DownloadTracker.Extra.ApkChecksum(this)).with(it)
         }
     }

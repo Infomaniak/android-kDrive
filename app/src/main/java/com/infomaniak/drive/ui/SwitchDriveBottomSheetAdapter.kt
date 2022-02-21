@@ -51,6 +51,7 @@ class SwitchDriveBottomSheetAdapter(
 
         itemSelectText.text = drive.name
         itemSelectActiveIcon.isVisible = drive.id == AccountUtils.currentDriveId
+
         setOnClickListener { onItemClicked(drive) }
     }
 }
