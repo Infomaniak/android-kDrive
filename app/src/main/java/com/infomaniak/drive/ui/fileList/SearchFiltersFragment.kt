@@ -17,11 +17,13 @@
  */
 package com.infomaniak.drive.ui.fileList
 
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -35,7 +37,6 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterTypeBottomSheetDia
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.getBackNavigationResult
-import com.infomaniak.drive.utils.getTintedDrawable
 import com.infomaniak.drive.utils.safeNavigate
 import com.infomaniak.lib.core.utils.toPx
 import kotlinx.android.synthetic.main.fragment_search_filters.*
@@ -46,6 +47,12 @@ class SearchFiltersFragment : Fragment() {
     private val searchFiltersViewModel: SearchFiltersViewModel by navGraphViewModels(R.id.searchFiltersFragment)
 
     private val categoryRights = DriveInfosController.getCategoryRights()
+
+    private val defaultTypeIconDrawable: Drawable? by lazy {
+        ContextCompat.getDrawable(requireContext(), R.drawable.ic_file)
+            ?.mutate()
+            ?.apply { setTint(ResourcesCompat.getColor(resources, R.color.iconColor, null)) }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         inflater.inflate(R.layout.fragment_search_filters, container, false)
@@ -151,11 +158,7 @@ class SearchFiltersFragment : Fragment() {
             typeFilterStartIcon.setImageResource(it.icon)
             typeFilterText.setText(it.searchFilterName)
         } ?: run {
-            val icFile = requireContext().getTintedDrawable(
-                drawableId = R.drawable.ic_file_tintable,
-                colorInt = ContextCompat.getColor(requireContext(), R.color.iconColor),
-            )
-            typeFilterStartIcon.setImageDrawable(icFile)
+            typeFilterStartIcon.setImageDrawable(defaultTypeIconDrawable)
             typeFilterText.setText(R.string.searchFiltersSelectType)
         }
     }

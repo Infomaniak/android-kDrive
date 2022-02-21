@@ -168,11 +168,11 @@
                         android:id="@+id/typeFilterStartIcon"
                         android:layout_width="16dp"
                         android:layout_height="16dp"
-                        android:src="@drawable/ic_file"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="ContentDescription" />
+                        tools:ignore="ContentDescription"
+                        tools:src="@drawable/ic_file" />
 
                     <TextView
                         android:id="@+id/typeFilterText"
