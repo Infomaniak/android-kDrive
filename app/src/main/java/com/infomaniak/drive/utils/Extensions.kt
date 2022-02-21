@@ -288,9 +288,18 @@ fun View.setFileItem(file: File, isGrid: Boolean = false, viewHolder: FileViewHo
 
     filePreview.scaleType = ImageView.ScaleType.CENTER
 
-    fun getTintedDrawable(icon: Int, tint: String, viewHolder: FileViewHolder?): Drawable? {
-        if (viewHolder?.tintedDrawable == null) viewHolder?.tintedDrawable = ContextCompat.getDrawable(context, icon)?.mutate()
-        return viewHolder?.tintedDrawable?.apply { setTint(tint.toColorInt()) }
+    fun getTintedDrawable(icon: Int, tint: String): Drawable? {
+
+        fun getDrawable(): Drawable? = ContextCompat.getDrawable(context, icon)?.mutate()
+
+        val drawable = if (viewHolder == null) {
+            getDrawable()
+        } else {
+            if (viewHolder.tintedDrawable == null) viewHolder.tintedDrawable = getDrawable()
+            viewHolder.tintedDrawable
+        }
+
+        return drawable?.apply { setTint(tint.toColorInt()) }
     }
 
     when {
@@ -299,11 +308,11 @@ fun View.setFileItem(file: File, isGrid: Boolean = false, viewHolder: FileViewHo
             if (tint == null) {
                 filePreview.loadGlide(icon)
             } else {
-                filePreview.loadGlide(getTintedDrawable(icon, tint, viewHolder))
+                filePreview.loadGlide(getTintedDrawable(icon, tint))
             }
         }
         file.isDrive() -> {
-            filePreview.loadGlide(getTintedDrawable(R.drawable.ic_drive, file.driveColor, viewHolder))
+            filePreview.loadGlide(getTintedDrawable(R.drawable.ic_drive, file.driveColor))
         }
         else -> {
             val fileType = file.getFileType()
