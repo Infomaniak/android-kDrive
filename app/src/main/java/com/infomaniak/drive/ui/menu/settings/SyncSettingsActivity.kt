@@ -277,8 +277,7 @@ class SyncSettingsActivity : BaseActivity() {
                 && allSyncedFoldersCount > 0
     }
 
-    private fun Context.trackPhotoSyncSettingsEvent(syncSettings: SyncSettings) {
-        val category = "photoSync"
+    private fun Context.trackPhotoSyncSettingsEvent(category: String, syncSettings: SyncSettings) {
         val dateName = when (syncSettingsViewModel.saveOldPictures.value!!) {
             SavePicturesDate.SINCE_NOW -> "syncNew"
             SavePicturesDate.SINCE_FOREVER -> "syncAll"
@@ -299,7 +298,7 @@ class SyncSettingsActivity : BaseActivity() {
                 SavePicturesDate.SINCE_FOREVER -> Date(0)
                 SavePicturesDate.SINCE_DATE -> syncSettingsViewModel.customDate.value ?: Date()
             }
-
+            val trackerCategory = "photoSync"
             if (activateSyncSwitch.isChecked) {
                 val syncSettings = SyncSettings(
                     userId = selectDriveViewModel.selectedUserId.value!!,
@@ -310,14 +309,18 @@ class SyncSettingsActivity : BaseActivity() {
                     createDatedSubFolders = createDatedSubFoldersSwitch.isChecked,
                     deleteAfterSync = deletePicturesAfterSyncSwitch.isChecked
                 )
-                application.trackPhotoSyncSettingsEvent(syncSettings)
+                application.trackPhotoSyncSettingsEvent(trackerCategory, syncSettings)
                 syncSettings.setIntervalType(syncSettingsViewModel.syncIntervalType.value!!)
                 UploadFile.setAppSyncSettings(syncSettings)
                 activateAutoSync(syncSettings)
             } else {
                 disableAutoSync()
             }
-            application.trackEvent("photoSync", TrackerAction.CLICK, if (activateSyncSwitch.isChecked) "enabled" else "disabled")
+            application.trackEvent(
+                trackerCategory,
+                TrackerAction.CLICK,
+                if (activateSyncSwitch.isChecked) "enabled" else "disabled"
+            )
 
             withContext(Dispatchers.Main) {
                 onBackPressed()
