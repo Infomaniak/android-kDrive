@@ -430,18 +430,20 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         fun availableOfflineSwitched(fileInfoActionsView: FileInfoActionsView, isChecked: Boolean) {
-            when {
-                currentFile.isOffline && isChecked -> Unit
-                !currentFile.isOffline && !isChecked -> Unit
-                isChecked -> {
-                    trackActionEvent("offline", 1f)
-                    fileInfoActionsView.downloadAsOfflineFile()
-                }
-                else -> {
-                    trackActionEvent("offline", 0f)
-                    val offlineLocalPath = currentFile.getOfflineFile(context)
-                    val cacheFile = currentFile.getCacheFile(context)
-                    offlineLocalPath?.let { removeOfflineFile(offlineLocalPath, cacheFile) }
+            currentFile.apply {
+                when {
+                    isOffline && isChecked -> Unit
+                    !isOffline && !isChecked -> Unit
+                    isChecked -> {
+                        trackActionEvent("offline", 1f)
+                        fileInfoActionsView.downloadAsOfflineFile()
+                    }
+                    else -> {
+                        trackActionEvent("offline", 0f)
+                        val offlineLocalPath = getOfflineFile(context)
+                        val cacheFile = getCacheFile(context)
+                        offlineLocalPath?.let { removeOfflineFile(offlineLocalPath, cacheFile) }
+                    }
                 }
             }
         }
@@ -453,7 +455,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
         fun duplicateFileClicked() {
             currentFile.apply {
-                val fileName = currentFile.getFileName()
+                val fileName = getFileName()
                 val copyName = context.getString(R.string.allDuplicateFileName, fileName, getFileExtension() ?: "")
 
                 Utils.createPromptNameDialog(
@@ -477,7 +479,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                 Utils.createConfirmation(
                     context = context,
                     title = context.getString(R.string.modalLeaveShareTitle),
-                    message = context.getString(R.string.modalLeaveShareDescription, currentFile.name),
+                    message = context.getString(R.string.modalLeaveShareDescription, name),
                     autoDismiss = false
                 ) { dialog ->
                     onLeaveShare {
@@ -496,7 +498,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                     fieldName = if (isFolder()) R.string.hintInputDirName else R.string.hintInputFileName,
                     positiveButton = R.string.buttonSave,
                     fieldValue = name,
-                    selectedRange = currentFile.getFileName().length
+                    selectedRange = getFileName().length
                 ) { dialog, name ->
                     onRenameFile(name) {
                         trackActionEvent("rename")
