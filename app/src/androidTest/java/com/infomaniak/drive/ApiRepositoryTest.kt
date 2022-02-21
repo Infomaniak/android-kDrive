@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive
 
+import android.util.Log
 import com.google.gson.JsonObject
 import com.infomaniak.drive.data.api.ApiRepository.addCategory
 import com.infomaniak.drive.data.api.ApiRepository.createCategory
@@ -273,7 +274,10 @@ class ApiRepositoryTest : KDriveTest() {
         @Test
         @DisplayName("Check if the file activities are correctly retrieved")
         fun getFileActivities() {
-            assertApiResponseData(getFileActivities(testFile, 1))
+            with(getFileActivities(testFile, 1)) {
+                Log.e("getFileActivityTest", context.getString(translatedError))
+                assertApiResponseData(this)
+            }
         }
 
         @Test
