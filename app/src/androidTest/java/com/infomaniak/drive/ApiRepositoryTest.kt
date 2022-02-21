@@ -56,6 +56,7 @@ import com.infomaniak.drive.data.api.ApiRepository.putFileShareLink
 import com.infomaniak.drive.data.api.ApiRepository.removeCategory
 import com.infomaniak.drive.data.api.ApiRepository.updateDropBox
 import com.infomaniak.drive.data.api.ApiRoutes.postFileShare
+import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponseData
 import com.infomaniak.drive.utils.ApiTestUtils.createDropBoxForTest
@@ -278,8 +279,11 @@ class ApiRepositoryTest : KDriveTest() {
         fun getFileActivities() {
             val okHttpClientWithTimeout = runBlocking { KDriveHttpClient.getHttpClient(user.id, 30) }
             with(getFileActivities(okHttpClientWithTimeout, testFile, 1)) {
-                Log.e("getFileActivityTest", "api response error : ${context.getString(translatedError)}")
-                assertApiResponseData(this)
+                if (isSuccess()) {
+                    assertApiResponseData(this)
+                } else {
+                    Log.e("getFileActivityTest", "api response error : ${context.getString(translatedError)}")
+                }
             }
         }
 
