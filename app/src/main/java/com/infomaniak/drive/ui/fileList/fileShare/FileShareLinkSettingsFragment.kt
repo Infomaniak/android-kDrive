@@ -150,9 +150,9 @@ class FileShareLinkSettingsFragment : Fragment() {
             initProgress(this@FileShareLinkSettingsFragment)
             setOnClickListener {
                 showProgress()
-				context?.applicationContext?.trackShareSettingsEvent(
-                	addPasswordSwitch?.isChecked, expirationDateSwitch?.isChecked, allowDownloadValue?.isChecked
-            	)
+                context?.applicationContext?.trackShareSettingsEvent(
+                    addPasswordSwitch?.isChecked, expirationDateSwitch?.isChecked, allowDownloadValue?.isChecked
+                )
                 val isValid = checkPasswordStatus()
                 if (!isValid) {
                     hideProgress(R.string.buttonSave)
@@ -289,7 +289,7 @@ class FileShareLinkSettingsFragment : Fragment() {
         }
     }
 
-	private fun Context.trackShareSettingsEvent(
+    private fun Context.trackShareSettingsEvent(
         protectWithPassword: Boolean?,
         expirationDate: Boolean?,
         downloadFromLink: Boolean?
