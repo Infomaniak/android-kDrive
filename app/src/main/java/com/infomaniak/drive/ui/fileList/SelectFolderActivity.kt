@@ -48,23 +48,28 @@ class SelectFolderActivity : BaseActivity() {
         const val BULK_OPERATION_CUSTOM_TAG = "bulk_operation_type"
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        val userId = intent.extras?.getInt(USER_ID_TAG) ?: throw MissingFormatArgumentException(USER_ID_TAG)
-        val driveId = intent.extras?.getInt(USER_DRIVE_ID_TAG) ?: throw MissingFormatArgumentException(USER_DRIVE_ID_TAG)
-        val customArgs = intent.extras?.getBundle(CUSTOM_ARGS_TAG)
-        val userDrive = UserDrive(userId, driveId)
+    override fun onCreate(savedInstanceState: Bundle?) = with(intent) {
+        val userId = extras?.getInt(USER_ID_TAG) ?: throw MissingFormatArgumentException(USER_ID_TAG)
+        val driveId = extras?.getInt(USER_DRIVE_ID_TAG) ?: throw MissingFormatArgumentException(USER_DRIVE_ID_TAG)
+        val customArgs = extras?.getBundle(CUSTOM_ARGS_TAG)
+        val currentUserDrive = UserDrive(userId, driveId)
 
-        mainViewModel.selectFolderUserDrive = userDrive
-        saveExternalViewModel.userDrive = userDrive
-        saveExternalViewModel.currentDrive = DriveInfosController.getDrives(userId, driveId).firstOrNull()
-        saveExternalViewModel.disableSelectedFolder = intent.extras?.getInt(DISABLE_SELECTED_FOLDER_TAG)
+        mainViewModel.selectFolderUserDrive = currentUserDrive
+
+        saveExternalViewModel.apply {
+            userDrive = currentUserDrive
+            currentDrive = DriveInfosController.getDrives(userId, driveId).firstOrNull()
+            disableSelectedFolderId = extras?.getInt(DISABLE_SELECTED_FOLDER_TAG)
+        }
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_select_folder)
+        setSaveButton(customArgs)
+    }
 
+    private fun setSaveButton(customArgs: Bundle?) {
         saveButton.setOnClickListener {
             val currentFragment = hostFragment.childFragmentManager.fragments.first() as SelectFolderFragment
-
             val intent = Intent().apply {
                 putExtra(FOLDER_ID_TAG, currentFragment.folderId)
                 putExtra(FOLDER_NAME_TAG, currentFragment.folderName)
@@ -90,6 +95,6 @@ class SelectFolderActivity : BaseActivity() {
     class SaveExternalViewModel : ViewModel() {
         var userDrive: UserDrive? = null
         var currentDrive: Drive? = null
-        var disableSelectedFolder: Int? = null
+        var disableSelectedFolderId: Int? = null
     }
 }

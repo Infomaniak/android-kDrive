@@ -72,32 +72,28 @@ open class FileAdapter(
     private var showLoading = false
     private var fileAdapterObserver: RecyclerView.AdapterDataObserver? = null
 
-    private fun createFileAdapterObserver(recyclerView: RecyclerView): RecyclerView.AdapterDataObserver {
-        return object : RecyclerView.AdapterDataObserver() {
+    private fun createFileAdapterObserver(recyclerView: RecyclerView) = object : RecyclerView.AdapterDataObserver() {
 
-            private fun notifyChanged(position: Int) {
-                recyclerView.post {
-                    if (fileList.isNotEmpty() && position < fileList.count()) notifyItemChanged(position)
+        private fun notifyChanged(position: Int) {
+            recyclerView.post { if (fileList.isNotEmpty() && position < fileList.count()) notifyItemChanged(position) }
+        }
+
+        override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+            if (fileList.isEmpty()) {
+                onEmptyList?.invoke()
+            } else if (viewHolderType == DisplayType.LIST && fileList.isNotEmpty()) {
+                when {
+                    positionStart == 0 -> notifyChanged(0)
+                    positionStart >= fileList.count() -> notifyChanged(fileList.lastIndex)
                 }
             }
+        }
 
-            override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
-                if (fileList.isEmpty()) {
-                    onEmptyList?.invoke()
-                } else if (viewHolderType == DisplayType.LIST && fileList.isNotEmpty()) {
-                    when {
-                        positionStart == 0 -> notifyChanged(0)
-                        positionStart >= fileList.count() -> notifyChanged(fileList.lastIndex)
-                    }
-                }
-            }
-
-            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                if (viewHolderType == DisplayType.LIST && fileList.count() > 1) {
-                    when {
-                        positionStart == 0 -> notifyChanged(itemCount)
-                        positionStart + itemCount == fileList.count() -> notifyChanged(fileList.lastIndex - itemCount)
-                    }
+        override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+            if (viewHolderType == DisplayType.LIST && fileList.count() > 1) {
+                when {
+                    positionStart == 0 -> notifyChanged(itemCount)
+                    positionStart + itemCount == fileList.count() -> notifyChanged(fileList.lastIndex - itemCount)
                 }
             }
         }
@@ -259,71 +255,89 @@ open class FileAdapter(
         }
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView.fileCardView) {
         if (getItemViewType(position) != VIEW_TYPE_LOADING) {
             val file = getFile(position)
+            val isGrid = viewHolderType == DisplayType.GRID
 
-            holder.itemView.fileCardView.apply {
-                val isGrid = viewHolderType == DisplayType.GRID
+            if (isGrid) {
+                if (isHomeOffline) (layoutParams as ConstraintLayout.LayoutParams).dimensionRatio = "2:1"
+            } else {
+                setCorners(position, itemCount)
+            }
 
-                if (!isGrid) setCorners(position, itemCount)
+            setFileItem(file, isGrid)
+            checkIfEnableFile(file)
 
-                if (isGrid && isHomeOffline) {
-                    (layoutParams as ConstraintLayout.LayoutParams).dimensionRatio = "2:1"
-                }
+            when {
+                uploadInProgress && !file.isPendingUploadFolder() -> displayStopUploadButton(position, file)
+                multiSelectMode -> displayFileChecked(file, isGrid)
+                else -> displayFilePreview()
+            }
 
-                setFileItem(file, isGrid)
+            setupFileChecked(file)
+            setupMenuButton(file)
+            setupCardClicksListeners(file)
+        }
+    }
 
-                checkIfEnableFile(file)
+    private fun MaterialCardView.displayStopUploadButton(position: Int, file: File) {
+        stopUploadButton?.apply {
+            setOnClickListener { onStopUploadButtonClicked?.invoke(position, file.name) }
+            isVisible = true
+        }
+    }
 
-                when {
-                    uploadInProgress && !file.isPendingUploadFolder() -> {
-                        stopUploadButton?.setOnClickListener { onStopUploadButtonClicked?.invoke(position, file.name) }
-                        stopUploadButton?.isVisible = true
-                    }
-                    multiSelectMode -> {
-                        fileChecked.isChecked = isSelectedFile(file) || allSelected
-                        fileChecked.isVisible = true
-                        filePreview.isVisible = isGrid
-                    }
-                    else -> {
-                        filePreview.isVisible = true
-                        fileChecked.isGone = true
-                    }
-                }
+    private fun MaterialCardView.displayFileChecked(file: File, isGrid: Boolean) {
+        fileChecked.apply {
+            isChecked = isSelectedFile(file) || allSelected
+            isVisible = true
+        }
+        filePreview.isVisible = isGrid
+    }
 
-                menuButton?.apply {
-                    isGone = uploadInProgress
-                            || selectFolder
-                            || file.isDrive()
-                            || file.isTrashed()
-                            || file.isFromActivities
-                            || file.isFromSearch
-                            || (offlineMode && !file.isOffline)
-                    setOnClickListener { onMenuClicked?.invoke(file) }
-                }
+    private fun MaterialCardView.displayFilePreview() {
+        filePreview.isVisible = true
+        fileChecked.isGone = true
+    }
 
-                fileChecked.setOnClickListener {
-                    onSelectedFile(file, fileChecked.isChecked)
-                }
-                setOnClickListener {
-                    if (multiSelectMode) {
-                        fileChecked.isChecked = !fileChecked.isChecked
-                        onSelectedFile(file, fileChecked.isChecked)
-                    } else {
-                        val trackerName = "preview" + file.getFileType().value.replaceFirstChar { it.titlecase() }
-                        context.applicationContext?.trackEvent("preview", TrackerAction.CLICK, trackerName)
-                        onFileClicked?.invoke(file)
-                    }
-                }
-                setOnLongClickListener {
-                    if (enabledMultiSelectMode) {
-                        fileChecked.isChecked = !fileChecked.isChecked
-                        onSelectedFile(file, fileChecked.isChecked)
-                        if (!multiSelectMode) openMultiSelectMode?.invoke()
-                        true
-                    } else false
-                }
+    private fun MaterialCardView.setupFileChecked(file: File) {
+        fileChecked.apply { setOnClickListener { onSelectedFile(file, isChecked) } }
+    }
+
+    private fun MaterialCardView.setupMenuButton(file: File) {
+        menuButton?.apply {
+            isGone = uploadInProgress
+                    || selectFolder
+                    || file.isDrive()
+                    || file.isTrashed()
+                    || file.isFromActivities
+                    || file.isFromSearch
+                    || (offlineMode && !file.isOffline)
+            setOnClickListener { onMenuClicked?.invoke(file) }
+        }
+    }
+
+    private fun MaterialCardView.setupCardClicksListeners(file: File) {
+        setOnClickListener {
+            if (multiSelectMode) {
+                fileChecked.isChecked = !fileChecked.isChecked
+                onSelectedFile(file, fileChecked.isChecked)
+            } else {
+				val trackerName = "preview" + file.getFileType().value.replaceFirstChar { it.titlecase() }
+                context.applicationContext?.trackEvent("preview", TrackerAction.CLICK, trackerName)
+                onFileClicked?.invoke(file)
+            }
+        }
+
+        setOnLongClickListener {
+            if (enabledMultiSelectMode) {
+                fileChecked.isChecked = !fileChecked.isChecked
+                onSelectedFile(file, fileChecked.isChecked)
+                if (!multiSelectMode) openMultiSelectMode?.invoke()
+                true
+            } else {
+                false
             }
         }
     }

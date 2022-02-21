@@ -6,16 +6,17 @@ apply plugin: 'androidx.navigation.safeargs.kotlin'
 apply plugin: 'realm-android'
 
 android {
+
     compileSdkVersion 31
 
     defaultConfig {
-        applicationId "com.infomaniak.drive"
+        applicationId 'com.infomaniak.drive'
         minSdkVersion 21
         targetSdkVersion 31
         versionCode 4_01_000_06
-        versionName "4.1.0"
+        versionName '4.1.0'
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
         buildConfigField 'String', 'CLIENT_ID', '"9473D73C-C20F-4971-9E10-D957C563FA68"'
         buildConfigField 'String', 'DRIVE_API', '"https://drive.infomaniak.com/drive/"'
@@ -39,9 +40,7 @@ android {
         targetCompatibility rootProject.ext.java_version
     }
 
-    kotlinOptions {
-        jvmTarget = rootProject.ext.java_version
-    }
+    kotlinOptions { jvmTarget = rootProject.ext.java_version }
 
     buildTypes {
         release {
@@ -50,17 +49,15 @@ android {
         }
     }
 
-    flavorDimensions "distribution"
+    flavorDimensions 'distribution'
     productFlavors {
         standard {
-            dimension "distribution"
+            dimension 'distribution'
             apply plugin: 'com.google.gms.google-services'
         }
-        fdroid {
-            dimension "distribution"
-        }
+        fdroid { dimension 'distribution' }
         preprod {
-            dimension "distribution"
+            dimension 'distribution'
             buildConfigField 'String', 'DRIVE_API', '"https://drive.preprod.dev.infomaniak.ch/drive/"'
             buildConfigField 'String', 'DRIVE_API_V2', '"https://drive.preprod.dev.infomaniak.ch/2/drive/"'
         }
@@ -68,7 +65,7 @@ android {
 
     gradle.buildFinished { BuildResult buildResult ->
         try {
-            "say \"Ok\"".execute()
+            'say \"Ok\"'.execute()
         } catch (Throwable ignored) {
         }
     }
@@ -95,7 +92,7 @@ sentry {
 }
 
 dependencies {
-    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(path: ':Core')
 
     def work_version = '2.7.1'
@@ -124,13 +121,11 @@ dependencies {
     implementation "io.coil-kt:coil-gif:$coil_version"
 
     def glide_version = '4.12.0'
-    implementation("com.github.bumptech.glide:glide:$glide_version") {
-        exclude group: "com.android.support"
-    }
+    implementation("com.github.bumptech.glide:glide:$glide_version") { exclude group: 'com.android.support' }
     implementation "com.github.bumptech.glide:okhttp3-integration:$glide_version"
     kapt "com.github.bumptech.glide:compiler:$glide_version"
 
-    implementation "io.realm:android-adapters:4.0.0"
+    implementation 'io.realm:android-adapters:4.0.0'
 
     standardImplementation 'com.google.android.play:core:1.10.3'
     standardImplementation 'com.google.firebase:firebase-messaging-ktx:23.0.0'

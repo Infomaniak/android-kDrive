@@ -269,44 +269,41 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     }
 
     @Deprecated(message = "Only for API 29 and below, otherwise use MediaStore.createDeleteRequest()")
-    fun deleteSynchronizedFilesOnDevice(filesToDelete: ArrayList<UploadFile>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val fileDeleted = arrayListOf<UploadFile>()
-            filesToDelete.forEach { uploadFile ->
-                val uri = uploadFile.getUriObject()
-                if (!uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
-                    try {
-                        SyncUtils.checkDocumentProviderPermissions(getContext(), uri)
-                        getContext().contentResolver.query(
-                            uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null
-                        )?.use { cursor ->
-                            if (cursor.moveToFirst()) {
-                                var columnIndex: Int? = null
-                                var pathname: String? = null
-                                try {
-                                    columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-                                    pathname = cursor.getString(columnIndex)
-                                    java.io.File(pathname).delete()
-                                    getContext().contentResolver.delete(uri, null, null)
-                                    fileDeleted.add(uploadFile)
-                                } catch (nullPointerException: NullPointerException) {
-                                    Sentry.withScope { scope ->
-                                        scope.setExtra("columnIndex", columnIndex.toString())
-                                        scope.setExtra("pathname", pathname.toString())
-                                        scope.setExtra("uploadFileUri", uploadFile.uri)
-                                        Sentry.captureException(Exception("deleteSynchronizedFilesOnDevice()"))
-                                    }
+    fun deleteSynchronizedFilesOnDevice(filesToDelete: ArrayList<UploadFile>) = viewModelScope.launch(Dispatchers.IO) {
+        val fileDeleted = arrayListOf<UploadFile>()
+        filesToDelete.forEach { uploadFile ->
+            val uri = uploadFile.getUriObject()
+            if (!uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
+                try {
+                    SyncUtils.checkDocumentProviderPermissions(getContext(), uri)
+                    val query = getContext().contentResolver.query(uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null)
+                    query?.use { cursor ->
+                        if (cursor.moveToFirst()) {
+                            var columnIndex: Int? = null
+                            var pathname: String? = null
+                            try {
+                                columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+                                pathname = cursor.getString(columnIndex)
+                                java.io.File(pathname).delete()
+                                getContext().contentResolver.delete(uri, null, null)
+                                fileDeleted.add(uploadFile)
+                            } catch (nullPointerException: NullPointerException) {
+                                Sentry.withScope { scope ->
+                                    scope.setExtra("columnIndex", columnIndex.toString())
+                                    scope.setExtra("pathname", pathname.toString())
+                                    scope.setExtra("uploadFileUri", uploadFile.uri)
+                                    Sentry.captureException(Exception("deleteSynchronizedFilesOnDevice()"))
                                 }
                             }
                         }
-                    } catch (exception: SecurityException) {
-                        exception.printStackTrace()
-                        fileDeleted.add(uploadFile)
                     }
+                } catch (exception: SecurityException) {
+                    exception.printStackTrace()
+                    fileDeleted.add(uploadFile)
                 }
             }
-            UploadFile.deleteAll(fileDeleted)
         }
+        UploadFile.deleteAll(fileDeleted)
     }
 
     override fun onCleared() {

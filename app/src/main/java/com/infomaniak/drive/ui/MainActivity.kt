@@ -44,6 +44,7 @@ import androidx.core.view.get
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
@@ -123,29 +124,47 @@ class MainActivity : BaseActivity() {
 
         downloadReceiver = DownloadReceiver(mainViewModel)
         fileObserver.startWatching()
+        val navController = setupNavController()
 
+        setupBottomNavigation(navController)
+        handleShowProgressIntent(navController)
+        listenToNetworkStatus()
+
+        navController.addOnDestinationChangedListener { _, dest, args -> onDestinationChanged(dest, args) }
+
+        setupMainFab(navController)
+        setupDrivePermissions()
+        handleInAppReview()
+        handleUpdates(navController)
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
+    }
+
+    private fun setupNavController(): NavController {
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
-
-        val navController = navHostFragment.navController.apply {
-            if (currentDestination == null) {
-                navigate(graph.startDestinationId)
-            }
+        return navHostFragment.navController.apply {
+            if (currentDestination == null) navigate(graph.startDestinationId)
         }
+    }
 
-        bottomNavigation.setupWithNavControllerCustom(navController)
-        bottomNavigation.itemIconTintList = ContextCompat.getColorStateList(this, R.color.item_icon_tint_bottom)
-        bottomNavigation.selectedItemId = UiSettings(this).bottomNavigationSelectedItem
-        bottomNavigation.setOnItemReselectedListener { item ->
-            when (item.itemId) {
-                R.id.fileListFragment,
-                R.id.favoritesFragment -> {
-                    navController.popBackStack(R.id.homeFragment, false)
-                    navController.navigate(item.itemId)
+    private fun setupBottomNavigation(navController: NavController) {
+        bottomNavigation.apply {
+            setupWithNavControllerCustom(navController)
+            itemIconTintList = ContextCompat.getColorStateList(this@MainActivity, R.color.item_icon_tint_bottom)
+            selectedItemId = UiSettings(this@MainActivity).bottomNavigationSelectedItem
+            setOnItemReselectedListener { item ->
+                when (item.itemId) {
+                    R.id.fileListFragment, R.id.favoritesFragment -> {
+                        navController.popBackStack(R.id.homeFragment, false)
+                        navController.navigate(item.itemId)
+                    }
+                    else -> navController.popBackStack(item.itemId, false)
                 }
-                else -> navController.popBackStack(item.itemId, false)
             }
         }
+    }
 
+    private fun handleShowProgressIntent(navController: NavController) {
         intent?.getIntExtra(INTENT_SHOW_PROGRESS, 0)?.let { folderId ->
             if (folderId > 0) {
                 Sentry.addBreadcrumb(Breadcrumb().apply {
@@ -158,7 +177,9 @@ class MainActivity : BaseActivity() {
                 mainViewModel.navigateFileListToFolderId(navController, folderId)
             }
         }
+    }
 
+    private fun listenToNetworkStatus() {
         LiveDataNetworkStatus(this).observe(this) { isAvailable ->
             Log.d("Internet availability", if (isAvailable) "Available" else "Unavailable")
             Sentry.addBreadcrumb(Breadcrumb().apply {
@@ -168,28 +189,34 @@ class MainActivity : BaseActivity() {
             })
             mainViewModel.isInternetAvailable.value = isAvailable
             if (isAvailable) {
-                lifecycleScope.launch {
-                    AccountUtils.updateCurrentUserAndDrives(this@MainActivity)
-                }
+                lifecycleScope.launch { AccountUtils.updateCurrentUserAndDrives(this@MainActivity) }
             }
         }
+    }
 
-        navController.addOnDestinationChangedListener { _, destination, navigationArgs ->
-            onDestinationChanged(destination, navigationArgs)
-        }
-
+    private fun setupMainFab(navController: NavController) {
         mainFab.setOnClickListener { navController.navigate(R.id.addFileBottomSheetDialog) }
         mainViewModel.currentFolder.observe(this) { file ->
             mainFab.isEnabled = file?.rights?.newFile == true
         }
+    }
 
+    private fun setupDrivePermissions() {
         drivePermissions = DrivePermissions().apply {
             registerPermissions(this@MainActivity)
             checkWriteStoragePermission()
         }
+    }
 
-        if (AppSettings.appLaunches == 20 || (AppSettings.appLaunches != 0 && AppSettings.appLaunches % 100 == 0)) launchInAppReview()
+    private fun handleInAppReview() {
+        with(AppSettings) {
+            if (appLaunches == 20 || (appLaunches != 0 && appLaunches % 100 == 0)) {
+                launchInAppReview()
+            }
+        }
+    }
 
+    private fun handleUpdates(navController: NavController) {
         if (!UiSettings(this).updateLater || AppSettings.appLaunches % 10 == 0) {
             checkUpdateIsAvailable { updateIsAvailable ->
                 if (!updateAvailableShow && updateIsAvailable) {
@@ -198,8 +225,6 @@ class MainActivity : BaseActivity() {
                 }
             }
         }
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
     }
 
     override fun onResume() {
@@ -223,6 +248,10 @@ class MainActivity : BaseActivity() {
         setBottomNavigationUserAvatar(this)
         startContentObserverService()
 
+        handleDeletionOfUploadedPhotos()
+    }
+
+    private fun handleDeletionOfUploadedPhotos() {
         if (UploadFile.getAppSyncSettings()?.deleteAfterSync == true && UploadFile.getCurrentUserPendingUploadsCount() == 0) {
             UploadFile.getAllUploadedFiles()?.let { filesUploadedRecently ->
                 if (filesUploadedRecently.size >= SYNCED_FILES_DELETION_FILES_AMOUNT) {
