@@ -65,7 +65,9 @@ import com.infomaniak.drive.utils.ApiTestUtils.deleteTestFile
 import com.infomaniak.drive.utils.ApiTestUtils.getCategory
 import com.infomaniak.drive.utils.ApiTestUtils.getShareLink
 import com.infomaniak.drive.utils.ApiTestUtils.putNewFileInTrash
+import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import java.util.*
@@ -274,8 +276,9 @@ class ApiRepositoryTest : KDriveTest() {
         @Test
         @DisplayName("Check if the file activities are correctly retrieved")
         fun getFileActivities() {
-            with(getFileActivities(testFile, 1)) {
-                Log.e("getFileActivityTest", context.getString(translatedError))
+            val okHttpClientWithTimeout = runBlocking { KDriveHttpClient.getHttpClient(user.id, 30) }
+            with(getFileActivities(okHttpClientWithTimeout, testFile, 1)) {
+                Log.e("getFileActivityTest", "api response error : ${context.getString(translatedError)}")
                 assertApiResponseData(this)
             }
         }
