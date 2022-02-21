@@ -77,7 +77,9 @@ open class UploadFile(
 
     fun isSyncOffline() = type == Type.SYNC_OFFLINE.name
 
-    fun isCloudStorage() = type == Type.CLOUD_STORAGE.name
+    private fun isCloudStorage() = type == Type.CLOUD_STORAGE.name
+
+    fun replaceOnConflict() = isSync() || isSyncOffline() || isCloudStorage()
 
     fun refreshIdentifier() {
         getRealmInstance().use { realm ->
