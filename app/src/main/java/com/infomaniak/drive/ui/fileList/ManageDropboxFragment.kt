@@ -159,7 +159,7 @@ open class ManageDropboxFragment : Fragment() {
         disableButton.apply {
             initProgress(this@ManageDropboxFragment)
             setOnClickListener {
-            	trackDropBoxEvent("convertToFolder")
+                trackDropBoxEvent("convertToFolder")
                 showProgress(ContextCompat.getColor(requireContext(), R.color.title))
                 mainViewModel.deleteDropBox(file).observe(viewLifecycleOwner) { apiResponse ->
                     if (apiResponse.isSuccess()) {
@@ -177,7 +177,7 @@ open class ManageDropboxFragment : Fragment() {
         saveButton.apply {
             initProgress(this@ManageDropboxFragment)
             setOnClickListener {
-            	trackDropBoxEvent("saveDropbox")
+                trackDropBoxEvent("saveDropbox")
                 currentDropBox?.newPasswordValue = passwordTextInput.text?.toString()
                 currentDropBox?.newLimitFileSize = if (limitStorageSwitch.isChecked) {
                     limitStorageValue.text?.toString()?.toLongOrNull()?.let { Utils.convertGigaByteToBytes(it) }
