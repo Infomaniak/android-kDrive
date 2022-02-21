@@ -68,10 +68,33 @@ class UploadInProgressFragment : FileListFragment() {
 
         super.onViewCreated(view, savedInstanceState)
 
-        val fromPendingFolders = findNavController().previousBackStackEntry?.destination?.id == R.id.uploadInProgressFragment
-        collapsingToolbarLayout.title =
-            if (folderId > 0 && fromPendingFolders) folderName else getString(R.string.uploadInProgressTitle)
+        setupCollapsingToolbarLayout()
+        observeTrackUploadWorkerProgress()
+        observeTrackUploadWorkerSucceeded()
+        observeIndexUploadToDelete()
+        mainViewModel.refreshActivities.removeObservers(super.getViewLifecycleOwner())
+        setupOnStopUploadButtonClicked()
 
+        if (isPendingFolders()) {
+            fileAdapter.onFileClicked = { navigateToUploadView(it.id, it.name) }
+        } else {
+            toolbar.setNavigationOnClickListener { popBackStack() }
+            requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { popBackStack() }
+        }
+
+        sortLayout.isGone = true
+    }
+
+    private fun setupCollapsingToolbarLayout() {
+        val fromPendingFolders = findNavController().previousBackStackEntry?.destination?.id == R.id.uploadInProgressFragment
+        collapsingToolbarLayout.title = if (folderId > 0 && fromPendingFolders) {
+            folderName
+        } else {
+            getString(R.string.uploadInProgressTitle)
+        }
+    }
+
+    private fun observeTrackUploadWorkerProgress() {
         requireContext().trackUploadWorkerProgress().observe(viewLifecycleOwner) {
             val workInfo = it.firstOrNull() ?: return@observe
             val fileName = workInfo.progress.getString(UploadWorker.FILENAME) ?: return@observe
@@ -85,27 +108,29 @@ class UploadInProgressFragment : FileListFragment() {
                     if (!isPendingFolders()) whenAnUploadIsDone(position, fileAdapter.fileList[position].id)
                     fileListViewModel.currentAdapterPendingFiles.value = fileAdapter.getFileObjectsList(null)
                 } else {
-                    fileAdapter.updateFileProgress(position = position, progress = progress)
+                    fileAdapter.updateFileProgress(position, progress)
                 }
             }
 
             Log.d("uploadInProgress", "$fileName $progress%")
         }
+    }
 
+    private fun observeTrackUploadWorkerSucceeded() {
         requireContext().trackUploadWorkerSucceeded().observe(viewLifecycleOwner) {
             fileListViewModel.currentAdapterPendingFiles.value = fileAdapter.getFileObjectsList(null)
         }
+    }
 
+    private fun observeIndexUploadToDelete() {
         fileListViewModel.indexUploadToDelete.observe(viewLifecycleOwner) { list ->
-            list?.let {
-                list.forEach { (position, fileId) ->
-                    whenAnUploadIsDone(position, fileId)
-                }
+            list?.forEach { (position, fileId) ->
+                whenAnUploadIsDone(position, fileId)
             }
         }
+    }
 
-        mainViewModel.refreshActivities.removeObservers(super.getViewLifecycleOwner())
-
+    private fun setupOnStopUploadButtonClicked() {
         fileAdapter.onStopUploadButtonClicked = { position, fileName ->
             pendingUploadFiles.find { it.fileName == fileName }?.let { syncFile ->
                 val title = getString(R.string.uploadInProgressCancelFileUploadTitle, syncFile.fileName)
@@ -117,15 +142,6 @@ class UploadInProgressFragment : FileListFragment() {
                 }
             }
         }
-
-        if (isPendingFolders()) {
-            fileAdapter.onFileClicked = { navigateToUploadView(it.id, it.name) }
-        } else {
-            toolbar.setNavigationOnClickListener { popBackStack() }
-            requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { popBackStack() }
-        }
-
-        sortLayout.isGone = true
     }
 
     override fun setupFileAdapter() {
