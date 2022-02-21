@@ -133,12 +133,13 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             offscreenPageLimit = 1
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
-                    currentFile = previewSliderAdapter.getFile(position)
-                    editButton.isVisible = currentFile.isOnlyOfficePreview()
-                    openWithButton.isGone = currentFile.isOnlyOfficePreview()
-                    bottomSheetFileInfos.openWith.isVisible = true
-                    lifecycleScope.launchWhenResumed {
-                        withContext(Dispatchers.Main) { bottomSheetFileInfos.updateCurrentFile(currentFile) }
+                    previewSliderAdapter.getFile(position).let {
+                        editButton.isVisible = it.isOnlyOfficePreview()
+                        openWithButton.isGone = it.isOnlyOfficePreview()
+                        bottomSheetFileInfos.openWith.isVisible = true
+                        lifecycleScope.launchWhenResumed {
+                            withContext(Dispatchers.Main) { bottomSheetFileInfos.updateCurrentFile(it) }
+                        }
                     }
                 }
             })
