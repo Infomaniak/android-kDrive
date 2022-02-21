@@ -25,6 +25,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.utils.AccountUtils
 import kotlinx.coroutines.Dispatchers
 
@@ -54,8 +55,11 @@ class FileShareViewModel : ViewModel() {
             "block_downloads" to shareLink.blockDownloads,
             "block_comments" to shareLink.blockComments,
             "block_information" to shareLink.blockInformation,
-            "valid_until" to (shareLink.validUntil?.time?.let { it / 1_000L } ?: "")
         )
+
+        if (AccountUtils.getCurrentDrive()?.pack != Drive.DrivePack.FREE.value) {
+            body["valid_until"] = shareLink.validUntil?.time?.let { it / 1_000L } ?: ""
+        }
 
         when {
             shareLink.password.isNullOrBlank() -> {
