@@ -25,7 +25,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -60,18 +60,16 @@ import kotlin.math.min
 
 class PicturesFragment(
     private val multiSelectParent: MultiSelectParent? = null,
-    private val onFinish: (() -> Unit)? = null
+    private val onFinish: (() -> Unit)? = null,
 ) : Fragment(), MultiSelectListener {
 
     private val mainViewModel: MainViewModel by activityViewModels()
     private val picturesViewModel: PicturesViewModel by viewModels()
     private val picturesAdapter: PicturesAdapter by lazy {
-        PicturesAdapter { file ->
-            Utils.displayFile(mainViewModel, findNavController(), file, picturesAdapter.pictureList)
-        }
+        PicturesAdapter { file -> Utils.displayFile(mainViewModel, findNavController(), file, picturesAdapter.pictureList) }
     }
 
-    private val selectFolderResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data ->
             with(data?.extras!!) {
                 val folderName = getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
@@ -82,7 +80,7 @@ class PicturesFragment(
 
                 performBulkOperation(
                     type = bulkOperationType,
-                    destinationFolder = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId)
+                    destinationFolder = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId),
                 )
             }
         }
@@ -103,15 +101,11 @@ class PicturesFragment(
         noPicturesLayout.setup(
             icon = R.drawable.ic_images,
             title = R.string.picturesNoFile,
-            initialListView = picturesRecyclerView
+            initialListView = picturesRecyclerView,
         )
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            if (picturesAdapter.multiSelectMode) {
-                closeMultiSelect()
-            } else {
-                findNavController().popBackStack()
-            }
+            if (picturesAdapter.multiSelectMode) closeMultiSelect() else findNavController().popBackStack()
         }
 
         picturesAdapter.apply {
@@ -136,8 +130,7 @@ class PicturesFragment(
             if (fileId == 0) return@observe
 
             val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 100)
-
-            if(progress == 100) picturesAdapter.updateOfflineStatus(fileId)
+            if (progress == 100) picturesAdapter.updateOfflineStatus(fileId)
         }
 
         getPictures()
@@ -190,9 +183,7 @@ class PicturesFragment(
     fun performBulkOperation(type: BulkOperationType, destinationFolder: File? = null, color: String? = null) {
 
         val selectedFiles = picturesAdapter.getValidItemsSelected()
-
         val fileCount = selectedFiles.size
-
         val sendActions: (dialog: Dialog?) -> Unit = sendActions(fileCount, selectedFiles, type, destinationFolder, color)
 
         if (type == BulkOperationType.TRASH) {
@@ -306,11 +297,11 @@ class PicturesFragment(
                 mediator.addSource(
                     mainViewModel.deleteFileFromFavorites(
                         file,
-                        callback = {
+                        onFileUpdate = {
                             lifecycleScope.launch(Dispatchers.Main) {
                                 picturesAdapter.notifyFileChanged(file.id) { it.isFavorite = false }
                             }
-                        }
+                        },
                     ),
                     mainViewModel.updateMultiSelectMediator(mediator),
                 )
@@ -403,8 +394,7 @@ class PicturesFragment(
     }
 
     private fun enableButtonMultiSelect(isEnabled: Boolean) {
-        if (isEnabled) multiSelectParent?.enableMultiSelectActionButtons()
-        else multiSelectParent?.disableMultiSelectActionButtons()
+        multiSelectParent?.run { if (isEnabled) enableMultiSelectActionButtons() else disableMultiSelectActionButtons() }
     }
 
     private fun configPicturesLayoutManager() {
@@ -427,10 +417,15 @@ class PicturesFragment(
     }
 
     private fun openMultiSelect() {
-        picturesAdapter.multiSelectMode = true
-        picturesAdapter.notifyItemRangeChanged(0, picturesAdapter.itemCount)
-        multiSelectParent?.openMultiSelectBar()
-        multiSelectParent?.disableSwipeRefresh()
+        picturesAdapter.apply {
+            multiSelectMode = true
+            notifyItemRangeChanged(0, itemCount)
+        }
+
+        multiSelectParent?.run {
+            openMultiSelectBar()
+            disableSwipeRefresh()
+        }
     }
 
     fun duplicateFiles() {
@@ -452,8 +447,10 @@ class PicturesFragment(
             notifyItemRangeChanged(0, itemCount)
         }
 
-        multiSelectParent?.closeMultiSelectBar()
-        multiSelectParent?.enableSwipeRefresh()
+        multiSelectParent?.run {
+            closeMultiSelectBar()
+            enableSwipeRefresh()
+        }
     }
 
     private fun getPictures() {
@@ -481,8 +478,8 @@ class PicturesFragment(
         }
     }
 
-    companion object {
-        private const val numberItemLoader = 12
+    private companion object {
+        const val numberItemLoader = 12
     }
 }
 

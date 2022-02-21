@@ -48,21 +48,15 @@ class MenuPicturesFragment : Fragment(), MultiSelectParent {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        binding = FragmentMenuPicturesBinding.inflate(inflater, container, false)
+        binding = FragmentMenuPicturesBinding.inflate(inflater, container, false).apply {
+            toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        binding.toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
-        }
-
-        binding.apply {
             closeButtonMultiSelect.setOnClickListener { picturesFragment.onCloseMultiSelection() }
             moveButtonMultiSelect.setOnClickListener { picturesFragment.onMove() }
             deleteButtonMultiSelect.setOnClickListener { picturesFragment.onDelete() }
             menuButtonMultiSelect.setOnClickListener { picturesFragment.onMenu() }
-        }
 
-        binding.swipeRefreshLayout.setOnRefreshListener {
-            picturesFragment.onRefreshPictures()
+            swipeRefreshLayout.setOnRefreshListener { picturesFragment.onRefreshPictures() }
         }
 
         return binding.root
@@ -103,15 +97,15 @@ class MenuPicturesFragment : Fragment(), MultiSelectParent {
         menuButtonMultiSelect.isEnabled = false
     }
 
-    override fun setTitleMultiSelect(title: String) {
-        binding.titleMultiSelect.text = title
+    override fun setTitleMultiSelect(title: String) = with(binding) {
+        titleMultiSelect.text = title
     }
 
-    override fun disableSwipeRefresh() {
-        binding.swipeRefreshLayout.isEnabled = false
+    override fun disableSwipeRefresh() = with(binding) {
+        swipeRefreshLayout.isEnabled = false
     }
 
-    override fun enableSwipeRefresh() {
-        binding.swipeRefreshLayout.isEnabled = true
+    override fun enableSwipeRefresh() = with(binding) {
+        swipeRefreshLayout.isEnabled = true
     }
 }

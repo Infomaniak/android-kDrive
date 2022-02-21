@@ -44,8 +44,9 @@ class ActionPicturesMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
     private val actionMultiSelectModel by viewModels<ActionMultiSelectModel>()
     private val navigationArgs: ActionMultiSelectBottomSheetDialogArgs by navArgs()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        inflater.inflate(R.layout.fragment_bottom_sheet_action_multi_select, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return inflater.inflate(R.layout.fragment_bottom_sheet_action_multi_select, container, false)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -93,8 +94,11 @@ class ActionPicturesMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun configureDownloadFile() {
-        val drivePermissions = DrivePermissions()
-        drivePermissions.registerPermissions(this) { authorized -> if (authorized) downloadFileArchive() }
+        val drivePermissions = DrivePermissions().apply {
+            registerPermissions(this@ActionPicturesMultiSelectBottomSheetDialog) { authorized ->
+                if (authorized) downloadFileArchive()
+            }
+        }
         downloadFile.apply {
             setOnClickListener { if (drivePermissions.checkWriteStoragePermission()) downloadFileArchive() }
             isVisible = navigationArgs.fileIds.isNotEmpty()

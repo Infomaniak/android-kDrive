@@ -34,9 +34,7 @@ import io.realm.RealmList
 import kotlinx.android.synthetic.main.cardview_picture.view.*
 import kotlinx.android.synthetic.main.title_recycler_section.view.*
 
-class PicturesAdapter(
-    private val onItemClick: (file: File) -> Unit
-) : LoaderAdapter<Any>() {
+class PicturesAdapter(private val onItemClick: (file: File) -> Unit) : LoaderAdapter<Any>() {
 
     var itemsSelected: OrderedRealmCollection<File> = RealmList()
 
@@ -79,10 +77,10 @@ class PicturesAdapter(
                 .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
 
             if (newestSectionTitle != month) {
-                // This case can only be hit once when adding duplicated images
-                // If we need to add a month section title, it needs to be inserted a position 0 where as if we only insert the
-                // images without creating a new month section title, it needs to be inserted at position 1 right after the
-                // existing month title
+                // This case can only be hit once, when adding duplicated images.
+                // If we need to add a new month section title, it needs to be inserted at position 0.
+                // If we only insert images, without creating a new month section title,
+                // they need to be inserted at position 1, right after the existing month title.
                 index = 0
                 itemList.add(index++, month)
                 newestSectionTitle = month
@@ -169,16 +167,11 @@ class PicturesAdapter(
 
     fun getValidItemsSelected() = itemsSelected.filter { it.isUsable() }
 
-    private fun isSelectedFile(file: File): Boolean {
-        return itemsSelected.any { it.isUsable() && it.id == file.id }
-    }
+    private fun isSelectedFile(file: File): Boolean = itemsSelected.any { it.isUsable() && it.id == file.id }
 
     private fun onSelectedFile(file: File, isSelected: Boolean) {
         if (file.isUsable()) {
-            when {
-                isSelected -> addSelectedFile(file)
-                else -> removeSelectedFile(file)
-            }
+            if (isSelected) addSelectedFile(file) else removeSelectedFile(file)
         } else {
             itemsSelected = RealmList()
         }
@@ -211,14 +204,11 @@ class PicturesAdapter(
 
     fun deleteByFileId(fileId: Int) {
         indexOf(fileId)?.let(::deleteAt)
-        pictureList.indexOfFirstOrNull { (it as? File)?.id == fileId }
-            ?.let(pictureList::removeAt)
+        pictureList.indexOfFirstOrNull { (it as? File)?.id == fileId }?.let(pictureList::removeAt)
     }
 
     fun updateFileProgressByFileId(fileId: Int, progress: Int, onComplete: ((position: Int, file: File) -> Unit)? = null) {
-        indexOf(fileId)?.let { position ->
-            updateFileProgress(position, progress, onComplete)
-        }
+        indexOf(fileId)?.let { position -> updateFileProgress(position, progress, onComplete) }
     }
 
     private fun updateFileProgress(position: Int, progress: Int, onComplete: ((position: Int, file: File) -> Unit)? = null) {
@@ -226,17 +216,13 @@ class PicturesAdapter(
         file.currentProgress = progress
         notifyItemChanged(position, progress)
 
-        if (progress == 100) {
-            onComplete?.invoke(position, file)
-        }
+        if (progress == 100) onComplete?.invoke(position, file)
     }
 
     private fun getFile(position: Int) = itemList[position] as File
 
     fun updateOfflineStatus(fileId: Int) {
-        indexOf(fileId)?.let { position ->
-            (itemList[position] as? File)?.isOffline = true
-        }
+        indexOf(fileId)?.let { position -> (itemList[position] as? File)?.isOffline = true }
     }
 
     fun notifyFileChanged(fileId: Int, onChange: ((file: File) -> Unit)? = null) {
@@ -246,7 +232,6 @@ class PicturesAdapter(
         }
     }
 
-
     private fun List<Any>.indexOfFirstOrNull(predicate: (Any) -> Boolean): Int? {
         val index = indexOfFirst(predicate)
         return if (index >= 0) index else null
@@ -254,6 +239,6 @@ class PicturesAdapter(
 
     enum class DisplayType(val layout: Int) {
         TITLE(R.layout.title_recycler_section),
-        PICTURE(R.layout.cardview_picture)
+        PICTURE(R.layout.cardview_picture),
     }
 }
