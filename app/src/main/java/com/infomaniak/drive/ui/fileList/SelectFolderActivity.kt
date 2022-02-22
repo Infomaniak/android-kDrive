@@ -41,8 +41,8 @@ class SelectFolderActivity : BaseActivity() {
         const val USER_ID_TAG = "userId"
         const val USER_DRIVE_ID_TAG = "userDriveId"
         const val FOLDER_ID_TAG = "folderId"
-        const val FOLDER_NAME_TAG = "folderNAME"
-        const val DISABLE_SELECTED_FOLDER_TAG = "disableSelectedFolder"
+        const val FOLDER_NAME_TAG = "folderName"
+        const val CURRENT_FOLDER_ID_TAG = "currentFolderId"
         const val CUSTOM_ARGS_TAG = "customArgs"
 
         const val BULK_OPERATION_CUSTOM_TAG = "bulk_operation_type"
@@ -56,10 +56,12 @@ class SelectFolderActivity : BaseActivity() {
 
         mainViewModel.selectFolderUserDrive = currentUserDrive
 
+        val currentFolderId = extras?.getInt(CURRENT_FOLDER_ID_TAG)
+
         saveExternalViewModel.apply {
             userDrive = currentUserDrive
             currentDrive = DriveInfosController.getDrives(userId, driveId).firstOrNull()
-            disableSelectedFolderId = extras?.getInt(DISABLE_SELECTED_FOLDER_TAG)
+            disableSelectedFolderId = currentFolderId
         }
 
         super.onCreate(savedInstanceState)
