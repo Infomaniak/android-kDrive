@@ -242,11 +242,9 @@ object Utils {
         val (cloudUri, uri) = file.getCloudAndFileUris(this, userDrive)
         return Intent().apply {
             action = Intent.ACTION_VIEW
-            addFlags(
-                Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
-                        Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-            )
+            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
+                    Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
             setDataAndType(uri, contentResolver.getType(cloudUri))
         }
     }
