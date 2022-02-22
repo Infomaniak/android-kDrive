@@ -60,7 +60,7 @@ jobs:
       with:
         api-level: ${{ matrix.api-level }}
         target: ${{ matrix.target }}
-        profile: Pixel 4
+#         profile: Pixel 4
         arch: x86_64
         avd-name: kdrive-test
         force-avd-creation: false
@@ -91,7 +91,7 @@ jobs:
       with:
         api-level: ${{ matrix.api-level }}
         target: ${{ matrix.target }}
-        profile: Pixel 4
+#         profile: Pixel 4
         arch: x86_64
         avd-name: kdrive-test
         force-avd-creation: false
