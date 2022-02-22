@@ -305,15 +305,9 @@ fun View.setFileItem(file: File, isGrid: Boolean = false, viewHolder: FileViewHo
     when {
         file.isFolder() -> {
             val (icon, tint) = file.getFolderIcon()
-            if (tint == null) {
-                filePreview.loadGlide(icon)
-            } else {
-                filePreview.loadGlide(getTintedDrawable(icon, tint))
-            }
+            if (tint == null) filePreview.loadGlide(icon) else filePreview.loadGlide(getTintedDrawable(icon, tint))
         }
-        file.isDrive() -> {
-            filePreview.loadGlide(getTintedDrawable(R.drawable.ic_drive, file.driveColor))
-        }
+        file.isDrive() -> filePreview.loadGlide(getTintedDrawable(R.drawable.ic_drive, file.driveColor))
         else -> {
             val fileType = file.getFileType()
             val isGraphic = fileType == ConvertedType.IMAGE || fileType == ConvertedType.VIDEO
@@ -323,9 +317,7 @@ fun View.setFileItem(file: File, isGrid: Boolean = false, viewHolder: FileViewHo
                     CoroutineScope(Dispatchers.IO).launch {
                         val bitmap = context.getLocalThumbnail(file)
                         withContext(Dispatchers.Main) {
-                            if (filePreview?.isVisible == true && context != null) {
-                                filePreview.loadGlide(bitmap, fileType.icon)
-                            }
+                            if (filePreview?.isVisible == true && context != null) filePreview.loadGlide(bitmap, fileType.icon)
                         }
                     }
                 }
