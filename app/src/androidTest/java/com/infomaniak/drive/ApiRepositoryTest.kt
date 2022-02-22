@@ -69,9 +69,7 @@ import com.infomaniak.drive.utils.ApiTestUtils.createFileForTest
 import com.infomaniak.drive.utils.ApiTestUtils.deleteTestFile
 import com.infomaniak.drive.utils.ApiTestUtils.getCategory
 import com.infomaniak.drive.utils.ApiTestUtils.getShareLink
-import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import kotlinx.coroutines.runBlocking
 import org.junit.*
 import org.junit.runner.RunWith
 
@@ -129,8 +127,7 @@ class ApiRepositoryTest : KDriveTest() {
 
     @Test
     fun getFileActivities() {
-        val okHttpClientWithTimeout = runBlocking { KDriveHttpClient.getHttpClient(user.id, 30) }
-        with(getFileActivities(okHttpClientWithTimeout, testFile, 1)) {
+        with(getFileActivities(testFile, 1, false)) {
             if (isSuccess()) {
                 assertApiResponse(this)
             } else {
