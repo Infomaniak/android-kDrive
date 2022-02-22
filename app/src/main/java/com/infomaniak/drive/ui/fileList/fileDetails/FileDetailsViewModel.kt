@@ -26,6 +26,8 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileActivity
 import com.infomaniak.drive.data.models.FileComment
 import com.infomaniak.drive.data.models.Share
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -44,7 +46,9 @@ class FileDetailsViewModel : ViewModel() {
 
         return liveData(Dispatchers.IO + getFileActivitiesJob) {
             suspend fun recursive(page: Int) {
-                val apiRepository = ApiRepository.getFileActivities(file, page)
+                // Increase timeout for this api call because it can take more than 10s to process data
+                val okHttpClient = KDriveHttpClient.getHttpClient(AccountUtils.currentUserId, 30)
+                val apiRepository = ApiRepository.getFileActivities(okHttpClient, file, page)
                 if (apiRepository.isSuccess()) {
                     when {
                         apiRepository.data?.isNullOrEmpty() == true -> emit(null)

@@ -197,11 +197,6 @@ object ApiRepository {
         return callApi(ApiRoutes.getFileCount(file), GET)
     }
 
-    fun getFileActivities(file: File, page: Int): ApiResponse<ArrayList<FileActivity>> {
-        val url = "${ApiRoutes.getFileActivities(file)}?with=user&${pagination(page, 25)}" + ACTIONS
-        return callApi(url, GET)
-    }
-
     fun getFileComments(file: File, page: Int): ApiResponse<ArrayList<FileComment>> {
         val url = "${ApiRoutes.commentFile(file)}?with=like,response&${pagination(page)}"
         return callApi(url, GET)
