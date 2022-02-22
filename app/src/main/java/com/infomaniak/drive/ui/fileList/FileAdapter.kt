@@ -36,7 +36,6 @@ import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.utils.setupFileProgress
 import com.infomaniak.lib.core.views.LoaderAdapter.Companion.VIEW_TYPE_LOADING
 import com.infomaniak.lib.core.views.LoaderAdapter.Companion.createLoadingViewHolder
-import com.infomaniak.lib.core.views.ViewHolder
 import io.realm.OrderedRealmCollection
 import io.realm.Realm
 import io.realm.RealmList
@@ -46,7 +45,7 @@ import kotlinx.android.synthetic.main.item_file.view.*
 
 open class FileAdapter(
     var fileList: OrderedRealmCollection<File> = RealmList()
-) : RealmRecyclerViewAdapter<File, ViewHolder>(fileList, true, true) {
+) : RealmRecyclerViewAdapter<File, FileViewHolder>(fileList, true, true) {
 
     var itemsSelected: OrderedRealmCollection<File> = RealmList()
 
@@ -235,14 +234,14 @@ open class FileAdapter(
         return if (hasStableIds() && file != null) file.id.toLong() else super.getItemId(position)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileViewHolder {
         return when (viewType) {
-            VIEW_TYPE_LOADING -> createLoadingViewHolder(parent)
-            else -> ViewHolder(LayoutInflater.from(parent.context).inflate(viewType, parent, false))
+            VIEW_TYPE_LOADING -> FileViewHolder(createLoadingViewHolder(parent).itemView)
+            else -> FileViewHolder(LayoutInflater.from(parent.context).inflate(viewType, parent, false))
         }
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: List<Any>) {
+    override fun onBindViewHolder(holder: FileViewHolder, position: Int, payloads: List<Any>) {
         if (payloads.firstOrNull() is Int && getItemViewType(position) != VIEW_TYPE_LOADING) {
             val file = getFile(position)
             val progress = payloads.first() as Int
@@ -257,7 +256,7 @@ open class FileAdapter(
         }
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView.fileCardView) {
+    override fun onBindViewHolder(holder: FileViewHolder, position: Int) = with(holder.itemView.fileCardView) {
         if (getItemViewType(position) != VIEW_TYPE_LOADING) {
             val file = getFile(position)
             val isGrid = viewHolderType == DisplayType.GRID
@@ -268,7 +267,7 @@ open class FileAdapter(
                 setCorners(position, itemCount)
             }
 
-            setFileItem(file, isGrid)
+            setFileItem(file, isGrid, holder)
             checkIfEnableFile(file)
 
             when {
