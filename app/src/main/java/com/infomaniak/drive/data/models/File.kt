@@ -21,7 +21,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Parcelable
 import android.webkit.MimeTypeMap
-import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.google.gson.annotations.SerializedName
@@ -438,7 +438,8 @@ open class File(
             val offlineFile = getOfflineFile(context, userDrive.userId)
 
             return cloudUri to if (isOffline && offlineFile != null) {
-                FileProvider.getUriForFile(context, context.getString(R.string.FILE_AUTHORITY), offlineFile)
+                // We use the uri with scheme file because some apps don't support modifications from a content uri
+                offlineFile.toUri()
             } else cloudUri
         }
 
