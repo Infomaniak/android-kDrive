@@ -110,8 +110,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
         setBackActionHandlers()
 
-        drivePermissions = DrivePermissions()
-        drivePermissions.registerPermissions(this) { authorized -> if (authorized) downloadFileClicked() }
+        drivePermissions = DrivePermissions().apply {
+            registerPermissions(this@PreviewSliderFragment) { authorized -> if (authorized) downloadFileClicked() }
+        }
 
         bottomSheetFileInfos.apply {
             init(
