@@ -92,10 +92,10 @@ open class PreviewVideoFragment : PreviewFragment() {
     }
 
     override fun onDestroy() {
-        exoPlayer.apply {
+        exoPlayer?.apply {
             // Compute the percentage of the video the user watched before exiting
-            trackMediaPlayerEvent("duration", this?.currentPosition?.times(100)?.div(contentDuration + 1)?.toFloat())
-            this?.release()
+            trackMediaPlayerEvent("duration", currentPosition.times(100).div(contentDuration + 1).toFloat())
+            release()
         }
         super.onDestroy()
     }
