@@ -46,6 +46,7 @@ import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.MatomoUtils.trackScreen
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntent
 import com.infomaniak.drive.views.FileInfoActionsView
@@ -134,6 +135,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             offscreenPageLimit = 1
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
+                    childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.trackScreen()
                     currentPreviewFile = previewSliderAdapter.getFile(position)
                     editButton.isVisible = currentPreviewFile.isOnlyOfficePreview()
                     openWithButton.isGone = currentPreviewFile.isOnlyOfficePreview()

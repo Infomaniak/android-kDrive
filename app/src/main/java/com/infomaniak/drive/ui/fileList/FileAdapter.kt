@@ -29,9 +29,11 @@ import com.google.android.material.card.MaterialCardView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
+import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.setCornersRadius
+import com.infomaniak.drive.utils.setFileItem
+import com.infomaniak.drive.utils.setupFileProgress
 import com.infomaniak.lib.core.views.LoaderAdapter.Companion.VIEW_TYPE_LOADING
 import com.infomaniak.lib.core.views.LoaderAdapter.Companion.createLoadingViewHolder
 import com.infomaniak.lib.core.views.ViewHolder
@@ -324,8 +326,6 @@ open class FileAdapter(
                 fileChecked.isChecked = !fileChecked.isChecked
                 onSelectedFile(file, fileChecked.isChecked)
             } else {
-                val trackerName = "preview" + file.getFileType().value.replaceFirstChar { it.titlecase() }
-                context.applicationContext?.trackEvent("preview", TrackerAction.CLICK, trackerName)
                 onFileClicked?.invoke(file)
             }
         }

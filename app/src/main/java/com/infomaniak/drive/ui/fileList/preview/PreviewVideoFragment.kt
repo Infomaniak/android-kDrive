@@ -83,19 +83,20 @@ open class PreviewVideoFragment : PreviewFragment() {
 
     override fun onResume() {
         super.onResume()
-        trackFileType(this)
         if (exoPlayer == null) initializePlayer()
     }
 
     override fun onPause() {
-        trackMediaPlayerEvent("pause")
         exoPlayer?.pause()
         super.onPause()
     }
 
     override fun onDestroy() {
-        trackMediaPlayerEvent("duration", exoPlayer?.duration?.toFloat())
-        exoPlayer?.release()
+        exoPlayer.apply {
+            // Compute the percentage of the video the user watched before exiting
+            trackMediaPlayerEvent("duration", this?.currentPosition?.times(100)?.div(contentDuration + 1)?.toFloat())
+            this?.release()
+        }
         super.onDestroy()
     }
 
@@ -141,8 +142,12 @@ open class PreviewVideoFragment : PreviewFragment() {
         exoPlayer?.addListener(object : Player.Listener {
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
-                super.onIsPlayingChanged(isPlaying)
-                if (isPlaying) (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+                if (isPlaying) {
+                    trackMediaPlayerEvent("play")
+                    (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+                } else {
+                    trackMediaPlayerEvent("pause")
+                }
             }
 
             override fun onPlayerError(error: PlaybackException) {
@@ -195,15 +200,6 @@ open class PreviewVideoFragment : PreviewFragment() {
         } else {
             Uri.parse(ApiRoutes.downloadFile(file))
         }
-    }
-
-    private fun trackFileType(fragment: PreviewFragment) {
-        val name = when (fragment::class) {
-            PreviewVideoFragment::class -> "playVideo"
-            PreviewMusicFragment::class -> "playMusic"
-            else -> "play"
-        }
-        trackMediaPlayerEvent(name)
     }
 
     private fun trackMediaPlayerEvent(name: String, value: Float? = null) {

@@ -110,15 +110,13 @@ class CreateOrEditCategoryFragment : Fragment() {
             isEnabled = categoryIsPredefined || !isCreateCategory || categoryName.isNotEmpty()
             setOnClickListener {
                 showProgress()
-                val trackerName: String
                 if (categoryId == CREATE_CATEGORY_ID) {
-                    trackerName = "add"
+                    trackCategoriesEvent("add")
                     createCategory()
                 } else {
-                    trackerName = "edit"
+                    trackCategoriesEvent("edit")
                     editCategory(categoryId)
                 }
-                trackCategoriesEvent(trackerName)
             }
         }
     }

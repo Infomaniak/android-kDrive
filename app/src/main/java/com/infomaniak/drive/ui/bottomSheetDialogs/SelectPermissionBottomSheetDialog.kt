@@ -165,15 +165,13 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         saveButton.initProgress(viewLifecycleOwner)
         saveButton.showProgress()
         shareableItem?.let { shareable ->
-            val sharePermissionTrackerName: String
             if (permission == ShareablePermission.DELETE || permission == null) {
-                sharePermissionTrackerName = "deleteUser"
+                context?.applicationContext?.trackShareRightsEvent("deleteUser")
                 deleteShare(file, shareable, permission)
             } else {
-                sharePermissionTrackerName = permission.name.lowercase(Locale.getDefault()) + "Right"
+                context?.applicationContext?.trackShareRightsEvent(permission.name.lowercase(Locale.getDefault()) + "Right")
                 editShare(file, shareable, permission)
             }
-            context?.applicationContext?.trackShareRightsEvent(sharePermissionTrackerName)
         }
     }
 
