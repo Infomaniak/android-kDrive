@@ -75,11 +75,11 @@ class SaveExternalFilesActivity : BaseActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) = with(selectDriveViewModel) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_save_external_file)
 
-        if (!isAuth()) return@with
+        if (!isAuth()) return
 
         setupDrivePermissions()
         activeDefaultUser()
@@ -121,11 +121,13 @@ class SaveExternalFilesActivity : BaseActivity() {
             drive = AccountUtils.getCurrentDrive()
         }
 
-        selectDriveViewModel.selectedUserId.value = userId
-        selectDriveViewModel.selectedDrive.value = drive
+        selectDriveViewModel.apply {
+            selectedUserId.value = userId
+            selectedDrive.value = drive
+        }
     }
 
-    private fun SelectDriveViewModel.fetchSelectedDrive() {
+    private fun fetchSelectedDrive() = with(selectDriveViewModel) {
         selectedDrive.observe(this@SaveExternalFilesActivity) {
             it?.let { drive ->
                 displaySelectedDrive(drive)
@@ -168,7 +170,7 @@ class SaveExternalFilesActivity : BaseActivity() {
         }
     }
 
-    private fun SelectDriveViewModel.fetchFolder() {
+    private fun fetchFolder() = with(selectDriveViewModel) {
         saveExternalFilesViewModel.folderId.observe(this@SaveExternalFilesActivity) { folderId ->
 
             val folder = if (selectedUserId.value == null || selectedDrive.value?.id == null || folderId == null) {
@@ -192,7 +194,7 @@ class SaveExternalFilesActivity : BaseActivity() {
         }
     }
 
-    private fun SelectDriveViewModel.setupSaveButton() {
+    private fun setupSaveButton() = with(selectDriveViewModel) {
         saveButton.apply {
             initProgress(this@SaveExternalFilesActivity)
             setOnClickListener {
