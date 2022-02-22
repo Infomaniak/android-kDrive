@@ -181,10 +181,14 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     }
 
     fun deleteFileFromFavorites(file: File, userDrive: UserDrive? = null) = liveData(Dispatchers.IO) {
-        emit(ApiRepository.deleteFavoriteFile(file))
+        with(ApiRepository.deleteFavoriteFile(file)) {
+            emit(this)
 
-        FileController.updateFile(file.id, userDrive = userDrive) {
-            it.isFavorite = false
+            if (isSuccess()) {
+                FileController.updateFile(file.id, userDrive = userDrive) {
+                    it.isFavorite = false
+                }
+            }
         }
     }
 
