@@ -181,12 +181,11 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     }
 
     fun deleteFileFromFavorites(file: File, userDrive: UserDrive? = null) = liveData(Dispatchers.IO) {
-        CoroutineScope(Dispatchers.IO).launch {
-            FileController.updateFile(file.id, userDrive = userDrive) {
-                it.isFavorite = false
-            }
-        }
         emit(ApiRepository.deleteFavoriteFile(file))
+
+        FileController.updateFile(file.id, userDrive = userDrive) {
+            it.isFavorite = false
+        }
     }
 
     fun getFileDetails(fileId: Int, userDrive: UserDrive): LiveData<File?> {
