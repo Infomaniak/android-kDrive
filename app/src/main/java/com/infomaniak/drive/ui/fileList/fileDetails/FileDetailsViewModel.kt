@@ -44,14 +44,15 @@ class FileDetailsViewModel : ViewModel() {
 
         return liveData(Dispatchers.IO + getFileActivitiesJob) {
             suspend fun recursive(page: Int) {
-                val apiRepository = ApiRepository.getFileActivities(file, page)
-                if (apiRepository.isSuccess()) {
-                    when {
-                        apiRepository.data?.isNullOrEmpty() == true -> emit(null)
-                        apiRepository.page == apiRepository.pages -> emit(apiRepository)
-                        else -> {
-                            emit(apiRepository)
-                            recursive(page + 1)
+                with(ApiRepository.getFileActivities(file, page)) {
+                    if (isSuccess()) {
+                        when {
+                            data?.isNullOrEmpty() == true -> emit(null)
+                            page == pages -> emit(this)
+                            else -> {
+                                emit(this)
+                                recursive(page + 1)
+                            }
                         }
                     }
                 }
@@ -66,14 +67,15 @@ class FileDetailsViewModel : ViewModel() {
 
         return liveData(Dispatchers.IO + getFileCommentsJob) {
             suspend fun recursive(page: Int) {
-                val apiRepository = ApiRepository.getFileComments(file, page)
-                if (apiRepository.isSuccess()) {
-                    when {
-                        apiRepository.data?.isNullOrEmpty() == true -> emit(null)
-                        apiRepository.page == apiRepository.pages -> emit(apiRepository)
-                        else -> {
-                            emit(apiRepository)
-                            recursive(page + 1)
+                with(ApiRepository.getFileComments(file, page)) {
+                    if (isSuccess()) {
+                        when {
+                            data?.isNullOrEmpty() == true -> emit(null)
+                            page == pages -> emit(this)
+                            else -> {
+                                emit(this)
+                                recursive(page + 1)
+                            }
                         }
                     }
                 }
