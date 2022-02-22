@@ -17,68 +17,50 @@
  */
 package com.infomaniak.drive.ui
 
-import android.content.Context
-import android.content.Intent
-import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.matcher.ViewMatchers.assertThat
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.uiautomator.By
-import androidx.test.uiautomator.UiCollection
-import androidx.test.uiautomator.UiSelector
-import androidx.test.uiautomator.Until
+import androidx.test.uiautomator.UiObjectNotFoundException
+import com.infomaniak.drive.KDriveTest
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.UiTestUtils.APP_PACKAGE
-import com.infomaniak.drive.utils.UiTestUtils.DEFAULT_DRIVE_ID
-import com.infomaniak.drive.utils.UiTestUtils.DEFAULT_DRIVE_NAME
-import com.infomaniak.drive.utils.UiTestUtils.LAUNCH_TIMEOUT
-import com.infomaniak.drive.utils.UiTestUtils.device
+import com.infomaniak.drive.utils.UiTestUtils
+import com.infomaniak.drive.utils.UiTestUtils.closeBottomSheetInfoModalIfDisplayed
 import com.infomaniak.drive.utils.UiTestUtils.getDeviceViewById
-import com.infomaniak.drive.utils.UiTestUtils.getViewIdentifier
-import org.hamcrest.CoreMatchers.notNullValue
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
+import com.infomaniak.drive.utils.UiTestUtils.selectDriveInList
+import com.infomaniak.drive.utils.UiTestUtils.switchToDriveInstance
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 
 /**
  * UI Tests relative to a home (drive switch, drive activities, file search)
  */
-@RunWith(AndroidJUnit4::class)
-class HomeUiTest {
+class HomeUiTest : KDriveTest() {
 
-    @Before
+    @BeforeEach
     fun startApp() {
-        device.pressHome()
-
-        val launcherPackage: String = device.launcherPackageName
-        assertThat(launcherPackage, notNullValue())
-        device.wait(Until.hasObject(By.pkg(launcherPackage).depth(0)), 3000)
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        val intent = context.packageManager.getLaunchIntentForPackage(APP_PACKAGE)?.apply {
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        }
-        context.startActivity(intent)
-        device.wait(Until.hasObject(By.pkg(APP_PACKAGE).depth(0)), LAUNCH_TIMEOUT)
+        UiTestUtils.startApp()
     }
 
     @Test
+    @DisplayName("Check UI to switch drive from home then user menu")
     fun testSwitchDrive() {
-        val switchDrive = getDeviceViewById("driveInfos")
-        switchDrive?.clickAndWaitForNewWindow()
+        // Change drive from homeFragment
+        getDeviceViewById("homeFragment").clickAndWaitForNewWindow()
+        if (DriveInfosController.getDrivesCount(AccountUtils.currentUserId) < 2) {
+            // finding switchDriveButton should throw because it only appears if user has at least 2 drives
+            Assertions.assertThrows(UiObjectNotFoundException::class.java) {
+                getDeviceViewById("switchDriveButton").clickAndWaitForNewWindow()
+            }
+        } else {
+            switchToDriveInstance(0)
 
-        val driveRecyclerView = UiCollection(UiSelector().resourceId(getViewIdentifier("selectionRecyclerView")))
+            val driveId = AccountUtils.currentDriveId
 
-        driveRecyclerView.getChildByInstance(
-            UiSelector().resourceId(getViewIdentifier("driveCard")),
-            driveRecyclerView.childCount - 1
-        ).clickAndWaitForNewWindow()
-
-        switchDrive?.clickAndWaitForNewWindow()
-
-        driveRecyclerView.getChildByText(
-            UiSelector().resourceId(getViewIdentifier("driveCard")),
-            DEFAULT_DRIVE_NAME
-        ).clickAndWaitForNewWindow()
-
-        assert(AccountUtils.currentDriveId == DEFAULT_DRIVE_ID)
+            // Change drive from menuFragment
+            getDeviceViewById("menuFragment").clickAndWaitForNewWindow()
+            getDeviceViewById("driveIcon").clickAndWaitForNewWindow()
+            selectDriveInList(1) // Switch back to dev test drive
+            assert(AccountUtils.currentDriveId != driveId) { "Drive id should be different" }
+        }
     }
 }

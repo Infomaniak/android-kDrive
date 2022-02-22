@@ -19,18 +19,18 @@ package com.infomaniak.drive.utils
 
 import android.content.Context
 import android.content.Intent
+import android.widget.Button
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.*
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.DriveInfosController
 import org.hamcrest.CoreMatchers
 
 object UiTestUtils {
-    const val APP_PACKAGE = "com.infomaniak.drive"
-    const val LAUNCH_TIMEOUT = 5000L
-    const val DEFAULT_DRIVE_NAME = "infomaniak"
-    const val DEFAULT_DRIVE_ID = 100338
+    private const val APP_PACKAGE = "com.infomaniak.drive"
+    private const val LAUNCH_TIMEOUT = 5000L
 
     var context: Context = ApplicationProvider.getApplicationContext()
     var device: UiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
@@ -49,10 +49,16 @@ object UiTestUtils {
         }
         context.startActivity(intent)
         device.wait(Until.hasObject(By.pkg(APP_PACKAGE).depth(0)), LAUNCH_TIMEOUT)
+        // Accept permissions modal
+        acceptPermissions()
+        // Close the bottomSheetModal displayed because it's the user's first connection
+        closeBottomSheetInfoModalIfDisplayed(false)
+        // Change drive to avoid flooding Infomaniak
+        switchToDriveInstance(1)
     }
 
     fun createPrivateFolder(folderName: String) {
-        getDeviceViewById("mainFab")?.clickAndWaitForNewWindow()
+        getDeviceViewById("mainFab").clickAndWaitForNewWindow()
 
         UiCollection(UiSelector().resourceId(getViewIdentifier("addFileBottomSheetLayout"))).getChildByText(
             UiSelector().resourceId(getViewIdentifier("folderCreateText")),
@@ -65,20 +71,30 @@ object UiTestUtils {
 
         UiCollection(UiSelector().resourceId(getViewIdentifier("createFolderLayout"))).apply {
             getChildByInstance(UiSelector().resourceId(getViewIdentifier("folderNameValueInput")), 0).text = folderName
+            val permissionsRecyclerView = UiScrollable(UiSelector().resourceId(getViewIdentifier("permissionsRecyclerView")))
+            permissionsRecyclerView.getChildByText(
+                UiSelector().resourceId(getViewIdentifier("permissionCard")),
+                context.getString(R.string.createFolderMeOnly)
+            ).run {
+                permissionsRecyclerView.scrollIntoView(this)
+                click()
+            }
             getChildByText(
                 UiSelector().resourceId(getViewIdentifier("createFolderButton")),
                 context.getString(R.string.buttonCreateFolder)
             ).clickAndWaitForNewWindow()
         }
-
-        device.pressBack()
     }
 
     fun deleteFile(fileRecyclerView: UiScrollable, fileName: String) {
         (fileRecyclerView.getChildByText(UiSelector().resourceId(getViewIdentifier("fileCardView")), fileName)).apply {
+            fileRecyclerView.scrollForward()
             fileRecyclerView.scrollIntoView(this)
-            swipeLeft(3)
-            getChild((UiSelector().resourceId(getViewIdentifier("deleteButton")))).clickAndWaitForNewWindow()
+            getChild(UiSelector().resourceId(getViewIdentifier("menuButton"))).click()
+            UiScrollable(UiSelector().resourceId(getViewIdentifier("scrollView"))).apply {
+                scrollForward()
+                getChild(UiSelector().resourceId(getViewIdentifier("deleteFile"))).click()
+            }
         }
         device.findObject(UiSelector().text(context.getString(R.string.buttonMove))).clickAndWaitForNewWindow()
     }
@@ -86,13 +102,66 @@ object UiTestUtils {
     fun openFileShareDetails(fileRecyclerView: UiScrollable, fileName: String) {
         (fileRecyclerView.getChildByText(UiSelector().resourceId(getViewIdentifier("fileCardView")), fileName)).apply {
             fileRecyclerView.scrollIntoView(this)
-            swipeLeft(3)
-            getChild((UiSelector().resourceId(getViewIdentifier("menuButton")))).clickAndWaitForNewWindow()
+            getChild((UiSelector().resourceId(getViewIdentifier("menuButton")))).click()
         }
-        getDeviceViewById("fileRights")?.clickAndWaitForNewWindow()
+        getDeviceViewById("fileRights").clickAndWaitForNewWindow()
     }
 
-    fun getDeviceViewById(id: String): UiObject? {
-        return device.findObject(UiSelector().resourceId(getViewIdentifier(id)))
+    fun getDeviceViewById(id: String): UiObject = device.findObject(UiSelector().resourceId(getViewIdentifier(id)))
+
+    fun findFileInList(fileRecyclerView: UiScrollable, fileName: String): UiObject? {
+        return try {
+            fileRecyclerView.getChildByText(UiSelector().resourceId(getViewIdentifier("fileCardView")), fileName)
+        } catch (exception: UiObjectNotFoundException) {
+            null
+        }
+    }
+
+    fun createPublicShareLink(recyclerView: UiScrollable) {
+        recyclerView.getChildByText(
+            UiSelector().resourceId(getViewIdentifier("permissionTitle")),
+            context.getString(R.string.shareLinkPublicRightTitle)
+        ).click()
+        device.apply {
+            findObject(UiSelector().resourceId(getViewIdentifier("saveButton"))).clickAndWaitForNewWindow()
+            findObject(UiSelector().resourceId(getViewIdentifier("shareLinkButton"))).clickAndWaitForNewWindow()
+        }
+    }
+
+    fun selectDriveInList(instance: Int) {
+        UiCollection(UiSelector().resourceId(getViewIdentifier("selectRecyclerView"))).getChildByInstance(
+            UiSelector().resourceId(getViewIdentifier("itemSelectText")), instance
+        ).clickAndWaitForNewWindow()
+    }
+
+    fun closeBottomSheetInfoModalIfDisplayed(isCategoryInformation: Boolean) {
+        try {
+            val id = if (isCategoryInformation) "actionButton" else "secondaryActionButton"
+            device.findObject(UiSelector().resourceId(getViewIdentifier(id))).click()
+        } catch (exception: UiObjectNotFoundException) {
+            // Continue if bottomSheet are not displayed
+        }
+    }
+
+    private fun acceptPermissions() {
+        try {
+            device.findObject(UiSelector().instance(0).className(Button::class.java).text("Allow")).click()
+        } catch (exception: UiObjectNotFoundException) {
+            try {
+                device.findObject(UiSelector().instance(0).className(Button::class.java).text("Autoriser")).click()
+            } catch (exception: UiObjectNotFoundException) {
+                // Continue if permissions are not displayed
+            }
+        }
+    }
+
+    fun switchToDriveInstance(instanceNumero: Int) {
+        getDeviceViewById("homeFragment").clickAndWaitForNewWindow()
+        if (DriveInfosController.getDrivesCount(AccountUtils.currentUserId) > 1) {
+            getDeviceViewById("switchDriveButton").clickAndWaitForNewWindow()
+            selectDriveInList(instanceNumero) // Switch to dev test drive
+            // Close the bottomSheet modal displayed to have info on categories
+            closeBottomSheetInfoModalIfDisplayed(true)
+        }
     }
 }
