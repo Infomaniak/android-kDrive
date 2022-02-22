@@ -19,17 +19,15 @@ package com.infomaniak.drive.data.api
 
 import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
+import com.infomaniak.drive.data.api.ApiRoutes.withFile
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.User
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.ApiController.ApiMethod.*
 import com.infomaniak.lib.core.utils.ApiController.callApi
-import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 
 object ApiRepository {
@@ -93,15 +91,15 @@ object ApiRepository {
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
-    fun getFileActivities(file: File, page: Int, forFileList: Boolean): ApiResponse<ArrayList<FileActivity>> {
-        val queries = if (forFileList) {
-            "&depth=children&from_date=${file.responseAt}&with=file,rights,collaborative_folder,favorite,share_link,mobile,categories"
-        } else {
-            "&with=user"
-        }
+    // Increase timeout for this api call because it can take more than 10s to process data
+    fun getFileActivities(
+        file: File,
+        page: Int,
+        forFileList: Boolean,
+        okHttpClient: OkHttpClient = HttpClient.okHttpClientLongTimeout,
+    ): ApiResponse<ArrayList<FileActivity>> {
+        val queries = if (forFileList) "&depth=children&from_date=${file.responseAt}&$withFile" else "&with=user"
         val url = "${ApiRoutes.getFileActivities(file)}?${pagination(page)}$queries$ACTIONS"
-        // Increase timeout for this api call because it can take more than 10s to process data
-        val okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(AccountUtils.currentUserId, 30) }
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
