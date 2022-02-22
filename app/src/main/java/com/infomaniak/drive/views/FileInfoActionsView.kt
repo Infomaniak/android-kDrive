@@ -435,11 +435,11 @@ class FileInfoActionsView @JvmOverloads constructor(
                     isOffline && isChecked -> Unit
                     !isOffline && !isChecked -> Unit
                     isChecked -> {
-                        trackActionEvent("offline", 1f)
+                        trackActionEvent("offline", true.toFloat())
                         fileInfoActionsView.downloadAsOfflineFile()
                     }
                     else -> {
-                        trackActionEvent("offline", 0f)
+                        trackActionEvent("offline", false.toFloat())
                         val offlineLocalPath = getOfflineFile(context)
                         val cacheFile = getCacheFile(context)
                         offlineLocalPath?.let { removeOfflineFile(offlineLocalPath, cacheFile) }

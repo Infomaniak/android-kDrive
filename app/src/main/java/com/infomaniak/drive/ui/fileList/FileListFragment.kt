@@ -564,8 +564,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun setupToggleDisplayButton() {
         toggleDisplayButton.setOnClickListener {
             val newListMode = !UiSettings(requireContext()).listMode
-            val trackerName = if (newListMode) "viewList" else "viewGrid"
-            trackEvent("displayStyle", TrackerAction.CLICK, trackerName)
+            trackEvent("displayStyle", TrackerAction.CLICK, if (newListMode) "viewList" else "viewGrid")
             UiSettings(requireContext()).listMode = newListMode
             fileListViewModel.isListMode.value = newListMode
         }
@@ -609,7 +608,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     when {
                         file.isFolder() -> file.openFolder()
                         file.isBookmark() -> openBookmark(file)
-                        else -> file.displayFile()
+                        else -> {
+                            val trackerName = "preview" + file.getFileType().value.replaceFirstChar { it.titlecase() }
+                            trackEvent("preview", TrackerAction.CLICK, trackerName)
+                            file.displayFile()
+                        }
                     }
                 } else {
                     refreshActivities()

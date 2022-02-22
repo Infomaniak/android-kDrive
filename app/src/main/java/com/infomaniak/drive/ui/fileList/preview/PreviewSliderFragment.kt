@@ -46,6 +46,7 @@ import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.MatomoUtils.trackScreen
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntent
 import com.infomaniak.drive.views.FileInfoActionsView
@@ -133,13 +134,14 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             offscreenPageLimit = 1
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
-                    previewSliderAdapter.getFile(position).let {
-                        editButton.isVisible = it.isOnlyOfficePreview()
-                        openWithButton.isGone = it.isOnlyOfficePreview()
-                        bottomSheetFileInfos.openWith.isVisible = true
-                        lifecycleScope.launchWhenResumed {
-                            withContext(Dispatchers.Main) { bottomSheetFileInfos.updateCurrentFile(it) }
-                        }
+                    childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.trackScreen()
+
+                    currentFile = previewSliderAdapter.getFile(position)
+                    editButton.isVisible = currentFile.isOnlyOfficePreview()
+                    openWithButton.isGone = currentFile.isOnlyOfficePreview()
+                    bottomSheetFileInfos.openWith.isVisible = true
+                    lifecycleScope.launchWhenResumed {
+                        withContext(Dispatchers.Main) { bottomSheetFileInfos.updateCurrentFile(currentFile) }
                     }
                 }
             })
