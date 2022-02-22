@@ -93,6 +93,7 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialog.Companion.FILE_ID
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED_CATEGORIES
+import com.infomaniak.drive.ui.fileList.FileViewHolder
 import com.infomaniak.drive.ui.fileList.UploadInProgressFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.MatomoUtils.trackShareRightsEvent
@@ -262,17 +263,18 @@ fun Window.lightNavigationBar(enabled: Boolean) {
     }
 }
 
-fun View.setFileItem(file: File, isGrid: Boolean = false) {
+fun View.setFileItem(file: File, isGrid: Boolean = false, viewHolder: FileViewHolder? = null) {
 
     fileName.text = file.name
     fileFavorite.isVisible = file.isFavorite
-    fileDate?.isVisible = file.id != ROOT_ID
-    fileDate?.text =
-        if (file.deletedAt.isPositive()) {
+    fileDate?.apply {
+        isVisible = file.id != ROOT_ID
+        text = if (file.deletedAt.isPositive()) {
             file.getDeletedAt().format(context.getString(R.string.allDeletedFilePattern))
         } else {
             file.getLastModifiedAt().format(context.getString(R.string.allLastModifiedFilePattern))
         }
+    }
 
     file.size?.let {
         fileSize?.text = FormatterFileSize.formatShortFileSize(context, it)
@@ -286,16 +288,26 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
 
     filePreview.scaleType = ImageView.ScaleType.CENTER
 
+    fun getTintedDrawable(icon: Int, tint: String): Drawable? {
+
+        fun getDrawable(): Drawable? = ContextCompat.getDrawable(context, icon)?.mutate()
+
+        val drawable = if (viewHolder == null) {
+            getDrawable()
+        } else {
+            if (viewHolder.tintedDrawable == null) viewHolder.tintedDrawable = getDrawable()
+            viewHolder.tintedDrawable
+        }
+
+        return drawable?.apply { setTint(tint.toColorInt()) }
+    }
+
     when {
         file.isFolder() -> {
             val (icon, tint) = file.getFolderIcon()
-            if (tint == null) {
-                filePreview.loadGlide(icon)
-            } else {
-                filePreview.loadGlide(context.getTintedDrawable(icon, tint))
-            }
+            if (tint == null) filePreview.loadGlide(icon) else filePreview.loadGlide(getTintedDrawable(icon, tint))
         }
-        file.isDrive() -> filePreview.loadGlide(context.getTintedDrawable(R.drawable.ic_drive, file.driveColor))
+        file.isDrive() -> filePreview.loadGlide(getTintedDrawable(R.drawable.ic_drive, file.driveColor))
         else -> {
             val fileType = file.getFileType()
             val isGraphic = fileType == ConvertedType.IMAGE || fileType == ConvertedType.VIDEO
@@ -305,9 +317,7 @@ fun View.setFileItem(file: File, isGrid: Boolean = false) {
                     CoroutineScope(Dispatchers.IO).launch {
                         val bitmap = context.getLocalThumbnail(file)
                         withContext(Dispatchers.Main) {
-                            if (filePreview?.isVisible == true && context != null) {
-                                filePreview.loadGlide(bitmap, fileType.icon)
-                            }
+                            if (filePreview?.isVisible == true && context != null) filePreview.loadGlide(bitmap, fileType.icon)
                         }
                     }
                 }
@@ -794,15 +804,6 @@ fun Context.shareText(text: String) {
     ContextCompat.startActivity(this, Intent.createChooser(intent, null), null)
 }
 
-fun Context.getTintedDrawable(drawableId: Int, colorString: String): Drawable? {
-    return getTintedDrawable(drawableId, colorString.toColorInt())
-}
-
-fun Context.getTintedDrawable(drawableId: Int, colorInt: Int): Drawable? {
-    return ContextCompat.getDrawable(this, drawableId)
-        ?.apply { setTint(colorInt) }
-}
-
 fun Category.getName(context: Context): String = when (name) {
     "PREDEF_CAT_BANKING" -> context.getString(R.string.categoryBanking)
     "PREDEF_CAT_BILL" -> context.getString(R.string.categoryBill)
@@ -847,13 +848,11 @@ fun File.getFolderIcon(): Pair<Int, String?> {
     return when (getVisibilityType()) {
         VisibilityType.IS_TEAM_SPACE -> R.drawable.ic_folder_common_documents to null
         VisibilityType.IS_SHARED_SPACE -> R.drawable.ic_folder_shared to null
-        VisibilityType.IS_COLLABORATIVE_FOLDER -> R.drawable.ic_folder_dropbox_tintable to color
-        else -> {
-            if (isDisabled()) {
-                R.drawable.ic_folder_disable to null
-            } else {
-                R.drawable.ic_folder_filled_tintable to color
-            }
+        VisibilityType.IS_COLLABORATIVE_FOLDER -> R.drawable.ic_folder_dropbox to color
+        else -> if (isDisabled()) {
+            R.drawable.ic_folder_disable to null
+        } else {
+            R.drawable.ic_folder_filled to color
         }
     }
 }
