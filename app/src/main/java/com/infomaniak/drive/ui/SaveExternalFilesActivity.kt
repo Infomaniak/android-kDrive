@@ -44,6 +44,7 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.menu.settings.SelectDriveDialog
 import com.infomaniak.drive.ui.menu.settings.SelectDriveViewModel
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.MatomoUtils.trackCurrentUserId
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.*
 import io.sentry.Sentry
@@ -83,6 +84,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
         setupDrivePermissions()
         activeDefaultUser()
+        application.trackCurrentUserId()
         fetchSelectedDrive()
         fetchFolder()
         setupSaveButton()

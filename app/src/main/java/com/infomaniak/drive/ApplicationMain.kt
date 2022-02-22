@@ -41,6 +41,7 @@ import com.infomaniak.drive.data.sync.UploadNotifications.pendingIntentFlags
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.KDriveHttpClient
+import com.infomaniak.drive.utils.MatomoUtils.buildTracker
 import com.infomaniak.drive.utils.NotificationUtils.initNotificationChannel
 import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.clearStack
@@ -62,9 +63,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import org.matomo.sdk.Tracker
 import java.util.*
 
+
 class ApplicationMain : Application(), ImageLoaderFactory {
+
+    val matomoTracker: Tracker by lazy { buildTracker() }
 
     override fun onCreate() {
         super.onCreate()
@@ -168,5 +173,4 @@ class ApplicationMain : Application(), ImageLoaderFactory {
             return AccountUtils.currentUser!!.apiToken
         }
     }
-
 }

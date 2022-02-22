@@ -96,6 +96,7 @@ import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED
 import com.infomaniak.drive.ui.fileList.FileViewHolder
 import com.infomaniak.drive.ui.fileList.UploadInProgressFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
+import com.infomaniak.drive.utils.MatomoUtils.trackShareRightsEvent
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.views.CategoryIconView
 import com.infomaniak.lib.core.models.User
@@ -794,6 +795,7 @@ fun View.updateUploadFileInProgress(pendingFilesCount: Int) {
 }
 
 fun Context.shareText(text: String) {
+    applicationContext?.trackShareRightsEvent("shareButton")
     val intent = Intent().apply {
         action = Intent.ACTION_SEND
         putExtra(Intent.EXTRA_TEXT, text)

@@ -39,6 +39,8 @@ import com.google.android.exoplayer2.util.EventLogger
 import com.google.android.exoplayer2.util.Util
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.TrackerAction
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
 import kotlinx.android.synthetic.main.fragment_preview_others.*
@@ -69,7 +71,10 @@ open class PreviewVideoFragment : PreviewFragment() {
         fileName.text = file.name
 
         playerView.setOnClickListener {
-            if (playerView.isControllerFullyVisible) (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+            if (playerView.isControllerFullyVisible) {
+                trackMediaPlayerEvent("toggleFullScreen")
+                (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+            }
         }
         errorLayout.setOnClickListener {
             (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
@@ -87,7 +92,11 @@ open class PreviewVideoFragment : PreviewFragment() {
     }
 
     override fun onDestroy() {
-        exoPlayer?.release()
+        exoPlayer?.apply {
+            // Compute the percentage of the video the user watched before exiting
+            trackMediaPlayerEvent("duration", currentPosition.times(100).div(contentDuration + 1).toFloat())
+            release()
+        }
         super.onDestroy()
     }
 
@@ -133,8 +142,12 @@ open class PreviewVideoFragment : PreviewFragment() {
         exoPlayer?.addListener(object : Player.Listener {
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
-                super.onIsPlayingChanged(isPlaying)
-                if (isPlaying) (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+                if (isPlaying) {
+                    trackMediaPlayerEvent("play")
+                    (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+                } else {
+                    trackMediaPlayerEvent("pause")
+                }
             }
 
             override fun onPlayerError(error: PlaybackException) {
@@ -187,5 +200,9 @@ open class PreviewVideoFragment : PreviewFragment() {
         } else {
             Uri.parse(ApiRoutes.downloadFile(file))
         }
+    }
+
+    private fun trackMediaPlayerEvent(name: String, value: Float? = null) {
+        trackEvent("mediaPlayer", TrackerAction.CLICK, name, value)
     }
 }

@@ -36,6 +36,8 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterDateBottomSheetDia
 import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterTypeBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.TrackerAction
 import com.infomaniak.drive.utils.getBackNavigationResult
 import com.infomaniak.drive.utils.safeNavigate
 import com.infomaniak.lib.core.utils.toPx
@@ -116,6 +118,10 @@ class SearchFiltersFragment : Fragment() {
 
     private fun setSaveButton() = with(searchFiltersViewModel) {
         saveButton.setOnClickListener {
+            if (date.value != null) trackSearchEvent("filterDate")
+            if (type.value != null) trackSearchEvent("filterFileType")
+            if (categories != null) trackSearchEvent("filterCategory")
+
             searchViewModel.dateFilter = date.value
             searchViewModel.typeFilter = type.value
             searchViewModel.categoriesFilter = categories
@@ -195,5 +201,9 @@ class SearchFiltersFragment : Fragment() {
     private fun MaterialCardView.setupSelection(enabled: Boolean) {
         strokeWidth = if (enabled) 2.toPx() else 0
         invalidate()
+    }
+
+    private fun trackSearchEvent(name: String) {
+        trackEvent("search", TrackerAction.CLICK, name)
     }
 }

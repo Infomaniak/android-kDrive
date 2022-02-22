@@ -22,6 +22,7 @@ android {
         buildConfigField 'String', 'DRIVE_API', '"https://drive.infomaniak.com/drive/"'
         buildConfigField 'String', 'DRIVE_API_V2', '"https://drive.infomaniak.com/2/drive/"'
         buildConfigField 'String', 'INFOMANIAK_API', '"https://api.infomaniak.com/1/"'
+        buildConfigField 'String', 'MATOMO_URL', '"https://analytics.infomaniak.com/matomo.php"'
         buildConfigField 'String', 'OFFICE_URL', '"https://drive.infomaniak.com/app/office/"'
         buildConfigField 'String', 'SHOP_URL', '"https://shop.infomaniak.com/order/"'
         buildConfigField 'String', 'SUPPORT_URL', '"https://support.infomaniak.com/"'
@@ -102,7 +103,6 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.viewpager2:viewpager2:1.1.0-beta01'
-    implementation 'com.googlecode.plist:dd-plist:1.23'
 
     def exoplayer_version = '2.16.1'
     implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
@@ -130,7 +130,10 @@ dependencies {
     standardImplementation 'com.google.android.play:core:1.10.3'
     standardImplementation 'com.google.firebase:firebase-messaging-ktx:23.0.0'
 
+    implementation 'com.googlecode.plist:dd-plist:1.23'
+
     implementation 'com.github.hannesa2:paho.mqtt.android:3.3.5'
+    implementation 'com.github.matomo-org:matomo-sdk-android:4.1.4'
 
     implementation 'io.sentry:sentry-android:5.6.1'
 

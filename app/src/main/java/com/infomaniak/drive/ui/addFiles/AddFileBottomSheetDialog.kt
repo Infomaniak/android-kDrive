@@ -41,6 +41,7 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
+import com.infomaniak.drive.utils.MatomoUtils.trackNewElementEvent
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.FORMAT_NEW_FILE
 import com.infomaniak.lib.core.utils.format
@@ -59,7 +60,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private lateinit var openCameraPermissions: DrivePermissions
     private lateinit var uploadFilesPermissions: DrivePermissions
 
-    private var currentPhotoUri: Uri? = null
     private var mediaPhotoPath = ""
     private var mediaVideoPath = ""
 
@@ -111,11 +111,11 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun openCamera() {
         if (openCameraPermissions.checkSyncPermissions()) {
+            trackNewElement("takePhotoOrVideo")
             openCamera.isEnabled = false
             try {
                 val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
-                    currentPhotoUri = createMediaFile(false)
-                    putExtra(MediaStore.EXTRA_OUTPUT, currentPhotoUri)
+                    putExtra(MediaStore.EXTRA_OUTPUT, createMediaFile(false))
                 }
                 val takeVideoIntent = Intent(MediaStore.ACTION_VIDEO_CAPTURE).apply {
                     putExtra(MediaStore.EXTRA_OUTPUT, createMediaFile(true))
@@ -132,6 +132,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun uploadFiles() {
         if (uploadFilesPermissions.checkSyncPermissions()) {
+            trackNewElement("uploadFile")
             documentUpload.isEnabled = false
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 type = "*/*"
@@ -146,6 +147,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun scanDocuments() {
+        trackNewElement("scan")
         // TODO find a good lib
         dismiss()
     }
@@ -160,6 +162,15 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         dismiss()
     }
 
+    private fun File.Office.getEventName(): String {
+        return when (this) {
+            File.Office.DOCS -> "createText"
+            File.Office.POINTS -> "createPresentation"
+            File.Office.GRIDS -> "createTable"
+            File.Office.TXT -> "createNote"
+        }
+    }
+
     private fun createFile(office: File.Office) {
         Utils.createPromptNameDialog(
             context = requireContext(),
@@ -168,6 +179,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             positiveButton = R.string.buttonCreate,
             iconRes = office.convertedType.icon
         ) { dialog, name ->
+            trackNewElement(office.getEventName())
             val createFile = CreateFile(name, office.extension)
             mainViewModel.createOffice(currentFolderFile.driveId, currentFolderFile.id, createFile)
                 .observe(viewLifecycleOwner) { apiResponse ->
@@ -215,7 +227,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                     photoFile.length() != 0L -> photoFile
                     else -> java.io.File(mediaVideoPath)
                 }
-
                 val fileModifiedAt = Date(file.lastModified())
                 val fileSize = file.length()
                 val applicationContext = context?.applicationContext
@@ -303,6 +314,11 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         java.io.File(requireContext().cacheDir, getString(R.string.EXPOSED_UPLOAD_DIR)).apply {
             if (exists()) deleteRecursively()
         }
+    }
+
+    private fun trackNewElement(trackerName: String) {
+        val trackerSource = if (mainViewModel.currentFolderOpenAddFileBottom.value == null) "FromFAB" else "FromFolder"
+        trackNewElementEvent(trackerName + trackerSource)
     }
 
     override fun onDestroy() {

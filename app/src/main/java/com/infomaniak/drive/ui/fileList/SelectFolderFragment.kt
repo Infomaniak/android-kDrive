@@ -28,6 +28,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.Rights
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity.SaveExternalViewModel
+import com.infomaniak.drive.utils.MatomoUtils.trackNewElementEvent
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.safeNavigate
@@ -56,6 +57,7 @@ class SelectFolderFragment : FileListFragment() {
                 val selectFolderActivity = requireActivity() as? SelectFolderActivity
                 if (FileController.getFileById(folderId, userDrive)?.rights?.newFolder == true) {
                     selectFolderActivity?.hideSaveButton()
+                    trackNewElementEvent("createFolderOnTheFly")
                     safeNavigate(
                         SelectFolderFragmentDirections.actionSelectFolderFragmentToNewFolderFragment(
                             parentFolderId = folderId,

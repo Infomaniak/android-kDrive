@@ -20,6 +20,8 @@ package com.infomaniak.drive.ui
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.MatomoUtils.trackCurrentUserId
+import com.infomaniak.drive.utils.MatomoUtils.trackScreen
 import kotlinx.coroutines.runBlocking
 
 open class BaseActivity : AppCompatActivity() {
@@ -29,6 +31,8 @@ open class BaseActivity : AppCompatActivity() {
 
         if (AccountUtils.currentUser == null) {
             runBlocking { AccountUtils.requestCurrentUser() }
+            application.trackCurrentUserId()
         }
+        trackScreen()
     }
 }

@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.fileList.fileShare
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -34,11 +35,16 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.MatomoUtils.trackEventWithBooleanValue
 import com.infomaniak.drive.views.ShareLinkContainerView.Companion.getTypeName
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.android.synthetic.main.fragment_file_share_link_settings.*
+import kotlinx.android.synthetic.main.fragment_file_share_link_settings.expirationDateInput
+import kotlinx.android.synthetic.main.fragment_file_share_link_settings.newPasswordButton
+import kotlinx.android.synthetic.main.fragment_file_share_link_settings.passwordTextLayout
+import kotlinx.android.synthetic.main.item_dropbox_settings.*
 import java.util.*
 
 class FileShareLinkSettingsFragment : Fragment() {
@@ -144,6 +150,9 @@ class FileShareLinkSettingsFragment : Fragment() {
             initProgress(this@FileShareLinkSettingsFragment)
             setOnClickListener {
                 showProgress()
+                context?.applicationContext?.trackShareSettingsEvent(
+                    addPasswordSwitch?.isChecked, expirationDateSwitch?.isChecked, allowDownloadValue?.isChecked
+                )
                 val isValid = checkPasswordStatus()
                 if (!isValid) {
                     hideProgress(R.string.buttonSave)
@@ -278,5 +287,16 @@ class FileShareLinkSettingsFragment : Fragment() {
                 },
             )
         }
+    }
+
+    private fun Context.trackShareSettingsEvent(
+        protectWithPassword: Boolean?,
+        expirationDate: Boolean?,
+        downloadFromLink: Boolean?
+    ) {
+        val category = "shareAndRights"
+        trackEventWithBooleanValue(category, "protectWithPassword", protectWithPassword)
+        trackEventWithBooleanValue(category, "expirationDateLink", expirationDate)
+        trackEventWithBooleanValue(category, "downloadFromLink", downloadFromLink)
     }
 }

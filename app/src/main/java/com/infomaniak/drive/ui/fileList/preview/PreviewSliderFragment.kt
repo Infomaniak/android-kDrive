@@ -46,6 +46,7 @@ import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.MatomoUtils.trackScreen
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntent
 import com.infomaniak.drive.views.FileInfoActionsView
@@ -69,6 +70,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     private var hideActions: Boolean = false
     private var showUi = false
+
+    override val ownerFragment = this
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data -> onSelectFolderResult(data) }
@@ -133,6 +136,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             offscreenPageLimit = 1
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
+                    childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.trackScreen()
                     currentPreviewFile = previewSliderAdapter.getFile(position)
                     editButton.isVisible = currentPreviewFile.isOnlyOfficePreview()
                     openWithButton.isGone = currentPreviewFile.isOnlyOfficePreview()
@@ -270,8 +274,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         })
     }
 
-    override fun addFavoritesClicked() {
-        currentPreviewFile.apply {
+    override fun addFavoritesClicked(currentFile: File) {
+        currentFile.apply {
+            super.addFavoritesClicked(this)
             val observer: Observer<ApiResponse<Boolean>> = Observer { apiResponse ->
                 if (apiResponse.isSuccess()) {
                     isFavorite = !isFavorite
@@ -335,6 +340,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun downloadFileClicked() {
+        super.downloadFileClicked()
         bottomSheetFileInfos.downloadFile(drivePermissions) {
             toggleBottomSheet(true)
         }
@@ -404,6 +410,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun openWithClicked() {
+        super.openWithClicked()
         val packageManager = requireContext().packageManager
         if (requireContext().openWithIntent(currentPreviewFile, userDrive).resolveActivity(packageManager) == null) {
             requireActivity().showSnackbar(R.string.allActivityNotFoundError)
