@@ -17,10 +17,7 @@
  */
 package com.infomaniak.drive.ui.fileList.fileDetails
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
+import androidx.lifecycle.*
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileActivity
@@ -43,20 +40,7 @@ class FileDetailsViewModel : ViewModel() {
         getFileActivitiesJob = Job()
 
         return liveData(Dispatchers.IO + getFileActivitiesJob) {
-            suspend fun recursive(page: Int) {
-                val apiRepository = ApiRepository.getFileActivities(file, page, false)
-                if (apiRepository.isSuccess()) {
-                    when {
-                        apiRepository.data?.isNullOrEmpty() == true -> emit(null)
-                        apiRepository.page == apiRepository.pages -> emit(apiRepository)
-                        else -> {
-                            emit(apiRepository)
-                            recursive(page + 1)
-                        }
-                    }
-                }
-            }
-            recursive(1)
+            manageRecursiveApiResponse(file) { file, page -> ApiRepository.getFileActivities(file, page, false) }
         }
     }
 
@@ -65,20 +49,7 @@ class FileDetailsViewModel : ViewModel() {
         getFileCommentsJob = Job()
 
         return liveData(Dispatchers.IO + getFileCommentsJob) {
-            suspend fun recursive(page: Int) {
-                val apiRepository = ApiRepository.getFileComments(file, page)
-                if (apiRepository.isSuccess()) {
-                    when {
-                        apiRepository.data?.isNullOrEmpty() == true -> emit(null)
-                        apiRepository.page == apiRepository.pages -> emit(apiRepository)
-                        else -> {
-                            emit(apiRepository)
-                            recursive(page + 1)
-                        }
-                    }
-                }
-            }
-            recursive(1)
+            manageRecursiveApiResponse(file) { file, page -> ApiRepository.getFileComments(file, page) }
         }
     }
 
@@ -100,5 +71,26 @@ class FileDetailsViewModel : ViewModel() {
 
     fun postUnlike(file: File, fileComment: FileComment) = liveData(Dispatchers.IO) {
         emit(ApiRepository.postFileCommentUnlike(file, fileComment.id))
+    }
+
+    private suspend fun <T> LiveDataScope<ApiResponse<ArrayList<T>>?>.manageRecursiveApiResponse(
+        file: File,
+        apiResponseCallback: (file: File, page: Int) -> ApiResponse<ArrayList<T>>
+    ) {
+        suspend fun recursive(page: Int) {
+            with(apiResponseCallback(file, page)) {
+                if (isSuccess()) {
+                    when {
+                        data.isNullOrEmpty() -> emit(null)
+                        page == pages || data!!.count() < itemsPerPage -> emit(this) // TODO delete second condition for api-v2
+                        else -> {
+                            emit(this)
+                            recursive(page + 1)
+                        }
+                    }
+                }
+            }
+        }
+        recursive(1)
     }
 }

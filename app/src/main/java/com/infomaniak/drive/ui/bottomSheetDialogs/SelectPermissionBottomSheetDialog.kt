@@ -49,7 +49,6 @@ import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_select_permission.*
 import kotlinx.coroutines.Dispatchers
-import java.util.*
 
 class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
     private lateinit var adapter: PermissionsAdapter

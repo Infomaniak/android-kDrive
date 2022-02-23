@@ -22,7 +22,6 @@ import com.infomaniak.drive.KDriveTest
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.UiTestUtils
-import com.infomaniak.drive.utils.UiTestUtils.closeBottomSheetInfoModalIfDisplayed
 import com.infomaniak.drive.utils.UiTestUtils.getDeviceViewById
 import com.infomaniak.drive.utils.UiTestUtils.selectDriveInList
 import com.infomaniak.drive.utils.UiTestUtils.switchToDriveInstance
