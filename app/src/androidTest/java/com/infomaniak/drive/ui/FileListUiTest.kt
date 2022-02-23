@@ -37,7 +37,6 @@ import java.util.*
 /**
  * UI Tests relative to file list (quick operations, file creation, upload, import, ...)
  */
-@Disabled
 class FileListUiTest : KDriveTest() {
 
     @BeforeEach

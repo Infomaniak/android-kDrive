@@ -36,7 +36,6 @@ import java.util.*
 /**
  * UI Tests relative to a file item (sharing, comments, details, activities)
  */
-@Disabled
 class FileItemUiTest : KDriveTest() {
 
     @BeforeEach

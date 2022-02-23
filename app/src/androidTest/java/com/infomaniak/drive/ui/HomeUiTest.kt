@@ -30,7 +30,6 @@ import org.junit.jupiter.api.*
 /**
  * UI Tests relative to a home (drive switch, drive activities, file search)
  */
-@Disabled
 class HomeUiTest : KDriveTest() {
 
     @BeforeEach
