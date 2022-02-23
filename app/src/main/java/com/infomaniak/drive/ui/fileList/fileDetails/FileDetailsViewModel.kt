@@ -44,7 +44,7 @@ class FileDetailsViewModel : ViewModel() {
 
         return liveData(Dispatchers.IO + getFileActivitiesJob) {
             suspend fun recursive(page: Int) {
-                val apiRepository = ApiRepository.getFileActivities(file, page)
+                val apiRepository = ApiRepository.getFileActivities(file, page, false)
                 if (apiRepository.isSuccess()) {
                     when {
                         apiRepository.data?.isNullOrEmpty() == true -> emit(null)
