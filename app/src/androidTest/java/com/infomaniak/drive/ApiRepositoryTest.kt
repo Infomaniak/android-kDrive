@@ -75,6 +75,13 @@ import java.util.*
  */
 class ApiRepositoryTest : KDriveTest() {
 
+    private lateinit var randomSuffix: String
+
+    @BeforeEach
+    fun beforeEach() {
+        randomSuffix = UUID.randomUUID().toString()
+    }
+
     @Test
     @DisplayName("Check if remote drive data are correctly retrieved")
     fun getDriveData() {
@@ -104,7 +111,7 @@ class ApiRepositoryTest : KDriveTest() {
     @DisplayName("Create a category then delete it")
     fun createCategory() {
         val color = "#0000FF"
-        val name = "category tests"
+        val name = "category test $randomSuffix}"
         val categoryId = createCategory(userDrive.driveId, name, color).let {
             assertApiResponseData(it)
             assertEquals(name, it.data?.name, "Name of the category should be equals to $name")
@@ -134,13 +141,13 @@ class ApiRepositoryTest : KDriveTest() {
     @DisplayName("Update a created category then delete it")
     fun updateCategory() {
         var color = "#0000FF"
-        var name = "category tests"
+        var name = "categoryTest-$randomSuffix}"
         val categoryId = createCategory(userDrive.driveId, name, color).let {
             assertNotNull(it.data)
             it.data!!.id
         }
 
-        name = "update category"
+        name = "updateCategory-$randomSuffix}"
         color = "#FF0000"
         // Edit the category by changing its color and name
         with(editCategory(userDrive.driveId, categoryId, name, color)) {
@@ -373,7 +380,7 @@ class ApiRepositoryTest : KDriveTest() {
         @Test
         @DisplayName("Copy the test file to root folder")
         fun duplicateFile() {
-            val copyName = "test copy"
+            val copyName = "testCopy-$randomSuffix"
             val copyFile = duplicateFile(testFile, copyName, ROOT_ID).let {
                 assertApiResponseData(it)
                 assertEquals(copyName, it.data?.name, "The copy name should be equal to $copyName")
@@ -514,7 +521,7 @@ class ApiRepositoryTest : KDriveTest() {
     inner class ShareTestFolder {
 
         private lateinit var testFolder: File
-        private val folderName = "testFolder-${UUID.randomUUID()}"
+        private val folderName = "testFolder-$randomSuffix}"
 
         @BeforeEach
         @Throws(Exception::class)
