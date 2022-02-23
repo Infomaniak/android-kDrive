@@ -40,7 +40,7 @@ class FileDetailsViewModel : ViewModel() {
         getFileActivitiesJob = Job()
 
         return liveData(Dispatchers.IO + getFileActivitiesJob) {
-            manageRecursiveApiResponse(file) { file, page -> ApiRepository.getFileActivities(file, page) }
+            manageRecursiveApiResponse(file) { file, page -> ApiRepository.getFileActivities(file, page, false) }
         }
     }
 
