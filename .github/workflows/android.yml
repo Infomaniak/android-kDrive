@@ -2,10 +2,10 @@ name: Android CI
 
 on:
   push:
-    branches: [ Clean-tests-code ]
-  # pull_request:
-  #   branches: [ master ]
-  #   types: [ synchronize, opened, reopened, ready_for_review ]
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+    types: [ synchronize, opened, reopened, ready_for_review ]
 
 jobs:
 
