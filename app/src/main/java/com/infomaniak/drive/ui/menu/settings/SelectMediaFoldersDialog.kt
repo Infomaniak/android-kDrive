@@ -78,8 +78,9 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
             initialListView = mediaFolderList,
         )
 
-        val drivePermissions = DrivePermissions()
-        drivePermissions.registerPermissions(this) { authorized -> if (authorized) loadFolders() else dismiss() }
+        val drivePermissions = DrivePermissions().apply {
+            registerPermissions(this@SelectMediaFoldersDialog) { authorized -> if (authorized) loadFolders() else dismiss() }
+        }
         if (drivePermissions.checkWriteStoragePermission()) loadFolders()
     }
 

@@ -17,41 +17,44 @@
  */
 package com.infomaniak.drive.ui
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.uiautomator.UiScrollable
 import androidx.test.uiautomator.UiSelector
+import com.infomaniak.drive.KDriveTest
 import com.infomaniak.drive.utils.UiTestUtils
+import com.infomaniak.drive.utils.UiTestUtils.deleteFile
 import com.infomaniak.drive.utils.UiTestUtils.device
+import com.infomaniak.drive.utils.UiTestUtils.findFileInList
 import com.infomaniak.drive.utils.UiTestUtils.getViewIdentifier
 import com.infomaniak.drive.utils.UiTestUtils.startApp
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 import java.util.*
 
 /**
  * UI Tests relative to file list (quick operations, file creation, upload, import, ...)
  */
-@RunWith(AndroidJUnit4::class)
-class FileListUiTest {
+class FileListUiTest : KDriveTest() {
 
-    @Before
+    @BeforeEach
     fun init() {
         startApp()
-        UiTestUtils.getDeviceViewById("fileListFragment")?.click()
+        UiTestUtils.getDeviceViewById("fileListFragment").click()
     }
 
     @Test
-    fun testCreateFolder() {
+    @DisplayName("Check UI to Create then delete a folder")
+    fun testCreateAndDeleteFolder() {
         val fileRecyclerView = UiScrollable(UiSelector().resourceId(getViewIdentifier("fileRecyclerView")))
-        val initialFileNumber = fileRecyclerView.childCount
         val randomFolderName = "UI-Test-${UUID.randomUUID()}"
 
         UiTestUtils.createPrivateFolder(randomFolderName)
         device.waitForWindowUpdate(null, 5000)
-        assert(fileRecyclerView.childCount == initialFileNumber + 1)
+        assertNotNull(findFileInList(fileRecyclerView, randomFolderName), "File must be found")
 
-        UiTestUtils.deleteFile(fileRecyclerView, randomFolderName)
-        assert(fileRecyclerView.childCount == initialFileNumber)
+        deleteFile(fileRecyclerView, randomFolderName)
+        assertNull(findFileInList(fileRecyclerView, randomFolderName), "File must not be found")
     }
 }

@@ -28,6 +28,8 @@ import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.login.MigrationActivity
 import com.infomaniak.drive.ui.login.MigrationActivity.Companion.getOldkDriveUser
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.MatomoUtils.trackCurrentUserId
+import com.infomaniak.drive.utils.MatomoUtils.trackScreen
 import com.infomaniak.drive.utils.isKeyguardSecure
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -40,29 +42,28 @@ class LaunchActivity : AppCompatActivity() {
 
             logoutCurrentUserIfNeeded() // Rights v2 migration temporary fix
 
-            when {
+            val destinationClass = when {
                 AccountUtils.requestCurrentUser() == null -> {
-                    if (getOldkDriveUser().isEmpty) {
-                        startActivity(Intent(this@LaunchActivity, LoginActivity::class.java))
-                    } else {
-                        startActivity(Intent(this@LaunchActivity, MigrationActivity::class.java))
-                    }
+                    if (getOldkDriveUser().isEmpty) LoginActivity::class.java else MigrationActivity::class.java
                 }
                 isKeyguardSecure() && AppSettings.appSecurityLock -> {
-                    startActivity(Intent(this@LaunchActivity, LockActivity::class.java))
+                    LockActivity::class.java
                 }
                 else -> {
+                    application.trackCurrentUserId()
                     if (DriveInfosController.getDrivesCount(AccountUtils.currentUserId) == 0L) {
                         AccountUtils.updateCurrentUserAndDrives(this@LaunchActivity)
                     }
                     if (DriveInfosController.getDrives(AccountUtils.currentUserId).all { it.maintenance }) {
-                        startActivity(Intent(this@LaunchActivity, MaintenanceActivity::class.java))
+                        MaintenanceActivity::class.java
                     } else {
-                        startActivity(Intent(this@LaunchActivity, MainActivity::class.java))
+                        MainActivity::class.java
                     }
                 }
             }
+            startActivity(Intent(this@LaunchActivity, destinationClass))
         }
+        trackScreen()
     }
 
     override fun onPause() {

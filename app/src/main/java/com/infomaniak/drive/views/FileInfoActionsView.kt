@@ -46,6 +46,7 @@ import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.Utils.moveFileClicked
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.CoroutineScope
@@ -163,6 +164,8 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     private fun shareFile() {
+        context.applicationContext?.trackFileActionEvent("sendFileCopy")
+
         val context = ownerFragment.requireContext()
         val shareIntent = Intent().apply {
             action = Intent.ACTION_SEND
@@ -180,7 +183,7 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     private fun initOnClickListeners() {
-        editDocument.setOnClickListener { onItemClickListener.editDocumentClicked(ownerFragment, currentFile) }
+        editDocument.setOnClickListener { onItemClickListener.editDocumentClicked() }
         displayInfo.setOnClickListener { onItemClickListener.displayInfoClicked() }
         fileRights.setOnClickListener { onItemClickListener.fileRightsClicked() }
         sendCopy.setOnClickListener { if (currentFile.isFolder()) openAddFileBottom() else shareFile() }
@@ -193,18 +196,18 @@ class FileInfoActionsView @JvmOverloads constructor(
             addFavorites.isEnabled = false
             onItemClickListener.addFavoritesClicked()
         }
-        leaveShare.setOnClickListener { onItemClickListener.leaveShare(context, currentFile) }
+        leaveShare.setOnClickListener { onItemClickListener.leaveShare() }
         availableOfflineSwitch.setOnCheckedChangeListener { _, isChecked ->
-            onItemClickListener.availableOfflineSwitched(this, currentFile, isChecked)
+            onItemClickListener.availableOfflineSwitched(this, isChecked)
         }
         availableOffline.setOnClickListener { availableOfflineSwitch.performClick() }
         moveFile.setOnClickListener {
             val currentFolderId = FileController.getParentFile(currentFile.id)?.id ?: -42
-            onItemClickListener.moveFileClicked(ownerFragment.context, currentFolderId, selectFolderResultLauncher)
+            onItemClickListener.moveFileClicked(currentFolderId, selectFolderResultLauncher)
         }
-        duplicateFile.setOnClickListener { onItemClickListener.duplicateFileClicked(ownerFragment.requireContext(), currentFile) }
-        renameFile.setOnClickListener { onItemClickListener.renameFileClicked(ownerFragment.requireContext(), currentFile) }
-        deleteFile.setOnClickListener { onItemClickListener.deleteFileClicked(ownerFragment.requireContext(), currentFile) }
+        duplicateFile.setOnClickListener { onItemClickListener.duplicateFileClicked() }
+        renameFile.setOnClickListener { onItemClickListener.renameFileClicked() }
+        deleteFile.setOnClickListener { onItemClickListener.deleteFileClicked() }
     }
 
     fun downloadAsOfflineFile() {
@@ -388,13 +391,22 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     interface OnItemClickListener {
-        fun addFavoritesClicked()
-        fun copyPublicLink()
+
+        val ownerFragment: Fragment
+        val currentFile: File
+
+        private val context: Context get() = ownerFragment.requireContext()
+        private val application: Context? get() = context.applicationContext
+
+        private fun trackActionEvent(name: String, value: Float? = null) = application?.trackFileActionEvent(name, value)
+
+        fun addFavoritesClicked() = trackActionEvent("favorite", (!currentFile.isFavorite).toFloat())
+        fun copyPublicLink() = trackActionEvent("copyShareLink")
         fun displayInfoClicked()
-        fun downloadFileClicked()
+        fun downloadFileClicked() = trackActionEvent("download")
         fun manageCategoriesClicked(fileId: Int)
-        fun colorFolderClicked(color: String) = Unit
-        fun dropBoxClicked(isDropBox: Boolean) = Unit
+        fun dropBoxClicked(isDropBox: Boolean) = trackActionEvent("convertToDropbox", isDropBox.toFloat())
+        fun colorFolderClicked(color: String) = application?.trackEvent("colorFolder", TrackerAction.CLICK, "switch")
         fun fileRightsClicked()
         fun onCacheAddedToOffline() = Unit
         fun onDeleteFile(onApiResponse: () -> Unit)
@@ -402,10 +414,11 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun onLeaveShare(onApiResponse: () -> Unit)
         fun onMoveFile(destinationFolder: File)
         fun onRenameFile(newName: String, onApiResponse: () -> Unit)
-        fun openWithClicked()
+        fun openWithClicked() = trackActionEvent("openWith")
         fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File)
 
-        fun editDocumentClicked(ownerFragment: Fragment, currentFile: File) {
+        fun editDocumentClicked() {
+            trackActionEvent("edit")
             ownerFragment.openOnlyOfficeDocument(currentFile)
         }
 
@@ -416,26 +429,33 @@ class FileInfoActionsView @JvmOverloads constructor(
             }
         }
 
-        fun availableOfflineSwitched(fileInfoActionsView: FileInfoActionsView, currentFile: File, isChecked: Boolean) {
-            when {
-                currentFile.isOffline && isChecked -> Unit
-                !currentFile.isOffline && !isChecked -> Unit
-                isChecked -> fileInfoActionsView.downloadAsOfflineFile()
-                else -> {
-                    val offlineLocalPath = currentFile.getOfflineFile(fileInfoActionsView.context)
-                    val cacheFile = currentFile.getCacheFile(fileInfoActionsView.context)
-                    offlineLocalPath?.let { removeOfflineFile(offlineLocalPath, cacheFile) }
+        fun availableOfflineSwitched(fileInfoActionsView: FileInfoActionsView, isChecked: Boolean) {
+            currentFile.apply {
+                when {
+                    isOffline && isChecked -> Unit
+                    !isOffline && !isChecked -> Unit
+                    isChecked -> {
+                        trackActionEvent("offline", true.toFloat())
+                        fileInfoActionsView.downloadAsOfflineFile()
+                    }
+                    else -> {
+                        trackActionEvent("offline", false.toFloat())
+                        val offlineLocalPath = getOfflineFile(context)
+                        val cacheFile = getCacheFile(context)
+                        offlineLocalPath?.let { removeOfflineFile(offlineLocalPath, cacheFile) }
+                    }
                 }
             }
         }
 
-        fun moveFileClicked(context: Context?, folderId: Int, selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
-            context?.moveFileClicked(folderId, selectFolderResultLauncher)
+        fun moveFileClicked(folderId: Int, selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
+            trackActionEvent("move")
+            context.moveFileClicked(folderId, selectFolderResultLauncher)
         }
 
-        fun duplicateFileClicked(context: Context, currentFile: File) {
+        fun duplicateFileClicked() {
             currentFile.apply {
-                val fileName = currentFile.getFileName()
+                val fileName = getFileName()
                 val copyName = context.getString(R.string.allDuplicateFileName, fileName, getFileExtension() ?: "")
 
                 Utils.createPromptNameDialog(
@@ -447,28 +467,30 @@ class FileInfoActionsView @JvmOverloads constructor(
                     selectedRange = fileName.length
                 ) { dialog, name ->
                     onDuplicateFile(name) {
+                        trackActionEvent("copy")
                         dialog.dismiss()
                     }
                 }
             }
         }
 
-        fun leaveShare(context: Context, currentFile: File) {
+        fun leaveShare() {
             currentFile.apply {
                 Utils.createConfirmation(
                     context = context,
                     title = context.getString(R.string.modalLeaveShareTitle),
-                    message = context.getString(R.string.modalLeaveShareDescription, currentFile.name),
+                    message = context.getString(R.string.modalLeaveShareDescription, name),
                     autoDismiss = false
                 ) { dialog ->
                     onLeaveShare {
+                        trackActionEvent("stopShare")
                         dialog.dismiss()
                     }
                 }
             }
         }
 
-        fun renameFileClicked(context: Context, currentFile: File) {
+        fun renameFileClicked() {
             currentFile.apply {
                 Utils.createPromptNameDialog(
                     context = context,
@@ -476,21 +498,31 @@ class FileInfoActionsView @JvmOverloads constructor(
                     fieldName = if (isFolder()) R.string.hintInputDirName else R.string.hintInputFileName,
                     positiveButton = R.string.buttonSave,
                     fieldValue = name,
-                    selectedRange = currentFile.getFileName().length
+                    selectedRange = getFileName().length
                 ) { dialog, name ->
                     onRenameFile(name) {
+                        trackActionEvent("rename")
                         dialog.dismiss()
                     }
                 }
             }
         }
 
-        fun deleteFileClicked(context: Context, currentFile: File) {
+        fun deleteFileClicked() {
             Utils.confirmFileDeletion(context, fileName = currentFile.name) { dialog ->
                 onDeleteFile {
+                    trackActionEvent("putInTrash")
                     dialog.dismiss()
                 }
             }
         }
+    }
+
+    companion object {
+
+        private fun Context.trackFileActionEvent(trackerName: String, trackerValue: Float? = null) {
+            trackEvent("fileAction", TrackerAction.CLICK, trackerName, trackerValue)
+        }
+
     }
 }

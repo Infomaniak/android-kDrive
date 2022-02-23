@@ -258,10 +258,10 @@ object FileController {
         saveFiles(FAVORITES_FILE, files, replaceOldData, realm)
     }
 
-    private fun saveMySharesFiles(files: ArrayList<File>, replaceOldData: Boolean) {
+    private fun saveMySharesFiles(userDrive: UserDrive, files: ArrayList<File>, replaceOldData: Boolean) {
         val keepCaches = arrayListOf<Int>()
         val keepFiles = arrayListOf<Int>()
-        getRealmInstance().use { realm ->
+        getRealmInstance(userDrive).use { realm ->
             files.forEachIndexed { index, file ->
                 val offlineFile = file.getOfflineFile(Realm.getApplicationContext()!!)
 
@@ -388,10 +388,10 @@ object FileController {
         userDrive: UserDrive,
         sortType: SortType,
         page: Int = 1,
-        ignoreCloud: Boolean = false,
+        onlyLocal: Boolean = false,
         transaction: (files: ArrayList<File>, isComplete: Boolean) -> Unit
     ) {
-        if (ignoreCloud) {
+        if (onlyLocal) {
             transaction(getFilesFromCache(MY_SHARES_FILE_ID, userDrive, sortType), true)
         } else {
             val apiResponse = ApiRepository.getMySharedFiles(
@@ -402,11 +402,11 @@ object FileController {
                 when {
                     apiResponseData.isNullOrEmpty() -> transaction(arrayListOf(), true)
                     apiResponseData.size < ApiRepository.PER_PAGE -> {
-                        saveMySharesFiles(apiResponseData, page == 1)
+                        saveMySharesFiles(userDrive, apiResponseData, page == 1)
                         transaction(apiResponseData, true)
                     }
                     else -> {
-                        saveMySharesFiles(apiResponseData, page == 1)
+                        saveMySharesFiles(userDrive, apiResponseData, page == 1)
                         transaction(apiResponseData, false)
                         getMySharedFiles(userDrive, sortType, page + 1, false, transaction)
                     }

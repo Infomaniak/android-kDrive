@@ -35,6 +35,8 @@ import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.MatomoUtils.trackAccountEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackCurrentUserId
 import com.infomaniak.drive.utils.clearStack
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.InfomaniakCore
@@ -102,11 +104,15 @@ class LoginActivity : AppCompatActivity() {
             setOnClickListener {
                 signInButton.isEnabled = false
                 showProgress()
+                trackAccountEvent("openLoginWebview")
                 infomaniakLogin.startWebViewLogin(webViewLoginResultLauncher)
             }
         }
 
-        signInButton.setOnClickListener { openUrl(ApiRoutes.orderDrive()) }
+        signInButton.setOnClickListener {
+            trackAccountEvent("openCreationWebview")
+            openUrl(ApiRoutes.orderDrive())
+        }
     }
 
     private fun authenticateUser(authCode: String) {
@@ -117,7 +123,11 @@ class LoginActivity : AppCompatActivity() {
                 onSuccess = {
                     lifecycleScope.launch(Dispatchers.IO) {
                         when (val user = authenticateUser(this@LoginActivity, it)) {
-                            is User -> launchMainActivity()
+                            is User -> {
+                                application.trackCurrentUserId()
+                                trackAccountEvent("loggedIn")
+                                launchMainActivity()
+                            }
                             is ApiResponse<*> -> withContext(Dispatchers.Main) {
                                 if (user.error?.code?.equals("no_drive") == true) {
                                     launchNoDriveActivity()

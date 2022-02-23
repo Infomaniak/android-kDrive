@@ -23,7 +23,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
@@ -56,10 +55,12 @@ import kotlinx.coroutines.withContext
 
 class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoActionsView.OnItemClickListener {
 
-    private lateinit var currentFile: File
     private lateinit var drivePermissions: DrivePermissions
     private val mainViewModel: MainViewModel by activityViewModels()
     private val navigationArgs: FileInfoActionsBottomSheetDialogArgs by navArgs()
+
+    override lateinit var currentFile: File
+    override val ownerFragment = this
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data -> onSelectFolderResult(data) }
@@ -136,9 +137,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         fileInfoActionsView.removeOfflineObservations(this)
     }
 
-    override fun editDocumentClicked(ownerFragment: Fragment, currentFile: File) {
+    override fun editDocumentClicked() {
         findNavController().popBackStack()
-        super.editDocumentClicked(ownerFragment, currentFile)
+        super.editDocumentClicked()
     }
 
     override fun displayInfoClicked() {
@@ -181,6 +182,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun copyPublicLink() {
+        super.copyPublicLink()
         fileInfoActionsView.createPublicCopyLink(onSuccess = {
             requireActivity().showSnackbar(title = R.string.fileInfoLinkCopiedToClipboard, anchorView = requireActivity().mainFab)
             findNavController().popBackStack()
@@ -190,6 +192,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun downloadFileClicked() {
+        super.downloadFileClicked()
         fileInfoActionsView.downloadFile(drivePermissions) {
             findNavController().popBackStack()
         }
@@ -205,6 +208,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun colorFolderClicked(color: String) {
+        super.colorFolderClicked(color)
         if (AccountUtils.getCurrentDrive()?.pack == Drive.DrivePack.FREE.value) {
             safeNavigate(R.id.colorFolderUpgradeBottomSheetDialog)
         } else {
@@ -213,6 +217,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun addFavoritesClicked() {
+        super.addFavoritesClicked()
         currentFile.apply {
             val observer: Observer<ApiResponse<Boolean>> = Observer { apiResponse ->
                 if (apiResponse.isSuccess()) {
@@ -313,6 +318,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun openWithClicked() {
+        super.openWithClicked()
         if (requireContext().openWithIntent(currentFile).resolveActivity(requireContext().packageManager) == null) {
             requireActivity().showSnackbar(R.string.allActivityNotFoundError)
             findNavController().popBackStack()

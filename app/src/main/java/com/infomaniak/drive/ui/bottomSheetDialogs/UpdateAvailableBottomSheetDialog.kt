@@ -28,6 +28,7 @@ class UpdateAvailableBottomSheetDialog : InformationBottomSheetDialog() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         title.setText(R.string.updateAvailableTitle)
         description.setText(R.string.updateAvailableDescription)
         illu.setAnimation(R.raw.illu_upgrade)
@@ -37,11 +38,13 @@ class UpdateAvailableBottomSheetDialog : InformationBottomSheetDialog() {
             dismiss()
         }
 
-        actionButton.setText(R.string.buttonUpdate)
-        actionButton.setOnClickListener {
-            UiSettings(requireContext()).updateLater = false
-            requireContext().goToPlaystore()
-            dismiss()
+        actionButton.apply {
+            setText(R.string.buttonUpdate)
+            setOnClickListener {
+                UiSettings(requireContext()).updateLater = false
+                requireContext().goToPlaystore()
+                dismiss()
+            }
         }
     }
 }

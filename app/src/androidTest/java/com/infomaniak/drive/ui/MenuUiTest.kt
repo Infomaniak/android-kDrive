@@ -17,70 +17,67 @@
  */
 package com.infomaniak.drive.ui
 
-import android.content.Context
-import android.content.Intent
 import android.widget.EditText
-import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.uiautomator.By
+import androidx.test.uiautomator.UiObjectNotFoundException
 import androidx.test.uiautomator.UiSelector
-import androidx.test.uiautomator.Until
+import com.infomaniak.drive.KDriveTest
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Env
 import com.infomaniak.drive.utils.UiTestUtils
+import com.infomaniak.drive.utils.UiTestUtils.closeBottomSheetInfoModalIfDisplayed
 import com.infomaniak.drive.utils.UiTestUtils.device
 import com.infomaniak.drive.utils.UiTestUtils.getDeviceViewById
-import org.hamcrest.CoreMatchers
-import org.junit.Before
-import org.junit.Test
-import java.lang.Thread.sleep
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 
-class MenuUiTest {
-    @Before
+class MenuUiTest : KDriveTest() {
+
+    @BeforeEach
     fun startApp() {
-        device.pressHome()
-
-        val launcherPackage: String = device.launcherPackageName
-        ViewMatchers.assertThat(launcherPackage, CoreMatchers.notNullValue())
-        device.wait(Until.hasObject(By.pkg(launcherPackage).depth(0)), 3000)
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        val intent = context.packageManager.getLaunchIntentForPackage(UiTestUtils.APP_PACKAGE)?.apply {
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        }
-        context.startActivity(intent)
-        device.wait(Until.hasObject(By.pkg(UiTestUtils.APP_PACKAGE).depth(0)), UiTestUtils.LAUNCH_TIMEOUT)
-        getDeviceViewById("menuFragment")?.clickAndWaitForNewWindow()
+        UiTestUtils.startApp()
+        getDeviceViewById("menuFragment").clickAndWaitForNewWindow()
     }
 
     @Test
+    @DisplayName("Check UI to add a new kdrive user then log him off")
     fun testAddUser() {
-        getDeviceViewById("changeUser")?.clickAndWaitForNewWindow()
-        getDeviceViewById("addUser")?.clickAndWaitForNewWindow()
-        getDeviceViewById("nextButton")?.click()
-        getDeviceViewById("nextButton")?.click()
-        getDeviceViewById("connectButton")?.clickAndWaitForNewWindow()
+        swipeDownNestedScrollView()
+        getDeviceViewById("changeUserIcon").clickAndWaitForNewWindow()
+        getDeviceViewById("addUser").clickAndWaitForNewWindow()
+        getDeviceViewById("nextButton").click()
+        getDeviceViewById("nextButton").click()
+        getDeviceViewById("connectButton").clickAndWaitForNewWindow()
+        with(device) {
 
-        // Username
-        device.findObject(UiSelector().instance(0).className(EditText::class.java)).text = Env.NEW_USER_NAME
+            // Username
+            findObject(UiSelector().instance(0).className(EditText::class.java)).text = Env.NEW_USER_NAME
 
-        // Password
-        device.findObject(UiSelector().text("Mot de passe")).text = Env.NEW_USER_PASSWORD
-        device.findObject(UiSelector().text("CONNEXION")).clickAndWaitForNewWindow()
+            // Password
+            findObject(UiSelector().instance(1).className(EditText::class.java)).text = Env.NEW_USER_PASSWORD
 
-        sleep(6000)
+            // Save button
+            try {
+                findObject(UiSelector().text("CONNECTION")).clickAndWaitForNewWindow(6000)
+            } catch (exception: UiObjectNotFoundException) {
+                findObject(UiSelector().text("CONNEXION")).clickAndWaitForNewWindow(6000)
+            }
 
-        assert(AccountUtils.currentUserId == Env.NEW_USER_ID)
-        getDeviceViewById("menuFragment")?.clickAndWaitForNewWindow()
-        // Cheat to scroll to bottom of screen
-        device.swipe(
-            device.displayWidth * 3 / 4,
-            device.displayHeight * 9 / 10,
-            device.displayWidth * 3 / 4,
-            device.displayHeight * 1 / 10,
-            10
-        )
-        getDeviceViewById("logout")?.clickAndWaitForNewWindow()
-        device.findObject(UiSelector().text(UiTestUtils.context.getString(R.string.buttonConfirm))).clickAndWaitForNewWindow()
+            // Close the bottom sheet displayed for categories information
+            closeBottomSheetInfoModalIfDisplayed(true)
+            getDeviceViewById("menuFragment").clickAndWaitForNewWindow(2000)
+            assert(AccountUtils.currentUserId == Env.NEW_USER_ID) { "User Id should be ${Env.NEW_USER_ID} but is ${AccountUtils.currentUserId}" }
+            swipeDownNestedScrollView()
+            getDeviceViewById("logout").clickAndWaitForNewWindow()
+            findObject(UiSelector().text(UiTestUtils.context.getString(R.string.buttonConfirm))).clickAndWaitForNewWindow()
+        }
+    }
+
+    private fun swipeDownNestedScrollView() {
+        with(device) {
+            // Cheat to scroll down because nestedScrollView doesn't want to scroll
+            swipe(displayWidth / 4, displayHeight - 20, displayWidth / 4, displayHeight / 4, 5)
+        }
     }
 }

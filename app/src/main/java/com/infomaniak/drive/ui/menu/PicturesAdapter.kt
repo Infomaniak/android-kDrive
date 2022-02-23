@@ -45,7 +45,7 @@ class PicturesAdapter(
         for (picture in newPictureList) {
             val month = picture.getLastModifiedAt()
                 .format(context.getString(R.string.photosHeaderDateFormat))
-                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+                .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
 
             if (lastSectionTitle != month) {
                 addItemList.add(month)

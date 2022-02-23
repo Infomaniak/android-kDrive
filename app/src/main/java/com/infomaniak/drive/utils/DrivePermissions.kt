@@ -28,7 +28,7 @@ import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -54,17 +54,16 @@ class DrivePermissions {
 
     fun registerPermissions(activity: FragmentActivity, onPermissionResult: ((authorized: Boolean) -> Unit)? = null) {
         this.activity = activity
-        registerForActivityResult =
-            activity.registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-                val authorized = permissions.values.all { it == true }
-                resultPermissions(onPermissionResult, authorized)
-            }
+        registerForActivityResult = activity.registerForActivityResult(RequestMultiplePermissions()) { permissions ->
+            val authorized = permissions.values.all { it == true }
+            resultPermissions(onPermissionResult, authorized)
+        }
     }
 
     fun registerPermissions(fragment: Fragment, onPermissionResult: ((authorized: Boolean) -> Unit)? = null) {
         this.activity = fragment.requireActivity()
         registerForActivityResult =
-            fragment.registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            fragment.registerForActivityResult(RequestMultiplePermissions()) { permissions ->
                 val authorized = permissions.values.all { it == true }
                 resultPermissions(onPermissionResult, authorized)
             }

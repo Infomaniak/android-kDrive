@@ -40,6 +40,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.fileList.fileDetails.CreateOrEditCategoryAdapter.Companion.COLORS
+import com.infomaniak.drive.utils.MatomoUtils.trackCategoriesEvent
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.find
 import com.infomaniak.drive.utils.getScreenSizeInDp
@@ -109,7 +110,13 @@ class CreateOrEditCategoryFragment : Fragment() {
             isEnabled = categoryIsPredefined || !isCreateCategory || categoryName.isNotEmpty()
             setOnClickListener {
                 showProgress()
-                if (categoryId == CREATE_CATEGORY_ID) createCategory() else editCategory(categoryId)
+                if (categoryId == CREATE_CATEGORY_ID) {
+                    trackCategoriesEvent("add")
+                    createCategory()
+                } else {
+                    trackCategoriesEvent("edit")
+                    editCategory(categoryId)
+                }
             }
         }
     }

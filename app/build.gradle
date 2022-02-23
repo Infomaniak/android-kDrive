@@ -4,6 +4,7 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'androidx.navigation.safeargs.kotlin'
 apply plugin: 'realm-android'
+apply plugin: 'de.mannodermaus.android-junit5'
 
 android {
 
@@ -16,12 +17,13 @@ android {
         versionCode 4_01_000_06
         versionName '4.1.0'
 
-        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArgument "runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder"
         buildConfigField 'String', 'CLIENT_ID', '"9473D73C-C20F-4971-9E10-D957C563FA68"'
         buildConfigField 'String', 'DRIVE_API', '"https://drive.infomaniak.com/drive/"'
         buildConfigField 'String', 'DRIVE_API_V2', '"https://drive.infomaniak.com/2/drive/"'
         buildConfigField 'String', 'INFOMANIAK_API', '"https://api.infomaniak.com/1/"'
+        buildConfigField 'String', 'MATOMO_URL', '"https://analytics.infomaniak.com/matomo.php"'
         buildConfigField 'String', 'OFFICE_URL', '"https://drive.infomaniak.com/app/office/"'
         buildConfigField 'String', 'SHOP_URL', '"https://shop.infomaniak.com/order/"'
         buildConfigField 'String', 'SUPPORT_URL', '"https://support.infomaniak.com/"'
@@ -68,6 +70,12 @@ android {
         } catch (Throwable ignored) {
         }
     }
+
+    testOptions.unitTests.all {
+        testLogging {
+            events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
+        }
+    }
 }
 
 sentry {
@@ -102,7 +110,6 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.viewpager2:viewpager2:1.1.0-beta01'
-    implementation 'com.googlecode.plist:dd-plist:1.23'
 
     def exoplayer_version = '2.16.1'
     implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
@@ -130,15 +137,26 @@ dependencies {
     standardImplementation 'com.google.android.play:core:1.10.3'
     standardImplementation 'com.google.firebase:firebase-messaging-ktx:23.0.0'
 
+    implementation 'com.googlecode.plist:dd-plist:1.23'
+
     implementation 'com.github.hannesa2:paho.mqtt.android:3.3.5'
+    implementation 'com.github.matomo-org:matomo-sdk-android:4.1.4'
 
     implementation 'io.sentry:sentry-android:5.6.1'
 
+    implementation 'androidx.test:core-ktx:1.4.0'
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.3'
     testImplementation 'io.github.serpro69:kotlin-faker:1.9.0'
-    testImplementation 'junit:junit:4.13.2'
     androidTestImplementation "androidx.work:work-testing:$work_version"
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+    androidTestImplementation 'androidx.test:runner:1.4.0'
+
+    def jupiter_version = '5.8.2'
+    androidTestImplementation "org.junit.jupiter:junit-jupiter-api:$jupiter_version"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$jupiter_version"
+
+    def junit_version = '1.3.0'
+    androidTestImplementation "de.mannodermaus.junit5:android-test-core:$junit_version"
+    androidTestRuntimeOnly "de.mannodermaus.junit5:android-test-runner:$junit_version"
 }
