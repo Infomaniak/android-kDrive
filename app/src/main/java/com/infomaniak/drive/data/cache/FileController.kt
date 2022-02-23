@@ -749,10 +749,10 @@ object FileController {
         userDrive: UserDrive? = null
     ): Map<out Int, FileActivity> {
         val okHttpClient = runBlocking {
-            userDrive?.userId?.let { KDriveHttpClient.getHttpClient(it) } ?: HttpClient.okHttpClient
+            userDrive?.userId?.let { KDriveHttpClient.getHttpClient(it, 30) } ?: HttpClient.okHttpClientLongTimeout
         }
         val returnResponse = arrayMapOf<Int, FileActivity>()
-        val apiResponse = ApiRepository.getFileActivities(okHttpClient, folder, page)
+        val apiResponse = ApiRepository.getFileActivities(folder, page, true, okHttpClient)
         if (!apiResponse.isSuccess()) return returnResponse
 
         return if (apiResponse.data?.isNotEmpty() == true) {

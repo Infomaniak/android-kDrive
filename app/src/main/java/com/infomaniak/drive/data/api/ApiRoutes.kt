@@ -25,7 +25,10 @@ import com.infomaniak.drive.data.models.Team
 
 object ApiRoutes {
 
-    private const val with = "with=children,rights,collaborative_folder,favorite,mobile,share_link,categories"
+    private val with = with("children")
+    val withFile = with("file")
+
+    private fun with(target: String) = "with=$target,rights,collaborative_folder,favorite,mobile,share_link,categories"
 
     private fun fileURL(file: File) = "${DRIVE_API}${file.driveId}/file/${file.id}"
 
@@ -111,7 +114,7 @@ object ApiRoutes {
     fun dropBox(file: File) = "${fileURL(file)}/collaborate"
 
     fun getLastActivities(driveId: Int) =
-        "${DRIVE_API}$driveId/file/activity?with=file,rights,collaborative_folder,favorite,mobile,share_link,categories" +
+        "${DRIVE_API}$driveId/file/activity?$withFile" +
                 "&depth=unlimited" +
                 "&actions[]=file_create" +
                 "&actions[]=file_update" +
