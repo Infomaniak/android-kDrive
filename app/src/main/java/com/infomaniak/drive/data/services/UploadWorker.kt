@@ -62,6 +62,7 @@ import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.*
 import java.io.IOException
+import java.util.*
 
 class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
     private lateinit var contentResolver: ContentResolver
@@ -71,47 +72,30 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     private var uploadedCount = 0
 
     override suspend fun doWork(): Result {
+
+        Log.d(TAG, "UploadWorker starts job!")
         contentResolver = applicationContext.contentResolver
-        Log.d(TAG, "UploadWorker start job !")
 
         // Checks if the maximum number of retry allowed is reached
-        if (runAttemptCount >= MAX_RETRY_COUNT) {
-            return Result.failure()
-        }
+        if (runAttemptCount >= MAX_RETRY_COUNT) return Result.failure()
 
-        // Move the service to foreground
-        applicationContext.uploadServiceNotification().apply {
-            setContentTitle(applicationContext.getString(R.string.notificationUploadServiceChannelName))
-            setForeground(ForegroundInfo(NotificationUtils.UPLOAD_SERVICE_ID, build()))
-        }
+        moveServiceToForeground()
 
         return try {
+
             // Check if we have the required permissions before continuing
-            if (!applicationContext.hasPermissions(DrivePermissions.permissions)) {
-                UploadNotifications.permissionErrorNotification(applicationContext)
-                Log.d(TAG, "UploadWorker no permissions")
-                return Result.failure()
-            }
+            checkPermissions()?.let { return it }
 
-            // Retrieve the latest media that have not been taken in the sync
-            val appSyncSettings = UploadFile.getAppSyncSettings()
-            appSyncSettings?.let {
-                Log.d(TAG, "UploadWorker check locals")
-                checkLocalLastMedias(it)
-            }
+            // Retrieve the latest media that have not been synced
+            val appSyncSettings = retrieveLatestNotSyncedMedia()
 
-            // Check if the user has cancelled the upload and no files to sync
-            val isCancelledByUser = inputData.getBoolean(CANCELLED_BY_USER, false)
-            if (UploadFile.getAllPendingUploadsCount() == 0 && isCancelledByUser) {
-                UploadNotifications.showCancelledByUserNotification(applicationContext)
-                Log.d(TAG, "UploadWorker cancelled by user")
-                return Result.success()
-            }
+            // Check if the user has cancelled the uploads and there is no more files to sync
+            checkRemainingUploadsAndCancellationStatus()?.let { return it }
 
             // Start uploads
             val result = startSyncFiles()
 
-            // Check if need to re-sync
+            // Check if re-sync is needed
             checkIfNeedReSync(appSyncSettings)
 
             result
@@ -133,48 +117,51 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         } catch (exception: CancellationException) { // Work has been cancelled
             Log.d(TAG, "UploadWorker > is CancellationException !")
-            if (applicationContext.isSyncActive()) Result.failure()
-            else Result.retry()
+            if (applicationContext.isSyncActive()) Result.failure() else Result.retry()
 
         } catch (exception: UploadTask.LockErrorException) {
             currentUploadFile?.lockErrorNotification(applicationContext)
             Result.retry()
 
         } catch (exception: Exception) {
-            when {
-                exception is UploadTask.WrittenBytesExceededException
-                        || exception is UploadTask.NotAuthorizedException
-                        || exception is UploadTask.UploadErrorException -> Result.retry()
+            handleGenericException(exception)
 
-                exception.isNetworkException() -> {
-                    currentUploadFile?.networkErrorNotification(applicationContext)
-                    Result.retry()
-                }
-                exception is IOException -> {
-                    Sentry.withScope { scope ->
-                        scope.level = SentryLevel.WARNING
-                        scope.setExtra("uploadFile", ApiController.gson.toJson(currentUploadFile ?: ""))
-                        scope.setExtra("previousChunkBytesWritten", "${currentUploadTask?.previousChunkBytesWritten()}")
-                        scope.setExtra("lastProgress", "${currentUploadTask?.lastProgress()}")
-                        Sentry.captureException(exception)
-                    }
-                    Result.retry()
-                }
-                else -> {
-                    exception.printStackTrace()
-                    currentUploadFile?.exceptionNotification(applicationContext)
-                    Sentry.captureException(exception)
-                    Result.failure()
-                }
-            }
         } finally {
-            applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
-            Sentry.addBreadcrumb(Breadcrumb().apply {
-                category = BREADCRUMB_TAG
-                message = "finish with $uploadedCount files uploaded"
-                level = SentryLevel.INFO
-            })
+            cancelUploadNotification()
         }
+    }
+
+    private suspend fun moveServiceToForeground() {
+        applicationContext.uploadServiceNotification().apply {
+            setContentTitle(applicationContext.getString(R.string.notificationUploadServiceChannelName))
+            setForeground(ForegroundInfo(NotificationUtils.UPLOAD_SERVICE_ID, build()))
+        }
+    }
+
+    private fun checkPermissions(): Result? {
+        if (!applicationContext.hasPermissions(DrivePermissions.permissions)) {
+            UploadNotifications.permissionErrorNotification(applicationContext)
+            Log.d(TAG, "UploadWorker no permissions")
+            return Result.failure()
+        }
+        return null
+    }
+
+    private suspend fun retrieveLatestNotSyncedMedia(): SyncSettings? {
+        return UploadFile.getAppSyncSettings()?.also {
+            Log.d(TAG, "UploadWorker check locals")
+            checkLocalLastMedias(it)
+        }
+    }
+
+    private fun checkRemainingUploadsAndCancellationStatus(): Result? {
+        val isCancelledByUser = inputData.getBoolean(CANCELLED_BY_USER, false)
+        if (UploadFile.getAllPendingUploadsCount() == 0 && isCancelledByUser) {
+            UploadNotifications.showCancelledByUserNotification(applicationContext)
+            Log.d(TAG, "UploadWorker cancelled by user")
+            return Result.success()
+        }
+        return null
     }
 
     private suspend fun startSyncFiles(): Result = withContext(Dispatchers.IO) {
@@ -198,6 +185,51 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         Log.d(TAG, "startSyncFiles: finish with $uploadedCount uploaded")
 
         Result.success()
+    }
+
+    private suspend fun checkIfNeedReSync(syncSettings: SyncSettings?) {
+        syncSettings?.let { checkLocalLastMedias(it) }
+        if (UploadFile.getAllPendingUploadsCount() > 0) {
+            val data = Data.Builder().putInt(LAST_UPLOADED_COUNT, uploadedCount).build()
+            applicationContext.syncImmediately(data, true)
+        }
+    }
+
+    private fun handleGenericException(exception: Exception): Result {
+        return when {
+            exception is UploadTask.WrittenBytesExceededException ||
+                    exception is UploadTask.NotAuthorizedException ||
+                    exception is UploadTask.UploadErrorException -> Result.retry()
+            exception.isNetworkException() -> {
+                currentUploadFile?.networkErrorNotification(applicationContext)
+                Result.retry()
+            }
+            exception is IOException -> {
+                Sentry.withScope { scope ->
+                    scope.level = SentryLevel.WARNING
+                    scope.setExtra("uploadFile", ApiController.gson.toJson(currentUploadFile ?: ""))
+                    scope.setExtra("previousChunkBytesWritten", "${currentUploadTask?.previousChunkBytesWritten()}")
+                    scope.setExtra("lastProgress", "${currentUploadTask?.lastProgress()}")
+                    Sentry.captureException(exception)
+                }
+                Result.retry()
+            }
+            else -> {
+                exception.printStackTrace()
+                currentUploadFile?.exceptionNotification(applicationContext)
+                Sentry.captureException(exception)
+                Result.failure()
+            }
+        }
+    }
+
+    private fun cancelUploadNotification() {
+        applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = BREADCRUMB_TAG
+            message = "finish with $uploadedCount files uploaded"
+            level = SentryLevel.INFO
+        })
     }
 
     private suspend fun UploadFile.initUpload(pendingCount: Int) = withContext(Dispatchers.IO) {
@@ -288,25 +320,24 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private suspend fun checkIfNeedReSync(syncSettings: SyncSettings?) {
-        syncSettings?.let { checkLocalLastMedias(it) }
-        if (UploadFile.getAllPendingUploadsCount() > 0) {
-            val data = Data.Builder().putInt(LAST_UPLOADED_COUNT, uploadedCount).build()
-            applicationContext.syncImmediately(data, true)
-        }
-    }
-
     private suspend fun checkLocalLastMedias(syncSettings: SyncSettings) = withContext(Dispatchers.IO) {
-        val lastUploadDate = UploadFile.getLastDate(applicationContext).time - CHECK_LOCAL_LAST_MEDIAS_DELAY
+
+        fun initArgs(lastUploadDate: Date): Array<String> {
+            val dateInMilliSeconds = lastUploadDate.time - CHECK_LOCAL_LAST_MEDIAS_DELAY
+            val dateInSeconds = (dateInMilliSeconds / 1_000L).toString()
+            return arrayOf(dateInMilliSeconds.toString(), dateInSeconds, dateInSeconds)
+        }
+
+        val lastUploadDate = UploadFile.getLastDate(applicationContext)
+        val args = initArgs(lastUploadDate)
         val selection = "( ${SyncUtils.DATE_TAKEN} >= ? " +
                 "OR ${MediaStore.MediaColumns.DATE_ADDED} >= ? " +
                 "OR ${MediaStore.MediaColumns.DATE_MODIFIED} = ? )"
-        val args = arrayOf(lastUploadDate.toString(), (lastUploadDate / 1000).toString(), (lastUploadDate / 1000).toString())
+        val jobs = arrayListOf<Deferred<Any?>>()
         var customSelection: String
         var customArgs: Array<String>
-        val jobs = arrayListOf<Deferred<Any?>>()
 
-        Log.d(TAG, "checkLocalLastMedias> started with ${UploadFile.getLastDate(applicationContext)}")
+        Log.d(TAG, "checkLocalLastMedias> started with $lastUploadDate")
 
         MediaFolder.getAllSyncedFolders().forEach { mediaFolder ->
             // Add log
@@ -318,8 +349,11 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             Log.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.name}_${mediaFolder.id}")
 
             // Sync media folder
-            var isNotPending = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-                "AND ${MediaStore.Images.Media.IS_PENDING} = 0" else ""
+            var isNotPending = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                "AND ${MediaStore.Images.Media.IS_PENDING} = 0"
+            } else {
+                ""
+            }
             customSelection = "$selection AND $IMAGES_BUCKET_ID = ? $isNotPending"
             customArgs = args + mediaFolder.id.toString()
 
@@ -328,13 +362,16 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 contentUri = MediaFoldersProvider.imagesExternalUri,
                 selection = customSelection,
                 args = customArgs,
-                mediaFolder = mediaFolder
+                mediaFolder = mediaFolder,
             )
             jobs.add(getLastImagesOperation)
 
             if (syncSettings.syncVideo) {
-                isNotPending = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-                    "AND ${MediaStore.Video.Media.IS_PENDING} = 0" else ""
+                isNotPending = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    "AND ${MediaStore.Video.Media.IS_PENDING} = 0"
+                } else {
+                    ""
+                }
                 customSelection = "$selection AND $VIDEO_BUCKET_ID = ? $isNotPending"
 
                 val getLastVideosOperation = getLocalLastMediasAsync(
@@ -342,7 +379,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                     contentUri = MediaFoldersProvider.videosExternalUri,
                     selection = customSelection,
                     args = customArgs,
-                    mediaFolder = mediaFolder
+                    mediaFolder = mediaFolder,
                 )
                 jobs.add(getLastVideosOperation)
             }
@@ -452,7 +489,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         private const val LAST_UPLOADED_COUNT = "last_uploaded_count"
 
         private const val MAX_RETRY_COUNT = 3
-        private const val CHECK_LOCAL_LAST_MEDIAS_DELAY = 10000 // 10s (ms)
+        private const val CHECK_LOCAL_LAST_MEDIAS_DELAY = 10_000L // 10s (in ms)
 
         fun workConstraints(): Constraints {
             val networkType = if (AppSettings.onlyWifiSync) NetworkType.UNMETERED else NetworkType.CONNECTED
@@ -462,9 +499,9 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
 
         fun Context.showSyncConfigNotification() {
-            val pendingIntent = this.syncSettingsActivityPendingIntent()
+            val pendingIntent = syncSettingsActivityPendingIntent()
             val notificationManagerCompat = NotificationManagerCompat.from(this)
-            this.showGeneralNotification(getString(R.string.noSyncFolderNotificationTitle)).apply {
+            showGeneralNotification(getString(R.string.noSyncFolderNotificationTitle)).apply {
                 setContentText(getString(R.string.noSyncFolderNotificationDescription))
                 setContentIntent(pendingIntent)
                 notificationManagerCompat.notify(NotificationUtils.FILE_OBSERVE_ID, this.build())
