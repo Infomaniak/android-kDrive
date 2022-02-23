@@ -152,7 +152,6 @@ class ApiRepositoryTest : KDriveTest() {
         deleteCategory(userDrive.driveId, categoryId)
     }
 
-
     @Test
     @DisplayName("Retrieve recent activities from remote")
     fun getLastActivity() {
