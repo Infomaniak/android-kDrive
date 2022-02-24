@@ -52,7 +52,9 @@
     <queries>
         <intent>
             <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="*" />
+            <data
+                android:mimeType="*/*"
+                android:scheme="*" />
         </intent>
     </queries>
 
