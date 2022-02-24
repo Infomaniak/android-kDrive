@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2022 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/closeButtonMultiSelect"
+        style="@style/IconButton"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="@dimen/marginStandardMedium"
+        android:contentDescription="@string/buttonClose"
+        app:icon="@drawable/ic_close"
+        app:iconSize="20dp"
+        app:iconTint="@color/primary"
+        app:layout_constraintBottom_toBottomOf="@id/selectAllButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/selectAllButton" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/selectAllButton"
+        style="@style/TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/marginStandardMedium"
+        android:text="@string/buttonSelectAll"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/titleMultiSelect"
+        style="@style/H1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/marginStandard"
+        android:layout_marginEnd="@dimen/marginStandardVerySmall"
+        android:textSize="22sp"
+        app:layout_constraintBottom_toBottomOf="@id/moveButtonMultiSelect"
+        app:layout_constraintEnd_toStartOf="@id/moveButtonMultiSelect"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/moveButtonMultiSelect"
+        tools:text="500 sélectionné(s)" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/moveButtonMultiSelect"
+        style="@style/IconButton"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_marginEnd="@dimen/marginStandardSmall"
+        android:layout_marginBottom="@dimen/marginStandardSmall"
+        android:contentDescription="@string/buttonMoveTo"
+        app:icon="@drawable/ic_folder_select"
+        app:iconSize="20dp"
+        app:iconTint="@color/icon_toolbar_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/deleteButtonMultiSelect" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/deleteButtonMultiSelect"
+        style="@style/IconButton"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_marginEnd="@dimen/marginStandardVerySmall"
+        android:layout_marginBottom="@dimen/marginStandardSmall"
+        android:contentDescription="@string/buttonDelete"
+        app:icon="@drawable/ic_delete"
+        app:iconSize="20dp"
+        app:iconTint="@color/icon_toolbar_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/menuButtonMultiSelect" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/menuButtonMultiSelect"
+        style="@style/IconButton"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_marginEnd="@dimen/marginStandardMedium"
+        android:layout_marginBottom="@dimen/marginStandardSmall"
+        android:contentDescription="@string/buttonMenu"
+        app:icon="@drawable/ic_menu"
+        app:iconSize="20dp"
+        app:iconTint="@color/icon_toolbar_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>
