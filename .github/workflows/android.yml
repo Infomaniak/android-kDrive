@@ -4,99 +4,100 @@ on:
   push:
     branches: [ master ]
   pull_request:
-    branches: [ master, android-ci ]
+    branches: [ master ]
+    types: [ synchronize, opened, reopened, ready_for_review ]
 
 jobs:
 
   instrumentation-tests:
-
+    if: github.event.pull_request.draft == false
     runs-on: self-hosted
     strategy:
       matrix:
-        api-level: [29]
-        target: [google_apis]
-    
+        api-level: [ 31 ]
+        target: [ google_apis ]
+
     env:
-        ENV_PATH: "app/src/androidTest/java/com/infomaniak/drive/utils/Env.kt"
-        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        DRIVE_ID: ${{ secrets.DRIVE_ID }}
-        INVITE_USER_NAME: ${{ secrets.INVITE_USER_NAME }}
-        NEW_USER_ID: ${{ secrets.NEW_USER_ID }}
-        NEW_USER_NAME: ${{ secrets.NEW_USER_NAME }}
-        NEW_USER_PASSWORD: ${{ secrets.NEW_USER_PASSWORD }}
+      ENV_PATH: "app/src/androidTest/java/com/infomaniak/drive/utils/Env.kt"
+      ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+      DRIVE_ID: ${{ secrets.DRIVE_ID }}
+      INVITE_USER_NAME: ${{ secrets.INVITE_USER_NAME }}
+      NEW_USER_ID: ${{ secrets.NEW_USER_ID }}
+      NEW_USER_NAME: ${{ secrets.NEW_USER_NAME }}
+      NEW_USER_PASSWORD: ${{ secrets.NEW_USER_PASSWORD }}
 
     steps:
-    - name: Cancel Previous Runs
-      uses: styfle/cancel-workflow-action@0.9.1
-      with:
-        access_token: ${{ github.token }}
-        
-    - name: Checkout the code
-      uses: actions/checkout@v2
-      with:
-        token: ${{ secrets.MY_REPO_PAT }}
-        submodules: recursive
-        
-    - name: Gradle cache
-      uses: actions/cache@v2
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('**/buildSrc/**/*.kt') }}
-       
-    - name: AVD cache
-      uses: actions/cache@v2
-      id: avd-cache
-      with:
-        path: |
-          ~/.android/avd/*
-          ~/.android/adb*
-        key: avd-${{ matrix.api-level }}
-        
-    - name: create AVD and generate snapshot for caching
-      if: steps.avd-cache.outputs.cache-hit != 'true'
-      uses: reactivecircus/android-emulator-runner@v2
-      with:
-        api-level: ${{ matrix.api-level }}
-        target: ${{ matrix.target }}
-#         profile: Pixel 4
-        arch: x86_64
-        avd-name: kdrive-test
-        force-avd-creation: false
-        emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none -skin 540x1110
-        script: echo "Generated AVD snapshot for caching."
-    
-#     - name: set up JDK 11
-#       uses: actions/setup-java@v2
-#       with:
-#         java-version: 11
-#         distribution: 'zulu'
-#         cache: gradle
-    
-    - name: Create test env
-      run: |
-        touch $ENV_PATH
-        echo "package com.infomaniak.drive.utils; object Env { const val USE_CURRENT_USER = false; const val TOKEN: String = \"$ACCESS_TOKEN\";  const val DRIVE_ID = $DRIVE_ID; const val INVITE_USER_NAME: String = \"$INVITE_USER_NAME\"; const val NEW_USER_ID = $NEW_USER_ID; const val NEW_USER_NAME: String = \"$NEW_USER_NAME\"; const val NEW_USER_PASSWORD: String = \"$NEW_USER_PASSWORD\" }" > $ENV_PATH
-    
-    
-    # Setup Gradle and Run tests
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-      
-    - name: Run Unit tests
-      run: ./gradlew testDebugUnitTest --stacktrace
-    
-    - name: Run instrumentation tests
-      uses: ReactiveCircus/android-emulator-runner@v2.22.0
-      with:
-        api-level: ${{ matrix.api-level }}
-        target: ${{ matrix.target }}
-#         profile: Pixel 4
-        arch: x86_64
-        avd-name: kdrive-test
-        force-avd-creation: false
-        emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none -skin 540x1110
-#         emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -skin 540x1110
-        script: ./gradlew app:connectedStandardDebugAndroidTest --stacktrace
-    
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Checkout the code
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.MY_REPO_PAT }}
+          submodules: recursive
+
+      - name: Gradle cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('**/buildSrc/**/*.kt') }}
+
+      - name: AVD cache
+        uses: actions/cache@v2
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ matrix.api-level }}
+
+      - name: create AVD and generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: ${{ matrix.target }}
+          profile: Pixel 4
+          arch: x86_64
+          avd-name: kdrive-test
+          force-avd-creation: false
+          disable-animations: false
+          emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none -skin 540x1110
+          script: echo "Generated AVD snapshot for caching."
+
+      # - name: set up JDK 11
+      #   uses: actions/setup-java@v2
+      #   with:
+      #     java-version: 11
+      #     distribution: 'zulu'
+      #     cache: gradle
+
+      - name: Create test env
+        run: |
+          touch $ENV_PATH
+          echo "package com.infomaniak.drive.utils; object Env { const val USE_CURRENT_USER = false; const val TOKEN: String = \"$ACCESS_TOKEN\";  const val DRIVE_ID = $DRIVE_ID; const val INVITE_USER_NAME: String = \"$INVITE_USER_NAME\"; const val NEW_USER_ID = $NEW_USER_ID; const val NEW_USER_NAME: String = \"$NEW_USER_NAME\"; const val NEW_USER_PASSWORD: String = \"$NEW_USER_PASSWORD\" }" > $ENV_PATH
+
+      # Setup Gradle and Run tests
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run Unit tests
+        run: ./gradlew testDebugUnitTest --stacktrace
+
+      - name: Run instrumentation tests
+        uses: ReactiveCircus/android-emulator-runner@v2.22.0
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: ${{ matrix.target }}
+          profile: Pixel 4
+          arch: x86_64
+          avd-name: kdrive-test
+          force-avd-creation: false
+          disable-animations: true
+          emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none -skin 540x1110
+          # emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -skin 540x1110
+          script: ./gradlew app:connectedStandardDebugAndroidTest --stacktrace

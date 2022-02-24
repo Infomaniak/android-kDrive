@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.utils
 
-import android.util.Log
 import androidx.collection.arrayMapOf
 import com.infomaniak.drive.KDriveTest.Companion.okHttpClient
 import com.infomaniak.drive.KDriveTest.Companion.userDrive
@@ -39,10 +38,8 @@ object ApiTestUtils {
 
     fun assertApiResponseData(response: ApiResponse<*>) {
         with(response) {
-            if (!isSuccess()) {
-                Log.e("ApiTestUtils", "ApiResponse> ${error?.description}")
-            }
-            Assertions.assertTrue(isSuccess(), "This should succeed")
+            val resultError = "(result: [${error?.code}] - [${error?.description}] - [$translatedError])"
+            Assertions.assertTrue(isSuccess(), "This should succeed $resultError")
             Assertions.assertNull(error, "There should be no error")
             Assertions.assertNotNull(data, "The data cannot be null")
         }
@@ -51,7 +48,7 @@ object ApiTestUtils {
     fun deleteTestFile(remoteFile: File) {
         Assertions.assertTrue(
             ApiRepository.deleteFile(remoteFile).isSuccess(),
-            "created file couldn't be deleted from the remote"
+            "created file couldn't be deleted from the remote",
         )
     }
 
@@ -71,21 +68,21 @@ object ApiTestUtils {
         return ApiController.callApi(ApiRoutes.createCategory(driveId), ApiController.ApiMethod.GET)
     }
 
-    fun putNewFileInTrash() =
-        // Creates a file, puts it in trash and returns it
-        createFileForTest().also { deleteTestFile(it) }
+    // Creates a file, puts it in trash and returns it
+    fun putNewFileInTrash() = createFileForTest().also { deleteTestFile(it) }
 
-    fun createFolderWithName(name: String) =
-        createFolder(okHttpClient, userDrive.driveId, Utils.ROOT_ID, name).let {
+    fun createFolderWithName(name: String): File {
+        return createFolder(okHttpClient, userDrive.driveId, Utils.ROOT_ID, name).let {
             assertApiResponseData(it)
             it.data!!
         }
+    }
 
     fun createDropBoxForTest(folder: File, maxSize: Long): DropBox {
         val body = arrayMapOf(
             "email_when_finished" to true,
             "limit_file_size" to maxSize,
-            "password" to "password"
+            "password" to "password",
         )
         return postDropBox(folder, body).let {
             assertApiResponseData(it)
