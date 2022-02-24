@@ -28,7 +28,6 @@ import com.infomaniak.drive.utils.UiTestUtils.getDeviceViewById
 import com.infomaniak.drive.utils.UiTestUtils.getViewIdentifier
 import com.infomaniak.drive.utils.UiTestUtils.startApp
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.util.*
