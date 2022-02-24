@@ -183,7 +183,11 @@ class PicturesFragment(
 
     fun performBulkOperation(type: BulkOperationType, destinationFolder: File? = null, color: String? = null) {
 
-        val selectedFiles = picturesAdapter.getValidItemsSelected()
+        var selectedFiles = picturesAdapter.getValidItemsSelected()
+
+        if (type == BulkOperationType.ADD_FAVORITES) selectedFiles = selectedFiles.filter { !it.isFavorite }
+        else if (type == BulkOperationType.REMOVE_FAVORITES) selectedFiles = selectedFiles.filter { it.isFavorite }
+
         val fileCount = selectedFiles.size
         val sendActions: (dialog: Dialog?) -> Unit = sendActions(fileCount, selectedFiles, type, destinationFolder, color)
 
