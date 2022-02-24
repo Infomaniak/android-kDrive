@@ -168,30 +168,33 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         emit(ApiRepository.createOfficeFile(driveId, folderId, createFile))
     }
 
-    fun addFileToFavorites(file: File, userDrive: UserDrive? = null, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
-        ApiRepository.postFavoriteFile(file).let { apiResponse ->
-            if (apiResponse.isSuccess()) {
-                FileController.updateFile(file.id, userDrive = userDrive) { localFile ->
-                    localFile.isFavorite = true
-                }
-                onSuccess?.invoke()
-            }
-            emit(apiResponse)
-        }
-    }
+    fun addFileToFavorites(file: File, userDrive: UserDrive? = null, onSuccess: (() -> Unit)? = null) =
+        liveData(Dispatchers.IO) {
+            with(ApiRepository.postFavoriteFile(file)) {
+                emit(this)
 
-    fun deleteFileFromFavorites(file: File, userDrive: UserDrive? = null, onFileUpdate: ((File) -> Unit)? = null) = liveData(Dispatchers.IO) {
-        with(ApiRepository.deleteFavoriteFile(file)) {
-            emit(this)
-
-            if (isSuccess()) {
-                FileController.updateFile(file.id, userDrive = userDrive) {
-                    it.isFavorite = false
-                    onFileUpdate?.invoke(it)
+                if (isSuccess()) {
+                    FileController.updateFile(file.id, userDrive = userDrive) {
+                        it.isFavorite = true
+                    }
+                    onSuccess?.invoke()
                 }
             }
         }
-    }
+
+    fun deleteFileFromFavorites(file: File, userDrive: UserDrive? = null, onSuccess: ((File) -> Unit)? = null) =
+        liveData(Dispatchers.IO) {
+            with(ApiRepository.deleteFavoriteFile(file)) {
+                emit(this)
+
+                if (isSuccess()) {
+                    FileController.updateFile(file.id, userDrive = userDrive) {
+                        it.isFavorite = false
+                        onSuccess?.invoke(it)
+                    }
+                }
+            }
+        }
 
     fun getFileDetails(fileId: Int, userDrive: UserDrive): LiveData<File?> {
         getFileDetailsJob.cancel()

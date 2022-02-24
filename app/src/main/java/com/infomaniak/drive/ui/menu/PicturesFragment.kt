@@ -141,6 +141,7 @@ class PicturesFragment(
     }
 
     override fun onMove() {
+        // TODO use "parentId" when https://github.com/Infomaniak/android-kDrive/issues/532 is merged
         val folderId = if (picturesAdapter.itemsSelected.count() == 1) {
             FileController.getParentFile(picturesAdapter.itemsSelected[0].id, UserDrive(), mainViewModel.realm)?.id
         } else {
@@ -297,7 +298,7 @@ class PicturesFragment(
                 mediator.addSource(
                     mainViewModel.deleteFileFromFavorites(
                         file,
-                        onFileUpdate = {
+                        onSuccess = {
                             lifecycleScope.launch(Dispatchers.Main) {
                                 picturesAdapter.notifyFileChanged(file.id) { it.isFavorite = false }
                             }

@@ -33,6 +33,7 @@ import io.realm.OrderedRealmCollection
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.cardview_picture.view.*
 import kotlinx.android.synthetic.main.title_recycler_section.view.*
+import java.util.*
 
 class PicturesAdapter(private val onItemClick: (file: File) -> Unit) : LoaderAdapter<Any>() {
 

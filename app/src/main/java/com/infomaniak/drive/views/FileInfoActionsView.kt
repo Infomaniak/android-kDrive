@@ -202,7 +202,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
         availableOffline.setOnClickListener { availableOfflineSwitch.performClick() }
         moveFile.setOnClickListener {
-            val currentFolderId = FileController.getParentFile(currentFile.id)?.id ?: -42
+            val currentFolderId = FileController.getParentFile(currentFile.id)?.id
             onItemClickListener.moveFileClicked(currentFolderId, selectFolderResultLauncher)
         }
         duplicateFile.setOnClickListener { onItemClickListener.duplicateFileClicked() }
@@ -448,7 +448,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             }
         }
 
-        fun moveFileClicked(folderId: Int, selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
+        fun moveFileClicked(folderId: Int?, selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
             trackActionEvent("move")
             context.moveFileClicked(folderId, selectFolderResultLauncher)
         }
