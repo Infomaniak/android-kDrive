@@ -75,12 +75,7 @@ import java.util.*
  */
 class ApiRepositoryTest : KDriveTest() {
 
-    private lateinit var randomSuffix: String
-
-    @BeforeEach
-    fun beforeEach() {
-        randomSuffix = UUID.randomUUID().toString()
-    }
+    private val randomSuffix = UUID.randomUUID()
 
     @Test
     @DisplayName("Check if remote drive data are correctly retrieved")
@@ -141,7 +136,7 @@ class ApiRepositoryTest : KDriveTest() {
     @DisplayName("Update a created category then delete it")
     fun updateCategory() {
         var color = "#0000FF"
-        var name = "categoryTest-$randomSuffix}"
+        var name = "category-$randomSuffix}"
         val categoryId = createCategory(userDrive.driveId, name, color).let {
             assertNotNull(it.data)
             it.data!!.id
