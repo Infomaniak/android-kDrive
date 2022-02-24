@@ -35,14 +35,8 @@ import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.services.UploadWorkerThrowable.runUploadCatching
 import com.infomaniak.drive.data.sync.UploadNotifications
-import com.infomaniak.drive.data.sync.UploadNotifications.allowedFileSizeExceededNotification
-import com.infomaniak.drive.data.sync.UploadNotifications.exceptionNotification
-import com.infomaniak.drive.data.sync.UploadNotifications.folderNotFoundNotification
-import com.infomaniak.drive.data.sync.UploadNotifications.lockErrorNotification
-import com.infomaniak.drive.data.sync.UploadNotifications.networkErrorNotification
-import com.infomaniak.drive.data.sync.UploadNotifications.outOfMemoryNotification
-import com.infomaniak.drive.data.sync.UploadNotifications.quotaExceededNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.setupCurrentUploadNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.syncSettingsActivityPendingIntent
@@ -52,24 +46,21 @@ import com.infomaniak.drive.utils.MediaFoldersProvider.VIDEO_BUCKET_ID
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.uploadServiceNotification
-import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.ApiController
 import com.infomaniak.lib.core.utils.hasPermissions
-import com.infomaniak.lib.core.utils.isNetworkException
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.*
-import java.io.IOException
 import java.util.*
 
 class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
     private lateinit var contentResolver: ContentResolver
 
-    private var currentUploadFile: UploadFile? = null
-    private var currentUploadTask: UploadTask? = null
-    private var uploadedCount = 0
+    var currentUploadFile: UploadFile? = null
+    var currentUploadTask: UploadTask? = null
+    var uploadedCount = 0
 
     override suspend fun doWork(): Result {
 
@@ -81,16 +72,15 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         moveServiceToForeground()
 
-        return try {
-
+        return runUploadCatching {
             // Check if we have the required permissions before continuing
-            checkPermissions()?.let { return it }
+            checkPermissions()?.let { return@runUploadCatching it }
 
             // Retrieve the latest media that have not been synced
             val appSyncSettings = retrieveLatestNotSyncedMedia()
 
             // Check if the user has cancelled the uploads and there is no more files to sync
-            checkRemainingUploadsAndCancellationStatus()?.let { return it }
+            checkRemainingUploadsAndUserCancellation()?.let { return@runUploadCatching it }
 
             // Start uploads
             val result = startSyncFiles()
@@ -99,35 +89,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             checkIfNeedReSync(appSyncSettings)
 
             result
-        } catch (exception: UploadTask.FolderNotFoundException) {
-            currentUploadFile?.folderNotFoundNotification(applicationContext)
-            Result.failure()
-
-        } catch (exception: UploadTask.QuotaExceededException) {
-            currentUploadFile?.quotaExceededNotification(applicationContext)
-            Result.failure()
-
-        } catch (exception: UploadTask.AllowedFileSizeExceededException) {
-            currentUploadFile?.allowedFileSizeExceededNotification(applicationContext)
-            Result.failure()
-
-        } catch (exception: OutOfMemoryError) {
-            currentUploadFile?.outOfMemoryNotification(applicationContext)
-            Result.retry()
-
-        } catch (exception: CancellationException) { // Work has been cancelled
-            Log.d(TAG, "UploadWorker > is CancellationException !")
-            if (applicationContext.isSyncActive()) Result.failure() else Result.retry()
-
-        } catch (exception: UploadTask.LockErrorException) {
-            currentUploadFile?.lockErrorNotification(applicationContext)
-            Result.retry()
-
-        } catch (exception: Exception) {
-            handleGenericException(exception)
-
-        } finally {
-            cancelUploadNotification()
         }
     }
 
@@ -154,7 +115,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private fun checkRemainingUploadsAndCancellationStatus(): Result? {
+    private fun checkRemainingUploadsAndUserCancellation(): Result? {
         val isCancelledByUser = inputData.getBoolean(CANCELLED_BY_USER, false)
         if (UploadFile.getAllPendingUploadsCount() == 0 && isCancelledByUser) {
             UploadNotifications.showCancelledByUserNotification(applicationContext)
@@ -193,43 +154,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             val data = Data.Builder().putInt(LAST_UPLOADED_COUNT, uploadedCount).build()
             applicationContext.syncImmediately(data, true)
         }
-    }
-
-    private fun handleGenericException(exception: Exception): Result {
-        return when {
-            exception is UploadTask.WrittenBytesExceededException ||
-                    exception is UploadTask.NotAuthorizedException ||
-                    exception is UploadTask.UploadErrorException -> Result.retry()
-            exception.isNetworkException() -> {
-                currentUploadFile?.networkErrorNotification(applicationContext)
-                Result.retry()
-            }
-            exception is IOException -> {
-                Sentry.withScope { scope ->
-                    scope.level = SentryLevel.WARNING
-                    scope.setExtra("uploadFile", ApiController.gson.toJson(currentUploadFile ?: ""))
-                    scope.setExtra("previousChunkBytesWritten", "${currentUploadTask?.previousChunkBytesWritten()}")
-                    scope.setExtra("lastProgress", "${currentUploadTask?.lastProgress()}")
-                    Sentry.captureException(exception)
-                }
-                Result.retry()
-            }
-            else -> {
-                exception.printStackTrace()
-                currentUploadFile?.exceptionNotification(applicationContext)
-                Sentry.captureException(exception)
-                Result.failure()
-            }
-        }
-    }
-
-    private fun cancelUploadNotification() {
-        applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = BREADCRUMB_TAG
-            message = "finish with $uploadedCount files uploaded"
-            level = SentryLevel.INFO
-        })
     }
 
     private suspend fun UploadFile.initUpload(pendingCount: Int) = withContext(Dispatchers.IO) {
