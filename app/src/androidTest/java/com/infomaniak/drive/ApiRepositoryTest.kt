@@ -95,7 +95,7 @@ class ApiRepositoryTest : KDriveTest() {
     @Test
     @DisplayName("Create a folder with team space visibility")
     fun createTeamFolder() {
-        with(createTeamFolder(okHttpClient, userDrive.driveId, "teamFolder", true)) {
+        with(createTeamFolder(okHttpClient, userDrive.driveId, "teamFolder$randomSuffix", true)) {
             assertApiResponseData(this)
             assertTrue(data!!.visibility.contains("is_team_space_folder"), "visibility should be 'is_team_space_folder'")
             deleteTestFile(data!!)
@@ -106,7 +106,7 @@ class ApiRepositoryTest : KDriveTest() {
     @DisplayName("Create a category then delete it")
     fun createCategory() {
         val color = "#0000FF"
-        val name = "category test $randomSuffix}"
+        val name = "testCreateCategory-$randomSuffix}"
         val categoryId = createCategory(userDrive.driveId, name, color).let {
             assertApiResponseData(it)
             assertEquals(name, it.data?.name, "Name of the category should be equals to $name")
@@ -473,7 +473,7 @@ class ApiRepositoryTest : KDriveTest() {
         @DisplayName("Add a category to the test file, then delete this category")
         fun addCategoryToFile() {
             // Create a test category
-            val category = createCategory(userDrive.driveId, "test category", "#FFF").data
+            val category = createCategory(userDrive.driveId, "testAddCategory-$randomSuffix", "#FFF").data
             assertNotNull(category)
 
             // Add the category to the test file
@@ -495,7 +495,7 @@ class ApiRepositoryTest : KDriveTest() {
         @DisplayName("Add a category to the test file, then remove this category from the file")
         fun removeCategoryToFile() {
             // Create a test category
-            val category = createCategory(userDrive.driveId, "test cat", "#000").data
+            val category = createCategory(userDrive.driveId, "testRemoveCategory-$randomSuffix", "#000").data
             assertNotNull(category, "Category should not be null")
             // Add the category to the test file
             addCategory(testFile, category!!.id)

@@ -55,10 +55,12 @@ open class KDriveTest {
 
                 val apiResponse = ApiRepository.getUserProfile(HttpClient.okHttpClientNoInterceptor)
                 user = apiResponse.data!!
-                runBlocking {
-                    user.apiToken = ApiToken(Env.TOKEN, "", "Bearer", userId = user.id, expiresAt = null)
-                    user.organizations = arrayListOf()
-                    AccountUtils.addUser(user)
+                if (AccountUtils.currentUserId != user.id) {
+                    runBlocking {
+                        user.apiToken = ApiToken(Env.TOKEN, "", "Bearer", userId = user.id, expiresAt = null)
+                        user.organizations = arrayListOf()
+                        AccountUtils.addUser(user)
+                    }
                 }
             }
             userDrive = UserDrive(user.id, Env.DRIVE_ID)

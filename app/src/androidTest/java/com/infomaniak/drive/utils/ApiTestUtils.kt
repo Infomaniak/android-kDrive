@@ -18,6 +18,7 @@
 package com.infomaniak.drive.utils
 
 import androidx.collection.arrayMapOf
+import com.infomaniak.drive.KDriveTest.Companion.context
 import com.infomaniak.drive.KDriveTest.Companion.okHttpClient
 import com.infomaniak.drive.KDriveTest.Companion.userDrive
 import com.infomaniak.drive.data.api.ApiRepository
@@ -38,7 +39,9 @@ object ApiTestUtils {
 
     fun assertApiResponseData(response: ApiResponse<*>) {
         with(response) {
-            val resultError = "(result: [${error?.code}] - [${error?.description}] - [$translatedError])"
+            val resultError =
+                if (!isSuccess()) "(result: [${error?.code}] - [${error?.description}] - [${context.getString(translatedError)}])"
+                else ""
             Assertions.assertTrue(isSuccess(), "This should succeed $resultError")
             Assertions.assertNull(error, "There should be no error")
             Assertions.assertNotNull(data, "The data cannot be null")
