@@ -35,6 +35,7 @@ import java.util.*
  */
 class FileControllerTest : KDriveTest() {
 
+    private val randomSuffix = UUID.randomUUID()
     private lateinit var realm: Realm
 
     @BeforeEach
@@ -53,7 +54,7 @@ class FileControllerTest : KDriveTest() {
     @Test
     @DisplayName("Create a folder at the drive's root")
     fun createTestFolder() {
-        val folderName = "TestFolder-${UUID.randomUUID()}"
+        val folderName = "TestFolder-$randomSuffix"
         // Create a folder under root
         with(ApiRepository.createFolder(okHttpClient, userDrive.driveId, Utils.ROOT_ID, folderName, true)) {
             assertApiResponseData(this)
@@ -259,7 +260,7 @@ class FileControllerTest : KDriveTest() {
     @Test
     @DisplayName("Check if renaming file's results are correct")
     fun renameTestFile() {
-        val newName = "renamed file"
+        val newName = "renamed file $randomSuffix"
         val file = createFileForTest()
         assertApiResponseData(renameFile(file, newName))
         with(getLastModifiedFiles(userDrive.driveId)) {
