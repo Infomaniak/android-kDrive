@@ -25,14 +25,12 @@ import com.infomaniak.drive.utils.UiTestUtils
 import com.infomaniak.drive.utils.UiTestUtils.getDeviceViewById
 import com.infomaniak.drive.utils.UiTestUtils.selectDriveInList
 import com.infomaniak.drive.utils.UiTestUtils.switchToDriveInstance
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.*
 
 /**
  * UI Tests relative to a home (drive switch, drive activities, file search)
  */
+@Disabled
 class HomeUiTest : KDriveTest() {
 
     @BeforeEach
