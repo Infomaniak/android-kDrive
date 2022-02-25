@@ -132,7 +132,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             val downloadRequired = forceDownload || mustRefreshUi
             (homeViewPager.getFragment(0) as? HomeActivitiesFragment)?.getLastActivities(currentDrive.id, downloadRequired)
             (homeViewPager.getFragment(1) as? HomeOfflineFragment)?.reloadOffline()
-            (homeViewPager.getFragment(2) as? PicturesFragment)?.reloadPictures()
+            (homeViewPager.getFragment(2) as? PicturesFragment)?.onRefreshPictures()
 
             setDriveHeader(currentDrive)
             notEnoughStorage.setup(currentDrive)

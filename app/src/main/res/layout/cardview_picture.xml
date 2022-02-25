@@ -40,6 +40,21 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="ContentDescription" />
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/pictureChecked"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:layout_marginStart="@dimen/marginStandardSmall"
+            android:layout_marginTop="@dimen/marginStandardSmall"
+            android:button="@drawable/ic_checkbox"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:useMaterialThemeColors="false"
+            tools:visibility="visible" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </com.infomaniak.lib.core.views.LoaderCardView>

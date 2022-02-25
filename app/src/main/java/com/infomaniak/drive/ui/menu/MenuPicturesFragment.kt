@@ -23,39 +23,49 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
+import com.infomaniak.drive.databinding.FragmentMenuPicturesBinding
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import kotlinx.android.synthetic.main.fragment_menu_pictures.*
 
-class MenuPicturesFragment : Fragment() {
+class MenuPicturesFragment : Fragment(), MultiSelectParent {
+
+    private lateinit var binding: FragmentMenuPicturesBinding
+
+    private val picturesFragment: PicturesFragment by lazy {
+        PicturesFragment(this@MenuPicturesFragment) {
+            timer.cancel()
+            binding.swipeRefreshLayout.isRefreshing = false
+        }
+    }
 
     private val timer: CountDownTimer by lazy {
         createRefreshTimer { swipeRefreshLayout?.isRefreshing = true }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_menu_pictures, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        binding = FragmentMenuPicturesBinding.inflate(inflater, container, false).apply {
+            toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+
+            closeButtonMultiSelect.setOnClickListener { picturesFragment.onCloseMultiSelection() }
+            moveButtonMultiSelect.setOnClickListener { picturesFragment.onMove() }
+            deleteButtonMultiSelect.setOnClickListener { picturesFragment.onDelete() }
+            menuButtonMultiSelect.setOnClickListener { picturesFragment.onMenu() }
+
+            swipeRefreshLayout.setOnRefreshListener { picturesFragment.onRefreshPictures() }
+        }
+
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
-        }
-
         ViewCompat.requestApplyInsets(pictureListCoordinator)
-
-        val picturesFragment = PicturesFragment {
-            timer.cancel()
-            swipeRefreshLayout.isRefreshing = false
-        }
-
-        swipeRefreshLayout.setOnRefreshListener {
-            picturesFragment.reloadPictures()
-        }
 
         timer.start()
         if (childFragmentManager.findFragmentByTag("picturesFragment") == null) {
@@ -65,4 +75,37 @@ class MenuPicturesFragment : Fragment() {
         }
     }
 
+    override fun openMultiSelectBar() = with(binding) {
+        collapsingToolbarLayout.isGone = true
+        multiSelectLayout.isVisible = true
+    }
+
+    override fun closeMultiSelectBar() = with(binding) {
+        collapsingToolbarLayout.isVisible = true
+        multiSelectLayout.isGone = true
+    }
+
+    override fun enableMultiSelectActionButtons() = with(binding) {
+        deleteButtonMultiSelect.isEnabled = true
+        moveButtonMultiSelect.isEnabled = true
+        menuButtonMultiSelect.isEnabled = true
+    }
+
+    override fun disableMultiSelectActionButtons() = with(binding) {
+        deleteButtonMultiSelect.isEnabled = false
+        moveButtonMultiSelect.isEnabled = false
+        menuButtonMultiSelect.isEnabled = false
+    }
+
+    override fun setTitleMultiSelect(title: String) = with(binding) {
+        titleMultiSelect.text = title
+    }
+
+    override fun disableSwipeRefresh() = with(binding) {
+        swipeRefreshLayout.isEnabled = false
+    }
+
+    override fun enableSwipeRefresh() = with(binding) {
+        swipeRefreshLayout.isEnabled = true
+    }
 }

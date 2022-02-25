@@ -320,7 +320,10 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private fun performBulkOperation(type: BulkOperationType, destinationFolder: File? = null, color: String? = null) {
 
-        val selectedFiles = fileAdapter.getValidItemsSelected()
+        var selectedFiles = fileAdapter.getValidItemsSelected()
+
+        if (type == BulkOperationType.ADD_FAVORITES) selectedFiles = selectedFiles.filter { !it.isFavorite }
+        else if (type == BulkOperationType.REMOVE_FAVORITES) selectedFiles = selectedFiles.filter { it.isFavorite }
 
         val fileCount = if (fileAdapter.allSelected) {
             fileListViewModel.lastItemCount?.count ?: fileAdapter.itemCount
@@ -470,7 +473,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             BulkOperationType.ADD_FAVORITES -> {
                 mediator.addSource(
                     mainViewModel.addFileToFavorites(file) {
-                        runBlocking(Dispatchers.Main) {
+                        lifecycleScope.launch(Dispatchers.Main) {
                             fileAdapter.notifyFileChanged(file.id) { file ->
                                 if (!file.isManaged) file.isFavorite = true
                             }
