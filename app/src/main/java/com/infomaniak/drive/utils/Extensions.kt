@@ -22,7 +22,6 @@ import android.app.Activity
 import android.app.ActivityManager
 import android.app.DownloadManager
 import android.app.KeyguardManager
-import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
@@ -30,11 +29,9 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.database.Cursor
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Point
 import android.graphics.drawable.Drawable
-import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -42,7 +39,6 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.DisplayMetrics
 import android.util.Patterns
-import android.util.Size
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
@@ -51,18 +47,13 @@ import android.view.animation.RotateAnimation
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
-import android.widget.LinearLayout
 import androidx.activity.result.ActivityResult
 import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.toColorInt
-import androidx.core.net.toFile
-import androidx.core.net.toUri
 import androidx.core.os.bundleOf
-import androidx.core.view.forEachIndexed
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -86,41 +77,25 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.data.models.File.VisibilityType
+import com.infomaniak.drive.data.models.DriveUser
+import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.FileCategory
+import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialog.Companion.FILE_ID
-import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED_CATEGORIES
-import com.infomaniak.drive.ui.fileList.FileViewHolder
 import com.infomaniak.drive.ui.fileList.UploadInProgressFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.MatomoUtils.trackShareRightsEvent
-import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.drive.views.CategoryIconView
 import com.infomaniak.lib.core.models.User
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.UtilsUi.getInitials
-import com.infomaniak.lib.core.utils.format
 import io.realm.RealmList
-import io.sentry.Sentry
-import kotlinx.android.synthetic.main.cardview_file_grid.view.*
 import kotlinx.android.synthetic.main.item_file.view.*
-import kotlinx.android.synthetic.main.item_file.view.categoriesLayout
-import kotlinx.android.synthetic.main.item_file.view.fileFavorite
-import kotlinx.android.synthetic.main.item_file.view.fileName
-import kotlinx.android.synthetic.main.item_file.view.fileOffline
-import kotlinx.android.synthetic.main.item_file.view.fileOfflineProgression
-import kotlinx.android.synthetic.main.item_file.view.filePreview
-import kotlinx.android.synthetic.main.item_file.view.progressLayout
 import kotlinx.android.synthetic.main.item_user.view.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -265,123 +240,7 @@ fun Window.lightNavigationBar(enabled: Boolean) {
     }
 }
 
-fun View.setFileItem(file: File, isGrid: Boolean = false, viewHolder: FileViewHolder? = null) {
-
-    fileName.text = file.name
-    fileFavorite.isVisible = file.isFavorite
-    fileDate?.apply {
-        isVisible = file.id != ROOT_ID
-        text = if (file.deletedAt.isPositive()) {
-            file.getDeletedAt().format(context.getString(R.string.allDeletedFilePattern))
-        } else {
-            file.getLastModifiedAt().format(context.getString(R.string.allLastModifiedFilePattern))
-        }
-    }
-
-    file.size?.let {
-        fileSize?.text = FormatterFileSize.formatShortFileSize(context, it)
-        fileSeparator?.isVisible = true
-    } ?: run {
-        fileSize?.text = ""
-        fileSeparator?.isGone = true
-    }
-
-    progressLayout.isGone = true
-
-    filePreview.scaleType = ImageView.ScaleType.CENTER
-
-    fun getTintedDrawable(icon: Int, tint: String): Drawable? {
-
-        fun getDrawable(): Drawable? = ContextCompat.getDrawable(context, icon)?.mutate()
-
-        val drawable = if (viewHolder == null) {
-            getDrawable()
-        } else {
-            if (viewHolder.tintedDrawable == null) viewHolder.tintedDrawable = getDrawable()
-            viewHolder.tintedDrawable
-        }
-
-        return drawable?.apply { setTint(tint.toColorInt()) }
-    }
-
-    when {
-        file.isFolder() -> {
-            val (icon, tint) = file.getFolderIcon()
-            if (tint == null) filePreview.loadGlide(icon) else filePreview.loadGlide(getTintedDrawable(icon, tint))
-        }
-        file.isDrive() -> filePreview.loadGlide(getTintedDrawable(R.drawable.ic_drive, file.driveColor))
-        else -> {
-            val fileType = file.getFileType()
-            val isGraphic = fileType == ConvertedType.IMAGE || fileType == ConvertedType.VIDEO
-            when {
-                file.hasThumbnail && (isGrid || isGraphic) -> filePreview.loadGlideUrl(file.thumbnail(), fileType.icon)
-                file.isFromUploads && isGraphic -> {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val bitmap = context.getLocalThumbnail(file)
-                        withContext(Dispatchers.Main) {
-                            if (filePreview?.isVisible == true && context != null) filePreview.loadGlide(bitmap, fileType.icon)
-                        }
-                    }
-                }
-                else -> filePreview.loadGlide(fileType.icon)
-            }
-            filePreview2?.loadGlide(fileType.icon)
-            setupFileProgress(file)
-        }
-    }
-
-    val canReadCategoryOnFile = DriveInfosController.getCategoryRights().canReadCategoryOnFile
-    val categories = file.getCategories()
-    (categoriesLayout as LinearLayout).apply {
-        if (!canReadCategoryOnFile || categories.isEmpty()) {
-            isGone = true
-        } else {
-            forEachIndexed { index, view ->
-                with(view as CategoryIconView) {
-                    val category = categories.getOrNull(index)
-                    if (index < MAX_DISPLAYED_CATEGORIES - 1) {
-                        setCategoryIconOrHide(category)
-                    } else {
-                        setRemainingCategoriesNumber(category, categories.size - MAX_DISPLAYED_CATEGORIES)
-                    }
-                }
-            }
-            isVisible = true
-        }
-    }
-}
-
 fun String.isValidUrl(): Boolean = Patterns.WEB_URL.matcher(this).matches()
-
-fun View.setupFileProgress(file: File, containsProgress: Boolean = false) {
-    val progress = file.currentProgress
-
-    when {
-        !containsProgress && progress == Utils.INDETERMINATE_PROGRESS && file.isPendingOffline(context) -> {
-            fileOffline.isGone = true
-            fileOfflineProgression.isGone = true
-            fileOfflineProgression.isIndeterminate = true
-            fileOfflineProgression.isVisible = true
-            progressLayout.isVisible = true
-        }
-        containsProgress && progress in 0..99 -> {
-            fileOffline.isGone = true
-            if (fileOfflineProgression.isIndeterminate) {
-                fileOfflineProgression.isGone = true
-                fileOfflineProgression.isIndeterminate = false
-            }
-            fileOfflineProgression.progress = progress
-            fileOfflineProgression.isVisible = true
-            progressLayout.isVisible = true
-        }
-        file.isOfflineFile(context, checkLocalFile = false) -> {
-            fileOffline.isVisible = true
-            fileOfflineProgression.isGone = true
-            progressLayout.isVisible = true
-        }
-        else -> progressLayout.isGone = true
-    }
-}
 
 fun View.setUserView(user: User, showChevron: Boolean = true, onItemClicked: (user: User) -> Unit) {
     userName.text = user.displayName
@@ -666,87 +525,6 @@ fun Drive?.getDriveUsers(): List<DriveUser> = this?.users?.let { categories ->
     return@let DriveInfosController.getUsers(ArrayList(categories.drive + categories.account))
 } ?: listOf()
 
-@Suppress("BlockingMethodInNonBlockingContext")
-suspend fun Context.getLocalThumbnail(file: File): Bitmap? = withContext(Dispatchers.IO) {
-    val fileUri = file.path.toUri()
-    val thumbnailSize = 100
-    return@withContext if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        val size = Size(thumbnailSize, thumbnailSize)
-        try {
-            if (fileUri.scheme.equals(ContentResolver.SCHEME_FILE)) {
-                if (file.getMimeType().contains("video")) {
-                    ThumbnailUtils.createVideoThumbnail(fileUri.toFile(), size, null)
-                } else {
-                    ThumbnailUtils.createImageThumbnail(fileUri.toFile(), size, null)
-                }
-            } else {
-                contentResolver.loadThumbnail(fileUri, size, null)
-            }
-        } catch (e: Exception) {
-            null
-        }
-    } else {
-
-        val localFile = fileUri.lastPathSegment?.split(":")?.let { list ->
-            list.getOrNull(1)?.let { path -> java.io.File(path) }
-        }
-        val isSchemeFile = fileUri.scheme.equals(ContentResolver.SCHEME_FILE)
-
-        val externalRealPath = when {
-            !isSchemeFile && localFile?.exists() == true -> {
-                Sentry.withScope { scope -> // Get more information in uri with absolute path
-                    scope.setExtra("uri", "$fileUri")
-                    Sentry.captureMessage("Uri contains absolute path")
-                }
-                localFile.absolutePath
-            }
-            "com.android.externalstorage.documents" == fileUri.authority -> {
-                Utils.getRealPathFromExternalStorage(this@getLocalThumbnail, fileUri)
-            }
-            else -> ""
-        }
-
-        if (isSchemeFile || externalRealPath.isNotBlank()) {
-            val path = if (externalRealPath.isNotBlank()) externalRealPath else fileUri.path
-            path?.let {
-                if (file.getMimeType().contains("video")) {
-                    ThumbnailUtils.createVideoThumbnail(path, MediaStore.Video.Thumbnails.MICRO_KIND)
-                } else {
-                    Utils.extractThumbnail(path, thumbnailSize, thumbnailSize)
-                }
-            }
-        } else {
-            try {
-                ContentUris.parseId(fileUri)
-            } catch (e: Exception) {
-                fileUri.lastPathSegment?.split(":")?.let {
-                    it.getOrNull(1)?.toLongOrNull()
-                }
-            }?.let { fileId ->
-                val options = BitmapFactory.Options().apply {
-                    outWidth = thumbnailSize
-                    outHeight = thumbnailSize
-                }
-                if (contentResolver.getType(fileUri)?.contains("video") == true) {
-                    MediaStore.Video.Thumbnails.getThumbnail(
-                        contentResolver,
-                        fileId,
-                        MediaStore.Video.Thumbnails.MICRO_KIND,
-                        options
-                    )
-                } else {
-                    MediaStore.Images.Thumbnails.getThumbnail(
-                        contentResolver,
-                        fileId,
-                        MediaStore.Images.Thumbnails.MICRO_KIND,
-                        options
-                    )
-                }
-            }
-        }
-    }
-}
-
 fun Context.startDownloadFile(downloadURL: Uri, fileName: String) {
     var formattedFileName = fileName.replace(Regex("[\\\\/:*?\"<>|%]"), "_")
 
@@ -838,25 +616,6 @@ fun MaterialCardView.setCornersRadius(topCornerRadius: Float, bottomCornerRadius
         .setBottomLeftCorner(CornerFamily.ROUNDED, bottomCornerRadius)
         .setBottomRightCorner(CornerFamily.ROUNDED, bottomCornerRadius)
         .build()
-}
-
-/**
- * This method is here, and not directly a class method in the File class, because of a supposed Realm bug.
- * When we try to put it in the File class, the app doesn't build anymore, because of a "broken method".
- * This is not the only method in this case, search this comment in the project, and you'll see.
- * Realm's Github issue: https://github.com/realm/realm-java/issues/7637
- */
-fun File.getFolderIcon(): Pair<Int, String?> {
-    return when (getVisibilityType()) {
-        VisibilityType.IS_TEAM_SPACE -> R.drawable.ic_folder_common_documents to null
-        VisibilityType.IS_SHARED_SPACE -> R.drawable.ic_folder_shared to null
-        VisibilityType.IS_COLLABORATIVE_FOLDER -> R.drawable.ic_folder_dropbox to color
-        else -> if (isDisabled()) {
-            R.drawable.ic_folder_disable to null
-        } else {
-            R.drawable.ic_folder_filled to color
-        }
-    }
 }
 
 operator fun Regex.contains(input: String) = containsMatchIn(input)
