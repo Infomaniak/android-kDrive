@@ -83,16 +83,23 @@ object FileController {
         return realm?.let(block) ?: getRealmInstance(userDrive).use(block)
     }
 
+    fun getParentFileId(fileId: Int, userDrive: UserDrive? = null, realm: Realm? = null): Int? {
+        val block: (Realm) -> Int? = { currentRealm ->
+            getFileById(currentRealm, fileId)?.localParent?.let { parents ->
+                if (parents.count() == 1) parents.firstOrNull()?.id
+                else parents.firstOrNull { it.id > 0 }?.id
+            }
+        }
+        return realm?.let(block) ?: getRealmInstance(userDrive).use(block)
+    }
+
     fun generateAndSavePath(fileId: Int, userDrive: UserDrive): String {
         return getRealmInstance(userDrive).use { realm ->
             getFileById(realm, fileId)?.let { file ->
                 if (file.path.isEmpty()) {
                     val generatedPath = generatePath(file, userDrive)
                     if (generatedPath.isNotBlank()) {
-                        CoroutineScope(Dispatchers.IO).launch {
-                            savePath(userDrive, fileId, generatedPath)
-                        }
-
+                        CoroutineScope(Dispatchers.IO).launch { savePath(userDrive, fileId, generatedPath) }
                     }
                     generatedPath
                 } else file.path
