@@ -165,7 +165,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private suspend fun UploadFile.initUpload(pendingCount: Int) = withContext(Dispatchers.IO) {
         val uri = getUriObject()
-        var isSuccess = false
 
         currentUploadFile = this@initUpload
         applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
@@ -328,7 +327,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     private fun CoroutineScope.updateUploadCountNotification(uploadFile: UploadFile, pendingCount: Int) {
         launch {
             // We wait a little otherwise it is too fast and the notification may not be updated
-            delay(500)
+            delay(NotificationUtils.ELAPSED_TIME)
             ensureActive()
             uploadFile.setupCurrentUploadNotification(applicationContext, pendingCount)
         }
