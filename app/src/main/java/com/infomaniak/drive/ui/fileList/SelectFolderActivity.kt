@@ -23,12 +23,15 @@ import androidx.activity.viewModels
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModel
+import androidx.navigation.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.utils.Utils
 import kotlinx.android.synthetic.main.activity_select_folder.*
 import java.util.*
 
@@ -36,6 +39,8 @@ class SelectFolderActivity : BaseActivity() {
 
     private val saveExternalViewModel: SaveExternalViewModel by viewModels()
     private val mainViewModel: MainViewModel by viewModels()
+
+    private val navigationIds = mutableListOf<Int>()
 
     companion object {
         const val USER_ID_TAG = "userId"
@@ -52,11 +57,10 @@ class SelectFolderActivity : BaseActivity() {
         val userId = extras?.getInt(USER_ID_TAG) ?: throw MissingFormatArgumentException(USER_ID_TAG)
         val driveId = extras?.getInt(USER_DRIVE_ID_TAG) ?: throw MissingFormatArgumentException(USER_DRIVE_ID_TAG)
         val customArgs = extras?.getBundle(CUSTOM_ARGS_TAG)
+        val currentFolderId = extras?.getIntOrNull(CURRENT_FOLDER_ID_TAG)
         val currentUserDrive = UserDrive(userId, driveId)
 
         mainViewModel.selectFolderUserDrive = currentUserDrive
-
-        val currentFolderId = extras?.getInt(CURRENT_FOLDER_ID_TAG)
 
         saveExternalViewModel.apply {
             userDrive = currentUserDrive
@@ -67,7 +71,10 @@ class SelectFolderActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_select_folder)
         setSaveButton(customArgs)
+        currentFolderId?.let { initiateNavigationToCurrentFolder(it, currentUserDrive) } ?: Unit
     }
+
+    private fun Bundle.getIntOrNull(key: String): Int? = getInt(key).let { if (it == 0) null else it }
 
     private fun setSaveButton(customArgs: Bundle?) {
         saveButton.setOnClickListener {
@@ -79,6 +86,34 @@ class SelectFolderActivity : BaseActivity() {
             }
             setResult(RESULT_OK, intent)
             finish()
+        }
+    }
+
+    private fun initiateNavigationToCurrentFolder(folderId: Int, userDrive: UserDrive) {
+        generateNavigationIds(folderId, userDrive)
+        navigateToCurrentFolder()
+    }
+
+    private fun generateNavigationIds(folderId: Int, userDrive: UserDrive) = with(navigationIds) {
+        add(folderId)
+        addNavigationIdsRecursively(folderId, userDrive)
+        reverse()
+    }
+
+    private fun MutableList<Int>.addNavigationIdsRecursively(folderId: Int, userDrive: UserDrive) {
+        FileController.getParentFileProxy(folderId, mainViewModel.realm)?.id?.let { parentId ->
+            if (parentId != Utils.ROOT_ID) {
+                add(parentId)
+                addNavigationIdsRecursively(parentId, userDrive)
+            }
+        }
+    }
+
+    private fun navigateToCurrentFolder() {
+        navigationIds.forEach { folderId ->
+            findNavController(R.id.hostFragment).navigate(
+                SelectFolderFragmentDirections.fileListFragmentToFileListFragment(folderId)
+            )
         }
     }
 

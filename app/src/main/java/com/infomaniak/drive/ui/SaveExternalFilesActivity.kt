@@ -166,6 +166,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 val intent = Intent(this@SaveExternalFilesActivity, SelectFolderActivity::class.java).apply {
                     putExtra(SelectFolderActivity.USER_ID_TAG, selectDriveViewModel.selectedUserId.value)
                     putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, selectDriveViewModel.selectedDrive.value?.id)
+                    putExtra(SelectFolderActivity.CURRENT_FOLDER_ID_TAG, saveExternalFilesViewModel.folderId.value)
                 }
                 selectFolderResultLauncher.launch(intent)
             }
