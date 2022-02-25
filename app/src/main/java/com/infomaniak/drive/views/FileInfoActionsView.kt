@@ -355,14 +355,16 @@ class FileInfoActionsView @JvmOverloads constructor(
             isPendingOffline && file.currentProgress in 0..99 -> {
                 availableOfflineComplete.isGone = true
                 availableOfflineIcon.isGone = true
-                availableOfflineProgress.isGone = true // Before changing the type of progression it must first be gone
-                if (isOfflineProgress) {
-                    availableOfflineProgress.isIndeterminate = false
-                    availableOfflineProgress.progress = file.currentProgress
-                } else {
-                    availableOfflineProgress.isIndeterminate = true
+                availableOfflineProgress.apply {
+                    isGone = true // We need to hide the view before updating its `isIndeterminate`
+                    if (isOfflineProgress) {
+                        isIndeterminate = false
+                        progress = file.currentProgress
+                    } else {
+                        isIndeterminate = true
+                    }
+                    isVisible = true
                 }
-                availableOfflineProgress.isVisible = true
             }
             !isOfflineProgress -> {
                 availableOfflineProgress.isGone = true

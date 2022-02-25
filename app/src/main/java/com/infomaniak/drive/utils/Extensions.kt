@@ -163,7 +163,7 @@ fun ImageView.loadGlide(bitmap: Bitmap?, @DrawableRes errorRes: Int) {
 fun ImageView.loadGlideUrl(
     url: String?,
     @DrawableRes errorRes: Int = R.drawable.fallback_image,
-    errorDrawable: Drawable? = null
+    errorDrawable: Drawable? = null,
 ) {
     Glide.with(this)
         .load(OkHttpLibraryGlideModule.GlideAuthUrl(url))
@@ -174,15 +174,18 @@ fun ImageView.loadGlideUrl(
         .into(this)
 }
 
-fun ImageView.loadAvatar(driveUser: DriveUser): Disposable =
-    loadAvatar(driveUser.id, driveUser.getUserAvatar(), driveUser.displayName.getInitials())
+fun ImageView.loadAvatar(driveUser: DriveUser): Disposable {
+    return loadAvatar(driveUser.id, driveUser.getUserAvatar(), driveUser.displayName.getInitials())
+}
 
 fun ImageView.loadAvatar(user: User): Disposable = loadAvatar(user.id, user.avatar, user.getInitials())
 
 fun ImageView.loadAvatar(id: Int, avatarUrl: String?, initials: String): Disposable {
     val imageLoader = ImageLoader.Builder(context).build()
-    val fallback =
-        context.generateInitialsAvatarDrawable(initials = initials, background = context.getBackgroundColorBasedOnId(id))
+    val fallback = context.generateInitialsAvatarDrawable(
+        initials = initials,
+        background = context.getBackgroundColorBasedOnId(id),
+    )
     return load(avatarUrl, imageLoader) {
         error(fallback)
         fallback(fallback)
@@ -192,7 +195,6 @@ fun ImageView.loadAvatar(id: Int, avatarUrl: String?, initials: String): Disposa
 
 fun TextInputEditText.showOrHideEmptyError(): Boolean {
     val parentLayout = parent.parent as TextInputLayout
-
     parentLayout.error = if (text.isNullOrBlank()) context.getString(R.string.allEmptyInputError) else null
     return parentLayout.error != null
 }
@@ -201,30 +203,30 @@ fun Cursor.uri(contentUri: Uri): Uri {
     return ContentUris.withAppendedId(contentUri, getLong(getColumnIndexOrThrow(MediaStore.MediaColumns._ID)))
 }
 
-fun Number.isPositive(): Boolean {
-    return toLong() > 0
+fun Number.isPositive(): Boolean = toLong() > 0
+
+fun Resources.isNightModeEnabled(): Boolean {
+    return configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
 }
 
-fun Resources.isNightModeEnabled() = configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-
-fun Activity.setColorStatusBar(appBar: Boolean = false) {
+fun Activity.setColorStatusBar(appBar: Boolean = false) = with(window) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        window.statusBarColor = ContextCompat.getColor(this, if (appBar) R.color.appBar else R.color.background)
-        window.lightStatusBar(!resources.isNightModeEnabled())
+        statusBarColor = ContextCompat.getColor(this@setColorStatusBar, if (appBar) R.color.appBar else R.color.background)
+        lightStatusBar(!resources.isNightModeEnabled())
     } else {
-        window.statusBarColor = Color.BLACK
+        statusBarColor = Color.BLACK
     }
 }
 
 fun Window.lightStatusBar(enabled: Boolean) {
-// TODO DON'T WORK
-//    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-//        if (enabled) {
-//            insetsController?.setSystemBarsAppearance(APPEARANCE_LIGHT_STATUS_BARS, APPEARANCE_LIGHT_STATUS_BARS)
-//        } else {
-//            insetsController?.setSystemBarsAppearance(0, APPEARANCE_LIGHT_STATUS_BARS)
-//        }
-//    } else
+    // TODO: DOESN'T WORK
+    // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+    //     if (enabled) {
+    //         insetsController?.setSystemBarsAppearance(APPEARANCE_LIGHT_STATUS_BARS, APPEARANCE_LIGHT_STATUS_BARS)
+    //     } else {
+    //         insetsController?.setSystemBarsAppearance(0, APPEARANCE_LIGHT_STATUS_BARS)
+    //     }
+    // } else
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         if (enabled) {
             decorView.systemUiVisibility = decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
@@ -234,19 +236,19 @@ fun Window.lightStatusBar(enabled: Boolean) {
     }
 }
 
-fun Activity.setColorNavigationBar(appBar: Boolean = false) {
+fun Activity.setColorNavigationBar(appBar: Boolean = false) = with(window) {
     val color = if (appBar) R.color.appBar else R.color.background
     when (resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)) {
         Configuration.UI_MODE_NIGHT_YES -> {
-            window.navigationBarColor = ContextCompat.getColor(this, color)
-            window.lightNavigationBar(false)
+            navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, color)
+            lightNavigationBar(false)
         }
         else -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                window.navigationBarColor = ContextCompat.getColor(this, color)
-                window.lightNavigationBar(true)
+                navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, color)
+                lightNavigationBar(true)
             } else {
-                window.navigationBarColor = Color.BLACK
+                navigationBarColor = Color.BLACK
             }
         }
     }
@@ -434,7 +436,7 @@ fun ImageView.animateRotation(isDeployed: Boolean = false) {
     val startDeg = if (isDeployed) 0.0f else 90.0f
     val endDeg = if (isDeployed) 90.0f else 0.0f
     this.startAnimation(
-        RotateAnimation(startDeg, endDeg, Animation.RELATIVE_TO_SELF, 0.5F, Animation.RELATIVE_TO_SELF, 0.5F)
+        RotateAnimation(startDeg, endDeg, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f)
             .apply {
                 duration = 200
                 fillAfter = true

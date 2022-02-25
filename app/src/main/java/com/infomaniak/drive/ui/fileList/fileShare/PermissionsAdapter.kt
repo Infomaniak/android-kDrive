@@ -100,7 +100,7 @@ class PermissionsAdapter(
     private fun View.setupMainIcon() {
         mainIcon.shapeAppearanceModel = ShapeAppearanceModel()
             .toBuilder()
-            .setAllCornerSizes(RelativeCornerSize(0.5F))
+            .setAllCornerSizes(RelativeCornerSize(0.5f))
             .build()
     }
 
