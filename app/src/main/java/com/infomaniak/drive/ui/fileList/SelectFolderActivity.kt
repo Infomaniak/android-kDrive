@@ -31,7 +31,6 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.utils.Utils
 import kotlinx.android.synthetic.main.activity_select_folder.*
 import java.util.*
 
@@ -87,21 +86,29 @@ class SelectFolderActivity : BaseActivity() {
     }
 
     private fun initiateNavigationToCurrentFolder(folderId: Int, userDrive: UserDrive) {
-        val pathSeparator = "/"
-        val path = FileController.generateAndSavePath(folderId, userDrive).removePrefix(pathSeparator)
-        val parentId = Utils.ROOT_ID
-        navigateToCurrentFolderRecursively(path, parentId, pathSeparator)
+        generateNavigationIds(folderId, userDrive)
+        navigateToCurrentFolder()
     }
 
-    private fun navigateToCurrentFolderRecursively(path: String, parentId: Int, pathSeparator: String) {
-        val pathNames = path.split(pathSeparator)
-        val nextFolderName = pathNames.firstOrNull() ?: return
-        FileController.getFileIdByNameAndParentId(nextFolderName, parentId)?.let { nextFolderId ->
+    private fun generateNavigationIds(folderId: Int, userDrive: UserDrive) = with(saveExternalViewModel) {
+        navigationIds.add(folderId)
+        addNavigationIdsRecursively(folderId, userDrive)
+        navigationIds.reverse()
+        navigationIds.removeFirstOrNull()
+    }
+
+    private fun addNavigationIdsRecursively(folderId: Int, userDrive: UserDrive) {
+        FileController.getParentFile(folderId, userDrive)?.id?.let {
+            saveExternalViewModel.navigationIds.add(it)
+            addNavigationIdsRecursively(it, userDrive)
+        }
+    }
+
+    private fun navigateToCurrentFolder() {
+        saveExternalViewModel.navigationIds.forEach {
             findNavController(R.id.hostFragment).navigate(
-                SelectFolderFragmentDirections.fileListFragmentToFileListFragment(folderId = nextFolderId)
+                SelectFolderFragmentDirections.fileListFragmentToFileListFragment(folderId = it)
             )
-            val newPath = path.removePrefix("$nextFolderName$pathSeparator")
-            if (newPath != path) navigateToCurrentFolderRecursively(newPath, nextFolderId, pathSeparator)
         }
     }
 
@@ -121,5 +128,6 @@ class SelectFolderActivity : BaseActivity() {
         var userDrive: UserDrive? = null
         var currentDrive: Drive? = null
         var disableSelectedFolderId: Int? = null
+        val navigationIds = mutableListOf<Int>()
     }
 }

@@ -135,10 +135,6 @@ object FileController {
         }
     }
 
-    fun getFileIdByNameAndParentId(fileName: String, parentId: Int): Int? {
-        return getFileById(parentId)?.children?.find { it.name == fileName }?.id
-    }
-
     fun removeFile(
         fileId: Int,
         keepFileCaches: ArrayList<Int> = arrayListOf(),
