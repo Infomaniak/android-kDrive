@@ -263,7 +263,9 @@ class PicturesFragment(
                         copyName = requireContext().getString(R.string.allDuplicateFileName, fileName, file.getFileExtension()),
                         onSuccess = { apiResponse ->
                             apiResponse.data?.let {
-                                picturesAdapter.duplicatedList.add(0, it)
+                                lifecycleScope.launchWhenResumed {
+                                    picturesRecyclerView.post { picturesAdapter.duplicatedList.add(0, it) }
+                                }
                             }
                         },
                     ),
