@@ -94,9 +94,7 @@ private fun View.displaySize(file: File) {
 }
 
 private fun View.displayIcon(file: File, isGrid: Boolean, viewHolder: FileViewHolder?) {
-
     filePreview.scaleType = ImageView.ScaleType.CENTER
-
     when {
         file.isFolder() -> displayFolderIcon(file, viewHolder)
         file.isDrive() -> displayDriveIcon(file, viewHolder)
@@ -151,6 +149,7 @@ private fun Context.getTintedDrawable(viewHolder: FileViewHolder?, icon: Int, ti
 private fun View.displayCategories(file: File) {
     val canReadCategoryOnFile = DriveInfosController.getCategoryRights().canReadCategoryOnFile
     val categories = file.getCategories()
+
     (categoriesLayout as LinearLayout).apply {
         if (!canReadCategoryOnFile || categories.isEmpty()) {
             isGone = true
@@ -222,7 +221,6 @@ private fun Context.getThumbnailAfterAndroidPie(file: File, fileUri: Uri, thumbn
 }
 
 private fun Context.getThumbnailUntilAndroidPie(file: File, fileUri: Uri, thumbnailSize: Int): Bitmap? {
-
     val isSchemeFile = fileUri.scheme.equals(ContentResolver.SCHEME_FILE)
     val localFile = fileUri.lastPathSegment?.split(":")?.let { list ->
         list.getOrNull(1)?.let { path -> java.io.File(path) }
