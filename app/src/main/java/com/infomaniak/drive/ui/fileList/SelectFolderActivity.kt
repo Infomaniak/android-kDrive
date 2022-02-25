@@ -101,7 +101,7 @@ class SelectFolderActivity : BaseActivity() {
     }
 
     private fun MutableList<Int>.addNavigationIdsRecursively(folderId: Int, userDrive: UserDrive) {
-        FileController.getParentFileId(folderId, userDrive)?.let { parentId ->
+        FileController.getParentFileProxy(folderId, mainViewModel.realm)?.id?.let { parentId ->
             if (parentId != Utils.ROOT_ID) {
                 add(parentId)
                 addNavigationIdsRecursively(parentId, userDrive)

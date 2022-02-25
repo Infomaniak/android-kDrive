@@ -71,23 +71,17 @@ object FileController {
     // https://github.com/realm/realm-java/issues/1862
     fun emptyList(realm: Realm): RealmResults<File> = realm.where(File::class.java).alwaysFalse().findAll()
 
-    fun getParentFile(fileId: Int, userDrive: UserDrive? = null, realm: Realm? = null): File? {
-        val block: (Realm) -> File? = { currentRealm ->
-            getFileById(currentRealm, fileId)?.localParent?.let { parents ->
-                if (parents.count() == 1) parents.firstOrNull()
-                else parents.firstOrNull { it.id > 0 }
-            }?.let { parent ->
-                currentRealm.copyFromRealm(parent, 0)
-            }
+    fun getParentFileProxy(fileId: Int, realm: Realm): File? {
+        return getFileById(realm, fileId)?.localParent?.let { parents ->
+            if (parents.count() == 1) parents.firstOrNull()
+            else parents.firstOrNull { it.id > 0 }
         }
-        return realm?.let(block) ?: getRealmInstance(userDrive).use(block)
     }
 
-    fun getParentFileId(fileId: Int, userDrive: UserDrive? = null, realm: Realm? = null): Int? {
-        val block: (Realm) -> Int? = { currentRealm ->
-            getFileById(currentRealm, fileId)?.localParent?.let { parents ->
-                if (parents.count() == 1) parents.firstOrNull()?.id
-                else parents.firstOrNull { it.id > 0 }?.id
+    fun getParentFile(fileId: Int, userDrive: UserDrive? = null, realm: Realm? = null): File? {
+        val block: (Realm) -> File? = { currentRealm ->
+            getParentFileProxy(fileId, currentRealm)?.let { parent ->
+                currentRealm.copyFromRealm(parent, 0)
             }
         }
         return realm?.let(block) ?: getRealmInstance(userDrive).use(block)
@@ -96,13 +90,13 @@ object FileController {
     fun generateAndSavePath(fileId: Int, userDrive: UserDrive): String {
         return getRealmInstance(userDrive).use { realm ->
             getFileById(realm, fileId)?.let { file ->
-                if (file.path.isEmpty()) {
+                file.path.ifEmpty {
                     val generatedPath = generatePath(file, userDrive)
                     if (generatedPath.isNotBlank()) {
                         CoroutineScope(Dispatchers.IO).launch { savePath(userDrive, fileId, generatedPath) }
                     }
                     generatedPath
-                } else file.path
+                }
             } ?: ""
         }
     }
