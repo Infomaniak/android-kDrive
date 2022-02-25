@@ -29,11 +29,9 @@ import com.infomaniak.drive.utils.UiTestUtils.closeBottomSheetInfoModalIfDisplay
 import com.infomaniak.drive.utils.UiTestUtils.device
 import com.infomaniak.drive.utils.UiTestUtils.getDeviceViewById
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
-@Disabled
 class MenuUiTest : KDriveTest() {
 
     @BeforeEach

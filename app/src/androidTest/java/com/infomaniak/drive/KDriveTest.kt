@@ -22,6 +22,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponseData
 import com.infomaniak.drive.utils.Env
 import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.RealmModules
@@ -54,11 +55,14 @@ open class KDriveTest {
                 InfomaniakCore.bearerToken = Env.TOKEN
 
                 val apiResponse = ApiRepository.getUserProfile(HttpClient.okHttpClientNoInterceptor)
+                assertApiResponseData(apiResponse)
                 user = apiResponse.data!!
-                runBlocking {
-                    user.apiToken = ApiToken(Env.TOKEN, "", "Bearer", userId = user.id, expiresAt = null)
-                    user.organizations = arrayListOf()
-                    AccountUtils.addUser(user)
+                if (AccountUtils.currentUserId != user.id) {
+                    runBlocking {
+                        user.apiToken = ApiToken(Env.TOKEN, "", "Bearer", userId = user.id, expiresAt = null)
+                        user.organizations = arrayListOf()
+                        AccountUtils.addUser(user)
+                    }
                 }
             }
             userDrive = UserDrive(user.id, Env.DRIVE_ID)

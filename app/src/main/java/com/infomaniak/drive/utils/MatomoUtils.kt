@@ -28,7 +28,6 @@ import org.matomo.sdk.Tracker
 import org.matomo.sdk.TrackerBuilder
 import org.matomo.sdk.extra.DownloadTracker
 import org.matomo.sdk.extra.TrackHelper
-import java.util.*
 
 object MatomoUtils {
 

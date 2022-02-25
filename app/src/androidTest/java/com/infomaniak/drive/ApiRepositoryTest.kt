@@ -75,6 +75,8 @@ import java.util.*
  */
 class ApiRepositoryTest : KDriveTest() {
 
+    private val randomSuffix = UUID.randomUUID()
+
     @Test
     @DisplayName("Check if remote drive data are correctly retrieved")
     fun getDriveData() {
@@ -93,7 +95,7 @@ class ApiRepositoryTest : KDriveTest() {
     @Test
     @DisplayName("Create a folder with team space visibility")
     fun createTeamFolder() {
-        with(createTeamFolder(okHttpClient, userDrive.driveId, "teamFolder", true)) {
+        with(createTeamFolder(okHttpClient, userDrive.driveId, "teamFolder$randomSuffix", true)) {
             assertApiResponseData(this)
             assertTrue(data!!.visibility.contains("is_team_space_folder"), "visibility should be 'is_team_space_folder'")
             deleteTestFile(data!!)
@@ -104,7 +106,7 @@ class ApiRepositoryTest : KDriveTest() {
     @DisplayName("Create a category then delete it")
     fun createCategory() {
         val color = "#0000FF"
-        val name = "category tests"
+        val name = "testCreateCategory-$randomSuffix}"
         val categoryId = createCategory(userDrive.driveId, name, color).let {
             assertApiResponseData(it)
             assertEquals(name, it.data?.name, "Name of the category should be equals to $name")
@@ -134,13 +136,13 @@ class ApiRepositoryTest : KDriveTest() {
     @DisplayName("Update a created category then delete it")
     fun updateCategory() {
         var color = "#0000FF"
-        var name = "category tests"
+        var name = "category-$randomSuffix}"
         val categoryId = createCategory(userDrive.driveId, name, color).let {
             assertNotNull(it.data)
             it.data!!.id
         }
 
-        name = "update category"
+        name = "updateCategory-$randomSuffix}"
         color = "#FF0000"
         // Edit the category by changing its color and name
         with(editCategory(userDrive.driveId, categoryId, name, color)) {
@@ -373,7 +375,7 @@ class ApiRepositoryTest : KDriveTest() {
         @Test
         @DisplayName("Copy the test file to root folder")
         fun duplicateFile() {
-            val copyName = "test copy"
+            val copyName = "testCopy-$randomSuffix"
             val copyFile = duplicateFile(testFile, copyName, ROOT_ID).let {
                 assertApiResponseData(it)
                 assertEquals(copyName, it.data?.name, "The copy name should be equal to $copyName")
@@ -471,7 +473,7 @@ class ApiRepositoryTest : KDriveTest() {
         @DisplayName("Add a category to the test file, then delete this category")
         fun addCategoryToFile() {
             // Create a test category
-            val category = createCategory(userDrive.driveId, "test category", "#FFF").data
+            val category = createCategory(userDrive.driveId, "testAddCategory-$randomSuffix", "#FFF").data
             assertNotNull(category)
 
             // Add the category to the test file
@@ -493,7 +495,7 @@ class ApiRepositoryTest : KDriveTest() {
         @DisplayName("Add a category to the test file, then remove this category from the file")
         fun removeCategoryToFile() {
             // Create a test category
-            val category = createCategory(userDrive.driveId, "test cat", "#000").data
+            val category = createCategory(userDrive.driveId, "testRemoveCategory-$randomSuffix", "#000").data
             assertNotNull(category, "Category should not be null")
             // Add the category to the test file
             addCategory(testFile, category!!.id)
@@ -514,7 +516,7 @@ class ApiRepositoryTest : KDriveTest() {
     inner class ShareTestFolder {
 
         private lateinit var testFolder: File
-        private val folderName = "testFolder-${UUID.randomUUID()}"
+        private val folderName = "testFolder-$randomSuffix}"
 
         @BeforeEach
         @Throws(Exception::class)
