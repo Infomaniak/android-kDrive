@@ -37,6 +37,7 @@ import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.UploadWorkerThrowable.runUploadCatching
 import com.infomaniak.drive.data.sync.UploadNotifications
+import com.infomaniak.drive.data.sync.UploadNotifications.exceptionNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.setupCurrentUploadNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.syncSettingsActivityPendingIntent
@@ -129,6 +130,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val uploadFiles = UploadFile.getAllPendingUploads()
         val lastUploadedCount = inputData.getInt(LAST_UPLOADED_COUNT, 0)
         var pendingCount = uploadFiles.size
+        var successCount = 0
 
         if (pendingCount > 0) applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
 
@@ -136,16 +138,21 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         uploadFiles.forEach { uploadFile ->
             Log.d(TAG, "startSyncFiles> upload ${uploadFile.fileName}")
-            uploadFile.initUpload(pendingCount)
+            if (uploadFile.initUpload(pendingCount)) successCount++
             pendingCount--
         }
 
-        uploadedCount = uploadFiles.size - pendingCount + lastUploadedCount
-        if (uploadedCount > 0) currentUploadFile?.showUploadedFilesNotification(applicationContext, uploadedCount)
+        uploadedCount = successCount + lastUploadedCount
 
         Log.d(TAG, "startSyncFiles: finish with $uploadedCount uploaded")
 
-        Result.success()
+        if (uploadedCount > 0) {
+            currentUploadFile?.showUploadedFilesNotification(applicationContext, uploadedCount)
+            Result.success()
+        } else {
+            currentUploadFile?.exceptionNotification(applicationContext)
+            Result.failure()
+        }
     }
 
     private suspend fun checkIfNeedReSync(syncSettings: SyncSettings?) {
@@ -158,8 +165,9 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private suspend fun UploadFile.initUpload(pendingCount: Int) = withContext(Dispatchers.IO) {
         val uri = getUriObject()
-        currentUploadFile = this@initUpload
+        var isSuccess = false
 
+        currentUploadFile = this@initUpload
         applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
         updateUploadCountNotification(this@initUpload, pendingCount)
 
@@ -171,27 +179,29 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             }
         } catch (exception: Exception) {
             handleException(exception, uri)
+            false
         }
     }
 
-    private suspend fun UploadFile.initUploadSchemeFile(uri: Uri) {
+    private suspend fun UploadFile.initUploadSchemeFile(uri: Uri): Boolean {
         val cacheFile = uri.toFile().apply {
             if (!exists()) {
                 UploadFile.deleteIfExists(uri)
-                return
+                return false
             }
         }
 
-        startUploadFile(cacheFile.length())
-        UploadFile.deleteIfExists(uri)
+        return startUploadFile(cacheFile.length()).also {
+            UploadFile.deleteIfExists(uri)
 
-        if (!isSyncOffline()) cacheFile.delete()
+            if (!isSyncOffline()) cacheFile.delete()
+        }
     }
 
-    private suspend fun UploadFile.initUploadSchemeContent(uri: Uri) {
+    private suspend fun UploadFile.initUploadSchemeContent(uri: Uri): Boolean {
         SyncUtils.checkDocumentProviderPermissions(applicationContext, uri)
 
-        contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
+        return contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val mediaSize = SyncUtils.getFileSize(cursor)
                 val descriptorSize = fileDescriptorSize(getOriginalUri(applicationContext))
@@ -199,12 +209,13 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 startUploadFile(size)
             } else {
                 UploadFile.deleteIfExists(uri)
+                false
             }
-        }
+        } ?: false
     }
 
-    private suspend fun UploadFile.startUploadFile(size: Long) {
-        if (size != 0L) {
+    private suspend fun UploadFile.startUploadFile(size: Long): Boolean {
+        return if (size != 0L) {
             if (fileSize != size) {
                 UploadFile.update(uri) {
                     it.fileSize = size
@@ -213,9 +224,10 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             }
 
             currentUploadTask = UploadTask(context = applicationContext, uploadFile = this, worker = this@UploadWorker)
-                .apply { start() }
+            currentUploadTask!!.start().also {
+                Log.d(TAG, "startUploadFile> end upload $fileName")
+            }
 
-            Log.d("kDrive", "$TAG > end upload $fileName")
         } else {
             UploadFile.deleteIfExists(getUriObject())
             Log.d("kDrive", "$TAG > $fileName deleted size:$size")
@@ -223,6 +235,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 scope.setExtra("data", ApiController.gson.toJson(this))
                 Sentry.captureMessage("$fileName deleted size:$size")
             }
+            false
         }
     }
 
