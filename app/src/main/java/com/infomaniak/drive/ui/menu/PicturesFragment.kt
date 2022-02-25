@@ -142,8 +142,8 @@ class PicturesFragment(
 
     override fun onMove() {
         // TODO use "parentId" when https://github.com/Infomaniak/android-kDrive/issues/532 is merged
-        val folderId = if (picturesAdapter.itemsSelected.count() == 1) {
-            FileController.getParentFile(picturesAdapter.itemsSelected[0].id, UserDrive(), mainViewModel.realm)?.id
+        val folderId = if (picturesAdapter.selectedItems.count() == 1) {
+            FileController.getParentFile(picturesAdapter.selectedItems[0].id, UserDrive(), mainViewModel.realm)?.id
         } else {
             null
         }
@@ -157,7 +157,7 @@ class PicturesFragment(
     override fun onMenu() {
         val fileIds = arrayListOf<Int>()
         var (onlyFolders, onlyFavorite, onlyOffline) = arrayOf(true, true, true)
-        picturesAdapter.itemsSelected.forEach {
+        picturesAdapter.selectedItems.forEach {
             fileIds.add(it.id)
             if (!it.isFolder()) onlyFolders = false
             if (!it.isFavorite) onlyFavorite = false
@@ -449,7 +449,7 @@ class PicturesFragment(
 
     fun closeMultiSelect() {
         picturesAdapter.apply {
-            itemsSelected = RealmList()
+            selectedItems = RealmList()
             multiSelectMode = false
             notifyItemRangeChanged(0, itemCount)
         }

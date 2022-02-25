@@ -37,7 +37,7 @@ import java.util.*
 
 class PicturesAdapter(private val onItemClick: (file: File) -> Unit) : LoaderAdapter<Any>() {
 
-    var itemsSelected: OrderedRealmCollection<File> = RealmList()
+    var selectedItems: OrderedRealmCollection<File> = RealmList()
 
     private var lastSectionTitle: String = ""
     var pictureList: ArrayList<File> = arrayListOf()
@@ -166,25 +166,25 @@ class PicturesAdapter(private val onItemClick: (file: File) -> Unit) : LoaderAda
         notifyDataSetChanged()
     }
 
-    fun getValidItemsSelected() = itemsSelected.filter { it.isUsable() }
+    fun getValidItemsSelected() = selectedItems.filter { it.isUsable() }
 
-    private fun isSelectedFile(file: File): Boolean = itemsSelected.any { it.isUsable() && it.id == file.id }
+    private fun isSelectedFile(file: File): Boolean = selectedItems.any { it.isUsable() && it.id == file.id }
 
     private fun onSelectedFile(file: File, isSelected: Boolean) {
         if (file.isUsable()) {
             if (isSelected) addSelectedFile(file) else removeSelectedFile(file)
         } else {
-            itemsSelected = RealmList()
+            selectedItems = RealmList()
         }
         updateMultiSelectMode?.invoke()
     }
 
     private fun addSelectedFile(file: File) {
-        itemsSelected.add(file)
+        selectedItems.add(file)
     }
 
     private fun removeSelectedFile(file: File) {
-        itemsSelected.remove(file)
+        selectedItems.remove(file)
     }
 
     private fun indexOf(fileId: Int) = itemList.indexOfFirstOrNull { (it as? File)?.id == fileId }
