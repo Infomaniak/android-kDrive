@@ -33,7 +33,6 @@ import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
 import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
-import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.ApiController.gson
@@ -211,9 +210,9 @@ class UploadTask(
             }
         }
 
-        val availableMemory = context.getAvailableMemory().availMem
-        if (chunkSize >= availableMemory) {
-            chunkSize = ceil(availableMemory.toDouble() / 4).toInt()
+        val availableHeapMemory = getAvailableHalfHeapMemory()
+        if (chunkSize > availableHeapMemory) {
+            chunkSize = (availableHeapMemory / limitParallelRequest).toInt()
         }
     }
 
@@ -323,10 +322,9 @@ class UploadTask(
         )
     }
 
-    private fun checkLimitParallelRequest() {
-        val availableMemory = context.getAvailableMemory().availMem
-        if (chunkSize * limitParallelRequest >= availableMemory) {
-            limitParallelRequest = (availableMemory / limitParallelRequest).toInt()
+    private fun checkLimitParallelRequest() = getAvailableHalfHeapMemory().let { availableHalfMemory ->
+        if (chunkSize * limitParallelRequest >= availableHalfMemory * 2) {
+            limitParallelRequest = (availableHalfMemory / chunkSize).toInt()
         }
     }
 
@@ -349,6 +347,13 @@ class UploadTask(
                 relativePath +
                 if (uploadFile.fileCreatedAt == null) "" else "&file_created_at=${uploadFile.fileCreatedAt!!.time / 1000}"
     }
+
+    /**
+     * Returns half the available memory in the heap, to avoid [OutOfMemoryError]
+     * It can vary depending on the available ram memory in the device
+     * @return half available memory
+     */
+    private fun getAvailableHalfHeapMemory() = Runtime.getRuntime().freeMemory() / 2
 
     fun previousChunkBytesWritten() = previousChunkBytesWritten
 
