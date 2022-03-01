@@ -40,7 +40,8 @@ import androidx.activity.result.contract.ActivityResultContracts.StartIntentSend
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
-import androidx.core.view.*
+import androidx.core.view.get
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
@@ -71,13 +72,10 @@ import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.Utils.getRootName
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
-import com.infomaniak.lib.core.utils.toPx
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_trashed_file_actions.*
-import kotlinx.android.synthetic.main.fragment_preview_slider.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -123,19 +121,6 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        Log.e("status", "onCreate: CREATING", );
-//        window.toggleEdgeToEdge(false)
-//        window.toggleEdgeToEdge(true)
-
-//        ViewCompat.setOnApplyWindowInsetsListener(mainActivityRoot) { view, windowInsets ->
-//            Log.e("status", "onCreate: main activity inset listener proced", );
-//            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-//            hostFragment.setPadding(insets.left, insets.top, insets.right, insets.bottom)
-//            bottomNavigation.setMargin(bottom = insets.bottom + 24.toPx())
-////            WindowInsetsCompat.CONSUMED
-//             windowInsets
-//        }
 
         downloadReceiver = DownloadReceiver(mainViewModel)
         fileObserver.startWatching()
@@ -313,15 +298,7 @@ class MainActivity : BaseActivity() {
 
         handleBottomNavigationVisibility(destination.id, shouldHideBottomNavigation)
 
-//        when(destination.id) {
-//            R.id.previewSliderFragment, R.id.fileDetailsFragment -> { window.toggleEdgeToEdge(true) }
-//            else -> {
-//                window.toggleEdgeToEdge(false)
-//                bottomNavigation.setOnApplyWindowInsetsListener(null)
-//            }
-//        }
-
-        if(destination.id != R.id.previewSliderFragment && destination.id != R.id.fileDetailsFragment) {
+        if (destination.id != R.id.previewSliderFragment && destination.id != R.id.fileDetailsFragment) {
             window.toggleEdgeToEdge(false)
             bottomNavigation.setOnApplyWindowInsetsListener(null)
         }

@@ -219,11 +219,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 override fun onStateChanged(bottomSheet: View, newState: Int) {
                     when (bottomSheetBehavior.state) {
                         BottomSheetBehavior.STATE_HIDDEN -> {
-                            activity?.window?.navigationBarColor =
-                                ColorUtils.setAlphaComponent(
-                                    ContextCompat.getColor(requireContext(), R.color.previewBackground),
-                                    128
-                                )
+                            activity?.window?.navigationBarColor = ColorUtils.setAlphaComponent(
+                                ContextCompat.getColor(requireContext(), R.color.previewBackground), 128
+                            )
                             activity?.window?.lightNavigationBar(false)
                         }
                         else -> {

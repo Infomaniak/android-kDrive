@@ -40,7 +40,6 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.TabViewPagerUtils.setup
 import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior
 import com.infomaniak.lib.core.utils.format
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
 import kotlinx.android.synthetic.main.fragment_file_details.*
 import kotlinx.android.synthetic.main.view_subtitle_toolbar.view.*
@@ -91,7 +90,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
                 toolbar.setMargin(top = insets.top)
                 view.setMargin(bottom = insets.bottom)
 
-                // Return CONSUMED if you don't want the window insets to keep being passed down to descendant views.
+                // Return CONSUMED if you don't want the window insets to keep being passed down to descendant views
                 WindowInsetsCompat.CONSUMED
             }
         }
@@ -152,18 +151,12 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-    }
-
     override fun onPause() {
         super.onPause()
         // TODO Understand why we need to do this
         toolbar.setNavigationIconTint(ContextCompat.getColor(requireContext(), R.color.primary))
 
         activity?.window?.apply {
-//            toggleEdgeToEdge(false)
-
             // If light mode
             if (context?.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_NO) {
                 lightStatusBar(true)

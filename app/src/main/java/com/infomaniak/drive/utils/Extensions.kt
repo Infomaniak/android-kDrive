@@ -54,7 +54,9 @@ import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
-import androidx.core.view.*
+import androidx.core.view.WindowCompat
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
@@ -211,21 +213,7 @@ fun Window.lightStatusBar(enabled: Boolean) {
 }
 
 fun Window.toggleEdgeToEdge(enabled: Boolean) {
-        WindowCompat.setDecorFitsSystemWindows(this, !enabled)
-//    fun setDecorFitsSystemWindows(
-//        window: Window,
-//        decorFitsSystemWindows: Boolean
-//    ) {
-//        val decorFitsFlags = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-//                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-//                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
-//        val decorView = window.decorView
-//        val sysUiVis = decorView.systemUiVisibility
-//        decorView.systemUiVisibility =
-//            if (decorFitsSystemWindows) sysUiVis and decorFitsFlags.inv() else sysUiVis or decorFitsFlags
-//    }
-//
-//    setDecorFitsSystemWindows(this, !enabled)
+    WindowCompat.setDecorFitsSystemWindows(this, !enabled)
 }
 
 fun Activity.setColorNavigationBar(appBar: Boolean = false) = with(window) {
