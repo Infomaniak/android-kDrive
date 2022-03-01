@@ -52,17 +52,21 @@ class MenuPicturesFragment : Fragment(), MultiSelectParent {
         binding = FragmentMenuPicturesBinding.inflate(inflater, container, false).apply {
             toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
             swipeRefreshLayout.setOnRefreshListener { picturesFragment.onRefreshPictures() }
-            multiSelectLayout.selectAllButton.isInvisible = true
-            setMultiSelectClickListeners(multiSelectLayout)
         }
+
+        binding.multiSelectLayout.apply {
+            selectAllButton.isInvisible = true
+            setMultiSelectClickListeners()
+        }
+
         return binding.root
     }
 
-    private fun setMultiSelectClickListeners(multiSelectLayout: MultiSelectLayoutBinding) = with(multiSelectLayout) {
-        closeButtonMultiSelect.setOnClickListener { picturesFragment.onCloseMultiSelection() }
-        moveButtonMultiSelect.setOnClickListener { picturesFragment.onMove() }
-        deleteButtonMultiSelect.setOnClickListener { picturesFragment.onDelete() }
-        menuButtonMultiSelect.setOnClickListener { picturesFragment.onMenu() }
+    private fun MultiSelectLayoutBinding.setMultiSelectClickListeners() = with(picturesFragment) {
+        closeButtonMultiSelect.setOnClickListener { onCloseMultiSelection() }
+        moveButtonMultiSelect.setOnClickListener { onMove() }
+        deleteButtonMultiSelect.setOnClickListener { onDelete() }
+        menuButtonMultiSelect.setOnClickListener { onMenu() }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
