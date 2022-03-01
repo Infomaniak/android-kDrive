@@ -82,6 +82,7 @@ import io.realm.RealmList
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.fragment_new_folder.toolbar
+import kotlinx.android.synthetic.main.multi_select_layout.*
 import kotlinx.coroutines.*
 
 open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
@@ -857,7 +858,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         fileAdapter.notifyItemRangeChanged(0, fileAdapter.itemCount)
         collapsingToolbarLayout.isGone = true
         multiSelectLayout.isVisible = true
-        selectAllButton.isVisible = true
     }
 
     private fun onUpdateMultiSelect(selectedNumber: Int? = null) {
@@ -892,7 +892,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         collapsingToolbarLayout.isVisible = true
         multiSelectLayout.isGone = true
-        selectAllButton.isGone = true
     }
 
     private fun downloadFolderActivities(currentFolder: File) {

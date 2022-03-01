@@ -50,7 +50,6 @@ import com.infomaniak.lib.core.utils.toDp
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.cardview_picture.*
-import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.android.synthetic.main.fragment_pictures.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
