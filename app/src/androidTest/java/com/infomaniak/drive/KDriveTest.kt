@@ -20,6 +20,7 @@ package com.infomaniak.drive
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponseData
@@ -30,6 +31,7 @@ import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.models.User
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.login.ApiToken
+import io.realm.Realm
 import io.realm.RealmConfiguration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -43,6 +45,7 @@ open class KDriveTest {
         internal lateinit var user: User
         internal lateinit var userDrive: UserDrive
         internal lateinit var okHttpClient: OkHttpClient
+        internal lateinit var uiRealm: Realm
 
         @BeforeAll
         @JvmStatic
@@ -67,6 +70,7 @@ open class KDriveTest {
             }
             userDrive = UserDrive(user.id, Env.DRIVE_ID)
             okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(user.id) }
+            uiRealm = FileController.getRealmInstance(userDrive)
         }
 
         @AfterAll
@@ -76,6 +80,7 @@ open class KDriveTest {
                 runBlocking { AccountUtils.removeUser(context, user) }
             }
             ApiRepository.emptyTrash(userDrive.driveId)
+            uiRealm.close()
         }
 
         internal fun getConfig() = RealmConfiguration.Builder().inMemory()
