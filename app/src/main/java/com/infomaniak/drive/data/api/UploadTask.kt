@@ -79,6 +79,7 @@ class UploadTask(
 
         try {
             uploadTask(this)
+            return@withContext true
         } catch (exception: FileNotFoundException) {
             UploadFile.deleteIfExists(uploadFile.getUriObject(), keepFile = uploadFile.isSync())
             Sentry.withScope { scope ->
@@ -92,6 +93,7 @@ class UploadTask(
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
             throw exception
         }
+        return@withContext false
     }
 
     private suspend fun uploadTask(coroutineScope: CoroutineScope) = withContext(Dispatchers.IO) {
