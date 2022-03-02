@@ -70,7 +70,7 @@ import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 
-open class FileListFragment : MultiSelectFragment(), SwipeRefreshLayout.OnRefreshListener {
+open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefreshLayout.OnRefreshListener {
 
     private lateinit var binding: FragmentFileListBinding
 
@@ -119,6 +119,8 @@ open class FileListFragment : MultiSelectFragment(), SwipeRefreshLayout.OnRefres
 
         // Beware, if this value is modified, the Categories' layouts should be modified accordingly.
         const val MAX_DISPLAYED_CATEGORIES = 3
+
+        const val MATOMO_CATEGORY = "fileListFileAction"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -51,7 +51,7 @@ import kotlinx.coroutines.runBlocking
 import kotlin.math.max
 import kotlin.math.min
 
-class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelectFragment() {
+class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelectFragment(MATOMO_CATEGORY) {
 
     private val picturesViewModel: PicturesViewModel by viewModels()
     private lateinit var picturesAdapter: PicturesAdapter
@@ -276,7 +276,8 @@ class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelect
         picturesAdapter.updateFileProgressByFileId(fileId, progress, onComplete)
     }
 
-    private companion object {
-        const val NUMBER_ITEMS_LOADER = 13
+    companion object {
+        private const val NUMBER_ITEMS_LOADER = 13
+        const val MATOMO_CATEGORY = "picturesFileAction"
     }
 }

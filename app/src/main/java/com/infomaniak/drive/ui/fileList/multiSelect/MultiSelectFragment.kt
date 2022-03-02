@@ -60,7 +60,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-abstract class MultiSelectFragment : Fragment(), MultiSelectResult {
+abstract class MultiSelectFragment(private val matomoCategory: String) : Fragment(), MultiSelectResult {
 
     protected val mainViewModel: MainViewModel by activityViewModels()
     protected val multiSelectManager = MultiSelectManager()
@@ -169,11 +169,11 @@ abstract class MultiSelectFragment : Fragment(), MultiSelectResult {
         val selectedFiles = multiSelectManager.getValidSelectedItems(type)
         val fileCount = allSelectedFileCount ?: selectedFiles.size
 
+        applicationContext?.trackBulkActionEvent(matomoCategory, type, fileCount)
+
         val sendActions: (dialog: Dialog?) -> Unit = sendActions(
             type, areAllFromTheSameFolder, fileCount, selectedFiles, destinationFolder, color
         )
-
-        applicationContext?.trackBulkActionEvent(type, fileCount)
 
         if (type == BulkOperationType.TRASH) {
             Utils.createConfirmation(
