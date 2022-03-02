@@ -19,14 +19,7 @@ package com.infomaniak.drive.ui
 
 import androidx.test.uiautomator.UiScrollable
 import androidx.test.uiautomator.UiSelector
-import com.infomaniak.drive.KDriveTest
-import com.infomaniak.drive.utils.UiTestUtils
-import com.infomaniak.drive.utils.UiTestUtils.createPublicShareLink
-import com.infomaniak.drive.utils.UiTestUtils.deleteFile
-import com.infomaniak.drive.utils.UiTestUtils.device
-import com.infomaniak.drive.utils.UiTestUtils.getDeviceViewById
-import com.infomaniak.drive.utils.UiTestUtils.getViewIdentifier
-import com.infomaniak.drive.utils.UiTestUtils.startApp
+import com.infomaniak.drive.utils.KDriveUiTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
@@ -36,12 +29,11 @@ import java.util.*
 /**
  * UI Tests relative to a file item (sharing, comments, details, activities)
  */
-@Disabled
-class FileItemUiTest : KDriveTest() {
+class FileItemUiTest : KDriveUiTest() {
 
     @BeforeEach
-    fun init() {
-        startApp()
+    override fun startApp() {
+        super.startApp()
         getDeviceViewById("fileListFragment").click()
     }
 
@@ -52,9 +44,9 @@ class FileItemUiTest : KDriveTest() {
         val fileRecyclerView = UiScrollable(UiSelector().resourceId(getViewIdentifier("fileRecyclerView")))
 
         // Create the folder then returns to main view
-        UiTestUtils.createPrivateFolder(randomFolderName)
+        createPrivateFolder(randomFolderName)
         // Go to fileList view
-        UiTestUtils.openFileShareDetails(fileRecyclerView, randomFolderName)
+        openFileShareDetails(fileRecyclerView, randomFolderName)
 
         device.apply {
             findObject(UiSelector().resourceId(getViewIdentifier("shareLinkSwitch"))).clickAndWaitForNewWindow()

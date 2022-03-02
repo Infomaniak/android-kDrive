@@ -18,25 +18,17 @@
 package com.infomaniak.drive.ui
 
 import androidx.test.uiautomator.UiObjectNotFoundException
-import com.infomaniak.drive.KDriveTest
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.UiTestUtils
-import com.infomaniak.drive.utils.UiTestUtils.getDeviceViewById
-import com.infomaniak.drive.utils.UiTestUtils.selectDriveInList
-import com.infomaniak.drive.utils.UiTestUtils.switchToDriveInstance
-import org.junit.jupiter.api.*
+import com.infomaniak.drive.utils.KDriveUiTest
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 
 /**
  * UI Tests relative to a home (drive switch, drive activities, file search)
  */
-@Disabled
-class HomeUiTest : KDriveTest() {
-
-    @BeforeEach
-    fun startApp() {
-        UiTestUtils.startApp()
-    }
+class HomeUiTest : KDriveUiTest() {
 
     @Test
     @DisplayName("Check UI to switch drive from home then user menu")
