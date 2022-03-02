@@ -53,7 +53,7 @@ import kotlinx.coroutines.runBlocking
 import kotlin.math.max
 import kotlin.math.min
 
-class PicturesFragment() : MultiSelectFragment() {
+class PicturesFragment() : MultiSelectFragment(MATOMO_CATEGORY) {
 
     private val picturesViewModel: PicturesViewModel by viewModels()
     private lateinit var picturesAdapter: PicturesAdapter
@@ -294,6 +294,7 @@ class PicturesFragment() : MultiSelectFragment() {
 
     companion object {
         const val TAG = "PicturesFragment"
+        const val MATOMO_CATEGORY = "picturesFileAction"
         private const val NUMBER_ITEMS_LOADER = 13
     }
 }

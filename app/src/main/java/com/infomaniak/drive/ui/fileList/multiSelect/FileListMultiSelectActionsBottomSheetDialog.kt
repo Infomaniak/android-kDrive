@@ -22,9 +22,10 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.fileList.FileListFragment
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_multi_select_actions.*
 
-class FileListMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog() {
+class FileListMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(FileListFragment.MATOMO_CATEGORY) {
 
     private val mainViewModel: MainViewModel by activityViewModels()
 
