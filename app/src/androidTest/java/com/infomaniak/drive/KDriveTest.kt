@@ -19,6 +19,7 @@ package com.infomaniak.drive
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.runner.permission.PermissionRequester
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UserDrive
@@ -40,7 +41,10 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 
 open class KDriveTest {
+
     companion object {
+
+        internal const val APP_PACKAGE = BuildConfig.APPLICATION_ID
         internal val context = ApplicationProvider.getApplicationContext<Context>()
         internal lateinit var user: User
         internal lateinit var userDrive: UserDrive
@@ -71,16 +75,32 @@ open class KDriveTest {
             userDrive = UserDrive(user.id, Env.DRIVE_ID)
             okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(user.id) }
             uiRealm = FileController.getRealmInstance(userDrive)
+
+            grantPermissions(
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                android.Manifest.permission.ACCESS_MEDIA_LOCATION,
+                android.Manifest.permission.ACCESS_NETWORK_STATE,
+                android.Manifest.permission.FOREGROUND_SERVICE,
+                android.Manifest.permission.INTERNET,
+                android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                android.Manifest.permission.READ_SYNC_SETTINGS,
+                android.Manifest.permission.READ_SYNC_STATS,
+                android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
+                android.Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                android.Manifest.permission.USE_BIOMETRIC,
+                android.Manifest.permission.WAKE_LOCK,
+                android.Manifest.permission.WRITE_SYNC_SETTINGS,
+            )
         }
 
         @AfterAll
         @JvmStatic
         fun afterAll() {
+            ApiRepository.emptyTrash(userDrive.driveId)
+            if (!uiRealm.isClosed) uiRealm.close()
             if (!Env.USE_CURRENT_USER) {
                 runBlocking { AccountUtils.removeUser(context, user) }
             }
-            ApiRepository.emptyTrash(userDrive.driveId)
-            uiRealm.close()
         }
 
         internal fun getConfig() = RealmConfiguration.Builder().inMemory()
@@ -88,5 +108,12 @@ open class KDriveTest {
             .deleteRealmIfMigrationNeeded()
             .modules(RealmModules.LocalFilesModule())
             .build()
+
+        private fun grantPermissions(vararg permissions: String) {
+            PermissionRequester().apply {
+                addPermissions(*permissions)
+                requestPermissions()
+            }
+        }
     }
 }

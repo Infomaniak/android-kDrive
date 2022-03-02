@@ -20,25 +20,20 @@ package com.infomaniak.drive.ui
 import android.widget.EditText
 import androidx.test.uiautomator.UiObjectNotFoundException
 import androidx.test.uiautomator.UiSelector
-import com.infomaniak.drive.KDriveTest
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Env
-import com.infomaniak.drive.utils.UiTestUtils
-import com.infomaniak.drive.utils.UiTestUtils.closeBottomSheetInfoModalIfDisplayed
-import com.infomaniak.drive.utils.UiTestUtils.device
-import com.infomaniak.drive.utils.UiTestUtils.getDeviceViewById
+import com.infomaniak.drive.utils.KDriveUiTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
-@Disabled
-class MenuUiTest : KDriveTest() {
+class MenuUiTest : KDriveUiTest() {
 
     @BeforeEach
-    fun startApp() {
-        UiTestUtils.startApp()
+    override fun startApp() {
+        super.startApp()
         getDeviceViewById("menuFragment").clickAndWaitForNewWindow()
     }
 
@@ -67,12 +62,12 @@ class MenuUiTest : KDriveTest() {
             }
 
             // Close the bottom sheet displayed for categories information
-            closeBottomSheetInfoModalIfDisplayed(true)
+            closeBottomSheetInfoModalIfDisplayed()
             getDeviceViewById("menuFragment").clickAndWaitForNewWindow(2000)
             assert(AccountUtils.currentUserId == Env.NEW_USER_ID) { "User Id should be ${Env.NEW_USER_ID} but is ${AccountUtils.currentUserId}" }
             swipeDownNestedScrollView()
             getDeviceViewById("logout").clickAndWaitForNewWindow()
-            findObject(UiSelector().text(UiTestUtils.context.getString(R.string.buttonConfirm))).clickAndWaitForNewWindow()
+            findObject(UiSelector().text(context.getString(R.string.buttonConfirm))).clickAndWaitForNewWindow()
         }
     }
 
