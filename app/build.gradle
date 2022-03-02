@@ -11,6 +11,7 @@ android {
     compileSdkVersion 31
 
     defaultConfig {
+        testInstrumentationRunnerArguments runnerBuilder: 'de.mannodermaus.junit5.AndroidJUnit5Builder'
         applicationId 'com.infomaniak.drive'
         minSdkVersion 21
         targetSdkVersion 31
@@ -18,7 +19,6 @@ android {
         versionName '4.1.0'
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-        testInstrumentationRunnerArgument 'runnerBuilder', 'de.mannodermaus.junit5.AndroidJUnit5Builder'
         buildConfigField 'String', 'CLIENT_ID', '"9473D73C-C20F-4971-9E10-D957C563FA68"'
         buildConfigField 'String', 'DRIVE_API', '"https://drive.infomaniak.com/drive/"'
         buildConfigField 'String', 'DRIVE_API_V2', '"https://drive.infomaniak.com/2/drive/"'
@@ -113,7 +113,7 @@ dependencies {
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.viewpager2:viewpager2:1.1.0-beta01'
 
-    def exoplayer_version = '2.16.1'
+    def exoplayer_version = '2.17.0'
     implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer-ui:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
