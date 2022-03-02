@@ -69,9 +69,9 @@ object MatomoUtils {
         context?.applicationContext?.trackEvent(category, action, trackerName, trackerValue)
     }
 
-    fun Context.trackBulkActionEvent(action: BulkOperationType, modifiedFileNumber: Int) {
-        val trackerName = "bulk" + if (modifiedFileNumber == 1) "Single" else "" + action.toString()
-        trackEvent("FileAction", TrackerAction.CLICK, trackerName, modifiedFileNumber.toFloat())
+    fun Context.trackBulkActionEvent(category: String, action: BulkOperationType, modifiedFileNumber: Int) {
+        val trackerName = "bulk" + (if (modifiedFileNumber == 1) "Single" else "") + action.toString()
+        trackEvent(category, TrackerAction.CLICK, trackerName, modifiedFileNumber.toFloat())
     }
 
     fun Context.trackEventWithBooleanValue(category: String, trackerName: String, trackerValue: Boolean?) {
@@ -99,7 +99,7 @@ object MatomoUtils {
     }
 }
 
-fun Boolean.toFloat() = if (this) 1f else 0f
+fun Boolean.toFloat() = if (this) 1.0f else 0.0f
 
 enum class TrackerAction {
     CLICK, INPUT;

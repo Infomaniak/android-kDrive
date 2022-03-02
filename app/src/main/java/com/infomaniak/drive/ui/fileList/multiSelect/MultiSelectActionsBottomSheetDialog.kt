@@ -31,13 +31,12 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.MatomoUtils.trackBulkActionEvent
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_multi_select_actions.*
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.Dispatchers
 
-abstract class MultiSelectActionsBottomSheetDialog : BottomSheetDialogFragment() {
+abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: String) : BottomSheetDialogFragment() {
 
     val navigationArgs: MultiSelectActionsBottomSheetDialogArgs by navArgs()
 
@@ -94,13 +93,15 @@ abstract class MultiSelectActionsBottomSheetDialog : BottomSheetDialogFragment()
                 if (authorized) downloadFileArchive()
             }
         }
+
         downloadFile.apply {
             setOnClickListener {
                 if (drivePermissions.checkWriteStoragePermission()) {
-                    context?.applicationContext?.trackEvent("FileAction", TrackerAction.CLICK, "bulkDownload")
+                    context?.applicationContext?.trackEvent(matomoCategory + "FileAction", TrackerAction.CLICK, "bulkDownload")
                     downloadFileArchive()
                 }
             }
+
             isVisible = navigationArgs.fileIds.isNotEmpty()
         }
     }
@@ -143,7 +144,6 @@ abstract class MultiSelectActionsBottomSheetDialog : BottomSheetDialogFragment()
             if (finalType == null) {
                 closeMultiSelect()
             } else {
-                context?.applicationContext?.trackBulkActionEvent(finalType, navigationArgs.fileIds.size)
                 // TODO - 2 - Implement download for multiselection !
                 when (finalType) {
                     BulkOperationType.COPY -> duplicateFiles()
