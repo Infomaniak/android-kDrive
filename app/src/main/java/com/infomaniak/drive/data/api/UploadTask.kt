@@ -33,6 +33,7 @@ import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
 import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
+import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.ApiController.gson
@@ -87,10 +88,21 @@ class UploadTask(
                 Sentry.captureException(exception)
             }
 
-        } catch (exception: Exception) {
+        } catch (exception: TotalChunksExceededException) {
             exception.printStackTrace()
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
+            Sentry.withScope { scope ->
+                scope.level = SentryLevel.WARNING
+                scope.setExtra("half heap", "${getAvailableHalfHeapMemory()}")
+                scope.setExtra("available ram memory", "${context.getAvailableMemory().availMem}")
+                scope.setExtra("available service memory", "${context.getAvailableMemory().threshold}")
+                Sentry.captureException(exception)
+            }
+        } catch (exception: Exception) {
+            exception.printStackTrace()
             throw exception
+        } finally {
+            notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
         }
         return@withContext false
     }
@@ -105,11 +117,13 @@ class UploadTask(
             val requestSemaphore = Semaphore(limitParallelRequest)
             val totalChunks = ceil(uploadFile.fileSize.toDouble() / chunkSize).toInt()
 
+            if (totalChunks > TOTAL_CHUNKS) throw TotalChunksExceededException()
+
             checkLimitParallelRequest()
 
             val uploadedChunks =
                 ApiRepository.getValidChunks(uploadFile.driveId, uploadFile.remoteFolder, uploadFile.identifier).data
-            val restartUpload = uploadedChunks?.let { needToResetUpload(it) } ?: false
+            val restartUpload = uploadedChunks?.let { needToResetUpload(it, totalChunks) } ?: false
 
             Sentry.addBreadcrumb(Breadcrumb().apply {
                 category = UploadWorker.BREADCRUMB_TAG
@@ -125,7 +139,7 @@ class UploadTask(
                 requestSemaphore.acquire()
                 if (uploadedChunks?.validChunks?.contains(chunkNumber) == true && !restartUpload) {
                     Log.d("kDrive", "chunk:$chunkNumber ignored")
-                    input.read(ByteArray(chunkSize), 0, chunkSize)
+                    input.skip(chunkSize.toLong())
                     requestSemaphore.release()
                     continue
                 }
@@ -216,8 +230,10 @@ class UploadTask(
         }
     }
 
-    private fun needToResetUpload(uploadedChunks: ValidChunks): Boolean {
-        if (uploadedChunks.sizeToUpload != uploadFile.fileSize) {
+    private fun needToResetUpload(uploadedChunks: ValidChunks, totalChunks: Int): Boolean = with(uploadedChunks) {
+        val previousChunkSize = sizeToUpload.toInt() / expectedChunksCount
+
+        if (sizeToUpload != uploadFile.fileSize || expectedChunksCount != totalChunks || previousChunkSize != chunkSize) {
             uploadFile.refreshIdentifier()
             return true
         }
@@ -324,7 +340,7 @@ class UploadTask(
 
     private fun checkLimitParallelRequest() = getAvailableHalfHeapMemory().let { availableHalfMemory ->
         if (chunkSize * limitParallelRequest >= availableHalfMemory) {
-            limitParallelRequest = (availableHalfMemory / chunkSize).toInt()
+            limitParallelRequest = 1 // We limit it to 1 because if we have more it throws OOF exceptions
         }
     }
 
@@ -364,6 +380,7 @@ class UploadTask(
     class LockErrorException : Exception()
     class NotAuthorizedException : Exception()
     class QuotaExceededException : Exception()
+    class TotalChunksExceededException : Exception()
     class UploadErrorException : Exception()
     class WrittenBytesExceededException : Exception()
 
