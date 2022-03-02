@@ -26,9 +26,11 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.checkbox.MaterialCheckBox
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setCornersRadius
@@ -44,32 +46,26 @@ import kotlinx.android.synthetic.main.cardview_file_list.view.*
 import kotlinx.android.synthetic.main.item_file.view.*
 
 open class FileAdapter(
-    var fileList: OrderedRealmCollection<File> = RealmList()
+    private val multiSelectManager: MultiSelectManager,
+    var fileList: OrderedRealmCollection<File> = RealmList(),
 ) : RealmRecyclerViewAdapter<File, FileViewHolder>(fileList, true, true) {
-
-    var itemsSelected: OrderedRealmCollection<File> = RealmList()
 
     var onEmptyList: (() -> Unit)? = null
     var onFileClicked: ((file: File) -> Unit)? = null
     var onMenuClicked: ((selectedFile: File) -> Unit)? = null
     var onStopUploadButtonClicked: ((index: Int, fileName: String) -> Unit)? = null
-    var openMultiSelectMode: (() -> Unit)? = null
-    var updateMultiSelectMode: (() -> Unit)? = null
 
-    var enabledMultiSelectMode: Boolean = false
-    var multiSelectMode: Boolean = false
-    var allSelected = false
-    var offlineMode: Boolean = false
-    var selectFolder: Boolean = false
-    var showShareFileButton: Boolean = true
+    var offlineMode = false
+    var selectFolder = false
+    var showShareFileButton = true
     var viewHolderType: DisplayType = DisplayType.LIST
 
-    var uploadInProgress: Boolean = false
+    var uploadInProgress = false
 
     var isComplete = false
     var isHomeOffline = false
 
-    private var pendingWifiConnection: Boolean = false
+    private var pendingWifiConnection = false
     private var showLoading = false
     private var fileAdapterObserver: RecyclerView.AdapterDataObserver? = null
 
@@ -113,7 +109,7 @@ open class FileAdapter(
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
-        kotlin.runCatching {
+        runCatching {
             fileAdapterObserver?.let(::unregisterAdapterDataObserver)
             fileAdapterObserver = null
         }
@@ -122,8 +118,6 @@ open class FileAdapter(
     private fun getFile(position: Int) = fileList[position]
 
     fun getFiles() = fileList
-
-    fun getValidItemsSelected() = itemsSelected.filter { it.isUsable() }
 
     fun showLoading() {
         if (!showLoading) {
@@ -222,9 +216,14 @@ open class FileAdapter(
         return if (position < fileList.size) {
             when (viewHolderType) {
                 DisplayType.LIST -> DisplayType.LIST.layout
-                else -> if (getFile(position).isFolder() || getFile(position).isDrive()) DisplayType.GRID_FOLDER.layout else DisplayType.GRID.layout
+                else -> {
+                    val file = getFile(position)
+                    if (file.isFolder() || file.isDrive()) DisplayType.GRID_FOLDER.layout else DisplayType.GRID.layout
+                }
             }
-        } else VIEW_TYPE_LOADING
+        } else {
+            VIEW_TYPE_LOADING
+        }
     }
 
     override fun getItemCount() = fileList.size + if (showLoading) 1 else 0
@@ -272,7 +271,7 @@ open class FileAdapter(
 
             when {
                 uploadInProgress && !file.isPendingUploadFolder() -> displayStopUploadButton(position, file)
-                multiSelectMode -> displayFileChecked(file, isGrid)
+                multiSelectManager.isMultiSelectOpened -> displayFileChecked(file, isGrid)
                 else -> displayFilePreview()
             }
 
@@ -291,7 +290,7 @@ open class FileAdapter(
 
     private fun MaterialCardView.displayFileChecked(file: File, isGrid: Boolean) {
         fileChecked.apply {
-            isChecked = isSelectedFile(file) || allSelected
+            isChecked = isSelectedFile(file) || multiSelectManager.areAllSelected
             isVisible = true
         }
         filePreview.isVisible = isGrid
@@ -303,7 +302,7 @@ open class FileAdapter(
     }
 
     private fun MaterialCardView.setupFileChecked(file: File) {
-        fileChecked.apply { setOnClickListener { onSelectedFile(file, isChecked) } }
+        fileChecked.apply { setOnClickListener { onFileSelected(file, isChecked) } }
     }
 
     private fun MaterialCardView.setupMenuButton(file: File) {
@@ -319,21 +318,25 @@ open class FileAdapter(
         }
     }
 
-    private fun MaterialCardView.setupCardClicksListeners(file: File) {
+    private fun MaterialCardView.setupCardClicksListeners(file: File) = with(multiSelectManager) {
+
+        fun MaterialCheckBox.selectFile() {
+            isChecked = !isChecked
+            onFileSelected(file, isChecked)
+        }
+
         setOnClickListener {
-            if (multiSelectMode) {
-                fileChecked.isChecked = !fileChecked.isChecked
-                onSelectedFile(file, fileChecked.isChecked)
+            if (isMultiSelectOpened) {
+                fileChecked.selectFile()
             } else {
                 onFileClicked?.invoke(file)
             }
         }
 
         setOnLongClickListener {
-            if (enabledMultiSelectMode) {
-                fileChecked.isChecked = !fileChecked.isChecked
-                onSelectedFile(file, fileChecked.isChecked)
-                if (!multiSelectMode) openMultiSelectMode?.invoke()
+            if (isMultiSelectAuthorized) {
+                fileChecked.selectFile()
+                if (!isMultiSelectOpened) openMultiSelect?.invoke()
                 true
             } else {
                 false
@@ -368,10 +371,10 @@ open class FileAdapter(
         fileCardView.isEnabled = enable
     }
 
-    private fun onSelectedFile(file: File, isSelected: Boolean) {
+    private fun onFileSelected(file: File, isSelected: Boolean) = with(multiSelectManager) {
         if (file.isUsable()) {
             when {
-                allSelected -> { // if all selected, unselect everything and only select the clicked one (like web-app)
+                areAllSelected -> { // If all selected, unselect everything and only select the clicked one (like web-app)
                     configureAllSelected(false)
                     addSelectedFile(file)
                 }
@@ -379,28 +382,26 @@ open class FileAdapter(
                 else -> removeSelectedFile(file)
             }
         } else {
-            itemsSelected = RealmList()
+            selectedItems = RealmList()
         }
-        updateMultiSelectMode?.invoke()
+        updateMultiSelect?.invoke()
     }
 
-    fun configureAllSelected(isSelectedAll: Boolean) {
-        allSelected = isSelectedAll
-        itemsSelected = RealmList()
+    fun configureAllSelected(isSelectedAll: Boolean) = with(multiSelectManager) {
+        areAllSelected = isSelectedAll
+        selectedItems = RealmList()
         notifyItemRangeChanged(0, itemCount)
     }
 
     private fun addSelectedFile(file: File) {
-        itemsSelected.add(file)
+        multiSelectManager.selectedItems.add(file)
     }
 
     private fun removeSelectedFile(file: File) {
-        itemsSelected.remove(file)
+        multiSelectManager.selectedItems.remove(file)
     }
 
-    private fun isSelectedFile(file: File): Boolean {
-        return itemsSelected.any { it.isUsable() && it.id == file.id }
-    }
+    private fun isSelectedFile(file: File): Boolean = multiSelectManager.selectedItems.any { it.isUsable() && it.id == file.id }
 
     fun toggleOfflineMode(context: Context, isOffline: Boolean) {
         if (offlineMode != isOffline) {

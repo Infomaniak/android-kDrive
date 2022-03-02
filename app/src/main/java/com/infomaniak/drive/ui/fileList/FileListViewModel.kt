@@ -20,15 +20,17 @@ package com.infomaniak.drive.ui.fileList
 import androidx.lifecycle.*
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.Type
+import com.infomaniak.drive.data.models.FileCount
+import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
 import com.infomaniak.drive.utils.Position
 import com.infomaniak.drive.utils.SingleLiveEvent
-import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -140,12 +142,6 @@ class FileListViewModel : ViewModel() {
             FileController.getMySharedFiles(UserDrive(), sortType) { files, isComplete ->
                 runBlocking { emit(files to isComplete) }
             }
-        }
-    }
-
-    fun performCancellableBulkOperation(bulkOperation: BulkOperation): LiveData<ApiResponse<CancellableAction>> {
-        return liveData(Dispatchers.IO) {
-            emit(ApiRepository.performCancellableBulkOperation(bulkOperation))
         }
     }
 
