@@ -86,9 +86,6 @@
             android:id="@+id/action_fileListFragment_to_fileInfoActionsBottomSheetDialog"
             app:destination="@id/fileInfoActionsBottomSheetDialog" />
         <action
-            android:id="@+id/action_fileListFragment_to_actionMultiSelectBottomSheetDialog"
-            app:destination="@id/actionMultiSelectBottomSheetDialog" />
-        <action
             android:id="@+id/action_fileListFragment_to_dropBoxResultBottomSheetDialog"
             app:destination="@id/dropBoxResultBottomSheetDialog" />
         <action
@@ -191,10 +188,10 @@
     </dialog>
 
     <dialog
-        android:id="@+id/actionMultiSelectBottomSheetDialog"
-        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog"
-        android:label="ActionMultiSelectBottomSheetDialog"
-        tools:layout="@layout/fragment_bottom_sheet_action_multi_select">
+        android:id="@+id/multiSelectActionsBottomSheetDialog"
+        android:name="com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog"
+        android:label="MultiSelectActionsBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_multi_select_actions">
         <argument
             android:name="fileIds"
             app:argType="integer[]" />
@@ -210,12 +207,16 @@
             android:name="onlyOffline"
             android:defaultValue="false"
             app:argType="boolean" />
+        <argument
+            android:name="isFromGallery"
+            android:defaultValue="false"
+            app:argType="boolean" />
     </dialog>
 
     <dialog
         android:id="@+id/switchDriveDialog"
         android:name="com.infomaniak.drive.ui.SwitchDriveDialog"
-        android:label="ActionMultiSelectBottomSheetDialog"
+        android:label="SwitchDriveDialog"
         tools:layout="@layout/fragment_bottom_sheet_select" />
 
     <fragment

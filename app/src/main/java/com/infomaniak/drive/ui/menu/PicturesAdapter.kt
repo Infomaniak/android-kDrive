@@ -22,46 +22,122 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import com.google.android.material.checkbox.MaterialCheckBox
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager
 import com.infomaniak.drive.utils.loadGlideUrl
 import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.LoaderCardView
 import com.infomaniak.lib.core.views.ViewHolder
-import io.realm.OrderedRealmCollection
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.cardview_picture.view.*
 import kotlinx.android.synthetic.main.title_recycler_section.view.*
-import java.util.*
 
-class PicturesAdapter(private val onItemClick: (file: File) -> Unit) : LoaderAdapter<Any>() {
+class PicturesAdapter(
+    private val multiSelectManager: MultiSelectManager,
+    private val onFileClicked: (file: File) -> Unit,
+) : LoaderAdapter<Any>() {
 
-    var selectedItems: OrderedRealmCollection<File> = RealmList()
-
-    private var lastSectionTitle: String = ""
     var pictureList: ArrayList<File> = arrayListOf()
     var duplicatedList: ArrayList<File> = arrayListOf()
 
-    var enabledMultiSelectMode: Boolean = false // If the multi selection is allowed to be used
-    var multiSelectMode: Boolean = false // If the multi selection is opened
-    var openMultiSelectMode: (() -> Unit)? = null
-    var updateMultiSelectMode: (() -> Unit)? = null
+    private var lastSectionTitle = ""
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        return ViewHolder(LayoutInflater.from(parent.context).inflate(viewType, parent, false))
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return when {
+            super.getItemViewType(position) == VIEW_TYPE_LOADING -> DisplayType.PICTURE.layout
+            itemList[position] is File -> DisplayType.PICTURE.layout
+            else -> DisplayType.TITLE.layout
+        }
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        when {
+            super.getItemViewType(position) == VIEW_TYPE_LOADING -> (holder.itemView as LoaderCardView).startLoading()
+            getItemViewType(position) == DisplayType.TITLE.layout -> holder.itemView.title.text = (itemList[position] as String)
+            getItemViewType(position) == DisplayType.PICTURE.layout -> bindPictureDisplayType(position, holder)
+        }
+    }
+
+    private fun bindPictureDisplayType(position: Int, holder: ViewHolder) = with((holder.itemView as LoaderCardView)) {
+        val file = (itemList[position] as File)
+        displayThumbnail(file)
+        handleCheckmark(file)
+        setupCardClicksListeners(file)
+    }
+
+    private fun LoaderCardView.displayThumbnail(file: File) {
+        stopLoading()
+        picture.apply {
+            loadGlideUrl(file.thumbnail())
+            contentDescription = file.name
+        }
+    }
+
+    private fun LoaderCardView.handleCheckmark(file: File) {
+        pictureChecked.apply {
+
+            fun isSelectedFile(file: File): Boolean = multiSelectManager.selectedItems.any { it.isUsable() && it.id == file.id }
+
+            if (multiSelectManager.multiSelectMode) {
+                isChecked = isSelectedFile(file)
+                isVisible = true
+            } else {
+                isGone = true
+            }
+        }
+    }
+
+    private fun LoaderCardView.setupCardClicksListeners(file: File) = with(multiSelectManager) {
+
+        setOnClickListener {
+            if (multiSelectMode) {
+                pictureChecked.onFileSelected(file)
+            } else {
+                onFileClicked(file)
+            }
+        }
+
+        setOnLongClickListener {
+            if (enabledMultiSelectMode) {
+                pictureChecked.onFileSelected(file)
+                if (!multiSelectMode) openMultiSelectMode?.invoke()
+                true
+            } else {
+                false
+            }
+        }
+    }
+
+    private fun MaterialCheckBox.onFileSelected(file: File) = with(multiSelectManager) {
+        isChecked = !isChecked
+
+        if (file.isUsable()) {
+            if (isChecked) selectedItems.add(file) else selectedItems.remove(file)
+        } else {
+            selectedItems = RealmList()
+        }
+
+        updateMultiSelectMode?.invoke()
+    }
 
     fun formatList(context: Context, newPictureList: ArrayList<File>): ArrayList<Any> {
         pictureList.addAll(newPictureList)
         val addItemList: ArrayList<Any> = arrayListOf()
 
-        for (picture in newPictureList) {
-            val month = picture.getLastModifiedAt()
-                .format(context.getString(R.string.photosHeaderDateFormat))
-                .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-
+        for (file in newPictureList) {
+            val month = file.getMonth(context)
             if (lastSectionTitle != month) {
                 addItemList.add(month)
                 lastSectionTitle = month
             }
-            addItemList.add(picture)
+            addItemList.add(file)
         }
 
         return addItemList
@@ -73,10 +149,7 @@ class PicturesAdapter(private val onItemClick: (file: File) -> Unit) : LoaderAda
         for (file in duplicatedList) {
             pictureList.add(0, file)
 
-            val month = file.getLastModifiedAt()
-                .format(context.getString(R.string.photosHeaderDateFormat))
-                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
-
+            val month = file.getMonth(context)
             if (newestSectionTitle != month) {
                 // This case can only be hit once, when adding duplicated images.
                 // If we need to add a new month section title, it needs to be inserted at position 0.
@@ -93,71 +166,11 @@ class PicturesAdapter(private val onItemClick: (file: File) -> Unit) : LoaderAda
         duplicatedList.clear()
     }
 
-    override fun getItemViewType(position: Int): Int {
-        return when {
-            super.getItemViewType(position) == VIEW_TYPE_LOADING -> DisplayType.PICTURE.layout
-            itemList[position] is File -> DisplayType.PICTURE.layout
-            else -> DisplayType.TITLE.layout
-        }
-    }
+    private fun File.getMonth(context: Context): String {
+        return getLastModifiedAt()
+            .format(context.getString(R.string.photosHeaderDateFormat))
+            .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(parent.context).inflate(viewType, parent, false))
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        when {
-            super.getItemViewType(position) == VIEW_TYPE_LOADING -> (holder.itemView as LoaderCardView).startLoading()
-            getItemViewType(position) == DisplayType.TITLE.layout -> holder.itemView.title.text = (itemList[position] as String)
-            getItemViewType(position) == DisplayType.PICTURE.layout -> bindPictureDisplayType(position, holder)
-        }
-    }
-
-    private fun bindPictureDisplayType(position: Int, holder: ViewHolder) = with((holder.itemView as LoaderCardView)) {
-        val file = (itemList[position] as File)
-        displayThumbnail(file)
-        handleCheckmark(file)
-        setupClickListener(file)
-        setupLongClickListener(file)
-    }
-
-    private fun LoaderCardView.displayThumbnail(file: File) {
-        stopLoading()
-        picture.loadGlideUrl(file.thumbnail())
-        picture.contentDescription = file.name
-    }
-
-    private fun LoaderCardView.handleCheckmark(file: File) {
-        if (multiSelectMode) {
-            pictureChecked.isChecked = isSelectedFile(file)
-            pictureChecked.isVisible = true
-        } else {
-            pictureChecked.isGone = true
-        }
-    }
-
-    private fun LoaderCardView.setupClickListener(file: File) {
-        setOnClickListener {
-            if (multiSelectMode) {
-                pictureChecked.isChecked = !pictureChecked.isChecked
-                onSelectedFile(file, pictureChecked.isChecked)
-            } else {
-                onItemClick(file)
-            }
-        }
-    }
-
-    private fun LoaderCardView.setupLongClickListener(file: File) {
-        setOnLongClickListener {
-            if (enabledMultiSelectMode) {
-                pictureChecked.isChecked = !pictureChecked.isChecked
-                onSelectedFile(file, pictureChecked.isChecked)
-                if (!multiSelectMode) openMultiSelectMode?.invoke()
-                true
-            } else {
-                false
-            }
-        }
     }
 
     fun clearPictures() {
@@ -166,28 +179,10 @@ class PicturesAdapter(private val onItemClick: (file: File) -> Unit) : LoaderAda
         notifyDataSetChanged()
     }
 
-    fun getValidItemsSelected() = selectedItems.filter { it.isUsable() }
-
-    private fun isSelectedFile(file: File): Boolean = selectedItems.any { it.isUsable() && it.id == file.id }
-
-    private fun onSelectedFile(file: File, isSelected: Boolean) {
-        if (file.isUsable()) {
-            if (isSelected) addSelectedFile(file) else removeSelectedFile(file)
-        } else {
-            selectedItems = RealmList()
-        }
-        updateMultiSelectMode?.invoke()
+    fun deleteByFileId(fileId: Int) {
+        indexOf(fileId)?.let(::deleteAt)
+        pictureList.indexOfFirstOrNull { (it as? File)?.id == fileId }?.let(pictureList::removeAt)
     }
-
-    private fun addSelectedFile(file: File) {
-        selectedItems.add(file)
-    }
-
-    private fun removeSelectedFile(file: File) {
-        selectedItems.remove(file)
-    }
-
-    private fun indexOf(fileId: Int) = itemList.indexOfFirstOrNull { (it as? File)?.id == fileId }
 
     fun deleteAt(position: Int) {
         val previousItem = itemList.getOrNull(position - 1)
@@ -203,11 +198,6 @@ class PicturesAdapter(private val onItemClick: (file: File) -> Unit) : LoaderAda
         }
     }
 
-    fun deleteByFileId(fileId: Int) {
-        indexOf(fileId)?.let(::deleteAt)
-        pictureList.indexOfFirstOrNull { (it as? File)?.id == fileId }?.let(pictureList::removeAt)
-    }
-
     fun updateFileProgressByFileId(fileId: Int, progress: Int, onComplete: ((position: Int, file: File) -> Unit)? = null) {
         indexOf(fileId)?.let { position -> updateFileProgress(position, progress, onComplete) }
     }
@@ -220,8 +210,6 @@ class PicturesAdapter(private val onItemClick: (file: File) -> Unit) : LoaderAda
         if (progress == 100) onComplete?.invoke(position, file)
     }
 
-    private fun getFile(position: Int) = itemList[position] as File
-
     fun updateOfflineStatus(fileId: Int) {
         indexOf(fileId)?.let { position -> (itemList[position] as? File)?.isOffline = true }
     }
@@ -232,6 +220,10 @@ class PicturesAdapter(private val onItemClick: (file: File) -> Unit) : LoaderAda
             notifyItemChanged(position)
         }
     }
+
+    private fun indexOf(fileId: Int) = itemList.indexOfFirstOrNull { (it as? File)?.id == fileId }
+
+    private fun getFile(position: Int) = itemList[position] as File
 
     private fun List<Any>.indexOfFirstOrNull(predicate: (Any) -> Boolean): Int? {
         val index = indexOfFirst(predicate)
