@@ -51,12 +51,12 @@ import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntent
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.utils.toPx
 import kotlinx.android.synthetic.main.fragment_preview_slider.*
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
 
 class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListener {
 
@@ -237,8 +237,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     private fun setupTransparentStatusbar() {
         activity?.window?.apply {
-            statusBarColor =
-                ColorUtils.setAlphaComponent(ContextCompat.getColor(requireContext(), R.color.previewBackground), 128)
+            statusBarColor = ColorUtils.setAlphaComponent(
+                ContextCompat.getColor(requireContext(), R.color.previewBackground), 128
+            )
 
             lightStatusBar(false)
             toggleEdgeToEdge(true)
@@ -246,15 +247,25 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
         view?.let {
             ViewCompat.setOnApplyWindowInsetsListener(it) { _, windowInsets ->
-                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+                with(windos.getInsets(WindowInsetsCompat.Type.systemBars())) {
+                    val peekHeight = getDefaultPeekHeight()
 
-                header?.setMargin(top = insets.top)
-                bottomSheetBehavior.peekHeight = 90.toPx() + insets.bottom
-                bottomSheetBehavior.expandedOffset = insets.top
+                    header?.setMargin(top = top)
+                    bottomSheetBehavior.peekHeight = peekHeight + bottom
+                    bottomSheetBehavior.expandedOffset = top
+                }
 
                 windowInsets
             }
         }
+    }
+
+    private fun getDefaultPeekHeight(): Int {
+        val typedArray =
+            requireContext().theme.obtainStyledAttributes(R.style.BottomSheetStyle, intArrayOf(R.attr.behavior_peekHeight))
+        val peekHeight = typedArray.getDimensionPixelSize(0, 0)
+        typedArray.recycle()
+        return peekHeight
     }
 
     override fun onResume() {
@@ -275,12 +286,13 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun onDestroyView() {
-        activity?.window?.let { controllerWindow ->
-            view?.let { controllerView ->
-                WindowInsetsControllerCompat(controllerWindow, controllerView).show(WindowInsetsCompat.Type.statusBars())
-            }
-        }
+//        activity?.window?.let { controllerWindow ->
+//            view?.let { controllerView ->
+//                WindowInsetsControllerCompat(controllerWindow, controllerView).show(WindowInsetsCompat.Type.statusBars())
+//            }
+//        }
 
+        toggleSystemBar(true)
         super.onDestroyView()
     }
 

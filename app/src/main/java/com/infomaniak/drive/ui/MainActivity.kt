@@ -91,6 +91,7 @@ class MainActivity : BaseActivity() {
     private var updateAvailableShow = false
     private var uploadedFilesToDelete = arrayListOf<UploadFile>()
     private var hasDisplayedInformationPanel: Boolean = false
+    private var lastDestinationId: Int? = null
 
     private lateinit var drivePermissions: DrivePermissions
 
@@ -299,9 +300,12 @@ class MainActivity : BaseActivity() {
         handleBottomNavigationVisibility(destination.id, shouldHideBottomNavigation)
 
         if (destination.id != R.id.previewSliderFragment && destination.id != R.id.fileDetailsFragment) {
-            window.toggleEdgeToEdge(false)
+            if (lastDestinationId == R.id.previewSliderFragment || lastDestinationId == R.id.fileDetailsFragment) {
+                window.toggleEdgeToEdge(false)
+            }
             bottomNavigation.setOnApplyWindowInsetsListener(null)
         }
+        lastDestinationId = destination.id
 
         when (destination.id) {
             R.id.favoritesFragment,

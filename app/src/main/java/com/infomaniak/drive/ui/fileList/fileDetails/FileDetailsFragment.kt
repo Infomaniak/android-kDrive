@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.fileList.fileDetails
 
 import android.content.res.ColorStateList
-import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -39,6 +38,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.TabViewPagerUtils.setup
 import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior
+import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior.Companion.EXPAND_TITLE_THRESHOLD
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
 import kotlinx.android.synthetic.main.fragment_file_details.*
@@ -59,10 +59,13 @@ class FileDetailsFragment : FileDetailsSubFragment() {
 
         // If light mode, change the color of the icons of the status to match the background
         // If dark mode the icons stay white all along, no need to check
-        if (context?.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_NO) {
+        if (context?.resources?.isNightModeEnabled() == false) {
             appBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
-                if (abs(verticalOffset) >= 0.6 * appBarLayout.totalScrollRange) activity?.window?.lightStatusBar(true)
-                else activity?.window?.lightStatusBar(false)
+                if (abs(verticalOffset) >= EXPAND_TITLE_THRESHOLD * appBarLayout.totalScrollRange) {
+                    activity?.window?.lightStatusBar(true)
+                } else {
+                    activity?.window?.lightStatusBar(false)
+                }
             })
         }
 
@@ -86,9 +89,10 @@ class FileDetailsFragment : FileDetailsSubFragment() {
 
             // Corrects the layout so it still takes into account system bars in edge-to-edge mode
             ViewCompat.setOnApplyWindowInsetsListener(requireView()) { view, windowInsets ->
-                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-                toolbar.setMargin(top = insets.top)
-                view.setMargin(bottom = insets.bottom)
+                with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
+                    toolbar.setMargin(top = top)
+                    view.setMargin(bottom = bottom)
+                }
 
                 // Return CONSUMED if you don't want the window insets to keep being passed down to descendant views
                 WindowInsetsCompat.CONSUMED
@@ -157,8 +161,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         toolbar.setNavigationIconTint(ContextCompat.getColor(requireContext(), R.color.primary))
 
         activity?.window?.apply {
-            // If light mode
-            if (context?.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_NO) {
+            if (context?.resources?.isNightModeEnabled() == false) {
                 lightStatusBar(true)
             }
         }
