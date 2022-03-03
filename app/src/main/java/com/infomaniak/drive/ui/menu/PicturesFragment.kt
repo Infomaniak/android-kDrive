@@ -86,14 +86,19 @@ class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelect
             updateMultiSelect = { onItemSelected() }
         }
 
-        picturesAdapter = PicturesAdapter(
-            multiSelectManager = multiSelectManager,
-            onFileClicked = { file -> Utils.displayFile(mainViewModel, findNavController(), file, picturesAdapter.pictureList) },
-        ).apply {
-            numberItemLoader = NUMBER_ITEMS_LOADER
-            stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT
+        val isPicturesAdapterInitialized = ::picturesAdapter.isInitialized
+        if (!isPicturesAdapterInitialized) {
+            picturesAdapter = PicturesAdapter(
+                multiSelectManager = multiSelectManager,
+                onFileClicked = { file ->
+                    Utils.displayFile(mainViewModel, findNavController(), file, picturesAdapter.pictureList)
+                },
+            ).apply {
+                numberItemLoader = NUMBER_ITEMS_LOADER
+                stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT
 
-            adapter = this
+                adapter = this
+            }
         }
 
         if (menuPicturesBinding != null) multiSelectManager.isMultiSelectAuthorized = true
