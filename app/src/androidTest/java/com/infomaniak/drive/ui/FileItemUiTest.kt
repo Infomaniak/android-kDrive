@@ -21,7 +21,6 @@ import androidx.test.uiautomator.UiScrollable
 import androidx.test.uiautomator.UiSelector
 import com.infomaniak.drive.utils.KDriveUiTest
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -41,12 +40,11 @@ class FileItemUiTest : KDriveUiTest() {
     @DisplayName("Check UI to create a folder then create a share link for it")
     fun testCreateFileShareLink() {
         val randomFolderName = "UI-Test-${UUID.randomUUID()}"
-        val fileRecyclerView = UiScrollable(UiSelector().resourceId(getViewIdentifier("fileRecyclerView")))
 
         // Create the folder then returns to main view
         createPrivateFolder(randomFolderName)
         // Go to fileList view
-        openFileShareDetails(fileRecyclerView, randomFolderName)
+        openFileShareDetails(randomFolderName)
 
         device.apply {
             findObject(UiSelector().resourceId(getViewIdentifier("shareLinkSwitch"))).clickAndWaitForNewWindow()
@@ -54,6 +52,6 @@ class FileItemUiTest : KDriveUiTest() {
             pressBack()
             findObject(UiSelector().resourceId(getViewIdentifier("closeButton"))).clickAndWaitForNewWindow()
         }
-        deleteFile(fileRecyclerView, randomFolderName)
+        deleteFile(randomFolderName)
     }
 }

@@ -25,7 +25,6 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Env
 import com.infomaniak.drive.utils.KDriveUiTest
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 

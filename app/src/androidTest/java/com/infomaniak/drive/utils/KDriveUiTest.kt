@@ -18,24 +18,25 @@
 package com.infomaniak.drive.utils
 
 import android.view.View
-import androidx.lifecycle.Lifecycle
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.Espresso.pressBack
 import androidx.test.espresso.NoMatchingViewException
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions
-import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.contrib.RecyclerViewActions
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.runner.permission.PermissionRequester
 import androidx.test.uiautomator.*
 import com.infomaniak.drive.KDriveTest
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.ui.MainActivity
+import com.infomaniak.drive.ui.fileList.FileViewHolder
 import de.mannodermaus.junit5.ActivityScenarioExtension
 import org.hamcrest.Description
 import org.hamcrest.Matcher
-import org.hamcrest.Matchers
+import org.hamcrest.Matchers.allOf
 import org.hamcrest.TypeSafeMatcher
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -86,34 +87,33 @@ open class KDriveUiTest : KDriveTest() {
         }
     }
 
-    fun deleteFile(fileRecyclerView: UiScrollable, fileName: String) {
-        (fileRecyclerView.getChildByText(UiSelector().resourceId(getViewIdentifier("fileCardView")), fileName)).apply {
-            fileRecyclerView.scrollForward()
-            fileRecyclerView.scrollIntoView(this)
-            getChild(UiSelector().resourceId(getViewIdentifier("menuButton"))).click()
-            UiScrollable(UiSelector().resourceId(getViewIdentifier("scrollView"))).apply {
-                scrollForward()
-                getChild(UiSelector().resourceId(getViewIdentifier("deleteFile"))).click()
-            }
+    fun deleteFile(fileName: String) {
+        openFileListItemMenu(fileName)
+        UiScrollable(UiSelector().resourceId(getViewIdentifier("scrollView"))).apply {
+            scrollForward()
+            getChild(UiSelector().resourceId(getViewIdentifier("deleteFile"))).click()
         }
         device.findObject(UiSelector().text(context.getString(R.string.buttonMove))).clickAndWaitForNewWindow()
     }
 
-    fun openFileShareDetails(fileRecyclerView: UiScrollable, fileName: String) {
-        (fileRecyclerView.getChildByText(UiSelector().resourceId(getViewIdentifier("fileCardView")), fileName)).apply {
-            fileRecyclerView.scrollIntoView(this)
-            getChild((UiSelector().resourceId(getViewIdentifier("menuButton")))).click()
-        }
+    fun openFileShareDetails(fileName: String) {
+        openFileListItemMenu(fileName)
         getDeviceViewById("fileRights").clickAndWaitForNewWindow()
     }
 
     fun getDeviceViewById(id: String): UiObject = device.findObject(UiSelector().resourceId(getViewIdentifier(id)))
 
-    fun findFileInList(fileRecyclerView: UiScrollable, fileName: String): UiObject? {
-        return try {
-            fileRecyclerView.getChildByText(UiSelector().resourceId(getViewIdentifier("fileCardView")), fileName)
-        } catch (exception: UiObjectNotFoundException) {
-            null
+    fun findFileIfInList(fileName: String, mustBeInList: Boolean) {
+        if (mustBeInList) {
+            // Try to scroll to the file
+            onView(withResourceName("fileRecyclerView")).perform(
+                RecyclerViewActions.scrollTo<FileViewHolder>(hasDescendant(withText(fileName)))
+            )
+            // Assert the file is displayed
+            onView(withText(fileName)).check(matches(isDisplayed()))
+        } else {
+            // Assert the file does not exists in view hierarchy
+            onView(withText(fileName)).check(doesNotExist())
         }
     }
 
@@ -154,17 +154,19 @@ open class KDriveUiTest : KDriveTest() {
             } catch (noMatchingException: NoMatchingViewException) {
                 // Continue if bottomSheet are not displayed
             }
+        } catch (loseFocusException: RuntimeException) {
+            // if the focus was lost by root
+            pressBack()
         }
     }
 
     fun checkViewVisibility(isVisible: Boolean, viewId: Int? = null, stringId: Int? = null) {
-        val matchers = Matchers.allOf(arrayListOf<Matcher<View>>().apply {
+        val matchers = allOf(arrayListOf<Matcher<View>>().apply {
             viewId?.let { add(withId(it)) }
-            stringId?.let { add(ViewMatchers.withText(it)) }
+            stringId?.let { add(withText(it)) }
             Assertions.assertFalse(isEmpty())
         })
-
-        onView(first(matchers)).check(ViewAssertions.matches(ViewMatchers.withEffectiveVisibility(if (isVisible) ViewMatchers.Visibility.VISIBLE else ViewMatchers.Visibility.GONE)))
+        onView(first(matchers)).check(matches(withEffectiveVisibility(if (isVisible) Visibility.VISIBLE else Visibility.GONE)))
     }
 
     private fun first(matcher: Matcher<View?>): Matcher<View?> {
@@ -177,5 +179,15 @@ open class KDriveUiTest : KDriveTest() {
 
             override fun matchesSafely(view: View?): Boolean = (matcher.matches(view) && isFirst).also { if (it) isFirst = false }
         }
+    }
+
+    private fun openFileListItemMenu(fileName: String) {
+        findFileIfInList(fileName, true)
+        onView(
+            allOf(
+                withResourceName("menuButton"),
+                isDescendantOfA(allOf(withResourceName("endIconLayout"), hasSibling(hasDescendant(withText(fileName)))))
+            )
+        ).perform(click())
     }
 }
