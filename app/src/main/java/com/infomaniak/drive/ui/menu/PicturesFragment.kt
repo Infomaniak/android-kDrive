@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.menu
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,6 +42,7 @@ import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomShee
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
 import com.infomaniak.drive.ui.fileList.multiSelect.PicturesMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.*
+import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import com.infomaniak.lib.core.utils.toDp
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.cardview_picture.*
@@ -51,12 +53,16 @@ import kotlinx.coroutines.runBlocking
 import kotlin.math.max
 import kotlin.math.min
 
-class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelectFragment(MATOMO_CATEGORY) {
+class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
 
     private val picturesViewModel: PicturesViewModel by viewModels()
     private lateinit var picturesAdapter: PicturesAdapter
 
     var menuPicturesBinding: FragmentMenuPicturesBinding? = null
+
+    private val refreshTimer: CountDownTimer by lazy {
+        createRefreshTimer { menuPicturesBinding?.swipeRefreshLayout?.isRefreshing = true }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_pictures, container, false)
@@ -120,7 +126,10 @@ class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelect
             if (progress == 100) picturesAdapter.updateOfflineStatus(fileId)
         }
 
-        if (!isPicturesAdapterInitialized) getPictures()
+        if (!isPicturesAdapterInitialized) {
+            if (menuPicturesBinding != null) refreshTimer.start()
+            getPictures()
+        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -174,7 +183,11 @@ class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelect
                         showRefreshButton = true,
                     )
                 }
-                onFinish?.invoke()
+
+                menuPicturesBinding?.let { binding ->
+                    refreshTimer.cancel()
+                    binding.swipeRefreshLayout.isRefreshing = false
+                }
             }
         }
     }
@@ -194,7 +207,7 @@ class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelect
     override fun getAllSelectedFileCount(): Int? = null
 
     fun onMoveButtonClicked() {
-        // TODO use "parentId" when https://github.com/Infomaniak/android-kDrive/issues/532 is merged
+        // TODO: Use `parentId` when https://github.com/Infomaniak/android-kDrive/issues/532 is merged
         val folderId = if (multiSelectManager.selectedItems.count() == 1) {
             FileController.getParentFileProxy(multiSelectManager.selectedItems[0].id, mainViewModel.realm)?.id
         } else {
