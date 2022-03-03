@@ -63,10 +63,7 @@ import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
-import com.infomaniak.lib.core.utils.hideProgress
-import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.setPagination
-import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 
@@ -320,9 +317,7 @@ open class FileListFragment : MultiSelectFragment(), SwipeRefreshLayout.OnRefres
             menuButtonMultiSelect.setOnClickListener { onMenuButtonClicked() }
 
             selectAllButton.apply {
-                initProgress(viewLifecycleOwner)
                 setOnClickListener {
-                    showProgress(ContextCompat.getColor(requireContext(), R.color.primary))
                     if (multiSelectManager.areAllSelected) {
                         fileAdapter.configureAllSelected(false)
                         onUpdateMultiSelect()
@@ -576,7 +571,7 @@ open class FileListFragment : MultiSelectFragment(), SwipeRefreshLayout.OnRefres
     private fun onUpdateMultiSelect(selectedNumber: Int? = null) {
         onItemSelected(selectedNumber)
         val textId = if (multiSelectManager.areAllSelected) R.string.buttonDeselectAll else R.string.buttonSelectAll
-        multiSelectLayout?.selectAllButton?.hideProgress(textId)
+        multiSelectLayout?.selectAllButton?.setText(textId)
     }
 
     private fun downloadFolderActivities(updatedFolder: File) {
