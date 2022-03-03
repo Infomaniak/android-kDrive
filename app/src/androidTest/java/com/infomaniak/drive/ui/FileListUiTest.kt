@@ -17,13 +17,8 @@
  */
 package com.infomaniak.drive.ui
 
-import androidx.test.uiautomator.UiScrollable
-import androidx.test.uiautomator.UiSelector
 import com.infomaniak.drive.utils.KDriveUiTest
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -42,14 +37,13 @@ class FileListUiTest : KDriveUiTest() {
     @Test
     @DisplayName("Check UI to Create then delete a folder")
     fun testCreateAndDeleteFolder() {
-        val fileRecyclerView = UiScrollable(UiSelector().resourceId(getViewIdentifier("fileRecyclerView")))
         val randomFolderName = "UI-Test-${UUID.randomUUID()}"
 
         createPrivateFolder(randomFolderName)
         device.waitForWindowUpdate(null, 5000)
-        assertNotNull(findFileInList(fileRecyclerView, randomFolderName), "File must be found")
+        findFileIfInList(randomFolderName, true)
 
-        deleteFile(fileRecyclerView, randomFolderName)
-        assertNull(findFileInList(fileRecyclerView, randomFolderName), "File must not be found")
+        deleteFile(randomFolderName)
+        findFileIfInList(randomFolderName, false)
     }
 }

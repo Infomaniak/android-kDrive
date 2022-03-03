@@ -43,7 +43,7 @@ class HomeUiTest : KDriveUiTest() {
         } else {
             switchToDriveInstance(0)
 
-            val driveId = AccountUtils.currentDriveId
+            val driveId = userDrive.driveId
 
             // Change drive from menuFragment
             getDeviceViewById("menuFragment").clickAndWaitForNewWindow()
