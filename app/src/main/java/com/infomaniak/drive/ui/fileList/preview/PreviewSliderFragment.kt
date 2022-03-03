@@ -27,6 +27,7 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.*
+import androidx.core.view.ViewCompat.getWindowInsetsController
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
@@ -56,7 +57,6 @@ import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
 
 class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListener {
 
@@ -166,7 +166,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
         configureBottomSheetFileInfo()
 
-        setupTransparentStatusbar()
+        setupTransparentStatusBar()
     }
 
     private fun setBackActionHandlers() {
@@ -196,16 +196,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     private fun toggleSystemBar(show: Boolean) {
-        activity?.window?.let { controllerWindow ->
-            view?.let { controllerView ->
-                WindowInsetsControllerCompat(controllerWindow, controllerView).let { controller ->
-                    controller.apply {
-                        systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                        val systemBars = WindowInsetsCompat.Type.systemBars()
-                        if (show) show(systemBars) else hide(systemBars)
-                    }
-                }
-            }
+        getWindowInsetsController(requireView())?.apply {
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            val systemBars = WindowInsetsCompat.Type.systemBars()
+            if (show) show(systemBars) else hide(systemBars)
         }
     }
 
@@ -235,7 +229,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
-    private fun setupTransparentStatusbar() {
+    private fun setupTransparentStatusBar() {
         activity?.window?.apply {
             statusBarColor = ColorUtils.setAlphaComponent(
                 ContextCompat.getColor(requireContext(), R.color.previewBackground), 128
@@ -247,7 +241,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
         view?.let {
             ViewCompat.setOnApplyWindowInsetsListener(it) { _, windowInsets ->
-                with(windos.getInsets(WindowInsetsCompat.Type.systemBars())) {
+                with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
                     val peekHeight = getDefaultPeekHeight()
 
                     header?.setMargin(top = top)
@@ -261,8 +255,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     private fun getDefaultPeekHeight(): Int {
-        val typedArray =
-            requireContext().theme.obtainStyledAttributes(R.style.BottomSheetStyle, intArrayOf(R.attr.behavior_peekHeight))
+        val typedArray = requireContext().theme.obtainStyledAttributes(
+            R.style.BottomSheetStyle, intArrayOf(R.attr.behavior_peekHeight)
+        )
         val peekHeight = typedArray.getDimensionPixelSize(0, 0)
         typedArray.recycle()
         return peekHeight
@@ -286,12 +281,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun onDestroyView() {
-//        activity?.window?.let { controllerWindow ->
-//            view?.let { controllerView ->
-//                WindowInsetsControllerCompat(controllerWindow, controllerView).show(WindowInsetsCompat.Type.statusBars())
-//            }
-//        }
-
         toggleSystemBar(true)
         super.onDestroyView()
     }

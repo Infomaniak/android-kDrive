@@ -57,8 +57,8 @@ class FileDetailsFragment : FileDetailsSubFragment() {
 
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        // If light mode, change the color of the icons of the status to match the background
-        // If dark mode the icons stay white all along, no need to check
+        // If in Light mode, change the status icons color to match the background.
+        // If in Dark mode, the icons stay white all along, no need to check.
         if (context?.resources?.isNightModeEnabled() == false) {
             appBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
                 if (abs(verticalOffset) >= EXPAND_TITLE_THRESHOLD * appBarLayout.totalScrollRange) {

@@ -126,9 +126,9 @@ class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(
     }
 
     companion object {
-        const val EXPAND_TITLE_THRESHOLD = 0.61
+        const val EXPAND_TITLE_THRESHOLD = 0.61f
 
-        fun getToolbarHeight(context: Context): Int {
+        private fun getToolbarHeight(context: Context): Int {
             val typedValue = TypedValue()
             return if (context.theme.resolveAttribute(android.R.attr.actionBarSize, typedValue, true)) {
                 TypedValue.complexToDimensionPixelSize(typedValue.data, context.resources.displayMetrics)
