@@ -22,8 +22,9 @@ import androidx.test.uiautomator.UiObjectNotFoundException
 import androidx.test.uiautomator.UiSelector
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.AccountUtils.removeUser
 import com.infomaniak.drive.utils.Env
-import com.infomaniak.drive.utils.KDriveUiTest
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -39,6 +40,11 @@ class MenuUiTest : KDriveUiTest() {
     @Test
     @DisplayName("Check UI to add a new kdrive user then log him off")
     fun testAddUser() {
+        // Remove the other user if he's already in the database
+        runBlocking {
+            val newUser = AccountUtils.getUserById(Env.NEW_USER_ID)
+            if (newUser != null) removeUser(context, newUser)
+        }
         swipeDownNestedScrollView()
         getDeviceViewById("changeUserIcon").clickAndWaitForNewWindow()
         getDeviceViewById("addUser").clickAndWaitForNewWindow()

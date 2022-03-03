@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui
 
-import com.infomaniak.drive.utils.KDriveUiTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
