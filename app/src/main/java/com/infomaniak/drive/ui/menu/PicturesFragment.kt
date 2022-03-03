@@ -118,7 +118,7 @@ class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelect
             if (progress == 100) picturesAdapter.updateOfflineStatus(fileId)
         }
 
-        getPictures()
+        if (!isPicturesAdapterInitialized) getPictures()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
