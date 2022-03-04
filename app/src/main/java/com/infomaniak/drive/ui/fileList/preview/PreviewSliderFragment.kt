@@ -25,7 +25,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.ColorUtils
 import androidx.core.view.*
 import androidx.core.view.ViewCompat.getWindowInsetsController
 import androidx.fragment.app.Fragment
@@ -255,9 +254,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 override fun onStateChanged(bottomSheet: View, newState: Int) {
                     when (bottomSheetBehavior.state) {
                         BottomSheetBehavior.STATE_HIDDEN -> {
-                            activity?.window?.navigationBarColor = ColorUtils.setAlphaComponent(
-                                ContextCompat.getColor(requireContext(), R.color.previewBackground), 128
-                            )
+                            activity?.window?.navigationBarColor =
+                                ContextCompat.getColor(requireContext(), R.color.previewBackgroundTransparent)
                             activity?.window?.lightNavigationBar(false)
                         }
                         else -> {
@@ -273,9 +271,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     private fun setupTransparentStatusBar() {
         activity?.window?.apply {
-            statusBarColor = ColorUtils.setAlphaComponent(
-                ContextCompat.getColor(requireContext(), R.color.previewBackground), 128
-            )
+            statusBarColor = ContextCompat.getColor(requireContext(), R.color.previewBackgroundTransparent)
 
             lightStatusBar(false)
             toggleEdgeToEdge(true)
