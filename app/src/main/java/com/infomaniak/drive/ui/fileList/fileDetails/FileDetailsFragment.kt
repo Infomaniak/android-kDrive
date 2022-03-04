@@ -100,6 +100,23 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        // TODO Understand why we need to do this
+        toolbar.setNavigationIconTint(ContextCompat.getColor(requireContext(), R.color.primary))
+
+        activity?.window?.apply {
+            if (context?.resources?.isNightModeEnabled() == false) {
+                lightStatusBar(true)
+            }
+        }
+    }
+
+    override fun onDestroyView() {
+        requireActivity().window.toggleEdgeToEdge(false)
+        super.onDestroyView()
+    }
+
     private fun setFile(file: File) {
         fileDetailsViewModel.currentFile.value = file
         subtitleToolbar.title.text = file.name
@@ -152,18 +169,6 @@ class FileDetailsFragment : FileDetailsSubFragment() {
             }
 
             setup(tabsViewPager, tabsGroup, tabs)
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        // TODO Understand why we need to do this
-        toolbar.setNavigationIconTint(ContextCompat.getColor(requireContext(), R.color.primary))
-
-        activity?.window?.apply {
-            if (context?.resources?.isNightModeEnabled() == false) {
-                lightStatusBar(true)
-            }
         }
     }
 }
