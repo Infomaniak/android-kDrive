@@ -35,6 +35,7 @@ class MultiSelectManager {
     var isMultiSelectOpened = false
 
     var selectedItems: OrderedRealmCollection<File> = RealmList()
+    val exceptedItemsIds = mutableListOf<Int>()
     var areAllSelected = false
     var currentFolder: File? = null
 
@@ -42,7 +43,7 @@ class MultiSelectManager {
     var updateMultiSelect: (() -> Unit)? = null
 
     fun getValidSelectedItems(type: BulkOperationType? = null): List<File> {
-        val selectedFiles = selectedItems.filter { it.isUsable() }
+        val selectedFiles = selectedItems.filter { it.isUsable() && !exceptedItemsIds.contains(it.id) }
         return when (type) {
             BulkOperationType.ADD_FAVORITES -> selectedFiles.filter { !it.isFavorite }
             BulkOperationType.REMOVE_FAVORITES -> selectedFiles.filter { it.isFavorite }

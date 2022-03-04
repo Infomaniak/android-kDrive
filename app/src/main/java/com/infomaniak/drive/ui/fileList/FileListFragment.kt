@@ -332,7 +332,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                 setOnClickListener {
                     selectAllTimer.start()
                     if (multiSelectManager.areAllSelected) {
-                        fileAdapter.configureAllSelected(false)
+                        val isSelectedAll = multiSelectManager.exceptedItemsIds.isNotEmpty()
+                        fileAdapter.configureAllSelected(isSelectedAll)
                         onUpdateMultiSelect()
                     } else {
                         fileAdapter.configureAllSelected(true)
@@ -340,12 +341,9 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
                         fileListViewModel.getFileCount(multiSelectManager.currentFolder!!)
                             .observe(viewLifecycleOwner) { fileCount ->
-                                val fileNumber = fileCount.count
-                                if (fileNumber < BulkOperationsUtils.MIN_SELECTED) {
-                                    multiSelectManager.selectedItems = fileAdapter.getFiles()
-                                }
+                                multiSelectManager.selectedItems = fileAdapter.getFiles()
                                 enableMultiSelectButtons(true)
-                                onUpdateMultiSelect(fileNumber)
+                                onUpdateMultiSelect(fileCount.count)
                             }
                     }
                 }
@@ -583,9 +581,18 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     private fun onUpdateMultiSelect(selectedNumber: Int? = null) {
         onItemSelected(selectedNumber)
+        updateSelectAllButtonText()
+    }
+
+    private fun updateSelectAllButtonText() {
         multiSelectLayout?.selectAllButton?.apply {
+
             selectAllTimer.cancel()
-            val textId = if (multiSelectManager.areAllSelected) R.string.buttonDeselectAll else R.string.buttonSelectAll
+
+            val textId = with(multiSelectManager) {
+                if (areAllSelected && exceptedItemsIds.isEmpty()) R.string.buttonDeselectAll else R.string.buttonSelectAll
+            }
+
             if (isClickable) setText(textId) else hideProgress(textId)
         }
     }

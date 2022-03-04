@@ -20,14 +20,23 @@ package com.infomaniak.drive.data.models
 data class BulkOperation(
     val action: BulkOperationType,
     val fileIds: List<Int>?,
+    val exceptedFilesIds: List<Int>?,
     val parent: File,
     val destinationFolderId: Int?
 ) {
 
     fun toMap(): Map<String, Any> {
-        var body = mapOf<String, Any>("action" to action.toString().lowercase())
-        destinationFolderId?.let { body = body.plus("destination_directory_id" to destinationFolderId) }
-        fileIds?.let { body = body.plus("file_ids" to fileIds) } ?: run { body = body.plus("parent_id" to parent.id) }
-        return body
+        return mutableMapOf<String, Any>().apply {
+
+            put("action", action.toString().lowercase())
+
+            destinationFolderId?.let { put("destination_directory_id", it) }
+
+            fileIds?.let { put("file_ids", it) } ?: run {
+
+                put("parent_id", parent.id)
+                if (exceptedFilesIds?.isNotEmpty() == true) put("except_file_ids", exceptedFilesIds)
+            }
+        }
     }
 }
