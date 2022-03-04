@@ -191,9 +191,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         super.onSaveInstanceState(outState)
     }
 
-    override fun onDestroyView() {
+    override fun onStop() {
         clearEdgeToEdge()
-        super.onDestroyView()
+        super.onStop()
     }
 
     override fun onDestroy() {
