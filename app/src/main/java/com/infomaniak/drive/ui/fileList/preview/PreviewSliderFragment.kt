@@ -192,7 +192,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun onDestroyView() {
-        cleanEdgeToEdge()
+        clearEdgeToEdge()
         super.onDestroyView()
     }
 
@@ -205,10 +205,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         super.onDestroy()
     }
 
-    private fun cleanEdgeToEdge() {
+    private fun clearEdgeToEdge() {
         toggleSystemBar(true)
         requireActivity().window.toggleEdgeToEdge(false)
-        requireView().setOnApplyWindowInsetsListener(null)
+        requireView().setOnApplyWindowInsetsListener(null) // This fixes an issue where the material bottom navigation's icons disappear
     }
 
     private fun setBackActionHandlers() {
@@ -282,7 +282,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
 
         view?.apply {
-            setOnApplyWindowInsetsListener(null)
+            setOnApplyWindowInsetsListener(null) // This fixes an issue where the material bottom navigation's icons disappear
             ViewCompat.setOnApplyWindowInsetsListener(this) { _, windowInsets ->
                 with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
                     val peekHeight = getDefaultPeekHeight()
