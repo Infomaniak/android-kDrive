@@ -91,7 +91,6 @@ class MainActivity : BaseActivity() {
     private var updateAvailableShow = false
     private var uploadedFilesToDelete = arrayListOf<UploadFile>()
     private var hasDisplayedInformationPanel: Boolean = false
-    private var lastDestinationId: Int? = null
 
     private lateinit var drivePermissions: DrivePermissions
 
@@ -298,14 +297,6 @@ class MainActivity : BaseActivity() {
         val shouldHideBottomNavigation = navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldHideBottomNavigation
 
         handleBottomNavigationVisibility(destination.id, shouldHideBottomNavigation)
-
-        if (destination.id != R.id.previewSliderFragment && destination.id != R.id.fileDetailsFragment) {
-            if (lastDestinationId == R.id.previewSliderFragment || lastDestinationId == R.id.fileDetailsFragment) {
-                window.toggleEdgeToEdge(false)
-            }
-            bottomNavigation.setOnApplyWindowInsetsListener(null)
-        }
-        lastDestinationId = destination.id
 
         when (destination.id) {
             R.id.favoritesFragment,

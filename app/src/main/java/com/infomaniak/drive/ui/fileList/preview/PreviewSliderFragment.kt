@@ -169,6 +169,48 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         setupTransparentStatusBar()
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        with(bottomSheetFileInfos) {
+            updateAvailableOfflineItem()
+            observeOfflineProgression(this@PreviewSliderFragment) { fileId ->
+                previewSliderAdapter.updateFile(fileId) { file -> file.isOffline = true }
+            }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        previewSliderViewModel.currentPreview = currentFile
+        bottomSheetFileInfos.removeOfflineObservations(this)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        if (this::currentFile.isInitialized) outState.putInt(PREVIEW_FILE_ID_TAG, currentFile.id)
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onDestroyView() {
+        cleanEdgeToEdge()
+        super.onDestroyView()
+    }
+
+    override fun onDestroy() {
+        // Reset current preview file list
+        if (findNavController().previousBackStackEntry?.destination?.id != R.id.searchFragment) {
+            mainViewModel.currentPreviewFileList = LinkedHashMap()
+        }
+
+        super.onDestroy()
+    }
+
+    private fun cleanEdgeToEdge() {
+        toggleSystemBar(true)
+        requireActivity().window.toggleEdgeToEdge(false)
+        requireView().setOnApplyWindowInsetsListener(null)
+    }
+
     private fun setBackActionHandlers() {
         getBackNavigationResult<Int>(DownloadProgressDialog.OPEN_WITH) {
             context?.openWith(currentFile, userDrive)
@@ -196,7 +238,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     private fun toggleSystemBar(show: Boolean) {
-        getWindowInsetsController(requireView())?.apply {
+        getWindowInsetsController(requireActivity().window.decorView)?.apply {
             systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             val systemBars = WindowInsetsCompat.Type.systemBars()
             if (show) show(systemBars) else hide(systemBars)
@@ -239,8 +281,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             toggleEdgeToEdge(true)
         }
 
-        view?.let {
-            ViewCompat.setOnApplyWindowInsetsListener(it) { _, windowInsets ->
+        view?.apply {
+            setOnApplyWindowInsetsListener(null)
+            ViewCompat.setOnApplyWindowInsetsListener(this) { _, windowInsets ->
                 with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
                     val peekHeight = getDefaultPeekHeight()
 
@@ -261,42 +304,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         val peekHeight = typedArray.getDimensionPixelSize(0, 0)
         typedArray.recycle()
         return peekHeight
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        with(bottomSheetFileInfos) {
-            updateAvailableOfflineItem()
-            observeOfflineProgression(this@PreviewSliderFragment) { fileId ->
-                previewSliderAdapter.updateFile(fileId) { file -> file.isOffline = true }
-            }
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        previewSliderViewModel.currentPreview = currentFile
-        bottomSheetFileInfos.removeOfflineObservations(this)
-    }
-
-    override fun onDestroyView() {
-        toggleSystemBar(true)
-        super.onDestroyView()
-    }
-
-    override fun onDestroy() {
-        // Reset current preview file list
-        if (findNavController().previousBackStackEntry?.destination?.id != R.id.searchFragment) {
-            mainViewModel.currentPreviewFileList = LinkedHashMap()
-        }
-
-        super.onDestroy()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        if (this::currentFile.isInitialized) outState.putInt(PREVIEW_FILE_ID_TAG, currentFile.id)
-        super.onSaveInstanceState(outState)
     }
 
     override fun displayInfoClicked() {
