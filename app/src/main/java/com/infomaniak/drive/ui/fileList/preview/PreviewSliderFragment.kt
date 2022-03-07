@@ -281,10 +281,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             setOnApplyWindowInsetsListener(null) // This fixes an issue where the material bottom navigation's icons disappear
             ViewCompat.setOnApplyWindowInsetsListener(this) { _, windowInsets ->
                 with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
-                    val peekHeight = getDefaultPeekHeight()
-
                     header?.setMargin(top = top, right = right, left = left)
-                    bottomSheetBehavior.peekHeight = peekHeight + bottom
+                    bottomSheetBehavior.peekHeight = getDefaultPeekHeight() + bottom
                     bottomSheetBehavior.expandedOffset = top
                 }
 
