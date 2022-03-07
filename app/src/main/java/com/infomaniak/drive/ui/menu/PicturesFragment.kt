@@ -82,8 +82,8 @@ class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelect
 
         multiSelectManager.apply {
             openMultiSelect = {
-                openMultiSelect()
                 menuPicturesBinding?.swipeRefreshLayout?.isEnabled = false
+                openMultiSelect()
             }
             updateMultiSelect = { onItemSelected() }
         }
@@ -144,7 +144,7 @@ class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelect
             spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                 override fun getSpanSize(position: Int): Int {
                     return when {
-                        picturesAdapter.itemList.getOrNull(position) is String -> numPicturesColumns
+                        position == 0 || picturesAdapter.itemList.getOrNull(position) is String -> numPicturesColumns
                         else -> 1
                     }
                 }
@@ -277,6 +277,6 @@ class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelect
     }
 
     private companion object {
-        const val NUMBER_ITEMS_LOADER = 12
+        const val NUMBER_ITEMS_LOADER = 13
     }
 }

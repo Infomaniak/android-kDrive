@@ -30,6 +30,7 @@ import com.infomaniak.drive.utils.loadGlideUrl
 import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.LoaderCardView
+import com.infomaniak.lib.core.views.LoaderTextView
 import com.infomaniak.lib.core.views.ViewHolder
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.cardview_picture.view.*
@@ -51,7 +52,9 @@ class PicturesAdapter(
 
     override fun getItemViewType(position: Int): Int {
         return when {
-            super.getItemViewType(position) == VIEW_TYPE_LOADING -> DisplayType.PICTURE.layout
+            super.getItemViewType(position) == VIEW_TYPE_LOADING -> {
+                if (position == 0) DisplayType.TITLE.layout else DisplayType.PICTURE.layout
+            }
             itemList[position] is File -> DisplayType.PICTURE.layout
             else -> DisplayType.TITLE.layout
         }
@@ -59,8 +62,15 @@ class PicturesAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         when {
-            super.getItemViewType(position) == VIEW_TYPE_LOADING -> (holder.itemView as LoaderCardView).startLoading()
-            getItemViewType(position) == DisplayType.TITLE.layout -> holder.itemView.title.text = (itemList[position] as String)
+            super.getItemViewType(position) == VIEW_TYPE_LOADING -> {
+                if (position > 0) (holder.itemView as LoaderCardView).startLoading()
+            }
+            getItemViewType(position) == DisplayType.TITLE.layout -> {
+                (holder.itemView.title as LoaderTextView).apply {
+                    layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT
+                    text = (itemList[position] as String)
+                }
+            }
             getItemViewType(position) == DisplayType.PICTURE.layout -> bindPictureDisplayType(position, holder)
         }
     }

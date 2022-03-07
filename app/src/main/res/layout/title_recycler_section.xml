@@ -20,13 +20,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <TextView
+    <com.infomaniak.lib.core.views.LoaderTextView
         android:id="@+id/title"
         style="@style/H2"
-        android:layout_width="match_parent"
+        android:layout_width="120dp"
         android:layout_height="wrap_content"
         android:layout_marginVertical="@dimen/marginStandardMedium"
         android:layout_marginStart="@dimen/marginStandard"
-        tools:text="Novembre 2021" />
-
+        tools:text="November 2021" />
 </LinearLayout>

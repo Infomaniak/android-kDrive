@@ -33,9 +33,7 @@ import kotlinx.android.synthetic.main.item_file_activity.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class FileActivitiesAdapter(
-    val isFolder: Boolean,
-) : LoaderAdapter<FileActivity>() {
+class FileActivitiesAdapter(val isFolder: Boolean) : LoaderAdapter<FileActivity>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_file_activity, parent, false))
