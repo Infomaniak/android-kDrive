@@ -126,7 +126,8 @@ class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(
     }
 
     companion object {
-        const val EXPAND_TITLE_THRESHOLD = 0.61f
+        // TODO remove this. Show "getScrimVisibleHeightTrigger" in "CollapsingToolbarLayout"
+        const val EXPAND_TITLE_THRESHOLD = 0.2f
 
         private fun getToolbarHeight(context: Context): Int {
             val typedValue = TypedValue()
