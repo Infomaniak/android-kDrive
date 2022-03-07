@@ -18,6 +18,7 @@
 package com.infomaniak.drive
 
 import android.content.Context
+import android.util.Log
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.runner.permission.PermissionRequester
 import com.infomaniak.drive.data.api.ApiRepository
@@ -57,45 +58,50 @@ open class KDriveTest {
         @BeforeAll
         @JvmStatic
         fun beforeAll() {
-            if (Env.USE_CURRENT_USER) {
-                user = runBlocking(Dispatchers.IO) { AccountUtils.requestCurrentUser() }!!
-                InfomaniakCore.bearerToken = user.apiToken.accessToken
+            try {
+                if (Env.USE_CURRENT_USER) {
+                    user = runBlocking(Dispatchers.IO) { AccountUtils.requestCurrentUser() }!!
+                    InfomaniakCore.bearerToken = user.apiToken.accessToken
 
-            } else {
-                InfomaniakCore.bearerToken = Env.TOKEN
+                } else {
+                    InfomaniakCore.bearerToken = Env.TOKEN
 
-                val apiResponse = ApiRepository.getUserProfile(HttpClient.okHttpClientNoInterceptor)
-                assertApiResponseData(apiResponse)
-                user = apiResponse.data!!
-                user.apiToken = ApiToken(Env.TOKEN, "", "Bearer", userId = user.id, expiresAt = null)
-                runBlocking {
-                    if (getUserById(user.id) == null) {
-                        user.organizations = arrayListOf()
-                        addUser(user)
-                    } else {
-                        currentUser = user
+                    val apiResponse = ApiRepository.getUserProfile(HttpClient.okHttpClientNoInterceptor)
+                    assertApiResponseData(apiResponse)
+                    user = apiResponse.data!!
+                    user.apiToken = ApiToken(Env.TOKEN, "", "Bearer", userId = user.id, expiresAt = null)
+                    runBlocking {
+                        if (getUserById(user.id) == null) {
+                            user.organizations = arrayListOf()
+                            addUser(user)
+                        } else {
+                            currentUser = user
+                        }
                     }
                 }
-            }
-            userDrive = UserDrive(user.id, Env.DRIVE_ID)
-            okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(user.id) }
-            uiRealm = FileController.getRealmInstance(userDrive)
+                userDrive = UserDrive(user.id, Env.DRIVE_ID)
+                okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(user.id) }
+                uiRealm = FileController.getRealmInstance(userDrive)
 
-            grantPermissions(
-                android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                android.Manifest.permission.ACCESS_MEDIA_LOCATION,
-                android.Manifest.permission.ACCESS_NETWORK_STATE,
-                android.Manifest.permission.FOREGROUND_SERVICE,
-                android.Manifest.permission.INTERNET,
-                android.Manifest.permission.READ_EXTERNAL_STORAGE,
-                android.Manifest.permission.READ_SYNC_SETTINGS,
-                android.Manifest.permission.READ_SYNC_STATS,
-                android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
-                android.Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                android.Manifest.permission.USE_BIOMETRIC,
-                android.Manifest.permission.WAKE_LOCK,
-                android.Manifest.permission.WRITE_SYNC_SETTINGS,
-            )
+                grantPermissions(
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    android.Manifest.permission.ACCESS_MEDIA_LOCATION,
+                    android.Manifest.permission.ACCESS_NETWORK_STATE,
+                    android.Manifest.permission.FOREGROUND_SERVICE,
+                    android.Manifest.permission.INTERNET,
+                    android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                    android.Manifest.permission.READ_SYNC_SETTINGS,
+                    android.Manifest.permission.READ_SYNC_STATS,
+                    android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
+                    android.Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                    android.Manifest.permission.USE_BIOMETRIC,
+                    android.Manifest.permission.WAKE_LOCK,
+                    android.Manifest.permission.WRITE_SYNC_SETTINGS,
+                )
+            } catch (exception: Exception) {
+                Log.e("KDriveTest", "An exception occurred during test class setup")
+                exception.printStackTrace()
+            }
         }
 
         @AfterAll
