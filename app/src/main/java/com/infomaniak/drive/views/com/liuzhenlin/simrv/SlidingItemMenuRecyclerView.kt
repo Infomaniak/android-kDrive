@@ -41,8 +41,11 @@ import java.util.*
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-class SlidingItemMenuRecyclerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) :
-    RecyclerView(context, attrs, defStyle) {
+class SlidingItemMenuRecyclerView @JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null,
+    defStyle: Int = 0,
+) : RecyclerView(context, attrs, defStyle) {
+
     /**
      * Distance to travel before drag may begin
      */
@@ -109,14 +112,12 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(context: Context, at
         if (itemView.isGone) return false
 
         val itemChildCount = itemView.childCount
-        val itemLastChild =
-            itemView.getChildAt(if (itemChildCount >= 2) itemChildCount - 1 else 1) as? FrameLayout ?: return false
+        val itemLastChild = itemView.getChildAt(if (itemChildCount > 1) itemChildCount - 1 else 1) as? FrameLayout ?: return false
         val menuItemCount = itemLastChild.childCount
         val menuItemWidths = IntArray(menuItemCount)
         var itemMenuWidth = 0
         for (i in 0 until menuItemCount) {
-            menuItemWidths[i] = (itemLastChild
-                .getChildAt(i) as FrameLayout)
+            menuItemWidths[i] = (itemLastChild.getChildAt(i) as FrameLayout)
                 .getChildAt(0)
                 .width
             itemMenuWidth += menuItemWidths[i]
@@ -142,22 +143,20 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(context: Context, at
     }
 
     override fun onInterceptTouchEvent(motionEvent: MotionEvent): Boolean {
-        if (motionEvent.action == MotionEvent.ACTION_DOWN) {
-            // Reset things for a new event stream, just in case we didn't get
-            // the whole previous stream.
-            resetTouch()
-        }
+
+        // Reset things for a new event stream, just in case we didn't get the whole previous stream.
+        if (motionEvent.action == MotionEvent.ACTION_DOWN) resetTouch()
 
         if (velocityTracker == null) velocityTracker = VelocityTracker.obtain()
-
         velocityTracker?.addMovement(motionEvent)
 
         var intercept = false
+
         when (motionEvent.action) {
             MotionEvent.ACTION_DOWN -> {
                 downX = motionEvent.x.roundToInt()
                 downY = motionEvent.y.roundToInt()
-                markCurrTouchPoint(downX.toFloat(), downY.toFloat())
+                markCurrentTouchPoint(downX.toFloat(), downY.toFloat())
                 var i = childCount - 1
                 while (i >= 0) {
                     val child = getChildAt(i)
@@ -172,9 +171,7 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(context: Context, at
                         continue
                     }
                     itemView = itemView.getChildAt(0) as ViewGroup //kDrive
-                    if (childHasMenu(itemView)) {
-                        activeItem = itemView
-                    }
+                    if (childHasMenu(itemView)) activeItem = itemView
                     break
                 }
                 if (openedItems.size == 0) return intercept || super.onInterceptTouchEvent(motionEvent)
@@ -207,22 +204,18 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(context: Context, at
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
-                markCurrTouchPoint(motionEvent.x, motionEvent.y)
+                markCurrentTouchPoint(motionEvent.x, motionEvent.y)
                 intercept = tryHandleItemScrollingEvent()
                 // If the user initially put his/her finger down on the fully opened itemView's menu,
                 // disallow our parent class to intercept the touch events since we will do that
                 // as the user tends to scroll the current touched itemView horizontally.
-                if (hasItemFullyOpenOnActionDown && activeItemMenuBounds.contains(downX, downY)) {
-                    return intercept
-                }
+                if (hasItemFullyOpenOnActionDown && activeItemMenuBounds.contains(downX, downY)) return intercept
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 // If the user initially placed his/her finger on the fully opened itemView's menu
                 // and has clicked it or has not scrolled that itemView, hide it as his/her last
                 // finger touching the screen lifts.
-                if (hasItemFullyOpenOnActionDown && activeItemMenuBounds.contains(downX, downY)) {
-                    releaseItemView(true)
-                }
+                if (hasItemFullyOpenOnActionDown && activeItemMenuBounds.contains(downX, downY)) releaseItemView(true)
                 clearTouch()
             }
         }
@@ -231,124 +224,136 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(context: Context, at
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(motionEvent: MotionEvent): Boolean {
-        if (isVerticalScrollBarEnabled) {
-            // Makes the vertical scroll bar disappear while an itemView is being dragged.
-            super.setVerticalScrollBarEnabled(!isItemBeingDragged)
-        }
+
+        // Makes the vertical scroll bar disappear while an itemView is being dragged.
+        if (isVerticalScrollBarEnabled) super.setVerticalScrollBarEnabled(!isItemBeingDragged)
 
         if (velocityTracker == null) velocityTracker = VelocityTracker.obtain()
-
         velocityTracker?.addMovement(motionEvent)
 
         when (motionEvent.action and MotionEvent.ACTION_MASK) {
-            MotionEvent.ACTION_POINTER_DOWN, MotionEvent.ACTION_POINTER_UP -> if (isItemBeingDragged || hasItemFullyOpenOnActionDown || openedItems.size > 0) {
-                return true
-            }
-            MotionEvent.ACTION_MOVE -> {
-                markCurrTouchPoint(motionEvent.x, motionEvent.y)
-                if (!isItemDraggable && cancelTouch()) {
-                    return true
-                }
-                if (isItemBeingDragged) {
-                    // Positive when the user's finger slides towards the right.
-                    var dx = touchX[touchX.size - 1] - touchX[touchX.size - 2]
-                    activeItem?.let {
-                        // Positive when the itemView scrolls towards the right.
-                        val translationX = it.getChildAt(0).translationX
-                        val finalXFromEndToStart = -(it.getTag(TAG_ITEM_MENU_WIDTH) as Int)
-                        // Swipe the itemView towards the horizontal start over the width of
-                        // the itemView's menu.
-                        if (dx + translationX < finalXFromEndToStart) {
-                            dx /= 3f
-                            // Swipe the itemView towards the end of horizontal to (0,0).
-                        } else if (dx + translationX > 0) {
-                            dx = 0 - translationX
-                        }
-                        translateItemViewXBy(it, dx)
-                    }
-
-                    // Consume this touch event and do not invoke the method onTouchEvent(e) of
-                    // the parent class to temporarily make this view unable to scroll up or down.
-                    return true
-                } else {
-                    // If there existed itemView whose menu was fully open when the user initially
-                    // put his/her finger down, always consume the touch event and only when the item
-                    // has a tend of scrolling horizontally will we handle the next events.
-                    if (hasItemFullyOpenOnActionDown or tryHandleItemScrollingEvent()) {
-                        return true
-                    }
-                    // Disallow current view to scroll while an/some item view(s) is/are scrolling.
-                    if (openedItems.size > 0) {
-                        return true
-                    }
-                }
-            }
-            MotionEvent.ACTION_UP -> {
-                activeItem?.let { activeItem ->
-                    if (isItemDraggable && isItemBeingDragged) {
-                        val translationX = activeItem.getChildAt(0).translationX
-                        val itemMenuWidth = activeItem.getTag(TAG_ITEM_MENU_WIDTH) as Int
-                        if (translationX == 0f) { // itemView's menu is closed
-
-                            // itemView's menu is totally opened
-                        } else if (translationX == -itemMenuWidth.toFloat()) {
-                            fullyOpenedItem = activeItem
-                        } else {
-                            val dx = touchX[touchX.size - 1] - touchX[touchX.size - 2]
-                            velocityTracker?.computeCurrentVelocity(1000)
-                            val velocityX = abs(velocityTracker?.xVelocity ?: 0F)
-                            // If the speed at which the user's finger lifted is greater than 200 dp/s
-                            // while user was scrolling itemView towards the horizontal start,
-                            // make it automatically scroll to open and show its menu.
-                            if (dx < 0 && velocityX >= itemMinimumFlingVelocity) {
-                                smoothTranslateItemViewXTo(
-                                    activeItem,
-                                    -itemMenuWidth.toFloat(),
-                                    itemScrollDuration
-                                )
-                                fullyOpenedItem = activeItem
-                                clearTouch()
-                                cancelParentTouch(motionEvent)
-                                return true
-
-                                // If the speed at which the user's finger lifted is greater than 200 dp/s
-                                // while user was scrolling itemView towards the end of horizontal,
-                                // make its menu hidden.
-                            } else if (dx > 0 && velocityX >= itemMinimumFlingVelocity) {
-                                releaseItemView(true)
-                                clearTouch()
-                                cancelParentTouch(motionEvent)
-                                return true
-                            }
-                            val middle = itemMenuWidth / 2f
-                            // If the sliding distance is less than half of its slideable distance,
-                            // hide its menu,
-                            if (abs(translationX) < middle) {
-                                releaseItemView(true)
-
-                                // else open its menu.
-                            } else {
-                                smoothTranslateItemViewXTo(
-                                    activeItem,
-                                    -itemMenuWidth.toFloat(),
-                                    itemScrollDuration
-                                )
-                                fullyOpenedItem = activeItem
-                            }
-                        }
-                        clearTouch()
-                        cancelParentTouch(motionEvent)
-                        return true // Returns true here in case of a fling started in this up event.
-                    }
-                }
-                cancelTouch()
-            }
+            MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_POINTER_DOWN -> whenPointerUpOrDown()?.let { return it }
+            MotionEvent.ACTION_MOVE -> whenMove(motionEvent)?.let { return it }
+            MotionEvent.ACTION_UP -> whenUp(motionEvent)?.let { return it }
             MotionEvent.ACTION_CANCEL -> cancelTouch()
         }
+
         return super.onTouchEvent(motionEvent)
     }
 
-    private fun markCurrTouchPoint(x: Float, y: Float) {
+    private fun whenPointerUpOrDown(): Boolean? {
+        if (isItemBeingDragged || hasItemFullyOpenOnActionDown || openedItems.size > 0) return true
+        return null
+    }
+
+    private fun whenMove(motionEvent: MotionEvent): Boolean? {
+        markCurrentTouchPoint(motionEvent.x, motionEvent.y)
+        if (!isItemDraggable && cancelTouch()) return true
+
+        if (isItemBeingDragged) {
+            // Positive when the user's finger slides towards the right.
+            var dx = touchX[touchX.size - 1] - touchX[touchX.size - 2]
+            activeItem?.let {
+                // Positive when the itemView scrolls towards the right.
+                val translationX = it.getChildAt(0).translationX
+                val finalXFromEndToStart = -(it.getTag(TAG_ITEM_MENU_WIDTH) as Int)
+                // Swipe the itemView towards the horizontal start over the width of the itemView's menu.
+                if (dx + translationX < finalXFromEndToStart) {
+                    dx /= 3f
+                    // Swipe the itemView towards the end of horizontal to (0,0).
+                } else if (dx + translationX > 0) {
+                    dx = 0 - translationX
+                }
+                translateItemViewXBy(it, dx)
+            }
+
+            // Consume this touch event and do not invoke the method onTouchEvent(e) of
+            // the parent class to temporarily make this view unable to scroll up or down.
+            return true
+        } else {
+            // If there existed itemView whose menu was fully open when the user initially
+            // put his/her finger down, always consume the touch event and only when the
+            // item has a tend of scrolling horizontally will we handle the next events.
+            if (hasItemFullyOpenOnActionDown or tryHandleItemScrollingEvent()) return true
+
+            // Disallow current view to scroll while an/some item view(s) is/are scrolling.
+            if (openedItems.size > 0) return true
+        }
+
+        return null
+    }
+
+    private fun whenUp(motionEvent: MotionEvent): Boolean? {
+
+        if (isItemDraggable && isItemBeingDragged) activeItem?.let { currentItem ->
+
+            val translationX = currentItem.getChildAt(0).translationX
+            val itemMenuWidth = currentItem.getTag(TAG_ITEM_MENU_WIDTH) as Int
+            when (translationX) {
+                0.0f -> { // itemView's menu is closed
+                    // No-op
+                }
+                -itemMenuWidth.toFloat() -> { // itemView's menu is totally opened
+                    fullyOpenedItem = currentItem
+                }
+                else -> {
+                    handleItemViewMenuPartiallyOpened(currentItem, itemMenuWidth, motionEvent, translationX)?.let { return it }
+                }
+            }
+
+            clearTouch()
+            cancelParentTouch(motionEvent)
+            return true // Returns true here in case of a fling started in this up event.
+        }
+
+        cancelTouch()
+        return null
+    }
+
+    private fun handleItemViewMenuPartiallyOpened(
+        currentItem: ViewGroup,
+        itemMenuWidth: Int,
+        motionEvent: MotionEvent,
+        translationX: Float,
+    ): Boolean? {
+
+        val dx = touchX[touchX.size - 1] - touchX[touchX.size - 2]
+        velocityTracker?.computeCurrentVelocity(1000)
+        val velocityX = abs(velocityTracker?.xVelocity ?: 0F)
+
+        // If the speed at which the user's finger lifted is greater than 200 dp/s
+        // while user was scrolling itemView towards the horizontal start,
+        // make it automatically scroll to open and show its menu.
+        if (dx < 0 && velocityX >= itemMinimumFlingVelocity) {
+            smoothTranslateItemViewXTo(currentItem, -itemMenuWidth.toFloat(), itemScrollDuration)
+            fullyOpenedItem = currentItem
+            clearTouch()
+            cancelParentTouch(motionEvent)
+            return true
+
+            // If the speed at which the user's finger lifted is greater than 200 dp/s
+            // while user was scrolling itemView towards the end of horizontal,
+            // make its menu hidden.
+        } else if (dx > 0 && velocityX >= itemMinimumFlingVelocity) {
+            releaseItemView(true)
+            clearTouch()
+            cancelParentTouch(motionEvent)
+            return true
+        }
+
+        val middle = itemMenuWidth / 2.0f
+        // If the sliding distance is less than half of its slideable distance, hide its menu,
+        if (abs(translationX) < middle) {
+            releaseItemView(true)
+        } else { // else open its menu.
+            smoothTranslateItemViewXTo(currentItem, -itemMenuWidth.toFloat(), itemScrollDuration)
+            fullyOpenedItem = currentItem
+        }
+
+        return null
+    }
+
+    private fun markCurrentTouchPoint(x: Float, y: Float) {
         System.arraycopy(touchX, 1, touchX, 0, touchX.size - 1)
         touchX[touchX.size - 1] = x
         System.arraycopy(touchY, 1, touchY, 0, touchY.size - 1)
@@ -362,17 +367,11 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(context: Context, at
             return false
         }
         // The layout's orientation may not be vertical.
-        if (layoutManager?.canScrollHorizontally() == true) {
-            return false
-        }
+        if (layoutManager?.canScrollHorizontally() == true) return false
         val absDy = abs(touchY[touchY.size - 1] - downY)
         if (absDy <= touchSlop) {
             val dx = touchX[touchX.size - 1] - downX
-            isItemBeingDragged = if (openedItems.size == 0) {
-                dx < -touchSlop
-            } else {
-                abs(dx) > touchSlop
-            }
+            isItemBeingDragged = if (openedItems.size == 0) dx < -touchSlop else abs(dx) > touchSlop
             if (isItemBeingDragged) {
                 requestParentDisallowInterceptTouchEvent()
                 return true
@@ -398,9 +397,7 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(context: Context, at
         // 2. If the previously opened itemView differs from the one currently touched,
         //    and the current one has not been scrolled at all, set 'mActiveItem' to null.
         if (hasItemFullyOpenOnActionDown) {
-            if (activeItem === fullyOpenedItem) {
-                releaseItemView(animate)
-            }
+            if (activeItem === fullyOpenedItem) releaseItemView(animate)
             clearTouch()
             return true
         }
@@ -438,7 +435,7 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(context: Context, at
     fun releaseItemView(animate: Boolean = true) {
         releaseItemViewInternal(
             if (isItemBeingDragged) activeItem else fullyOpenedItem,
-            if (animate) itemScrollDuration else 0
+            if (animate) itemScrollDuration else 0,
         )
     }
 
@@ -449,9 +446,7 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(context: Context, at
             } else {
                 translateItemViewXBy(itemView, itemView.getChildAt(0).translationX)
             }
-            if (fullyOpenedItem === itemView) {
-                fullyOpenedItem = null
-            }
+            if (fullyOpenedItem === itemView) fullyOpenedItem = null
         }
     }
 
@@ -470,9 +465,7 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(context: Context, at
         itemView = itemView.getChildAt(0) as ViewGroup //kDrive
         if (fullyOpenedItem !== itemView && childHasMenu(itemView)) {
             // First, cancels the item view being touched or previously fully opened (if any)
-            if (!cancelTouch(animate)) {
-                releaseItemView(animate)
-            }
+            if (!cancelTouch(animate)) releaseItemView(animate)
             smoothTranslateItemViewXTo(
                 itemView, -(itemView.getTag(TAG_ITEM_MENU_WIDTH) as Int).toFloat(),
                 if (animate) itemScrollDuration else 0
@@ -504,14 +497,10 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(context: Context, at
             animator.interpolator = interpolator
             animator.duration = duration.toLong()
             animator.start()
-            if (canceled) {
-                animator.addListener(animator.listener)
-            }
+            if (canceled) animator.addListener(animator.listener)
         } else {
             // Checks if there is an animator running for the given item view even if dx == 0
-            if (animator != null && animator.isRunning) {
-                animator.cancel()
-            }
+            if (animator != null && animator.isRunning) animator.cancel()
             // If duration <= 0, then scroll the 'itemView' directly to prevent a redundant call
             // to the animator.
             baseTranslateItemViewXBy(itemView, dx)
@@ -545,9 +534,7 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(context: Context, at
         }
 
         val itemChildCount = itemView.childCount
-        for (i in 0 until itemChildCount) {
-            itemView.getChildAt(i).translationX = translationX
-        }
+        for (i in 0 until itemChildCount) itemView.getChildAt(i).translationX = translationX
 
         val itemMenu = itemView.getChildAt(itemChildCount - 1) as FrameLayout
         val menuItemWidths = itemView.getTag(TAG_MENU_ITEM_WIDTHS) as IntArray
@@ -569,9 +556,7 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(context: Context, at
             val openedItems = openedItems.toTypedArray()
             for (openedItem in openedItems) {
                 val animator = openedItem.getTag(TAG_ITEM_ANIMATOR) as Animator?
-                if (animator != null && animator.isRunning) {
-                    animator.end()
-                }
+                if (animator != null && animator.isRunning) animator.end()
             }
             this.openedItems.clear()
         }
@@ -595,18 +580,14 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(context: Context, at
                 val childrenLayerTypes = SimpleArrayMap<View, Int>(0)
                 fun ensureChildrenLayerTypes() {
                     val itemChildCount = itemView.childCount
-                    val itemMenu = itemView.getChildAt(
-                        itemChildCount - 1
-                    ) as ViewGroup
+                    val itemMenu = itemView.getChildAt(itemChildCount - 1) as ViewGroup
                     val menuItemCount = itemMenu.childCount
 
                     // We do not know whether the cached children are valid or not, so just
                     // clear the Map and re-put some children into it, of which the layer types
                     // will also be up-to-date.
                     childrenLayerTypes.clear()
-                    childrenLayerTypes.ensureCapacity(
-                        itemChildCount - 1 + menuItemCount
-                    )
+                    childrenLayerTypes.ensureCapacity(itemChildCount - 1 + menuItemCount)
                     for (i in 0 until itemChildCount - 1) {
                         val itemChild = itemView.getChildAt(i)
                         childrenLayerTypes.put(itemChild, itemChild.layerType)
@@ -633,9 +614,7 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(context: Context, at
                 override fun onAnimationEnd(animation: Animator) {
                     for (i in childrenLayerTypes.size() - 1 downTo 0) {
                         childrenLayerTypes.keyAt(i).apply {
-                            post {
-                                setLayerType(childrenLayerTypes.valueAt(i), null)
-                            }
+                            post { setLayerType(childrenLayerTypes.valueAt(i), null) }
                         }
 
                     }
