@@ -25,8 +25,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.ContextCompat
-import androidx.core.view.isGone
-import androidx.core.view.isVisible
+import androidx.core.view.*
+import androidx.core.view.ViewCompat.getWindowInsetsController
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
@@ -164,62 +164,12 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
 
         configureBottomSheetFileInfo()
-    }
 
-    private fun setBackActionHandlers() {
-        getBackNavigationResult<Int>(DownloadProgressDialog.OPEN_WITH) {
-            context?.openWith(currentFile, userDrive)
-        }
-
-        getBackNavigationResult<Any>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
-            bottomSheetFileInfos.refreshBottomSheetUi(currentFile)
-        }
-    }
-
-    fun toggleFullscreen() {
-        previewSliderParent?.apply {
-            val transition = Slide(Gravity.TOP)
-            transition.duration = 200
-            transition.addTarget(R.id.header)
-            TransitionManager.beginDelayedTransition(this, transition)
-            header.isVisible = showUi
-            toggleBottomSheet(showUi)
-            showUi = !showUi
-        }
-    }
-
-    private fun configureBottomSheetFileInfo() {
-        activity?.setColorNavigationBar(true)
-        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetFileInfos)
-        bottomSheetBehavior.apply {
-            isHideable = true
-            isDraggable = !hideActions
-            addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-                override fun onStateChanged(bottomSheet: View, newState: Int) {
-                    when (bottomSheetBehavior.state) {
-                        BottomSheetBehavior.STATE_HIDDEN -> {
-                            activity?.window?.navigationBarColor =
-                                ContextCompat.getColor(requireContext(), R.color.previewBackground)
-                            activity?.window?.lightNavigationBar(false)
-                        }
-                        else -> {
-                            activity?.setColorNavigationBar(true)
-                        }
-                    }
-                }
-
-                override fun onSlide(bottomSheet: View, slideOffset: Float) = Unit
-            })
-        }
+        setupTransparentStatusBar()
     }
 
     override fun onResume() {
         super.onResume()
-
-        activity?.window?.apply {
-            statusBarColor = ContextCompat.getColor(requireContext(), R.color.previewBackground)
-            lightStatusBar(false)
-        }
 
         with(bottomSheetFileInfos) {
             updateAvailableOfflineItem()
@@ -235,17 +185,119 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         bottomSheetFileInfos.removeOfflineObservations(this)
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        if (this::currentFile.isInitialized) outState.putInt(PREVIEW_FILE_ID_TAG, currentFile.id)
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onStop() {
+        clearEdgeToEdge()
+        super.onStop()
+    }
+
     override fun onDestroy() {
         // Reset current preview file list
         if (findNavController().previousBackStackEntry?.destination?.id != R.id.searchFragment) {
             mainViewModel.currentPreviewFileList = LinkedHashMap()
         }
+
         super.onDestroy()
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        if (this::currentFile.isInitialized) outState.putInt(PREVIEW_FILE_ID_TAG, currentFile.id)
-        super.onSaveInstanceState(outState)
+    private fun clearEdgeToEdge() {
+        toggleSystemBar(true)
+        requireActivity().window.toggleEdgeToEdge(false)
+        requireView().setOnApplyWindowInsetsListener(null) // This fixes an issue where the material bottom navigation's icons disappear
+    }
+
+    private fun setBackActionHandlers() {
+        getBackNavigationResult<Int>(DownloadProgressDialog.OPEN_WITH) {
+            context?.openWith(currentFile, userDrive)
+        }
+
+        getBackNavigationResult<Any>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
+            bottomSheetFileInfos.refreshBottomSheetUi(currentFile)
+        }
+    }
+
+    fun toggleFullscreen() {
+        previewSliderParent?.apply {
+            val transition = Slide(Gravity.TOP).apply {
+                duration = 200
+                addTarget(R.id.header)
+            }
+            TransitionManager.beginDelayedTransition(this, transition)
+            header.isVisible = showUi
+
+            toggleBottomSheet(showUi)
+            toggleSystemBar(showUi)
+
+            showUi = !showUi
+        }
+    }
+
+    private fun toggleSystemBar(show: Boolean) {
+        getWindowInsetsController(requireActivity().window.decorView)?.apply {
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            val systemBars = WindowInsetsCompat.Type.systemBars()
+            if (show) show(systemBars) else hide(systemBars)
+        }
+    }
+
+    private fun configureBottomSheetFileInfo() {
+        activity?.setColorNavigationBar(true)
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetFileInfos)
+        bottomSheetBehavior.apply {
+            isHideable = true
+            isDraggable = !hideActions
+            addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+                    when (bottomSheetBehavior.state) {
+                        BottomSheetBehavior.STATE_HIDDEN -> {
+                            activity?.window?.navigationBarColor =
+                                ContextCompat.getColor(requireContext(), R.color.previewBackgroundTransparent)
+                            activity?.window?.lightNavigationBar(false)
+                        }
+                        else -> {
+                            activity?.setColorNavigationBar(true)
+                        }
+                    }
+                }
+
+                override fun onSlide(bottomSheet: View, slideOffset: Float) = Unit
+            })
+        }
+    }
+
+    private fun setupTransparentStatusBar() {
+        activity?.window?.apply {
+            statusBarColor = ContextCompat.getColor(requireContext(), R.color.previewBackgroundTransparent)
+
+            lightStatusBar(false)
+            toggleEdgeToEdge(true)
+        }
+
+        view?.apply {
+            setOnApplyWindowInsetsListener(null) // This fixes an issue where the material bottom navigation's icons disappear
+            ViewCompat.setOnApplyWindowInsetsListener(this) { _, windowInsets ->
+                with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
+                    header?.setMargin(top = top, right = right, left = left)
+                    bottomSheetBehavior.peekHeight = getDefaultPeekHeight() + bottom
+                    bottomSheetBehavior.expandedOffset = top
+                }
+
+                windowInsets
+            }
+        }
+    }
+
+    private fun getDefaultPeekHeight(): Int {
+        val typedArray = requireContext().theme.obtainStyledAttributes(
+            R.style.BottomSheetStyle, intArrayOf(R.attr.behavior_peekHeight)
+        )
+        val peekHeight = typedArray.getDimensionPixelSize(0, 0)
+        typedArray.recycle()
+        return peekHeight
     }
 
     override fun displayInfoClicked() {
@@ -295,10 +347,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
-    private fun toggleBottomSheet(show: Boolean? = null) {
-        val mustShow = show ?: (bottomSheetBehavior.state == BottomSheetBehavior.STATE_HIDDEN)
+    private fun toggleBottomSheet(show: Boolean) {
         bottomSheetFileInfos?.scrollToTop()
-        bottomSheetBehavior.state = if (mustShow) {
+        bottomSheetBehavior.state = if (show) {
             BottomSheetBehavior.STATE_COLLAPSED
         } else {
             BottomSheetBehavior.STATE_HIDDEN

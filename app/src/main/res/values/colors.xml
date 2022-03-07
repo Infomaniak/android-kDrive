@@ -18,5 +18,6 @@
 <resources>
     <color name="iconColor">#85A2B6</color>
     <color name="previewBackground">#111C28</color>
+    <color name="previewBackgroundTransparent">#80111C28</color>
     <color name="disabledButtonBackgroundColor">@android:color/black</color>
 </resources>
