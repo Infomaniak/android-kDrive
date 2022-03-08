@@ -136,7 +136,7 @@ open class KDriveUiTest : KDriveTest() {
 
     fun switchToDriveInstance(instanceNumero: Int) {
         getDeviceViewById("homeFragment").clickAndWaitForNewWindow()
-        if (DriveInfosController.getDrivesCount(AccountUtils.currentUserId) > 1) {
+        if (!DriveInfosController.hasSingleDrive(AccountUtils.currentUserId)) {
             getDeviceViewById("switchDriveButton").clickAndWaitForNewWindow()
             selectDriveInList(instanceNumero) // Switch to dev test drive
             // Close the bottomSheet modal displayed to have info on categories

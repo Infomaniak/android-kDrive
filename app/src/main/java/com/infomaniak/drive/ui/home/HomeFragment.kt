@@ -66,7 +66,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             noNetworkCard.isGone = isInternetAvailable
         }
         switchDriveButton.apply {
-            if (DriveInfosController.getDrivesCount(AccountUtils.currentUserId) == 1L) {
+            if (DriveInfosController.hasSingleDrive(AccountUtils.currentUserId)) {
                 icon = null
                 isEnabled = false
             } else {

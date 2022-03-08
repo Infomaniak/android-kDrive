@@ -136,6 +136,10 @@ object DriveInfosController {
         maintenance: Boolean? = null
     ) = getRealmInstance().use { getDrivesQuery(it, userId, driveId, sharedWithMe, maintenance).count() }
 
+    fun hasSingleDrive(userId: Int): Boolean {
+        return getDrivesCount(userId) == 1L
+    }
+
     fun getTeams(drive: Drive): List<Team> {
         val teamList = getRealmInstance().use { realm ->
             realm.copyFromRealm(

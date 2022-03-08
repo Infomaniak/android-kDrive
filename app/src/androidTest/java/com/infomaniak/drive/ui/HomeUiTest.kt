@@ -35,7 +35,7 @@ class HomeUiTest : KDriveUiTest() {
     fun testSwitchDrive() {
         // Change drive from homeFragment
         getDeviceViewById("homeFragment").clickAndWaitForNewWindow()
-        if (DriveInfosController.getDrivesCount(AccountUtils.currentUserId) < 2) {
+        if (DriveInfosController.hasSingleDrive(AccountUtils.currentUserId)) {
             // finding switchDriveButton should throw because it only appears if user has at least 2 drives
             Assertions.assertThrows(UiObjectNotFoundException::class.java) {
                 getDeviceViewById("switchDriveButton").clickAndWaitForNewWindow()
