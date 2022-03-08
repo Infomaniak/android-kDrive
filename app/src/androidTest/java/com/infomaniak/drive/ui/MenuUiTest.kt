@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui
 
 import android.widget.EditText
+import androidx.test.filters.LargeTest
 import androidx.test.uiautomator.UiObjectNotFoundException
 import androidx.test.uiautomator.UiSelector
 import com.infomaniak.drive.R
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
+@LargeTest
 class MenuUiTest : KDriveUiTest() {
 
     @BeforeEach
@@ -58,14 +60,14 @@ class MenuUiTest : KDriveUiTest() {
 
             // Save button
             try {
-                findObject(UiSelector().text("CONNECTION")).clickAndWaitForNewWindow(6000)
+                findObject(UiSelector().text("CONNECTION")).clickAndWaitForNewWindow(LONG_TIMEOUT)
             } catch (exception: UiObjectNotFoundException) {
-                findObject(UiSelector().text("CONNEXION")).clickAndWaitForNewWindow(6000)
+                findObject(UiSelector().text("CONNEXION")).clickAndWaitForNewWindow(LONG_TIMEOUT)
             }
 
             // Close the bottom sheet displayed for categories information
             closeBottomSheetInfoModalIfDisplayed()
-            getDeviceViewById("menuFragment").clickAndWaitForNewWindow(2000)
+            getDeviceViewById("menuFragment").clickAndWaitForNewWindow(SHORT_TIMEOUT)
             assert(AccountUtils.currentUserId == Env.NEW_USER_ID) { "User Id should be ${Env.NEW_USER_ID} but is ${AccountUtils.currentUserId}" }
             swipeDownNestedScrollView()
             getDeviceViewById("logout").clickAndWaitForNewWindow()

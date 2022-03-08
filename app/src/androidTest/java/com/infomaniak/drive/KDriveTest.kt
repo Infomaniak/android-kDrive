@@ -81,21 +81,7 @@ open class KDriveTest {
             okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(user.id) }
             uiRealm = FileController.getRealmInstance(userDrive)
 
-            grantPermissions(
-                android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                android.Manifest.permission.ACCESS_MEDIA_LOCATION,
-                android.Manifest.permission.ACCESS_NETWORK_STATE,
-                android.Manifest.permission.FOREGROUND_SERVICE,
-                android.Manifest.permission.INTERNET,
-                android.Manifest.permission.READ_EXTERNAL_STORAGE,
-                android.Manifest.permission.READ_SYNC_SETTINGS,
-                android.Manifest.permission.READ_SYNC_STATS,
-                android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
-                android.Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                android.Manifest.permission.USE_BIOMETRIC,
-                android.Manifest.permission.WAKE_LOCK,
-                android.Manifest.permission.WRITE_SYNC_SETTINGS,
-            )
+            grantPermissions(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
 
         @AfterAll

@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui
 
+import androidx.test.filters.LargeTest
 import androidx.test.uiautomator.UiScrollable
 import androidx.test.uiautomator.UiSelector
 import org.junit.jupiter.api.BeforeEach
@@ -27,6 +28,7 @@ import java.util.*
 /**
  * UI Tests relative to a file item (sharing, comments, details, activities)
  */
+@LargeTest
 class FileItemUiTest : KDriveUiTest() {
 
     @BeforeEach
