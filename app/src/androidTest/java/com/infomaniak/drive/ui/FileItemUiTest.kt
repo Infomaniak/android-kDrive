@@ -17,18 +17,11 @@
  */
 package com.infomaniak.drive.ui
 
+import androidx.test.filters.LargeTest
 import androidx.test.uiautomator.UiScrollable
 import androidx.test.uiautomator.UiSelector
-import com.infomaniak.drive.KDriveTest
-import com.infomaniak.drive.utils.UiTestUtils
-import com.infomaniak.drive.utils.UiTestUtils.createPublicShareLink
-import com.infomaniak.drive.utils.UiTestUtils.deleteFile
-import com.infomaniak.drive.utils.UiTestUtils.device
-import com.infomaniak.drive.utils.UiTestUtils.getDeviceViewById
-import com.infomaniak.drive.utils.UiTestUtils.getViewIdentifier
-import com.infomaniak.drive.utils.UiTestUtils.startApp
+import com.infomaniak.drive.utils.KDriveUiTest
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -36,12 +29,12 @@ import java.util.*
 /**
  * UI Tests relative to a file item (sharing, comments, details, activities)
  */
-@Disabled
-class FileItemUiTest : KDriveTest() {
+@LargeTest
+class FileItemUiTest : KDriveUiTest() {
 
     @BeforeEach
-    fun init() {
-        startApp()
+    override fun startApp() {
+        super.startApp()
         getDeviceViewById("fileListFragment").click()
     }
 
@@ -49,12 +42,11 @@ class FileItemUiTest : KDriveTest() {
     @DisplayName("Check UI to create a folder then create a share link for it")
     fun testCreateFileShareLink() {
         val randomFolderName = "UI-Test-${UUID.randomUUID()}"
-        val fileRecyclerView = UiScrollable(UiSelector().resourceId(getViewIdentifier("fileRecyclerView")))
 
         // Create the folder then returns to main view
-        UiTestUtils.createPrivateFolder(randomFolderName)
+        createPrivateFolder(randomFolderName)
         // Go to fileList view
-        UiTestUtils.openFileShareDetails(fileRecyclerView, randomFolderName)
+        openFileShareDetails(randomFolderName)
 
         device.apply {
             findObject(UiSelector().resourceId(getViewIdentifier("shareLinkSwitch"))).clickAndWaitForNewWindow()
@@ -62,6 +54,6 @@ class FileItemUiTest : KDriveTest() {
             pressBack()
             findObject(UiSelector().resourceId(getViewIdentifier("closeButton"))).clickAndWaitForNewWindow()
         }
-        deleteFile(fileRecyclerView, randomFolderName)
+        deleteFile(randomFolderName)
     }
 }

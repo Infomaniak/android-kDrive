@@ -17,33 +17,27 @@
  */
 package com.infomaniak.drive.ui
 
+import androidx.test.filters.LargeTest
 import androidx.test.uiautomator.UiObjectNotFoundException
-import com.infomaniak.drive.KDriveTest
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.UiTestUtils
-import com.infomaniak.drive.utils.UiTestUtils.getDeviceViewById
-import com.infomaniak.drive.utils.UiTestUtils.selectDriveInList
-import com.infomaniak.drive.utils.UiTestUtils.switchToDriveInstance
-import org.junit.jupiter.api.*
+import com.infomaniak.drive.utils.KDriveUiTest
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 
 /**
  * UI Tests relative to a home (drive switch, drive activities, file search)
  */
-@Disabled
-class HomeUiTest : KDriveTest() {
-
-    @BeforeEach
-    fun startApp() {
-        UiTestUtils.startApp()
-    }
+@LargeTest
+class HomeUiTest : KDriveUiTest() {
 
     @Test
     @DisplayName("Check UI to switch drive from home then user menu")
     fun testSwitchDrive() {
         // Change drive from homeFragment
         getDeviceViewById("homeFragment").clickAndWaitForNewWindow()
-        if (DriveInfosController.getDrivesCount(AccountUtils.currentUserId) < 2) {
+        if (DriveInfosController.hasSingleDrive(AccountUtils.currentUserId)) {
             // finding switchDriveButton should throw because it only appears if user has at least 2 drives
             Assertions.assertThrows(UiObjectNotFoundException::class.java) {
                 getDeviceViewById("switchDriveButton").clickAndWaitForNewWindow()
@@ -51,7 +45,7 @@ class HomeUiTest : KDriveTest() {
         } else {
             switchToDriveInstance(0)
 
-            val driveId = AccountUtils.currentDriveId
+            val driveId = userDrive.driveId
 
             // Change drive from menuFragment
             getDeviceViewById("menuFragment").clickAndWaitForNewWindow()

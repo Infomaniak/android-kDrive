@@ -17,19 +17,9 @@
  */
 package com.infomaniak.drive.ui
 
-import androidx.test.uiautomator.UiScrollable
-import androidx.test.uiautomator.UiSelector
-import com.infomaniak.drive.KDriveTest
-import com.infomaniak.drive.utils.UiTestUtils
-import com.infomaniak.drive.utils.UiTestUtils.deleteFile
-import com.infomaniak.drive.utils.UiTestUtils.device
-import com.infomaniak.drive.utils.UiTestUtils.findFileInList
-import com.infomaniak.drive.utils.UiTestUtils.getViewIdentifier
-import com.infomaniak.drive.utils.UiTestUtils.startApp
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
+import androidx.test.filters.LargeTest
+import com.infomaniak.drive.utils.KDriveUiTest
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -37,26 +27,25 @@ import java.util.*
 /**
  * UI Tests relative to file list (quick operations, file creation, upload, import, ...)
  */
-@Disabled
-class FileListUiTest : KDriveTest() {
+@LargeTest
+class FileListUiTest : KDriveUiTest() {
 
     @BeforeEach
-    fun init() {
-        startApp()
-        UiTestUtils.getDeviceViewById("fileListFragment").click()
+    override fun startApp() {
+        super.startApp()
+        getDeviceViewById("fileListFragment").click()
     }
 
     @Test
     @DisplayName("Check UI to Create then delete a folder")
     fun testCreateAndDeleteFolder() {
-        val fileRecyclerView = UiScrollable(UiSelector().resourceId(getViewIdentifier("fileRecyclerView")))
         val randomFolderName = "UI-Test-${UUID.randomUUID()}"
 
-        UiTestUtils.createPrivateFolder(randomFolderName)
+        createPrivateFolder(randomFolderName)
         device.waitForWindowUpdate(null, 5000)
-        assertNotNull(findFileInList(fileRecyclerView, randomFolderName), "File must be found")
+        findFileIfInList(randomFolderName, true)
 
-        deleteFile(fileRecyclerView, randomFolderName)
-        assertNull(findFileInList(fileRecyclerView, randomFolderName), "File must not be found")
+        deleteFile(randomFolderName)
+        findFileIfInList(randomFolderName, false)
     }
 }
