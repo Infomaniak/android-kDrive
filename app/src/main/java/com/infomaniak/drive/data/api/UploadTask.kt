@@ -226,7 +226,7 @@ class UploadTask(
 
         val availableHeapMemory = getAvailableHalfHeapMemory()
         if (chunkSize >= availableHeapMemory) {
-            chunkSize = (availableHeapMemory / limitParallelRequest).toInt()
+            chunkSize = ceil(availableHeapMemory.toDouble() / limitParallelRequest).toInt()
         }
     }
 
