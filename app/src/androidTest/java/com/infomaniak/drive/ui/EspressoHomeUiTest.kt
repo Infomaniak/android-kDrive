@@ -26,6 +26,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.KDriveUiTest
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 @LargeTest
@@ -37,6 +38,7 @@ class EspressoHomeUiTest : KDriveUiTest() {
         onView(withId(R.id.homeFragment)).perform(click())
     }
 
+    @DisplayName("Check home fragment's general layout is correctly displayed")
     @Test
     fun homeFragmentIsCorrectlyDisplayed() {
         checkViewVisibility(false, R.id.noNetworkCard)
@@ -47,6 +49,7 @@ class EspressoHomeUiTest : KDriveUiTest() {
         checkViewVisibility(true, R.id.homeViewPager)
     }
 
+    @DisplayName("Check the activity tabs is correctly displayed when selected")
     @Test
     fun activitiesTabIsDisplayed() {
         clickOnHomeTabs(R.id.homeActivitiesButton)
@@ -55,6 +58,7 @@ class EspressoHomeUiTest : KDriveUiTest() {
         checkViewVisibility(true, R.id.homeTabsTitle, R.string.homeLastActivities)
     }
 
+    @DisplayName("Check the offline tabs is correctly displayed when selected")
     @Test
     fun offlineTabIsDisplayed() {
         clickOnHomeTabs(R.id.homeOfflineButton)
@@ -65,6 +69,7 @@ class EspressoHomeUiTest : KDriveUiTest() {
         checkViewVisibility(!isOfflineFilesEmpty, R.id.toggleDisplayButton)
     }
 
+    @DisplayName("Check the pictures tabs is correctly displayed when selected")
     @Test
     fun picturesTabIsDisplayed() {
         clickOnHomeTabs(R.id.homePicturesButton)

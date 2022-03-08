@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui
 
 import android.widget.EditText
+import androidx.test.filters.LargeTest
 import androidx.test.uiautomator.UiObjectNotFoundException
 import androidx.test.uiautomator.UiSelector
 import com.infomaniak.drive.R
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
+@LargeTest
 class MenuUiTest : KDriveUiTest() {
 
     @BeforeEach

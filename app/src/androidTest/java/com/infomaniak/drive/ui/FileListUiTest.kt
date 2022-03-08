@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui
 
+import androidx.test.filters.LargeTest
 import com.infomaniak.drive.utils.KDriveUiTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -26,6 +27,7 @@ import java.util.*
 /**
  * UI Tests relative to file list (quick operations, file creation, upload, import, ...)
  */
+@LargeTest
 class FileListUiTest : KDriveUiTest() {
 
     @BeforeEach
