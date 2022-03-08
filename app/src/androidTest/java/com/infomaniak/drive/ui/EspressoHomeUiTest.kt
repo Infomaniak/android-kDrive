@@ -65,7 +65,7 @@ class EspressoHomeUiTest : KDriveUiTest() {
         val isOfflineFilesEmpty =
             FileController.getOfflineFiles(File.SortType.NAME_AZ, customRealm = uiRealm).isNullOrEmpty()
         checkViewVisibility(isOfflineFilesEmpty, R.id.noFilesLayout)
-        checkViewVisibility(isOfflineFilesEmpty, stringId = R.string.offlineFileNoFile)
+        checkViewVisibility(isOfflineFilesEmpty, stringRes = R.string.offlineFileNoFile)
         checkViewVisibility(!isOfflineFilesEmpty, R.id.toggleDisplayButton)
     }
 
@@ -76,7 +76,7 @@ class EspressoHomeUiTest : KDriveUiTest() {
         try {
             checkViewVisibility(true, R.id.picture)
         } catch (error: Throwable) {
-            checkViewVisibility(true, stringId = R.string.picturesNoFile)
+            checkViewVisibility(true, stringRes = R.string.picturesNoFile)
         }
     }
 

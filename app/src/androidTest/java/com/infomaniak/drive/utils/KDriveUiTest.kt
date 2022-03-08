@@ -18,6 +18,8 @@
 package com.infomaniak.drive.utils
 
 import android.view.View
+import androidx.annotation.IdRes
+import androidx.annotation.StringRes
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.espresso.NoMatchingViewException
@@ -160,24 +162,33 @@ open class KDriveUiTest : KDriveTest() {
         }
     }
 
-    fun checkViewVisibility(isVisible: Boolean, viewId: Int? = null, stringId: Int? = null) {
+    /**
+     * Checks if a view is visible by the user
+     * Search for the first view matching the given [viewId], [stringRes] (or both)
+     *
+     * @param isVisible True if the view must be displayed to the user
+     * @param viewId Id of the targeted view
+     * @param stringRes Id of the text inside the targeted view
+     */
+    fun checkViewVisibility(isVisible: Boolean, @IdRes viewId: Int? = null, @StringRes stringRes: Int? = null) {
         val matchers = allOf(arrayListOf<Matcher<View>>().apply {
             viewId?.let { add(withId(it)) }
-            stringId?.let { add(withText(it)) }
+            stringRes?.let { add(withText(it)) }
             Assertions.assertFalse(isEmpty())
         })
-        onView(first(matchers)).check(matches(withEffectiveVisibility(if (isVisible) Visibility.VISIBLE else Visibility.GONE)))
+        onView(matchers.first()).check(matches(withEffectiveVisibility(if (isVisible) Visibility.VISIBLE else Visibility.GONE)))
     }
 
-    private fun first(matcher: Matcher<View?>): Matcher<View?> {
+    private fun Matcher<View?>.first(): Matcher<View?> {
         return object : TypeSafeMatcher<View?>() {
             var isFirst = true
 
             override fun describeTo(description: Description) {
-                matcher.describeTo(description.appendText(" at first index"))
+                this@first.describeTo(description.appendText(" at first index"))
             }
 
-            override fun matchesSafely(view: View?): Boolean = (matcher.matches(view) && isFirst).also { if (it) isFirst = false }
+            override fun matchesSafely(view: View?): Boolean =
+                (this@first.matches(view) && isFirst).also { if (it) isFirst = false }
         }
     }
 
