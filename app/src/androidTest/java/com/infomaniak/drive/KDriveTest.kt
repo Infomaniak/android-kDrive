@@ -25,7 +25,6 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.AccountUtils.addUser
-import com.infomaniak.drive.utils.AccountUtils.currentUser
 import com.infomaniak.drive.utils.AccountUtils.getUserById
 import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponseData
 import com.infomaniak.drive.utils.Env
@@ -73,7 +72,7 @@ open class KDriveTest {
                         user.organizations = arrayListOf()
                         addUser(user)
                     } else {
-                        currentUser = user
+                        AccountUtils.currentUser = user
                     }
                 }
             }
