@@ -88,10 +88,21 @@ class UploadTask(
                 Sentry.captureException(exception)
             }
 
-        } catch (exception: Exception) {
+        } catch (exception: TotalChunksExceededException) {
             exception.printStackTrace()
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
+            Sentry.withScope { scope ->
+                scope.level = SentryLevel.WARNING
+                scope.setExtra("half heap", "${getAvailableHalfHeapMemory()}")
+                scope.setExtra("available ram memory", "${context.getAvailableMemory().availMem}")
+                scope.setExtra("available service memory", "${context.getAvailableMemory().threshold}")
+                Sentry.captureException(exception)
+            }
+        } catch (exception: Exception) {
+            exception.printStackTrace()
             throw exception
+        } finally {
+            notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
         }
         return@withContext false
     }
@@ -106,11 +117,13 @@ class UploadTask(
             val requestSemaphore = Semaphore(limitParallelRequest)
             val totalChunks = ceil(uploadFile.fileSize.toDouble() / chunkSize).toInt()
 
+            if (totalChunks > TOTAL_CHUNKS) throw TotalChunksExceededException()
+
             checkLimitParallelRequest()
 
             val uploadedChunks =
                 ApiRepository.getValidChunks(uploadFile.driveId, uploadFile.remoteFolder, uploadFile.identifier).data
-            val restartUpload = uploadedChunks?.let { needToResetUpload(it) } ?: false
+            val restartUpload = uploadedChunks?.let { needToResetUpload(it, totalChunks) } ?: false
 
             Sentry.addBreadcrumb(Breadcrumb().apply {
                 category = UploadWorker.BREADCRUMB_TAG
@@ -126,7 +139,7 @@ class UploadTask(
                 requestSemaphore.acquire()
                 if (uploadedChunks?.validChunks?.contains(chunkNumber) == true && !restartUpload) {
                     Log.d("kDrive", "chunk:$chunkNumber ignored")
-                    input.read(ByteArray(chunkSize), 0, chunkSize)
+                    input.skip(chunkSize.toLong())
                     requestSemaphore.release()
                     continue
                 }
@@ -211,14 +224,16 @@ class UploadTask(
             }
         }
 
-        val availableMemory = context.getAvailableMemory().availMem
-        if (chunkSize >= availableMemory) {
-            chunkSize = ceil(availableMemory.toDouble() / 4).toInt()
+        val availableHeapMemory = getAvailableHalfHeapMemory()
+        if (chunkSize >= availableHeapMemory) {
+            chunkSize = ceil(availableHeapMemory.toDouble() / limitParallelRequest).toInt()
         }
     }
 
-    private fun needToResetUpload(uploadedChunks: ValidChunks): Boolean {
-        if (uploadedChunks.sizeToUpload != uploadFile.fileSize) {
+    private fun needToResetUpload(uploadedChunks: ValidChunks, totalChunks: Int): Boolean = with(uploadedChunks) {
+        val previousChunkSize = sizeToUpload.toInt() / expectedChunksCount
+
+        if (sizeToUpload != uploadFile.fileSize || expectedChunksCount != totalChunks || previousChunkSize != chunkSize) {
             uploadFile.refreshIdentifier()
             return true
         }
@@ -323,10 +338,9 @@ class UploadTask(
         )
     }
 
-    private fun checkLimitParallelRequest() {
-        val availableMemory = context.getAvailableMemory().availMem
-        if (chunkSize * limitParallelRequest >= availableMemory) {
-            limitParallelRequest = (availableMemory / limitParallelRequest).toInt()
+    private fun checkLimitParallelRequest() = getAvailableHalfHeapMemory().let { availableHalfMemory ->
+        if (chunkSize * limitParallelRequest >= availableHalfMemory) {
+            limitParallelRequest = 1 // We limit it to 1 because if we have more it throws OOF exceptions
         }
     }
 
@@ -350,6 +364,13 @@ class UploadTask(
                 if (uploadFile.fileCreatedAt == null) "" else "&file_created_at=${uploadFile.fileCreatedAt!!.time / 1000}"
     }
 
+    /**
+     * Returns half the available memory in the heap, to avoid [OutOfMemoryError]
+     * It can vary depending on the available ram memory in the device
+     * @return half available memory
+     */
+    private fun getAvailableHalfHeapMemory() = Runtime.getRuntime().freeMemory() / 2
+
     fun previousChunkBytesWritten() = previousChunkBytesWritten
 
     fun lastProgress() = currentProgress
@@ -359,6 +380,7 @@ class UploadTask(
     class LockErrorException : Exception()
     class NotAuthorizedException : Exception()
     class QuotaExceededException : Exception()
+    class TotalChunksExceededException : Exception()
     class UploadErrorException : Exception()
     class WrittenBytesExceededException : Exception()
 
