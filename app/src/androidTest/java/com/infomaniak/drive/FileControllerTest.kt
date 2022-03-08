@@ -16,6 +16,7 @@ import com.infomaniak.drive.data.cache.FileController.searchFiles
 import com.infomaniak.drive.data.cache.FileController.storePicturesDrive
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.utils.AccountUtils.currentUser
 import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponseData
 import com.infomaniak.drive.utils.ApiTestUtils.createFileForTest
 import com.infomaniak.drive.utils.ApiTestUtils.deleteTestFile
@@ -42,6 +43,7 @@ class FileControllerTest : KDriveTest() {
     @Throws(Exception::class)
     fun setUp() {
         realm = Realm.getInstance(getConfig())
+        if (currentUser == null) currentUser = user
     }
 
     @AfterEach

@@ -41,10 +41,7 @@ class MenuUiTest : KDriveUiTest() {
     @DisplayName("Check UI to add a new kdrive user then log him off")
     fun testAddUser() {
         // Remove the other user if he's already in the database
-        runBlocking {
-            val newUser = AccountUtils.getUserById(Env.NEW_USER_ID)
-            if (newUser != null) removeUser(context, newUser)
-        }
+        runBlocking { AccountUtils.getUserById(Env.NEW_USER_ID).let { if (it != null) removeUser(context, it) } }
         swipeDownNestedScrollView()
         getDeviceViewById("changeUserIcon").clickAndWaitForNewWindow()
         getDeviceViewById("addUser").clickAndWaitForNewWindow()

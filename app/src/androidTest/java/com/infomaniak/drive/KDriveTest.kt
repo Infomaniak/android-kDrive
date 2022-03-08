@@ -18,7 +18,6 @@
 package com.infomaniak.drive
 
 import android.content.Context
-import android.util.Log
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.runner.permission.PermissionRequester
 import com.infomaniak.drive.data.api.ApiRepository
@@ -52,56 +51,52 @@ open class KDriveTest {
         internal val context = ApplicationProvider.getApplicationContext<Context>()
         internal lateinit var okHttpClient: OkHttpClient
         internal lateinit var uiRealm: Realm
+        internal lateinit var user: User
         internal lateinit var userDrive: UserDrive
-        private lateinit var user: User
 
         @BeforeAll
         @JvmStatic
         fun beforeAll() {
-            try {
-                if (Env.USE_CURRENT_USER) {
-                    user = runBlocking(Dispatchers.IO) { AccountUtils.requestCurrentUser() }!!
-                    InfomaniakCore.bearerToken = user.apiToken.accessToken
+            if (Env.USE_CURRENT_USER) {
+                user = runBlocking(Dispatchers.IO) { AccountUtils.requestCurrentUser() }!!
+                InfomaniakCore.bearerToken = user.apiToken.accessToken
+            } else {
+                InfomaniakCore.bearerToken = Env.TOKEN
 
-                } else {
-                    InfomaniakCore.bearerToken = Env.TOKEN
+                val apiResponse = ApiRepository.getUserProfile(HttpClient.okHttpClientNoInterceptor)
+                assertApiResponseData(apiResponse)
+                user = apiResponse.data!!
+                user.apiToken = ApiToken(Env.TOKEN, "", "Bearer", userId = user.id, expiresAt = null)
 
-                    val apiResponse = ApiRepository.getUserProfile(HttpClient.okHttpClientNoInterceptor)
-                    assertApiResponseData(apiResponse)
-                    user = apiResponse.data!!
-                    user.apiToken = ApiToken(Env.TOKEN, "", "Bearer", userId = user.id, expiresAt = null)
-                    runBlocking {
-                        if (getUserById(user.id) == null) {
-                            user.organizations = arrayListOf()
-                            addUser(user)
-                        } else {
-                            currentUser = user
-                        }
+                runBlocking {
+                    if (getUserById(user.id) == null) {
+                        user.organizations = arrayListOf()
+                        addUser(user)
+                    } else {
+                        currentUser = user
                     }
                 }
-                userDrive = UserDrive(user.id, Env.DRIVE_ID)
-                okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(user.id) }
-                uiRealm = FileController.getRealmInstance(userDrive)
-
-                grantPermissions(
-                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    android.Manifest.permission.ACCESS_MEDIA_LOCATION,
-                    android.Manifest.permission.ACCESS_NETWORK_STATE,
-                    android.Manifest.permission.FOREGROUND_SERVICE,
-                    android.Manifest.permission.INTERNET,
-                    android.Manifest.permission.READ_EXTERNAL_STORAGE,
-                    android.Manifest.permission.READ_SYNC_SETTINGS,
-                    android.Manifest.permission.READ_SYNC_STATS,
-                    android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
-                    android.Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                    android.Manifest.permission.USE_BIOMETRIC,
-                    android.Manifest.permission.WAKE_LOCK,
-                    android.Manifest.permission.WRITE_SYNC_SETTINGS,
-                )
-            } catch (exception: Exception) {
-                Log.e("KDriveTest", "An exception occurred during test class setup")
-                exception.printStackTrace()
             }
+
+            userDrive = UserDrive(user.id, Env.DRIVE_ID)
+            okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(user.id) }
+            uiRealm = FileController.getRealmInstance(userDrive)
+
+            grantPermissions(
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                android.Manifest.permission.ACCESS_MEDIA_LOCATION,
+                android.Manifest.permission.ACCESS_NETWORK_STATE,
+                android.Manifest.permission.FOREGROUND_SERVICE,
+                android.Manifest.permission.INTERNET,
+                android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                android.Manifest.permission.READ_SYNC_SETTINGS,
+                android.Manifest.permission.READ_SYNC_STATS,
+                android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
+                android.Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                android.Manifest.permission.USE_BIOMETRIC,
+                android.Manifest.permission.WAKE_LOCK,
+                android.Manifest.permission.WRITE_SYNC_SETTINGS,
+            )
         }
 
         @AfterAll
