@@ -180,7 +180,7 @@ class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelect
         menuPicturesBinding?.swipeRefreshLayout?.isEnabled = true
     }
 
-    override fun getSelectedFilesCount(): Int? = null
+    override fun getAllSelectedFileCount(): Int? = null
 
     fun onMoveButtonClicked() {
         // TODO use "parentId" when https://github.com/Infomaniak/android-kDrive/issues/532 is merged
@@ -208,14 +208,14 @@ class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelect
     override fun performBulkOperation(
         type: BulkOperationType,
         areAllFromTheSameFolder: Boolean,
-        selectedFilesCount: Int?,
+        allSelectedFileCount: Int?,
         destinationFolder: File?,
         color: String?,
     ) {
         // API doesn't support bulk operations for files originating from
         // different parent folders, so we repeat the action for each file.
         // Hence the `areAllFromTheSameFolder` set at false.
-        super.performBulkOperation(type, false, selectedFilesCount, destinationFolder, color)
+        super.performBulkOperation(type, false, allSelectedFileCount, destinationFolder, color)
     }
 
     override fun onIndividualActionSuccess(type: BulkOperationType, data: Any) {

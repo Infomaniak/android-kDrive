@@ -280,7 +280,7 @@ open class FileListFragment : MultiSelectFragment(), SwipeRefreshLayout.OnRefres
         getBackNavigationResult<String>(ColorFolderBottomSheetDialog.COLOR_FOLDER_NAV_KEY) {
             performBulkOperation(
                 type = BulkOperationType.COLOR_FOLDER,
-                selectedFilesCount = getSelectedFilesCount(),
+                allSelectedFileCount = getAllSelectedFileCount(),
                 color = it,
             )
         }
@@ -315,7 +315,7 @@ open class FileListFragment : MultiSelectFragment(), SwipeRefreshLayout.OnRefres
 
             closeButtonMultiSelect.setOnClickListener { closeMultiSelect() }
             moveButtonMultiSelect.setOnClickListener { moveFiles(folderId) }
-            deleteButtonMultiSelect.setOnClickListener { deleteFiles(getSelectedFilesCount()) }
+            deleteButtonMultiSelect.setOnClickListener { deleteFiles(getAllSelectedFileCount()) }
             menuButtonMultiSelect.setOnClickListener { onMenuButtonClicked() }
 
             selectAllButton.apply {
@@ -633,15 +633,19 @@ open class FileListFragment : MultiSelectFragment(), SwipeRefreshLayout.OnRefres
     override fun performBulkOperation(
         type: BulkOperationType,
         areAllFromTheSameFolder: Boolean,
-        selectedFilesCount: Int?,
+        allSelectedFileCount: Int?,
         destinationFolder: File?,
         color: String?,
     ) {
-        super.performBulkOperation(type, areAllFromTheSameFolder, getSelectedFilesCount(), destinationFolder, color)
+        super.performBulkOperation(type, areAllFromTheSameFolder, getAllSelectedFileCount(), destinationFolder, color)
     }
 
-    override fun getSelectedFilesCount(): Int? {
-        return if (multiSelectManager.areAllSelected) fileListViewModel.lastItemCount?.count ?: fileAdapter.itemCount else null
+    override fun getAllSelectedFileCount(): Int? {
+        return if (multiSelectManager.areAllSelected) {
+            fileListViewModel.lastItemCount?.count ?: fileAdapter.itemCount
+        } else {
+            null
+        }
     }
 
     override fun onIndividualActionSuccess(type: BulkOperationType, data: Any) {

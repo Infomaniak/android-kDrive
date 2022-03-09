@@ -76,7 +76,7 @@ abstract class MultiSelectFragment : Fragment(), MultiSelectResult {
 
                 performBulkOperation(
                     type = bulkOperationType,
-                    selectedFilesCount = getSelectedFilesCount(),
+                    allSelectedFileCount = getAllSelectedFileCount(),
                     destinationFolder = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId),
                 )
             }
@@ -128,14 +128,14 @@ abstract class MultiSelectFragment : Fragment(), MultiSelectResult {
         multiSelectLayout?.root?.isGone = true
     }
 
-    abstract fun getSelectedFilesCount(): Int?
+    abstract fun getAllSelectedFileCount(): Int?
 
     fun moveFiles(folderId: Int?) {
         requireContext().moveFileClicked(folderId, selectFolderResultLauncher)
     }
 
-    fun deleteFiles(fileCount: Int? = null) {
-        performBulkOperation(type = BulkOperationType.TRASH, selectedFilesCount = fileCount)
+    fun deleteFiles(allSelectedFileCount: Int? = null) {
+        performBulkOperation(type = BulkOperationType.TRASH, allSelectedFileCount = allSelectedFileCount)
     }
 
     fun colorFolders() {
@@ -158,13 +158,13 @@ abstract class MultiSelectFragment : Fragment(), MultiSelectResult {
     open fun performBulkOperation(
         type: BulkOperationType,
         areAllFromTheSameFolder: Boolean = true,
-        selectedFilesCount: Int? = null,
+        allSelectedFileCount: Int? = null,
         destinationFolder: File? = null,
         color: String? = null,
     ) = with(requireContext()) {
 
         val selectedFiles = multiSelectManager.getValidSelectedItems(type)
-        val fileCount = selectedFilesCount ?: selectedFiles.size
+        val fileCount = allSelectedFileCount ?: selectedFiles.size
 
         val sendActions: (dialog: Dialog?) -> Unit = sendActions(
             type, areAllFromTheSameFolder, fileCount, selectedFiles, destinationFolder, color
