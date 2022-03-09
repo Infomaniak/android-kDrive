@@ -50,11 +50,11 @@ class RecentChangesViewModel : ViewModel() {
                     )
                 )
             } else {
-                val isFirstPage = currentPage == 1
                 val apiResponse = ApiRepository.getLastModifiedFiles(driveId, currentPage)
                 when {
                     apiResponse.isSuccess() -> apiResponse.data?.let { data ->
                         val isComplete = data.size < PER_PAGE
+                        val isFirstPage = currentPage == 1
                         emit(FileListFragment.FolderFilesResult(files = data, isComplete = isComplete, page = currentPage))
                         FileController.storeRecentChanges(data, isFirstPage)
                     }

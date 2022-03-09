@@ -37,7 +37,9 @@ class RecentChangesFragment : FileSubTypeListFragment() {
         downloadFiles = DownloadFiles()
         setNoFilesLayout = SetNoFilesLayout()
         folderId = Utils.OTHER_ROOT_ID
-        setupFileAdapter()
+
+        super.onViewCreated(view, savedInstanceState)
+
         fileRecyclerView.apply {
             setPagination({
                 if (!fileAdapter.isComplete && !isDownloadingChanges) {
@@ -46,9 +48,6 @@ class RecentChangesFragment : FileSubTypeListFragment() {
                 }
             })
         }
-        downloadFiles(false, false)
-
-        super.onViewCreated(view, savedInstanceState)
 
         sortButton.isGone = true
         collapsingToolbarLayout.title = getString(R.string.lastEditsTitle)
