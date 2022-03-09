@@ -106,14 +106,7 @@ abstract class MultiSelectFragment : Fragment(), MultiSelectResult {
 
     fun onItemSelected(selectedNumber: Int? = null) {
         val fileSelectedNumber = selectedNumber ?: multiSelectManager.getValidSelectedItems().size
-
-        when (fileSelectedNumber) {
-            0, 1 -> {
-                val isEnabled = fileSelectedNumber == 1
-                enableMultiSelectButtons(isEnabled)
-            }
-        }
-
+        if (fileSelectedNumber in 0..1) enableMultiSelectButtons(fileSelectedNumber == 1)
         multiSelectLayout?.titleMultiSelect?.text = resources.getQuantityString(
             R.plurals.fileListMultiSelectedTitle, fileSelectedNumber, fileSelectedNumber
         )
