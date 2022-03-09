@@ -145,7 +145,7 @@ dependencies {
     implementation 'com.github.hannesa2:paho.mqtt.android:3.3.5'
     implementation 'com.github.matomo-org:matomo-sdk-android:4.1.4'
 
-    implementation 'io.sentry:sentry-android:5.6.1'
+    implementation 'io.sentry:sentry-android:5.6.2'
 
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.3'
     testImplementation 'io.github.serpro69:kotlin-faker:1.9.0'
