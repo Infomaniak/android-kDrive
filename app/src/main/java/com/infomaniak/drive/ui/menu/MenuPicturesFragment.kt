@@ -55,10 +55,7 @@ class MenuPicturesFragment : Fragment() {
             setMultiSelectClickListeners()
         }
 
-        picturesFragment.apply {
-            menuPicturesBinding = binding
-            multiSelectToolbar = binding.collapsingToolbarLayout
-        }
+        picturesFragment.menuPicturesBinding = binding
 
         return binding.root
     }

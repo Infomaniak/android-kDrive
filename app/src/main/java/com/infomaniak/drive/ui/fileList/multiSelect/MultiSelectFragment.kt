@@ -19,7 +19,9 @@ package com.infomaniak.drive.ui.fileList.multiSelect
 
 import android.app.Dialog
 import android.content.Intent
-import androidx.activity.result.contract.ActivityResultContracts
+import android.os.Bundle
+import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -64,9 +66,9 @@ abstract class MultiSelectFragment : Fragment(), MultiSelectResult {
     protected val multiSelectManager = MultiSelectManager()
     protected var adapter: RecyclerView.Adapter<*>? = null
     protected var multiSelectLayout: MultiSelectLayoutBinding? = null
-    var multiSelectToolbar: CollapsingToolbarLayout? = null
+    private var multiSelectToolbar: CollapsingToolbarLayout? = null
 
-    private val selectFolderResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data ->
             with(data?.extras!!) {
                 val folderId = getInt(FOLDER_ID_TAG)
@@ -81,6 +83,16 @@ abstract class MultiSelectFragment : Fragment(), MultiSelectResult {
                 )
             }
         }
+    }
+
+    abstract fun initMultiSelectLayout(): MultiSelectLayoutBinding?
+    abstract fun initMultiSelectToolbar(): CollapsingToolbarLayout?
+    abstract fun getAllSelectedFileCount(): Int?
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        multiSelectLayout = initMultiSelectLayout()
+        multiSelectToolbar = initMultiSelectToolbar()
+        super.onViewCreated(view, savedInstanceState)
     }
 
     fun openMultiSelect() {
@@ -127,8 +139,6 @@ abstract class MultiSelectFragment : Fragment(), MultiSelectResult {
         multiSelectToolbar?.isVisible = true
         multiSelectLayout?.root?.isGone = true
     }
-
-    abstract fun getAllSelectedFileCount(): Int?
 
     fun moveFiles(folderId: Int?) {
         requireContext().moveFileClicked(folderId, selectFolderResultLauncher)
