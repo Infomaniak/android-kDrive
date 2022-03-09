@@ -42,6 +42,9 @@ class FileActivitiesAdapter(val isFolder: Boolean) : LoaderAdapter<FileActivity>
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView) {
         if (getItemViewType(position) == VIEW_TYPE_LOADING) {
             activityDateCardView.startLoading()
+            activityUserName.resetLoader()
+            activityAction.resetLoader()
+            activityHour.resetLoader()
         } else {
             activityDateCardView.stopLoading()
 
