@@ -207,7 +207,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     private fun clearEdgeToEdge() {
         toggleSystemBar(true)
         requireActivity().window.toggleEdgeToEdge(false)
-        requireView().setOnApplyWindowInsetsListener(null) // This fixes an issue where the material bottom navigation's icons disappear
     }
 
     private fun setBackActionHandlers() {
@@ -278,7 +277,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
 
         view?.apply {
-            setOnApplyWindowInsetsListener(null) // This fixes an issue where the material bottom navigation's icons disappear
             ViewCompat.setOnApplyWindowInsetsListener(this) { _, windowInsets ->
                 with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
                     header?.setMargin(top = top, right = right, left = left)

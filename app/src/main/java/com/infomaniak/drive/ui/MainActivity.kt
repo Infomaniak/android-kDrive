@@ -298,6 +298,12 @@ class MainActivity : BaseActivity() {
 
         handleBottomNavigationVisibility(destination.id, shouldHideBottomNavigation)
 
+        // TODO: Find a better way to do this. Currently, we need to put that
+        // here and not in the preview slider fragment because of APIs <= 27.
+        if (destination.id != R.id.previewSliderFragment && destination.id != R.id.fileDetailsFragment) {
+            bottomNavigation.setOnApplyWindowInsetsListener(null)
+        }
+
         when (destination.id) {
             R.id.favoritesFragment,
             R.id.homeFragment,
