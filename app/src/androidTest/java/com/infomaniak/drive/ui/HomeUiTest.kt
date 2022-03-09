@@ -21,7 +21,6 @@ import androidx.test.filters.LargeTest
 import androidx.test.uiautomator.UiObjectNotFoundException
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.KDriveUiTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test

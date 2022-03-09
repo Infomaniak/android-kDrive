@@ -24,7 +24,6 @@ import androidx.test.filters.LargeTest
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.utils.KDriveUiTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test

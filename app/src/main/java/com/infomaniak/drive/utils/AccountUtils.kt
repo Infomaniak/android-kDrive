@@ -69,7 +69,7 @@ object AccountUtils : CredentialManager {
         set(userId) {
             field = userId
             GlobalScope.launch(Dispatchers.IO) {
-                AppSettings.updateAppSettings { appSettings -> appSettings._currentUserId = userId }
+                AppSettings.updateAppSettings { appSettings -> if (appSettings.isValid) appSettings._currentUserId = userId }
             }
         }
 

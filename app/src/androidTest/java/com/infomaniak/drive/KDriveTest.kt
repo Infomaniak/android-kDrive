@@ -24,6 +24,8 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.AccountUtils.addUser
+import com.infomaniak.drive.utils.AccountUtils.getUserById
 import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponseData
 import com.infomaniak.drive.utils.Env
 import com.infomaniak.drive.utils.KDriveHttpClient
@@ -46,10 +48,10 @@ open class KDriveTest {
 
         internal const val APP_PACKAGE = BuildConfig.APPLICATION_ID
         internal val context = ApplicationProvider.getApplicationContext<Context>()
-        internal lateinit var user: User
-        internal lateinit var userDrive: UserDrive
         internal lateinit var okHttpClient: OkHttpClient
         internal lateinit var uiRealm: Realm
+        internal lateinit var user: User
+        internal lateinit var userDrive: UserDrive
 
         @BeforeAll
         @JvmStatic
@@ -57,21 +59,24 @@ open class KDriveTest {
             if (Env.USE_CURRENT_USER) {
                 user = runBlocking(Dispatchers.IO) { AccountUtils.requestCurrentUser() }!!
                 InfomaniakCore.bearerToken = user.apiToken.accessToken
-
             } else {
                 InfomaniakCore.bearerToken = Env.TOKEN
 
                 val apiResponse = ApiRepository.getUserProfile(HttpClient.okHttpClientNoInterceptor)
                 assertApiResponseData(apiResponse)
                 user = apiResponse.data!!
-                if (AccountUtils.currentUserId != user.id) {
-                    runBlocking {
-                        user.apiToken = ApiToken(Env.TOKEN, "", "Bearer", userId = user.id, expiresAt = null)
+                user.apiToken = ApiToken(Env.TOKEN, "", "Bearer", userId = user.id, expiresAt = null)
+
+                runBlocking {
+                    if (getUserById(user.id) == null) {
                         user.organizations = arrayListOf()
-                        AccountUtils.addUser(user)
+                        addUser(user)
+                    } else {
+                        AccountUtils.currentUser = user
                     }
                 }
             }
+
             userDrive = UserDrive(user.id, Env.DRIVE_ID)
             okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(user.id) }
             uiRealm = FileController.getRealmInstance(userDrive)

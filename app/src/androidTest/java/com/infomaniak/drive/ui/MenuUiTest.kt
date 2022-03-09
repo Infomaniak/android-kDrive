@@ -23,8 +23,9 @@ import androidx.test.uiautomator.UiObjectNotFoundException
 import androidx.test.uiautomator.UiSelector
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.AccountUtils.removeUser
 import com.infomaniak.drive.utils.Env
-import com.infomaniak.drive.utils.KDriveUiTest
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -41,6 +42,8 @@ class MenuUiTest : KDriveUiTest() {
     @Test
     @DisplayName("Check UI to add a new kdrive user then log him off")
     fun testAddUser() {
+        // Remove the other user if he's already in the database
+        runBlocking { AccountUtils.getUserById(Env.NEW_USER_ID)?.let { removeUser(context, it) } }
         swipeDownNestedScrollView()
         getDeviceViewById("changeUserIcon").clickAndWaitForNewWindow()
         getDeviceViewById("addUser").clickAndWaitForNewWindow()
@@ -57,14 +60,14 @@ class MenuUiTest : KDriveUiTest() {
 
             // Save button
             try {
-                findObject(UiSelector().text("CONNECTION")).clickAndWaitForNewWindow(6000)
+                findObject(UiSelector().text("CONNECTION")).clickAndWaitForNewWindow(LONG_TIMEOUT)
             } catch (exception: UiObjectNotFoundException) {
-                findObject(UiSelector().text("CONNEXION")).clickAndWaitForNewWindow(6000)
+                findObject(UiSelector().text("CONNEXION")).clickAndWaitForNewWindow(LONG_TIMEOUT)
             }
 
             // Close the bottom sheet displayed for categories information
             closeBottomSheetInfoModalIfDisplayed()
-            getDeviceViewById("menuFragment").clickAndWaitForNewWindow(2000)
+            getDeviceViewById("menuFragment").clickAndWaitForNewWindow(SHORT_TIMEOUT)
             assert(AccountUtils.currentUserId == Env.NEW_USER_ID) { "User Id should be ${Env.NEW_USER_ID} but is ${AccountUtils.currentUserId}" }
             swipeDownNestedScrollView()
             getDeviceViewById("logout").clickAndWaitForNewWindow()

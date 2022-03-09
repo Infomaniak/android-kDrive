@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui
 
 import androidx.test.filters.LargeTest
-import com.infomaniak.drive.utils.KDriveUiTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -42,7 +41,7 @@ class FileListUiTest : KDriveUiTest() {
         val randomFolderName = "UI-Test-${UUID.randomUUID()}"
 
         createPrivateFolder(randomFolderName)
-        device.waitForWindowUpdate(null, 5000)
+        device.waitForWindowUpdate(null, LONG_TIMEOUT)
         findFileIfInList(randomFolderName, true)
 
         deleteFile(randomFolderName)

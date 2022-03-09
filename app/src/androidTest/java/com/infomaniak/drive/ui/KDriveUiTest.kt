@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.utils
+package com.infomaniak.drive.ui
 
 import android.view.View
 import androidx.annotation.IdRes
@@ -33,8 +33,8 @@ import androidx.test.uiautomator.*
 import com.infomaniak.drive.KDriveTest
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.fileList.FileViewHolder
+import com.infomaniak.drive.utils.AccountUtils
 import de.mannodermaus.junit5.ActivityScenarioExtension
 import org.hamcrest.Description
 import org.hamcrest.Matcher
@@ -49,6 +49,9 @@ open class KDriveUiTest : KDriveTest() {
     @JvmField
     @RegisterExtension
     val activityExtension = ActivityScenarioExtension.launch<MainActivity>()
+
+    protected val LONG_TIMEOUT = 6000L
+    protected val SHORT_TIMEOUT = 2000L
 
     var device: UiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
 
