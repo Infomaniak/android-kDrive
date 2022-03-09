@@ -38,11 +38,13 @@ class MenuPicturesFragment : Fragment() {
     private val picturesFragment = PicturesFragment(
         onFinish = {
             timer.cancel()
-            binding.swipeRefreshLayout.isRefreshing = false
+            if (::binding.isInitialized) binding.swipeRefreshLayout.isRefreshing = false
         },
     )
 
-    private val timer: CountDownTimer by lazy { createRefreshTimer { binding.swipeRefreshLayout.isRefreshing = true } }
+    private val timer: CountDownTimer by lazy {
+        createRefreshTimer { if (::binding.isInitialized) binding.swipeRefreshLayout.isRefreshing = true }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentMenuPicturesBinding.inflate(inflater, container, false).apply {

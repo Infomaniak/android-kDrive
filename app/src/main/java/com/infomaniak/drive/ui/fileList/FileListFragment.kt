@@ -88,7 +88,7 @@ open class FileListFragment : MultiSelectFragment(), SwipeRefreshLayout.OnRefres
     private var retryLoadingActivities = false
 
     protected val showLoadingTimer: CountDownTimer by lazy {
-        createRefreshTimer { binding.swipeRefreshLayout.isRefreshing = true }
+        createRefreshTimer { if (::binding.isInitialized) binding.swipeRefreshLayout.isRefreshing = true }
     }
 
     protected open var downloadFiles: (ignoreCache: Boolean, isNewSort: Boolean) -> Unit = DownloadFiles()
@@ -682,7 +682,7 @@ open class FileListFragment : MultiSelectFragment(), SwipeRefreshLayout.OnRefres
             getBackNavigationResult<SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
                 trackEvent("fileList", TrackerAction.CLICK, newSortType.name)
                 fileListViewModel.sortType = newSortType
-                binding.sortButton.setText(fileListViewModel.sortType.translation)
+                if (::binding.isInitialized) binding.sortButton.setText(fileListViewModel.sortType.translation)
 
                 downloadFiles(fileListViewModel.isSharedWithMe, true)
 
@@ -767,23 +767,27 @@ open class FileListFragment : MultiSelectFragment(), SwipeRefreshLayout.OnRefres
         hideFileList: Boolean,
         changeControlsVisibility: Boolean = true,
         ignoreOffline: Boolean = false
-    ) = with(binding) {
-        val isOffline = mainViewModel.isInternetAvailable.value == false
-        val hasFilesAndIsOffline = !hideFileList && isOffline
+    ) {
+        if (!::binding.isInitialized) return
 
-        sortLayout.isGone = hideFileList
+        with(binding) {
+            val isOffline = mainViewModel.isInternetAvailable.value == false
+            val hasFilesAndIsOffline = !hideFileList && isOffline
 
-        if (changeControlsVisibility) {
-            val isFileListDestination = findNavController().currentDestination?.id == R.id.fileListFragment
-            noNetwork.isVisible = hasFilesAndIsOffline
-            toolbar.menu?.findItem(R.id.searchItem)?.isVisible = !hideFileList && isFileListDestination
+            sortLayout.isGone = hideFileList
+
+            if (changeControlsVisibility) {
+                val isFileListDestination = findNavController().currentDestination?.id == R.id.fileListFragment
+                noNetwork.isVisible = hasFilesAndIsOffline
+                toolbar.menu?.findItem(R.id.searchItem)?.isVisible = !hideFileList && isFileListDestination
+            }
+
+            noFilesLayout.toggleVisibility(
+                noNetwork = isOffline && !ignoreOffline,
+                isVisible = hideFileList,
+                showRefreshButton = changeControlsVisibility
+            )
         }
-
-        noFilesLayout.toggleVisibility(
-            noNetwork = isOffline && !ignoreOffline,
-            isVisible = hideFileList,
-            showRefreshButton = changeControlsVisibility
-        )
     }
 
     open fun onRestartItemsClicked() = Unit
