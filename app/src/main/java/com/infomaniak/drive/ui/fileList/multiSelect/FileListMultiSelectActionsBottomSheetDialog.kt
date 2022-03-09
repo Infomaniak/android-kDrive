@@ -19,10 +19,14 @@ package com.infomaniak.drive.ui.fileList.multiSelect
 
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.fragment.app.activityViewModels
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.ui.MainViewModel
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_multi_select_actions.*
 
 class FileListMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog() {
+
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     override fun configureColoredFolder(areIndividualActionsVisible: Boolean) {
         if (areIndividualActionsVisible) {
@@ -35,10 +39,9 @@ class FileListMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomShee
     }
 
     private fun computeColoredFolderAvailability(fileIds: IntArray): Boolean {
-        fileIds.forEach {
-            val file = FileController.getFileById(it)
-            if (file?.isAllowedToBeColored() == true) return true
+        return fileIds.any {
+            val file = FileController.getFileProxyById(fileId = it, customRealm = mainViewModel.realm)
+            file?.isAllowedToBeColored() == true
         }
-        return false
     }
 }
