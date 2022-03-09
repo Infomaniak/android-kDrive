@@ -15,18 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.ui.bottomSheetDialogs
+package com.infomaniak.drive.ui.fileList.multiSelect
 
-import android.app.Application
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.liveData
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -34,35 +30,34 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.BulkOperationType
-import com.infomaniak.drive.ui.menu.PicturesFragment
 import com.infomaniak.drive.utils.*
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_action_multi_select.*
+import com.infomaniak.drive.utils.MatomoUtils.trackBulkActionEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_multi_select_actions.*
+import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.Dispatchers
 
-class ActionPicturesMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
+abstract class MultiSelectActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
-    private val actionMultiSelectModel by viewModels<ActionMultiSelectModel>()
-    private val navigationArgs: ActionMultiSelectBottomSheetDialogArgs by navArgs()
+    val navigationArgs: MultiSelectActionsBottomSheetDialogArgs by navArgs()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.fragment_bottom_sheet_action_multi_select, container, false)
+        return inflater.inflate(R.layout.fragment_bottom_sheet_multi_select_actions, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val otherActionsVisibility = navigationArgs.fileIds.size in 1..BulkOperationsUtils.MIN_SELECTED
-        configureColoredFolder()
-        configureAddFavorites(otherActionsVisibility)
-        configureAvailableOffline(otherActionsVisibility)
+        val areIndividualActionsVisible = navigationArgs.fileIds.size in 1..BulkOperationsUtils.MIN_SELECTED
+        configureColoredFolder(areIndividualActionsVisible)
+        configureAddFavorites(areIndividualActionsVisible)
+        configureAvailableOffline(areIndividualActionsVisible)
         configureDownloadFile()
         configureDuplicateFile()
     }
 
-    private fun configureColoredFolder() {
-        coloredFolder.isGone = true
-    }
+    abstract fun configureColoredFolder(areIndividualActionsVisible: Boolean)
 
-    private fun configureAddFavorites(otherActionsVisibility: Boolean) = with(navigationArgs) {
+    private fun configureAddFavorites(areIndividualActionsVisible: Boolean) = with(navigationArgs) {
         addFavorites.apply {
             addFavoritesIcon.isEnabled = onlyFavorite
             val (text, action) = if (onlyFavorite) {
@@ -72,11 +67,11 @@ class ActionPicturesMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
             }
             addFavoritesText.setText(text)
             setOnClickListener { onActionSelected(action) }
-            isVisible = otherActionsVisibility
+            isVisible = areIndividualActionsVisible
         }
     }
 
-    private fun configureAvailableOffline(otherActionsVisibility: Boolean) = with(navigationArgs) {
+    private fun configureAvailableOffline(areIndividualActionsVisible: Boolean) = with(navigationArgs) {
         availableOfflineSwitch.apply {
             isChecked = onlyOffline
             setOnCheckedChangeListener { _, _ -> selectOfflineDialogActionCallBack() }
@@ -84,7 +79,7 @@ class ActionPicturesMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
         disabledAvailableOffline.isVisible = onlyFolders
         availableOffline.apply {
             setOnClickListener { selectOfflineDialogActionCallBack() }
-            isVisible = otherActionsVisibility
+            isVisible = areIndividualActionsVisible
         }
     }
 
@@ -95,12 +90,17 @@ class ActionPicturesMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun configureDownloadFile() {
         val drivePermissions = DrivePermissions().apply {
-            registerPermissions(this@ActionPicturesMultiSelectBottomSheetDialog) { authorized ->
+            registerPermissions(this@MultiSelectActionsBottomSheetDialog) { authorized ->
                 if (authorized) downloadFileArchive()
             }
         }
         downloadFile.apply {
-            setOnClickListener { if (drivePermissions.checkWriteStoragePermission()) downloadFileArchive() }
+            setOnClickListener {
+                if (drivePermissions.checkWriteStoragePermission()) {
+                    context?.applicationContext?.trackEvent("FileAction", TrackerAction.CLICK, "bulkDownload")
+                    downloadFileArchive()
+                }
+            }
             isVisible = navigationArgs.fileIds.isNotEmpty()
         }
     }
@@ -110,11 +110,16 @@ class ActionPicturesMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun downloadFileArchive() {
-        actionMultiSelectModel.downloadArchive(navigationArgs.fileIds).observe(viewLifecycleOwner) { apiResponse ->
+
+        fun downloadArchive(fileIds: IntArray) = liveData(Dispatchers.IO) {
+            emit(ApiRepository.getUUIDArchiveFiles(AccountUtils.currentDriveId, fileIds))
+        }
+
+        downloadArchive(navigationArgs.fileIds).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 apiResponse.data?.let {
                     val downloadURL = Uri.parse(ApiRoutes.downloadArchiveFiles(AccountUtils.currentDriveId, it.uuid))
-                    requireContext().startDownloadFile(downloadURL, "Archive.zip")
+                    requireContext().startDownloadFile(downloadURL, ARCHIVE_FILE_NAME)
                 }
             } else {
                 requireActivity().showSnackbar(apiResponse.translatedError)
@@ -123,34 +128,37 @@ class ActionPicturesMultiSelectBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun onActionSelected(type: SelectDialogAction? = null) {
+    fun onActionSelected(type: SelectDialogAction? = null) {
         val finalType = when (type) {
             SelectDialogAction.ADD_FAVORITES -> BulkOperationType.ADD_FAVORITES
             SelectDialogAction.REMOVE_FAVORITES -> BulkOperationType.REMOVE_FAVORITES
             SelectDialogAction.ADD_OFFLINE -> BulkOperationType.ADD_OFFLINE
             SelectDialogAction.REMOVE_OFFLINE -> BulkOperationType.REMOVE_OFFLINE
             SelectDialogAction.DUPLICATE -> BulkOperationType.COPY
+            SelectDialogAction.COLOR_FOLDER -> BulkOperationType.COLOR_FOLDER
             else -> null
         }
 
-        (parentFragment as PicturesFragment).apply {
-            when (finalType) {
-                null -> closeMultiSelect()
-                BulkOperationType.COPY -> duplicateFiles()
-                else -> performBulkOperation(finalType)
+        (parentFragment as MultiSelectFragment).apply {
+            if (finalType == null) {
+                closeMultiSelect()
+            } else {
+                context?.applicationContext?.trackBulkActionEvent(finalType, navigationArgs.fileIds.size)
+                when (finalType) {
+                    BulkOperationType.COPY -> duplicateFiles()
+                    BulkOperationType.COLOR_FOLDER -> colorFolders()
+                    else -> performBulkOperation(finalType)
+                }
             }
         }
-
         parentFragmentManager.beginTransaction().remove(this).commit()
     }
 
-    class ActionMultiSelectModel(app: Application) : AndroidViewModel(app) {
-        fun downloadArchive(fileIds: IntArray) = liveData(Dispatchers.IO) {
-            emit(ApiRepository.getUUIDArchiveFiles(AccountUtils.currentDriveId, fileIds))
-        }
+    enum class SelectDialogAction {
+        ADD_FAVORITES, REMOVE_FAVORITES, ADD_OFFLINE, REMOVE_OFFLINE, DUPLICATE, COLOR_FOLDER
     }
 
-    enum class SelectDialogAction {
-        ADD_FAVORITES, REMOVE_FAVORITES, ADD_OFFLINE, REMOVE_OFFLINE, DUPLICATE
+    private companion object {
+        const val ARCHIVE_FILE_NAME = "Archive.zip"
     }
 }

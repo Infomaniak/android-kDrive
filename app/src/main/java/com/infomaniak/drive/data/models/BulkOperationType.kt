@@ -48,7 +48,5 @@ enum class BulkOperationType(@StringRes val title: Int, @PluralsRes val successM
         }
     }
 
-    override fun toString(): String {
-        return name.lowercase().replaceFirstChar { it.titlecase() }
-    }
+    override fun toString(): String = name.lowercase().replaceFirstChar { it.titlecase() }
 }

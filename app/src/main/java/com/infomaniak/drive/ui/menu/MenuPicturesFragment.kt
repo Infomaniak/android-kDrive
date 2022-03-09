@@ -23,9 +23,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
-import androidx.core.view.isGone
 import androidx.core.view.isInvisible
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
@@ -33,19 +31,19 @@ import com.infomaniak.drive.databinding.FragmentMenuPicturesBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 
-class MenuPicturesFragment : Fragment(), MultiSelectParent {
+class MenuPicturesFragment : Fragment() {
 
     private lateinit var binding: FragmentMenuPicturesBinding
 
-    private val picturesFragment: PicturesFragment by lazy {
-        PicturesFragment(this@MenuPicturesFragment) {
+    private val picturesFragment = PicturesFragment(
+        onFinish = {
             timer.cancel()
-            binding.swipeRefreshLayout.isRefreshing = false
-        }
-    }
+            if (::binding.isInitialized) binding.swipeRefreshLayout.isRefreshing = false
+        },
+    )
 
     private val timer: CountDownTimer by lazy {
-        createRefreshTimer { binding.swipeRefreshLayout.isRefreshing = true }
+        createRefreshTimer { if (::binding.isInitialized) binding.swipeRefreshLayout.isRefreshing = true }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -59,14 +57,16 @@ class MenuPicturesFragment : Fragment(), MultiSelectParent {
             setMultiSelectClickListeners()
         }
 
+        picturesFragment.menuPicturesBinding = binding
+
         return binding.root
     }
 
     private fun MultiSelectLayoutBinding.setMultiSelectClickListeners() = with(picturesFragment) {
-        closeButtonMultiSelect.setOnClickListener { onCloseMultiSelection() }
-        moveButtonMultiSelect.setOnClickListener { onMove() }
-        deleteButtonMultiSelect.setOnClickListener { onDelete() }
-        menuButtonMultiSelect.setOnClickListener { onMenu() }
+        closeButtonMultiSelect.setOnClickListener { closeMultiSelect() }
+        moveButtonMultiSelect.setOnClickListener { onMoveButtonClicked() }
+        deleteButtonMultiSelect.setOnClickListener { deleteFiles() }
+        menuButtonMultiSelect.setOnClickListener { onMenuButtonClicked() }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -75,44 +75,11 @@ class MenuPicturesFragment : Fragment(), MultiSelectParent {
         ViewCompat.requestApplyInsets(binding.pictureListCoordinator)
 
         timer.start()
+
         if (childFragmentManager.findFragmentByTag("picturesFragment") == null) {
             childFragmentManager.beginTransaction()
                 .replace(R.id.picturesFragmentView, picturesFragment, "picturesFragment")
                 .commit()
         }
-    }
-
-    override fun openMultiSelectBar() = with(binding) {
-        collapsingToolbarLayout.isGone = true
-        multiSelectLayout.root.isVisible = true
-    }
-
-    override fun closeMultiSelectBar() = with(binding) {
-        collapsingToolbarLayout.isVisible = true
-        multiSelectLayout.root.isGone = true
-    }
-
-    override fun enableMultiSelectActionButtons() = with(binding.multiSelectLayout) {
-        deleteButtonMultiSelect.isEnabled = true
-        moveButtonMultiSelect.isEnabled = true
-        menuButtonMultiSelect.isEnabled = true
-    }
-
-    override fun disableMultiSelectActionButtons() = with(binding.multiSelectLayout) {
-        deleteButtonMultiSelect.isEnabled = false
-        moveButtonMultiSelect.isEnabled = false
-        menuButtonMultiSelect.isEnabled = false
-    }
-
-    override fun setTitleMultiSelect(title: String) = with(binding.multiSelectLayout) {
-        titleMultiSelect.text = title
-    }
-
-    override fun disableSwipeRefresh() = with(binding) {
-        swipeRefreshLayout.isEnabled = false
-    }
-
-    override fun enableSwipeRefresh() = with(binding) {
-        swipeRefreshLayout.isEnabled = true
     }
 }

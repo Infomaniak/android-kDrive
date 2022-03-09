@@ -17,8 +17,6 @@
  */
 package com.infomaniak.drive.ui.fileList
 
-import android.app.Dialog
-import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
@@ -26,16 +24,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
-import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
@@ -44,65 +37,60 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.WorkInfo
+import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
-import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.SortTypeUsage
-import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerSucceeded
-import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog
-import com.infomaniak.drive.ui.bottomSheetDialogs.ActionMultiSelectBottomSheetDialog.Companion.SELECT_DIALOG_ACTION
+import com.infomaniak.drive.databinding.FragmentFileListBinding
+import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
-import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.BULK_OPERATION_CUSTOM_TAG
+import com.infomaniak.drive.ui.fileList.multiSelect.FileListMultiSelectActionsBottomSheetDialog
+import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialogArgs
+import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.BulkOperationsUtils.generateWorkerData
-import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
 import com.infomaniak.drive.utils.FilePresenter.openBookmark
 import com.infomaniak.drive.utils.FilePresenter.openBookmarkIntent
-import com.infomaniak.drive.utils.MatomoUtils.trackBulkActionEvent
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.drive.utils.Utils.moveFileClicked
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.setPagination
 import com.infomaniak.lib.core.utils.showProgress
-import io.realm.RealmList
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_file_list.*
-import kotlinx.android.synthetic.main.fragment_new_folder.toolbar
-import kotlinx.android.synthetic.main.multi_select_layout.*
 import kotlinx.coroutines.*
 
-open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
+open class FileListFragment : MultiSelectFragment(), SwipeRefreshLayout.OnRefreshListener {
+
+    private lateinit var binding: FragmentFileListBinding
 
     protected lateinit var fileAdapter: FileAdapter
     protected val fileListViewModel: FileListViewModel by viewModels()
-    protected val mainViewModel: MainViewModel by activityViewModels()
 
     private val navigationArgs: FileListFragmentArgs by navArgs()
 
     internal var folderId = ROOT_ID
     internal var folderName: String = "/"
-    private var currentFolder: File? = null
 
     private lateinit var activitiesRefreshTimer: CountDownTimer
     private var isDownloading = false
     private var isLoadingActivities = false
     private var retryLoadingActivities = false
 
-    protected val showLoadingTimer: CountDownTimer by lazy { createRefreshTimer { swipeRefreshLayout?.isRefreshing = true } }
+    protected val showLoadingTimer: CountDownTimer by lazy {
+        createRefreshTimer { if (::binding.isInitialized) binding.swipeRefreshLayout.isRefreshing = true }
+    }
+
     protected open var downloadFiles: (ignoreCache: Boolean, isNewSort: Boolean) -> Unit = DownloadFiles()
     protected open var sortFiles: () -> Unit = SortFiles()
     protected open var setNoFilesLayout: () -> Unit = SetNoFilesLayout()
@@ -113,22 +101,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     protected open var sortTypeUsage = SortTypeUsage.FILE_LIST
 
     protected var userDrive: UserDrive? = null
-
-    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
-        it.whenResultIsOk { data ->
-            with(data?.extras!!) {
-                val folderId = getInt(SelectFolderActivity.FOLDER_ID_TAG)
-                val folderName = getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
-                val customArgs = getBundle(SelectFolderActivity.CUSTOM_ARGS_TAG)
-                val bulkOperationType = customArgs?.getParcelable<BulkOperationType>(BULK_OPERATION_CUSTOM_TAG)!!
-
-                performBulkOperation(
-                    type = bulkOperationType,
-                    destinationFolder = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId),
-                )
-            }
-        }
-    }
 
     companion object {
         const val REFRESH_FAVORITE_FILE = "force_list_refresh"
@@ -153,8 +125,12 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         folderId = navigationArgs.folderId
         folderName = if (folderId == ROOT_ID) AccountUtils.getCurrentDrive()?.name ?: "/" else navigationArgs.folderName
-        return inflater.inflate(R.layout.fragment_file_list, container, false)
+        binding = FragmentFileListBinding.inflate(inflater, container, false)
+        return binding.root
     }
+
+    override fun initMultiSelectLayout(): MultiSelectLayoutBinding? = binding.multiSelectLayout
+    override fun initMultiSelectToolbar(): CollapsingToolbarLayout? = binding.collapsingToolbarLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -189,20 +165,26 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         setNoFilesLayout()
 
-        if ((folderId == ROOT_ID || folderId == OTHER_ROOT_ID) && hideBackButtonWhenRoot) toolbar.navigationIcon = null
-        toolbar.setOnMenuItemClickListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.searchItem -> safeNavigate(FileListFragmentDirections.actionFileListFragmentToSearchFragment())
-                R.id.restartItem -> onRestartItemsClicked()
-                R.id.closeItem -> onCloseItemsClicked()
+        binding.toolbar.apply {
+            if ((folderId == ROOT_ID || folderId == OTHER_ROOT_ID) && hideBackButtonWhenRoot) navigationIcon = null
+
+            setOnMenuItemClickListener { menuItem ->
+                when (menuItem.itemId) {
+                    R.id.searchItem -> safeNavigate(FileListFragmentDirections.actionFileListFragmentToSearchFragment())
+                    R.id.restartItem -> onRestartItemsClicked()
+                    R.id.closeItem -> onCloseItemsClicked()
+                }
+                true
             }
-            true
+
+            setNavigationOnClickListener { findNavController().popBackStack() }
+
+            menu?.findItem(R.id.searchItem)?.isVisible = findNavController().currentDestination?.id == R.id.fileListFragment
         }
-        toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
         if (homeClassName() == null) {
             requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-                if (fileAdapter.multiSelectMode) {
+                if (multiSelectManager.isMultiSelectOpened) {
                     closeMultiSelect()
                 } else {
                     findNavController().popBackStack()
@@ -210,9 +192,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
         }
 
-        swipeRefreshLayout.setOnRefreshListener(this)
-        collapsingToolbarLayout.title = folderName
-        ViewCompat.requestApplyInsets(fileListCoordinator) // Restore coordinator state
+        with(binding) {
+            swipeRefreshLayout.setOnRefreshListener(this@FileListFragment)
+            collapsingToolbarLayout.title = folderName
+            ViewCompat.requestApplyInsets(fileListCoordinator) // Restore coordinator state
+        }
 
         setupFileAdapter()
 
@@ -251,8 +235,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 }
             }
         }
-
-        toolbar?.menu?.findItem(R.id.searchItem)?.isVisible = findNavController().currentDestination?.id == R.id.fileListFragment
 
         MqttClientWrapper.observe(viewLifecycleOwner) { notification ->
             if (notification is ActionNotification && notification.driveId == AccountUtils.currentDriveId) refreshActivities()
@@ -297,7 +279,11 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         getBackNavigationResult<String>(ColorFolderBottomSheetDialog.COLOR_FOLDER_NAV_KEY) {
-            performBulkOperation(type = BulkOperationType.COLOR_FOLDER, color = it)
+            performBulkOperation(
+                type = BulkOperationType.COLOR_FOLDER,
+                allSelectedFileCount = getAllSelectedFileCount(),
+                color = it,
+            )
         }
     }
 
@@ -323,242 +309,39 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         super.onDestroyView()
     }
 
-    private fun performBulkOperation(type: BulkOperationType, destinationFolder: File? = null, color: String? = null) {
-
-        var selectedFiles = fileAdapter.getValidItemsSelected()
-
-        if (type == BulkOperationType.ADD_FAVORITES) selectedFiles = selectedFiles.filter { !it.isFavorite }
-        else if (type == BulkOperationType.REMOVE_FAVORITES) selectedFiles = selectedFiles.filter { it.isFavorite }
-
-        val fileCount = if (fileAdapter.allSelected) {
-            fileListViewModel.lastItemCount?.count ?: fileAdapter.itemCount
-        } else {
-            selectedFiles.size
-        }
-
-        val sendActions: (dialog: Dialog?) -> Unit = sendActions(fileCount, selectedFiles, type, destinationFolder, color)
-        context?.applicationContext?.trackBulkActionEvent(type, fileCount)
-
-        if (type == BulkOperationType.TRASH) {
-            Utils.createConfirmation(
-                context = requireContext(),
-                title = getString(R.string.modalMoveTrashTitle),
-                message = resources.getQuantityString(R.plurals.modalMoveTrashDescription, fileCount, fileCount),
-                isDeletion = true,
-                onConfirmation = sendActions,
-            )
-        } else {
-            sendActions(null)
-        }
-    }
-
-    private fun sendActions(
-        fileCount: Int,
-        selectedFiles: List<File>,
-        type: BulkOperationType,
-        destinationFolder: File?,
-        color: String?,
-    ): (Dialog?) -> Unit = {
-
-        val canBulkAllSelectedFiles = fileAdapter.allSelected && fileCount > BulkOperationsUtils.MIN_SELECTED
-        val hasEnoughSelectedFilesToBulk = selectedFiles.size > BulkOperationsUtils.MIN_SELECTED
-
-        if (canBulkAllSelectedFiles || hasEnoughSelectedFilesToBulk) {
-            sendBulkAction(
-                fileCount, BulkOperation(
-                    action = type,
-                    fileIds = if (fileAdapter.allSelected) null else selectedFiles.map { it.id },
-                    parent = currentFolder!!,
-                    destinationFolderId = destinationFolder?.id,
-                )
-            )
-
-        } else {
-            val mediator = mainViewModel.createMultiSelectMediator()
-            enableButtonMultiSelect(false)
-            sendIndividualActions(selectedFiles, type, mediator, destinationFolder, color)
-            observeMediator(mediator, fileCount, type, destinationFolder)
-        }
-    }
-
-    private fun sendIndividualActions(
-        selectedFiles: List<File>,
-        type: BulkOperationType,
-        mediator: MediatorLiveData<Pair<Int, Int>>,
-        destinationFolder: File?,
-        color: String?,
-    ) {
-        selectedFiles.reversed().forEach {
-            val file = when {
-                it.isManagedAndValidByRealm() -> it.realm.copyFromRealm(it, 0)
-                it.isNotManagedByRealm() -> it
-                else -> return@forEach
-            }
-            sendAction(file, type, mediator, destinationFolder, color)
-        }
-    }
-
-    private fun observeMediator(
-        mediator: MediatorLiveData<Pair<Int, Int>>,
-        fileCount: Int,
-        type: BulkOperationType,
-        destinationFolder: File?,
-    ) {
-        mediator.observe(viewLifecycleOwner) { (success, total) ->
-            if (total == fileCount) handleBulkActionResult(success, type, destinationFolder)
-        }
-    }
-
-    private fun sendBulkAction(fileCount: Int = 0, bulkOperation: BulkOperation) {
-        MqttClientWrapper.start {
-            fileListViewModel.performCancellableBulkOperation(bulkOperation).observe(viewLifecycleOwner) { apiResponse ->
-                if (apiResponse.isSuccess()) {
-                    apiResponse.data?.let { cancellableAction ->
-                        requireContext().launchBulkOperationWorker(
-                            generateWorkerData(cancellableAction.cancelId, fileCount, bulkOperation.action)
-                        )
-                    }
-                } else requireActivity().showSnackbar(apiResponse.translateError())
-                closeMultiSelect()
-            }
-        }
-    }
-
-    private fun sendAction(
-        file: File,
-        type: BulkOperationType,
-        mediator: MediatorLiveData<Pair<Int, Int>>,
-        destinationFolder: File?,
-        color: String?,
-    ) {
-
-        val onSuccess: (Int) -> Unit = { fileId ->
-            runBlocking(Dispatchers.Main) { fileAdapter.deleteByFileId(fileId) }
-        }
-
-        when (type) {
-            BulkOperationType.TRASH -> {
-                mediator.addSource(
-                    mainViewModel.deleteFile(file, onSuccess = onSuccess),
-                    mainViewModel.updateMultiSelectMediator(mediator),
-                )
-            }
-            BulkOperationType.MOVE -> {
-                mediator.addSource(
-                    mainViewModel.moveFile(file, destinationFolder!!, onSuccess),
-                    mainViewModel.updateMultiSelectMediator(mediator),
-                )
-            }
-            BulkOperationType.COPY -> {
-                val fileName = file.getFileName()
-                mediator.addSource(
-                    mainViewModel.duplicateFile(
-                        file,
-                        destinationFolder!!.id,
-                        requireContext().getString(R.string.allDuplicateFileName, fileName, file.getFileExtension()),
-                    ),
-                    mainViewModel.updateMultiSelectMediator(mediator),
-                )
-            }
-            BulkOperationType.COLOR_FOLDER -> {
-                if (color != null && file.isAllowedToBeColored()) {
-                    mediator.addSource(
-                        mainViewModel.updateFolderColor(file, color),
-                        mainViewModel.updateMultiSelectMediator(mediator),
-                    )
-                } else {
-                    mediator.apply {
-                        val success = value?.first ?: 0
-                        val total = (value?.second ?: 0) + 1
-                        value = success to total
-                    }
-                }
-            }
-            BulkOperationType.ADD_OFFLINE, BulkOperationType.REMOVE_OFFLINE -> addOrRemoveSelectedFilesToOffline(file, type)
-            BulkOperationType.ADD_FAVORITES -> {
-                mediator.addSource(
-                    mainViewModel.addFileToFavorites(file) {
-                        lifecycleScope.launch(Dispatchers.Main) {
-                            fileAdapter.notifyFileChanged(file.id) { file ->
-                                if (!file.isManaged) file.isFavorite = true
-                            }
-                        }
-                    },
-                    mainViewModel.updateMultiSelectMediator(mediator),
-                )
-            }
-            BulkOperationType.REMOVE_FAVORITES -> {
-                mediator.addSource(
-                    mainViewModel.deleteFileFromFavorites(file),
-                    mainViewModel.updateMultiSelectMediator(mediator),
-                )
-            }
-        }
-    }
-
-    private fun handleBulkActionResult(success: Int, type: BulkOperationType, destinationFolder: File?) {
-        val title = if (success == 0) {
-            getString(R.string.anErrorHasOccurred)
-        } else {
-            resources.getQuantityString(type.successMessage, success, success, destinationFolder?.name + "/")
-        }
-        requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
-        refreshActivities()
-        closeMultiSelect()
-    }
-
     private fun setupMultiSelect() {
-        fileAdapter.enabledMultiSelectMode = true
+        multiSelectManager.isMultiSelectAuthorized = true
 
-        closeButtonMultiSelect.setOnClickListener { closeMultiSelect() }
+        multiSelectLayout?.apply {
 
-        deleteButtonMultiSelect.setOnClickListener { performBulkOperation(BulkOperationType.TRASH) }
+            closeButtonMultiSelect.setOnClickListener { closeMultiSelect() }
+            moveButtonMultiSelect.setOnClickListener { moveFiles(folderId) }
+            deleteButtonMultiSelect.setOnClickListener { deleteFiles(getAllSelectedFileCount()) }
+            menuButtonMultiSelect.setOnClickListener { onMenuButtonClicked() }
 
-        moveButtonMultiSelect.setOnClickListener { context?.moveFileClicked(folderId, selectFolderResultLauncher) }
+            selectAllButton.apply {
+                initProgress(viewLifecycleOwner)
+                setOnClickListener {
+                    showProgress(ContextCompat.getColor(requireContext(), R.color.primary))
+                    if (multiSelectManager.areAllSelected) {
+                        fileAdapter.configureAllSelected(false)
+                        onUpdateMultiSelect()
+                    } else {
+                        fileAdapter.configureAllSelected(true)
+                        enableMultiSelectButtons(false)
 
-        menuButtonMultiSelect.setOnClickListener {
-            val fileIds = arrayListOf<Int>()
-            var (onlyFolders, onlyFavorite, onlyOffline) = arrayOf(true, true, true)
-            fileAdapter.getValidItemsSelected().forEach {
-                fileIds.add(it.id)
-                if (!it.isFolder()) onlyFolders = false
-                if (!it.isFavorite) onlyFavorite = false
-                if (!it.isOffline) onlyOffline = false
-            }
-
-            safeNavigate(
-                FileListFragmentDirections.actionFileListFragmentToActionMultiSelectBottomSheetDialog(
-                    fileIds = fileIds.toIntArray(),
-                    onlyFolders = onlyFolders,
-                    onlyFavorite = onlyFavorite,
-                    onlyOffline = onlyOffline,
-                )
-            )
-        }
-
-        selectAllButton.apply {
-            initProgress(viewLifecycleOwner)
-            setOnClickListener {
-                showProgress(ContextCompat.getColor(requireContext(), R.color.primary))
-                if (fileAdapter.allSelected) {
-                    fileAdapter.configureAllSelected(false)
-                    onUpdateMultiSelect()
-                } else {
-                    fileAdapter.configureAllSelected(true)
-                    enableButtonMultiSelect(false)
-
-                    fileListViewModel.getFileCount(currentFolder!!).observe(viewLifecycleOwner) { fileCount ->
-                        val fileNumber = fileCount.count
-                        if (fileNumber < BulkOperationsUtils.MIN_SELECTED) fileAdapter.itemsSelected = fileAdapter.getFiles()
-                        enableButtonMultiSelect(true)
-                        onUpdateMultiSelect(fileNumber)
+                        fileListViewModel.getFileCount(multiSelectManager.currentFolder!!)
+                            .observe(viewLifecycleOwner) { fileCount ->
+                                val fileNumber = fileCount.count
+                                if (fileNumber < BulkOperationsUtils.MIN_SELECTED) {
+                                    multiSelectManager.selectedItems = fileAdapter.getFiles()
+                                }
+                                enableMultiSelectButtons(true)
+                                onUpdateMultiSelect(fileNumber)
+                            }
                     }
                 }
             }
-        }
-
-        getBackNavigationResult<Boolean>(ActionMultiSelectBottomSheetDialog.DISABLE_SELECT_MODE) {
-            if (it) closeMultiSelect()
         }
     }
 
@@ -566,11 +349,13 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         setupToggleDisplayButton()
         setupListMode()
         setupSortButton()
-        uploadFileInProgress.setUploadFileInProgress(R.string.uploadInThisFolderTitle) { goToUploadInProgress(folderId) }
+        binding.uploadFileInProgress.root.setUploadFileInProgress(R.string.uploadInThisFolderTitle) {
+            goToUploadInProgress(folderId)
+        }
     }
 
     private fun setupToggleDisplayButton() {
-        toggleDisplayButton.setOnClickListener {
+        binding.toggleDisplayButton.setOnClickListener {
             val newListMode = !UiSettings(requireContext()).listMode
             trackEvent("displayStyle", TrackerAction.CLICK, if (newListMode) "viewList" else "viewGrid")
             UiSettings(requireContext()).listMode = newListMode
@@ -586,7 +371,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun setupSortButton() {
-        sortButton.apply {
+        binding.sortButton.apply {
             setText(fileListViewModel.sortType.translation)
             setOnClickListener { navigateToSortFilesDialog() }
         }
@@ -602,10 +387,15 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     protected open fun setupFileAdapter() {
         mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
             fileAdapter.toggleOfflineMode(requireContext(), !isInternetAvailable)
-            noNetwork.isGone = isInternetAvailable
+            binding.noNetwork.isGone = isInternetAvailable
         }
 
-        fileAdapter = FileAdapter(FileController.emptyList(mainViewModel.realm)).apply {
+        multiSelectManager.apply {
+            openMultiSelect = { openMultiSelect() }
+            updateMultiSelect = { onUpdateMultiSelect() }
+        }
+
+        fileAdapter = FileAdapter(multiSelectManager, FileController.emptyList(mainViewModel.realm)).apply {
             stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
             setHasStableIds(true)
 
@@ -627,10 +417,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 }
             }
 
-            openMultiSelectMode = { openMultiSelect() }
-
-            updateMultiSelectMode = { onUpdateMultiSelect() }
-
             onMenuClicked = { file ->
                 val fileObject = file.realm?.copyFromRealm(file, 1) ?: file
                 val bundle = FileInfoActionsBottomSheetDialogArgs(
@@ -639,14 +425,15 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 ).toBundle()
                 safeNavigate(R.id.fileInfoActionsBottomSheetDialog, bundle, currentClassName = homeClassName())
             }
+
+            adapter = this
         }
 
-        onBackNavigationResult()
-        fileRecyclerView.setHasFixedSize(true)
-        fileRecyclerView.adapter = fileAdapter
-        fileRecyclerView.setPagination({
-            if (!fileAdapter.isComplete) fileAdapter.showLoading()
-        })
+        binding.fileRecyclerView.apply {
+            setHasFixedSize(true)
+            adapter = fileAdapter
+            setPagination({ if (!fileAdapter.isComplete) fileAdapter.showLoading() })
+        }
 
         mainViewModel.updateOfflineFile.observe(viewLifecycleOwner) {
             it?.let { fileId ->
@@ -685,73 +472,6 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         Utils.displayFile(mainViewModel, findNavController(), this, fileList)
     }
 
-    private fun onBackNavigationResult() {
-        // TODO - 2 - Implement download for multiselection !
-        getBackNavigationResult<BulkOperationType>(SELECT_DIALOG_ACTION) { type ->
-            when (type) {
-                BulkOperationType.COPY -> {
-                    val intent = Intent(requireContext(), SelectFolderActivity::class.java).apply {
-                        putExtra(SelectFolderActivity.USER_ID_TAG, AccountUtils.currentUserId)
-                        putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
-                        putExtra(
-                            SelectFolderActivity.CUSTOM_ARGS_TAG,
-                            bundleOf(BULK_OPERATION_CUSTOM_TAG to BulkOperationType.COPY),
-                        )
-                    }
-                    selectFolderResultLauncher.launch(intent)
-                }
-                BulkOperationType.COLOR_FOLDER -> {
-                    if (AccountUtils.getCurrentDrive()?.pack == Drive.DrivePack.FREE.value) {
-                        safeNavigate(R.id.colorFolderUpgradeBottomSheetDialog)
-                    } else {
-                        safeNavigate(FileListFragmentDirections.actionFileListToColorFolder(null))
-                    }
-                }
-                else -> performBulkOperation(type)
-            }
-        }
-    }
-
-    private fun addOrRemoveSelectedFilesToOffline(file: File, type: BulkOperationType) {
-        if (!file.isFolder()) {
-            val cacheFile = file.getCacheFile(requireContext())
-            val offlineFile = file.getOfflineFile(requireContext())
-            if (type == BulkOperationType.ADD_OFFLINE) {
-                addSelectedFileToOffline(file, offlineFile, cacheFile)
-            } else {
-                removeSelectedFileFromOffline(file, offlineFile, cacheFile)
-            }
-            closeMultiSelect()
-        }
-    }
-
-    private fun addSelectedFileToOffline(file: File, offlineFile: java.io.File?, cacheFile: java.io.File) {
-        if (offlineFile != null && !file.isObsoleteOrNotIntact(cacheFile)) {
-            Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
-            runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
-
-            fileAdapter.updateFileProgressByFileId(file.id, 100) { _, currentFile ->
-                currentFile.apply {
-                    if (isNotManagedByRealm()) {
-                        isOffline = true
-                        currentProgress = 0
-                    }
-                }
-            }
-        } else {
-            Utils.downloadAsOfflineFile(requireContext(), file)
-        }
-    }
-
-    private fun removeSelectedFileFromOffline(file: File, offlineFile: java.io.File?, cacheFile: java.io.File) {
-        lifecycleScope.launch {
-            if (offlineFile != null) {
-                mainViewModel.removeOfflineFile(file, offlineFile, cacheFile)
-                file.isOffline = false
-            }
-        }
-    }
-
     private fun checkIfNoFiles() {
         changeNoFilesLayoutVisibility(
             hideFileList = fileAdapter.itemCount == 0,
@@ -772,12 +492,12 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         activitiesRefreshTimer.cancel()
         isLoadingActivities = true
-        mainViewModel.currentFolder.value?.let { currentFolder ->
-            FileController.getFileById(currentFolder.id, userDrive)?.let { updatedFolder ->
+        mainViewModel.currentFolder.value?.let { localCurrentFolder ->
+            FileController.getFileById(localCurrentFolder.id, userDrive)?.let { updatedFolder ->
                 downloadFolderActivities(updatedFolder)
                 activitiesRefreshTimer.start()
-            } ?: kotlin.run { activitiesRefreshTimer.start() }
-        } ?: kotlin.run { activitiesRefreshTimer.start() }
+            } ?: run { activitiesRefreshTimer.start() }
+        } ?: run { activitiesRefreshTimer.start() }
     }
 
     private fun observeOfflineDownloadProgress() {
@@ -795,7 +515,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             if (fileId == 0) return@observe
 
             val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 100)
-            fileRecyclerView.post {
+            binding.fileRecyclerView.post {
                 fileAdapter.updateFileProgressByFileId(fileId, progress) { _, file ->
                     val tag = workInfo.tags.firstOrNull { it == file.getWorkerTag() }
                     if (tag != null) {
@@ -823,7 +543,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         val isNotCurrentDriveRoot = folderId == ROOT_ID && findNavController().currentDestination?.id != R.id.fileListFragment
         if (!showPendingFiles || isNotCurrentDriveRoot) return
         fileListViewModel.getPendingFilesCount(folderId).observe(viewLifecycleOwner) { pendingFilesCount ->
-            uploadFileInProgress.updateUploadFileInProgress(pendingFilesCount)
+            binding.uploadFileInProgress.root.updateUploadFileInProgress(pendingFilesCount)
         }
     }
 
@@ -834,7 +554,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         )
     }
 
-    private fun setupDisplayMode(isListMode: Boolean) {
+    private fun setupDisplayMode(isListMode: Boolean) = with(binding) {
         val navController = findNavController()
         fileRecyclerView.layoutManager = createLayoutManager(isListMode, navController)
 
@@ -853,49 +573,14 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         else SentryGridLayoutManager(navController, requireContext(), 2)
     }
 
-    private fun openMultiSelect() {
-        fileAdapter.multiSelectMode = true
-        fileAdapter.notifyItemRangeChanged(0, fileAdapter.itemCount)
-        collapsingToolbarLayout.isGone = true
-        multiSelectLayout.isVisible = true
-    }
-
     private fun onUpdateMultiSelect(selectedNumber: Int? = null) {
-        val fileSelectedNumber = selectedNumber ?: fileAdapter.getValidItemsSelected().size
-        when (fileSelectedNumber) {
-            0, 1 -> {
-                val isEnabled = fileSelectedNumber == 1
-                enableButtonMultiSelect(isEnabled)
-            }
-        }
-        titleMultiSelect.text = resources.getQuantityString(
-            R.plurals.fileListMultiSelectedTitle,
-            fileSelectedNumber,
-            fileSelectedNumber
-        )
-        selectAllButton.hideProgress(if (fileAdapter.allSelected) R.string.buttonDeselectAll else R.string.buttonSelectAll)
+        onItemSelected(selectedNumber)
+        val textId = if (multiSelectManager.areAllSelected) R.string.buttonDeselectAll else R.string.buttonSelectAll
+        multiSelectLayout?.selectAllButton?.hideProgress(textId)
     }
 
-    private fun enableButtonMultiSelect(isEnabled: Boolean) {
-        deleteButtonMultiSelect.isEnabled = isEnabled
-        moveButtonMultiSelect.isEnabled = isEnabled
-        menuButtonMultiSelect.isEnabled = isEnabled
-    }
-
-    private fun closeMultiSelect() {
-        fileAdapter.apply {
-            itemsSelected = RealmList()
-            multiSelectMode = false
-            allSelected = false
-            notifyItemRangeChanged(0, itemCount)
-        }
-
-        collapsingToolbarLayout.isVisible = true
-        multiSelectLayout.isGone = true
-    }
-
-    private fun downloadFolderActivities(currentFolder: File) {
-        fileListViewModel.getFolderActivities(currentFolder, userDrive).observe(viewLifecycleOwner) { isNotEmpty ->
+    private fun downloadFolderActivities(updatedFolder: File) {
+        fileListViewModel.getFolderActivities(updatedFolder, userDrive).observe(viewLifecycleOwner) { isNotEmpty ->
             if (isNotEmpty == true) {
                 getFolderFiles(
                     ignoreCache = false,
@@ -903,18 +588,16 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                         it?.let { (_, files, _) ->
                             changeNoFilesLayoutVisibility(
                                 hideFileList = files.isEmpty(),
-                                changeControlsVisibility = !currentFolder.isRoot()
+                                changeControlsVisibility = !updatedFolder.isRoot(),
                             )
                         }
-                    })
+                    },
+                )
             }
         }
     }
 
-    private fun getFolderFiles(
-        ignoreCache: Boolean,
-        onFinish: ((FolderFilesResult?) -> Unit)? = null
-    ) {
+    private fun getFolderFiles(ignoreCache: Boolean, onFinish: ((FolderFilesResult?) -> Unit)? = null) {
         showPendingFiles()
         fileListViewModel.getFiles(
             folderId,
@@ -928,7 +611,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun updateVisibleProgresses() {
-        val layoutManager = fileRecyclerView.layoutManager
+        val layoutManager = binding.fileRecyclerView.layoutManager
         if (layoutManager is LinearLayoutManager) {
             val first = layoutManager.findFirstVisibleItemPosition()
             val count = layoutManager.findLastVisibleItemPosition() - first + 1
@@ -936,12 +619,70 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
     }
 
+    private fun onMenuButtonClicked() {
+        val (fileIds, onlyFolders, onlyFavorite, onlyOffline) = multiSelectManager.getMenuNavArgs()
+        FileListMultiSelectActionsBottomSheetDialog().apply {
+            arguments = MultiSelectActionsBottomSheetDialogArgs(
+                fileIds = fileIds,
+                onlyFolders = onlyFolders,
+                onlyFavorite = onlyFavorite,
+                onlyOffline = onlyOffline,
+            ).toBundle()
+        }.show(childFragmentManager, "ActionFileListMultiSelectBottomSheetDialog")
+    }
+
+    override fun performBulkOperation(
+        type: BulkOperationType,
+        areAllFromTheSameFolder: Boolean,
+        allSelectedFileCount: Int?,
+        destinationFolder: File?,
+        color: String?,
+    ) {
+        super.performBulkOperation(type, areAllFromTheSameFolder, getAllSelectedFileCount(), destinationFolder, color)
+    }
+
+    override fun getAllSelectedFileCount(): Int? {
+        return if (multiSelectManager.areAllSelected) {
+            fileListViewModel.lastItemCount?.count ?: fileAdapter.itemCount
+        } else {
+            null
+        }
+    }
+
+    override fun onIndividualActionSuccess(type: BulkOperationType, data: Any) {
+        when (type) {
+            BulkOperationType.TRASH, BulkOperationType.MOVE -> {
+                runBlocking(Dispatchers.Main) { fileAdapter.deleteByFileId(data as Int) }
+            }
+            BulkOperationType.ADD_FAVORITES -> {
+                lifecycleScope.launch(Dispatchers.Main) {
+                    fileAdapter.notifyFileChanged(data as Int) { file -> if (!file.isManaged) file.isFavorite = true }
+                }
+            }
+            BulkOperationType.COPY,
+            BulkOperationType.COLOR_FOLDER,
+            BulkOperationType.ADD_OFFLINE,
+            BulkOperationType.REMOVE_OFFLINE,
+            BulkOperationType.REMOVE_FAVORITES -> {
+                // No-op
+            }
+        }
+    }
+
+    override fun onAllIndividualActionsFinished(type: BulkOperationType) {
+        refreshActivities()
+    }
+
+    override fun updateFileProgressByFileId(fileId: Int, progress: Int, onComplete: ((position: Int, file: File) -> Unit)?) {
+        fileAdapter.updateFileProgressByFileId(fileId, progress, onComplete)
+    }
+
     private inner class SortFiles : () -> Unit {
         override fun invoke() {
             getBackNavigationResult<SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
                 trackEvent("fileList", TrackerAction.CLICK, newSortType.name)
                 fileListViewModel.sortType = newSortType
-                sortButton?.setText(fileListViewModel.sortType.translation)
+                if (::binding.isInitialized) binding.sortButton.setText(fileListViewModel.sortType.translation)
 
                 downloadFiles(fileListViewModel.isSharedWithMe, true)
 
@@ -953,7 +694,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private inner class SetNoFilesLayout : () -> Unit {
         override fun invoke() {
-            noFilesLayout.setup(title = R.string.noFilesDescription, initialListView = fileRecyclerView) {
+            binding.noFilesLayout.setup(title = R.string.noFilesDescription, initialListView = binding.fileRecyclerView) {
                 fileListViewModel.cancelDownloadFiles()
                 downloadFiles(false, false)
             }
@@ -978,13 +719,13 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                             realm = mainViewModel.realm
                         ).apply { fileAdapter.updateFileList(this) }
 
-                        currentFolder = if (result.parentFolder?.id == ROOT_ID) {
+                        multiSelectManager.currentFolder = if (result.parentFolder?.id == ROOT_ID) {
                             AccountUtils.getCurrentDrive()?.convertToFile(Utils.getRootName(requireContext()))
                         } else {
                             result.parentFolder
                         }
 
-                        mainViewModel.currentFolder.value = currentFolder
+                        mainViewModel.currentFolder.value = multiSelectManager.currentFolder
                         changeNoFilesLayoutVisibility(
                             hideFileList = fileAdapter.fileList.isEmpty(),
                             changeControlsVisibility = result.parentFolder?.isRoot() == false
@@ -1004,7 +745,7 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 }
                 isDownloading = false
                 showLoadingTimer.cancel()
-                swipeRefreshLayout.isRefreshing = false
+                binding.swipeRefreshLayout.isRefreshing = false
             })
         }
     }
@@ -1027,24 +768,29 @@ open class FileListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         changeControlsVisibility: Boolean = true,
         ignoreOffline: Boolean = false
     ) {
-        val isOffline = mainViewModel.isInternetAvailable.value == false
-        val hasFilesAndIsOffline = !hideFileList && isOffline
+        if (!::binding.isInitialized) return
 
-        sortLayout?.isGone = hideFileList
+        with(binding) {
+            val isOffline = mainViewModel.isInternetAvailable.value == false
+            val hasFilesAndIsOffline = !hideFileList && isOffline
 
-        if (changeControlsVisibility) {
-            val isFileListDestination = findNavController().currentDestination?.id == R.id.fileListFragment
-            noNetwork.isVisible = hasFilesAndIsOffline
-            toolbar?.menu?.findItem(R.id.searchItem)?.isVisible = !hideFileList && isFileListDestination
+            sortLayout.isGone = hideFileList
+
+            if (changeControlsVisibility) {
+                val isFileListDestination = findNavController().currentDestination?.id == R.id.fileListFragment
+                noNetwork.isVisible = hasFilesAndIsOffline
+                toolbar.menu?.findItem(R.id.searchItem)?.isVisible = !hideFileList && isFileListDestination
+            }
+
+            noFilesLayout.toggleVisibility(
+                noNetwork = isOffline && !ignoreOffline,
+                isVisible = hideFileList,
+                showRefreshButton = changeControlsVisibility
+            )
         }
-
-        noFilesLayout.toggleVisibility(
-            noNetwork = isOffline && !ignoreOffline,
-            isVisible = hideFileList,
-            showRefreshButton = changeControlsVisibility
-        )
     }
 
     open fun onRestartItemsClicked() = Unit
+
     open fun onCloseItemsClicked() = Unit
 }
