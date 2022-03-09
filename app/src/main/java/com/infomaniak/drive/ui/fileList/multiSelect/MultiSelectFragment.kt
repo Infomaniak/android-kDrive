@@ -60,10 +60,10 @@ import kotlinx.coroutines.runBlocking
 
 abstract class MultiSelectFragment : Fragment(), MultiSelectResult {
 
-    val mainViewModel: MainViewModel by activityViewModels()
-    val multiSelectManager = MultiSelectManager()
-    var adapter: RecyclerView.Adapter<*>? = null
-    var multiSelectLayout: MultiSelectLayoutBinding? = null
+    protected val mainViewModel: MainViewModel by activityViewModels()
+    protected val multiSelectManager = MultiSelectManager()
+    protected var adapter: RecyclerView.Adapter<*>? = null
+    protected var multiSelectLayout: MultiSelectLayoutBinding? = null
     var multiSelectToolbar: CollapsingToolbarLayout? = null
 
     private val selectFolderResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
