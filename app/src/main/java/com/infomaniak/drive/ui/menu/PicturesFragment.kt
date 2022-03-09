@@ -201,7 +201,6 @@ class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelect
                 onlyFolders = onlyFolders,
                 onlyFavorite = onlyFavorite,
                 onlyOffline = onlyOffline,
-                isFromGallery = true,
             ).toBundle()
         }.show(childFragmentManager, "ActionPicturesMultiSelectBottomSheetDialog")
     }

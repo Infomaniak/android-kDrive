@@ -144,7 +144,6 @@ abstract class MultiSelectActionsBottomSheetDialog : BottomSheetDialogFragment()
                 closeMultiSelect()
             } else {
                 context?.applicationContext?.trackBulkActionEvent(finalType, navigationArgs.fileIds.size)
-                // TODO - 2 - Implement download for multiselection !
                 when (finalType) {
                     BulkOperationType.COPY -> duplicateFiles()
                     BulkOperationType.COLOR_FOLDER -> colorFolders()

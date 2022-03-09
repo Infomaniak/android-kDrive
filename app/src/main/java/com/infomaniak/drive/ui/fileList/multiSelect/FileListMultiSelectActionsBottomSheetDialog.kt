@@ -24,9 +24,9 @@ import kotlinx.android.synthetic.main.fragment_bottom_sheet_multi_select_actions
 
 class FileListMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog() {
 
-    override fun configureColoredFolder(areIndividualActionsVisible: Boolean) = with(navigationArgs) {
-        if (areIndividualActionsVisible && !isFromGallery) {
-            disabledColoredFolder.isGone = computeColoredFolderAvailability(fileIds)
+    override fun configureColoredFolder(areIndividualActionsVisible: Boolean) {
+        if (areIndividualActionsVisible) {
+            disabledColoredFolder.isGone = computeColoredFolderAvailability(navigationArgs.fileIds)
             coloredFolder.apply {
                 setOnClickListener { onActionSelected(SelectDialogAction.COLOR_FOLDER) }
                 isVisible = true
