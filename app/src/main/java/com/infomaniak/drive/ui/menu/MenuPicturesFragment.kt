@@ -76,10 +76,8 @@ class MenuPicturesFragment : Fragment() {
 
         timer.start()
 
-        if (childFragmentManager.findFragmentByTag("picturesFragment") == null) {
-            childFragmentManager.beginTransaction()
-                .replace(R.id.picturesFragmentView, picturesFragment, "picturesFragment")
-                .commit()
-        }
+        childFragmentManager.beginTransaction()
+            .replace(R.id.picturesFragmentView, picturesFragment, "picturesFragment")
+            .commit()
     }
 }
