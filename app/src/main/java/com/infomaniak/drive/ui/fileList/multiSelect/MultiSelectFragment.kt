@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.fileList.multiSelect
 
 import android.app.Dialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -52,7 +53,7 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.USER_ID_T
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSelectResult
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
-import com.infomaniak.drive.utils.MatomoUtils.trackBulkActionEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.Utils.moveFileClicked
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.activity_main.*
@@ -387,5 +388,10 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                 file.isOffline = false
             }
         }
+    }
+
+    private fun Context.trackBulkActionEvent(category: String, action: BulkOperationType, modifiedFileNumber: Int) {
+        val trackerName = "bulk" + (if (modifiedFileNumber == 1) "Single" else "") + action.toString()
+        trackEvent(category, TrackerAction.CLICK, trackerName, modifiedFileNumber.toFloat())
     }
 }
