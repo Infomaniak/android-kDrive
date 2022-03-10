@@ -56,6 +56,7 @@
                 app:layout_constraintStart_toEndOf="@id/commentUserAvatar"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_chainStyle="packed"
+                app:loader_corner="@dimen/radius"
                 tools:text="@tools:sample/full_names" />
 
             <com.infomaniak.lib.core.views.LoaderTextView
@@ -68,6 +69,7 @@
                 app:layout_constraintEnd_toStartOf="@id/likeButton"
                 app:layout_constraintStart_toEndOf="@id/commentUserAvatar"
                 app:layout_constraintTop_toBottomOf="@id/commentUserName"
+                app:loader_corner="@dimen/radius"
                 tools:text="Ceci est un commentaire" />
 
             <ImageView
@@ -92,6 +94,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@id/commentDateIcon"
                 app:layout_constraintTop_toBottomOf="@id/commentValue"
+                app:loader_corner="@dimen/radius"
                 tools:text="15 min" />
 
             <com.google.android.material.button.MaterialButton

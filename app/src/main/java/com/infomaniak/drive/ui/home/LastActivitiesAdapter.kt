@@ -52,6 +52,9 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
         (holder.itemView as LoaderCardView).apply {
             if (getItemViewType(position) == VIEW_TYPE_LOADING) {
                 startLoading()
+                userName.resetLoader()
+                actionValue.resetLoader()
+                dateValue.resetLoader()
             } else {
                 stopLoading()
                 val fileActivity = itemList[position]

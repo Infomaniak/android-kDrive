@@ -98,6 +98,7 @@
             app:layout_constraintEnd_toStartOf="@id/activityHourLayout"
             app:layout_constraintStart_toEndOf="@id/activityUserAvatar"
             app:layout_constraintTop_toTopOf="parent"
+            app:loader_corner="@dimen/radius"
             tools:text="@tools:sample/full_names" />
 
         <com.infomaniak.lib.core.views.LoaderTextView
@@ -110,6 +111,7 @@
             app:layout_constraintEnd_toStartOf="@id/activityHourLayout"
             app:layout_constraintStart_toEndOf="@id/activityUserAvatar"
             app:layout_constraintTop_toBottomOf="@id/activityUserName"
+            app:loader_corner="@dimen/radius"
             tools:text="a modifié le fichier" />
 
         <LinearLayout
@@ -137,6 +139,7 @@
                 android:layout_marginStart="@dimen/marginStandardVerySmall"
                 android:minWidth="@dimen/marginStandard"
                 android:textSize="12sp"
+                app:loader_corner="@dimen/radius"
                 tools:text="10:10" />
 
         </LinearLayout>
