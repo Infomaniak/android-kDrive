@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,22 +28,13 @@ import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentMenuPicturesBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
-import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 
 class MenuPicturesFragment : Fragment() {
 
     private lateinit var binding: FragmentMenuPicturesBinding
 
-    private val picturesFragment = PicturesFragment(
-        onFinish = {
-            timer.cancel()
-            if (::binding.isInitialized) binding.swipeRefreshLayout.isRefreshing = false
-        },
-    )
+    private var picturesFragment = PicturesFragment()
 
-    private val timer: CountDownTimer by lazy {
-        createRefreshTimer { if (::binding.isInitialized) binding.swipeRefreshLayout.isRefreshing = true }
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentMenuPicturesBinding.inflate(inflater, container, false).apply {
@@ -56,8 +46,6 @@ class MenuPicturesFragment : Fragment() {
             selectAllButton.isInvisible = true
             setMultiSelectClickListeners()
         }
-
-        picturesFragment.menuPicturesBinding = binding
 
         return binding.root
     }
@@ -74,10 +62,17 @@ class MenuPicturesFragment : Fragment() {
 
         ViewCompat.requestApplyInsets(binding.pictureListCoordinator)
 
-        timer.start()
+        with(childFragmentManager) {
+            (findFragmentByTag(PicturesFragment.TAG) as? PicturesFragment)?.let {
+                picturesFragment = it
+            } ?: run {
+                beginTransaction()
+                    .replace(R.id.picturesFragmentView, picturesFragment, PicturesFragment.TAG)
+                    .commit()
+            }
+        }
 
-        childFragmentManager.beginTransaction()
-            .replace(R.id.picturesFragmentView, picturesFragment, "picturesFragment")
-            .commit()
+        picturesFragment.menuPicturesBinding = binding
     }
 }
+

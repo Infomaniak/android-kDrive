@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.menu
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,6 +42,7 @@ import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomShee
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
 import com.infomaniak.drive.ui.fileList.multiSelect.PicturesMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.*
+import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import com.infomaniak.lib.core.utils.toDp
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.cardview_picture.*
@@ -51,12 +53,18 @@ import kotlinx.coroutines.runBlocking
 import kotlin.math.max
 import kotlin.math.min
 
-class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelectFragment() {
+class PicturesFragment() : MultiSelectFragment() {
 
     private val picturesViewModel: PicturesViewModel by viewModels()
     private lateinit var picturesAdapter: PicturesAdapter
 
     var menuPicturesBinding: FragmentMenuPicturesBinding? = null
+
+    private val timer: CountDownTimer by lazy {
+        createRefreshTimer {
+            menuPicturesBinding?.swipeRefreshLayout?.isRefreshing = true
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_pictures, container, false)
@@ -155,6 +163,7 @@ class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelect
     }
 
     private fun getPictures() {
+        timer.start()
         picturesAdapter.apply {
             val ignoreCloud = mainViewModel.isInternetAvailable.value == false
             showLoading()
@@ -174,9 +183,14 @@ class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelect
                         showRefreshButton = true,
                     )
                 }
-                onFinish?.invoke()
+                onFinishDownload()
             }
         }
+    }
+
+    private fun onFinishDownload() {
+        timer.cancel()
+        menuPicturesBinding?.swipeRefreshLayout?.isRefreshing = false
     }
 
     fun onRefreshPictures() {
@@ -276,7 +290,8 @@ class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelect
         picturesAdapter.updateFileProgressByFileId(fileId, progress, onComplete)
     }
 
-    private companion object {
-        const val NUMBER_ITEMS_LOADER = 13
+    companion object {
+        const val TAG = "PicturesFragment"
+        private const val NUMBER_ITEMS_LOADER = 13
     }
 }
