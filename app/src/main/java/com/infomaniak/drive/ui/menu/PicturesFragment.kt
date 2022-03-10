@@ -68,13 +68,15 @@ class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelect
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val currentlyInGallery = menuPicturesBinding != null
+
         noPicturesLayout.setup(
             icon = R.drawable.ic_images,
             title = R.string.picturesNoFile,
             initialListView = picturesRecyclerView,
         )
 
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, currentlyInGallery) {
             if (multiSelectManager.isMultiSelectOpened) closeMultiSelect() else findNavController().popBackStack()
         }
 
@@ -101,7 +103,7 @@ class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelect
             }
         }
 
-        if (menuPicturesBinding != null) multiSelectManager.isMultiSelectAuthorized = true
+        if (currentlyInGallery) multiSelectManager.isMultiSelectAuthorized = true
 
         picturesRecyclerView.adapter = picturesAdapter
         configPicturesLayoutManager()
