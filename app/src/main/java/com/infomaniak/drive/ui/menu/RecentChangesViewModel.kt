@@ -24,24 +24,29 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRepository.PER_PAGE
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.ui.fileList.FileListFragment
-import com.infomaniak.drive.ui.home.HomeViewModel.Companion.DOWNLOAD_INTERVAL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import java.util.*
 
 class RecentChangesViewModel : ViewModel() {
 
     private var getRecentChangesJob = Job()
-    private var lastModifiedTime: Long = 0
 
     var currentPage = 1
 
     fun getRecentChanges(driveId: Int): LiveData<FileListFragment.FolderFilesResult?> {
         getRecentChangesJob.cancel()
         getRecentChangesJob = Job()
-        val ignoreDownload = lastModifiedTime != 0L && (Date().time - lastModifiedTime) < DOWNLOAD_INTERVAL
+
         return liveData(Dispatchers.IO + getRecentChangesJob) {
-            if (ignoreDownload) {
+            val apiResponse = ApiRepository.getLastModifiedFiles(driveId, currentPage)
+            if (apiResponse.isSuccess()) {
+                apiResponse.data?.let { data ->
+                    val isComplete = data.size < PER_PAGE
+                    val isFirstPage = currentPage == 1
+                    emit(FileListFragment.FolderFilesResult(files = data, isComplete = isComplete, page = currentPage))
+                    FileController.storeRecentChanges(data, isFirstPage)
+                }
+            } else {
                 emit(
                     FileListFragment.FolderFilesResult(
                         files = FileController.getRecentChanges(),
@@ -49,17 +54,6 @@ class RecentChangesViewModel : ViewModel() {
                         page = currentPage
                     )
                 )
-            } else {
-                val apiResponse = ApiRepository.getLastModifiedFiles(driveId, currentPage)
-                when {
-                    apiResponse.isSuccess() -> apiResponse.data?.let { data ->
-                        val isComplete = data.size < PER_PAGE
-                        val isFirstPage = currentPage == 1
-                        emit(FileListFragment.FolderFilesResult(files = data, isComplete = isComplete, page = currentPage))
-                        FileController.storeRecentChanges(data, isFirstPage)
-                    }
-                    else -> emit(null)
-                }
             }
         }
     }
