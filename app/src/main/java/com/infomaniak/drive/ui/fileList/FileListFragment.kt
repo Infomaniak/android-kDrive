@@ -63,7 +63,10 @@ import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
+import com.infomaniak.lib.core.utils.hideProgress
+import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.setPagination
+import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 
@@ -98,6 +101,14 @@ open class FileListFragment : MultiSelectFragment(), SwipeRefreshLayout.OnRefres
     protected open var sortTypeUsage = SortTypeUsage.FILE_LIST
 
     protected var userDrive: UserDrive? = null
+
+    private var hasSelectAllButtonTimerBeenTriggered = false
+    private val selectAllButtonTimer: CountDownTimer by lazy {
+        createRefreshTimer {
+            hasSelectAllButtonTimerBeenTriggered = true
+            multiSelectLayout?.selectAllButton?.showProgress(ContextCompat.getColor(requireContext(), R.color.primary))
+        }
+    }
 
     companion object {
         const val REFRESH_FAVORITE_FILE = "force_list_refresh"
@@ -317,7 +328,9 @@ open class FileListFragment : MultiSelectFragment(), SwipeRefreshLayout.OnRefres
             menuButtonMultiSelect.setOnClickListener { onMenuButtonClicked() }
 
             selectAllButton.apply {
+                initProgress(viewLifecycleOwner)
                 setOnClickListener {
+                    selectAllButtonTimer.start()
                     if (multiSelectManager.areAllSelected) {
                         fileAdapter.configureAllSelected(false)
                         onUpdateMultiSelect()
@@ -570,8 +583,16 @@ open class FileListFragment : MultiSelectFragment(), SwipeRefreshLayout.OnRefres
 
     private fun onUpdateMultiSelect(selectedNumber: Int? = null) {
         onItemSelected(selectedNumber)
-        val textId = if (multiSelectManager.areAllSelected) R.string.buttonDeselectAll else R.string.buttonSelectAll
-        multiSelectLayout?.selectAllButton?.setText(textId)
+        multiSelectLayout?.selectAllButton?.apply {
+            selectAllButtonTimer.cancel()
+            val textId = if (multiSelectManager.areAllSelected) R.string.buttonDeselectAll else R.string.buttonSelectAll
+            if (hasSelectAllButtonTimerBeenTriggered) {
+                hasSelectAllButtonTimerBeenTriggered = false
+                hideProgress(textId)
+            } else {
+                setText(textId)
+            }
+        }
     }
 
     private fun downloadFolderActivities(updatedFolder: File) {
