@@ -57,7 +57,6 @@ class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelect
     private lateinit var picturesAdapter: PicturesAdapter
 
     var menuPicturesBinding: FragmentMenuPicturesBinding? = null
-    var currentlyInGallery = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_pictures, container, false)
@@ -69,7 +68,7 @@ class PicturesFragment(private val onFinish: (() -> Unit)? = null) : MultiSelect
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        currentlyInGallery = menuPicturesBinding != null
+        val currentlyInGallery = menuPicturesBinding != null
 
         noPicturesLayout.setup(
             icon = R.drawable.ic_images,
