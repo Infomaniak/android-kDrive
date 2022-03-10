@@ -102,7 +102,7 @@ open class FileListFragment : MultiSelectFragment(), SwipeRefreshLayout.OnRefres
 
     protected var userDrive: UserDrive? = null
 
-    private val selectAllButtonTimer: CountDownTimer by lazy {
+    private val selectAllTimer: CountDownTimer by lazy {
         createRefreshTimer {
             multiSelectLayout?.selectAllButton?.showProgress(ContextCompat.getColor(requireContext(), R.color.primary))
         }
@@ -328,7 +328,7 @@ open class FileListFragment : MultiSelectFragment(), SwipeRefreshLayout.OnRefres
             selectAllButton.apply {
                 initProgress(viewLifecycleOwner)
                 setOnClickListener {
-                    selectAllButtonTimer.start()
+                    selectAllTimer.start()
                     if (multiSelectManager.areAllSelected) {
                         fileAdapter.configureAllSelected(false)
                         onUpdateMultiSelect()
@@ -582,9 +582,9 @@ open class FileListFragment : MultiSelectFragment(), SwipeRefreshLayout.OnRefres
     private fun onUpdateMultiSelect(selectedNumber: Int? = null) {
         onItemSelected(selectedNumber)
         multiSelectLayout?.selectAllButton?.apply {
-            selectAllButtonTimer.cancel()
+            selectAllTimer.cancel()
             val textId = if (multiSelectManager.areAllSelected) R.string.buttonDeselectAll else R.string.buttonSelectAll
-            if (!isClickable) hideProgress(textId) else setText(textId)
+            if (isClickable) setText(textId) else hideProgress(textId)
         }
     }
 
