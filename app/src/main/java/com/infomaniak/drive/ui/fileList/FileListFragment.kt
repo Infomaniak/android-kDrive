@@ -102,6 +102,12 @@ open class FileListFragment : MultiSelectFragment(), SwipeRefreshLayout.OnRefres
 
     protected var userDrive: UserDrive? = null
 
+    private val selectAllTimer: CountDownTimer by lazy {
+        createRefreshTimer {
+            multiSelectLayout?.selectAllButton?.showProgress(ContextCompat.getColor(requireContext(), R.color.primary))
+        }
+    }
+
     companion object {
         const val REFRESH_FAVORITE_FILE = "force_list_refresh"
         const val CANCELLABLE_MAIN_KEY = "cancellable_main"
@@ -322,7 +328,7 @@ open class FileListFragment : MultiSelectFragment(), SwipeRefreshLayout.OnRefres
             selectAllButton.apply {
                 initProgress(viewLifecycleOwner)
                 setOnClickListener {
-                    showProgress(ContextCompat.getColor(requireContext(), R.color.primary))
+                    selectAllTimer.start()
                     if (multiSelectManager.areAllSelected) {
                         fileAdapter.configureAllSelected(false)
                         onUpdateMultiSelect()
@@ -575,8 +581,11 @@ open class FileListFragment : MultiSelectFragment(), SwipeRefreshLayout.OnRefres
 
     private fun onUpdateMultiSelect(selectedNumber: Int? = null) {
         onItemSelected(selectedNumber)
-        val textId = if (multiSelectManager.areAllSelected) R.string.buttonDeselectAll else R.string.buttonSelectAll
-        multiSelectLayout?.selectAllButton?.hideProgress(textId)
+        multiSelectLayout?.selectAllButton?.apply {
+            selectAllTimer.cancel()
+            val textId = if (multiSelectManager.areAllSelected) R.string.buttonDeselectAll else R.string.buttonSelectAll
+            if (isClickable) setText(textId) else hideProgress(textId)
+        }
     }
 
     private fun downloadFolderActivities(updatedFolder: File) {
