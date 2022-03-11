@@ -60,10 +60,8 @@ class PicturesFragment() : MultiSelectFragment() {
 
     var menuPicturesBinding: FragmentMenuPicturesBinding? = null
 
-    private val timer: CountDownTimer by lazy {
-        createRefreshTimer {
-            menuPicturesBinding?.swipeRefreshLayout?.isRefreshing = true
-        }
+    private val refreshTimer: CountDownTimer by lazy {
+        createRefreshTimer { menuPicturesBinding?.swipeRefreshLayout?.isRefreshing = true }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -76,7 +74,7 @@ class PicturesFragment() : MultiSelectFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val currentlyInGallery = menuPicturesBinding != null
+        val isCurrentlyInGallery = menuPicturesBinding != null
 
         noPicturesLayout.setup(
             icon = R.drawable.ic_images,
@@ -84,7 +82,7 @@ class PicturesFragment() : MultiSelectFragment() {
             initialListView = picturesRecyclerView,
         )
 
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, currentlyInGallery) {
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, isCurrentlyInGallery) {
             if (multiSelectManager.isMultiSelectOpened) closeMultiSelect() else findNavController().popBackStack()
         }
 
@@ -111,7 +109,7 @@ class PicturesFragment() : MultiSelectFragment() {
             }
         }
 
-        if (currentlyInGallery) multiSelectManager.isMultiSelectAuthorized = true
+        if (isCurrentlyInGallery) multiSelectManager.isMultiSelectAuthorized = true
 
         picturesRecyclerView.adapter = picturesAdapter
         configPicturesLayoutManager()
@@ -128,7 +126,10 @@ class PicturesFragment() : MultiSelectFragment() {
             if (progress == 100) picturesAdapter.updateOfflineStatus(fileId)
         }
 
-        if (!isPicturesAdapterInitialized) getPictures()
+        if (!isPicturesAdapterInitialized) {
+            if (isCurrentlyInGallery) refreshTimer.start()
+            getPictures()
+        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -163,7 +164,6 @@ class PicturesFragment() : MultiSelectFragment() {
     }
 
     private fun getPictures() {
-        timer.start()
         picturesAdapter.apply {
             val ignoreCloud = mainViewModel.isInternetAvailable.value == false
             showLoading()
@@ -183,14 +183,16 @@ class PicturesFragment() : MultiSelectFragment() {
                         showRefreshButton = true,
                     )
                 }
-                onFinishDownload()
+                onDownloadFinished()
             }
         }
     }
 
-    private fun onFinishDownload() {
-        timer.cancel()
-        menuPicturesBinding?.swipeRefreshLayout?.isRefreshing = false
+    private fun onDownloadFinished() {
+        menuPicturesBinding?.let { binding ->
+            refreshTimer.cancel()
+            binding.swipeRefreshLayout.isRefreshing = false
+        }
     }
 
     fun onRefreshPictures() {
@@ -208,7 +210,7 @@ class PicturesFragment() : MultiSelectFragment() {
     override fun getAllSelectedFileCount(): Int? = null
 
     fun onMoveButtonClicked() {
-        // TODO use "parentId" when https://github.com/Infomaniak/android-kDrive/issues/532 is merged
+        // TODO: Use `parentId` when https://github.com/Infomaniak/android-kDrive/issues/532 is merged
         val folderId = if (multiSelectManager.selectedItems.count() == 1) {
             FileController.getParentFileProxy(multiSelectManager.selectedItems[0].id, mainViewModel.realm)?.id
         } else {

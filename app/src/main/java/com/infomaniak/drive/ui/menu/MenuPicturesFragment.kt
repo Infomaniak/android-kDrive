@@ -35,7 +35,6 @@ class MenuPicturesFragment : Fragment() {
 
     private var picturesFragment = PicturesFragment()
 
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentMenuPicturesBinding.inflate(inflater, container, false).apply {
             toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
@@ -75,4 +74,3 @@ class MenuPicturesFragment : Fragment() {
         picturesFragment.menuPicturesBinding = binding
     }
 }
-
