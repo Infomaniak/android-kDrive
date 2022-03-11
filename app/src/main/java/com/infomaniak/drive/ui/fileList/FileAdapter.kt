@@ -415,8 +415,6 @@ open class FileAdapter(
         }
     }
 
-    private fun isSelectedFile(file: File): Boolean = multiSelectManager.selectedItems.any { it.isUsable() && it.id == file.id }
-
     fun toggleOfflineMode(context: Context, isOffline: Boolean) {
         if (offlineMode != isOffline) {
             offlineMode = isOffline
