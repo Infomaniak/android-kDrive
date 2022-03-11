@@ -62,7 +62,7 @@ class PicturesAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         when {
             super.getItemViewType(position) == VIEW_TYPE_LOADING -> {
-                if (position == 0) holder.itemView.title.resetLoader() else (holder.itemView as LoaderCardView).startLoading()
+                if (position == 0) holder.itemView.title.resetLoader() else (holder.itemView as LoaderCardView).start()
             }
             getItemViewType(position) == DisplayType.TITLE.layout -> holder.itemView.title.text = (itemList[position] as String)
             getItemViewType(position) == DisplayType.PICTURE.layout -> bindPictureDisplayType(position, holder)
@@ -77,7 +77,7 @@ class PicturesAdapter(
     }
 
     private fun LoaderCardView.displayThumbnail(file: File) {
-        stopLoading()
+        stop()
         picture.apply {
             loadGlideUrl(file.thumbnail())
             contentDescription = file.name
