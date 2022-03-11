@@ -180,6 +180,7 @@ class PicturesAdapter(
     fun clearPictures() {
         itemList.clear()
         pictureList.clear()
+        lastSectionTitle = ""
         notifyDataSetChanged()
     }
 
