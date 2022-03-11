@@ -27,16 +27,18 @@ data class BulkOperation(
 
     fun toMap(): Map<String, Any> {
         return mutableMapOf<String, Any>().apply {
-
             put("action", action.toString().lowercase())
-
             destinationFolderId?.let { put("destination_directory_id", it) }
-
-            fileIds?.let { put("file_ids", it) } ?: run {
-
-                put("parent_id", parent.id)
-                if (exceptedFilesIds?.isNotEmpty() == true) put("except_file_ids", exceptedFilesIds)
-            }
+            if (fileIds != null) addFilesInNormalMode() else addFilesInSelectAllMode()
         }
+    }
+
+    private fun MutableMap<String, Any>.addFilesInNormalMode() {
+        fileIds?.let { put("file_ids", it) }
+    }
+
+    private fun MutableMap<String, Any>.addFilesInSelectAllMode() {
+        put("parent_id", parent.id)
+        if (exceptedFilesIds?.isNotEmpty() == true) put("except_file_ids", exceptedFilesIds)
     }
 }
