@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.fileList.multiSelect
 
 import android.app.Dialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -52,7 +53,7 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.USER_ID_T
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSelectResult
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
-import com.infomaniak.drive.utils.MatomoUtils.trackBulkActionEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.Utils.moveFileClicked
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.activity_main.*
@@ -60,7 +61,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-abstract class MultiSelectFragment : Fragment(), MultiSelectResult {
+abstract class MultiSelectFragment(private val matomoCategory: String) : Fragment(), MultiSelectResult {
 
     protected val mainViewModel: MainViewModel by activityViewModels()
     protected val multiSelectManager = MultiSelectManager()
@@ -169,11 +170,11 @@ abstract class MultiSelectFragment : Fragment(), MultiSelectResult {
         val selectedFiles = multiSelectManager.getValidSelectedItems(type)
         val fileCount = allSelectedFileCount ?: selectedFiles.size
 
+        applicationContext?.trackBulkActionEvent(matomoCategory, type, fileCount)
+
         val sendActions: (dialog: Dialog?) -> Unit = sendActions(
             type, areAllFromTheSameFolder, fileCount, selectedFiles, destinationFolder, color
         )
-
-        applicationContext?.trackBulkActionEvent(type, fileCount)
 
         if (type == BulkOperationType.TRASH) {
             Utils.createConfirmation(
@@ -387,5 +388,10 @@ abstract class MultiSelectFragment : Fragment(), MultiSelectResult {
                 file.isOffline = false
             }
         }
+    }
+
+    private fun Context.trackBulkActionEvent(category: String, action: BulkOperationType, modifiedFileNumber: Int) {
+        val trackerName = "bulk" + (if (modifiedFileNumber == 1) "Single" else "") + action.toString()
+        trackEvent(category, TrackerAction.CLICK, trackerName, modifiedFileNumber.toFloat())
     }
 }
