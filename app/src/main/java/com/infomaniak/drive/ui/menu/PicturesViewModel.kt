@@ -56,7 +56,9 @@ class PicturesViewModel : ViewModel() {
                             }
                         }
                         if (isFirstPage) FileController.removeOrphanFiles()
-                    } else emit(FileController.getPicturesDrive() to true)
+                    } else {
+                        emit(FileController.getPicturesDrive() to true)
+                    }
                 }
             }
             recursive(1)
