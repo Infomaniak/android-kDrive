@@ -203,12 +203,12 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         destinationFolder: File?,
         color: String?,
     ): (Dialog?) -> Unit = {
-        with(multiSelectManager) {
 
-            val canBulkAllSelectedFiles = areAllSelected && fileCount > BulkOperationsUtils.MIN_SELECTED
-            val hasEnoughSelectedFilesToBulk = selectedFiles.size > BulkOperationsUtils.MIN_SELECTED
+        val canBulkAllSelectedFiles = multiSelectManager.areAllSelected && fileCount > BulkOperationsUtils.MIN_SELECTED
+        val hasEnoughSelectedFilesToBulk = selectedFiles.size > BulkOperationsUtils.MIN_SELECTED
 
-            if (areAllFromTheSameFolder && (canBulkAllSelectedFiles || hasEnoughSelectedFilesToBulk)) {
+        if (areAllFromTheSameFolder && (canBulkAllSelectedFiles || hasEnoughSelectedFilesToBulk)) {
+            with(multiSelectManager) {
                 sendBulkAction(
                     fileCount, BulkOperation(
                         action = type,
@@ -218,13 +218,13 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                         destinationFolderId = destinationFolder?.id,
                     )
                 )
-
-            } else {
-                val mediator = mainViewModel.createMultiSelectMediator()
-                enableMultiSelectButtons(false)
-                sendAllIndividualActions(selectedFiles, type, mediator, destinationFolder, color)
-                observeMediator(mediator, fileCount, type, destinationFolder)
             }
+
+        } else {
+            val mediator = mainViewModel.createMultiSelectMediator()
+            enableMultiSelectButtons(false)
+            sendAllIndividualActions(selectedFiles, type, mediator, destinationFolder, color)
+            observeMediator(mediator, fileCount, type, destinationFolder)
         }
     }
 
