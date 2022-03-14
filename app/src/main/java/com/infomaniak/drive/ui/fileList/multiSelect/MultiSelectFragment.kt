@@ -106,10 +106,11 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     }
 
     fun onItemSelected(selectedNumber: Int? = null) = with(multiSelectManager) {
-        val fileSelectedNumber = if (areAllSelected) {
-            (adapter?.itemCount ?: 0) - exceptedItemsIds.size
-        } else {
-            selectedNumber ?: getValidSelectedItems().size
+
+        val fileSelectedNumber = when {
+            areAllSelected -> (adapter?.itemCount ?: 0) - exceptedItemsIds.size
+            selectedNumber != null -> selectedNumber
+            else -> getValidSelectedItems().size
         }
 
         if (fileSelectedNumber in 0..1) enableMultiSelectButtons(fileSelectedNumber == 1)
