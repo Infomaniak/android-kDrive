@@ -140,7 +140,7 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
 
     private fun setupPagination() {
         picturesRecyclerView.apply {
-            paginationListener?.let { removeOnScrollListener(it) }
+            paginationListener?.let(::removeOnScrollListener)
             paginationListener = setPagination(
                 whenLoadMoreIsPossible = {
                     if (!picturesAdapter.isComplete && !isDownloadingPictures) {
