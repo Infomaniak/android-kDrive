@@ -149,7 +149,8 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
 
                         loadMorePictures(AccountUtils.currentDriveId)
                     }
-                }
+                },
+                triggerOffset = 100
             )
         }
     }
