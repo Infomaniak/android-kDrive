@@ -218,7 +218,7 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
 
                 onDownloadFinished()
 
-				isDownloadingPictures = false
+                isDownloadingPictures = false
             }
         }
     }

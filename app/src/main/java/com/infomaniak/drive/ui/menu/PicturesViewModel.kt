@@ -23,12 +23,9 @@ import androidx.lifecycle.liveData
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.FileActivity
 import com.infomaniak.drive.utils.IsComplete
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import java.util.*
-import kotlin.collections.ArrayList
 
 class PicturesViewModel : ViewModel() {
     private var getPicturesJob: Job = Job()
@@ -52,8 +49,9 @@ class PicturesViewModel : ViewModel() {
                     val isFirstPage = page == 1
                     val isComplete = (data?.size ?: 0) < ApiRepository.PER_PAGE
 
-                    if(data.isNullOrEmpty()) emit(null)
-                    else {
+                    if (data.isNullOrEmpty()) {
+                        emit(null)
+                    } else {
                         FileController.storePicturesDrive(data, isFirstPage)
                         emit(data to isComplete)
                     }
