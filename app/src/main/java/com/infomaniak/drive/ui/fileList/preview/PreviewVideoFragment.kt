@@ -143,13 +143,14 @@ open class PreviewVideoFragment : PreviewFragment() {
         exoPlayer?.addListener(object : Player.Listener {
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
+                val flagKeepScreenOn = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                 if (isPlaying) {
                     trackMediaPlayerEvent("play")
                     (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
-                    activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    activity?.window?.addFlags(flagKeepScreenOn)
                 } else {
                     trackMediaPlayerEvent("pause")
-                    activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    activity?.window?.clearFlags(flagKeepScreenOn)
                 }
             }
 
