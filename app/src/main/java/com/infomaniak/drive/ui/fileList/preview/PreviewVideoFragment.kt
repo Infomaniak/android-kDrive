@@ -23,6 +23,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import androidx.core.net.toUri
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -145,8 +146,10 @@ open class PreviewVideoFragment : PreviewFragment() {
                 if (isPlaying) {
                     trackMediaPlayerEvent("play")
                     (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+                    activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                 } else {
                     trackMediaPlayerEvent("pause")
+                    activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                 }
             }
 
