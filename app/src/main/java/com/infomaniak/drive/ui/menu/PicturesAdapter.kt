@@ -87,6 +87,8 @@ class PicturesAdapter(
     private fun LoaderCardView.handleCheckmark(file: File) {
         pictureChecked.apply {
 
+            isClickable = false
+
             fun isSelectedFile(file: File): Boolean = multiSelectManager.selectedItems.any { it.isUsable() && it.id == file.id }
 
             if (multiSelectManager.isMultiSelectOpened) {
