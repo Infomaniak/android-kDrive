@@ -335,8 +335,11 @@ open class FileAdapter(
 
         setOnLongClickListener {
             if (isMultiSelectAuthorized) {
+                if (!isMultiSelectOpened) {
+                    fileChecked.isChecked = false
+                    openMultiSelect?.invoke()
+                }
                 fileChecked.selectFile()
-                if (!isMultiSelectOpened) openMultiSelect?.invoke()
                 true
             } else {
                 false
