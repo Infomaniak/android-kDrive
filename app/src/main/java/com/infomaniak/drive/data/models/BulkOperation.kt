@@ -29,16 +29,16 @@ data class BulkOperation(
         return mutableMapOf<String, Any>().apply {
             put("action", action.toString().lowercase())
             destinationFolderId?.let { put("destination_directory_id", it) }
-            if (fileIds != null) addFilesInNormalMode() else addFilesInSelectAllMode()
+            if (fileIds == null) addFilesInSelectAllMode() else addFilesInNormalMode()
         }
-    }
-
-    private fun MutableMap<String, Any>.addFilesInNormalMode() {
-        fileIds?.let { put("file_ids", it) }
     }
 
     private fun MutableMap<String, Any>.addFilesInSelectAllMode() {
         put("parent_id", parent.id)
         if (exceptedFilesIds?.isNotEmpty() == true) put("except_file_ids", exceptedFilesIds)
+    }
+
+    private fun MutableMap<String, Any>.addFilesInNormalMode() {
+        fileIds?.let { put("file_ids", it) }
     }
 }
