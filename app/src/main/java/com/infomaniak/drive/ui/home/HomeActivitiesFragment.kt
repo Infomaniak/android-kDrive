@@ -60,7 +60,7 @@ class HomeActivitiesFragment : Fragment() {
     private fun initAdapter() {
         homeTabsRecyclerView.apply {
             homeViewModel.lastActivityPage = 1
-            paginationListener?.let { removeOnScrollListener(it) }
+            paginationListener?.let(::removeOnScrollListener)
 
             val lastActivitiesAdapter = LastActivitiesAdapter()
             lastActivitiesAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT

@@ -43,6 +43,7 @@ import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
 import com.infomaniak.drive.ui.fileList.multiSelect.PicturesMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
+import com.infomaniak.lib.core.utils.setPagination
 import com.infomaniak.lib.core.utils.toDp
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.cardview_picture.*
@@ -57,6 +58,9 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
 
     private val picturesViewModel: PicturesViewModel by viewModels()
     private lateinit var picturesAdapter: PicturesAdapter
+
+    private var paginationListener: RecyclerView.OnScrollListener? = null
+    private var isDownloadingPictures = false
 
     var menuPicturesBinding: FragmentMenuPicturesBinding? = null
 
@@ -73,6 +77,8 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        setupPagination()
 
         val isCurrentlyInGallery = menuPicturesBinding != null
 
@@ -128,7 +134,24 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
 
         if (!isPicturesAdapterInitialized) {
             if (isCurrentlyInGallery) refreshTimer.start()
-            getPictures()
+            loadMorePictures(AccountUtils.currentDriveId, true)
+        }
+    }
+
+    private fun setupPagination() {
+        picturesRecyclerView.apply {
+            paginationListener?.let(::removeOnScrollListener)
+            paginationListener = setPagination(
+                whenLoadMoreIsPossible = {
+                    if (!picturesAdapter.isComplete && !isDownloadingPictures) {
+                        picturesViewModel.lastPicturesPage++
+                        picturesViewModel.lastPicturesLastPage++
+
+                        loadMorePictures(AccountUtils.currentDriveId)
+                    }
+                },
+                triggerOffset = 100
+            )
         }
     }
 
@@ -163,12 +186,21 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
         picturesRecyclerView.layoutManager = gridLayoutManager
     }
 
-    private fun getPictures() {
+    private fun loadMorePictures(driveId: Int, forceDownload: Boolean = false) {
         picturesAdapter.apply {
+            if (forceDownload) {
+                picturesViewModel.apply {
+                    lastPicturesPage = 1
+                    lastPicturesLastPage = 1
+                }
+                clean()
+            }
+
             val ignoreCloud = mainViewModel.isInternetAvailable.value == false
             showLoading()
             isComplete = false
-            picturesViewModel.getAllPicturesFiles(AccountUtils.currentDriveId, ignoreCloud).observe(viewLifecycleOwner) {
+            isDownloadingPictures = true
+            picturesViewModel.getLastPictures(driveId, ignoreCloud).observe(viewLifecycleOwner) {
                 it?.let { (pictures, isComplete) ->
                     stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
                     val pictureList = formatList(requireContext(), pictures)
@@ -183,7 +215,10 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
                         showRefreshButton = true,
                     )
                 }
+
                 onDownloadFinished()
+
+                isDownloadingPictures = false
             }
         }
     }
@@ -198,7 +233,7 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
     fun onRefreshPictures() {
         if (isResumed) {
             picturesAdapter.clearPictures()
-            getPictures()
+            loadMorePictures(AccountUtils.currentDriveId, true)
         }
     }
 
