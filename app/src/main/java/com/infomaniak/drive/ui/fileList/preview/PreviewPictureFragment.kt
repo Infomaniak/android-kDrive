@@ -24,13 +24,11 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.net.toUri
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import coil.Coil
 import coil.load
-import coil.request.Disposable
 import coil.request.ImageRequest
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
@@ -66,20 +64,22 @@ class PreviewPictureFragment : PreviewFragment() {
         } else {
             null
         }
-        val imageViewDisposable = imageView.load(file.thumbnail()) { placeholder(R.drawable.coil_hack) }
 
         if (offlineFile != null && file.isOfflineAndIntact(offlineFile)) {
-            if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
-            imageView?.setImageURI(offlineFile.toUri())
+            imageView?.load(offlineFile) {
+                crossfade(true)
+                placeholder(R.drawable.coil_hack)
+            }
         } else {
-            loadImage(timer, imageViewDisposable)
+            loadImage(timer)
         }
 
         container?.layoutTransition?.setAnimateParentHierarchy(false)
         setupImageListeners()
     }
 
-    private fun loadImage(timer: CountDownTimer, imageViewDisposable: Disposable) {
+    private fun loadImage(timer: CountDownTimer) {
+        val imageViewDisposable = imageView.load(file.thumbnail()) { placeholder(R.drawable.coil_hack) }
         val imageLoader = Coil.imageLoader(requireContext())
         val previewRequest = buildPreviewRequest(timer)
 
