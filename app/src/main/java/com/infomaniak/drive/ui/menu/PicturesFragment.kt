@@ -242,7 +242,7 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
         menuPicturesBinding?.swipeRefreshLayout?.isEnabled = true
     }
 
-    override fun getAllSelectedFileCount(): Int? = null
+    override fun getAllSelectedFilesCount(): Int? = null
 
     fun onMoveButtonClicked() {
         // TODO: Use `parentId` when https://github.com/Infomaniak/android-kDrive/issues/532 is merged
@@ -270,14 +270,14 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
     override fun performBulkOperation(
         type: BulkOperationType,
         areAllFromTheSameFolder: Boolean,
-        allSelectedFileCount: Int?,
+        allSelectedFilesCount: Int?,
         destinationFolder: File?,
         color: String?,
     ) {
         // API doesn't support bulk operations for files originating from
         // different parent folders, so we repeat the action for each file.
         // Hence the `areAllFromTheSameFolder` set at false.
-        super.performBulkOperation(type, false, allSelectedFileCount, destinationFolder, color)
+        super.performBulkOperation(type, false, allSelectedFilesCount, destinationFolder, color)
     }
 
     override fun onIndividualActionSuccess(type: BulkOperationType, data: Any) {

@@ -79,7 +79,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
 
                 performBulkOperation(
                     type = bulkOperationType,
-                    allSelectedFileCount = getAllSelectedFileCount(),
+                    allSelectedFilesCount = getAllSelectedFilesCount(),
                     destinationFolder = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId),
                 )
             }
@@ -88,7 +88,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
 
     abstract fun initMultiSelectLayout(): MultiSelectLayoutBinding?
     abstract fun initMultiSelectToolbar(): CollapsingToolbarLayout?
-    abstract fun getAllSelectedFileCount(): Int?
+    abstract fun getAllSelectedFilesCount(): Int?
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         multiSelectLayout = initMultiSelectLayout()
@@ -145,8 +145,8 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         requireContext().moveFileClicked(folderId, selectFolderResultLauncher)
     }
 
-    fun deleteFiles(allSelectedFileCount: Int? = null) {
-        performBulkOperation(type = BulkOperationType.TRASH, allSelectedFileCount = allSelectedFileCount)
+    fun deleteFiles(allSelectedFilesCount: Int? = null) {
+        performBulkOperation(type = BulkOperationType.TRASH, allSelectedFilesCount = allSelectedFilesCount)
     }
 
     fun colorFolders() {
@@ -169,13 +169,13 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     open fun performBulkOperation(
         type: BulkOperationType,
         areAllFromTheSameFolder: Boolean = true,
-        allSelectedFileCount: Int? = null,
+        allSelectedFilesCount: Int? = null,
         destinationFolder: File? = null,
         color: String? = null,
     ) = with(requireContext()) {
 
         val selectedFiles = multiSelectManager.getValidSelectedItems(type)
-        val fileCount = (allSelectedFileCount?.minus(multiSelectManager.exceptedItemsIds.size)) ?: selectedFiles.size
+        val fileCount = (allSelectedFilesCount?.minus(multiSelectManager.exceptedItemsIds.size)) ?: selectedFiles.size
 
         applicationContext?.trackBulkActionEvent(matomoCategory, type, fileCount)
 

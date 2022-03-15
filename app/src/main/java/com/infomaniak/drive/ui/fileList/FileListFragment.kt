@@ -289,7 +289,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         getBackNavigationResult<String>(ColorFolderBottomSheetDialog.COLOR_FOLDER_NAV_KEY) {
             performBulkOperation(
                 type = BulkOperationType.COLOR_FOLDER,
-                allSelectedFileCount = getAllSelectedFileCount(),
+                allSelectedFilesCount = getAllSelectedFilesCount(),
                 color = it,
             )
         }
@@ -324,7 +324,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
             closeButtonMultiSelect.setOnClickListener { closeMultiSelect() }
             moveButtonMultiSelect.setOnClickListener { moveFiles(folderId) }
-            deleteButtonMultiSelect.setOnClickListener { deleteFiles(getAllSelectedFileCount()) }
+            deleteButtonMultiSelect.setOnClickListener { deleteFiles(getAllSelectedFilesCount()) }
             menuButtonMultiSelect.setOnClickListener { onMenuButtonClicked() }
 
             selectAllButton.apply {
@@ -652,14 +652,14 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     override fun performBulkOperation(
         type: BulkOperationType,
         areAllFromTheSameFolder: Boolean,
-        allSelectedFileCount: Int?,
+        allSelectedFilesCount: Int?,
         destinationFolder: File?,
         color: String?,
     ) {
-        super.performBulkOperation(type, areAllFromTheSameFolder, getAllSelectedFileCount(), destinationFolder, color)
+        super.performBulkOperation(type, areAllFromTheSameFolder, getAllSelectedFilesCount(), destinationFolder, color)
     }
 
-    override fun getAllSelectedFileCount(): Int? {
+    override fun getAllSelectedFilesCount(): Int? {
         return if (multiSelectManager.areAllSelected) {
             fileListViewModel.lastItemCount?.count ?: fileAdapter.itemCount
         } else {
