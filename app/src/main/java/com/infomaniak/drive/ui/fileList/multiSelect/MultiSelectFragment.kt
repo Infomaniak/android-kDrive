@@ -55,7 +55,6 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.Utils.moveFileClicked
-import io.realm.RealmList
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -130,7 +129,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
 
     open fun closeMultiSelect() {
         multiSelectManager.apply {
-            selectedItems = RealmList()
+            resetSelectedItems()
             areAllSelected = false
             isMultiSelectOpened = false
         }

@@ -291,7 +291,7 @@ open class FileAdapter(
 
     private fun MaterialCardView.displayFileChecked(file: File, isGrid: Boolean) = with(multiSelectManager) {
         fileChecked.apply {
-            isChecked = if (areAllSelected) !exceptedItemsIds.contains(file.id) else isSelectedFile(file)
+            isChecked = if (areAllSelected) !exceptedItemsIds.contains(file.id) else (file.isUsable() && isSelectedFile(file))
             isVisible = true
         }
         filePreview.isVisible = isGrid
@@ -382,14 +382,14 @@ open class FileAdapter(
                 else -> removeSelectedFile(file)
             }
         } else {
-            selectedItems = RealmList()
+            resetSelectedItems()
         }
         updateMultiSelect?.invoke()
     }
 
     fun configureAllSelected(isSelectedAll: Boolean) = with(multiSelectManager) {
         areAllSelected = isSelectedAll
-        selectedItems = RealmList()
+        resetSelectedItems()
         exceptedItemsIds.clear()
         notifyItemRangeChanged(0, itemCount)
     }
@@ -403,6 +403,7 @@ open class FileAdapter(
                 if (index != -1) exceptedItemsIds.removeAt(index) else return@with
             }
         } else {
+            selectedItemsIds.add(file.id)
             selectedItems.add(file)
         }
     }
@@ -411,6 +412,7 @@ open class FileAdapter(
         if (areAllSelected) {
             exceptedItemsIds.add(file.id)
         } else {
+            selectedItemsIds.remove(file.id)
             selectedItems.remove(file)
         }
     }

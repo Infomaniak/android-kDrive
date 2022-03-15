@@ -341,7 +341,10 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
                         fileListViewModel.getFileCount(multiSelectManager.currentFolder!!)
                             .observe(viewLifecycleOwner) { fileCount ->
-                                multiSelectManager.selectedItems = fileAdapter.getFiles()
+                                with(fileAdapter.getFiles()) {
+                                    multiSelectManager.selectedItems = this
+                                    multiSelectManager.selectedItemsIds = this.map { it.id }.toHashSet()
+                                }
                                 enableMultiSelectButtons(true)
                                 onUpdateMultiSelect(fileCount.count)
                             }
