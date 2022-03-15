@@ -401,7 +401,10 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     }
 
     private fun Context.trackBulkActionEvent(category: String, action: BulkOperationType, modifiedFileNumber: Int) {
-        val trackerName = "bulk" + (if (modifiedFileNumber == 1) "Single" else "") + action.toString()
+
+        fun BulkOperationType.toMatomoString(): String = name.lowercase().replaceFirstChar { it.titlecase() }
+
+        val trackerName = "bulk" + (if (modifiedFileNumber == 1) "Single" else "") + action.toMatomoString()
         trackEvent(category, TrackerAction.CLICK, trackerName, modifiedFileNumber.toFloat())
     }
 }

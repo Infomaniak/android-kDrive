@@ -520,11 +520,9 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
     }
 
-    companion object {
-
-        private fun Context.trackFileActionEvent(trackerName: String, trackerValue: Float? = null) {
+    private companion object {
+        fun Context.trackFileActionEvent(trackerName: String, trackerValue: Float? = null) {
             trackEvent("fileAction", TrackerAction.CLICK, trackerName, trackerValue)
         }
-
     }
 }

@@ -47,6 +47,4 @@ enum class BulkOperationType(@StringRes val title: Int, @PluralsRes val successM
             else -> context.copyOperationProgressNotification()
         }
     }
-
-    override fun toString(): String = name.lowercase().replaceFirstChar { it.titlecase() }
 }
