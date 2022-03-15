@@ -7,8 +7,6 @@ buildscript {
 
     repositories {
         google()
-        jcenter()
-        maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local' }
     }
 
     dependencies {
@@ -17,18 +15,18 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.android.tools.build:gradle:7.1.2'
         classpath 'com.google.gms:google-services:4.3.10'
-        classpath 'de.mannodermaus.gradle.plugins:android-junit5:1.7.1.1'
+        classpath 'de.mannodermaus.gradle.plugins:android-junit5:1.8.2.0'
     }
 }
 
-plugins { id 'io.sentry.android.gradle' version '3.0.0-alpha.2' }
+plugins { id 'io.sentry.android.gradle' version '3.0.0-rc.3' }
 
 allprojects {
     repositories {
-        jcenter()
         google()
-        maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local' }
+        mavenCentral()
         maven { url 'https://jitpack.io' }
+        jcenter() // Only for io.realm:android-adapters
     }
 }
 
