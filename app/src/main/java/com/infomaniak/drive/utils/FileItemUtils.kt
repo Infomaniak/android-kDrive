@@ -117,12 +117,12 @@ private fun View.displayFileIcon(file: File, isGrid: Boolean) {
     val isGraphic = fileType == ConvertedType.IMAGE || fileType == ConvertedType.VIDEO
 
     when {
-        file.hasThumbnail && (isGrid || isGraphic) -> filePreview.loadUrl(file.thumbnail(), fileType.icon)
+        file.hasThumbnail && (isGrid || isGraphic) -> filePreview.loadAny(file.thumbnail(), fileType.icon)
         file.isFromUploads && isGraphic -> {
             CoroutineScope(Dispatchers.IO).launch {
                 val bitmap = context.getLocalThumbnail(file)
                 withContext(Dispatchers.Main) {
-                    if (filePreview?.isVisible == true && context != null) filePreview.loadBitmap(bitmap, fileType.icon)
+                    if (filePreview?.isVisible == true && context != null) filePreview.loadAny(bitmap, fileType.icon)
                 }
             }
         }

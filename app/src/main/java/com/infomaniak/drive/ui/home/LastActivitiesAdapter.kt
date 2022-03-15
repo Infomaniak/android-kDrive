@@ -31,8 +31,8 @@ import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileActivity
+import com.infomaniak.drive.utils.loadAny
 import com.infomaniak.drive.utils.loadAvatar
-import com.infomaniak.drive.utils.loadUrl
 import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.LoaderCardView
 import com.infomaniak.lib.core.views.ViewHolder
@@ -169,7 +169,7 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
         if (this?.hasThumbnail == true && getFileType() == ConvertedType.IMAGE || this?.getFileType() == ConvertedType.VIDEO) {
             iconView.isGone = true
             imageView.isVisible = true
-            imageView.loadUrl(thumbnail(), getFileType().icon)
+            imageView.loadAny(thumbnail(), getFileType().icon)
         } else {
             imageView.isGone = true
             iconView.isVisible = true

@@ -28,8 +28,8 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.utils.loadAny
 import com.infomaniak.drive.utils.loadAvatar
-import com.infomaniak.drive.utils.loadBitmap
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_shareable_item.view.*
 
@@ -93,9 +93,7 @@ class SharedItemsAdapter(
             infos.isVisible = true
         }
 
-        avatar.apply {
-            loadBitmap(null, errorRes = R.drawable.ic_circle_send)
-        }
+        avatar.loadAny(null, errorRes = R.drawable.ic_circle_send)
 
         rightsValue.setText(invitation.getFilePermission().translation)
         externalUserLabel.apply {

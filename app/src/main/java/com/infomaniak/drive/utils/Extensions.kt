@@ -28,7 +28,6 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.database.Cursor
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Point
 import android.net.Uri
@@ -116,24 +115,10 @@ fun Context.isKeyguardSecure(): Boolean {
     return (getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager)?.isKeyguardSecure ?: false
 }
 
-fun ImageView.loadBitmap(
-    bitmap: Bitmap?,
-    @DrawableRes errorRes: Int = R.drawable.fallback_image
-): Disposable {
-    return load(bitmap) {
+fun ImageView.loadAny(data: Any?, @DrawableRes errorRes: Int = R.drawable.fallback_image): Disposable {
+    return load(data) {
         error(errorRes)
         fallback(errorRes)
-        placeholder(R.drawable.placeholder)
-    }
-}
-
-fun ImageView.loadUrl(
-    uri: String?,
-    @DrawableRes placeholder: Int = R.drawable.fallback_image
-): Disposable {
-    return load(uri) {
-        error(placeholder)
-        fallback(placeholder)
         placeholder(R.drawable.placeholder)
     }
 }
