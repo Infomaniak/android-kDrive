@@ -76,9 +76,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
             setOnCheckedChangeListener { _, _ -> selectOfflineDialogActionCallBack() }
         }
         disabledAvailableOffline.isVisible = onlyFolders
-        availableOffline.apply {
-            setOnClickListener { selectOfflineDialogActionCallBack() }
-        }
+        availableOffline.setOnClickListener { selectOfflineDialogActionCallBack() }
     }
 
     private fun selectOfflineDialogActionCallBack() {
