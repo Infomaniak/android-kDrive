@@ -38,6 +38,7 @@ import kotlinx.android.synthetic.main.fragment_preview_picture.container
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class PreviewPictureFragment : PreviewFragment() {
 
@@ -66,10 +67,7 @@ class PreviewPictureFragment : PreviewFragment() {
         }
 
         if (offlineFile != null && file.isOfflineAndIntact(offlineFile)) {
-            imageView?.load(offlineFile) {
-                crossfade(true)
-                placeholder(R.drawable.coil_hack)
-            }
+            loadImage(timer, offlineFile)
         } else {
             loadImage(timer)
         }
@@ -78,10 +76,10 @@ class PreviewPictureFragment : PreviewFragment() {
         setupImageListeners()
     }
 
-    private fun loadImage(timer: CountDownTimer) {
+    private fun loadImage(timer: CountDownTimer, offlineFile: File? = null) {
         val imageViewDisposable = imageView.load(file.thumbnail()) { placeholder(R.drawable.coil_hack) }
         val imageLoader = Coil.imageLoader(requireContext())
-        val previewRequest = buildPreviewRequest(timer)
+        val previewRequest = buildPreviewRequest(timer, offlineFile)
 
         lifecycleScope.launch(Dispatchers.IO) {
             imageLoader.execute(previewRequest).drawable?.let { drawable ->
@@ -91,9 +89,9 @@ class PreviewPictureFragment : PreviewFragment() {
         }
     }
 
-    private fun buildPreviewRequest(timer: CountDownTimer): ImageRequest {
+    private fun buildPreviewRequest(timer: CountDownTimer, offlineFile: File?): ImageRequest {
         return ImageRequest.Builder(requireContext())
-            .data(file.imagePreview())
+            .data(offlineFile ?: file.imagePreview())
             .listener(
                 onError = { _, _ ->
                     fileName?.text = file.name
