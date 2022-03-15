@@ -64,7 +64,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private var mediaVideoPath = ""
 
     private val captureMediaResultLauncher = registerForActivityResult(StartActivityForResult()) {
-        it.whenResultIsOk { data -> onCaptureMediaResult(data) }
+        it.whenResultIsOk { onCaptureMediaResult() }
         dismiss()
     }
 
@@ -219,34 +219,26 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun onCaptureMediaResult(data: Intent?) {
+    private fun onCaptureMediaResult() {
         try {
-            if (data?.data == null) {
-                val photoFile = java.io.File(mediaPhotoPath)
-                val file = when {
-                    photoFile.length() != 0L -> photoFile
-                    else -> java.io.File(mediaVideoPath)
-                }
-                val fileModifiedAt = Date(file.lastModified())
-                val fileSize = file.length()
-                val applicationContext = context?.applicationContext
-                lifecycleScope.launch(Dispatchers.IO) {
-                    val cacheUri = Utils.copyDataToUploadCache(requireContext(), file, fileModifiedAt)
-                    UploadFile(
-                        uri = cacheUri.toString(),
-                        driveId = currentFolderFile.driveId,
-                        fileCreatedAt = Date(file.lastModified()),
-                        fileModifiedAt = fileModifiedAt,
-                        fileName = file.name,
-                        fileSize = fileSize,
-                        remoteFolder = currentFolderFile.id,
-                        type = UploadFile.Type.UPLOAD.name,
-                        userId = currentUserId,
-                    ).store()
-                    applicationContext?.syncImmediately()
-                    file.delete()
-                }
-
+            val file = with(java.io.File(mediaPhotoPath)) { if (length() != 0L) this else java.io.File(mediaVideoPath) }
+            val fileModifiedAt = Date(file.lastModified())
+            val applicationContext = context?.applicationContext
+            lifecycleScope.launch(Dispatchers.IO) {
+                val cacheUri = Utils.copyDataToUploadCache(requireContext(), file, fileModifiedAt)
+                UploadFile(
+                    uri = cacheUri.toString(),
+                    driveId = currentFolderFile.driveId,
+                    fileCreatedAt = fileModifiedAt,
+                    fileModifiedAt = fileModifiedAt,
+                    fileName = file.name,
+                    fileSize = file.length(),
+                    remoteFolder = currentFolderFile.id,
+                    type = UploadFile.Type.UPLOAD.name,
+                    userId = currentUserId,
+                ).store()
+                applicationContext?.syncImmediately()
+                file.delete()
             }
         } catch (exception: Exception) {
             exception.printStackTrace()
