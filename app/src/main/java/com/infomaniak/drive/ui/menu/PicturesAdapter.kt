@@ -26,7 +26,7 @@ import com.google.android.material.checkbox.MaterialCheckBox
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager
-import com.infomaniak.drive.utils.loadGlideUrl
+import com.infomaniak.drive.utils.loadUrl
 import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.LoaderCardView
@@ -78,7 +78,7 @@ class PicturesAdapter(
     private fun LoaderCardView.displayThumbnail(file: File) {
         stop()
         picture.apply {
-            loadGlideUrl(file.thumbnail())
+            loadUrl(file.thumbnail())
             contentDescription = file.name
         }
     }

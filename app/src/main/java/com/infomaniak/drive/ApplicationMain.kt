@@ -27,9 +27,11 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationManagerCompat
 import coil.ImageLoader
 import coil.ImageLoaderFactory
+import coil.annotation.ExperimentalCoilApi
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
-import coil.util.CoilUtils
+import coil.disk.DiskCache
+import coil.memory.MemoryCache
 import com.facebook.stetho.Stetho
 import com.facebook.stetho.okhttp3.StethoInterceptor
 import com.infomaniak.drive.BuildConfig.DRIVE_API
@@ -66,6 +68,7 @@ import okhttp3.OkHttpClient
 import org.matomo.sdk.Tracker
 import java.util.*
 
+@ExperimentalCoilApi
 class ApplicationMain : Application(), ImageLoaderFactory {
 
     val matomoTracker: Tracker by lazy { buildTracker() }
@@ -122,8 +125,8 @@ class ApplicationMain : Application(), ImageLoaderFactory {
     override fun newImageLoader(): ImageLoader {
         return ImageLoader.Builder(applicationContext)
             .crossfade(true)
-            .componentRegistry {
-                add(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) ImageDecoderDecoder(applicationContext) else GifDecoder())
+            .components {
+                add(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) ImageDecoderDecoder.Factory() else GifDecoder.Factory())
             }
             .okHttpClient {
                 OkHttpClient.Builder().apply {
@@ -139,8 +142,18 @@ class ApplicationMain : Application(), ImageLoaderFactory {
                     if (com.infomaniak.lib.core.BuildConfig.DEBUG) {
                         addNetworkInterceptor(StethoInterceptor())
                     }
-                    cache(CoilUtils.createDefaultCache(applicationContext))
                 }.build()
+            }
+            .memoryCache {
+                MemoryCache.Builder(applicationContext)
+                    .maxSizePercent(MEMORY_CACHE_PERCENT)
+                    .build()
+            }
+            .diskCache {
+                DiskCache.Builder()
+                    .directory(applicationContext.cacheDir.resolve("coil_cache"))
+                    .maxSizePercent(DISK_CACHE_PERCENT)
+                    .build()
             }
             .build()
     }
@@ -171,5 +184,10 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         override suspend fun getApiToken(): ApiToken {
             return AccountUtils.currentUser!!.apiToken
         }
+    }
+
+    private companion object {
+        const val DISK_CACHE_PERCENT = .02 // 2%
+        const val MEMORY_CACHE_PERCENT = .25 // 25%
     }
 }

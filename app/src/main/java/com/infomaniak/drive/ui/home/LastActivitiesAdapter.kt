@@ -25,14 +25,14 @@ import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileActivity
 import com.infomaniak.drive.utils.loadAvatar
-import com.infomaniak.drive.utils.loadGlide
-import com.infomaniak.drive.utils.loadGlideUrl
+import com.infomaniak.drive.utils.loadUrl
 import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.LoaderCardView
 import com.infomaniak.lib.core.views.ViewHolder
@@ -76,7 +76,7 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
             2 * DAY_IN_MILLIS, FORMAT_ABBREV_ALL
         )
 
-        fileIcon.loadGlide(getFileTypeIcon(fileActivity.file))
+        fileIcon.load(getFileTypeIcon(fileActivity.file))
         fileName1.text = fileActivityName
 
         if (sizeMergedFile >= 1) {
@@ -87,7 +87,7 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
             fileActivity.file.loadPreview(filePreview1, filePreviewIcon1 as ConstraintLayout)
             val file2 = fileActivity.mergedFileActivities[0].file
             file2.loadPreview(filePreview2, filePreviewIcon2 as ConstraintLayout)
-            fileIcon2.loadGlide(getFileTypeIcon(file2))
+            fileIcon2.load(getFileTypeIcon(file2))
             fileName2.text = file2?.name ?: fileActivity.mergedFileActivities[0].path.substringAfterLast("/")
 
             if (sizeMergedFile == 1) {
@@ -107,12 +107,12 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
                 (cardFilePreview2.layoutParams as ConstraintLayout.LayoutParams).dimensionRatio = "1:1"
 
                 if (sizeMergedFile > 2) {
-                    fileIcon3.loadGlide(R.drawable.ic_copy)
+                    fileIcon3.load(R.drawable.ic_copy)
                     fileName3.text = fileName3.context.getString(R.string.fileActivityOtherFiles, sizeMergedFile - 1)
                     moreFile.text = "+${sizeMergedFile - 1}"
                     moreFile.isVisible = true
                 } else {
-                    fileIcon3.loadGlide(getFileTypeIcon(file3))
+                    fileIcon3.load(getFileTypeIcon(file3))
                     fileName3.text = file3?.name ?: fileActivity.mergedFileActivities[1].path.substringAfterLast("/")
                     moreFile.isGone = true
                 }
@@ -169,11 +169,11 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
         if (this?.hasThumbnail == true && getFileType() == ConvertedType.IMAGE || this?.getFileType() == ConvertedType.VIDEO) {
             iconView.isGone = true
             imageView.isVisible = true
-            imageView.loadGlideUrl(thumbnail(), getFileType().icon)
+            imageView.loadUrl(thumbnail(), getFileType().icon)
         } else {
             imageView.isGone = true
             iconView.isVisible = true
-            iconView.icon.loadGlide(getFileTypeIcon(this))
+            iconView.icon.load(getFileTypeIcon(this))
         }
     }
 
