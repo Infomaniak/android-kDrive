@@ -19,18 +19,15 @@ package com.infomaniak.drive.ui.fileList.preview
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.net.toUri
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import coil.Coil
 import coil.load
-import coil.request.Disposable
 import coil.request.ImageRequest
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
@@ -40,6 +37,7 @@ import kotlinx.android.synthetic.main.fragment_preview_picture.container
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class PreviewPictureFragment : PreviewFragment() {
 
@@ -52,7 +50,6 @@ class PreviewPictureFragment : PreviewFragment() {
 
         if (noCurrentFile()) return
 
-        val timer = createRefreshTimer(milliseconds = 400) { noThumbnailLayout?.isVisible = true }.start()
         previewDescription.isGone = true
         fileIcon.setImageResource(file.getFileType().icon)
 
@@ -61,27 +58,16 @@ class PreviewPictureFragment : PreviewFragment() {
             setOnClickListener { (parentFragment as? PreviewSliderFragment)?.openWithClicked() }
         }
 
-        val offlineFile = if (file.isOffline) {
-            file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive.userId)
-        } else {
-            null
-        }
-        val imageViewDisposable = imageView.load(file.thumbnail()) { placeholder(R.drawable.coil_hack) }
-
-        if (offlineFile != null && file.isOfflineAndIntact(offlineFile)) {
-            if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
-            imageView?.setImageURI(offlineFile.toUri())
-        } else {
-            loadImage(timer, imageViewDisposable)
-        }
+        loadImage()
 
         container?.layoutTransition?.setAnimateParentHierarchy(false)
         setupImageListeners()
     }
 
-    private fun loadImage(timer: CountDownTimer, imageViewDisposable: Disposable) {
+    private fun loadImage() {
+        val imageViewDisposable = imageView.load(file.thumbnail()) { placeholder(R.drawable.coil_hack) }
         val imageLoader = Coil.imageLoader(requireContext())
-        val previewRequest = buildPreviewRequest(timer)
+        val previewRequest = buildPreviewRequest()
 
         lifecycleScope.launch(Dispatchers.IO) {
             imageLoader.execute(previewRequest).drawable?.let { drawable ->
@@ -91,9 +77,12 @@ class PreviewPictureFragment : PreviewFragment() {
         }
     }
 
-    private fun buildPreviewRequest(timer: CountDownTimer): ImageRequest {
+    private fun buildPreviewRequest(): ImageRequest {
+        val timer = createRefreshTimer(milliseconds = 400) { noThumbnailLayout?.isVisible = true }.start()
+        val offlineFile = if (file.isOffline) getOfflineFile() else null
+
         return ImageRequest.Builder(requireContext())
-            .data(file.imagePreview())
+            .data(offlineFile ?: file.imagePreview())
             .listener(
                 onError = { _, _ ->
                     fileName?.text = file.name
@@ -107,6 +96,12 @@ class PreviewPictureFragment : PreviewFragment() {
                 },
             )
             .build()
+    }
+
+    private fun getOfflineFile(): File? {
+        return file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive.userId)?.let {
+            if (file.isOfflineAndIntact(it)) it else null
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")

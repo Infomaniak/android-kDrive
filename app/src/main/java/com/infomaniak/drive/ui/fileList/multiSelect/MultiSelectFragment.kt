@@ -207,8 +207,9 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
 
         val canBulkAllSelectedFiles = multiSelectManager.areAllSelected && fileCount > BulkOperationsUtils.MIN_SELECTED
         val hasEnoughSelectedFilesToBulk = selectedFiles.size > BulkOperationsUtils.MIN_SELECTED
+        val isNotOfflineBulk = type != BulkOperationType.ADD_OFFLINE && type != BulkOperationType.REMOVE_OFFLINE
 
-        if (areAllFromTheSameFolder && (canBulkAllSelectedFiles || hasEnoughSelectedFilesToBulk)) {
+        if (areAllFromTheSameFolder && isNotOfflineBulk && (canBulkAllSelectedFiles || hasEnoughSelectedFilesToBulk)) {
             with(multiSelectManager) {
                 sendBulkAction(
                     fileCount, BulkOperation(
