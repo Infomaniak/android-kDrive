@@ -89,7 +89,7 @@ class PicturesAdapter(
             isClickable = false
 
             if (multiSelectManager.isMultiSelectOpened) {
-                isChecked = file.isUsable() && multiSelectManager.isSelectedFile(file)
+                isChecked = multiSelectManager.isSelectedFile(file)
                 isVisible = true
             } else {
                 isGone = true

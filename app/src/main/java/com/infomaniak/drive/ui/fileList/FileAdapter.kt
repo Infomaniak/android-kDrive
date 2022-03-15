@@ -291,7 +291,7 @@ open class FileAdapter(
 
     private fun MaterialCardView.displayFileChecked(file: File, isGrid: Boolean) = with(multiSelectManager) {
         fileChecked.apply {
-            isChecked = if (areAllSelected) !exceptedItemsIds.contains(file.id) else (file.isUsable() && isSelectedFile(file))
+            isChecked = if (areAllSelected) !exceptedItemsIds.contains(file.id) else isSelectedFile(file)
             isVisible = true
         }
         filePreview.isVisible = isGrid
