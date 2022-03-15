@@ -289,7 +289,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         getBackNavigationResult<String>(ColorFolderBottomSheetDialog.COLOR_FOLDER_NAV_KEY) {
             performBulkOperation(
                 type = BulkOperationType.COLOR_FOLDER,
-                allSelectedFileCount = getAllSelectedFileCount(),
+                allSelectedFilesCount = getAllSelectedFilesCount(),
                 color = it,
             )
         }
@@ -324,7 +324,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
             closeButtonMultiSelect.setOnClickListener { closeMultiSelect() }
             moveButtonMultiSelect.setOnClickListener { moveFiles(folderId) }
-            deleteButtonMultiSelect.setOnClickListener { deleteFiles(getAllSelectedFileCount()) }
+            deleteButtonMultiSelect.setOnClickListener { deleteFiles(getAllSelectedFilesCount()) }
             menuButtonMultiSelect.setOnClickListener { onMenuButtonClicked() }
 
             selectAllButton.apply {
@@ -332,7 +332,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                 setOnClickListener {
                     selectAllTimer.start()
                     if (multiSelectManager.areAllSelected) {
-                        fileAdapter.configureAllSelected(false)
+                        val isSelectedAll = multiSelectManager.exceptedItemsIds.isNotEmpty()
+                        fileAdapter.configureAllSelected(isSelectedAll)
                         onUpdateMultiSelect()
                     } else {
                         fileAdapter.configureAllSelected(true)
@@ -340,12 +341,12 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
                         fileListViewModel.getFileCount(multiSelectManager.currentFolder!!)
                             .observe(viewLifecycleOwner) { fileCount ->
-                                val fileNumber = fileCount.count
-                                if (fileNumber < BulkOperationsUtils.MIN_SELECTED) {
-                                    multiSelectManager.selectedItems = fileAdapter.getFiles()
+                                with(fileAdapter.getFiles()) {
+                                    multiSelectManager.selectedItems = this
+                                    multiSelectManager.selectedItemsIds = this.map { it.id }.toHashSet()
                                 }
                                 enableMultiSelectButtons(true)
-                                onUpdateMultiSelect(fileNumber)
+                                onUpdateMultiSelect(fileCount.count)
                             }
                     }
                 }
@@ -583,9 +584,18 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     private fun onUpdateMultiSelect(selectedNumber: Int? = null) {
         onItemSelected(selectedNumber)
+        updateSelectAllButtonText()
+    }
+
+    private fun updateSelectAllButtonText() {
         multiSelectLayout?.selectAllButton?.apply {
+
             selectAllTimer.cancel()
-            val textId = if (multiSelectManager.areAllSelected) R.string.buttonDeselectAll else R.string.buttonSelectAll
+
+            val textId = with(multiSelectManager) {
+                if (areAllSelected && exceptedItemsIds.isEmpty()) R.string.buttonDeselectAll else R.string.buttonSelectAll
+            }
+
             if (isClickable) setText(textId) else hideProgress(textId)
         }
     }
@@ -645,14 +655,14 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     override fun performBulkOperation(
         type: BulkOperationType,
         areAllFromTheSameFolder: Boolean,
-        allSelectedFileCount: Int?,
+        allSelectedFilesCount: Int?,
         destinationFolder: File?,
         color: String?,
     ) {
-        super.performBulkOperation(type, areAllFromTheSameFolder, getAllSelectedFileCount(), destinationFolder, color)
+        super.performBulkOperation(type, areAllFromTheSameFolder, getAllSelectedFilesCount(), destinationFolder, color)
     }
 
-    override fun getAllSelectedFileCount(): Int? {
+    override fun getAllSelectedFilesCount(): Int? {
         return if (multiSelectManager.areAllSelected) {
             fileListViewModel.lastItemCount?.count ?: fileAdapter.itemCount
         } else {

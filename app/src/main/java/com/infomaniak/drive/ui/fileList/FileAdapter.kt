@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.fileList
 
 import android.content.Context
+import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -288,9 +289,9 @@ open class FileAdapter(
         }
     }
 
-    private fun MaterialCardView.displayFileChecked(file: File, isGrid: Boolean) {
+    private fun MaterialCardView.displayFileChecked(file: File, isGrid: Boolean) = with(multiSelectManager) {
         fileChecked.apply {
-            isChecked = isSelectedFile(file) || multiSelectManager.areAllSelected
+            isChecked = if (areAllSelected) !exceptedItemsIds.contains(file.id) else isSelectedFile(file)
             isVisible = true
         }
         filePreview.isVisible = isGrid
@@ -377,34 +378,44 @@ open class FileAdapter(
     private fun onFileSelected(file: File, isSelected: Boolean) = with(multiSelectManager) {
         if (file.isUsable()) {
             when {
-                areAllSelected -> { // If all selected, unselect everything and only select the clicked one (like web-app)
-                    configureAllSelected(false)
-                    addSelectedFile(file)
-                }
                 isSelected -> addSelectedFile(file)
                 else -> removeSelectedFile(file)
             }
         } else {
-            selectedItems = RealmList()
+            resetSelectedItems()
         }
         updateMultiSelect?.invoke()
     }
 
     fun configureAllSelected(isSelectedAll: Boolean) = with(multiSelectManager) {
         areAllSelected = isSelectedAll
-        selectedItems = RealmList()
+        resetSelectedItems()
+        exceptedItemsIds.clear()
         notifyItemRangeChanged(0, itemCount)
     }
 
-    private fun addSelectedFile(file: File) {
-        multiSelectManager.selectedItems.add(file)
+    private fun addSelectedFile(file: File) = with(multiSelectManager) {
+        if (areAllSelected) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                exceptedItemsIds.removeIf { it == file.id }
+            } else {
+                val index = exceptedItemsIds.indexOf(file.id)
+                if (index != -1) exceptedItemsIds.removeAt(index) else return@with
+            }
+        } else {
+            selectedItemsIds.add(file.id)
+            selectedItems.add(file)
+        }
     }
 
-    private fun removeSelectedFile(file: File) {
-        multiSelectManager.selectedItems.remove(file)
+    private fun removeSelectedFile(file: File) = with(multiSelectManager) {
+        if (areAllSelected) {
+            exceptedItemsIds.add(file.id)
+        } else {
+            selectedItemsIds.remove(file.id)
+            selectedItems.remove(file)
+        }
     }
-
-    private fun isSelectedFile(file: File): Boolean = multiSelectManager.selectedItems.any { it.isUsable() && it.id == file.id }
 
     fun toggleOfflineMode(context: Context, isOffline: Boolean) {
         if (offlineMode != isOffline) {

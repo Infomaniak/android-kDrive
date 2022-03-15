@@ -31,7 +31,6 @@ import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.LoaderCardView
 import com.infomaniak.lib.core.views.ViewHolder
-import io.realm.RealmList
 import kotlinx.android.synthetic.main.cardview_picture.view.*
 import kotlinx.android.synthetic.main.title_recycler_section.view.*
 
@@ -89,10 +88,8 @@ class PicturesAdapter(
 
             isClickable = false
 
-            fun isSelectedFile(file: File): Boolean = multiSelectManager.selectedItems.any { it.isUsable() && it.id == file.id }
-
             if (multiSelectManager.isMultiSelectOpened) {
-                isChecked = isSelectedFile(file)
+                isChecked = multiSelectManager.isSelectedFile(file)
                 isVisible = true
             } else {
                 isGone = true
@@ -125,9 +122,15 @@ class PicturesAdapter(
         isChecked = !isChecked
 
         if (file.isUsable()) {
-            if (isChecked) selectedItems.add(file) else selectedItems.remove(file)
+            if (isChecked) {
+                selectedItemsIds.add(file.id)
+                selectedItems.add(file)
+            } else {
+                selectedItemsIds.remove(file.id)
+                selectedItems.remove(file)
+            }
         } else {
-            selectedItems = RealmList()
+            resetSelectedItems()
         }
 
         updateMultiSelect?.invoke()

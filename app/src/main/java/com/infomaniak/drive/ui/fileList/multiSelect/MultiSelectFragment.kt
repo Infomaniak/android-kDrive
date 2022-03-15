@@ -55,7 +55,6 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.Utils.moveFileClicked
-import io.realm.RealmList
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -79,7 +78,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
 
                 performBulkOperation(
                     type = bulkOperationType,
-                    allSelectedFileCount = getAllSelectedFileCount(),
+                    allSelectedFilesCount = getAllSelectedFilesCount(),
                     destinationFolder = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId),
                 )
             }
@@ -88,7 +87,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
 
     abstract fun initMultiSelectLayout(): MultiSelectLayoutBinding?
     abstract fun initMultiSelectToolbar(): CollapsingToolbarLayout?
-    abstract fun getAllSelectedFileCount(): Int?
+    abstract fun getAllSelectedFilesCount(): Int?
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         multiSelectLayout = initMultiSelectLayout()
@@ -105,9 +104,16 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         multiSelectLayout?.root?.isVisible = true
     }
 
-    fun onItemSelected(selectedNumber: Int? = null) {
-        val fileSelectedNumber = selectedNumber ?: multiSelectManager.getValidSelectedItems().size
+    fun onItemSelected(selectedNumber: Int? = null) = with(multiSelectManager) {
+
+        val fileSelectedNumber = when {
+            areAllSelected -> (adapter?.itemCount ?: 0) - exceptedItemsIds.size
+            selectedNumber != null -> selectedNumber
+            else -> getValidSelectedItems().size
+        }
+
         if (fileSelectedNumber in 0..1) enableMultiSelectButtons(fileSelectedNumber == 1)
+
         multiSelectLayout?.titleMultiSelect?.text = resources.getQuantityString(
             R.plurals.fileListMultiSelectedTitle, fileSelectedNumber, fileSelectedNumber
         )
@@ -123,7 +129,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
 
     open fun closeMultiSelect() {
         multiSelectManager.apply {
-            selectedItems = RealmList()
+            resetSelectedItems()
             areAllSelected = false
             isMultiSelectOpened = false
         }
@@ -138,8 +144,8 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         requireContext().moveFileClicked(folderId, selectFolderResultLauncher)
     }
 
-    fun deleteFiles(allSelectedFileCount: Int? = null) {
-        performBulkOperation(type = BulkOperationType.TRASH, allSelectedFileCount = allSelectedFileCount)
+    fun deleteFiles(allSelectedFilesCount: Int? = null) {
+        performBulkOperation(type = BulkOperationType.TRASH, allSelectedFilesCount = allSelectedFilesCount)
     }
 
     fun colorFolders() {
@@ -162,13 +168,13 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     open fun performBulkOperation(
         type: BulkOperationType,
         areAllFromTheSameFolder: Boolean = true,
-        allSelectedFileCount: Int? = null,
+        allSelectedFilesCount: Int? = null,
         destinationFolder: File? = null,
         color: String? = null,
     ) = with(requireContext()) {
 
         val selectedFiles = multiSelectManager.getValidSelectedItems(type)
-        val fileCount = allSelectedFileCount ?: selectedFiles.size
+        val fileCount = (allSelectedFilesCount?.minus(multiSelectManager.exceptedItemsIds.size)) ?: selectedFiles.size
 
         applicationContext?.trackBulkActionEvent(matomoCategory, type, fileCount)
 
@@ -203,14 +209,18 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         val isNotOfflineBulk = type != BulkOperationType.ADD_OFFLINE && type != BulkOperationType.REMOVE_OFFLINE
 
         if (areAllFromTheSameFolder && isNotOfflineBulk && (canBulkAllSelectedFiles || hasEnoughSelectedFilesToBulk)) {
-            sendBulkAction(
-                fileCount, BulkOperation(
-                    action = type,
-                    fileIds = if (multiSelectManager.areAllSelected) null else selectedFiles.map { it.id },
-                    parent = multiSelectManager.currentFolder!!,
-                    destinationFolderId = destinationFolder?.id,
+            with(multiSelectManager) {
+                sendBulkAction(
+                    fileCount, BulkOperation(
+                        action = type,
+                        fileIds = if (areAllSelected) null else selectedFiles.map { it.id },
+                        exceptedFilesIds = if (areAllSelected) exceptedItemsIds else null,
+                        parent = currentFolder!!,
+                        destinationFolderId = destinationFolder?.id,
+                    )
                 )
-            )
+            }
+
         } else {
             val mediator = mainViewModel.createMultiSelectMediator()
             enableMultiSelectButtons(false)

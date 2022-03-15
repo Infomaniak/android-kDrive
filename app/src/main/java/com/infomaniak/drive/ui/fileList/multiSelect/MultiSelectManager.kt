@@ -35,20 +35,29 @@ class MultiSelectManager {
     var isMultiSelectOpened = false
 
     var selectedItems: OrderedRealmCollection<File> = RealmList()
+    var selectedItemsIds: HashSet<Int> = hashSetOf()
+    val exceptedItemsIds = mutableListOf<Int>()
     var areAllSelected = false
     var currentFolder: File? = null
 
     var openMultiSelect: (() -> Unit)? = null
     var updateMultiSelect: (() -> Unit)? = null
 
+    fun resetSelectedItems() {
+        selectedItemsIds = hashSetOf()
+        selectedItems = RealmList()
+    }
+
     fun getValidSelectedItems(type: BulkOperationType? = null): List<File> {
-        val selectedFiles = selectedItems.filter { it.isUsable() }
+        val selectedFiles = selectedItems.filter { it.isUsable() && !exceptedItemsIds.contains(it.id) }
         return when (type) {
             BulkOperationType.ADD_FAVORITES -> selectedFiles.filter { !it.isFavorite }
             BulkOperationType.REMOVE_FAVORITES -> selectedFiles.filter { it.isFavorite }
             else -> selectedFiles
         }
     }
+
+    fun isSelectedFile(file: File): Boolean = file.isUsable() && selectedItemsIds.contains(file.id)
 
     fun performCancellableBulkOperation(bulkOperation: BulkOperation): LiveData<ApiResponse<CancellableAction>> {
         return liveData(Dispatchers.IO) { emit(ApiRepository.performCancellableBulkOperation(bulkOperation)) }
