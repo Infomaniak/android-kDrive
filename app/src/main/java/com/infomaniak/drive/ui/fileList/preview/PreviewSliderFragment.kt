@@ -167,8 +167,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun onStart() {
-        setupTransparentStatusBar()
         super.onStart()
+        setupTransparentStatusBar()
     }
 
     override fun onResume() {
@@ -256,11 +256,17 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 override fun onStateChanged(bottomSheet: View, newState: Int) {
                     when (bottomSheetBehavior.state) {
                         BottomSheetBehavior.STATE_HIDDEN -> {
-                            activity?.window?.navigationBarColor =
-                                ContextCompat.getColor(requireContext(), R.color.previewBackgroundTransparent)
-                            activity?.window?.lightNavigationBar(false)
+                            activity?.window?.apply {
+                                navigationBarColor =
+                                    ContextCompat.getColor(requireContext(), R.color.previewBackgroundTransparent)
+                                lightNavigationBar(false)
+                            }
+                        }
+                        BottomSheetBehavior.STATE_EXPANDED -> {
+                            activity?.setColorStatusBar(true)
                         }
                         else -> {
+                            setupTransparentStatusBar()
                             activity?.setColorNavigationBar(true)
                         }
                     }
