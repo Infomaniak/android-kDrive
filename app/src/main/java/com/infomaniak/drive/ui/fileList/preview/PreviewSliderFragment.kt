@@ -164,8 +164,11 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
 
         configureBottomSheetFileInfo()
+    }
 
+    override fun onStart() {
         setupTransparentStatusBar()
+        super.onStart()
     }
 
     override fun onResume() {
@@ -282,6 +285,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                     header?.setMargin(top = top, right = right, left = left)
                     bottomSheetBehavior.peekHeight = getDefaultPeekHeight() + bottom
                     bottomSheetBehavior.expandedOffset = top
+                    bottomSheetFileInfos.setPadding(0, 0, 0, top + bottom)
                 }
 
                 windowInsets
