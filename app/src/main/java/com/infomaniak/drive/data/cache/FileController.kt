@@ -73,8 +73,7 @@ object FileController {
 
     fun getParentFileProxy(fileId: Int, realm: Realm): File? {
         return getFileById(realm, fileId)?.localParent?.let { parents ->
-            if (parents.count() == 1) parents.firstOrNull()
-            else parents.firstOrNull { it.id > 0 }
+            parents.firstOrNull { it.id > 0 }
         }
     }
 
