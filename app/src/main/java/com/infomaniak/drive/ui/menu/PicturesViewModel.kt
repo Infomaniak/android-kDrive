@@ -25,6 +25,7 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.IsComplete
+import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 
@@ -42,33 +43,36 @@ class PicturesViewModel : ViewModel() {
         getPicturesJob = Job()
 
         return liveData(Dispatchers.IO + getPicturesJob) {
-            if (!ignoreCloud) {
-                val page = lastPicturesPage
-                val apiResponse = ApiRepository.getLastPictures(driveId = driveId, page = page)
-                if (apiResponse.isSuccess()) {
-                    val data = apiResponse.data
-                    val isFirstPage = page == 1
-                    val isComplete = (data?.size ?: 0) < ApiRepository.PER_PAGE
-
-                    if (data.isNullOrEmpty()) {
-                        emit(null)
-                    } else {
-                        FileController.storePicturesDrive(data, isFirstPage)
-                        emit(data to isComplete)
-                    }
-
-                    if (isFirstPage) FileController.removeOrphanFiles()
-                } else {
-                    getRealmPictures()
-                }
-            } else {
-                getRealmPictures()
-            }
+            if (ignoreCloud) emitRealmPictures() else fetchApiPictures(driveId)
         }
     }
 
-    private suspend fun LiveDataScope<Pair<ArrayList<File>, IsComplete>?>.getRealmPictures() {
+    private suspend fun LiveDataScope<Pair<ArrayList<File>, IsComplete>?>.emitRealmPictures() {
         emit(FileController.getPicturesDrive() to true)
+    }
+
+    private suspend fun LiveDataScope<Pair<ArrayList<File>, IsComplete>?>.fetchApiPictures(driveId: Int) {
+        val page = lastPicturesPage
+        val apiResponse = ApiRepository.getLastPictures(driveId = driveId, page = page)
+        if (apiResponse.isSuccess()) emitApiPictures(apiResponse, page) else emitRealmPictures()
+    }
+
+    private suspend fun LiveDataScope<Pair<ArrayList<File>, IsComplete>?>.emitApiPictures(
+        apiResponse: ApiResponse<ArrayList<File>>,
+        page: Int,
+    ) {
+        val data = apiResponse.data
+        val isFirstPage = page == 1
+        val isComplete = (data?.size ?: 0) < ApiRepository.PER_PAGE
+
+        if (data.isNullOrEmpty()) {
+            emit(null)
+        } else {
+            FileController.storePicturesDrive(data, isFirstPage)
+            emit(data to isComplete)
+        }
+
+        if (isFirstPage) FileController.removeOrphanFiles()
     }
 
     override fun onCleared() {
