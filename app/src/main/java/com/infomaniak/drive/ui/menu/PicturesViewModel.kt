@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.menu
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.LiveDataScope
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import com.infomaniak.drive.data.api.ApiRepository
@@ -58,10 +59,16 @@ class PicturesViewModel : ViewModel() {
 
                     if (isFirstPage) FileController.removeOrphanFiles()
                 } else {
-                    emit(FileController.getPicturesDrive() to true)
+                    getRealmPictures()
                 }
+            } else {
+                getRealmPictures()
             }
         }
+    }
+
+    private suspend fun LiveDataScope<Pair<ArrayList<File>, IsComplete>?>.getRealmPictures() {
+        emit(FileController.getPicturesDrive() to true)
     }
 
     override fun onCleared() {
