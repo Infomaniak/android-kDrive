@@ -22,6 +22,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.infomaniak.drive.R
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
 import kotlinx.android.synthetic.main.fragment_preview_others.*
 
 class PreviewOtherFragment : PreviewFragment() {
@@ -40,10 +42,8 @@ class PreviewOtherFragment : PreviewFragment() {
         fileIcon.setImageResource(file.getFileType().icon)
         fileName.text = file.name
 
-        container?.setOnClickListener {
-            (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
-        }
+        container?.setOnClickListener { toggleFullscreen() }
 
-        bigOpenWithButton.setOnClickListener { (parentFragment as? PreviewSliderFragment)?.openWithClicked() }
+        bigOpenWithButton.setOnClickListener { openWithClicked() }
     }
 }

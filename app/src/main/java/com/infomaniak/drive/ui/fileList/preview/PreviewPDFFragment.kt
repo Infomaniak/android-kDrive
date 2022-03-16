@@ -32,6 +32,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.utils.PdfCore
 import com.infomaniak.drive.utils.PreviewPDFUtils
 import com.infomaniak.lib.core.models.ApiResponse
@@ -76,7 +78,7 @@ class PreviewPDFFragment : PreviewFragment() {
 
         bigOpenWithButton.apply {
             isGone = true
-            setOnClickListener { (parentFragment as? PreviewSliderFragment)?.openWithClicked() }
+            setOnClickListener { openWithClicked() }
         }
 
         previewPDFViewModel.downloadProgress.observe(viewLifecycleOwner, Observer { progress ->
@@ -84,12 +86,8 @@ class PreviewPDFFragment : PreviewFragment() {
             downloadProgress.progress = progress
         })
 
-        pdfViewRecycler.onClicked = {
-            (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
-        }
-        downloadLayout.setOnClickListener {
-            (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
-        }
+        pdfViewRecycler.onClicked = { toggleFullscreen() }
+        downloadLayout.setOnClickListener { toggleFullscreen() }
     }
 
     override fun setMenuVisibility(menuVisible: Boolean) {
