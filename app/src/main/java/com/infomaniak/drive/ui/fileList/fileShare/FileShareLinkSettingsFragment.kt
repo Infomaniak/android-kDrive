@@ -41,10 +41,7 @@ import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.android.synthetic.main.fragment_file_share_link_settings.*
-import kotlinx.android.synthetic.main.fragment_file_share_link_settings.expirationDateInput
-import kotlinx.android.synthetic.main.fragment_file_share_link_settings.newPasswordButton
-import kotlinx.android.synthetic.main.fragment_file_share_link_settings.passwordTextLayout
-import kotlinx.android.synthetic.main.item_dropbox_settings.*
+import kotlinx.android.synthetic.main.item_dropbox_settings.expirationDateSwitch
 import java.util.*
 
 class FileShareLinkSettingsFragment : Fragment() {
