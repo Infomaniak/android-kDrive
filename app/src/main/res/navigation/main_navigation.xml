@@ -207,6 +207,10 @@
             android:name="onlyOffline"
             android:defaultValue="false"
             app:argType="boolean" />
+        <argument
+            android:name="isAllSelected"
+            android:defaultValue="false"
+            app:argType="boolean" />
     </dialog>
 
     <dialog

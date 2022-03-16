@@ -22,6 +22,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.liveData
 import androidx.navigation.fragment.navArgs
@@ -49,7 +50,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         val areIndividualActionsVisible = navigationArgs.fileIds.size in 1..BulkOperationsUtils.MIN_SELECTED
         configureColoredFolder(areIndividualActionsVisible)
         configureAddFavorites(areIndividualActionsVisible)
-        configureAvailableOffline()
+        configureAvailableOffline(navigationArgs.isAllSelected)
         configureDownloadFile()
         configureDuplicateFile()
     }
@@ -70,13 +71,16 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         }
     }
 
-    private fun configureAvailableOffline() = with(navigationArgs) {
+    private fun configureAvailableOffline(isAllSelected: Boolean) = with(navigationArgs) {
         availableOfflineSwitch.apply {
             isChecked = onlyOffline
             setOnCheckedChangeListener { _, _ -> selectOfflineDialogActionCallBack() }
         }
         disabledAvailableOffline.isVisible = onlyFolders
-        availableOffline.setOnClickListener { selectOfflineDialogActionCallBack() }
+        availableOffline.apply {
+            setOnClickListener { selectOfflineDialogActionCallBack() }
+            isGone = isAllSelected
+        }
     }
 
     private fun selectOfflineDialogActionCallBack() {

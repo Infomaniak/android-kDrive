@@ -648,6 +648,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                 onlyFolders = onlyFolders,
                 onlyFavorite = onlyFavorite,
                 onlyOffline = onlyOffline,
+                isAllSelected = multiSelectManager.areAllSelected
             ).toBundle()
         }.show(childFragmentManager, "ActionFileListMultiSelectBottomSheetDialog")
     }
