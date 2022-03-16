@@ -84,6 +84,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
     }
 
     override fun onStart() {
+        super.onStart()
         activity?.window?.apply {
             statusBarColor = Color.TRANSPARENT
             lightStatusBar(false)
@@ -100,7 +101,6 @@ class FileDetailsFragment : FileDetailsSubFragment() {
                 WindowInsetsCompat.CONSUMED
             }
         }
-        super.onStart()
     }
 
     override fun onPause() {
