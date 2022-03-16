@@ -145,15 +145,10 @@ class ApplicationMain : Application(), ImageLoaderFactory {
                 }.build()
             }
             .memoryCache {
-                MemoryCache.Builder(applicationContext)
-                    .maxSizePercent(MEMORY_CACHE_PERCENT)
-                    .build()
+                MemoryCache.Builder(applicationContext).build()
             }
             .diskCache {
-                DiskCache.Builder()
-                    .directory(applicationContext.cacheDir.resolve("coil_cache"))
-                    .maxSizePercent(DISK_CACHE_PERCENT)
-                    .build()
+                DiskCache.Builder().directory(applicationContext.cacheDir.resolve(COIL_CACHE_DIR)).build()
             }
             .build()
     }
@@ -187,7 +182,6 @@ class ApplicationMain : Application(), ImageLoaderFactory {
     }
 
     private companion object {
-        const val DISK_CACHE_PERCENT = .02 // 2%
-        const val MEMORY_CACHE_PERCENT = .25 // 25%
+        const val COIL_CACHE_DIR = "coil_cache"
     }
 }
