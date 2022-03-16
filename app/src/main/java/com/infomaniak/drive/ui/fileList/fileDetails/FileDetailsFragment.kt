@@ -127,7 +127,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
 
     private fun setBannerThumbnail(file: File) {
         if (file.hasThumbnail) {
-            collapsingBackground.loadGlideUrl(file.thumbnail())
+            collapsingBackground.loadAny(file.thumbnail())
         } else {
             appBar.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.background))
             val params = subtitleToolbar.layoutParams as CoordinatorLayout.LayoutParams

@@ -28,10 +28,8 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.database.Cursor
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Point
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -70,7 +68,6 @@ import androidx.navigation.fragment.findNavController
 import coil.ImageLoader
 import coil.load
 import coil.request.Disposable
-import com.bumptech.glide.Glide
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -118,36 +115,12 @@ fun Context.isKeyguardSecure(): Boolean {
     return (getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager)?.isKeyguardSecure ?: false
 }
 
-fun ImageView.loadGlide(@DrawableRes drawable: Int) {
-    Glide.with(this).load(drawable).into(this)
-}
-
-fun ImageView.loadGlide(drawable: Drawable?) {
-    Glide.with(this).load(drawable).into(this)
-}
-
-fun ImageView.loadGlide(bitmap: Bitmap?, @DrawableRes errorRes: Int) {
-    Glide.with(this)
-        .load(bitmap)
-        .transition(Utils.CROSS_FADE_TRANSITION)
-        .placeholder(R.drawable.placeholder)
-        .error(errorRes)
-        .centerCrop()
-        .into(this)
-}
-
-fun ImageView.loadGlideUrl(
-    url: String?,
-    @DrawableRes errorRes: Int = R.drawable.fallback_image,
-    errorDrawable: Drawable? = null,
-) {
-    Glide.with(this)
-        .load(OkHttpLibraryGlideModule.GlideAuthUrl(url))
-        .transition(Utils.CROSS_FADE_TRANSITION)
-        .placeholder(R.drawable.placeholder)
-        .let { if (errorDrawable == null) it.error(errorRes) else it.error(errorDrawable) }
-        .centerCrop()
-        .into(this)
+fun ImageView.loadAny(data: Any?, @DrawableRes errorRes: Int = R.drawable.fallback_image): Disposable {
+    return load(data) {
+        error(errorRes)
+        fallback(errorRes)
+        placeholder(R.drawable.placeholder)
+    }
 }
 
 fun ImageView.loadAvatar(driveUser: DriveUser): Disposable {

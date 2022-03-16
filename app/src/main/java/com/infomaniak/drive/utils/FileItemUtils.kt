@@ -38,6 +38,7 @@ import androidx.core.net.toUri
 import androidx.core.view.forEachIndexed
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.ConvertedType
@@ -104,11 +105,11 @@ private fun View.displayIcon(file: File, isGrid: Boolean, viewHolder: FileViewHo
 
 private fun View.displayFolderIcon(file: File, viewHolder: FileViewHolder?) {
     val (icon, tint) = file.getFolderIcon()
-    if (tint == null) filePreview.loadGlide(icon) else filePreview.loadGlide(context.getTintedDrawable(viewHolder, icon, tint))
+    if (tint == null) filePreview.load(icon) else filePreview.load(context.getTintedDrawable(viewHolder, icon, tint))
 }
 
 private fun View.displayDriveIcon(file: File, viewHolder: FileViewHolder?) {
-    filePreview.loadGlide(context.getTintedDrawable(viewHolder, R.drawable.ic_drive, file.driveColor))
+    filePreview.load(context.getTintedDrawable(viewHolder, R.drawable.ic_drive, file.driveColor))
 }
 
 private fun View.displayFileIcon(file: File, isGrid: Boolean) {
@@ -116,19 +117,19 @@ private fun View.displayFileIcon(file: File, isGrid: Boolean) {
     val isGraphic = fileType == ConvertedType.IMAGE || fileType == ConvertedType.VIDEO
 
     when {
-        file.hasThumbnail && (isGrid || isGraphic) -> filePreview.loadGlideUrl(file.thumbnail(), fileType.icon)
+        file.hasThumbnail && (isGrid || isGraphic) -> filePreview.loadAny(file.thumbnail(), fileType.icon)
         file.isFromUploads && isGraphic -> {
             CoroutineScope(Dispatchers.IO).launch {
                 val bitmap = context.getLocalThumbnail(file)
                 withContext(Dispatchers.Main) {
-                    if (filePreview?.isVisible == true && context != null) filePreview.loadGlide(bitmap, fileType.icon)
+                    if (filePreview?.isVisible == true && context != null) filePreview.loadAny(bitmap, fileType.icon)
                 }
             }
         }
-        else -> filePreview.loadGlide(fileType.icon)
+        else -> filePreview.load(fileType.icon)
     }
 
-    filePreview2?.loadGlide(fileType.icon)
+    filePreview2?.load(fileType.icon)
     setupFileProgress(file)
 }
 
