@@ -503,5 +503,13 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         const val PREVIEW_FILE_DRIVE_ID = "previewFileDriveId"
         const val PREVIEW_IS_SHARED_WITH_ME = "isSharedWithMe"
         const val PREVIEW_HIDE_ACTIONS = "hideActions"
+
+        fun Fragment.toggleFullscreen() {
+            (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+        }
+
+        fun Fragment.openWithClicked() {
+            (parentFragment as? PreviewSliderFragment)?.openWithClicked()
+        }
     }
 }

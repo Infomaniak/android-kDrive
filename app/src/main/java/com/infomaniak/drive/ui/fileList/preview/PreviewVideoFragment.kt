@@ -40,6 +40,8 @@ import com.google.android.exoplayer2.util.EventLogger
 import com.google.android.exoplayer2.util.Util
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.TrackerAction
 import com.infomaniak.lib.core.networking.HttpClient
@@ -64,7 +66,7 @@ open class PreviewVideoFragment : PreviewFragment() {
 
         bigOpenWithButton.apply {
             isGone = true
-            setOnClickListener { (parentFragment as? PreviewSliderFragment)?.openWithClicked() }
+            setOnClickListener { openWithClicked() }
         }
 
         fileIcon.setImageResource(file.getFileType().icon)
@@ -74,12 +76,10 @@ open class PreviewVideoFragment : PreviewFragment() {
         playerView.setOnClickListener {
             if (playerView.isControllerFullyVisible) {
                 trackMediaPlayerEvent("toggleFullScreen")
-                (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+                toggleFullscreen()
             }
         }
-        errorLayout.setOnClickListener {
-            (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
-        }
+        errorLayout.setOnClickListener { toggleFullscreen() }
     }
 
     override fun onResume() {
@@ -146,7 +146,7 @@ open class PreviewVideoFragment : PreviewFragment() {
                 val flagKeepScreenOn = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                 if (isPlaying) {
                     trackMediaPlayerEvent("play")
-                    (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+                    toggleFullscreen()
                     activity?.window?.addFlags(flagKeepScreenOn)
                 } else {
                     trackMediaPlayerEvent("pause")

@@ -30,6 +30,8 @@ import coil.Coil
 import coil.load
 import coil.request.ImageRequest
 import com.infomaniak.drive.R
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import kotlinx.android.synthetic.main.fragment_preview_others.*
 import kotlinx.android.synthetic.main.fragment_preview_picture.*
@@ -55,7 +57,7 @@ class PreviewPictureFragment : PreviewFragment() {
 
         bigOpenWithButton.apply {
             isGone = true
-            setOnClickListener { (parentFragment as? PreviewSliderFragment)?.openWithClicked() }
+            setOnClickListener { openWithClicked() }
         }
 
         loadImage()
@@ -136,7 +138,7 @@ class PreviewPictureFragment : PreviewFragment() {
                 result
             }
 
-            setOnClickListener { (parentFragment as? PreviewSliderFragment)?.toggleFullscreen() }
+            setOnClickListener { toggleFullscreen() }
         }
     }
 }
