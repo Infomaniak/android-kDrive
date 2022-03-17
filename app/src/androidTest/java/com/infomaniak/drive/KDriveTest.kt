@@ -36,6 +36,7 @@ import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.login.ApiToken
 import io.realm.Realm
 import io.realm.RealmConfiguration
+import io.realm.exceptions.RealmFileException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
@@ -79,8 +80,8 @@ open class KDriveTest {
 
             userDrive = UserDrive(user.id, Env.DRIVE_ID)
             okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(user.id) }
-            uiRealm = FileController.getRealmInstance(userDrive)
-
+            
+            setUpRealm()
             grantPermissions(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
 
@@ -89,7 +90,7 @@ open class KDriveTest {
         fun afterAll() {
             ApiRepository.emptyTrash(userDrive.driveId)
             if (!uiRealm.isClosed) uiRealm.close()
-            Realm.deleteRealm(FileController.getRealmConfiguration(FileController.getDriveFileName(userDrive)))
+            Realm.deleteRealm(getConfig(userDrive))
             if (!Env.USE_CURRENT_USER) {
                 runBlocking { AccountUtils.removeUser(context, user) }
             }
@@ -100,6 +101,25 @@ open class KDriveTest {
             .deleteRealmIfMigrationNeeded()
             .modules(RealmModules.LocalFilesModule())
             .build()
+
+        private fun getConfig(userDrive: UserDrive): RealmConfiguration {
+            return FileController.getRealmConfiguration(FileController.getDriveFileName(Companion.userDrive))
+        }
+
+        private fun setUpRealm() {
+            try {
+                uiRealm = FileController.getRealmInstance(userDrive)
+            } catch (realmFileException: RealmFileException) {
+                java.io.File(getConfig(userDrive).path).apply {
+                    if (exists()) {
+                        delete()
+                        uiRealm = FileController.getRealmInstance(userDrive)
+                    } else {
+                        throw realmFileException
+                    }
+                }
+            }
+        }
 
         private fun grantPermissions(vararg permissions: String) {
             PermissionRequester().apply {
