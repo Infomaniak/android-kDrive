@@ -47,8 +47,8 @@ class MenuUiTest : KDriveUiTest() {
         swipeDownNestedScrollView()
         getDeviceViewById("changeUserIcon").clickAndWaitForNewWindow()
         getDeviceViewById("addUser").clickAndWaitForNewWindow()
-        getDeviceViewById("nextButton").click()
-        getDeviceViewById("nextButton").click()
+        getDeviceViewById("nextButton").clickAndWaitForNewWindow()
+        getDeviceViewById("nextButton").clickAndWaitForNewWindow()
         getDeviceViewById("connectButton").clickAndWaitForNewWindow()
         with(device) {
 
