@@ -27,9 +27,11 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationManagerCompat
 import coil.ImageLoader
 import coil.ImageLoaderFactory
+import coil.annotation.ExperimentalCoilApi
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
-import coil.util.CoilUtils
+import coil.disk.DiskCache
+import coil.memory.MemoryCache
 import com.facebook.stetho.Stetho
 import com.facebook.stetho.okhttp3.StethoInterceptor
 import com.infomaniak.drive.BuildConfig.DRIVE_API
@@ -41,6 +43,7 @@ import com.infomaniak.drive.data.sync.UploadNotifications.pendingIntentFlags
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.KDriveHttpClient
+import com.infomaniak.drive.utils.MatomoUtils.buildTracker
 import com.infomaniak.drive.utils.NotificationUtils.initNotificationChannel
 import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.clearStack
@@ -62,9 +65,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import org.matomo.sdk.Tracker
 import java.util.*
 
+@ExperimentalCoilApi
 class ApplicationMain : Application(), ImageLoaderFactory {
+
+    val matomoTracker: Tracker by lazy { buildTracker() }
 
     override fun onCreate() {
         super.onCreate()
@@ -118,8 +125,8 @@ class ApplicationMain : Application(), ImageLoaderFactory {
     override fun newImageLoader(): ImageLoader {
         return ImageLoader.Builder(applicationContext)
             .crossfade(true)
-            .componentRegistry {
-                add(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) ImageDecoderDecoder(applicationContext) else GifDecoder())
+            .components {
+                add(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) ImageDecoderDecoder.Factory() else GifDecoder.Factory())
             }
             .okHttpClient {
                 OkHttpClient.Builder().apply {
@@ -135,8 +142,13 @@ class ApplicationMain : Application(), ImageLoaderFactory {
                     if (com.infomaniak.lib.core.BuildConfig.DEBUG) {
                         addNetworkInterceptor(StethoInterceptor())
                     }
-                    cache(CoilUtils.createDefaultCache(applicationContext))
                 }.build()
+            }
+            .memoryCache {
+                MemoryCache.Builder(applicationContext).build()
+            }
+            .diskCache {
+                DiskCache.Builder().directory(applicationContext.cacheDir.resolve(COIL_CACHE_DIR)).build()
             }
             .build()
     }
@@ -169,4 +181,7 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         }
     }
 
+    private companion object {
+        const val COIL_CACHE_DIR = "coil_cache"
+    }
 }

@@ -22,19 +22,14 @@ import android.app.Activity
 import android.app.ActivityManager
 import android.app.DownloadManager
 import android.app.KeyguardManager
-import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.database.Cursor
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Point
-import android.graphics.drawable.Drawable
-import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -42,7 +37,6 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.DisplayMetrics
 import android.util.Patterns
-import android.util.Size
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
@@ -51,17 +45,14 @@ import android.view.animation.RotateAnimation
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
-import android.widget.LinearLayout
+import androidx.activity.result.ActivityResult
 import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.toColorInt
-import androidx.core.net.toFile
-import androidx.core.net.toUri
 import androidx.core.os.bundleOf
-import androidx.core.view.forEachIndexed
+import androidx.core.view.WindowCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -77,7 +68,6 @@ import androidx.navigation.fragment.findNavController
 import coil.ImageLoader
 import coil.load
 import coil.request.Disposable
-import com.bumptech.glide.Glide
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -85,39 +75,25 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.data.models.File.VisibilityType
+import com.infomaniak.drive.data.models.DriveUser
+import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.FileCategory
+import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialog.Companion.FILE_ID
-import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED_CATEGORIES
 import com.infomaniak.drive.ui.fileList.UploadInProgressFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
-import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.drive.views.CategoryIconView
+import com.infomaniak.drive.utils.MatomoUtils.trackShareRightsEvent
 import com.infomaniak.lib.core.models.User
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.UtilsUi.getInitials
-import com.infomaniak.lib.core.utils.format
 import io.realm.RealmList
-import io.sentry.Sentry
-import kotlinx.android.synthetic.main.cardview_file_grid.view.*
 import kotlinx.android.synthetic.main.item_file.view.*
-import kotlinx.android.synthetic.main.item_file.view.categoriesLayout
-import kotlinx.android.synthetic.main.item_file.view.fileFavorite
-import kotlinx.android.synthetic.main.item_file.view.fileName
-import kotlinx.android.synthetic.main.item_file.view.fileOffline
-import kotlinx.android.synthetic.main.item_file.view.fileOfflineProgression
-import kotlinx.android.synthetic.main.item_file.view.filePreview
-import kotlinx.android.synthetic.main.item_file.view.progressLayout
 import kotlinx.android.synthetic.main.item_user.view.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -139,47 +115,26 @@ fun Context.isKeyguardSecure(): Boolean {
     return (getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager)?.isKeyguardSecure ?: false
 }
 
-fun ImageView.loadGlide(@DrawableRes drawable: Int) {
-    Glide.with(this).load(drawable).into(this)
+fun ImageView.loadAny(data: Any?, @DrawableRes errorRes: Int = R.drawable.fallback_image): Disposable {
+    return load(data) {
+        error(errorRes)
+        fallback(errorRes)
+        placeholder(R.drawable.placeholder)
+    }
 }
 
-fun ImageView.loadGlide(drawable: Drawable?) {
-    Glide.with(this).load(drawable).into(this)
+fun ImageView.loadAvatar(driveUser: DriveUser): Disposable {
+    return loadAvatar(driveUser.id, driveUser.getUserAvatar(), driveUser.displayName.getInitials())
 }
-
-fun ImageView.loadGlide(bitmap: Bitmap?, @DrawableRes errorRes: Int) {
-    Glide.with(this)
-        .load(bitmap)
-        .transition(Utils.CROSS_FADE_TRANSITION)
-        .placeholder(R.drawable.placeholder)
-        .error(errorRes)
-        .centerCrop()
-        .into(this)
-}
-
-fun ImageView.loadGlideUrl(
-    url: String?,
-    @DrawableRes errorRes: Int = R.drawable.fallback_image,
-    errorDrawable: Drawable? = null
-) {
-    Glide.with(this)
-        .load(OkHttpLibraryGlideModule.GlideAuthUrl(url))
-        .transition(Utils.CROSS_FADE_TRANSITION)
-        .placeholder(R.drawable.placeholder)
-        .let { if (errorDrawable == null) it.error(errorRes) else it.error(errorDrawable) }
-        .centerCrop()
-        .into(this)
-}
-
-fun ImageView.loadAvatar(driveUser: DriveUser): Disposable =
-    loadAvatar(driveUser.id, driveUser.getUserAvatar(), driveUser.displayName.getInitials())
 
 fun ImageView.loadAvatar(user: User): Disposable = loadAvatar(user.id, user.avatar, user.getInitials())
 
 fun ImageView.loadAvatar(id: Int, avatarUrl: String?, initials: String): Disposable {
     val imageLoader = ImageLoader.Builder(context).build()
-    val fallback =
-        context.generateInitialsAvatarDrawable(initials = initials, background = context.getBackgroundColorBasedOnId(id))
+    val fallback = context.generateInitialsAvatarDrawable(
+        initials = initials,
+        background = context.getBackgroundColorBasedOnId(id),
+    )
     return load(avatarUrl, imageLoader) {
         error(fallback)
         fallback(fallback)
@@ -189,7 +144,6 @@ fun ImageView.loadAvatar(id: Int, avatarUrl: String?, initials: String): Disposa
 
 fun TextInputEditText.showOrHideEmptyError(): Boolean {
     val parentLayout = parent.parent as TextInputLayout
-
     parentLayout.error = if (text.isNullOrBlank()) context.getString(R.string.allEmptyInputError) else null
     return parentLayout.error != null
 }
@@ -198,30 +152,30 @@ fun Cursor.uri(contentUri: Uri): Uri {
     return ContentUris.withAppendedId(contentUri, getLong(getColumnIndexOrThrow(MediaStore.MediaColumns._ID)))
 }
 
-fun Number.isPositive(): Boolean {
-    return toLong() > 0
+fun Number.isPositive(): Boolean = toLong() > 0
+
+fun Resources.isNightModeEnabled(): Boolean {
+    return configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
 }
 
-fun Resources.isNightModeEnabled() = configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-
-fun Activity.setColorStatusBar(appBar: Boolean = false) {
+fun Activity.setColorStatusBar(appBar: Boolean = false) = with(window) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        window.statusBarColor = ContextCompat.getColor(this, if (appBar) R.color.appBar else R.color.background)
-        window.lightStatusBar(!resources.isNightModeEnabled())
+        statusBarColor = ContextCompat.getColor(this@setColorStatusBar, if (appBar) R.color.appBar else R.color.background)
+        lightStatusBar(!resources.isNightModeEnabled())
     } else {
-        window.statusBarColor = Color.BLACK
+        statusBarColor = Color.BLACK
     }
 }
 
 fun Window.lightStatusBar(enabled: Boolean) {
-// TODO DON'T WORK
-//    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-//        if (enabled) {
-//            insetsController?.setSystemBarsAppearance(APPEARANCE_LIGHT_STATUS_BARS, APPEARANCE_LIGHT_STATUS_BARS)
-//        } else {
-//            insetsController?.setSystemBarsAppearance(0, APPEARANCE_LIGHT_STATUS_BARS)
-//        }
-//    } else
+    // TODO: DOESN'T WORK
+    // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+    //     if (enabled) {
+    //         insetsController?.setSystemBarsAppearance(APPEARANCE_LIGHT_STATUS_BARS, APPEARANCE_LIGHT_STATUS_BARS)
+    //     } else {
+    //         insetsController?.setSystemBarsAppearance(0, APPEARANCE_LIGHT_STATUS_BARS)
+    //     }
+    // } else
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         if (enabled) {
             decorView.systemUiVisibility = decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
@@ -231,19 +185,23 @@ fun Window.lightStatusBar(enabled: Boolean) {
     }
 }
 
-fun Activity.setColorNavigationBar(appBar: Boolean = false) {
+fun Window.toggleEdgeToEdge(enabled: Boolean) {
+    WindowCompat.setDecorFitsSystemWindows(this, !enabled)
+}
+
+fun Activity.setColorNavigationBar(appBar: Boolean = false) = with(window) {
     val color = if (appBar) R.color.appBar else R.color.background
     when (resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)) {
         Configuration.UI_MODE_NIGHT_YES -> {
-            window.navigationBarColor = ContextCompat.getColor(this, color)
-            window.lightNavigationBar(false)
+            navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, color)
+            lightNavigationBar(false)
         }
         else -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                window.navigationBarColor = ContextCompat.getColor(this, color)
-                window.lightNavigationBar(true)
+                navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, color)
+                lightNavigationBar(true)
             } else {
-                window.navigationBarColor = Color.BLACK
+                navigationBarColor = Color.BLACK
             }
         }
     }
@@ -260,116 +218,7 @@ fun Window.lightNavigationBar(enabled: Boolean) {
     }
 }
 
-fun View.setFileItem(file: File, isGrid: Boolean = false) {
-
-    fileName.text = file.name
-    fileFavorite.isVisible = file.isFavorite
-    fileDate?.isVisible = file.id != ROOT_ID
-    fileDate?.text =
-        if (file.deletedAt.isPositive()) {
-            file.getDeletedAt().format(context.getString(R.string.allDeletedFilePattern))
-        } else {
-            file.getLastModifiedAt().format(context.getString(R.string.allLastModifiedFilePattern))
-        }
-
-    file.size?.let {
-        fileSize?.text = FormatterFileSize.formatShortFileSize(context, it)
-        fileSeparator?.isVisible = true
-    } ?: run {
-        fileSize?.text = ""
-        fileSeparator?.isGone = true
-    }
-
-    progressLayout.isGone = true
-
-    filePreview.scaleType = ImageView.ScaleType.CENTER
-
-    when {
-        file.isFolder() -> {
-            val (icon, tint) = file.getFolderIcon()
-            if (tint == null) {
-                filePreview.loadGlide(icon)
-            } else {
-                filePreview.loadGlide(context.getTintedDrawable(icon, tint))
-            }
-        }
-        file.isDrive() -> filePreview.loadGlide(context.getTintedDrawable(R.drawable.ic_drive, file.driveColor))
-        else -> {
-            when {
-                file.hasThumbnail &&
-                        (isGrid || file.getFileType() == ConvertedType.IMAGE || file.getFileType() == ConvertedType.VIDEO) -> {
-                    filePreview.loadGlideUrl(file.thumbnail(), file.getFileType().icon)
-                }
-                file.isFromUploads &&
-                        (file.getMimeType().startsWith("image/") || file.getMimeType().startsWith("video/")) -> {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val bitmap = context.getLocalThumbnail(file)
-                        withContext(Dispatchers.Main) {
-                            if (filePreview?.isVisible == true && context != null) {
-                                filePreview.loadGlide(bitmap, file.getFileType().icon)
-                            }
-                        }
-                    }
-                }
-                else -> filePreview.loadGlide(file.getFileType().icon)
-            }
-            filePreview2?.loadGlide(file.getFileType().icon)
-            setupFileProgress(file)
-        }
-    }
-
-    val canReadCategoryOnFile = DriveInfosController.getCategoryRights().canReadCategoryOnFile
-    val categories = file.getCategories()
-    (categoriesLayout as LinearLayout).apply {
-        if (!canReadCategoryOnFile || categories.isEmpty()) {
-            isGone = true
-        } else {
-            forEachIndexed { index, view ->
-                with(view as CategoryIconView) {
-                    val category = categories.getOrNull(index)
-                    if (index < MAX_DISPLAYED_CATEGORIES - 1) {
-                        setCategoryIconOrHide(category)
-                    } else {
-                        setRemainingCategoriesNumber(category, categories.size - MAX_DISPLAYED_CATEGORIES)
-                    }
-                }
-            }
-            isVisible = true
-        }
-    }
-}
-
 fun String.isValidUrl(): Boolean = Patterns.WEB_URL.matcher(this).matches()
-
-fun View.setupFileProgress(file: File, containsProgress: Boolean = false) {
-    val progress = file.currentProgress
-
-    when {
-        !containsProgress && progress == Utils.INDETERMINATE_PROGRESS && file.isPendingOffline(context) -> {
-            fileOffline.isGone = true
-            fileOfflineProgression.isGone = true
-            fileOfflineProgression.isIndeterminate = true
-            fileOfflineProgression.isVisible = true
-            progressLayout.isVisible = true
-        }
-        containsProgress && progress in 0..99 -> {
-            fileOffline.isGone = true
-            if (fileOfflineProgression.isIndeterminate) {
-                fileOfflineProgression.isGone = true
-                fileOfflineProgression.isIndeterminate = false
-            }
-            fileOfflineProgression.progress = progress
-            fileOfflineProgression.isVisible = true
-            progressLayout.isVisible = true
-        }
-        file.isOfflineFile(context, checkLocalFile = false) -> {
-            fileOffline.isVisible = true
-            fileOfflineProgression.isGone = true
-            progressLayout.isVisible = true
-        }
-        else -> progressLayout.isGone = true
-    }
-}
 
 fun View.setUserView(user: User, showChevron: Boolean = true, onItemClicked: (user: User) -> Unit) {
     userName.text = user.displayName
@@ -424,7 +273,7 @@ fun ImageView.animateRotation(isDeployed: Boolean = false) {
     val startDeg = if (isDeployed) 0.0f else 90.0f
     val endDeg = if (isDeployed) 90.0f else 0.0f
     this.startAnimation(
-        RotateAnimation(startDeg, endDeg, Animation.RELATIVE_TO_SELF, 0.5F, Animation.RELATIVE_TO_SELF, 0.5F)
+        RotateAnimation(startDeg, endDeg, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f)
             .apply {
                 duration = 200
                 fillAfter = true
@@ -646,90 +495,13 @@ fun Fragment.navigateToUploadView(folderId: Int, folderName: String? = null) {
     )
 }
 
+fun ActivityResult.whenResultIsOk(completion: (Intent?) -> Unit) {
+    if (resultCode == Activity.RESULT_OK) data.let(completion::invoke)
+}
+
 fun Drive?.getDriveUsers(): List<DriveUser> = this?.users?.let { categories ->
     return@let DriveInfosController.getUsers(ArrayList(categories.drive + categories.account))
 } ?: listOf()
-
-@Suppress("BlockingMethodInNonBlockingContext")
-suspend fun Context.getLocalThumbnail(file: File): Bitmap? = withContext(Dispatchers.IO) {
-    val fileUri = file.path.toUri()
-    val thumbnailSize = 100
-    return@withContext if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        val size = Size(thumbnailSize, thumbnailSize)
-        try {
-            if (fileUri.scheme.equals(ContentResolver.SCHEME_FILE)) {
-                if (file.getMimeType().contains("video")) {
-                    ThumbnailUtils.createVideoThumbnail(fileUri.toFile(), size, null)
-                } else {
-                    ThumbnailUtils.createImageThumbnail(fileUri.toFile(), size, null)
-                }
-            } else {
-                contentResolver.loadThumbnail(fileUri, size, null)
-            }
-        } catch (e: Exception) {
-            null
-        }
-    } else {
-
-        val localFile = fileUri.lastPathSegment?.split(":")?.let { list ->
-            list.getOrNull(1)?.let { path -> java.io.File(path) }
-        }
-        val isSchemeFile = fileUri.scheme.equals(ContentResolver.SCHEME_FILE)
-
-        val externalRealPath = when {
-            !isSchemeFile && localFile?.exists() == true -> {
-                Sentry.withScope { scope -> // Get more information in uri with absolute path
-                    scope.setExtra("uri", "$fileUri")
-                    Sentry.captureMessage("Uri contains absolute path")
-                }
-                localFile.absolutePath
-            }
-            "com.android.externalstorage.documents" == fileUri.authority -> {
-                Utils.getRealPathFromExternalStorage(this@getLocalThumbnail, fileUri)
-            }
-            else -> ""
-        }
-
-        if (isSchemeFile || externalRealPath.isNotBlank()) {
-            val path = if (externalRealPath.isNotBlank()) externalRealPath else fileUri.path
-            path?.let {
-                if (file.getMimeType().contains("video")) {
-                    ThumbnailUtils.createVideoThumbnail(path, MediaStore.Video.Thumbnails.MICRO_KIND)
-                } else {
-                    Utils.extractThumbnail(path, thumbnailSize, thumbnailSize)
-                }
-            }
-        } else {
-            try {
-                ContentUris.parseId(fileUri)
-            } catch (e: Exception) {
-                fileUri.lastPathSegment?.split(":")?.let {
-                    it.getOrNull(1)?.toLongOrNull()
-                }
-            }?.let { fileId ->
-                val options = BitmapFactory.Options().apply {
-                    outWidth = thumbnailSize
-                    outHeight = thumbnailSize
-                }
-                if (contentResolver.getType(fileUri)?.contains("video") == true) {
-                    MediaStore.Video.Thumbnails.getThumbnail(
-                        contentResolver,
-                        fileId,
-                        MediaStore.Video.Thumbnails.MICRO_KIND,
-                        options
-                    )
-                } else {
-                    MediaStore.Images.Thumbnails.getThumbnail(
-                        contentResolver,
-                        fileId,
-                        MediaStore.Images.Thumbnails.MICRO_KIND,
-                        options
-                    )
-                }
-            }
-        }
-    }
-}
 
 fun Context.startDownloadFile(downloadURL: Uri, fileName: String) {
     var formattedFileName = fileName.replace(Regex("[\\\\/:*?\"<>|%]"), "_")
@@ -781,21 +553,13 @@ fun View.updateUploadFileInProgress(pendingFilesCount: Int) {
 }
 
 fun Context.shareText(text: String) {
+    applicationContext?.trackShareRightsEvent("shareButton")
     val intent = Intent().apply {
         action = Intent.ACTION_SEND
         putExtra(Intent.EXTRA_TEXT, text)
         type = "text/plain"
     }
     ContextCompat.startActivity(this, Intent.createChooser(intent, null), null)
-}
-
-fun Context.getTintedDrawable(drawableId: Int, colorString: String): Drawable? {
-    return getTintedDrawable(drawableId, colorString.toColorInt())
-}
-
-fun Context.getTintedDrawable(drawableId: Int, colorInt: Int): Drawable? {
-    return ContextCompat.getDrawable(this, drawableId)
-        ?.apply { setTint(colorInt) }
 }
 
 fun Category.getName(context: Context): String = when (name) {
@@ -832,23 +596,4 @@ fun MaterialCardView.setCornersRadius(topCornerRadius: Float, bottomCornerRadius
         .build()
 }
 
-/**
- * This method is here, and not directly a class method in the File class, because of a supposed Realm bug.
- * When we try to put it in the File class, the app doesn't build anymore, because of a "broken method".
- * This is not the only method in this case, search this comment in the project, and you'll see.
- * Realm's Github issue: https://github.com/realm/realm-java/issues/7637
- */
-fun File.getFolderIcon(): Pair<Int, String?> {
-    return when (getVisibilityType()) {
-        VisibilityType.IS_TEAM_SPACE -> R.drawable.ic_folder_common_documents to null
-        VisibilityType.IS_SHARED_SPACE -> R.drawable.ic_folder_shared to null
-        VisibilityType.IS_COLLABORATIVE_FOLDER -> R.drawable.ic_folder_dropbox_tintable to color
-        else -> {
-            if (isDisabled()) {
-                R.drawable.ic_folder_disable to null
-            } else {
-                R.drawable.ic_folder_filled_tintable to color
-            }
-        }
-    }
-}
+operator fun Regex.contains(input: String) = containsMatchIn(input)

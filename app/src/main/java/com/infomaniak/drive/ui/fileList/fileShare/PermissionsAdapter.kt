@@ -23,6 +23,7 @@ import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.RelativeCornerSize
 import com.google.android.material.shape.ShapeAppearanceModel
@@ -30,10 +31,9 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File.FolderPermission
 import com.infomaniak.drive.data.models.Permission
-import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.data.models.Shareable.ShareablePermission
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.loadAvatar
-import com.infomaniak.drive.utils.loadGlide
 import com.infomaniak.lib.core.models.User
 import com.infomaniak.lib.core.utils.toPx
 import com.infomaniak.lib.core.views.ViewHolder
@@ -68,64 +68,81 @@ class PermissionsAdapter(
         notifyItemInserted(permissionList.size)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView) {
         val permission = permissionList[position]
-        holder.itemView.apply {
-            permissionCard.apply {
-                setupSelection(position == selectionPosition)
-                setOnClickListener {
-                    if (selectionPosition != position) {
-                        onPermissionChanged(permission)
-                        selectionPosition = position
-                        notifyItemRangeChanged(0, itemCount)
+
+        permissionCard.apply {
+            setupSelection(position == selectionPosition)
+            setOnClickListener {
+                if (selectionPosition != position) {
+                    onPermissionChanged(permission)
+                    selectionPosition = position
+                    notifyItemRangeChanged(0, itemCount)
+                }
+            }
+        }
+
+        setupTexts(permission)
+        setupMainIcon()
+
+        when (permission) {
+            FolderPermission.ONLY_ME -> setupOnlyMePermissionUi()
+            FolderPermission.INHERIT -> setupInheritPermissionUi()
+            else -> setupOthersPermissionUi(permission)
+        }
+    }
+
+    private fun View.setupTexts(permission: Permission) {
+        permissionTitle.setText(permission.translation)
+        permissionDescription.text = context.getString(permission.description, AccountUtils.getCurrentDrive()?.name)
+    }
+
+    private fun View.setupMainIcon() {
+        mainIcon.shapeAppearanceModel = ShapeAppearanceModel()
+            .toBuilder()
+            .setAllCornerSizes(RelativeCornerSize(0.5f))
+            .build()
+    }
+
+    private fun View.setupOnlyMePermissionUi() {
+        currentUser?.let { user -> mainIcon.loadAvatar(user) }
+        permissionDescription.isGone = true
+    }
+
+    private fun View.setupInheritPermissionUi() {
+        if (sharedUsers.isNotEmpty()) {
+
+            sharedUsers.firstOrNull()?.let { firstUser -> mainIcon.loadAvatar(firstUser) }
+
+            secondIcon.apply {
+                sharedUsers.getOrNull(1)?.let { user ->
+                    isVisible = true
+                    loadAvatar(user)
+                }
+            }
+
+            thirdIcon.apply {
+                if (sharedUsers.size > 2) {
+                    isVisible = true
+                    remainingText.apply {
+                        isVisible = true
+                        text = "+${sharedUsers.size - 2}"
                     }
                 }
             }
-            permissionTitle.setText(permission.translation)
-            permissionDescription.text = context.getString(permission.description, AccountUtils.getCurrentDrive()?.name)
+        }
+    }
 
-            val shapeAppearanceModel = ShapeAppearanceModel()
-                .toBuilder()
-                .setAllCornerSizes(RelativeCornerSize(0.5F))
-                .build()
-            mainIcon.shapeAppearanceModel = shapeAppearanceModel
+    private fun View.setupOthersPermissionUi(permission: Permission) {
+        mainIcon.load(permission.icon)
+        mainIcon.shapeAppearanceModel = ShapeAppearanceModel()
 
-            when (permission) {
-                FolderPermission.ONLY_ME -> {
-                    currentUser?.let { user -> mainIcon.loadAvatar(user) }
-                    permissionDescription.isGone = true
-                }
-                FolderPermission.INHERIT -> {
-                    if (sharedUsers.isNotEmpty()) {
-                        sharedUsers.firstOrNull()?.let { firstUser -> mainIcon.loadAvatar(firstUser) }
-                        secondIcon.apply {
-                            sharedUsers.getOrNull(1)?.let { user ->
-                                isVisible = true
-                                loadAvatar(user)
-                            }
-                        }
-                        thirdIcon.apply {
-                            if (sharedUsers.size > 2) {
-                                isVisible = true
-                                remainingText.isVisible = true
-                                remainingText.text = "+${sharedUsers.size - 2}"
-                            }
-                        }
-                    }
-                }
-                else -> {
-                    mainIcon.loadGlide(permission.icon)
-                    mainIcon.shapeAppearanceModel = ShapeAppearanceModel()
-
-                    when {
-                        permission == Shareable.ShareablePermission.MANAGE && isExternalUser -> {
-                            enableViewHolder(false)
-                            userExternalWarning.isVisible = true
-                        }
-                        else -> enableViewHolder(true)
-                    }
-                }
+        when {
+            permission == ShareablePermission.MANAGE && isExternalUser -> {
+                enableViewHolder(false)
+                userExternalWarning.isVisible = true
             }
+            else -> enableViewHolder(true)
         }
     }
 

@@ -54,4 +54,5 @@
                 android:valueType="intType" />
         </aapt:attr>
     </target>
+
 </animated-vector>

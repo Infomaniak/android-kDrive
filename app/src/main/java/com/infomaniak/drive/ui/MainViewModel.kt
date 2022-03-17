@@ -42,7 +42,6 @@ import com.infomaniak.lib.core.networking.HttpClient
 import io.realm.Realm
 import io.sentry.Sentry
 import kotlinx.coroutines.*
-import java.util.*
 
 class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
@@ -169,26 +168,33 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         emit(ApiRepository.createOfficeFile(driveId, folderId, createFile))
     }
 
-    fun addFileToFavorites(file: File, userDrive: UserDrive? = null, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
-        ApiRepository.postFavoriteFile(file).let { apiResponse ->
-            if (apiResponse.isSuccess()) {
-                FileController.updateFile(file.id, userDrive = userDrive) { localFile ->
-                    localFile.isFavorite = true
-                }
-                onSuccess?.invoke()
-            }
-            emit(apiResponse)
-        }
-    }
+    fun addFileToFavorites(file: File, userDrive: UserDrive? = null, onSuccess: (() -> Unit)? = null) =
+        liveData(Dispatchers.IO) {
+            with(ApiRepository.postFavoriteFile(file)) {
+                emit(this)
 
-    fun deleteFileFromFavorites(file: File, userDrive: UserDrive? = null) = liveData(Dispatchers.IO) {
-        CoroutineScope(Dispatchers.IO).launch {
-            FileController.updateFile(file.id, userDrive = userDrive) {
-                it.isFavorite = false
+                if (isSuccess()) {
+                    FileController.updateFile(file.id, userDrive = userDrive) {
+                        it.isFavorite = true
+                    }
+                    onSuccess?.invoke()
+                }
             }
         }
-        emit(ApiRepository.deleteFavoriteFile(file))
-    }
+
+    fun deleteFileFromFavorites(file: File, userDrive: UserDrive? = null, onSuccess: ((File) -> Unit)? = null) =
+        liveData(Dispatchers.IO) {
+            with(ApiRepository.deleteFavoriteFile(file)) {
+                emit(this)
+
+                if (isSuccess()) {
+                    FileController.updateFile(file.id, userDrive = userDrive) {
+                        it.isFavorite = false
+                        onSuccess?.invoke(it)
+                    }
+                }
+            }
+        }
 
     fun getFileDetails(fileId: Int, userDrive: UserDrive): LiveData<File?> {
         getFileDetailsJob.cancel()
@@ -232,8 +238,16 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             emit(FileController.deleteFile(file, userDrive = userDrive, context = getContext(), onSuccess = onSuccess))
         }
 
-    fun duplicateFile(file: File, folderId: Int? = null, copyName: String?) = liveData(Dispatchers.IO) {
-        emit(ApiRepository.duplicateFile(file, copyName, folderId ?: Utils.ROOT_ID))
+    fun duplicateFile(
+        file: File,
+        folderId: Int? = null,
+        copyName: String?,
+        onSuccess: ((apiResponse: ApiResponse<File>) -> Unit)? = null,
+    ) = liveData(Dispatchers.IO) {
+        ApiRepository.duplicateFile(file, copyName, folderId ?: Utils.ROOT_ID).let { apiResponse ->
+            if (apiResponse.isSuccess()) onSuccess?.invoke(apiResponse)
+            emit(apiResponse)
+        }
     }
 
     fun convertFile(file: File) = liveData(Dispatchers.IO) {
@@ -270,44 +284,41 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     }
 
     @Deprecated(message = "Only for API 29 and below, otherwise use MediaStore.createDeleteRequest()")
-    fun deleteSynchronizedFilesOnDevice(filesToDelete: ArrayList<UploadFile>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val fileDeleted = arrayListOf<UploadFile>()
-            filesToDelete.forEach { uploadFile ->
-                val uri = uploadFile.getUriObject()
-                if (!uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
-                    try {
-                        SyncUtils.checkDocumentProviderPermissions(getContext(), uri)
-                        getContext().contentResolver.query(
-                            uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null
-                        )?.use { cursor ->
-                            if (cursor.moveToFirst()) {
-                                var columnIndex: Int? = null
-                                var pathname: String? = null
-                                try {
-                                    columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-                                    pathname = cursor.getString(columnIndex)
-                                    java.io.File(pathname).delete()
-                                    getContext().contentResolver.delete(uri, null, null)
-                                    fileDeleted.add(uploadFile)
-                                } catch (nullPointerException: NullPointerException) {
-                                    Sentry.withScope { scope ->
-                                        scope.setExtra("columnIndex", columnIndex.toString())
-                                        scope.setExtra("pathname", pathname.toString())
-                                        scope.setExtra("uploadFileUri", uploadFile.uri)
-                                        Sentry.captureException(Exception("deleteSynchronizedFilesOnDevice()"))
-                                    }
+    fun deleteSynchronizedFilesOnDevice(filesToDelete: ArrayList<UploadFile>) = viewModelScope.launch(Dispatchers.IO) {
+        val fileDeleted = arrayListOf<UploadFile>()
+        filesToDelete.forEach { uploadFile ->
+            val uri = uploadFile.getUriObject()
+            if (!uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
+                try {
+                    SyncUtils.checkDocumentProviderPermissions(getContext(), uri)
+                    val query = getContext().contentResolver.query(uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null)
+                    query?.use { cursor ->
+                        if (cursor.moveToFirst()) {
+                            var columnIndex: Int? = null
+                            var pathname: String? = null
+                            try {
+                                columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+                                pathname = cursor.getString(columnIndex)
+                                java.io.File(pathname).delete()
+                                getContext().contentResolver.delete(uri, null, null)
+                                fileDeleted.add(uploadFile)
+                            } catch (nullPointerException: NullPointerException) {
+                                Sentry.withScope { scope ->
+                                    scope.setExtra("columnIndex", columnIndex.toString())
+                                    scope.setExtra("pathname", pathname.toString())
+                                    scope.setExtra("uploadFileUri", uploadFile.uri)
+                                    Sentry.captureException(Exception("deleteSynchronizedFilesOnDevice()"))
                                 }
                             }
                         }
-                    } catch (exception: SecurityException) {
-                        exception.printStackTrace()
-                        fileDeleted.add(uploadFile)
                     }
+                } catch (exception: SecurityException) {
+                    exception.printStackTrace()
+                    fileDeleted.add(uploadFile)
                 }
             }
-            UploadFile.deleteAll(fileDeleted)
         }
+        UploadFile.deleteAll(fileDeleted)
     }
 
     override fun onCleared() {

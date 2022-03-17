@@ -1,39 +1,33 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
+
     ext.kotlin_version = '1.6.10'
-    ext.navigation_version = '2.4.0-rc01'
+    ext.navigation_version = '2.4.1'
     ext.java_version = JavaVersion.VERSION_1_8
+
     repositories {
         google()
-        jcenter()
-        maven {
-            url 'https://oss.jfrog.org/artifactory/oss-snapshot-local'
-        }
     }
+
     dependencies {
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$navigation_version"
-        classpath 'io.realm:realm-gradle-plugin:10.8.0'
+        classpath 'io.realm:realm-gradle-plugin:10.10.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.android.tools.build:gradle:7.0.4'
+        classpath 'com.android.tools.build:gradle:7.1.2'
         classpath 'com.google.gms:google-services:4.3.10'
+        classpath 'de.mannodermaus.gradle.plugins:android-junit5:1.8.2.0'
     }
 }
 
-plugins {
-    id "io.sentry.android.gradle" version "3.0.0-alpha.2"
-}
+plugins { id 'io.sentry.android.gradle' version '3.0.0-rc.3' }
 
 allprojects {
     repositories {
-        jcenter()
         google()
-        maven {
-            url 'https://oss.jfrog.org/artifactory/oss-snapshot-local'
-        }
-        maven { url "https://jitpack.io" }
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+        jcenter() // Only for io.realm:android-adapters
     }
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
+task clean(type: Delete) { delete rootProject.buildDir }

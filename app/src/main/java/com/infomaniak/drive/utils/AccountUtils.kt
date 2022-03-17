@@ -32,6 +32,7 @@ import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive
+import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.lib.core.InfomaniakCore
@@ -69,7 +70,7 @@ object AccountUtils : CredentialManager {
         set(userId) {
             field = userId
             GlobalScope.launch(Dispatchers.IO) {
-                AppSettings.updateAppSettings { appSettings -> appSettings._currentUserId = userId }
+                AppSettings.updateAppSettings { appSettings -> if (appSettings.isValid) appSettings._currentUserId = userId }
             }
         }
 
@@ -77,7 +78,7 @@ object AccountUtils : CredentialManager {
         set(driveId) {
             field = driveId
             GlobalScope.launch(Dispatchers.IO) {
-                AppSettings.updateAppSettings { appSettings -> appSettings._currentDriveId = driveId }
+                AppSettings.updateAppSettings { appSettings -> if (appSettings.isValid) appSettings._currentDriveId = driveId }
             }
         }
 
@@ -113,63 +114,79 @@ object AccountUtils : CredentialManager {
         context: Context,
         fromMaintenance: Boolean = false,
         fromCloudStorage: Boolean = false,
-        okHttpClient: OkHttpClient = HttpClient.okHttpClient
+        okHttpClient: OkHttpClient = HttpClient.okHttpClient,
     ) = withContext(Dispatchers.IO) {
-        val userProfile = ApiRepository.getUserProfile(okHttpClient)
 
-        if (userProfile.result != ApiResponse.Status.ERROR) {
-            userProfile.data?.let { user ->
-                ApiRepository.getAllDrivesData(okHttpClient).apply {
-                    if (result != ApiResponse.Status.ERROR) {
-                        data?.let { driveInfo ->
-                            val driveRemovedList = DriveInfosController.storeDriveInfos(user.id, driveInfo)
-                            val appSyncSettings = UploadFile.getAppSyncSettings()
-                            for (driveRemoved in driveRemovedList) {
-                                if (appSyncSettings?.userId == user.id && appSyncSettings.driveId == driveRemoved.id) {
-                                    Sentry.captureMessage(DISABLE_AUTO_SYNC)
-                                    context.disableAutoSync()
-                                }
-                                if (currentDriveId == driveRemoved.id) {
-                                    getFirstDrive()
-                                    GlobalScope.launch(Dispatchers.Main) {
-                                        reloadApp?.invoke(bundleOf())
-                                    }
-                                }
-                                FileController.deleteUserDriveFiles(user.id, driveRemoved.id)
-                            }
+        val (userResult, user) = with(ApiRepository.getUserProfile(okHttpClient)) {
+            result to (data ?: return@withContext)
+        }
 
-                            if (fromMaintenance) {
-                                if (driveInfo.drives.main.any { drive -> !drive.maintenance }) {
-                                    GlobalScope.launch(Dispatchers.Main) {
-                                        reloadApp?.invoke(bundleOf())
-                                    }
-                                }
-                            } else if (driveInfo.drives.main.all { drive -> drive.maintenance } ||
-                                driveInfo.drives.main.any { drive -> drive.maintenance && drive.id == currentDriveId }) {
-                                GlobalScope.launch(Dispatchers.Main) {
-                                    reloadApp?.invoke(bundleOf())
-                                }
-                            }
+        if (userResult != ApiResponse.Status.ERROR) {
+            ApiRepository.getAllDrivesData(okHttpClient).apply {
+                if (result != ApiResponse.Status.ERROR && data != null) {
+                    handleDrivesData(context, fromMaintenance, fromCloudStorage, user, data as DriveInfo)
+                } else if (error?.code?.equals("no_drive") == true) {
+                    removeUser(context, user)
+                }
+            }
+        }
+    }
 
-                            MqttClientWrapper.updateToken(driveInfo.ipsToken)
+    private suspend fun handleDrivesData(
+        context: Context,
+        fromMaintenance: Boolean,
+        fromCloudStorage: Boolean,
+        user: User,
+        driveInfo: DriveInfo,
+    ) {
+        deleteFiles(user, driveInfo, context)
+        reloadAppIfNeeded(fromMaintenance, driveInfo)
+        MqttClientWrapper.updateToken(driveInfo.ipsToken)
+        requestUser(user)
+        if (!fromCloudStorage) CloudStorageProvider.notifyRootsChanged(context)
+    }
 
-                            TokenAuthenticator.mutex.withLock {
-                                if (currentUserId == user.id) {
-                                    user.apply {
-                                        organizations = arrayListOf()
-                                        requestCurrentUser()?.let { user ->
-                                            setUserToken(this, user.apiToken)
-                                            currentUser = this
-                                        }
-                                    }
-                                }
-                            }
-                            if (!fromCloudStorage) {
-                                CloudStorageProvider.notifyRootsChanged(context)
-                            }
-                        }
-                    } else if (error?.code?.equals("no_drive") == true) {
-                        removeUser(context, user)
+    private fun deleteFiles(user: User, driveInfo: DriveInfo, context: Context) {
+
+        val driveRemovedList = DriveInfosController.storeDriveInfos(user.id, driveInfo)
+        val appSyncSettings = UploadFile.getAppSyncSettings()
+
+        for (driveRemoved in driveRemovedList) {
+            if (appSyncSettings?.userId == user.id && appSyncSettings.driveId == driveRemoved.id) {
+                Sentry.captureMessage(DISABLE_AUTO_SYNC)
+                context.disableAutoSync()
+            }
+            if (currentDriveId == driveRemoved.id) {
+                getFirstDrive()
+                GlobalScope.launch(Dispatchers.Main) { reloadApp?.invoke(bundleOf()) }
+            }
+            FileController.deleteUserDriveFiles(user.id, driveRemoved.id)
+        }
+    }
+
+    private fun reloadAppIfNeeded(fromMaintenance: Boolean, driveInfo: DriveInfo) {
+        if (fromMaintenance) {
+            if (driveInfo.drives.main.any { drive -> !drive.maintenance }) {
+                GlobalScope.launch(Dispatchers.Main) {
+                    reloadApp?.invoke(bundleOf())
+                }
+            }
+        } else if (driveInfo.drives.main.all { drive -> drive.maintenance } ||
+            driveInfo.drives.main.any { drive -> drive.maintenance && drive.id == currentDriveId }) {
+            GlobalScope.launch(Dispatchers.Main) {
+                reloadApp?.invoke(bundleOf())
+            }
+        }
+    }
+
+    private suspend fun requestUser(user: User) {
+        TokenAuthenticator.mutex.withLock {
+            if (currentUserId == user.id) {
+                user.apply {
+                    organizations = arrayListOf()
+                    requestCurrentUser()?.let { user ->
+                        setUserToken(this, user.apiToken)
+                        currentUser = this
                     }
                 }
             }
@@ -198,15 +215,11 @@ object AccountUtils : CredentialManager {
         }
     }
 
-    override fun getAllUsers(): LiveData<List<User>> {
-        return userDatabase.userDao().getAll()
-    }
+    override fun getAllUsers(): LiveData<List<User>> = userDatabase.userDao().getAll()
 
-    private fun getAllUserCount(): Int {
-        return userDatabase.userDao().count()
-    }
+    private fun getAllUserCount(): Int = userDatabase.userDao().count()
 
-    fun getAllUsersSync() = userDatabase.userDao().getAllSync()
+    fun getAllUsersSync(): List<User> = userDatabase.userDao().getAllSync()
 
     suspend fun setUserToken(user: User?, apiToken: ApiToken) {
         user?.let {
@@ -267,9 +280,7 @@ object AccountUtils : CredentialManager {
         return currentDrive
     }
 
-    suspend fun getUserById(id: Int): User? {
-        return userDatabase.userDao().findById(id)
-    }
+    suspend fun getUserById(id: Int): User? = userDatabase.userDao().findById(id)
 
     private fun resetApp(context: Context) {
         if (getAllUserCount() == 0) {
@@ -290,7 +301,5 @@ object AccountUtils : CredentialManager {
         }
     }
 
-    fun isEnableAppSync(): Boolean {
-        return UploadFile.getAppSyncSettings() != null
-    }
+    fun isEnableAppSync(): Boolean = UploadFile.getAppSyncSettings() != null
 }

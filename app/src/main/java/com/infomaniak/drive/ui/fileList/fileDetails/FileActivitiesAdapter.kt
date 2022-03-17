@@ -23,19 +23,17 @@ import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
+import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.FileActivity
 import com.infomaniak.drive.utils.loadAvatar
-import com.infomaniak.drive.utils.loadGlide
 import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_file_activity.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class FileActivitiesAdapter(
-    val isFolder: Boolean,
-) : LoaderAdapter<FileActivity>() {
+class FileActivitiesAdapter(val isFolder: Boolean) : LoaderAdapter<FileActivity>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_file_activity, parent, false))
@@ -44,6 +42,9 @@ class FileActivitiesAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView) {
         if (getItemViewType(position) == VIEW_TYPE_LOADING) {
             activityDateCardView.startLoading()
+            activityUserName.resetLoader()
+            activityAction.resetLoader()
+            activityHour.resetLoader()
         } else {
             activityDateCardView.stopLoading()
 
@@ -57,7 +58,7 @@ class FileActivitiesAdapter(
                 activityUserAvatar.loadAvatar(driveUser)
             } ?: run {
                 activityUserName.setText(R.string.allUserAnonymous)
-                activityUserAvatar.loadGlide(R.drawable.ic_account)
+                activityUserAvatar.load(R.drawable.ic_account)
             }
 
             if (position == 0 || !isSameDay(currentFileActivity.createdAt, itemList[position - 1].createdAt)) {

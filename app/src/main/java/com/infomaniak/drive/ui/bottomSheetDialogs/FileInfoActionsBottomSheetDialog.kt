@@ -17,13 +17,12 @@
  */
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
@@ -56,10 +55,16 @@ import kotlinx.coroutines.withContext
 
 class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoActionsView.OnItemClickListener {
 
-    private lateinit var currentFile: File
     private lateinit var drivePermissions: DrivePermissions
     private val mainViewModel: MainViewModel by activityViewModels()
     private val navigationArgs: FileInfoActionsBottomSheetDialogArgs by navArgs()
+
+    override lateinit var currentFile: File
+    override val ownerFragment = this
+
+    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
+        it.whenResultIsOk { data -> onSelectFolderResult(data) }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_bottom_sheet_file_info_actions, container, false)
@@ -82,6 +87,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                 ownerFragment = this@FileInfoActionsBottomSheetDialog,
                 mainViewModel = mainViewModel,
                 onItemClickListener = this@FileInfoActionsBottomSheetDialog,
+                selectFolderResultLauncher = selectFolderResultLauncher,
                 isSharedWithMe = navigationArgs.userDrive.sharedWithMe,
             )
             updateCurrentFile(currentFile)
@@ -118,11 +124,6 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        onSelectFolderResult(requestCode, resultCode, data)
-    }
-
     override fun onResume() {
         super.onResume()
         // Fix the popBackStack in onViewCreated because onResume is still called
@@ -136,9 +137,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         fileInfoActionsView.removeOfflineObservations(this)
     }
 
-    override fun editDocumentClicked(ownerFragment: Fragment, currentFile: File) {
+    override fun editDocumentClicked() {
         findNavController().popBackStack()
-        super.editDocumentClicked(ownerFragment, currentFile)
+        super.editDocumentClicked()
     }
 
     override fun displayInfoClicked() {
@@ -181,6 +182,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun copyPublicLink() {
+        super.copyPublicLink()
         fileInfoActionsView.createPublicCopyLink(onSuccess = {
             requireActivity().showSnackbar(title = R.string.fileInfoLinkCopiedToClipboard, anchorView = requireActivity().mainFab)
             findNavController().popBackStack()
@@ -190,6 +192,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun downloadFileClicked() {
+        super.downloadFileClicked()
         fileInfoActionsView.downloadFile(drivePermissions) {
             findNavController().popBackStack()
         }
@@ -205,6 +208,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun colorFolderClicked(color: String) {
+        super.colorFolderClicked(color)
         if (AccountUtils.getCurrentDrive()?.pack == Drive.DrivePack.FREE.value) {
             safeNavigate(R.id.colorFolderUpgradeBottomSheetDialog)
         } else {
@@ -213,6 +217,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun addFavoritesClicked() {
+        super.addFavoritesClicked()
         currentFile.apply {
             val observer: Observer<ApiResponse<Boolean>> = Observer { apiResponse ->
                 if (apiResponse.isSuccess()) {
@@ -313,6 +318,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun openWithClicked() {
+        super.openWithClicked()
         if (requireContext().openWithIntent(currentFile).resolveActivity(requireContext().packageManager) == null) {
             requireActivity().showSnackbar(R.string.allActivityNotFoundError)
             findNavController().popBackStack()

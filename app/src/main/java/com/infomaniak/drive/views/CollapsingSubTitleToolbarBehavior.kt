@@ -95,17 +95,17 @@ class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(
         subtitleToolbarView.layoutParams = layoutParams
         subtitleToolbarView.y = childPosition
 
-        if (!isExpandedTitleColor && percentage < 0.61) {
+        if (!isExpandedTitleColor && percentage < EXPAND_TITLE_THRESHOLD) {
             textColorAnimation(subtitleToolbarView.title, collapsedTitleColor, expandedTitleColor)
             textColorAnimation(subtitleToolbarView.subTitle, collapsedSubTitleColor, expandedSubTitleColor)
             isExpandedTitleColor = true
-        } else if (isExpandedTitleColor && percentage >= 0.61) {
+        } else if (isExpandedTitleColor && percentage >= EXPAND_TITLE_THRESHOLD) {
             textColorAnimation(subtitleToolbarView.title, expandedTitleColor, collapsedTitleColor)
             textColorAnimation(subtitleToolbarView.subTitle, expandedSubTitleColor, collapsedSubTitleColor)
             isExpandedTitleColor = false
         }
 
-        appBarLayout.toolbar.setNavigationIconTint(if (percentage < 0.61) expandedTitleColor else collapsedTitleColor)
+        appBarLayout.toolbar.setNavigationIconTint(if (percentage < EXPAND_TITLE_THRESHOLD) expandedTitleColor else collapsedTitleColor)
         subtitleToolbarView.title.typeface = if (percentage < 1) expandedTitleFont else collapsedTitleFont
 
         return true
@@ -126,7 +126,10 @@ class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(
     }
 
     companion object {
-        fun getToolbarHeight(context: Context): Int {
+        // TODO remove this. Show "getScrimVisibleHeightTrigger" in "CollapsingToolbarLayout"
+        const val EXPAND_TITLE_THRESHOLD = 0.2f
+
+        private fun getToolbarHeight(context: Context): Int {
             val typedValue = TypedValue()
             return if (context.theme.resolveAttribute(android.R.attr.actionBarSize, typedValue, true)) {
                 TypedValue.complexToDimensionPixelSize(typedValue.data, context.resources.displayMetrics)

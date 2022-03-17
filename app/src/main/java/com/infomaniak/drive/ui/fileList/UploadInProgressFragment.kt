@@ -41,6 +41,7 @@ import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWork
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import io.realm.Realm
+import io.realm.RealmResults
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.android.synthetic.main.fragment_file_list.*
@@ -68,10 +69,33 @@ class UploadInProgressFragment : FileListFragment() {
 
         super.onViewCreated(view, savedInstanceState)
 
-        val fromPendingFolders = findNavController().previousBackStackEntry?.destination?.id == R.id.uploadInProgressFragment
-        collapsingToolbarLayout.title =
-            if (folderId > 0 && fromPendingFolders) folderName else getString(R.string.uploadInProgressTitle)
+        setupCollapsingToolbarLayout()
+        observeTrackUploadWorkerProgress()
+        observeTrackUploadWorkerSucceeded()
+        observeIndexUploadToDelete()
+        mainViewModel.refreshActivities.removeObservers(super.getViewLifecycleOwner())
+        setupOnStopUploadButtonClicked()
 
+        if (isPendingFolders()) {
+            fileAdapter.onFileClicked = { navigateToUploadView(it.id, it.name) }
+        } else {
+            toolbar.setNavigationOnClickListener { popBackStack() }
+            requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { popBackStack() }
+        }
+
+        sortLayout.isGone = true
+    }
+
+    private fun setupCollapsingToolbarLayout() {
+        val fromPendingFolders = findNavController().previousBackStackEntry?.destination?.id == R.id.uploadInProgressFragment
+        collapsingToolbarLayout.title = if (folderId > 0 && fromPendingFolders) {
+            folderName
+        } else {
+            getString(R.string.uploadInProgressTitle)
+        }
+    }
+
+    private fun observeTrackUploadWorkerProgress() {
         requireContext().trackUploadWorkerProgress().observe(viewLifecycleOwner) {
             val workInfo = it.firstOrNull() ?: return@observe
             val fileName = workInfo.progress.getString(UploadWorker.FILENAME) ?: return@observe
@@ -85,27 +109,29 @@ class UploadInProgressFragment : FileListFragment() {
                     if (!isPendingFolders()) whenAnUploadIsDone(position, fileAdapter.fileList[position].id)
                     fileListViewModel.currentAdapterPendingFiles.value = fileAdapter.getFileObjectsList(null)
                 } else {
-                    fileAdapter.updateFileProgress(position = position, progress = progress)
+                    fileAdapter.updateFileProgress(position, progress)
                 }
             }
 
             Log.d("uploadInProgress", "$fileName $progress%")
         }
+    }
 
+    private fun observeTrackUploadWorkerSucceeded() {
         requireContext().trackUploadWorkerSucceeded().observe(viewLifecycleOwner) {
             fileListViewModel.currentAdapterPendingFiles.value = fileAdapter.getFileObjectsList(null)
         }
+    }
 
+    private fun observeIndexUploadToDelete() {
         fileListViewModel.indexUploadToDelete.observe(viewLifecycleOwner) { list ->
-            list?.let {
-                list.forEach { (position, fileId) ->
-                    whenAnUploadIsDone(position, fileId)
-                }
+            list?.forEach { (position, fileId) ->
+                whenAnUploadIsDone(position, fileId)
             }
         }
+    }
 
-        mainViewModel.refreshActivities.removeObservers(super.getViewLifecycleOwner())
-
+    private fun setupOnStopUploadButtonClicked() {
         fileAdapter.onStopUploadButtonClicked = { position, fileName ->
             pendingUploadFiles.find { it.fileName == fileName }?.let { syncFile ->
                 val title = getString(R.string.uploadInProgressCancelFileUploadTitle, syncFile.fileName)
@@ -117,15 +143,6 @@ class UploadInProgressFragment : FileListFragment() {
                 }
             }
         }
-
-        if (isPendingFolders()) {
-            fileAdapter.onFileClicked = { navigateToUploadView(it.id, it.name) }
-        } else {
-            toolbar.setNavigationOnClickListener { popBackStack() }
-            requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { popBackStack() }
-        }
-
-        sortLayout.isGone = true
     }
 
     override fun setupFileAdapter() {
@@ -253,44 +270,58 @@ class UploadInProgressFragment : FileListFragment() {
 
         private fun downloadPendingFolders() {
             UploadFile.getAllPendingFolders(realmUpload)?.let { pendingFolders ->
+                if (pendingFolders.count() == 1) navigateToFirstFolder(pendingFolders) else showPendingFolders(pendingFolders)
+            } ?: noFilesLayout.toggleVisibility(true)
+        }
 
-                if (pendingFolders.count() == 1) {
-                    val uploadFile = pendingFolders.first()!!
-                    val isSharedWithMe = AccountUtils.currentDriveId != uploadFile.driveId
-                    val userDrive = UserDrive(driveId = uploadFile.driveId, sharedWithMe = isSharedWithMe)
-                    val folder = FileController.getFileById(uploadFile.remoteFolder, userDrive)!!
-                    navigateToUploadView(uploadFile.remoteFolder, folder.name)
+        private fun navigateToFirstFolder(pendingFolders: RealmResults<UploadFile>) {
+            val uploadFile = pendingFolders.first()!!
+            val isSharedWithMe = AccountUtils.currentDriveId != uploadFile.driveId
+            val userDrive = UserDrive(driveId = uploadFile.driveId, sharedWithMe = isSharedWithMe)
+
+            FileController.getFileById(uploadFile.remoteFolder, userDrive)?.let { folder ->
+                navigateToUploadView(uploadFile.remoteFolder, folder.name)
+            } ?: run {
+                Sentry.withScope { scope ->
+                    scope.level = SentryLevel.WARNING
+                    scope.setExtra("currentDriveId", "${AccountUtils.currentDriveId}")
+                    scope.setExtra("driveId", "${uploadFile.driveId}")
+                    scope.setExtra("pendingFoldersCount", "${pendingFolders.count()}")
+                    scope.setExtra("remoteFolder", "${uploadFile.remoteFolder}")
+                    scope.setExtra("userDrive", "$userDrive")
+                    Sentry.captureMessage("Any folder found")
+                }
+            }
+        }
+
+        private fun showPendingFolders(pendingFolders: RealmResults<UploadFile>) {
+            val files = arrayListOf<File>()
+            val drivesNames = ArrayMap<Int, String>()
+
+            pendingFolders.forEach { uploadFile ->
+                val driveId = uploadFile.driveId
+                val isSharedWithMe = driveId != AccountUtils.currentDriveId
+
+                val driveName = if (isSharedWithMe && drivesNames[driveId] == null) {
+                    val drive = DriveInfosController.getDrives(AccountUtils.currentUserId, driveId, null).first()
+                    drivesNames[driveId] = drive.name
+                    drive.name
 
                 } else {
-                    val files = arrayListOf<File>()
-                    val drivesNames = ArrayMap<Int, String>()
-
-                    pendingFolders.forEach { uploadFile ->
-                        val driveId = uploadFile.driveId
-                        val isSharedWithMe = driveId != AccountUtils.currentDriveId
-
-                        val driveName = if (isSharedWithMe && drivesNames[driveId] == null) {
-                            val drive = DriveInfosController.getDrives(AccountUtils.currentUserId, driveId, null).first()
-                            drivesNames[driveId] = drive.name
-                            drive.name
-
-                        } else {
-                            drivesNames[driveId]
-                        }
-
-                        val userDrive = UserDrive(driveId = driveId, sharedWithMe = isSharedWithMe, driveName = driveName)
-                        files.add(createFolderFile(uploadFile.remoteFolder, userDrive))
-                    }
-
-                    pendingFiles = files
-                    fileAdapter.isComplete = true
-                    fileAdapter.setFiles(files)
-                    noFilesLayout.toggleVisibility(pendingFolders.isEmpty())
-                    showLoadingTimer.cancel()
-                    swipeRefreshLayout.isRefreshing = false
-                    toolbar.menu.findItem(R.id.closeItem).isVisible = true
+                    drivesNames[driveId]
                 }
-            } ?: noFilesLayout.toggleVisibility(true)
+
+                val userDrive = UserDrive(driveId = driveId, sharedWithMe = isSharedWithMe, driveName = driveName)
+                files.add(createFolderFile(uploadFile.remoteFolder, userDrive))
+            }
+
+            pendingFiles = files
+            fileAdapter.isComplete = true
+            fileAdapter.setFiles(files)
+            noFilesLayout.toggleVisibility(pendingFolders.isEmpty())
+            showLoadingTimer.cancel()
+            swipeRefreshLayout.isRefreshing = false
+            toolbar.menu.findItem(R.id.closeItem).isVisible = true
         }
 
         private fun createFolderFile(fileId: Int, userDrive: UserDrive): File {

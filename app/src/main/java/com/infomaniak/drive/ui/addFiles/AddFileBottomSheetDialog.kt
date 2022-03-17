@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui.addFiles
 
-import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
@@ -26,6 +25,7 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.activityViewModels
@@ -41,6 +41,7 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
+import com.infomaniak.drive.utils.MatomoUtils.trackNewElementEvent
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.FORMAT_NEW_FILE
 import com.infomaniak.lib.core.utils.format
@@ -59,13 +60,17 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private lateinit var openCameraPermissions: DrivePermissions
     private lateinit var uploadFilesPermissions: DrivePermissions
 
-    private var currentPhotoUri: Uri? = null
     private var mediaPhotoPath = ""
     private var mediaVideoPath = ""
 
-    companion object {
-        const val SELECT_FILES_REQ = 2
-        const val CAPTURE_MEDIA_REQ = 3
+    private val captureMediaResultLauncher = registerForActivityResult(StartActivityForResult()) {
+        it.whenResultIsOk { onCaptureMediaResult() }
+        dismiss()
+    }
+
+    private val selectFilesResultLauncher = registerForActivityResult(StartActivityForResult()) {
+        it.whenResultIsOk { data -> onSelectFilesResult(data) }
+        dismiss()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -82,13 +87,11 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
         currentFolder.setFileItem(currentFolderFile)
 
-        openCameraPermissions = DrivePermissions()
-        openCameraPermissions.registerPermissions(this) { autorized ->
-            if (autorized) openCamera()
+        openCameraPermissions = DrivePermissions().apply {
+            registerPermissions(this@AddFileBottomSheetDialog) { authorized -> if (authorized) openCamera() }
         }
-        uploadFilesPermissions = DrivePermissions()
-        uploadFilesPermissions.registerPermissions(this) { autorized ->
-            if (autorized) uploadFiles()
+        uploadFilesPermissions = DrivePermissions().apply {
+            registerPermissions(this@AddFileBottomSheetDialog) { authorized -> if (authorized) uploadFiles() }
         }
 
         openCamera.setOnClickListener { openCamera() }
@@ -107,32 +110,21 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         mainViewModel.currentFolderOpenAddFileBottom.value = null
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (resultCode == Activity.RESULT_OK) {
-            when (requestCode) {
-                SELECT_FILES_REQ -> onSelectFilesResult(data)
-                CAPTURE_MEDIA_REQ -> onCaptureMediaResult(data)
-            }
-        }
-        dismiss()
-    }
-
     private fun openCamera() {
         if (openCameraPermissions.checkSyncPermissions()) {
+            trackNewElement("takePhotoOrVideo")
             openCamera.isEnabled = false
             try {
                 val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
-                    currentPhotoUri = createMediaFile(false)
-                    putExtra(MediaStore.EXTRA_OUTPUT, currentPhotoUri)
+                    putExtra(MediaStore.EXTRA_OUTPUT, createMediaFile(false))
                 }
                 val takeVideoIntent = Intent(MediaStore.ACTION_VIDEO_CAPTURE).apply {
                     putExtra(MediaStore.EXTRA_OUTPUT, createMediaFile(true))
                 }
-                val chooserIntent = Intent.createChooser(takePictureIntent, getString(R.string.buttonTakePhotoOrVideo))
-                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(takeVideoIntent))
-                startActivityForResult(chooserIntent, CAPTURE_MEDIA_REQ)
+                val chooserIntent = Intent.createChooser(takePictureIntent, getString(R.string.buttonTakePhotoOrVideo)).apply {
+                    putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(takeVideoIntent))
+                }
+                captureMediaResultLauncher.launch(chooserIntent)
             } catch (e: IOException) {
                 e.printStackTrace()
             }
@@ -141,6 +133,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun uploadFiles() {
         if (uploadFilesPermissions.checkSyncPermissions()) {
+            trackNewElement("uploadFile")
             documentUpload.isEnabled = false
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 type = "*/*"
@@ -149,11 +142,13 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                 putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
                 addCategory(Intent.CATEGORY_OPENABLE)
             }
-            startActivityForResult(Intent.createChooser(intent, getString(R.string.addFileSelectUploadFile)), SELECT_FILES_REQ)
+            val chooserIntent = Intent.createChooser(intent, getString(R.string.addFileSelectUploadFile))
+            selectFilesResultLauncher.launch(chooserIntent)
         }
     }
 
     private fun scanDocuments() {
+        trackNewElement("scan")
         // TODO find a good lib
         dismiss()
     }
@@ -168,6 +163,15 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         dismiss()
     }
 
+    private fun File.Office.getEventName(): String {
+        return when (this) {
+            File.Office.DOCS -> "createText"
+            File.Office.POINTS -> "createPresentation"
+            File.Office.GRIDS -> "createTable"
+            File.Office.TXT -> "createNote"
+        }
+    }
+
     private fun createFile(office: File.Office) {
         Utils.createPromptNameDialog(
             context = requireContext(),
@@ -176,6 +180,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             positiveButton = R.string.buttonCreate,
             iconRes = office.convertedType.icon
         ) { dialog, name ->
+            trackNewElement(office.getEventName())
             val createFile = CreateFile(name, office.extension)
             mainViewModel.createOffice(currentFolderFile.driveId, currentFolderFile.id, createFile)
                 .observe(viewLifecycleOwner) { apiResponse ->
@@ -215,35 +220,26 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun onCaptureMediaResult(data: Intent?) {
+    private fun onCaptureMediaResult() {
         try {
-            if (data?.data == null) {
-                val photoFile = java.io.File(mediaPhotoPath)
-                val file = when {
-                    photoFile.length() != 0L -> photoFile
-                    else -> java.io.File(mediaVideoPath)
-                }
-
-                val fileModifiedAt = Date(file.lastModified())
-                val fileSize = file.length()
-                val applicationContext = context?.applicationContext
-                lifecycleScope.launch(Dispatchers.IO) {
-                    val cacheUri = Utils.copyDataToUploadCache(requireContext(), file, fileModifiedAt)
-                    UploadFile(
-                        uri = cacheUri.toString(),
-                        driveId = currentFolderFile.driveId,
-                        fileCreatedAt = Date(file.lastModified()),
-                        fileModifiedAt = fileModifiedAt,
-                        fileName = file.name,
-                        fileSize = fileSize,
-                        remoteFolder = currentFolderFile.id,
-                        type = UploadFile.Type.UPLOAD.name,
-                        userId = currentUserId,
-                    ).store()
-                    applicationContext?.syncImmediately()
-                    file.delete()
-                }
-
+            val file = with(java.io.File(mediaPhotoPath)) { if (length() != 0L) this else java.io.File(mediaVideoPath) }
+            val fileModifiedAt = Date(file.lastModified())
+            val applicationContext = context?.applicationContext
+            lifecycleScope.launch(Dispatchers.IO) {
+                val cacheUri = Utils.copyDataToUploadCache(requireContext(), file, fileModifiedAt)
+                UploadFile(
+                    uri = cacheUri.toString(),
+                    driveId = currentFolderFile.driveId,
+                    fileCreatedAt = fileModifiedAt,
+                    fileModifiedAt = fileModifiedAt,
+                    fileName = file.name,
+                    fileSize = file.length(),
+                    remoteFolder = currentFolderFile.id,
+                    type = UploadFile.Type.UPLOAD.name,
+                    userId = currentUserId,
+                ).store()
+                applicationContext?.syncImmediately()
+                file.delete()
             }
         } catch (exception: Exception) {
             exception.printStackTrace()
@@ -311,6 +307,11 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         java.io.File(requireContext().cacheDir, getString(R.string.EXPOSED_UPLOAD_DIR)).apply {
             if (exists()) deleteRecursively()
         }
+    }
+
+    private fun trackNewElement(trackerName: String) {
+        val trackerSource = if (mainViewModel.currentFolderOpenAddFileBottom.value == null) "FromFAB" else "FromFolder"
+        trackNewElementEvent(trackerName + trackerSource)
     }
 
     override fun onDestroy() {

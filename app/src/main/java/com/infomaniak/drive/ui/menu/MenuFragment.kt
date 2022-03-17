@@ -79,7 +79,7 @@ class MenuFragment : Fragment() {
             userImage.loadAvatar(currentUser)
 
             driveIcon.apply {
-                if (DriveInfosController.getDrivesCount(currentUser.id) == 1L) {
+                if (DriveInfosController.hasSingleDrive(currentUser.id)) {
                     isGone = true
                 } else {
                     setOnClickListener { safeNavigate(R.id.switchDriveDialog) }

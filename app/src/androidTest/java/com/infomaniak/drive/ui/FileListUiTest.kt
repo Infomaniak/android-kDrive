@@ -17,41 +17,34 @@
  */
 package com.infomaniak.drive.ui
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.uiautomator.UiScrollable
-import androidx.test.uiautomator.UiSelector
-import com.infomaniak.drive.utils.UiTestUtils
-import com.infomaniak.drive.utils.UiTestUtils.device
-import com.infomaniak.drive.utils.UiTestUtils.getViewIdentifier
-import com.infomaniak.drive.utils.UiTestUtils.startApp
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
+import androidx.test.filters.LargeTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 import java.util.*
 
 /**
  * UI Tests relative to file list (quick operations, file creation, upload, import, ...)
  */
-@RunWith(AndroidJUnit4::class)
-class FileListUiTest {
+@LargeTest
+class FileListUiTest : KDriveUiTest() {
 
-    @Before
-    fun init() {
-        startApp()
-        UiTestUtils.getDeviceViewById("fileListFragment")?.click()
+    @BeforeEach
+    override fun startApp() {
+        super.startApp()
+        getDeviceViewById("fileListFragment").click()
     }
 
     @Test
-    fun testCreateFolder() {
-        val fileRecyclerView = UiScrollable(UiSelector().resourceId(getViewIdentifier("fileRecyclerView")))
-        val initialFileNumber = fileRecyclerView.childCount
+    @DisplayName("Check UI to Create then delete a folder")
+    fun testCreateAndDeleteFolder() {
         val randomFolderName = "UI-Test-${UUID.randomUUID()}"
 
-        UiTestUtils.createPrivateFolder(randomFolderName)
-        device.waitForWindowUpdate(null, 5000)
-        assert(fileRecyclerView.childCount == initialFileNumber + 1)
+        createPrivateFolder(randomFolderName)
+        device.waitForWindowUpdate(null, LONG_TIMEOUT)
+        findFileIfInList(randomFolderName, true)
 
-        UiTestUtils.deleteFile(fileRecyclerView, randomFolderName)
-        assert(fileRecyclerView.childCount == initialFileNumber)
+        deleteFile(randomFolderName)
+        findFileIfInList(randomFolderName, false)
     }
 }

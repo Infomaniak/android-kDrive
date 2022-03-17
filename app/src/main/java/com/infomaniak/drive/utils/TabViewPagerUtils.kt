@@ -24,6 +24,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.button.MaterialButtonToggleGroup
+import com.infomaniak.drive.utils.MatomoUtils.trackScreen
 
 object TabViewPagerUtils {
 
@@ -47,7 +48,10 @@ object TabViewPagerUtils {
         tabsGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
                 val position = (tabsViewPager.adapter as ViewPagerAdapter).tabs.indexOfFirst { it.button == checkedId }
-                tabsViewPager.setCurrentItem(position, true)
+                tabsViewPager.apply {
+                    getFragment(position)?.trackScreen()
+                    setCurrentItem(position, true)
+                }
                 onCheckedButton?.invoke(position)
             }
         }

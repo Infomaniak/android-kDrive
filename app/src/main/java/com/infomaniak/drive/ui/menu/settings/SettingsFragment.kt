@@ -35,12 +35,11 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.UiSettings
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackEventWithBooleanValue
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.drive.utils.isKeyguardSecure
-import com.infomaniak.drive.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_settings.*
 
 class SettingsFragment : Fragment() {
@@ -56,10 +55,13 @@ class SettingsFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-        val drivePermissions = DrivePermissions()
-        drivePermissions.registerPermissions(this) { autorized -> if (autorized) requireActivity().syncImmediately() }
+        val drivePermissions = DrivePermissions().apply {
+            registerPermissions(this@SettingsFragment) { authorized -> if (authorized) requireActivity().syncImmediately() }
+        }
+
         onlyWifiSyncValue.isChecked = AppSettings.onlyWifiSync
         onlyWifiSyncValue.setOnCheckedChangeListener { _, isChecked ->
+            context?.applicationContext?.trackEventWithBooleanValue("settings", "onlyWifiTransfer", isChecked)
             AppSettings.onlyWifiSync = isChecked
             requireActivity().launchAllUpload(drivePermissions)
         }
@@ -77,7 +79,10 @@ class SettingsFragment : Fragment() {
             if (requireContext().isKeyguardSecure()) {
                 appSecuritySeparator.isVisible = true
                 isVisible = true
-                setOnClickListener { safeNavigate(R.id.appSecurityActivity, null, null) }
+                setOnClickListener {
+                    trackSettingsEvent("lockApp")
+                    safeNavigate(R.id.appSecurityActivity, null, null)
+                }
             } else {
                 appSecuritySeparator.isGone = true
                 isGone = true
@@ -107,9 +112,10 @@ class SettingsFragment : Fragment() {
                 defaultNightMode = nightMode[which]!!
             }
             .setPositiveButton(R.string.buttonConfirm) { _, _ ->
+                trackSettingsEvent("theme${themeSettingsValue.text}")
                 UiSettings(requireContext()).nightMode = defaultNightMode
                 AppCompatDelegate.setDefaultNightMode(defaultNightMode)
-                setThemeSettingsVelue()
+                setThemeSettingsValue()
             }
             .setNegativeButton(R.string.buttonCancel) { _, _ -> }
             .setCancelable(false).show()
@@ -119,10 +125,10 @@ class SettingsFragment : Fragment() {
         super.onResume()
         syncPictureValue.setText(if (AccountUtils.isEnableAppSync()) R.string.allActivated else R.string.allDisabled)
         appSecurityValue.setText(if (AppSettings.appSecurityLock) R.string.allActivated else R.string.allDisabled)
-        setThemeSettingsVelue()
+        setThemeSettingsValue()
     }
 
-    private fun setThemeSettingsVelue() {
+    private fun setThemeSettingsValue() {
         val themeTextValue = when (AppCompatDelegate.getDefaultNightMode()) {
             AppCompatDelegate.MODE_NIGHT_NO -> R.string.themeSettingsLightLabel
             AppCompatDelegate.MODE_NIGHT_YES -> R.string.themeSettingsDarkLabel
@@ -152,5 +158,9 @@ class SettingsFragment : Fragment() {
             }
         }
         startActivity(intent)
+    }
+
+    private fun trackSettingsEvent(trackerName: String) {
+        trackEvent("settings", TrackerAction.CLICK, trackerName)
     }
 }

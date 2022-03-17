@@ -25,10 +25,8 @@ import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileComment
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.openOnlyOfficeDocument
-import com.infomaniak.drive.utils.showSnackbar
+import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import kotlinx.android.synthetic.main.fragment_file_details.*
 import kotlinx.android.synthetic.main.fragment_file_details_comments.*
 
@@ -78,6 +76,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
                     positiveButton = R.string.buttonSend
                 ) { dialog, name ->
                     fileDetailsViewModel.postFileComment(currentFile, name).observe(viewLifecycleOwner) { apiResponse ->
+                        trackCommentAction("add")
                         if (apiResponse.isSuccess()) {
                             apiResponse?.data?.let { comment ->
                                 commentsAdapter.addComment(comment)
@@ -122,6 +121,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
                     fieldValue = comment.body,
                     positiveButton = R.string.buttonSave
                 ) { dialog, body ->
+                    trackCommentAction("update")
                     fileDetailsViewModel.putFileComment(currentFile, comment.id, body)
                         .observe(viewLifecycleOwner) { apiResponse ->
                             if (apiResponse.isSuccess()) {
@@ -139,6 +139,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
                     autoDismiss = false,
                     message = getString(R.string.modalCommentDeleteDescription)
                 ) { dialog ->
+                    trackCommentAction("delete")
                     fileDetailsViewModel.deleteFileComment(currentFile, comment.id)
                         .observe(viewLifecycleOwner) { apiResponse ->
                             dialog.dismiss()
@@ -168,6 +169,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
                 }
             }
         } else {
+            trackCommentAction("like")
             fileDetailsViewModel.postLike(currentFile, fileComment).observe(viewLifecycleOwner) { apiResponse ->
                 if (apiResponse.isSuccess()) {
                     fileComment.liked = true
@@ -186,5 +188,9 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
     override fun onResume() {
         super.onResume()
         requireParentFragment().addCommentButton.isVisible = true
+    }
+
+    private fun trackCommentAction(name: String) {
+        trackEvent("comment", TrackerAction.CLICK, name)
     }
 }

@@ -17,10 +17,12 @@
  */
 package com.infomaniak.drive.ui.menu.settings
 
+import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
@@ -42,12 +44,11 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackEventWithBooleanValue
 import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
-import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.startOfTheDay
 import com.infomaniak.lib.core.utils.FORMAT_DATE_CLEAR_MONTH
 import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.utils.initProgress
@@ -64,6 +65,12 @@ class SyncSettingsActivity : BaseActivity() {
     private val selectDriveViewModel: SelectDriveViewModel by viewModels()
     private var oldSyncSettings: SyncSettings? = null
     private var editNumber = 0
+
+    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
+        it.whenResultIsOk { data ->
+            syncSettingsViewModel.syncFolder.value = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -139,23 +146,24 @@ class SyncSettingsActivity : BaseActivity() {
             val intent = Intent(this, SelectFolderActivity::class.java).apply {
                 putExtra(SelectFolderActivity.USER_ID_TAG, selectDriveViewModel.selectedUserId.value)
                 putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, selectDriveViewModel.selectedDrive.value?.id)
-                putExtra(SelectFolderActivity.DISABLE_SELECTED_FOLDER_TAG, Utils.ROOT_ID)
+                putExtra(SelectFolderActivity.CURRENT_FOLDER_ID_TAG, syncSettingsViewModel.syncFolder.value)
             }
-            startActivityForResult(intent, SelectFolderActivity.SELECT_FOLDER_REQUEST)
+            selectFolderResultLauncher.launch(intent)
         }
 
-        syncSettingsViewModel.syncFolder.observe(this) { syncFolder ->
+        syncSettingsViewModel.syncFolder.observe(this) { syncFolderId ->
+
             val selectedUserId = selectDriveViewModel.selectedUserId.value
             val selectedDriveId = selectDriveViewModel.selectedDrive.value?.id
-            if (syncFolder != null && selectedUserId != null && selectedDriveId != null) {
-                FileController.getFileById(syncFolder, UserDrive(selectedUserId, selectedDriveId))?.let {
+            if (syncFolderId != null && selectedUserId != null && selectedDriveId != null) {
+                FileController.getFileById(syncFolderId, UserDrive(selectedUserId, selectedDriveId))?.let {
                     pathName.text = it.name
                     changeSaveButtonStatus()
                 }
             } else {
                 pathName.setText(R.string.selectFolderTitle)
             }
-            mediaFoldersSettingsVisibility(syncFolder != null)
+            mediaFoldersSettingsVisibility(syncFolderId != null)
         }
 
         syncSettingsViewModel.saveOldPictures.observe(this) {
@@ -224,13 +232,6 @@ class SyncSettingsActivity : BaseActivity() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == SelectFolderActivity.SELECT_FOLDER_REQUEST && resultCode == RESULT_OK) {
-            syncSettingsViewModel.syncFolder.value = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
-        }
-    }
-
     fun onDialogDismissed() {
         syncSettingsVisibility(MediaFolder.getAllSyncedFoldersCount() > 0)
         changeSaveButtonStatus()
@@ -277,6 +278,19 @@ class SyncSettingsActivity : BaseActivity() {
                 && allSyncedFoldersCount > 0
     }
 
+    private fun Context.trackPhotoSyncSettingsEvent(category: String, syncSettings: SyncSettings) {
+        val dateName = when (syncSettingsViewModel.saveOldPictures.value!!) {
+            SavePicturesDate.SINCE_NOW -> "syncNew"
+            SavePicturesDate.SINCE_FOREVER -> "syncAll"
+            SavePicturesDate.SINCE_DATE -> "syncFromDate"
+        }
+
+        trackEventWithBooleanValue(category, "deleteAfterImport", syncSettings.deleteAfterSync)
+        trackEventWithBooleanValue(category, "createDatedFolders", syncSettings.createDatedSubFolders)
+        trackEventWithBooleanValue(category, "importVideo", syncSettings.syncVideo)
+        trackEvent(category, TrackerAction.CLICK, dateName)
+    }
+
     private fun saveSettings() {
         saveButton.showProgress()
         lifecycleScope.launch(Dispatchers.IO) {
@@ -285,7 +299,7 @@ class SyncSettingsActivity : BaseActivity() {
                 SavePicturesDate.SINCE_FOREVER -> Date(0)
                 SavePicturesDate.SINCE_DATE -> syncSettingsViewModel.customDate.value ?: Date()
             }
-
+            val trackerCategory = "photoSync"
             if (activateSyncSwitch.isChecked) {
                 val syncSettings = SyncSettings(
                     userId = selectDriveViewModel.selectedUserId.value!!,
@@ -296,12 +310,18 @@ class SyncSettingsActivity : BaseActivity() {
                     createDatedSubFolders = createDatedSubFoldersSwitch.isChecked,
                     deleteAfterSync = deletePicturesAfterSyncSwitch.isChecked
                 )
+                application.trackPhotoSyncSettingsEvent(trackerCategory, syncSettings)
                 syncSettings.setIntervalType(syncSettingsViewModel.syncIntervalType.value!!)
                 UploadFile.setAppSyncSettings(syncSettings)
                 activateAutoSync(syncSettings)
             } else {
                 disableAutoSync()
             }
+            application.trackEvent(
+                trackerCategory,
+                TrackerAction.CLICK,
+                if (activateSyncSwitch.isChecked) "enabled" else "disabled"
+            )
 
             withContext(Dispatchers.Main) {
                 onBackPressed()

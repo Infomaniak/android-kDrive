@@ -25,11 +25,13 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.lib.core.utils.setPagination
 import kotlinx.android.synthetic.main.fragment_file_list.*
 
 class RecentChangesFragment : FileSubTypeListFragment() {
 
     private val recentChangesViewModel: RecentChangesViewModel by viewModels()
+    private var isDownloadingChanges = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         downloadFiles = DownloadFiles()
@@ -37,6 +39,15 @@ class RecentChangesFragment : FileSubTypeListFragment() {
         folderId = Utils.OTHER_ROOT_ID
 
         super.onViewCreated(view, savedInstanceState)
+
+        fileRecyclerView.apply {
+            setPagination({
+                if (!fileAdapter.isComplete && !isDownloadingChanges) {
+                    recentChangesViewModel.currentPage++
+                    downloadFiles(false, false)
+                }
+            })
+        }
 
         sortButton.isGone = true
         collapsingToolbarLayout.title = getString(R.string.lastEditsTitle)
@@ -57,8 +68,9 @@ class RecentChangesFragment : FileSubTypeListFragment() {
         override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             showLoadingTimer.start()
             fileAdapter.isComplete = false
+            isDownloadingChanges = true
 
-            recentChangesViewModel.getRecentChanges(AccountUtils.currentDriveId, false).observe(viewLifecycleOwner) { result ->
+            recentChangesViewModel.getRecentChanges(AccountUtils.currentDriveId).observe(viewLifecycleOwner) { result ->
                 populateFileList(
                     files = result?.files ?: arrayListOf(),
                     folderId = FileController.RECENT_CHANGES_FILE_ID,
@@ -67,6 +79,7 @@ class RecentChangesFragment : FileSubTypeListFragment() {
                     realm = mainViewModel.realm,
                     isNewSort = isNewSort,
                 )
+                isDownloadingChanges = false
             }
         }
     }

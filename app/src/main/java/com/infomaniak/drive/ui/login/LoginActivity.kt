@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.login
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isInvisible
@@ -34,6 +35,8 @@ import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.MatomoUtils.trackAccountEvent
+import com.infomaniak.drive.utils.MatomoUtils.trackCurrentUserId
 import com.infomaniak.drive.utils.clearStack
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.InfomaniakCore
@@ -55,6 +58,23 @@ import kotlinx.coroutines.withContext
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var infomaniakLogin: InfomaniakLogin
+
+    private val webViewLoginResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        with(result) {
+            if (resultCode == RESULT_OK) {
+                val authCode = data?.extras?.getString(InfomaniakLogin.CODE_TAG)
+                val translatedError = data?.extras?.getString(InfomaniakLogin.ERROR_TRANSLATED_TAG)
+                when {
+                    translatedError?.isNotBlank() == true -> showError(translatedError)
+                    authCode?.isNotBlank() == true -> authenticateUser(authCode)
+                    else -> showError(getString(R.string.anErrorHasOccurred))
+                }
+            } else {
+                connectButton?.hideProgress(R.string.connect)
+                signInButton.isEnabled = true
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,29 +104,14 @@ class LoginActivity : AppCompatActivity() {
             setOnClickListener {
                 signInButton.isEnabled = false
                 showProgress()
-                infomaniakLogin.startWebViewLogin(WEB_VIEW_LOGIN_REQ)
+                trackAccountEvent("openLoginWebview")
+                infomaniakLogin.startWebViewLogin(webViewLoginResultLauncher)
             }
         }
 
-        signInButton.setOnClickListener { openUrl(ApiRoutes.orderDrive()) }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == WEB_VIEW_LOGIN_REQ && resultCode == RESULT_OK) {
-            val authCode = data?.extras?.getString(InfomaniakLogin.CODE_TAG)
-            val translatedError = data?.extras?.getString(InfomaniakLogin.ERROR_TRANSLATED_TAG)
-
-            if (!translatedError.isNullOrBlank()) {
-                showError(translatedError)
-            } else if (!authCode.isNullOrBlank()) {
-                authenticateUser(authCode)
-            } else {
-                showError(getString(R.string.anErrorHasOccurred))
-            }
-        } else {
-            connectButton?.hideProgress(R.string.connect)
-            signInButton.isEnabled = true
+        signInButton.setOnClickListener {
+            trackAccountEvent("openCreationWebview")
+            openUrl(ApiRoutes.orderDrive())
         }
     }
 
@@ -118,7 +123,11 @@ class LoginActivity : AppCompatActivity() {
                 onSuccess = {
                     lifecycleScope.launch(Dispatchers.IO) {
                         when (val user = authenticateUser(this@LoginActivity, it)) {
-                            is User -> launchMainActivity()
+                            is User -> {
+                                application.trackCurrentUserId()
+                                trackAccountEvent("loggedIn")
+                                launchMainActivity()
+                            }
                             is ApiResponse<*> -> withContext(Dispatchers.Main) {
                                 if (user.error?.code?.equals("no_drive") == true) {
                                     launchNoDriveActivity()
@@ -160,8 +169,6 @@ class LoginActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val WEB_VIEW_LOGIN_REQ = 1
-
         suspend fun authenticateUser(context: Context, apiToken: ApiToken): Any {
 
             AccountUtils.getUserById(apiToken.userId)?.let {

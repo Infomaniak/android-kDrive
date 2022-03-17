@@ -28,7 +28,9 @@
         android:id="@+id/coloredFolder"
         android:layout_width="match_parent"
         android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground">
+        android:background="?selectableItemBackground"
+        android:visibility="gone"
+        tools:visibility="visible">
 
         <ImageView
             android:id="@+id/coloredFolderIcon"
@@ -77,6 +79,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/star_favorites"
             tools:ignore="ContentDescription" />
 
         <TextView

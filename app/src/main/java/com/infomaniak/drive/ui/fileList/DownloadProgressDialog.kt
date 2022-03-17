@@ -54,20 +54,10 @@ class DownloadProgressDialog : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = with(navigationArgs) {
         isCancelable = false
+
         FileController.getFileById(fileId, userDrive)?.let { file ->
             dialogView.icon.setImageResource(file.getFileType().icon)
-            downloadViewModel.downloadFile(requireContext(), file, userDrive).observe(this@DownloadProgressDialog) {
-                it?.let { (progress, isComplete) ->
-                    if (isComplete) {
-                        setBackNavigationResult(if (isOpenBookmark) OPEN_BOOKMARK else OPEN_WITH, fileId)
-                    } else {
-                        downloadProgress.progress = progress
-                    }
-                } ?: run {
-                    requireActivity().showSnackbar(R.string.anErrorHasOccurred)
-                    findNavController().popBackStack()
-                }
-            }
+            observeDownloadedFile(file)
         }
 
         return MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
@@ -80,6 +70,21 @@ class DownloadProgressDialog : DialogFragment() {
                 } else false
             }
             .create()
+    }
+
+    private fun observeDownloadedFile(file: File) = with(navigationArgs) {
+        downloadViewModel.downloadFile(requireContext(), file, userDrive).observe(this@DownloadProgressDialog) {
+            it?.let { (progress, isComplete) ->
+                if (isComplete) {
+                    setBackNavigationResult(if (isOpenBookmark) OPEN_BOOKMARK else OPEN_WITH, fileId)
+                } else {
+                    downloadProgress.progress = progress
+                }
+            } ?: run {
+                requireActivity().showSnackbar(R.string.anErrorHasOccurred)
+                findNavController().popBackStack()
+            }
+        }
     }
 
     override fun getView() = dialogView

@@ -38,6 +38,7 @@ import com.infomaniak.drive.data.models.ShareLink.*
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.Shareable.ShareablePermission
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter
+import com.infomaniak.drive.utils.MatomoUtils.trackShareRightsEvent
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setBackNavigationResult
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
@@ -164,8 +165,10 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         saveButton.showProgress()
         shareableItem?.let { shareable ->
             if (permission == ShareablePermission.DELETE || permission == null) {
+                context?.applicationContext?.trackShareRightsEvent("deleteUser")
                 deleteShare(file, shareable, permission)
             } else {
+                context?.applicationContext?.trackShareRightsEvent(permission.name.lowercase() + "Right")
                 editShare(file, shareable, permission)
             }
         }

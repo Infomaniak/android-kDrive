@@ -59,7 +59,12 @@ class FileCommentsAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView) {
-        if (getItemViewType(position) == VIEW_TYPE_LOADING) return
+        if (getItemViewType(position) == VIEW_TYPE_LOADING) {
+            commentUserName.resetLoader()
+            commentValue.resetLoader()
+            commentDateValue.resetLoader()
+            return
+        }
 
         val currentComment = itemList[position]
 

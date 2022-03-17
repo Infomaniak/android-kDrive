@@ -18,51 +18,59 @@
 package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
+import androidx.core.view.isInvisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
-import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
-import kotlinx.android.synthetic.main.fragment_menu_pictures.*
+import com.infomaniak.drive.databinding.FragmentMenuPicturesBinding
+import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 
 class MenuPicturesFragment : Fragment() {
 
-    private val timer: CountDownTimer by lazy {
-        createRefreshTimer { swipeRefreshLayout?.isRefreshing = true }
+    private lateinit var binding: FragmentMenuPicturesBinding
+
+    private var picturesFragment = PicturesFragment()
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        binding = FragmentMenuPicturesBinding.inflate(inflater, container, false).apply {
+            toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+            swipeRefreshLayout.setOnRefreshListener { picturesFragment.onRefreshPictures() }
+        }
+
+        binding.multiSelectLayout.apply {
+            selectAllButton.isInvisible = true
+            setMultiSelectClickListeners()
+        }
+
+        return binding.root
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_menu_pictures, container, false)
+    private fun MultiSelectLayoutBinding.setMultiSelectClickListeners() = with(picturesFragment) {
+        closeButtonMultiSelect.setOnClickListener { closeMultiSelect() }
+        moveButtonMultiSelect.setOnClickListener { onMoveButtonClicked() }
+        deleteButtonMultiSelect.setOnClickListener { deleteFiles() }
+        menuButtonMultiSelect.setOnClickListener { onMenuButtonClicked() }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
+        ViewCompat.requestApplyInsets(binding.pictureListCoordinator)
+
+        with(childFragmentManager) {
+            (findFragmentByTag(PicturesFragment.TAG) as? PicturesFragment)?.let {
+                picturesFragment = it
+            } ?: run {
+                beginTransaction()
+                    .replace(R.id.picturesFragmentView, picturesFragment, PicturesFragment.TAG)
+                    .commit()
+            }
         }
 
-        ViewCompat.requestApplyInsets(pictureListCoordinator)
-
-        val picturesFragment = PicturesFragment {
-            timer.cancel()
-            swipeRefreshLayout.isRefreshing = false
-        }
-
-        swipeRefreshLayout.setOnRefreshListener {
-            picturesFragment.reloadPictures()
-        }
-
-        timer.start()
-        if (childFragmentManager.findFragmentByTag("picturesFragment") == null) {
-            childFragmentManager.beginTransaction()
-                .replace(R.id.picturesFragmentView, picturesFragment, "picturesFragment")
-                .commit()
-        }
+        picturesFragment.menuPicturesBinding = binding
     }
-
 }

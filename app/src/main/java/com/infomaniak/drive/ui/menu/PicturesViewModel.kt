@@ -18,54 +18,65 @@
 package com.infomaniak.drive.ui.menu
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.LiveDataScope
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.IsComplete
+import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 
 class PicturesViewModel : ViewModel() {
     private var getPicturesJob: Job = Job()
 
-    fun getAllPicturesFiles(
+    var lastPicturesPage = 1
+    var lastPicturesLastPage = 1
+
+    fun getLastPictures(
         driveId: Int,
-        ignoreCloud: Boolean = false
+        ignoreCloud: Boolean = false,
     ): LiveData<Pair<ArrayList<File>, IsComplete>?> {
         getPicturesJob.cancel()
         getPicturesJob = Job()
+
         return liveData(Dispatchers.IO + getPicturesJob) {
-            suspend fun recursive(page: Int) {
-                if (!ignoreCloud) {
-                    val apiResponse = ApiRepository.getLastPictures(driveId = driveId, page = page)
-                    if (apiResponse.isSuccess()) {
-                        val data = apiResponse.data
-                        val isFirstPage = page == 1
-                        when {
-                            data.isNullOrEmpty() -> emit(null)
-                            data.size < ApiRepository.PER_PAGE -> {
-                                FileController.storePicturesDrive(data, isFirstPage)
-                                emit(data to true)
-                            }
-                            else -> {
-                                FileController.storePicturesDrive(data, isFirstPage)
-                                emit(data to false)
-                                recursive(page + 1)
-                            }
-                        }
-                        if (isFirstPage) FileController.removeOrphanFiles()
-                    } else emit(FileController.getPicturesDrive() to true)
-                }
-            }
-            recursive(1)
+            if (ignoreCloud) emitRealmPictures() else fetchApiPictures(driveId)
         }
+    }
+
+    private suspend fun LiveDataScope<Pair<ArrayList<File>, IsComplete>?>.emitRealmPictures() {
+        emit(FileController.getPicturesDrive() to true)
+    }
+
+    private suspend fun LiveDataScope<Pair<ArrayList<File>, IsComplete>?>.fetchApiPictures(driveId: Int) {
+        val page = lastPicturesPage
+        val apiResponse = ApiRepository.getLastPictures(driveId = driveId, page = page)
+        if (apiResponse.isSuccess()) emitApiPictures(apiResponse, page) else emitRealmPictures()
+    }
+
+    private suspend fun LiveDataScope<Pair<ArrayList<File>, IsComplete>?>.emitApiPictures(
+        apiResponse: ApiResponse<ArrayList<File>>,
+        page: Int,
+    ) {
+        val data = apiResponse.data
+        val isFirstPage = page == 1
+        val isComplete = (data?.size ?: 0) < ApiRepository.PER_PAGE
+
+        if (data.isNullOrEmpty()) {
+            emit(null)
+        } else {
+            FileController.storePicturesDrive(data, isFirstPage)
+            emit(data to isComplete)
+        }
+
+        if (isFirstPage) FileController.removeOrphanFiles()
     }
 
     override fun onCleared() {
         getPicturesJob.cancel()
         super.onCleared()
     }
-
 }

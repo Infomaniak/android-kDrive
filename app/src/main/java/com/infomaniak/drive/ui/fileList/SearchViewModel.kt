@@ -86,7 +86,7 @@ class SearchViewModel : ViewModel() {
         return dateFilter?.let { it.start.timestamp() to it.end.timestamp() }
     }
 
-    private fun formatType() = typeFilter?.name?.lowercase(Locale.ROOT)
+    private fun formatType() = typeFilter?.name?.lowercase()
 
     private fun formatCategories(): String? {
         return categoriesFilter?.joinToString(

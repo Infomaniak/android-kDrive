@@ -19,6 +19,7 @@ package com.infomaniak.drive.data.api
 
 import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
+import com.infomaniak.drive.data.api.ApiRoutes.withFile
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
@@ -90,9 +91,15 @@ object ApiRepository {
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
-    fun getFileActivities(okHttpClient: OkHttpClient, file: File, page: Int): ApiResponse<ArrayList<FileActivity>> {
-        val url = "${ApiRoutes.getFileActivities(file)}?${pagination(page)}&depth=children&from_date=${file.responseAt}" +
-                "&with=file,rights,collaborative_folder,favorite,share_link,mobile,categories" + ACTIONS
+    // Increase timeout for this api call because it can take more than 10s to process data
+    fun getFileActivities(
+        file: File,
+        page: Int,
+        forFileList: Boolean,
+        okHttpClient: OkHttpClient = HttpClient.okHttpClientLongTimeout,
+    ): ApiResponse<ArrayList<FileActivity>> {
+        val queries = if (forFileList) "&depth=children&from_date=${file.responseAt}&$withFile" else "&with=user"
+        val url = "${ApiRoutes.getFileActivities(file)}?${pagination(page)}$queries$ACTIONS"
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
@@ -139,7 +146,7 @@ object ApiRepository {
         return callApi(
             ApiRoutes.createTeamFolder(driveId),
             POST,
-            mapOf("name" to name, "for_all_users" to forAllUsers),
+            mapOf("name" to name, "for_all_user" to forAllUsers),
             okHttpClient = okHttpClient
         )
     }
@@ -195,11 +202,6 @@ object ApiRepository {
 
     fun getFileCount(file: File): ApiResponse<FileCount> {
         return callApi(ApiRoutes.getFileCount(file), GET)
-    }
-
-    fun getFileActivities(file: File, page: Int): ApiResponse<ArrayList<FileActivity>> {
-        val url = "${ApiRoutes.getFileActivities(file)}?with=user&${pagination(page, 25)}" + ACTIONS
-        return callApi(url, GET)
     }
 
     fun getFileComments(file: File, page: Int): ApiResponse<ArrayList<FileComment>> {

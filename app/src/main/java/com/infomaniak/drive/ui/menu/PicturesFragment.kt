@@ -19,39 +19,140 @@ package com.infomaniak.drive.ui.menu
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.activity.addCallback
+import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.WorkInfo
+import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.infomaniak.drive.R
-import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.getScreenSizeInDp
+import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.services.DownloadWorker
+import com.infomaniak.drive.databinding.FragmentMenuPicturesBinding
+import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
+import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialogArgs
+import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
+import com.infomaniak.drive.ui.fileList.multiSelect.PicturesMultiSelectActionsBottomSheetDialog
+import com.infomaniak.drive.utils.*
+import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
+import com.infomaniak.lib.core.utils.setPagination
 import com.infomaniak.lib.core.utils.toDp
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.cardview_picture.*
 import kotlinx.android.synthetic.main.fragment_pictures.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlin.math.max
 import kotlin.math.min
 
-class PicturesFragment(
-    private val onFinish: (() -> Unit)? = null
-) : Fragment() {
+class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
 
-    private val mainViewModel: MainViewModel by activityViewModels()
     private val picturesViewModel: PicturesViewModel by viewModels()
-    private val picturesAdapter: PicturesAdapter by lazy {
-        PicturesAdapter { file ->
-            Utils.displayFile(mainViewModel, findNavController(), file, picturesAdapter.pictureList)
-        }
+    private lateinit var picturesAdapter: PicturesAdapter
+
+    private var paginationListener: RecyclerView.OnScrollListener? = null
+    private var isDownloadingPictures = false
+
+    var menuPicturesBinding: FragmentMenuPicturesBinding? = null
+
+    private val refreshTimer: CountDownTimer by lazy {
+        createRefreshTimer { menuPicturesBinding?.swipeRefreshLayout?.isRefreshing = true }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_pictures, container, false)
+    }
+
+    override fun initMultiSelectLayout(): MultiSelectLayoutBinding? = menuPicturesBinding?.multiSelectLayout
+    override fun initMultiSelectToolbar(): CollapsingToolbarLayout? = menuPicturesBinding?.collapsingToolbarLayout
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setupPagination()
+
+        val isCurrentlyInGallery = menuPicturesBinding != null
+
+        noPicturesLayout.setup(
+            icon = R.drawable.ic_images,
+            title = R.string.picturesNoFile,
+            initialListView = picturesRecyclerView,
+        )
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, isCurrentlyInGallery) {
+            if (multiSelectManager.isMultiSelectOpened) closeMultiSelect() else findNavController().popBackStack()
+        }
+
+        multiSelectManager.apply {
+            openMultiSelect = {
+                menuPicturesBinding?.swipeRefreshLayout?.isEnabled = false
+                openMultiSelect()
+            }
+            updateMultiSelect = { onItemSelected() }
+        }
+
+        val isPicturesAdapterInitialized = ::picturesAdapter.isInitialized
+        if (!isPicturesAdapterInitialized) {
+            picturesAdapter = PicturesAdapter(
+                multiSelectManager = multiSelectManager,
+                onFileClicked = { file ->
+                    Utils.displayFile(mainViewModel, findNavController(), file, picturesAdapter.pictureList)
+                },
+            ).apply {
+                numberItemLoader = NUMBER_ITEMS_LOADER
+                stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT
+
+                adapter = this
+            }
+        }
+
+        if (isCurrentlyInGallery) multiSelectManager.isMultiSelectAuthorized = true
+
+        picturesRecyclerView.adapter = picturesAdapter
+        configPicturesLayoutManager()
+
+        mainViewModel.observeDownloadOffline(requireContext()).observe(viewLifecycleOwner) { workInfoList ->
+            if (workInfoList.isEmpty()) return@observe
+
+            val workInfo = workInfoList.firstOrNull { it.state == WorkInfo.State.RUNNING } ?: return@observe
+
+            val fileId: Int = workInfo.progress.getInt(DownloadWorker.FILE_ID, 0)
+            if (fileId == 0) return@observe
+
+            val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 100)
+            if (progress == 100) picturesAdapter.updateOfflineStatus(fileId)
+        }
+
+        if (!isPicturesAdapterInitialized) {
+            if (isCurrentlyInGallery) refreshTimer.start()
+            loadMorePictures(AccountUtils.currentDriveId, true)
+        }
+    }
+
+    private fun setupPagination() {
+        picturesRecyclerView.apply {
+            paginationListener?.let(::removeOnScrollListener)
+            paginationListener = setPagination(
+                whenLoadMoreIsPossible = {
+                    if (!picturesAdapter.isComplete && !isDownloadingPictures) {
+                        picturesViewModel.lastPicturesPage++
+                        picturesViewModel.lastPicturesLastPage++
+
+                        loadMorePictures(AccountUtils.currentDriveId)
+                    }
+                },
+                triggerOffset = 100
+            )
+        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -59,51 +160,47 @@ class PicturesFragment(
         configPicturesLayoutManager()
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        noPicturesLayout.setup(
-            icon = R.drawable.ic_images,
-            title = R.string.picturesNoFile,
-            initialListView = picturesRecyclerView
-        )
-
-        picturesAdapter.numberItemLoader = numberItemLoader
-        picturesAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT
-
-        picturesRecyclerView.adapter = picturesAdapter
-        configPicturesLayoutManager()
-
-        getPictures()
-    }
-
     private fun configPicturesLayoutManager() {
+
+        fun getNumPicturesColumns(): Int {
+            val minColumns = 2
+            val maxColumns = 5
+            val expectedItemSize = 300
+            val screenWidth = requireActivity().getScreenSizeInDp().x
+            return min(max(minColumns, screenWidth / expectedItemSize.toDp()), maxColumns)
+        }
+
         val numPicturesColumns = getNumPicturesColumns()
-        val gridLayoutManager = GridLayoutManager(requireContext(), numPicturesColumns)
-        gridLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-            override fun getSpanSize(position: Int): Int {
-                return when {
-                    picturesAdapter.itemList.getOrNull(position) is String -> numPicturesColumns
-                    else -> 1
+
+        val gridLayoutManager = GridLayoutManager(requireContext(), numPicturesColumns).apply {
+            spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                override fun getSpanSize(position: Int): Int {
+                    return when {
+                        position == 0 || picturesAdapter.itemList.getOrNull(position) is String -> numPicturesColumns
+                        else -> 1
+                    }
                 }
             }
         }
+
         picturesRecyclerView.layoutManager = gridLayoutManager
     }
 
-    fun reloadPictures() {
-        if (isResumed) {
-            picturesAdapter.clearPictures()
-            getPictures()
-        }
-    }
-
-    private fun getPictures() {
+    private fun loadMorePictures(driveId: Int, forceDownload: Boolean = false) {
         picturesAdapter.apply {
+            if (forceDownload) {
+                picturesViewModel.apply {
+                    lastPicturesPage = 1
+                    lastPicturesLastPage = 1
+                }
+                clean()
+            }
+
             val ignoreCloud = mainViewModel.isInternetAvailable.value == false
             showLoading()
             isComplete = false
-            picturesViewModel.getAllPicturesFiles(AccountUtils.currentDriveId, ignoreCloud).observe(viewLifecycleOwner) {
+            isDownloadingPictures = true
+            picturesViewModel.getLastPictures(driveId, ignoreCloud).observe(viewLifecycleOwner) {
                 it?.let { (pictures, isComplete) ->
                     stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
                     val pictureList = formatList(requireContext(), pictures)
@@ -115,20 +212,124 @@ class PicturesFragment(
                     noPicturesLayout.toggleVisibility(
                         noNetwork = ignoreCloud,
                         isVisible = pictureList.isEmpty(),
-                        showRefreshButton = true
+                        showRefreshButton = true,
                     )
                 }
-                onFinish?.invoke()
+
+                onDownloadFinished()
+
+                isDownloadingPictures = false
             }
         }
     }
 
-    private fun getNumPicturesColumns(minColumns: Int = 2, maxColumns: Int = 5, expectedItemSize: Int = 300): Int {
-        val screenWidth = requireActivity().getScreenSizeInDp().x
-        return min(max(minColumns, screenWidth / expectedItemSize.toDp()), maxColumns)
+    private fun onDownloadFinished() {
+        menuPicturesBinding?.let { binding ->
+            refreshTimer.cancel()
+            binding.swipeRefreshLayout.isRefreshing = false
+        }
+    }
+
+    fun onRefreshPictures() {
+        if (isResumed) {
+            picturesAdapter.clearPictures()
+            loadMorePictures(AccountUtils.currentDriveId, true)
+        }
+    }
+
+    override fun closeMultiSelect() {
+        super.closeMultiSelect()
+        menuPicturesBinding?.swipeRefreshLayout?.isEnabled = true
+    }
+
+    override fun getAllSelectedFilesCount(): Int? = null
+
+    fun onMoveButtonClicked() {
+        // TODO: Use `parentId` when https://github.com/Infomaniak/android-kDrive/issues/532 is merged
+        val folderId = if (multiSelectManager.selectedItems.count() == 1) {
+            FileController.getParentFileProxy(multiSelectManager.selectedItems[0].id, mainViewModel.realm)?.id
+        } else {
+            null
+        }
+
+        moveFiles(folderId)
+    }
+
+    fun onMenuButtonClicked() {
+        val (fileIds, onlyFolders, onlyFavorite, onlyOffline) = multiSelectManager.getMenuNavArgs()
+        PicturesMultiSelectActionsBottomSheetDialog().apply {
+            arguments = MultiSelectActionsBottomSheetDialogArgs(
+                fileIds = fileIds,
+                onlyFolders = onlyFolders,
+                onlyFavorite = onlyFavorite,
+                onlyOffline = onlyOffline,
+            ).toBundle()
+        }.show(childFragmentManager, "ActionPicturesMultiSelectBottomSheetDialog")
+    }
+
+    override fun performBulkOperation(
+        type: BulkOperationType,
+        areAllFromTheSameFolder: Boolean,
+        allSelectedFilesCount: Int?,
+        destinationFolder: File?,
+        color: String?,
+    ) {
+        // API doesn't support bulk operations for files originating from
+        // different parent folders, so we repeat the action for each file.
+        // Hence the `areAllFromTheSameFolder` set at false.
+        super.performBulkOperation(type, false, allSelectedFilesCount, destinationFolder, color)
+    }
+
+    override fun onIndividualActionSuccess(type: BulkOperationType, data: Any) {
+        when (type) {
+            BulkOperationType.TRASH -> {
+                runBlocking(Dispatchers.Main) { picturesAdapter.deleteByFileId(data as Int) }
+            }
+            BulkOperationType.COPY -> {
+                picturesAdapter.duplicatedList.add(0, data as File)
+            }
+            BulkOperationType.ADD_OFFLINE, BulkOperationType.REMOVE_OFFLINE -> {
+                menuPicturesBinding?.swipeRefreshLayout?.isEnabled = true
+            }
+            BulkOperationType.ADD_FAVORITES -> {
+                lifecycleScope.launch(Dispatchers.Main) {
+                    picturesAdapter.notifyFileChanged(data as Int) { it.isFavorite = true }
+                }
+            }
+            BulkOperationType.REMOVE_FAVORITES -> {
+                lifecycleScope.launch(Dispatchers.Main) {
+                    picturesAdapter.notifyFileChanged(data as Int) { it.isFavorite = false }
+                }
+            }
+            BulkOperationType.MOVE, BulkOperationType.COLOR_FOLDER -> {
+                // No-op
+            }
+        }
+    }
+
+    override fun onAllIndividualActionsFinished(type: BulkOperationType) {
+        menuPicturesBinding?.swipeRefreshLayout?.isEnabled = true
+
+        if (type == BulkOperationType.COPY) {
+            val oldTotal = picturesAdapter.itemList.size
+            val oldFirstItem = picturesAdapter.itemList.firstOrNull()
+
+            picturesAdapter.addDuplicatedImages(requireContext())
+            val newTotal = picturesAdapter.itemList.count()
+            val newFirstItem = picturesAdapter.itemList.firstOrNull()
+
+            val positionStart = if (oldFirstItem != newFirstItem) 0 else 1
+            picturesAdapter.notifyItemRangeInserted(positionStart, newTotal - oldTotal)
+        }
+    }
+
+    override fun updateFileProgressByFileId(fileId: Int, progress: Int, onComplete: ((position: Int, file: File) -> Unit)?) {
+        picturesAdapter.updateFileProgressByFileId(fileId, progress, onComplete)
     }
 
     companion object {
-        private const val numberItemLoader = 12
+        const val TAG = "PicturesFragment"
+        const val MATOMO_CATEGORY = "picturesFileAction"
+        private const val NUMBER_ITEMS_LOADER = 13
     }
 }

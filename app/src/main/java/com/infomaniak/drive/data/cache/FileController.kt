@@ -71,12 +71,15 @@ object FileController {
     // https://github.com/realm/realm-java/issues/1862
     fun emptyList(realm: Realm): RealmResults<File> = realm.where(File::class.java).alwaysFalse().findAll()
 
+    fun getParentFileProxy(fileId: Int, realm: Realm): File? {
+        return getFileById(realm, fileId)?.localParent?.let { parents ->
+            parents.firstOrNull { it.id > 0 }
+        }
+    }
+
     fun getParentFile(fileId: Int, userDrive: UserDrive? = null, realm: Realm? = null): File? {
         val block: (Realm) -> File? = { currentRealm ->
-            getFileById(currentRealm, fileId)?.localParent?.let { parents ->
-                if (parents.count() == 1) parents.firstOrNull()
-                else parents.firstOrNull { it.id > 0 }
-            }?.let { parent ->
+            getParentFileProxy(fileId, currentRealm)?.let { parent ->
                 currentRealm.copyFromRealm(parent, 0)
             }
         }
@@ -86,16 +89,13 @@ object FileController {
     fun generateAndSavePath(fileId: Int, userDrive: UserDrive): String {
         return getRealmInstance(userDrive).use { realm ->
             getFileById(realm, fileId)?.let { file ->
-                if (file.path.isEmpty()) {
+                file.path.ifEmpty {
                     val generatedPath = generatePath(file, userDrive)
                     if (generatedPath.isNotBlank()) {
-                        CoroutineScope(Dispatchers.IO).launch {
-                            savePath(userDrive, fileId, generatedPath)
-                        }
-
+                        CoroutineScope(Dispatchers.IO).launch { savePath(userDrive, fileId, generatedPath) }
                     }
                     generatedPath
-                } else file.path
+                }
             } ?: ""
         }
     }
@@ -258,10 +258,10 @@ object FileController {
         saveFiles(FAVORITES_FILE, files, replaceOldData, realm)
     }
 
-    private fun saveMySharesFiles(files: ArrayList<File>, replaceOldData: Boolean) {
+    private fun saveMySharesFiles(userDrive: UserDrive, files: ArrayList<File>, replaceOldData: Boolean) {
         val keepCaches = arrayListOf<Int>()
         val keepFiles = arrayListOf<Int>()
-        getRealmInstance().use { realm ->
+        getRealmInstance(userDrive).use { realm ->
             files.forEachIndexed { index, file ->
                 val offlineFile = file.getOfflineFile(Realm.getApplicationContext()!!)
 
@@ -388,10 +388,10 @@ object FileController {
         userDrive: UserDrive,
         sortType: SortType,
         page: Int = 1,
-        ignoreCloud: Boolean = false,
+        onlyLocal: Boolean = false,
         transaction: (files: ArrayList<File>, isComplete: Boolean) -> Unit
     ) {
-        if (ignoreCloud) {
+        if (onlyLocal) {
             transaction(getFilesFromCache(MY_SHARES_FILE_ID, userDrive, sortType), true)
         } else {
             val apiResponse = ApiRepository.getMySharedFiles(
@@ -402,11 +402,11 @@ object FileController {
                 when {
                     apiResponseData.isNullOrEmpty() -> transaction(arrayListOf(), true)
                     apiResponseData.size < ApiRepository.PER_PAGE -> {
-                        saveMySharesFiles(apiResponseData, page == 1)
+                        saveMySharesFiles(userDrive, apiResponseData, page == 1)
                         transaction(apiResponseData, true)
                     }
                     else -> {
-                        saveMySharesFiles(apiResponseData, page == 1)
+                        saveMySharesFiles(userDrive, apiResponseData, page == 1)
                         transaction(apiResponseData, false)
                         getMySharedFiles(userDrive, sortType, page + 1, false, transaction)
                     }
@@ -464,7 +464,7 @@ object FileController {
     fun getPicturesDrive(customRealm: Realm? = null): ArrayList<File> {
         val operation: (Realm) -> ArrayList<File> = { realm ->
             realm.where(File::class.java).equalTo(File::id.name, PICTURES_FILE_ID).findFirst()?.let { picturesFolder ->
-                realm.copyFromRealm(picturesFolder.children, 0) as ArrayList<File>
+                realm.copyFromRealm(picturesFolder.children, 1) as ArrayList<File>
             } ?: arrayListOf()
         }
         return customRealm?.let(operation) ?: getRealmInstance().use(operation)
@@ -749,10 +749,10 @@ object FileController {
         userDrive: UserDrive? = null
     ): Map<out Int, FileActivity> {
         val okHttpClient = runBlocking {
-            userDrive?.userId?.let { KDriveHttpClient.getHttpClient(it) } ?: HttpClient.okHttpClient
+            userDrive?.userId?.let { KDriveHttpClient.getHttpClient(it, 30) } ?: HttpClient.okHttpClientLongTimeout
         }
         val returnResponse = arrayMapOf<Int, FileActivity>()
-        val apiResponse = ApiRepository.getFileActivities(okHttpClient, folder, page)
+        val apiResponse = ApiRepository.getFileActivities(folder, page, true, okHttpClient)
         if (!apiResponse.isSuccess()) return returnResponse
 
         return if (apiResponse.data?.isNotEmpty() == true) {

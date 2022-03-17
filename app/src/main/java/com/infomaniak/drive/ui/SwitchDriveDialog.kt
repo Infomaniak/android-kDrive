@@ -25,6 +25,8 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialog
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.TrackerAction
 import com.infomaniak.drive.views.SelectBottomSheetDialog
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_select.*
 
@@ -37,6 +39,7 @@ class SwitchDriveDialog : SelectBottomSheetDialog() {
 
         val driveList = DriveInfosController.getDrives(AccountUtils.currentUserId)
         selectRecyclerView.adapter = SwitchDriveBottomSheetAdapter(driveList) { drive ->
+            context?.applicationContext?.trackEvent("drive", TrackerAction.CLICK, "switch")
             findNavController().popBackStack()
             // TODO - Implement drive blocked BottomSheetDialog (for invoice issues) - Awaiting API attributes
             if (drive.maintenance) {

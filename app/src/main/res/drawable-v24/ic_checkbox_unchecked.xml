@@ -18,10 +18,15 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
-    android:tint="#9E9E9E"
     android:viewportWidth="24"
     android:viewportHeight="24">
+
     <path
-        android:fillColor="#fff"
-        android:pathData="M15.318,2.146l4.536,4.536a0.5,0.5 0,0 1,0.146 0.353V21.5a0.5,0.5 0,0 1,-0.5 0.5h-15a0.5,0.5 0,0 1,-0.5 -0.5v-19a0.5,0.5 0,0 1,0.5 -0.5h10.465a0.5,0.5 0,0 1,0.353 0.146zM15.586,0H4a2,2 0,0 0,-2 2v20a2,2 0,0 0,2 2h16a2,2 0,0 0,2 -2V6.414a1,1 0,0 0,-0.293 -0.707L16.293,0.293A1,1 0,0 0,15.586 0z" />
+        android:name="circle"
+        android:fillColor="#00000000"
+        android:fillType="evenOdd"
+        android:pathData="M12,12m-11.5,0a11.5,11.5 0,1 1,23 0a11.5,11.5 0,1 1,-23 0"
+        android:strokeWidth="1"
+        android:strokeColor="@color/border" />
+
 </vector>

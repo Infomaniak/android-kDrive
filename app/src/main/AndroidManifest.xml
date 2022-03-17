@@ -52,7 +52,9 @@
     <queries>
         <intent>
             <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="*" />
+            <data
+                android:mimeType="*/*"
+                android:scheme="*" />
         </intent>
     </queries>
 
@@ -130,6 +132,7 @@
 
         <activity
             android:name="com.infomaniak.lib.login.WebViewLoginActivity"
+            android:configChanges="orientation|screenSize"
             android:theme="@style/WebViewTheme" />
 
         <activity
@@ -137,8 +140,6 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.Login"
             tools:ignore="LockedOrientationActivity" />
-
-        <service android:name="org.eclipse.paho.android.service.MqttService" />
 
         <service android:name=".data.sync.FileObserveService" />
         <service

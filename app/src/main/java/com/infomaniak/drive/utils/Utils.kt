@@ -26,6 +26,7 @@ import android.os.Environment
 import android.provider.DocumentsContract
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
@@ -35,12 +36,9 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
-import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.work.*
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
-import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.infomaniak.drive.R
@@ -67,8 +65,6 @@ object Utils {
     const val OTHER_ROOT_ID = -1
 
     const val INDETERMINATE_PROGRESS = -1
-
-    val CROSS_FADE_TRANSITION = withCrossFade(DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build())
 
     fun createConfirmation(
         context: Context,
@@ -217,17 +213,17 @@ object Utils {
         clipboard?.setPrimaryClip(ClipData.newPlainText(text, text))
     }
 
-    fun moveFileClicked(ownerFragment: Fragment, currentFolder: Int) {
-        val intent = Intent(ownerFragment.context, SelectFolderActivity::class.java).apply {
+    fun Context.moveFileClicked(currentFolderId: Int?, selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
+        val intent = Intent(this, SelectFolderActivity::class.java).apply {
             putExtra(SelectFolderActivity.USER_ID_TAG, AccountUtils.currentUserId)
             putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
-            putExtra(SelectFolderActivity.DISABLE_SELECTED_FOLDER_TAG, currentFolder)
+            putExtra(SelectFolderActivity.CURRENT_FOLDER_ID_TAG, currentFolderId)
             putExtra(
                 SelectFolderActivity.CUSTOM_ARGS_TAG,
-                bundleOf(SelectFolderActivity.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE)
+                bundleOf(SelectFolderActivity.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE),
             )
         }
-        ownerFragment.startActivityForResult(intent, SelectFolderActivity.SELECT_FOLDER_REQUEST)
+        selectFolderResultLauncher.launch(intent)
     }
 
     fun Context.openWith(file: File, userDrive: UserDrive = UserDrive()) {
@@ -242,11 +238,9 @@ object Utils {
         val (cloudUri, uri) = file.getCloudAndFileUris(this, userDrive)
         return Intent().apply {
             action = Intent.ACTION_VIEW
-            addFlags(
-                Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
-                        Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-            )
+            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
+                    Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
             setDataAndType(uri, contentResolver.getType(cloudUri))
         }
     }
