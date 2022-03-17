@@ -641,14 +641,14 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     }
 
     private fun onMenuButtonClicked() {
-        val (fileIds, onlyFolders, onlyFavorite, onlyOffline) = multiSelectManager.getMenuNavArgs()
+        val (fileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
         FileListMultiSelectActionsBottomSheetDialog().apply {
             arguments = MultiSelectActionsBottomSheetDialogArgs(
                 fileIds = fileIds,
                 onlyFolders = onlyFolders,
                 onlyFavorite = onlyFavorite,
                 onlyOffline = onlyOffline,
-                isAllSelected = multiSelectManager.areAllSelected
+                isAllSelected = isAllSelected
             ).toBundle()
         }.show(childFragmentManager, "ActionFileListMultiSelectBottomSheetDialog")
     }

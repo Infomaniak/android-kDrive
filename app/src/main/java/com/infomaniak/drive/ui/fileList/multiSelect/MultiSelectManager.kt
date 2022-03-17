@@ -72,11 +72,11 @@ class MultiSelectManager {
             if (!it.isFavorite) onlyFavorite = false
             if (!it.isOffline) onlyOffline = false
         }
-        return MenuNavArgs(fileIds.toIntArray(), onlyFolders, onlyFavorite, onlyOffline)
+        return MenuNavArgs(fileIds.toIntArray(), onlyFolders, onlyFavorite, onlyOffline, areAllSelected)
     }
 
     @Suppress("ArrayInDataClass")
-    data class MenuNavArgs(val fileIds: IntArray, val onlyFolders: Boolean, val onlyFavorite: Boolean, val onlyOffline: Boolean)
+    data class MenuNavArgs(val fileIds: IntArray, val onlyFolders: Boolean, val onlyFavorite: Boolean, val onlyOffline: Boolean, val isAllSelected: Boolean)
 
     interface MultiSelectResult {
         fun onIndividualActionSuccess(type: BulkOperationType, data: Any)
