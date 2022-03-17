@@ -81,7 +81,10 @@ class FileDetailsFragment : FileDetailsSubFragment() {
                     shareResponse.data?.let { fileDetailsViewModel.currentFileShare.value = it }
                 }
             }
+    }
 
+    override fun onStart() {
+        super.onStart()
         activity?.window?.apply {
             statusBarColor = Color.TRANSPARENT
             lightStatusBar(false)
@@ -112,9 +115,9 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         }
     }
 
-    override fun onDestroyView() {
+    override fun onStop() {
         requireActivity().window.toggleEdgeToEdge(false)
-        super.onDestroyView()
+        super.onStop()
     }
 
     private fun setFile(file: File) {

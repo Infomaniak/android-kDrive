@@ -164,7 +164,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
 
         configureBottomSheetFileInfo()
+    }
 
+    override fun onStart() {
+        super.onStart()
         setupTransparentStatusBar()
     }
 
@@ -282,6 +285,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                     header?.setMargin(top = top, right = right, left = left)
                     bottomSheetBehavior.peekHeight = getDefaultPeekHeight() + bottom
                     bottomSheetBehavior.expandedOffset = top
+                    /* Add padding to the bottom to allow the last element of the list to be displayed right over the
+                     android navigation bar, bottom makes the element half hidden under nav bar so we need top + bottom */
+                    bottomSheetFileInfos.setPadding(0, 0, 0, top + bottom)
                 }
 
                 windowInsets
