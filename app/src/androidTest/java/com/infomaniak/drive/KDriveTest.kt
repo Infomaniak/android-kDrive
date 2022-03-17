@@ -89,6 +89,7 @@ open class KDriveTest {
         fun afterAll() {
             ApiRepository.emptyTrash(userDrive.driveId)
             if (!uiRealm.isClosed) uiRealm.close()
+            Realm.deleteRealm(FileController.getRealmConfiguration(FileController.getDriveFileName(userDrive)))
             if (!Env.USE_CURRENT_USER) {
                 runBlocking { AccountUtils.removeUser(context, user) }
             }
