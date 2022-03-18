@@ -183,16 +183,24 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             type, areAllFromTheSameFolder, fileCount, selectedFiles, destinationFolder, color
         )
 
-        if (type == BulkOperationType.TRASH) {
-            Utils.createConfirmation(
+        when (type) {
+            BulkOperationType.TRASH -> Utils.createConfirmation(
                 context = this,
                 title = getString(R.string.modalMoveTrashTitle),
                 message = resources.getQuantityString(R.plurals.modalMoveTrashDescription, fileCount, fileCount),
                 isDeletion = true,
                 onConfirmation = sendActions,
             )
-        } else {
-            sendActions(null)
+            BulkOperationType.DELETE_PERMANENTLY -> {
+                Utils.confirmFileDeletion(
+                    context = this,
+                    fileCount = fileCount,
+                    fromTrash = true,
+                    autoDismiss = true,
+                    onConfirmation = sendActions,
+                )
+            }
+            else -> sendActions(null)
         }
     }
 
@@ -328,6 +336,15 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                     deleteFileFromFavorites(
                         file = file,
                         onSuccess = { onIndividualActionSuccess(BulkOperationType.REMOVE_FAVORITES, file.id) },
+                    ),
+                    updateMultiSelectMediator(mediator),
+                )
+            }
+            BulkOperationType.DELETE_PERMANENTLY -> {
+                mediator.addSource(
+                    deleteFilePermanently(
+                        file = file,
+                        onSuccess = { onIndividualActionSuccess(BulkOperationType.DELETE_PERMANENTLY, file.id) },
                     ),
                     updateMultiSelectMediator(mediator),
                 )
