@@ -31,6 +31,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
+import androidx.navigation.fragment.findNavController
 import androidx.work.WorkInfo
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -44,6 +45,7 @@ import com.infomaniak.drive.data.models.File.VisibilityType.IS_SHARED_SPACE
 import com.infomaniak.drive.data.models.File.VisibilityType.IS_TEAM_SPACE
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
@@ -125,6 +127,8 @@ class FileInfoActionsView @JvmOverloads constructor(
                 }
 
                 addFavorites.isVisible = rights?.canFavorite == true
+                Log.e("add-goto-folder", "updateCurrentFile - The value isSharedWithMe is: ${isSharedWithMe}", );
+                Log.e("add-goto-folder", "updateCurrentFile - The value currentFile.getOfflineFile(context) is: ${currentFile.getOfflineFile(context)}", );
                 availableOffline.isGone = isSharedWithMe || currentFile.getOfflineFile(context) == null
                 deleteFile.isVisible = rights?.delete == true
                 downloadFile.isVisible = rights?.read == true
@@ -137,6 +141,9 @@ class FileInfoActionsView @JvmOverloads constructor(
                 leaveShare.isVisible = rights?.leave == true
                 moveFile.isVisible = rights?.move == true && !isSharedWithMe
                 renameFile.isVisible = rights?.rename == true && !isSharedWithMe
+                Log.e("add-goto-folder", "updateCurrentFile - The value R.id.fileListFragment is: ${R.id.fileListFragment}", );
+                Log.e("add-goto-folder", "updateCurrentFile - The value ownerFragment.findNavController().previousBackStackEntry?.destination?.id is: ${ownerFragment.findNavController().previousBackStackEntry?.destination?.id}", );
+                goToFolder.isVisible = ownerFragment.findNavController().previousBackStackEntry?.destination?.id != R.id.fileListFragment //TODO
             }
 
             if (currentFile.isDropBox() || currentFile.rights?.canBecomeCollab == true) {
