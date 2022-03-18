@@ -56,6 +56,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         configureAvailableOffline()
         configureDownloadFile()
         configureDuplicateFile()
+        configureDeletePermanently()
     }
 
     protected open fun configureColoredFolder(areIndividualActionsVisible: Boolean) {
@@ -133,6 +134,10 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         duplicateFile.setOnClickListener { onActionSelected(SelectDialogAction.DUPLICATE) }
     }
 
+    protected open fun configureDeletePermanently() {
+        deletePermanently.isGone = true
+    }
+
     private fun downloadFileArchive() {
 
         fun downloadArchive(fileIds: IntArray) = liveData(Dispatchers.IO) {
@@ -160,6 +165,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
             SelectDialogAction.ADD_OFFLINE -> BulkOperationType.ADD_OFFLINE
             SelectDialogAction.REMOVE_OFFLINE -> BulkOperationType.REMOVE_OFFLINE
             SelectDialogAction.DUPLICATE -> BulkOperationType.COPY
+            SelectDialogAction.DELETE_PERMANENTLY -> BulkOperationType.DELETE_PERMANENTLY
             else -> null
         }
 
@@ -170,6 +176,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
                 when (finalType) {
                     BulkOperationType.COLOR_FOLDER -> colorFolders()
                     BulkOperationType.COPY -> duplicateFiles()
+                    BulkOperationType.DELETE_PERMANENTLY -> performBulkOperation(finalType, areAllFromTheSameFolder = false)
                     else -> performBulkOperation(finalType)
                 }
             }
@@ -182,6 +189,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         ADD_OFFLINE, REMOVE_OFFLINE,
         DUPLICATE,
         COLOR_FOLDER,
+        DELETE_PERMANENTLY,
     }
 
     private companion object {

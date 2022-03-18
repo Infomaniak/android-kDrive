@@ -238,6 +238,14 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             emit(FileController.deleteFile(file, userDrive = userDrive, context = getContext(), onSuccess = onSuccess))
         }
 
+    // TODO: duplicate with TrashViewModel
+    fun deleteFilePermanently(file: File, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
+        with(ApiRepository.deleteTrashFile(file)) {
+            emit(this)
+            if (isSuccess()) onSuccess?.invoke()
+        }
+    }
+
     fun duplicateFile(
         file: File,
         folderId: Int? = null,
