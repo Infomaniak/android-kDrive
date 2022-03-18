@@ -340,6 +340,15 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                     updateMultiSelectMediator(mediator),
                 )
             }
+            BulkOperationType.RESTORE_TO_ORIGIN -> {
+                mediator.addSource(
+                    restoreTrashFile(
+                        file = file,
+                        onSuccess = { onIndividualActionSuccess(BulkOperationType.RESTORE_TO_ORIGIN, file.id) },
+                    ),
+                    updateMultiSelectMediator(mediator),
+                )
+            }
             BulkOperationType.DELETE_PERMANENTLY -> {
                 mediator.addSource(
                     deleteFilePermanently(
