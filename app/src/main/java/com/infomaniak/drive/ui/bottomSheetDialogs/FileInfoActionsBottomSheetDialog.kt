@@ -34,6 +34,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.drive.Drive
+import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_ACTION_KEY
@@ -159,6 +160,16 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                 fileId = currentFile.id
             )
         )
+    }
+
+    override fun goToFolder() {
+        FileController.getParentFile(currentFile.id)?.let { folder ->
+            with(findNavController()) {
+                popBackStack(R.id.homeFragment, false)
+                (requireActivity() as MainActivity).bottomNavigation.findViewById<View>(R.id.fileListFragment).performClick()
+                mainViewModel.navigateFileListToFolderId(this, folder.id)
+            }
+        }
     }
 
     override fun dropBoxClicked(isDropBox: Boolean) {

@@ -208,6 +208,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         duplicateFile.setOnClickListener { onItemClickListener.duplicateFileClicked() }
         renameFile.setOnClickListener { onItemClickListener.renameFileClicked() }
         deleteFile.setOnClickListener { onItemClickListener.deleteFileClicked() }
+        goToFolder.setOnClickListener { onItemClickListener.goToFolder() }
     }
 
     fun downloadAsOfflineFile() {
@@ -403,13 +404,14 @@ class FileInfoActionsView @JvmOverloads constructor(
         private fun trackActionEvent(name: String, value: Float? = null) = application?.trackFileActionEvent(name, value)
 
         fun addFavoritesClicked() = trackActionEvent("favorite", (!currentFile.isFavorite).toFloat())
+        fun colorFolderClicked(color: String) = application?.trackEvent("colorFolder", TrackerAction.CLICK, "switch")
         fun copyPublicLink() = trackActionEvent("copyShareLink")
         fun displayInfoClicked()
         fun downloadFileClicked() = trackActionEvent("download")
-        fun manageCategoriesClicked(fileId: Int)
         fun dropBoxClicked(isDropBox: Boolean) = trackActionEvent("convertToDropbox", isDropBox.toFloat())
-        fun colorFolderClicked(color: String) = application?.trackEvent("colorFolder", TrackerAction.CLICK, "switch")
         fun fileRightsClicked()
+        fun goToFolder()
+        fun manageCategoriesClicked(fileId: Int)
         fun onCacheAddedToOffline() = Unit
         fun onDeleteFile(onApiResponse: () -> Unit)
         fun onDuplicateFile(result: String, onApiResponse: () -> Unit)
