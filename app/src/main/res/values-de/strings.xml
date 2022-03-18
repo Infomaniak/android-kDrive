@@ -666,8 +666,14 @@
     <string name="trashActionRestoreFileOriginalPlace">Am ursprünglichen Ort wiederherstellen</string>
     <string name="trashNoFile">Keine Datei gelöscht</string>
     <string name="trashTitle">Papierkorb</string>
-    <string name="trashedFileRestoreFileInSuccess">%1$s wiederhergestellt in %2$s</string>
-    <string name="trashedFileRestoreFileToOriginalPlaceSuccess">%s am ursprünglichen Ort wiederhergestellt</string>
+    <plurals name="trashedFileRestoreFileInSuccess">
+        <item quantity="one">%1$s wiederhergestellt in %2$s</item>
+        <item quantity="other">%1$d Elemente wiederhergestellt in %2$s</item>
+    </plurals>
+    <plurals name="trashedFileRestoreFileToOriginalPlaceSuccess">
+        <item quantity="one">%s am ursprünglichen Ort wiederhergestellt</item>
+        <item quantity="other">%d Elemente am ursprünglichen Ort wiederhergestellt</item>
+    </plurals>
     <string name="updateAvailableDescription">Mit Blick auf ein optimales kDrive-Benutzererlebnis empfehlen wir Ihnen, Ihre Anwendung zu aktualisieren.</string>
     <string name="updateAvailableTitle">Aktualisierung verfügbar!</string>
     <string name="uploadCancelDescription">Der Import wurde vom Benutzer abgebrochen</string>

@@ -680,8 +680,14 @@
     <string name="trashActionRestoreFileOriginalPlace">Recover to the original location</string>
     <string name="trashNoFile">No file deleted</string>
     <string name="trashTitle">Trash</string>
-    <string name="trashedFileRestoreFileInSuccess">%1$s recovered in %2$s</string>
-    <string name="trashedFileRestoreFileToOriginalPlaceSuccess">%s recovered to the original location</string>
+    <plurals name="trashedFileRestoreFileInSuccess">
+        <item quantity="one">%1$s recovered in %2$s</item>
+        <item quantity="other">%1$d items recovered in %2$s</item>
+    </plurals>
+    <plurals name="trashedFileRestoreFileToOriginalPlaceSuccess">
+        <item quantity="one">%s recovered to the original location</item>
+        <item quantity="other">%d items recovered to their original location</item>
+    </plurals>
     <string name="updateAvailableDescription">To get the best out of kDrive, we recommend you update your application.</string>
     <string name="updateAvailableTitle">Update available!</string>
     <string name="uploadCancelDescription">Upload cancelled by the user</string>

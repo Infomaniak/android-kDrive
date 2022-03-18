@@ -40,6 +40,7 @@ enum class BulkOperationType(@StringRes val title: Int, @PluralsRes val successM
     ADD_FAVORITES(0, successMessage = R.plurals.fileListAddFavoritesConfirmationSnackbar),
     REMOVE_FAVORITES(0, successMessage = R.plurals.fileListRemoveFavoritesConfirmationSnackbar),
 
+    RESTORE_TO_ORIGIN(0, successMessage = R.plurals.trashedFileRestoreFileToOriginalPlaceSuccess),
     DELETE_PERMANENTLY(0, successMessage = R.plurals.snackbarDeleteConfirmation);
 
     fun getNotificationBuilder(context: Context): NotificationCompat.Builder {
