@@ -50,7 +50,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         val areIndividualActionsVisible = navigationArgs.fileIds.size in 1..BulkOperationsUtils.MIN_SELECTED
         configureColoredFolder(areIndividualActionsVisible)
         configureAddFavorites(areIndividualActionsVisible)
-        configureAvailableOffline(navigationArgs.isAllSelected)
+        configureAvailableOffline()
         configureDownloadFile()
         configureDuplicateFile()
     }
@@ -71,7 +71,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         }
     }
 
-    private fun configureAvailableOffline(isAllSelected: Boolean) = with(navigationArgs) {
+    private fun configureAvailableOffline() = with(navigationArgs) {
         availableOfflineSwitch.apply {
             isChecked = onlyOffline
             setOnCheckedChangeListener { _, _ -> selectOfflineDialogActionCallBack() }
