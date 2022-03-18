@@ -89,7 +89,7 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
         )
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, isCurrentlyInGallery) {
-            if (multiSelectManager.isMultiSelectOpened) closeMultiSelect() else findNavController().popBackStack()
+            if (multiSelectManager.isMultiSelectOn) closeMultiSelect() else findNavController().popBackStack()
         }
 
         multiSelectManager.apply {

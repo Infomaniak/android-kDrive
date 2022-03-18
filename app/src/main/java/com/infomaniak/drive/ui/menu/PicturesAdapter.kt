@@ -88,7 +88,7 @@ class PicturesAdapter(
 
             isClickable = false
 
-            if (multiSelectManager.isMultiSelectOpened) {
+            if (multiSelectManager.isMultiSelectOn) {
                 isChecked = multiSelectManager.isSelectedFile(file)
                 isVisible = true
             } else {
@@ -100,7 +100,7 @@ class PicturesAdapter(
     private fun LoaderCardView.setupCardClicksListeners(file: File) = with(multiSelectManager) {
 
         setOnClickListener {
-            if (isMultiSelectOpened) {
+            if (isMultiSelectOn) {
                 pictureChecked.onFileSelected(file)
             } else {
                 onFileClicked(file)
@@ -110,7 +110,7 @@ class PicturesAdapter(
         setOnLongClickListener {
             if (isMultiSelectAuthorized) {
                 pictureChecked.onFileSelected(file)
-                if (!isMultiSelectOpened) openMultiSelect?.invoke()
+                if (!isMultiSelectOn) openMultiSelect?.invoke()
                 true
             } else {
                 false

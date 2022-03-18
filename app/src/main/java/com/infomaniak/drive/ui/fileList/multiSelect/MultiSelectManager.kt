@@ -32,12 +32,12 @@ import kotlinx.coroutines.Dispatchers
 class MultiSelectManager {
 
     var isMultiSelectAuthorized = false
-    var isMultiSelectOpened = false
+    var isMultiSelectOn = false
+    var isSelectAllOn = false
 
     var selectedItems: OrderedRealmCollection<File> = RealmList()
     var selectedItemsIds: HashSet<Int> = hashSetOf()
     val exceptedItemsIds = mutableListOf<Int>()
-    var areAllSelected = false
     var currentFolder: File? = null
 
     var openMultiSelect: (() -> Unit)? = null
@@ -72,7 +72,7 @@ class MultiSelectManager {
             if (!it.isFavorite) onlyFavorite = false
             if (!it.isOffline) onlyOffline = false
         }
-        return MenuNavArgs(fileIds.toIntArray(), onlyFolders, onlyFavorite, onlyOffline, areAllSelected)
+        return MenuNavArgs(fileIds.toIntArray(), onlyFolders, onlyFavorite, onlyOffline, isSelectAllOn)
     }
 
     @Suppress("ArrayInDataClass")
