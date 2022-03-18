@@ -675,6 +675,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         when (type) {
             BulkOperationType.TRASH,
             BulkOperationType.MOVE,
+            BulkOperationType.RESTORE_IN,
             BulkOperationType.RESTORE_TO_ORIGIN,
             BulkOperationType.DELETE_PERMANENTLY -> {
                 runBlocking(Dispatchers.Main) { fileAdapter.deleteByFileId(data as Int) }
