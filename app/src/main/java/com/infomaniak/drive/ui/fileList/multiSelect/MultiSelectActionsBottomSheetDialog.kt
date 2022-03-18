@@ -24,13 +24,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.liveData
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.BulkOperationType
+import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_multi_select_actions.*
@@ -39,6 +42,7 @@ import kotlinx.coroutines.Dispatchers
 
 abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: String) : BottomSheetDialogFragment() {
 
+    private val mainViewModel: MainViewModel by activityViewModels()
     val navigationArgs: MultiSelectActionsBottomSheetDialogArgs by navArgs()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -55,31 +59,50 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         configureDuplicateFile()
     }
 
-    abstract fun configureColoredFolder(areIndividualActionsVisible: Boolean)
-
-    private fun configureAddFavorites(areIndividualActionsVisible: Boolean) = with(navigationArgs) {
-        addFavorites.apply {
-            addFavoritesIcon.isEnabled = onlyFavorite
-            val (text, action) = if (onlyFavorite) {
-                R.string.buttonRemoveFavorites to SelectDialogAction.REMOVE_FAVORITES
-            } else {
-                R.string.buttonAddFavorites to SelectDialogAction.ADD_FAVORITES
+    protected open fun configureColoredFolder(areIndividualActionsVisible: Boolean) {
+        if (areIndividualActionsVisible) {
+            disabledColoredFolder.isGone = computeColoredFolderAvailability(navigationArgs.fileIds)
+            coloredFolder.apply {
+                setOnClickListener { onActionSelected(SelectDialogAction.COLOR_FOLDER) }
+                isVisible = true
             }
-            addFavoritesText.setText(text)
-            setOnClickListener { onActionSelected(action) }
-            isVisible = areIndividualActionsVisible
         }
     }
 
-    private fun configureAvailableOffline() = with(navigationArgs) {
-        availableOfflineSwitch.apply {
-            isChecked = onlyOffline
-            setOnCheckedChangeListener { _, _ -> selectOfflineDialogActionCallBack() }
+    private fun computeColoredFolderAvailability(fileIds: IntArray): Boolean {
+        return fileIds.any {
+            val file = FileController.getFileProxyById(fileId = it, customRealm = mainViewModel.realm)
+            file?.isAllowedToBeColored() == true
         }
-        disabledAvailableOffline.isVisible = onlyFolders
-        availableOffline.apply {
-            setOnClickListener { selectOfflineDialogActionCallBack() }
-            isGone = isAllSelected
+    }
+
+    protected open fun configureAddFavorites(areIndividualActionsVisible: Boolean) {
+        with(navigationArgs) {
+            addFavorites.apply {
+                addFavoritesIcon.isEnabled = onlyFavorite
+                val (text, action) = if (onlyFavorite) {
+                    R.string.buttonRemoveFavorites to SelectDialogAction.REMOVE_FAVORITES
+                } else {
+                    R.string.buttonAddFavorites to SelectDialogAction.ADD_FAVORITES
+                }
+                addFavoritesText.setText(text)
+                setOnClickListener { onActionSelected(action) }
+                isVisible = areIndividualActionsVisible
+            }
+        }
+    }
+
+    protected open fun configureAvailableOffline() {
+        with(navigationArgs) {
+            availableOfflineSwitch.apply {
+                isChecked = onlyOffline
+                setOnCheckedChangeListener { _, _ -> selectOfflineDialogActionCallBack() }
+            }
+            disabledAvailableOffline.isVisible = onlyFolders
+            availableOffline.apply {
+                setOnClickListener { selectOfflineDialogActionCallBack() }
+                isGone = isAllSelected
+            }
         }
     }
 
@@ -88,7 +111,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         onActionSelected(action)
     }
 
-    private fun configureDownloadFile() {
+    protected open fun configureDownloadFile() {
         val drivePermissions = DrivePermissions().apply {
             registerPermissions(this@MultiSelectActionsBottomSheetDialog) { authorized ->
                 if (authorized) downloadFileArchive()
@@ -107,7 +130,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         }
     }
 
-    private fun configureDuplicateFile() {
+    protected open fun configureDuplicateFile() {
         duplicateFile.setOnClickListener { onActionSelected(SelectDialogAction.DUPLICATE) }
     }
 
@@ -132,12 +155,12 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
 
     fun onActionSelected(type: SelectDialogAction? = null) {
         val finalType = when (type) {
+            SelectDialogAction.COLOR_FOLDER -> BulkOperationType.COLOR_FOLDER
             SelectDialogAction.ADD_FAVORITES -> BulkOperationType.ADD_FAVORITES
             SelectDialogAction.REMOVE_FAVORITES -> BulkOperationType.REMOVE_FAVORITES
             SelectDialogAction.ADD_OFFLINE -> BulkOperationType.ADD_OFFLINE
             SelectDialogAction.REMOVE_OFFLINE -> BulkOperationType.REMOVE_OFFLINE
             SelectDialogAction.DUPLICATE -> BulkOperationType.COPY
-            SelectDialogAction.COLOR_FOLDER -> BulkOperationType.COLOR_FOLDER
             else -> null
         }
 
@@ -146,8 +169,8 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
                 closeMultiSelect()
             } else {
                 when (finalType) {
-                    BulkOperationType.COPY -> duplicateFiles()
                     BulkOperationType.COLOR_FOLDER -> colorFolders()
+                    BulkOperationType.COPY -> duplicateFiles()
                     else -> performBulkOperation(finalType)
                 }
             }
@@ -156,7 +179,10 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
     }
 
     enum class SelectDialogAction {
-        ADD_FAVORITES, REMOVE_FAVORITES, ADD_OFFLINE, REMOVE_OFFLINE, DUPLICATE, COLOR_FOLDER
+        ADD_FAVORITES, REMOVE_FAVORITES,
+        ADD_OFFLINE, REMOVE_OFFLINE,
+        DUPLICATE,
+        COLOR_FOLDER,
     }
 
     private companion object {

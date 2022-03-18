@@ -100,6 +100,7 @@ object Utils {
         fileName: String? = null,
         fileCount: Int = 1,
         fromTrash: Boolean = false,
+        autoDismiss: Boolean = false,
         onConfirmation: (dialog: Dialog) -> Unit
     ) {
         val title: Int = if (fromTrash) R.string.modalDeleteTitle else R.string.modalMoveTrashTitle
@@ -115,7 +116,7 @@ object Utils {
             context = context,
             title = context.getString(title),
             message = message,
-            autoDismiss = false,
+            autoDismiss = autoDismiss,
             isDeletion = true,
             buttonText = context.getString(button),
             onConfirmation = onConfirmation

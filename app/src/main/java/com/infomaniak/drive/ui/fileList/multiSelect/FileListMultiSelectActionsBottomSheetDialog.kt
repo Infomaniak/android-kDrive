@@ -17,32 +17,6 @@
  */
 package com.infomaniak.drive.ui.fileList.multiSelect
 
-import androidx.core.view.isGone
-import androidx.core.view.isVisible
-import androidx.fragment.app.activityViewModels
-import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListFragment
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_multi_select_actions.*
 
-class FileListMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(FileListFragment.MATOMO_CATEGORY) {
-
-    private val mainViewModel: MainViewModel by activityViewModels()
-
-    override fun configureColoredFolder(areIndividualActionsVisible: Boolean) {
-        if (areIndividualActionsVisible) {
-            disabledColoredFolder.isGone = computeColoredFolderAvailability(navigationArgs.fileIds)
-            coloredFolder.apply {
-                setOnClickListener { onActionSelected(SelectDialogAction.COLOR_FOLDER) }
-                isVisible = true
-            }
-        }
-    }
-
-    private fun computeColoredFolderAvailability(fileIds: IntArray): Boolean {
-        return fileIds.any {
-            val file = FileController.getFileProxyById(fileId = it, customRealm = mainViewModel.realm)
-            file?.isAllowedToBeColored() == true
-        }
-    }
-}
+class FileListMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(FileListFragment.MATOMO_CATEGORY)
