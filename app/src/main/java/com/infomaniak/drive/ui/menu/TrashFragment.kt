@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.navigation.navGraphViewModels
 import com.google.android.material.button.MaterialButton
@@ -27,6 +28,8 @@ import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.SortTypeUsage
+import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialogArgs
+import com.infomaniak.drive.ui.fileList.multiSelect.TrashMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackTrashEvent
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -36,6 +39,7 @@ class TrashFragment : FileSubTypeListFragment() {
 
     val trashViewModel: TrashViewModel by navGraphViewModels(R.id.trashFragment)
 
+    override var enabledMultiSelectMode: Boolean = true
     override var sortTypeUsage = SortTypeUsage.TRASH
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -71,6 +75,13 @@ class TrashFragment : FileSubTypeListFragment() {
         trashViewModel.removeFileId.observe(viewLifecycleOwner) { fileToRemove ->
             removeFileFromAdapter(fileToRemove)
         }
+
+        multiSelectLayout?.apply {
+            emptyTrashButton.isVisible = true
+            selectAllButton.isInvisible = true
+            moveButtonMultiSelect.isInvisible = true
+            deleteButtonMultiSelect.isInvisible = true
+        }
     }
 
     private fun MaterialButton.setupEmptyTrashButton() {
@@ -97,6 +108,19 @@ class TrashFragment : FileSubTypeListFragment() {
         }
     }
 
+    override fun onMenuButtonClicked() {
+        val (fileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
+        TrashMultiSelectActionsBottomSheetDialog().apply {
+            arguments = MultiSelectActionsBottomSheetDialogArgs(
+                fileIds = fileIds,
+                onlyFolders = onlyFolders,
+                onlyFavorite = onlyFavorite,
+                onlyOffline = onlyOffline,
+                isAllSelected = isAllSelected
+            ).toBundle()
+        }.show(childFragmentManager, "ActionTrashMultiSelectBottomSheetDialog")
+    }
+
     private fun showTrashedFileActions(file: File) {
         trashViewModel.selectedFile.value = file
         safeNavigate(R.id.trashedFileActionsBottomSheetDialog)
@@ -105,6 +129,10 @@ class TrashFragment : FileSubTypeListFragment() {
     private fun removeFileFromAdapter(fileId: Int) {
         fileAdapter.deleteByFileId(fileId)
         noFilesLayout.toggleVisibility(fileAdapter.getFiles().isEmpty())
+    }
+
+    companion object {
+        const val MATOMO_CATEGORY = "trashFileAction"
     }
 
     private inner class SortFiles : () -> Unit {
