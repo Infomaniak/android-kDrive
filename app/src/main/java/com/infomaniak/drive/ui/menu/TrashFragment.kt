@@ -56,6 +56,7 @@ class TrashFragment : FileSubTypeListFragment() {
         toolbar.setContentInsetsRelative(0, 0)
 
         emptyTrash.setupEmptyTrashButton()
+        multiSelectLayout?.emptyTrashButton?.setupEmptyTrashButton()
 
         if (folderId == ROOT_ID) collapsingToolbarLayout.title = getString(R.string.trashTitle)
 
@@ -95,6 +96,7 @@ class TrashFragment : FileSubTypeListFragment() {
                 autoDismiss = false,
             ) { dialog ->
                 trackTrashEvent("emptyTrash")
+                closeMultiSelect()
                 trashViewModel.emptyTrash(AccountUtils.currentDriveId).observe(viewLifecycleOwner) { apiResponse ->
                     dialog.dismiss()
                     if (apiResponse.data == true) {
