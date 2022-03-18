@@ -51,6 +51,7 @@ class SelectFolderActivity : BaseActivity() {
         const val CUSTOM_ARGS_TAG = "customArgs"
 
         const val BULK_OPERATION_CUSTOM_TAG = "bulk_operation_type"
+        const val ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG = "are_all_from_the_same_folder"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) = with(intent) {

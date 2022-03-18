@@ -45,6 +45,7 @@ import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListFragmentDirections
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
+import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.BULK_OPERATION_CUSTOM_TAG
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.CUSTOM_ARGS_TAG
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.FOLDER_ID_TAG
@@ -78,9 +79,11 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                 val folderName = getString(FOLDER_NAME_TAG).toString()
                 val customArgs = getBundle(CUSTOM_ARGS_TAG)
                 val bulkOperationType = customArgs?.getParcelable<BulkOperationType>(BULK_OPERATION_CUSTOM_TAG)!!
+                val areAllFromTheSameFolder = customArgs.getBoolean(ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG, true)
 
                 performBulkOperation(
                     type = bulkOperationType,
+                    areAllFromTheSameFolder = areAllFromTheSameFolder,
                     allSelectedFilesCount = getAllSelectedFilesCount(),
                     destinationFolder = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId),
                 )
@@ -165,6 +168,20 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             putExtra(USER_ID_TAG, AccountUtils.currentUserId)
             putExtra(USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
             putExtra(CUSTOM_ARGS_TAG, bundleOf(BULK_OPERATION_CUSTOM_TAG to BulkOperationType.COPY))
+        }
+        selectFolderResultLauncher.launch(intent)
+    }
+
+    fun restoreIn() {
+        val intent = Intent(requireContext(), SelectFolderActivity::class.java).apply {
+            putExtra(USER_ID_TAG, AccountUtils.currentUserId)
+            putExtra(USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
+            putExtra(
+                CUSTOM_ARGS_TAG, bundleOf(
+                    BULK_OPERATION_CUSTOM_TAG to BulkOperationType.RESTORE_IN,
+                    ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG to false,
+                )
+            )
         }
         selectFolderResultLauncher.launch(intent)
     }
@@ -339,6 +356,16 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                     deleteFileFromFavorites(
                         file = file,
                         onSuccess = { onIndividualActionSuccess(BulkOperationType.REMOVE_FAVORITES, file.id) },
+                    ),
+                    updateMultiSelectMediator(mediator),
+                )
+            }
+            BulkOperationType.RESTORE_IN -> {
+                mediator.addSource(
+                    restoreTrashFile(
+                        file = file,
+                        newFolderId = destinationFolder!!.id,
+                        onSuccess = { onIndividualActionSuccess(BulkOperationType.RESTORE_IN, file.id) },
                     ),
                     updateMultiSelectMediator(mediator),
                 )
