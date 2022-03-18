@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.navigation.navGraphViewModels
+import com.google.android.material.button.MaterialButton
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.models.File
@@ -47,28 +48,10 @@ class TrashFragment : FileSubTypeListFragment() {
         setNoFilesLayout = SetNoFilesLayout()
 
         super.onViewCreated(view, savedInstanceState)
+
         toolbar.setContentInsetsRelative(0, 0)
-        emptyTrash.apply {
-            isVisible = true
-            setOnClickListener {
-                Utils.createConfirmation(
-                    context = requireContext(),
-                    title = getString(R.string.buttonEmptyTrash),
-                    message = getString(R.string.modalEmptyTrashDescription),
-                    isDeletion = true,
-                    autoDismiss = false
-                ) { dialog ->
-                    trackTrashEvent("emptyTrash")
-                    trashViewModel.emptyTrash(AccountUtils.currentDriveId).observe(viewLifecycleOwner) { apiResponse ->
-                        dialog.dismiss()
-                        if (apiResponse.data == true) {
-                            Utils.showSnackbar(requireView(), R.string.snackbarEmptyTrashConfirmation)
-                            onRefresh()
-                        } else requireActivity().showSnackbar(apiResponse.translateError())
-                    }
-                }
-            }
-        }
+
+        emptyTrash.apply { setupEmptyTrashButton() }
 
         if (folderId == ROOT_ID) collapsingToolbarLayout.title = getString(R.string.trashTitle)
 
@@ -76,19 +59,41 @@ class TrashFragment : FileSubTypeListFragment() {
             showShareFileButton = false
             onFileClicked = { file ->
                 trashViewModel.cancelTrashFileJob()
-                if (file.isFolder()) safeNavigate(
-                    TrashFragmentDirections.actionTrashFragmentSelf(
-                        file.id,
-                        file.name
-                    )
-                )
-                else showTrashedFileActions(file)
+                if (file.isFolder()) {
+                    safeNavigate(TrashFragmentDirections.actionTrashFragmentSelf(file.id, file.name))
+                } else {
+                    showTrashedFileActions(file)
+                }
             }
             onMenuClicked = { file -> showTrashedFileActions(file) }
         }
 
         trashViewModel.removeFileId.observe(viewLifecycleOwner) { fileToRemove ->
             removeFileFromAdapter(fileToRemove)
+        }
+    }
+
+    private fun MaterialButton.setupEmptyTrashButton() {
+        isVisible = true
+        setOnClickListener {
+            Utils.createConfirmation(
+                context = requireContext(),
+                title = getString(R.string.buttonEmptyTrash),
+                message = getString(R.string.modalEmptyTrashDescription),
+                isDeletion = true,
+                autoDismiss = false,
+            ) { dialog ->
+                trackTrashEvent("emptyTrash")
+                trashViewModel.emptyTrash(AccountUtils.currentDriveId).observe(viewLifecycleOwner) { apiResponse ->
+                    dialog.dismiss()
+                    if (apiResponse.data == true) {
+                        Utils.showSnackbar(requireView(), R.string.snackbarEmptyTrashConfirmation)
+                        onRefresh()
+                    } else {
+                        requireActivity().showSnackbar(apiResponse.translateError())
+                    }
+                }
+            }
         }
     }
 
@@ -121,12 +126,13 @@ class TrashFragment : FileSubTypeListFragment() {
             noFilesLayout.setup(
                 icon = R.drawable.ic_delete,
                 title = R.string.trashNoFile,
-                initialListView = fileRecyclerView
+                initialListView = fileRecyclerView,
             )
         }
     }
 
     private inner class DownloadFiles() : (Boolean, Boolean) -> Unit {
+
         private var folder: File? = null
 
         constructor(folder: File?) : this() {
@@ -145,7 +151,7 @@ class TrashFragment : FileSubTypeListFragment() {
                             files = result.files,
                             isComplete = isComplete,
                             forceClean = result.page == 1,
-                            isNewSort = isNewSort
+                            isNewSort = isNewSort,
                         )
                     }
                 }
@@ -156,11 +162,10 @@ class TrashFragment : FileSubTypeListFragment() {
                             files = result?.files ?: ArrayList(),
                             isComplete = result?.isComplete ?: true,
                             forceClean = result?.page == 1,
-                            isNewSort = isNewSort
+                            isNewSort = isNewSort,
                         )
                     }
             }
         }
     }
 }
-

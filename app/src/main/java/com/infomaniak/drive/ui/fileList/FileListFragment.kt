@@ -640,7 +640,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         }
     }
 
-    private fun onMenuButtonClicked() {
+    protected open fun onMenuButtonClicked() {
         val (fileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
         FileListMultiSelectActionsBottomSheetDialog().apply {
             arguments = MultiSelectActionsBottomSheetDialogArgs(

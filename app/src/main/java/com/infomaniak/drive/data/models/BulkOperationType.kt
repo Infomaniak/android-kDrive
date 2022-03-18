@@ -42,8 +42,8 @@ enum class BulkOperationType(@StringRes val title: Int, @PluralsRes val successM
 
     fun getNotificationBuilder(context: Context): NotificationCompat.Builder {
         return when (this) {
-            MOVE -> context.moveOperationProgressNotification()
             TRASH -> context.trashOperationProgressNotification()
+            MOVE -> context.moveOperationProgressNotification()
             else -> context.copyOperationProgressNotification()
         }
     }
