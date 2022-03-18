@@ -378,7 +378,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             }
             BulkOperationType.DELETE_PERMANENTLY -> {
                 mediator.addSource(
-                    deleteFilePermanently(
+                    deleteTrashFile(
                         file = file,
                         onSuccess = { onIndividualActionSuccess(BulkOperationType.DELETE_PERMANENTLY, file.id) },
                     ),
