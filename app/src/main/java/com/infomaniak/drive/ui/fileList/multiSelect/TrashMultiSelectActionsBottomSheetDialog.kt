@@ -44,6 +44,13 @@ class TrashMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDi
         duplicateFile.isGone = true
     }
 
+    override fun configureRestoreFileToOriginalPlace() {
+        restoreFileToOriginalPlace.apply {
+            isVisible = true
+            setOnClickListener { onActionSelected(SelectDialogAction.RESTORE_TO_ORIGIN) }
+        }
+    }
+
     override fun configureDeletePermanently() {
         deletePermanently.apply {
             isVisible = true

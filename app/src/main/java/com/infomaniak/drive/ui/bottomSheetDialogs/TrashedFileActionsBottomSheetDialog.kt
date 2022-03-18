@@ -103,14 +103,14 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun restoreResult(apiResponse: ApiResponse<Any>, originalPlace: Boolean, folderName: String? = null) {
         if (apiResponse.isSuccess()) {
-            val title = if (originalPlace) R.string.trashedFileRestoreFileToOriginalPlaceSuccess
-            else R.string.trashedFileRestoreFileInSuccess
+            val title = if (originalPlace) R.plurals.trashedFileRestoreFileToOriginalPlaceSuccess
+            else R.plurals.trashedFileRestoreFileInSuccess
 
             val args = arrayListOf(currentTrashedFile.name).apply {
                 if (!originalPlace && folderName != null) add(folderName)
             }
 
-            requireActivity().showSnackbar(getString(title, *args.toTypedArray()))
+            requireActivity().showSnackbar(resources.getQuantityString(title, 1, *args.toTypedArray()))
             dismissAndRemoveFileFromList()
         } else {
             val title = if (apiResponse.formatError() == ErrorCode.AN_ERROR_HAS_OCCURRED) R.string.errorRestore

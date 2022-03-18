@@ -655,8 +655,14 @@
     <string name="trashActionRestoreFileOriginalPlace">Ripristina nell’ubicazione di origine</string>
     <string name="trashNoFile">Nessun file eliminato</string>
     <string name="trashTitle">Cestino</string>
-    <string name="trashedFileRestoreFileInSuccess">%1$s ripristinato in %2$s</string>
-    <string name="trashedFileRestoreFileToOriginalPlaceSuccess">%s ripristinato nell’ubicazione di origine</string>
+    <plurals name="trashedFileRestoreFileInSuccess">
+        <item quantity="one">%1$s ripristinato in %2$s</item>
+        <item quantity="other">%1$s elementi ripristinati in %2$s</item>
+    </plurals>
+    <plurals name="trashedFileRestoreFileToOriginalPlaceSuccess">
+        <item quantity="one">%s ripristinato nell’ubicazione di origine</item>
+        <item quantity="other">%d elementi ipristinati nell’ubicazione di origine</item>
+    </plurals>
     <string name="updateAvailableDescription">Per vivere la migliore esperienza con kDrive, ti consigliamo di aggiornare la tua applicazione.</string>
     <string name="updateAvailableTitle">Aggiornamento disponibile!</string>
     <string name="uploadCancelDescription">L’importazione è stata annullata dall’utente</string>
