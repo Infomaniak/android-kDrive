@@ -304,16 +304,16 @@ object FileController {
         realm?.let(block) ?: getRealmInstance().use(block)
     }
 
-    fun getDriveFileName(userDrive: UserDrive): String {
+    private fun getDriveFileName(userDrive: UserDrive): String {
         val realmDb = if (userDrive.sharedWithMe) REALM_DB_SHARES_WITH_ME else REALM_DB_FILE
         return realmDb.format(userDrive.userId, userDrive.driveId)
     }
 
-    fun getRealmInstance(userDrive: UserDrive? = null): Realm {
-        return Realm.getInstance(getRealmConfiguration(getDriveFileName(userDrive ?: UserDrive())))
-    }
+    fun getRealmConfiguration(userDrive: UserDrive?) = getRealmConfiguration(getDriveFileName(userDrive ?: UserDrive()))
 
-    fun getRealmConfiguration(dbName: String): RealmConfiguration {
+    fun getRealmInstance(userDrive: UserDrive? = null) = Realm.getInstance(getRealmConfiguration(userDrive))
+
+    private fun getRealmConfiguration(dbName: String): RealmConfiguration {
         return RealmConfiguration.Builder()
             .schemaVersion(FileMigration.bddVersion) // Must be bumped when the schema changes
             .migration(FileMigration())

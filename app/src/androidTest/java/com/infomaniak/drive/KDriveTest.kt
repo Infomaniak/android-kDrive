@@ -80,7 +80,7 @@ open class KDriveTest {
 
             userDrive = UserDrive(user.id, Env.DRIVE_ID)
             okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(user.id) }
-            
+
             setUpRealm()
             grantPermissions(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
@@ -90,27 +90,23 @@ open class KDriveTest {
         fun afterAll() {
             ApiRepository.emptyTrash(userDrive.driveId)
             if (!uiRealm.isClosed) uiRealm.close()
-            Realm.deleteRealm(getConfig(userDrive))
+            Realm.deleteRealm(FileController.getRealmConfiguration(userDrive))
             if (!Env.USE_CURRENT_USER) {
                 runBlocking { AccountUtils.removeUser(context, user) }
             }
         }
 
-        internal fun getConfig() = RealmConfiguration.Builder().inMemory()
+        internal fun getRealmConfigurationTest() = RealmConfiguration.Builder().inMemory()
             .name("KDrive-test.realm")
             .deleteRealmIfMigrationNeeded()
             .modules(RealmModules.LocalFilesModule())
             .build()
 
-        private fun getConfig(userDrive: UserDrive): RealmConfiguration {
-            return FileController.getRealmConfiguration(FileController.getDriveFileName(userDrive))
-        }
-
         private fun setUpRealm() {
             try {
                 uiRealm = FileController.getRealmInstance(userDrive)
             } catch (realmFileException: RealmFileException) {
-                java.io.File(getConfig(userDrive).path).apply {
+                java.io.File(FileController.getRealmConfiguration(userDrive).path).apply {
                     if (exists()) {
                         delete()
                         uiRealm = FileController.getRealmInstance(userDrive)
