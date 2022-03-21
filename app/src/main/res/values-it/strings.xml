@@ -58,6 +58,7 @@
     <string name="allMinutesShort">%d min</string>
     <string name="allNoNetwork">Nessuna connessione di rete</string>
     <string name="allOfficeDocs">Documento</string>
+    <string name="allOfficeForm">Modulo</string>
     <string name="allOfficeGrids">Tabella</string>
     <string name="allOfficeNote">Testi</string>
     <string name="allOfficePoints">Presentazione</string>
@@ -264,9 +265,13 @@
     <string name="errorShareLink">Errore durante la creazione del link</string>
     <string name="favoritesNoFile">Al momento non sono disponibili preferiti</string>
     <string name="favoritesTitle">Preferiti</string>
+    <string name="fileActivityCollaborativeFolderAccess">ha consultato il deposito file</string>
     <string name="fileActivityCollaborativeFolderCreate">ha creato un deposito file</string>
     <string name="fileActivityCollaborativeFolderDelete">ha cancellato un deposito file</string>
     <string name="fileActivityCollaborativeFolderUpdate">ha aggiornato un deposito file</string>
+    <string name="fileActivityCollaborativeUserAccess">ha lasciato dei documenti nel deposito file</string>
+    <string name="fileActivityCollaborativeUserCreate">ha creato una cartella nel deposito file per potervi lasciare documenti</string>
+    <string name="fileActivityCollaborativeUserDelete">ha eliminato una cartella dal deposito file nella quale un utente ha lasciato dei documenti</string>
     <plurals name="fileActivityCommentCreate">
         <item quantity="one">ha commentato il seguente file</item>
         <item quantity="other">ha commentato %d file</item>
