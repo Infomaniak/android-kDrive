@@ -103,7 +103,7 @@ open class KDriveTest {
             .build()
 
         private fun getConfig(userDrive: UserDrive): RealmConfiguration {
-            return FileController.getRealmConfiguration(FileController.getDriveFileName(Companion.userDrive))
+            return FileController.getRealmConfiguration(FileController.getDriveFileName(userDrive))
         }
 
         private fun setUpRealm() {
@@ -115,6 +115,8 @@ open class KDriveTest {
                         delete()
                         uiRealm = FileController.getRealmInstance(userDrive)
                     } else {
+                        realmFileException.printStackTrace()
+                        assert(false) { "realmFileException thrown" }
                         throw realmFileException
                     }
                 }
