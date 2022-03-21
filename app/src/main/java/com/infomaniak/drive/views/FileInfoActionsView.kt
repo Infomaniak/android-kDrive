@@ -138,8 +138,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                 leaveShare.isVisible = rights?.leave == true
                 moveFile.isVisible = rights?.move == true && !isSharedWithMe
                 renameFile.isVisible = rights?.rename == true && !isSharedWithMe
-                goToFolder.isVisible =
-                    ownerFragment.findNavController().previousBackStackEntry?.destination?.id != R.id.fileListFragment
+                goToFolder.isVisible = isGoToFolderVisible()
             }
 
             if (currentFile.isDropBox() || currentFile.rights?.canBecomeCollab == true) {
@@ -160,6 +159,11 @@ class FileInfoActionsView @JvmOverloads constructor(
                 coloredFolder.isVisible = currentFile.isAllowedToBeColored()
             }
         }
+    }
+
+    private fun isGoToFolderVisible(): Boolean {
+        val previousId = ownerFragment.findNavController().previousBackStackEntry?.destination?.id
+        return previousId != R.id.fileListFragment && FileController.getParentFile(currentFile.id) != null
     }
 
     fun scrollToTop() {
