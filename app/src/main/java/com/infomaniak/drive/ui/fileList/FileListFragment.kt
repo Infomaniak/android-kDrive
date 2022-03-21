@@ -154,10 +154,6 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         mainViewModel.navigateFileListToFolderId.observe(viewLifecycleOwner) {
             it?.let { intentFolderId ->
                 FileController.getFileById(intentFolderId)?.let { file ->
-//                    safeNavigate(
-//                        FileListFragmentDirections
-//                            .fileListFragmentToFileListFragment(file.id, file.name)
-//                    )
                     findNavController().navigate(
                         FileListFragmentDirections
                             .fileListFragmentToFileListFragment(file.id, file.name)
