@@ -76,7 +76,13 @@ class MultiSelectManager {
     }
 
     @Suppress("ArrayInDataClass")
-    data class MenuNavArgs(val fileIds: IntArray, val onlyFolders: Boolean, val onlyFavorite: Boolean, val onlyOffline: Boolean, val isAllSelected: Boolean)
+    data class MenuNavArgs(
+        val fileIds: IntArray,
+        val onlyFolders: Boolean,
+        val onlyFavorite: Boolean,
+        val onlyOffline: Boolean,
+        val isAllSelected: Boolean
+    )
 
     interface MultiSelectResult {
         fun onIndividualActionSuccess(type: BulkOperationType, data: Any)

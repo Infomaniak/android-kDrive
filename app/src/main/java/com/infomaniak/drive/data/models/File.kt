@@ -473,7 +473,7 @@ open class File(
                 in Regex("document|text/plain|msword") -> ConvertedType.TEXT
                 in Regex("video/") -> ConvertedType.VIDEO
                 in Regex("text/|application/") -> ConvertedType.CODE
-                else -> if(getFileExtension() == ".docxf") ConvertedType.FORM else ConvertedType.UNKNOWN
+                else -> if (getFileExtension() == ".docxf") ConvertedType.FORM else ConvertedType.UNKNOWN
             }
         }
     }
