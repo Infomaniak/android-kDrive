@@ -52,6 +52,7 @@
     <string name="allFileMoveCancelled">Verschieben abgebrochen</string>
     <string name="allFileRename">%s erfolgreich umbenannt</string>
     <string name="allFolder">Ordner</string>
+    <string name="allFont">Schriftart</string>
     <string name="allJustNow">Jetzt</string>
     <string name="allLast7Days">Letzte 7 Tage</string>
     <string name="allLastModifiedFilePattern">\'Geändert am \'dd MMM yyyy \'-\' HH:mm</string>
@@ -567,7 +568,7 @@
     <string name="shareLinkRestrictedRightDocumentDescriptionShort">Nur hinzugefügte Benutzer können auf die Dokument zugreifen.</string>
     <string name="shareLinkRestrictedRightFileDescriptionShort">Nur hinzugefügte Benutzer können auf die Datei zugreifen.</string>
     <string name="shareLinkRestrictedRightFolderDescriptionShort">Nur hinzugefügte Benutzer können auf den Ordner.</string>
-    <string name="shareLinkRestrictedRightTitle">Eingeschränkt</string>
+    <string name="shareLinkRestrictedRightTitle">Auswählen</string>
     <string name="shareLinkSettingsAddExpirationDateDescription">Der Freigabelink kann nicht mehr verwendet werden, wenn das Datum verstrichen ist.</string>
     <string name="shareLinkSettingsAllowDownloadDescription">Benutzer können die Dateien über diesen Link herunter- bzw. heraufladen.</string>
     <string name="shareLinkSettingsAllowDownloadTitle">Download über den Freigabelink</string>
