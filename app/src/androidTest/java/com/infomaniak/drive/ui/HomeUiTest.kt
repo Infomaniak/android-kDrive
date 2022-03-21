@@ -22,6 +22,7 @@ import androidx.test.uiautomator.UiObjectNotFoundException
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.utils.AccountUtils
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.Test
  * UI Tests relative to a home (drive switch, drive activities, file search)
  */
 @LargeTest
+@Disabled
 class HomeUiTest : KDriveUiTest() {
 
     @Test

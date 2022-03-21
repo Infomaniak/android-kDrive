@@ -27,10 +27,12 @@ import com.infomaniak.drive.utils.AccountUtils.removeUser
 import com.infomaniak.drive.utils.Env
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 @LargeTest
+@Disabled
 class MenuUiTest : KDriveUiTest() {
 
     @BeforeEach
