@@ -24,7 +24,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
-import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -89,7 +88,7 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
         )
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, isCurrentlyInGallery) {
-            if (multiSelectManager.isMultiSelectOpened) closeMultiSelect() else findNavController().popBackStack()
+            if (multiSelectManager.isMultiSelectOn) closeMultiSelect() else findNavController().popBackStack()
         }
 
         multiSelectManager.apply {
