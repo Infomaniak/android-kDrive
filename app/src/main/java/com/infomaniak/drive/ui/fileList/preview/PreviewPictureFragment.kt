@@ -81,10 +81,10 @@ class PreviewPictureFragment : PreviewFragment() {
 
     private fun buildPreviewRequest(): ImageRequest {
         val timer = createRefreshTimer(milliseconds = 400) { noThumbnailLayout?.isVisible = true }.start()
-//        val offlineFile = if (file.isOffline) getOfflineFile() else null // TODO issue https://github.com/coil-kt/coil/issues/1201
+        val offlineFile = if (file.isOffline) getOfflineFile() else null
 
         return ImageRequest.Builder(requireContext())
-            .data(file.imagePreview()) // load only remote file because load a large image from local issue https://github.com/coil-kt/coil/issues/1201
+            .data(offlineFile ?: file.imagePreview())
             .listener(
                 onError = { _, _ ->
                     fileName?.text = file.name
@@ -100,9 +100,6 @@ class PreviewPictureFragment : PreviewFragment() {
             .build()
     }
 
-    /**
-     * TODO waiting for issue https://github.com/coil-kt/coil/issues/1201
-     */
     private fun getOfflineFile(): File? {
         return file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive.userId)?.let {
             if (file.isOfflineAndIntact(it)) it else null
