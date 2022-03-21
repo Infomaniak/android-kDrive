@@ -169,6 +169,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             File.Office.POINTS -> "createPresentation"
             File.Office.GRIDS -> "createTable"
             File.Office.TXT -> "createNote"
+            File.Office.FORM -> "createForm"
         }
     }
 
