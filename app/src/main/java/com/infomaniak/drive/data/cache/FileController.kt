@@ -309,9 +309,9 @@ object FileController {
         return realmDb.format(userDrive.userId, userDrive.driveId)
     }
 
-    fun getRealmInstance(userDrive: UserDrive? = null): Realm {
-        return Realm.getInstance(getRealmConfiguration(getDriveFileName(userDrive ?: UserDrive())))
-    }
+    fun getRealmConfiguration(userDrive: UserDrive?) = getRealmConfiguration(getDriveFileName(userDrive ?: UserDrive()))
+
+    fun getRealmInstance(userDrive: UserDrive? = null) = Realm.getInstance(getRealmConfiguration(userDrive))
 
     private fun getRealmConfiguration(dbName: String): RealmConfiguration {
         return RealmConfiguration.Builder()

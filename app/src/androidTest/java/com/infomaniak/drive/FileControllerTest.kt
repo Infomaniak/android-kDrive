@@ -42,7 +42,7 @@ class FileControllerTest : KDriveTest() {
     @BeforeEach
     @Throws(Exception::class)
     fun setUp() {
-        realm = Realm.getInstance(getConfig())
+        realm = Realm.getInstance(getRealmConfigurationTest())
         if (AccountUtils.currentUser == null) AccountUtils.currentUser = user
     }
 
@@ -50,7 +50,7 @@ class FileControllerTest : KDriveTest() {
     @Throws(Exception::class)
     fun tearDown() {
         if (!realm.isClosed) realm.close()
-        Realm.deleteRealm(getConfig())
+        Realm.deleteRealm(getRealmConfigurationTest())
     }
 
     @Test
