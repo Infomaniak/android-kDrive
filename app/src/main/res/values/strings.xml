@@ -70,6 +70,7 @@
     <string name="allMinutesShort">%d min</string>
     <string name="allNoNetwork">No network connection</string>
     <string name="allOfficeDocs">Document</string>
+    <string name="allOfficeForm">Form</string>
     <string name="allOfficeGrids">Table</string>
     <string name="allOfficeNote">Text</string>
     <string name="allOfficePoints">Presentation</string>
@@ -276,9 +277,13 @@
     <string name="errorShareLink">Error when creating link</string>
     <string name="favoritesNoFile">No favorites at this time</string>
     <string name="favoritesTitle">Favorites</string>
+    <string name="fileActivityCollaborativeFolderAccess">has accessed the drop box</string>
     <string name="fileActivityCollaborativeFolderCreate">created a drop box</string>
     <string name="fileActivityCollaborativeFolderDelete">deleted a drop box</string>
     <string name="fileActivityCollaborativeFolderUpdate">updated a drop box</string>
+    <string name="fileActivityCollaborativeUserAccess">has sent files in drop box</string>
+    <string name="fileActivityCollaborativeUserCreate">has created a folder inside the drop box to send files</string>
+    <string name="fileActivityCollaborativeUserDelete">has deleted a drop box folder</string>
     <plurals name="fileActivityCommentCreate">
         <item quantity="one">commented the following file</item>
         <item quantity="other">commented %d files</item>

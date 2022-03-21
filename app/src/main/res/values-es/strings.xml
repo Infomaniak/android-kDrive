@@ -58,6 +58,7 @@
     <string name="allMinutesShort">%d min</string>
     <string name="allNoNetwork">Sin contenido de red</string>
     <string name="allOfficeDocs">Documento</string>
+    <string name="allOfficeForm">Formulario</string>
     <string name="allOfficeGrids">Cuadro</string>
     <string name="allOfficeNote">Texto</string>
     <string name="allOfficePoints">Presentación</string>
@@ -264,9 +265,13 @@
     <string name="errorShareLink">Error al crear el enlace</string>
     <string name="favoritesNoFile">Todavía no hay favoritos</string>
     <string name="favoritesTitle">Favoritos</string>
+    <string name="fileActivityCollaborativeFolderAccess">ha consultado el buzón de depósito</string>
     <string name="fileActivityCollaborativeFolderCreate">ha creado un buzón de depósito</string>
     <string name="fileActivityCollaborativeFolderDelete">ha borrado un buzón de depósito</string>
     <string name="fileActivityCollaborativeFolderUpdate">ha actualizado un buzón de depósito</string>
+    <string name="fileActivityCollaborativeUserAccess">ha depositado archivos en el buzón de depósito</string>
+    <string name="fileActivityCollaborativeUserCreate">ha creado una carpeta en el cuadro desplegable para poder depositar archivos</string>
+    <string name="fileActivityCollaborativeUserDelete">ha eliminado una carpeta del buzón de depósito para en la que un usuario ha depositado archivos</string>
     <plurals name="fileActivityCommentCreate">
         <item quantity="one">ha comentado el archivo siguiente</item>
         <item quantity="other">ha comentado %d archivos</item>

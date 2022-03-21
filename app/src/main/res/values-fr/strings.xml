@@ -58,6 +58,7 @@
     <string name="allMinutesShort">%d min</string>
     <string name="allNoNetwork">Pas de connexion réseau</string>
     <string name="allOfficeDocs">Document</string>
+    <string name="allOfficeForm">Formulaire</string>
     <string name="allOfficeGrids">Tableau</string>
     <string name="allOfficeNote">Texte</string>
     <string name="allOfficePoints">Présentation</string>
@@ -264,9 +265,13 @@
     <string name="errorShareLink">Erreur lors de la création du lien</string>
     <string name="favoritesNoFile">Aucun favori pour le moment</string>
     <string name="favoritesTitle">Favoris</string>
+    <string name="fileActivityCollaborativeFolderAccess">a consulté la boîte de dépôt</string>
     <string name="fileActivityCollaborativeFolderCreate">a créé une boîte de dépôt</string>
     <string name="fileActivityCollaborativeFolderDelete">a supprimé une boîte de dépôt</string>
     <string name="fileActivityCollaborativeFolderUpdate">a mis à jour une boîte de dépôt</string>
+    <string name="fileActivityCollaborativeUserAccess">a déposé des fichiers dans la boite de dépôt</string>
+    <string name="fileActivityCollaborativeUserCreate">a créé un dossier dans la boite de dépôt pour pouvoir déposer des fichiers</string>
+    <string name="fileActivityCollaborativeUserDelete">a supprimé un dossier de la boite de dépôt dans lequel un user a déposé des fichiers</string>
     <plurals name="fileActivityCommentCreate">
         <item quantity="one">a commenté le fichier suivant</item>
         <item quantity="other">a commenté %d fichiers</item>
