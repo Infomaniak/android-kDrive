@@ -21,6 +21,7 @@ import androidx.test.filters.LargeTest
 import androidx.test.uiautomator.UiScrollable
 import androidx.test.uiautomator.UiSelector
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -29,6 +30,7 @@ import java.util.*
  * UI Tests relative to a file item (sharing, comments, details, activities)
  */
 @LargeTest
+@Disabled
 class FileItemUiTest : KDriveUiTest() {
 
     @BeforeEach
