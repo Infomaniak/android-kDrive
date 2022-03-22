@@ -38,10 +38,13 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.TabViewPagerUtils.setup
 import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior
-import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior.Companion.EXPAND_TITLE_THRESHOLD
+import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior.Companion.isExpanded
+import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior.Companion.isNewState
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
 import kotlinx.android.synthetic.main.fragment_file_details.*
+import kotlinx.android.synthetic.main.fragment_file_details.view.*
+import kotlinx.android.synthetic.main.fragment_file_list.view.*
 import kotlinx.android.synthetic.main.view_subtitle_toolbar.view.*
 import kotlin.math.abs
 
@@ -56,18 +59,6 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
-
-        // If in Light mode, change the status icons color to match the background.
-        // If in Dark mode, the icons stay white all along, no need to check.
-        if (context?.resources?.isNightModeEnabled() == false) {
-            appBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
-                if (abs(verticalOffset) >= EXPAND_TITLE_THRESHOLD * appBarLayout.totalScrollRange) {
-                    activity?.window?.lightStatusBar(true)
-                } else {
-                    activity?.window?.lightStatusBar(false)
-                }
-            })
-        }
 
         FileController.getFileById(navigationArgs.fileId, navigationArgs.userDrive)?.let { file ->
             setFile(file)
@@ -129,6 +120,16 @@ class FileDetailsFragment : FileDetailsSubFragment() {
     }
 
     private fun setBannerThumbnail(file: File) {
+        appBar.addOnOffsetChangedListener(object : AppBarStateChangeListener() {
+            override fun onStateChanged(appBarLayout: AppBarLayout?, state: State?) {
+                isNewState = state != State.IDLE
+                isExpanded = state == State.EXPANDED
+
+                // If in Light mode, change the status icons color to match the background.
+                // If in Dark mode, the icons stay white all along, no need to check.
+                if (context?.resources?.isNightModeEnabled() == false) activity?.window?.lightStatusBar(!isExpanded)
+            }
+        })
         if (file.hasThumbnail) {
             collapsingBackground.loadAny(file.thumbnail())
         } else {
@@ -172,6 +173,31 @@ class FileDetailsFragment : FileDetailsSubFragment() {
             }
 
             setup(tabsViewPager, tabsGroup, tabs)
+        }
+    }
+
+    abstract class AppBarStateChangeListener : AppBarLayout.OnOffsetChangedListener {
+        enum class State {
+            EXPANDED, COLLAPSED, IDLE
+        }
+
+        private var mCurrentState = State.EXPANDED
+        override fun onOffsetChanged(appBarLayout: AppBarLayout, yOffset: Int) {
+            val appBarYPosition = abs(yOffset)
+            // ScrimVisibleHeightTrigger starts from the top of the appbar and stops at the collapsing threshold
+            val appBarCollapsingThreshold = appBarLayout.height -
+                    appBarLayout.fileDetailsCollapsingToolbar.scrimVisibleHeightTrigger
+            mCurrentState = when {
+                appBarYPosition < appBarCollapsingThreshold -> callStateChangeListener(appBarLayout, State.EXPANDED)
+                appBarYPosition >= appBarCollapsingThreshold -> callStateChangeListener(appBarLayout, State.COLLAPSED)
+                else -> callStateChangeListener(appBarLayout, State.IDLE)
+            }
+        }
+
+        abstract fun onStateChanged(appBarLayout: AppBarLayout?, state: State?)
+
+        private fun callStateChangeListener(appBarLayout: AppBarLayout, state: State): State {
+            return state.also { if (mCurrentState != it) onStateChanged(appBarLayout, it) }
         }
     }
 }

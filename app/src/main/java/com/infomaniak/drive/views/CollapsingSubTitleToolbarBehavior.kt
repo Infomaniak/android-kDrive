@@ -51,8 +51,6 @@ class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(
     private val expandedTitleMarginStart: Int = context.resources.getDimensionPixelOffset(R.dimen.marginStandard)
     private val expandedTitleSize = context.resources.getDimensionPixelSize(R.dimen.h1).toFloat()
 
-    private var isExpandedTitleColor = true
-
     fun setExpandedColor(title: Int, subTitle: Int) {
         expandedTitleColor = title
         expandedSubTitleColor = subTitle
@@ -94,20 +92,19 @@ class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(
 
         subtitleToolbarView.layoutParams = layoutParams
         subtitleToolbarView.y = childPosition
+        if (isNewState) {
+            if (isExpanded) {
+                textColorAnimation(subtitleToolbarView.title, collapsedTitleColor, expandedTitleColor)
+                textColorAnimation(subtitleToolbarView.subTitle, collapsedSubTitleColor, expandedSubTitleColor)
+            } else {
+                textColorAnimation(subtitleToolbarView.title, expandedTitleColor, collapsedTitleColor)
+                textColorAnimation(subtitleToolbarView.subTitle, expandedSubTitleColor, collapsedSubTitleColor)
+            }
 
-        if (!isExpandedTitleColor && percentage < EXPAND_TITLE_THRESHOLD) {
-            textColorAnimation(subtitleToolbarView.title, collapsedTitleColor, expandedTitleColor)
-            textColorAnimation(subtitleToolbarView.subTitle, collapsedSubTitleColor, expandedSubTitleColor)
-            isExpandedTitleColor = true
-        } else if (isExpandedTitleColor && percentage >= EXPAND_TITLE_THRESHOLD) {
-            textColorAnimation(subtitleToolbarView.title, expandedTitleColor, collapsedTitleColor)
-            textColorAnimation(subtitleToolbarView.subTitle, expandedSubTitleColor, collapsedSubTitleColor)
-            isExpandedTitleColor = false
+            appBarLayout.toolbar.setNavigationIconTint(if (isExpanded) expandedTitleColor else collapsedTitleColor)
+            subtitleToolbarView.title.typeface = if (percentage < 1) expandedTitleFont else collapsedTitleFont
+            isNewState = false
         }
-
-        appBarLayout.toolbar.setNavigationIconTint(if (percentage < EXPAND_TITLE_THRESHOLD) expandedTitleColor else collapsedTitleColor)
-        subtitleToolbarView.title.typeface = if (percentage < 1) expandedTitleFont else collapsedTitleFont
-
         return true
     }
 
@@ -126,8 +123,8 @@ class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(
     }
 
     companion object {
-        // TODO remove this. Show "getScrimVisibleHeightTrigger" in "CollapsingToolbarLayout"
-        const val EXPAND_TITLE_THRESHOLD = 0.2f
+        var isExpanded = true
+        var isNewState = false
 
         private fun getToolbarHeight(context: Context): Int {
             val typedValue = TypedValue()
