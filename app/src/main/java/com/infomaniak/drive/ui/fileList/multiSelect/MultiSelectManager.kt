@@ -81,7 +81,7 @@ class MultiSelectManager {
         val onlyFolders: Boolean,
         val onlyFavorite: Boolean,
         val onlyOffline: Boolean,
-        val isAllSelected: Boolean
+        val isAllSelected: Boolean,
     )
 
     interface MultiSelectResult {
