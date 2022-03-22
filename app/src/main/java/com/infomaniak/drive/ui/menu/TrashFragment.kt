@@ -83,6 +83,11 @@ class TrashFragment : FileSubTypeListFragment() {
             moveButtonMultiSelect.isInvisible = true
             deleteButtonMultiSelect.isInvisible = true
         }
+
+        multiSelectManager.openMultiSelect = {
+            swipeRefreshLayout?.isEnabled = false
+            openMultiSelect()
+        }
     }
 
     private fun setupToolbars() {
@@ -132,6 +137,11 @@ class TrashFragment : FileSubTypeListFragment() {
                 isAllSelected = isAllSelected
             ).toBundle()
         }.show(childFragmentManager, "ActionTrashMultiSelectBottomSheetDialog")
+    }
+
+    override fun closeMultiSelect() {
+        super.closeMultiSelect()
+        swipeRefreshLayout?.isEnabled = true
     }
 
     private fun showTrashedFileActions(file: File) {

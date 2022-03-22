@@ -287,9 +287,6 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
             BulkOperationType.COPY -> {
                 picturesAdapter.duplicatedList.add(0, data as File)
             }
-            BulkOperationType.ADD_OFFLINE, BulkOperationType.REMOVE_OFFLINE -> {
-                menuPicturesBinding?.swipeRefreshLayout?.isEnabled = true
-            }
             BulkOperationType.ADD_FAVORITES -> {
                 lifecycleScope.launch(Dispatchers.Main) {
                     picturesAdapter.notifyFileChanged(data as Int) { it.isFavorite = true }
@@ -300,14 +297,16 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
                     picturesAdapter.notifyFileChanged(data as Int) { it.isFavorite = false }
                 }
             }
-            BulkOperationType.MOVE, BulkOperationType.COLOR_FOLDER -> {
+            BulkOperationType.ADD_OFFLINE, BulkOperationType.REMOVE_OFFLINE,
+            BulkOperationType.MOVE,
+            BulkOperationType.COLOR_FOLDER,
+            BulkOperationType.RESTORE_IN, BulkOperationType.RESTORE_TO_ORIGIN, BulkOperationType.DELETE_PERMANENTLY -> {
                 // No-op
             }
         }
     }
 
     override fun onAllIndividualActionsFinished(type: BulkOperationType) {
-        menuPicturesBinding?.swipeRefreshLayout?.isEnabled = true
 
         if (type == BulkOperationType.COPY) {
             val oldTotal = picturesAdapter.itemList.size
