@@ -44,7 +44,6 @@ import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
 import kotlinx.android.synthetic.main.fragment_file_details.*
 import kotlinx.android.synthetic.main.fragment_file_details.view.*
-import kotlinx.android.synthetic.main.fragment_file_list.view.*
 import kotlinx.android.synthetic.main.view_subtitle_toolbar.view.*
 import kotlin.math.abs
 
@@ -60,9 +59,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
 
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        FileController.getFileById(navigationArgs.fileId, navigationArgs.userDrive)?.let { file ->
-            setFile(file)
-        }
+        FileController.getFileById(navigationArgs.fileId, navigationArgs.userDrive)?.let { file -> setFile(file) }
 
         mainViewModel.getFileDetails(navigationArgs.fileId, navigationArgs.userDrive)
             .observe(viewLifecycleOwner) { fileResponse ->
@@ -122,7 +119,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
     private fun setBannerThumbnail(file: File) {
         appBar.addOnOffsetChangedListener(object : AppBarStateChangeListener() {
             override fun onStateChanged(appBarLayout: AppBarLayout?, state: State?) {
-                isNewState = state != State.IDLE
+                isNewState = true
                 isExpanded = state == State.EXPANDED
 
                 // If in Light mode, change the status icons color to match the background.
@@ -177,20 +174,18 @@ class FileDetailsFragment : FileDetailsSubFragment() {
     }
 
     abstract class AppBarStateChangeListener : AppBarLayout.OnOffsetChangedListener {
-        enum class State {
-            EXPANDED, COLLAPSED, IDLE
-        }
+        enum class State { EXPANDED, COLLAPSED }
 
         private var mCurrentState = State.EXPANDED
         override fun onOffsetChanged(appBarLayout: AppBarLayout, yOffset: Int) {
-            val appBarYPosition = abs(yOffset)
             // ScrimVisibleHeightTrigger starts from the top of the appbar and stops at the collapsing threshold
-            val appBarCollapsingThreshold = appBarLayout.height -
-                    appBarLayout.fileDetailsCollapsingToolbar.scrimVisibleHeightTrigger
-            mCurrentState = when {
-                appBarYPosition < appBarCollapsingThreshold -> callStateChangeListener(appBarLayout, State.EXPANDED)
-                appBarYPosition >= appBarCollapsingThreshold -> callStateChangeListener(appBarLayout, State.COLLAPSED)
-                else -> callStateChangeListener(appBarLayout, State.IDLE)
+            val appBarCollapsingThreshold =
+                appBarLayout.height - appBarLayout.fileDetailsCollapsingToolbar.scrimVisibleHeightTrigger
+
+            mCurrentState = if (abs(yOffset) < appBarCollapsingThreshold) {
+                callStateChangeListener(appBarLayout, State.EXPANDED)
+            } else {
+                callStateChangeListener(appBarLayout, State.COLLAPSED)
             }
         }
 

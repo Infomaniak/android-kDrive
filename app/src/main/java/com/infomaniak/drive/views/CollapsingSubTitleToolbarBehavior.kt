@@ -93,13 +93,13 @@ class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(
         subtitleToolbarView.layoutParams = layoutParams
         subtitleToolbarView.y = childPosition
         if (isNewState) {
-            if (isExpanded) {
-                textColorAnimation(subtitleToolbarView.title, collapsedTitleColor, expandedTitleColor)
-                textColorAnimation(subtitleToolbarView.subTitle, collapsedSubTitleColor, expandedSubTitleColor)
+            val (startColor, endColor, startSubColor, endSubColor) = if (isExpanded) {
+                arrayOf(collapsedTitleColor, expandedTitleColor, collapsedSubTitleColor, expandedSubTitleColor)
             } else {
-                textColorAnimation(subtitleToolbarView.title, expandedTitleColor, collapsedTitleColor)
-                textColorAnimation(subtitleToolbarView.subTitle, expandedSubTitleColor, collapsedSubTitleColor)
+                arrayOf(expandedTitleColor, collapsedTitleColor, expandedSubTitleColor, collapsedSubTitleColor)
             }
+            textColorAnimation(subtitleToolbarView.title, startColor, endColor)
+            textColorAnimation(subtitleToolbarView.subTitle, startSubColor, endSubColor)
 
             appBarLayout.toolbar.setNavigationIconTint(if (isExpanded) expandedTitleColor else collapsedTitleColor)
             subtitleToolbarView.title.typeface = if (percentage < 1) expandedTitleFont else collapsedTitleFont
