@@ -192,7 +192,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
         if (homeClassName() == null) {
             requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-                if (multiSelectManager.isMultiSelectOpened) {
+                if (multiSelectManager.isMultiSelectOn) {
                     closeMultiSelect()
                 } else {
                     findNavController().popBackStack()
@@ -331,7 +331,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                 initProgress(viewLifecycleOwner)
                 setOnClickListener {
                     selectAllTimer.start()
-                    if (multiSelectManager.areAllSelected) {
+                    if (multiSelectManager.isSelectAllOn) {
                         val isSelectedAll = multiSelectManager.exceptedItemsIds.isNotEmpty()
                         fileAdapter.configureAllSelected(isSelectedAll)
                         onUpdateMultiSelect()
@@ -593,7 +593,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             selectAllTimer.cancel()
 
             val textId = with(multiSelectManager) {
-                if (areAllSelected && exceptedItemsIds.isEmpty()) R.string.buttonDeselectAll else R.string.buttonSelectAll
+                if (isSelectAllOn && exceptedItemsIds.isEmpty()) R.string.buttonDeselectAll else R.string.buttonSelectAll
             }
 
             if (isClickable) setText(textId) else hideProgress(textId)
@@ -664,7 +664,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     }
 
     override fun getAllSelectedFilesCount(): Int? {
-        return if (multiSelectManager.areAllSelected) {
+        return if (multiSelectManager.isSelectAllOn) {
             fileListViewModel.lastItemCount?.count ?: fileAdapter.itemCount
         } else {
             null

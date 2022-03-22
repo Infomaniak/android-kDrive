@@ -266,9 +266,13 @@
     <string name="errorShareLink">Fehler bei der Erstellung des Links</string>
     <string name="favoritesNoFile">Derzeit keine Favoriten</string>
     <string name="favoritesTitle">Favoriten</string>
+    <string name="fileActivityCollaborativeFolderAccess">hat die Briefkasten eingesehen</string>
     <string name="fileActivityCollaborativeFolderCreate">eine Briefkasten erstellt</string>
     <string name="fileActivityCollaborativeFolderDelete">eine Briefkasten gelöscht</string>
     <string name="fileActivityCollaborativeFolderUpdate">eine Briefkasten aktualisiert</string>
+    <string name="fileActivityCollaborativeUserAccess">hat Dateien im Briefkasten abgelegt</string>
+    <string name="fileActivityCollaborativeUserCreate">hat einen Ordner im Briefkasten angelegt, um Dateien ablegen zu können</string>
+    <string name="fileActivityCollaborativeUserDelete">hat einen Ordner im Briefkasten gelöscht, in dem ein User Dateien abgelegt hat</string>
     <plurals name="fileActivityCommentCreate">
         <item quantity="one">hat folgende Datei kommentiert</item>
         <item quantity="other">hat %d Dateien kommentiert</item>

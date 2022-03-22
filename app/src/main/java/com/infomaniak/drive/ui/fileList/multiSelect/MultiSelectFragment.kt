@@ -96,7 +96,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     }
 
     fun openMultiSelect() {
-        multiSelectManager.isMultiSelectOpened = true
+        multiSelectManager.isMultiSelectOn = true
 
         adapter?.apply { notifyItemRangeChanged(0, itemCount) }
 
@@ -107,8 +107,8 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     fun onItemSelected(selectedNumber: Int? = null) = with(multiSelectManager) {
 
         val fileSelectedNumber = when {
-            areAllSelected -> (adapter?.itemCount ?: 0) - exceptedItemsIds.size
             selectedNumber != null -> selectedNumber
+            isSelectAllOn -> (getAllSelectedFilesCount() ?: 0) - exceptedItemsIds.size
             else -> getValidSelectedItems().size
         }
 
@@ -130,8 +130,9 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     open fun closeMultiSelect() {
         multiSelectManager.apply {
             resetSelectedItems()
-            areAllSelected = false
-            isMultiSelectOpened = false
+            exceptedItemsIds.clear()
+            isSelectAllOn = false
+            isMultiSelectOn = false
         }
 
         adapter?.apply { notifyItemRangeChanged(0, itemCount) }
@@ -204,7 +205,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         color: String?,
     ): (Dialog?) -> Unit = {
 
-        val canBulkAllSelectedFiles = multiSelectManager.areAllSelected && fileCount > BulkOperationsUtils.MIN_SELECTED
+        val canBulkAllSelectedFiles = multiSelectManager.isSelectAllOn && fileCount > BulkOperationsUtils.MIN_SELECTED
         val hasEnoughSelectedFilesToBulk = selectedFiles.size > BulkOperationsUtils.MIN_SELECTED
         val isNotOfflineBulk = type != BulkOperationType.ADD_OFFLINE && type != BulkOperationType.REMOVE_OFFLINE
 
@@ -213,8 +214,8 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                 sendBulkAction(
                     fileCount, BulkOperation(
                         action = type,
-                        fileIds = if (areAllSelected) null else selectedFiles.map { it.id },
-                        exceptedFilesIds = if (areAllSelected) exceptedItemsIds else null,
+                        fileIds = if (isSelectAllOn) null else selectedFiles.map { it.id },
+                        exceptedFilesIds = if (isSelectAllOn) exceptedItemsIds else null,
                         parent = currentFolder!!,
                         destinationFolderId = destinationFolder?.id,
                     )

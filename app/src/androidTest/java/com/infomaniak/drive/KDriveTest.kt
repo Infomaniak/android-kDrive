@@ -36,6 +36,7 @@ import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.login.ApiToken
 import io.realm.Realm
 import io.realm.RealmConfiguration
+import io.realm.exceptions.RealmFileException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
@@ -79,8 +80,8 @@ open class KDriveTest {
 
             userDrive = UserDrive(user.id, Env.DRIVE_ID)
             okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(user.id) }
-            uiRealm = FileController.getRealmInstance(userDrive)
 
+            setUpRealm()
             grantPermissions(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
 
@@ -89,16 +90,34 @@ open class KDriveTest {
         fun afterAll() {
             ApiRepository.emptyTrash(userDrive.driveId)
             if (!uiRealm.isClosed) uiRealm.close()
+            Realm.deleteRealm(FileController.getRealmConfiguration(userDrive))
             if (!Env.USE_CURRENT_USER) {
                 runBlocking { AccountUtils.removeUser(context, user) }
             }
         }
 
-        internal fun getConfig() = RealmConfiguration.Builder().inMemory()
+        internal fun getRealmConfigurationTest() = RealmConfiguration.Builder().inMemory()
             .name("KDrive-test.realm")
             .deleteRealmIfMigrationNeeded()
             .modules(RealmModules.LocalFilesModule())
             .build()
+
+        private fun setUpRealm() {
+            try {
+                uiRealm = FileController.getRealmInstance(userDrive)
+            } catch (realmFileException: RealmFileException) {
+                java.io.File(FileController.getRealmConfiguration(userDrive).path).apply {
+                    if (exists()) {
+                        delete()
+                        uiRealm = FileController.getRealmInstance(userDrive)
+                    } else {
+                        realmFileException.printStackTrace()
+                        assert(false) { "realmFileException thrown" }
+                        throw realmFileException
+                    }
+                }
+            }
+        }
 
         private fun grantPermissions(vararg permissions: String) {
             PermissionRequester().apply {

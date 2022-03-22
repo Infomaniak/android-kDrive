@@ -126,21 +126,21 @@ dependencies {
     implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
     implementation 'com.github.rubensousa:gravitysnaphelper:2.2.2'
 
-    def coil_version = '2.0.0-rc01'
+    def coil_version = '2.0.0-rc02'
     implementation "io.coil-kt:coil:$coil_version"
     implementation "io.coil-kt:coil-gif:$coil_version"
 
     implementation 'io.realm:android-adapters:4.0.0'
 
     standardImplementation 'com.google.android.play:core:1.10.3'
-    standardImplementation 'com.google.firebase:firebase-messaging-ktx:23.0.0'
+    standardImplementation 'com.google.firebase:firebase-messaging-ktx:23.0.2'
 
     implementation 'com.googlecode.plist:dd-plist:1.23'
 
     implementation 'com.github.hannesa2:paho.mqtt.android:3.3.5'
     implementation 'com.github.matomo-org:matomo-sdk-android:4.1.4'
 
-    implementation 'io.sentry:sentry-android:5.6.3'
+    implementation 'io.sentry:sentry-android:5.7.0'
 
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.3'
     testImplementation 'io.github.serpro69:kotlin-faker:1.10.0'

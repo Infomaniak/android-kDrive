@@ -23,11 +23,16 @@ import androidx.annotation.StringRes
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.espresso.NoMatchingViewException
+import androidx.test.espresso.PerformException
+import androidx.test.espresso.UiController
+import androidx.test.espresso.ViewAction
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.espresso.util.HumanReadables
+import androidx.test.espresso.util.TreeIterables
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.*
 import com.infomaniak.drive.KDriveTest
@@ -43,6 +48,8 @@ import org.hamcrest.TypeSafeMatcher
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.RegisterExtension
+import java.util.concurrent.TimeoutException
+
 
 open class KDriveUiTest : KDriveTest() {
 
@@ -66,14 +73,13 @@ open class KDriveUiTest : KDriveTest() {
     fun createPrivateFolder(folderName: String) {
         getDeviceViewById("mainFab").clickAndWaitForNewWindow()
 
-        UiCollection(UiSelector().resourceId(getViewIdentifier("addFileBottomSheetLayout"))).getChildByText(
-            UiSelector().resourceId(getViewIdentifier("folderCreateText")),
-            context.getString(R.string.allFolder)
-        ).click()
+        UiCollection(UiSelector().resourceId(getViewIdentifier("addFileBottomSheetLayout"))).getChild(
+            UiSelector().resourceId(getViewIdentifier("folderCreateText"))
+        ).clickAndWaitForNewWindow()
 
-        UiCollection(UiSelector().resourceId(getViewIdentifier("newFolderLayout"))).getChildByText(
-            UiSelector().resourceId(getViewIdentifier("privateFolder")), context.getString(R.string.allFolder)
-        ).click()
+        UiCollection(UiSelector().resourceId(getViewIdentifier("newFolderLayout"))).getChild(
+            UiSelector().resourceId(getViewIdentifier("privateFolder"))
+        ).clickAndWaitForNewWindow()
 
         UiCollection(UiSelector().resourceId(getViewIdentifier("createFolderLayout"))).apply {
             getChildByInstance(UiSelector().resourceId(getViewIdentifier("folderNameValueInput")), 0).text = folderName
@@ -85,10 +91,7 @@ open class KDriveUiTest : KDriveTest() {
                 permissionsRecyclerView.scrollIntoView(this)
                 click()
             }
-            getChildByText(
-                UiSelector().resourceId(getViewIdentifier("createFolderButton")),
-                context.getString(R.string.buttonCreateFolder)
-            ).clickAndWaitForNewWindow()
+            getChild(UiSelector().resourceId(getViewIdentifier("createFolderButton"))).clickAndWaitForNewWindow()
         }
     }
 
@@ -114,6 +117,7 @@ open class KDriveUiTest : KDriveTest() {
             onView(withResourceName("fileRecyclerView")).perform(
                 RecyclerViewActions.scrollTo<FileViewHolder>(hasDescendant(withText(fileName)))
             )
+            onView(isRoot()).perform(waitUntilShown(withText(fileName), SHORT_TIMEOUT))
             // Assert the file is displayed
             onView(withText(fileName)).check(matches(isDisplayed()))
         } else {
@@ -179,15 +183,47 @@ open class KDriveUiTest : KDriveTest() {
             stringRes?.let { add(withText(it)) }
             Assertions.assertFalse(isEmpty())
         })
+        if (isVisible) onView(isRoot()).perform(waitUntilShown(matchers, LONG_TIMEOUT))
         onView(matchers.first()).check(matches(withEffectiveVisibility(if (isVisible) Visibility.VISIBLE else Visibility.GONE)))
     }
+
+    /**
+     * ViewAction that waits until the element matching [matcher] is shown to user, or throw if it's not after [timeout] passed.
+     * @param matcher The matcher of the view to wait for.
+     * @param timeout The timeout of until when to wait for.
+     */
+    private fun waitUntilShown(matcher: Matcher<View>, timeout: Long): ViewAction {
+        return object : ViewAction {
+            override fun getConstraints() = isRoot()
+
+            override fun getDescription() = "wait until a specific view is shown during $timeout millis."
+
+            override fun perform(uiController: UiController, view: View?) {
+                uiController.loopMainThreadUntilIdle()
+                val endTime = System.currentTimeMillis() + timeout
+                do {
+                    // If a displayed matching view is found in the view hierarchy, return to stop waiting
+                    TreeIterables.breadthFirstViewTraversal(view).forEach { if (matcher.matches(it) && it.isShown) return }
+                    uiController.loopMainThreadForAtLeast(50)
+                } while (System.currentTimeMillis() < endTime)
+
+                // View not found
+                throw PerformException.Builder()
+                    .withActionDescription(this.description)
+                    .withViewDescription(HumanReadables.describe(view))
+                    .withCause(TimeoutException())
+                    .build()
+            }
+        }
+    }
+
 
     private fun Matcher<View?>.first(): Matcher<View?> {
         return object : TypeSafeMatcher<View?>() {
             var isFirst = true
 
             override fun describeTo(description: Description) {
-                this@first.describeTo(description.appendText(" at first index"))
+                this@first.describeTo(description.appendText("at first index"))
             }
 
             override fun matchesSafely(view: View?): Boolean =

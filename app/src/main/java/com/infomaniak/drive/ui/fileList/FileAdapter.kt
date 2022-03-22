@@ -272,7 +272,7 @@ open class FileAdapter(
 
             when {
                 uploadInProgress && !file.isPendingUploadFolder() -> displayStopUploadButton(position, file)
-                multiSelectManager.isMultiSelectOpened -> displayFileChecked(file, isGrid)
+                multiSelectManager.isMultiSelectOn -> displayFileChecked(file, isGrid)
                 else -> displayFilePreview()
             }
 
@@ -291,7 +291,7 @@ open class FileAdapter(
 
     private fun MaterialCardView.displayFileChecked(file: File, isGrid: Boolean) = with(multiSelectManager) {
         fileChecked.apply {
-            isChecked = if (areAllSelected) !exceptedItemsIds.contains(file.id) else isSelectedFile(file)
+            isChecked = if (isSelectAllOn) !exceptedItemsIds.contains(file.id) else isSelectedFile(file)
             isVisible = true
         }
         filePreview.isVisible = isGrid
@@ -327,7 +327,7 @@ open class FileAdapter(
         }
 
         setOnClickListener {
-            if (isMultiSelectOpened) {
+            if (isMultiSelectOn) {
                 fileChecked.selectFile()
             } else {
                 onFileClicked?.invoke(file)
@@ -336,7 +336,7 @@ open class FileAdapter(
 
         setOnLongClickListener {
             if (isMultiSelectAuthorized) {
-                if (!isMultiSelectOpened) {
+                if (!isMultiSelectOn) {
                     fileChecked.isChecked = false
                     openMultiSelect?.invoke()
                 }
@@ -388,14 +388,14 @@ open class FileAdapter(
     }
 
     fun configureAllSelected(isSelectedAll: Boolean) = with(multiSelectManager) {
-        areAllSelected = isSelectedAll
+        isSelectAllOn = isSelectedAll
         resetSelectedItems()
         exceptedItemsIds.clear()
         notifyItemRangeChanged(0, itemCount)
     }
 
     private fun addSelectedFile(file: File) = with(multiSelectManager) {
-        if (areAllSelected) {
+        if (isSelectAllOn) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 exceptedItemsIds.removeIf { it == file.id }
             } else {
@@ -409,7 +409,7 @@ open class FileAdapter(
     }
 
     private fun removeSelectedFile(file: File) = with(multiSelectManager) {
-        if (areAllSelected) {
+        if (isSelectAllOn) {
             exceptedItemsIds.add(file.id)
         } else {
             selectedItemsIds.remove(file.id)
