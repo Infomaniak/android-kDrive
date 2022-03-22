@@ -4,8 +4,9 @@
 /.idea
 .DS_Store
 /build
-/app/release
 /captures
 .externalNativeBuild
 .cxx
+*.apk
+*.aab
 app/src/androidTest/java/com/infomaniak/drive/utils/Env.kt
