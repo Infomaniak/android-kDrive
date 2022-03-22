@@ -56,6 +56,7 @@ import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.max
 
 class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListener {
 
@@ -284,7 +285,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
                     header?.setMargin(top = top, right = right, left = left)
                     bottomSheetBehavior.peekHeight = getDefaultPeekHeight() + bottom
-                    bottomSheetBehavior.expandedOffset = top
+                    bottomSheetBehavior.expandedOffset = max(top, height - bottomSheetFileInfos.height)
                     /* Add padding to the bottom to allow the last element of the list to be displayed right over the
                      android navigation bar, bottom makes the element half hidden under nav bar so we need top + bottom */
                     bottomSheetFileInfos.setPadding(0, 0, 0, top + bottom)
