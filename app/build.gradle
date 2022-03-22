@@ -8,13 +8,13 @@ apply plugin: 'de.mannodermaus.android-junit5'
 
 android {
 
-    compileSdkVersion 31
+    compileSdkVersion 32
 
     defaultConfig {
         testInstrumentationRunnerArguments runnerBuilder: 'de.mannodermaus.junit5.AndroidJUnit5Builder'
         applicationId 'com.infomaniak.drive'
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion 32
         versionCode 4_01_002_01
         versionName '4.1.2'
 
