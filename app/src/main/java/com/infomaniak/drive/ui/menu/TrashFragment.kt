@@ -19,9 +19,11 @@ package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.navigation.navGraphViewModels
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
@@ -53,10 +55,8 @@ class TrashFragment : FileSubTypeListFragment() {
 
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar.setContentInsetsRelative(0, 0)
-
-        emptyTrash.setupEmptyTrashButton()
-        multiSelectLayout?.emptyTrashButton?.setupEmptyTrashButton()
+        setupToolbars()
+        setupTrashEmptying()
 
         if (folderId == ROOT_ID) collapsingToolbarLayout.title = getString(R.string.trashTitle)
 
@@ -79,10 +79,21 @@ class TrashFragment : FileSubTypeListFragment() {
 
         multiSelectLayout?.apply {
             emptyTrashButton.isVisible = true
-            selectAllButton.isInvisible = true
+            selectAllButton.isGone = true
             moveButtonMultiSelect.isInvisible = true
             deleteButtonMultiSelect.isInvisible = true
         }
+    }
+
+    private fun setupToolbars() {
+        fun MaterialToolbar.removeInsets() = setContentInsetsRelative(0, 0)
+        toolbar.removeInsets()
+        multiSelectLayout?.toolbarMultiSelect?.removeInsets()
+    }
+
+    private fun setupTrashEmptying() {
+        emptyTrash.setupEmptyTrashButton()
+        multiSelectLayout?.emptyTrashButton?.setupEmptyTrashButton()
     }
 
     private fun MaterialButton.setupEmptyTrashButton() {
