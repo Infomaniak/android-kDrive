@@ -45,7 +45,7 @@ class ColorFolderUpgradeBottomSheetDialog : InformationBottomSheetDialog() {
 
         packAvailability.apply {
             isVisible = true
-            text = getString(R.string.allPackAvailability, getString(R.string.packs_solo_team_pro))
+            text = getString(R.string.allPackAvailability, getString(R.string.packsSoloTeamPro))
         }
     }
 }

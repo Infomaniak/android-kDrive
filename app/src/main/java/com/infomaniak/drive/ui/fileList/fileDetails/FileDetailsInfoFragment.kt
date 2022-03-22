@@ -28,15 +28,15 @@ import android.view.ViewGroup
 import androidx.core.view.forEachIndexed
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.liveData
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.Permission
-import com.infomaniak.drive.data.models.Share
-import com.infomaniak.drive.data.models.ShareLink
+import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.utils.*
@@ -45,6 +45,7 @@ import com.infomaniak.drive.views.UserAvatarView
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.fragment_file_details.*
 import kotlinx.android.synthetic.main.fragment_file_details_infos.*
+import kotlinx.coroutines.Dispatchers
 
 class FileDetailsInfoFragment : FileDetailsSubFragment() {
 
@@ -81,6 +82,10 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
 
             if (file.path.isNotBlank()) setPath(file.path)
 
+            if (file.isFolder()) {
+                displayFolderContentCount(file)
+            }
+
             file.sizeWithVersions?.let {
                 totalSizeValue.text = Formatter.formatFileSize(context, it)
                 totalSize.isVisible = true
@@ -97,6 +102,31 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         }
 
         setBackActionHandlers()
+    }
+
+    private fun displayFolderContentCount(file: File) {
+        getFileCounts(file).observe(viewLifecycleOwner) {
+            with(resources) {
+                fileCountValue.text = when {
+                    it.count == 0 -> getString(R.string.emptyFolder)
+                    it.files == 0 && it.folders != 0 -> getQuantityString(R.plurals.folder, it.folders, it.folders)
+                    it.files != 0 && it.folders == 0 -> getQuantityString(R.plurals.file, it.files, it.files)
+                    else -> {
+                        val folderText = getQuantityString(R.plurals.folder, it.folders, it.folders)
+                        val fileText = getQuantityString(R.plurals.file, it.files, it.files)
+                        getString(R.string.folderContentTemplate, folderText, fileText)
+                    }
+                }
+            }
+
+            fileCount.isVisible = true
+        }
+    }
+
+    private fun getFileCounts(folder: File): LiveData<FileCount> = liveData(Dispatchers.IO) {
+        ApiRepository.getFileCount(folder).data?.let {
+            emit(FileCount(it.files, it.count, it.folders))
+        }
     }
 
     private fun setBackActionHandlers() {

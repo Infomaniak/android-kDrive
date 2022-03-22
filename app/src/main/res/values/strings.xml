@@ -25,8 +25,10 @@
     <string name="notification_channel_id_upload_download" translatable="false">upload_download_channel_id</string>
     <string name="notification_channel_id_upload_service" translatable="false">sync_service_channel_id</string>
 
-    <string name="packs_solo_team_pro" translatable="false">Solo, Team &amp; Pro</string>
-    <string name="packs_team_pro" translatable="false">Team &amp; Pro</string>
+    <string name="packsSoloTeamPro" translatable="false">Solo, Team &amp; Pro</string>
+    <string name="packsTeamPro" translatable="false">Team &amp; Pro</string>
+
+    <string name="folderContentTemplate" translatable="false">%1s &amp; %2s</string>
 
     <string name="aboutAppVersionTitle">kDrive application</string>
     <string name="aboutLicenseDescription">GNU General Public Licence, version 3</string>
@@ -194,6 +196,7 @@
     <string name="cloudStorageQuerySearchImpossibleSelectDrive">No search possible: no drive selected</string>
     <string name="commonFolderDescription">Share this folder with users of kDrive %s</string>
     <string name="commonFolderTitle">Common folder</string>
+    <string name="content">Content</string>
     <string name="contentDescriptionIsSelected">Is selected</string>
     <string name="convertToDropboxTitle">Convert to drop box %s</string>
     <string name="createCategoryTitle">Create a category</string>
@@ -247,6 +250,7 @@
     <string name="dropboxSharedLinkTitle">Dropbox sharing link</string>
     <string name="editCategoryInfoDescription">The modification will be visible to all kDrive users who have access to the categories.</string>
     <string name="editCategoryTitle">Edit a category</string>
+    <string name="emptyFolder">Empty folder</string>
     <string name="errorAddComment">Error when adding comment</string>
     <string name="errorAddFavorite">Error when adding to favorites</string>
     <string name="errorCache">Caching error</string>
@@ -278,6 +282,10 @@
     <string name="errorShareLink">Error when creating link</string>
     <string name="favoritesNoFile">No favorites at this time</string>
     <string name="favoritesTitle">Favorites</string>
+    <plurals name="file">
+        <item quantity="one">1 file</item>
+        <item quantity="other">%d files</item>
+    </plurals>
     <string name="fileActivityCollaborativeFolderAccess">has accessed the drop box</string>
     <string name="fileActivityCollaborativeFolderCreate">created a drop box</string>
     <string name="fileActivityCollaborativeFolderDelete">deleted a drop box</string>
@@ -435,6 +443,10 @@
     <string name="fileShareLinkSettingsTitle">Advanced sharing link settings</string>
     <string name="fileTypeFilterTitle">File type</string>
     <string name="filtersTitle">Filters</string>
+    <plurals name="folder">
+        <item quantity="one">1 folder</item>
+        <item quantity="other">%d folders	</item>
+    </plurals>
     <string name="folderColorDescription">Change the colour of your folders to personalise and better organise your kDrive to your liking.</string>
     <string name="folderColorTitle">Folder Colour</string>
     <string name="folderDescription">Private or shared folder</string>
