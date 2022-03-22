@@ -29,7 +29,7 @@ enum class ConvertedType(val value: String, @DrawableRes val icon: Int, @StringR
     AUDIO("audio", R.drawable.ic_file_audio, R.string.allAudio),
     CODE("code", R.drawable.ic_file_code, R.string.allCode),
     FOLDER("dir", R.drawable.ic_folder_filled, R.string.allFolder),
-    FONT("font", R.drawable.ic_file, R.string.allFont),
+    FONT("font", R.drawable.ic_file_font, R.string.allFont),
     FORM("form", R.drawable.ic_file_form, -1),
     IMAGE("image", R.drawable.ic_file_image, R.string.allPictures),
     PDF("pdf", R.drawable.ic_file_pdf, R.string.allPdf),
