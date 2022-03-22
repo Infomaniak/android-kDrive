@@ -22,7 +22,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
-import androidx.core.view.isInvisible
+import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
@@ -42,7 +42,7 @@ class MenuPicturesFragment : Fragment() {
         }
 
         binding.multiSelectLayout.apply {
-            selectAllButton.isInvisible = true
+            selectAllButton.isGone = true
             setMultiSelectClickListeners()
         }
 
@@ -50,7 +50,7 @@ class MenuPicturesFragment : Fragment() {
     }
 
     private fun MultiSelectLayoutBinding.setMultiSelectClickListeners() = with(picturesFragment) {
-        closeButtonMultiSelect.setOnClickListener { closeMultiSelect() }
+        toolbarMultiSelect.setNavigationOnClickListener { closeMultiSelect() }
         moveButtonMultiSelect.setOnClickListener { onMoveButtonClicked() }
         deleteButtonMultiSelect.setOnClickListener { deleteFiles() }
         menuButtonMultiSelect.setOnClickListener { onMenuButtonClicked() }

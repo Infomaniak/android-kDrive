@@ -322,7 +322,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
         multiSelectLayout?.apply {
 
-            closeButtonMultiSelect.setOnClickListener { closeMultiSelect() }
+            toolbarMultiSelect.setNavigationOnClickListener { closeMultiSelect() }
             moveButtonMultiSelect.setOnClickListener { moveFiles(folderId) }
             deleteButtonMultiSelect.setOnClickListener { deleteFiles(getAllSelectedFilesCount()) }
             menuButtonMultiSelect.setOnClickListener { onMenuButtonClicked() }
