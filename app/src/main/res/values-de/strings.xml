@@ -52,6 +52,7 @@
     <string name="allFileMoveCancelled">Verschieben abgebrochen</string>
     <string name="allFileRename">%s erfolgreich umbenannt</string>
     <string name="allFolder">Ordner</string>
+    <string name="allFont">Schriftart</string>
     <string name="allJustNow">Jetzt</string>
     <string name="allLast7Days">Letzte 7 Tage</string>
     <string name="allLastModifiedFilePattern">\'Geändert am \'dd MMM yyyy \'-\' HH:mm</string>

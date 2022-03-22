@@ -52,6 +52,7 @@
     <string name="allFileMoveCancelled">Déplacement annulé</string>
     <string name="allFileRename">%s renommé avec succès</string>
     <string name="allFolder">Dossier</string>
+    <string name="allFont">Police</string>
     <string name="allJustNow">À l’instant</string>
     <string name="allLast7Days">Les 7 derniers jours</string>
     <string name="allLastModifiedFilePattern">\'Modifié le \'dd MMM yyyy \'-\' HH:mm</string>

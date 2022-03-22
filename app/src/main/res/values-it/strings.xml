@@ -52,6 +52,7 @@
     <string name="allFileMoveCancelled">Spostamento annullato</string>
     <string name="allFileRename">%s rinominato con successo</string>
     <string name="allFolder">Cartella</string>
+    <string name="allFont">Font</string>
     <string name="allJustNow">All’istante</string>
     <string name="allLast7Days">Gli ultimi 7 giorni</string>
     <string name="allLastModifiedFilePattern">\'Modificato il \'dd MMM yyyy \'-\' HH:mm</string>

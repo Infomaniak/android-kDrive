@@ -51,6 +51,7 @@ class SearchFilterTypeBottomSheetDialog : SelectBottomSheetDialog() {
             ConvertedType.AUDIO,
             ConvertedType.CODE,
             ConvertedType.FOLDER,
+            ConvertedType.FONT,
             ConvertedType.IMAGE,
             ConvertedType.PDF,
             ConvertedType.PRESENTATION,

@@ -64,6 +64,7 @@
     <string name="allFileMoveCancelled">Move cancelled</string>
     <string name="allFileRename">%s renamed successfully</string>
     <string name="allFolder">Folder</string>
+    <string name="allFont">Font</string>
     <string name="allJustNow">Just now</string>
     <string name="allLast7Days">Last 7 days</string>
     <string name="allLastModifiedFilePattern">\'Changed on \'dd MMM yyyy \'-\' HH:mm</string>

@@ -170,6 +170,7 @@ open class File(
             ConvertedType.SPREADSHEET.value -> ConvertedType.SPREADSHEET
             ConvertedType.TEXT.value -> ConvertedType.TEXT
             ConvertedType.VIDEO.value -> ConvertedType.VIDEO
+            ConvertedType.FORM.value -> ConvertedType.FORM
             else -> when {
                 isFolder() -> ConvertedType.FOLDER
                 isBookmark() -> ConvertedType.URL
@@ -380,6 +381,7 @@ open class File(
         DOCS(ConvertedType.TEXT, "docx"),
         POINTS(ConvertedType.PRESENTATION, "pptx"),
         GRIDS(ConvertedType.SPREADSHEET, "xlsx"),
+        FORM(ConvertedType.FORM, "docxf"),
         TXT(ConvertedType.TEXT, "txt")
     }
 
@@ -471,7 +473,7 @@ open class File(
                 in Regex("document|text/plain|msword") -> ConvertedType.TEXT
                 in Regex("video/") -> ConvertedType.VIDEO
                 in Regex("text/|application/") -> ConvertedType.CODE
-                else -> ConvertedType.UNKNOWN
+                else -> if (getFileExtension() == ".${Office.FORM.extension}") ConvertedType.FORM else ConvertedType.UNKNOWN
             }
         }
     }
