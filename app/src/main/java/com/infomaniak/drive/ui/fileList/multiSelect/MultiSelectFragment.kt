@@ -107,8 +107,8 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     fun onItemSelected(selectedNumber: Int? = null) = with(multiSelectManager) {
 
         val fileSelectedNumber = when {
-            isSelectAllOn -> (adapter?.itemCount ?: 0) - exceptedItemsIds.size
             selectedNumber != null -> selectedNumber
+            isSelectAllOn -> (getAllSelectedFilesCount() ?: 0) - exceptedItemsIds.size
             else -> getValidSelectedItems().size
         }
 
@@ -130,6 +130,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     open fun closeMultiSelect() {
         multiSelectManager.apply {
             resetSelectedItems()
+            exceptedItemsIds.clear()
             isSelectAllOn = false
             isMultiSelectOn = false
         }
