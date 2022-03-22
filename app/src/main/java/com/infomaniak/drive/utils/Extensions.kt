@@ -81,6 +81,8 @@ import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
+import com.infomaniak.drive.ui.MainActivity
+import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialog.Companion.FILE_ID
 import com.infomaniak.drive.ui.fileList.UploadInProgressFragmentArgs
@@ -92,6 +94,7 @@ import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.UtilsUi.getInitials
 import io.realm.RealmList
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.android.synthetic.main.item_user.view.*
 import java.util.*
@@ -483,6 +486,14 @@ fun Fragment.safeNavigate(
     currentClassName: String? = null
 ) {
     if (canNavigate(currentClassName)) findNavController().navigate(resId, args, navOptions, navigatorExtras)
+}
+
+fun Fragment.navigateToParentFolder(folder: File, mainViewModel: MainViewModel) {
+    with(findNavController()) {
+        popBackStack(R.id.homeFragment, false)
+        (requireActivity() as MainActivity).bottomNavigation.findViewById<View>(R.id.fileListFragment).performClick()
+        mainViewModel.navigateFileListToFolderId(this, folder.id)
+    }
 }
 
 fun Fragment.navigateToUploadView(folderId: Int, folderName: String? = null) {

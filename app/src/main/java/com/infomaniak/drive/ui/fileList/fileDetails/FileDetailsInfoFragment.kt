@@ -38,13 +38,11 @@ import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.data.models.Share
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.drive.Category
-import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.ShareLinkContainerView
 import com.infomaniak.drive.views.UserAvatarView
 import com.infomaniak.lib.core.utils.format
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_file_details.*
 import kotlinx.android.synthetic.main.fragment_file_details_infos.*
 
@@ -147,13 +145,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
     private fun setupPathLocationButton() {
         FileController.getParentFile(this.file.id)?.let { folder ->
             pathLocationButton.isVisible = true
-            pathLocationButton.setOnClickListener {
-                with(findNavController()) {
-                    popBackStack(R.id.homeFragment, false)
-                    (requireActivity() as MainActivity).bottomNavigation.findViewById<View>(R.id.fileListFragment).performClick()
-                    mainViewModel.navigateFileListToFolderId(this, folder.id)
-                }
-            }
+            pathLocationButton.setOnClickListener { navigateToParentFolder(folder, mainViewModel) }
         }
     }
 

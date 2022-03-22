@@ -319,6 +319,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         safeNavigate(PreviewSliderFragmentDirections.actionPreviewSliderFragmentToFileShareDetailsFragment(currentFile.id))
     }
 
+    override fun goToFolder() {
+        FileController.getParentFile(currentFile.id)?.let { folder -> navigateToParentFolder(folder, mainViewModel) }
+    }
+
     override fun copyPublicLink() {
         bottomSheetFileInfos.createPublicCopyLink(onSuccess = { file ->
             previewSliderAdapter.updateFile(currentFile.id) { it.shareLink = file?.shareLink }

@@ -161,6 +161,10 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         )
     }
 
+    override fun goToFolder() {
+        FileController.getParentFile(currentFile.id)?.let { folder -> navigateToParentFolder(folder, mainViewModel) }
+    }
+
     override fun dropBoxClicked(isDropBox: Boolean) {
         if (isDropBox) {
             safeNavigate(
