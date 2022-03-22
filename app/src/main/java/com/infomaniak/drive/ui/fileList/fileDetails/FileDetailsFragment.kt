@@ -38,8 +38,6 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.TabViewPagerUtils.setup
 import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior
-import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior.Companion.isExpanded
-import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior.Companion.isNewState
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
 import kotlinx.android.synthetic.main.fragment_file_details.*
@@ -117,24 +115,28 @@ class FileDetailsFragment : FileDetailsSubFragment() {
     }
 
     private fun setBannerThumbnail(file: File) {
+        val params = subtitleToolbar.layoutParams as CoordinatorLayout.LayoutParams
+        val collapsingToolbarBehavior = params.behavior as? CollapsingSubTitleToolbarBehavior
+
         appBar.addOnOffsetChangedListener(object : AppBarStateChangeListener() {
             override fun onStateChanged(appBarLayout: AppBarLayout?, state: State?) {
-                isNewState = true
-                isExpanded = state == State.EXPANDED
+                collapsingToolbarBehavior?.let {
+                    it.isNewState = true
+                    it.isExpanded = state == State.EXPANDED
 
-                // If in Light mode, change the status icons color to match the background.
-                // If in Dark mode, the icons stay white all along, no need to check.
-                if (context?.resources?.isNightModeEnabled() == false) activity?.window?.lightStatusBar(!isExpanded)
+                    // If in Light mode, change the status icons color to match the background.
+                    // If in Dark mode, the icons stay white all along, no need to check.
+                    if (context?.resources?.isNightModeEnabled() == false) activity?.window?.lightStatusBar(!it.isExpanded)
+                }
             }
         })
         if (file.hasThumbnail) {
             collapsingBackground.loadAny(file.thumbnail())
         } else {
             appBar.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.background))
-            val params = subtitleToolbar.layoutParams as CoordinatorLayout.LayoutParams
             val titleColor = ContextCompat.getColor(requireContext(), R.color.title)
             val subTitleColor = ContextCompat.getColor(requireContext(), R.color.secondaryText)
-            (params.behavior as? CollapsingSubTitleToolbarBehavior)?.setExpandedColor(titleColor, subTitleColor)
+            collapsingToolbarBehavior?.setExpandedColor(titleColor, subTitleColor)
             subtitleToolbar.title.setTextColor(titleColor)
             subtitleToolbar.subTitle.setTextColor(subTitleColor)
             toolbar.setNavigationIconTint(titleColor)
@@ -182,7 +184,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
             val appBarCollapsingThreshold =
                 appBarLayout.height - appBarLayout.fileDetailsCollapsingToolbar.scrimVisibleHeightTrigger
 
-            mCurrentState = if (abs(yOffset) < appBarCollapsingThreshold) {
+            mCurrentState = if (abs(yOffset) <= appBarCollapsingThreshold) {
                 callStateChangeListener(appBarLayout, State.EXPANDED)
             } else {
                 callStateChangeListener(appBarLayout, State.COLLAPSED)
