@@ -178,13 +178,13 @@ class FileDetailsFragment : FileDetailsSubFragment() {
     abstract class AppBarStateChangeListener : AppBarLayout.OnOffsetChangedListener {
         enum class State { EXPANDED, COLLAPSED }
 
-        private var mCurrentState = State.EXPANDED
+        private var currentState = State.EXPANDED
         override fun onOffsetChanged(appBarLayout: AppBarLayout, yOffset: Int) {
             // ScrimVisibleHeightTrigger starts from the top of the appbar and stops at the collapsing threshold
             val appBarCollapsingThreshold =
                 appBarLayout.height - appBarLayout.fileDetailsCollapsingToolbar.scrimVisibleHeightTrigger
 
-            mCurrentState = if (abs(yOffset) <= appBarCollapsingThreshold) {
+            currentState = if (abs(yOffset) <= appBarCollapsingThreshold) {
                 callStateChangeListener(appBarLayout, State.EXPANDED)
             } else {
                 callStateChangeListener(appBarLayout, State.COLLAPSED)
@@ -194,7 +194,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         abstract fun onStateChanged(appBarLayout: AppBarLayout?, state: State?)
 
         private fun callStateChangeListener(appBarLayout: AppBarLayout, state: State): State {
-            return state.also { if (mCurrentState != it) onStateChanged(appBarLayout, it) }
+            return state.also { if (currentState != it) onStateChanged(appBarLayout, it) }
         }
     }
 }
