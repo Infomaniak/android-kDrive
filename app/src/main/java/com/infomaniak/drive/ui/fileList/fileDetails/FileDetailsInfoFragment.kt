@@ -104,16 +104,16 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         setBackActionHandlers()
     }
 
-    private fun displayFolderContentCount(file: File) {
-        getFileCounts(file).observe(viewLifecycleOwner) {
+    private fun displayFolderContentCount(folder: File) {
+        getFileCounts(folder).observe(viewLifecycleOwner) { (files, count, folders) ->
             with(resources) {
                 fileCountValue.text = when {
-                    it.count == 0 -> getString(R.string.emptyFolder)
-                    it.files == 0 && it.folders != 0 -> getQuantityString(R.plurals.folder, it.folders, it.folders)
-                    it.files != 0 && it.folders == 0 -> getQuantityString(R.plurals.file, it.files, it.files)
+                    count == 0 -> getString(R.string.emptyFolder)
+                    files == 0 && folders != 0 -> getQuantityString(R.plurals.folder, folders, folders)
+                    files != 0 && folders == 0 -> getQuantityString(R.plurals.file, files, files)
                     else -> {
-                        val folderText = getQuantityString(R.plurals.folder, it.folders, it.folders)
-                        val fileText = getQuantityString(R.plurals.file, it.files, it.files)
+                        val folderText = getQuantityString(R.plurals.folder, folders, folders)
+                        val fileText = getQuantityString(R.plurals.file, files, files)
                         getString(R.string.folderContentTemplate, folderText, fileText)
                     }
                 }
@@ -124,9 +124,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
     }
 
     private fun getFileCounts(folder: File): LiveData<FileCount> = liveData(Dispatchers.IO) {
-        ApiRepository.getFileCount(folder).data?.let {
-            emit(FileCount(it.files, it.count, it.folders))
-        }
+        ApiRepository.getFileCount(folder).data?.let { emit(FileCount(it.files, it.count, it.folders)) }
     }
 
     private fun setBackActionHandlers() {

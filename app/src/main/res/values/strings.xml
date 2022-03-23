@@ -445,7 +445,7 @@
     <string name="filtersTitle">Filters</string>
     <plurals name="folder">
         <item quantity="one">1 folder</item>
-        <item quantity="other">%d folders	</item>
+        <item quantity="other">%d folders</item>
     </plurals>
     <string name="folderColorDescription">Change the colour of your folders to personalise and better organise your kDrive to your liking.</string>
     <string name="folderColorTitle">Folder Colour</string>
