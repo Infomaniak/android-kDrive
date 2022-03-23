@@ -182,7 +182,6 @@
     <string name="cloudStorageQuerySearchImpossibleSelectDrive">Impossibile effettuare la ricerca, non è stato selezionato nessun drive</string>
     <string name="commonFolderDescription">Condividi questa cartella con utenti del kDrive %s</string>
     <string name="commonFolderTitle">Cartella comune</string>
-    <string name="content">Contenuto</string>
     <string name="contentDescriptionIsSelected">È selezionata</string>
     <string name="convertToDropboxTitle">Converti in deposito file %s</string>
     <string name="createCategoryTitle">Crea una categoria</string>
@@ -236,7 +235,6 @@
     <string name="dropboxSharedLinkTitle">Link di condivisione Dropbox</string>
     <string name="editCategoryInfoDescription">La modifica sarà visibile a tutti gli utenti del kDrive che hanno accesso alle categorie.</string>
     <string name="editCategoryTitle">Modifica una categoria</string>
-    <string name="emptyFolder">Cartella vuota</string>
     <string name="errorAddComment">Errore durante l’aggiunta del commento</string>
     <string name="errorAddFavorite">Errore durante l’aggiunta ai preferiti</string>
     <string name="errorCache">Errore durante la memorizzazione nella cache</string>
@@ -268,10 +266,6 @@
     <string name="errorShareLink">Errore durante la creazione del link</string>
     <string name="favoritesNoFile">Al momento non sono disponibili preferiti</string>
     <string name="favoritesTitle">Preferiti</string>
-    <plurals name="file">
-        <item quantity="one">1 file</item>
-        <item quantity="other">%d file</item>
-    </plurals>
     <string name="fileActivityCollaborativeFolderAccess">ha consultato il deposito file</string>
     <string name="fileActivityCollaborativeFolderCreate">ha creato un deposito file</string>
     <string name="fileActivityCollaborativeFolderDelete">ha cancellato un deposito file</string>
@@ -365,6 +359,16 @@
     <string name="fileDetailsCommentsFieldName">Il tuo commento</string>
     <string name="fileDetailsCommentsTitle">Commenti</string>
     <string name="fileDetailsCommentsUnavailable">Aprire il documento per aggiungere commenti. Poi seleziona la voce da commentare.</string>
+    <string name="fileDetailsInfoContent">Contenuto</string>
+    <string name="fileDetailsInfoEmptyFolder">Cartella vuota</string>
+    <plurals name="fileDetailsInfoFile">
+        <item quantity="one">1 file</item>
+        <item quantity="other">%d file</item>
+    </plurals>
+    <plurals name="fileDetailsInfoFolder">
+        <item quantity="one">1 cartella</item>
+        <item quantity="other">%d cartelle</item>
+    </plurals>
     <string name="fileDetailsInfosAddedDateTitle">Aggiungi al drive</string>
     <string name="fileDetailsInfosCreationDateTitle">Creazione</string>
     <string name="fileDetailsInfosOriginalSize">Dimensioni di origine</string>
@@ -429,10 +433,6 @@
     <string name="fileShareLinkSettingsTitle">Impostazioni avanzate del link di condivisione</string>
     <string name="fileTypeFilterTitle">Tipo di file</string>
     <string name="filtersTitle">Filtri</string>
-    <plurals name="folder">
-        <item quantity="one">1 cartella</item>
-        <item quantity="other">%d cartelle</item>
-    </plurals>
     <string name="folderColorDescription">Cambia il colore delle tue cartelle per personalizzare e organizzare meglio il tuo kDrive a tuo piacimento.</string>
     <string name="folderColorTitle">Colore delle cartelle</string>
     <string name="folderDescription">Cartella personale o condivisa</string>

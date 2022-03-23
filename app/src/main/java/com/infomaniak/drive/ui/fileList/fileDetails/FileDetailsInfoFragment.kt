@@ -106,12 +106,12 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         getFileCounts(folder).observe(viewLifecycleOwner) { (files, count, folders) ->
             with(resources) {
                 fileCountValue.text = when {
-                    count == 0 -> getString(R.string.emptyFolder)
-                    files == 0 && folders != 0 -> getQuantityString(R.plurals.folder, folders, folders)
-                    files != 0 && folders == 0 -> getQuantityString(R.plurals.file, files, files)
+                    count == 0 -> getString(R.string.fileDetailsInfoEmptyFolder)
+                    files == 0 && folders != 0 -> getQuantityString(R.plurals.fileDetailsInfoFolder, folders, folders)
+                    files != 0 && folders == 0 -> getQuantityString(R.plurals.fileDetailsInfoFile, files, files)
                     else -> {
-                        val folderText = getQuantityString(R.plurals.folder, folders, folders)
-                        val fileText = getQuantityString(R.plurals.file, files, files)
+                        val folderText = getQuantityString(R.plurals.fileDetailsInfoFolder, folders, folders)
+                        val fileText = getQuantityString(R.plurals.fileDetailsInfoFile, files, files)
                         getString(R.string.folderContentTemplate, folderText, fileText)
                     }
                 }
