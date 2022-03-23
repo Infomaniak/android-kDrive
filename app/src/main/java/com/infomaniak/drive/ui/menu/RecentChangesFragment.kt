@@ -23,6 +23,8 @@ import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialogArgs
+import com.infomaniak.drive.ui.fileList.multiSelect.RecentChangesMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.setPagination
@@ -31,13 +33,12 @@ import kotlinx.android.synthetic.main.fragment_file_list.*
 class RecentChangesFragment : FileSubTypeListFragment() {
 
     private val recentChangesViewModel: RecentChangesViewModel by viewModels()
+
+    override var enabledMultiSelectMode: Boolean = true
     private var isDownloadingChanges = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        downloadFiles = DownloadFiles()
-        setNoFilesLayout = SetNoFilesLayout()
-        folderId = Utils.OTHER_ROOT_ID
-
+        initParams()
         super.onViewCreated(view, savedInstanceState)
 
         fileRecyclerView.apply {
@@ -51,6 +52,35 @@ class RecentChangesFragment : FileSubTypeListFragment() {
 
         sortButton.isGone = true
         collapsingToolbarLayout.title = getString(R.string.lastEditsTitle)
+
+        setupMultiSelectLayout()
+    }
+
+    private fun initParams() {
+        downloadFiles = DownloadFiles()
+        setNoFilesLayout = SetNoFilesLayout()
+        folderId = Utils.OTHER_ROOT_ID
+    }
+
+    private fun setupMultiSelectLayout() {
+        multiSelectLayout?.selectAllButton?.isGone = true
+    }
+
+    override fun onMenuButtonClicked() {
+        val (fileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
+        RecentChangesMultiSelectActionsBottomSheetDialog().apply {
+            arguments = MultiSelectActionsBottomSheetDialogArgs(
+                fileIds = fileIds,
+                onlyFolders = onlyFolders,
+                onlyFavorite = onlyFavorite,
+                onlyOffline = onlyOffline,
+                isAllSelected = isAllSelected
+            ).toBundle()
+        }.show(childFragmentManager, "ActionRecentChangesMultiSelectBottomSheetDialog")
+    }
+
+    companion object {
+        const val MATOMO_CATEGORY = "recentChangesFileAction"
     }
 
     private inner class SetNoFilesLayout : () -> Unit {
