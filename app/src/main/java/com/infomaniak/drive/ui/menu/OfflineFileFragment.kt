@@ -29,12 +29,15 @@ open class OfflineFileFragment : FileSubTypeListFragment() {
     override var allowCancellation: Boolean = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        initParams()
+        super.onViewCreated(view, savedInstanceState)
+        collapsingToolbarLayout.title = getString(R.string.offlineFileTitle)
+    }
+
+    private fun initParams() {
         downloadFiles = DownloadFiles()
         setNoFilesLayout = SetNoFilesLayout()
         folderId = Utils.OTHER_ROOT_ID
-        super.onViewCreated(view, savedInstanceState)
-
-        collapsingToolbarLayout.title = getString(R.string.offlineFileTitle)
     }
 
     private inner class SetNoFilesLayout : () -> Unit {
