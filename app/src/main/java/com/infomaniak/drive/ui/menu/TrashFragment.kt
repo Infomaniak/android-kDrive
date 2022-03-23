@@ -45,21 +45,44 @@ class TrashFragment : FileSubTypeListFragment() {
     override var sortTypeUsage = SortTypeUsage.TRASH
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        fileListViewModel.sortType = SortType.RECENT_TRASHED
-        sortFiles = SortFiles()
-        downloadFiles =
-            DownloadFiles(
-                if (folderId != ROOT_ID) File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId) else null
-            )
-        setNoFilesLayout = SetNoFilesLayout()
-
+        initParams()
         super.onViewCreated(view, savedInstanceState)
-
         setupToolbars()
         setupTrashEmptying()
 
         if (folderId == ROOT_ID) collapsingToolbarLayout.title = getString(R.string.trashTitle)
 
+        setupAdapter()
+
+        trashViewModel.removeFileId.observe(viewLifecycleOwner) { fileToRemove ->
+            removeFileFromAdapter(fileToRemove)
+        }
+
+        setupMultiSelectLayout()
+        setupMultiSelectOpening()
+    }
+
+    private fun initParams() {
+        fileListViewModel.sortType = SortType.RECENT_TRASHED
+        sortFiles = SortFiles()
+        downloadFiles = DownloadFiles(
+            if (folderId != ROOT_ID) File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId) else null
+        )
+        setNoFilesLayout = SetNoFilesLayout()
+    }
+
+    private fun setupToolbars() {
+        fun MaterialToolbar.removeInsets() = setContentInsetsRelative(0, 0)
+        toolbar.removeInsets()
+        multiSelectLayout?.toolbarMultiSelect?.removeInsets()
+    }
+
+    private fun setupTrashEmptying() {
+        emptyTrash.setupEmptyTrashButton()
+        multiSelectLayout?.emptyTrashButton?.setupEmptyTrashButton()
+    }
+
+    private fun setupAdapter() {
         fileAdapter.apply {
             showShareFileButton = false
             onFileClicked = { file ->
@@ -72,33 +95,22 @@ class TrashFragment : FileSubTypeListFragment() {
             }
             onMenuClicked = { file -> showTrashedFileActions(file) }
         }
+    }
 
-        trashViewModel.removeFileId.observe(viewLifecycleOwner) { fileToRemove ->
-            removeFileFromAdapter(fileToRemove)
-        }
-
+    private fun setupMultiSelectLayout() {
         multiSelectLayout?.apply {
             emptyTrashButton.isVisible = true
             selectAllButton.isGone = true
             moveButtonMultiSelect.isInvisible = true
             deleteButtonMultiSelect.isInvisible = true
         }
+    }
 
+    private fun setupMultiSelectOpening() {
         multiSelectManager.openMultiSelect = {
             swipeRefreshLayout?.isEnabled = false
             openMultiSelect()
         }
-    }
-
-    private fun setupToolbars() {
-        fun MaterialToolbar.removeInsets() = setContentInsetsRelative(0, 0)
-        toolbar.removeInsets()
-        multiSelectLayout?.toolbarMultiSelect?.removeInsets()
-    }
-
-    private fun setupTrashEmptying() {
-        emptyTrash.setupEmptyTrashButton()
-        multiSelectLayout?.emptyTrashButton?.setupEmptyTrashButton()
     }
 
     private fun MaterialButton.setupEmptyTrashButton() {
