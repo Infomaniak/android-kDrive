@@ -82,9 +82,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
 
             if (file.path.isNotBlank()) setPath(file.path)
 
-            if (file.isFolder()) {
-                displayFolderContentCount(file)
-            }
+            if (file.isFolder()) displayFolderContentCount(file)
 
             file.sizeWithVersions?.let {
                 totalSizeValue.text = Formatter.formatFileSize(context, it)
