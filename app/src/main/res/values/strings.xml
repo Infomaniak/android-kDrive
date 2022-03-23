@@ -28,7 +28,7 @@
     <string name="packsSoloTeamPro" translatable="false">Solo, Team &amp; Pro</string>
     <string name="packsTeamPro" translatable="false">Team &amp; Pro</string>
 
-    <string name="folderContentTemplate" translatable="false">%1s &amp; %2s</string>
+    <string name="fileDetailsInfoFolderContentTemplate" translatable="false">%1s &amp; %2s</string>
 
     <string name="aboutAppVersionTitle">kDrive application</string>
     <string name="aboutLicenseDescription">GNU General Public Licence, version 3</string>

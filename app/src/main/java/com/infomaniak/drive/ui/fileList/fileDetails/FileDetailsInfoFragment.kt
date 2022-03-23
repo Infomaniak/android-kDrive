@@ -28,15 +28,15 @@ import android.view.ViewGroup
 import androidx.core.view.forEachIndexed
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.liveData
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.Permission
+import com.infomaniak.drive.data.models.Share
+import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.utils.*
@@ -45,7 +45,6 @@ import com.infomaniak.drive.views.UserAvatarView
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.fragment_file_details.*
 import kotlinx.android.synthetic.main.fragment_file_details_infos.*
-import kotlinx.coroutines.Dispatchers
 
 class FileDetailsInfoFragment : FileDetailsSubFragment() {
 
@@ -112,7 +111,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
                     else -> {
                         val folderText = getQuantityString(R.plurals.fileDetailsInfoFolder, folders, folders)
                         val fileText = getQuantityString(R.plurals.fileDetailsInfoFile, files, files)
-                        getString(R.string.folderContentTemplate, folderText, fileText)
+                        getString(R.string.fileDetailsInfoFolderContentTemplate, folderText, fileText)
                     }
                 }
             }
