@@ -120,13 +120,13 @@ class FileDetailsFragment : FileDetailsSubFragment() {
 
         appBar.addOnOffsetChangedListener(object : AppBarStateChangeListener() {
             override fun onStateChanged(appBarLayout: AppBarLayout?, state: State?) {
-                collapsingToolbarBehavior?.let {
-                    it.isNewState = true
-                    it.isExpanded = state == State.EXPANDED
+                collapsingToolbarBehavior?.apply {
+                    isNewState = true
+                    isExpanded = state == State.EXPANDED
 
                     // If in Light mode, change the status icons color to match the background.
                     // If in Dark mode, the icons stay white all along, no need to check.
-                    if (context?.resources?.isNightModeEnabled() == false) activity?.window?.lightStatusBar(!it.isExpanded)
+                    if (context?.resources?.isNightModeEnabled() == false) activity?.window?.lightStatusBar(!isExpanded)
                 }
             }
         })
@@ -184,11 +184,10 @@ class FileDetailsFragment : FileDetailsSubFragment() {
             val appBarCollapsingThreshold =
                 appBarLayout.height - appBarLayout.fileDetailsCollapsingToolbar.scrimVisibleHeightTrigger
 
-            currentState = if (abs(yOffset) <= appBarCollapsingThreshold) {
-                callStateChangeListener(appBarLayout, State.EXPANDED)
-            } else {
-                callStateChangeListener(appBarLayout, State.COLLAPSED)
-            }
+            currentState = callStateChangeListener(
+                appBarLayout = appBarLayout,
+                state = if (abs(yOffset) <= appBarCollapsingThreshold) State.EXPANDED else State.COLLAPSED
+            )
         }
 
         abstract fun onStateChanged(appBarLayout: AppBarLayout?, state: State?)
