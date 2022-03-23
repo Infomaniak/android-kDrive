@@ -190,6 +190,7 @@ class TrashFragment : FileSubTypeListFragment() {
                 icon = R.drawable.ic_delete,
                 title = R.string.trashNoFile,
                 initialListView = fileRecyclerView,
+                viewsToDisable = listOf(emptyTrash),
             )
         }
     }

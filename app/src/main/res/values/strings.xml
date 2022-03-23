@@ -678,7 +678,7 @@
     <string name="trashActionDelete">Delete permanently</string>
     <string name="trashActionRestoreFileIn">Recover in</string>
     <string name="trashActionRestoreFileOriginalPlace">Recover to the original location</string>
-    <string name="trashNoFile">No file deleted</string>
+    <string name="trashNoFile">No deleted files</string>
     <string name="trashTitle">Trash</string>
     <plurals name="trashedFileRestoreFileInSuccess">
         <item quantity="one">%1$s recovered in %2$s</item>
