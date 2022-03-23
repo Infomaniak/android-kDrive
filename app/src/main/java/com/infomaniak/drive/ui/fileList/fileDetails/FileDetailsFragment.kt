@@ -38,10 +38,10 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.TabViewPagerUtils.setup
 import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior
-import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior.Companion.EXPAND_TITLE_THRESHOLD
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
 import kotlinx.android.synthetic.main.fragment_file_details.*
+import kotlinx.android.synthetic.main.fragment_file_details.view.*
 import kotlinx.android.synthetic.main.view_subtitle_toolbar.view.*
 import kotlin.math.abs
 
@@ -57,21 +57,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
 
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        // If in Light mode, change the status icons color to match the background.
-        // If in Dark mode, the icons stay white all along, no need to check.
-        if (context?.resources?.isNightModeEnabled() == false) {
-            appBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
-                if (abs(verticalOffset) >= EXPAND_TITLE_THRESHOLD * appBarLayout.totalScrollRange) {
-                    activity?.window?.lightStatusBar(true)
-                } else {
-                    activity?.window?.lightStatusBar(false)
-                }
-            })
-        }
-
-        FileController.getFileById(navigationArgs.fileId, navigationArgs.userDrive)?.let { file ->
-            setFile(file)
-        }
+        FileController.getFileById(navigationArgs.fileId, navigationArgs.userDrive)?.let { file -> setFile(file) }
 
         mainViewModel.getFileDetails(navigationArgs.fileId, navigationArgs.userDrive)
             .observe(viewLifecycleOwner) { fileResponse ->
@@ -129,14 +115,29 @@ class FileDetailsFragment : FileDetailsSubFragment() {
     }
 
     private fun setBannerThumbnail(file: File) {
+        val params = subtitleToolbar.layoutParams as CoordinatorLayout.LayoutParams
+        val collapsingToolbarBehavior = params.behavior as? CollapsingSubTitleToolbarBehavior
+
+        appBar.addOnOffsetChangedListener(object : AppBarStateChangeListener() {
+            override fun onStateChanged(state: State) {
+                collapsingToolbarBehavior?.apply {
+                    isNewState = true
+                    isExpanded = state == State.EXPANDED
+
+                    // If in Light mode, change the status icons color to match the background.
+                    // If in Dark mode, the icons stay white all along, no need to check.
+                    if (context?.resources?.isNightModeEnabled() == false) activity?.window?.lightStatusBar(!isExpanded)
+                }
+            }
+        })
+
         if (file.hasThumbnail) {
             collapsingBackground.loadAny(file.thumbnail())
         } else {
             appBar.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.background))
-            val params = subtitleToolbar.layoutParams as CoordinatorLayout.LayoutParams
             val titleColor = ContextCompat.getColor(requireContext(), R.color.title)
             val subTitleColor = ContextCompat.getColor(requireContext(), R.color.secondaryText)
-            (params.behavior as? CollapsingSubTitleToolbarBehavior)?.setExpandedColor(titleColor, subTitleColor)
+            collapsingToolbarBehavior?.setExpandedColor(titleColor, subTitleColor)
             subtitleToolbar.title.setTextColor(titleColor)
             subtitleToolbar.subTitle.setTextColor(subTitleColor)
             toolbar.setNavigationIconTint(titleColor)
@@ -173,5 +174,28 @@ class FileDetailsFragment : FileDetailsSubFragment() {
 
             setup(tabsViewPager, tabsGroup, tabs)
         }
+    }
+
+    abstract class AppBarStateChangeListener : AppBarLayout.OnOffsetChangedListener {
+
+        private var currentState = State.EXPANDED
+
+        override fun onOffsetChanged(appBarLayout: AppBarLayout, yOffset: Int) {
+            // ScrimVisibleHeightTrigger starts from the top of the appbar and stops at the collapsing threshold
+            val appBarCollapsingThreshold =
+                appBarLayout.height - appBarLayout.fileDetailsCollapsingToolbar.scrimVisibleHeightTrigger
+
+            currentState = callStateChangeListener(
+                if (abs(yOffset) <= appBarCollapsingThreshold) State.EXPANDED else State.COLLAPSED
+            )
+        }
+
+        private fun callStateChangeListener(state: State): State {
+            return state.also { if (currentState != it) onStateChanged(it) }
+        }
+
+        abstract fun onStateChanged(state: State)
+
+        enum class State { EXPANDED, COLLAPSED }
     }
 }

@@ -67,7 +67,8 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin" />
+                app:layout_collapseMode="pin"
+                app:navigationIconTint="@android:color/white" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -76,6 +77,8 @@
         layout="@layout/view_subtitle_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/marginStandard"
+        android:layout_marginTop="126dp"
         app:layout_behavior=".views.CollapsingSubTitleToolbarBehavior" />
 
     <LinearLayout
