@@ -23,7 +23,6 @@ import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.navigation.navGraphViewModels
-import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
@@ -47,7 +46,6 @@ class TrashFragment : FileSubTypeListFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initParams()
         super.onViewCreated(view, savedInstanceState)
-        setupToolbars()
         setupTrashEmptying()
 
         if (folderId == ROOT_ID) collapsingToolbarLayout.title = getString(R.string.trashTitle)
@@ -69,12 +67,6 @@ class TrashFragment : FileSubTypeListFragment() {
             if (folderId != ROOT_ID) File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId) else null
         )
         setNoFilesLayout = SetNoFilesLayout()
-    }
-
-    private fun setupToolbars() {
-        fun MaterialToolbar.removeInsets() = setContentInsetsRelative(0, 0)
-        toolbar.removeInsets()
-        multiSelectLayout?.toolbarMultiSelect?.removeInsets()
     }
 
     private fun setupTrashEmptying() {
