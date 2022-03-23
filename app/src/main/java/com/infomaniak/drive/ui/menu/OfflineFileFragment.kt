@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.menu
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isGone
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialogArgs
@@ -32,12 +33,13 @@ open class OfflineFileFragment : FileSubTypeListFragment() {
     override var enabledMultiSelectMode: Boolean = true
     override var allowCancellation: Boolean = false
 
+    override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = swipeRefreshLayout
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initParams()
         super.onViewCreated(view, savedInstanceState)
         collapsingToolbarLayout.title = getString(R.string.offlineFileTitle)
         setupMultiSelectLayout()
-        setupMultiSelectOpening()
     }
 
     private fun initParams() {
@@ -48,13 +50,6 @@ open class OfflineFileFragment : FileSubTypeListFragment() {
 
     private fun setupMultiSelectLayout() {
         multiSelectLayout?.selectAllButton?.isGone = true
-    }
-
-    private fun setupMultiSelectOpening() {
-        multiSelectManager.openMultiSelect = {
-            swipeRefreshLayout?.isEnabled = false
-            openMultiSelect()
-        }
     }
 
     override fun onMenuButtonClicked() {
@@ -68,11 +63,6 @@ open class OfflineFileFragment : FileSubTypeListFragment() {
                 isAllSelected = isAllSelected
             ).toBundle()
         }.show(childFragmentManager, "ActionOfflineMultiSelectBottomSheetDialog")
-    }
-
-    override fun closeMultiSelect() {
-        super.closeMultiSelect()
-        swipeRefreshLayout?.isEnabled = true
     }
 
     companion object {

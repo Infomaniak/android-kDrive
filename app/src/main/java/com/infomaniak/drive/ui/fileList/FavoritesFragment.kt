@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.view.isGone
 import androidx.navigation.fragment.findNavController
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.ui.fileList.multiSelect.FavoritesMultiSelectActionsBottomSheetDialog
@@ -35,13 +36,14 @@ class FavoritesFragment : FileListFragment() {
 
     override var enabledMultiSelectMode: Boolean = true
 
+    override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = swipeRefreshLayout
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initParams()
         super.onViewCreated(view, savedInstanceState)
         collapsingToolbarLayout.title = getString(R.string.favoritesTitle)
         setupAdapter()
         setupMultiSelectLayout()
-        setupMultiSelectOpening()
     }
 
     private fun initParams() {
@@ -72,13 +74,6 @@ class FavoritesFragment : FileListFragment() {
         multiSelectLayout?.selectAllButton?.isGone = true
     }
 
-    private fun setupMultiSelectOpening() {
-        multiSelectManager.openMultiSelect = {
-            swipeRefreshLayout?.isEnabled = false
-            openMultiSelect()
-        }
-    }
-
     override fun onMenuButtonClicked() {
         val (fileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
         FavoritesMultiSelectActionsBottomSheetDialog().apply {
@@ -90,11 +85,6 @@ class FavoritesFragment : FileListFragment() {
                 isAllSelected = isAllSelected
             ).toBundle()
         }.show(childFragmentManager, "ActionFavoritesMultiSelectBottomSheetDialog")
-    }
-
-    override fun closeMultiSelect() {
-        super.closeMultiSelect()
-        swipeRefreshLayout?.isEnabled = true
     }
 
     companion object {
