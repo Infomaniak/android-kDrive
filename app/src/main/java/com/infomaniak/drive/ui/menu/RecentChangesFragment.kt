@@ -23,6 +23,8 @@ import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.BulkOperationType
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.RecentChangesMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.AccountUtils
@@ -77,6 +79,19 @@ class RecentChangesFragment : FileSubTypeListFragment() {
                 isAllSelected = isAllSelected
             ).toBundle()
         }.show(childFragmentManager, "ActionRecentChangesMultiSelectBottomSheetDialog")
+    }
+
+    override fun performBulkOperation(
+        type: BulkOperationType,
+        areAllFromTheSameFolder: Boolean,
+        allSelectedFilesCount: Int?,
+        destinationFolder: File?,
+        color: String?,
+    ) {
+        // API doesn't support bulk operations for files originating from
+        // different parent folders, so we repeat the action for each file.
+        // Hence the `areAllFromTheSameFolder` set at false.
+        super.performBulkOperation(type, false, allSelectedFilesCount, destinationFolder, color)
     }
 
     companion object {
