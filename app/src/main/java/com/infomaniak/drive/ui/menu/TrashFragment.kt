@@ -23,6 +23,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.navigation.navGraphViewModels
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.button.MaterialButton
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
@@ -43,6 +44,8 @@ class TrashFragment : FileSubTypeListFragment() {
     override var enabledMultiSelectMode: Boolean = true
     override var sortTypeUsage = SortTypeUsage.TRASH
 
+    override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = swipeRefreshLayout
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initParams()
         super.onViewCreated(view, savedInstanceState)
@@ -57,7 +60,6 @@ class TrashFragment : FileSubTypeListFragment() {
         }
 
         setupMultiSelectLayout()
-        setupMultiSelectOpening()
     }
 
     private fun initParams() {
@@ -98,13 +100,6 @@ class TrashFragment : FileSubTypeListFragment() {
         }
     }
 
-    private fun setupMultiSelectOpening() {
-        multiSelectManager.openMultiSelect = {
-            swipeRefreshLayout?.isEnabled = false
-            openMultiSelect()
-        }
-    }
-
     private fun MaterialButton.setupEmptyTrashButton() {
         isVisible = true
         setOnClickListener {
@@ -141,11 +136,6 @@ class TrashFragment : FileSubTypeListFragment() {
                 isAllSelected = isAllSelected
             ).toBundle()
         }.show(childFragmentManager, "ActionTrashMultiSelectBottomSheetDialog")
-    }
-
-    override fun closeMultiSelect() {
-        super.closeMultiSelect()
-        swipeRefreshLayout?.isEnabled = true
     }
 
     private fun showTrashedFileActions(file: File) {

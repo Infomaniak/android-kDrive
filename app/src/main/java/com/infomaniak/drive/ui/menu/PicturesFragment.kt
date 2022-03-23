@@ -29,6 +29,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.WorkInfo
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.infomaniak.drive.R
@@ -73,6 +74,7 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
 
     override fun initMultiSelectLayout(): MultiSelectLayoutBinding? = menuPicturesBinding?.multiSelectLayout
     override fun initMultiSelectToolbar(): CollapsingToolbarLayout? = menuPicturesBinding?.collapsingToolbarLayout
+    override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = menuPicturesBinding?.swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -92,10 +94,7 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
         }
 
         multiSelectManager.apply {
-            openMultiSelect = {
-                menuPicturesBinding?.swipeRefreshLayout?.isEnabled = false
-                openMultiSelect()
-            }
+            openMultiSelect = { openMultiSelect() }
             updateMultiSelect = { onItemSelected() }
         }
 
@@ -234,11 +233,6 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
             picturesAdapter.clearPictures()
             loadMorePictures(AccountUtils.currentDriveId, true)
         }
-    }
-
-    override fun closeMultiSelect() {
-        super.closeMultiSelect()
-        menuPicturesBinding?.swipeRefreshLayout?.isEnabled = true
     }
 
     override fun getAllSelectedFilesCount(): Int? = null
