@@ -139,4 +139,3 @@ class FavoritesFragment : FileListFragment() {
         }
     }
 }
-
