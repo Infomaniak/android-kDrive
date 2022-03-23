@@ -122,7 +122,6 @@
 
         <activity
             android:name=".ui.login.LoginActivity"
-            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.Login"
             tools:ignore="LockedOrientationActivity" />
 
