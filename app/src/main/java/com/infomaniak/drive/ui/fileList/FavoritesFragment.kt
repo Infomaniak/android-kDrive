@@ -33,15 +33,21 @@ class FavoritesFragment : FileListFragment() {
     override var enabledMultiSelectMode: Boolean = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        initParams()
+        super.onViewCreated(view, savedInstanceState)
+        collapsingToolbarLayout.title = getString(R.string.favoritesTitle)
+        setupAdapter()
+    }
+
+    private fun initParams() {
         if (folderId == ROOT_ID) {
             downloadFiles = DownloadFiles()
             folderId = OTHER_ROOT_ID
         }
         setNoFilesLayout = SetNoFilesLayout()
-        super.onViewCreated(view, savedInstanceState)
+    }
 
-        collapsingToolbarLayout.title = getString(R.string.favoritesTitle)
-
+    private fun setupAdapter() {
         fileAdapter.apply {
             onEmptyList = { changeNoFilesLayoutVisibility(hideFileList = true, changeControlsVisibility = false) }
 
@@ -55,7 +61,6 @@ class FavoritesFragment : FileListFragment() {
                 }
             }
         }
-
     }
 
     private inner class SetNoFilesLayout : () -> Unit {
