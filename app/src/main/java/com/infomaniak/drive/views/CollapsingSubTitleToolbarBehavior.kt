@@ -105,9 +105,11 @@ class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(
             }
 
             appBarLayout.toolbar.setNavigationIconTint(if (isExpanded) expandedTitleColor else collapsedTitleColor)
-            subtitleToolbarView.title.typeface = if (percentage < 1) expandedTitleFont else collapsedTitleFont
             isNewState = false
         }
+
+        subtitleToolbarView.title.typeface = if (percentage < 1) expandedTitleFont else collapsedTitleFont
+
         return true
     }
 

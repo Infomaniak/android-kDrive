@@ -119,7 +119,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         val collapsingToolbarBehavior = params.behavior as? CollapsingSubTitleToolbarBehavior
 
         appBar.addOnOffsetChangedListener(object : AppBarStateChangeListener() {
-            override fun onStateChanged(appBarLayout: AppBarLayout?, state: State?) {
+            override fun onStateChanged(state: State) {
                 collapsingToolbarBehavior?.apply {
                     isNewState = true
                     isExpanded = state == State.EXPANDED
@@ -130,6 +130,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
                 }
             }
         })
+
         if (file.hasThumbnail) {
             collapsingBackground.loadAny(file.thumbnail())
         } else {
@@ -176,24 +177,25 @@ class FileDetailsFragment : FileDetailsSubFragment() {
     }
 
     abstract class AppBarStateChangeListener : AppBarLayout.OnOffsetChangedListener {
-        enum class State { EXPANDED, COLLAPSED }
 
         private var currentState = State.EXPANDED
+
         override fun onOffsetChanged(appBarLayout: AppBarLayout, yOffset: Int) {
             // ScrimVisibleHeightTrigger starts from the top of the appbar and stops at the collapsing threshold
             val appBarCollapsingThreshold =
                 appBarLayout.height - appBarLayout.fileDetailsCollapsingToolbar.scrimVisibleHeightTrigger
 
             currentState = callStateChangeListener(
-                appBarLayout = appBarLayout,
-                state = if (abs(yOffset) <= appBarCollapsingThreshold) State.EXPANDED else State.COLLAPSED
+                if (abs(yOffset) <= appBarCollapsingThreshold) State.EXPANDED else State.COLLAPSED
             )
         }
 
-        abstract fun onStateChanged(appBarLayout: AppBarLayout?, state: State?)
-
-        private fun callStateChangeListener(appBarLayout: AppBarLayout, state: State): State {
-            return state.also { if (currentState != it) onStateChanged(appBarLayout, it) }
+        private fun callStateChangeListener(state: State): State {
+            return state.also { if (currentState != it) onStateChanged(it) }
         }
+
+        abstract fun onStateChanged(state: State)
+
+        enum class State { EXPANDED, COLLAPSED }
     }
 }
