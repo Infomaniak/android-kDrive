@@ -27,6 +27,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.button.MaterialButton
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
+import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.SortTypeUsage
@@ -146,6 +147,19 @@ class TrashFragment : FileSubTypeListFragment() {
     private fun removeFileFromAdapter(fileId: Int) {
         fileAdapter.deleteByFileId(fileId)
         noFilesLayout.toggleVisibility(fileAdapter.getFiles().isEmpty())
+    }
+
+    override fun performBulkOperation(
+        type: BulkOperationType,
+        areAllFromTheSameFolder: Boolean,
+        allSelectedFilesCount: Int?,
+        destinationFolder: File?,
+        color: String?,
+    ) {
+        // API doesn't support bulk operations for files originating from
+        // different parent folders, so we repeat the action for each file.
+        // Hence the `areAllFromTheSameFolder` set at false.
+        super.performBulkOperation(type, false, allSelectedFilesCount, destinationFolder, color)
     }
 
     companion object {
