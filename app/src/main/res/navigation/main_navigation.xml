@@ -260,6 +260,9 @@
         <action
             android:id="@+id/action_favoritesFragment_self"
             app:destination="@id/favoritesFragment" />
+        <action
+            android:id="@+id/action_fileList_to_colorFolder"
+            app:destination="@id/colorFolderBottomSheetDialog" />
     </fragment>
 
     <fragment
