@@ -205,6 +205,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                 context = this,
                 title = getString(R.string.modalMoveTrashTitle),
                 message = resources.getQuantityString(R.plurals.modalMoveTrashDescription, fileCount, fileCount),
+                autoDismiss = false,
                 isDeletion = true,
                 onConfirmation = sendActions,
             )
@@ -213,7 +214,6 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                     context = this,
                     fileCount = fileCount,
                     fromTrash = true,
-                    autoDismiss = true,
                     onConfirmation = sendActions,
                 )
             }
@@ -228,7 +228,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         selectedFiles: List<File>,
         destinationFolder: File?,
         color: String?,
-    ): (Dialog?) -> Unit = {
+    ): (Dialog?) -> Unit = { dialog ->
 
         val canBulkAllSelectedFiles = multiSelectManager.isSelectAllOn
         val hasEnoughSelectedFilesToBulk = selectedFiles.size > BulkOperationsUtils.MIN_SELECTED
@@ -237,13 +237,15 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         if (areAllFromTheSameFolder && isNotOfflineBulk && (canBulkAllSelectedFiles || hasEnoughSelectedFilesToBulk)) {
             with(multiSelectManager) {
                 sendBulkAction(
-                    fileCount, BulkOperation(
+                    fileCount = fileCount,
+                    bulkOperation = BulkOperation(
                         action = type,
                         fileIds = if (isSelectAllOn) null else selectedFiles.map { it.id },
                         exceptedFilesIds = if (isSelectAllOn) exceptedItemsIds else null,
                         parent = currentFolder!!,
                         destinationFolderId = destinationFolder?.id,
-                    )
+                    ),
+                    dialog = dialog,
                 )
             }
 
@@ -251,13 +253,14 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             val mediator = mainViewModel.createMultiSelectMediator()
             enableMultiSelectButtons(false)
             sendAllIndividualActions(selectedFiles, type, mediator, destinationFolder, color)
-            observeMediator(mediator, fileCount, type, destinationFolder)
+            observeMediator(mediator, fileCount, type, destinationFolder, dialog)
         }
     }
 
-    private fun sendBulkAction(fileCount: Int = 0, bulkOperation: BulkOperation) {
+    private fun sendBulkAction(fileCount: Int = 0, bulkOperation: BulkOperation, dialog: Dialog? = null) {
         MqttClientWrapper.start {
             multiSelectManager.performCancellableBulkOperation(bulkOperation).observe(viewLifecycleOwner) { apiResponse ->
+                dialog?.dismiss()
                 if (apiResponse.isSuccess()) {
                     apiResponse.data?.let { cancellableAction ->
                         requireContext().launchBulkOperationWorker(
@@ -393,9 +396,13 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         fileCount: Int,
         type: BulkOperationType,
         destinationFolder: File?,
+        dialog: Dialog? = null,
     ) {
         mediator.observe(viewLifecycleOwner) { (success, total) ->
-            if (total == fileCount) handleIndividualActionsResult(success, type, destinationFolder)
+            if (total == fileCount) {
+                dialog?.dismiss()
+                handleIndividualActionsResult(success, type, destinationFolder)
+            }
         }
     }
 
