@@ -103,7 +103,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
     }
 
     private fun displayFolderContentCount(folder: File) {
-        getFileCounts(folder).observe(viewLifecycleOwner) { (files, count, folders) ->
+        fileDetailsViewModel.getFileCounts(folder).observe(viewLifecycleOwner) { (files, count, folders) ->
             with(resources) {
                 fileCountValue.text = when {
                     count == 0 -> getString(R.string.fileDetailsInfoEmptyFolder)
@@ -119,10 +119,6 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
 
             fileCount.isVisible = true
         }
-    }
-
-    private fun getFileCounts(folder: File): LiveData<FileCount> = liveData(Dispatchers.IO) {
-        ApiRepository.getFileCount(folder).data?.let { emit(FileCount(it.files, it.count, it.folders)) }
     }
 
     private fun setBackActionHandlers() {
