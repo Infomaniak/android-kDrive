@@ -51,7 +51,11 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val areIndividualActionsVisible = navigationArgs.fileIds.size in 1..BulkOperationsUtils.MIN_SELECTED
+
+        val areIndividualActionsVisible = with(navigationArgs) {
+            fileIds.size in 1..BulkOperationsUtils.MIN_SELECTED && !isAllSelected
+        }
+
         configureColoredFolder(areIndividualActionsVisible)
         configureAddFavorites(areIndividualActionsVisible)
         configureAvailableOffline()
