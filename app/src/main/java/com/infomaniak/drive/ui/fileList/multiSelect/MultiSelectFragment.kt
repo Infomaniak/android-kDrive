@@ -387,8 +387,11 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                 }
             }
         } else {
-            Utils.downloadAsOfflineFile(requireContext(), file)
-            file.isOffline = true
+            if (!Utils.downloadAsOfflineFile(requireContext(), file)) {
+                requireActivity().showSnackbar(R.string.snackBarInvalidFileNameError)
+            } else {
+                file.isOffline = true
+            }
         }
     }
 

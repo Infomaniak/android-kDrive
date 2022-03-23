@@ -49,6 +49,7 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.Utils.moveFileClicked
+import com.infomaniak.drive.utils.Utils.showSnackbar
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -206,7 +207,10 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
         leaveShare.setOnClickListener { onItemClickListener.leaveShare() }
         availableOfflineSwitch.setOnCheckedChangeListener { _, isChecked ->
-            onItemClickListener.availableOfflineSwitched(this, isChecked)
+            if (!onItemClickListener.availableOfflineSwitched(this, isChecked)) {
+                availableOfflineSwitch.isChecked = false
+                showSnackbar(findViewById(R.id.fileActionCoordinatorLayout), R.string.snackBarInvalidFileNameError)
+            }
         }
         availableOffline.setOnClickListener { availableOfflineSwitch.performClick() }
         moveFile.setOnClickListener {
@@ -219,7 +223,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         goToFolder.setOnClickListener { onItemClickListener.goToFolder() }
     }
 
-    fun downloadAsOfflineFile() {
+    fun downloadAsOfflineFile(): Boolean {
         val cacheFile = currentFile.getCacheFile(context)
         if (cacheFile.exists()) {
             currentFile.getOfflineFile(context)?.let { offlineFile ->
@@ -229,10 +233,11 @@ class FileInfoActionsView @JvmOverloads constructor(
                 onItemClickListener.onCacheAddedToOffline()
             }
         } else {
-            Utils.downloadAsOfflineFile(context, currentFile)
+            if (!Utils.downloadAsOfflineFile(context, currentFile)) return false
             if (currentFile.isPendingOffline(context)) mainViewModel.updateOfflineFile.value = currentFile.id
         }
         refreshBottomSheetUi(currentFile)
+        return true
     }
 
     fun downloadFile(drivePermissions: DrivePermissions, onSuccess: () -> Unit) {
@@ -244,7 +249,10 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
     }
 
-    fun createPublicCopyLink(onSuccess: ((file: File?) -> Unit)? = null, onError: ((translatedError: String) -> Unit)? = null) {
+    fun createPublicCopyLink(
+        onSuccess: ((file: File?) -> Unit)? = null,
+        onError: ((translatedError: String) -> Unit)? = null
+    ) {
         when {
             currentFile.collaborativeFolder != null -> {
                 copyPublicLink(currentFile.collaborativeFolder!!)
@@ -441,14 +449,14 @@ class FileInfoActionsView @JvmOverloads constructor(
             }
         }
 
-        fun availableOfflineSwitched(fileInfoActionsView: FileInfoActionsView, isChecked: Boolean) {
+        fun availableOfflineSwitched(fileInfoActionsView: FileInfoActionsView, isChecked: Boolean): Boolean {
             currentFile.apply {
                 when {
                     isOffline && isChecked -> Unit
                     !isOffline && !isChecked -> Unit
                     isChecked -> {
                         trackActionEvent("offline", true.toFloat())
-                        fileInfoActionsView.downloadAsOfflineFile()
+                        return fileInfoActionsView.downloadAsOfflineFile()
                     }
                     else -> {
                         trackActionEvent("offline", false.toFloat())
@@ -458,6 +466,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                     }
                 }
             }
+            return true
         }
 
         fun moveFileClicked(folderId: Int?, selectFolderResultLauncher: ActivityResultLauncher<Intent>) {

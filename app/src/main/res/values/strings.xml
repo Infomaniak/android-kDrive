@@ -196,6 +196,7 @@
     <string name="cloudStorageQuerySearchImpossibleSelectDrive">No search possible: no drive selected</string>
     <string name="commonFolderDescription">Share this folder with users of kDrive %s</string>
     <string name="commonFolderTitle">Common folder</string>
+    <string name="content">Content</string>
     <string name="contentDescriptionIsSelected">Is selected</string>
     <string name="convertToDropboxTitle">Convert to drop box %s</string>
     <string name="createCategoryTitle">Create a category</string>
@@ -249,6 +250,7 @@
     <string name="dropboxSharedLinkTitle">Dropbox sharing link</string>
     <string name="editCategoryInfoDescription">The modification will be visible to all kDrive users who have access to the categories.</string>
     <string name="editCategoryTitle">Edit a category</string>
+    <string name="emptyFolder">Empty folder</string>
     <string name="errorAddComment">Error when adding comment</string>
     <string name="errorAddFavorite">Error when adding to favorites</string>
     <string name="errorCache">Caching error</string>
@@ -280,6 +282,10 @@
     <string name="errorShareLink">Error when creating link</string>
     <string name="favoritesNoFile">No favorites at this time</string>
     <string name="favoritesTitle">Favorites</string>
+    <plurals name="file">
+        <item quantity="one">1 file</item>
+        <item quantity="other">%d files</item>
+    </plurals>
     <string name="fileActivityCollaborativeFolderAccess">has accessed the drop box</string>
     <string name="fileActivityCollaborativeFolderCreate">created a drop box</string>
     <string name="fileActivityCollaborativeFolderDelete">deleted a drop box</string>
@@ -447,6 +453,10 @@
     <string name="fileShareLinkSettingsTitle">Advanced sharing link settings</string>
     <string name="fileTypeFilterTitle">File type</string>
     <string name="filtersTitle">Filters</string>
+    <plurals name="folder">
+        <item quantity="one">1 folder</item>
+        <item quantity="other">%d folders</item>
+    </plurals>
     <string name="folderColorDescription">Change the colour of your folders to personalise and better organise your kDrive to your liking.</string>
     <string name="folderColorTitle">Folder Colour</string>
     <string name="folderDescription">Private or shared folder</string>
@@ -619,6 +629,7 @@
     <string name="sharedWithMeNoFile">No files shared with me</string>
     <string name="sharedWithMeTitle">Shared with me</string>
     <string name="snackBarCategoryDeleted">Category successfully deleted</string>
+    <string name="snackBarInvalidFileNameError">Error during offline storage, invalid file name</string>
     <plurals name="snackBarUploadError">
         <item quantity="one">A file could not be imported</item>
         <item quantity="other">%d files could not be imported</item>

@@ -252,7 +252,9 @@ object Utils {
         offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
     }
 
-    fun downloadAsOfflineFile(context: Context, file: File, userDrive: UserDrive = UserDrive()) {
+    fun downloadAsOfflineFile(context: Context, file: File, userDrive: UserDrive = UserDrive()): Boolean {
+        if (file.name.contains(Regex("[/:*?<>|”\"\\\\]"))) return false
+
         val workManager = WorkManager.getInstance(context)
 
         if (file.isPendingOffline(context)) workManager.cancelAllWorkByTag(file.getWorkerTag())
@@ -274,6 +276,7 @@ object Utils {
 
         workManager
             .enqueueUniqueWork(DownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
+        return true
     }
 
     fun showSnackbar(

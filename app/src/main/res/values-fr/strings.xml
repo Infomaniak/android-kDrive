@@ -182,6 +182,7 @@
     <string name="cloudStorageQuerySearchImpossibleSelectDrive">Recherche impossible, aucun drive n’a été sélectionné</string>
     <string name="commonFolderDescription">Partagez ce dossier avec des utilisateurs du kDrive %s</string>
     <string name="commonFolderTitle">Dossier commun</string>
+    <string name="content">Contenu</string>
     <string name="contentDescriptionIsSelected">Est sélectionné</string>
     <string name="convertToDropboxTitle">Convertir en boîte de dépôt %s</string>
     <string name="createCategoryTitle">Créer une catégorie</string>
@@ -235,6 +236,7 @@
     <string name="dropboxSharedLinkTitle">Lien de partage de la boîte de dépôt</string>
     <string name="editCategoryInfoDescription">La modification sera visible par tous les utilisateurs du kDrive ayant accès aux catégories.</string>
     <string name="editCategoryTitle">Modifier une catégorie</string>
+    <string name="emptyFolder">Dossier vide</string>
     <string name="errorAddComment">Erreur lors de l’ajout du commentaire</string>
     <string name="errorAddFavorite">Erreur lors de l’ajout aux favoris</string>
     <string name="errorCache">Erreur lors de la mise en cache</string>
@@ -266,6 +268,10 @@
     <string name="errorShareLink">Erreur lors de la création du lien</string>
     <string name="favoritesNoFile">Aucun favori pour le moment</string>
     <string name="favoritesTitle">Favoris</string>
+    <plurals name="file">
+        <item quantity="one">1 fichier</item>
+        <item quantity="other">%d fichiers</item>
+    </plurals>
     <string name="fileActivityCollaborativeFolderAccess">a consulté la boîte de dépôt</string>
     <string name="fileActivityCollaborativeFolderCreate">a créé une boîte de dépôt</string>
     <string name="fileActivityCollaborativeFolderDelete">a supprimé une boîte de dépôt</string>
@@ -433,6 +439,10 @@
     <string name="fileShareLinkSettingsTitle">Paramètres avancés du lien de partage</string>
     <string name="fileTypeFilterTitle">Type de fichier</string>
     <string name="filtersTitle">Filtres</string>
+    <plurals name="folder">
+        <item quantity="one">1 dossier</item>
+        <item quantity="other">%d dossiers</item>
+    </plurals>
     <string name="folderColorDescription">Changer la couleur de vos dossiers pour personnaliser et mieux organiser votre kDrive selon vos envies.</string>
     <string name="folderColorTitle">Couleurs des dossiers</string>
     <string name="folderDescription">Dossier privé ou partagé</string>
@@ -605,6 +615,7 @@
     <string name="sharedWithMeNoFile">Aucun fichier partagé avec moi</string>
     <string name="sharedWithMeTitle">Partagés avec moi</string>
     <string name="snackBarCategoryDeleted">Catégorie supprimée avec succès</string>
+    <string name="snackBarInvalidFileNameError">Erreur lors de la mise hors ligne, nom de fichier invalide</string>
     <plurals name="snackBarUploadError">
         <item quantity="one">Un fichier n’a pas pu être importé</item>
         <item quantity="other">%d fichiers n’ont pas pu être importés</item>
