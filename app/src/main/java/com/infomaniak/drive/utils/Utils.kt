@@ -252,6 +252,15 @@ object Utils {
         offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
     }
 
+    /**
+     * Download [file] to put it offline on drive [userDrive]
+     *
+     * @param context
+     * @param file file to put offline
+     * @param userDrive drive on which the file will be available offline
+     *
+     * @return true if the file has been successfully downloaded, false if its name contains forbidden characters
+     */
     fun downloadAsOfflineFile(context: Context, file: File, userDrive: UserDrive = UserDrive()): Boolean {
         if (file.name.contains(Regex("[/:*?<>|\"\\\\]"))) return false
 
