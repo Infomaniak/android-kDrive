@@ -615,7 +615,7 @@
     <string name="sharedWithMeNoFile">No hay archivos compartidos conmigo</string>
     <string name="sharedWithMeTitle">Usos compartidos conmigo</string>
     <string name="snackBarCategoryDeleted">Categoría eliminada correctamente</string>
-    <string name="snackBarInvalidFileNameError">Errore durante il salvataggio offline, nome del file non valido</string>
+    <string name="snackBarInvalidFileNameError">El nombre del archivo %s no es compatible con la disponibilidad fuera de línea</string>
     <plurals name="snackBarUploadError">
         <item quantity="one">No se ha podido importar un archivo</item>
         <item quantity="other">No se han podido importar %d archivos</item>

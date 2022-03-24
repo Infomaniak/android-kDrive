@@ -209,7 +209,10 @@ class FileInfoActionsView @JvmOverloads constructor(
         availableOfflineSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (!onItemClickListener.availableOfflineSwitched(this, isChecked)) {
                 availableOfflineSwitch.isChecked = false
-                showSnackbar(findViewById(R.id.fileActionCoordinatorLayout), R.string.snackBarInvalidFileNameError)
+                showSnackbar(
+                    findViewById(R.id.fileActionCoordinatorLayout),
+                    context.getString(R.string.snackBarInvalidFileNameError, currentFile.name)
+                )
             }
         }
         availableOffline.setOnClickListener { availableOfflineSwitch.performClick() }

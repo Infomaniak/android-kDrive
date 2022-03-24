@@ -615,7 +615,7 @@
     <string name="sharedWithMeNoFile">Keine Datei mit mir geteilt</string>
     <string name="sharedWithMeTitle">Mit mir geteilt</string>
     <string name="snackBarCategoryDeleted">Kategorie erfolgreich gelöscht</string>
-    <string name="snackBarInvalidFileNameError">Fehler beim Offline-Speichern, ungültiger Datei Name</string>
+    <string name="snackBarInvalidFileNameError">Datei Name %s nicht für Offline-Verfügbarkeit unterstützt</string>
     <plurals name="snackBarUploadError">
         <item quantity="one">Eine Datei konnte nicht importiert werden</item>
         <item quantity="other">%d Dateien konnten nicht importiert werden</item>
