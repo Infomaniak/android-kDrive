@@ -37,7 +37,6 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_multi_select_actions.*
-import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.Dispatchers
 
 abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: String) : BottomSheetDialogFragment() {
@@ -77,18 +76,18 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
     }
 
     protected open fun configureAddFavorites(areIndividualActionsVisible: Boolean) {
-        with(navigationArgs) {
-            addFavorites.apply {
-                addFavoritesIcon.isEnabled = onlyFavorite
-                val (text, action) = if (onlyFavorite) {
-                    R.string.buttonRemoveFavorites to SelectDialogAction.REMOVE_FAVORITES
-                } else {
-                    R.string.buttonAddFavorites to SelectDialogAction.ADD_FAVORITES
-                }
-                addFavoritesText.setText(text)
-                setOnClickListener { onActionSelected(action) }
-                isVisible = areIndividualActionsVisible
+        val (text, action) = with(navigationArgs) {
+            addFavoritesIcon.isEnabled = onlyFavorite
+            if (onlyFavorite) {
+                R.string.buttonRemoveFavorites to SelectDialogAction.REMOVE_FAVORITES
+            } else {
+                R.string.buttonAddFavorites to SelectDialogAction.ADD_FAVORITES
             }
+        }
+        addFavoritesText.setText(text)
+        addFavorites.apply {
+            setOnClickListener { onActionSelected(action) }
+            isVisible = areIndividualActionsVisible
         }
     }
 
