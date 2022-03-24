@@ -139,6 +139,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     override fun initMultiSelectLayout(): MultiSelectLayoutBinding? = binding.multiSelectLayout
     override fun initMultiSelectToolbar(): CollapsingToolbarLayout? = binding.collapsingToolbarLayout
+    override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

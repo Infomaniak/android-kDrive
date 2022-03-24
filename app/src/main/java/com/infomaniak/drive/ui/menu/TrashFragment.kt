@@ -23,6 +23,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.navigation.navGraphViewModels
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.infomaniak.drive.R
@@ -45,6 +46,8 @@ class TrashFragment : FileSubTypeListFragment() {
     override var enabledMultiSelectMode: Boolean = true
     override var sortTypeUsage = SortTypeUsage.TRASH
 
+    override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = swipeRefreshLayout
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initParams()
         super.onViewCreated(view, savedInstanceState)
@@ -60,7 +63,6 @@ class TrashFragment : FileSubTypeListFragment() {
         }
 
         setupMultiSelectLayout()
-        setupMultiSelectOpening()
     }
 
     private fun initParams() {
@@ -104,13 +106,6 @@ class TrashFragment : FileSubTypeListFragment() {
             selectAllButton.isGone = true
             moveButtonMultiSelect.isInvisible = true
             deleteButtonMultiSelect.isInvisible = true
-        }
-    }
-
-    private fun setupMultiSelectOpening() {
-        multiSelectManager.openMultiSelect = {
-            swipeRefreshLayout?.isEnabled = false
-            openMultiSelect()
         }
     }
 

@@ -32,6 +32,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
@@ -71,6 +72,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     protected var adapter: RecyclerView.Adapter<*>? = null
     protected var multiSelectLayout: MultiSelectLayoutBinding? = null
     private var multiSelectToolbar: CollapsingToolbarLayout? = null
+    private var swipeRefresh: SwipeRefreshLayout? = null
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data ->
@@ -93,15 +95,26 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
 
     abstract fun initMultiSelectLayout(): MultiSelectLayoutBinding?
     abstract fun initMultiSelectToolbar(): CollapsingToolbarLayout?
+    abstract fun initSwipeRefreshLayout(): SwipeRefreshLayout?
     abstract fun getAllSelectedFilesCount(): Int?
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+
         multiSelectLayout = initMultiSelectLayout()
         multiSelectToolbar = initMultiSelectToolbar()
+        swipeRefresh = initSwipeRefreshLayout()
+
+        if (multiSelectManager.isMultiSelectOn) {
+            openMultiSelect()
+            onItemSelected()
+        }
+
         super.onViewCreated(view, savedInstanceState)
     }
 
     fun openMultiSelect() {
+        swipeRefresh?.isEnabled = false
+
         multiSelectManager.isMultiSelectOn = true
 
         adapter?.apply { notifyItemRangeChanged(0, itemCount) }
@@ -134,6 +147,8 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     }
 
     open fun closeMultiSelect() {
+        swipeRefresh?.isEnabled = true
+
         multiSelectManager.apply {
             resetSelectedItems()
             exceptedItemsIds.clear()
