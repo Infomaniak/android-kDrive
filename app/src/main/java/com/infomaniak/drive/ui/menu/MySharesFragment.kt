@@ -19,13 +19,10 @@ package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
 import android.view.View
-import androidx.core.view.isGone
 import androidx.navigation.fragment.findNavController
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.BulkOperationType
-import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MySharesMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.Utils
@@ -47,7 +44,6 @@ class MySharesFragment : FileSubTypeListFragment() {
         super.onViewCreated(view, savedInstanceState)
         collapsingToolbarLayout.title = getString(R.string.mySharesTitle)
         setupAdapter()
-        setupMultiSelectLayout()
     }
 
     private fun initParams() {
@@ -73,10 +69,6 @@ class MySharesFragment : FileSubTypeListFragment() {
         }
     }
 
-    private fun setupMultiSelectLayout() {
-        multiSelectLayout?.selectAllButton?.isGone = true
-    }
-
     override fun onMenuButtonClicked() {
         val (fileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
         MySharesMultiSelectActionsBottomSheetDialog().apply {
@@ -88,19 +80,6 @@ class MySharesFragment : FileSubTypeListFragment() {
                 isAllSelected = isAllSelected
             ).toBundle()
         }.show(childFragmentManager, "ActionMySharesMultiSelectBottomSheetDialog")
-    }
-
-    override fun performBulkOperation(
-        type: BulkOperationType,
-        areAllFromTheSameFolder: Boolean,
-        allSelectedFilesCount: Int?,
-        destinationFolder: File?,
-        color: String?,
-    ) {
-        // API doesn't support bulk operations for files originating from
-        // different parent folders, so we repeat the action for each file.
-        // Hence the `areAllFromTheSameFolder` set at false.
-        super.performBulkOperation(type, false, allSelectedFilesCount, destinationFolder, color)
     }
 
     companion object {
