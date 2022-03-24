@@ -49,7 +49,7 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.Utils.moveFileClicked
-import com.infomaniak.drive.utils.Utils.showSnackbar
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -99,7 +99,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             actionListLayout.isGone = true
         } else {
             quickActionsLayout.isVisible = true
-            quickActionsLayout.isVisible = true
+            actionListLayout.isVisible = true
 
             // TODO - Enhanceable code : Replace these let by an autonomous view with "enabled/disabled" method ?
             currentFile.rights.let { rights ->
@@ -208,11 +208,13 @@ class FileInfoActionsView @JvmOverloads constructor(
         leaveShare.setOnClickListener { onItemClickListener.leaveShare() }
         availableOfflineSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (!onItemClickListener.availableOfflineSwitched(this, isChecked)) {
-                availableOfflineSwitch.isChecked = false
-                showSnackbar(
-                    findViewById(R.id.fileActionCoordinatorLayout),
-                    context.getString(R.string.snackBarInvalidFileNameError, currentFile.name)
-                )
+                with(ownerFragment) {
+                    findNavController().popBackStack()
+                    availableOfflineSwitch.isChecked = false
+                    activity?.let {
+                        it.showSnackbar(getString(R.string.snackBarInvalidFileNameError, currentFile.name), it.mainFab)
+                    }
+                }
             }
         }
         availableOffline.setOnClickListener { availableOfflineSwitch.performClick() }
