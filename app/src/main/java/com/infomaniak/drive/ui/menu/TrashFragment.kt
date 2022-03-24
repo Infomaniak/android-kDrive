@@ -51,7 +51,7 @@ class TrashFragment : FileSubTypeListFragment() {
 
         toolbar.setContentInsetsRelative(0, 0)
 
-        emptyTrash.apply { setupEmptyTrashButton() }
+        emptyTrash.setupEmptyTrashButton()
 
         if (folderId == ROOT_ID) collapsingToolbarLayout.title = getString(R.string.trashTitle)
 
