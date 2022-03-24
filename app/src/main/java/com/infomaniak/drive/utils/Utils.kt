@@ -253,7 +253,7 @@ object Utils {
     }
 
     fun downloadAsOfflineFile(context: Context, file: File, userDrive: UserDrive = UserDrive()): Boolean {
-        if (file.name.contains(Regex("[/:*?<>|”\"\\\\]"))) return false
+        if (file.name.contains(Regex("[/:*?<>|\"\\\\]"))) return false
 
         val workManager = WorkManager.getInstance(context)
 
