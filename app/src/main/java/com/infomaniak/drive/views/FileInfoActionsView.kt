@@ -246,6 +246,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             if (currentFile.isPendingOffline(context)) mainViewModel.updateOfflineFile.value = currentFile.id
         }
         refreshBottomSheetUi(currentFile)
+
         return true
     }
 
@@ -475,6 +476,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                     }
                 }
             }
+
             return true
         }
 

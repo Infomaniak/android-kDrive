@@ -15,743 +15,742 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-    <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/scrollView"
+    android:id="@+id/scrollView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <include layout="@layout/view_bottom_sheet_separator" />
+
+        <include
+            android:id="@+id/fileView"
+            layout="@layout/item_file"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/marginStandardSmall"
+            android:layout_marginBottom="@dimen/marginStandardSmall" />
+
+        <GridLayout
+            android:id="@+id/quickActionsLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="2"
+            android:rowCount="2">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/displayInfo"
+                android:layout_width="0dp"
+                android:layout_height="90dp"
+                android:layout_columnWeight="1"
+                android:layout_gravity="start|top|fill"
+                android:layout_marginStart="@dimen/marginStandard"
+                android:layout_marginTop="@dimen/marginStandardMedium"
+                android:layout_marginEnd="@dimen/marginStandardVerySmall"
+                app:cardBackgroundColor="@color/background"
+                app:cardCornerRadius="@dimen/cardViewRadius"
+                app:cardElevation="0dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:id="@+id/displayInfoIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/marginStandardVerySmall"
+                        android:src="@drawable/ic_info"
+                        app:layout_constraintBottom_toTopOf="@id/displayInfoText"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="ContentDescription" />
+
+                    <TextView
+                        android:id="@+id/displayInfoText"
+                        style="@style/Subtitle2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/marginStandardVerySmall"
+                        android:gravity="center"
+                        android:text="@string/fileDetailsInfosTitle"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/displayInfoIcon" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <View
+                    android:id="@+id/disabledInfo"
+                    style="@style/DisabledView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/background"
+                    android:visibility="gone" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/sendCopy"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_rowWeight="1"
+                android:layout_columnWeight="1"
+                android:layout_gravity="end|top|fill"
+                android:layout_marginStart="@dimen/marginStandardVerySmall"
+                android:layout_marginTop="@dimen/marginStandardMedium"
+                android:layout_marginEnd="@dimen/marginStandard"
+                app:cardBackgroundColor="@color/background"
+                app:cardCornerRadius="@dimen/cardViewRadius"
+                app:cardElevation="0dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:id="@+id/sendCopyIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/marginStandardVerySmall"
+                        android:src="@drawable/ic_export"
+                        app:layout_constraintBottom_toTopOf="@id/sendCopyText"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="@color/iconColor"
+                        tools:ignore="ContentDescription" />
+
+                    <TextView
+                        android:id="@+id/sendCopyText"
+                        style="@style/Subtitle2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/marginStandardVerySmall"
+                        android:gravity="center"
+                        android:text="@string/buttonSendCopy"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/sendCopyIcon" />
+
+                    <View
+                        android:id="@+id/disabledSendCopy"
+                        style="@style/DisabledView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@color/background"
+                        android:visibility="gone" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/fileRights"
+                android:layout_width="0dp"
+                android:layout_height="90dp"
+                android:layout_columnWeight="1"
+                android:layout_gravity="start|bottom|fill"
+                android:layout_marginStart="@dimen/marginStandard"
+                android:layout_marginTop="@dimen/marginStandardSmall"
+                android:layout_marginEnd="@dimen/marginStandardVerySmall"
+                android:layout_marginBottom="@dimen/marginStandardMedium"
+                app:cardBackgroundColor="@color/background"
+                app:cardCornerRadius="@dimen/cardViewRadius"
+                app:cardElevation="0dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:id="@+id/fileRightsIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/marginStandardVerySmall"
+                        android:src="@drawable/ic_share"
+                        app:layout_constraintBottom_toTopOf="@id/fileRightsText"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="ContentDescription" />
+
+                    <TextView
+                        android:id="@+id/fileRightsText"
+                        style="@style/Subtitle2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/marginStandardVerySmall"
+                        android:gravity="center"
+                        android:text="@string/buttonFileRights"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/fileRightsIcon" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <View
+                    android:id="@+id/disabledFileRights"
+                    style="@style/DisabledView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/background"
+                    android:visibility="gone" />
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/copyPublicLink"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_rowWeight="1"
+                android:layout_columnWeight="1"
+                android:layout_gravity="end|bottom|fill"
+                android:layout_marginStart="@dimen/marginStandardVerySmall"
+                android:layout_marginTop="@dimen/marginStandardSmall"
+                android:layout_marginEnd="@dimen/marginStandard"
+                android:layout_marginBottom="@dimen/marginStandardMedium"
+                app:cardBackgroundColor="@color/background"
+                app:cardCornerRadius="@dimen/cardViewRadius"
+                app:cardElevation="0dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/copyPublicLinkLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:id="@+id/copyPublicLinkIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/marginStandardVerySmall"
+                        android:src="@drawable/ic_link"
+                        app:layout_constraintBottom_toTopOf="@id/copyPublicLinkText"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="ContentDescription" />
+
+                    <TextView
+                        android:id="@+id/copyPublicLinkText"
+                        style="@style/Subtitle2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/marginStandardVerySmall"
+                        android:gravity="center"
+                        android:text="@string/buttonCopyPublicLink"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/copyPublicLinkIcon" />
+
+                    <View
+                        android:id="@+id/disabledPublicLink"
+                        style="@style/DisabledView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@color/background"
+                        android:visibility="gone" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:id="@+id/copyPublicLinkLoader"
+                    style="@style/CircularIndicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:indeterminate="true"
+                    android:visibility="gone" />
+            </com.google.android.material.card.MaterialCardView>
+        </GridLayout>
 
         <LinearLayout
+            android:id="@+id/actionListLayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <include layout="@layout/view_bottom_sheet_separator" />
-
-            <include
-                android:id="@+id/fileView"
-                layout="@layout/item_file"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/openWith"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/marginStandardSmall"
-                android:layout_marginBottom="@dimen/marginStandardSmall" />
+                android:layout_height="@dimen/buttonHeight"
+                android:background="?selectableItemBackground">
 
-            <GridLayout
-                android:id="@+id/quickActionsLayout"
+                <ImageView
+                    android:id="@+id/openWithIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandard"
+                    android:src="@drawable/ic_open_with"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="ContentDescription" />
+
+                <TextView
+                    android:id="@+id/openWithText"
+                    style="@style/Subtitle2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardMedium"
+                    android:layout_marginEnd="@dimen/marginStandard"
+                    android:text="@string/buttonOpenWith"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/openWithIcon"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/editDocument"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:columnCount="2"
-                android:rowCount="2">
+                android:layout_height="@dimen/buttonHeight"
+                android:background="?selectableItemBackground">
 
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/displayInfo"
-                    android:layout_width="0dp"
-                    android:layout_height="90dp"
-                    android:layout_columnWeight="1"
-                    android:layout_gravity="start|top|fill"
+                <ImageView
+                    android:id="@+id/editDocumentIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/marginStandard"
-                    android:layout_marginTop="@dimen/marginStandardMedium"
-                    android:layout_marginEnd="@dimen/marginStandardVerySmall"
-                    app:cardBackgroundColor="@color/background"
-                    app:cardCornerRadius="@dimen/cardViewRadius"
-                    app:cardElevation="0dp">
+                    android:src="@drawable/ic_edit_document"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="ContentDescription" />
 
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
-
-                        <ImageView
-                            android:id="@+id/displayInfoIcon"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/marginStandardVerySmall"
-                            android:src="@drawable/ic_info"
-                            app:layout_constraintBottom_toTopOf="@id/displayInfoText"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:ignore="ContentDescription" />
-
-                        <TextView
-                            android:id="@+id/displayInfoText"
-                            style="@style/Subtitle2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="@dimen/marginStandardVerySmall"
-                            android:gravity="center"
-                            android:text="@string/fileDetailsInfosTitle"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@id/displayInfoIcon" />
-
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    <View
-                        android:id="@+id/disabledInfo"
-                        style="@style/DisabledView"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="@color/background"
-                        android:visibility="gone" />
-
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/sendCopy"
+                <TextView
+                    android:id="@+id/editDocumentText"
+                    style="@style/Subtitle2"
                     android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_rowWeight="1"
-                    android:layout_columnWeight="1"
-                    android:layout_gravity="end|top|fill"
-                    android:layout_marginStart="@dimen/marginStandardVerySmall"
-                    android:layout_marginTop="@dimen/marginStandardMedium"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardMedium"
                     android:layout_marginEnd="@dimen/marginStandard"
-                    app:cardBackgroundColor="@color/background"
-                    app:cardCornerRadius="@dimen/cardViewRadius"
-                    app:cardElevation="0dp">
+                    android:text="@string/buttonEdit"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/editDocumentIcon"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/manageCategories"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/buttonHeight"
+                android:background="?selectableItemBackground"
+                android:visibility="gone"
+                tools:visibility="visible">
 
-                        <ImageView
-                            android:id="@+id/sendCopyIcon"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/marginStandardVerySmall"
-                            android:src="@drawable/ic_export"
-                            app:layout_constraintBottom_toTopOf="@id/sendCopyText"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:tint="@color/iconColor"
-                            tools:ignore="ContentDescription" />
-
-                        <TextView
-                            android:id="@+id/sendCopyText"
-                            style="@style/Subtitle2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="@dimen/marginStandardVerySmall"
-                            android:gravity="center"
-                            android:text="@string/buttonSendCopy"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@id/sendCopyIcon" />
-
-                        <View
-                            android:id="@+id/disabledSendCopy"
-                            style="@style/DisabledView"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="@color/background"
-                            android:visibility="gone" />
-
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/fileRights"
-                    android:layout_width="0dp"
-                    android:layout_height="90dp"
-                    android:layout_columnWeight="1"
-                    android:layout_gravity="start|bottom|fill"
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/manageCategoriesIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/marginStandard"
-                    android:layout_marginTop="@dimen/marginStandardSmall"
-                    android:layout_marginEnd="@dimen/marginStandardVerySmall"
-                    android:layout_marginBottom="@dimen/marginStandardMedium"
-                    app:cardBackgroundColor="@color/background"
-                    app:cardCornerRadius="@dimen/cardViewRadius"
-                    app:cardElevation="0dp">
+                    android:src="@drawable/ic_category"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
-
-                        <ImageView
-                            android:id="@+id/fileRightsIcon"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/marginStandardVerySmall"
-                            android:src="@drawable/ic_share"
-                            app:layout_constraintBottom_toTopOf="@id/fileRightsText"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:ignore="ContentDescription" />
-
-                        <TextView
-                            android:id="@+id/fileRightsText"
-                            style="@style/Subtitle2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="@dimen/marginStandardVerySmall"
-                            android:gravity="center"
-                            android:text="@string/buttonFileRights"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@id/fileRightsIcon" />
-
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    <View
-                        android:id="@+id/disabledFileRights"
-                        style="@style/DisabledView"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="@color/background"
-                        android:visibility="gone" />
-
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/copyPublicLink"
+                <TextView
+                    android:id="@+id/manageCategoriesText"
+                    style="@style/Subtitle2"
                     android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_rowWeight="1"
-                    android:layout_columnWeight="1"
-                    android:layout_gravity="end|bottom|fill"
-                    android:layout_marginStart="@dimen/marginStandardVerySmall"
-                    android:layout_marginTop="@dimen/marginStandardSmall"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardMedium"
                     android:layout_marginEnd="@dimen/marginStandard"
-                    android:layout_marginBottom="@dimen/marginStandardMedium"
-                    app:cardBackgroundColor="@color/background"
-                    app:cardCornerRadius="@dimen/cardViewRadius"
-                    app:cardElevation="0dp">
+                    android:text="@string/manageCategoriesTitle"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/manageCategoriesIcon"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/copyPublicLinkLayout"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/addFavorites"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/buttonHeight"
+                android:background="?selectableItemBackground">
 
-                        <ImageView
-                            android:id="@+id/copyPublicLinkIcon"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/marginStandardVerySmall"
-                            android:src="@drawable/ic_link"
-                            app:layout_constraintBottom_toTopOf="@id/copyPublicLinkText"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:ignore="ContentDescription" />
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/addFavoritesIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandard"
+                    android:src="@drawable/ic_star_filled"
+                    android:tint="@color/star_favorites"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                        <TextView
-                            android:id="@+id/copyPublicLinkText"
-                            style="@style/Subtitle2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="@dimen/marginStandardVerySmall"
-                            android:gravity="center"
-                            android:text="@string/buttonCopyPublicLink"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@id/copyPublicLinkIcon" />
+                <TextView
+                    android:id="@+id/addFavoritesText"
+                    style="@style/Subtitle2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardMedium"
+                    android:layout_marginEnd="@dimen/marginStandard"
+                    android:text="@string/buttonAddFavorites"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/addFavoritesIcon"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-                        <View
-                            android:id="@+id/disabledPublicLink"
-                            style="@style/DisabledView"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="@color/background"
-                            android:visibility="gone" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/goToFolder"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/buttonHeight"
+                android:background="?selectableItemBackground">
 
-                    </androidx.constraintlayout.widget.ConstraintLayout>
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/goToFolderIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandard"
+                    android:src="@drawable/ic_folder_filled"
+                    android:tint="@color/iconColor"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/goToFolderText"
+                    style="@style/Subtitle2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardMedium"
+                    android:layout_marginEnd="@dimen/marginStandard"
+                    android:text="@string/buttonSeeFolder"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/goToFolderIcon"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/dropBox"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/buttonHeight"
+                android:background="?selectableItemBackground"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/dropBoxIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandard"
+                    android:src="@drawable/ic_folder_dropbox"
+                    android:tint="@color/iconColor"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/dropBoxText"
+                    style="@style/Subtitle2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardMedium"
+                    android:layout_marginEnd="@dimen/marginStandard"
+                    android:text="@string/buttonConvertToDropBox"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/dropBoxIcon"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/coloredFolder"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/buttonHeight"
+                android:background="?selectableItemBackground"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/coloredFolderIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandard"
+                    android:src="@drawable/ic_color_bucket"
+                    android:tint="@color/iconColor"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/coloredFolderText"
+                    style="@style/Subtitle2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardMedium"
+                    android:layout_marginEnd="@dimen/marginStandard"
+                    android:text="@string/buttonChangeFolderColor"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/coloredFolderIcon"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/availableOffline"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/buttonHeight"
+                android:background="?selectableItemBackground">
+
+                <FrameLayout
+                    android:id="@+id/availableOfflineIconLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandard"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <ImageView
+                        android:id="@+id/availableOfflineIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_offline"
+                        tools:ignore="ContentDescription" />
 
                     <com.google.android.material.progressindicator.CircularProgressIndicator
-                        android:id="@+id/copyPublicLinkLoader"
+                        android:id="@+id/availableOfflineProgress"
                         style="@style/CircularIndicator"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:indeterminate="true"
                         android:visibility="gone" />
-                </com.google.android.material.card.MaterialCardView>
-            </GridLayout>
 
-            <LinearLayout
-                android:id="@+id/actionListLayout"
+                    <ImageView
+                        android:id="@+id/availableOfflineComplete"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_check"
+                        android:visibility="gone"
+                        tools:ignore="ContentDescription" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/availableOfflineText"
+                    style="@style/Subtitle2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardMedium"
+                    android:layout_marginEnd="@dimen/marginStandard"
+                    android:text="@string/buttonAvailableOffline"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/availableOfflineSwitch"
+                    app:layout_constraintStart_toEndOf="@id/availableOfflineIconLayout"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/availableOfflineSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/marginStandard"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/downloadFile"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:layout_height="@dimen/buttonHeight"
+                android:background="?selectableItemBackground">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/openWith"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/buttonHeight"
-                    android:background="?selectableItemBackground">
+                <ImageView
+                    android:id="@+id/downloadFileIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandard"
+                    android:src="@drawable/ic_download"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="ContentDescription" />
 
-                    <ImageView
-                        android:id="@+id/openWithIcon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandard"
-                        android:src="@drawable/ic_open_with"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="ContentDescription" />
+                <TextView
+                    android:id="@+id/downloadFileText"
+                    style="@style/Subtitle2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardMedium"
+                    android:layout_marginEnd="@dimen/marginStandard"
+                    android:text="@string/buttonDownload"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/downloadFileIcon"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-                    <TextView
-                        android:id="@+id/openWithText"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandardMedium"
-                        android:layout_marginEnd="@dimen/marginStandard"
-                        android:text="@string/buttonOpenWith"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/openWithIcon"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/moveFile"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/buttonHeight"
+                android:background="?selectableItemBackground">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/editDocument"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/buttonHeight"
-                    android:background="?selectableItemBackground">
+                <ImageView
+                    android:id="@+id/moveFileIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandard"
+                    android:src="@drawable/ic_folder_select"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="ContentDescription" />
 
-                    <ImageView
-                        android:id="@+id/editDocumentIcon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandard"
-                        android:src="@drawable/ic_edit_document"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="ContentDescription" />
+                <TextView
+                    android:id="@+id/moveFileText"
+                    style="@style/Subtitle2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardMedium"
+                    android:layout_marginEnd="@dimen/marginStandard"
+                    android:text="@string/buttonMoveTo"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/moveFileIcon"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-                    <TextView
-                        android:id="@+id/editDocumentText"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandardMedium"
-                        android:layout_marginEnd="@dimen/marginStandard"
-                        android:text="@string/buttonEdit"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/editDocumentIcon"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/duplicateFile"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/buttonHeight"
+                android:background="?selectableItemBackground">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/manageCategories"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/buttonHeight"
-                    android:background="?selectableItemBackground"
-                    android:visibility="gone"
-                    tools:visibility="visible">
+                <ImageView
+                    android:id="@+id/duplicateFileIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandard"
+                    android:src="@drawable/ic_duplicate"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="ContentDescription" />
 
-                    <androidx.appcompat.widget.AppCompatImageView
-                        android:id="@+id/manageCategoriesIcon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandard"
-                        android:src="@drawable/ic_category"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                <TextView
+                    android:id="@+id/duplicateFileText"
+                    style="@style/Subtitle2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardMedium"
+                    android:layout_marginEnd="@dimen/marginStandard"
+                    android:text="@string/buttonDuplicate"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/duplicateFileIcon"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-                    <TextView
-                        android:id="@+id/manageCategoriesText"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandardMedium"
-                        android:layout_marginEnd="@dimen/marginStandard"
-                        android:text="@string/manageCategoriesTitle"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/manageCategoriesIcon"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/renameFile"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/buttonHeight"
+                android:background="?selectableItemBackground">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/addFavorites"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/buttonHeight"
-                    android:background="?selectableItemBackground">
+                <ImageView
+                    android:id="@+id/renameFileIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandard"
+                    android:src="@drawable/ic_edit"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="ContentDescription" />
 
-                    <androidx.appcompat.widget.AppCompatImageView
-                        android:id="@+id/addFavoritesIcon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandard"
-                        android:src="@drawable/ic_star_filled"
-                        android:tint="@color/star_favorites"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                <TextView
+                    android:id="@+id/renameFileText"
+                    style="@style/Subtitle2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardMedium"
+                    android:layout_marginEnd="@dimen/marginStandard"
+                    android:text="@string/buttonRename"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/renameFileIcon"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-                    <TextView
-                        android:id="@+id/addFavoritesText"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandardMedium"
-                        android:layout_marginEnd="@dimen/marginStandard"
-                        android:text="@string/buttonAddFavorites"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/addFavoritesIcon"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/leaveShare"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/buttonHeight"
+                android:background="?selectableItemBackground"
+                android:visibility="gone"
+                tools:visibility="visible">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/goToFolder"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/buttonHeight"
-                    android:background="?selectableItemBackground">
+                <ImageView
+                    android:id="@+id/leaveShareIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandard"
+                    android:src="@drawable/ic_link_broken"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="ContentDescription" />
 
-                    <androidx.appcompat.widget.AppCompatImageView
-                        android:id="@+id/goToFolderIcon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandard"
-                        android:src="@drawable/ic_folder_filled"
-                        android:tint="@color/iconColor"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                <TextView
+                    android:id="@+id/leaveShareText"
+                    style="@style/Subtitle2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardMedium"
+                    android:layout_marginEnd="@dimen/marginStandard"
+                    android:text="@string/buttonLeaveShare"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/leaveShareIcon"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-                    <TextView
-                        android:id="@+id/goToFolderText"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandardMedium"
-                        android:layout_marginEnd="@dimen/marginStandard"
-                        android:text="@string/buttonSeeFolder"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/goToFolderIcon"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/deleteFile"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/buttonHeight"
+                android:background="?selectableItemBackground">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/dropBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/buttonHeight"
-                    android:background="?selectableItemBackground"
-                    android:visibility="gone"
-                    tools:visibility="visible">
+                <ImageView
+                    android:id="@+id/deleteFileIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandard"
+                    android:src="@drawable/ic_delete"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="ContentDescription" />
 
-                    <androidx.appcompat.widget.AppCompatImageView
-                        android:id="@+id/dropBoxIcon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandard"
-                        android:src="@drawable/ic_folder_dropbox"
-                        android:tint="@color/iconColor"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:id="@+id/dropBoxText"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandardMedium"
-                        android:layout_marginEnd="@dimen/marginStandard"
-                        android:text="@string/buttonConvertToDropBox"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/dropBoxIcon"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/coloredFolder"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/buttonHeight"
-                    android:background="?selectableItemBackground"
-                    android:visibility="gone"
-                    tools:visibility="visible">
-
-                    <androidx.appcompat.widget.AppCompatImageView
-                        android:id="@+id/coloredFolderIcon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandard"
-                        android:src="@drawable/ic_color_bucket"
-                        android:tint="@color/iconColor"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:id="@+id/coloredFolderText"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandardMedium"
-                        android:layout_marginEnd="@dimen/marginStandard"
-                        android:text="@string/buttonChangeFolderColor"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/coloredFolderIcon"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/availableOffline"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/buttonHeight"
-                    android:background="?selectableItemBackground">
-
-                    <FrameLayout
-                        android:id="@+id/availableOfflineIconLayout"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandard"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent">
-
-                        <ImageView
-                            android:id="@+id/availableOfflineIcon"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/ic_offline"
-                            tools:ignore="ContentDescription" />
-
-                        <com.google.android.material.progressindicator.CircularProgressIndicator
-                            android:id="@+id/availableOfflineProgress"
-                            style="@style/CircularIndicator"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:visibility="gone" />
-
-                        <ImageView
-                            android:id="@+id/availableOfflineComplete"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/ic_check"
-                            android:visibility="gone"
-                            tools:ignore="ContentDescription" />
-                    </FrameLayout>
-
-                    <TextView
-                        android:id="@+id/availableOfflineText"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandardMedium"
-                        android:layout_marginEnd="@dimen/marginStandard"
-                        android:text="@string/buttonAvailableOffline"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/availableOfflineSwitch"
-                        app:layout_constraintStart_toEndOf="@id/availableOfflineIconLayout"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/availableOfflineSwitch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="@dimen/marginStandard"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/downloadFile"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/buttonHeight"
-                    android:background="?selectableItemBackground">
-
-                    <ImageView
-                        android:id="@+id/downloadFileIcon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandard"
-                        android:src="@drawable/ic_download"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="ContentDescription" />
-
-                    <TextView
-                        android:id="@+id/downloadFileText"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandardMedium"
-                        android:layout_marginEnd="@dimen/marginStandard"
-                        android:text="@string/buttonDownload"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/downloadFileIcon"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/moveFile"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/buttonHeight"
-                    android:background="?selectableItemBackground">
-
-                    <ImageView
-                        android:id="@+id/moveFileIcon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandard"
-                        android:src="@drawable/ic_folder_select"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="ContentDescription" />
-
-                    <TextView
-                        android:id="@+id/moveFileText"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandardMedium"
-                        android:layout_marginEnd="@dimen/marginStandard"
-                        android:text="@string/buttonMoveTo"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/moveFileIcon"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/duplicateFile"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/buttonHeight"
-                    android:background="?selectableItemBackground">
-
-                    <ImageView
-                        android:id="@+id/duplicateFileIcon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandard"
-                        android:src="@drawable/ic_duplicate"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="ContentDescription" />
-
-                    <TextView
-                        android:id="@+id/duplicateFileText"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandardMedium"
-                        android:layout_marginEnd="@dimen/marginStandard"
-                        android:text="@string/buttonDuplicate"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/duplicateFileIcon"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/renameFile"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/buttonHeight"
-                    android:background="?selectableItemBackground">
-
-                    <ImageView
-                        android:id="@+id/renameFileIcon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandard"
-                        android:src="@drawable/ic_edit"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="ContentDescription" />
-
-                    <TextView
-                        android:id="@+id/renameFileText"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandardMedium"
-                        android:layout_marginEnd="@dimen/marginStandard"
-                        android:text="@string/buttonRename"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/renameFileIcon"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/leaveShare"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/buttonHeight"
-                    android:background="?selectableItemBackground"
-                    android:visibility="gone"
-                    tools:visibility="visible">
-
-                    <ImageView
-                        android:id="@+id/leaveShareIcon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandard"
-                        android:src="@drawable/ic_link_broken"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="ContentDescription" />
-
-                    <TextView
-                        android:id="@+id/leaveShareText"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandardMedium"
-                        android:layout_marginEnd="@dimen/marginStandard"
-                        android:text="@string/buttonLeaveShare"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/leaveShareIcon"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/deleteFile"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/buttonHeight"
-                    android:background="?selectableItemBackground">
-
-                    <ImageView
-                        android:id="@+id/deleteFileIcon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandard"
-                        android:src="@drawable/ic_delete"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="ContentDescription" />
-
-                    <TextView
-                        android:id="@+id/deleteFileText"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandardMedium"
-                        android:layout_marginEnd="@dimen/marginStandard"
-                        android:text="@string/modalMoveTrashTitle"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/deleteFileIcon"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </LinearLayout>
+                <TextView
+                    android:id="@+id/deleteFileText"
+                    style="@style/Subtitle2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardMedium"
+                    android:layout_marginEnd="@dimen/marginStandard"
+                    android:text="@string/modalMoveTrashTitle"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/deleteFileIcon"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
