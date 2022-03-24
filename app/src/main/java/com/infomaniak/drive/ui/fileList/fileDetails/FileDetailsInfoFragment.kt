@@ -81,6 +81,8 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
 
             if (file.path.isNotBlank()) setPath(file.path)
 
+            if (file.isFolder()) displayFolderContentCount(file)
+
             file.sizeWithVersions?.let {
                 totalSizeValue.text = Formatter.formatFileSize(context, it)
                 totalSize.isVisible = true
@@ -97,6 +99,23 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         }
 
         setBackActionHandlers()
+    }
+
+    private fun displayFolderContentCount(folder: File) {
+        fileDetailsViewModel.getFileCounts(folder).observe(viewLifecycleOwner) { (files, count, folders) ->
+            val folderText = resources.getQuantityString(R.plurals.fileDetailsInfoFolder, folders, folders)
+            val fileText = resources.getQuantityString(R.plurals.fileDetailsInfoFile, files, files)
+            fileCountValue.text = when {
+                count == 0 -> getString(R.string.fileDetailsInfoEmptyFolder)
+                files == 0 && folders != 0 -> folderText
+                files != 0 && folders == 0 -> fileText
+                else -> {
+                    getString(R.string.fileDetailsInfoFolderContentTemplate, folderText, fileText)
+                }
+            }
+
+            fileCount.isVisible = true
+        }
     }
 
     private fun setBackActionHandlers() {

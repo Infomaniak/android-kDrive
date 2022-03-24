@@ -359,6 +359,16 @@
     <string name="fileDetailsCommentsFieldName">Ihr Kommentar</string>
     <string name="fileDetailsCommentsTitle">Kommentare</string>
     <string name="fileDetailsCommentsUnavailable">Öffnen Sie das Dokument, um Kommentare hinzuzufügen. Wählen Sie dann das zu kommentierende Element aus.</string>
+    <string name="fileDetailsInfoContent">Inhalt</string>
+    <string name="fileDetailsInfoEmptyFolder">Leerer Ordner</string>
+    <plurals name="fileDetailsInfoFile">
+        <item quantity="one">1 Datei</item>
+        <item quantity="other">%d Dateien</item>
+    </plurals>
+    <plurals name="fileDetailsInfoFolder">
+        <item quantity="one">1 Ordner</item>
+        <item quantity="other">%d Ordner</item>
+    </plurals>
     <string name="fileDetailsInfosAddedDateTitle">Hinzufügung zum Drive</string>
     <string name="fileDetailsInfosCreationDateTitle">Angelegt</string>
     <string name="fileDetailsInfosOriginalSize">Originalgröße</string>

@@ -19,10 +19,7 @@ package com.infomaniak.drive.ui.fileList.fileDetails
 
 import androidx.lifecycle.*
 import com.infomaniak.drive.data.api.ApiRepository
-import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.FileActivity
-import com.infomaniak.drive.data.models.FileComment
-import com.infomaniak.drive.data.models.Share
+import com.infomaniak.drive.data.models.*
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -51,6 +48,10 @@ class FileDetailsViewModel : ViewModel() {
         return liveData(Dispatchers.IO + getFileCommentsJob) {
             manageRecursiveApiResponse(file) { file, page -> ApiRepository.getFileComments(file, page) }
         }
+    }
+
+    fun getFileCounts(folder: File): LiveData<FileCount> = liveData(Dispatchers.IO) {
+        ApiRepository.getFileCount(folder).data?.let { emit(FileCount(it.files, it.count, it.folders)) }
     }
 
     fun postFileComment(file: File, body: String) = liveData(Dispatchers.IO) {
