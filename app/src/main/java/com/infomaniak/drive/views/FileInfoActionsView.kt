@@ -33,6 +33,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.navigation.fragment.findNavController
 import androidx.work.WorkInfo
+import com.google.android.material.switchmaterial.SwitchMaterial
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
@@ -206,15 +207,18 @@ class FileInfoActionsView @JvmOverloads constructor(
             onItemClickListener.addFavoritesClicked()
         }
         leaveShare.setOnClickListener { onItemClickListener.leaveShare() }
-        availableOfflineSwitch.setOnCheckedChangeListener { _, isChecked ->
-            if (!onItemClickListener.availableOfflineSwitched(this, isChecked)) {
-                with(ownerFragment) {
-                    findNavController().popBackStack()
+        // Use OnClickListener instead of OnCheckedChangeListener because the later is unnecessarily called on every 
+        // refreshBottomSheetUI calls
+        availableOfflineSwitch.setOnClickListener { view ->
+            val downloadError = !onItemClickListener.availableOfflineSwitched(this, (view as SwitchMaterial).isChecked)
+            with(ownerFragment) {
+                if (downloadError) {
                     availableOfflineSwitch.isChecked = false
                     activity?.let {
                         it.showSnackbar(getString(R.string.snackBarInvalidFileNameError, currentFile.name), it.mainFab)
                     }
                 }
+                findNavController().popBackStack()
             }
         }
         availableOffline.setOnClickListener { availableOfflineSwitch.performClick() }
