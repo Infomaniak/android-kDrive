@@ -283,8 +283,7 @@ object Utils {
             .setConstraints(constraints)
             .build()
 
-        workManager
-            .enqueueUniqueWork(DownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
+        workManager.enqueueUniqueWork(DownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
         return true
     }
 
