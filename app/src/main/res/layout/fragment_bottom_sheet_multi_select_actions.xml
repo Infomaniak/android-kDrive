@@ -46,13 +46,6 @@
                 android:src="@drawable/ic_offline"
                 tools:ignore="ContentDescription" />
 
-            <com.google.android.material.progressindicator.CircularProgressIndicator
-                android:id="@+id/availableOfflineProgress"
-                style="@style/CircularIndicator"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="gone" />
-
             <ImageView
                 android:id="@+id/availableOfflineComplete"
                 android:layout_width="wrap_content"
