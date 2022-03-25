@@ -26,7 +26,7 @@ import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.menu.UserAdapter
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.MatomoUtils.trackAccountEvent
-import com.infomaniak.lib.core.models.User
+import com.infomaniak.lib.core.models.user.User
 import kotlinx.android.synthetic.main.view_switch_settings.*
 
 class SwitchUserActivity : AppCompatActivity() {

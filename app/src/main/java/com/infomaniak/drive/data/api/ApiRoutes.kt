@@ -38,8 +38,6 @@ object ApiRoutes {
 
     fun getAllDrivesData() = "${DRIVE_API}init?with=drives,users,teams,ips,categories"
 
-    fun getUserProfile() = "${INFOMANIAK_API}profile"
-
     fun checkFileShare(file: File) = "${fileURL(file)}/share/check"
 
     fun updateFileSharedUser(file: File, driveUser: DriveUser) = "${fileURL(file)}/share/${driveUser.id}"

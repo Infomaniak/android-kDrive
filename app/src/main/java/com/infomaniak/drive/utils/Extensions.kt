@@ -88,7 +88,7 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomShe
 import com.infomaniak.drive.ui.fileList.UploadInProgressFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.MatomoUtils.trackShareRightsEvent
-import com.infomaniak.lib.core.models.User
+import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId

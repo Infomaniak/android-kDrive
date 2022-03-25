@@ -18,7 +18,7 @@
 package com.infomaniak.drive.utils
 
 import androidx.collection.ArrayMap
-import com.infomaniak.lib.core.models.User
+import com.infomaniak.lib.core.models.user.User
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okhttp3.OkHttpClient

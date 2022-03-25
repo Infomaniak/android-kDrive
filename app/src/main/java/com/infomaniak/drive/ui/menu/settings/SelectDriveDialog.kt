@@ -30,7 +30,7 @@ import com.infomaniak.drive.ui.menu.UserAdapter
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.setUserView
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
-import com.infomaniak.lib.core.models.User
+import com.infomaniak.lib.core.models.user.User
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_drive.*
 import kotlinx.android.synthetic.main.popup_select_user.view.*
 

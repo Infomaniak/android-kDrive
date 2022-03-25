@@ -22,7 +22,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.setUserView
-import com.infomaniak.lib.core.models.User
+import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.views.ViewHolder
 
 class UserAdapter(

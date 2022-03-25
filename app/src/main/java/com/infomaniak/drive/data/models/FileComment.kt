@@ -18,7 +18,7 @@
 package com.infomaniak.drive.data.models
 
 import com.google.gson.annotations.SerializedName
-import com.infomaniak.lib.core.models.User
+import com.infomaniak.lib.core.models.user.User
 import java.util.*
 
 data class FileComment(
