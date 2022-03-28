@@ -288,7 +288,7 @@ object Utils {
         return true
     }
 
-    fun getInvalidFileNameCharacter(fileName: String) : String? = Regex("[/:*?<>|\"\\\\]").find(fileName)?.value
+    fun getInvalidFileNameCharacter(fileName: String): String? = Regex("[/:*?<>|\"\\\\]").find(fileName)?.value
 
     fun showSnackbar(
         view: View,

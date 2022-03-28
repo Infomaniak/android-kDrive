@@ -428,7 +428,10 @@ fun Activity.showSnackbar(
 
 fun Fragment.showSnackBarInvalidFileName(fileName: String) {
     activity?.let {
-        it.showSnackbar(getString(R.string.snackBarInvalidFileNameError, Utils.getInvalidFileNameCharacter(fileName)), it.mainFab)
+        it.showSnackbar(
+            getString(R.string.snackBarInvalidFileNameError, Utils.getInvalidFileNameCharacter(fileName), fileName),
+            it.mainFab
+        )
     }
 }
 

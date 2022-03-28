@@ -256,10 +256,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
     }
 
-    fun createPublicCopyLink(
-        onSuccess: ((file: File?) -> Unit)? = null,
-        onError: ((translatedError: String) -> Unit)? = null
-    ) {
+    fun createPublicCopyLink(onSuccess: ((file: File?) -> Unit)? = null, onError: ((translatedError: String) -> Unit)? = null) {
         when {
             currentFile.collaborativeFolder != null -> {
                 copyPublicLink(currentFile.collaborativeFolder!!)
