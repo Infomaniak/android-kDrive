@@ -231,7 +231,6 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                     context = this,
                     fileCount = fileCount,
                     fromTrash = true,
-                    autoDismiss = true,
                     onConfirmation = sendActions,
                 )
             }
