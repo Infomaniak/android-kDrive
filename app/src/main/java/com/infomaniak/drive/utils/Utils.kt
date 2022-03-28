@@ -262,8 +262,7 @@ object Utils {
      * @return true if the file has been successfully downloaded, false if its name contains forbidden characters
      */
     fun downloadAsOfflineFile(context: Context, file: File, userDrive: UserDrive = UserDrive()): Boolean {
-        val forbiddenCharacters = "[/:*?<>|\"\\\\]"
-        if (file.name.contains(Regex(forbiddenCharacters))) return false
+        if (getInvalidFileNameCharacter(file.name) != null) return false
 
         val workManager = WorkManager.getInstance(context)
 
@@ -288,6 +287,8 @@ object Utils {
 
         return true
     }
+
+    fun getInvalidFileNameCharacter(fileName: String) : String? = Regex("[/:*?<>|\"\\\\]").find(fileName)?.value
 
     fun showSnackbar(
         view: View,

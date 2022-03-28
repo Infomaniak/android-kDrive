@@ -50,7 +50,6 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.Utils.moveFileClicked
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -214,9 +213,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             with(ownerFragment) {
                 if (downloadError) {
                     availableOfflineSwitch.isChecked = false
-                    activity?.let {
-                        it.showSnackbar(getString(R.string.snackBarInvalidFileNameError, currentFile.name), it.mainFab)
-                    }
+                    showSnackBarInvalidFileName(currentFile.name)
                 }
                 findNavController().popBackStack()
             }

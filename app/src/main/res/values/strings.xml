@@ -619,7 +619,7 @@
     <string name="sharedWithMeNoFile">No files shared with me</string>
     <string name="sharedWithMeTitle">Shared with me</string>
     <string name="snackBarCategoryDeleted">Category successfully deleted</string>
-    <string name="snackBarInvalidFileNameError">File name %s not supported for offline availability</string>
+    <string name="snackBarInvalidFileNameError">File name\'s character \"%s\" not supported for offline availability</string>
     <plurals name="snackBarUploadError">
         <item quantity="one">A file could not be imported</item>
         <item quantity="other">%d files could not be imported</item>

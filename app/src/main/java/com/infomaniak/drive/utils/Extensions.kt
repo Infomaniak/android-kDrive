@@ -426,6 +426,12 @@ fun Activity.showSnackbar(
     )
 }
 
+fun Fragment.showSnackBarInvalidFileName(fileName: String) {
+    activity?.let {
+        it.showSnackbar(getString(R.string.snackBarInvalidFileNameError, Utils.getInvalidFileNameCharacter(fileName)), it.mainFab)
+    }
+}
+
 @SuppressLint("NewApi")
 fun FragmentActivity.requestCredentials(onSuccess: () -> Unit) {
     val biometricPrompt = BiometricPrompt(this,
