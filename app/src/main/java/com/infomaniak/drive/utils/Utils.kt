@@ -262,7 +262,8 @@ object Utils {
      * @return true if the file has been successfully downloaded, false if its name contains forbidden characters
      */
     fun downloadAsOfflineFile(context: Context, file: File, userDrive: UserDrive = UserDrive()): Boolean {
-        if (file.name.contains(Regex("[/:*?<>|\"\\\\]"))) return false
+        val forbiddenCharacters = "[/:*?<>|\"\\\\]"
+        if (file.name.contains(Regex(forbiddenCharacters))) return false
 
         val workManager = WorkManager.getInstance(context)
 
@@ -284,7 +285,7 @@ object Utils {
             .build()
 
         workManager.enqueueUniqueWork(DownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
-        
+
         return true
     }
 
