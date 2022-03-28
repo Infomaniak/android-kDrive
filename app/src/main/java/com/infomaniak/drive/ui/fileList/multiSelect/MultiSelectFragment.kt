@@ -109,6 +109,11 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         super.onViewCreated(view, savedInstanceState)
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (!isAdded) closeMultiSelect()
+    }
+
     fun openMultiSelect() {
         swipeRefresh?.isEnabled = false
 
