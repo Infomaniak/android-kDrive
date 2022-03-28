@@ -35,7 +35,6 @@ import coil.memory.MemoryCache
 import com.facebook.stetho.Stetho
 import com.facebook.stetho.okhttp3.StethoInterceptor
 import com.infomaniak.drive.BuildConfig.DRIVE_API
-import com.infomaniak.drive.BuildConfig.INFOMANIAK_API
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.services.MqttClientWrapper
@@ -47,11 +46,12 @@ import com.infomaniak.drive.utils.MatomoUtils.buildTracker
 import com.infomaniak.drive.utils.NotificationUtils.initNotificationChannel
 import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.clearStack
+import com.infomaniak.lib.core.BuildConfig.INFOMANIAK_API
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.auth.TokenAuthenticator
 import com.infomaniak.lib.core.auth.TokenInterceptor
 import com.infomaniak.lib.core.auth.TokenInterceptorListener
-import com.infomaniak.lib.core.models.User
+import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.login.ApiToken

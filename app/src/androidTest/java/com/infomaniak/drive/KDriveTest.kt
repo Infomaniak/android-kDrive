@@ -31,7 +31,7 @@ import com.infomaniak.drive.utils.Env
 import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.lib.core.InfomaniakCore
-import com.infomaniak.lib.core.models.User
+import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.login.ApiToken
 import io.realm.Realm

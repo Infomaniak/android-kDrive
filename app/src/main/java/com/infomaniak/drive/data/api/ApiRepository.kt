@@ -23,14 +23,14 @@ import com.infomaniak.drive.data.api.ApiRoutes.withFile
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
+import com.infomaniak.lib.core.api.ApiRepositoryCore
 import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.models.User
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.ApiController.ApiMethod.*
 import com.infomaniak.lib.core.utils.ApiController.callApi
 import okhttp3.OkHttpClient
 
-object ApiRepository {
+object ApiRepository : ApiRepositoryCore() {
 
     var PER_PAGE = 200
     private const val ACTIONS = "&actions[]=file_move" +
@@ -61,13 +61,6 @@ object ApiRepository {
         okHttpClient: OkHttpClient
     ): ApiResponse<DriveInfo> {
         val url = ApiRoutes.getAllDrivesData()
-        return callApi(url, GET, okHttpClient = okHttpClient)
-    }
-
-    fun getUserProfile(
-        okHttpClient: OkHttpClient
-    ): ApiResponse<User> {
-        val url = "${ApiRoutes.getUserProfile()}?with=avatar,phones,emails"
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
