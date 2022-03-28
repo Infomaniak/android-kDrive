@@ -36,7 +36,7 @@ class TrashMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDi
         availableOffline.isGone = true
     }
 
-    override fun configureDownloadFile() {
+    override fun configureDownload() {
         downloadFile.isGone = true
     }
 

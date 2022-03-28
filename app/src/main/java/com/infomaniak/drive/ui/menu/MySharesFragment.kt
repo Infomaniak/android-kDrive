@@ -77,7 +77,8 @@ class MySharesFragment : FileSubTypeListFragment() {
                 onlyFolders = onlyFolders,
                 onlyFavorite = onlyFavorite,
                 onlyOffline = onlyOffline,
-                isAllSelected = isAllSelected
+                isAllSelected = isAllSelected,
+                areAllFromTheSameFolder = false,
             ).toBundle()
         }.show(childFragmentManager, "ActionMySharesMultiSelectBottomSheetDialog")
     }

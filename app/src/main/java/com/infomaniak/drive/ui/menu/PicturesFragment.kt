@@ -239,13 +239,15 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
     }
 
     fun onMenuButtonClicked() {
-        val (fileIds, onlyFolders, onlyFavorite, onlyOffline) = multiSelectManager.getMenuNavArgs()
+        val (fileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
         PicturesMultiSelectActionsBottomSheetDialog().apply {
             arguments = MultiSelectActionsBottomSheetDialogArgs(
                 fileIds = fileIds,
                 onlyFolders = onlyFolders,
                 onlyFavorite = onlyFavorite,
                 onlyOffline = onlyOffline,
+                isAllSelected = isAllSelected,
+                areAllFromTheSameFolder = false,
             ).toBundle()
         }.show(childFragmentManager, "ActionPicturesMultiSelectBottomSheetDialog")
     }
