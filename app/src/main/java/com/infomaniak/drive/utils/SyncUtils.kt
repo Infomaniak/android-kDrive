@@ -75,26 +75,6 @@ object SyncUtils {
 
         if (fileModifiedAt == null || fileModifiedAt.time == 0L) {
             fileModifiedAt = Date()
-            Sentry.withScope { scope ->
-                val noData = "No data"
-                val dateTakenValue = if (dateTakenIndex != -1) cursor.getLong(dateTakenIndex).toString() else noData
-                scope.setExtra("dateTakenIndex", dateTakenValue)
-
-                val dateAddedValue = if (dateAddedIndex != -1) cursor.getLong(dateAddedIndex).toString() else noData
-                scope.setExtra("dateAddedIndex", dateAddedValue)
-
-                val lastModifiedData = if (lastModifiedIndex != -1) cursor.getLong(lastModifiedIndex).toString() else noData
-                scope.setExtra("lastModifiedIndex", lastModifiedData)
-
-                val dateModifiedData = if (dateModifiedIndex != -1) cursor.getLong(dateModifiedIndex).toString() else noData
-                scope.setExtra("dateModifiedIndex", dateModifiedData)
-
-                scope.setExtra("fileName", getFileName(cursor) ?: "noData")
-
-                scope.setExtra("columnNames", cursor.columnNames.joinToString(", "))
-
-                Sentry.captureMessage("Error fileModifiedAt is null")
-            }
         }
 
         return Pair(fileCreatedAt, fileModifiedAt)
