@@ -90,6 +90,9 @@ class ApplicationMain : Application(), ImageLoaderFactory {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) detectCredentialProtectedWhileLocked()
                 }.build()
             )
+        } else {
+            // For Microsoft Office app. Show File.getCloudAndFileUris()
+            StrictMode.setVmPolicy(VmPolicy.Builder().build())
         }
 
         SentryAndroid.init(this) { options: SentryAndroidOptions ->
