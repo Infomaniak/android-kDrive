@@ -228,21 +228,29 @@ class FileInfoActionsView @JvmOverloads constructor(
         deleteFile.setOnClickListener { onItemClickListener.deleteFileClicked() }
         goToFolder.setOnClickListener { onItemClickListener.goToFolder() }
     }
-
+    /**
+     * Download [currentFile] to put it offline
+     *
+     * @return true if the file has been successfully downloaded, false if its name contains forbidden characters
+     */
     fun downloadAsOfflineFile(): Boolean {
-        val cacheFile = currentFile.getCacheFile(context)
-        if (cacheFile.exists()) {
-            currentFile.getOfflineFile(context)?.let { offlineFile ->
-                Utils.moveCacheFileToOffline(currentFile, cacheFile, offlineFile)
-                CoroutineScope(Dispatchers.IO).launch { FileController.updateOfflineStatus(currentFile.id, true) }
-                currentFile.isOffline = true
-                onItemClickListener.onCacheAddedToOffline()
+        with(currentFile) {
+            if (Utils.getInvalidFileNameCharacter(name) != null) return false
+
+            val cacheFile = getCacheFile(context)
+            if (cacheFile.exists()) {
+                getOfflineFile(context)?.let { offlineFile ->
+                    Utils.moveCacheFileToOffline(this, cacheFile, offlineFile)
+                    CoroutineScope(Dispatchers.IO).launch { FileController.updateOfflineStatus(id, true) }
+                    isOffline = true
+                    onItemClickListener.onCacheAddedToOffline()
+                }
+            } else {
+                Utils.downloadAsOfflineFile(context, this)
+                if (isPendingOffline(context)) mainViewModel.updateOfflineFile.value = id
             }
-        } else {
-            if (!Utils.downloadAsOfflineFile(context, currentFile)) return false
-            if (currentFile.isPendingOffline(context)) mainViewModel.updateOfflineFile.value = currentFile.id
+            refreshBottomSheetUi(this)
         }
-        refreshBottomSheetUi(currentFile)
 
         return true
     }

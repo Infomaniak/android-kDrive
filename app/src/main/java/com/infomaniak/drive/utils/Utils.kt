@@ -252,18 +252,7 @@ object Utils {
         offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
     }
 
-    /**
-     * Download [file] to put it offline on drive [userDrive]
-     *
-     * @param context
-     * @param file file to put offline
-     * @param userDrive drive on which the file will be available offline
-     *
-     * @return true if the file has been successfully downloaded, false if its name contains forbidden characters
-     */
-    fun downloadAsOfflineFile(context: Context, file: File, userDrive: UserDrive = UserDrive()): Boolean {
-        if (getInvalidFileNameCharacter(file.name) != null) return false
-
+    fun downloadAsOfflineFile(context: Context, file: File, userDrive: UserDrive = UserDrive()) {
         val workManager = WorkManager.getInstance(context)
 
         if (file.isPendingOffline(context)) workManager.cancelAllWorkByTag(file.getWorkerTag())
@@ -284,8 +273,6 @@ object Utils {
             .build()
 
         workManager.enqueueUniqueWork(DownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
-
-        return true
     }
 
     fun getInvalidFileNameCharacter(fileName: String): String? = Regex("[/:*?<>|\"\\\\]").find(fileName)?.value

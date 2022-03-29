@@ -376,27 +376,27 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     }
 
     private fun addSelectedFileToOffline(file: File, offlineFile: java.io.File?, cacheFile: java.io.File) {
-        if (offlineFile != null && !file.isObsoleteOrNotIntact(cacheFile)) {
-            Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
-            runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
+        val invalidFileNameChar = Utils.getInvalidFileNameCharacter(file.name)
+        if (invalidFileNameChar == null) {
+            if (offlineFile != null && !file.isObsoleteOrNotIntact(cacheFile)) {
+                Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
+                runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
 
-            updateFileProgressByFileId(file.id, 100) { _, currentFile ->
-                currentFile.apply {
-                    if (isNotManagedByRealm()) {
-                        isOffline = true
-                        currentProgress = 0
+                updateFileProgressByFileId(file.id, 100) { _, currentFile ->
+                    currentFile.apply {
+                        if (isNotManagedByRealm()) {
+                            isOffline = true
+                            currentProgress = 0
+                        }
                     }
                 }
+            } else {
+                Utils.downloadAsOfflineFile(requireContext(), file)
             }
         } else {
-            if (Utils.downloadAsOfflineFile(requireContext(), file)) {
-                file.isOffline = true
-            } else {
-                context?.showNotificationAndLaunchActivity(
-                    getString(R.string.snackBarInvalidFileNameError, Utils.getInvalidFileNameCharacter(file.name), file.name),
-                    MainActivity::class.java,
-                )
-            }
+            context?.showNotificationAndLaunchActivity(
+                getString(R.string.snackBarInvalidFileNameError, invalidFileNameChar, file.name), MainActivity::class.java
+            )
         }
     }
 
