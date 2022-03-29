@@ -605,7 +605,7 @@
     <string name="sharedWithMeNoFile">No hay archivos compartidos conmigo</string>
     <string name="sharedWithMeTitle">Usos compartidos conmigo</string>
     <string name="snackBarCategoryDeleted">Categoría eliminada correctamente</string>
-    <string name="snackBarInvalidFileNameError">El carácter \"%s\" del archivo %s no es compatible con la disponibilidad fuera de línea</string>
+    <string name="snackBarInvalidFileNameError">El carácter \"%s\" del archivo %s no es compatible con el uso fuera de línea</string>
     <plurals name="snackBarUploadError">
         <item quantity="one">No se ha podido importar un archivo</item>
         <item quantity="other">No se han podido importar %d archivos</item>

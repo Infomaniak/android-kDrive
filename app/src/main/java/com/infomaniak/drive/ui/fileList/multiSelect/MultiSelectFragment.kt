@@ -41,6 +41,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
+import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListFragmentDirections
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
@@ -54,6 +55,7 @@ import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSele
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.NotificationUtils.showNotificationAndLaunchActivity
 import com.infomaniak.drive.utils.Utils.moveFileClicked
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
@@ -390,7 +392,10 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             if (Utils.downloadAsOfflineFile(requireContext(), file)) {
                 file.isOffline = true
             } else {
-                showSnackBarInvalidFileName(file.name)
+                context?.showNotificationAndLaunchActivity(
+                    getString(R.string.snackBarInvalidFileNameError, Utils.getInvalidFileNameCharacter(file.name), file.name),
+                    MainActivity::class.java,
+                )
             }
         }
     }
