@@ -27,7 +27,7 @@ import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.Rights
-import com.infomaniak.drive.ui.fileList.SelectFolderActivity.SaveExternalViewModel
+import com.infomaniak.drive.ui.fileList.SelectFolderActivity.SelectFolderViewModel
 import com.infomaniak.drive.utils.MatomoUtils.trackNewElementEvent
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -37,7 +37,7 @@ import kotlinx.android.synthetic.main.fragment_file_list.*
 
 class SelectFolderFragment : FileListFragment() {
 
-    private val saveExternalViewModel: SaveExternalViewModel by activityViewModels()
+    private val selectFolderViewModel: SelectFolderViewModel by activityViewModels()
     private val navigationArgs: SelectFolderFragmentArgs by navArgs()
 
     override var enabledMultiSelectMode: Boolean = false
@@ -45,10 +45,10 @@ class SelectFolderFragment : FileListFragment() {
     override var showPendingFiles: Boolean = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        userDrive = saveExternalViewModel.userDrive
+        userDrive = selectFolderViewModel.userDrive
         super.onViewCreated(view, savedInstanceState)
 
-        folderName = if (folderId == ROOT_ID) saveExternalViewModel.currentDrive?.name ?: "/" else navigationArgs.folderName
+        folderName = if (folderId == ROOT_ID) selectFolderViewModel.currentDrive?.name ?: "/" else navigationArgs.folderName
 
         collapsingToolbarLayout.title = getString(R.string.selectFolderTitle)
 
@@ -89,7 +89,7 @@ class SelectFolderFragment : FileListFragment() {
             with(requireActivity() as SelectFolderActivity) {
                 showSaveButton()
                 val currentFolderRights = FileController.getFileById(folderId, userDrive)?.rights ?: Rights()
-                val enable = folderId != saveExternalViewModel.disableSelectedFolderId
+                val enable = folderId != selectFolderViewModel.disableSelectedFolderId
                         && (currentFolderRights.moveInto || currentFolderRights.newFile)
                 enableSaveButton(enable)
             }

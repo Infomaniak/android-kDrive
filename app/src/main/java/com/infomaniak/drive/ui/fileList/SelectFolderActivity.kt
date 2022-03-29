@@ -37,7 +37,7 @@ import java.util.*
 
 class SelectFolderActivity : BaseActivity() {
 
-    private val saveExternalViewModel: SaveExternalViewModel by viewModels()
+    private val selectFolderViewModel: SelectFolderViewModel by viewModels()
     private val mainViewModel: MainViewModel by viewModels()
 
     private val navigationIds = mutableListOf<Int>()
@@ -62,7 +62,7 @@ class SelectFolderActivity : BaseActivity() {
 
         mainViewModel.selectFolderUserDrive = currentUserDrive
 
-        saveExternalViewModel.apply {
+        selectFolderViewModel.apply {
             userDrive = currentUserDrive
             currentDrive = DriveInfosController.getDrives(userId, driveId).firstOrNull()
             disableSelectedFolderId = currentFolderId
@@ -129,7 +129,7 @@ class SelectFolderActivity : BaseActivity() {
         saveButton.isGone = true
     }
 
-    class SaveExternalViewModel : ViewModel() {
+    class SelectFolderViewModel : ViewModel() {
         var userDrive: UserDrive? = null
         var currentDrive: Drive? = null
         var disableSelectedFolderId: Int? = null

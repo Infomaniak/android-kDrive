@@ -146,7 +146,7 @@ class SyncSettingsActivity : BaseActivity() {
             val intent = Intent(this, SelectFolderActivity::class.java).apply {
                 putExtra(SelectFolderActivity.USER_ID_TAG, selectDriveViewModel.selectedUserId.value)
                 putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, selectDriveViewModel.selectedDrive.value?.id)
-                putExtra(SelectFolderActivity.CURRENT_FOLDER_ID_TAG, syncSettingsViewModel.syncFolder.value)
+                putExtra(SelectFolderActivity.CURRENT_FOLDER_ID_TAG, Utils.ROOT_ID)
             }
             selectFolderResultLauncher.launch(intent)
         }
