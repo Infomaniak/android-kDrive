@@ -178,14 +178,12 @@ private fun View.displayCategories(file: File) {
  * Realm's Github issue: https://github.com/realm/realm-java/issues/7637
  */
 fun File.getFolderIcon(): Pair<Int, String?> {
-    return when {
-        isDisabled() -> R.drawable.ic_folder_disable to null
-        getVisibilityType() == VisibilityType.IS_TEAM_SPACE -> R.drawable.ic_folder_common_documents to null
-        getVisibilityType() == VisibilityType.IS_TEAM_SPACE_FOLDER -> {
-            R.drawable.ic_folder_common_documents to getCommonFolderDefaultColor()
-        }
-        getVisibilityType() == VisibilityType.IS_SHARED_SPACE -> R.drawable.ic_folder_shared to null
-        getVisibilityType() == VisibilityType.IS_COLLABORATIVE_FOLDER -> R.drawable.ic_folder_dropbox to color
+    return if (isDisabled()) R.drawable.ic_folder_disable to null
+    else when (getVisibilityType()) {
+        VisibilityType.IS_TEAM_SPACE -> R.drawable.ic_folder_common_documents to null
+        VisibilityType.IS_TEAM_SPACE_FOLDER -> R.drawable.ic_folder_common_documents to getCommonFolderDefaultColor()
+        VisibilityType.IS_SHARED_SPACE -> R.drawable.ic_folder_shared to null
+        VisibilityType.IS_COLLABORATIVE_FOLDER -> R.drawable.ic_folder_dropbox to color
         else -> R.drawable.ic_folder_filled to color
     }
 }
