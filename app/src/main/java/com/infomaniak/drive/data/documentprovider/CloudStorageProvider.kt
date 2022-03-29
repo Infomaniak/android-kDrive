@@ -18,7 +18,6 @@
 package com.infomaniak.drive.data.documentprovider
 
 import android.annotation.SuppressLint
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.res.AssetFileDescriptor
@@ -31,7 +30,6 @@ import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
 import android.provider.Settings
 import android.util.Log
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import com.infomaniak.drive.R
@@ -44,11 +42,10 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
-import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
-import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
+import com.infomaniak.drive.utils.NotificationUtils.showNotificationAndLaunchActivity
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.isPositive
@@ -610,20 +607,14 @@ class CloudStorageProvider : DocumentsProvider() {
                 context.cancelNotification(syncPermissionNotifId)
 
                 // Display new notification
-                context.showGeneralNotification(context.getString(R.string.uploadPermissionError)).apply {
-                    setContentText(context.getString(R.string.cloudStorageMissingPermissionNotifDescription))
-                    setContentIntent(
-                        PendingIntent.getActivity(
-                            context,
-                            0,
-                            Intent(
-                                Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                                Uri.parse("package:${context.packageName}")
-                            ),
-                            UploadNotifications.pendingIntentFlags
-                        )
+                with(context) {
+                    val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:${packageName}"))
+                    showNotificationAndLaunchActivity(
+                        getString(R.string.uploadPermissionError),
+                        intent = intent,
+                        contentText = getString(R.string.cloudStorageMissingPermissionNotifDescription),
+                        notificationId = syncPermissionNotifId
                     )
-                    NotificationManagerCompat.from(context).notify(syncPermissionNotifId, build())
                 }
             }
         }

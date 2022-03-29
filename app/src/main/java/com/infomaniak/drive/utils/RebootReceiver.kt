@@ -18,17 +18,13 @@
 package com.infomaniak.drive.utils
 
 import android.Manifest
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import androidx.core.app.NotificationManagerCompat
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.MediaFolder
-import com.infomaniak.drive.data.sync.UploadNotifications
-import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.login.MigrationActivity.Companion.getOldkDriveUser
-import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
+import com.infomaniak.drive.utils.NotificationUtils.showNotificationAndLaunchActivity
 import com.infomaniak.drive.utils.SyncUtils.activateSyncIfNeeded
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
@@ -36,22 +32,16 @@ import com.infomaniak.lib.core.utils.hasPermissions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.*
 
 class RebootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
         with(context) {
 
             if (!getOldkDriveUser().isEmpty) {
-                val openAppIntent = Intent(this, LaunchActivity::class.java).clearStack()
-                val pendingIntent = PendingIntent.getActivity(this, 0, openAppIntent, UploadNotifications.pendingIntentFlags)
-                val notificationManagerCompat = NotificationManagerCompat.from(context)
-
-                showGeneralNotification(getString(R.string.migrateNotificationTitle)).apply {
-                    setContentText(getString(R.string.migrateNotificationDescription))
-                    setContentIntent(pendingIntent)
-                    notificationManagerCompat.notify(UUID.randomUUID().hashCode(), build())
-                }
+                showNotificationAndLaunchActivity(
+                    getString(R.string.migrateNotificationTitle),
+                    contentText = getString(R.string.migrateNotificationDescription)
+                )
             }
 
             CoroutineScope(Dispatchers.IO).launch {

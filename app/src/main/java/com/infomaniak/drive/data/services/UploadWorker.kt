@@ -25,7 +25,6 @@ import android.os.Build
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toFile
 import androidx.lifecycle.LiveData
 import androidx.work.*
@@ -38,7 +37,6 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.UploadWorkerThrowable.runUploadCatching
 import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.data.sync.UploadNotifications.exceptionNotification
-import com.infomaniak.drive.data.sync.UploadNotifications.getActivityPendingIntent
 import com.infomaniak.drive.data.sync.UploadNotifications.setupCurrentUploadNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
 import com.infomaniak.drive.ui.menu.settings.SyncSettingsActivity
@@ -46,7 +44,7 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaFoldersProvider.IMAGES_BUCKET_ID
 import com.infomaniak.drive.utils.MediaFoldersProvider.VIDEO_BUCKET_ID
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
-import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
+import com.infomaniak.drive.utils.NotificationUtils.showNotificationAndLaunchActivity
 import com.infomaniak.drive.utils.NotificationUtils.uploadServiceNotification
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.ApiController
@@ -436,13 +434,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
 
         fun Context.showSyncConfigNotification() {
-            val pendingIntent = getActivityPendingIntent(SyncSettingsActivity::class.java)
-            val notificationManagerCompat = NotificationManagerCompat.from(this)
-            showGeneralNotification(getString(R.string.noSyncFolderNotificationTitle)).apply {
-                setContentText(getString(R.string.noSyncFolderNotificationDescription))
-                setContentIntent(pendingIntent)
-                notificationManagerCompat.notify(NotificationUtils.FILE_OBSERVE_ID, this.build())
-            }
+            showNotificationAndLaunchActivity(
+                getString(R.string.noSyncFolderNotificationTitle),
+                activity = SyncSettingsActivity::class.java,
+                contentText = getString(R.string.noSyncFolderNotificationDescription),
+                notificationId = NotificationUtils.FILE_OBSERVE_ID
+            )
         }
 
         fun Context.trackUploadWorkerProgress(): LiveData<MutableList<WorkInfo>> {

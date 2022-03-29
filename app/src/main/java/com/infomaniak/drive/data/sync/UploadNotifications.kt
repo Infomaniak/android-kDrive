@@ -197,7 +197,9 @@ object UploadNotifications {
         )
     }
 
-    fun Context.getActivityPendingIntent(activity: Class<*>): PendingIntent {
-        return PendingIntent.getActivity(this, 0, Intent(this, activity).clearStack(), pendingIntentFlags)
+    fun Context.getActivityPendingIntent(activity: Class<*>): PendingIntent = getPendingIntent(Intent(this, activity))
+
+    fun Context.getPendingIntent(intent: Intent): PendingIntent {
+        return PendingIntent.getActivity(this, 0, intent.clearStack(), pendingIntentFlags)
     }
 }

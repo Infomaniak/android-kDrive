@@ -20,13 +20,17 @@ package com.infomaniak.drive.utils
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.sync.UploadNotifications.getActivityPendingIntent
+import com.infomaniak.drive.data.sync.UploadNotifications.getPendingIntent
+import com.infomaniak.drive.ui.LaunchActivity
 import java.util.*
 
 object NotificationUtils {
@@ -73,6 +77,32 @@ object NotificationUtils {
         }
     }
 
+    private fun Context.showGeneralNotification(title: String): NotificationCompat.Builder {
+        val channelId = getString(R.string.notification_channel_id_general)
+        return NotificationCompat.Builder(this, channelId).apply {
+            setTicker(title)
+            setAutoCancel(true)
+            setContentTitle(title)
+            setSmallIcon(DEFAULT_SMALL_ICON)
+        }
+    }
+
+    fun Context.showNotificationAndLaunchActivity(
+        title: String,
+        activity: Class<*> = LaunchActivity::class.java,
+        intent: Intent? = null,
+        contentText: String? = null,
+        notificationId: Int = UUID.randomUUID().hashCode()
+    ) {
+        val pendingIntent: PendingIntent = intent?.let { getPendingIntent(it) } ?: getActivityPendingIntent(activity)
+        val notificationManagerCompat = NotificationManagerCompat.from(this)
+        showGeneralNotification(title).apply {
+            setContentText(contentText)
+            setContentIntent(pendingIntent)
+            notificationManagerCompat.notify(notificationId, build())
+        }
+    }
+
     fun Context.uploadNotification(): NotificationCompat.Builder {
         val channelId = getString(R.string.notification_channel_id_upload_download)
         return NotificationCompat.Builder(this, channelId).apply {
@@ -84,24 +114,6 @@ object NotificationUtils {
         val channelId = getString(R.string.notification_channel_id_upload_service)
         return NotificationCompat.Builder(this, channelId).apply {
             setSmallIcon(DEFAULT_SMALL_ICON)
-        }
-    }
-
-    fun Context.showGeneralNotification(title: String): NotificationCompat.Builder {
-        val channelId = getString(R.string.notification_channel_id_general)
-        return NotificationCompat.Builder(this, channelId).apply {
-            setTicker(title)
-            setAutoCancel(true)
-            setContentTitle(title)
-            setSmallIcon(DEFAULT_SMALL_ICON)
-        }
-    }
-
-    fun Context.showNotificationAndLaunchActivity(title: String, activity: Class<*>) {
-        val notificationManagerCompat = NotificationManagerCompat.from(this)
-        showGeneralNotification(title).apply {
-            setContentIntent(getActivityPendingIntent(activity))
-            notificationManagerCompat.notify(UUID.randomUUID().hashCode(), build())
         }
     }
 

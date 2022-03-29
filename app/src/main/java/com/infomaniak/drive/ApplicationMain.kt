@@ -18,13 +18,11 @@
 package com.infomaniak.drive
 
 import android.app.Application
-import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.app.NotificationManagerCompat
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.annotation.ExperimentalCoilApi
@@ -38,13 +36,12 @@ import com.infomaniak.drive.BuildConfig.DRIVE_API
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.services.MqttClientWrapper
-import com.infomaniak.drive.data.sync.UploadNotifications.pendingIntentFlags
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.MatomoUtils.buildTracker
 import com.infomaniak.drive.utils.NotificationUtils.initNotificationChannel
-import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
+import com.infomaniak.drive.utils.NotificationUtils.showNotificationAndLaunchActivity
 import com.infomaniak.drive.utils.clearStack
 import com.infomaniak.lib.core.BuildConfig.INFOMANIAK_API
 import com.infomaniak.lib.core.InfomaniakCore
@@ -66,7 +63,6 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import org.matomo.sdk.Tracker
-import java.util.*
 
 @ExperimentalCoilApi
 class ApplicationMain : Application(), ImageLoaderFactory {
@@ -157,13 +153,7 @@ class ApplicationMain : Application(), ImageLoaderFactory {
     }
 
     private val refreshTokenError: (User) -> Unit = { user ->
-        val openAppIntent = Intent(this, LaunchActivity::class.java).clearStack()
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, openAppIntent, pendingIntentFlags)
-        val notificationManagerCompat = NotificationManagerCompat.from(this)
-        showGeneralNotification(getString(R.string.refreshTokenError)).apply {
-            setContentIntent(pendingIntent)
-            notificationManagerCompat.notify(UUID.randomUUID().hashCode(), build())
-        }
+        showNotificationAndLaunchActivity(getString(R.string.refreshTokenError))
 
         CoroutineScope(Dispatchers.IO).launch {
             AccountUtils.removeUser(this@ApplicationMain, user)
