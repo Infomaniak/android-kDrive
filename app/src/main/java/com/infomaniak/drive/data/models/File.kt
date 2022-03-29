@@ -347,6 +347,8 @@ open class File(
                 && getVisibilityType() != VisibilityType.IS_TEAM_SPACE
     }
 
+    fun getCommonFolderDefaultColor(): String = _color ?: "#5287FF" // R.drawable.ic_folder_common_documents tint color
+
     var color: String
         get() = _color ?: "#9F9F9F" // R.color.secondaryText
         set(color) {
