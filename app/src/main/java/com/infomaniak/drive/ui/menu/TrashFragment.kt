@@ -67,7 +67,7 @@ class TrashFragment : FileSubTypeListFragment() {
         fileListViewModel.sortType = SortType.RECENT_TRASHED
         sortFiles = SortFiles()
         downloadFiles = DownloadFiles(
-            if (folderId != ROOT_ID) File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId) else null
+            if (folderId == ROOT_ID) null else File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId)
         )
         setNoFilesLayout = SetNoFilesLayout()
     }
@@ -94,7 +94,6 @@ class TrashFragment : FileSubTypeListFragment() {
 
     private fun setupMultiSelectLayout() {
         multiSelectLayout?.apply {
-            emptyTrashButton.isVisible = true
             selectAllButton.isGone = true
             moveButtonMultiSelect.isInvisible = true
             deleteButtonMultiSelect.isInvisible = true
@@ -103,6 +102,7 @@ class TrashFragment : FileSubTypeListFragment() {
 
     private fun MaterialButton.setupEmptyTrashButton() {
         isVisible = true
+        if (folderId != ROOT_ID) isEnabled = false
         setOnClickListener {
             Utils.createConfirmation(
                 context = requireContext(),
@@ -191,7 +191,7 @@ class TrashFragment : FileSubTypeListFragment() {
                 icon = R.drawable.ic_delete,
                 title = R.string.trashNoFile,
                 initialListView = fileRecyclerView,
-                viewsToDisable = listOf(emptyTrash),
+                viewsToDisable = if (folderId == ROOT_ID) listOf(emptyTrash) else null,
             )
         }
     }
