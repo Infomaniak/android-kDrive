@@ -21,6 +21,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Parcelable
 import android.webkit.MimeTypeMap
+import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -440,9 +441,15 @@ open class File(
             val offlineFile = getOfflineFile(context, userDrive.userId)
 
             return cloudUri to if (isOffline && offlineFile != null) {
-                // We use the uri with scheme file because some apps don't support modifications from a content uri
-                offlineFile.toUri()
-            } else cloudUri
+                // We use the uri with scheme file because Microsoft Office don't support modifications from a content uri
+                if (isOnlyOfficePreview()) {
+                    offlineFile.toUri()
+                } else {
+                    FileProvider.getUriForFile(context, context.getString(R.string.FILE_AUTHORITY), offlineFile)
+                }
+            } else {
+                cloudUri
+            }
         }
 
         /**
