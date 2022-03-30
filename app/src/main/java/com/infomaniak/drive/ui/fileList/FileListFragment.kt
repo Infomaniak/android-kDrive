@@ -237,6 +237,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
         requireContext().trackUploadWorkerSucceeded().observe(viewLifecycleOwner) {
             if (!isDownloading) activitiesRefreshTimer.start()
+            if (binding.uploadFileInProgress.root.isVisible) showPendingFiles()
         }
 
         mainViewModel.refreshActivities.observe(viewLifecycleOwner) {
