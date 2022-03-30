@@ -74,7 +74,7 @@ object UploadNotifications {
             context.disableAutoSync()
 
             description = R.string.uploadFolderNotFoundSyncDisabledError
-            contentIntent = context.getActivityPendingIntent(SyncSettingsActivity::class.java)
+            contentIntent = context.syncSettingsActivityPendingIntent()
         } else {
             description = R.string.uploadFolderNotFoundError
             contentIntent = null
@@ -197,7 +197,7 @@ object UploadNotifications {
         )
     }
 
-    fun Context.getActivityPendingIntent(activity: Class<*>): PendingIntent {
-        return PendingIntent.getActivity(this, 0, Intent(this, activity).clearStack(), pendingIntentFlags)
+    fun Context.syncSettingsActivityPendingIntent(): PendingIntent {
+        return PendingIntent.getActivity(this, 0, Intent(this, SyncSettingsActivity::class.java).clearStack(), pendingIntentFlags)
     }
 }

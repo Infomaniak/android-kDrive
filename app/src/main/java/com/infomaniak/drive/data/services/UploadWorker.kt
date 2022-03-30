@@ -38,10 +38,9 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.UploadWorkerThrowable.runUploadCatching
 import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.data.sync.UploadNotifications.exceptionNotification
-import com.infomaniak.drive.data.sync.UploadNotifications.getActivityPendingIntent
 import com.infomaniak.drive.data.sync.UploadNotifications.setupCurrentUploadNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
-import com.infomaniak.drive.ui.menu.settings.SyncSettingsActivity
+import com.infomaniak.drive.data.sync.UploadNotifications.syncSettingsActivityPendingIntent
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaFoldersProvider.IMAGES_BUCKET_ID
 import com.infomaniak.drive.utils.MediaFoldersProvider.VIDEO_BUCKET_ID
@@ -436,7 +435,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
 
         fun Context.showSyncConfigNotification() {
-            val pendingIntent = getActivityPendingIntent(SyncSettingsActivity::class.java)
+            val pendingIntent = syncSettingsActivityPendingIntent()
             val notificationManagerCompat = NotificationManagerCompat.from(this)
             showGeneralNotification(getString(R.string.noSyncFolderNotificationTitle)).apply {
                 setContentText(getString(R.string.noSyncFolderNotificationDescription))

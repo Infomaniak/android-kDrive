@@ -24,10 +24,7 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.sync.UploadNotifications.getActivityPendingIntent
-import java.util.*
 
 object NotificationUtils {
 
@@ -94,14 +91,6 @@ object NotificationUtils {
             setAutoCancel(true)
             setContentTitle(title)
             setSmallIcon(DEFAULT_SMALL_ICON)
-        }
-    }
-
-    fun Context.showNotificationAndLaunchActivity(title: String, activity: Class<*>) {
-        val notificationManagerCompat = NotificationManagerCompat.from(this)
-        showGeneralNotification(title).apply {
-            setContentIntent(getActivityPendingIntent(activity))
-            notificationManagerCompat.notify(UUID.randomUUID().hashCode(), build())
         }
     }
 

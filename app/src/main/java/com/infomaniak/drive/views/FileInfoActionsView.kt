@@ -228,6 +228,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         deleteFile.setOnClickListener { onItemClickListener.deleteFileClicked() }
         goToFolder.setOnClickListener { onItemClickListener.goToFolder() }
     }
+
     /**
      * Download [currentFile] to put it offline
      *

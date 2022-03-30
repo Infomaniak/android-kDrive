@@ -23,6 +23,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -41,7 +42,6 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
-import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListFragmentDirections
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
@@ -55,12 +55,13 @@ import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSele
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
-import com.infomaniak.drive.utils.NotificationUtils.showNotificationAndLaunchActivity
+import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.Utils.moveFileClicked
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.util.*
 
 abstract class MultiSelectFragment(private val matomoCategory: String) : Fragment(), MultiSelectResult {
 
@@ -394,9 +395,11 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                 Utils.downloadAsOfflineFile(requireContext(), file)
             }
         } else {
-            context?.showNotificationAndLaunchActivity(
-                getString(R.string.snackBarInvalidFileNameError, invalidFileNameChar, file.name), MainActivity::class.java
-            )
+            context?.let {
+                it.showGeneralNotification(
+                    getString(R.string.snackBarInvalidFileNameError, invalidFileNameChar, file.name)
+                ).apply { NotificationManagerCompat.from(it).notify(UUID.randomUUID().hashCode(), build()) }
+            }
         }
     }
 
