@@ -197,8 +197,7 @@ object UploadNotifications {
         )
     }
 
-    fun Context.syncSettingsActivityPendingIntent(): PendingIntent = PendingIntent.getActivity(
-        this, 0,
-        Intent(this, SyncSettingsActivity::class.java).clearStack(), pendingIntentFlags
-    )
+    fun Context.syncSettingsActivityPendingIntent(): PendingIntent {
+        return PendingIntent.getActivity(this, 0, Intent(this, SyncSettingsActivity::class.java).clearStack(), pendingIntentFlags)
+    }
 }

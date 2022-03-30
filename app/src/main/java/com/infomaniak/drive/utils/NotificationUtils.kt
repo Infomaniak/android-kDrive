@@ -84,12 +84,16 @@ object NotificationUtils {
         }
     }
 
-    fun Context.showGeneralNotification(title: String): NotificationCompat.Builder {
+    fun Context.showGeneralNotification(
+        title: String,
+        description: String? = null
+    ): NotificationCompat.Builder {
         val channelId = getString(R.string.notification_channel_id_general)
         return NotificationCompat.Builder(this, channelId).apply {
             setTicker(title)
             setAutoCancel(true)
             setContentTitle(title)
+            description?.let { setStyle(NotificationCompat.BigTextStyle().bigText(it)) }
             setSmallIcon(DEFAULT_SMALL_ICON)
         }
     }

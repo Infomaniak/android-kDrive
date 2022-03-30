@@ -605,6 +605,7 @@
     <string name="sharedWithMeNoFile">Keine Datei mit mir geteilt</string>
     <string name="sharedWithMeTitle">Mit mir geteilt</string>
     <string name="snackBarCategoryDeleted">Kategorie erfolgreich gelöscht</string>
+    <string name="snackBarInvalidFileNameError">Das Zeichen \"%s\" in der Datei %s wird für die Offline-Schaltung nicht unterstützt</string>
     <plurals name="snackBarUploadError">
         <item quantity="one">Eine Datei konnte nicht importiert werden</item>
         <item quantity="other">%d Dateien konnten nicht importiert werden</item>

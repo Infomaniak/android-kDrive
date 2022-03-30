@@ -23,6 +23,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -54,11 +55,13 @@ import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSele
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.Utils.moveFileClicked
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.util.*
 
 abstract class MultiSelectFragment(private val matomoCategory: String) : Fragment(), MultiSelectResult {
 
@@ -374,21 +377,30 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     }
 
     private fun addSelectedFileToOffline(file: File, offlineFile: java.io.File?, cacheFile: java.io.File) {
-        if (offlineFile != null && !file.isObsoleteOrNotIntact(cacheFile)) {
-            Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
-            runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
+        val invalidFileNameChar = Utils.getInvalidFileNameCharacter(file.name)
+        if (invalidFileNameChar == null) {
+            if (offlineFile != null && !file.isObsoleteOrNotIntact(cacheFile)) {
+                Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
+                runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
 
-            updateFileProgressByFileId(file.id, 100) { _, currentFile ->
-                currentFile.apply {
-                    if (isNotManagedByRealm()) {
-                        isOffline = true
-                        currentProgress = 0
+                updateFileProgressByFileId(file.id, 100) { _, currentFile ->
+                    currentFile.apply {
+                        if (isNotManagedByRealm()) {
+                            isOffline = true
+                            currentProgress = 0
+                        }
                     }
                 }
+            } else {
+                Utils.downloadAsOfflineFile(requireContext(), file)
             }
         } else {
-            Utils.downloadAsOfflineFile(requireContext(), file)
-            file.isOffline = true
+            context?.let {
+                it.showGeneralNotification(
+                    title = getString(R.string.anErrorHasOccurred),
+                    description = getString(R.string.snackBarInvalidFileNameError, invalidFileNameChar, file.name)
+                ).apply { NotificationManagerCompat.from(it).notify(UUID.randomUUID().hashCode(), build()) }
+            }
         }
     }
 

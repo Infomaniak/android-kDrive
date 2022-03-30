@@ -33,6 +33,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.navigation.fragment.findNavController
 import androidx.work.WorkInfo
+import com.google.android.material.switchmaterial.SwitchMaterial
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
@@ -98,7 +99,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             actionListLayout.isGone = true
         } else {
             quickActionsLayout.isVisible = true
-            quickActionsLayout.isVisible = true
+            actionListLayout.isVisible = true
 
             // TODO - Enhanceable code : Replace these let by an autonomous view with "enabled/disabled" method ?
             currentFile.rights.let { rights ->
@@ -205,8 +206,17 @@ class FileInfoActionsView @JvmOverloads constructor(
             onItemClickListener.addFavoritesClicked()
         }
         leaveShare.setOnClickListener { onItemClickListener.leaveShare() }
-        availableOfflineSwitch.setOnCheckedChangeListener { _, isChecked ->
-            onItemClickListener.availableOfflineSwitched(this, isChecked)
+        // Use OnClickListener instead of OnCheckedChangeListener because the later is unnecessarily called on every 
+        // refreshBottomSheetUI calls
+        availableOfflineSwitch.setOnClickListener { view ->
+            val downloadError = !onItemClickListener.availableOfflineSwitched(this, (view as SwitchMaterial).isChecked)
+            with(ownerFragment) {
+                if (downloadError) {
+                    availableOfflineSwitch.isChecked = false
+                    showSnackBarInvalidFileName(currentFile.name)
+                }
+                findNavController().popBackStack()
+            }
         }
         availableOffline.setOnClickListener { availableOfflineSwitch.performClick() }
         moveFile.setOnClickListener {
@@ -219,20 +229,31 @@ class FileInfoActionsView @JvmOverloads constructor(
         goToFolder.setOnClickListener { onItemClickListener.goToFolder() }
     }
 
-    fun downloadAsOfflineFile() {
-        val cacheFile = currentFile.getCacheFile(context)
-        if (cacheFile.exists()) {
-            currentFile.getOfflineFile(context)?.let { offlineFile ->
-                Utils.moveCacheFileToOffline(currentFile, cacheFile, offlineFile)
-                CoroutineScope(Dispatchers.IO).launch { FileController.updateOfflineStatus(currentFile.id, true) }
-                currentFile.isOffline = true
-                onItemClickListener.onCacheAddedToOffline()
+    /**
+     * Download [currentFile] to put it offline
+     *
+     * @return true if the file has been successfully downloaded, false if its name contains forbidden characters
+     */
+    fun downloadAsOfflineFile(): Boolean {
+        with(currentFile) {
+            if (Utils.getInvalidFileNameCharacter(name) != null) return false
+
+            val cacheFile = getCacheFile(context)
+            if (cacheFile.exists()) {
+                getOfflineFile(context)?.let { offlineFile ->
+                    Utils.moveCacheFileToOffline(this, cacheFile, offlineFile)
+                    CoroutineScope(Dispatchers.IO).launch { FileController.updateOfflineStatus(id, true) }
+                    isOffline = true
+                    onItemClickListener.onCacheAddedToOffline()
+                }
+            } else {
+                Utils.downloadAsOfflineFile(context, this)
+                if (isPendingOffline(context)) mainViewModel.updateOfflineFile.value = id
             }
-        } else {
-            Utils.downloadAsOfflineFile(context, currentFile)
-            if (currentFile.isPendingOffline(context)) mainViewModel.updateOfflineFile.value = currentFile.id
+            refreshBottomSheetUi(this)
         }
-        refreshBottomSheetUi(currentFile)
+
+        return true
     }
 
     fun downloadFile(drivePermissions: DrivePermissions, onSuccess: () -> Unit) {
@@ -441,14 +462,14 @@ class FileInfoActionsView @JvmOverloads constructor(
             }
         }
 
-        fun availableOfflineSwitched(fileInfoActionsView: FileInfoActionsView, isChecked: Boolean) {
+        fun availableOfflineSwitched(fileInfoActionsView: FileInfoActionsView, isChecked: Boolean): Boolean {
             currentFile.apply {
                 when {
                     isOffline && isChecked -> Unit
                     !isOffline && !isChecked -> Unit
                     isChecked -> {
                         trackActionEvent("offline", true.toFloat())
-                        fileInfoActionsView.downloadAsOfflineFile()
+                        return fileInfoActionsView.downloadAsOfflineFile()
                     }
                     else -> {
                         trackActionEvent("offline", false.toFloat())
@@ -458,6 +479,8 @@ class FileInfoActionsView @JvmOverloads constructor(
                     }
                 }
             }
+
+            return true
         }
 
         fun moveFileClicked(folderId: Int?, selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
