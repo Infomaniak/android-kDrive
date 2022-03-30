@@ -397,7 +397,8 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         } else {
             context?.let {
                 it.showGeneralNotification(
-                    getString(R.string.snackBarInvalidFileNameError, invalidFileNameChar, file.name)
+                    title = getString(R.string.anErrorHasOccurred),
+                    description = getString(R.string.snackBarInvalidFileNameError, invalidFileNameChar, file.name)
                 ).apply { NotificationManagerCompat.from(it).notify(UUID.randomUUID().hashCode(), build()) }
             }
         }
