@@ -52,7 +52,7 @@ class RecentChangesFragment : FileSubTypeListFragment() {
                 }
             })
         }
-
+        
         sortButton.isGone = true
         collapsingToolbarLayout.title = getString(R.string.lastEditsTitle)
     }
