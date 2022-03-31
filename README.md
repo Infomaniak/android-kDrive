@@ -14,7 +14,7 @@ Protect your data in a sovereign cloud exclusively developed and hosted in Switz
 
 [<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" 
       alt="Download from Google Play" height="100">](https://play.google.com/store/apps/details?id=com.infomaniak.drive)
-[<img src="https://f-droid.org/badge/get-it-on.png"
+[<img src="https://gitlab.com/fdroid/artwork/-/raw/master/badge/get-it-on-en.png"
       alt="Get it on F-Droid"
       height="100">](https://f-droid.org/packages/com.infomaniak.drive/)
 
