@@ -25,67 +25,6 @@
     <include layout="@layout/view_bottom_sheet_separator" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/availableOffline"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground">
-
-        <FrameLayout
-            android:id="@+id/availableOfflineIconLayout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <ImageView
-                android:id="@+id/availableOfflineIcon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_offline"
-                tools:ignore="ContentDescription" />
-
-            <ImageView
-                android:id="@+id/availableOfflineComplete"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/buttonAvailableOffline"
-                android:src="@drawable/ic_check"
-                android:visibility="gone" />
-        </FrameLayout>
-
-        <TextView
-            android:id="@+id/availableOfflineText"
-            style="@style/Subtitle1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandardMedium"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:text="@string/buttonAvailableOffline"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/availableOfflineSwitch"
-            app:layout_constraintStart_toEndOf="@id/availableOfflineIconLayout"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/availableOfflineSwitch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/marginStandard"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <View
-            android:id="@+id/disabledAvailableOffline"
-            style="@style/DisabledView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/addFavorites"
         android:layout_width="match_parent"
         android:layout_height="@dimen/buttonHeight"
@@ -151,6 +90,67 @@
 
         <View
             android:id="@+id/disabledColoredFolder"
+            style="@style/DisabledView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/availableOffline"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/buttonHeight"
+        android:background="?selectableItemBackground">
+
+        <FrameLayout
+            android:id="@+id/availableOfflineIconLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/marginStandard"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/availableOfflineIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_offline"
+                tools:ignore="ContentDescription" />
+
+            <ImageView
+                android:id="@+id/availableOfflineComplete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/buttonAvailableOffline"
+                android:src="@drawable/ic_check"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/availableOfflineText"
+            style="@style/Subtitle1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/marginStandardMedium"
+            android:layout_marginEnd="@dimen/marginStandard"
+            android:text="@string/buttonAvailableOffline"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/availableOfflineSwitch"
+            app:layout_constraintStart_toEndOf="@id/availableOfflineIconLayout"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/availableOfflineSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/marginStandard"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/disabledAvailableOffline"
             style="@style/DisabledView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
