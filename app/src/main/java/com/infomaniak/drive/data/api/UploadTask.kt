@@ -112,14 +112,14 @@ class UploadTask(
         val fileInputStream = context.contentResolver.openInputStream(uploadFile.getOriginalUri(context))
 
         initChunkSize(uploadFile.fileSize)
+        checkLimitParallelRequest()
+
         BufferedInputStream(fileInputStream, chunkSize).use { input ->
             val waitingCoroutines = arrayListOf<Job>()
             val requestSemaphore = Semaphore(limitParallelRequest)
             val totalChunks = ceil(uploadFile.fileSize.toDouble() / chunkSize).toInt()
 
             if (totalChunks > TOTAL_CHUNKS) throw TotalChunksExceededException()
-
-            checkLimitParallelRequest()
 
             val uploadedChunks =
                 ApiRepository.getValidChunks(uploadFile.driveId, uploadFile.remoteFolder, uploadFile.identifier).data
@@ -228,6 +228,8 @@ class UploadTask(
         if (chunkSize >= availableHeapMemory) {
             chunkSize = ceil(availableHeapMemory.toDouble() / limitParallelRequest).toInt()
         }
+
+        if (chunkSize == 0) throw OutOfMemoryError("chunk size is 0")
     }
 
     private fun needToResetUpload(uploadedChunks: ValidChunks, totalChunks: Int): Boolean = with(uploadedChunks) {
