@@ -103,16 +103,6 @@ class TrashViewModel : ViewModel() {
         }
     }
 
-    fun deleteTrashFile(file: File) = liveData(Dispatchers.IO) {
-        emit(ApiRepository.deleteTrashFile(file))
-    }
-
-    fun restoreTrashFile(file: File, newFolder: File? = null) =
-        liveData(Dispatchers.IO) {
-            val body = newFolder?.let { mapOf("destination_directory_id" to newFolder.id) }
-            emit(ApiRepository.postRestoreTrashFile(file, body))
-        }
-
     fun emptyTrash(driveId: Int) = liveData(Dispatchers.IO) {
         emit(ApiRepository.emptyTrash(driveId))
     }

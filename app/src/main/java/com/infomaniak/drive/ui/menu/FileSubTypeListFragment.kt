@@ -48,7 +48,7 @@ open class FileSubTypeListFragment : FileListFragment() {
         forceClean: Boolean = false,
         ignoreOffline: Boolean = false,
         realm: Realm? = null,
-        isNewSort: Boolean
+        isNewSort: Boolean,
     ) {
         if (fileAdapter.itemCount == 0 || forceClean || isNewSort) {
             if (realm == null) {
@@ -64,13 +64,15 @@ open class FileSubTypeListFragment : FileListFragment() {
                 }
             }
         }
+
         fileAdapter.isComplete = isComplete
         showLoadingTimer.cancel()
         swipeRefreshLayout.isRefreshing = false
+
         changeNoFilesLayoutVisibility(
             files.isEmpty(),
             changeControlsVisibility = true,
-            ignoreOffline = ignoreOffline
+            ignoreOffline = ignoreOffline,
         )
     }
 }

@@ -21,29 +21,33 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/closeButtonMultiSelect"
-        style="@style/IconButton"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_marginStart="@dimen/marginStandardMedium"
-        android:contentDescription="@string/buttonClose"
-        app:icon="@drawable/ic_close"
-        app:iconSize="20dp"
-        app:iconTint="@color/primary"
-        app:layout_constraintBottom_toBottomOf="@id/selectAllButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/selectAllButton" />
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbarMultiSelect"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:layout_collapseMode="pin"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/ic_close">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/selectAllButton"
-        style="@style/TextButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/marginStandardMedium"
-        android:text="@string/buttonSelectAll"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/selectAllButton"
+            style="@style/TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginEnd="@dimen/marginStandardSmall"
+            android:text="@string/buttonSelectAll" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/emptyTrashButton"
+            style="@style/TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginEnd="@dimen/marginStandardSmall"
+            android:text="@string/buttonEmptyTrash"
+            android:visibility="gone" />
+    </com.google.android.material.appbar.MaterialToolbar>
 
     <TextView
         android:id="@+id/titleMultiSelect"
@@ -53,7 +57,7 @@
         android:layout_marginStart="@dimen/marginStandard"
         android:layout_marginEnd="@dimen/marginStandardVerySmall"
         android:textSize="22sp"
-        app:layout_constraintBottom_toBottomOf="@id/moveButtonMultiSelect"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/moveButtonMultiSelect"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/moveButtonMultiSelect"
@@ -65,7 +69,6 @@
         android:layout_width="34dp"
         android:layout_height="34dp"
         android:layout_marginEnd="@dimen/marginStandardSmall"
-        android:layout_marginBottom="@dimen/marginStandardSmall"
         android:contentDescription="@string/buttonMoveTo"
         app:icon="@drawable/ic_folder_select"
         app:iconSize="20dp"
@@ -79,7 +82,6 @@
         android:layout_width="34dp"
         android:layout_height="34dp"
         android:layout_marginEnd="@dimen/marginStandardVerySmall"
-        android:layout_marginBottom="@dimen/marginStandardSmall"
         android:contentDescription="@string/buttonDelete"
         app:icon="@drawable/ic_delete"
         app:iconSize="20dp"
@@ -93,11 +95,11 @@
         android:layout_width="34dp"
         android:layout_height="34dp"
         android:layout_marginEnd="@dimen/marginStandardMedium"
-        android:layout_marginBottom="@dimen/marginStandardSmall"
         android:contentDescription="@string/buttonMenu"
         app:icon="@drawable/ic_menu"
         app:iconSize="20dp"
         app:iconTint="@color/icon_toolbar_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

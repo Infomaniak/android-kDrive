@@ -38,7 +38,11 @@ enum class BulkOperationType(@StringRes val title: Int, @PluralsRes val successM
     ADD_OFFLINE(0, successMessage = R.plurals.fileListAddOfflineConfirmationSnackbar),
     REMOVE_OFFLINE(0, successMessage = R.plurals.fileListRemoveOfflineConfirmationSnackbar),
     ADD_FAVORITES(0, successMessage = R.plurals.fileListAddFavoritesConfirmationSnackbar),
-    REMOVE_FAVORITES(0, successMessage = R.plurals.fileListRemoveFavoritesConfirmationSnackbar);
+    REMOVE_FAVORITES(0, successMessage = R.plurals.fileListRemoveFavoritesConfirmationSnackbar),
+
+    RESTORE_IN(0, successMessage = R.plurals.trashedFileRestoreFileInSuccess),
+    RESTORE_TO_ORIGIN(0, successMessage = R.plurals.trashedFileRestoreFileToOriginalPlaceSuccess),
+    DELETE_PERMANENTLY(0, successMessage = R.plurals.snackbarDeleteConfirmation);
 
     fun getNotificationBuilder(context: Context): NotificationCompat.Builder {
         return when (this) {

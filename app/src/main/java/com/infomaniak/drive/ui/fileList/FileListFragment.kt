@@ -38,6 +38,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.WorkInfo
 import com.google.android.material.appbar.CollapsingToolbarLayout
+import com.google.android.material.appbar.MaterialToolbar
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
@@ -68,6 +69,7 @@ import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.setPagination
 import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.coroutines.*
 
 open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefreshLayout.OnRefreshListener {
@@ -139,9 +141,12 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     override fun initMultiSelectLayout(): MultiSelectLayoutBinding? = binding.multiSelectLayout
     override fun initMultiSelectToolbar(): CollapsingToolbarLayout? = binding.collapsingToolbarLayout
+    override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        setupToolbars()
 
         activitiesRefreshTimer = createRefreshTimer(ACTIVITIES_REFRESH_DELAY) {
             isLoadingActivities = false
@@ -251,6 +256,12 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         setupBackActionHandler()
     }
 
+    private fun setupToolbars() {
+        fun MaterialToolbar.removeInsets() = setContentInsetsRelative(0, 0)
+        toolbar.removeInsets()
+        multiSelectLayout?.toolbarMultiSelect?.removeInsets()
+    }
+
     private fun setupBackActionHandler() {
         getBackNavigationResult<Bundle>(CANCELLABLE_MAIN_KEY) { bundle ->
             bundle.getString(CANCELLABLE_TITLE_KEY)?.let { title ->
@@ -322,7 +333,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
         multiSelectLayout?.apply {
 
-            closeButtonMultiSelect.setOnClickListener { closeMultiSelect() }
+            toolbarMultiSelect.setNavigationOnClickListener { closeMultiSelect() }
             moveButtonMultiSelect.setOnClickListener { moveFiles(folderId) }
             deleteButtonMultiSelect.setOnClickListener { deleteFiles(getAllSelectedFilesCount()) }
             menuButtonMultiSelect.setOnClickListener { onMenuButtonClicked() }
@@ -673,7 +684,11 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     override fun onIndividualActionSuccess(type: BulkOperationType, data: Any) {
         when (type) {
-            BulkOperationType.TRASH, BulkOperationType.MOVE -> {
+            BulkOperationType.TRASH,
+            BulkOperationType.MOVE,
+            BulkOperationType.RESTORE_IN,
+            BulkOperationType.RESTORE_TO_ORIGIN,
+            BulkOperationType.DELETE_PERMANENTLY -> {
                 runBlocking(Dispatchers.Main) { fileAdapter.deleteByFileId(data as Int) }
             }
             BulkOperationType.ADD_FAVORITES -> {

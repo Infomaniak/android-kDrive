@@ -29,6 +29,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.WorkInfo
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.infomaniak.drive.R
@@ -73,6 +74,7 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
 
     override fun initMultiSelectLayout(): MultiSelectLayoutBinding? = menuPicturesBinding?.multiSelectLayout
     override fun initMultiSelectToolbar(): CollapsingToolbarLayout? = menuPicturesBinding?.collapsingToolbarLayout
+    override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = menuPicturesBinding?.swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -92,10 +94,7 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
         }
 
         multiSelectManager.apply {
-            openMultiSelect = {
-                menuPicturesBinding?.swipeRefreshLayout?.isEnabled = false
-                openMultiSelect()
-            }
+            openMultiSelect = { openMultiSelect() }
             updateMultiSelect = { onItemSelected() }
         }
 
@@ -236,11 +235,6 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
         }
     }
 
-    override fun closeMultiSelect() {
-        super.closeMultiSelect()
-        menuPicturesBinding?.swipeRefreshLayout?.isEnabled = true
-    }
-
     override fun getAllSelectedFilesCount(): Int? = null
 
     fun onMoveButtonClicked() {
@@ -287,9 +281,6 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
             BulkOperationType.COPY -> {
                 picturesAdapter.duplicatedList.add(0, data as File)
             }
-            BulkOperationType.ADD_OFFLINE, BulkOperationType.REMOVE_OFFLINE -> {
-                menuPicturesBinding?.swipeRefreshLayout?.isEnabled = true
-            }
             BulkOperationType.ADD_FAVORITES -> {
                 lifecycleScope.launch(Dispatchers.Main) {
                     picturesAdapter.notifyFileChanged(data as Int) { it.isFavorite = true }
@@ -300,14 +291,16 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
                     picturesAdapter.notifyFileChanged(data as Int) { it.isFavorite = false }
                 }
             }
-            BulkOperationType.MOVE, BulkOperationType.COLOR_FOLDER -> {
+            BulkOperationType.ADD_OFFLINE, BulkOperationType.REMOVE_OFFLINE,
+            BulkOperationType.MOVE,
+            BulkOperationType.COLOR_FOLDER,
+            BulkOperationType.RESTORE_IN, BulkOperationType.RESTORE_TO_ORIGIN, BulkOperationType.DELETE_PERMANENTLY -> {
                 // No-op
             }
         }
     }
 
     override fun onAllIndividualActionsFinished(type: BulkOperationType) {
-        menuPicturesBinding?.swipeRefreshLayout?.isEnabled = true
 
         if (type == BulkOperationType.COPY) {
             val oldTotal = picturesAdapter.itemList.size

@@ -19,14 +19,20 @@ package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isGone
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.navigation.navGraphViewModels
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.button.MaterialButton
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
+import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.SortTypeUsage
+import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialogArgs
+import com.infomaniak.drive.ui.fileList.multiSelect.TrashMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackTrashEvent
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -36,25 +42,42 @@ class TrashFragment : FileSubTypeListFragment() {
 
     val trashViewModel: TrashViewModel by navGraphViewModels(R.id.trashFragment)
 
+    override var enabledMultiSelectMode: Boolean = true
     override var sortTypeUsage = SortTypeUsage.TRASH
 
+    override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = swipeRefreshLayout
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        fileListViewModel.sortType = SortType.RECENT_TRASHED
-        sortFiles = SortFiles()
-        downloadFiles =
-            DownloadFiles(
-                if (folderId != ROOT_ID) File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId) else null
-            )
-        setNoFilesLayout = SetNoFilesLayout()
-
+        initParams()
         super.onViewCreated(view, savedInstanceState)
-
-        toolbar.setContentInsetsRelative(0, 0)
-
-        emptyTrash.setupEmptyTrashButton()
+        setupTrashEmptying()
 
         if (folderId == ROOT_ID) collapsingToolbarLayout.title = getString(R.string.trashTitle)
 
+        setupAdapter()
+
+        trashViewModel.removeFileId.observe(viewLifecycleOwner) { fileToRemove ->
+            removeFileFromAdapter(fileToRemove)
+        }
+
+        setupMultiSelectLayout()
+    }
+
+    private fun initParams() {
+        fileListViewModel.sortType = SortType.RECENT_TRASHED
+        sortFiles = SortFiles()
+        downloadFiles = DownloadFiles(
+            if (folderId == ROOT_ID) null else File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId)
+        )
+        setNoFilesLayout = SetNoFilesLayout()
+    }
+
+    private fun setupTrashEmptying() {
+        emptyTrash.setupEmptyTrashButton()
+        multiSelectLayout?.emptyTrashButton?.setupEmptyTrashButton()
+    }
+
+    private fun setupAdapter() {
         fileAdapter.apply {
             showShareFileButton = false
             onFileClicked = { file ->
@@ -67,14 +90,19 @@ class TrashFragment : FileSubTypeListFragment() {
             }
             onMenuClicked = { file -> showTrashedFileActions(file) }
         }
+    }
 
-        trashViewModel.removeFileId.observe(viewLifecycleOwner) { fileToRemove ->
-            removeFileFromAdapter(fileToRemove)
+    private fun setupMultiSelectLayout() {
+        multiSelectLayout?.apply {
+            selectAllButton.isGone = true
+            moveButtonMultiSelect.isInvisible = true
+            deleteButtonMultiSelect.isInvisible = true
         }
     }
 
     private fun MaterialButton.setupEmptyTrashButton() {
         isVisible = true
+        if (folderId != ROOT_ID) isEnabled = false
         setOnClickListener {
             Utils.createConfirmation(
                 context = requireContext(),
@@ -84,6 +112,7 @@ class TrashFragment : FileSubTypeListFragment() {
                 autoDismiss = false,
             ) { dialog ->
                 trackTrashEvent("emptyTrash")
+                closeMultiSelect()
                 trashViewModel.emptyTrash(AccountUtils.currentDriveId).observe(viewLifecycleOwner) { apiResponse ->
                     dialog.dismiss()
                     if (apiResponse.data == true) {
@@ -97,6 +126,37 @@ class TrashFragment : FileSubTypeListFragment() {
         }
     }
 
+    override fun onMenuButtonClicked() {
+        val (fileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
+        TrashMultiSelectActionsBottomSheetDialog().apply {
+            arguments = MultiSelectActionsBottomSheetDialogArgs(
+                fileIds = fileIds,
+                onlyFolders = onlyFolders,
+                onlyFavorite = onlyFavorite,
+                onlyOffline = onlyOffline,
+                isAllSelected = isAllSelected
+            ).toBundle()
+        }.show(childFragmentManager, "ActionTrashMultiSelectBottomSheetDialog")
+    }
+
+    override fun performBulkOperation(
+        type: BulkOperationType,
+        areAllFromTheSameFolder: Boolean,
+        allSelectedFilesCount: Int?,
+        destinationFolder: File?,
+        color: String?,
+    ) {
+        // API doesn't support bulk operations for files originating from
+        // different parent folders, so we repeat the action for each file.
+        // Hence the `areAllFromTheSameFolder` set at false.
+        super.performBulkOperation(type, false, allSelectedFilesCount, destinationFolder, color)
+    }
+
+    override fun closeMultiSelect() {
+        super.closeMultiSelect()
+        swipeRefreshLayout?.isEnabled = true
+    }
+
     private fun showTrashedFileActions(file: File) {
         trashViewModel.selectedFile.value = file
         safeNavigate(R.id.trashedFileActionsBottomSheetDialog)
@@ -105,6 +165,10 @@ class TrashFragment : FileSubTypeListFragment() {
     private fun removeFileFromAdapter(fileId: Int) {
         fileAdapter.deleteByFileId(fileId)
         noFilesLayout.toggleVisibility(fileAdapter.getFiles().isEmpty())
+    }
+
+    companion object {
+        const val MATOMO_CATEGORY = "trashFileAction"
     }
 
     private inner class SortFiles : () -> Unit {
@@ -127,6 +191,7 @@ class TrashFragment : FileSubTypeListFragment() {
                 icon = R.drawable.ic_delete,
                 title = R.string.trashNoFile,
                 initialListView = fileRecyclerView,
+                viewsToDisable = if (folderId == ROOT_ID) listOf(emptyTrash) else null,
             )
         }
     }

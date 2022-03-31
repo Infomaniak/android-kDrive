@@ -238,6 +238,21 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             emit(FileController.deleteFile(file, userDrive = userDrive, context = getContext(), onSuccess = onSuccess))
         }
 
+    fun restoreTrashFile(file: File, newFolderId: Int? = null, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
+        val body = newFolderId?.let { mapOf("destination_directory_id" to it) }
+        with(ApiRepository.postRestoreTrashFile(file, body)) {
+            emit(this)
+            if (isSuccess()) onSuccess?.invoke()
+        }
+    }
+
+    fun deleteTrashFile(file: File, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
+        with(ApiRepository.deleteTrashFile(file)) {
+            emit(this)
+            if (isSuccess()) onSuccess?.invoke()
+        }
+    }
+
     fun duplicateFile(
         file: File,
         folderId: Int? = null,

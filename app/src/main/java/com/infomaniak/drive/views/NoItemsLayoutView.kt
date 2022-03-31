@@ -39,6 +39,7 @@ class NoItemsLayoutView @JvmOverloads constructor(
     private var icon by Delegates.notNull<Int>()
     private var title by Delegates.notNull<Int>()
     private var description: Int? = null
+    private var viewsToDisable: List<View>? = null
     private var onNetworkUnavailableRefresh: (() -> Unit)? = null
 
     init {
@@ -52,12 +53,14 @@ class NoItemsLayoutView @JvmOverloads constructor(
         description: Int? = null,
         initialListView: View,
         secondaryBackground: Boolean = false,
-        onNetworkUnavailableRefresh: (() -> Unit)? = null
+        viewsToDisable: List<View>? = null,
+        onNetworkUnavailableRefresh: (() -> Unit)? = null,
     ) {
         this.icon = icon
         this.title = title
         this.description = description
         this.initialListView = initialListView
+        this.viewsToDisable = viewsToDisable
         this.onNetworkUnavailableRefresh = onNetworkUnavailableRefresh
         if (secondaryBackground) noItemsIconLayout.setBackgroundResource(R.drawable.round_empty_secondary)
     }
@@ -66,6 +69,7 @@ class NoItemsLayoutView @JvmOverloads constructor(
 
         if (isVisible) {
             this.isVisible = true
+            viewsToDisable?.forEach { it.isEnabled = false }
             initialListView.isGone = true
             noItemsIconLayout.icon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_no_network))
             noItemsTitle.setText(R.string.noFilesDescriptionNoNetwork)
@@ -89,6 +93,7 @@ class NoItemsLayoutView @JvmOverloads constructor(
             }
         } else {
             this.isGone = true
+            viewsToDisable?.forEach { it.isEnabled = true }
             initialListView.isVisible = true
         }
     }

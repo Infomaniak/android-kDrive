@@ -32,6 +32,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
@@ -45,6 +46,7 @@ import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListFragmentDirections
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
+import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.BULK_OPERATION_CUSTOM_TAG
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.CUSTOM_ARGS_TAG
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.FOLDER_ID_TAG
@@ -70,6 +72,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     protected var adapter: RecyclerView.Adapter<*>? = null
     protected var multiSelectLayout: MultiSelectLayoutBinding? = null
     private var multiSelectToolbar: CollapsingToolbarLayout? = null
+    private var swipeRefresh: SwipeRefreshLayout? = null
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data ->
@@ -78,9 +81,11 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                 val folderName = getString(FOLDER_NAME_TAG).toString()
                 val customArgs = getBundle(CUSTOM_ARGS_TAG)
                 val bulkOperationType = customArgs?.getParcelable<BulkOperationType>(BULK_OPERATION_CUSTOM_TAG)!!
+                val areAllFromTheSameFolder = customArgs.getBoolean(ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG, true)
 
                 performBulkOperation(
                     type = bulkOperationType,
+                    areAllFromTheSameFolder = areAllFromTheSameFolder,
                     allSelectedFilesCount = getAllSelectedFilesCount(),
                     destinationFolder = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId),
                 )
@@ -90,15 +95,26 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
 
     abstract fun initMultiSelectLayout(): MultiSelectLayoutBinding?
     abstract fun initMultiSelectToolbar(): CollapsingToolbarLayout?
+    abstract fun initSwipeRefreshLayout(): SwipeRefreshLayout?
     abstract fun getAllSelectedFilesCount(): Int?
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+
         multiSelectLayout = initMultiSelectLayout()
         multiSelectToolbar = initMultiSelectToolbar()
+        swipeRefresh = initSwipeRefreshLayout()
+
+        if (multiSelectManager.isMultiSelectOn) {
+            openMultiSelect()
+            onItemSelected()
+        }
+
         super.onViewCreated(view, savedInstanceState)
     }
 
     fun openMultiSelect() {
+        swipeRefresh?.isEnabled = false
+
         multiSelectManager.isMultiSelectOn = true
 
         adapter?.apply { notifyItemRangeChanged(0, itemCount) }
@@ -131,6 +147,8 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     }
 
     open fun closeMultiSelect() {
+        swipeRefresh?.isEnabled = true
+
         multiSelectManager.apply {
             resetSelectedItems()
             exceptedItemsIds.clear()
@@ -169,6 +187,20 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         selectFolderResultLauncher.launch(intent)
     }
 
+    fun restoreIn() {
+        val intent = Intent(requireContext(), SelectFolderActivity::class.java).apply {
+            putExtra(USER_ID_TAG, AccountUtils.currentUserId)
+            putExtra(USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
+            putExtra(
+                CUSTOM_ARGS_TAG, bundleOf(
+                    BULK_OPERATION_CUSTOM_TAG to BulkOperationType.RESTORE_IN,
+                    ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG to false,
+                )
+            )
+        }
+        selectFolderResultLauncher.launch(intent)
+    }
+
     open fun performBulkOperation(
         type: BulkOperationType,
         areAllFromTheSameFolder: Boolean = true,
@@ -186,16 +218,23 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             type, areAllFromTheSameFolder, fileCount, selectedFiles, destinationFolder, color
         )
 
-        if (type == BulkOperationType.TRASH) {
-            Utils.createConfirmation(
+        when (type) {
+            BulkOperationType.TRASH -> Utils.createConfirmation(
                 context = this,
                 title = getString(R.string.modalMoveTrashTitle),
                 message = resources.getQuantityString(R.plurals.modalMoveTrashDescription, fileCount, fileCount),
                 isDeletion = true,
                 onConfirmation = sendActions,
             )
-        } else {
-            sendActions(null)
+            BulkOperationType.DELETE_PERMANENTLY -> {
+                Utils.confirmFileDeletion(
+                    context = this,
+                    fileCount = fileCount,
+                    fromTrash = true,
+                    onConfirmation = sendActions,
+                )
+            }
+            else -> sendActions(null)
         }
     }
 
@@ -277,7 +316,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         when (type) {
             BulkOperationType.TRASH -> {
                 mediator.addSource(
-                    deleteFile(file, onSuccess = { onIndividualActionSuccess(BulkOperationType.TRASH, it) }),
+                    deleteFile(file, onSuccess = { onIndividualActionSuccess(type, it) }),
                     updateMultiSelectMediator(mediator),
                 )
             }
@@ -286,7 +325,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                     moveFile(
                         file = file,
                         newParent = destinationFolder!!,
-                        onSuccess = { onIndividualActionSuccess(BulkOperationType.MOVE, it) },
+                        onSuccess = { onIndividualActionSuccess(type, it) },
                     ),
                     updateMultiSelectMediator(mediator),
                 )
@@ -298,7 +337,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                         file = file,
                         folderId = destinationFolder!!.id,
                         copyName = getString(R.string.allDuplicateFileName, fileName, file.getFileExtension()),
-                        onSuccess = { it.data?.let { file -> onIndividualActionSuccess(BulkOperationType.COPY, file) } },
+                        onSuccess = { it.data?.let { file -> onIndividualActionSuccess(type, file) } },
                     ),
                     updateMultiSelectMediator(mediator),
                 )
@@ -322,7 +361,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                 mediator.addSource(
                     addFileToFavorites(
                         file = file,
-                        onSuccess = { onIndividualActionSuccess(BulkOperationType.ADD_FAVORITES, file.id) }),
+                        onSuccess = { onIndividualActionSuccess(type, file.id) }),
                     updateMultiSelectMediator(mediator),
                 )
             }
@@ -330,7 +369,35 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                 mediator.addSource(
                     deleteFileFromFavorites(
                         file = file,
-                        onSuccess = { onIndividualActionSuccess(BulkOperationType.REMOVE_FAVORITES, file.id) },
+                        onSuccess = { onIndividualActionSuccess(type, file.id) },
+                    ),
+                    updateMultiSelectMediator(mediator),
+                )
+            }
+            BulkOperationType.RESTORE_IN -> {
+                mediator.addSource(
+                    restoreTrashFile(
+                        file = file,
+                        newFolderId = destinationFolder!!.id,
+                        onSuccess = { onIndividualActionSuccess(type, file.id) },
+                    ),
+                    updateMultiSelectMediator(mediator),
+                )
+            }
+            BulkOperationType.RESTORE_TO_ORIGIN -> {
+                mediator.addSource(
+                    restoreTrashFile(
+                        file = file,
+                        onSuccess = { onIndividualActionSuccess(type, file.id) },
+                    ),
+                    updateMultiSelectMediator(mediator),
+                )
+            }
+            BulkOperationType.DELETE_PERMANENTLY -> {
+                mediator.addSource(
+                    deleteTrashFile(
+                        file = file,
+                        onSuccess = { onIndividualActionSuccess(type, file.id) },
                     ),
                     updateMultiSelectMediator(mediator),
                 )
@@ -367,11 +434,10 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             val cacheFile = file.getCacheFile(requireContext())
             if (type == BulkOperationType.ADD_OFFLINE) {
                 addSelectedFileToOffline(file, offlineFile, cacheFile)
-                onIndividualActionSuccess(BulkOperationType.ADD_OFFLINE, Unit)
             } else {
                 removeSelectedFileFromOffline(file, offlineFile, cacheFile)
-                onIndividualActionSuccess(BulkOperationType.REMOVE_OFFLINE, Unit)
             }
+            onIndividualActionSuccess(type, Unit)
             closeMultiSelect()
         }
     }
