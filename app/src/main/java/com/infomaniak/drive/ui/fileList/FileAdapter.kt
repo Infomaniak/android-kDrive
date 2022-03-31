@@ -311,7 +311,6 @@ open class FileAdapter(
             isGone = uploadInProgress
                     || selectFolder
                     || file.isDrive()
-                    || file.isTrashed()
                     || file.isFromActivities
                     || file.isFromSearch
                     || (offlineMode && !file.isOffline)
