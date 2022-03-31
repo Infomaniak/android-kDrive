@@ -43,6 +43,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.ConvertedType
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.File.VisibilityType
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED_CATEGORIES
 import com.infomaniak.drive.ui.fileList.FileViewHolder
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -177,15 +178,13 @@ private fun View.displayCategories(file: File) {
  * Realm's Github issue: https://github.com/realm/realm-java/issues/7637
  */
 fun File.getFolderIcon(): Pair<Int, String?> {
-    return when (getVisibilityType()) {
-        File.VisibilityType.IS_TEAM_SPACE -> R.drawable.ic_folder_common_documents to null
-        File.VisibilityType.IS_SHARED_SPACE -> R.drawable.ic_folder_shared to null
-        File.VisibilityType.IS_COLLABORATIVE_FOLDER -> R.drawable.ic_folder_dropbox to color
-        else -> if (isDisabled()) {
-            R.drawable.ic_folder_disable to null
-        } else {
-            R.drawable.ic_folder_filled to color
-        }
+    return if (isDisabled()) R.drawable.ic_folder_disable to null
+    else when (getVisibilityType()) {
+        VisibilityType.IS_TEAM_SPACE -> R.drawable.ic_folder_common_documents to null
+        VisibilityType.IS_TEAM_SPACE_FOLDER -> R.drawable.ic_folder_common_documents to getCommonFolderDefaultColor()
+        VisibilityType.IS_SHARED_SPACE -> R.drawable.ic_folder_shared to null
+        VisibilityType.IS_COLLABORATIVE_FOLDER -> R.drawable.ic_folder_dropbox to color
+        else -> R.drawable.ic_folder_filled to color
     }
 }
 
