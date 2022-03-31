@@ -29,7 +29,7 @@ import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.SortTypeUsage
-import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialogArgs
+import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.TrashMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackTrashEvent
@@ -123,18 +123,14 @@ class TrashFragment : FileSubTypeListFragment() {
         }
     }
 
-    override fun onMenuButtonClicked() {
-        val (fileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
-        TrashMultiSelectActionsBottomSheetDialog().apply {
-            arguments = MultiSelectActionsBottomSheetDialogArgs(
-                fileIds = fileIds,
-                onlyFolders = onlyFolders,
-                onlyFavorite = onlyFavorite,
-                onlyOffline = onlyOffline,
-                isAllSelected = isAllSelected,
-                areAllFromTheSameFolder = false,
-            ).toBundle()
-        }.show(childFragmentManager, "ActionTrashMultiSelectBottomSheetDialog")
+    override fun onMenuButtonClicked(
+        multiSelectBottomSheet: MultiSelectActionsBottomSheetDialog,
+        areAllFromTheSameFolder: Boolean,
+    ) {
+        super.onMenuButtonClicked(
+            multiSelectBottomSheet = TrashMultiSelectActionsBottomSheetDialog(),
+            areAllFromTheSameFolder = false,
+        )
     }
 
     override fun closeMultiSelect() {

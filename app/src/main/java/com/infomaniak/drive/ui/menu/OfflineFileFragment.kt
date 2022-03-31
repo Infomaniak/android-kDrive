@@ -21,7 +21,7 @@ import android.os.Bundle
 import android.view.View
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialogArgs
+import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.OfflineMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.Utils
 import kotlinx.android.synthetic.main.fragment_file_list.*
@@ -44,18 +44,14 @@ open class OfflineFileFragment : FileSubTypeListFragment() {
         folderId = Utils.OTHER_ROOT_ID
     }
 
-    override fun onMenuButtonClicked() {
-        val (fileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
-        OfflineMultiSelectActionsBottomSheetDialog().apply {
-            arguments = MultiSelectActionsBottomSheetDialogArgs(
-                fileIds = fileIds,
-                onlyFolders = onlyFolders,
-                onlyFavorite = onlyFavorite,
-                onlyOffline = onlyOffline,
-                isAllSelected = isAllSelected,
-                areAllFromTheSameFolder = false,
-            ).toBundle()
-        }.show(childFragmentManager, "ActionOfflineMultiSelectBottomSheetDialog")
+    override fun onMenuButtonClicked(
+        multiSelectBottomSheet: MultiSelectActionsBottomSheetDialog,
+        areAllFromTheSameFolder: Boolean,
+    ) {
+        super.onMenuButtonClicked(
+            multiSelectBottomSheet = OfflineMultiSelectActionsBottomSheetDialog(),
+            areAllFromTheSameFolder = false,
+        )
     }
 
     companion object {

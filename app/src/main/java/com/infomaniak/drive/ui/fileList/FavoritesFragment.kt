@@ -27,7 +27,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.multiSelect.FavoritesMultiSelectActionsBottomSheetDialog
-import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialogArgs
+import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -76,18 +76,14 @@ class FavoritesFragment : FileListFragment() {
         multiSelectLayout?.selectAllButton?.isGone = true
     }
 
-    override fun onMenuButtonClicked() {
-        val (fileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
-        FavoritesMultiSelectActionsBottomSheetDialog().apply {
-            arguments = MultiSelectActionsBottomSheetDialogArgs(
-                fileIds = fileIds,
-                onlyFolders = onlyFolders,
-                onlyFavorite = onlyFavorite,
-                onlyOffline = onlyOffline,
-                isAllSelected = isAllSelected,
-                areAllFromTheSameFolder = false,
-            ).toBundle()
-        }.show(childFragmentManager, "ActionFavoritesMultiSelectBottomSheetDialog")
+    override fun onMenuButtonClicked(
+        multiSelectBottomSheet: MultiSelectActionsBottomSheetDialog,
+        areAllFromTheSameFolder: Boolean,
+    ) {
+        super.onMenuButtonClicked(
+            multiSelectBottomSheet = FavoritesMultiSelectActionsBottomSheetDialog(),
+            areAllFromTheSameFolder = false,
+        )
     }
 
     override fun performBulkOperation(

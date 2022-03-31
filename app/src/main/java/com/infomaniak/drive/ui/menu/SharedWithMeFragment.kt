@@ -31,7 +31,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialog
-import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialogArgs
+import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.SharedWithMeMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
@@ -125,18 +125,14 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
         }
     }
 
-    override fun onMenuButtonClicked() {
-        val (fileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
-        SharedWithMeMultiSelectActionsBottomSheetDialog().apply {
-            arguments = MultiSelectActionsBottomSheetDialogArgs(
-                fileIds = fileIds,
-                onlyFolders = onlyFolders,
-                onlyFavorite = onlyFavorite,
-                onlyOffline = onlyOffline,
-                isAllSelected = isAllSelected,
-                areAllFromTheSameFolder = false,
-            ).toBundle()
-        }.show(childFragmentManager, "ActionSharedWithMeMultiSelectBottomSheetDialog")
+    override fun onMenuButtonClicked(
+        multiSelectBottomSheet: MultiSelectActionsBottomSheetDialog,
+        areAllFromTheSameFolder: Boolean,
+    ) {
+        super.onMenuButtonClicked(
+            multiSelectBottomSheet = SharedWithMeMultiSelectActionsBottomSheetDialog(),
+            areAllFromTheSameFolder = false,
+        )
     }
 
     companion object {

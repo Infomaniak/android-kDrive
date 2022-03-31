@@ -207,7 +207,6 @@
             app:argType="boolean" />
         <argument
             android:name="areAllFromTheSameFolder"
-            android:defaultValue="false"
             app:argType="boolean" />
     </dialog>
 

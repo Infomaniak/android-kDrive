@@ -38,9 +38,7 @@ import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.databinding.FragmentMenuPicturesBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
-import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
-import com.infomaniak.drive.ui.fileList.multiSelect.PicturesMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import com.infomaniak.lib.core.utils.setPagination
@@ -236,20 +234,6 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
         }
 
         moveFiles(folderId)
-    }
-
-    fun onMenuButtonClicked() {
-        val (fileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
-        PicturesMultiSelectActionsBottomSheetDialog().apply {
-            arguments = MultiSelectActionsBottomSheetDialogArgs(
-                fileIds = fileIds,
-                onlyFolders = onlyFolders,
-                onlyFavorite = onlyFavorite,
-                onlyOffline = onlyOffline,
-                isAllSelected = isAllSelected,
-                areAllFromTheSameFolder = false,
-            ).toBundle()
-        }.show(childFragmentManager, "ActionPicturesMultiSelectBottomSheetDialog")
     }
 
     override fun performBulkOperation(

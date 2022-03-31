@@ -55,7 +55,6 @@ import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.FileListMultiSelectActionsBottomSheetDialog
-import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.FilePresenter.openBookmark
@@ -343,7 +342,12 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             toolbarMultiSelect.setNavigationOnClickListener { closeMultiSelect() }
             moveButtonMultiSelect.setOnClickListener { moveFiles(folderId) }
             deleteButtonMultiSelect.setOnClickListener { deleteFiles(getAllSelectedFilesCount()) }
-            menuButtonMultiSelect.setOnClickListener { onMenuButtonClicked() }
+            menuButtonMultiSelect.setOnClickListener {
+                onMenuButtonClicked(
+                    multiSelectBottomSheet = FileListMultiSelectActionsBottomSheetDialog(),
+                    areAllFromTheSameFolder = true,
+                )
+            }
 
             selectAllButton.apply {
                 initProgress(viewLifecycleOwner)
@@ -660,20 +664,6 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             val count = layoutManager.findLastVisibleItemPosition() - first + 1
             fileAdapter.notifyItemRangeChanged(first, count, -1)
         }
-    }
-
-    protected open fun onMenuButtonClicked() {
-        val (fileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
-        FileListMultiSelectActionsBottomSheetDialog().apply {
-            arguments = MultiSelectActionsBottomSheetDialogArgs(
-                fileIds = fileIds,
-                onlyFolders = onlyFolders,
-                onlyFavorite = onlyFavorite,
-                onlyOffline = onlyOffline,
-                isAllSelected = isAllSelected,
-                areAllFromTheSameFolder = true,
-            ).toBundle()
-        }.show(childFragmentManager, "ActionFileListMultiSelectBottomSheetDialog")
     }
 
     override fun performBulkOperation(
