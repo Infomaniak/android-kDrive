@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.fileList
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
@@ -318,6 +319,17 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         updateVisibleProgresses()
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        with(binding) {
+            fileListViewModel.isListMode.value?.let { isListMode ->
+                val navController = findNavController()
+                fileRecyclerView.layoutManager = createLayoutManager(isListMode, navController)
+            }
+        }
+    }
+
     override fun onStop() {
         fileAdapter.removeRealmDataListener()
         super.onStop()
@@ -589,8 +601,10 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     }
 
     protected open fun createLayoutManager(isListMode: Boolean, navController: NavController): LinearLayoutManager {
+        val columnNumber = requireActivity().getAdjustedColumnNumber(450)
+
         return if (isListMode) SentryLinearLayoutManager(navController, requireContext())
-        else SentryGridLayoutManager(navController, requireContext(), 2)
+        else SentryGridLayoutManager(navController, requireContext(), columnNumber)
     }
 
     private fun onUpdateMultiSelect(selectedNumber: Int? = null) {
