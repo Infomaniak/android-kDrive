@@ -621,7 +621,7 @@ fun MaterialCardView.setCornersRadius(topCornerRadius: Float, bottomCornerRadius
 
 fun Activity.getAdjustedColumnNumber(expectedItemSize: Int, minColumns: Int = 2, maxColumns: Int = 5): Int {
     val screenWidth = getScreenSizeInDp().x
-    return min(max(minColumns, screenWidth / expectedItemSize.toDp()), maxColumns)
+    return min(max(minColumns, screenWidth / expectedItemSize), maxColumns)
 }
 
 operator fun Regex.contains(input: String) = containsMatchIn(input)

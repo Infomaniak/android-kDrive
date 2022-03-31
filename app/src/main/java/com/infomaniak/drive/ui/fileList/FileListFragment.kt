@@ -601,7 +601,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     }
 
     protected open fun createLayoutManager(isListMode: Boolean, navController: NavController): LinearLayoutManager {
-        val columnNumber = requireActivity().getAdjustedColumnNumber(450)
+        val columnNumber = requireActivity().getAdjustedColumnNumber(200, maxColumns = 10)
 
         return if (isListMode) SentryLinearLayoutManager(navController, requireContext())
         else SentryGridLayoutManager(navController, requireContext(), columnNumber)

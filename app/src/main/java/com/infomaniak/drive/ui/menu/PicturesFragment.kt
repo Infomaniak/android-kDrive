@@ -157,7 +157,8 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
 
     private fun configPicturesLayoutManager() {
 
-        val numPicturesColumns = requireActivity().getAdjustedColumnNumber(300)
+
+        val numPicturesColumns = requireActivity().getAdjustedColumnNumber(150, minColumns = 3, maxColumns = 15)
 
         val gridLayoutManager = GridLayoutManager(requireContext(), numPicturesColumns).apply {
             spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
