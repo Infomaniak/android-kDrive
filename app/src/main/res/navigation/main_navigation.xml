@@ -153,7 +153,7 @@
     <dialog
         android:id="@+id/fileInfoActionsBottomSheetDialog"
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialog"
-        android:label="FileInfoActionsBottomSheetDialog"
+        android:label="@string/fileActionBottomSheetDialog"
         tools:layout="@layout/fragment_bottom_sheet_file_info_actions">
         <argument
             android:name="fileId"

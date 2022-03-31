@@ -216,7 +216,9 @@ class FileInfoActionsView @JvmOverloads constructor(
                     showSnackBarInvalidFileName(currentFile.name)
                 }
                 with(findNavController()) {
-                    if (currentBackStackEntry?.destination?.label == "FileInfoActionsBottomSheetDialog") popBackStack()
+                    if (currentBackStackEntry?.destination?.label == getString(R.string.fileActionBottomSheetDialog)) {
+                        popBackStack()
+                    }
                 }
             }
         }

@@ -19,6 +19,8 @@
     <string name="app_name" translatable="false">kDrive</string>
     <string name="allCommonDocuments" translatable="false">Common Documents</string>
 
+    <string name="fileActionBottomSheetDialog" translatable="false">FileInfoActionsBottomSheetDialog</string>
+
     <string name="notification_channel_id_comment" translatable="false">comment_channel_id</string>
     <string name="notification_channel_id_general" translatable="false">general_channel_id</string>
     <string name="notification_channel_id_shared" translatable="false">shared_channel_id</string>
