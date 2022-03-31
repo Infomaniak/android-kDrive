@@ -82,6 +82,13 @@
     <string name="allYesterday">Gestern</string>
     <string name="appSecurityDescription">Schützen Sie den Zugang zu Ihrer Anwendung, indem Sie die Sperre Ihres Telefons aktivieren.</string>
     <string name="appSecurityTitle">Sperrung der Anwendung</string>
+    <string name="backgroundSyncCheckboxTitle">Ich habe das Notwendige getan</string>
+    <string name="backgroundSyncDescription">Um die korrekte Funktion von kDrive zu gewährleisten, aktivieren Sie bitte die Hintergrundsynchronisation auf Ihrem Telefon</string>
+    <string name="backgroundSyncOpenGuideButton">Leitfaden öffnen</string>
+    <string name="backgroundSyncOpenGuideDescription">Es ist möglich, dass Ihr Telefonmodell die Synchronisierung im Hintergrund blockiert, obwohl Sie die Option aktiviert haben. Bitte folgen Sie dieser Anleitung, um die Synchronisation zum Laufen zu bringen. Andernfalls müssen Sie Ihre Dateien manuell aus der App heraus synchronisieren.</string>
+    <string name="backgroundSyncSwitchDescription">Die App wird Ihre Dateien automatisch im Hintergrund synchronisieren.</string>
+    <string name="backgroundSyncSwitchTitle">Zulassen, dass die App im Hintergrund läuft</string>
+    <string name="backgroundSyncTitle">Hintergrundsynchronisation</string>
     <string name="belongToAllCategoriesFilterDescription">Die Ergebnisse müssen allen ausgewählten Kategorien angehören</string>
     <string name="belongToOneCategoryFilterDescription">Die Ergebnisse müssen einer der ausgewählten Kategorien angehören</string>
     <string name="buttonAdd">Hinzufügen</string>

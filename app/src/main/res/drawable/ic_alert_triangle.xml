@@ -1,0 +1,32 @@
+<!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2022 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#ff8500"
+        android:pathData="M23.4663,19.9218L14.1193,2.0718C13.7741,1.4129 13.0917,1.0001 12.3478,1.0001C11.604,1.0001 10.9216,1.4129 10.5763,2.0718L1.2283,19.9218C0.9036,20.5418 0.9266,21.2865 1.2889,21.8853C1.6513,22.4841 2.3004,22.8499 3.0003,22.8498H21.6943C22.3943,22.8499 23.0433,22.4841 23.4057,21.8853C23.7681,21.2865 23.7911,20.5418 23.4663,19.9218Z" />
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="M11.3473,8.3448C11.3473,7.7925 11.7951,7.3448 12.3473,7.3448C12.8996,7.3448 13.3473,7.7925 13.3473,8.3448V14.3448C13.3473,14.8971 12.8996,15.3448 12.3473,15.3448C11.7951,15.3448 11.3473,14.8971 11.3473,14.3448V8.3448Z" />
+    <path
+        android:fillColor="#ffffff"
+        android:pathData="M12.3973,19.8548H12.3693C11.5499,19.8522 10.8784,19.2036 10.8473,18.3848C10.8328,17.9889 10.978,17.6037 11.2503,17.316C11.5226,17.0282 11.8992,16.862 12.2953,16.8548H12.3233C13.1426,16.8558 13.8151,17.5031 13.8473,18.3218C13.863,18.7186 13.718,19.105 13.4451,19.3936C13.1722,19.6821 12.7944,19.8484 12.3973,19.8548Z" />
+</vector>
