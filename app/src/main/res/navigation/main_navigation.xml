@@ -91,9 +91,6 @@
         <action
             android:id="@+id/action_fileListFragment_to_downloadProgressDialog"
             app:destination="@id/downloadProgressDialog" />
-        <action
-            android:id="@+id/action_fileList_to_colorFolder"
-            app:destination="@id/colorFolderBottomSheetDialog" />
     </fragment>
 
     <fragment
@@ -182,9 +179,6 @@
         <action
             android:id="@+id/action_fileInfoActionsBottomSheetDialog_to_selectCategoriesFragment"
             app:destination="@id/selectCategoriesFragment" />
-        <action
-            android:id="@+id/action_fileInfoActions_to_colorFolder"
-            app:destination="@id/colorFolderBottomSheetDialog" />
     </dialog>
 
     <dialog
@@ -260,9 +254,6 @@
         <action
             android:id="@+id/action_favoritesFragment_self"
             app:destination="@id/favoritesFragment" />
-        <action
-            android:id="@+id/action_fileList_to_colorFolder"
-            app:destination="@id/colorFolderBottomSheetDialog" />
     </fragment>
 
     <fragment
