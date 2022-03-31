@@ -430,12 +430,9 @@ fun Activity.showSnackbar(
 }
 
 fun Fragment.showSnackBarInvalidFileName(fileName: String) {
-    activity?.let {
-        it.showSnackbar(
-            getString(R.string.snackBarInvalidFileNameError, Utils.getInvalidFileNameCharacter(fileName), fileName),
-            it.mainFab
-        )
-    }
+    activity?.showSnackbar(
+        getString(R.string.snackBarInvalidFileNameError, Utils.getInvalidFileNameCharacter(fileName), fileName)
+    )
 }
 
 @SuppressLint("NewApi")

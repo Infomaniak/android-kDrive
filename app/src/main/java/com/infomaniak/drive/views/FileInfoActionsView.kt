@@ -215,7 +215,9 @@ class FileInfoActionsView @JvmOverloads constructor(
                     availableOfflineSwitch.isChecked = false
                     showSnackBarInvalidFileName(currentFile.name)
                 }
-                findNavController().popBackStack()
+                with(findNavController()) {
+                    if (currentBackStackEntry?.destination?.label == "FileInfoActionsBottomSheetDialog") popBackStack()
+                }
             }
         }
         availableOffline.setOnClickListener { availableOfflineSwitch.performClick() }
