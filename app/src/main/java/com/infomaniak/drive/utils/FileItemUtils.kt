@@ -119,8 +119,10 @@ private fun View.displayFileIcon(file: File, isGrid: Boolean) {
 
     when {
         file.hasThumbnail && (isGrid || isGraphic) -> {
-            filePreview.scaleType = ImageView.ScaleType.CENTER_CROP
-            filePreview.loadAny(file.thumbnail(), fileType.icon)
+            filePreview.apply {
+                scaleType = ImageView.ScaleType.CENTER_CROP
+                loadAny(file.thumbnail(), fileType.icon)
+            }
         }
         file.isFromUploads && isGraphic -> {
             filePreview.scaleType = ImageView.ScaleType.CENTER_CROP
