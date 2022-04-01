@@ -264,8 +264,10 @@ open class FileAdapter(
 
             if (isGrid) {
                 if (isHomeOffline) {
-                    (layoutParams as ConstraintLayout.LayoutParams).dimensionRatio = null
-                    (layoutParams as ConstraintLayout.LayoutParams).height = 150.toPx()
+                    (layoutParams as ConstraintLayout.LayoutParams).apply {
+                        dimensionRatio = null
+                        height = 150.toPx()
+                    }
                 }
             } else {
                 setCorners(position, itemCount)
