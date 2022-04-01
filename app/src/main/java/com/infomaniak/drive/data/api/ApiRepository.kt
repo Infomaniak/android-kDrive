@@ -48,8 +48,8 @@ object ApiRepository : ApiRepositoryCore() {
             "&actions[]=file_favorite_remove" +
             "&actions[]=file_categorize" +
             "&actions[]=file_uncategorize" +
-            // "&actions[]=file_color_update" + // TODO: add it back when it's available in production environment
-            // "&actions[]=file_color_delete" + // TODO: add it back when it's available in production environment
+            "&actions[]=file_color_update" +
+            "&actions[]=file_color_delete" +
             "&actions[]=share_link_create" +
             "&actions[]=share_link_update" +
             "&actions[]=share_link_delete" +
