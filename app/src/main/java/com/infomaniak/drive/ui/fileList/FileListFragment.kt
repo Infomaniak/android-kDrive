@@ -320,7 +320,9 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        fileListViewModel.isListMode.value?.let { binding.fileRecyclerView.layoutManager = createLayoutManager(it) }
+        fileListViewModel.isListMode.value?.let { isListMode ->
+            if(!isListMode) binding.fileRecyclerView.layoutManager = createLayoutManager(isListMode)
+        }
     }
 
     override fun onStop() {
