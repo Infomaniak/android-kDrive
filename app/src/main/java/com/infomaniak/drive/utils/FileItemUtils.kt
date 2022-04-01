@@ -134,8 +134,10 @@ private fun View.displayFileIcon(file: File, isGrid: Boolean) {
             }
         }
         else -> {
-            filePreview.scaleType = ImageView.ScaleType.CENTER
-            filePreview.load(fileType.icon)
+            filePreview.apply {
+                scaleType = ImageView.ScaleType.CENTER
+                load(fileType.icon)
+            }
         }
     }
 
