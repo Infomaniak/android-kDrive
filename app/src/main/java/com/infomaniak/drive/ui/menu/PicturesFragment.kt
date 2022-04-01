@@ -44,15 +44,12 @@ import com.infomaniak.drive.ui.fileList.multiSelect.PicturesMultiSelectActionsBo
 import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import com.infomaniak.lib.core.utils.setPagination
-import com.infomaniak.lib.core.utils.toDp
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.cardview_picture.*
 import kotlinx.android.synthetic.main.fragment_pictures.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlin.math.max
-import kotlin.math.min
 
 class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
 
@@ -160,15 +157,8 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
 
     private fun configPicturesLayoutManager() {
 
-        fun getNumPicturesColumns(): Int {
-            val minColumns = 2
-            val maxColumns = 5
-            val expectedItemSize = 300
-            val screenWidth = requireActivity().getScreenSizeInDp().x
-            return min(max(minColumns, screenWidth / expectedItemSize.toDp()), maxColumns)
-        }
 
-        val numPicturesColumns = getNumPicturesColumns()
+        val numPicturesColumns = requireActivity().getAdjustedColumnNumber(150, minColumns = 3, maxColumns = 15)
 
         val gridLayoutManager = GridLayoutManager(requireContext(), numPicturesColumns).apply {
             spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {

@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.fileList
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
@@ -30,7 +31,6 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -318,6 +318,13 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         updateVisibleProgresses()
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        fileListViewModel.isListMode.value?.let { isListMode ->
+            if (!isListMode) binding.fileRecyclerView.layoutManager = createLayoutManager(isListMode)
+        }
+    }
+
     override fun onStop() {
         fileAdapter.removeRealmDataListener()
         super.onStop()
@@ -575,8 +582,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     }
 
     private fun setupDisplayMode(isListMode: Boolean) = with(binding) {
-        val navController = findNavController()
-        fileRecyclerView.layoutManager = createLayoutManager(isListMode, navController)
+        fileRecyclerView.layoutManager = createLayoutManager(isListMode)
 
         val listModeIconRes = when {
             isListMode -> R.drawable.ic_list
@@ -588,9 +594,14 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         fileRecyclerView.adapter = fileAdapter
     }
 
-    protected open fun createLayoutManager(isListMode: Boolean, navController: NavController): LinearLayoutManager {
-        return if (isListMode) SentryLinearLayoutManager(navController, requireContext())
-        else SentryGridLayoutManager(navController, requireContext(), 2)
+    protected open fun createLayoutManager(isListMode: Boolean): LinearLayoutManager {
+        val navController = findNavController()
+        return if (isListMode) {
+            SentryLinearLayoutManager(navController, requireContext())
+        } else {
+            val columnNumber = requireActivity().getAdjustedColumnNumber(200, maxColumns = 10)
+            SentryGridLayoutManager(navController, requireContext(), columnNumber)
+        }
     }
 
     private fun onUpdateMultiSelect(selectedNumber: Int? = null) {

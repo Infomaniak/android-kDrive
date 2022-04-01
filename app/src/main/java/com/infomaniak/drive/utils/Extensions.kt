@@ -93,12 +93,15 @@ import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.UtilsUi.getInitials
+import com.infomaniak.lib.core.utils.toDp
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.android.synthetic.main.item_user.view.*
 import java.util.*
 import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 typealias FileId = Int
@@ -614,6 +617,11 @@ fun MaterialCardView.setCornersRadius(topCornerRadius: Float, bottomCornerRadius
         .setBottomLeftCorner(CornerFamily.ROUNDED, bottomCornerRadius)
         .setBottomRightCorner(CornerFamily.ROUNDED, bottomCornerRadius)
         .build()
+}
+
+fun Activity.getAdjustedColumnNumber(expectedItemSize: Int, minColumns: Int = 2, maxColumns: Int = 5): Int {
+    val screenWidth = getScreenSizeInDp().x
+    return min(max(minColumns, screenWidth / expectedItemSize), maxColumns)
 }
 
 operator fun Regex.contains(input: String) = containsMatchIn(input)

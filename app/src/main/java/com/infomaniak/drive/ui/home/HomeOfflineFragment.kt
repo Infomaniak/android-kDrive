@@ -22,7 +22,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.infomaniak.drive.R
@@ -58,7 +57,7 @@ class HomeOfflineFragment : OfflineFileFragment() {
         fileAdapter.isHomeOffline = true
     }
 
-    override fun createLayoutManager(isListMode: Boolean, navController: NavController): LinearLayoutManager {
+    override fun createLayoutManager(isListMode: Boolean): LinearLayoutManager {
         return SentryLinearLayoutManager(findNavController(), requireContext())
     }
 
