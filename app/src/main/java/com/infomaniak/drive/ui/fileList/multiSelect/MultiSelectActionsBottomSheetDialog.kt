@@ -34,6 +34,7 @@ import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialog.Companion.openColorFolderBottomSheetDialog
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_multi_select_actions.*
@@ -194,7 +195,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
                 closeMultiSelect()
             } else {
                 when (finalType) {
-                    BulkOperationType.COLOR_FOLDER -> colorFolders()
+                    BulkOperationType.COLOR_FOLDER -> openColorFolderBottomSheetDialog(null)
                     BulkOperationType.COPY -> duplicateFiles()
                     BulkOperationType.RESTORE_IN -> restoreIn()
                     BulkOperationType.RESTORE_TO_ORIGIN, BulkOperationType.DELETE_PERMANENTLY -> {

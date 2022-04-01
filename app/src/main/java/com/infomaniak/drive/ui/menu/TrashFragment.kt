@@ -19,7 +19,6 @@ package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
 import android.view.View
-import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.navigation.navGraphViewModels
@@ -27,7 +26,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.button.MaterialButton
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
-import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.SortTypeUsage
@@ -94,7 +92,6 @@ class TrashFragment : FileSubTypeListFragment() {
 
     private fun setupMultiSelectLayout() {
         multiSelectLayout?.apply {
-            selectAllButton.isGone = true
             moveButtonMultiSelect.isInvisible = true
             deleteButtonMultiSelect.isInvisible = true
         }
@@ -137,19 +134,6 @@ class TrashFragment : FileSubTypeListFragment() {
                 isAllSelected = isAllSelected
             ).toBundle()
         }.show(childFragmentManager, "ActionTrashMultiSelectBottomSheetDialog")
-    }
-
-    override fun performBulkOperation(
-        type: BulkOperationType,
-        areAllFromTheSameFolder: Boolean,
-        allSelectedFilesCount: Int?,
-        destinationFolder: File?,
-        color: String?,
-    ) {
-        // API doesn't support bulk operations for files originating from
-        // different parent folders, so we repeat the action for each file.
-        // Hence the `areAllFromTheSameFolder` set at false.
-        super.performBulkOperation(type, false, allSelectedFilesCount, destinationFolder, color)
     }
 
     override fun closeMultiSelect() {

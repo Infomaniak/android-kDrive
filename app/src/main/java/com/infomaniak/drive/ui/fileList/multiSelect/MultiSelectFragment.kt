@@ -40,11 +40,9 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.BulkOperation
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.ui.fileList.FileListFragmentDirections
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.BULK_OPERATION_CUSTOM_TAG
@@ -168,14 +166,6 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
 
     fun deleteFiles(allSelectedFilesCount: Int? = null) {
         performBulkOperation(type = BulkOperationType.TRASH, allSelectedFilesCount = allSelectedFilesCount)
-    }
-
-    fun colorFolders() {
-        if (AccountUtils.getCurrentDrive()?.pack == Drive.DrivePack.FREE.value) {
-            safeNavigate(R.id.colorFolderUpgradeBottomSheetDialog)
-        } else {
-            safeNavigate(FileListFragmentDirections.actionFileListToColorFolder(null))
-        }
     }
 
     fun duplicateFiles() {

@@ -23,6 +23,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.os.bundleOf
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
@@ -213,11 +214,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun colorFolderClicked(color: String) {
         super.colorFolderClicked(color)
-        if (AccountUtils.getCurrentDrive()?.pack == Drive.DrivePack.FREE.value) {
-            safeNavigate(R.id.colorFolderUpgradeBottomSheetDialog)
-        } else {
-            safeNavigate(FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsToColorFolder(color))
-        }
+        openColorFolderBottomSheetDialog(color)
     }
 
     override fun addFavoritesClicked() {
@@ -386,5 +383,19 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     private fun transmitActionAndPopBack(message: String, action: CancellableAction? = null) {
         val bundle = bundleOf(CANCELLABLE_TITLE_KEY to message, CANCELLABLE_ACTION_KEY to action)
         setBackNavigationResult(CANCELLABLE_MAIN_KEY, bundle)
+    }
+
+    companion object {
+
+        fun Fragment.openColorFolderBottomSheetDialog(color: String?) {
+            if (AccountUtils.getCurrentDrive()?.pack == Drive.DrivePack.FREE.value) {
+                safeNavigate(R.id.colorFolderUpgradeBottomSheetDialog)
+            } else {
+                safeNavigate(
+                    R.id.colorFolderBottomSheetDialog,
+                    ColorFolderBottomSheetDialogArgs(color = color).toBundle()
+                )
+            }
+        }
     }
 }

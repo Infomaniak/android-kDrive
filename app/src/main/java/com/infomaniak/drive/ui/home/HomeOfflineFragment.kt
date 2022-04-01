@@ -33,6 +33,8 @@ import kotlinx.android.synthetic.main.fragment_file_list.*
 
 class HomeOfflineFragment : OfflineFileFragment() {
 
+    override var enabledMultiSelectMode: Boolean = false
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

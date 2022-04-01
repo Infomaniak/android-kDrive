@@ -20,8 +20,11 @@ package com.infomaniak.drive.ui.menu
 import android.os.Bundle
 import android.view.View
 import androidx.navigation.fragment.findNavController
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialogArgs
+import com.infomaniak.drive.ui.fileList.multiSelect.MySharesMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -30,19 +33,28 @@ import kotlinx.android.synthetic.main.fragment_file_list.*
 
 class MySharesFragment : FileSubTypeListFragment() {
 
+    override var enabledMultiSelectMode: Boolean = true
     override var hideBackButtonWhenRoot: Boolean = false
     override var allowCancellation: Boolean = false
 
+    override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = swipeRefreshLayout
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        initParams()
+        super.onViewCreated(view, savedInstanceState)
+        collapsingToolbarLayout.title = getString(R.string.mySharesTitle)
+        setupAdapter()
+    }
+
+    private fun initParams() {
         if (folderId == ROOT_ID) {
             downloadFiles = DownloadFiles()
             folderId = OTHER_ROOT_ID
         }
         setNoFilesLayout = SetNoFilesLayout()
-        super.onViewCreated(view, savedInstanceState)
+    }
 
-        collapsingToolbarLayout.title = getString(R.string.mySharesTitle)
-
+    private fun setupAdapter() {
         fileAdapter.onFileClicked = { file ->
             fileListViewModel.cancelDownloadFiles()
             if (file.isFolder()) safeNavigate(
@@ -55,6 +67,23 @@ class MySharesFragment : FileSubTypeListFragment() {
                 Utils.displayFile(mainViewModel, findNavController(), file, fileList)
             }
         }
+    }
+
+    override fun onMenuButtonClicked() {
+        val (fileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
+        MySharesMultiSelectActionsBottomSheetDialog().apply {
+            arguments = MultiSelectActionsBottomSheetDialogArgs(
+                fileIds = fileIds,
+                onlyFolders = onlyFolders,
+                onlyFavorite = onlyFavorite,
+                onlyOffline = onlyOffline,
+                isAllSelected = isAllSelected
+            ).toBundle()
+        }.show(childFragmentManager, "ActionMySharesMultiSelectBottomSheetDialog")
+    }
+
+    companion object {
+        const val MATOMO_CATEGORY = "mySharesFileAction"
     }
 
     private inner class SetNoFilesLayout : () -> Unit {

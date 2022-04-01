@@ -21,14 +21,18 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.os.bundleOf
 import androidx.core.view.isGone
+import androidx.core.view.isInvisible
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialog
+import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialogArgs
+import com.infomaniak.drive.ui.fileList.multiSelect.SharedWithMeMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -39,10 +43,13 @@ import kotlinx.android.synthetic.main.fragment_file_list.*
 
 class SharedWithMeFragment : FileSubTypeListFragment() {
 
-    private lateinit var realm: Realm
     private val navigationArgs: SharedWithMeFragmentArgs by navArgs()
+    private lateinit var realm: Realm
 
+    override var enabledMultiSelectMode: Boolean = true
     override var hideBackButtonWhenRoot: Boolean = false
+
+    override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val inDriveList = folderId == ROOT_ID && !navigationArgs.driveId.isPositive()
@@ -52,7 +59,10 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
         realm = FileController.getRealmInstance(userDrive)
         downloadFiles = DownloadFiles(
             when {
-                inDriveList -> null
+                inDriveList -> {
+                    enabledMultiSelectMode = false
+                    null
+                }
                 inDriveRoot -> File(driveId = navigationArgs.driveId, type = File.Type.DRIVE.value)
                 else -> File(id = folderId, name = folderName, driveId = navigationArgs.driveId)
             }
@@ -82,6 +92,8 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                 }
             }
         }
+
+        setupMultiSelectLayout()
     }
 
     override fun onDestroy() {
@@ -104,6 +116,30 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                 driveId = file.driveId
             )
         )
+    }
+
+    private fun setupMultiSelectLayout() {
+        multiSelectLayout?.apply {
+            moveButtonMultiSelect.isInvisible = true
+            deleteButtonMultiSelect.isInvisible = true
+        }
+    }
+
+    override fun onMenuButtonClicked() {
+        val (fileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
+        SharedWithMeMultiSelectActionsBottomSheetDialog().apply {
+            arguments = MultiSelectActionsBottomSheetDialogArgs(
+                fileIds = fileIds,
+                onlyFolders = onlyFolders,
+                onlyFavorite = onlyFavorite,
+                onlyOffline = onlyOffline,
+                isAllSelected = isAllSelected
+            ).toBundle()
+        }.show(childFragmentManager, "ActionSharedWithMeMultiSelectBottomSheetDialog")
+    }
+
+    companion object {
+        const val MATOMO_CATEGORY = "sharedWithMeFileAction"
     }
 
     private inner class SetNoFilesLayout : () -> Unit {
