@@ -96,7 +96,7 @@ private fun View.displaySize(file: File) {
 }
 
 private fun View.displayIcon(file: File, isGrid: Boolean, viewHolder: FileViewHolder?) {
-    filePreview.scaleType = ImageView.ScaleType.CENTER
+    filePreview.scaleType = if (isGrid) ImageView.ScaleType.FIT_CENTER else ImageView.ScaleType.CENTER
     when {
         file.isFolder() -> displayFolderIcon(file, viewHolder)
         file.isDrive() -> displayDriveIcon(file, viewHolder)
@@ -118,8 +118,12 @@ private fun View.displayFileIcon(file: File, isGrid: Boolean) {
     val isGraphic = fileType == ConvertedType.IMAGE || fileType == ConvertedType.VIDEO
 
     when {
-        file.hasThumbnail && (isGrid || isGraphic) -> filePreview.loadAny(file.thumbnail(), fileType.icon)
+        file.hasThumbnail && (isGrid || isGraphic) -> {
+            filePreview.scaleType = ImageView.ScaleType.CENTER_CROP
+            filePreview.loadAny(file.thumbnail(), fileType.icon)
+        }
         file.isFromUploads && isGraphic -> {
+            filePreview.scaleType = ImageView.ScaleType.CENTER_CROP
             CoroutineScope(Dispatchers.IO).launch {
                 val bitmap = context.getLocalThumbnail(file)
                 withContext(Dispatchers.Main) {
@@ -127,7 +131,10 @@ private fun View.displayFileIcon(file: File, isGrid: Boolean) {
                 }
             }
         }
-        else -> filePreview.load(fileType.icon)
+        else -> {
+            filePreview.scaleType = ImageView.ScaleType.CENTER
+            filePreview.load(fileType.icon)
+        }
     }
 
     filePreview2?.load(fileType.icon)
