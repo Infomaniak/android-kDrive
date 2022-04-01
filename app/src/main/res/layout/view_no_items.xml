@@ -50,6 +50,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.35"
         app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintWidth_max="250dp"
         app:layout_constraintWidth_percent="0.5" />
 
     <TextView

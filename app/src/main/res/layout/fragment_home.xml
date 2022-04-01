@@ -62,6 +62,7 @@
                             android:gravity="start|center"
                             android:lineSpacingMultiplier="1"
                             android:maxLines="2"
+                            android:maxWidth="1000000dp"
                             android:textColor="@color/title"
                             android:textSize="28sp"
                             app:icon="@drawable/ic_keyboard_arrow_down"
