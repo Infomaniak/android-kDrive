@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.login
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -80,8 +81,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        lockScreenForTablets()
-
+        lockLandscapeForSmallScreens()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
@@ -120,7 +120,8 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun lockScreenForTablets() {
+    @SuppressLint("SourceLockedOrientationActivity")
+    private fun lockLandscapeForSmallScreens() {
         val displayMetrics = resources.displayMetrics
         val screenHeightInches = (displayMetrics.heightPixels / displayMetrics.ydpi)
         val screenWidthInches = (displayMetrics.widthPixels / displayMetrics.xdpi)
@@ -128,7 +129,7 @@ class LoginActivity : AppCompatActivity() {
         val aspectRatio = resources.configuration.screenLayout and Configuration.SCREENLAYOUT_LONG_MASK
         val isLongScreen = aspectRatio != Configuration.SCREENLAYOUT_LONG_NO
 
-        val isScreenTooSmall = isLongScreen && min(screenHeightInches, screenWidthInches) < FOUR_INCHES
+        val isScreenTooSmall = isLongScreen && min(screenHeightInches, screenWidthInches) < MIN_HEIGHT_FOR_LANDSCAPE
 
         if (isScreenTooSmall) requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
@@ -187,7 +188,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val FOUR_INCHES = 4
+        const val MIN_HEIGHT_FOR_LANDSCAPE = 4
 
         suspend fun authenticateUser(context: Context, apiToken: ApiToken): Any {
 
