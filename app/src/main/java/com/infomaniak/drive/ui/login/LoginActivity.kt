@@ -122,9 +122,7 @@ class LoginActivity : AppCompatActivity() {
 
     @SuppressLint("SourceLockedOrientationActivity")
     private fun lockLandscapeForSmallScreens() {
-        val displayMetrics = resources.displayMetrics
-        val screenHeightInches = (displayMetrics.heightPixels / displayMetrics.ydpi)
-        val screenWidthInches = (displayMetrics.widthPixels / displayMetrics.xdpi)
+        val (screenHeightInches, screenWidthInches) = with(resources.displayMetrics) { (heightPixels / ydpi) to (widthPixels / xdpi) }
 
         val aspectRatio = resources.configuration.screenLayout and Configuration.SCREENLAYOUT_LONG_MASK
         val isLongScreen = aspectRatio != Configuration.SCREENLAYOUT_LONG_NO
