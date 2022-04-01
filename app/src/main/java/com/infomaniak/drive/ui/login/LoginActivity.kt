@@ -17,8 +17,11 @@
  */
 package com.infomaniak.drive.ui.login
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.StringRes
@@ -54,6 +57,7 @@ import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.min
 
 class LoginActivity : AppCompatActivity() {
 
@@ -77,6 +81,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        lockLandscapeForSmallScreens()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
@@ -113,6 +118,18 @@ class LoginActivity : AppCompatActivity() {
             trackAccountEvent("openCreationWebview")
             openUrl(ApiRoutes.orderDrive())
         }
+    }
+
+    @SuppressLint("SourceLockedOrientationActivity")
+    private fun lockLandscapeForSmallScreens() {
+        val (screenHeightInches, screenWidthInches) = with(resources.displayMetrics) { (heightPixels / ydpi) to (widthPixels / xdpi) }
+
+        val aspectRatio = resources.configuration.screenLayout and Configuration.SCREENLAYOUT_LONG_MASK
+        val isLongScreen = aspectRatio != Configuration.SCREENLAYOUT_LONG_NO
+
+        val isScreenTooSmall = isLongScreen && min(screenHeightInches, screenWidthInches) < MIN_HEIGHT_FOR_LANDSCAPE
+
+        if (isScreenTooSmall) requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
 
     private fun authenticateUser(authCode: String) {
@@ -169,6 +186,8 @@ class LoginActivity : AppCompatActivity() {
     }
 
     companion object {
+        const val MIN_HEIGHT_FOR_LANDSCAPE = 4
+
         suspend fun authenticateUser(context: Context, apiToken: ApiToken): Any {
 
             AccountUtils.getUserById(apiToken.userId)?.let {
