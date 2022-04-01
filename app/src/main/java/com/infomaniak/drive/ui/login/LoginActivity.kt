@@ -80,10 +80,10 @@ class LoginActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        lockScreenForTablets()
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-
-        lockScreenForTablets()
 
         infomaniakLogin = InfomaniakLogin(context = this, appUID = BuildConfig.APPLICATION_ID, clientID = BuildConfig.CLIENT_ID)
 
@@ -128,7 +128,7 @@ class LoginActivity : AppCompatActivity() {
         val aspectRatio = resources.configuration.screenLayout and Configuration.SCREENLAYOUT_LONG_MASK
         val isLongScreen = aspectRatio != Configuration.SCREENLAYOUT_LONG_NO
 
-        val isScreenTooSmall = isLongScreen && min(screenHeightInches, screenWidthInches) < TEN_CENTIMETERS
+        val isScreenTooSmall = isLongScreen && min(screenHeightInches, screenWidthInches) < FOUR_INCHES
 
         if (isScreenTooSmall) requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
@@ -187,7 +187,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val TEN_CENTIMETERS = 3.93701 // in 'inches' unit
+        const val FOUR_INCHES = 4
 
         suspend fun authenticateUser(context: Context, apiToken: ApiToken): Any {
 
