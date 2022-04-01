@@ -25,6 +25,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.appbar.AppBarLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentMenuPicturesBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
@@ -40,6 +41,9 @@ class MenuPicturesFragment : Fragment() {
         binding = FragmentMenuPicturesBinding.inflate(inflater, container, false).apply {
             toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
             swipeRefreshLayout.setOnRefreshListener { picturesFragment.onRefreshPictures() }
+
+            // This is required to be able to scroll down with the fast scrollbar in the gallery
+            picturesFragmentView.isNestedScrollingEnabled = true
         }
 
         binding.multiSelectLayout.apply {
@@ -78,5 +82,13 @@ class MenuPicturesFragment : Fragment() {
         }
 
         picturesFragment.menuPicturesBinding = binding
+
+        binding.appBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
+//            Log.e("gallery-scrollbar", "onViewCreated - The value binding.appBar.totalScrollRange is: ${binding.appBar.totalScrollRange}", );
+//            Log.e("gallery-scrollbar", "onViewCreated - The value verticalOffset is: ${verticalOffset}")
+//            Log.e("gallery-scrollbar", "onViewCreated - The value binding.appBar.totalScrollRange + verticalOffset is: ${binding.appBar.totalScrollRange + verticalOffset}", );
+            picturesFragment.setScrollbarTrackOffset(binding.appBar.totalScrollRange + verticalOffset)
+//            verticalOffset == 0
+        })
     }
 }

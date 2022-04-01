@@ -382,4 +382,7 @@
         <item name="android:focusable">true</item>
     </style>
 
+    <style name="ScrollbarTextStyle">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
 </resources>

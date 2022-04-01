@@ -295,6 +295,12 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
         picturesAdapter.updateFileProgressByFileId(fileId, progress, onComplete)
     }
 
+    fun setScrollbarTrackOffset(offset: Int) {
+        pictureFastScroller.trackMarginEnd = offset
+//        pictureFastScroller.invalidate()
+//        pictureFastScroller.findViewById<LinearLayout>(com.qtalk.recyclerviewfastscroller.R.id.trackView).invalidate()
+    }
+
     companion object {
         const val TAG = "PicturesFragment"
         const val MATOMO_CATEGORY = "picturesFileAction"

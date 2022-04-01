@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.home
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -54,10 +55,13 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private val offlineFragment = HomeOfflineFragment().apply {
         arguments = FileListFragmentArgs(folderId = 1, folderName = "").toBundle()
     }
+
+    private val picturesFragment = PicturesFragment()
+
     private val tabsHome = arrayListOf(
         FragmentTab(HomeActivitiesFragment(), R.id.homeActivitiesButton),
         FragmentTab(offlineFragment, R.id.homeOfflineButton),
-        FragmentTab(PicturesFragment(), R.id.homePicturesButton),
+        FragmentTab(picturesFragment, R.id.homePicturesButton),
     )
 
     companion object {
@@ -117,6 +121,17 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             setup(homeViewPager, tabsHomeGroup, tabsHome) { UiSettings(requireContext()).lastHomeSelectedTab = it }
             homeViewPager.currentItem = UiSettings(requireContext()).lastHomeSelectedTab
         }
+
+        // This is required to be able to scroll down with the fast scrollbar in the home view
+        homeCoordinator.isNestedScrollingEnabled = true
+
+//        appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
+//            Log.e("gallery-scrollbar", "onViewCreated - The value binding.appBar.totalScrollRange is: ${appBarLayout.totalScrollRange}", );
+//            Log.e("gallery-scrollbar", "onViewCreated - The value verticalOffset is: ${verticalOffset}")
+//            Log.e("gallery-scrollbar", "onViewCreated - The value binding.appBar.totalScrollRange + verticalOffset is: ${appBarLayout.totalScrollRange + verticalOffset}", );
+//            picturesFragment.setScrollbarTrackOffset(appBarLayout.totalScrollRange + verticalOffset)
+////            verticalOffset == 0
+//        })
     }
 
     override fun onResume() {

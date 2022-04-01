@@ -31,16 +31,19 @@ import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.LoaderCardView
 import com.infomaniak.lib.core.views.ViewHolder
+import com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller
 import kotlinx.android.synthetic.main.cardview_picture.view.*
 import kotlinx.android.synthetic.main.title_recycler_section.view.*
 
 class PicturesAdapter(
     private val multiSelectManager: MultiSelectManager,
     private val onFileClicked: (file: File) -> Unit,
-) : LoaderAdapter<Any>() {
+) : LoaderAdapter<Any>(), RecyclerViewFastScroller.OnPopupTextUpdate {
 
     var pictureList: ArrayList<File> = arrayListOf()
     var duplicatedList: ArrayList<File> = arrayListOf()
+
+    var scrollBarTagList: ArrayList<String> = arrayListOf()
 
     private var lastSectionTitle = ""
 
@@ -142,9 +145,11 @@ class PicturesAdapter(
 
         for (file in newPictureList) {
             val month = file.getMonth(context)
+            scrollBarTagList.add(month)
             if (lastSectionTitle != month) {
                 addItemList.add(month)
                 lastSectionTitle = month
+                scrollBarTagList.add(month)
             }
             addItemList.add(file)
         }
@@ -243,5 +248,14 @@ class PicturesAdapter(
     enum class DisplayType(val layout: Int) {
         TITLE(R.layout.title_recycler_section),
         PICTURE(R.layout.cardview_picture),
+    }
+
+    override fun onChange(position: Int): CharSequence {
+        return when {
+            position >= itemList.count() -> scrollBarTagList.last()
+            itemList[position] is String -> itemList[position] as String
+            itemList[position] is File -> scrollBarTagList[position]
+            else -> ""
+        }
     }
 }

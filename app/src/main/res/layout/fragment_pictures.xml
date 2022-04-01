@@ -23,13 +23,26 @@
     android:orientation="vertical"
     tools:context=".ui.menu.PicturesFragment">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/picturesRecyclerView"
+    <com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller
+        android:id="@+id/pictureFastScroller"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingBottom="@dimen/recyclerViewPaddingBottom"
-        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager" />
+        app:supportSwipeToRefresh="true"
+        app:handleDrawable="@drawable/pictures_fast_scrollbar_thumb"
+        app:popupDrawable="@drawable/pictures_fast_scrollbar_popup"
+        app:popupTextStyle="@style/ScrollbarTextStyle"
+        app:handleWidth="20dp"
+        app:handleHeight="45dp">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/picturesRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="@dimen/recyclerViewPaddingBottom"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager" />
+
+    </com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
