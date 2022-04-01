@@ -37,6 +37,7 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setCornersRadius
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.utils.setupFileProgress
+import com.infomaniak.lib.core.utils.toPx
 import com.infomaniak.lib.core.views.LoaderAdapter.Companion.VIEW_TYPE_LOADING
 import com.infomaniak.lib.core.views.LoaderAdapter.Companion.createLoadingViewHolder
 import io.realm.OrderedRealmCollection
@@ -262,7 +263,10 @@ open class FileAdapter(
             val isGrid = viewHolderType == DisplayType.GRID
 
             if (isGrid) {
-                if (isHomeOffline) (layoutParams as ConstraintLayout.LayoutParams).dimensionRatio = "2:1"
+                if (isHomeOffline) {
+                    (layoutParams as ConstraintLayout.LayoutParams).dimensionRatio = null
+                    (layoutParams as ConstraintLayout.LayoutParams).height = 150.toPx()
+                }
             } else {
                 setCorners(position, itemCount)
             }
