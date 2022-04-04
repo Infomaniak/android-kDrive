@@ -87,6 +87,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     private lateinit var activitiesRefreshTimer: CountDownTimer
     private var isDownloading = false
     private var isLoadingActivities = false
+    private var isUploading = false
     private var retryLoadingActivities = false
 
     protected val showLoadingTimer: CountDownTimer by lazy {
@@ -150,8 +151,10 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
         activitiesRefreshTimer = createRefreshTimer(ACTIVITIES_REFRESH_DELAY) {
             isLoadingActivities = false
+
             if (retryLoadingActivities) {
                 retryLoadingActivities = false
+                isUploading = false
                 if (isResumed) refreshActivities()
             }
         }
@@ -226,18 +229,16 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             val isUploaded = workInfo.progress.getBoolean(UploadWorker.IS_UPLOADED, false)
             val remoteFolderId = workInfo.progress.getInt(UploadWorker.REMOTE_FOLDER_ID, 0)
 
-            if (remoteFolderId == folderId && isUploaded) {
-                when {
-                    findNavController().currentDestination?.id == R.id.sharedWithMeFragment
-                            && folderId == ROOT_ID -> downloadFiles(true, false)
-                    else -> refreshActivities()
-                }
+            isUploading = if (remoteFolderId == folderId && isUploaded) {
+                showUploadedFiles()
+                false
+            } else {
+                true
             }
         }
 
         requireContext().trackUploadWorkerSucceeded().observe(viewLifecycleOwner) {
-            if (!isDownloading) activitiesRefreshTimer.start()
-            if (binding.uploadFileInProgress.root.isVisible) showPendingFiles()
+            if (!isDownloading || isUploading) activitiesRefreshTimer.start()
         }
 
         mainViewModel.refreshActivities.observe(viewLifecycleOwner) {
@@ -327,6 +328,14 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     override fun onDestroyView() {
         isDownloading = false
         super.onDestroyView()
+    }
+
+    private fun showUploadedFiles() {
+        when {
+            findNavController().currentDestination?.id == R.id.sharedWithMeFragment
+                    && folderId == ROOT_ID -> downloadFiles(true, false)
+            else -> refreshActivities()
+        }
     }
 
     private fun setupMultiSelect() {
