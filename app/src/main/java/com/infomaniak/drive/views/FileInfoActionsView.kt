@@ -50,6 +50,7 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.Utils.moveFileClicked
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -211,14 +212,14 @@ class FileInfoActionsView @JvmOverloads constructor(
         availableOfflineSwitch.setOnClickListener { view ->
             val downloadError = !onItemClickListener.availableOfflineSwitched(this, (view as SwitchMaterial).isChecked)
             with(ownerFragment) {
+                val isBottomSheetFragmentView =
+                    findNavController().currentBackStackEntry?.destination?.id == R.id.fileInfoActionsBottomSheetDialog
                 if (downloadError) {
                     availableOfflineSwitch.isChecked = false
-                    showSnackBarInvalidFileName(currentFile.name)
+                    showSnackBarInvalidFileName(currentFile.name, if (isBottomSheetFragmentView) activity?.mainFab else null)
                 }
-                with(findNavController()) {
-                    if (currentBackStackEntry?.destination?.label == getString(R.string.fileActionBottomSheetDialog)) {
-                        popBackStack()
-                    }
+                if (isBottomSheetFragmentView) {
+                    findNavController().popBackStack()
                 }
             }
         }
