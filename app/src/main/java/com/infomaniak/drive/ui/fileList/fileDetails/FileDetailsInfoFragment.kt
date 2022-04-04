@@ -295,7 +295,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
             if (apiResponse.isSuccess()) {
                 shareLinkContainer.update(apiResponse.data)
             } else {
-                requireActivity().showSnackbar(getString(R.string.errorShareLink))
+                showSnackbar(getString(R.string.errorShareLink))
             }
         }
     }
@@ -306,7 +306,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
             if (success) {
                 shareLinkContainer.update(null)
             } else {
-                requireActivity().showSnackbar(apiResponse.translateError())
+                showSnackbar(apiResponse.translateError())
             }
         }
     }

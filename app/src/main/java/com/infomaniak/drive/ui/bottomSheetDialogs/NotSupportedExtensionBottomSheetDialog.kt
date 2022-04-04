@@ -61,7 +61,7 @@ class NotSupportedExtensionBottomSheetDialog : InformationBottomSheetDialog() {
                         ApiResponse.Status.SUCCESS -> apiResponse.data?.let { newFile ->
                             requireContext().openOnlyOfficeActivity(newFile)
                         }
-                        else -> requireActivity().showSnackbar(apiResponse.translateError())
+                        else -> showSnackbar(apiResponse.translateError())
                     }
                     dismiss()
                 }

@@ -67,7 +67,7 @@ class ConvertToDropBoxFragment : ManageDropboxFragment() {
                         mainViewModel.createDropBoxSuccess.value = apiResponse.data
                         findNavController().popBackStack()
                     } else {
-                        requireActivity().showSnackbar(apiResponse.translateError())
+                        showSnackbar(apiResponse.translateError())
                     }
                     saveButton.hideProgress(R.string.buttonSave)
                 }

@@ -81,7 +81,7 @@ class DownloadProgressDialog : DialogFragment() {
                     downloadProgress.progress = progress
                 }
             } ?: run {
-                requireActivity().showSnackbar(R.string.anErrorHasOccurred)
+                showSnackbar(R.string.anErrorHasOccurred)
                 findNavController().popBackStack()
             }
         }

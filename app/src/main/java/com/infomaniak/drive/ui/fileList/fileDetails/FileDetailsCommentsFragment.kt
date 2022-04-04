@@ -80,10 +80,10 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
                         if (apiResponse.isSuccess()) {
                             apiResponse?.data?.let { comment ->
                                 commentsAdapter.addComment(comment)
-                                requireActivity().showSnackbar(R.string.fileDetailsCommentsConfirmationSnackbar)
+                                showSnackbar(R.string.fileDetailsCommentsConfirmationSnackbar)
                             }
                         } else {
-                            requireActivity().showSnackbar(R.string.errorAddComment)
+                            showSnackbar(R.string.errorAddComment)
                         }
                         dialog.dismiss()
                         noCommentsLayout.toggleVisibility(commentsAdapter.itemCount == 0, showRefreshButton = false)
@@ -147,7 +147,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
                                 commentsAdapter.deleteComment(comment)
                                 noCommentsLayout.toggleVisibility(commentsAdapter.itemCount == 0, showRefreshButton = false)
                             } else {
-                                requireActivity().showSnackbar(R.string.errorDelete)
+                                showSnackbar(R.string.errorDelete)
                             }
                         }
                 }
@@ -165,7 +165,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
                     fileComment.likesCount = fileComment.likesCount - 1
                     commentsAdapter.updateComment(fileComment)
                 } else {
-                    requireActivity().showSnackbar(apiResponse.translatedError)
+                    showSnackbar(apiResponse.translatedError)
                 }
             }
         } else {
@@ -179,7 +179,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
                     fileComment.likesCount = fileComment.likesCount + 1
                     commentsAdapter.updateComment(fileComment)
                 } else {
-                    requireActivity().showSnackbar(apiResponse.translatedError)
+                    showSnackbar(apiResponse.translatedError)
                 }
             }
         }

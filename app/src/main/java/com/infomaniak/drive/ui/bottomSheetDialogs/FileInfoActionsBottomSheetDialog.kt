@@ -119,7 +119,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                 } else {
                     getString(apiResponse.translatedError)
                 }
-                showSnackbarAboveFab(text)
+                showSnackbar(text, true)
             }
         }
     }
@@ -188,9 +188,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override fun copyPublicLink() {
         super.copyPublicLink()
         fileInfoActionsView.createPublicCopyLink(onSuccess = {
-            showSnackbarAboveFab(R.string.fileInfoLinkCopiedToClipboard)
+            showSnackbar(R.string.fileInfoLinkCopiedToClipboard, true)
             findNavController().popBackStack()
-        }, onError = { translatedError -> showSnackbarAboveFab(translatedError) })
+        }, onError = { translatedError -> showSnackbar(translatedError, true) })
     }
 
     override fun downloadFileClicked() {
@@ -223,7 +223,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                     showFavoritesResultSnackbar()
                     setBackNavigationResult(REFRESH_FAVORITE_FILE, currentFile.id)
                 } else {
-                    showSnackbarAboveFab(R.string.errorAddFavorite)
+                    showSnackbar(R.string.errorAddFavorite, true)
                     findNavController().popBackStack()
                 }
             }
@@ -318,7 +318,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override fun openWithClicked() {
         super.openWithClicked()
         if (requireContext().openWithIntent(currentFile).resolveActivity(requireContext().packageManager) == null) {
-            showSnackbarAboveFab(R.string.allActivityNotFoundError)
+            showSnackbar(R.string.allActivityNotFoundError, true)
             findNavController().popBackStack()
         } else {
             safeNavigate(
@@ -364,7 +364,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     private fun File.showFavoritesResultSnackbar() {
-        showSnackbarAboveFab(getString(if (isFavorite) R.string.allFileAddFavoris else R.string.allFileDeleteFavoris, name))
+        showSnackbar(getString(if (isFavorite) R.string.allFileAddFavoris else R.string.allFileDeleteFavoris, name), true)
     }
 
     private fun transmitActionAndPopBack(message: String, action: CancellableAction? = null) {

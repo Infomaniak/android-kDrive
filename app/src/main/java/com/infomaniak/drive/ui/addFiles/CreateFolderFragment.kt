@@ -128,7 +128,7 @@ open class CreateFolderFragment : Fragment() {
                     if (apiResponse.formatError() == ErrorCode.DESTINATION_ALREADY_EXISTS) {
                         folderNameValueLayout.error = getString(apiResponse.translateError())
                     }
-                    requireActivity().showSnackbar(apiResponse.translateError())
+                    showSnackbar(apiResponse.translateError())
                 }
                 createFolderButton.hideProgress(R.string.createFolderTitle)
             }

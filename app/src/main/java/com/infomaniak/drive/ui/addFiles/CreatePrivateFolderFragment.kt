@@ -26,7 +26,6 @@ import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.utils.MatomoUtils.trackNewElementEvent
 import com.infomaniak.drive.utils.safeNavigate
 import com.infomaniak.drive.utils.showSnackbar
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_create_folder.*
 
 class CreatePrivateFolderFragment : CreateFolderFragment() {
@@ -54,7 +53,7 @@ class CreatePrivateFolderFragment : CreateFolderFragment() {
         createFolder(newFolderViewModel.currentPermission == ONLY_ME) { file, redirectToShareDetails ->
             file?.let {
                 saveNewFolder(file)
-                requireActivity().showSnackbar(R.string.createPrivateFolderSucces, anchorView = requireActivity().mainFab)
+                showSnackbar(R.string.createPrivateFolderSucces, true)
                 if (redirectToShareDetails) {
                     safeNavigate(
                         CreatePrivateFolderFragmentDirections.actionCreatePrivateFolderFragmentToFileShareDetailsFragment(

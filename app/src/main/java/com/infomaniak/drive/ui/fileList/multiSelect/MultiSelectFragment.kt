@@ -57,7 +57,6 @@ import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.Utils.moveFileClicked
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -297,7 +296,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                         )
                     }
                 } else {
-                    requireActivity().showSnackbar(apiResponse.translateError())
+                    showSnackbar(apiResponse.translateError())
                 }
                 closeMultiSelect()
             }
@@ -441,7 +440,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         } else {
             resources.getQuantityString(type.successMessage, success, success, destinationFolder?.name + "/")
         }
-        requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab)
+        showSnackbar(title, true)
         closeMultiSelect()
 
         onAllIndividualActionsFinished(type)

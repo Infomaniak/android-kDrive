@@ -67,7 +67,6 @@ import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.setPagination
 import com.infomaniak.lib.core.utils.showProgress
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.coroutines.*
 
@@ -279,12 +278,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                         }
                     }) else null
 
-                    requireActivity().showSnackbar(
-                        title,
-                        anchorView = requireActivity().mainFab,
-                        onActionClicked = onCancelActionClicked
-                    )
-                } ?: run { requireActivity().showSnackbar(title, anchorView = requireActivity().mainFab) }
+                    showSnackbar(title, showAboveFab = true, onActionClicked = onCancelActionClicked)
+                } ?: run { showSnackbar(title, showAboveFab = true) }
             }
         }
 

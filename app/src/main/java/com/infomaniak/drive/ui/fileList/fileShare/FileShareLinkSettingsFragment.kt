@@ -159,7 +159,7 @@ class FileShareLinkSettingsFragment : Fragment() {
                         if (apiResponse.data == true) {
                             findNavController().popBackStack()
                         } else {
-                            requireActivity().showSnackbar(R.string.errorModification)
+                            showSnackbar(R.string.errorModification)
                         }
                         saveButton?.hideProgress(R.string.buttonSave)
                     }

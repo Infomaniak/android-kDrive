@@ -216,7 +216,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                 if (downloadError) {
                     availableOfflineSwitch.isChecked = false
                     val fileName = currentFile.name
-                    showSnackbarAboveFab(
+                    showSnackbar(
                         getString(R.string.snackBarInvalidFileNameError, Utils.getInvalidFileNameCharacter(fileName), fileName),
                         isBottomSheetFragmentView
                     )

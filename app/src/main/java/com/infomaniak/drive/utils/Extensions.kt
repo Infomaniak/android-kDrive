@@ -428,12 +428,22 @@ fun Activity.showSnackbar(
     )
 }
 
-fun Fragment.showSnackbarAboveFab(titleId: Int, showAboveFab: Boolean = true) {
-    showSnackbarAboveFab(getString(titleId), showAboveFab)
+fun Fragment.showSnackbar(
+    titleId: Int,
+    showAboveFab: Boolean = false,
+    actionButtonTitle: Int = R.string.buttonCancel,
+    onActionClicked: (() -> Unit)? = null
+) {
+    showSnackbar(getString(titleId), showAboveFab, actionButtonTitle, onActionClicked)
 }
 
-fun Fragment.showSnackbarAboveFab(title: String, showAboveFab: Boolean = true) {
-    activity?.let { it.showSnackbar(title, if (showAboveFab) it.mainFab else null) }
+fun Fragment.showSnackbar(
+    title: String,
+    showAboveFab: Boolean = false,
+    actionButtonTitle: Int = R.string.buttonCancel,
+    onActionClicked: (() -> Unit)? = null
+) {
+    activity?.let { it.showSnackbar(title, if (showAboveFab) it.mainFab else null, actionButtonTitle, onActionClicked) }
 }
 
 @SuppressLint("NewApi")

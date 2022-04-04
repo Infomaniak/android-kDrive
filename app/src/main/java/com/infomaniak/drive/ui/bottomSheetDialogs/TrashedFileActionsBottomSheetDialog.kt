@@ -92,10 +92,10 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
                     dialog.dismiss()
                     if (apiResponse.data == true) {
                         val title = resources.getQuantityString(R.plurals.snackbarDeleteConfirmation, 1, currentTrashedFile.name)
-                        requireActivity().showSnackbar(title)
+                        showSnackbar(title)
                         dismissAndRemoveFileFromList()
                     } else {
-                        requireActivity().showSnackbar(R.string.errorDelete)
+                        showSnackbar(R.string.errorDelete)
                         findNavController().popBackStack()
                     }
                 }
@@ -112,13 +112,13 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
                 if (!originalPlace && folderName != null) add(folderName)
             }
 
-            requireActivity().showSnackbar(resources.getQuantityString(title, 1, *args.toTypedArray()))
+            showSnackbar(resources.getQuantityString(title, 1, *args.toTypedArray()))
             dismissAndRemoveFileFromList()
         } else {
             val title = if (apiResponse.formatError() == ErrorCode.AN_ERROR_HAS_OCCURRED) R.string.errorRestore
             else apiResponse.translateError()
 
-            requireActivity().showSnackbar(title)
+            showSnackbar(title)
             findNavController().popBackStack()
         }
     }

@@ -186,10 +186,10 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             mainViewModel.createOffice(currentFolderFile.driveId, currentFolderFile.id, createFile)
                 .observe(viewLifecycleOwner) { apiResponse ->
                     if (apiResponse.isSuccess()) {
-                        showSnackbarAboveFab(getString(R.string.modalCreateFileSucces, createFile.name))
+                        showSnackbar(getString(R.string.modalCreateFileSucces, createFile.name), true)
                         apiResponse.data?.let { file -> requireContext().openOnlyOfficeActivity(file) }
                     } else {
-                        showSnackbarAboveFab(R.string.errorFileCreate)
+                        showSnackbar(R.string.errorFileCreate, true)
                     }
                     mainViewModel.refreshActivities.value = true
                     dialog.dismiss()
@@ -215,7 +215,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                 launchSync = true
             }
         } catch (exception: Exception) {
-            showSnackbarAboveFab(R.string.errorDeviceStorage)
+            showSnackbar(R.string.errorDeviceStorage, true)
         } finally {
             if (launchSync) requireContext().syncImmediately()
         }
@@ -244,7 +244,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             }
         } catch (exception: Exception) {
             exception.printStackTrace()
-            showSnackbarAboveFab(R.string.errorDeviceStorage)
+            showSnackbar(R.string.errorDeviceStorage, true)
         }
     }
 
@@ -260,10 +260,10 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
             when {
                 isLowMemory -> {
-                    showSnackbarAboveFab(R.string.uploadOutOfMemoryError)
+                    showSnackbar(R.string.uploadOutOfMemoryError, true)
                 }
                 fileName == null -> {
-                    showSnackbarAboveFab(R.string.anErrorHasOccurred)
+                    showSnackbar(R.string.anErrorHasOccurred, true)
                 }
                 else -> {
                     CoroutineScope(Dispatchers.IO).launch {

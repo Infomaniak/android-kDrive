@@ -80,7 +80,7 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
                 if (apiResponse.error?.code == ErrorCode.DESTINATION_ALREADY_EXISTS.code) {
                     folderNameValueLayout.error = getString(apiResponse.translateError())
                 }
-                requireActivity().showSnackbar(apiResponse.translateError())
+                showSnackbar(apiResponse.translateError())
             }
 
             createFolderButton.hideProgress(R.string.createFolderTitle)
@@ -88,7 +88,7 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
     }
 
     private fun whenFolderCreated(file: File) {
-        requireActivity().showSnackbar(R.string.createCommonFolderSucces)
+        showSnackbar(R.string.createCommonFolderSucces)
 
         if (newFolderViewModel.currentPermission == SPECIFIC_USERS) {
             safeNavigate(
