@@ -364,7 +364,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     private fun File.showFavoritesResultSnackbar() {
-        showSnackbarAboveFab(getString(if (isFavorite) R.string.allFileAddFavoris else R.string.allFileDeleteFavoris, name), true)
+        showSnackbarAboveFab(getString(if (isFavorite) R.string.allFileAddFavoris else R.string.allFileDeleteFavoris, name))
     }
 
     private fun transmitActionAndPopBack(message: String, action: CancellableAction? = null) {
