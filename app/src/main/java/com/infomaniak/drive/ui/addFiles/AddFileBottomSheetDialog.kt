@@ -186,10 +186,10 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             mainViewModel.createOffice(currentFolderFile.driveId, currentFolderFile.id, createFile)
                 .observe(viewLifecycleOwner) { apiResponse ->
                     if (apiResponse.isSuccess()) {
-                        requireActivity().showSnackbar(getString(R.string.modalCreateFileSucces, createFile.name))
+                        showSnackbarAboveFab(getString(R.string.modalCreateFileSucces, createFile.name))
                         apiResponse.data?.let { file -> requireContext().openOnlyOfficeActivity(file) }
                     } else {
-                        requireActivity().showSnackbar(R.string.errorFileCreate)
+                        showSnackbarAboveFab(R.string.errorFileCreate)
                     }
                     mainViewModel.refreshActivities.value = true
                     dialog.dismiss()
@@ -215,7 +215,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                 launchSync = true
             }
         } catch (exception: Exception) {
-            requireActivity().showSnackbar(R.string.errorDeviceStorage)
+            showSnackbarAboveFab(R.string.errorDeviceStorage)
         } finally {
             if (launchSync) requireContext().syncImmediately()
         }
@@ -244,7 +244,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             }
         } catch (exception: Exception) {
             exception.printStackTrace()
-            requireActivity().showSnackbar(R.string.errorDeviceStorage)
+            showSnackbarAboveFab(R.string.errorDeviceStorage)
         }
     }
 
@@ -260,10 +260,10 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
             when {
                 isLowMemory -> {
-                    requireActivity().showSnackbar(R.string.uploadOutOfMemoryError)
+                    showSnackbarAboveFab(R.string.uploadOutOfMemoryError)
                 }
                 fileName == null -> {
-                    requireActivity().showSnackbar(R.string.anErrorHasOccurred)
+                    showSnackbarAboveFab(R.string.anErrorHasOccurred)
                 }
                 else -> {
                     CoroutineScope(Dispatchers.IO).launch {

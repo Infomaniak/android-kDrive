@@ -48,7 +48,6 @@ import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntent
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.lib.core.models.ApiResponse
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_file_info_actions.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -120,7 +119,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                 } else {
                     getString(apiResponse.translatedError)
                 }
-                requireActivity().showSnackbar(text, mainFab)
+                showSnackbarAboveFab(text)
             }
         }
     }
@@ -189,11 +188,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override fun copyPublicLink() {
         super.copyPublicLink()
         fileInfoActionsView.createPublicCopyLink(onSuccess = {
-            requireActivity().showSnackbar(title = R.string.fileInfoLinkCopiedToClipboard, anchorView = requireActivity().mainFab)
+            showSnackbarAboveFab(R.string.fileInfoLinkCopiedToClipboard)
             findNavController().popBackStack()
-        }, onError = { translatedError ->
-            requireActivity().showSnackbar(translatedError, anchorView = requireActivity().mainFab)
-        })
+        }, onError = { translatedError -> showSnackbarAboveFab(translatedError) })
     }
 
     override fun downloadFileClicked() {
@@ -226,7 +223,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                     showFavoritesResultSnackbar()
                     setBackNavigationResult(REFRESH_FAVORITE_FILE, currentFile.id)
                 } else {
-                    requireActivity().showSnackbar(R.string.errorAddFavorite, requireActivity().mainFab)
+                    showSnackbarAboveFab(R.string.errorAddFavorite)
                     findNavController().popBackStack()
                 }
             }
@@ -321,7 +318,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override fun openWithClicked() {
         super.openWithClicked()
         if (requireContext().openWithIntent(currentFile).resolveActivity(requireContext().packageManager) == null) {
-            requireActivity().showSnackbar(R.string.allActivityNotFoundError)
+            showSnackbarAboveFab(R.string.allActivityNotFoundError)
             findNavController().popBackStack()
         } else {
             safeNavigate(
@@ -367,17 +364,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     private fun File.showFavoritesResultSnackbar() {
-        if (isFavorite) {
-            requireActivity().showSnackbar(
-                getString(R.string.allFileAddFavoris, name),
-                anchorView = requireActivity().mainFab
-            )
-        } else {
-            requireActivity().showSnackbar(
-                getString(R.string.allFileDeleteFavoris, name),
-                anchorView = requireActivity().mainFab
-            )
-        }
+        showSnackbarAboveFab(getString(if (isFavorite) R.string.allFileAddFavoris else R.string.allFileDeleteFavoris, name), true)
     }
 
     private fun transmitActionAndPopBack(message: String, action: CancellableAction? = null) {
