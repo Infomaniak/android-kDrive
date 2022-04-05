@@ -25,6 +25,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -130,6 +131,8 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
             if (isCurrentlyInGallery) refreshTimer.start()
             loadMorePictures(AccountUtils.currentDriveId, true)
         }
+
+        Log.e("gibran", "onViewCreated - The value pictureFastScroller.isVisible is: ${pictureFastScroller.isVisible}", );
     }
 
     private fun setupPagination() {
@@ -297,6 +300,7 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
     }
 
     fun setScrollbarTrackOffset(offset: Int) {
+        Log.e("gibran", "setScrollbarTrackOffset - The value pictureFastScroller is: ${pictureFastScroller}", );
         pictureFastScroller?.trackMarginEnd = offset
 
 //        pictureFastScroller.invalidate()

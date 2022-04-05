@@ -914,6 +914,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
     }
 
     private fun initImpl() {
+        Log.e("gibran", "initImpl: ", );
         if (hasEmptyItemDecorator) {
             setEmptySpaceItemDecorator()
         }

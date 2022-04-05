@@ -124,6 +124,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         // This line is required to be able to scroll down with the fast scrollbar in the home view
         homeCoordinator.isNestedScrollingEnabled = true
+        homeViewPager.isNestedScrollingEnabled = true
 
         appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
             picturesFragment.setScrollbarTrackOffset(appBarLayout.totalScrollRange + verticalOffset + 92.toPx())

@@ -27,7 +27,6 @@
         android:id="@+id/pictureFastScroller"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:supportSwipeToRefresh="true"
         app:handleDrawable="@drawable/pictures_fast_scrollbar_thumb"
         app:popupDrawable="@drawable/pictures_fast_scrollbar_popup"
         app:popupTextStyle="@style/ScrollbarTextStyle"

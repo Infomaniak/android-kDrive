@@ -42,7 +42,7 @@ class MenuPicturesFragment : Fragment() {
             toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
             swipeRefreshLayout.setOnRefreshListener { picturesFragment.onRefreshPictures() }
 
-            // This is required to be able to scroll down with the fast scrollbar in the gallery
+            // This line is required to be able to scroll down with the fast scrollbar in the gallery
             picturesFragmentView.isNestedScrollingEnabled = true
         }
 
