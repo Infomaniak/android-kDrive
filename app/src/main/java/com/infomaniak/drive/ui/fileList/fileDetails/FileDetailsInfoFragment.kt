@@ -295,7 +295,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
             if (apiResponse.isSuccess()) {
                 shareLinkContainer.update(apiResponse.data)
             } else {
-                showSnackbar(getString(R.string.errorShareLink))
+                showSnackbar(R.string.errorShareLink)
             }
         }
     }

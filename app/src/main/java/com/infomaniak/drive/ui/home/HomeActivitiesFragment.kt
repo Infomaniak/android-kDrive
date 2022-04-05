@@ -90,7 +90,7 @@ class HomeActivitiesFragment : Fragment() {
                 }
                 onFileClicked = { currentFile, validPreviewFiles ->
                     if (currentFile.isTrashed()) {
-                        showSnackbar(getString(R.string.errorPreviewTrash), showAboveFab = true)
+                        showSnackbar(R.string.errorPreviewTrash, true)
                     } else Utils.displayFile(mainViewModel, findNavController(), currentFile, validPreviewFiles)
                 }
             }

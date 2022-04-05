@@ -327,10 +327,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     override fun copyPublicLink() {
         bottomSheetFileInfos.createPublicCopyLink(onSuccess = { file ->
             previewSliderAdapter.updateFile(currentFile.id) { it.shareLink = file?.shareLink }
-            showSnackbar(titleId = R.string.fileInfoLinkCopiedToClipboard)
+            showSnackbar(R.string.fileInfoLinkCopiedToClipboard)
             toggleBottomSheet(true)
         }, onError = { translatedError ->
-            showSnackbar(title = translatedError)
+            showSnackbar(translatedError)
             toggleBottomSheet(true)
         })
     }
@@ -426,7 +426,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                     toggleBottomSheet(true)
                 }
             } else {
-                showSnackbar(getString(R.string.errorDuplicate))
+                showSnackbar(R.string.errorDuplicate)
                 toggleBottomSheet(true)
             }
             onApiResponse()
@@ -464,7 +464,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 showSnackbar(title)
                 mainViewModel.deleteFileFromHome.value = true
             } else {
-                showSnackbar(getString(R.string.errorDelete))
+                showSnackbar(R.string.errorDelete)
             }
         }
     }
