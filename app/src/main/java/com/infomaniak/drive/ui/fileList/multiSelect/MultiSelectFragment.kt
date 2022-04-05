@@ -160,6 +160,27 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         multiSelectLayout?.root?.isGone = true
     }
 
+    open fun onMenuButtonClicked(
+        multiSelectBottomSheet: MultiSelectActionsBottomSheetDialog,
+        areAllFromTheSameFolder: Boolean,
+    ) {
+        multiSelectBottomSheet.apply {
+            arguments = getMultiSelectBottomSheetArguments(areAllFromTheSameFolder)
+        }.show(childFragmentManager, "MultiSelectActionsBottomSheetDialog")
+    }
+
+    private fun getMultiSelectBottomSheetArguments(areAllFromTheSameFolder: Boolean): Bundle {
+        val (fileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
+        return MultiSelectActionsBottomSheetDialogArgs(
+            fileIds = fileIds,
+            onlyFolders = onlyFolders,
+            onlyFavorite = onlyFavorite,
+            onlyOffline = onlyOffline,
+            isAllSelected = isAllSelected,
+            areAllFromTheSameFolder = areAllFromTheSameFolder,
+        ).toBundle()
+    }
+
     fun moveFiles(folderId: Int?) {
         requireContext().moveFileClicked(folderId, selectFolderResultLauncher)
     }

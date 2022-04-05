@@ -28,6 +28,7 @@ import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentMenuPicturesBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
+import com.infomaniak.drive.ui.fileList.multiSelect.PicturesMultiSelectActionsBottomSheetDialog
 
 class MenuPicturesFragment : Fragment() {
 
@@ -53,7 +54,12 @@ class MenuPicturesFragment : Fragment() {
         toolbarMultiSelect.setNavigationOnClickListener { closeMultiSelect() }
         moveButtonMultiSelect.setOnClickListener { onMoveButtonClicked() }
         deleteButtonMultiSelect.setOnClickListener { deleteFiles() }
-        menuButtonMultiSelect.setOnClickListener { onMenuButtonClicked() }
+        menuButtonMultiSelect.setOnClickListener {
+            onMenuButtonClicked(
+                multiSelectBottomSheet = PicturesMultiSelectActionsBottomSheetDialog(),
+                areAllFromTheSameFolder = false,
+            )
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

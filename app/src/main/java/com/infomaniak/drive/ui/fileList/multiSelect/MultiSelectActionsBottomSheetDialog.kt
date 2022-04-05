@@ -59,7 +59,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         configureColoredFolder(areIndividualActionsVisible)
         configureAddFavorites(areIndividualActionsVisible)
         configureAvailableOffline()
-        configureDownloadFile()
+        configureDownload()
         configureDuplicateFile()
         configureRestoreFileIn()
         configureRestoreFileToOriginalPlace()
@@ -122,10 +122,10 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         onActionSelected(action)
     }
 
-    protected open fun configureDownloadFile() {
+    protected open fun configureDownload() {
         val drivePermissions = DrivePermissions().apply {
             registerPermissions(this@MultiSelectActionsBottomSheetDialog) { authorized ->
-                if (authorized) downloadFileArchive()
+                if (authorized) download()
             }
         }
 
@@ -133,7 +133,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
             setOnClickListener {
                 if (drivePermissions.checkWriteStoragePermission()) {
                     context?.applicationContext?.trackEvent(matomoCategory, TrackerAction.CLICK, "bulkDownload")
-                    downloadFileArchive()
+                    download()
                 }
             }
 
@@ -157,13 +157,14 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         deletePermanently.isGone = true
     }
 
-    private fun downloadFileArchive() {
+    private fun download() {
+        if (navigationArgs.areAllFromTheSameFolder) downloadArchive() else downloadFiles()
+    }
 
-        fun downloadArchive(fileIds: IntArray) = liveData(Dispatchers.IO) {
-            emit(ApiRepository.getUUIDArchiveFiles(AccountUtils.currentDriveId, fileIds))
-        }
-
-        downloadArchive(navigationArgs.fileIds).observe(viewLifecycleOwner) { apiResponse ->
+    private fun downloadArchive() {
+        liveData(Dispatchers.IO) {
+            emit(ApiRepository.getUUIDArchiveFiles(AccountUtils.currentDriveId, navigationArgs.fileIds))
+        }.observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 apiResponse.data?.let {
                     val downloadURL = Uri.parse(ApiRoutes.downloadArchiveFiles(AccountUtils.currentDriveId, it.uuid))
@@ -174,6 +175,17 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
             }
             onActionSelected()
         }
+    }
+
+    private fun downloadFiles() {
+        navigationArgs.fileIds.forEach { fileId ->
+            FileController.getFileProxyById(fileId = fileId, customRealm = mainViewModel.realm)?.let { file ->
+                val downloadUrl = Uri.parse(ApiRoutes.downloadFile(file))
+                val fileName = if (file.isFolder()) "${file.name}.zip" else file.name
+                requireContext().startDownloadFile(downloadUrl, fileName)
+            }
+        }
+        onActionSelected()
     }
 
     fun onActionSelected(type: SelectDialogAction? = null) {

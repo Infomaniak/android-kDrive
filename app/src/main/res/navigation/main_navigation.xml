@@ -205,6 +205,9 @@
             android:name="isAllSelected"
             android:defaultValue="false"
             app:argType="boolean" />
+        <argument
+            android:name="areAllFromTheSameFolder"
+            app:argType="boolean" />
     </dialog>
 
     <dialog
