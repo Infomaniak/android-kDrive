@@ -70,7 +70,7 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
         currentFile.setFileItem(currentTrashedFile)
         restoreFileIn.setOnClickListener {
-            trackTrashEvent("restoreGiveFolder")
+            trackTrashEvent("restoreGivenFolder")
             val intent = Intent(requireContext(), SelectFolderActivity::class.java).apply {
                 putExtra(SelectFolderActivity.USER_ID_TAG, AccountUtils.currentUserId)
                 putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
