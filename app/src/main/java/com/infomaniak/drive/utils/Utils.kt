@@ -275,7 +275,7 @@ object Utils {
         workManager.enqueueUniqueWork(DownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
     }
 
-    fun getInvalidFileNameCharacter(fileName: String): String? = Regex("[/:*?<>|\"\\\\]").find(fileName)?.value
+    fun getInvalidFileNameCharacter(fileName: String): String? = Regex("[\\\\/:*?\"<>|]").find(fileName)?.value
 
     fun showSnackbar(
         view: View,

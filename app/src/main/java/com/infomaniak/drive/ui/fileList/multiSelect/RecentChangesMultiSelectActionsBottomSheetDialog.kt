@@ -19,4 +19,6 @@ package com.infomaniak.drive.ui.fileList.multiSelect
 
 import com.infomaniak.drive.ui.menu.RecentChangesFragment
 
-class RecentChangesMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(RecentChangesFragment.MATOMO_CATEGORY)
+class RecentChangesMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(
+    RecentChangesFragment.MATOMO_CATEGORY
+)
