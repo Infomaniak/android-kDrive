@@ -867,6 +867,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
 
     private fun registerDataObserver() {
         if (recyclerView.adapter?.hasObservers() != true) {
+            Log.e("gibran", "registerDataObserver: registering observer !!", );
             recyclerView.adapter?.registerAdapterDataObserver(adapterDataObserver.value)
         }
     }
@@ -963,6 +964,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
     fun detachFastScrollerFromRecyclerView() {
         // unregister the observer to prevent memory leaks only if initialized
         if (adapterDataObserver.isInitialized()) {
+            Log.e("gibran", "detachFastScrollerFromRecyclerView: now detaching observer", );
             recyclerView.adapter?.unregisterAdapterDataObserver(adapterDataObserver.value)
         }
         handleImageView.setOnTouchListener(null)

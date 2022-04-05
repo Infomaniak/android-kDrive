@@ -84,11 +84,7 @@ class MenuPicturesFragment : Fragment() {
         picturesFragment.menuPicturesBinding = binding
 
         binding.appBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
-//            Log.e("gallery-scrollbar", "onViewCreated - The value binding.appBar.totalScrollRange is: ${binding.appBar.totalScrollRange}", );
-//            Log.e("gallery-scrollbar", "onViewCreated - The value verticalOffset is: ${verticalOffset}")
-//            Log.e("gallery-scrollbar", "onViewCreated - The value binding.appBar.totalScrollRange + verticalOffset is: ${binding.appBar.totalScrollRange + verticalOffset}", );
             picturesFragment.setScrollbarTrackOffset(binding.appBar.totalScrollRange + verticalOffset)
-//            verticalOffset == 0
         })
     }
 }

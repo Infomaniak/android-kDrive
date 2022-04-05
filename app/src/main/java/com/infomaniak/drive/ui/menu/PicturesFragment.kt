@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.menu
 import android.content.res.Configuration
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -296,7 +297,8 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
     }
 
     fun setScrollbarTrackOffset(offset: Int) {
-        pictureFastScroller.trackMarginEnd = offset
+        pictureFastScroller?.trackMarginEnd = offset
+
 //        pictureFastScroller.invalidate()
 //        pictureFastScroller.findViewById<LinearLayout>(com.qtalk.recyclerviewfastscroller.R.id.trackView).invalidate()
     }

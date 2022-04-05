@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.home
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -44,6 +43,7 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.TabViewPagerUtils.FragmentTab
 import com.infomaniak.drive.utils.TabViewPagerUtils.getFragment
 import com.infomaniak.drive.utils.TabViewPagerUtils.setup
+import com.infomaniak.lib.core.utils.toPx
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.item_search_view.*
 
@@ -122,16 +122,12 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             homeViewPager.currentItem = UiSettings(requireContext()).lastHomeSelectedTab
         }
 
-        // This is required to be able to scroll down with the fast scrollbar in the home view
+        // This line is required to be able to scroll down with the fast scrollbar in the home view
         homeCoordinator.isNestedScrollingEnabled = true
 
-//        appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
-//            Log.e("gallery-scrollbar", "onViewCreated - The value binding.appBar.totalScrollRange is: ${appBarLayout.totalScrollRange}", );
-//            Log.e("gallery-scrollbar", "onViewCreated - The value verticalOffset is: ${verticalOffset}")
-//            Log.e("gallery-scrollbar", "onViewCreated - The value binding.appBar.totalScrollRange + verticalOffset is: ${appBarLayout.totalScrollRange + verticalOffset}", );
-//            picturesFragment.setScrollbarTrackOffset(appBarLayout.totalScrollRange + verticalOffset)
-////            verticalOffset == 0
-//        })
+        appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
+            picturesFragment.setScrollbarTrackOffset(appBarLayout.totalScrollRange + verticalOffset + 92.toPx())
+        })
     }
 
     override fun onResume() {
