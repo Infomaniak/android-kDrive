@@ -407,33 +407,35 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/goToFolder"
+                android:id="@+id/coloredFolder"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/buttonHeight"
-                android:background="?selectableItemBackground">
+                android:background="?selectableItemBackground"
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/goToFolderIcon"
+                    android:id="@+id/coloredFolderIcon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/marginStandard"
-                    android:src="@drawable/ic_folder_filled"
+                    android:src="@drawable/ic_color_bucket"
                     android:tint="@color/iconColor"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/goToFolderText"
+                    android:id="@+id/coloredFolderText"
                     style="@style/Subtitle2"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/marginStandardMedium"
                     android:layout_marginEnd="@dimen/marginStandard"
-                    android:text="@string/buttonSeeFolder"
+                    android:text="@string/buttonChangeFolderColor"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/goToFolderIcon"
+                    app:layout_constraintStart_toEndOf="@id/coloredFolderIcon"
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -471,35 +473,33 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/coloredFolder"
+                android:id="@+id/goToFolder"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/buttonHeight"
-                android:background="?selectableItemBackground"
-                android:visibility="gone"
-                tools:visibility="visible">
+                android:background="?selectableItemBackground">
 
                 <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/coloredFolderIcon"
+                    android:id="@+id/goToFolderIcon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/marginStandard"
-                    android:src="@drawable/ic_color_bucket"
+                    android:src="@drawable/ic_folder_filled"
                     android:tint="@color/iconColor"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/coloredFolderText"
+                    android:id="@+id/goToFolderText"
                     style="@style/Subtitle2"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/marginStandardMedium"
                     android:layout_marginEnd="@dimen/marginStandard"
-                    android:text="@string/buttonChangeFolderColor"
+                    android:text="@string/buttonSeeFolder"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/coloredFolderIcon"
+                    app:layout_constraintStart_toEndOf="@id/goToFolderIcon"
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
