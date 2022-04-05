@@ -13,7 +13,7 @@ jobs:
 
   instrumentation-tests:
     if: github.event.pull_request.draft == false
-    runs-on: self-hosted
+    runs-on: [ self-hosted, Android ]
     strategy:
       matrix:
         api-level: [ 31 ]
@@ -102,4 +102,4 @@ jobs:
           disable-animations: true
           emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none -skin 540x1110
           # emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -skin 540x1110
-          script: ./gradlew app:connectedStandardDebugAndroidTest --stacktrace
+          script: ./gradlew uninstallAll app:connectedStandardDebugAndroidTest --stacktrace
