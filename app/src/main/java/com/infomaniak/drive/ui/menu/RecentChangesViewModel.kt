@@ -43,8 +43,8 @@ class RecentChangesViewModel : ViewModel() {
                 apiResponse.data?.let { data ->
                     val isComplete = data.size < PER_PAGE
                     val isFirstPage = currentPage == 1
-                    emit(FileListFragment.FolderFilesResult(files = data, isComplete = isComplete, page = currentPage))
                     FileController.storeRecentChanges(data, isFirstPage)
+                    emit(FileListFragment.FolderFilesResult(files = data, isComplete = isComplete, page = currentPage))
                 }
             } else {
                 emit(
