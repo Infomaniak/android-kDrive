@@ -211,11 +211,19 @@ class FileInfoActionsView @JvmOverloads constructor(
         availableOfflineSwitch.setOnClickListener { view ->
             val downloadError = !onItemClickListener.availableOfflineSwitched(this, (view as SwitchMaterial).isChecked)
             with(ownerFragment) {
+                val isBottomSheetFragmentView =
+                    findNavController().currentBackStackEntry?.destination?.id == R.id.fileInfoActionsBottomSheetDialog
                 if (downloadError) {
                     availableOfflineSwitch.isChecked = false
-                    showSnackBarInvalidFileName(currentFile.name)
+                    val fileName = currentFile.name
+                    showSnackbar(
+                        getString(R.string.snackBarInvalidFileNameError, Utils.getInvalidFileNameCharacter(fileName), fileName),
+                        isBottomSheetFragmentView
+                    )
                 }
-                findNavController().popBackStack()
+                if (isBottomSheetFragmentView) {
+                    findNavController().popBackStack()
+                }
             }
         }
         availableOffline.setOnClickListener { availableOfflineSwitch.performClick() }

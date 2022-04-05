@@ -237,7 +237,7 @@ class SearchFragment : FileListFragment() {
 
         fun handleApiCallFailure(apiResponse: ApiResponse<ArrayList<File>>) {
             searchViewModel.visibilityMode.value = VisibilityMode.NO_RESULTS
-            requireActivity().showSnackbar(apiResponse.translateError())
+            showSnackbar(apiResponse.translateError())
         }
 
         fun getSearchResults(data: ArrayList<File>?): ArrayList<File> {

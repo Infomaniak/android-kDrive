@@ -79,7 +79,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
                 navigateToFileShareDetails(file)
             }
         }, onError = { translatedError ->
-            requireActivity().showSnackbar(translatedError)
+            showSnackbar(translatedError)
             findNavController().popBackStack(R.id.newFolderFragment, true)
         })
     }

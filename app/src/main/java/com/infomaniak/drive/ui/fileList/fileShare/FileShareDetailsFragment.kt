@@ -249,7 +249,7 @@ class FileShareDetailsFragment : Fragment() {
             if (apiResponse.isSuccess()) {
                 shareLinkContainer.update(apiResponse.data)
             } else {
-                requireActivity().showSnackbar(getString(R.string.errorShareLink))
+                showSnackbar(R.string.errorShareLink)
             }
         }
     }
@@ -260,7 +260,7 @@ class FileShareDetailsFragment : Fragment() {
             if (success) {
                 shareLinkContainer.update(null)
             } else {
-                requireActivity().showSnackbar(apiResponse.translateError())
+                showSnackbar(apiResponse.translateError())
             }
         }
     }

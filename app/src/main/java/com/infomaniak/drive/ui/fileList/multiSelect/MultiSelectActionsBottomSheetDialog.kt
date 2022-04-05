@@ -171,7 +171,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
                     requireContext().startDownloadFile(downloadURL, ARCHIVE_FILE_NAME)
                 }
             } else {
-                requireActivity().showSnackbar(apiResponse.translatedError)
+                showSnackbar(apiResponse.translatedError)
             }
             onActionSelected()
         }

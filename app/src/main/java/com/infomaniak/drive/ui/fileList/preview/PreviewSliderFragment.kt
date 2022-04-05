@@ -327,10 +327,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     override fun copyPublicLink() {
         bottomSheetFileInfos.createPublicCopyLink(onSuccess = { file ->
             previewSliderAdapter.updateFile(currentFile.id) { it.shareLink = file?.shareLink }
-            requireActivity().showSnackbar(title = R.string.fileInfoLinkCopiedToClipboard)
+            showSnackbar(R.string.fileInfoLinkCopiedToClipboard)
             toggleBottomSheet(true)
         }, onError = { translatedError ->
-            requireActivity().showSnackbar(title = translatedError)
+            showSnackbar(translatedError)
             toggleBottomSheet(true)
         })
     }
@@ -344,7 +344,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                     showFavoritesResultSnackbar()
                     bottomSheetFileInfos.refreshBottomSheetUi(this)
                 } else {
-                    requireActivity().showSnackbar(R.string.errorDelete)
+                    showSnackbar(R.string.errorDelete)
                 }
                 toggleBottomSheet(true)
             }
@@ -367,7 +367,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     private fun File.showFavoritesResultSnackbar() {
         val id = if (isFavorite) R.string.allFileAddFavoris else R.string.allFileDeleteFavoris
-        requireActivity().showSnackbar(getString(id, name))
+        showSnackbar(getString(id, name))
     }
 
     override fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File) {
@@ -392,9 +392,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                     toggleBottomSheet(true)
                 }
                 mainViewModel.currentPreviewFileList.remove(currentFile.id)
-                requireActivity().showSnackbar(R.string.snackbarLeaveShareConfirmation)
+                showSnackbar(R.string.snackbarLeaveShareConfirmation)
             } else {
-                requireActivity().showSnackbar(apiResponse.translatedError)
+                showSnackbar(apiResponse.translatedError)
             }
         }
     }
@@ -422,11 +422,11 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 apiResponse.data?.let { file ->
                     mainViewModel.currentPreviewFileList[file.id] = file
                     previewSliderAdapter.addFile(file)
-                    requireActivity().showSnackbar(getString(R.string.allFileDuplicate, currentFile.name))
+                    showSnackbar(getString(R.string.allFileDuplicate, currentFile.name))
                     toggleBottomSheet(true)
                 }
             } else {
-                requireActivity().showSnackbar(getString(R.string.errorDuplicate))
+                showSnackbar(R.string.errorDuplicate)
                 toggleBottomSheet(true)
             }
             onApiResponse()
@@ -437,11 +437,11 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         bottomSheetFileInfos.onRenameFile(mainViewModel, newName,
             onSuccess = {
                 toggleBottomSheet(true)
-                requireActivity().showSnackbar(getString(R.string.allFileRename, currentFile.name))
+                showSnackbar(getString(R.string.allFileRename, currentFile.name))
                 onApiResponse()
             }, onError = { translatedError ->
                 toggleBottomSheet(true)
-                requireActivity().showSnackbar(translatedError)
+                showSnackbar(translatedError)
                 onApiResponse()
             })
     }
@@ -461,10 +461,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                     1,
                     currentFile.name
                 )
-                requireActivity().showSnackbar(title)
+                showSnackbar(title)
                 mainViewModel.deleteFileFromHome.value = true
             } else {
-                requireActivity().showSnackbar(getString(R.string.errorDelete))
+                showSnackbar(R.string.errorDelete)
             }
         }
     }
@@ -473,7 +473,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         super.openWithClicked()
         val packageManager = requireContext().packageManager
         if (requireContext().openWithIntent(currentFile, userDrive).resolveActivity(packageManager) == null) {
-            requireActivity().showSnackbar(R.string.allActivityNotFoundError)
+            showSnackbar(R.string.allActivityNotFoundError)
         } else {
             safeNavigate(
                 PreviewSliderFragmentDirections.actionPreviewSliderFragmentToDownloadProgressDialog(
@@ -490,15 +490,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             .observe(viewLifecycleOwner) { apiResponse ->
                 if (apiResponse.isSuccess()) {
                     mainViewModel.refreshActivities.value = true
-                    requireActivity().showSnackbar(
-                        getString(
-                            R.string.allFileMove,
-                            currentFile.name,
-                            destinationFolder.name
-                        )
-                    )
+                    showSnackbar(getString(R.string.allFileMove, currentFile.name, destinationFolder.name))
                 } else {
-                    requireActivity().showSnackbar(R.string.errorMove)
+                    showSnackbar(R.string.errorMove)
                 }
             }
     }

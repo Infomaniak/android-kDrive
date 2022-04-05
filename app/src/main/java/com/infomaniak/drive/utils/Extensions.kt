@@ -93,7 +93,6 @@ import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.UtilsUi.getInitials
-import com.infomaniak.lib.core.utils.toDp
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.item_file.view.*
@@ -429,13 +428,22 @@ fun Activity.showSnackbar(
     )
 }
 
-fun Fragment.showSnackBarInvalidFileName(fileName: String) {
-    activity?.let {
-        it.showSnackbar(
-            getString(R.string.snackBarInvalidFileNameError, Utils.getInvalidFileNameCharacter(fileName), fileName),
-            it.mainFab
-        )
-    }
+fun Fragment.showSnackbar(
+    titleId: Int,
+    showAboveFab: Boolean = false,
+    actionButtonTitle: Int = R.string.buttonCancel,
+    onActionClicked: (() -> Unit)? = null
+) {
+    showSnackbar(getString(titleId), showAboveFab, actionButtonTitle, onActionClicked)
+}
+
+fun Fragment.showSnackbar(
+    title: String,
+    showAboveFab: Boolean = false,
+    actionButtonTitle: Int = R.string.buttonCancel,
+    onActionClicked: (() -> Unit)? = null
+) {
+    activity?.let { it.showSnackbar(title, if (showAboveFab) it.mainFab else null, actionButtonTitle, onActionClicked) }
 }
 
 @SuppressLint("NewApi")

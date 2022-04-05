@@ -30,10 +30,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.safeNavigate
-import com.infomaniak.drive.utils.showSnackbar
+import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.utils.setPagination
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_home_tabs.*
@@ -93,10 +90,7 @@ class HomeActivitiesFragment : Fragment() {
                 }
                 onFileClicked = { currentFile, validPreviewFiles ->
                     if (currentFile.isTrashed()) {
-                        requireActivity().showSnackbar(
-                            getString(R.string.errorPreviewTrash),
-                            anchorView = requireActivity().mainFab
-                        )
+                        showSnackbar(R.string.errorPreviewTrash, true)
                     } else Utils.displayFile(mainViewModel, findNavController(), currentFile, validPreviewFiles)
                 }
             }

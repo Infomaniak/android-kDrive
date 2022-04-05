@@ -116,7 +116,7 @@ class TrashFragment : FileSubTypeListFragment() {
                         Utils.showSnackbar(requireView(), R.string.snackbarEmptyTrashConfirmation)
                         onRefresh()
                     } else {
-                        requireActivity().showSnackbar(apiResponse.translateError())
+                        showSnackbar(apiResponse.translateError())
                     }
                 }
             }

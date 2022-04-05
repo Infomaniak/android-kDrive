@@ -94,7 +94,7 @@ open class ManageDropboxFragment : Fragment() {
                     if (apiResponse?.isSuccess() == true) {
                         apiResponse.data?.let { updateUi(file, it) }
                     } else {
-                        requireActivity().showSnackbar(apiResponse.translateError())
+                        showSnackbar(apiResponse.translateError())
                     }
                 }
             }
@@ -165,7 +165,7 @@ open class ManageDropboxFragment : Fragment() {
                     if (apiResponse.isSuccess()) {
                         findNavController().popBackStack()
                     } else {
-                        requireActivity().showSnackbar(R.string.errorDelete)
+                        showSnackbar(R.string.errorDelete)
                     }
                     hideProgress(R.string.buttonDisableDropBox)
                 }
@@ -190,7 +190,7 @@ open class ManageDropboxFragment : Fragment() {
                         if (apiResponse.isSuccess()) {
                             findNavController().popBackStack()
                         } else {
-                            requireActivity().showSnackbar(R.string.errorModification)
+                            showSnackbar(R.string.errorModification)
                         }
                         hideProgress(R.string.buttonSave)
                     }
