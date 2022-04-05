@@ -25,6 +25,7 @@ android {
         buildConfigField 'String', 'MATOMO_URL', '"https://analytics.infomaniak.com/matomo.php"'
         buildConfigField 'String', 'OFFICE_URL', '"https://drive.infomaniak.com/app/office/"'
         buildConfigField 'String', 'SHOP_URL', '"https://shop.infomaniak.com/order/"'
+        buildConfigField 'String', 'SUPPORT_DONT_KILL_MY_APP_URL', '"https://www.infomaniak.com/fr/support/faq/2685/kdrive-forcer-lapplication-mobile-en-arriere-plan-dont-kill-my-app"'
         buildConfigField 'String', 'SUPPORT_URL', '"https://support.infomaniak.com/"'
 
         resValue 'string', 'ACCOUNT_TYPE', 'com.infomaniak.drive'
@@ -70,7 +71,10 @@ android {
         }
     }
 
-    buildFeatures { viewBinding true }
+    buildFeatures {
+        viewBinding true
+        dataBinding true
+    }
 
     testOptions.unitTests.all {
         testLogging {
