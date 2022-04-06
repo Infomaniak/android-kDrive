@@ -414,6 +414,9 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                         requestDisallowInterceptTouchEvent(true)
 
                         if (motionEvent.action == MotionEvent.ACTION_DOWN) {
+                            // prevents the handle from fading if we've started moving the scrollbar manually
+                            hideHandleJob?.cancel()
+
                             if (!adapterDataObserver.isInitialized()) {
                                 registerDataObserver()
                             }
@@ -446,7 +449,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                         // move the handle only if fastScrolled, else leave the translation of the handle to the onScrolled method on the listener
 
                         if (isFastScrollEnabled) {
-                            moveHandle(currentRelativePos)
+                            moveHandle(currentRelativePos, false)
 
                             val position =
                                 recyclerView.computePositionForOffsetAndScroll(currentRelativePos)
@@ -484,6 +487,14 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                                 popupAnimationRunnable,
                                 Defaults.popupVisibilityDuration
                             )
+                        }
+                        if (handleVisibilityDuration > 0) {
+                            hideHandleJob?.cancel()
+                            
+                            hideHandleJob = CoroutineScope(Dispatchers.Main).launch {
+                                delay(handleVisibilityDuration.toLong())
+                                handleImageView.animateVisibility(false)
+                            }
                         }
                         super.onTouchEvent(motionEvent)
                     }
@@ -629,14 +640,14 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
         }
     }
 
-    private fun moveHandle(offset: Float) {
+    private fun moveHandle(offset: Float, runHideHandleJob: Boolean) {
         post {
             // animateVisibility() without animation
             handleImageView.scaleX = 1F
             handleImageView.scaleY = 1F
         }
 
-        if (handleVisibilityDuration > 0) {
+        if (handleVisibilityDuration > 0 && runHideHandleJob) {
             hideHandleJob?.cancel()
 
             hideHandleJob = CoroutineScope(Dispatchers.Main).launch {
@@ -908,7 +919,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
             val error = extent.toFloat() * offset / range
             val finalOffset: Float = (trackLength - handleLength) * ((error + offset) / range)
 
-            moveHandle(finalOffset)
+            moveHandle(finalOffset, true)
         }
     }
 
