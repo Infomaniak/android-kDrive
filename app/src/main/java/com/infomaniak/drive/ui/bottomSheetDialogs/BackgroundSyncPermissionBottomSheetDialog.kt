@@ -45,25 +45,21 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
         binding.lifecycleOwner = viewLifecycleOwner
         binding.syncPermissionsModel = backgroundSyncPermissionsViewModel
 
-        backgroundSyncPermissionsViewModel.apply {
-            drivePermissions.registerBatteryPermission(this@BackgroundSyncPermissionsBottomSheetDialog) { hasPermission ->
-                isWhitelisted.value = hasPermission
-                shouldBeWhitelisted.value = hasPermission
-                showManufacturerWarning.value = hasPermission && manufacturerWarning
-            }
-            val checkBatteryLifePermission = checkWhitelisted()
-            shouldBeWhitelisted.value = checkBatteryLifePermission
+        drivePermissions.registerBatteryPermission(this) { hasPermission -> onPermissionGranted(hasPermission) }
+        drivePermissions.updateShowBatteryOptimizationDialog(true)
 
+        backgroundSyncPermissionsViewModel.apply {
+            shouldBeWhitelisted.value = checkWhitelisted(false)
             shouldBeWhitelisted.observe(viewLifecycleOwner) { shouldBeWhitelisted ->
                 if (shouldBeWhitelisted && isWhitelisted.value != true) {
-                    checkWhitelisted()
+                    checkWhitelisted(true)
                 }
             }
             hasDoneNecessary.observe(viewLifecycleOwner) { hasDoneNecessary ->
-                DrivePermissions.mustShowBatteryModal = !(hasDoneNecessary && isWhitelisted.value == true)
+                val mustShowBatteryDialog = !(hasDoneNecessary && isWhitelisted.value == true)
+                drivePermissions.updateShowBatteryOptimizationDialog(mustShowBatteryDialog)
             }
         }
-
 
         return binding.root
     }
@@ -74,9 +70,17 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
         openGuideButton.setOnClickListener { context?.openUrl(BuildConfig.SUPPORT_DONT_KILL_MY_APP_URL) }
     }
 
+    private fun onPermissionGranted(hasPermission: Boolean) {
+        backgroundSyncPermissionsViewModel.apply {
+            isWhitelisted.value = hasPermission
+            shouldBeWhitelisted.value = hasPermission
+            showManufacturerWarning.value = hasPermission && manufacturerWarning
+            if (hasPermission && !manufacturerWarning) hasDoneNecessary.value = true
+        }
+    }
 
-    private fun checkWhitelisted(): Boolean {
-        return drivePermissions.checkBatteryLifePermission(true).also {
+    private fun checkWhitelisted(requestPermission: Boolean): Boolean {
+        return drivePermissions.checkBatteryLifePermission(requestPermission).also {
             backgroundSyncPermissionsViewModel.apply {
                 isWhitelisted.value = it
                 showManufacturerWarning.value = it && manufacturerWarning
@@ -98,7 +102,6 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
 
             /**
              * Whether the device has been produced by an evil manufacturer.
-             *
              * Always true for debug builds (to test the UI).
              *
              * @see evilManufacturers

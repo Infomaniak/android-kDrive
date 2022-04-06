@@ -76,45 +76,26 @@
                 android:gravity="center"
                 android:text="@string/backgroundSyncDescription"
                 android:textColor="@color/primaryText"
-                app:layout_constraintBottom_toTopOf="@id/allowBackgroundSync"
+                app:layout_constraintBottom_toTopOf="@id/allowBackgroundSyncSwitch"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/title"
                 app:layout_constraintVertical_chainStyle="packed" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/allowBackgroundSync"
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/allowBackgroundSyncSwitch"
+                style="@style/H3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/marginStandardSmall"
+                android:checked="@={syncPermissionsModel.shouldBeWhitelisted}"
+                android:clickable="@{!syncPermissionsModel.whitelisted}"
                 android:minHeight="@dimen/buttonHeight"
+                android:text="@string/backgroundSyncSwitchTitle"
                 app:layout_constraintBottom_toTopOf="@id/switchDescription"
-                app:layout_constraintTop_toBottomOf="@id/description">
-
-                <TextView
-                    android:id="@+id/allowBackgroundSyncText"
-                    style="@style/H3"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="@dimen/marginStandardMedium"
-                    android:text="@string/backgroundSyncSwitchTitle"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/allowBackgroundSyncSwitch"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/allowBackgroundSyncSwitch"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="@={syncPermissionsModel.shouldBeWhitelisted}"
-                    android:clickable="@{!syncPermissionsModel.whitelisted}"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/allowBackgroundSyncText"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/description" />
 
             <TextView
                 android:id="@+id/switchDescription"
@@ -127,7 +108,7 @@
                 app:layout_constraintBottom_toTopOf="@id/guideCard"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/allowBackgroundSync"
+                app:layout_constraintTop_toBottomOf="@id/allowBackgroundSyncSwitch"
                 app:layout_constraintVertical_chainStyle="packed" />
 
             <com.google.android.material.card.MaterialCardView

@@ -19,6 +19,7 @@ package com.infomaniak.drive.utils
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity.MODE_PRIVATE
 import android.app.Activity.RESULT_OK
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -45,12 +46,13 @@ import io.sentry.SentryLevel
 class DrivePermissions {
 
     companion object {
+        private const val SHARED_PREFS = "HINT_BATTERY_OPTIMIZATIONS"
+        private const val FLAG_SHOW_BATTERY_OPTIMIZATION_DIALOG = "showBatteryOptimizationDialog"
         val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_MEDIA_LOCATION)
         } else {
             arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
-        var mustShowBatteryModal = true
     }
 
     private lateinit var batteryPermissionResultLauncher: ActivityResultLauncher<Intent>
@@ -98,7 +100,7 @@ class DrivePermissions {
      * @return [Boolean] true if the sync has all permissions or false
      */
     fun checkSyncPermissions(requestPermission: Boolean = true): Boolean {
-        if (mustShowBatteryModal || !activity.batteryLifePermission(false)) {
+        if (mustShowBatteryOptimizationDialog(activity) || !activity.batteryLifePermission(false)) {
             BackgroundSyncPermissionsBottomSheetDialog().show(activity.supportFragmentManager, "syncPermissionsDialog")
         }
         return checkWriteStoragePermission(requestPermission)
@@ -153,5 +155,15 @@ class DrivePermissions {
                 false
             }
         }
+    }
+
+    private fun mustShowBatteryOptimizationDialog(context: Context): Boolean {
+        val sharedPrefs = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE)
+        return sharedPrefs.getBoolean(FLAG_SHOW_BATTERY_OPTIMIZATION_DIALOG, true)
+    }
+
+    fun updateShowBatteryOptimizationDialog(mustShowBatteryDialog: Boolean) {
+        val editableSharedPrefs = activity.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE).edit()
+        editableSharedPrefs.putBoolean(FLAG_SHOW_BATTERY_OPTIMIZATION_DIALOG, mustShowBatteryDialog).apply()
     }
 }
