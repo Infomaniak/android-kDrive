@@ -36,6 +36,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:animateLayoutChanges="true"
             android:paddingHorizontal="@dimen/marginStandard"
             tools:background="@color/appBar">
 
@@ -50,7 +51,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_chainStyle="packed"
                 tools:ignore="ContentDescription" />
 
             <TextView
@@ -64,8 +64,7 @@
                 app:layout_constraintBottom_toTopOf="@id/description"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/illu"
-                app:layout_constraintVertical_chainStyle="packed" />
+                app:layout_constraintTop_toBottomOf="@id/illu" />
 
             <TextView
                 android:id="@+id/description"
@@ -79,8 +78,7 @@
                 app:layout_constraintBottom_toTopOf="@id/allowBackgroundSyncSwitch"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/title"
-                app:layout_constraintVertical_chainStyle="packed" />
+                app:layout_constraintTop_toBottomOf="@id/title" />
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/allowBackgroundSyncSwitch"
@@ -108,8 +106,7 @@
                 app:layout_constraintBottom_toTopOf="@id/guideCard"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/allowBackgroundSyncSwitch"
-                app:layout_constraintVertical_chainStyle="packed" />
+                app:layout_constraintTop_toBottomOf="@id/allowBackgroundSyncSwitch" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/guideCard"
@@ -125,7 +122,6 @@
                 tools:visibility="visible">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/guideIcon"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="@dimen/marginStandardMedium">
@@ -161,41 +157,22 @@
                         android:text="@string/backgroundSyncOpenGuideButton"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/guideCardDescription"
-                        app:layout_constraintVertical_chainStyle="packed" />
+                        app:layout_constraintTop_toBottomOf="@+id/guideCardDescription" />
 
-                    <androidx.constraintlayout.widget.ConstraintLayout
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/hasDoneNecessaryCheckbox"
+                        style="@style/Subtitle1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/marginStandard"
-                        app:layout_constraintEnd_toEndOf="parent"
+                        android:button="@drawable/ic_checkbox"
+                        android:checked="@={syncPermissionsModel.hasDoneNecessary}"
+                        android:paddingStart="@dimen/marginStandardSmall"
+                        android:text="@string/backgroundSyncCheckboxTitle"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/openGuideButton"
-                        app:layout_constraintVertical_chainStyle="packed">
-
-                        <com.google.android.material.checkbox.MaterialCheckBox
-                            android:id="@+id/activateSyncSwitch"
-                            android:layout_width="26dp"
-                            android:layout_height="26dp"
-                            android:button="@drawable/ic_checkbox"
-                            android:checked="@={syncPermissionsModel.hasDoneNecessary}"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:useMaterialThemeColors="false"
-                            tools:visibility="visible" />
-
-                        <TextView
-                            android:id="@+id/checkboxTitle"
-                            style="@style/Subtitle1"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/marginStandardSmall"
-                            android:text="@string/backgroundSyncCheckboxTitle"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toEndOf="@id/activateSyncSwitch"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                    </androidx.constraintlayout.widget.ConstraintLayout>
+                        app:layout_constraintTop_toBottomOf="@id/openGuideButton"
+                        app:useMaterialThemeColors="false"
+                        tools:ignore="RtlSymmetry" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -210,8 +187,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/guideCard"
-                app:layout_constraintVertical_chainStyle="packed" />
+                app:layout_constraintTop_toBottomOf="@+id/guideCard" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

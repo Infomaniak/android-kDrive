@@ -19,7 +19,6 @@ package com.infomaniak.drive.utils
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity.MODE_PRIVATE
 import android.app.Activity.RESULT_OK
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -32,11 +31,13 @@ import android.provider.Settings
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsBottomSheetDialog
+import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsBottomSheetDialog.BackgroundSyncPermissionsViewModel.Companion.mustShowBatteryOptimizationDialog
 import com.infomaniak.lib.core.utils.hasPermissions
 import com.infomaniak.lib.core.utils.requestPermissionsIsPossible
 import com.infomaniak.lib.core.utils.startAppSettingsConfig
@@ -46,8 +47,6 @@ import io.sentry.SentryLevel
 class DrivePermissions {
 
     companion object {
-        private const val SHARED_PREFS = "HINT_BATTERY_OPTIMIZATIONS"
-        private const val FLAG_SHOW_BATTERY_OPTIMIZATION_DIALOG = "showBatteryOptimizationDialog"
         val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_MEDIA_LOCATION)
         } else {
@@ -100,9 +99,10 @@ class DrivePermissions {
      * @return [Boolean] true if the sync has all permissions or false
      */
     fun checkSyncPermissions(requestPermission: Boolean = true): Boolean {
-        if (mustShowBatteryOptimizationDialog(activity) || !activity.batteryLifePermission(false)) {
-            BackgroundSyncPermissionsBottomSheetDialog().show(activity.supportFragmentManager, "syncPermissionsDialog")
+        if (activity.mustShowBatteryOptimizationDialog() || !checkBatteryLifePermission(false)) {
+            BackgroundSyncPermissionsBottomSheetDialog(this).show(activity.supportFragmentManager, "syncPermissionsDialog")
         }
+
         return checkWriteStoragePermission(requestPermission)
     }
 
@@ -124,46 +124,40 @@ class DrivePermissions {
     /**
      * Checks if the user has already confirmed battery optimization's disabling permission
      */
-    fun checkBatteryLifePermission(requestPermission: Boolean = true) = activity.batteryLifePermission(requestPermission)
+    fun checkBatteryLifePermission(requestPermission: Boolean): Boolean {
+        activity.let {
+            val powerManager = it.getSystemService(Context.POWER_SERVICE) as PowerManager?
 
-    @SuppressLint("BatteryLife")
-    private fun Context.batteryLifePermission(requestPermission: Boolean): Boolean {
-        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager?
-        return when {
-            Build.VERSION.SDK_INT < Build.VERSION_CODES.M -> true
-            powerManager?.isIgnoringBatteryOptimizations(packageName) != false -> true
-            else -> {
-                if (requestPermission) {
-                    val intent = Intent(
-                        Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                        Uri.parse("package:$packageName")
-                    )
-
-                    try {
-                        batteryPermissionResultLauncher.launch(intent)
-                    } catch (activityNotFoundException: ActivityNotFoundException) {
-                        try {
-                            batteryPermissionResultLauncher.launch(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
-                        } catch (exception: Exception) {
-                            Sentry.withScope { scope ->
-                                scope.level = SentryLevel.WARNING
-                                Sentry.captureException(exception)
-                            }
-                        }
-                    }
+            return when {
+                Build.VERSION.SDK_INT < Build.VERSION_CODES.M -> true
+                powerManager?.isIgnoringBatteryOptimizations(it.packageName) != false -> true
+                else -> {
+                    if (requestPermission) it.requestBatteryOptimizationPermission()
+                    false
                 }
-                false
             }
         }
     }
 
-    private fun mustShowBatteryOptimizationDialog(context: Context): Boolean {
-        val sharedPrefs = context.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE)
-        return sharedPrefs.getBoolean(FLAG_SHOW_BATTERY_OPTIMIZATION_DIALOG, true)
-    }
+    @SuppressLint("BatteryLife")
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun Context.requestBatteryOptimizationPermission() {
+        val intent = Intent(
+            Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+            Uri.parse("package:$packageName")
+        )
 
-    fun updateShowBatteryOptimizationDialog(mustShowBatteryDialog: Boolean) {
-        val editableSharedPrefs = activity.getSharedPreferences(SHARED_PREFS, MODE_PRIVATE).edit()
-        editableSharedPrefs.putBoolean(FLAG_SHOW_BATTERY_OPTIMIZATION_DIALOG, mustShowBatteryDialog).apply()
+        try {
+            batteryPermissionResultLauncher.launch(intent)
+        } catch (activityNotFoundException: ActivityNotFoundException) {
+            try {
+                batteryPermissionResultLauncher.launch(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+            } catch (exception: Exception) {
+                Sentry.withScope { scope ->
+                    scope.level = SentryLevel.WARNING
+                    Sentry.captureException(exception)
+                }
+            }
+        }
     }
 }
