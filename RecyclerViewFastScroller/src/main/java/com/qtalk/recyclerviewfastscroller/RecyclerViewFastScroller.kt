@@ -42,12 +42,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.Runnable
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -89,6 +84,8 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
         private const val TAG: String = "RVFastScroller"
         private const val ERROR_MESSAGE_NO_RECYCLER_VIEW =
             "The RecyclerView required for initialization with FastScroller cannot be null"
+
+        data class Padding(var top: Int = 0, var bottom: Int = 0, var left: Int = 0, var right: Int = 0)
     }
 
     enum class FastScrollDirection(val value: Int) {
@@ -320,7 +317,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
             }
 
             // align added layouts based on configurations in use.
-//            alignTrackAndHandle()
+            alignTrackAndHandle()
             alignPopupLayout()
 
             // if not defined, set default popupTextView background
@@ -380,6 +377,14 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
     override fun onDetachedFromWindow() {
         detachFastScrollerFromRecyclerView()
         super.onDetachedFromWindow()
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+
+        Log.e("gibran", "onAttachedToWindow: called");
+//        recyclerView.addOnScrollListener(onScrollListener)
+        initImpl()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -490,7 +495,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                         }
                         if (handleVisibilityDuration > 0) {
                             hideHandleJob?.cancel()
-                            
+
                             hideHandleJob = CoroutineScope(Dispatchers.Main).launch {
                                 delay(handleVisibilityDuration.toLong())
                                 handleImageView.animateVisibility(false)
@@ -543,11 +548,17 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
         popupTextView.layoutParams = lpPopupLayout
     }
 
+    fun View.getPaddings(): Padding {
+        return Padding(paddingTop, paddingBottom, paddingLeft, paddingRight)
+    }
+
     private fun alignTrackAndHandle() {
-        val padding = resources.getDimensionPixelOffset(R.dimen.default_handle_padding)
+//        val padding = resources.getDimensionPixelOffset(R.dimen.default_handle_padding)
+        val padding = handleImageView.getPaddings()
+
         when (fastScrollDirection) {
             FastScrollDirection.HORIZONTAL -> {
-                handleImageView.setPadding(0, padding, 0, padding)
+                handleImageView.setPadding(0, padding.top, 0, padding.bottom)
                 popupTextView.layoutParams = LayoutParams(
                     LayoutParams.WRAP_CONTENT,
                     LayoutParams.WRAP_CONTENT
@@ -558,7 +569,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                 ).also { it.addRule(ALIGN_PARENT_BOTTOM) }
             }
             FastScrollDirection.VERTICAL -> {
-                handleImageView.setPadding(padding, 0, padding, 0)
+                handleImageView.setPadding(padding.left, 0, padding.right, 0)
                 popupTextView.layoutParams = LayoutParams(
                     LayoutParams.WRAP_CONTENT,
                     LayoutParams.WRAP_CONTENT
@@ -959,7 +970,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
     @Keep
     fun attachFastScrollerToRecyclerView(recyclerView: RecyclerView) {
         this.recyclerView = recyclerView
-        initImpl()
+//        initImpl()
     }
 
     /**
