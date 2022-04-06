@@ -119,7 +119,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         lifecycleScope.launchWhenResumed {
             setup(homeViewPager, tabsHomeGroup, tabsHome) { UiSettings(requireContext()).lastHomeSelectedTab = it }
-            homeViewPager.currentItem = UiSettings(requireContext()).lastHomeSelectedTab
+            homeViewPager.setCurrentItem(UiSettings(requireContext()).lastHomeSelectedTab, false)
         }
 
         // This line is required to be able to scroll down with the fast scrollbar in the home view
