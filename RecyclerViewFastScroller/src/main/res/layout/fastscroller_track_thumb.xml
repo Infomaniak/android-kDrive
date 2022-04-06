@@ -19,7 +19,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/handleimage"
-            android:paddingLeft="4dp"
-            tools:srcCompat="@drawable/custom_bg_primary"></ImageView>
+            tools:layout_width="28dp"
+            tools:layout_height="32dp"
+            tools:srcCompat="@drawable/custom_bg_primary" />
     </LinearLayout>
 </merge>

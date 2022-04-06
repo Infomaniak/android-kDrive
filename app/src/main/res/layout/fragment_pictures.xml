@@ -31,8 +31,8 @@
         app:popupDrawable="@drawable/pictures_fast_scrollbar_popup"
         app:handleVisibilityDuration="1000"
         app:popupTextStyle="@style/Subtitle2"
-        app:handleWidth="45dp"
-        app:handleHeight="45dp">
+        app:handleWidth="28dp"
+        app:handleHeight="32dp">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/picturesRecyclerView"

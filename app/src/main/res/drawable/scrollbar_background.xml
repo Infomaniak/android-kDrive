@@ -28,14 +28,13 @@
 <!--    </group>-->
 <!--</vector>-->
 
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:drawable="@drawable/scrollbar_background"
-        android:gravity="top" />
-    <item
-        android:bottom="8dp"
-        android:drawable="@drawable/ic_scrollbar_union"
-        android:left="8dp"
-        android:right="8dp"
-        android:top="8dp" />
-</layer-list>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners
+        android:bottomLeftRadius="8dp"
+        android:topLeftRadius="8dp" />
+    <solid android:color="@color/backgroundCardview" />
+    <size
+        android:width="28dp"
+        android:height="32dp" />
+</shape>
