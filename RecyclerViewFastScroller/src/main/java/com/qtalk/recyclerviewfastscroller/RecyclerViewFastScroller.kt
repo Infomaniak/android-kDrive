@@ -201,7 +201,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
     var fastScrollDirection: FastScrollDirection = Defaults.fastScrollDirection
         set(value) {
             field = value
-            alignTrackAndHandle()
+//            alignTrackAndHandle()
         }
 
     var handleWidth: Int = LayoutParams.WRAP_CONTENT
@@ -320,7 +320,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
             }
 
             // align added layouts based on configurations in use.
-            alignTrackAndHandle()
+//            alignTrackAndHandle()
             alignPopupLayout()
 
             // if not defined, set default popupTextView background
@@ -867,7 +867,6 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
 
     private fun registerDataObserver() {
         if (recyclerView.adapter?.hasObservers() != true) {
-            Log.e("gibran", "registerDataObserver: registering observer !!", );
             recyclerView.adapter?.registerAdapterDataObserver(adapterDataObserver.value)
         }
     }
@@ -914,7 +913,6 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
     }
 
     private fun initImpl() {
-        Log.e("gibran", "initImpl: ", );
         if (hasEmptyItemDecorator) {
             setEmptySpaceItemDecorator()
         }
@@ -965,7 +963,6 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
     fun detachFastScrollerFromRecyclerView() {
         // unregister the observer to prevent memory leaks only if initialized
         if (adapterDataObserver.isInitialized()) {
-            Log.e("gibran", "detachFastScrollerFromRecyclerView: now detaching observer", );
             recyclerView.adapter?.unregisterAdapterDataObserver(adapterDataObserver.value)
         }
         handleImageView.setOnTouchListener(null)

@@ -29,8 +29,9 @@
         android:layout_height="match_parent"
         app:handleDrawable="@drawable/pictures_fast_scrollbar_thumb"
         app:popupDrawable="@drawable/pictures_fast_scrollbar_popup"
-        app:popupTextStyle="@style/ScrollbarTextStyle"
-        app:handleWidth="20dp"
+        app:handleVisibilityDuration="1000"
+        app:popupTextStyle="@style/Subtitle2"
+        app:handleWidth="45dp"
         app:handleHeight="45dp">
 
         <androidx.recyclerview.widget.RecyclerView

@@ -18,11 +18,15 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:gravity="top">
         <shape android:shape="rectangle">
-            <corners android:radius="100dp" />
-            <solid android:color="@color/accent" />
+            <corners
+                android:bottomLeftRadius="100dp"
+                android:topLeftRadius="100dp" />
+            <solid android:color="@color/backgroundCardview" />
             <size
-                android:width="10dp"
-                android:height="35dp" />
+                android:width="50dp"
+                android:height="50dp" />
         </shape>
+    </item>
+    <item android:drawable="@drawable/ic_keyboard_arrow_down">
     </item>
 </layer-list>
