@@ -1,2 +1,2 @@
-include ':app', ':Core', ':RecyclerViewFastScroller'
+include ':app', ':Core'
 rootProject.name = "kDrive"

@@ -15,7 +15,7 @@
  */
 @file:Suppress("unused", "MemberVisibilityCanBePrivate")
 
-package com.qtalk.recyclerviewfastscroller
+package com.infomaniak.drive.ui.menu
 
 import android.animation.Animator
 import android.annotation.SuppressLint
@@ -42,6 +42,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.infomaniak.drive.R
 import kotlinx.coroutines.*
 import kotlin.math.max
 import kotlin.math.min
@@ -117,10 +118,10 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
 
     // defaults to be used throughout this class. All these values can be overriden in the individual methods provided for the main class
     private object Defaults {
-        val popupDrawableInt: Int = R.drawable.custom_bg_primary
-        val handleDrawableInt: Int = R.drawable.custom_bg_primary
-        val handleSize: Int = R.dimen.default_handle_size
-        val textStyle: Int = R.style.FastScrollerTextAppearance
+        val popupDrawableInt: Int = R.drawable.pictures_fast_scrollbar_popup
+        val handleDrawableInt: Int = R.drawable.pictures_fast_scrollbar_thumb
+        val handleSize: Int = R.dimen.defaultHandleSize
+        val textStyle: Int = R.style.FastScrollerDefaultTextAppearance
         val popupPosition: PopupPosition = PopupPosition.BEFORE_TRACK
         val fastScrollDirection: FastScrollDirection = FastScrollDirection.VERTICAL
         const val isFixedSizeHandle: Boolean = false
@@ -409,10 +410,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                 trackView.getLocationInWindow(locationArray)
                 val (xAbsPosition, yAbsPosition) = Pair(locationArray[0], locationArray[1])
 
-                val touchAction = motionEvent.action.and(motionEvent.actionMasked)
-                log("Touch Action: $touchAction")
-
-                when (touchAction) {
+                when (motionEvent.action.and(motionEvent.actionMasked)) {
                     MotionEvent.ACTION_MOVE, MotionEvent.ACTION_DOWN -> {
 
                         // disallow parent to spy on touch events
@@ -1055,11 +1053,5 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
          * Called when the handled is released, this marks the end of the fast scroll operation.
          * */
         fun onReleased() {}
-    }
-
-    private fun log(message: String = "") {
-        if (BuildConfig.DEBUG) {
-            Log.d(TAG, message)
-        }
     }
 }

@@ -23,7 +23,7 @@
     android:orientation="vertical"
     tools:context=".ui.menu.PicturesFragment">
 
-    <com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller
+    <com.infomaniak.drive.ui.menu.RecyclerViewFastScroller
         android:id="@+id/pictureFastScroller"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -31,8 +31,8 @@
         app:popupDrawable="@drawable/pictures_fast_scrollbar_popup"
         app:handleVisibilityDuration="1000"
         app:popupTextStyle="@style/Subtitle2"
-        app:handleWidth="28dp"
-        app:handleHeight="32dp">
+        app:handleWidth="35dp"
+        app:handleHeight="40dp">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/picturesRecyclerView"
@@ -42,7 +42,7 @@
             android:paddingBottom="@dimen/recyclerViewPaddingBottom"
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager" />
 
-    </com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller>
+    </com.infomaniak.drive.ui.menu.RecyclerViewFastScroller>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
