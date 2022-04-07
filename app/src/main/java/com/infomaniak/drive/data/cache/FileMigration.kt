@@ -18,6 +18,8 @@
 package com.infomaniak.drive.data.cache
 
 import androidx.core.os.bundleOf
+import com.infomaniak.drive.data.models.DropBox
+import com.infomaniak.drive.data.models.DropBox.*
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.Rights
@@ -32,7 +34,7 @@ import java.util.*
 
 class FileMigration : RealmMigration {
     companion object {
-        const val bddVersion = 3L // Must be bumped when the schema changes
+        const val bddVersion = 4L // Must be bumped when the schema changes
 
         const val LOGOUT_CURRENT_USER_TAG = "logout_current_user_tag"
     }
@@ -127,6 +129,42 @@ class FileMigration : RealmMigration {
             }
             oldVersionTemp++
         }
+
+        //region Migrated to version 4:
+        // - Add new field (Dropbox) in File table
+
+        if (oldVersionTemp == 3L) {
+            // Dropbox migration
+            val dropboxValiditySchema = schema.create(DropBoxValidity::class.java.simpleName).apply {
+                addField(DropBoxValidity::date.name, Date::class.java)
+                addField(DropBoxValidity::hasExpired.name, Boolean::class.java)
+            }
+            val dropboxSizeSchema = schema.create(DropBoxSize::class.java.simpleName).apply {
+                addField(DropBoxSize::limit.name, Long::class.java)
+                addField(DropBoxSize::remaining.name, Int::class.java)
+            }
+            val dropboxCapabilitiesSchema = schema.create(DropBoxCapabilities::class.java.simpleName).apply {
+                addField(DropBoxCapabilities::hasPassword.name, Boolean::class.java, FieldAttribute.REQUIRED)
+                addField(DropBoxCapabilities::hasNotification.name, Boolean::class.java, FieldAttribute.REQUIRED)
+                addField(DropBoxCapabilities::hasValidity.name, Boolean::class.java, FieldAttribute.REQUIRED)
+                addField(DropBoxCapabilities::hasSizeLimit.name, Boolean::class.java, FieldAttribute.REQUIRED)
+                addRealmObjectField(DropBoxCapabilities::validity.name, dropboxValiditySchema)
+                addRealmObjectField(DropBoxCapabilities::size.name, dropboxSizeSchema)
+            }
+            val dropboxSchema = schema.create(DropBox::class.java.simpleName).apply {
+                addField(DropBox::id.name, Int::class.java, FieldAttribute.REQUIRED)
+                addField(DropBox::name.name, String::class.java, FieldAttribute.REQUIRED)
+                addRealmObjectField(DropBox::capabilities.name, dropboxCapabilitiesSchema)
+                addField(DropBox::url.name, String::class.java, FieldAttribute.REQUIRED)
+                addField(DropBox::uuid.name, String::class.java, FieldAttribute.REQUIRED)
+                addField(DropBox::createdAt.name, Date::class.java)
+                addField(DropBox::createdBy.name, Int::class.java, FieldAttribute.REQUIRED)
+                addField(DropBox::lastUploadedAt.name, Long::class.java)
+                addField(DropBox::collaborativeUsersCount.name, Int::class.java, FieldAttribute.REQUIRED)
+                addField(DropBox::updatedAt.name, Date::class.java)
+            }
+        }
+        //endregion
     }
 
     override fun equals(other: Any?): Boolean {
