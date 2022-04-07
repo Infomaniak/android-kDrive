@@ -117,7 +117,7 @@ class FileShareDetailsFragment : Fragment() {
 
         mainViewModel.getFileShare(file.id).observe(viewLifecycleOwner) { (_, data) ->
             data?.let { share ->
-                val itemList = if (share.canUseTeam) allUserList + allTeams else allUserList
+                val itemList = if (file.rights?.canUseTeam == true) allUserList + allTeams else allUserList
                 fileShareViewModel.availableShareableItems.value = ArrayList(itemList)
 
                 share.teams.sort()
@@ -190,7 +190,7 @@ class FileShareDetailsFragment : Fragment() {
     private fun setupShareLink(shareLink: ShareLink? = null) {
         when {
             file.isDropBox() -> setupDropBoxShareLink()
-            file.rights?.canBecomeLink == true || file.shareLink?.isNotBlank() == true -> setupNormalShareLink(shareLink)
+            file.rights?.canBecomeShareLink == true || file.shareLink?.isNotBlank() == true -> setupNormalShareLink(shareLink)
             else -> hideShareLinkView()
         }
     }

@@ -152,7 +152,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         val apiResponse = ApiRepository.deleteFileShareLink(file)
         if (apiResponse.isSuccess()) FileController.updateFile(file.id) {
             it.shareLink = null
-            it.rights?.canBecomeLink = true
+            it.rights?.canBecomeShareLink = true
         }
         emit(apiResponse)
     }

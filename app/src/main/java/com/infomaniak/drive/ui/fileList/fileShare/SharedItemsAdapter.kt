@@ -48,7 +48,7 @@ class SharedItemsAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = itemList[position]
         holder.itemView.apply {
-            if (item.id != file.createdBy && file.rights?.share == true) {
+            if (item.id != file.createdBy && file.rights?.canShare == true) {
                 setOnClickListener { onItemClicked(item) }
                 chevron.isVisible = true
             } else {
@@ -101,7 +101,7 @@ class SharedItemsAdapter(
             isVisible = true
         }
 
-        if (invitation.id != file.createdBy && file.rights?.share == true) {
+        if (invitation.id != file.createdBy && file.rights?.canShare == true) {
             setOnClickListener { onItemClicked(invitation) }
         }
     }

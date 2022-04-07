@@ -198,7 +198,7 @@ class MainActivity : BaseActivity() {
     private fun setupMainFab(navController: NavController) {
         mainFab.setOnClickListener { navController.navigate(R.id.addFileBottomSheetDialog) }
         mainViewModel.currentFolder.observe(this) { file ->
-            mainFab.isEnabled = file?.rights?.newFile == true
+            mainFab.isEnabled = file?.rights?.canCreateFile == true
         }
     }
 

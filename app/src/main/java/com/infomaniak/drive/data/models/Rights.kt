@@ -26,22 +26,23 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 @RealmClass(embedded = true)
 open class Rights(
-    @SerializedName("can_become_collab") var canBecomeCollab: Boolean = false,
-    @SerializedName("can_become_link") var canBecomeLink: Boolean = false,
-    @SerializedName("can_favorite") var canFavorite: Boolean = false,
-    var delete: Boolean = false,
-    var leave: Boolean = false,
-    var move: Boolean = false,
-    @SerializedName("move_into") var moveInto: Boolean = false,
-    @SerializedName("new_file") var newFile: Boolean = false,
-    @SerializedName("new_folder") var newFolder: Boolean = false,
-    var read: Boolean = false,
-    var rename: Boolean = false,
+    @SerializedName("can_become_dropbox") var canBecomeDropbox: Boolean = false,
+    @SerializedName("can_become_sharelink") var canBecomeShareLink: Boolean = false,
+    @SerializedName("can_create_directory") var canCreateDirectory: Boolean = false,
+    @SerializedName("can_create_file") var canCreateFile: Boolean = false,
+    @SerializedName("can_delete") var canDelete: Boolean = false,
+    @SerializedName("can_leave") var canLeave: Boolean = false,
+    @SerializedName("can_move") var canMove: Boolean = false,
+    @SerializedName("can_move_into") var canMoveInto: Boolean = false,
+    @SerializedName("can_read") var canRead: Boolean = false,
+    @SerializedName("can_rename") var canRename: Boolean = false,
+    @SerializedName("can_share") var canShare: Boolean = false,
+    @SerializedName("can_show") var canShow: Boolean = false,
+    @SerializedName("can_upload") var canUpload: Boolean = false,
+    @SerializedName("can_use_favorite") var canUseFavorite: Boolean = false,
+    @SerializedName("can_use_team") var canUseTeam: Boolean = false,
+    @SerializedName("can_write") var canWrite: Boolean = false,
     var right: String = "",
-    var share: Boolean = false,
-    var show: Boolean = false,
-    @SerializedName("upload_new_file") var uploadNewFile: Boolean = false,
-    var write: Boolean = false,
 ) : RealmObject(), Parcelable {
 
     enum class Right(val value: String) {

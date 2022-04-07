@@ -163,7 +163,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
     }
 
     private fun setupShareButton() {
-        if (file.rights?.share == true) {
+        if (file.rights?.canShare == true) {
             shareButton.isVisible = true
             shareButton.setOnClickListener {
                 parentFragment?.safeNavigate(
@@ -185,7 +185,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
     private fun setupShareLink(share: Share?) {
         when {
             file.isDropBox() -> setupDropBoxShareLink()
-            file.rights?.canBecomeLink == true || file.shareLink?.isNotBlank() == true -> setupNormalShareLink(share)
+            file.rights?.canBecomeShareLink == true || file.shareLink?.isNotBlank() == true -> setupNormalShareLink(share)
             else -> hideShareLinkView()
         }
     }

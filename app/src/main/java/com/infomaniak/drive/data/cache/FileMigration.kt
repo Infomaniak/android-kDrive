@@ -174,6 +174,26 @@ class FileMigration : RealmMigration {
                 addField(FileVersion::totalSize.name, Long::class.java, FieldAttribute.REQUIRED)
             }
 
+            // Rights migration
+            schema.get(Rights::class.java.simpleName)?.apply {
+                renameField("show", Rights::canShow.name)
+                renameField("read", Rights::canRead.name)
+                renameField("write", Rights::canWrite.name)
+                renameField("share", Rights::canShare.name)
+                renameField("leave", Rights::canLeave.name)
+                renameField("delete", Rights::canDelete.name)
+                renameField("rename", Rights::canRename.name)
+                renameField("move", Rights::canMove.name)
+                renameField("newFolder", Rights::canCreateDirectory.name)
+                renameField("newFile", Rights::canCreateFile.name)
+                renameField("uploadNewFile", Rights::canUpload.name)
+                renameField("moveInto", Rights::canMoveInto.name)
+                renameField("canBecomeCollab", Rights::canBecomeDropbox.name)
+                renameField("canBecomeLink", Rights::canBecomeShareLink.name)
+                renameField("canFavorite", Rights::canUseFavorite.name)
+                addField(Rights::canUseTeam.name, Boolean::class.java, FieldAttribute.REQUIRED)
+            }
+
             // File migration
             schema.get(File::class.java.simpleName)?.apply {
                 addRealmObjectField(File::dropBox.name, dropboxSchema)

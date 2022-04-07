@@ -109,12 +109,12 @@ class FileInfoActionsView @JvmOverloads constructor(
                 displayInfo.isEnabled = isOnline
                 disabledInfo.isGone = isOnline
 
-                (rights?.share == true && isOnline).let { rightsEnabled ->
+                (rights?.canShare == true && isOnline).let { rightsEnabled ->
                     fileRights.isEnabled = rightsEnabled
                     disabledFileRights.isGone = rightsEnabled
                 }
 
-                (rights?.canBecomeLink == true && isOnline || currentFile.shareLink != null || !file.collaborativeFolder.isNullOrBlank()).let { publicLinkEnabled ->
+                (rights?.canBecomeShareLink == true && isOnline || currentFile.shareLink != null || !file.collaborativeFolder.isNullOrBlank()).let { publicLinkEnabled ->
                     copyPublicLink.isEnabled = publicLinkEnabled
                     disabledPublicLink.isGone = publicLinkEnabled
                     if (!file.collaborativeFolder.isNullOrBlank()) {
@@ -122,28 +122,28 @@ class FileInfoActionsView @JvmOverloads constructor(
                     }
                 }
 
-                ((file.isFolder() && rights?.newFile == true && rights.newFolder) || !file.isFolder()).let { sendCopyEnabled ->
+                ((file.isFolder() && rights?.canCreateFile == true && rights.canCreateDirectory) || !file.isFolder()).let { sendCopyEnabled ->
                     sendCopy.isEnabled = sendCopyEnabled
                     disabledSendCopy.isGone = sendCopyEnabled
                 }
 
-                addFavorites.isVisible = rights?.canFavorite == true
+                addFavorites.isVisible = rights?.canUseFavorite == true
                 availableOffline.isGone = isSharedWithMe || currentFile.getOfflineFile(context) == null
-                deleteFile.isVisible = rights?.delete == true
-                downloadFile.isVisible = rights?.read == true
-                duplicateFile.isGone = rights?.read == false
+                deleteFile.isVisible = rights?.canDelete == true
+                downloadFile.isVisible = rights?.canRead == true
+                duplicateFile.isGone = rights?.canRead == false
                         || isSharedWithMe
                         || currentFile.getVisibilityType() == IS_TEAM_SPACE
                         || currentFile.getVisibilityType() == IS_SHARED_SPACE
-                editDocument.isVisible = (currentFile.onlyoffice && rights?.write == true)
+                editDocument.isVisible = (currentFile.hasOnlyoffice && rights?.canWrite == true)
                         || (currentFile.onlyofficeConvertExtension != null)
-                leaveShare.isVisible = rights?.leave == true
-                moveFile.isVisible = rights?.move == true && !isSharedWithMe
-                renameFile.isVisible = rights?.rename == true && !isSharedWithMe
+                leaveShare.isVisible = rights?.canLeave == true
+                moveFile.isVisible = rights?.canMove == true && !isSharedWithMe
+                renameFile.isVisible = rights?.canRename == true && !isSharedWithMe
                 goToFolder.isVisible = isGoToFolderVisible()
             }
 
-            if (currentFile.isDropBox() || currentFile.rights?.canBecomeCollab == true) {
+            if (currentFile.isDropBox() || currentFile.rights?.canBecomeDropbox == true) {
                 dropBoxText.text = context.getString(
                     if (currentFile.isDropBox()) R.string.buttonManageDropBox else R.string.buttonConvertToDropBox
                 )
