@@ -19,6 +19,7 @@ package com.infomaniak.drive.data.models
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import com.infomaniak.drive.data.models.file.dropbox.DropBoxCapabilities
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
 import kotlinx.android.parcel.Parcelize
@@ -26,17 +27,17 @@ import java.util.*
 
 @Parcelize
 @RealmClass(embedded = true)
-data class DropBox(
+open class DropBox(
     var id: Int = -1,
-    val name: String = "",
+    var name: String = "",
     var capabilities: DropBoxCapabilities? = null,
     var url: String = "",
     var uuid: String = "",
-    @SerializedName("created_at") val createdAt: Date? = null,
-    @SerializedName("created_by") val createdBy: Int = -1,
-    @SerializedName("last_uploaded_at") val lastUploadedAt: Long? = null,
-    @SerializedName("nb_users") val collaborativeUsersCount: Int,
-    @SerializedName("updated_at") val updatedAt: Date? = null,
+    @SerializedName("created_at") var createdAt: Date? = null,
+    @SerializedName("created_by") var createdBy: Int = -1,
+    @SerializedName("last_uploaded_at") var lastUploadedAt: Long? = null,
+    @SerializedName("nb_users") var collaborativeUsersCount: Int = 0,
+    @SerializedName("updated_at") var updatedAt: Date? = null,
 ) : RealmObject(), Parcelable {
 
     inline val hasNotification: Boolean get() = capabilities?.hasNotification == true //when someone upload a file
@@ -62,28 +63,4 @@ data class DropBox(
         newValidUntil = validUntil
     }
 
-    @Parcelize
-    @RealmClass(embedded = true)
-    open class DropBoxCapabilities(
-        @SerializedName("has_password") val hasPassword: Boolean,
-        @SerializedName("has_notification") val hasNotification: Boolean,
-        @SerializedName("has_validity") val hasValidity: Boolean,
-        @SerializedName("has_size_limit") val hasSizeLimit: Boolean,
-        var validity: DropBoxValidity?,
-        var size: DropBoxSize?,
-    ) : RealmObject(), Parcelable
-
-    @Parcelize
-    @RealmClass(embedded = true)
-    open class DropBoxValidity(
-        var date: Date? = null,
-        @SerializedName("has_expired") var hasExpired: Boolean? = null,
-    ) : RealmObject(), Parcelable
-
-    @Parcelize
-    @RealmClass(embedded = true)
-    open class DropBoxSize(
-        var limit: Long? = null,
-        var remaining: Int? = null,
-    ) : RealmObject(), Parcelable
 }

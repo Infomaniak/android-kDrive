@@ -19,10 +19,12 @@ package com.infomaniak.drive.data.cache
 
 import androidx.core.os.bundleOf
 import com.infomaniak.drive.data.models.DropBox
-import com.infomaniak.drive.data.models.DropBox.*
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.Rights
+import com.infomaniak.drive.data.models.file.dropbox.DropBoxCapabilities
+import com.infomaniak.drive.data.models.file.dropbox.DropBoxSize
+import com.infomaniak.drive.data.models.file.dropbox.DropBoxValidity
 import com.infomaniak.drive.utils.AccountUtils
 import io.realm.DynamicRealm
 import io.realm.FieldAttribute
