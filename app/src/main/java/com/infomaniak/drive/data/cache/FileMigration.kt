@@ -22,6 +22,7 @@ import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.Rights
+import com.infomaniak.drive.data.models.file.FileVersion
 import com.infomaniak.drive.data.models.file.dropbox.DropBoxCapabilities
 import com.infomaniak.drive.data.models.file.dropbox.DropBoxSize
 import com.infomaniak.drive.data.models.file.dropbox.DropBoxValidity
@@ -164,6 +165,13 @@ class FileMigration : RealmMigration {
                 addField(DropBox::lastUploadedAt.name, Long::class.java)
                 addField(DropBox::collaborativeUsersCount.name, Int::class.java, FieldAttribute.REQUIRED)
                 addField(DropBox::updatedAt.name, Date::class.java)
+            }
+
+            // FileVersion migration
+            val fileVersionSchema = schema.create(FileVersion::class.java.simpleName).apply {
+                addField(FileVersion::isMultiple.name, Boolean::class.java, FieldAttribute.REQUIRED)
+                addField(FileVersion::number.name, Int::class.java, FieldAttribute.REQUIRED)
+                addField(FileVersion::totalSize.name, Long::class.java, FieldAttribute.REQUIRED)
             }
         }
         //endregion
