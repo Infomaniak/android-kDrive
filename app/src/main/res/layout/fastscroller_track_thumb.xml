@@ -33,9 +33,11 @@
             android:id="@+id/thumbIV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:layout_width="28dp"
+            android:clipToPadding="false"
+            android:elevation="10dp"
+            android:src="@drawable/pictures_fast_scrollbar_thumb"
+            tools:ignore="ContentDescription"
             tools:layout_height="32dp"
-            tools:background="@drawable/pictures_fast_scrollbar_thumb"
-            tools:ignore="ContentDescription" />
+            tools:layout_width="28dp" />
     </LinearLayout>
 </merge>

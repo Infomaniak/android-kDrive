@@ -157,9 +157,9 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
      **/
     var handleDrawable: Drawable?
         set(value) {
-            handleImageView.setImageDrawable(requireNotNull(value) { "No drawable found for the given ID" })
+            handleImageView.background = value
         }
-        get() = handleImageView.drawable
+        get() = handleImageView.background
 
     /**
      * Sets a style to the [TextView] used in the popup displayed
@@ -200,7 +200,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
     var fastScrollDirection: FastScrollDirection = Defaults.fastScrollDirection
         set(value) {
             field = value
-//            alignTrackAndHandle()
+            alignTrackAndHandle()
         }
 
     var handleWidth: Int = LayoutParams.WRAP_CONTENT
@@ -432,12 +432,12 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                             if (disableTrackTouch) {
                                 when (fastScrollDirection) {
                                     FastScrollDirection.HORIZONTAL -> {
-                                        val handleRange = handlePosition[0].toFloat() .. handlePosition[0]+handleLength
+                                        val handleRange = handlePosition[0].toFloat()..handlePosition[0] + handleLength
                                         if (!handleRange.contains(motionEvent.rawX))
                                             return@OnTouchListener false
                                     }
                                     FastScrollDirection.VERTICAL -> {
-                                        val handleRange = handlePosition[1].toFloat() .. handlePosition[1]+handleLength
+                                        val handleRange = handlePosition[1].toFloat()..handlePosition[1] + handleLength
                                         if (!handleRange.contains(motionEvent.rawY))
                                             return@OnTouchListener false
                                     }
