@@ -173,6 +173,15 @@ class FileMigration : RealmMigration {
                 addField(FileVersion::number.name, Int::class.java, FieldAttribute.REQUIRED)
                 addField(FileVersion::totalSize.name, Long::class.java, FieldAttribute.REQUIRED)
             }
+
+            // File migration
+            schema.get(File::class.java.simpleName)?.apply {
+                addRealmObjectField(File::dropBox.name, dropboxSchema)
+                addRealmObjectField(File::version.name, fileVersionSchema)
+            }
+
+            schema.get(DropBox::class.java.simpleName)?.isEmbedded = true
+            schema.get(FileVersion::class.java.simpleName)?.isEmbedded = true
         }
         //endregion
     }
