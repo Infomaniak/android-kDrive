@@ -284,10 +284,14 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             ViewCompat.setOnApplyWindowInsetsListener(this) { _, windowInsets ->
                 with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
                     header?.setMargin(top = top, right = right, left = left)
-                    bottomSheetBehavior.peekHeight = getDefaultPeekHeight() + bottom
-                    bottomSheetBehavior.expandedOffset = max(top, height - bottomSheetFileInfos.height)
+                    val topOffset = max(top, height - bottomSheetFileInfos.height)
+                    bottomSheetBehavior.apply {
+                        peekHeight = getDefaultPeekHeight() + bottom
+                        expandedOffset = topOffset
+                        maxHeight = height - topOffset
+                    }
                     /* Add padding to the bottom to allow the last element of the list to be displayed right over the
-                     android navigation bar, bottom makes the element half hidden under nav bar so we need top + bottom */
+                     android navigation bar */
                     bottomSheetFileInfos.setPadding(0, 0, 0, bottom)
                 }
 
