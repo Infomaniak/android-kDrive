@@ -48,5 +48,7 @@
         <attr name="trackMarginEnd" format="dimension" />
 
         <attr name="handleVisibilityDuration" format="integer" />
+
+        <attr name="disableTrackTouch" format="boolean"/>
     </declare-styleable>
 </resources>

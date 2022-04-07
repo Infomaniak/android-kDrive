@@ -31,6 +31,7 @@
         app:popupDrawable="@drawable/pictures_fast_scrollbar_popup"
         app:handleVisibilityDuration="1000"
         app:popupTextStyle="@style/Subtitle2"
+        app:disableTrackTouch="true"
         app:handleWidth="35dp"
         app:handleHeight="40dp">
 

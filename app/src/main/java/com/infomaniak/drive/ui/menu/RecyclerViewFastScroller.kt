@@ -131,6 +131,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
         const val hasEmptyItemDecorator: Boolean = true
         const val handleVisibilityDuration: Int = 0
         const val trackMargin: Int = 0
+        const val disableTrackTouch = false
     }
 
     /**
@@ -212,6 +213,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
             field = value
             refreshHandleImageViewSize()
         }
+    var disableTrackTouch: Boolean = Defaults.disableTrackTouch
 
     /**
      * The duration for which the handle should remain visible, defaults to -1 (don't hide)
@@ -362,6 +364,9 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                     Defaults.trackMargin
                 )
 
+            disableTrackTouch =
+                attribs.getBoolean(R.styleable.RecyclerViewFastScroller_disableTrackTouch, Defaults.disableTrackTouch)
+
             TextViewCompat.setTextAppearance(
                 popupTextView,
                 attribs.getResourceId(
@@ -419,6 +424,25 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                         if (motionEvent.action == MotionEvent.ACTION_DOWN) {
                             // prevents the handle from fading if we've started moving the scrollbar manually
                             hideHandleJob?.cancel()
+
+                            // disable the possibility to click on the track of the scrollbar
+                            val handlePosition = IntArray(2).also {
+                                handleImageView.getLocationOnScreen(it)
+                            }
+                            if (disableTrackTouch) {
+                                when (fastScrollDirection) {
+                                    FastScrollDirection.HORIZONTAL -> {
+                                        val handleRange = handlePosition[0].toFloat() .. handlePosition[0]+handleLength
+                                        if (!handleRange.contains(motionEvent.rawX))
+                                            return@OnTouchListener false
+                                    }
+                                    FastScrollDirection.VERTICAL -> {
+                                        val handleRange = handlePosition[1].toFloat() .. handlePosition[1]+handleLength
+                                        if (!handleRange.contains(motionEvent.rawY))
+                                            return@OnTouchListener false
+                                    }
+                                }
+                            }
 
                             if (!adapterDataObserver.isInitialized()) {
                                 registerDataObserver()
