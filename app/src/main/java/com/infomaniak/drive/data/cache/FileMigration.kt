@@ -180,6 +180,10 @@ class FileMigration : RealmMigration {
                 addRealmObjectField(File::version.name, fileVersionSchema)
             }
 
+            // Set embedded objects
+            schema.get(DropBoxValidity::class.java.simpleName)?.isEmbedded = true
+            schema.get(DropBoxSize::class.java.simpleName)?.isEmbedded = true
+            schema.get(DropBoxCapabilities::class.java.simpleName)?.isEmbedded = true
             schema.get(DropBox::class.java.simpleName)?.isEmbedded = true
             schema.get(FileVersion::class.java.simpleName)?.isEmbedded = true
         }
