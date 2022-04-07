@@ -19,42 +19,71 @@ package com.infomaniak.drive.data.models
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import io.realm.RealmObject
+import io.realm.annotations.RealmClass
 import kotlinx.android.parcel.Parcelize
 import java.util.*
 
 @Parcelize
+@RealmClass(embedded = true)
 data class DropBox(
-    val id: Int,
-    val url: String,
-    val uuid: String,
-    val alias: String,
-    val user: DriveUser,
-    val password: Boolean,
-    @SerializedName("created_by") val createdBy: Int,
-    @SerializedName("created_at") val createdAt: Date,
-    @SerializedName("updated_at") val updatedAt: Date?,
-    @SerializedName("valid_until") val validUntil: Date?,
-    @SerializedName("limit_remaining") val limitRemaining: Long?,
-    @SerializedName("limit_file_size") val limitFileSize: Long?,
-    @SerializedName("last_uploaded_at") val lastUploadedAt: Long?,
-    @SerializedName("email_when_finished") val emailWhenFinished: Boolean,
-    @SerializedName("collaborative_users_count") val collaborativeUsersCount: Int
-) : Parcelable {
+    var id: Int = -1,
+    val name: String = "",
+    var capabilities: DropBoxCapabilities? = null,
+    var url: String = "",
+    var uuid: String = "",
+    @SerializedName("created_at") val createdAt: Date? = null,
+    @SerializedName("created_by") val createdBy: Int = -1,
+    @SerializedName("last_uploaded_at") val lastUploadedAt: Long? = null,
+    @SerializedName("nb_users") val collaborativeUsersCount: Int,
+    @SerializedName("updated_at") val updatedAt: Date? = null,
+) : RealmObject(), Parcelable {
+
+    inline val hasNotification: Boolean get() = capabilities?.hasNotification == true //when someone upload a file
+    inline val hasPassword: Boolean get() = capabilities?.hasPassword == true
+    inline val limitFileSize: Long? get() = capabilities?.size?.limit
+    inline val validUntil: Date? get() = capabilities?.validity?.date
+
     /**
      * Local
      */
     var newPassword = false
     var newPasswordValue: String? = null
-    var newEmailWhenFinished = false
+    var newHasNotification = false
     var newLimitFileSize: Long? = null
     var withLimitFileSize = false
     var newValidUntil: Date? = null
 
     fun initLocalValue() {
-        newPassword = password
-        newEmailWhenFinished = emailWhenFinished
+        newPassword = hasPassword
+        newHasNotification = hasNotification
         newLimitFileSize = limitFileSize
         withLimitFileSize = limitFileSize != null
         newValidUntil = validUntil
     }
+
+    @Parcelize
+    @RealmClass(embedded = true)
+    open class DropBoxCapabilities(
+        @SerializedName("has_password") val hasPassword: Boolean,
+        @SerializedName("has_notification") val hasNotification: Boolean,
+        @SerializedName("has_validity") val hasValidity: Boolean,
+        @SerializedName("has_size_limit") val hasSizeLimit: Boolean,
+        var validity: DropBoxValidity?,
+        var size: DropBoxSize?,
+    ) : RealmObject(), Parcelable
+
+    @Parcelize
+    @RealmClass(embedded = true)
+    open class DropBoxValidity(
+        var date: Date? = null,
+        @SerializedName("has_expired") var hasExpired: Boolean? = null,
+    ) : RealmObject(), Parcelable
+
+    @Parcelize
+    @RealmClass(embedded = true)
+    open class DropBoxSize(
+        var limit: Long? = null,
+        var remaining: Int? = null,
+    ) : RealmObject(), Parcelable
 }

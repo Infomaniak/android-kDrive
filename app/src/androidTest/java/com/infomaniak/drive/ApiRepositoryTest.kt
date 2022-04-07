@@ -563,7 +563,7 @@ class ApiRepositoryTest : KDriveTest() {
 
             // Add a dropBox with default body and get its id
             val dropboxId = createDropBoxForTest(testFolder, maxSize).let {
-                assertTrue(it.emailWhenFinished, "Email when finished must be true")
+                assertTrue(it.hasNotification, "Email when finished must be true")
                 assertEquals(maxSize, it.limitFileSize, "Limit file size should be $maxSize")
                 it.id
             }
@@ -571,7 +571,7 @@ class ApiRepositoryTest : KDriveTest() {
             // Get the dropbox
             with(getDropBox(testFolder)) {
                 assertApiResponseData(this)
-                assertEquals(folderName, data!!.alias, "Dropbox name should be '$folderName'")
+                assertEquals(folderName, data!!.name, "Dropbox name should be '$folderName'")
                 assertEquals(dropboxId, data!!.id, "Dropbox id should be $dropboxId")
             }
         }
@@ -594,7 +594,7 @@ class ApiRepositoryTest : KDriveTest() {
 
             // Make sure the dropbox has been updated
             with(getDropBox(testFolder)) {
-                assertFalse(data?.emailWhenFinished ?: true, "Email when finished should be false")
+                assertFalse(data?.hasNotification ?: true, "Email when finished should be false")
                 assertEquals(maxSize * 2, data?.limitFileSize, "Limit file size should be ${maxSize * 2}")
             }
         }

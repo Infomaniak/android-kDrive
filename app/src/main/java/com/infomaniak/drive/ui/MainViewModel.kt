@@ -128,7 +128,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     fun updateDropBox(file: File, newDropBox: DropBox) = liveData(Dispatchers.IO) {
         val data = JsonObject().apply {
-            addProperty("email_when_finished", newDropBox.newEmailWhenFinished)
+            addProperty("email_when_finished", newDropBox.newHasNotification)
             addProperty("valid_until", newDropBox.newValidUntil?.time?.let { it / 1000 })
             addProperty("limit_file_size", newDropBox.newLimitFileSize)
             addProperty("with_limit_file_size", newDropBox.withLimitFileSize)

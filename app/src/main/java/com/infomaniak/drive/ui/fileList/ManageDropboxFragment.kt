@@ -110,7 +110,7 @@ open class ManageDropboxFragment : Fragment() {
 
             dropBox.limitFileSize?.let { size -> limitStorageValue.setText(Utils.convertBytesToGigaBytes(size).toString()) }
 
-            if (dropBox.password) {
+            if (dropBox.hasPassword) {
                 newPasswordButton.isVisible = true
                 needNewPassword = true
             }
@@ -130,10 +130,10 @@ open class ManageDropboxFragment : Fragment() {
 
     private fun setupSwitches(dropBox: DropBox) {
         with(dropBox) {
-            emailWhenFinishedSwitch.isChecked = emailWhenFinished
+            emailWhenFinishedSwitch.isChecked = hasNotification
             expirationDateSwitch.isChecked = validUntil != null
             limitStorageSwitch.isChecked = limitFileSize != null
-            passwordSwitch.isChecked = password
+            passwordSwitch.isChecked = hasPassword
         }
 
         if (expirationDateSwitch.isChecked) expirationDateInput.isVisible = true
@@ -220,15 +220,15 @@ open class ManageDropboxFragment : Fragment() {
     private fun emailSwitched(dropBox: DropBox?, isChecked: Boolean) {
         trackDropBoxEvent("switchEmailOnFileImport", trackerValue = isChecked.toFloat())
 
-        if (dropBox?.emailWhenFinished == isChecked) validationCount-- else validationCount++
-        currentDropBox?.newEmailWhenFinished = isChecked
+        if (dropBox?.hasNotification == isChecked) validationCount-- else validationCount++
+        currentDropBox?.newHasNotification = isChecked
         enableSaveButton()
     }
 
     private fun passwordSwitched(dropBox: DropBox?, isChecked: Boolean) {
         trackDropBoxEvent("switchProtectWithPassword", trackerValue = isChecked.toFloat())
 
-        if (dropBox?.password == isChecked) validationCount-- else validationCount++
+        if (dropBox?.hasPassword == isChecked) validationCount-- else validationCount++
 
         (if (needNewPassword) newPasswordButton else passwordTextLayout).apply { isVisible = isChecked }
 

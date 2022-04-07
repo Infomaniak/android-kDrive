@@ -170,7 +170,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             safeNavigate(
                 FileListFragmentDirections.actionFileListFragmentToDropBoxResultBottomSheetDialog(
                     url = dropBox.url,
-                    name = dropBox.alias
+                    name = dropBox.name
                 )
             )
         }
