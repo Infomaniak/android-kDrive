@@ -297,9 +297,6 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
 
     fun setScrollbarTrackOffset(offset: Int) {
         pictureFastScroller?.trackMarginEnd = offset
-
-//        pictureFastScroller.invalidate()
-//        pictureFastScroller.findViewById<LinearLayout>(com.qtalk.recyclerviewfastscroller.R.id.trackView).invalidate()
     }
 
     companion object {
