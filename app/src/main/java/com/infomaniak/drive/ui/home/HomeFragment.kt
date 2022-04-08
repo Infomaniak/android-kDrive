@@ -122,7 +122,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             homeViewPager.setCurrentItem(UiSettings(requireContext()).lastHomeSelectedTab, false)
         }
 
-        // This line is required to be able to scroll down with the fast scrollbar in the home view
+        // These two lines are required to be able to scroll down with the fast scrollbar in the home view
         homeCoordinator.isNestedScrollingEnabled = true
         homeViewPager.isNestedScrollingEnabled = true
 
