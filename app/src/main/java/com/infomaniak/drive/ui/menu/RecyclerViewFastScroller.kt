@@ -433,12 +433,12 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                                 when (fastScrollDirection) {
                                     FastScrollDirection.HORIZONTAL -> {
                                         val handleRange = handlePosition[0].toFloat()..handlePosition[0] + handleLength
-                                        if (!handleRange.contains(motionEvent.rawX))
+                                        if (!handleRange.contains(motionEvent.rawX) || handlePosition[1] > height)
                                             return@OnTouchListener false
                                     }
                                     FastScrollDirection.VERTICAL -> {
                                         val handleRange = handlePosition[1].toFloat()..handlePosition[1] + handleLength
-                                        if (!handleRange.contains(motionEvent.rawY))
+                                        if (!handleRange.contains(motionEvent.rawY) || handlePosition[0] > width)
                                             return@OnTouchListener false
                                     }
                                 }
