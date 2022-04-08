@@ -376,7 +376,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
 
             attribs.recycle()
         }
-        popupAnimationRunnable = Runnable { popupTextView.animateVisibility(false) }
+        popupAnimationRunnable = Runnable { popupTextView.animateVisibilityPop(false) }
     }
 
     override fun onDetachedFromWindow() {
@@ -451,7 +451,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                             if (isFastScrollEnabled) {
                                 handleStateListener?.onEngaged()
                                 // make the popup visible only if fastScroll is enabled
-                                popupTextView.animateVisibility()
+                                popupTextView.animateVisibilityPop()
                             }
                         }
 
@@ -517,7 +517,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
 
                             hideHandleJob = CoroutineScope(Dispatchers.Main).launch {
                                 delay(handleVisibilityDuration.toLong())
-                                handleImageView.animateVisibility(false)
+                                handleImageView.animateVisibilitySlide(false)
                             }
                         }
                         super.onTouchEvent(motionEvent)
@@ -679,7 +679,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
 
             hideHandleJob = CoroutineScope(Dispatchers.Main).launch {
                 delay(handleVisibilityDuration.toLong())
-                handleImageView.animateVisibility(false)
+                handleImageView.animateVisibilitySlide(false)
             }
         }
 
@@ -727,7 +727,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
      *
      * @param makeVisible
      * */
-    private fun View.animateVisibility(makeVisible: Boolean = true) {
+    private fun View.animateVisibilitySlide(makeVisible: Boolean = true) {
         val durationFactor = if (makeVisible) 0f else 1f
         val direction = (2 * durationFactor - 1)
 
@@ -735,6 +735,18 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
         val duration = (durationFactor * Defaults.animationDuration).toLong()
 
         this.animate().translationX(newPosition).duration = duration
+    }
+
+    private fun View.animateVisibilityPop(makeVisible: Boolean = true) {
+        val scaleFactor: Float = if (makeVisible) 1f else 0f
+        this.animate().scaleX(scaleFactor).setDuration(Defaults.animationDuration)
+            .onAnimationCancelled {
+                this.animate().scaleX(scaleFactor).duration = Defaults.animationDuration
+            }
+        this.animate().scaleY(scaleFactor).setDuration(Defaults.animationDuration)
+            .onAnimationCancelled {
+                this.animate().scaleY(scaleFactor).duration = Defaults.animationDuration
+            }
     }
 
     // set of load methods for handy loading from attribs
@@ -930,11 +942,11 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
 
             // check if the layout is scrollable. i.e. range is larger than extent, else disable fast scrolling and track touches.
             if (extent < range) {
-                handleImageView.animateVisibility()
+                handleImageView.animateVisibilitySlide()
                 handleImageView.isEnabled = true
                 trackView.isEnabled = true
             } else {
-                handleImageView.animateVisibility(false)
+                handleImageView.animateVisibilitySlide(false)
                 trackView.isEnabled = false
                 handleImageView.isEnabled = false
                 return
