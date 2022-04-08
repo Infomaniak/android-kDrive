@@ -650,13 +650,13 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
 
     private fun addThumbAndTrack() {
         View.inflate(context, R.layout.fastscroller_track_thumb, this)
-        handleImageView = findViewById(R.id.thumbIV)
+        handleImageView = findViewById(R.id.thumbView)
         trackView = findViewById(R.id.trackView)
     }
 
     private fun addPopupLayout() {
         View.inflate(context, R.layout.fastscroller_popup, this)
-        popupTextView = findViewById(R.id.fastScrollPopupTV)
+        popupTextView = findViewById(R.id.fastScrollPopup)
     }
 
     /**
