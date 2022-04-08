@@ -84,8 +84,6 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
         private const val TAG: String = "RVFastScroller"
         private const val ERROR_MESSAGE_NO_RECYCLER_VIEW =
             "The RecyclerView required for initialization with FastScroller cannot be null"
-
-        data class Padding(var top: Int = 0, var bottom: Int = 0, var left: Int = 0, var right: Int = 0)
     }
 
     enum class FastScrollDirection(val value: Int) {
@@ -567,16 +565,11 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
         popupTextView.layoutParams = lpPopupLayout
     }
 
-    fun View.getPaddings(): Padding {
-        return Padding(paddingTop, paddingBottom, paddingLeft, paddingRight)
-    }
-
     private fun alignTrackAndHandle() {
-        val padding = handleImageView.getPaddings()
 
         when (fastScrollDirection) {
             FastScrollDirection.HORIZONTAL -> {
-                handleImageView.setPadding(0, padding.top, 0, padding.bottom)
+                handleImageView.setPadding(0, handleImageView.top, 0, handleImageView.bottom)
                 popupTextView.layoutParams = LayoutParams(
                     LayoutParams.WRAP_CONTENT,
                     LayoutParams.WRAP_CONTENT
@@ -587,24 +580,18 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                 ).also { it.addRule(ALIGN_PARENT_BOTTOM) }
             }
             FastScrollDirection.VERTICAL -> {
-                handleImageView.setPadding(padding.left, 0, padding.right, 0)
+                handleImageView.setPadding(handleImageView.left, 0, handleImageView.right, 0)
                 popupTextView.layoutParams = LayoutParams(
                     LayoutParams.WRAP_CONTENT,
                     LayoutParams.WRAP_CONTENT
                 ).also {
-                    if (Build.VERSION.SDK_INT > 16)
-                        it.addRule(ALIGN_END, R.id.trackView)
-                    else
-                        it.addRule(ALIGN_RIGHT, R.id.trackView)
+                    it.addRule(ALIGN_END, R.id.trackView)
                 }
                 trackView.layoutParams = LayoutParams(
                     LayoutParams.WRAP_CONTENT,
                     LayoutParams.MATCH_PARENT
                 ).also {
-                    if (Build.VERSION.SDK_INT > 16)
-                        it.addRule(ALIGN_PARENT_END)
-                    else
-                        it.addRule(ALIGN_PARENT_RIGHT)
+                    it.addRule(ALIGN_PARENT_END)
                 }
             }
         }
