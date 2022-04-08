@@ -22,15 +22,13 @@ import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.Rights
+import com.infomaniak.drive.data.models.file.FileConversion
 import com.infomaniak.drive.data.models.file.FileVersion
 import com.infomaniak.drive.data.models.file.dropbox.DropBoxCapabilities
 import com.infomaniak.drive.data.models.file.dropbox.DropBoxSize
 import com.infomaniak.drive.data.models.file.dropbox.DropBoxValidity
 import com.infomaniak.drive.utils.AccountUtils
-import io.realm.DynamicRealm
-import io.realm.FieldAttribute
-import io.realm.RealmMigration
-import io.realm.RealmSchema
+import io.realm.*
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import java.util.*
@@ -134,7 +132,11 @@ class FileMigration : RealmMigration {
         }
 
         //region Migrated to version 4:
-        // - Add new field (Dropbox) in File table
+        // - Migrate (File) table to api v2
+        // - Migrate (Right) table to api v2
+        // - Added new field (Dropbox) in File table
+        // - Added new field (FileConversion) in File table
+        // - Added new field (FileVersion) in File table
 
         if (oldVersionTemp == 3L) {
             // Dropbox migration
@@ -174,6 +176,14 @@ class FileMigration : RealmMigration {
                 addField(FileVersion::totalSize.name, Long::class.java, FieldAttribute.REQUIRED)
             }
 
+            // FileConversion migration
+            val fileConversionSchema = schema.create(FileConversion::class.java.simpleName).apply {
+                addField(FileConversion::whenDownload.name, Boolean::class.java, FieldAttribute.REQUIRED)
+                addField(FileConversion::downloadExtensions.name, RealmList::class.java, FieldAttribute.REQUIRED)
+                addField(FileConversion::whenOnlyoffice.name, Boolean::class.java, FieldAttribute.REQUIRED)
+                addField(FileConversion::onlyofficeExtension.name, String::class.java)
+            }
+
             // Rights migration
             schema.get(Rights::class.java.simpleName)?.apply {
                 renameField("show", Rights::canShow.name)
@@ -196,6 +206,8 @@ class FileMigration : RealmMigration {
 
             // File migration
             schema.get(File::class.java.simpleName)?.apply {
+                removeField("onlyofficeConvertExtension")
+                addRealmObjectField(File::conversion.name, fileConversionSchema)
                 addRealmObjectField(File::dropBox.name, dropboxSchema)
                 addRealmObjectField(File::version.name, fileVersionSchema)
             }
@@ -206,6 +218,7 @@ class FileMigration : RealmMigration {
             schema.get(DropBoxCapabilities::class.java.simpleName)?.isEmbedded = true
             schema.get(DropBox::class.java.simpleName)?.isEmbedded = true
             schema.get(FileVersion::class.java.simpleName)?.isEmbedded = true
+            schema.get(FileConversion::class.java.simpleName)?.isEmbedded = true
         }
         //endregion
     }

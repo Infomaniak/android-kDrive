@@ -363,11 +363,11 @@ fun FragmentActivity.requestCredentials(onSuccess: () -> Unit) {
 }
 
 fun Fragment.openOnlyOfficeDocument(file: File) {
-    if (file.onlyofficeConvertExtension?.isNotBlank() == true) {
+    if (file.conversion?.whenOnlyoffice == true) {
         findNavController().navigate(
-            R.id.notSupportedExtensionBottomSheetDialog,
-            NotSupportedExtensionBottomSheetDialogArgs(file.id).toBundle()
-        )
+			R.id.notSupportedExtensionBottomSheetDialog, 
+			NotSupportedExtensionBottomSheetDialogArgs(file.id).toBundle()
+	)
     } else {
         requireContext().openOnlyOfficeActivity(file)
     }

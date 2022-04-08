@@ -136,7 +136,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                         || currentFile.getVisibilityType() == IS_TEAM_SPACE
                         || currentFile.getVisibilityType() == IS_SHARED_SPACE
                 editDocument.isVisible = (currentFile.hasOnlyoffice && rights?.canWrite == true)
-                        || (currentFile.onlyofficeConvertExtension != null)
+                        || (currentFile.conversion?.whenOnlyoffice == true)
                 leaveShare.isVisible = rights?.canLeave == true
                 moveFile.isVisible = rights?.canMove == true && !isSharedWithMe
                 renameFile.isVisible = rights?.canRename == true && !isSharedWithMe
