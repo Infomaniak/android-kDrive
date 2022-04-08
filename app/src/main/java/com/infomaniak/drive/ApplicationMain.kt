@@ -45,7 +45,7 @@ import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.MatomoUtils.buildTracker
 import com.infomaniak.drive.utils.NotificationUtils.initNotificationChannel
 import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
-import com.infomaniak.drive.utils.clearStack
+import com.infomaniak.lib.core.utils.clearStack
 import com.infomaniak.lib.core.BuildConfig.INFOMANIAK_API
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.auth.TokenAuthenticator

@@ -122,8 +122,7 @@
 
         <activity
             android:name=".ui.login.LoginActivity"
-            android:theme="@style/AppTheme.Login"
-            tools:ignore="LockedOrientationActivity" />
+            android:theme="@style/AppTheme.Login" />
 
         <activity
             android:name=".ui.login.NoDriveActivity"

@@ -33,7 +33,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.NotificationUtils
 import com.infomaniak.drive.utils.NotificationUtils.uploadNotification
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
-import com.infomaniak.drive.utils.clearStack
+import com.infomaniak.lib.core.utils.clearStack
 import io.sentry.Sentry
 
 object UploadNotifications {

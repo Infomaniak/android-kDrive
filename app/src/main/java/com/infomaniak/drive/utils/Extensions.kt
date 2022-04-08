@@ -107,8 +107,6 @@ typealias FileId = Int
 typealias IsComplete = Boolean
 typealias Position = Int
 
-fun Intent.clearStack() = apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK }
-
 fun Context.getAvailableMemory(): ActivityManager.MemoryInfo {
     val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
     return ActivityManager.MemoryInfo().also { memoryInfo ->
