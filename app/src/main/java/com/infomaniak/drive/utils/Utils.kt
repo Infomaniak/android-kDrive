@@ -25,7 +25,6 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.view.View
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -52,6 +51,7 @@ import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment
+import com.infomaniak.lib.core.utils.showToast
 import kotlinx.android.synthetic.main.dialog_download_progress.view.*
 import kotlinx.android.synthetic.main.dialog_name_prompt.view.*
 import kotlinx.android.synthetic.main.dialog_name_prompt.view.icon
@@ -230,7 +230,7 @@ object Utils {
         try {
             startActivity(openWithIntent(file, userDrive))
         } catch (e: ActivityNotFoundException) {
-            Toast.makeText(this, R.string.allActivityNotFoundError, Toast.LENGTH_LONG).show()
+            showToast(R.string.allActivityNotFoundError)
         }
     }
 
