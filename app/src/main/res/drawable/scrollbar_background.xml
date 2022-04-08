@@ -15,19 +15,6 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<!--<vector xmlns:android="http://schemas.android.com/apk/res/android"-->
-<!--    android:width="28dp"-->
-<!--    android:height="32dp"-->
-<!--    android:viewportWidth="28"-->
-<!--    android:viewportHeight="32">-->
-<!--    <group>-->
-<!--        <clip-path android:pathData="M8 0H20C28 0 28 0 28 0V24C28 32 28 32 28 32H8C3.58172 32 0 28.4183 0 24V8C0 3.58172 3.58172 0 8 0Z" />-->
-<!--        <path-->
-<!--            android:fillColor="#FFFFFF"-->
-<!--            android:pathData="M0 0V32H28V0" />-->
-<!--    </group>-->
-<!--</vector>-->
-
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
     <corners
