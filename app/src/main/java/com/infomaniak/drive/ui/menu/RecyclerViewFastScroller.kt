@@ -25,7 +25,6 @@ import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
@@ -387,9 +386,6 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-
-        Log.e("gibran", "onAttachedToWindow: called");
-//        recyclerView.addOnScrollListener(onScrollListener)
         initImpl()
     }
 
@@ -426,10 +422,11 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                             hideHandleJob?.cancel()
 
                             // disable the possibility to click on the track of the scrollbar
-                            val handlePosition = IntArray(2).also {
-                                handleImageView.getLocationOnScreen(it)
-                            }
                             if (disableTrackTouch) {
+                                val handlePosition = IntArray(2).also {
+                                    handleImageView.getLocationOnScreen(it)
+                                }
+
                                 when (fastScrollDirection) {
                                     FastScrollDirection.HORIZONTAL -> {
                                         val handleRange = handlePosition[0].toFloat()..handlePosition[0] + handleLength
@@ -575,7 +572,6 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
     }
 
     private fun alignTrackAndHandle() {
-//        val padding = resources.getDimensionPixelOffset(R.dimen.default_handle_padding)
         val padding = handleImageView.getPaddings()
 
         when (fastScrollDirection) {
@@ -668,9 +664,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
      * refresh layout is added as parent layout.
      */
     private fun enableNestedScrolling() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            isNestedScrollingEnabled = true
-        }
+        isNestedScrollingEnabled = true
     }
 
     private fun moveHandle(offset: Float, runHideHandleJob: Boolean) {
@@ -989,7 +983,6 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
     @Keep
     fun attachFastScrollerToRecyclerView(recyclerView: RecyclerView) {
         this.recyclerView = recyclerView
-//        initImpl()
     }
 
     /**
