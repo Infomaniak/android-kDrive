@@ -734,16 +734,13 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
      * @param makeVisible
      * */
     private fun View.animateVisibility(makeVisible: Boolean = true) {
+        val durationFactor = if (makeVisible) 0f else 1f
+        val direction = (2 * durationFactor - 1)
 
-        val scaleFactor: Float = if (makeVisible) 1f else 0f
-        this.animate().scaleX(scaleFactor).setDuration(Defaults.animationDuration)
-            .onAnimationCancelled {
-                this.animate().scaleX(scaleFactor).duration = Defaults.animationDuration
-            }
-        this.animate().scaleY(scaleFactor).setDuration(Defaults.animationDuration)
-            .onAnimationCancelled {
-                this.animate().scaleY(scaleFactor).duration = Defaults.animationDuration
-            }
+        val newPosition = width + direction * handleImageView.width
+        val duration = (durationFactor * Defaults.animationDuration).toLong()
+
+        this.animate().translationX(newPosition).duration = duration
     }
 
     // set of load methods for handy loading from attribs
@@ -937,7 +934,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                     else -> error("The orientation of the LinearLayoutManager should be horizontal or vertical")
                 }
 
-            // check if the layout is scrollable. i.e. range is large than extent, else disable fast scrolling and track touches.
+            // check if the layout is scrollable. i.e. range is larger than extent, else disable fast scrolling and track touches.
             if (extent < range) {
                 handleImageView.animateVisibility()
                 handleImageView.isEnabled = true
