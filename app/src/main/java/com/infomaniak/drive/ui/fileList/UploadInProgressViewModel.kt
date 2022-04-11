@@ -18,8 +18,11 @@
 package com.infomaniak.drive.ui.fileList
 
 import android.app.Application
+import android.content.ContentResolver
 import android.content.Context
+import android.provider.OpenableColumns
 import android.util.ArrayMap
+import androidx.core.net.toFile
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.liveData
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -28,8 +31,11 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.drive.utils.Utils
 import io.realm.RealmResults
+import io.sentry.Sentry
+import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
 
 class UploadInProgressViewModel(application: Application) : AndroidViewModel(application) {
@@ -41,6 +47,15 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
             UploadFile.getAllPendingFolders(realm)?.let { pendingFolders ->
                 emit(generateFolderFiles(pendingFolders))
             } ?: emit(arrayListOf())
+        }
+    }
+
+    fun getPendingFiles(folderId: Int) = liveData<Pair<ArrayList<File>, ArrayList<UploadFile>>?>(Dispatchers.IO) {
+        UploadFile.getRealmInstance().use { realm ->
+            UploadFile.getCurrentUserPendingUploads(realm, folderId)?.let { uploadFiles ->
+                val uploadFilesCopy = ArrayList(realm.copyFromRealm(uploadFiles, 0))
+                emit(generateUploadFiles(uploadFiles) to uploadFilesCopy)
+            } ?: emit(null)
         }
     }
 
@@ -63,6 +78,63 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
 
             val userDrive = UserDrive(driveId = driveId, sharedWithMe = isSharedWithMe, driveName = driveName)
             files.add(createFolderFile(uploadFile.remoteFolder, userDrive))
+        }
+
+        return files
+    }
+
+    private fun generateUploadFiles(uploadFiles: RealmResults<UploadFile>): ArrayList<File> {
+        val files = arrayListOf<File>()
+
+        uploadFiles.forEach { uploadFile ->
+            val uri = uploadFile.getUriObject()
+
+            if (uri.scheme.equals(ContentResolver.SCHEME_CONTENT)) {
+                try {
+                    SyncUtils.checkDocumentProviderPermissions(context, uri)
+                    context.contentResolver?.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
+                        if (cursor.moveToFirst()) {
+                            val size = SyncUtils.getFileSize(cursor)
+                            files.add(
+                                File(
+                                    id = uploadFile.uri.hashCode(),
+                                    isFromUploads = true,
+                                    name = uploadFile.fileName,
+                                    path = uploadFile.uri,
+                                    size = size,
+                                )
+                            )
+                        }
+                    }
+                } catch (exception: Exception) {
+                    exception.printStackTrace()
+                    files.add(
+                        File(
+                            id = uploadFile.uri.hashCode(),
+                            isFromUploads = true,
+                            name = uploadFile.fileName,
+                            path = uploadFile.uri,
+                        )
+                    )
+
+                    Sentry.withScope { scope ->
+                        scope.level = SentryLevel.WARNING
+                        scope.setExtra("fileName", uploadFile.fileName)
+                        scope.setExtra("uri", uploadFile.uri)
+                        Sentry.captureException(exception)
+                    }
+                }
+            } else {
+                files.add(
+                    File(
+                        id = uploadFile.uri.hashCode(),
+                        isFromUploads = true,
+                        name = uploadFile.fileName,
+                        path = uploadFile.uri,
+                        size = uri.toFile().length(),
+                    )
+                )
+            }
         }
 
         return files
