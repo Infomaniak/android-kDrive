@@ -15,182 +15,166 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialog">
 
-    <data>
-
-        <import type="android.view.View" />
-
-        <variable
-            name="syncPermissionsModel"
-            type="com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsBottomSheetDialog.BackgroundSyncPermissionsViewModel" />
-    </data>
-
-    <androidx.core.widget.NestedScrollView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialog">
+        android:animateLayoutChanges="true"
+        android:paddingHorizontal="@dimen/marginStandard"
+        tools:background="@color/appBar">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <ImageView
+            android:id="@+id/illu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/marginStandard"
+            android:maxHeight="270dp"
+            android:src="@drawable/mobile_sync"
+            app:layout_constraintBottom_toTopOf="@id/title"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            android:id="@+id/title"
+            style="@style/H2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/marginStandard"
+            android:gravity="center"
+            android:text="@string/backgroundSyncTitle"
+            app:layout_constraintBottom_toTopOf="@id/description"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/illu" />
+
+        <TextView
+            android:id="@+id/description"
+            style="@style/Subtitle1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/marginStandard"
+            android:gravity="center"
+            android:text="@string/backgroundSyncDescription"
+            android:textColor="@color/primaryText"
+            app:layout_constraintBottom_toTopOf="@id/allowBackgroundSyncSwitch"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/title" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/allowBackgroundSyncSwitch"
+            style="@style/H3"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:animateLayoutChanges="true"
-            android:paddingHorizontal="@dimen/marginStandard"
-            tools:background="@color/appBar">
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/marginStandardSmall"
+            android:minHeight="@dimen/buttonHeight"
+            android:text="@string/backgroundSyncSwitchTitle"
+            app:layout_constraintBottom_toTopOf="@id/switchDescription"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/description" />
 
-            <ImageView
-                android:id="@+id/illu"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/marginStandard"
-                android:maxHeight="270dp"
-                android:src="@drawable/mobile_sync"
-                app:layout_constraintBottom_toTopOf="@id/title"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="ContentDescription" />
+        <TextView
+            android:id="@+id/switchDescription"
+            style="@style/Subtitle2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/marginStandard"
+            android:text="@string/backgroundSyncSwitchDescription"
+            android:textColor="@color/primaryText"
+            app:layout_constraintBottom_toTopOf="@id/guideCard"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/allowBackgroundSyncSwitch" />
 
-            <TextView
-                android:id="@+id/title"
-                style="@style/H2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/marginStandard"
-                android:gravity="center"
-                android:text="@string/backgroundSyncTitle"
-                app:layout_constraintBottom_toTopOf="@id/description"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/illu" />
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/guideCard"
+            style="@style/CardViewInfomaniak"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/marginStandard"
+            android:visibility="gone"
+            app:cardBackgroundColor="@color/background"
+            app:layout_constraintBottom_toTopOf="@id/actionButton"
+            app:layout_constraintTop_toBottomOf="@id/switchDescription"
+            app:layout_goneMarginBottom="@dimen/marginStandardSmall"
+            tools:visibility="visible">
 
-            <TextView
-                android:id="@+id/description"
-                style="@style/Subtitle1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/marginStandard"
-                android:gravity="center"
-                android:text="@string/backgroundSyncDescription"
-                android:textColor="@color/primaryText"
-                app:layout_constraintBottom_toTopOf="@id/allowBackgroundSyncSwitch"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/title" />
-
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/allowBackgroundSyncSwitch"
-                style="@style/H3"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/marginStandardSmall"
-                android:checked="@={syncPermissionsModel.shouldBeWhitelisted}"
-                android:clickable="@{!syncPermissionsModel.whitelisted}"
-                android:minHeight="@dimen/buttonHeight"
-                android:text="@string/backgroundSyncSwitchTitle"
-                app:layout_constraintBottom_toTopOf="@id/switchDescription"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/description" />
+                android:padding="@dimen/marginStandardMedium">
 
-            <TextView
-                android:id="@+id/switchDescription"
-                style="@style/Subtitle2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/marginStandard"
-                android:text="@string/backgroundSyncSwitchDescription"
-                android:textColor="@color/primaryText"
-                app:layout_constraintBottom_toTopOf="@id/guideCard"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/allowBackgroundSyncSwitch" />
+                <ImageView
+                    android:id="@+id/icon"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_alert_triangle"
+                    app:layout_constraintEnd_toStartOf="@id/guideCardDescription"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="ContentDescription" />
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/guideCard"
-                style="@style/CardViewInfomaniak"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/marginStandard"
-                android:visibility="@{syncPermissionsModel.showManufacturerWarning ? View.VISIBLE : View.GONE}"
-                app:cardBackgroundColor="@color/background"
-                app:layout_constraintBottom_toTopOf="@id/actionButton"
-                app:layout_constraintTop_toBottomOf="@id/switchDescription"
-                app:layout_goneMarginBottom="@dimen/marginStandardSmall"
-                tools:visibility="visible">
+                <TextView
+                    android:id="@+id/guideCardDescription"
+                    style="@style/Subtitle2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardMedium"
+                    android:text="@string/backgroundSyncOpenGuideDescription"
+                    app:layout_constraintBottom_toTopOf="@id/openGuideButton"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/icon"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/openGuideButton"
+                    style="@style/ButtonInfomaniak"
+                    android:layout_width="0dp"
+                    android:layout_marginTop="@dimen/marginStandardMedium"
+                    android:layout_marginBottom="@dimen/marginStandard"
+                    android:text="@string/backgroundSyncOpenGuideButton"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/guideCardDescription" />
+
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/hasDoneNecessaryCheckbox"
+                    style="@style/Subtitle1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="@dimen/marginStandardMedium">
+                    android:layout_marginTop="@dimen/marginStandard"
+                    android:button="@drawable/ic_checkbox"
+                    android:paddingStart="@dimen/marginStandardSmall"
+                    android:text="@string/backgroundSyncCheckboxTitle"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/openGuideButton"
+                    app:useMaterialThemeColors="false"
+                    tools:ignore="RtlSymmetry" />
 
-                    <ImageView
-                        android:id="@+id/icon"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/ic_alert_triangle"
-                        app:layout_constraintEnd_toStartOf="@id/guideCardDescription"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="ContentDescription" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-                    <TextView
-                        android:id="@+id/guideCardDescription"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandardMedium"
-                        android:text="@string/backgroundSyncOpenGuideDescription"
-                        app:layout_constraintBottom_toTopOf="@id/openGuideButton"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/icon"
-                        app:layout_constraintTop_toTopOf="parent" />
+        </com.google.android.material.card.MaterialCardView>
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/openGuideButton"
-                        style="@style/ButtonInfomaniak"
-                        android:layout_width="0dp"
-                        android:layout_marginTop="@dimen/marginStandardMedium"
-                        android:layout_marginBottom="@dimen/marginStandard"
-                        android:text="@string/backgroundSyncOpenGuideButton"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/guideCardDescription" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/actionButton"
+            style="@style/ButtonInfomaniak"
+            android:layout_width="0dp"
+            android:layout_marginBottom="@dimen/marginStandard"
+            android:text="@string/buttonClose"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/guideCard" />
 
-                    <com.google.android.material.checkbox.MaterialCheckBox
-                        android:id="@+id/hasDoneNecessaryCheckbox"
-                        style="@style/Subtitle1"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/marginStandard"
-                        android:button="@drawable/ic_checkbox"
-                        android:checked="@={syncPermissionsModel.hasDoneNecessary}"
-                        android:paddingStart="@dimen/marginStandardSmall"
-                        android:text="@string/backgroundSyncCheckboxTitle"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/openGuideButton"
-                        app:useMaterialThemeColors="false"
-                        tools:ignore="RtlSymmetry" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/actionButton"
-                style="@style/ButtonInfomaniak"
-                android:layout_width="0dp"
-                android:layout_marginBottom="@dimen/marginStandard"
-                android:text="@string/buttonClose"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/guideCard" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </androidx.core.widget.NestedScrollView>
-
-</layout>
+</androidx.core.widget.NestedScrollView>
