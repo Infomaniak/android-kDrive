@@ -140,6 +140,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             Log.d(TAG, "startSyncFiles> upload ${uploadFile.fileName}")
             if (uploadFile.initUpload(pendingCount)) successCount++
             pendingCount--
+            if (UploadFile.getAllPendingPriorityFilesCount() > 0) checkIfNeedReSync(retrieveLatestNotSyncedMedia())
         }
 
         uploadedCount = successCount + lastUploadedCount
