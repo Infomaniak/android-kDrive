@@ -20,17 +20,16 @@ package com.infomaniak.drive.ui.fileList
 import android.content.ContentResolver
 import android.os.Bundle
 import android.provider.OpenableColumns
-import android.util.ArrayMap
 import android.util.Log
 import android.view.View
 import androidx.activity.addCallback
 import androidx.core.net.toFile
 import androidx.core.view.isGone
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.work.Data
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
@@ -53,6 +52,8 @@ class UploadInProgressFragment : FileListFragment() {
 
     private val drivePermissions: DrivePermissions by lazy { DrivePermissions() }
     private val realmUpload: Realm by lazy { UploadFile.getRealmInstance() }
+    private val uploadInProgressViewModel: UploadInProgressViewModel by viewModels()
+
     override var enabledMultiSelectMode: Boolean = false
     override var hideBackButtonWhenRoot: Boolean = false
     override var showPendingFiles = false
@@ -295,55 +296,17 @@ class UploadInProgressFragment : FileListFragment() {
         }
 
         private fun showPendingFolders(pendingFolders: RealmResults<UploadFile>) {
-            val files = arrayListOf<File>()
-            val drivesNames = ArrayMap<Int, String>()
-
-            pendingFolders.forEach { uploadFile ->
-                val driveId = uploadFile.driveId
-                val isSharedWithMe = driveId != AccountUtils.currentDriveId
-
-                val driveName = if (isSharedWithMe && drivesNames[driveId] == null) {
-                    val drive = DriveInfosController.getDrives(AccountUtils.currentUserId, driveId, null).first()
-                    drivesNames[driveId] = drive.name
-                    drive.name
-
-                } else {
-                    drivesNames[driveId]
+            uploadInProgressViewModel.getPendingFolders().observe(viewLifecycleOwner) {
+                it?.let { uploadFolders ->
+                    pendingFiles = uploadFolders
+                    fileAdapter.isComplete = true
+                    fileAdapter.setFiles(uploadFolders)
+                    noFilesLayout.toggleVisibility(pendingFolders.isEmpty())
+                    showLoadingTimer.cancel()
+                    swipeRefreshLayout.isRefreshing = false
+                    toolbar.menu.findItem(R.id.closeItem).isVisible = true
                 }
-
-                val userDrive = UserDrive(driveId = driveId, sharedWithMe = isSharedWithMe, driveName = driveName)
-                files.add(createFolderFile(uploadFile.remoteFolder, userDrive))
             }
-
-            pendingFiles = files
-            fileAdapter.isComplete = true
-            fileAdapter.setFiles(files)
-            noFilesLayout.toggleVisibility(pendingFolders.isEmpty())
-            showLoadingTimer.cancel()
-            swipeRefreshLayout.isRefreshing = false
-            toolbar.menu.findItem(R.id.closeItem).isVisible = true
-        }
-
-        private fun createFolderFile(fileId: Int, userDrive: UserDrive): File {
-            val folder = FileController.getFileById(fileId, userDrive)!!
-            val name: String
-            val type: String
-
-            if (fileId == Utils.ROOT_ID) {
-                name = Utils.getRootName(requireContext())
-                type = File.Type.DRIVE.value
-            } else {
-                name = folder.name
-                type = File.Type.FOLDER.value
-            }
-
-            return File(
-                id = fileId,
-                isFromUploads = true,
-                name = name,
-                path = folder.getRemotePath(userDrive),
-                type = type
-            )
         }
 
         private fun downloadPendingFilesByFolderId() {
