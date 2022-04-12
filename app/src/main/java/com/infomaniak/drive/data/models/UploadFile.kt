@@ -147,12 +147,12 @@ open class UploadFile(
         fun getAllPendingUploads(customRealm: Realm? = null): ArrayList<UploadFile> {
             val block: (Realm) -> ArrayList<UploadFile> = { realm ->
                 val results = pendingUploadsQuery(realm).findAll()
-                val syncUploadFiles = results.where().equalTo(UploadFile::type.name, Type.SYNC.name).findAll()
                 val priorityUploadFiles = results.where().notEqualTo(UploadFile::type.name, Type.SYNC.name).findAll()
-                ArrayList<UploadFile>().apply {
-                    addAll(realm.copyFromRealm(priorityUploadFiles, 0))
-                    addAll(realm.copyFromRealm(syncUploadFiles, 0))
-                }
+                val syncUploadFiles = results.where().equalTo(UploadFile::type.name, Type.SYNC.name).findAll()
+                arrayListOf(
+                    *realm.copyFromRealm(priorityUploadFiles, 0).toTypedArray(),
+                    *realm.copyFromRealm(syncUploadFiles, 0).toTypedArray()
+                )
             }
 
             return customRealm?.let(block) ?: getRealmInstance().use(block)
