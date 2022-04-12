@@ -142,15 +142,11 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
 
     private fun createFolderFile(fileId: Int, userDrive: UserDrive): File {
         val folder = FileController.getFileById(fileId, userDrive)!!
-        val name: String
-        val type: String
 
-        if (fileId == Utils.ROOT_ID) {
-            name = Utils.getRootName(context)
-            type = File.Type.DRIVE.value
+        val (name, type) = if (fileId == Utils.ROOT_ID) {
+            Utils.getRootName(context) to File.Type.DRIVE.value
         } else {
-            name = folder.name
-            type = File.Type.FOLDER.value
+            folder.name to File.Type.FOLDER.value
         }
 
         return File(
