@@ -24,7 +24,7 @@ import com.google.gson.reflect.TypeToken
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.utils.ApiController
 
-class UiSettings(val context: Context) {
+class UiSettings(private val context: Context) {
 
     private fun getUiSettings(): SharedPreferences {
         return context.getSharedPreferences("UISettings", Context.MODE_PRIVATE)
