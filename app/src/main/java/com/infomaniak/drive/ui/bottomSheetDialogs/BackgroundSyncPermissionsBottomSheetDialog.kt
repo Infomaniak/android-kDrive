@@ -28,7 +28,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
-import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsViewModel.Companion.manufacturerWarning
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_background_sync.*
@@ -78,8 +77,10 @@ class BackgroundSyncPermissionsBottomSheetDialog(private val drivePermissions: D
     }
 
     private fun showManufacturerWarning(hasBatteryPermission: Boolean) {
-        backgroundSyncPermissionsViewModel.isWhitelisted = hasBatteryPermission
-        guideCard.visibility = if (hasBatteryPermission && manufacturerWarning) View.VISIBLE else View.GONE
+        with(backgroundSyncPermissionsViewModel) {
+            isWhitelisted = hasBatteryPermission
+            guideCard.visibility = if (hasBatteryPermission && manufacturerWarning) View.VISIBLE else View.GONE
+        }
     }
 
     private fun shouldBeWhiteListed(shouldBeWhitelisted: Boolean) {

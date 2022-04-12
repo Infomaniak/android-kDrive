@@ -25,6 +25,14 @@ import kotlinx.android.synthetic.main.fragment_bottom_sheet_background_sync.*
 class BackgroundSyncPermissionsViewModel : ViewModel() {
 
     /**
+     * List of manufacturers which are known to restrict background processes or otherwise
+     * block synchronization.
+     *
+     * See https://developers.google.com/zero-touch/resources/manufacturer-names for manufacturer values.
+     */
+    private val evilManufacturers = arrayOf("asus", "huawei", "lenovo", "meizu", "oneplus", "oppo", "samsung", "vivo", "xiaomi")
+
+    /**
      * As long as it's false, the dialog will be displayed when user use a functionality needing background sync
      *
      * @see hasDoneNecessaryCheckbox
@@ -36,23 +44,11 @@ class BackgroundSyncPermissionsViewModel : ViewModel() {
      */
     var isWhitelisted = false
 
-    companion object {
-
-        /**
-         * List of manufacturers which are known to restrict background processes or otherwise
-         * block synchronization.
-         *
-         * See https://developers.google.com/zero-touch/resources/manufacturer-names for manufacturer values.
-         */
-        private val evilManufacturers =
-            arrayOf("asus", "huawei", "lenovo", "meizu", "oneplus", "oppo", "samsung", "vivo", "xiaomi")
-
-        /**
-         * Whether the device has been produced by an evil manufacturer.
-         * Always true for debug builds (to test the UI).
-         *
-         * @see evilManufacturers
-         */
-        val manufacturerWarning = evilManufacturers.contains(Build.MANUFACTURER.lowercase()) || BuildConfig.DEBUG
-    }
+    /**
+     * Whether the device has been produced by an evil manufacturer.
+     * Always true for debug builds (to test the UI).
+     *
+     * @see evilManufacturers
+     */
+    val manufacturerWarning = evilManufacturers.contains(Build.MANUFACTURER.lowercase()) || BuildConfig.DEBUG
 }
