@@ -18,6 +18,9 @@
 
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
+import android.app.Activity
+import android.content.Context
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -26,7 +29,6 @@ import androidx.fragment.app.viewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsViewModel.Companion.manufacturerWarning
-import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsViewModel.Companion.updateShowBatteryOptimizationDialog
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_background_sync.*
@@ -45,38 +47,28 @@ class BackgroundSyncPermissionsBottomSheetDialog(private val drivePermissions: D
 
         drivePermissions.registerBatteryPermission(this) { hasPermission -> onPermissionGranted(hasPermission) }
         activity?.updateShowBatteryOptimizationDialog(true)
+        shouldBeWhiteListed(checkWhitelisted(false))
 
-        backgroundSyncPermissionsViewModel.apply {
-            val isWhiteListed = checkWhitelisted(false)
-            allowBackgroundSyncSwitch.isClickable = !isWhiteListed
-            shouldBeWhitelisted.value = isWhiteListed
-
-            shouldBeWhitelisted.observe(viewLifecycleOwner) { shouldBeWhitelisted ->
-                allowBackgroundSyncSwitch.apply {
-                    isChecked = shouldBeWhitelisted
-                    isClickable = !shouldBeWhitelisted
-                }
-                if (shouldBeWhitelisted && isWhitelisted.value != true) checkWhitelisted(true)
-            }
-            hasDoneNecessary.observe(viewLifecycleOwner) { hasDoneNecessary ->
-                val mustShowBatteryDialog = !(hasDoneNecessary && isWhitelisted.value == true)
-                activity?.updateShowBatteryOptimizationDialog(mustShowBatteryDialog)
-            }
-
-            hasDoneNecessaryCheckbox.setOnCheckedChangeListener { _, isChecked -> hasDoneNecessary.value = isChecked }
-            allowBackgroundSyncSwitch.setOnCheckedChangeListener { _, isChecked -> shouldBeWhitelisted.value = isChecked }
+        allowBackgroundSyncSwitch.setOnCheckedChangeListener { _, isChecked -> shouldBeWhiteListed(isChecked) }
+        hasDoneNecessaryCheckbox.setOnCheckedChangeListener { _, isChecked ->
+            backgroundSyncPermissionsViewModel.hasDoneNecessary = isChecked
         }
-
         actionButton.setOnClickListener { dismiss() }
         openGuideButton.setOnClickListener { context?.openUrl(SUPPORT_FAQ_BACKGROUND_FUNCTIONING_URL) }
     }
 
-    private fun onPermissionGranted(hasPermission: Boolean) {
-        backgroundSyncPermissionsViewModel.apply {
-            shouldBeWhitelisted.value = hasPermission
-            showManufacturerWarning(hasPermission)
-            if (hasPermission && !manufacturerWarning) hasDoneNecessary.value = true
+    override fun onDismiss(dialog: DialogInterface) {
+        with(backgroundSyncPermissionsViewModel) {
+            val mustShowDialog = !(hasDoneNecessary && isWhitelisted)
+            activity?.updateShowBatteryOptimizationDialog(mustShowDialog)
         }
+        super.onDismiss(dialog)
+    }
+
+    private fun onPermissionGranted(hasPermission: Boolean) {
+        shouldBeWhiteListed(hasPermission)
+        showManufacturerWarning(hasPermission)
+        backgroundSyncPermissionsViewModel.apply { if (hasPermission && !manufacturerWarning) hasDoneNecessary = true }
     }
 
     private fun checkWhitelisted(requestPermission: Boolean): Boolean {
@@ -86,13 +78,32 @@ class BackgroundSyncPermissionsBottomSheetDialog(private val drivePermissions: D
     }
 
     private fun showManufacturerWarning(hasBatteryPermission: Boolean) {
-        backgroundSyncPermissionsViewModel.apply {
-            isWhitelisted.value = hasBatteryPermission
-            guideCard.visibility = if (hasBatteryPermission && manufacturerWarning) View.VISIBLE else View.GONE
+        backgroundSyncPermissionsViewModel.isWhitelisted = hasBatteryPermission
+        guideCard.visibility = if (hasBatteryPermission && manufacturerWarning) View.VISIBLE else View.GONE
+    }
+
+    private fun shouldBeWhiteListed(shouldBeWhitelisted: Boolean) {
+        allowBackgroundSyncSwitch.apply {
+            isChecked = shouldBeWhitelisted
+            isClickable = !shouldBeWhitelisted
         }
+        if (shouldBeWhitelisted && !backgroundSyncPermissionsViewModel.isWhitelisted) checkWhitelisted(true)
     }
 
     companion object {
-        const val SUPPORT_FAQ_BACKGROUND_FUNCTIONING_URL = "https://faq.infomaniak.com/2685"
+
+        private const val FLAG_SHOW_BATTERY_OPTIMIZATION_DIALOG = "SHOW_BATTERY_AUTHORIZATION_DIALOG"
+        private const val SHARED_PREFS = "HINT_BATTERY_OPTIMIZATIONS"
+        private const val SUPPORT_FAQ_BACKGROUND_FUNCTIONING_URL = "https://faq.infomaniak.com/2685"
+
+        fun Context.mustShowBatteryOptimizationDialog(): Boolean {
+            val sharedPrefs = getSharedPreferences(SHARED_PREFS, Activity.MODE_PRIVATE)
+            return sharedPrefs.getBoolean(FLAG_SHOW_BATTERY_OPTIMIZATION_DIALOG, true)
+        }
+
+        fun Context.updateShowBatteryOptimizationDialog(mustShowBatteryDialog: Boolean) {
+            val editableSharedPrefs = getSharedPreferences(SHARED_PREFS, Activity.MODE_PRIVATE).edit()
+            editableSharedPrefs.putBoolean(FLAG_SHOW_BATTERY_OPTIMIZATION_DIALOG, mustShowBatteryDialog).apply()
+        }
     }
 }
