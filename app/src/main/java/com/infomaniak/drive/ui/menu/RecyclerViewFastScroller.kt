@@ -223,11 +223,11 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
     private lateinit var handleImageView: AppCompatImageView
     private lateinit var trackView: LinearLayout
     private lateinit var recyclerView: RecyclerView
-    private var popupAnimationRunnable: Runnable
     private var isEngaged: Boolean = false
     private var handleStateListener: HandleStateListener? = null
     private var previousTotalVisibleItem: Int = 0
     private var hideHandleJob: Job? = null
+    private var hidePopupJob: Job? = null
 
     private val trackLength: Float
         get() =
@@ -374,7 +374,6 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
 
             attribs.recycle()
         }
-        popupAnimationRunnable = Runnable { popupTextView.animateVisibilityPop(false) }
     }
 
     override fun onDetachedFromWindow() {
@@ -418,6 +417,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                         if (motionEvent.action == MotionEvent.ACTION_DOWN) {
                             // prevents the handle from fading if we've started moving the scrollbar manually
                             hideHandleJob?.cancel()
+                            hidePopupJob?.cancel()
 
                             handleImageView.animateVisibilitySlide()
 
@@ -507,10 +507,12 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                         if (isFastScrollEnabled) {
                             handleStateListener?.onReleased()
                             // hide the popup with a default anim delay
-                            handler.postDelayed(
-                                popupAnimationRunnable,
-                                Defaults.popupVisibilityDuration
-                            )
+                            hidePopupJob?.cancel()
+
+                            hidePopupJob = CoroutineScope(Dispatchers.Main).launch {
+                                delay(Defaults.popupVisibilityDuration)
+                                popupTextView.animateVisibilityPop(false)
+                            }
                         }
                         if (handleVisibilityDuration > 0) {
                             hideHandleJob?.cancel()
