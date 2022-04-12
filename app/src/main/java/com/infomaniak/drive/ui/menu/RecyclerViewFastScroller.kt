@@ -419,6 +419,8 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                             // prevents the handle from fading if we've started moving the scrollbar manually
                             hideHandleJob?.cancel()
 
+                            handleImageView.animateVisibilitySlide()
+
                             // disable the possibility to click on the track of the scrollbar
                             if (disableTrackTouch) {
                                 val handlePosition = IntArray(2).also {
