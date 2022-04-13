@@ -42,8 +42,6 @@ class PicturesAdapter(
     var pictureList: ArrayList<File> = arrayListOf()
     var duplicatedList: ArrayList<File> = arrayListOf()
 
-    var scrollBarTagList: ArrayList<String> = arrayListOf()
-
     private var lastSectionTitle = ""
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -138,17 +136,15 @@ class PicturesAdapter(
         updateMultiSelect?.invoke()
     }
 
-    fun formatList(context: Context, newPictureList: ArrayList<File>): ArrayList<Any> {
+    fun formatList(newPictureList: ArrayList<File>): ArrayList<Any> {
         pictureList.addAll(newPictureList)
         val addItemList: ArrayList<Any> = arrayListOf()
 
         for (file in newPictureList) {
-            val month = file.getMonth(context)
-            scrollBarTagList.add(month)
+            val month = file.getMonth()
             if (lastSectionTitle != month) {
                 addItemList.add(month)
                 lastSectionTitle = month
-                scrollBarTagList.add(month)
             }
             addItemList.add(file)
         }
@@ -162,7 +158,7 @@ class PicturesAdapter(
         for (file in duplicatedList) {
             pictureList.add(0, file)
 
-            val month = file.getMonth(context)
+            val month = file.getMonth()
             if (newestSectionTitle != month) {
                 // This case can only be hit once, when adding duplicated images.
                 // If we need to add a new month section title, it needs to be inserted at position 0.
@@ -179,11 +175,10 @@ class PicturesAdapter(
         duplicatedList.clear()
     }
 
-    private fun File.getMonth(context: Context): String {
+    private fun File.getMonth(): String {
         return getLastModifiedAt()
-            .format(context.getString(R.string.photosHeaderDateFormat))
+            .format("MMMM yyyy")
             .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-
     }
 
     fun clearPictures() {
@@ -250,10 +245,10 @@ class PicturesAdapter(
     }
 
     override fun onChange(position: Int): CharSequence {
-        return when {
-            position >= itemList.count() -> scrollBarTagList.last()
-            itemList[position] is String -> itemList[position] as String
-            itemList[position] is File -> scrollBarTagList[position]
+        return when (val item = itemList.getOrNull(position)) {
+            null -> lastSectionTitle
+            is String -> item
+            is File -> item.getMonth()
             else -> ""
         }
     }

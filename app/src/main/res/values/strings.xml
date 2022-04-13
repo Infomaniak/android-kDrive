@@ -544,8 +544,6 @@
     <string name="onBoardingTitle1">Access your files on all your devices</string>
     <string name="onBoardingTitle2">Work together in one place and become more efficient</string>
     <string name="onBoardingTitle3">Save your memories securely</string>
-    <!-- Displayed in a photo list some languages may need to display the date before the month -->
-    <string name="photosHeaderDateFormat">MMMM yyyy</string>
     <string name="picturesNoFile">No photo at this time</string>
     <string name="previewDownloadIndication">Loading in progress, please wait…</string>
     <string name="previewLoadError">Unable to load preview</string>

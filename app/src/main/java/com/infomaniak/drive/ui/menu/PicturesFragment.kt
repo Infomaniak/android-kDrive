@@ -189,7 +189,7 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
             picturesViewModel.getLastPictures(driveId, ignoreCloud).observe(viewLifecycleOwner) {
                 it?.let { (pictures, isComplete) ->
                     stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
-                    val pictureList = formatList(requireContext(), pictures)
+                    val pictureList = formatList(pictures)
                     picturesRecyclerView.post { addAll(pictureList) }
                     this.isComplete = isComplete
                     noPicturesLayout.toggleVisibility(pictureList.isEmpty())
