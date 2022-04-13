@@ -27,22 +27,21 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.BuildConfig
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.UiSettings
+import com.infomaniak.drive.databinding.FragmentBottomSheetBackgroundSyncBinding
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_background_sync.*
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_categories_information.actionButton
 
 class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
 
+    private lateinit var binding: FragmentBottomSheetBackgroundSyncBinding
     private val drivePermissions = DrivePermissions()
     private var hasDoneNecessary = false
     private var isWhitelisted = false
-    private val manufacturerWarning = EVIL_MANUFACTURERS.contains(Build.MANUFACTURER.lowercase()) || BuildConfig.DEBUG
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.fragment_bottom_sheet_background_sync, container, false)
+        binding = FragmentBottomSheetBackgroundSyncBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -52,12 +51,12 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
         UiSettings(requireActivity()).mustDisplayBatteryDialog = true
         shouldBeWhiteListed(checkWhitelisted(false))
 
-        allowBackgroundSyncSwitch.setOnCheckedChangeListener { _, isChecked -> shouldBeWhiteListed(isChecked) }
-        hasDoneNecessaryCheckbox.setOnCheckedChangeListener { _, isChecked ->
-            hasDoneNecessary = isChecked
+        with(binding) {
+            allowBackgroundSyncSwitch.setOnCheckedChangeListener { _, isChecked -> shouldBeWhiteListed(isChecked) }
+            hasDoneNecessaryCheckbox.setOnCheckedChangeListener { _, isChecked -> hasDoneNecessary = isChecked }
+            actionButton.setOnClickListener { dismiss() }
+            openGuideButton.setOnClickListener { context?.openUrl(SUPPORT_FAQ_BACKGROUND_FUNCTIONING_URL) }
         }
-        actionButton.setOnClickListener { dismiss() }
-        openGuideButton.setOnClickListener { context?.openUrl(SUPPORT_FAQ_BACKGROUND_FUNCTIONING_URL) }
     }
 
     override fun onDismiss(dialog: DialogInterface) {
@@ -79,11 +78,11 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun showManufacturerWarning(hasBatteryPermission: Boolean) {
         isWhitelisted = hasBatteryPermission
-        guideCard.isVisible = hasBatteryPermission && manufacturerWarning
+        binding.guideCard.isVisible = hasBatteryPermission && manufacturerWarning
     }
 
     private fun shouldBeWhiteListed(shouldBeWhitelisted: Boolean) {
-        allowBackgroundSyncSwitch.apply {
+        binding.allowBackgroundSyncSwitch.apply {
             isChecked = shouldBeWhitelisted
             isClickable = !shouldBeWhitelisted
         }
@@ -94,6 +93,8 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
 
         private val EVIL_MANUFACTURERS =
             arrayOf("asus", "huawei", "lenovo", "meizu", "oneplus", "oppo", "samsung", "vivo", "xiaomi")
+
+        private val manufacturerWarning = EVIL_MANUFACTURERS.contains(Build.MANUFACTURER.lowercase()) || BuildConfig.DEBUG
 
         private const val SUPPORT_FAQ_BACKGROUND_FUNCTIONING_URL = "https://faq.infomaniak.com/2685"
     }
