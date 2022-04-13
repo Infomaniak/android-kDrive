@@ -49,6 +49,6 @@
 
         <attr name="handleVisibilityDuration" format="integer" />
 
-        <attr name="disableTrackTouch" format="boolean"/>
+        <attr name="disableTrackTouch" format="boolean" />
     </declare-styleable>
 </resources>

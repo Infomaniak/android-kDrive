@@ -61,7 +61,8 @@
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/picturesFragmentView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="true" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

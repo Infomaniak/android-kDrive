@@ -41,9 +41,6 @@ class MenuPicturesFragment : Fragment() {
         binding = FragmentMenuPicturesBinding.inflate(inflater, container, false).apply {
             toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
             swipeRefreshLayout.setOnRefreshListener { picturesFragment.onRefreshPictures() }
-
-            // This line is required to be able to scroll down with the fast scrollbar in the gallery
-            picturesFragmentView.isNestedScrollingEnabled = true
         }
 
         binding.multiSelectLayout.apply {

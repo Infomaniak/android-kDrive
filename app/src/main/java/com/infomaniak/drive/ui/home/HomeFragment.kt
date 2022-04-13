@@ -122,10 +122,6 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             homeViewPager.setCurrentItem(UiSettings(requireContext()).lastHomeSelectedTab, false)
         }
 
-        // These two lines are required to be able to scroll down with the fast scrollbar in the home view
-        homeCoordinator.isNestedScrollingEnabled = true
-        homeViewPager.isNestedScrollingEnabled = true
-
         appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
             val bottomNavigation = (activity as MainActivity).bottomNavigation
             val bottomNavigationOffset =
