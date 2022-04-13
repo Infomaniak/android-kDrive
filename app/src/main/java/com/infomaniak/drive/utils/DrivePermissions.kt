@@ -80,7 +80,7 @@ class DrivePermissions {
         batteryPermissionResultLauncher = fragment.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             // TODO remove this fix when api 32 will be stable
             // Fix to bypass the api 32 permission intent returning result_cancelled for both deny and allow action
-            val isApi32 = Build.VERSION.SDK_INT == Build.VERSION_CODES.S_V2
+            val isApi32 = Build.VERSION.SDK_INT > Build.VERSION_CODES.S
             val hasPermission = it.resultCode == RESULT_OK || (isApi32 && checkBatteryLifePermission(false))
             onPermissionResult(hasPermission)
         }
