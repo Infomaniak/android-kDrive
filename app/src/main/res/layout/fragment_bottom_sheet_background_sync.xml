@@ -25,7 +25,6 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:animateLayoutChanges="true"
         android:paddingHorizontal="@dimen/marginStandard"
         tools:background="@color/appBar">
 
@@ -35,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_marginVertical="@dimen/marginStandard"
             android:maxHeight="270dp"
-            android:src="@drawable/mobile_sync"
+            android:src="@drawable/ic_mobile_sync"
             app:layout_constraintBottom_toTopOf="@id/title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

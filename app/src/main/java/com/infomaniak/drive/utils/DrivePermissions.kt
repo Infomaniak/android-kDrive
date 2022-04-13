@@ -36,8 +36,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsBottomSheetDialog
-import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsBottomSheetDialog.Companion.mustShowBatteryOptimizationDialog
 import com.infomaniak.lib.core.utils.hasPermissions
 import com.infomaniak.lib.core.utils.requestPermissionsIsPossible
 import com.infomaniak.lib.core.utils.startAppSettingsConfig
@@ -78,7 +78,11 @@ class DrivePermissions {
     fun registerBatteryPermission(fragment: Fragment, onPermissionResult: ((authorized: Boolean) -> Unit)) {
         activity = fragment.requireActivity()
         batteryPermissionResultLauncher = fragment.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            onPermissionResult(it.resultCode == RESULT_OK)
+            // TODO remove this fix when api 32 will be stable
+            // Fix to bypass the api 32 permission intent returning result_cancelled for both deny and allow action
+            val isApi32 = Build.VERSION.SDK_INT == Build.VERSION_CODES.S_V2
+            val hasPermission = it.resultCode == RESULT_OK || (isApi32 && checkBatteryLifePermission(false))
+            onPermissionResult(hasPermission)
         }
     }
 
@@ -99,8 +103,8 @@ class DrivePermissions {
      * @return [Boolean] true if the sync has all permissions or false
      */
     fun checkSyncPermissions(requestPermission: Boolean = true): Boolean {
-        if (activity.mustShowBatteryOptimizationDialog() || !checkBatteryLifePermission(false)) {
-            BackgroundSyncPermissionsBottomSheetDialog(this).show(activity.supportFragmentManager, "syncPermissionsDialog")
+        if (UiSettings(activity).mustDisplayBatteryDialog || !checkBatteryLifePermission(false)) {
+            BackgroundSyncPermissionsBottomSheetDialog().show(activity.supportFragmentManager, "syncPermissionsDialog")
         }
 
         return checkWriteStoragePermission(requestPermission)
