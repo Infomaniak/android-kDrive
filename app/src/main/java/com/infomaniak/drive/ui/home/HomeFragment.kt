@@ -21,9 +21,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.ViewCompat
-import androidx.core.view.isGone
-import androidx.core.view.isVisible
+import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -36,6 +34,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
+import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.ui.menu.PicturesFragment
@@ -43,6 +42,8 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.TabViewPagerUtils.FragmentTab
 import com.infomaniak.drive.utils.TabViewPagerUtils.getFragment
 import com.infomaniak.drive.utils.TabViewPagerUtils.setup
+import com.infomaniak.lib.core.utils.toPx
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.item_search_view.*
 
@@ -54,10 +55,13 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private val offlineFragment = HomeOfflineFragment().apply {
         arguments = FileListFragmentArgs(folderId = 1, folderName = "").toBundle()
     }
+
+    private val picturesFragment = PicturesFragment()
+
     private val tabsHome = arrayListOf(
         FragmentTab(HomeActivitiesFragment(), R.id.homeActivitiesButton),
         FragmentTab(offlineFragment, R.id.homeOfflineButton),
-        FragmentTab(PicturesFragment(), R.id.homePicturesButton),
+        FragmentTab(picturesFragment, R.id.homePicturesButton),
     )
 
     companion object {
@@ -115,8 +119,15 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         lifecycleScope.launchWhenResumed {
             setup(homeViewPager, tabsHomeGroup, tabsHome) { UiSettings(requireContext()).lastHomeSelectedTab = it }
-            homeViewPager.currentItem = UiSettings(requireContext()).lastHomeSelectedTab
+            homeViewPager.setCurrentItem(UiSettings(requireContext()).lastHomeSelectedTab, false)
         }
+
+        appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
+            val bottomNavigation = (activity as MainActivity).bottomNavigation
+            val bottomNavigationOffset =
+                bottomNavigation.layoutParams.height + bottomNavigation.marginBottom + bottomNavigation.marginTop + 10.toPx()
+            picturesFragment.setScrollbarTrackOffset(appBarLayout.totalScrollRange + verticalOffset + bottomNavigationOffset)
+        })
     }
 
     override fun onResume() {

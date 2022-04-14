@@ -530,8 +530,6 @@
     <string name="onBoardingTitle1">Accede a tus archivos en todos tus dispositivos</string>
     <string name="onBoardingTitle2">Trabaja en grupo en un mismo lugar y gana en eficacia</string>
     <string name="onBoardingTitle3">Haz copia de seguridad de tus recuerdos</string>
-    <!-- Displayed in a photo list some languages may need to display the date before the month -->
-    <string name="photosHeaderDateFormat">MMMM yyyy</string>
     <string name="picturesNoFile">Todavía no hay fotos</string>
     <string name="previewDownloadIndication">Cambio en curso, espera…</string>
     <string name="previewLoadError">No se puede cargar la vista previa</string>

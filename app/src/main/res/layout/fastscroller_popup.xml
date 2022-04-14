@@ -15,16 +15,17 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<resources>
-
-    <dimen name="bottomNavigationRadius">30dp</dimen>
-    <dimen name="h1">28sp</dimen>
-    <dimen name="h3">16sp</dimen>
-    <dimen name="userAvatarOverlap">-6dp</dimen>
-    <dimen name="categoryIconOverlap">-8dp</dimen>
-    <dimen name="coloredChipSize">56dp</dimen>
-
-    <!--fastScroller-->
-    <dimen name="defaultHandleSize">18dp</dimen>
-    <dimen name="defaultPopupPadding">16dp</dimen>
-</resources>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fastScrollPopup"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/pictures_fast_scrollbar_popup"
+    android:elevation="10dp"
+    android:gravity="center"
+    android:minWidth="56dp"
+    android:minHeight="56dp"
+    android:padding="@dimen/defaultPopupPadding"
+    android:scaleX="0"
+    android:scaleY="0"
+    tools:text="A" />

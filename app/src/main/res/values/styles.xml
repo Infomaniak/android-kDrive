@@ -231,6 +231,11 @@
         <item name="android:textSize">14sp</item>
     </style>
 
+    <style name="FastScrollerDefaultTextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/background</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
     <!--CardView-->
 
     <style name="CardViewInfomaniak" parent="Widget.MaterialComponents.CardView">
@@ -381,5 +386,4 @@
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
     </style>
-
 </resources>

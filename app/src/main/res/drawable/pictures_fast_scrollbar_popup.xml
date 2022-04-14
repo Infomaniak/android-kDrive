@@ -15,16 +15,8 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<resources>
-
-    <dimen name="bottomNavigationRadius">30dp</dimen>
-    <dimen name="h1">28sp</dimen>
-    <dimen name="h3">16sp</dimen>
-    <dimen name="userAvatarOverlap">-6dp</dimen>
-    <dimen name="categoryIconOverlap">-8dp</dimen>
-    <dimen name="coloredChipSize">56dp</dimen>
-
-    <!--fastScroller-->
-    <dimen name="defaultHandleSize">18dp</dimen>
-    <dimen name="defaultPopupPadding">16dp</dimen>
-</resources>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="100dp" />
+    <solid android:color="@color/backgroundCardview" />
+</shape>

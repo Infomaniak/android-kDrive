@@ -25,6 +25,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.appbar.AppBarLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentMenuPicturesBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
@@ -78,5 +79,9 @@ class MenuPicturesFragment : Fragment() {
         }
 
         picturesFragment.menuPicturesBinding = binding
+
+        binding.appBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
+            picturesFragment.setScrollbarTrackOffset(binding.appBar.totalScrollRange + verticalOffset)
+        })
     }
 }
