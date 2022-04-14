@@ -19,6 +19,7 @@ package com.infomaniak.drive
 
 import android.util.Log
 import com.google.gson.JsonObject
+import com.infomaniak.drive.BuildConfig.DRIVE_API
 import com.infomaniak.drive.data.api.ApiRepository.addCategory
 import com.infomaniak.drive.data.api.ApiRepository.createCategory
 import com.infomaniak.drive.data.api.ApiRepository.createTeamFolder
@@ -463,8 +464,8 @@ class ApiRepositoryTest : KDriveTest() {
         fun shareLink() {
             val fileShareLink = postFileShare(testFile)
             assertTrue(
-                fileShareLink.contains("https://drive.infomaniak.com/drive/[0-9]+/file/[0-9]+/share".toRegex()),
-                "Link should match regex 'https://drive.infomaniak.com/drive/[0-9]+/file/[0-9]+/share/'",
+                fileShareLink.contains("$DRIVE_API[0-9]+/file/[0-9]+/share".toRegex()),
+                "Link should match regex '$DRIVE_API[0-9]+/file/[0-9]+/share/'",
             )
         }
 

@@ -39,7 +39,6 @@ import android.util.DisplayMetrics
 import android.util.Patterns
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import android.view.animation.Animation
 import android.view.animation.RotateAnimation
 import android.view.inputmethod.EditorInfo
@@ -92,6 +91,8 @@ import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.UtilsUi.getInitials
+import com.infomaniak.lib.core.utils.lightNavigationBar
+import com.infomaniak.lib.core.utils.lightStatusBar
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.item_file.view.*
@@ -169,24 +170,6 @@ fun Activity.setColorStatusBar(appBar: Boolean = false) = with(window) {
     }
 }
 
-fun Window.lightStatusBar(enabled: Boolean) {
-    // TODO: DOESN'T WORK
-    // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-    //     if (enabled) {
-    //         insetsController?.setSystemBarsAppearance(APPEARANCE_LIGHT_STATUS_BARS, APPEARANCE_LIGHT_STATUS_BARS)
-    //     } else {
-    //         insetsController?.setSystemBarsAppearance(0, APPEARANCE_LIGHT_STATUS_BARS)
-    //     }
-    // } else
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        if (enabled) {
-            decorView.systemUiVisibility = decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-        } else {
-            decorView.systemUiVisibility = decorView.systemUiVisibility and View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
-        }
-    }
-}
-
 fun Activity.setColorNavigationBar(appBar: Boolean = false) = with(window) {
     val color = if (appBar) R.color.appBar else R.color.background
     when (resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)) {
@@ -201,17 +184,6 @@ fun Activity.setColorNavigationBar(appBar: Boolean = false) = with(window) {
             } else {
                 navigationBarColor = Color.BLACK
             }
-        }
-    }
-}
-
-fun Window.lightNavigationBar(enabled: Boolean) {
-    //TODO Android 11
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        if (enabled) {
-            decorView.systemUiVisibility = decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-        } else {
-            decorView.systemUiVisibility = decorView.systemUiVisibility and View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR.inv()
         }
     }
 }
