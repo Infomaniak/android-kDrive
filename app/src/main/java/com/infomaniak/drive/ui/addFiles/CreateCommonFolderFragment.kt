@@ -32,9 +32,9 @@ import com.infomaniak.drive.data.models.File.FolderPermission.SPECIFIC_USERS
 import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.MatomoUtils.trackNewElementEvent
-import com.infomaniak.drive.utils.hideKeyboard
 import com.infomaniak.drive.utils.safeNavigate
 import com.infomaniak.drive.utils.showSnackbar
+import com.infomaniak.lib.core.utils.hideKeyboard
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*

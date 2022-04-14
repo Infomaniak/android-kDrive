@@ -38,8 +38,8 @@ import com.infomaniak.drive.data.models.Team
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.hideKeyboard
 import com.infomaniak.drive.utils.showSnackbar
+import com.infomaniak.lib.core.utils.hideKeyboard
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress

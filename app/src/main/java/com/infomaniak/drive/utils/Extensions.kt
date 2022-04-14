@@ -430,11 +430,6 @@ fun FragmentActivity.requestCredentials(onSuccess: () -> Unit) {
     biometricPrompt.authenticate(promptInfo)
 }
 
-fun View.hideKeyboard() {
-    (context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager)
-        .hideSoftInputFromWindow(this.windowToken, 0)
-}
-
 fun Fragment.openOnlyOfficeDocument(file: File) {
     if (file.onlyofficeConvertExtension?.isNotBlank() == true) {
         findNavController().navigate(R.id.notSupportedExtensionBottomSheetDialog, bundleOf(FILE_ID to file.id))
