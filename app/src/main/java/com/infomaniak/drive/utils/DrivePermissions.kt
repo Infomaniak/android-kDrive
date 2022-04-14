@@ -19,6 +19,7 @@ package com.infomaniak.drive.utils
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity.RESULT_OK
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.DialogInterface
@@ -28,11 +29,15 @@ import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.UiSettings
+import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsBottomSheetDialog
 import com.infomaniak.lib.core.utils.hasPermissions
 import com.infomaniak.lib.core.utils.requestPermissionsIsPossible
 import com.infomaniak.lib.core.utils.startAppSettingsConfig
@@ -49,6 +54,7 @@ class DrivePermissions {
         }
     }
 
+    private lateinit var batteryPermissionResultLauncher: ActivityResultLauncher<Intent>
     private lateinit var registerForActivityResult: ActivityResultLauncher<Array<String>>
     private lateinit var activity: FragmentActivity
 
@@ -61,12 +67,23 @@ class DrivePermissions {
     }
 
     fun registerPermissions(fragment: Fragment, onPermissionResult: ((authorized: Boolean) -> Unit)? = null) {
-        this.activity = fragment.requireActivity()
+        activity = fragment.requireActivity()
         registerForActivityResult =
             fragment.registerForActivityResult(RequestMultiplePermissions()) { permissions ->
                 val authorized = permissions.values.all { it == true }
                 resultPermissions(onPermissionResult, authorized)
             }
+    }
+
+    fun registerBatteryPermission(fragment: Fragment, onPermissionResult: ((authorized: Boolean) -> Unit)) {
+        activity = fragment.requireActivity()
+        batteryPermissionResultLauncher = fragment.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            // TODO remove this fix when api 32 will be stable
+            // Fix to bypass the api 32 permission intent returning result_cancelled for both deny and allow action
+            val isAboveApi31 = Build.VERSION.SDK_INT > Build.VERSION_CODES.S
+            val hasPermission = it.resultCode == RESULT_OK || (isAboveApi31 && checkBatteryLifePermission(false))
+            onPermissionResult(hasPermission)
+        }
     }
 
     private fun resultPermissions(onPermissionResult: ((authorized: Boolean) -> Unit)?, authorized: Boolean) {
@@ -86,7 +103,10 @@ class DrivePermissions {
      * @return [Boolean] true if the sync has all permissions or false
      */
     fun checkSyncPermissions(requestPermission: Boolean = true): Boolean {
-        activity.batteryLifePermission()
+        if (UiSettings(activity).mustDisplayBatteryDialog || !checkBatteryLifePermission(false)) {
+            BackgroundSyncPermissionsBottomSheetDialog().show(activity.supportFragmentManager, "syncPermissionsDialog")
+        }
+
         return checkWriteStoragePermission(requestPermission)
     }
 
@@ -105,25 +125,40 @@ class DrivePermissions {
         }
     }
 
-    @SuppressLint("BatteryLife")
-    private fun Context.batteryLifePermission() {
-        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager?
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && powerManager?.isIgnoringBatteryOptimizations(packageName) == false) {
-            val intent = Intent(
-                Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                Uri.parse("package:$packageName")
-            )
+    /**
+     * Checks if the user has already confirmed battery optimization's disabling permission
+     */
+    fun checkBatteryLifePermission(requestPermission: Boolean): Boolean {
+        return with(activity) {
+            val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager?
+            when {
+                Build.VERSION.SDK_INT < Build.VERSION_CODES.M -> true
+                powerManager?.isIgnoringBatteryOptimizations(packageName) != false -> true
+                else -> {
+                    if (requestPermission) requestBatteryOptimizationPermission()
+                    false
+                }
+            }
+        }
+    }
 
+    @SuppressLint("BatteryLife")
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun Context.requestBatteryOptimizationPermission() {
+        val intent = Intent(
+            Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+            Uri.parse("package:$packageName")
+        )
+
+        try {
+            batteryPermissionResultLauncher.launch(intent)
+        } catch (activityNotFoundException: ActivityNotFoundException) {
             try {
-                startActivity(intent)
-            } catch (activityNotFoundException: ActivityNotFoundException) {
-                try {
-                    startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
-                } catch (exception: Exception) {
-                    Sentry.withScope { scope ->
-                        scope.level = SentryLevel.WARNING
-                        Sentry.captureException(exception)
-                    }
+                batteryPermissionResultLauncher.launch(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+            } catch (exception: Exception) {
+                Sentry.withScope { scope ->
+                    scope.level = SentryLevel.WARNING
+                    Sentry.captureException(exception)
                 }
             }
         }

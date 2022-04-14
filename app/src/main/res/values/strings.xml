@@ -96,6 +96,13 @@
     <string name="allYesterday">Yesterday</string>
     <string name="appSecurityDescription">Protect access to your app by enabling your phone lock.</string>
     <string name="appSecurityTitle">App lock</string>
+    <string name="backgroundSyncCheckboxTitle">I’ve taken the appropriate steps</string>
+    <string name="backgroundSyncDescription">To ensure proper kDrive’s functioning, please enable background synchronization on your phone</string>
+    <string name="backgroundSyncOpenGuideButton">Open guide</string>
+    <string name="backgroundSyncOpenGuideDescription">It may be possible that your phone model blocks the background synchronization even though the option is activated. Please follow this guide to make it work. Otherwise, you will have to manually sync your files from the application.</string>
+    <string name="backgroundSyncSwitchDescription">The application will automatically synchronize your files in the background.</string>
+    <string name="backgroundSyncSwitchTitle">Allow the application to run in the background</string>
+    <string name="backgroundSyncTitle">Background synchronization</string>
     <string name="belongToAllCategoriesFilterDescription">Results must belong to all selected categories</string>
     <string name="belongToOneCategoryFilterDescription">Results must belong to one of the selected categories</string>
     <string name="buttonAdd">Add</string>

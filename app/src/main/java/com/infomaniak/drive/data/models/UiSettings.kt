@@ -99,6 +99,15 @@ class UiSettings(private val context: Context) {
             }
         }
 
+    var mustDisplayBatteryDialog: Boolean
+        get() = getUiSettings().getBoolean("mustDisplayBatteryDialog", true)
+        set(value) {
+            with(getUiSettings().edit()) {
+                putBoolean("mustDisplayBatteryDialog", value)
+                apply()
+            }
+        }
+
     var nightMode: Int
         get() = getUiSettings().getInt("nightMode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         set(value) {
