@@ -91,11 +91,11 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
 
     companion object {
 
-        private val EVIL_MANUFACTURERS =
-            arrayOf("asus", "huawei", "lenovo", "meizu", "oneplus", "oppo", "samsung", "vivo", "xiaomi")
+        private val EVIL_MANUFACTURERS = arrayOf("asus", "huawei", "lenovo", "meizu", "oneplus", "oppo", "vivo", "xiaomi")
 
         private val manufacturerWarning = EVIL_MANUFACTURERS.contains(Build.MANUFACTURER.lowercase()) || BuildConfig.DEBUG
 
         private const val SUPPORT_FAQ_BACKGROUND_FUNCTIONING_URL = "https://faq.infomaniak.com/2685"
+
     }
 }

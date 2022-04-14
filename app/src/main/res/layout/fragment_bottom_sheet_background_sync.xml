@@ -25,6 +25,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
         android:paddingHorizontal="@dimen/marginStandard"
         tools:background="@color/appBar">
 
@@ -33,8 +34,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginVertical="@dimen/marginStandard"
-            android:maxHeight="270dp"
-            android:src="@drawable/ic_mobile_sync"
+            android:src="@drawable/ic_background_sync"
             app:layout_constraintBottom_toTopOf="@id/title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -110,7 +110,8 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="@dimen/marginStandardMedium">
+                android:paddingHorizontal="@dimen/marginStandardMedium"
+                android:paddingTop="@dimen/marginStandardMedium">
 
                 <ImageView
                     android:id="@+id/icon"
@@ -139,7 +140,6 @@
                     style="@style/ButtonInfomaniak"
                     android:layout_width="0dp"
                     android:layout_marginTop="@dimen/marginStandardMedium"
-                    android:layout_marginBottom="@dimen/marginStandard"
                     android:text="@string/backgroundSyncOpenGuideButton"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -147,16 +147,16 @@
 
                 <com.google.android.material.checkbox.MaterialCheckBox
                     android:id="@+id/hasDoneNecessaryCheckbox"
-                    style="@style/Subtitle1"
+                    style="@style/Subtitle2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/marginStandard"
-                    android:button="@drawable/ic_checkbox"
-                    android:paddingStart="@dimen/marginStandardSmall"
+                    android:layout_marginTop="@dimen/marginStandardSmall"
+                    android:layout_marginBottom="@dimen/marginStandardSmall"
                     android:text="@string/backgroundSyncCheckboxTitle"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/openGuideButton"
-                    app:useMaterialThemeColors="false"
                     tools:ignore="RtlSymmetry" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -165,7 +165,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/actionButton"
-            style="@style/ButtonInfomaniak"
+            style="@style/ButtonInfomaniak.Light"
             android:layout_width="0dp"
             android:layout_marginBottom="@dimen/marginStandard"
             android:text="@string/buttonClose"
