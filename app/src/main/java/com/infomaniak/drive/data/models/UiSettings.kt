@@ -63,15 +63,6 @@ class UiSettings(private val context: Context) {
             }
         }
 
-    var hasDisplayedCategoriesInformationDialog: Boolean
-        get() = getUiSettings().getBoolean("hasDisplayedCategoriesInformationDialog", false)
-        set(value) {
-            with(getUiSettings().edit()) {
-                putBoolean("hasDisplayedCategoriesInformationDialog", value)
-                apply()
-            }
-        }
-
     var hasDisplayedSyncDialog: Boolean
         get() = getUiSettings().getBoolean("hasDisplayedSyncDialog", false)
         set(value) {

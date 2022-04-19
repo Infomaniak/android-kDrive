@@ -169,8 +169,6 @@
     <string name="buttonUpload">Importa dal telefono</string>
     <string name="buttonValid">Convalida</string>
     <string name="categoriesFilterTitle">Categorie</string>
-    <string name="categoriesPanelDescription">kDrive ora ti permette di classificare i tuoi documenti con categorie personalizzate. La ricerca permette poi di trovare i file secondo le categorie di vostra scelta.</string>
-    <string name="categoriesPanelTitle">Novità: semplificare l’archiviazione con le categorie!</string>
     <string name="categoryBanking">Banca</string>
     <string name="categoryBill">Fattura</string>
     <string name="categoryColorTitle">Colore della categoria</string>
