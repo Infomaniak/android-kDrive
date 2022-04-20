@@ -105,9 +105,17 @@ class DrivePermissions {
      * @return [Boolean] true if the sync has all permissions or false
      */
     fun checkSyncPermissions(requestPermission: Boolean = true): Boolean {
+
+        fun displayBatteryDialog() {
+            with(backgroundSyncPermissionsBottomSheetDialog) {
+                if (dialog?.isShowing != true && !isResumed) {
+                    show(this@DrivePermissions.activity.supportFragmentManager, "syncPermissionsDialog")
+                }
+            }
+        }
+
         if (UiSettings(activity).mustDisplayBatteryDialog || !checkBatteryLifePermission(false)) {
-            if (backgroundSyncPermissionsBottomSheetDialog.dialog?.isShowing != true && !backgroundSyncPermissionsBottomSheetDialog.isResumed)
-                backgroundSyncPermissionsBottomSheetDialog.show(activity.supportFragmentManager, "syncPermissionsDialog")
+            displayBatteryDialog()
         }
 
         return checkWriteStoragePermission(requestPermission)
