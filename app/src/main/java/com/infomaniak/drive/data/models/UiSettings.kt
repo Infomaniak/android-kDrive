@@ -22,6 +22,7 @@ import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
 import com.google.gson.reflect.TypeToken
 import com.infomaniak.drive.R
+import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsBottomSheetDialog.Companion.manufacturerWarning
 import com.infomaniak.lib.core.utils.ApiController
 
 class UiSettings(private val context: Context) {
@@ -91,7 +92,7 @@ class UiSettings(private val context: Context) {
         }
 
     var mustDisplayBatteryDialog: Boolean
-        get() = getUiSettings().getBoolean("mustDisplayBatteryDialog", true)
+        get() = getUiSettings().getBoolean("mustDisplayBatteryDialog", manufacturerWarning)
         set(value) {
             with(getUiSettings().edit()) {
                 putBoolean("mustDisplayBatteryDialog", value)

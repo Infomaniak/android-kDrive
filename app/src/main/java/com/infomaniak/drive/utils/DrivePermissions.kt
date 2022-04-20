@@ -58,6 +58,8 @@ class DrivePermissions {
     private lateinit var registerForActivityResult: ActivityResultLauncher<Array<String>>
     private lateinit var activity: FragmentActivity
 
+    private val backgroundSyncPermissionsBottomSheetDialog by lazy { BackgroundSyncPermissionsBottomSheetDialog() }
+
     fun registerPermissions(activity: FragmentActivity, onPermissionResult: ((authorized: Boolean) -> Unit)? = null) {
         this.activity = activity
         registerForActivityResult = activity.registerForActivityResult(RequestMultiplePermissions()) { permissions ->
@@ -104,7 +106,8 @@ class DrivePermissions {
      */
     fun checkSyncPermissions(requestPermission: Boolean = true): Boolean {
         if (UiSettings(activity).mustDisplayBatteryDialog || !checkBatteryLifePermission(false)) {
-            BackgroundSyncPermissionsBottomSheetDialog().show(activity.supportFragmentManager, "syncPermissionsDialog")
+            if (backgroundSyncPermissionsBottomSheetDialog.dialog?.isShowing != true && !backgroundSyncPermissionsBottomSheetDialog.isResumed)
+                backgroundSyncPermissionsBottomSheetDialog.show(activity.supportFragmentManager, "syncPermissionsDialog")
         }
 
         return checkWriteStoragePermission(requestPermission)
