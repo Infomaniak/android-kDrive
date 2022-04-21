@@ -18,6 +18,4 @@
 <resources>
     <color name="iconColor">#88969F</color>
     <color name="disabledButtonBackgroundColor">@android:color/white</color>
-    <!--backgroundCardview + 80% alpha-->
-    <color name="backgroundCardviewTransparent">#CC2D2E30</color>
 </resources>

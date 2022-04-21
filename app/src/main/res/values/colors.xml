@@ -20,6 +20,4 @@
     <color name="previewBackground">#111C28</color>
     <color name="previewBackgroundTransparent">#80111C28</color>
     <color name="disabledButtonBackgroundColor">@android:color/black</color>
-    <!--backgroundCardview + 80% alpha-->
-    <color name="backgroundCardviewTransparent">#CCFFFFFF</color>
 </resources>
