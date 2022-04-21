@@ -613,12 +613,6 @@
         tools:layout="@layout/fragment_bottom_sheet_information" />
 
     <dialog
-        android:id="@+id/categoriesInformationBottomSheetDialog"
-        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.CategoriesInformationBottomSheetDialog"
-        android:label="CategoriesInformationBottomSheetDialog"
-        tools:layout="@layout/fragment_bottom_sheet_categories_information" />
-
-    <dialog
         android:id="@+id/secureLinkShareBottomSheetDialog"
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SecureLinkShareBottomSheetDialog"
         android:label="SecureLinkShareBottomSheetDialog"

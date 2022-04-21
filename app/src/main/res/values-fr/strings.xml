@@ -169,8 +169,6 @@
     <string name="buttonUpload">Importer depuis le téléphone</string>
     <string name="buttonValid">Valider</string>
     <string name="categoriesFilterTitle">Catégories</string>
-    <string name="categoriesPanelDescription">kDrive permet maintenant de classer vos documents avec des catégories personnalisées. La recherche vous permet ensuite de retrouver les fichiers selon les catégories de votre choix.</string>
-    <string name="categoriesPanelTitle">Nouveau : simplifiez votre classement avec les catégories !</string>
     <string name="categoryBanking">Banque</string>
     <string name="categoryBill">Facture</string>
     <string name="categoryColorTitle">Couleur de la catégorie</string>
@@ -528,7 +526,7 @@
     <string name="notificationTitle">Notifications</string>
     <string name="notificationUploadDownloadChannelName">Importations et téléchargements</string>
     <string name="notificationUploadServiceChannelName">Service d’importation de fichier</string>
-    <string name="offlineFileNoFile">Aucun fichier hors-ligne</string>
+    <string name="offlineFileNoFile">Aucun fichier hors ligne</string>
     <string name="offlineFileNoFileDescription">Sélectionnez un fichier et rendez le disponible hors connexion pour le retrouver ici lorsque vous n’avez pas de réseau.</string>
     <string name="offlineFileTitle">Hors ligne</string>
     <string name="onBoardingDescription1">kDrive est compatible avec tous les appareils. Que vous soyez au bureau, à la maison ou en déplacement, vous pouvez travailler, partager et accéder sereinement à toutes vos données.</string>

@@ -37,7 +37,7 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
     private lateinit var binding: FragmentBottomSheetBackgroundSyncBinding
     private val drivePermissions = DrivePermissions()
     private var hasDoneNecessary = false
-    private var isWhitelisted = false
+    private var hadBatteryLifePermission = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentBottomSheetBackgroundSyncBinding.inflate(inflater, container, false)
@@ -48,11 +48,11 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         drivePermissions.registerBatteryPermission(this) { hasPermission -> onPermissionGranted(hasPermission) }
-        UiSettings(requireActivity()).mustDisplayBatteryDialog = true
-        shouldBeWhiteListed(checkWhitelisted(false))
+
+        setAllowBackgroundSyncSwitch(checkBatteryLifePermission(false))
 
         with(binding) {
-            allowBackgroundSyncSwitch.setOnCheckedChangeListener { _, isChecked -> shouldBeWhiteListed(isChecked) }
+            allowBackgroundSyncSwitch.setOnCheckedChangeListener { _, isChecked -> setAllowBackgroundSyncSwitch(isChecked) }
             hasDoneNecessaryCheckbox.setOnCheckedChangeListener { _, isChecked -> hasDoneNecessary = isChecked }
             actionButton.setOnClickListener { dismiss() }
             openGuideButton.setOnClickListener { context?.openUrl(SUPPORT_FAQ_BACKGROUND_FUNCTIONING_URL) }
@@ -60,40 +60,44 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     override fun onDismiss(dialog: DialogInterface) {
-        UiSettings(requireActivity()).mustDisplayBatteryDialog = !(hasDoneNecessary && isWhitelisted)
+        UiSettings(requireActivity()).mustDisplayBatteryDialog = if (manufacturerWarning) !hasDoneNecessary else false
         super.onDismiss(dialog)
     }
 
     private fun onPermissionGranted(hasPermission: Boolean) {
-        shouldBeWhiteListed(hasPermission)
-        showManufacturerWarning(hasPermission)
+        setAllowBackgroundSyncSwitch(hasPermission)
+        onHasBatteryPermission(hasPermission)
         if (hasPermission && !manufacturerWarning) hasDoneNecessary = true
     }
 
-    private fun checkWhitelisted(requestPermission: Boolean): Boolean {
+    private fun checkBatteryLifePermission(requestPermission: Boolean): Boolean {
         return drivePermissions.checkBatteryLifePermission(requestPermission).also { hasPermission ->
-            showManufacturerWarning(hasPermission)
+            onHasBatteryPermission(hasPermission)
         }
+    }
+
+    private fun onHasBatteryPermission(hasBatteryPermission: Boolean) {
+        hadBatteryLifePermission = hasBatteryPermission
+        showManufacturerWarning(hasBatteryPermission)
     }
 
     private fun showManufacturerWarning(hasBatteryPermission: Boolean) {
-        isWhitelisted = hasBatteryPermission
         binding.guideCard.isVisible = hasBatteryPermission && manufacturerWarning
     }
 
-    private fun shouldBeWhiteListed(shouldBeWhitelisted: Boolean) {
+    private fun setAllowBackgroundSyncSwitch(hasBatteryPermission: Boolean) {
         binding.allowBackgroundSyncSwitch.apply {
-            isChecked = shouldBeWhitelisted
-            isClickable = !shouldBeWhitelisted
+            isChecked = hasBatteryPermission
+            isClickable = !hasBatteryPermission
         }
-        if (shouldBeWhitelisted && !isWhitelisted) checkWhitelisted(true)
+        if (hasBatteryPermission && !hadBatteryLifePermission) checkBatteryLifePermission(true)
     }
 
     companion object {
 
         private val EVIL_MANUFACTURERS = arrayOf("asus", "huawei", "lenovo", "meizu", "oneplus", "oppo", "vivo", "xiaomi")
 
-        private val manufacturerWarning = EVIL_MANUFACTURERS.contains(Build.MANUFACTURER.lowercase()) || BuildConfig.DEBUG
+        val manufacturerWarning = EVIL_MANUFACTURERS.contains(Build.MANUFACTURER.lowercase()) || BuildConfig.DEBUG
 
         private const val SUPPORT_FAQ_BACKGROUND_FUNCTIONING_URL = "https://faq.infomaniak.com/2685"
 

@@ -183,8 +183,6 @@
     <string name="buttonUpload">Upload from phone</string>
     <string name="buttonValid">Validate</string>
     <string name="categoriesFilterTitle">Categories</string>
-    <string name="categoriesPanelDescription">kDrive now allows you to classify your documents with custom categories. The search then allows you to find files according to the categories of your choice.</string>
-    <string name="categoriesPanelTitle">New: Simplify your filing with categories!</string>
     <string name="categoryBanking">Banking</string>
     <string name="categoryBill">Bill</string>
     <string name="categoryColorTitle">Category colour</string>

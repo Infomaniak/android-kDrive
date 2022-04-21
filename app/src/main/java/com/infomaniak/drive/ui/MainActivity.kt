@@ -374,10 +374,6 @@ class MainActivity : BaseActivity() {
                         hasDisplayedSyncDialog = true
                         if (AppSettings.migrated) R.id.syncAfterMigrationBottomSheetDialog else R.id.syncConfigureBottomSheetDialog
                     }
-                    !hasDisplayedCategoriesInformationDialog -> {
-                        hasDisplayedCategoriesInformationDialog = true
-                        R.id.categoriesInformationBottomSheetDialog
-                    }
                     else -> null
                 }
                 destinationId?.let {

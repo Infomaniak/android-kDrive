@@ -169,8 +169,6 @@
     <string name="buttonUpload">Vom Telefon importieren</string>
     <string name="buttonValid">Validieren</string>
     <string name="categoriesFilterTitle">Kategorien</string>
-    <string name="categoriesPanelDescription">Mit kDrive können Sie jetzt Ihre Dokumente mit benutzerdefinierten Kategorien klassifizieren. Die Suche ermöglicht es Ihnen dann, Dateien nach den von Ihnen gewählten Kategorien zu suchen.</string>
-    <string name="categoriesPanelTitle">Neu: Vereinfachen Sie Ihre Ablage mit Kategorien!</string>
     <string name="categoryBanking">Bank</string>
     <string name="categoryBill">Rechnung</string>
     <string name="categoryColorTitle">Farbe der Kategorie</string>

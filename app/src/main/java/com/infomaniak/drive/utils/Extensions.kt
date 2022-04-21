@@ -42,7 +42,6 @@ import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.RotateAnimation
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import androidx.activity.result.ActivityResult
 import androidx.annotation.DrawableRes
