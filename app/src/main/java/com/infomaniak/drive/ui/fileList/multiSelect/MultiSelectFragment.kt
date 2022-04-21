@@ -57,6 +57,7 @@ import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.Utils.moveFileClicked
+import com.infomaniak.lib.core.utils.capitalizeFirstChar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -499,7 +500,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
 
     private fun Context.trackBulkActionEvent(category: String, action: BulkOperationType, modifiedFileNumber: Int) {
 
-        fun BulkOperationType.toMatomoString(): String = name.lowercase().replaceFirstChar { it.titlecase() }
+        fun BulkOperationType.toMatomoString(): String = name.lowercase().capitalizeFirstChar()
 
         val trackerName = "bulk" + (if (modifiedFileNumber == 1) "Single" else "") + action.toMatomoString()
         trackEvent(category, TrackerAction.CLICK, trackerName, modifiedFileNumber.toFloat())

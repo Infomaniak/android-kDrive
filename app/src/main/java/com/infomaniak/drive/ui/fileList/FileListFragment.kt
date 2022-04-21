@@ -60,13 +60,11 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.FilePresenter.openBookmark
 import com.infomaniak.drive.utils.FilePresenter.openBookmarkIntent
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
+import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
-import com.infomaniak.lib.core.utils.hideProgress
-import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.setPagination
-import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.coroutines.*
 
@@ -443,7 +441,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                         file.isFolder() -> file.openFolder()
                         file.isBookmark() -> openBookmark(file)
                         else -> {
-                            val trackerName = "preview" + file.getFileType().value.replaceFirstChar { it.titlecase() }
+                            val trackerName = "preview" + file.getFileType().value.capitalizeFirstChar()
                             trackEvent("preview", TrackerAction.CLICK, trackerName)
                             file.displayFile()
                         }

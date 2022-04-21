@@ -15,8 +15,8 @@ android {
         applicationId 'com.infomaniak.drive'
         minSdkVersion 21
         targetSdkVersion 32
-        versionCode 4_01_004_01
-        versionName '4.1.4'
+        versionCode 4_01_005_01
+        versionName '4.1.5'
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         buildConfigField 'String', 'CLIENT_ID', '"9473D73C-C20F-4971-9E10-D957C563FA68"'
@@ -128,7 +128,7 @@ dependencies {
     implementation 'io.realm:android-adapters:4.0.0'
 
     standardImplementation 'com.google.android.play:core:1.10.3'
-    standardImplementation 'com.google.firebase:firebase-messaging-ktx:23.0.2'
+    standardImplementation 'com.google.firebase:firebase-messaging-ktx:23.0.3'
 
     implementation 'com.googlecode.plist:dd-plist:1.23'
 

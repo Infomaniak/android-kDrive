@@ -41,7 +41,6 @@ import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
-import com.infomaniak.lib.core.utils.UtilsUi.getInitials
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress
@@ -160,7 +159,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                 lifecycleScope.launch(Dispatchers.IO) {
                     requireContext().apply {
                         val fallback = generateInitialsAvatarDrawable(
-                            initials = item.displayName.getInitials(),
+                            initials = item.getInitials(),
                             background = getBackgroundColorBasedOnId(item.id)
                         )
                         val imageLoader = ImageLoader.Builder(this).build()

@@ -123,10 +123,12 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
-            val bottomNavigation = (activity as MainActivity).bottomNavigation
-            val bottomNavigationOffset =
-                bottomNavigation.layoutParams.height + bottomNavigation.marginBottom + bottomNavigation.marginTop + 10.toPx()
-            picturesFragment.setScrollbarTrackOffset(appBarLayout.totalScrollRange + verticalOffset + bottomNavigationOffset)
+            (activity as MainActivity).bottomNavigation?.apply {
+                val bottomNavigationOffset = layoutParams.height + marginBottom + marginTop + 10.toPx()
+                picturesFragment.setScrollbarTrackOffset(
+                    appBarLayout?.totalScrollRange ?: 0 + verticalOffset + bottomNavigationOffset
+                )
+            }
         })
     }
 

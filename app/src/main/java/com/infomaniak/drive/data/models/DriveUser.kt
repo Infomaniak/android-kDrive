@@ -19,6 +19,7 @@ package com.infomaniak.drive.data.models
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import com.infomaniak.lib.core.utils.firstOrEmpty
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
 import kotlinx.android.parcel.Parcelize
@@ -46,6 +47,14 @@ open class DriveUser(
 
     fun getUserAvatar(): String {
         return if (avatar.isNotBlank()) avatar else avatarUrl.toString()
+    }
+
+    fun getInitials(): String {
+        displayName.split(" ").let { initials ->
+            val initialFirst = initials.firstOrNull()?.firstOrEmpty()?.uppercaseChar() ?: ""
+            val initialSecond = initials.getOrNull(1)?.firstOrEmpty()?.uppercaseChar() ?: ""
+            return@getInitials "$initialFirst$initialSecond"
+        }
     }
 
     enum class Type(val value: String) {

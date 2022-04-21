@@ -89,7 +89,6 @@ import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
-import com.infomaniak.lib.core.utils.UtilsUi.getInitials
 import com.infomaniak.lib.core.utils.lightNavigationBar
 import com.infomaniak.lib.core.utils.lightStatusBar
 import io.realm.RealmList
@@ -126,7 +125,7 @@ fun ImageView.loadAny(data: Any?, @DrawableRes errorRes: Int = R.drawable.fallba
 }
 
 fun ImageView.loadAvatar(driveUser: DriveUser): Disposable {
-    return loadAvatar(driveUser.id, driveUser.getUserAvatar(), driveUser.displayName.getInitials())
+    return loadAvatar(driveUser.id, driveUser.getUserAvatar(), driveUser.getInitials())
 }
 
 fun ImageView.loadAvatar(user: User): Disposable = loadAvatar(user.id, user.avatar, user.getInitials())

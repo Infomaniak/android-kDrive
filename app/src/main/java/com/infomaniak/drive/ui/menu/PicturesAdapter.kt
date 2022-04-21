@@ -27,6 +27,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager
 import com.infomaniak.drive.utils.loadAny
+import com.infomaniak.lib.core.utils.capitalizeFirstChar
 import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.LoaderCardView
@@ -176,9 +177,7 @@ class PicturesAdapter(
     }
 
     private fun File.getMonth(): String {
-        return getLastModifiedAt()
-            .format("MMMM yyyy")
-            .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        return getLastModifiedAt().format("MMMM yyyy").capitalizeFirstChar()
     }
 
     fun clearPictures() {
