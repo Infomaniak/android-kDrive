@@ -18,15 +18,14 @@
 package com.infomaniak.drive.data.models
 
 import com.google.gson.annotations.SerializedName
-import com.infomaniak.lib.core.models.user.User
 import java.util.*
 
 data class FileComment(
     val id: Int,
-    val user: User,
+    val user: DriveUser,
     var body: String,
     var liked: Boolean,
-    var likes: ArrayList<User>?,
+    var likes: ArrayList<DriveUser>?,
     @SerializedName("parent_id") val parentId: Int,
     @SerializedName("updated_at") val updatedAt: Date,
     @SerializedName("created_at") val createdAt: Date,
