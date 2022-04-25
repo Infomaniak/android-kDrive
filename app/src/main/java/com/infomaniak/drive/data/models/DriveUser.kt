@@ -19,6 +19,7 @@ package com.infomaniak.drive.data.models
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.utils.firstOrEmpty
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
@@ -42,6 +43,11 @@ open class DriveUser(
     var status: String = "",
     var type: String = "",
 ) : RealmObject(), Parcelable, Shareable {
+
+    constructor(user: User) : this() {
+        id = user.id
+        displayName = user.displayName ?: ""
+    }
 
     fun isExternalUser(): Boolean = type == Type.SHARED.value
 

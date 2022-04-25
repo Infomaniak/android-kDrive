@@ -23,6 +23,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileComment
 import com.infomaniak.drive.utils.*
@@ -174,7 +175,9 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
                 if (apiResponse.isSuccess()) {
                     fileComment.liked = true
                     AccountUtils.currentUser?.let {
-                        if (fileComment.likes == null) fileComment.likes = arrayListOf(it) else fileComment.likes?.add(it)
+                        val currentDriveUser = DriveUser(it)
+                        if (fileComment.likes == null) fileComment.likes = arrayListOf(currentDriveUser)
+                        else fileComment.likes?.add(currentDriveUser)
                     }
                     fileComment.likesCount = fileComment.likesCount + 1
                     commentsAdapter.updateComment(fileComment)
