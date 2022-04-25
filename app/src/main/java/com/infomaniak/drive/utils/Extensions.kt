@@ -62,7 +62,6 @@ import androidx.navigation.Navigator
 import androidx.navigation.fragment.DialogFragmentNavigator
 import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.findNavController
-import coil.ImageLoader
 import coil.load
 import coil.request.Disposable
 import com.google.android.material.card.MaterialCardView
@@ -87,10 +86,9 @@ import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.MatomoUtils.trackShareRightsEvent
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpUtils
-import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
-import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.lightNavigationBar
 import com.infomaniak.lib.core.utils.lightStatusBar
+import com.infomaniak.lib.core.utils.loadAvatar
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.item_file.view.*
@@ -126,21 +124,6 @@ fun ImageView.loadAny(data: Any?, @DrawableRes errorRes: Int = R.drawable.fallba
 
 fun ImageView.loadAvatar(driveUser: DriveUser): Disposable {
     return loadAvatar(driveUser.id, driveUser.getUserAvatar(), driveUser.getInitials())
-}
-
-fun ImageView.loadAvatar(user: User): Disposable = loadAvatar(user.id, user.avatar, user.getInitials())
-
-fun ImageView.loadAvatar(id: Int, avatarUrl: String?, initials: String): Disposable {
-    val imageLoader = ImageLoader.Builder(context).build()
-    val fallback = context.generateInitialsAvatarDrawable(
-        initials = initials,
-        background = context.getBackgroundColorBasedOnId(id),
-    )
-    return load(avatarUrl, imageLoader) {
-        error(fallback)
-        fallback(fallback)
-        placeholder(R.drawable.placeholder)
-    }
 }
 
 fun TextInputEditText.showOrHideEmptyError(): Boolean {

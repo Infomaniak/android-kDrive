@@ -23,7 +23,7 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.TooltipCompat
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.FileComment
-import com.infomaniak.drive.utils.loadAvatar
+import com.infomaniak.lib.core.utils.loadAvatar
 import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_file_comment.view.*

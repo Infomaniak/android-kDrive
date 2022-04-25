@@ -35,6 +35,7 @@ import com.infomaniak.drive.data.models.Shareable.ShareablePermission
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.lib.core.models.user.User
+import com.infomaniak.lib.core.utils.loadAvatar
 import com.infomaniak.lib.core.utils.toPx
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_permission.view.*

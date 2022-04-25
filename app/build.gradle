@@ -119,7 +119,7 @@ dependencies {
     implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
     implementation "com.google.android.exoplayer:extension-okhttp:$exoplayer_version"
 
-    implementation 'com.airbnb.android:lottie:5.0.3'
+    implementation 'com.airbnb.android:lottie:5.1.1'
     implementation 'com.github.MikeOrtiz:TouchImageView:3.2.0'
     implementation 'com.tbuonomo:dotsindicator:4.2'
     implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
@@ -132,7 +132,7 @@ dependencies {
 
     implementation 'com.googlecode.plist:dd-plist:1.23'
 
-    implementation 'com.github.hannesa2:paho.mqtt.android:3.3.5'
+    implementation 'com.github.hannesa2:paho.mqtt.android:3.3.7'
     implementation 'com.github.matomo-org:matomo-sdk-android:4.1.4'
 
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.3'
