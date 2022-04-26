@@ -161,7 +161,7 @@ class SelectCategoriesFragment : Fragment() {
 
     private fun CategoriesAdapter.updateFileCategoriesModeUi() {
         val uiCategories = DriveInfosController.getCurrentDriveCategories().map { category ->
-            val fileCategory = file.categories.find { it.id == category.id }
+            val fileCategory = file.categories?.find { it.id == category.id }
             createUiCategory(
                 category = category,
                 selectedState = if (fileCategory == null) SelectedState.NOT_SELECTED else SelectedState.SELECTED,

@@ -101,7 +101,7 @@ open class File(
     var type: String = "file",
     var users: @WriteWith<IntRealmListParceler> RealmList<Int> = RealmList(),
     var visibility: String = "",
-    var categories: @RawValue RealmList<FileCategory> = RealmList(),
+    var categories: @RawValue RealmList<FileCategory>? = RealmList(),
 
     var responseAt: Long = 0,
 
@@ -334,10 +334,10 @@ open class File(
 
     private fun getSortedCategoriesIds(): List<Int> {
         return if (isManaged) {
-            categories.sort(FileCategory::addedToFileAt.name).map { it.id }
+            categories?.sort(FileCategory::addedToFileAt.name)?.map { it.id }
         } else {
-            categories.sortedBy { it.addedToFileAt }.map { it.id }
-        }
+            categories?.sortedBy { it.addedToFileAt }?.map { it.id }
+        } ?: emptyList()
     }
 
     fun isAllowedToBeColored(): Boolean {
