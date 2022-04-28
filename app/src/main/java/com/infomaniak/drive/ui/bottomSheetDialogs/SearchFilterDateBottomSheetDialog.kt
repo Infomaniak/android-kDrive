@@ -133,11 +133,11 @@ class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun intervalAsText(start: Date, end: Date): String {
-        val longDate = "d MMM yyyy"
+        val longDate = FORMAT_DATE_CLEAR_MONTH_DAY_ONE_CHAR
         val separator = " - "
         val startFormat = when {
             start.year() != end.year() -> start.format(longDate) + separator
-            start.month() != end.month() -> start.format("d MMM") + separator
+            start.month() != end.month() -> start.format(FORMAT_DATE_SHORT_DAY_ONE_CHAR) + separator
             start.day() != end.day() -> start.format("d") + separator
             else -> ""
         }
