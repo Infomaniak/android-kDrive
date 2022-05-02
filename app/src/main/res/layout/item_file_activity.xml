@@ -118,6 +118,7 @@
             android:id="@+id/activityHourLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="@id/activityUserName"
             app:layout_constraintEnd_toEndOf="parent"
@@ -128,7 +129,6 @@
                 android:id="@+id/activityHourIcon"
                 android:layout_width="12dp"
                 android:layout_height="12dp"
-                android:paddingBottom="2dp"
                 android:src="@drawable/ic_clock"
                 tools:ignore="ContentDescription" />
 
