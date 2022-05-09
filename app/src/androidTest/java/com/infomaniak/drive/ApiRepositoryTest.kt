@@ -58,6 +58,7 @@ import com.infomaniak.drive.data.api.ApiRepository.removeCategory
 import com.infomaniak.drive.data.api.ApiRepository.updateDropBox
 import com.infomaniak.drive.data.api.ApiRoutes.postFileShare
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponseData
 import com.infomaniak.drive.utils.ApiTestUtils.createDropBoxForTest
 import com.infomaniak.drive.utils.ApiTestUtils.createFileForTest
@@ -399,24 +400,28 @@ class ApiRepositoryTest : KDriveTest() {
         @DisplayName("Create a custom share link, update it then delete it")
         fun shareLinkTest() {
             // TODO Changes for api-v2 : boolean instead of "true", "false", and can_edit instead of canEdit
-            val body = mapOf(
-                "permission" to "public",
-                "block_downloads" to "false",
-                "canEdit" to "false",
-                "show_stats" to "false",
-                "block_comments" to "false",
-                "block_information" to "false"
+            val body = ShareLink.ShareLinkSettings(
+                right = ShareLink.ShareLinkFilePermission.PUBLIC,
+                canDownload = true,
+                canEdit = false,
+                canSeeStats = false,
+                canComment = true,
+                canSeeInfo = true
             )
 
             // Creates the share link
             with(postFileShareLink(testFile, body)) {
                 assertApiResponseData(this)
-                assertEquals("public", data!!.permission.name.lowercase(), "Permission should be public")
-                assertFalse(data!!.blockDownloads, "Block downloads should be false")
-                assertFalse(data!!.canEdit, "Can edit should be false")
-                assertFalse(data!!.showStats, "Show stats should be false")
-                assertFalse(data!!.blockDownloads, "Block comments should be false")
-                assertFalse(data!!.blockInformation, "Block information should be false")
+                assertEquals("public", data!!.right.name.lowercase(), "Permission should be public")
+
+                with(data!!.capabilities) {
+                    assertTrue(canDownload, "Can downloads should be true")
+                    assertFalse(canEdit, "Can edit should be false")
+                    assertFalse(canSeeStats, "Show stats should be false")
+                    assertTrue(canComment, "Can comments should be true")
+                    assertTrue(canSeeInfo, "Can see information should be true")
+                }
+
             }
 
             // Get the share link
@@ -426,28 +431,30 @@ class ApiRepositoryTest : KDriveTest() {
             }
 
             // Modifies the share link
-            with(
-                putFileShareLink(
-                    testFile, mapOf(
-                        "permission" to "public",
-                        "block_downloads" to true,
-                        "can_edit" to true,
-                        "show_stats" to true,
-                        "block_comments" to true,
-                        "block_information" to true
-                    )
+            putFileShareLink(
+                testFile, ShareLink.ShareLinkSettings(
+                    right = ShareLink.ShareLinkFilePermission.PUBLIC,
+                    canDownload = false,
+                    canEdit = true,
+                    canSeeStats = true,
+                    canComment = false,
+                    canSeeInfo = false
                 )
-            ) { assertApiResponseData(this) }
+            ).let(::assertApiResponseData)
 
             // Makes sure modification has been made
             with(getShareLink(testFile)) {
                 assertApiResponseData(this)
-                assertEquals("public", data!!.permission.name.lowercase(), "Permission should be public")
-                assertTrue(data!!.blockDownloads, "block downloads should be true")
-                assertTrue(data!!.canEdit, "can edit should be true")
-                assertTrue(data!!.showStats, "show stats should be true")
-                assertTrue(data!!.blockDownloads, "block comments should be true")
-                assertTrue(data!!.blockInformation, "Block information should be true")
+                assertEquals("public", data!!.right.name.lowercase(), "Permission should be public")
+
+                with(data!!.capabilities) {
+                    assertFalse(canDownload, "can downloads should be false")
+                    assertTrue(canEdit, "can edit should be true")
+                    assertTrue(canSeeStats, "show stats should be true")
+                    assertFalse(canComment, "can comments should be false")
+                    assertFalse(canSeeInfo, "can see information should be false")
+                }
+
             }
 
             // Delete the shareLink
@@ -480,7 +487,7 @@ class ApiRepositoryTest : KDriveTest() {
             addCategory(testFile, category!!.id)
             with(getFileDetails(testFile)) {
                 assertApiResponseData(this)
-                assertNotNull(data!!.categories.find { it.id == category.id }, "The test category should be found")
+                assertNotNull(data!!.categories.find { it.categoryId == category.id }, "The test category should be found")
             }
 
             // Delete the category before removing it from the test file

@@ -185,7 +185,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
     private fun setupShareLink(share: Share?) {
         when {
             file.isDropBox() -> setupDropBoxShareLink()
-            file.rights?.canBecomeShareLink == true || file.shareLink?.isNotBlank() == true -> setupNormalShareLink(share)
+            file.rights?.canBecomeShareLink == true || file.sharelink?.url?.isNotBlank() == true -> setupNormalShareLink(share)
             else -> hideShareLinkView()
         }
     }

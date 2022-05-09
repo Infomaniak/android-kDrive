@@ -232,7 +232,7 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.unLikeCommentFile(file, commentId), POST)
     }
 
-    fun postFileShareLink(file: File, body: Map<String, String>): ApiResponse<ShareLink> {
+    fun postFileShareLink(file: File, body: ShareLink.ShareLinkSettings): ApiResponse<ShareLink> {
         return callApi(ApiRoutes.shareLink(file), POST, body)
     }
 
@@ -268,7 +268,7 @@ object ApiRepository : ApiRepositoryCore() {
         )
     }
 
-    fun putFileShareLink(file: File, body: Map<String, Any?>): ApiResponse<Boolean> {
+    fun putFileShareLink(file: File, body: ShareLink.ShareLinkSettings): ApiResponse<Boolean> {
         return callApi(ApiRoutes.shareLink(file), PUT, body)
     }
 

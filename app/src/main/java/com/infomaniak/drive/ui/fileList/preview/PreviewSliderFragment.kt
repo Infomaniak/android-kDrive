@@ -324,7 +324,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     override fun copyPublicLink() {
         bottomSheetFileInfos.createPublicCopyLink(onSuccess = { file ->
-            previewSliderAdapter.updateFile(currentFile.id) { it.shareLink = file?.shareLink }
+            previewSliderAdapter.updateFile(currentFile.id) { it.sharelink = file?.sharelink }
             showSnackbar(R.string.fileInfoLinkCopiedToClipboard)
             toggleBottomSheet(true)
         }, onError = { translatedError ->

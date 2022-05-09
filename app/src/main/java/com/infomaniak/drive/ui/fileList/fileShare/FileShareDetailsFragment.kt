@@ -190,7 +190,7 @@ class FileShareDetailsFragment : Fragment() {
     private fun setupShareLink(shareLink: ShareLink? = null) {
         when {
             file.isDropBox() -> setupDropBoxShareLink()
-            file.rights?.canBecomeShareLink == true || file.shareLink?.isNotBlank() == true -> setupNormalShareLink(shareLink)
+            file.rights?.canBecomeShareLink == true || file.sharelink?.url?.isNotBlank() == true -> setupNormalShareLink(shareLink)
             else -> hideShareLinkView()
         }
     }

@@ -33,6 +33,8 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.ShareLink.ShareLinkFilePermission
+import com.infomaniak.drive.data.models.ShareLink.ShareLinkSettings
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
@@ -96,12 +98,11 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     fun postFileShareLink(
         file: File,
-        // TODO Changes for api-v2 : boolean instead of "true", "false", and can_edit instead of canEdit
-        body: Map<String, String> = mapOf("permission" to "public", "block_downloads" to "false", "canEdit" to "false")
+        body: ShareLinkSettings = ShareLinkSettings(right = ShareLinkFilePermission.PUBLIC, canDownload = true, canEdit = false)
     ) = liveData(Dispatchers.IO) {
         val apiResponse = ApiRepository.postFileShareLink(file, body)
         if (apiResponse.isSuccess()) {
-            FileController.updateFile(file.id) { it.shareLink = apiResponse.data?.url }
+            FileController.updateFile(file.id) { it.sharelink = apiResponse.data }
         }
         emit(apiResponse)
     }
@@ -151,7 +152,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     fun deleteFileShareLink(file: File) = liveData(Dispatchers.IO) {
         val apiResponse = ApiRepository.deleteFileShareLink(file)
         if (apiResponse.isSuccess()) FileController.updateFile(file.id) {
-            it.shareLink = null
+            it.sharelink = null
             it.rights?.canBecomeShareLink = true
         }
         emit(apiResponse)

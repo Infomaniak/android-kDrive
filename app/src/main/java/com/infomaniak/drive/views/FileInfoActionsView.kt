@@ -114,7 +114,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                     disabledFileRights.isGone = rightsEnabled
                 }
 
-                (rights?.canBecomeShareLink == true && isOnline || currentFile.shareLink != null || !file.collaborativeFolder.isNullOrBlank()).let { publicLinkEnabled ->
+                (rights?.canBecomeShareLink == true && isOnline || currentFile.sharelink != null || !file.collaborativeFolder.isNullOrBlank()).let { publicLinkEnabled ->
                     copyPublicLink.isEnabled = publicLinkEnabled
                     disabledPublicLink.isGone = publicLinkEnabled
                     if (!file.collaborativeFolder.isNullOrBlank()) {
@@ -276,12 +276,12 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     fun createPublicCopyLink(onSuccess: ((file: File?) -> Unit)? = null, onError: ((translatedError: String) -> Unit)? = null) {
         when {
-            currentFile.collaborativeFolder != null -> {
-                copyPublicLink(currentFile.collaborativeFolder!!)
+            currentFile.dropBox != null -> {
+                copyPublicLink(currentFile.dropBox?.url!!)
                 onSuccess?.invoke(currentFile)
             }
-            currentFile.shareLink != null -> {
-                copyPublicLink(currentFile.shareLink!!)
+            currentFile.sharelink != null -> {
+                copyPublicLink(currentFile.sharelink?.url!!)
                 onSuccess?.invoke(currentFile)
             }
             else -> {
@@ -306,10 +306,10 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     private fun updateFilePublicLink(url: String) {
         CoroutineScope(Dispatchers.IO).launch {
-            FileController.updateFile(currentFile.id) { it.shareLink = url }
+            FileController.updateFile(currentFile.id) { it.sharelink?.url = url }
         }
         copyPublicLink(url)
-        currentFile.shareLink = url
+        currentFile.sharelink?.url = url
         refreshBottomSheetUi(currentFile)
     }
 
@@ -388,7 +388,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         addFavorites.isEnabled = true
         addFavoritesIcon.isEnabled = file.isFavorite
         addFavoritesText.setText(if (file.isFavorite) R.string.buttonRemoveFavorites else R.string.buttonAddFavorites)
-        copyPublicLinkText.setText(if (file.shareLink == null) R.string.buttonCreatePublicLink else R.string.buttonCopyPublicLink)
+        copyPublicLinkText.setText(if (file.sharelink == null) R.string.buttonCreatePublicLink else R.string.buttonCopyPublicLink)
 
         when {
             isPendingOffline && file.currentProgress in 0..99 -> {

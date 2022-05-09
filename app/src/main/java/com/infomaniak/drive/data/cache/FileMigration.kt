@@ -204,12 +204,30 @@ class FileMigration : RealmMigration {
                 addField(Rights::canUseTeam.name, Boolean::class.java, FieldAttribute.REQUIRED)
             }
 
+            // ShareLinkCapabilities migration
+            val shareLinkCapabilities = schema.create(ShareLinkCapabilities::class.java.simpleName).apply {
+                addField(ShareLinkCapabilities::canEdit.name, Boolean::class.java, FieldAttribute.REQUIRED)
+                addField(ShareLinkCapabilities::canSeeStats.name, Boolean::class.java, FieldAttribute.REQUIRED)
+                addField(ShareLinkCapabilities::canSeeInfo.name, Boolean::class.java, FieldAttribute.REQUIRED)
+                addField(ShareLinkCapabilities::canDownload.name, Boolean::class.java, FieldAttribute.REQUIRED)
+                addField(ShareLinkCapabilities::canComment.name, Boolean::class.java, FieldAttribute.REQUIRED)
+            }
+
+            // ShareLink migration
+            val shareLinkSchema = schema.create(ShareLink::class.java.simpleName).apply {
+                addField(ShareLink::url.name, String::class.java, FieldAttribute.REQUIRED)
+                addField(ShareLink::_right.name, String::class.java, FieldAttribute.REQUIRED)
+                addField(ShareLink::validUntil.name, Date::class.java)
+                addRealmObjectField(ShareLink::capabilities.name, shareLinkCapabilities)
+            }
+
             // File migration
             schema.get(File::class.java.simpleName)?.apply {
                 removeField("onlyofficeConvertExtension")
                 addRealmObjectField(File::conversion.name, fileConversionSchema)
                 addRealmObjectField(File::dropBox.name, dropboxSchema)
                 addRealmObjectField(File::version.name, fileVersionSchema)
+                addRealmObjectField(File::sharelink.name, shareLinkSchema)
             }
 
             // Set embedded objects
