@@ -33,8 +33,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.SearchDateFilter
 import com.infomaniak.drive.data.models.SearchDateFilter.DateFilterKey
 import com.infomaniak.drive.ui.fileList.SearchFiltersViewModel
-import com.infomaniak.drive.utils.*
-import com.infomaniak.lib.core.utils.format
+import com.infomaniak.lib.core.utils.*
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_search_filter_date.*
 import java.util.*
 import androidx.core.util.Pair as AndroidPair

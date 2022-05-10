@@ -28,11 +28,11 @@ import android.view.MotionEvent
 import android.widget.FrameLayout
 import androidx.fragment.app.FragmentManager
 import com.infomaniak.drive.R
-import com.infomaniak.drive.utils.hours
 import com.infomaniak.drive.utils.isNightModeEnabled
-import com.infomaniak.drive.utils.minutes
 import com.infomaniak.lib.core.utils.FORMAT_DATE_HOUR_MINUTE
 import com.infomaniak.lib.core.utils.format
+import com.infomaniak.lib.core.utils.hours
+import com.infomaniak.lib.core.utils.minutes
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog.OnTimeSetListener
 import com.wdullaer.materialdatetimepicker.time.Timepoint

@@ -37,9 +37,7 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDia
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackEventWithBooleanValue
 import com.infomaniak.drive.views.ShareLinkContainerView.Companion.getTypeName
-import com.infomaniak.lib.core.utils.hideProgress
-import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.showProgress
+import com.infomaniak.lib.core.utils.*
 import kotlinx.android.synthetic.main.fragment_file_share_link_settings.*
 import kotlinx.android.synthetic.main.item_dropbox_settings.expirationDateSwitch
 import java.util.*

@@ -49,10 +49,8 @@ import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.MatomoUtils.trackEventWithBooleanValue
 import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
-import com.infomaniak.lib.core.utils.FORMAT_DATE_CLEAR_MONTH
-import com.infomaniak.lib.core.utils.format
-import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.showProgress
+import com.infomaniak.drive.utils.Utils
+import com.infomaniak.lib.core.utils.*
 import kotlinx.android.synthetic.main.activity_sync_settings.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
