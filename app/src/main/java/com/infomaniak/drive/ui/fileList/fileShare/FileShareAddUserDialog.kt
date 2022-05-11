@@ -43,6 +43,7 @@ import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
+import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_file_share.*
 import kotlinx.coroutines.Dispatchers

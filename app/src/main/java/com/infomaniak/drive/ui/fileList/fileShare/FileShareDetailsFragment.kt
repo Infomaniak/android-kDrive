@@ -42,6 +42,7 @@ import com.infomaniak.drive.ui.fileList.fileDetails.FileDetailsInfoFragment
 import com.infomaniak.drive.ui.fileList.fileShare.FileShareAddUserDialog.Companion.SHARE_SELECTION_KEY
 import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.utils.hideKeyboard
+import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_file_share_details.*
 
 class FileShareDetailsFragment : Fragment() {

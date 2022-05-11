@@ -39,7 +39,7 @@ import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.TrackerAction
 import com.infomaniak.drive.utils.getBackNavigationResult
-import com.infomaniak.drive.utils.safeNavigate
+import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.toPx
 import kotlinx.android.synthetic.main.fragment_search_filters.*
 

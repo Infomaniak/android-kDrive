@@ -50,6 +50,7 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.Utils.moveFileClicked
+import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -206,7 +207,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             onItemClickListener.addFavoritesClicked()
         }
         leaveShare.setOnClickListener { onItemClickListener.leaveShare() }
-        // Use OnClickListener instead of OnCheckedChangeListener because the later is unnecessarily called on every 
+        // Use OnClickListener instead of OnCheckedChangeListener because the later is unnecessarily called on every
         // refreshBottomSheetUI calls
         availableOfflineSwitch.setOnClickListener { view ->
             val downloadError = !onItemClickListener.availableOfflineSwitched(this, (view as SwitchMaterial).isChecked)

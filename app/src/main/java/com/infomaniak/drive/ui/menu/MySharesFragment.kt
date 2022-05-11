@@ -28,7 +28,7 @@ import com.infomaniak.drive.ui.fileList.multiSelect.MySharesMultiSelectActionsBo
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.drive.utils.safeNavigate
+import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_file_list.*
 
 class MySharesFragment : FileSubTypeListFragment() {

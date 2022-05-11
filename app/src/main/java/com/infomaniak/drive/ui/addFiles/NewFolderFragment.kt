@@ -29,7 +29,7 @@ import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.safeNavigate
+import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_new_folder.*
 
 class NewFolderFragment : Fragment() {

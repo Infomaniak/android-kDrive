@@ -32,7 +32,6 @@ import android.graphics.Color
 import android.graphics.Point
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.DisplayMetrics
@@ -45,7 +44,6 @@ import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import androidx.activity.result.ActivityResult
 import androidx.annotation.DrawableRes
-import androidx.annotation.IdRes
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
@@ -56,11 +54,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.navigation.NavDirections
-import androidx.navigation.NavOptions
-import androidx.navigation.Navigator
-import androidx.navigation.fragment.DialogFragmentNavigator
-import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.findNavController
 import coil.load
 import coil.request.Disposable
@@ -89,6 +82,7 @@ import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.lightNavigationBar
 import com.infomaniak.lib.core.utils.lightStatusBar
 import com.infomaniak.lib.core.utils.loadAvatar
+import com.infomaniak.lib.core.utils.safeNavigate
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.item_file.view.*
@@ -382,29 +376,6 @@ fun Context.openOnlyOfficeActivity(file: File) {
         putExtra(OnlyOfficeActivity.ONLYOFFICE_URL_TAG, file.onlyOfficeUrl())
         putExtra(OnlyOfficeActivity.ONLYOFFICE_FILENAME_TAG, file.name)
     })
-}
-
-private fun Fragment.canNavigate(currentClassName: String? = null): Boolean {
-    val className = currentClassName ?: when (val currentDestination = findNavController().currentDestination) {
-        is FragmentNavigator.Destination -> currentDestination.className
-        is DialogFragmentNavigator.Destination -> currentDestination.className
-        else -> null
-    }
-    return javaClass.name == className
-}
-
-fun Fragment.safeNavigate(directions: NavDirections) {
-    if (canNavigate()) findNavController().navigate(directions)
-}
-
-fun Fragment.safeNavigate(
-    @IdRes resId: Int,
-    args: Bundle? = null,
-    navOptions: NavOptions? = null,
-    navigatorExtras: Navigator.Extras? = null,
-    currentClassName: String? = null
-) {
-    if (canNavigate(currentClassName)) findNavController().navigate(resId, args, navOptions, navigatorExtras)
 }
 
 fun Fragment.navigateToParentFolder(folder: File, mainViewModel: MainViewModel) {

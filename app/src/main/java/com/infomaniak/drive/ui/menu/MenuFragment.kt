@@ -38,6 +38,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.loadAvatar
+import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_menu.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

@@ -32,10 +32,10 @@ import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.safeNavigate
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
+import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 import kotlinx.coroutines.Dispatchers

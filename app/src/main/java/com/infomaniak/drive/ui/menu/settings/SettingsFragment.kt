@@ -35,11 +35,15 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.UiSettings
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.MatomoUtils.trackEventWithBooleanValue
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import com.infomaniak.drive.utils.TrackerAction
+import com.infomaniak.drive.utils.isKeyguardSecure
+import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_settings.*
 
 class SettingsFragment : Fragment() {
@@ -81,7 +85,7 @@ class SettingsFragment : Fragment() {
                 isVisible = true
                 setOnClickListener {
                     trackSettingsEvent("lockApp")
-                    safeNavigate(R.id.appSecurityActivity, null, null)
+                    safeNavigate(R.id.appSecurityActivity)
                 }
             } else {
                 appSecuritySeparator.isGone = true

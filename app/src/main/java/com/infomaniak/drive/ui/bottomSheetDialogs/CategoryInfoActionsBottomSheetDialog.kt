@@ -33,9 +33,13 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.MatomoUtils.trackCategoriesEvent
+import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.find
+import com.infomaniak.drive.utils.setBackNavigationResult
 import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_category_info_actions.*
 import kotlinx.coroutines.Dispatchers
 

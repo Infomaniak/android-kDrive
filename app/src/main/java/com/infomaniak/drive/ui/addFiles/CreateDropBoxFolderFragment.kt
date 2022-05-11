@@ -28,9 +28,13 @@ import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.FolderPermission.*
 import com.infomaniak.drive.data.models.Permission
-import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackNewElementEvent
+import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.animateRotation
+import com.infomaniak.drive.utils.showOrHideEmptyError
+import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
 import kotlinx.android.synthetic.main.fragment_create_folder.*
 import kotlinx.android.synthetic.main.item_dropbox_settings.*

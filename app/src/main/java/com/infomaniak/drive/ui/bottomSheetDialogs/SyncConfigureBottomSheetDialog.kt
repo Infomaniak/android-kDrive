@@ -23,7 +23,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.TrackerAction
-import com.infomaniak.drive.utils.safeNavigate
+import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 
 class SyncConfigureBottomSheetDialog : InformationBottomSheetDialog() {

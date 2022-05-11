@@ -43,6 +43,7 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.ShareLinkContainerView
 import com.infomaniak.drive.views.UserAvatarView
 import com.infomaniak.lib.core.utils.format
+import com.infomaniak.lib.core.utils.safeNavigate
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.android.synthetic.main.fragment_file_details.*

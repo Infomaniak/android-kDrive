@@ -31,8 +31,8 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivity.SelectFolderViewMod
 import com.infomaniak.drive.utils.MatomoUtils.trackNewElementEvent
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.drive.utils.safeNavigate
 import com.infomaniak.drive.utils.showSnackbar
+import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_file_list.*
 
 class SelectFolderFragment : FileListFragment() {

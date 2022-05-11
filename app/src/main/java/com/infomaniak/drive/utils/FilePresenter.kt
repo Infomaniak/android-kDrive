@@ -29,6 +29,7 @@ import com.infomaniak.drive.data.models.File.Companion.getCloudAndFileUris
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.fileList.FileListFragmentDirections
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
+import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.BufferedInputStream
 import java.io.BufferedReader
