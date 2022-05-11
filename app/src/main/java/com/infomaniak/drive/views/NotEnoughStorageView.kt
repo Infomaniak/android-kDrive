@@ -27,7 +27,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.FormatterFileSize
+import com.infomaniak.lib.core.utils.FormatterFileSize
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import kotlinx.android.synthetic.main.view_not_enough_storage.view.*
 

@@ -36,6 +36,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.utils.*
+import com.infomaniak.lib.core.utils.FormatterFileSize
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.loadAvatar
 import com.infomaniak.lib.core.utils.safeNavigate
