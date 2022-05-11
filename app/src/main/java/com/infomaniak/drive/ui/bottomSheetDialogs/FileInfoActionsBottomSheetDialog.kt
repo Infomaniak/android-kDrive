@@ -323,12 +323,11 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             findNavController().popBackStack()
         } else {
             safeNavigate(
-                FileInfoActionsBottomSheetDialogDirections
-                    .actionFileInfoActionsBottomSheetDialogToDownloadProgressDialog(
-                        fileId = currentFile.id,
-                        fileName = currentFile.name,
-                        userDrive = navigationArgs.userDrive
-                    )
+                FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToDownloadProgressDialog(
+                    fileId = currentFile.id,
+                    fileName = currentFile.name,
+                    userDrive = navigationArgs.userDrive
+                )
             )
         }
     }

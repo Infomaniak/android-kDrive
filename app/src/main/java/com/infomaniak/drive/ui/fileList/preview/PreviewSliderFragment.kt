@@ -32,6 +32,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
@@ -65,13 +66,13 @@ import kotlin.math.max
 class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListener {
 
     private val mainViewModel: MainViewModel by activityViewModels()
+    private val navigationArgs: PreviewSliderFragmentArgs by navArgs()
     private val previewSliderViewModel: PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     private lateinit var drivePermissions: DrivePermissions
     private lateinit var previewSliderAdapter: PreviewSliderAdapter
     private lateinit var userDrive: UserDrive
-    private var hideActions: Boolean = false
     private var showUi = false
 
     override val ownerFragment = this
@@ -89,16 +90,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
 
         if (previewSliderViewModel.currentPreview == null) {
-            val isSharedWithMe = arguments?.getBoolean(PREVIEW_IS_SHARED_WITH_ME, false) ?: false
-            val driveId = arguments?.getInt(PREVIEW_FILE_DRIVE_ID, 0) ?: 0
-            val fileId = arguments?.getInt(PREVIEW_FILE_ID_TAG) ?: savedInstanceState?.getInt(PREVIEW_FILE_ID_TAG)
+            userDrive = UserDrive(driveId = navigationArgs.driveId, sharedWithMe = navigationArgs.isSharedWithMe)
 
-            userDrive = UserDrive(driveId = driveId, sharedWithMe = isSharedWithMe)
-            hideActions = arguments?.getBoolean(PREVIEW_HIDE_ACTIONS, false) ?: false
-
-            currentFile = fileId?.let {
-                FileController.getFileById(it, userDrive) ?: mainViewModel.currentPreviewFileList[it]
-            } ?: throw Exception("No current preview found")
+            currentFile = FileController.getFileById(navigationArgs.fileId, userDrive)
+                ?: mainViewModel.currentPreviewFileList[navigationArgs.fileId] ?: throw Exception("No current preview found")
 
             previewSliderViewModel.currentPreview = currentFile
             previewSliderViewModel.userDrive = userDrive
@@ -193,11 +188,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         bottomSheetFileInfos.removeOfflineObservations(this)
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        if (this::currentFile.isInitialized) outState.putInt(PREVIEW_FILE_ID_TAG, currentFile.id)
-        super.onSaveInstanceState(outState)
-    }
-
     override fun onStop() {
         clearEdgeToEdge()
         super.onStop()
@@ -256,7 +246,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetFileInfos)
         bottomSheetBehavior.apply {
             isHideable = true
-            isDraggable = !hideActions
+            isDraggable = !navigationArgs.hideActions
             addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
                 override fun onStateChanged(bottomSheet: View, newState: Int) {
                     when (bottomSheetBehavior.state) {
@@ -506,10 +496,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     companion object {
-        const val PREVIEW_FILE_ID_TAG = "previewFileId"
-        const val PREVIEW_FILE_DRIVE_ID = "previewFileDriveId"
-        const val PREVIEW_IS_SHARED_WITH_ME = "isSharedWithMe"
-        const val PREVIEW_HIDE_ACTIONS = "hideActions"
 
         fun Fragment.toggleFullscreen() {
             (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()

@@ -50,7 +50,7 @@ import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragmentArgs
 import com.infomaniak.lib.core.utils.showToast
 import kotlinx.android.synthetic.main.dialog_download_progress.view.*
 import kotlinx.android.synthetic.main.dialog_name_prompt.view.*
@@ -192,16 +192,16 @@ object Utils {
         isSharedWithMe: Boolean = false
     ) {
         mainViewModel.currentPreviewFileList = fileList.associateBy { it.id } as LinkedHashMap<Int, File>
+        val bundle = PreviewSliderFragmentArgs(
+            fileId = selectedFile.id,
+            driveId = selectedFile.driveId,
+            isSharedWithMe = isSharedWithMe,
+            hideActions = selectedFile.isFromActivities
+        ).toBundle()
         val navOptions = NavOptions.Builder()
             .setEnterAnim(R.anim.fragment_open_enter)
             .setExitAnim(R.anim.fragment_open_exit)
             .build()
-        val bundle = bundleOf(
-            PreviewSliderFragment.PREVIEW_FILE_ID_TAG to selectedFile.id,
-            PreviewSliderFragment.PREVIEW_FILE_DRIVE_ID to selectedFile.driveId,
-            PreviewSliderFragment.PREVIEW_IS_SHARED_WITH_ME to isSharedWithMe,
-            PreviewSliderFragment.PREVIEW_HIDE_ACTIONS to selectedFile.isFromActivities
-        )
         navController.navigate(R.id.previewSliderFragment, bundle, navOptions)
     }
 

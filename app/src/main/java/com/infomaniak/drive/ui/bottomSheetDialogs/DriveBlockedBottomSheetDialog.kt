@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import android.os.Bundle
 import android.view.View
+import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
@@ -26,6 +27,8 @@ import com.infomaniak.lib.core.utils.toPx
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 
 class DriveBlockedBottomSheetDialog : InformationBottomSheetDialog() {
+
+    private val navigationArgs: DriveMaintenanceBottomSheetDialogArgs by navArgs()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -36,9 +39,8 @@ class DriveBlockedBottomSheetDialog : InformationBottomSheetDialog() {
             setImageResource(R.drawable.ic_drive_blocked)
         }
 
-        val driveName = requireArguments().getString(DriveMaintenanceBottomSheetDialog.DRIVE_NAME)
-        title.text = resources.getQuantityString(R.plurals.driveBlockedTitle, 1, driveName)
-        description.text = resources.getQuantityString(R.plurals.driveBlockedDescription, 1, driveName)
+        title.text = resources.getQuantityString(R.plurals.driveBlockedTitle, 1, navigationArgs.driveName)
+        description.text = resources.getQuantityString(R.plurals.driveBlockedDescription, 1, navigationArgs.driveName)
         actionButton.apply {
             setText(R.string.buttonRenew)
             setOnClickListener {

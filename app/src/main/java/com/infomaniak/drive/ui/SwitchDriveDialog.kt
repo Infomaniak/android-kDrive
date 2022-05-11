@@ -23,7 +23,7 @@ import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialog
+import com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialogArgs
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.TrackerAction
@@ -45,7 +45,7 @@ class SwitchDriveDialog : SelectBottomSheetDialog() {
             if (drive.maintenance) {
                 findNavController().navigate(
                     R.id.driveMaintenanceBottomSheetFragment,
-                    bundleOf(DriveMaintenanceBottomSheetDialog.DRIVE_NAME to drive.name)
+                    DriveMaintenanceBottomSheetDialogArgs(drive.name).toBundle()
                 )
             } else {
                 AccountUtils.currentDriveId = drive.id

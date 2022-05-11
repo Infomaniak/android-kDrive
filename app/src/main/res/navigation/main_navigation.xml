@@ -113,6 +113,18 @@
         <action
             android:id="@+id/action_previewSliderFragment_to_selectCategoriesFragment"
             app:destination="@id/selectCategoriesFragment" />
+        <argument
+            android:name="fileId"
+            app:argType="integer" />
+        <argument
+            android:name="driveId"
+            app:argType="integer" />
+        <argument
+            android:name="isSharedWithMe"
+            app:argType="boolean" />
+        <argument
+            android:name="hideActions"
+            app:argType="boolean" />
     </fragment>
 
     <fragment
@@ -584,7 +596,11 @@
         android:id="@+id/driveMaintenanceBottomSheetFragment"
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialog"
         android:label="driveMaintenanceBottomSheetFragment"
-        tools:layout="@layout/fragment_bottom_sheet_information" />
+        tools:layout="@layout/fragment_bottom_sheet_information">
+        <argument
+            android:name="driveName"
+            app:argType="string" />
+    </dialog>
 
     <dialog
         android:id="@+id/driveBlockedBottomSheetFragment"
