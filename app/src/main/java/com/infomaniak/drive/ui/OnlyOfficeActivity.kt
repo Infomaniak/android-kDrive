@@ -135,8 +135,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (webView.canGoBack()) webView.goBack()
-        else finish()
+        if (webView.canGoBack()) webView.goBack() else finish()
         super.onBackPressed()
     }
 
