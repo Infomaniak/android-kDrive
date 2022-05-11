@@ -124,7 +124,11 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             "password" to password
         )
         validUntil?.let { body.put("valid_until", validUntil) }
-        emit(ApiRepository.postDropBox(file, body))
+
+        with(ApiRepository.postDropBox(file, body)) {
+            if (isSuccess()) FileController.updateDropBox(file.id, data)
+            emit(this)
+        }
     }
 
     fun updateDropBox(file: File, newDropBox: DropBox) = liveData(Dispatchers.IO) {
@@ -132,7 +136,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             addProperty("email_when_finished", newDropBox.newHasNotification)
             addProperty("valid_until", newDropBox.newValidUntil?.time?.let { it / 1000 })
             addProperty("limit_file_size", newDropBox.newLimitFileSize)
-            addProperty("with_limit_file_size", newDropBox.withLimitFileSize)
 
             if (newDropBox.newPassword && !newDropBox.newPasswordValue.isNullOrBlank()) {
                 addProperty("password", newDropBox.newPasswordValue)
@@ -141,8 +144,10 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
                 addProperty("password", password)
             }
         }
-        val apiResponse = ApiRepository.updateDropBox(file, data)
-        emit(apiResponse)
+        with(ApiRepository.updateDropBox(file, data)) {
+            if (isSuccess()) FileController.updateDropBox(file.id, newDropBox)
+            emit(this)
+        }
     }
 
     fun deleteDropBox(file: File) = liveData(Dispatchers.IO) {

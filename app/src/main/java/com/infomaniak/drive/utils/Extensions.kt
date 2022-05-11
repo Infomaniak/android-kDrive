@@ -486,7 +486,7 @@ fun RealmList<Category>.find(id: Int): Category? {
 }
 
 fun RealmList<FileCategory>.find(id: Int): FileCategory? {
-    return where().equalTo(FileCategory::id.name, id).findFirst()
+    return where().equalTo(FileCategory::categoryId.name, id).findFirst()
 }
 
 fun MaterialCardView.setCornersRadius(topCornerRadius: Float, bottomCornerRadius: Float) {

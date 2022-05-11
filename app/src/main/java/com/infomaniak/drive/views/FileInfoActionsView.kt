@@ -114,10 +114,10 @@ class FileInfoActionsView @JvmOverloads constructor(
                     disabledFileRights.isGone = rightsEnabled
                 }
 
-                (rights?.canBecomeShareLink == true && isOnline || currentFile.sharelink != null || !file.collaborativeFolder.isNullOrBlank()).let { publicLinkEnabled ->
+                (rights?.canBecomeShareLink == true && isOnline || currentFile.sharelink != null || !file.dropbox?.url.isNullOrBlank()).let { publicLinkEnabled ->
                     copyPublicLink.isEnabled = publicLinkEnabled
                     disabledPublicLink.isGone = publicLinkEnabled
-                    if (!file.collaborativeFolder.isNullOrBlank()) {
+                    if (!file.dropbox?.url.isNullOrBlank()) {
                         copyPublicLinkText.text = context.getString(R.string.buttonCopyLink)
                     }
                 }
@@ -276,8 +276,8 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     fun createPublicCopyLink(onSuccess: ((file: File?) -> Unit)? = null, onError: ((translatedError: String) -> Unit)? = null) {
         when {
-            currentFile.dropBox != null -> {
-                copyPublicLink(currentFile.dropBox?.url!!)
+            currentFile.dropbox != null -> {
+                copyPublicLink(currentFile.dropbox?.url!!)
                 onSuccess?.invoke(currentFile)
             }
             currentFile.sharelink != null -> {

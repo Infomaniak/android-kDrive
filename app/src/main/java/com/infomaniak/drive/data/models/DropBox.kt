@@ -21,6 +21,7 @@ import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.data.models.file.dropbox.DropBoxCapabilities
 import io.realm.RealmObject
+import io.realm.annotations.Ignore
 import io.realm.annotations.RealmClass
 import kotlinx.android.parcel.Parcelize
 import java.util.*
@@ -48,18 +49,25 @@ open class DropBox(
     /**
      * Local
      */
+    @Ignore
     var newPassword = false
+
+    @Ignore
     var newPasswordValue: String? = null
+
+    @Ignore
     var newHasNotification = false
+
+    @Ignore
     var newLimitFileSize: Long? = null
-    var withLimitFileSize = false
+
+    @Ignore
     var newValidUntil: Date? = null
 
     fun initLocalValue() {
         newPassword = hasPassword
         newHasNotification = hasNotification
         newLimitFileSize = limitFileSize
-        withLimitFileSize = limitFileSize != null
         newValidUntil = validUntil
     }
 

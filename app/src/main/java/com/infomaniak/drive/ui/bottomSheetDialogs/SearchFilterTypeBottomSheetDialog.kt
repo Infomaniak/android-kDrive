@@ -22,7 +22,7 @@ import android.view.View
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.ConvertedType
+import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.ui.fileList.SearchFiltersViewModel
 import com.infomaniak.drive.views.SelectBottomSheetDialog
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_select.*
@@ -45,19 +45,19 @@ class SearchFilterTypeBottomSheetDialog : SelectBottomSheetDialog() {
         )
     }
 
-    private fun getSortedTypes(): List<ConvertedType> {
+    private fun getSortedTypes(): List<ExtensionType> {
         return listOf(
-            ConvertedType.ARCHIVE,
-            ConvertedType.AUDIO,
-            ConvertedType.CODE,
-            ConvertedType.FOLDER,
-            ConvertedType.FONT,
-            ConvertedType.IMAGE,
-            ConvertedType.PDF,
-            ConvertedType.PRESENTATION,
-            ConvertedType.SPREADSHEET,
-            ConvertedType.TEXT,
-            ConvertedType.VIDEO,
+            ExtensionType.ARCHIVE,
+            ExtensionType.AUDIO,
+            ExtensionType.CODE,
+            ExtensionType.FOLDER,
+            ExtensionType.FONT,
+            ExtensionType.IMAGE,
+            ExtensionType.PDF,
+            ExtensionType.PRESENTATION,
+            ExtensionType.SPREADSHEET,
+            ExtensionType.TEXT,
+            ExtensionType.VIDEO,
         ).sortedBy { getString(it.searchFilterName) }
     }
 }

@@ -20,7 +20,7 @@ package com.infomaniak.drive.utils
 import android.content.Context
 import android.media.MediaScannerConnection
 import android.provider.MediaStore
-import com.infomaniak.drive.data.models.ConvertedType
+import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 
@@ -28,7 +28,7 @@ object MediaUtils {
 
     fun File.isMedia(): Boolean {
         val fileType = getFileType()
-        return fileType == ConvertedType.IMAGE || fileType == ConvertedType.VIDEO || fileType == ConvertedType.AUDIO
+        return fileType == ExtensionType.IMAGE || fileType == ExtensionType.VIDEO || fileType == ExtensionType.AUDIO
     }
 
     fun scanFile(context: Context, file: java.io.File) {
@@ -37,9 +37,9 @@ object MediaUtils {
 
     fun File.deleteInMediaScan(context: Context, userDrive: UserDrive = UserDrive()) {
         val (uri, column) = when (getFileType()) {
-            ConvertedType.IMAGE -> MediaFoldersProvider.imagesExternalUri to MediaStore.Images.Media.DATA
-            ConvertedType.VIDEO -> MediaFoldersProvider.videosExternalUri to MediaStore.Video.Media.DATA
-            ConvertedType.AUDIO -> MediaFoldersProvider.audiosExternalUri to MediaStore.Audio.Media.DATA
+            ExtensionType.IMAGE -> MediaFoldersProvider.imagesExternalUri to MediaStore.Images.Media.DATA
+            ExtensionType.VIDEO -> MediaFoldersProvider.videosExternalUri to MediaStore.Video.Media.DATA
+            ExtensionType.AUDIO -> MediaFoldersProvider.audiosExternalUri to MediaStore.Audio.Media.DATA
             else -> throw UnsupportedOperationException("Accept only media files")
         }
         getOfflineFile(context, userDrive.userId)?.let { offlineFile ->

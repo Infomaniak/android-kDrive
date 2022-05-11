@@ -102,7 +102,7 @@ class FileShareDetailsFragment : Fragment() {
 
     private fun setToolbarTitle() {
         fileShareCollapsingToolbarLayout.title = getString(
-            if (file.type == File.Type.FOLDER.value) {
+            if (file.type == File.Type.DIRECTORY.value) {
                 R.string.fileShareDetailsFolderTitle
             } else {
                 R.string.fileShareDetailsFileTitle
@@ -213,7 +213,7 @@ class FileShareDetailsFragment : Fragment() {
         shareLink = newShareLink
         val (permissionsGroup, currentPermission) = FileDetailsInfoFragment.selectPermissions(
             isFolder = file.isFolder(),
-            isOnlyOffice = file.onlyoffice,
+            isOnlyOffice = file.hasOnlyoffice,
             shareLinkExist = shareLink != null,
         )
         safeNavigate(
@@ -232,7 +232,7 @@ class FileShareDetailsFragment : Fragment() {
                 fileId = file.id,
                 driveId = file.driveId,
                 shareLink = newShareLink,
-                isOnlyOfficeFile = file.onlyoffice,
+                isOnlyOfficeFile = file.hasOnlyoffice,
                 isFolder = file.isFolder(),
             )
         )

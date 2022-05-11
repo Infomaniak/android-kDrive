@@ -88,7 +88,7 @@ open class ManageDropboxFragment : Fragment() {
             disableButton.isEnabled = true
 
             if (isManageDropBox) {
-                file.collaborativeFolder?.let { url -> shareLinkContainer.shareLinkUrl.setUrl(url) }
+                file.dropbox?.url?.let { url -> shareLinkContainer.shareLinkUrl.setUrl(url) }
 
                 mainViewModel.getDropBox(file).observe(viewLifecycleOwner) { apiResponse ->
                     if (apiResponse?.isSuccess() == true) {
@@ -257,7 +257,6 @@ open class ManageDropboxFragment : Fragment() {
         if ((dropBox?.limitFileSize != null) == isChecked) validationCount-- else validationCount++
         limitStorageValueLayout.isVisible = isChecked
         limitStorageValueUnit.isVisible = isChecked
-        currentDropBox?.withLimitFileSize = isChecked
         enableSaveButton()
     }
 

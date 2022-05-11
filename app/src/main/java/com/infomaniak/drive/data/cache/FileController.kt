@@ -22,13 +22,10 @@ import androidx.collection.ArrayMap
 import androidx.collection.arrayMapOf
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.api.ApiRepository
-import com.infomaniak.drive.data.models.CancellableAction
-import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.Type
-import com.infomaniak.drive.data.models.FileActivity
 import com.infomaniak.drive.data.models.FileActivity.FileActivityType
-import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.RealmModules
@@ -211,6 +208,12 @@ object FileController {
                 scope.setExtra("custom realm", "${realm != null}")
                 Sentry.captureException(exception)
             }
+        }
+    }
+
+    fun updateDropBox(fileId: Int, newDropBox: DropBox?) {
+        updateFile(fileId) { fileProxy ->
+            fileProxy.dropbox = newDropBox
         }
     }
 
@@ -846,7 +849,7 @@ object FileController {
         val block: (Realm) -> RealmResults<File> = { realm ->
             realm.where(File::class.java)
                 .equalTo(File::isOffline.name, true)
-                .notEqualTo(File::type.name, Type.FOLDER.value)
+                .notEqualTo(File::type.name, Type.DIRECTORY.value)
                 .findAll()?.let { files ->
                     if (order == null) files
                     else getRealmLiveSortedFiles(localFolder = null, order = order, localChildren = files)
@@ -914,8 +917,8 @@ object FileController {
 
     private fun RealmQuery<File>.getSortQueryByOrder(order: SortType): RealmQuery<File> {
         return when (order) {
-            SortType.NAME_AZ -> sort(File::nameNaturalSorting.name, Sort.ASCENDING)
-            SortType.NAME_ZA -> sort(File::nameNaturalSorting.name, Sort.DESCENDING)
+            SortType.NAME_AZ -> sort(File::sortedName.name, Sort.ASCENDING)
+            SortType.NAME_ZA -> sort(File::sortedName.name, Sort.DESCENDING)
             SortType.OLDER -> sort(File::lastModifiedAt.name, Sort.ASCENDING)
             SortType.RECENT -> sort(File::lastModifiedAt.name, Sort.DESCENDING)
             SortType.OLDER_TRASHED -> sort(File::deletedAt.name, Sort.ASCENDING)

@@ -602,7 +602,7 @@
         tools:layout="@layout/fragment_bottom_sheet_select">
         <argument
             android:name="type"
-            app:argType="com.infomaniak.drive.data.models.ConvertedType"
+            app:argType="com.infomaniak.drive.data.models.ExtensionType"
             app:nullable="true" />
     </dialog>
 

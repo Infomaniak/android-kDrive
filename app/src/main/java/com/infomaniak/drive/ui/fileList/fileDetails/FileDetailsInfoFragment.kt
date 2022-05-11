@@ -70,12 +70,12 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
             setupShareButton()
             setupPathLocationButton()
 
-            if (file.createdAt.isPositive()) {
-                addedDateValue.text = file.getCreatedAt().format(ShareLinkContainerView.formatFullDate)
+            if (file.addedAt.isPositive()) {
+                addedDateValue.text = file.getAddedAt().format(ShareLinkContainerView.formatFullDate)
                 addedDate.isVisible = true
             }
 
-            if (file.fileCreatedAt.isPositive()) {
+            if (file.createdAt.isPositive()) {
                 creationDateValue.text = file.getFileCreatedAt().format(ShareLinkContainerView.formatFullDate)
                 creationDate.isVisible = true
             }
@@ -208,7 +208,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         shareLink = newShareLink
         val (permissionsGroup, currentPermission) = selectPermissions(
             isFolder = file.isFolder(),
-            isOnlyOffice = file.onlyoffice,
+            isOnlyOffice = file.hasOnlyoffice,
             shareLinkExist = newShareLink != null,
         )
         findNavController().navigate(
@@ -227,7 +227,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
                 fileId = file.id,
                 driveId = file.driveId,
                 shareLink = newShareLink,
-                isOnlyOfficeFile = file.onlyoffice,
+                isOnlyOfficeFile = file.hasOnlyoffice,
                 isFolder = file.isFolder(),
             )
         )

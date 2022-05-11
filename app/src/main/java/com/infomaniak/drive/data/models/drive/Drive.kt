@@ -93,7 +93,7 @@ open class Drive(
             driveId = id,
             lastModifiedAt = createdAt,
             name = rootName ?: name,
-            rights = Rights(newFile = true),
+            rights = Rights(canCreateFile = true),
             type = File.Type.DRIVE.value
         ).apply { driveColor = preferences.color }
     }

@@ -18,15 +18,13 @@
 package com.infomaniak.drive.data.cache
 
 import androidx.core.os.bundleOf
-import com.infomaniak.drive.data.models.DropBox
-import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.FileCategory
-import com.infomaniak.drive.data.models.Rights
+import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.file.FileConversion
 import com.infomaniak.drive.data.models.file.FileVersion
 import com.infomaniak.drive.data.models.file.dropbox.DropBoxCapabilities
 import com.infomaniak.drive.data.models.file.dropbox.DropBoxSize
 import com.infomaniak.drive.data.models.file.dropbox.DropBoxValidity
+import com.infomaniak.drive.data.models.file.sharelink.ShareLinkCapabilities
 import com.infomaniak.drive.utils.AccountUtils
 import io.realm.*
 import io.sentry.Sentry
@@ -69,11 +67,11 @@ class FileMigration : RealmMigration {
         // - Modified field (Rights) in File table (remove PrimaryKey & Id, and switched to Embedded)
         if (oldVersionTemp == 1L) {
             val fileCategorySchema = schema.create(FileCategory::class.java.simpleName).apply {
-                addField(FileCategory::id.name, Int::class.java, FieldAttribute.REQUIRED)
-                addField(FileCategory::iaCategoryUserValidation.name, String::class.java, FieldAttribute.REQUIRED)
-                addField(FileCategory::isGeneratedByIa.name, Boolean::class.java, FieldAttribute.REQUIRED)
+                addField(FileCategory::categoryId.name, Int::class.java, FieldAttribute.REQUIRED)
+                addField(FileCategory::userValidation.name, String::class.java, FieldAttribute.REQUIRED)
+                addField(FileCategory::isGeneratedByAI.name, Boolean::class.java, FieldAttribute.REQUIRED)
                 addField(FileCategory::userId.name, Int::class.java).setNullable(FileCategory::userId.name, true)
-                addField(FileCategory::addedToFileAt.name, Date::class.java, FieldAttribute.REQUIRED)
+                addField(FileCategory::addedAt.name, Date::class.java, FieldAttribute.REQUIRED)
             }
             schema.get(File::class.java.simpleName)?.apply {
                 addRealmListField(File::categories.name, fileCategorySchema)
@@ -137,6 +135,7 @@ class FileMigration : RealmMigration {
         // - Added new field (Dropbox) in File table
         // - Added new field (FileConversion) in File table
         // - Added new field (FileVersion) in File table
+        // - Added new field (ShareLink) in File table
 
         if (oldVersionTemp == 3L) {
             // Dropbox migration
@@ -223,9 +222,22 @@ class FileMigration : RealmMigration {
 
             // File migration
             schema.get(File::class.java.simpleName)?.apply {
+                removeField("collaborativeFolder")
                 removeField("onlyofficeConvertExtension")
+                removeField("hasVersion")
+                removeField("lastAccessedAt")
+                removeField("nbVersion")
+                removeField("sizeWithVersions")
+
+                renameField("convertedType", File::extensionType.name)
+                renameField("createdAt", File::extensionType.name)
+                renameField("fileCreatedAt", File::createdAt.name)
+                renameField("nameNaturalSorting", File::sortedName.name)
+                renameField("onlyoffice", File::hasOnlyoffice.name)
+                renameField("shareLink", File::sharelink.name)
+
                 addRealmObjectField(File::conversion.name, fileConversionSchema)
-                addRealmObjectField(File::dropBox.name, dropboxSchema)
+                addRealmObjectField(File::dropbox.name, dropboxSchema)
                 addRealmObjectField(File::version.name, fileVersionSchema)
                 addRealmObjectField(File::sharelink.name, shareLinkSchema)
             }

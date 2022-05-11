@@ -53,6 +53,7 @@ import com.infomaniak.lib.core.auth.TokenInterceptorListener
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
+import com.infomaniak.lib.core.utils.ApiController
 import com.infomaniak.lib.core.utils.clearStack
 import com.infomaniak.lib.login.ApiToken
 import io.sentry.SentryEvent

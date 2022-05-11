@@ -23,12 +23,13 @@ import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
 import kotlinx.android.parcel.Parcelize
+import kotlinx.android.parcel.RawValue
 
 @Parcelize
 @RealmClass(embedded = true)
 open class FileConversion(
     @SerializedName("when_download") var whenDownload: Boolean = false,
-    @SerializedName("download_extensions") var downloadExtensions: RealmList<String> = RealmList(),
+    @SerializedName("download_extensions") var downloadExtensions: @RawValue RealmList<String> = RealmList(),
     @SerializedName("when_onlyoffice") var whenOnlyoffice: Boolean = false,
     @SerializedName("onlyoffice_extension") var onlyofficeExtension: String? = null,
 ) : RealmObject(), Parcelable

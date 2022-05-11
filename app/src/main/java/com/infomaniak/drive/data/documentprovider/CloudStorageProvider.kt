@@ -664,7 +664,7 @@ class CloudStorageProvider : DocumentsProvider() {
     private fun MatrixCursor.addFile(file: File?, documentId: String, name: String = "", isRootFolder: Boolean = false) {
         var flags = 0
 
-        if ((file?.isFolder() == true && file.rights?.newFile == true) || isRootFolder) {
+        if ((file?.isFolder() == true && file.rights?.canCreateFile == true) || isRootFolder) {
             flags = flags or DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE
         }
 

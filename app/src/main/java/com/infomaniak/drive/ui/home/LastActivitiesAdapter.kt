@@ -27,7 +27,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import coil.load
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.ConvertedType
+import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileActivity
@@ -166,7 +166,7 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
     }
 
     private fun File?.loadPreview(imageView: ImageView, iconView: ConstraintLayout) {
-        if (this?.hasThumbnail == true && getFileType() == ConvertedType.IMAGE || this?.getFileType() == ConvertedType.VIDEO) {
+        if (this?.hasThumbnail == true && getFileType() == ExtensionType.IMAGE || this?.getFileType() == ExtensionType.VIDEO) {
             iconView.isGone = true
             imageView.isVisible = true
             imageView.loadAny(thumbnail(), getFileType().icon)
