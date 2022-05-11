@@ -93,7 +93,6 @@ import io.realm.RealmList
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.android.synthetic.main.item_user.view.*
-import java.util.*
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -178,47 +177,6 @@ fun View.setUserView(user: User, showChevron: Boolean = true, onItemClicked: (us
     chevron.isVisible = showChevron
     setOnClickListener { onItemClicked(user) }
 }
-
-fun Date.startOfTheDay(): Date =
-    Calendar.getInstance().apply {
-        time = this@startOfTheDay
-        set(Calendar.HOUR_OF_DAY, 0)
-        set(Calendar.MINUTE, 0)
-        set(Calendar.SECOND, 0)
-    }.time
-
-fun Date.endOfTheDay(): Date =
-    Calendar.getInstance().apply {
-        time = this@endOfTheDay
-        set(Calendar.HOUR_OF_DAY, 23)
-        set(Calendar.MINUTE, 59)
-        set(Calendar.SECOND, 59)
-    }.time
-
-fun Date.year(): Int =
-    Calendar.getInstance().apply {
-        time = this@year
-    }.get(Calendar.YEAR)
-
-fun Date.month(): Int =
-    Calendar.getInstance().apply {
-        time = this@month
-    }.get(Calendar.MONTH)
-
-fun Date.day(): Int =
-    Calendar.getInstance().apply {
-        time = this@day
-    }.get(Calendar.DAY_OF_MONTH)
-
-fun Date.hours(): Int =
-    Calendar.getInstance().apply {
-        time = this@hours
-    }.get(Calendar.HOUR_OF_DAY)
-
-fun Date.minutes(): Int =
-    Calendar.getInstance().apply {
-        time = this@minutes
-    }.get(Calendar.MINUTE)
 
 fun ImageView.animateRotation(isDeployed: Boolean = false) {
     val startDeg = if (isDeployed) 0.0f else 90.0f
