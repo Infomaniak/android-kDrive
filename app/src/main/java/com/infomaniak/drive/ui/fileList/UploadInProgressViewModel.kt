@@ -51,12 +51,13 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
     }
 
     fun getPendingFiles(folderId: Int) = liveData<Pair<ArrayList<File>, ArrayList<UploadFile>>?>(Dispatchers.IO) {
-        UploadFile.getRealmInstance().use { realm ->
-            UploadFile.getCurrentUserPendingUploads(realm, folderId)?.let { uploadFiles ->
-                val uploadFilesCopy = ArrayList(realm.copyFromRealm(uploadFiles, 0))
-                emit(generateUploadFiles(uploadFiles) to uploadFilesCopy)
-            } ?: emit(null)
+        val uploadFiles = UploadFile.getRealmInstance().use { realm ->
+            UploadFile.getCurrentUserPendingUploads(realm, folderId)?.let { uploadFilesProxy ->
+                ArrayList(realm.copyFromRealm(uploadFilesProxy, 0))
+            }
         }
+
+        uploadFiles?.let { emit(generateUploadFiles(it) to it) } ?: emit(null)
     }
 
     private fun generateFolderFiles(pendingFolders: RealmResults<UploadFile>): ArrayList<File> {
@@ -83,7 +84,7 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
         return files
     }
 
-    private fun generateUploadFiles(uploadFiles: RealmResults<UploadFile>): ArrayList<File> {
+    private fun generateUploadFiles(uploadFiles: ArrayList<UploadFile>): ArrayList<File> {
         val files = arrayListOf<File>()
 
         uploadFiles.forEach { uploadFile ->

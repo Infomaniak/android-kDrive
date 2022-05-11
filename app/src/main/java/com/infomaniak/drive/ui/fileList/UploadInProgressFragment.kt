@@ -308,8 +308,8 @@ class UploadInProgressFragment : FileListFragment() {
 
         private fun downloadPendingFilesByFolderId() {
             uploadInProgressViewModel.getPendingFiles(folderId).observe(viewLifecycleOwner) {
-                it?.let { (files, uploadFilesCopy) ->
-                    pendingUploadFiles = uploadFilesCopy
+                it?.let { (files, uploadFiles) ->
+                    pendingUploadFiles = uploadFiles
                     pendingFiles = files
 
                     toolbar.menu.findItem(R.id.restartItem).isVisible = true
