@@ -129,6 +129,31 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
             if (isCurrentlyInGallery) refreshTimer.start()
             loadMorePictures(AccountUtils.currentDriveId, true)
         }
+
+        observeApiResultPagination()
+    }
+
+    private fun observeApiResultPagination() = with(picturesAdapter) {
+        picturesViewModel.picturesApiResult.observe(viewLifecycleOwner) {
+            it?.let { (pictures, isComplete) ->
+                stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+                val pictureList = formatList(pictures)
+                picturesRecyclerView.post { addAll(pictureList) }
+                this.isComplete = isComplete
+                noPicturesLayout.toggleVisibility(pictureList.isEmpty())
+            } ?: run {
+                isComplete = true
+                noPicturesLayout.toggleVisibility(
+                    noNetwork = mainViewModel.isInternetAvailable.value == false,
+                    isVisible = pictureList.isEmpty(),
+                    showRefreshButton = true,
+                )
+            }
+
+            onDownloadFinished()
+
+            isDownloadingPictures = false
+        }
     }
 
     private fun setupPagination() {
@@ -182,30 +207,12 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
                 clean()
             }
 
-            val ignoreCloud = mainViewModel.isInternetAvailable.value == false
             showLoading()
             isComplete = false
             isDownloadingPictures = true
-            picturesViewModel.getLastPictures(driveId, ignoreCloud).observe(viewLifecycleOwner) {
-                it?.let { (pictures, isComplete) ->
-                    stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
-                    val pictureList = formatList(pictures)
-                    picturesRecyclerView.post { addAll(pictureList) }
-                    this.isComplete = isComplete
-                    noPicturesLayout.toggleVisibility(pictureList.isEmpty())
-                } ?: run {
-                    isComplete = true
-                    noPicturesLayout.toggleVisibility(
-                        noNetwork = ignoreCloud,
-                        isVisible = pictureList.isEmpty(),
-                        showRefreshButton = true,
-                    )
-                }
 
-                onDownloadFinished()
-
-                isDownloadingPictures = false
-            }
+            val ignoreCloud = mainViewModel.isInternetAvailable.value == false
+            picturesViewModel.loadMorePictures.value = driveId to ignoreCloud
         }
     }
 

@@ -17,10 +17,7 @@
  */
 package com.infomaniak.drive.ui.menu
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.LiveDataScope
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
+import androidx.lifecycle.*
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
@@ -35,7 +32,12 @@ class PicturesViewModel : ViewModel() {
     var lastPicturesPage = 1
     var lastPicturesLastPage = 1
 
-    fun getLastPictures(
+    val loadMorePictures = MutableLiveData<Pair<Int, Boolean>>()
+    val picturesApiResult = Transformations.switchMap(loadMorePictures) { (driveId, ignoreCloud) ->
+        getLastPictures(driveId, ignoreCloud)
+    }
+
+    private fun getLastPictures(
         driveId: Int,
         ignoreCloud: Boolean = false,
     ): LiveData<Pair<ArrayList<File>, IsComplete>?> {
