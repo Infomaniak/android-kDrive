@@ -413,7 +413,7 @@ class CloudStorageProvider : DocumentsProvider() {
             val copyName = file.name
             val targetParentFileId = getFileIdFromDocumentId(targetParentDocumentId)
 
-            val apiResponse = ApiRepository.duplicateFile(file, copyName, targetParentFileId)
+            val apiResponse = ApiRepository.copyFile(file, copyName, targetParentFileId)
 
             if (apiResponse.isSuccess()) {
 

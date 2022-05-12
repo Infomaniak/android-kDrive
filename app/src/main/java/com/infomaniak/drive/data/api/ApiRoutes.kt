@@ -22,6 +22,7 @@ import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Invitation
 import com.infomaniak.drive.data.models.Team
+import com.infomaniak.drive.utils.FileId
 
 object ApiRoutes {
 
@@ -34,14 +35,52 @@ object ApiRoutes {
 
     private fun fileURL(file: File) = "${DRIVE_API}${file.driveId}/file/${file.id}"
 
-    private fun fileURLv2(file: File) = "${DRIVE_API_V2}${file.driveId}/files/${file.id}"
+    private fun fileURLv2(file: File) = fileURLv2(file.driveId, file.id)
+
+    private fun fileURLv2(driveId: Int, fileId: FileId) = "${DRIVE_API_V2}${driveId}/files/${fileId}"
 
     private fun trashURL(file: File) = "${DRIVE_API}${file.driveId}/file/trash/${file.id}"
 
     fun getAllDrivesData() = "${DRIVE_API}init?with=drives,users,teams,ips,categories"
 
-    fun getDirectoryFiles(driveId: Int, parentId: Int, order: File.SortType) =
+    /**
+     * File/Directory
+     */
+    fun getFolderFiles(driveId: Int, parentId: Int, order: File.SortType) =
         "${DRIVE_API_V2}$driveId/files/$parentId/files?$fileWithQuery&order=${order.order}&order_by=${order.orderBy}"
+
+    fun getFileDetails(file: File) = "${fileURLv2(file)}?$fileExtraWithQuery"
+
+    fun createFolder(driveId: Int, parentId: Int) = "${fileURLv2(driveId, parentId)}/directory?$fileWithQuery"
+
+    fun createOfficeFile(driveId: Int, folderId: Int) = "${fileURLv2(driveId, folderId)}/file?$fileWithQuery"
+
+    fun thumbnailFile(file: File) = "${fileURLv2(file)}/thumbnail?t=${file.lastModifiedAt}"
+
+    fun imagePreviewFile(file: File) = "${fileURLv2(file)}/preview?quality=80&t=${file.lastModifiedAt}"
+
+    fun downloadFile(file: File) = "${fileURLv2(file)}/download"
+
+    fun convertFile(file: File): String = "${fileURLv2(file)}/convert?$fileWithQuery"
+
+    fun moveFile(file: File, newParentId: Int) = "${fileURLv2(file)}/move/$newParentId"
+
+    fun duplicateFile(file: File) = "${fileURLv2(file)}/duplicate?$fileWithQuery"
+
+    fun copyFile(file: File, destinationId: Int) = "${fileURLv2(file)}/copy/$destinationId?$fileWithQuery"
+
+    fun renameFile(file: File) = "${fileURLv2(file)}/rename"
+
+    fun getFileCount(file: File) = "${fileURLv2(file)}/count"
+
+    fun getFolderSize(file: File, depth: String) = "${fileURLv2(file)}/size?depth=$depth"
+
+    fun updateFolderColor(file: File) = "${fileURLv2(file)}/color"
+
+    //
+
+    fun createTeamFolder(driveId: Int) = "${DRIVE_API}$driveId/file/folder/team/?$with"
+
 
     fun checkFileShare(file: File) = "${fileURL(file)}/share/check"
 
@@ -55,12 +94,6 @@ object ApiRoutes {
     fun getFileShare(file: File) = "${fileURL(file)}/share?with=invitation,link,teams"
 
     fun postFileShare(file: File) = "${fileURL(file)}/share"
-
-    fun createFolder(driveId: Int, parentId: Int) = "${DRIVE_API}$driveId/file/folder/$parentId?$with"
-
-    fun createOfficeFile(driveId: Int, folderId: Int) = "${DRIVE_API}$driveId/file/file/$folderId?$with"
-
-    fun createTeamFolder(driveId: Int) = "${DRIVE_API}$driveId/file/folder/team/?$with"
 
     fun getDriveFileTrashedListForFolder(driveId: Int, order: File.SortType) =
         "${DRIVE_API}${driveId}/file/trash?with=children,parent,extras&order=${order.order}&order_by=${order.orderBy}"
@@ -76,8 +109,6 @@ object ApiRoutes {
 
     fun deleteFile(file: File) = fileURL(file)
 
-    fun downloadFile(file: File) = "${fileURL(file)}/download"
-
     fun commentFile(file: File) = "${fileURL(file)}/comment"
 
     fun updateComment(file: File, commentId: Int) = "${fileURL(file)}/comment/$commentId"
@@ -86,26 +117,9 @@ object ApiRoutes {
 
     fun unLikeCommentFile(file: File, commentId: Int) = "${fileURL(file)}/comment/$commentId/unlike"
 
-    fun getFileDetails(file: File) = "${fileURL(file)}?with=user,teams,children,parent,rights,favorite,version,extras," +
-            "share_link,collaborative_folder,mobile,conversion,categories"
-
-    fun getFileCount(file: File) = "${fileURL(file)}/count"
-
-    fun moveFile(file: File, newParentId: Int) = "${fileURL(file)}/move/$newParentId"
-
-    fun renameFile(file: File) = "${fileURL(file)}/rename"
-
-    fun updateFolderColor(file: File) = "${fileURLv2(file)}/color"
-
-    fun duplicateFile(file: File, folderId: Int) = "${fileURL(file)}/copy/$folderId?$with"
-
     fun uploadFile(driveId: Int, folderId: Int) = "${DRIVE_API}$driveId/file/$folderId/upload"
 
-    fun thumbnailFile(file: File) = "${fileURL(file)}/thumbnail?t=${file.lastModifiedAt}"
-
     fun thumbnailTrashFile(file: File) = "${trashURL(file)}/thumbnail?t=${file.lastModifiedAt}"
-
-    fun imagePreviewFile(file: File) = "${fileURL(file)}/preview?t=${file.lastModifiedAt}"
 
     fun showOffice(file: File) = "${OFFICE_URL}${file.driveId}/${file.id}"
 
@@ -156,8 +170,6 @@ object ApiRoutes {
     fun upgradeDrive(driveId: Int): String = "${SHOP_URL}drive/$driveId"
 
     fun orderDrive(): String = "${SHOP_URL}drive"
-
-    fun convertFile(file: File): String = "${fileURL(file)}/convert"
 
     fun cancelAction(driveId: Int): String = "${DRIVE_API}$driveId/cancel"
 

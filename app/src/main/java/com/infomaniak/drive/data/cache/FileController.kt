@@ -870,7 +870,7 @@ object FileController {
     suspend fun createFolder(name: String, parentId: Int, onlyForMe: Boolean, userDrive: UserDrive?): ApiResponse<File> {
         val okHttpClient = userDrive?.userId?.let { KDriveHttpClient.getHttpClient(it) } ?: HttpClient.okHttpClient
         val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId
-        return ApiRepository.createFolder(okHttpClient, driveId, parentId, name, onlyForMe, false)
+        return ApiRepository.createFolder(okHttpClient, driveId, parentId, name, onlyForMe)
     }
 
     suspend fun createCommonFolder(name: String, forAllUsers: Boolean, userDrive: UserDrive?): ApiResponse<File> {

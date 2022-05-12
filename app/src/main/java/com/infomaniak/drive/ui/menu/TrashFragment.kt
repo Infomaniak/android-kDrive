@@ -69,7 +69,7 @@ class TrashFragment : FileSubTypeListFragment() {
         fileListViewModel.sortType = SortType.RECENT_TRASHED
         sortFiles = SortFiles()
         downloadFiles = DownloadFiles(
-            if (folderId == ROOT_ID) null else File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId)
+            if (folderId == ROOT_ID) null else File(id = folderId, driveId = AccountUtils.currentDriveId, name = folderName)
         )
         setNoFilesLayout = SetNoFilesLayout()
     }

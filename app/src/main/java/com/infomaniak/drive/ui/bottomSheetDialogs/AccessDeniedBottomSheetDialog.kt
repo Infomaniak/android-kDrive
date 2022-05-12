@@ -87,7 +87,7 @@ class AccessDeniedBottomSheetDialog : InformationBottomSheetDialog() {
     class InformationBottomSheetViewModel : ViewModel() {
 
         fun enableFolderAccess(fileId: Int): LiveData<ApiResponse<File>> = liveData(Dispatchers.IO) {
-            emit(ApiRepository.postFolderAccess(File(driveId = AccountUtils.currentDriveId, id = fileId)))
+            emit(ApiRepository.postFolderAccess(File(id = fileId, driveId = AccountUtils.currentDriveId)))
         }
     }
 }

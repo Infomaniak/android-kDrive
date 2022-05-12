@@ -89,7 +89,7 @@ object ApiRepository : ApiRepositoryCore() {
         page: Int = 1,
         order: File.SortType
     ): ApiResponse<List<File>> {
-        val url = "${ApiRoutes.getDirectoryFiles(driveId, parentId, order)}&${pagination(page)}"
+        val url = "${ApiRoutes.getFolderFiles(driveId, parentId, order)}&${pagination(page)}"
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
@@ -126,12 +126,11 @@ object ApiRepository : ApiRepositoryCore() {
         parentId: Int,
         name: String,
         onlyForMe: Boolean = false,
-        share: Boolean = false
     ): ApiResponse<File> {
         return callApi(
             ApiRoutes.createFolder(driveId, parentId),
             POST,
-            mapOf("name" to name, "only_for_me" to onlyForMe, "share" to share),
+            mapOf("name" to name, "only_for_me" to onlyForMe),
             okHttpClient = okHttpClient
         )
     }
@@ -186,9 +185,14 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.updateFolderColor(file), POST, mapOf("color" to color))
     }
 
-    fun duplicateFile(file: File, copyName: String?, folderId: Int): ApiResponse<File> {
+    fun copyFile(file: File, copyName: String?, destinationId: Int): ApiResponse<File> {
         val body = if (copyName == null) mapOf() else mapOf("name" to copyName)
-        return callApi(ApiRoutes.duplicateFile(file, folderId), POST, body)
+        return callApi(ApiRoutes.copyFile(file, destinationId), POST, body)
+    }
+
+    fun duplicateFile(file: File, duplicateName: String?): ApiResponse<File> {
+        val body = if (duplicateName == null) mapOf() else mapOf("name" to duplicateName)
+        return callApi(ApiRoutes.duplicateFile(file), POST, body)
     }
 
     fun moveFile(file: File, newParent: File): ApiResponse<CancellableAction> {

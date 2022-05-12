@@ -377,7 +377,7 @@ class ApiRepositoryTest : KDriveTest() {
         @DisplayName("Copy the test file to root folder")
         fun duplicateFile() {
             val copyName = "testCopy-$randomSuffix"
-            val copyFile = duplicateFile(testFile, copyName, ROOT_ID).let {
+            val copyFile = duplicateFile(testFile, copyName).let {
                 assertApiResponseData(it)
                 assertEquals(copyName, it.data?.name, "The copy name should be equal to $copyName")
                 assertNotEquals(testFile.id, it.data?.id, "The id should be different from the original file")
@@ -386,7 +386,7 @@ class ApiRepositoryTest : KDriveTest() {
             }
 
             // Duplicate one more time with same name and location
-            with(duplicateFile(testFile, copyName, ROOT_ID)) {
+            with(duplicateFile(testFile, copyName)) {
                 assertApiResponseData(this)
                 assertEquals("$copyName (1)", data?.name, "The copy name should be equal to $copyName (1)")
                 deleteTestFile(data!!)

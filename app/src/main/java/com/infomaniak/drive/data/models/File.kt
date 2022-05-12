@@ -55,50 +55,59 @@ import java.util.*
 @Parcelize
 open class File(
     @PrimaryKey var id: Int = 0,
-    @SerializedName("parent_id") var parentId: Int = 0,
-    @SerializedName("color")
-    private var _color: String? = null,
-    @SerializedName("extension_type")
-    var extensionType: String = "",
-    @SerializedName("added_at")
-    var addedAt: Long = 0,
-    @SerializedName("created_by")
-    var createdBy: Int = 0,
-    var conversion: FileConversion? = null,
-    @SerializedName("deleted_at")
-    var deletedAt: Long = 0,
-    @SerializedName("deleted_by")
-    var deletedBy: Int = 0,
+    @SerializedName("parent_id")
+    var parentId: Int = 0,
     @SerializedName("drive_id")
     var driveId: Int = 0,
-    var dropbox: DropBox? = null,
-    @SerializedName("created_at")
-    var createdAt: Long = 0,
-    @SerializedName("has_thumbnail")
-    var hasThumbnail: Boolean = false,
-    @SerializedName("is_favorite")
-    var isFavorite: Boolean = false,
-    @SerializedName("last_modified_at")
-    var lastModifiedAt: Long = 0,
     var name: String = "",
     @SerializedName("sorted_name")
     var sortedName: String = name,
-    @SerializedName("has_onlyoffice")
-    var hasOnlyoffice: Boolean = false,
     var path: String = "", // remote path or Uri for uploadFile
+    var type: String = "file",
+    var status: String? = null,
+    var visibility: String = "",
+    @SerializedName("created_by")
+    var createdBy: Int = 0,
+    @SerializedName("created_at")
+    var createdAt: Long = 0,
+    @SerializedName("added_at")
+    var addedAt: Long = 0,
+    @SerializedName("last_modified_at")
+    var lastModifiedAt: Long = 0,
+    @SerializedName("deleted_by")
+    var deletedBy: Int = 0,
+    @SerializedName("deleted_at")
+    var deletedAt: Long = 0,
+    var users: @WriteWith<IntRealmListParceler> RealmList<Int> = RealmList(),
+    @SerializedName("is_favorite")
+    var isFavorite: Boolean = false,
+    var sharelink: ShareLink? = null,
     @SerializedName("capabilities")
     var rights: Rights? = null,
-    var sharelink: ShareLink? = null,
-    var size: Long? = null,
-    var status: String? = null,
-    var type: String = "file",
-    var users: @WriteWith<IntRealmListParceler> RealmList<Int> = RealmList(),
-    var version: FileVersion? = null,
-    var visibility: String = "",
     var categories: @RawValue RealmList<FileCategory> = RealmList(),
 
     /**
-     * Local
+     * DIRECTORY ONLY
+     */
+    @SerializedName("color")
+    private var _color: String? = null,
+    var dropbox: DropBox? = null,
+
+    /**
+     * FILE ONLY
+     */
+    var size: Long? = null,
+    @SerializedName("has_thumbnail")
+    var hasThumbnail: Boolean = false,
+    @SerializedName("has_onlyoffice")
+    var hasOnlyoffice: Boolean = false,
+    @SerializedName("extension_type")
+    var extensionType: String = "",
+    var version: FileVersion? = null,
+    var conversion: FileConversion? = null,
+
+    /**
+     * LOCAL
      */
     var children: @WriteWith<FileRealmListParceler> RealmList<File> = RealmList(),
     var isComplete: Boolean = false,

@@ -259,13 +259,24 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    fun duplicateFile(
+    fun copyFile(
         file: File,
-        folderId: Int? = null,
+        destinationId: Int? = null,
         copyName: String?,
         onSuccess: ((apiResponse: ApiResponse<File>) -> Unit)? = null,
     ) = liveData(Dispatchers.IO) {
-        ApiRepository.duplicateFile(file, copyName, folderId ?: Utils.ROOT_ID).let { apiResponse ->
+        ApiRepository.copyFile(file, copyName, destinationId ?: Utils.ROOT_ID).let { apiResponse ->
+            if (apiResponse.isSuccess()) onSuccess?.invoke(apiResponse)
+            emit(apiResponse)
+        }
+    }
+
+    fun duplicateFile(
+        file: File,
+        copyName: String?,
+        onSuccess: ((apiResponse: ApiResponse<File>) -> Unit)? = null,
+    ) = liveData(Dispatchers.IO) {
+        ApiRepository.duplicateFile(file, copyName).let { apiResponse ->
             if (apiResponse.isSuccess()) onSuccess?.invoke(apiResponse)
             emit(apiResponse)
         }
