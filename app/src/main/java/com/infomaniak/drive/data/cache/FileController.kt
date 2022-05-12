@@ -35,12 +35,10 @@ import com.infomaniak.lib.core.networking.HttpClient
 import io.realm.*
 import io.realm.kotlin.oneOf
 import io.sentry.Sentry
-import kotlinx.android.parcel.RawValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import okhttp3.OkHttpClient
 import java.util.*
 
 object FileController {
@@ -49,13 +47,15 @@ object FileController {
 
     // Bump this when we want to force-refresh files that are too old.
     // Example: We did it when we added Categories & Colored folders, to automatically display them when updating the app.
-    private const val MIN_VERSION_CODE = 4_01_000_03
+    private const val MIN_VERSION_CODE = 4_02_000_00
 
+    const val ROOT_ID = Utils.ROOT_ID
     const val FAVORITES_FILE_ID = -1
     const val MY_SHARES_FILE_ID = -2
     const val RECENT_CHANGES_FILE_ID = -4
     private const val PICTURES_FILE_ID = -3
 
+    private val ROOT_FILE = File(ROOT_ID, name = "Root")
     private val FAVORITES_FILE = File(FAVORITES_FILE_ID, name = "Favoris")
     private val MY_SHARES_FILE = File(MY_SHARES_FILE_ID, name = "My Shares")
     private val PICTURES_FILE = File(PICTURES_FILE_ID, name = "Pictures")
@@ -63,7 +63,13 @@ object FileController {
 
     private val minDateToIgnoreCache = Calendar.getInstance().apply { add(Calendar.MONTH, -2) }.timeInMillis / 1000 // 3 month
 
-    private fun getFileById(realm: Realm, fileId: Int) = realm.where(File::class.java).equalTo("id", fileId).findFirst()
+    private fun getFileById(realm: Realm, fileId: Int): File? {
+        return realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst()?.let {
+            var folderProxy: File? = null
+            realm.executeTransaction { folderProxy = if (fileId == ROOT_ID) realm.copyToRealm(ROOT_FILE) else null }
+            folderProxy
+        }
+    }
 
     // https://github.com/realm/realm-java/issues/1862
     fun emptyList(realm: Realm): RealmResults<File> = realm.where(File::class.java).alwaysFalse().findAll()
@@ -242,12 +248,6 @@ object FileController {
             if (oldFile?.isUsable() == true) keepOldLocalFilesData(oldFile, newFile)
             moreTransaction?.invoke()
             it.insertOrUpdate(newFile)
-        }
-    }
-
-    private fun addChildren(realm: Realm, file: File, children: ArrayList<File>) {
-        realm.executeTransaction {
-            file.children.addAll(children)
         }
     }
 
@@ -593,7 +593,7 @@ object FileController {
 
             val needToDownload = ignoreCache
                     || folderProxy == null
-                    || folderProxy.children.isNullOrEmpty()
+                    || folderProxy.children.isEmpty()
                     || !folderProxy.isComplete
                     || folderProxy.versionCode < MIN_VERSION_CODE
                     || hasDuplicatesFiles
@@ -601,9 +601,7 @@ object FileController {
 
             if (needToDownload && !ignoreCloud) {
                 result = downloadAndSaveFiles(
-                    currentRealm = realm,
-                    localFolder = folderProxy,
-                    localFolderWithoutChildren = localFolderWithoutChildren,
+                    localFolderProxy = folderProxy,
                     order = order,
                     page = page,
                     parentId = parentId,
@@ -627,9 +625,7 @@ object FileController {
     }
 
     private fun downloadAndSaveFiles(
-        currentRealm: Realm,
-        localFolder: File?,
-        localFolderWithoutChildren: File?,
+        localFolderProxy: File?,
         order: SortType,
         page: Int,
         parentId: Int,
@@ -637,73 +633,51 @@ object FileController {
         withChildren: Boolean
     ): Pair<File, ArrayList<File>>? {
         var result: Pair<File, ArrayList<File>>? = null
-        val okHttpClient: OkHttpClient
-        val driveId: Int
-        if (userDrive == null) {
-            okHttpClient = HttpClient.okHttpClient
-            driveId = AccountUtils.currentDriveId
+
+        val (okHttpClient, driveId) = if (userDrive == null) {
+            HttpClient.okHttpClient to AccountUtils.currentDriveId
         } else {
-            okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(userDrive.userId) }
-            driveId = userDrive.driveId
+            runBlocking { KDriveHttpClient.getHttpClient(userDrive.userId) } to userDrive.driveId
         }
-        val apiResponse = ApiRepository.getFileListForFolder(okHttpClient, driveId, parentId, page, order)
+
+        val apiResponse = ApiRepository.getDirectoryFiles(okHttpClient, driveId, parentId, page, order)
+        val localFolder = localFolderProxy?.realm?.copyFromRealm(localFolderProxy, 1)
 
         if (apiResponse.isSuccess()) {
-            apiResponse.data?.let { remoteFolder ->
-                val apiChildrenRealmList = remoteFolder.children
-                val apiChildren = ArrayList<File>(apiChildrenRealmList.toList())
-
-                saveRemoteFiles(localFolder, remoteFolder, page, currentRealm, apiChildren, apiResponse)
-                remoteFolder.children = RealmList()
-                result = (remoteFolder to if (withChildren) apiChildren else arrayListOf())
+            apiResponse.data?.let { remoteFiles ->
+                saveRemoteFiles(localFolderProxy, apiResponse)
+                result = (localFolder!! to if (withChildren) ArrayList(remoteFiles) else arrayListOf())
             }
-        } else if (page == 1 && localFolderWithoutChildren != null) {
-            val localSortedFolderFiles = if (withChildren) getLocalSortedFolderFiles(localFolder, order) else arrayListOf()
-            result = (localFolderWithoutChildren to localSortedFolderFiles)
+        } else if (page == 1 && localFolderProxy != null) {
+            val localSortedFolderFiles = if (withChildren) getLocalSortedFolderFiles(localFolderProxy, order) else arrayListOf()
+            result = (localFolder!! to localSortedFolderFiles)
         }
         return result
     }
 
-    private fun saveRemoteFiles(
-        localFolder: File?,
-        remoteFolder: @RawValue File,
-        page: Int,
-        currentRealm: Realm,
-        apiChildren: ArrayList<File>,
-        apiResponse: ApiResponse<File>
-    ) {
+    private fun saveRemoteFiles(localFolderProxy: File?, apiResponse: ApiResponse<List<File>>) {
+        val remoteFiles = apiResponse.data!!
         // Restore same children data
-        keepSubFolderChildren(localFolder?.children, remoteFolder.children)
+        keepSubFolderChildren(localFolderProxy?.children, remoteFiles)
         // Save to realm
-        if (localFolder?.children.isNullOrEmpty() || page == 1) {
-            saveRemoteFolder(currentRealm, remoteFolder, apiChildren.size, apiResponse.responseAt)
-        } else {
-            localFolder?.let { it ->
-                addChildren(currentRealm, it, apiChildren)
-                saveRemoteFolder(currentRealm, it, apiChildren.size, apiResponse.responseAt)
+        localFolderProxy?.let {
+            it.realm.executeTransaction {
+                // Add children
+                localFolderProxy.children.addAll(remoteFiles)
+                // Update folder properties
+                if (remoteFiles.size < ApiRepository.PER_PAGE) localFolderProxy.isComplete = true
+                localFolderProxy.responseAt = apiResponse.responseAt
+                localFolderProxy.versionCode = BuildConfig.VERSION_CODE
             }
         }
     }
 
     private fun keepSubFolderChildren(localFolderChildren: List<File>?, remoteFolderChildren: List<File>) {
-        localFolderChildren?.filter { !it.children.isNullOrEmpty() || it.isOffline }?.map { oldFile ->
+        localFolderChildren?.filter { !it.children.isEmpty() || it.isOffline }?.map { oldFile ->
             remoteFolderChildren.find { it.id == oldFile.id }?.apply {
                 if (oldFile.isFolder()) children = oldFile.children
                 isOffline = oldFile.isOffline
             }
-        }
-    }
-
-    private fun saveRemoteFolder(
-        currentRealm: Realm,
-        remoteFolder: File,
-        childrenSize: Int,
-        responseAt: Long
-    ) {
-        insertOrUpdateFile(currentRealm, remoteFolder) {
-            if (childrenSize < ApiRepository.PER_PAGE) remoteFolder.isComplete = true
-            remoteFolder.responseAt = responseAt
-            remoteFolder.versionCode = BuildConfig.VERSION_CODE
         }
     }
 

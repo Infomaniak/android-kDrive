@@ -147,7 +147,7 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
         val (name, type) = if (fileId == Utils.ROOT_ID) {
             Utils.getRootName(context) to File.Type.DRIVE.value
         } else {
-            folder.name to File.Type.FOLDER.value
+            folder.name to File.Type.DIRECTORY.value
         }
 
         return File(

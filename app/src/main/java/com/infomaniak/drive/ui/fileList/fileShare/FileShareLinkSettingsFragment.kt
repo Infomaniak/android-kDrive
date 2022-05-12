@@ -68,7 +68,7 @@ class FileShareLinkSettingsFragment : Fragment() {
 
         getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.OFFICE_EDITING_RIGHTS_NAV_KEY) { bundle ->
             officePermission = bundle.getParcelable(PERMISSION_BUNDLE_KEY)!!
-            shareLink.capabilities.canEdit = officePermission.apiValue
+            shareLink.capabilities?.canEdit = officePermission.apiValue
             setupShareLinkSettingsUi()
         }
 
@@ -77,7 +77,8 @@ class FileShareLinkSettingsFragment : Fragment() {
         setupShareLinkSettingsUi()
     }
 
-    private fun initOfficePermission() = with(shareLink.capabilities) {
+    private fun initOfficePermission() {
+        val canEdit = shareLink.capabilities?.canEdit == true
         officePermission = when {
             navigationArgs.isFolder -> if (canEdit) ShareLink.OfficeFolderPermission.WRITE else ShareLink.OfficeFolderPermission.READ
             else -> if (canEdit) ShareLink.OfficeFilePermission.WRITE else ShareLink.OfficeFilePermission.READ
@@ -124,19 +125,19 @@ class FileShareLinkSettingsFragment : Fragment() {
 
     private fun setupAllowDownload() {
         allowDownloadValue.setOnCheckedChangeListener { _, isChecked ->
-            shareLink.capabilities.canDownload = isChecked
+            shareLink.capabilities?.canDownload = isChecked
         }
     }
 
     private fun setupBlockComments() {
         blockCommentsValue.setOnCheckedChangeListener { _, isChecked ->
-            shareLink.capabilities.canComment = !isChecked
+            shareLink.capabilities?.canComment = !isChecked
         }
     }
 
     private fun setupBlockUsers() {
         blockUsersConsultValue.setOnCheckedChangeListener { _, isChecked ->
-            shareLink.capabilities.canSeeInfo = !isChecked
+            shareLink.capabilities?.canSeeInfo = !isChecked
         }
     }
 
@@ -235,9 +236,9 @@ class FileShareLinkSettingsFragment : Fragment() {
             fileShareLinkRights.isGone = true
         }
 
-        allowDownloadValue.isChecked = capabilities.canDownload
-        blockCommentsValue.isChecked = !capabilities.canComment
-        blockUsersConsultValue.isChecked = !capabilities.canSeeInfo
+        allowDownloadValue.isChecked = capabilities?.canDownload == true
+        blockCommentsValue.isChecked = capabilities?.canComment != true
+        blockUsersConsultValue.isChecked = capabilities?.canSeeInfo != true
 
         if (right == ShareLink.ShareLinkFilePermission.PASSWORD) {
             passwordTextLayout.isGone = true

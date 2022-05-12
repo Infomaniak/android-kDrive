@@ -25,6 +25,8 @@ import com.infomaniak.drive.data.models.Team
 
 object ApiRoutes {
 
+    private const val fileWithQuery = "with=capabilities,categories,conversion,dropbox,is_favorite,sharelink,sorted_name"
+    private const val fileExtraWithQuery = "$fileWithQuery,path,users,version"
     private val with = with("children")
     val withFile = with("file")
 
@@ -37,6 +39,9 @@ object ApiRoutes {
     private fun trashURL(file: File) = "${DRIVE_API}${file.driveId}/file/trash/${file.id}"
 
     fun getAllDrivesData() = "${DRIVE_API}init?with=drives,users,teams,ips,categories"
+
+    fun getDirectoryFiles(driveId: Int, parentId: Int, order: File.SortType) =
+        "${DRIVE_API_V2}$driveId/files/$parentId/files?$fileWithQuery&order=${order.order}&order_by=${order.orderBy}"
 
     fun checkFileShare(file: File) = "${fileURL(file)}/share/check"
 
@@ -56,9 +61,6 @@ object ApiRoutes {
     fun createOfficeFile(driveId: Int, folderId: Int) = "${DRIVE_API}$driveId/file/file/$folderId?$with"
 
     fun createTeamFolder(driveId: Int) = "${DRIVE_API}$driveId/file/folder/team/?$with"
-
-    fun getFileListForFolder(driveId: Int, parentId: Int, order: File.SortType) =
-        "${DRIVE_API}$driveId/file/$parentId?$with&order=${order.order}&order_by=${order.orderBy}"
 
     fun getDriveFileTrashedListForFolder(driveId: Int, order: File.SortType) =
         "${DRIVE_API}${driveId}/file/trash?with=children,parent,extras&order=${order.order}&order_by=${order.orderBy}"

@@ -1,7 +1,7 @@
 package com.infomaniak.drive
 
 import com.infomaniak.drive.data.api.ApiRepository
-import com.infomaniak.drive.data.api.ApiRepository.getFileListForFolder
+import com.infomaniak.drive.data.api.ApiRepository.getDirectoryFiles
 import com.infomaniak.drive.data.api.ApiRepository.getLastModifiedFiles
 import com.infomaniak.drive.data.api.ApiRepository.postFileShare
 import com.infomaniak.drive.data.api.ApiRepository.renameFile
@@ -251,7 +251,7 @@ class FileControllerTest : KDriveTest() {
     @DisplayName("Check if realm root contains files")
     fun getTestFileListForFolder() {
         // Get the file list of root folder
-        with(getFileListForFolder(okHttpClient, userDrive.driveId, Utils.ROOT_ID, order = File.SortType.NAME_AZ)) {
+        with(getDirectoryFiles(okHttpClient, userDrive.driveId, Utils.ROOT_ID, order = File.SortType.NAME_AZ)) {
             assertApiResponseData(this)
 
             // Use non null assertion because data nullability has been checked in assertApiResponse()

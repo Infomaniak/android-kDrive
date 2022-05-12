@@ -52,9 +52,9 @@ class FileShareViewModel : ViewModel() {
     fun editFileShareLink(file: File, shareLink: ShareLink) = liveData(Dispatchers.IO) {
         val body = ShareLink.ShareLinkSettings(
             right = shareLink.newRight,
-            canDownload = shareLink.capabilities.canDownload,
-            canComment = shareLink.capabilities.canComment,
-            canSeeInfo = shareLink.capabilities.canSeeInfo,
+            canDownload = shareLink.capabilities?.canDownload,
+            canComment = shareLink.capabilities?.canComment,
+            canSeeInfo = shareLink.capabilities?.canSeeInfo,
         )
 
         if (AccountUtils.getCurrentDrive()?.pack != Drive.DrivePack.FREE.value) {

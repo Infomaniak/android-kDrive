@@ -82,14 +82,14 @@ object ApiRepository : ApiRepositoryCore() {
 
     fun deleteFavoriteFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.favorite(file), DELETE)
 
-    fun getFileListForFolder(
+    fun getDirectoryFiles(
         okHttpClient: OkHttpClient,
         driveId: Int,
         parentId: Int,
         page: Int = 1,
         order: File.SortType
-    ): ApiResponse<File> {
-        val url = "${ApiRoutes.getFileListForFolder(driveId, parentId, order)}&${pagination(page)}"
+    ): ApiResponse<List<File>> {
+        val url = "${ApiRoutes.getDirectoryFiles(driveId, parentId, order)}&${pagination(page)}"
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
