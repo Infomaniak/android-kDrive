@@ -129,8 +129,8 @@ class FileShareDetailsFragment : Fragment() {
                 }
 
                 sharedUsersTitle.isVisible = true
-                sharedItemsAdapter.setAll(ArrayList(share.invitations + share.teams + share.users))
                 setupShareLink(share.link)
+                sharedItemsAdapter.setAll(ArrayList(share.members))
             }
         }
     }

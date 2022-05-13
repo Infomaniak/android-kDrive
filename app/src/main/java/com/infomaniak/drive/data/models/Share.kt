@@ -17,14 +17,10 @@
  */
 package com.infomaniak.drive.data.models
 
-import com.google.gson.annotations.SerializedName
-
 data class Share(
-    val id: Int,
-    var link: ShareLink?,
-    val path: String,
     val teams: ArrayList<Team>,
     val users: ArrayList<DriveUser>,
     val invitations: ArrayList<Invitation>,
-    @SerializedName("can_use_team") val canUseTeam: Boolean
-)
+) {
+    inline val members get() = invitations + teams + users
+}
