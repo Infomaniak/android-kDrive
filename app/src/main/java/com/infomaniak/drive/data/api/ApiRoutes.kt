@@ -19,12 +19,16 @@ package com.infomaniak.drive.data.api
 
 import com.infomaniak.drive.BuildConfig.*
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.utils.FileId
 
 object ApiRoutes {
 
     private const val fileWithQuery = "with=capabilities,categories,conversion,dropbox,is_favorite,sharelink,sorted_name"
     private const val fileExtraWithQuery = "$fileWithQuery,path,users,version"
+
+    private fun orderQuery(order: SortType) = "order=${order.order}&order_by=${order.orderBy}"
+
     private val with = with("children")
     val withFile = with("file")
 
@@ -45,7 +49,7 @@ object ApiRoutes {
     /**
      * File/Directory
      */
-    fun getFolderFiles(driveId: Int, parentId: Int, order: File.SortType) =
+    fun getFolderFiles(driveId: Int, parentId: Int, order: SortType) =
         "${DRIVE_API_V2}$driveId/files/$parentId/files?$fileWithQuery&order=${order.order}&order_by=${order.orderBy}"
 
     fun getFileDetails(file: File) = "${fileURLv2(file)}?$fileExtraWithQuery"
@@ -93,23 +97,24 @@ object ApiRoutes {
 
     fun forceFolderAccess(file: File) = "${accessUrl(file)}/force"
 
+    /**
+     * Favorite
+     */
+    fun getFavoriteFiles(driveId: Int, order: SortType) = "${v2URL(driveId)}/files/favorites?$fileWithQuery&${orderQuery(order)}"
+
+    fun favorite(file: File) = "${fileURLv2(file)}/favorite"
+
     //
 
     fun createTeamFolder(driveId: Int) = "${DRIVE_API}$driveId/file/folder/team/?$with"
 
     fun postFileShare(file: File) = "${fileURL(file)}/share"
 
-    fun getDriveFileTrashedListForFolder(driveId: Int, order: File.SortType) =
+    fun getDriveFileTrashedListForFolder(driveId: Int, order: SortType) =
         "${DRIVE_API}${driveId}/file/trash?with=children,parent,extras&order=${order.order}&order_by=${order.orderBy}"
 
-    fun getFileTrashedListForFolder(file: File, order: File.SortType) =
+    fun getFileTrashedListForFolder(file: File, order: SortType) =
         "${trashURL(file)}?with=children,parent,extras&order=${order.order}&order_by=${order.orderBy}"
-
-    fun getFavoriteFiles(driveId: Int, order: File.SortType) =
-        "${DRIVE_API}$driveId/file/favorite?$with&order=${order.order}&order_by=${order.orderBy}"
-
-    fun favorite(file: File) =
-        "${fileURL(file)}/favorite"
 
     fun deleteFile(file: File) = fileURL(file)
 
