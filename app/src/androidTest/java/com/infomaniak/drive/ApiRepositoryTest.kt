@@ -20,6 +20,7 @@ package com.infomaniak.drive
 import android.util.Log
 import com.google.gson.JsonObject
 import com.infomaniak.drive.BuildConfig.DRIVE_API
+import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRepository.addCategory
 import com.infomaniak.drive.data.api.ApiRepository.createCategory
 import com.infomaniak.drive.data.api.ApiRepository.createTeamFolder
@@ -39,7 +40,6 @@ import com.infomaniak.drive.data.api.ApiRepository.getFileActivities
 import com.infomaniak.drive.data.api.ApiRepository.getFileComments
 import com.infomaniak.drive.data.api.ApiRepository.getFileCount
 import com.infomaniak.drive.data.api.ApiRepository.getFileDetails
-import com.infomaniak.drive.data.api.ApiRepository.getFileShare
 import com.infomaniak.drive.data.api.ApiRepository.getLastActivities
 import com.infomaniak.drive.data.api.ApiRepository.getMySharedFiles
 import com.infomaniak.drive.data.api.ApiRepository.getTrashFile
@@ -49,7 +49,6 @@ import com.infomaniak.drive.data.api.ApiRepository.postFavoriteFile
 import com.infomaniak.drive.data.api.ApiRepository.postFileComment
 import com.infomaniak.drive.data.api.ApiRepository.postFileCommentLike
 import com.infomaniak.drive.data.api.ApiRepository.postFileCommentUnlike
-import com.infomaniak.drive.data.api.ApiRepository.postFileShareCheck
 import com.infomaniak.drive.data.api.ApiRepository.postFileShareLink
 import com.infomaniak.drive.data.api.ApiRepository.postRestoreTrashFile
 import com.infomaniak.drive.data.api.ApiRepository.putFileComment
@@ -65,7 +64,6 @@ import com.infomaniak.drive.utils.ApiTestUtils.createFileForTest
 import com.infomaniak.drive.utils.ApiTestUtils.createFolderWithName
 import com.infomaniak.drive.utils.ApiTestUtils.deleteTestFile
 import com.infomaniak.drive.utils.ApiTestUtils.getCategory
-import com.infomaniak.drive.utils.ApiTestUtils.getShareLink
 import com.infomaniak.drive.utils.ApiTestUtils.putNewFileInTrash
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import org.junit.jupiter.api.*
@@ -399,7 +397,6 @@ class ApiRepositoryTest : KDriveTest() {
         @Test
         @DisplayName("Create a custom share link, update it then delete it")
         fun shareLinkTest() {
-            // TODO Changes for api-v2 : boolean instead of "true", "false", and can_edit instead of canEdit
             val body = ShareLink.ShareLinkSettings(
                 right = ShareLink.ShareLinkFilePermission.PUBLIC,
                 canDownload = true,
@@ -412,9 +409,10 @@ class ApiRepositoryTest : KDriveTest() {
             // Creates the share link
             with(postFileShareLink(testFile, body)) {
                 assertApiResponseData(this)
+                assertNotNull(data?.capabilities, "The data's capabilities cannot be null")
                 assertEquals("public", data!!.right.name.lowercase(), "Permission should be public")
 
-                with(data!!.capabilities) {
+                with(data?.capabilities!!) {
                     assertTrue(canDownload, "Can downloads should be true")
                     assertFalse(canEdit, "Can edit should be false")
                     assertFalse(canSeeStats, "Show stats should be false")
@@ -425,9 +423,9 @@ class ApiRepositoryTest : KDriveTest() {
             }
 
             // Get the share link
-            with(getFileShare(okHttpClient, testFile)) {
+            with(ApiRepository.getShareLink(testFile)) {
                 assertApiResponseData(this)
-                assertEquals("/${testFile.name}", data!!.path, "Path should be the name of the file")
+                assertFalse(data?.url.isNullOrBlank(), "Sharelink url cannot be null")
             }
 
             // Modifies the share link
@@ -443,11 +441,12 @@ class ApiRepositoryTest : KDriveTest() {
             ).let(::assertApiResponseData)
 
             // Makes sure modification has been made
-            with(getShareLink(testFile)) {
+            with(ApiRepository.getShareLink(testFile)) {
                 assertApiResponseData(this)
+                assertNotNull(data?.capabilities, "The data's capabilities cannot be null")
                 assertEquals("public", data!!.right.name.lowercase(), "Permission should be public")
 
-                with(data!!.capabilities) {
+                with(data?.capabilities!!) {
                     assertFalse(canDownload, "can downloads should be false")
                     assertTrue(canEdit, "can edit should be true")
                     assertTrue(canSeeStats, "show stats should be true")
@@ -463,7 +462,7 @@ class ApiRepositoryTest : KDriveTest() {
                 assertTrue(data!!)
             }
 
-            assertFalse(postFileShareCheck(testFile, body).isSuccess(), "Share link check should fail")
+            assertFalse(ApiRepository.getShareLink(testFile).isSuccess(), "Share link check should fail")
         }
 
         @Test

@@ -77,7 +77,7 @@ class FileShareDetailsFragment : Fragment() {
             setAvailableShareableItems()
             setToolbarTitle()
             sharedUsersTitle.isGone = true
-            setupShareLink()
+            setupShareLink(file.sharelink)
             refreshUi()
             setBackActionHandlers()
             setBackPressedHandlers()
@@ -112,6 +112,7 @@ class FileShareDetailsFragment : Fragment() {
     }
 
     private fun refreshUi() {
+        //FIXME Need refactor
         sharedItemsAdapter = SharedItemsAdapter(file) { shareable -> openSelectPermissionDialog(shareable) }
         sharedUsersRecyclerView.adapter = sharedItemsAdapter
 
@@ -129,9 +130,12 @@ class FileShareDetailsFragment : Fragment() {
                 }
 
                 sharedUsersTitle.isVisible = true
-                setupShareLink(share.link)
                 sharedItemsAdapter.setAll(ArrayList(share.members))
             }
+        }
+
+        mainViewModel.getShareLink(file).observe(viewLifecycleOwner) {
+            it?.data?.let(::setupShareLink)
         }
     }
 

@@ -35,7 +35,6 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Permission
-import com.infomaniak.drive.data.models.Share
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
@@ -64,7 +63,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
 
             this.file = file
 
-            setupShareLink(fileDetailsViewModel.currentFileShare.value)
+            file.sharelink?.let { setupShareLink() }
             setupCategoriesContainer(file.getCategories())
             displayUsersAvatars()
             setupShareButton()
@@ -94,11 +93,6 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
                 originalSizeValue.text = Formatter.formatFileSize(context, it)
                 originalSize.isVisible = true
             }
-        }
-
-        fileDetailsViewModel.currentFileShare.observe(viewLifecycleOwner) { share ->
-            setPath(share.path)
-            setupShareLink(share)
         }
 
         setBackActionHandlers()
@@ -182,10 +176,10 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         }
     }
 
-    private fun setupShareLink(share: Share?) {
+    private fun setupShareLink() {
         when {
             file.isDropBox() -> setupDropBoxShareLink()
-            file.rights?.canBecomeShareLink == true || file.sharelink?.url?.isNotBlank() == true -> setupNormalShareLink(share)
+            file.rights?.canBecomeShareLink == true || file.sharelink?.url?.isNotBlank() == true -> setupNormalShareLink()
             else -> hideShareLinkView()
         }
     }
@@ -195,11 +189,11 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         shareLinkContainer.setup(file)
     }
 
-    private fun setupNormalShareLink(share: Share?) {
+    private fun setupNormalShareLink() {
         showShareLinkView()
         shareLinkContainer.setup(
             file = file,
-            shareLink = share?.link,
+            shareLink = file.sharelink,
             onTitleClicked = { newShareLink -> handleOnShareLinkTitleClicked(newShareLink) },
             onSettingsClicked = { newShareLink -> handleOnShareLinkSettingsClicked(newShareLink) })
     }

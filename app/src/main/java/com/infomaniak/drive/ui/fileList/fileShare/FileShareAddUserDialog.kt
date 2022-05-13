@@ -221,7 +221,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                 "emails" to ArrayList(selectedItems.invitations.map { it.email }),
                 "user_ids" to ArrayList(selectedItems.users.map { it.id }),
                 "team_ids" to ArrayList(selectedItems.teams.map { it.id }),
-                "permission" to newPermission
+                "right" to newPermission
             )
 
             fileShareViewModel.postFileShareCheck(file, body).observe(viewLifecycleOwner) { apiResponse ->

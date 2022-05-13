@@ -236,6 +236,10 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.unLikeCommentFile(file, commentId), POST)
     }
 
+    fun getShareLink(file: File): ApiResponse<ShareLink> {
+        return callApi(ApiRoutes.shareLink(file), GET)
+    }
+
     fun postFileShareLink(file: File, body: ShareLink.ShareLinkSettings): ApiResponse<ShareLink> {
         return callApi(ApiRoutes.shareLink(file), POST, body)
     }
@@ -255,9 +259,9 @@ object ApiRepository : ApiRepositoryCore() {
     fun deleteFileShare(file: File, shareableItem: Shareable): ApiResponse<Boolean> {
         return callApi(
             when (shareableItem) {
-                is Team -> ApiRoutes.updateFileSharedTeam(file, shareableItem)
-                is Invitation -> ApiRoutes.updateFileSharedInvitation(file, shareableItem)
-                else -> ApiRoutes.updateFileSharedUser(file, shareableItem as DriveUser)
+                is Team -> ApiRoutes.teamAccess(file, shareableItem.id)
+                is Invitation -> ApiRoutes.fileInvitationAccess(file, shareableItem.id)
+                else -> ApiRoutes.userAccess(file, shareableItem.id)
             }, DELETE
         )
     }
@@ -265,9 +269,9 @@ object ApiRepository : ApiRepositoryCore() {
     fun putFileShare(file: File, shareableItem: Shareable, body: Map<String, String>): ApiResponse<Boolean> {
         return callApi(
             when (shareableItem) {
-                is Team -> ApiRoutes.updateFileSharedTeam(file, shareableItem)
-                is Invitation -> ApiRoutes.updateFileSharedInvitation(file, shareableItem)
-                else -> ApiRoutes.updateFileSharedUser(file, shareableItem as DriveUser)
+                is Team -> ApiRoutes.teamAccess(file, shareableItem.id)
+                is Invitation -> ApiRoutes.fileInvitationAccess(file, shareableItem.id)
+                else -> ApiRoutes.userAccess(file, shareableItem.id)
             }, PUT, body
         )
     }
@@ -307,7 +311,7 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun postFolderAccess(file: File): ApiResponse<File> {
-        return callApi(ApiRoutes.postFolderAccess(file), POST)
+        return callApi(ApiRoutes.forceFolderAccess(file), POST)
     }
 
     fun getDropBox(file: File): ApiResponse<DropBox> {

@@ -18,10 +18,7 @@
 package com.infomaniak.drive.data.api
 
 import com.infomaniak.drive.BuildConfig.*
-import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.Invitation
-import com.infomaniak.drive.data.models.Team
 import com.infomaniak.drive.utils.FileId
 
 object ApiRoutes {
@@ -33,11 +30,13 @@ object ApiRoutes {
 
     private fun with(target: String) = "with=$target,rights,collaborative_folder,favorite,mobile,share_link,categories"
 
+    private fun v2URL(driveId: Int) = "${DRIVE_API_V2}${driveId}"
+
     private fun fileURL(file: File) = "${DRIVE_API}${file.driveId}/file/${file.id}"
 
     private fun fileURLv2(file: File) = fileURLv2(file.driveId, file.id)
 
-    private fun fileURLv2(driveId: Int, fileId: FileId) = "${DRIVE_API_V2}${driveId}/files/${fileId}"
+    private fun fileURLv2(driveId: Int, fileId: FileId) = "${v2URL(driveId)}/files/${fileId}"
 
     private fun trashURL(file: File) = "${DRIVE_API}${file.driveId}/file/trash/${file.id}"
 
@@ -77,21 +76,26 @@ object ApiRoutes {
 
     fun updateFolderColor(file: File) = "${fileURLv2(file)}/color"
 
+    /**
+     * File Access/Invitation
+     */
+    private fun accessUrl(file: File) = "${fileURLv2(file)}/access"
+
+    fun fileInvitationAccess(file: File, invitationId: Int) = "${v2URL(file.driveId)}/files/invitations/$invitationId"
+
+    fun getFileShare(file: File) = "${accessUrl(file)}?with=user"
+
+    fun checkFileShare(file: File) = "${accessUrl(file)}/check"
+
+    fun teamAccess(file: File, teamId: Int) = "${accessUrl(file)}/teams/$teamId"
+
+    fun userAccess(file: File, driveUserId: Int) = "${accessUrl(file)}/users/$driveUserId"
+
+    fun forceFolderAccess(file: File) = "${accessUrl(file)}/force"
+
     //
 
     fun createTeamFolder(driveId: Int) = "${DRIVE_API}$driveId/file/folder/team/?$with"
-
-
-    fun checkFileShare(file: File) = "${fileURL(file)}/share/check"
-
-    fun updateFileSharedUser(file: File, driveUser: DriveUser) = "${fileURL(file)}/share/${driveUser.id}"
-
-    fun updateFileSharedTeam(file: File, team: Team) = "${fileURL(file)}/share/team/${team.id}"
-
-    fun updateFileSharedInvitation(file: File, invitation: Invitation) =
-        "${DRIVE_API}${file.driveId}/file/invitation/${invitation.id}"
-
-    fun getFileShare(file: File) = "${fileURL(file)}/share?with=invitation,link,teams"
 
     fun postFileShare(file: File) = "${fileURL(file)}/share"
 
@@ -152,8 +156,6 @@ object ApiRoutes {
         "${DRIVE_API}$driveId/file/search?order=desc&order_by=last_modified_at&converted_type=image&$with"
 
     fun searchFiles(driveId: Int) = "${DRIVE_API}$driveId/file/search?$with"
-
-    fun postFolderAccess(file: File) = "${fileURL(file)}/share/access"
 
     fun restoreTrashFile(file: File) = "${trashURL(file)}/restore"
 

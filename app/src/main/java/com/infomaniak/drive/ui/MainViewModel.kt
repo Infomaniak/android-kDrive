@@ -163,6 +163,10 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         emit(apiResponse)
     }
 
+    fun getShareLink(file: File) = liveData(Dispatchers.IO) {
+        emit(ApiRepository.getShareLink(file))
+    }
+
     fun getFileShare(fileId: Int, userDrive: UserDrive? = null) = liveData(Dispatchers.IO) {
         val okHttpClient = userDrive?.userId?.let { KDriveHttpClient.getHttpClient(it) } ?: HttpClient.okHttpClient
         val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId

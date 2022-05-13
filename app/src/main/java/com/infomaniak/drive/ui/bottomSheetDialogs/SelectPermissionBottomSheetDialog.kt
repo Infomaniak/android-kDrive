@@ -216,7 +216,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         }
 
         fun editFileShare(file: File, shareableItem: Shareable, permission: ShareablePermission) = liveData(Dispatchers.IO) {
-            emit(ApiRepository.putFileShare(file, shareableItem, mapOf("permission" to permission.apiValue)))
+            emit(ApiRepository.putFileShare(file, shareableItem, mapOf("right" to permission.apiValue)))
         }
     }
 
