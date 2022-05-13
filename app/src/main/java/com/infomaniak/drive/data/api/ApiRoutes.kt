@@ -50,7 +50,7 @@ object ApiRoutes {
      * File/Directory
      */
     fun getFolderFiles(driveId: Int, parentId: Int, order: SortType) =
-        "${DRIVE_API_V2}$driveId/files/$parentId/files?$fileWithQuery&order=${order.order}&order_by=${order.orderBy}"
+        "${fileURLv2(driveId, parentId)}/files?$fileWithQuery&${orderQuery(order)}"
 
     fun getFileDetails(file: File) = "${fileURLv2(file)}?$fileExtraWithQuery"
 
@@ -104,6 +104,11 @@ object ApiRoutes {
 
     fun favorite(file: File) = "${fileURLv2(file)}/favorite"
 
+    /**
+     * Dropbox
+     */
+    fun dropBox(file: File) = "${fileURLv2(file)}/dropbox"
+
     //
 
     fun createTeamFolder(driveId: Int) = "${DRIVE_API}$driveId/file/folder/team/?$with"
@@ -133,8 +138,6 @@ object ApiRoutes {
     fun showOffice(file: File) = "${OFFICE_URL}${file.driveId}/${file.id}"
 
     fun getFileActivities(file: File) = "${fileURL(file)}/activity"
-
-    fun dropBox(file: File) = "${fileURL(file)}/collaborate"
 
     fun getLastActivities(driveId: Int) =
         "${DRIVE_API}$driveId/file/activity?$withFile" +
