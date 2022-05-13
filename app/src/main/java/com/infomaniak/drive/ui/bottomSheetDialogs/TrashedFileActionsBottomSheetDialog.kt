@@ -34,6 +34,7 @@ import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
+import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.menu.TrashViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackTrashEvent
@@ -49,13 +50,13 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data ->
-            val folderId = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
-            val folderName = data?.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG)
-            folderId?.let {
-                mainViewModel.restoreTrashFile(currentTrashedFile, folderId)
-                    .observe(this@TrashedFileActionsBottomSheetDialog) { apiResponse ->
-                        restoreResult(apiResponse, originalPlace = false, folderName = folderName)
-                    }
+            data?.extras?.let { bundle ->
+                SelectFolderActivityArgs.fromBundle(bundle).apply {
+                    mainViewModel.restoreTrashFile(currentTrashedFile, folderId)
+                        .observe(this@TrashedFileActionsBottomSheetDialog) { apiResponse ->
+                            restoreResult(apiResponse, originalPlace = false, folderName = folderName)
+                        }
+                }
             }
         }
     }
@@ -71,11 +72,15 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
         currentFile.setFileItem(currentTrashedFile)
         restoreFileIn.setOnClickListener {
             trackTrashEvent("restoreGivenFolder")
-            val intent = Intent(requireContext(), SelectFolderActivity::class.java).apply {
-                putExtra(SelectFolderActivity.USER_ID_TAG, AccountUtils.currentUserId)
-                putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
+            Intent(requireContext(), SelectFolderActivity::class.java).apply {
+                putExtras(
+                    SelectFolderActivityArgs(
+                        userId = AccountUtils.currentUserId,
+                        userDriveId = AccountUtils.currentDriveId
+                    ).toBundle()
+                )
+                selectFolderResultLauncher.launch(this)
             }
-            selectFolderResultLauncher.launch(intent)
         }
 
         restoreFileToOriginalPlace.setOnClickListener {

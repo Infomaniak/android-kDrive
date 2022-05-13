@@ -50,6 +50,7 @@ import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
+import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragmentArgs
 import com.infomaniak.lib.core.utils.showToast
 import kotlinx.android.synthetic.main.dialog_download_progress.view.*
@@ -214,16 +215,17 @@ object Utils {
     }
 
     fun Context.moveFileClicked(currentFolderId: Int?, selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
-        val intent = Intent(this, SelectFolderActivity::class.java).apply {
-            putExtra(SelectFolderActivity.USER_ID_TAG, AccountUtils.currentUserId)
-            putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
-            putExtra(SelectFolderActivity.CURRENT_FOLDER_ID_TAG, currentFolderId)
-            putExtra(
-                SelectFolderActivity.CUSTOM_ARGS_TAG,
-                bundleOf(SelectFolderActivity.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE),
+        Intent(this, SelectFolderActivity::class.java).apply {
+            putExtras(
+                SelectFolderActivityArgs(
+                    userId = AccountUtils.currentUserId,
+                    userDriveId = AccountUtils.currentDriveId,
+                    currentFolderId = currentFolderId ?: -1,
+                    customArgs = bundleOf(SelectFolderActivity.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE)
+                ).toBundle()
             )
+            selectFolderResultLauncher.launch(this)
         }
-        selectFolderResultLauncher.launch(intent)
     }
 
     fun Context.openWith(file: File, userDrive: UserDrive = UserDrive()) {

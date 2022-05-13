@@ -44,6 +44,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
+import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.MatomoUtils.trackEventWithBooleanValue
@@ -66,7 +67,9 @@ class SyncSettingsActivity : BaseActivity() {
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data ->
-            syncSettingsViewModel.syncFolder.value = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
+            data?.extras?.let { bundle ->
+                syncSettingsViewModel.syncFolder.value = SelectFolderActivityArgs.fromBundle(bundle).folderId
+            }
         }
     }
 
@@ -141,12 +144,16 @@ class SyncSettingsActivity : BaseActivity() {
         }
 
         selectPath.setOnClickListener {
-            val intent = Intent(this, SelectFolderActivity::class.java).apply {
-                putExtra(SelectFolderActivity.USER_ID_TAG, selectDriveViewModel.selectedUserId.value)
-                putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, selectDriveViewModel.selectedDrive.value?.id)
-                putExtra(SelectFolderActivity.CURRENT_FOLDER_ID_TAG, Utils.ROOT_ID)
+            Intent(this, SelectFolderActivity::class.java).apply {
+                putExtras(
+                    SelectFolderActivityArgs(
+                        userId = selectDriveViewModel.selectedUserId.value!!,
+                        userDriveId = selectDriveViewModel.selectedDrive.value?.id!!,
+                        currentFolderId = Utils.ROOT_ID,
+                    ).toBundle()
+                )
+                selectFolderResultLauncher.launch(this)
             }
-            selectFolderResultLauncher.launch(intent)
         }
 
         syncSettingsViewModel.syncFolder.observe(this) { syncFolderId ->

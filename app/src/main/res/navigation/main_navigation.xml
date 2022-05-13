@@ -342,6 +342,38 @@
         android:label="MainActivity"
         tools:layout="@layout/activity_main" />
 
+    <activity
+        android:id="@+id/selectFolderActivity"
+        android:name="com.infomaniak.drive.ui.fileList.SelectFolderActivity"
+        android:label="SelectFolderActivity"
+        tools:layout="@layout/activity_select_folder">
+        <argument
+            android:name="userId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <argument
+            android:name="userDriveId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <argument
+            android:name="folderId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <argument
+            android:name="folderName"
+            android:defaultValue=""
+            app:argType="string" />
+        <argument
+            android:name="currentFolderId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <argument
+            android:name="customArgs"
+            android:defaultValue="@null"
+            app:argType="android.os.Bundle"
+            app:nullable="true" />
+    </activity>
+
     <dialog
         android:id="@+id/addFileBottomSheetDialog"
         android:name="com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialog"

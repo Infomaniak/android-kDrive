@@ -41,6 +41,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
+import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.menu.settings.SelectDriveDialog
 import com.infomaniak.drive.ui.menu.settings.SelectDriveViewModel
 import com.infomaniak.drive.utils.*
@@ -72,7 +73,9 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data ->
-            saveExternalFilesViewModel.folderId.value = data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)
+            data?.extras?.let { bundle ->
+                saveExternalFilesViewModel.folderId.value = SelectFolderActivityArgs.fromBundle(bundle).folderId
+            }
         }
     }
 
@@ -163,12 +166,16 @@ class SaveExternalFilesActivity : BaseActivity() {
         selectPath.apply {
             isVisible = true
             setOnClickListener {
-                val intent = Intent(this@SaveExternalFilesActivity, SelectFolderActivity::class.java).apply {
-                    putExtra(SelectFolderActivity.USER_ID_TAG, selectDriveViewModel.selectedUserId.value)
-                    putExtra(SelectFolderActivity.USER_DRIVE_ID_TAG, selectDriveViewModel.selectedDrive.value?.id)
-                    putExtra(SelectFolderActivity.CURRENT_FOLDER_ID_TAG, saveExternalFilesViewModel.folderId.value)
+                Intent(this@SaveExternalFilesActivity, SelectFolderActivity::class.java).apply {
+                    putExtras(
+                        SelectFolderActivityArgs(
+                            userId = selectDriveViewModel.selectedUserId.value!!,
+                            userDriveId = selectDriveViewModel.selectedDrive.value?.id!!,
+                            currentFolderId = saveExternalFilesViewModel.folderId.value ?: -1,
+                        ).toBundle()
+                    )
+                    selectFolderResultLauncher.launch(this)
                 }
-                selectFolderResultLauncher.launch(intent)
             }
         }
     }
