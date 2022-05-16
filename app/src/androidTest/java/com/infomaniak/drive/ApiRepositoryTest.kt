@@ -47,8 +47,8 @@ import com.infomaniak.drive.data.api.ApiRepository.getUserProfile
 import com.infomaniak.drive.data.api.ApiRepository.moveFile
 import com.infomaniak.drive.data.api.ApiRepository.postFavoriteFile
 import com.infomaniak.drive.data.api.ApiRepository.postFileComment
-import com.infomaniak.drive.data.api.ApiRepository.postFileCommentLike
-import com.infomaniak.drive.data.api.ApiRepository.postFileCommentUnlike
+import com.infomaniak.drive.data.api.ApiRepository.postLikeComment
+import com.infomaniak.drive.data.api.ApiRepository.postUnlikeComment
 import com.infomaniak.drive.data.api.ApiRepository.postFileShareLink
 import com.infomaniak.drive.data.api.ApiRepository.postRestoreTrashFile
 import com.infomaniak.drive.data.api.ApiRepository.putFileComment
@@ -344,7 +344,7 @@ class ApiRepositoryTest : KDriveTest() {
             }
 
             // Likes the comment
-            with(postFileCommentLike(testFile, commentID)) {
+            with(postLikeComment(testFile, commentID)) {
                 assertApiResponseData(this)
                 assertTrue(data ?: false)
             }
@@ -358,7 +358,7 @@ class ApiRepositoryTest : KDriveTest() {
             }
 
             // Unlike the comment
-            with(postFileCommentUnlike(testFile, commentID)) {
+            with(postUnlikeComment(testFile, commentID)) {
                 assertApiResponseData(this)
                 assertTrue(data ?: false)
             }

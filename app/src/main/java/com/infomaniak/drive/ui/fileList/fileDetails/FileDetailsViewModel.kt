@@ -67,11 +67,11 @@ class FileDetailsViewModel : ViewModel() {
     }
 
     fun postLike(file: File, fileComment: FileComment) = liveData(Dispatchers.IO) {
-        emit(ApiRepository.postFileCommentLike(file, fileComment.id))
+        emit(ApiRepository.postLikeComment(file, fileComment.id))
     }
 
     fun postUnlike(file: File, fileComment: FileComment) = liveData(Dispatchers.IO) {
-        emit(ApiRepository.postFileCommentUnlike(file, fileComment.id))
+        emit(ApiRepository.postUnlikeComment(file, fileComment.id))
     }
 
     private suspend fun <T> LiveDataScope<ApiResponse<ArrayList<T>>?>.manageRecursiveApiResponse(

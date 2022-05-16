@@ -111,7 +111,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
                 } ?: also {
                     isComplete = true
                 }
-                noCommentsLayout.toggleVisibility(itemList.count() == 0, showRefreshButton = false)
+                noCommentsLayout.toggleVisibility(itemList.isEmpty(), showRefreshButton = false)
             }
 
             onEditClicked = { comment ->

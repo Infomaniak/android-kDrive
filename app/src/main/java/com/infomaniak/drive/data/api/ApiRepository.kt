@@ -212,28 +212,32 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun getFileComments(file: File, page: Int): ApiResponse<ArrayList<FileComment>> {
-        val url = "${ApiRoutes.commentFile(file)}?with=like,response&${pagination(page)}"
+        val url = "${ApiRoutes.fileComments(file)}&${pagination(page)}"
         return callApi(url, GET)
     }
 
     fun postFileComment(file: File, body: String): ApiResponse<FileComment> {
-        return callApi(ApiRoutes.commentFile(file), POST, mapOf("body" to body))
+        return callApi(ApiRoutes.fileComments(file), POST, mapOf("body" to body))
+    }
+
+    fun answerComment(file: File, commentId: Int, body: String): ApiResponse<FileComment> {
+        return callApi(ApiRoutes.answerComment(file, commentId), POST, mapOf("body" to body))
     }
 
     fun putFileComment(file: File, commentId: Int, body: String): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.updateComment(file, commentId), PUT, mapOf("body" to body))
+        return callApi(ApiRoutes.fileComment(file, commentId), PUT, mapOf("body" to body))
     }
 
     fun deleteFileComment(file: File, commentId: Int): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.updateComment(file, commentId), DELETE)
+        return callApi(ApiRoutes.fileComment(file, commentId), DELETE)
     }
 
-    fun postFileCommentLike(file: File, commentId: Int): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.likeCommentFile(file, commentId), POST)
+    fun postLikeComment(file: File, commentId: Int): ApiResponse<Boolean> {
+        return callApi(ApiRoutes.likeComment(file, commentId), POST)
     }
 
-    fun postFileCommentUnlike(file: File, commentId: Int): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.unLikeCommentFile(file, commentId), POST)
+    fun postUnlikeComment(file: File, commentId: Int): ApiResponse<Boolean> {
+        return callApi(ApiRoutes.unLikeComment(file, commentId), POST)
     }
 
     fun getShareLink(file: File): ApiResponse<ShareLink> {

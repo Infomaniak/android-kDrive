@@ -46,9 +46,7 @@ object ApiRoutes {
 
     fun getAllDrivesData() = "${DRIVE_API}init?with=drives,users,teams,ips,categories"
 
-    /**
-     * File/Directory
-     */
+    //region File/Directory
     fun getFolderFiles(driveId: Int, parentId: Int, order: SortType) =
         "${fileURLv2(driveId, parentId)}/files?$fileWithQuery&${orderQuery(order)}"
 
@@ -79,10 +77,9 @@ object ApiRoutes {
     fun getFolderSize(file: File, depth: String) = "${fileURLv2(file)}/size?depth=$depth"
 
     fun updateFolderColor(file: File) = "${fileURLv2(file)}/color"
+    //endregion
 
-    /**
-     * File Access/Invitation
-     */
+    //region Access/Invitation
     private fun accessUrl(file: File) = "${fileURLv2(file)}/access"
 
     fun fileInvitationAccess(file: File, invitationId: Int) = "${v2URL(file.driveId)}/files/invitations/$invitationId"
@@ -96,20 +93,31 @@ object ApiRoutes {
     fun userAccess(file: File, driveUserId: Int) = "${accessUrl(file)}/users/$driveUserId"
 
     fun forceFolderAccess(file: File) = "${accessUrl(file)}/force"
+    //endregion
 
-    /**
-     * Favorite
-     */
+    //region Favorite
     fun getFavoriteFiles(driveId: Int, order: SortType) = "${v2URL(driveId)}/files/favorites?$fileWithQuery&${orderQuery(order)}"
 
     fun favorite(file: File) = "${fileURLv2(file)}/favorite"
+    //endregion
 
-    /**
-     * Dropbox
-     */
+    //region Dropbox
     fun dropBox(file: File) = "${fileURLv2(file)}/dropbox"
+    //endregion
 
-    //
+    //region Comment
+    private const val withComments = "with=user,likes,responses,responses.user,responses.likes"
+
+    fun fileComments(file: File) = "${fileURLv2(file)}/comments?$withComments"
+
+    fun fileComment(file: File, commentId: Int) = "${fileURLv2(file)}/comments/$commentId"
+
+    fun answerComment(file: File, commentId: Int) = "${fileComment(file, commentId)}?$withComments"
+
+    fun likeComment(file: File, commentId: Int) = "${fileComment(file, commentId)}/like"
+
+    fun unLikeComment(file: File, commentId: Int) = "${fileComment(file, commentId)}/unlike"
+    //endregion
 
     fun createTeamFolder(driveId: Int) = "${DRIVE_API}$driveId/file/folder/team/?$with"
 
@@ -122,14 +130,6 @@ object ApiRoutes {
         "${trashURL(file)}?with=children,parent,extras&order=${order.order}&order_by=${order.orderBy}"
 
     fun deleteFile(file: File) = fileURL(file)
-
-    fun commentFile(file: File) = "${fileURL(file)}/comment"
-
-    fun updateComment(file: File, commentId: Int) = "${fileURL(file)}/comment/$commentId"
-
-    fun likeCommentFile(file: File, commentId: Int) = "${fileURL(file)}/comment/$commentId/like"
-
-    fun unLikeCommentFile(file: File, commentId: Int) = "${fileURL(file)}/comment/$commentId/unlike"
 
     fun uploadFile(driveId: Int, folderId: Int) = "${DRIVE_API}$driveId/file/$folderId/upload"
 
