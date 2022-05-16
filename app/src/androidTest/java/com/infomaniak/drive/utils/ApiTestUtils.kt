@@ -63,7 +63,7 @@ object ApiTestUtils {
     }
 
     fun getCategory(driveId: Int): ApiResponse<Array<Category>> {
-        return ApiController.callApi(ApiRoutes.createCategory(driveId), ApiController.ApiMethod.GET)
+        return ApiController.callApi(ApiRoutes.categories(driveId), ApiController.ApiMethod.GET)
     }
 
     // Creates a file, puts it in trash and returns it

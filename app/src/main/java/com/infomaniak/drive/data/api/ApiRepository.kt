@@ -286,27 +286,34 @@ object ApiRepository : ApiRepositoryCore() {
 
     fun createCategory(driveId: Int, name: String, color: String): ApiResponse<Category> {
         val body = mapOf("name" to name, "color" to color)
-        return callApi(ApiRoutes.createCategory(driveId), POST, body)
+        return callApi(ApiRoutes.categories(driveId), POST, body)
     }
 
     fun editCategory(driveId: Int, categoryId: Int, name: String?, color: String): ApiResponse<Category> {
         val body = arrayMapOf("color" to color).apply {
             name?.let { put("name", it) }
         }
-        return callApi(ApiRoutes.updateCategory(driveId, categoryId), PATCH, body)
+        return callApi(ApiRoutes.category(driveId, categoryId), PUT, body)
     }
 
     fun deleteCategory(driveId: Int, categoryId: Int): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.updateCategory(driveId, categoryId), DELETE)
+        return callApi(ApiRoutes.category(driveId, categoryId), DELETE)
     }
 
     fun addCategory(file: File, categoryId: Int): ApiResponse<Unit> {
-        val body = mapOf("id" to categoryId)
-        return callApi(ApiRoutes.addCategory(file), POST, body)
+        return callApi(ApiRoutes.fileCategory(file, categoryId), POST)
+    }
+
+    fun addCategory(driveId: Int, categoryId: Int, fileIds: List<Int>) {
+        return callApi(ApiRoutes.fileCategory(driveId, categoryId), POST, mapOf("file_ids" to fileIds))
     }
 
     fun removeCategory(file: File, categoryId: Int): ApiResponse<Unit> {
-        return callApi(ApiRoutes.removeCategory(file, categoryId), DELETE)
+        return callApi(ApiRoutes.fileCategory(file, categoryId), DELETE)
+    }
+
+    fun removeCategory(driveId: Int, categoryId: Int, fileIds: List<Int>): ApiResponse<Unit> {
+        return callApi(ApiRoutes.fileCategory(driveId, categoryId), DELETE, mapOf("file_ids" to fileIds))
     }
 
     fun getLastActivities(driveId: Int, page: Int): ApiResponse<ArrayList<FileActivity>> {

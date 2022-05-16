@@ -119,6 +119,16 @@ object ApiRoutes {
     fun unLikeComment(file: File, commentId: Int) = "${fileComment(file, commentId)}/unlike"
     //endregion
 
+    //region Category
+    fun categories(driveId: Int) = "${v2URL(driveId)}/categories"
+
+    fun category(driveId: Int, categoryId: Int) = "${categories(driveId)}/$categoryId"
+
+    fun fileCategory(file: File, categoryId: Int) = "${fileURLv2(file)}/categories/$categoryId"
+
+    fun fileCategory(driveId: Int, categoryId: Int) = "${v2URL(driveId)}/files/categories/$categoryId"
+    //endregion
+
     fun createTeamFolder(driveId: Int) = "${DRIVE_API}$driveId/file/folder/team/?$with"
 
     fun postFileShare(file: File) = "${fileURL(file)}/share"
@@ -151,14 +161,6 @@ object ApiRoutes {
     fun getLastModifiedFiles(driveId: Int) = "${DRIVE_API}$driveId/file/last_modified?$with"
 
     fun shareLink(file: File) = "${fileURL(file)}/link"
-
-    fun createCategory(driveId: Int) = "${DRIVE_API}$driveId/category"
-
-    fun updateCategory(driveId: Int, categoryId: Int) = "${DRIVE_API}$driveId/category/$categoryId"
-
-    fun addCategory(file: File) = "${fileURL(file)}/category"
-
-    fun removeCategory(file: File, categoryId: Int) = "${fileURL(file)}/category/$categoryId"
 
     fun getLastPictures(driveId: Int) =
         "${DRIVE_API}$driveId/file/search?order=desc&order_by=last_modified_at&converted_type=image&$with"
