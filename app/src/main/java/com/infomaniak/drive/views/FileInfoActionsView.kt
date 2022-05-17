@@ -46,7 +46,7 @@ import com.infomaniak.drive.data.models.File.VisibilityType.IS_SHARED_SPACE
 import com.infomaniak.drive.data.models.File.VisibilityType.IS_TEAM_SPACE
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.ui.fileList.SelectFolderActivity
+import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.Utils.moveFileClicked
@@ -465,9 +465,10 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         fun onSelectFolderResult(data: Intent?) {
-            data?.extras?.getInt(SelectFolderActivity.FOLDER_ID_TAG)?.let {
-                val folderName = data.extras?.getString(SelectFolderActivity.FOLDER_NAME_TAG).toString()
-                onMoveFile(File(id = it, name = folderName, driveId = AccountUtils.currentDriveId))
+            data?.extras?.let { bundle ->
+                SelectFolderActivityArgs.fromBundle(bundle).apply {
+                    onMoveFile(File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId))
+                }
             }
         }
 

@@ -46,11 +46,7 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.BULK_OPERATION_CUSTOM_TAG
-import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.CUSTOM_ARGS_TAG
-import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.FOLDER_ID_TAG
-import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.FOLDER_NAME_TAG
-import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.USER_DRIVE_ID_TAG
-import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.USER_ID_TAG
+import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSelectResult
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
@@ -74,19 +70,18 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data ->
-            with(data?.extras!!) {
-                val folderId = getInt(FOLDER_ID_TAG)
-                val folderName = getString(FOLDER_NAME_TAG).toString()
-                val customArgs = getBundle(CUSTOM_ARGS_TAG)
-                val bulkOperationType = customArgs?.getParcelable<BulkOperationType>(BULK_OPERATION_CUSTOM_TAG)!!
-                val areAllFromTheSameFolder = customArgs.getBoolean(ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG, true)
+            data?.extras?.let { bundle ->
+                SelectFolderActivityArgs.fromBundle(bundle).apply {
+                    val bulkOperationType = customArgs?.getParcelable<BulkOperationType>(BULK_OPERATION_CUSTOM_TAG)!!
+                    val areAllFromTheSameFolder = customArgs.getBoolean(ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG, true)
 
-                performBulkOperation(
-                    type = bulkOperationType,
-                    areAllFromTheSameFolder = areAllFromTheSameFolder,
-                    allSelectedFilesCount = getAllSelectedFilesCount(),
-                    destinationFolder = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId),
-                )
+                    performBulkOperation(
+                        type = bulkOperationType,
+                        areAllFromTheSameFolder = areAllFromTheSameFolder,
+                        allSelectedFilesCount = getAllSelectedFilesCount(),
+                        destinationFolder = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId),
+                    )
+                }
             }
         }
     }
@@ -190,26 +185,32 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     }
 
     fun duplicateFiles() {
-        val intent = Intent(requireContext(), SelectFolderActivity::class.java).apply {
-            putExtra(USER_ID_TAG, AccountUtils.currentUserId)
-            putExtra(USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
-            putExtra(CUSTOM_ARGS_TAG, bundleOf(BULK_OPERATION_CUSTOM_TAG to BulkOperationType.COPY))
+        Intent(requireContext(), SelectFolderActivity::class.java).apply {
+            putExtras(
+                SelectFolderActivityArgs(
+                    userId = AccountUtils.currentUserId,
+                    userDriveId = AccountUtils.currentDriveId,
+                    customArgs = bundleOf(BULK_OPERATION_CUSTOM_TAG to BulkOperationType.COPY)
+                ).toBundle()
+            )
+            selectFolderResultLauncher.launch(this)
         }
-        selectFolderResultLauncher.launch(intent)
     }
 
     fun restoreIn() {
-        val intent = Intent(requireContext(), SelectFolderActivity::class.java).apply {
-            putExtra(USER_ID_TAG, AccountUtils.currentUserId)
-            putExtra(USER_DRIVE_ID_TAG, AccountUtils.currentDriveId)
-            putExtra(
-                CUSTOM_ARGS_TAG, bundleOf(
-                    BULK_OPERATION_CUSTOM_TAG to BulkOperationType.RESTORE_IN,
-                    ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG to false,
-                )
+        Intent(requireContext(), SelectFolderActivity::class.java).apply {
+            putExtras(
+                SelectFolderActivityArgs(
+                    userId = AccountUtils.currentUserId,
+                    userDriveId = AccountUtils.currentDriveId,
+                    customArgs = bundleOf(
+                        BULK_OPERATION_CUSTOM_TAG to BulkOperationType.RESTORE_IN,
+                        ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG to false,
+                    )
+                ).toBundle()
             )
+            selectFolderResultLauncher.launch(this)
         }
-        selectFolderResultLauncher.launch(intent)
     }
 
     open fun performBulkOperation(

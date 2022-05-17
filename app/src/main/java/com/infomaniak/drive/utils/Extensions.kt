@@ -47,7 +47,6 @@ import androidx.annotation.DrawableRes
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -73,7 +72,7 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.OnlyOfficeActivity
-import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialog.Companion.FILE_ID
+import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.UploadInProgressFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.MatomoUtils.trackShareRightsEvent
@@ -365,7 +364,10 @@ fun FragmentActivity.requestCredentials(onSuccess: () -> Unit) {
 
 fun Fragment.openOnlyOfficeDocument(file: File) {
     if (file.onlyofficeConvertExtension?.isNotBlank() == true) {
-        findNavController().navigate(R.id.notSupportedExtensionBottomSheetDialog, bundleOf(FILE_ID to file.id))
+        findNavController().navigate(
+            R.id.notSupportedExtensionBottomSheetDialog,
+            NotSupportedExtensionBottomSheetDialogArgs(file.id).toBundle()
+        )
     } else {
         requireContext().openOnlyOfficeActivity(file)
     }

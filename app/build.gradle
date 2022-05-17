@@ -132,7 +132,7 @@ dependencies {
 
     implementation 'com.googlecode.plist:dd-plist:1.23'
 
-    implementation 'com.github.hannesa2:paho.mqtt.android:3.3.7'
+    implementation 'com.github.hannesa2:paho.mqtt.android:3.3.8'
     implementation 'com.github.matomo-org:matomo-sdk-android:4.1.4'
 
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.3'

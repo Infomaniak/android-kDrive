@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.FileController
@@ -35,10 +36,11 @@ import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 class NotSupportedExtensionBottomSheetDialog : InformationBottomSheetDialog() {
 
     val mainViewModel: MainViewModel by activityViewModels()
+    private val navigationArgs: NotSupportedExtensionBottomSheetDialogArgs by navArgs()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        FileController.getFileById(requireArguments().getInt(FILE_ID))?.let { currentFile ->
+        FileController.getFileById(navigationArgs.fileId)?.let { currentFile ->
 
             title.text = getString(R.string.notSupportedExtensionTitle, currentFile.getFileExtension())
             description.text = getString(R.string.notSupportedExtensionDescription, currentFile.name)
@@ -67,9 +69,5 @@ class NotSupportedExtensionBottomSheetDialog : InformationBottomSheetDialog() {
                 }
             }
         }
-    }
-
-    companion object {
-        const val FILE_ID = "fileId"
     }
 }

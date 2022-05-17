@@ -113,6 +113,18 @@
         <action
             android:id="@+id/action_previewSliderFragment_to_selectCategoriesFragment"
             app:destination="@id/selectCategoriesFragment" />
+        <argument
+            android:name="fileId"
+            app:argType="integer" />
+        <argument
+            android:name="driveId"
+            app:argType="integer" />
+        <argument
+            android:name="isSharedWithMe"
+            app:argType="boolean" />
+        <argument
+            android:name="hideActions"
+            app:argType="boolean" />
     </fragment>
 
     <fragment
@@ -329,6 +341,38 @@
         android:name="com.infomaniak.drive.ui.MainActivity"
         android:label="MainActivity"
         tools:layout="@layout/activity_main" />
+
+    <activity
+        android:id="@+id/selectFolderActivity"
+        android:name="com.infomaniak.drive.ui.fileList.SelectFolderActivity"
+        android:label="SelectFolderActivity"
+        tools:layout="@layout/activity_select_folder">
+        <argument
+            android:name="userId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <argument
+            android:name="userDriveId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <argument
+            android:name="folderId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <argument
+            android:name="folderName"
+            android:defaultValue=""
+            app:argType="string" />
+        <argument
+            android:name="currentFolderId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <argument
+            android:name="customArgs"
+            android:defaultValue="@null"
+            app:argType="android.os.Bundle"
+            app:nullable="true" />
+    </activity>
 
     <dialog
         android:id="@+id/addFileBottomSheetDialog"
@@ -584,7 +628,11 @@
         android:id="@+id/driveMaintenanceBottomSheetFragment"
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialog"
         android:label="driveMaintenanceBottomSheetFragment"
-        tools:layout="@layout/fragment_bottom_sheet_information" />
+        tools:layout="@layout/fragment_bottom_sheet_information">
+        <argument
+            android:name="driveName"
+            app:argType="string" />
+    </dialog>
 
     <dialog
         android:id="@+id/driveBlockedBottomSheetFragment"
