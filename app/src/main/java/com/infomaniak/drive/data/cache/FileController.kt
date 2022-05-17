@@ -64,7 +64,7 @@ object FileController {
     private val minDateToIgnoreCache = Calendar.getInstance().apply { add(Calendar.MONTH, -2) }.timeInMillis / 1000 // 3 month
 
     private fun getFileById(realm: Realm, fileId: Int): File? {
-        return realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst()?.let {
+        return realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst() ?: let {
             var folderProxy: File? = null
             realm.executeTransaction { folderProxy = if (fileId == ROOT_ID) realm.copyToRealm(ROOT_FILE) else null }
             folderProxy
