@@ -32,7 +32,6 @@ object ApiRoutes {
     private fun orderQuery(order: SortType) = "order_for[${order.orderBy}]=${order.order}&order_by=${order.orderBy}"
 
     private val with = with("children")
-    val withFile = with("file")
 
     private fun with(target: String) = "with=$target,rights,collaborative_folder,favorite,mobile,share_link,categories"
 
@@ -49,6 +48,23 @@ object ApiRoutes {
     private fun trashURLv2(file: File) = "${v2URL(file.driveId)}/trash/${file.id}"
 
     fun getAllDrivesData() = "${DRIVE_API}init?with=drives,users,teams,ips,categories"
+
+    /** Access/Invitation **/
+    //region Access/Invitation
+    private fun accessUrl(file: File) = "${fileURLv2(file)}/access"
+
+    fun fileInvitationAccess(file: File, invitationId: Int) = "${v2URL(file.driveId)}/files/invitations/$invitationId"
+
+    fun getFileShare(file: File) = "${accessUrl(file)}?with=user"
+
+    fun checkFileShare(file: File) = "${accessUrl(file)}/check"
+
+    fun teamAccess(file: File, teamId: Int) = "${accessUrl(file)}/teams/$teamId"
+
+    fun userAccess(file: File, driveUserId: Int) = "${accessUrl(file)}/users/$driveUserId"
+
+    fun forceFolderAccess(file: File) = "${accessUrl(file)}/force"
+    //endregion
 
     /** Activities **/
     //region Activities
@@ -69,6 +85,45 @@ object ApiRoutes {
                 "&actions[]=file_update"
 
     fun getTrashedFilesActivities(file: File) = "${trashURLv2(file)}/activities"
+    //endregion
+
+    /** Category **/
+    //region Category
+
+    fun categories(driveId: Int) = "${v2URL(driveId)}/categories"
+
+    fun category(driveId: Int, categoryId: Int) = "${categories(driveId)}/$categoryId"
+
+    fun fileCategory(file: File, categoryId: Int) = "${fileURLv2(file)}/categories/$categoryId"
+
+    fun fileCategory(driveId: Int, categoryId: Int) = "${v2URL(driveId)}/files/categories/$categoryId"
+    //endregion
+
+    /** Comment **/
+    //region Comment
+    private const val withComments = "with=user,likes,responses,responses.user,responses.likes"
+
+    fun fileComments(file: File) = "${fileURLv2(file)}/comments?$withComments"
+
+    fun fileComment(file: File, commentId: Int) = "${fileURLv2(file)}/comments/$commentId"
+
+    fun answerComment(file: File, commentId: Int) = "${fileComment(file, commentId)}?$withComments"
+
+    fun likeComment(file: File, commentId: Int) = "${fileComment(file, commentId)}/like"
+
+    fun unLikeComment(file: File, commentId: Int) = "${fileComment(file, commentId)}/unlike"
+    //endregion
+
+    /** Dropbox **/
+    //region Dropbox
+    fun dropBox(file: File) = "${fileURLv2(file)}/dropbox"
+    //endregion
+
+    /** Favorite **/
+    //region Favorite
+    fun getFavoriteFiles(driveId: Int, order: SortType) = "${v2URL(driveId)}/files/favorites?$fileWithQuery&${orderQuery(order)}"
+
+    fun favorite(file: File) = "${fileURLv2(file)}/favorite"
     //endregion
 
     /** File/Directory **/
@@ -103,62 +158,6 @@ object ApiRoutes {
     fun getFolderSize(file: File, depth: String) = "${fileURLv2(file)}/size?depth=$depth"
 
     fun updateFolderColor(file: File) = "${fileURLv2(file)}/color"
-    //endregion
-
-    /** Access/Invitation **/
-    //region Access/Invitation
-    private fun accessUrl(file: File) = "${fileURLv2(file)}/access"
-
-    fun fileInvitationAccess(file: File, invitationId: Int) = "${v2URL(file.driveId)}/files/invitations/$invitationId"
-
-    fun getFileShare(file: File) = "${accessUrl(file)}?with=user"
-
-    fun checkFileShare(file: File) = "${accessUrl(file)}/check"
-
-    fun teamAccess(file: File, teamId: Int) = "${accessUrl(file)}/teams/$teamId"
-
-    fun userAccess(file: File, driveUserId: Int) = "${accessUrl(file)}/users/$driveUserId"
-
-    fun forceFolderAccess(file: File) = "${accessUrl(file)}/force"
-    //endregion
-
-    /** Favorite **/
-    //region Favorite
-    fun getFavoriteFiles(driveId: Int, order: SortType) = "${v2URL(driveId)}/files/favorites?$fileWithQuery&${orderQuery(order)}"
-
-    fun favorite(file: File) = "${fileURLv2(file)}/favorite"
-    //endregion
-
-    /** Dropbox **/
-    //region Dropbox
-    fun dropBox(file: File) = "${fileURLv2(file)}/dropbox"
-    //endregion
-
-    /** Comment **/
-    //region Comment
-    private const val withComments = "with=user,likes,responses,responses.user,responses.likes"
-
-    fun fileComments(file: File) = "${fileURLv2(file)}/comments?$withComments"
-
-    fun fileComment(file: File, commentId: Int) = "${fileURLv2(file)}/comments/$commentId"
-
-    fun answerComment(file: File, commentId: Int) = "${fileComment(file, commentId)}?$withComments"
-
-    fun likeComment(file: File, commentId: Int) = "${fileComment(file, commentId)}/like"
-
-    fun unLikeComment(file: File, commentId: Int) = "${fileComment(file, commentId)}/unlike"
-    //endregion
-
-    /** Category **/
-    //region Category
-
-    fun categories(driveId: Int) = "${v2URL(driveId)}/categories"
-
-    fun category(driveId: Int, categoryId: Int) = "${categories(driveId)}/$categoryId"
-
-    fun fileCategory(file: File, categoryId: Int) = "${fileURLv2(file)}/categories/$categoryId"
-
-    fun fileCategory(driveId: Int, categoryId: Int) = "${v2URL(driveId)}/files/categories/$categoryId"
     //endregion
 
     fun createTeamFolder(driveId: Int) = "${DRIVE_API}$driveId/file/folder/team/?$with"
