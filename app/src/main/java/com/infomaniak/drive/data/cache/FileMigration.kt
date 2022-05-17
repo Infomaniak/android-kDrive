@@ -149,7 +149,7 @@ class FileMigration : RealmMigration {
             }
             val dropboxSizeSchema = schema.create(DropBoxSize::class.java.simpleName).apply {
                 addField(DropBoxSize::limit.name, Long::class.java)
-                addField(DropBoxSize::remaining.name, Int::class.java)
+                addField(DropBoxSize::remaining.name, Long::class.java)
             }
             val dropboxCapabilitiesSchema = schema.create(DropBoxCapabilities::class.java.simpleName).apply {
                 addField(DropBoxCapabilities::hasPassword.name, Boolean::class.java, FieldAttribute.REQUIRED)

@@ -29,7 +29,7 @@ object ApiRoutes {
     const val activitiesWithQuery =
         "with=file,file.capabilities,file.categories,file.conversion,file.dropbox,file.is_favorite,file.sharelink,file.sorted_name"
 
-    private fun orderQuery(order: SortType) = "order=${order.order}&order_by=${order.orderBy}"
+    private fun orderQuery(order: SortType) = "order_for[${order.orderBy}]=${order.order}&order_by=${order.orderBy}"
 
     private val with = with("children")
     val withFile = with("file")

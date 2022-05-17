@@ -26,5 +26,5 @@ import kotlinx.android.parcel.Parcelize
 @RealmClass(embedded = true)
 open class DropBoxSize(
     var limit: Long? = null,
-    var remaining: Int? = null,
+    var remaining: Long? = null,
 ) : RealmObject(), Parcelable

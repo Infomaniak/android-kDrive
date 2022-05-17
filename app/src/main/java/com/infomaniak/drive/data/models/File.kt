@@ -393,14 +393,14 @@ open class File(
     }
 
     enum class SortType(val order: String, val orderBy: String, val translation: Int) {
-        NAME_AZ("asc", "files.path", R.string.sortNameAZ),
-        NAME_ZA("desc", "files.path", R.string.sortNameZA),
+        NAME_AZ("asc", "path", R.string.sortNameAZ),
+        NAME_ZA("desc", "path", R.string.sortNameZA),
         OLDER("asc", "last_modified_at", R.string.sortOlder),
         RECENT("desc", "last_modified_at", R.string.sortRecent),
         OLDER_TRASHED("asc", "deleted_at", R.string.sortOlder),
         RECENT_TRASHED("desc", "deleted_at", R.string.sortRecent),
-        SMALLER("asc", "files.size", R.string.sortSmaller),
-        BIGGER("desc", "files.size", R.string.sortBigger),
+        SMALLER("asc", "size", R.string.sortSmaller),
+        BIGGER("desc", "size", R.string.sortBigger),
         // EXTENSION("asc", "extension", R.string.sortExtension); // TODO: Awaiting API
     }
 
