@@ -39,9 +39,11 @@ object ApiRoutes {
 
     private fun fileURL(file: File) = "${DRIVE_API}${file.driveId}/file/${file.id}"
 
+    private fun fileURLv2(driveId: Int) = "${v2URL(driveId)}/files"
+
     private fun fileURLv2(file: File) = fileURLv2(file.driveId, file.id)
 
-    private fun fileURLv2(driveId: Int, fileId: FileId) = "${v2URL(driveId)}/files/${fileId}"
+    private fun fileURLv2(driveId: Int, fileId: FileId) = "${fileURLv2(driveId)}/${fileId}"
 
     private fun trashURL(file: File) = "${DRIVE_API}${file.driveId}/file/trash/${file.id}"
 
@@ -49,7 +51,7 @@ object ApiRoutes {
 
     fun getAllDrivesData() = "${DRIVE_API}init?with=drives,users,teams,ips,categories"
 
-    /** Access/Invitation **/
+    /** Access/Invitation */
     //region Access/Invitation
     private fun accessUrl(file: File) = "${fileURLv2(file)}/access"
 
@@ -75,12 +77,12 @@ object ApiRoutes {
             "&actions[]=comment_create"
 
     fun getLastActivities(driveId: Int) =
-        "${v2URL(driveId)}/files/activities?$activitiesWithQuery,user&depth=unlimited&$activitiesActions"
+        "${fileURLv2(driveId)}/activities?$activitiesWithQuery,user&depth=unlimited&$activitiesActions"
 
     fun getFileActivities(file: File) = "${fileURLv2(file)}/activities"
 
     fun getFileActivities(driveId: Int, fileIds: String, fromDate: Long) =
-        "${v2URL(driveId)}/files/activities/batch?$activitiesWithQuery&file_ids=$fileIds&from_date=$fromDate" +
+        "${fileURLv2(driveId)}/activities/batch?$activitiesWithQuery&file_ids=$fileIds&from_date=$fromDate" +
                 "&actions[]=file_rename" +
                 "&actions[]=file_update"
 
@@ -96,7 +98,7 @@ object ApiRoutes {
 
     fun fileCategory(file: File, categoryId: Int) = "${fileURLv2(file)}/categories/$categoryId"
 
-    fun fileCategory(driveId: Int, categoryId: Int) = "${v2URL(driveId)}/files/categories/$categoryId"
+    fun fileCategory(driveId: Int, categoryId: Int) = "${fileURLv2(driveId)}/categories/$categoryId"
     //endregion
 
     /** Comment **/
@@ -121,7 +123,7 @@ object ApiRoutes {
 
     /** Favorite **/
     //region Favorite
-    fun getFavoriteFiles(driveId: Int, order: SortType) = "${v2URL(driveId)}/files/favorites?$fileWithQuery&${orderQuery(order)}"
+    fun getFavoriteFiles(driveId: Int, order: SortType) = "${fileURLv2(driveId)}/favorites?$fileWithQuery&${orderQuery(order)}"
 
     fun favorite(file: File) = "${fileURLv2(file)}/favorite"
     //endregion
@@ -160,7 +162,17 @@ object ApiRoutes {
     fun updateFolderColor(file: File) = "${fileURLv2(file)}/color"
     //endregion
 
-    fun createTeamFolder(driveId: Int) = "${DRIVE_API}$driveId/file/folder/team/?$with"
+    /** Root Directory **/
+    //region Root Directory
+    fun bulkAction(driveId: Int): String = "${fileURLv2(driveId)}/bulk"
+
+    fun getLastModifiedFiles(driveId: Int) = "${fileURLv2(driveId)}/last_modified?$fileWithQuery"
+
+    fun createTeamFolder(driveId: Int) = "${fileURLv2(driveId)}/team_directory?$fileWithQuery"
+
+    fun getMySharedFiles(driveId: Int, sortType: SortType) =
+        "${fileURLv2(driveId)}/my_shared?${orderQuery(sortType)}&$fileWithQuery,users"
+    //endregion
 
     fun postFileShare(file: File) = "${fileURL(file)}/share"
 
@@ -178,8 +190,6 @@ object ApiRoutes {
 
     fun showOffice(file: File) = "${OFFICE_URL}${file.driveId}/${file.id}"
 
-    fun getLastModifiedFiles(driveId: Int) = "${DRIVE_API}$driveId/file/last_modified?$with"
-
     fun shareLink(file: File) = "${fileURL(file)}/link"
 
     fun getLastPictures(driveId: Int) =
@@ -193,8 +203,6 @@ object ApiRoutes {
 
     fun emptyTrash(driveId: Int) = "${DRIVE_API}${driveId}/file/trash"
 
-    fun getMySharedFiles(driveId: Int): String = "${DRIVE_API}$driveId/file/my_shared?$with"
-
     fun getUUIDArchiveFiles(driveId: Int): String = "${DRIVE_API}$driveId/file/archive"
 
     fun downloadArchiveFiles(driveId: Int, uuid: String): String = "${DRIVE_API}$driveId/file/archive/$uuid/download"
@@ -204,6 +212,4 @@ object ApiRoutes {
     fun orderDrive(): String = "${SHOP_URL}drive"
 
     fun cancelAction(driveId: Int): String = "${DRIVE_API}$driveId/cancel"
-
-    fun bulkAction(folder: File): String = "${DRIVE_API}${folder.driveId}/file/bulk"
 }

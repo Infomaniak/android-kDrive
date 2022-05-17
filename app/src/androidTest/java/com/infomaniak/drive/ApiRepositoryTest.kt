@@ -230,7 +230,7 @@ class ApiRepositoryTest : KDriveTest() {
     @DisplayName("Retrieve shared remote file")
     fun mySharedFileTest() {
         val order = File.SortType.BIGGER
-        assertApiResponseData(getMySharedFiles(okHttpClient, userDrive.driveId, order.order, order.orderBy, 1))
+        assertApiResponseData(getMySharedFiles(okHttpClient, userDrive.driveId, order, 1))
     }
 
     @Nested

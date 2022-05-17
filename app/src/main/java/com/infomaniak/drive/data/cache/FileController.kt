@@ -398,7 +398,7 @@ object FileController {
             transaction(getFilesFromCache(MY_SHARES_FILE_ID, userDrive, sortType), true)
         } else {
             val apiResponse = ApiRepository.getMySharedFiles(
-                KDriveHttpClient.getHttpClient(userDrive.userId), userDrive.driveId, sortType.order, sortType.orderBy, page
+                KDriveHttpClient.getHttpClient(userDrive.userId), userDrive.driveId, sortType, page
             )
             if (apiResponse.isSuccess()) {
                 val apiResponseData = apiResponse.data

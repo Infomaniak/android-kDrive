@@ -145,12 +145,8 @@ object ApiRepository : ApiRepositoryCore() {
         name: String,
         forAllUsers: Boolean = false
     ): ApiResponse<File> {
-        return callApi(
-            ApiRoutes.createTeamFolder(driveId),
-            POST,
-            mapOf("name" to name, "for_all_user" to forAllUsers),
-            okHttpClient = okHttpClient
-        )
+        val body = mapOf("name" to name, "for_all_user" to forAllUsers)
+        return callApi(ApiRoutes.createTeamFolder(driveId), POST, body, okHttpClient = okHttpClient)
     }
 
     fun searchFiles(
@@ -363,15 +359,10 @@ object ApiRepository : ApiRepositoryCore() {
     fun getMySharedFiles(
         okHttpClient: OkHttpClient,
         driveId: Int,
-        order: String,
-        orderBy: String,
+        sortType: File.SortType,
         page: Int
     ): ApiResponse<ArrayList<File>> {
-        return callApi(
-            "${ApiRoutes.getMySharedFiles(driveId)}&order=$order&order_by=$orderBy&${pagination(page)}",
-            GET,
-            okHttpClient = okHttpClient
-        )
+        return callApi("${ApiRoutes.getMySharedFiles(driveId, sortType)}&${pagination(page)}", GET, okHttpClient = okHttpClient)
     }
 
     fun cancelAction(action: CancellableAction): ApiResponse<Boolean> {
@@ -379,7 +370,7 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun performCancellableBulkOperation(bulkOperation: BulkOperation): ApiResponse<CancellableAction> {
-        return callApi(ApiRoutes.bulkAction(bulkOperation.parent), POST, bulkOperation.toMap())
+        return callApi(ApiRoutes.bulkAction(bulkOperation.parent.driveId), POST, bulkOperation.toMap())
     }
 
     fun getUUIDArchiveFiles(driveId: Int, fileIds: IntArray): ApiResponse<ArchiveUUID> {
