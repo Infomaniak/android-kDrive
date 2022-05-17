@@ -55,7 +55,7 @@ object FileController {
     const val RECENT_CHANGES_FILE_ID = -4
     private const val PICTURES_FILE_ID = -3
 
-    private val ROOT_FILE = File(ROOT_ID, name = "Root")
+    private val ROOT_FILE get() = File(ROOT_ID, name = "Root", driveId = AccountUtils.currentDriveId)
     private val FAVORITES_FILE = File(FAVORITES_FILE_ID, name = "Favoris")
     private val MY_SHARES_FILE = File(MY_SHARES_FILE_ID, name = "My Shares")
     private val PICTURES_FILE = File(PICTURES_FILE_ID, name = "Pictures")
