@@ -26,7 +26,10 @@ import com.infomaniak.drive.data.models.file.dropbox.DropBoxSize
 import com.infomaniak.drive.data.models.file.dropbox.DropBoxValidity
 import com.infomaniak.drive.data.models.file.sharelink.ShareLinkCapabilities
 import com.infomaniak.drive.utils.AccountUtils
-import io.realm.*
+import io.realm.DynamicRealm
+import io.realm.FieldAttribute
+import io.realm.RealmMigration
+import io.realm.RealmSchema
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import java.util.*
@@ -132,6 +135,7 @@ class FileMigration : RealmMigration {
         //region Migrated to version 4:
         // - Migrate (File) table to api v2
         // - Migrate (Right) table to api v2
+        // - Migrate (FileActivity) table to api v2
         // - Added new field (Dropbox) in File table
         // - Added new field (FileConversion) in File table
         // - Added new field (FileVersion) in File table
@@ -178,9 +182,9 @@ class FileMigration : RealmMigration {
             // FileConversion migration
             val fileConversionSchema = schema.create(FileConversion::class.java.simpleName).apply {
                 addField(FileConversion::whenDownload.name, Boolean::class.java, FieldAttribute.REQUIRED)
-                addField(FileConversion::downloadExtensions.name, RealmList::class.java, FieldAttribute.REQUIRED)
                 addField(FileConversion::whenOnlyoffice.name, Boolean::class.java, FieldAttribute.REQUIRED)
                 addField(FileConversion::onlyofficeExtension.name, String::class.java)
+                addRealmListField(FileConversion::downloadExtensions.name, String::class.java)
             }
 
             // Rights migration
@@ -240,6 +244,11 @@ class FileMigration : RealmMigration {
                 addRealmObjectField(File::dropbox.name, dropboxSchema)
                 addRealmObjectField(File::version.name, fileVersionSchema)
                 addRealmObjectField(File::sharelink.name, shareLinkSchema)
+            }
+
+            // FileActivity migration
+            schema.get(FileActivity::class.java.simpleName)?.apply {
+                removeField("path")
             }
 
             // Set embedded objects

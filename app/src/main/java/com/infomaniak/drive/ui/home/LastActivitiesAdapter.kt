@@ -27,8 +27,8 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import coil.load
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.DriveUser
+import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileActivity
 import com.infomaniak.drive.utils.loadAny
@@ -64,7 +64,7 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
     }
 
     private fun View.createActivity(fileActivity: FileActivity, user: DriveUser) {
-        val fileActivityName: CharSequence = fileActivity.file?.name ?: fileActivity.path.substringAfterLast("/")
+        val fileActivityName: CharSequence = fileActivity.file?.name ?: fileActivity.newPath.substringAfterLast("/")
         val sizeMergedFile = fileActivity.mergedFileActivities.size
         actionValue.text = resources.getQuantityString(fileActivity.homeTranslation, sizeMergedFile + 1, sizeMergedFile + 1)
         userAvatar.loadAvatar(user)
@@ -88,7 +88,7 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
             val file2 = fileActivity.mergedFileActivities[0].file
             file2.loadPreview(filePreview2, filePreviewIcon2 as ConstraintLayout)
             fileIcon2.load(getFileTypeIcon(file2))
-            fileName2.text = file2?.name ?: fileActivity.mergedFileActivities[0].path.substringAfterLast("/")
+            fileName2.text = file2?.name ?: fileActivity.mergedFileActivities[0].newPath.substringAfterLast("/")
 
             if (sizeMergedFile == 1) {
                 cardFilePreview3.isGone = true
@@ -113,7 +113,7 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
                     moreFile.isVisible = true
                 } else {
                     fileIcon3.load(getFileTypeIcon(file3))
-                    fileName3.text = file3?.name ?: fileActivity.mergedFileActivities[1].path.substringAfterLast("/")
+                    fileName3.text = file3?.name ?: fileActivity.mergedFileActivities[1].newPath.substringAfterLast("/")
                     moreFile.isGone = true
                 }
             }

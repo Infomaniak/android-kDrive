@@ -19,7 +19,7 @@ package com.infomaniak.drive.data.api
 
 import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
-import com.infomaniak.drive.data.api.ApiRoutes.withFile
+import com.infomaniak.drive.data.api.ApiRoutes.activitiesWithQuery
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
@@ -57,15 +57,6 @@ object ApiRepository : ApiRepositoryCore() {
             "&actions[]=collaborative_folder_update" +
             "&actions[]=collaborative_folder_delete"
 
-    private const val ADDITIONAL_ACTIONS = "&actions[]=file_access" +
-            "&actions[]=comment_create" +
-            "&actions[]=comment_update" +
-            "&actions[]=comment_delete" +
-            "&actions[]=comment_like" +
-            "&actions[]=comment_unlike" +
-            "&actions[]=comment_resolve" +
-            "&actions[]=share_link_show"
-
     fun getAllDrivesData(
         okHttpClient: OkHttpClient
     ): ApiResponse<DriveInfo> {
@@ -100,10 +91,19 @@ object ApiRepository : ApiRepositoryCore() {
         forFileList: Boolean,
         okHttpClient: OkHttpClient = HttpClient.okHttpClientLongTimeout,
     ): ApiResponse<ArrayList<FileActivity>> {
-        val queries = if (forFileList) "&depth=children&from_date=${file.responseAt}&$withFile" else "&with=user"
-        val url = "${ApiRoutes.getFileActivities(file)}?${pagination(page)}$queries$ACTIONS" +
-                if (forFileList) "" else ADDITIONAL_ACTIONS
+        val queries = if (forFileList) "&depth=children&from_date=${file.responseAt}&$activitiesWithQuery" else "&with=user"
+        val url = "${ApiRoutes.getFileActivities(file)}?${pagination(page)}$queries" + if (forFileList) ACTIONS else ""
         return callApi(url, GET, okHttpClient = okHttpClient)
+    }
+
+    fun getFileActivities(
+        driveId: Int,
+        fileIds: List<Int>,
+        fromDate: Long,
+        okHttpClient: OkHttpClient = HttpClient.okHttpClientLongTimeout,
+    ): ApiResponse<ArrayList<FileActivity>> {
+        val formattedFileIds = fileIds.joinToString(",") { it.toString() }
+        return callApi(ApiRoutes.getFileActivities(driveId, formattedFileIds, fromDate), GET, okHttpClient = okHttpClient)
     }
 
     fun getLastModifiedFiles(driveId: Int, page: Int = 1): ApiResponse<ArrayList<File>> {

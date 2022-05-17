@@ -41,7 +41,6 @@ open class FileActivity(
     var newPath: String = "",
     @SerializedName("old_path")
     var oldPath: String = "",
-    var path: String = "",
 
     /**
      * Local

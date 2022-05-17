@@ -26,6 +26,8 @@ object ApiRoutes {
 
     private const val fileWithQuery = "with=capabilities,categories,conversion,dropbox,is_favorite,sharelink,sorted_name"
     private const val fileExtraWithQuery = "$fileWithQuery,path,users,version"
+    const val activitiesWithQuery =
+        "with=file,file.capabilities,file.categories,file.conversion,file.dropbox,file.is_favorite,file.sharelink,file.sorted_name"
 
     private fun orderQuery(order: SortType) = "order=${order.order}&order_by=${order.orderBy}"
 
@@ -44,8 +46,32 @@ object ApiRoutes {
 
     private fun trashURL(file: File) = "${DRIVE_API}${file.driveId}/file/trash/${file.id}"
 
+    private fun trashURLv2(file: File) = "${v2URL(file.driveId)}/trash/${file.id}"
+
     fun getAllDrivesData() = "${DRIVE_API}init?with=drives,users,teams,ips,categories"
 
+    /** Activities **/
+    //region Activities
+    private const val activitiesActions = "actions[]=file_create" +
+            "&actions[]=file_update" +
+            "&actions[]=file_restore" +
+            "&actions[]=file_trash" +
+            "&actions[]=comment_create"
+
+    fun getLastActivities(driveId: Int) =
+        "${v2URL(driveId)}/files/activities?$activitiesWithQuery,user&depth=unlimited&$activitiesActions"
+
+    fun getFileActivities(file: File) = "${fileURLv2(file)}/activities"
+
+    fun getFileActivities(driveId: Int, fileIds: String, fromDate: Long) =
+        "${v2URL(driveId)}/files/activities/batch?$activitiesWithQuery&file_ids=$fileIds&from_date=$fromDate" +
+                "&actions[]=file_rename" +
+                "&actions[]=file_update"
+
+    fun getTrashedFilesActivities(file: File) = "${trashURLv2(file)}/activities"
+    //endregion
+
+    /** File/Directory **/
     //region File/Directory
     fun getFolderFiles(driveId: Int, parentId: Int, order: SortType) =
         "${fileURLv2(driveId, parentId)}/files?$fileWithQuery&${orderQuery(order)}"
@@ -79,6 +105,7 @@ object ApiRoutes {
     fun updateFolderColor(file: File) = "${fileURLv2(file)}/color"
     //endregion
 
+    /** Access/Invitation **/
     //region Access/Invitation
     private fun accessUrl(file: File) = "${fileURLv2(file)}/access"
 
@@ -95,16 +122,19 @@ object ApiRoutes {
     fun forceFolderAccess(file: File) = "${accessUrl(file)}/force"
     //endregion
 
+    /** Favorite **/
     //region Favorite
     fun getFavoriteFiles(driveId: Int, order: SortType) = "${v2URL(driveId)}/files/favorites?$fileWithQuery&${orderQuery(order)}"
 
     fun favorite(file: File) = "${fileURLv2(file)}/favorite"
     //endregion
 
+    /** Dropbox **/
     //region Dropbox
     fun dropBox(file: File) = "${fileURLv2(file)}/dropbox"
     //endregion
 
+    /** Comment **/
     //region Comment
     private const val withComments = "with=user,likes,responses,responses.user,responses.likes"
 
@@ -119,7 +149,9 @@ object ApiRoutes {
     fun unLikeComment(file: File, commentId: Int) = "${fileComment(file, commentId)}/unlike"
     //endregion
 
+    /** Category **/
     //region Category
+
     fun categories(driveId: Int) = "${v2URL(driveId)}/categories"
 
     fun category(driveId: Int, categoryId: Int) = "${categories(driveId)}/$categoryId"
@@ -146,17 +178,6 @@ object ApiRoutes {
     fun thumbnailTrashFile(file: File) = "${trashURL(file)}/thumbnail?t=${file.lastModifiedAt}"
 
     fun showOffice(file: File) = "${OFFICE_URL}${file.driveId}/${file.id}"
-
-    fun getFileActivities(file: File) = "${fileURL(file)}/activity"
-
-    fun getLastActivities(driveId: Int) =
-        "${DRIVE_API}$driveId/file/activity?$withFile" +
-                "&depth=unlimited" +
-                "&actions[]=file_create" +
-                "&actions[]=file_update" +
-                "&actions[]=file_restore" +
-                "&actions[]=file_trash" +
-                "&actions[]=comment_create"
 
     fun getLastModifiedFiles(driveId: Int) = "${DRIVE_API}$driveId/file/last_modified?$with"
 
