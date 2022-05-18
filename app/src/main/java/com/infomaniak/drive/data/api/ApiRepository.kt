@@ -343,11 +343,15 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun getDriveTrash(driveId: Int, order: File.SortType, page: Int): ApiResponse<ArrayList<File>> {
-        return callApi("${ApiRoutes.getDriveFileTrashedListForFolder(driveId, order)}&${pagination(page)}", GET)
+        return callApi("${ApiRoutes.driveTrash(driveId, order)}&${pagination(page)}", GET)
     }
 
-    fun getTrashFile(file: File, order: File.SortType, page: Int): ApiResponse<File> {
-        return callApi("${ApiRoutes.getFileTrashedListForFolder(file, order)}&${pagination(page)}", GET)
+    fun getTrashedFile(file: File): ApiResponse<File> {
+        return callApi(ApiRoutes.trashedFile(file), GET)
+    }
+
+    fun getTrashedFolderFiles(file: File, order: File.SortType, page: Int): ApiResponse<List<File>> {
+        return callApi("${ApiRoutes.trashedFolderFiles(file, order)}&${pagination(page)}", GET)
     }
 
     fun postRestoreTrashFile(file: File, body: Map<String, Int>?): ApiResponse<Any> =
@@ -355,7 +359,7 @@ object ApiRepository : ApiRepositoryCore() {
 
     fun emptyTrash(driveId: Int): ApiResponse<Boolean> = callApi(ApiRoutes.emptyTrash(driveId), DELETE)
 
-    fun deleteTrashFile(file: File): ApiResponse<Any> = callApi(ApiRoutes.deleteTrashFile(file), DELETE)
+    fun deleteTrashFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.trashURL(file), DELETE)
 
     fun getMySharedFiles(
         okHttpClient: OkHttpClient,

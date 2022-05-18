@@ -255,7 +255,7 @@ class FileControllerTest : KDriveTest() {
             assertApiResponseData(this)
 
             // Use non null assertion because data nullability has been checked in assertApiResponse()
-            assertTrue(data!!.children.isNotEmpty(), "Root folder should contains files")
+            assertFalse(data.isNullOrEmpty(), "Root folder should contains files")
         }
     }
 

@@ -42,15 +42,15 @@ import com.infomaniak.drive.data.api.ApiRepository.getFileCount
 import com.infomaniak.drive.data.api.ApiRepository.getFileDetails
 import com.infomaniak.drive.data.api.ApiRepository.getLastActivities
 import com.infomaniak.drive.data.api.ApiRepository.getMySharedFiles
-import com.infomaniak.drive.data.api.ApiRepository.getTrashFile
+import com.infomaniak.drive.data.api.ApiRepository.getTrashedFile
 import com.infomaniak.drive.data.api.ApiRepository.getUserProfile
 import com.infomaniak.drive.data.api.ApiRepository.moveFile
 import com.infomaniak.drive.data.api.ApiRepository.postFavoriteFile
 import com.infomaniak.drive.data.api.ApiRepository.postFileComment
-import com.infomaniak.drive.data.api.ApiRepository.postLikeComment
-import com.infomaniak.drive.data.api.ApiRepository.postUnlikeComment
 import com.infomaniak.drive.data.api.ApiRepository.postFileShareLink
+import com.infomaniak.drive.data.api.ApiRepository.postLikeComment
 import com.infomaniak.drive.data.api.ApiRepository.postRestoreTrashFile
+import com.infomaniak.drive.data.api.ApiRepository.postUnlikeComment
 import com.infomaniak.drive.data.api.ApiRepository.putFileComment
 import com.infomaniak.drive.data.api.ApiRepository.putFileShareLink
 import com.infomaniak.drive.data.api.ApiRepository.removeCategory
@@ -169,7 +169,7 @@ class ApiRepositoryTest : KDriveTest() {
         // Create File to put it in trash
         val fileToDelete = putNewFileInTrash()
         // Get the deleted File from the trash, info should be the same
-        with(getTrashFile(fileToDelete, File.SortType.RECENT, 1)) {
+        with(getTrashedFile(fileToDelete)) {
             assertApiResponseData(this)
             assertEquals(fileToDelete.id, data?.id, "file id should be the same")
         }
@@ -552,9 +552,9 @@ class ApiRepositoryTest : KDriveTest() {
                 }
 
                 // Makes sure the folder contains the file
-                with(getFileDetails(this)) {
+                with(getFileDetails(file)) {
                     assertNotNull(data)
-                    assertTrue(data!!.children.contains(file), "The file should be contained in the test folder")
+                    assertEquals(data?.parentId, id, "The file should be contained in the test folder")
                 }
             }
         }

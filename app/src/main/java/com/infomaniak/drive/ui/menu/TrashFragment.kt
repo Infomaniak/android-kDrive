@@ -195,7 +195,7 @@ class TrashFragment : FileSubTypeListFragment() {
             fileAdapter.isComplete = false
 
             folder?.let { folder ->
-                trashViewModel.getTrashFile(folder, fileListViewModel.sortType).observe(viewLifecycleOwner) { result ->
+                trashViewModel.getTrashedFolderFiles(folder, fileListViewModel.sortType).observe(viewLifecycleOwner) { result ->
                     result?.apply {
                         populateFileList(
                             files = result.files,

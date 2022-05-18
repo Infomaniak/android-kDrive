@@ -41,9 +41,7 @@ object ApiRoutes {
 
     private fun fileURLv2(driveId: Int, fileId: FileId) = "${fileURLv2(driveId)}/${fileId}"
 
-    private fun trashURL(file: File) = "${DRIVE_API}${file.driveId}/file/trash/${file.id}"
-
-    private fun trashURLv2(file: File) = "${v2URL(file.driveId)}/trash/${file.id}"
+    fun trashURL(file: File) = "${v2URL(file.driveId)}/trash/${file.id}"
 
     fun getAllDrivesData() = "${DRIVE_API}init?with=drives,users,teams,ips,categories"
 
@@ -82,7 +80,7 @@ object ApiRoutes {
                 "&actions[]=file_rename" +
                 "&actions[]=file_update"
 
-    fun getTrashedFilesActivities(file: File) = "${trashURLv2(file)}/activities"
+    fun getTrashedFilesActivities(file: File) = "${trashURL(file)}/activities"
     //endregion
 
     /** Category **/
@@ -163,6 +161,21 @@ object ApiRoutes {
     fun searchFiles(driveId: Int, sortType: SortType) = "${fileURLv2(driveId)}/search?$fileWithQuery&${orderQuery(sortType)}"
     //endregion
 
+    /** Trash **/
+    //region Trash
+    fun driveTrash(driveId: Int, order: SortType) = "${v2URL(driveId)}/trash?${orderQuery(order)}&$fileWithQuery"
+
+    fun emptyTrash(driveId: Int) = "${v2URL(driveId)}/trash"
+
+    fun trashedFile(file: File) = "${trashURL(file)}?$fileExtraWithQuery"
+
+    fun trashedFolderFiles(file: File, order: SortType) = "${trashURL(file)}/files?${orderQuery(order)}&$fileWithQuery"
+
+    fun thumbnailTrashFile(file: File) = "${trashURL(file)}/thumbnail?t=${file.lastModifiedAt}"
+
+    fun restoreTrashFile(file: File) = "${trashURL(file)}/restore"
+    //endregion
+
     /** Root Directory **/
     //region Root Directory
     fun bulkAction(driveId: Int): String = "${fileURLv2(driveId)}/bulk"
@@ -177,27 +190,13 @@ object ApiRoutes {
 
     fun postFileShare(file: File) = "${fileURL(file)}/share"
 
-    fun getDriveFileTrashedListForFolder(driveId: Int, order: SortType) =
-        "${DRIVE_API}${driveId}/file/trash?with=children,parent,extras&order=${order.order}&order_by=${order.orderBy}"
-
-    fun getFileTrashedListForFolder(file: File, order: SortType) =
-        "${trashURL(file)}?with=children,parent,extras&order=${order.order}&order_by=${order.orderBy}"
-
     fun deleteFile(file: File) = fileURL(file)
 
     fun uploadFile(driveId: Int, folderId: Int) = "${DRIVE_API}$driveId/file/$folderId/upload"
 
-    fun thumbnailTrashFile(file: File) = "${trashURL(file)}/thumbnail?t=${file.lastModifiedAt}"
-
     fun showOffice(file: File) = "${OFFICE_URL}${file.driveId}/${file.id}"
 
     fun shareLink(file: File) = "${fileURL(file)}/link"
-
-    fun restoreTrashFile(file: File) = "${trashURL(file)}/restore"
-
-    fun deleteTrashFile(file: File) = trashURL(file)
-
-    fun emptyTrash(driveId: Int) = "${DRIVE_API}${driveId}/file/trash"
 
     fun getUUIDArchiveFiles(driveId: Int): String = "${DRIVE_API}$driveId/file/archive"
 
