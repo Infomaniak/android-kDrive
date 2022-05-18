@@ -68,6 +68,6 @@ class FileShareViewModel : ViewModel() {
             else -> body.password = shareLink.newPassword
         }
 
-        emit(ApiRepository.putFileShareLink(file, body))
+        emit(ApiRepository.updateShareLink(file, body))
     }
 }

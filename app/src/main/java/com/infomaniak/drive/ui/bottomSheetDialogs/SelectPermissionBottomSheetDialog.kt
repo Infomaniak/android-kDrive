@@ -208,7 +208,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         var currentPermission: Permission? = null
 
         fun editFileShareLinkOfficePermission(file: File, canEdit: Boolean) = liveData(Dispatchers.IO) {
-            emit(ApiRepository.putFileShareLink(file, ShareLinkSettings(canEdit = canEdit)))
+            emit(ApiRepository.updateShareLink(file, ShareLinkSettings(canEdit = canEdit)))
         }
 
         fun deleteFileShare(file: File, shareable: Shareable) = liveData(Dispatchers.IO) {

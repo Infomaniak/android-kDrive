@@ -286,7 +286,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             }
             else -> {
                 showCopyPublicLinkLoader(true)
-                mainViewModel.postFileShareLink(currentFile).observe(ownerFragment) { postShareResponse ->
+                mainViewModel.createShareLink(currentFile).observe(ownerFragment) { postShareResponse ->
                     when {
                         postShareResponse?.isSuccess() == true -> {
                             postShareResponse.data?.url?.let { url ->

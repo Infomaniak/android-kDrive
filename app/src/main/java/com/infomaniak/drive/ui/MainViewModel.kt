@@ -96,11 +96,11 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    fun postFileShareLink(
+    fun createShareLink(
         file: File,
         body: ShareLinkSettings = ShareLinkSettings(right = ShareLinkFilePermission.PUBLIC, canDownload = true, canEdit = false)
     ) = liveData(Dispatchers.IO) {
-        val apiResponse = ApiRepository.postFileShareLink(file, body)
+        val apiResponse = ApiRepository.createShareLink(file, body)
         if (apiResponse.isSuccess()) {
             FileController.updateFile(file.id) { it.sharelink = apiResponse.data }
         }

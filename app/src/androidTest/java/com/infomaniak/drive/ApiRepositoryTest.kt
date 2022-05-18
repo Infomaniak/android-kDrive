@@ -47,12 +47,12 @@ import com.infomaniak.drive.data.api.ApiRepository.getUserProfile
 import com.infomaniak.drive.data.api.ApiRepository.moveFile
 import com.infomaniak.drive.data.api.ApiRepository.postFavoriteFile
 import com.infomaniak.drive.data.api.ApiRepository.postFileComment
-import com.infomaniak.drive.data.api.ApiRepository.postFileShareLink
+import com.infomaniak.drive.data.api.ApiRepository.createShareLink
 import com.infomaniak.drive.data.api.ApiRepository.postLikeComment
 import com.infomaniak.drive.data.api.ApiRepository.postRestoreTrashFile
 import com.infomaniak.drive.data.api.ApiRepository.postUnlikeComment
 import com.infomaniak.drive.data.api.ApiRepository.putFileComment
-import com.infomaniak.drive.data.api.ApiRepository.putFileShareLink
+import com.infomaniak.drive.data.api.ApiRepository.updateShareLink
 import com.infomaniak.drive.data.api.ApiRepository.removeCategory
 import com.infomaniak.drive.data.api.ApiRepository.updateDropBox
 import com.infomaniak.drive.data.api.ApiRoutes.postFileShare
@@ -407,7 +407,7 @@ class ApiRepositoryTest : KDriveTest() {
             )
 
             // Creates the share link
-            with(postFileShareLink(testFile, body)) {
+            with(createShareLink(testFile, body)) {
                 assertApiResponseData(this)
                 assertNotNull(data?.capabilities, "The data's capabilities cannot be null")
                 assertEquals("public", data!!.right.name.lowercase(), "Permission should be public")
@@ -429,7 +429,7 @@ class ApiRepositoryTest : KDriveTest() {
             }
 
             // Modifies the share link
-            putFileShareLink(
+            updateShareLink(
                 testFile, ShareLink.ShareLinkSettings(
                     right = ShareLink.ShareLinkFilePermission.PUBLIC,
                     canDownload = false,

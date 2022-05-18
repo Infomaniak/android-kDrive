@@ -241,8 +241,12 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.shareLink(file), GET)
     }
 
-    fun postFileShareLink(file: File, body: ShareLink.ShareLinkSettings): ApiResponse<ShareLink> {
+    fun createShareLink(file: File, body: ShareLink.ShareLinkSettings): ApiResponse<ShareLink> {
         return callApi(ApiRoutes.shareLink(file), POST, body)
+    }
+
+    fun updateShareLink(file: File, body: ShareLink.ShareLinkSettings): ApiResponse<Boolean> {
+        return callApi(ApiRoutes.shareLink(file), PUT, body)
     }
 
     fun deleteFileShareLink(file: File): ApiResponse<Boolean> {
@@ -275,10 +279,6 @@ object ApiRepository : ApiRepositoryCore() {
                 else -> ApiRoutes.userAccess(file, shareableItem.id)
             }, PUT, body
         )
-    }
-
-    fun putFileShareLink(file: File, body: ShareLink.ShareLinkSettings): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.shareLink(file), PUT, body)
     }
 
     fun createCategory(driveId: Int, name: String, color: String): ApiResponse<Category> {

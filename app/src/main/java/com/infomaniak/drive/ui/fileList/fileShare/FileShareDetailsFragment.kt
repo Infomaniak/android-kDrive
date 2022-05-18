@@ -251,7 +251,7 @@ class FileShareDetailsFragment : Fragment() {
     }
 
     private fun createShareLink() {
-        mainViewModel.postFileShareLink(file).observe(viewLifecycleOwner) { apiResponse ->
+        mainViewModel.createShareLink(file).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 shareLinkContainer.update(apiResponse.data)
             } else {

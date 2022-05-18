@@ -166,6 +166,11 @@ object ApiRoutes {
     fun searchFiles(driveId: Int, sortType: SortType) = "${fileURLv2(driveId)}/search?$fileWithQuery&${orderQuery(sortType)}"
     //endregion
 
+    /** Share link **/
+    //region Share link
+    fun shareLink(file: File) = "${fileURLv2(file)}/link"
+    //endregion
+
     /** Trash **/
     //region Trash
     fun driveTrash(driveId: Int, order: SortType) = "${v2URL(driveId)}/trash?${orderQuery(order)}&$fileWithQuery"
@@ -198,8 +203,6 @@ object ApiRoutes {
     fun uploadFile(driveId: Int, folderId: Int) = "${DRIVE_API}$driveId/file/$folderId/upload"
 
     fun showOffice(file: File) = "${OFFICE_URL}${file.driveId}/${file.id}"
-
-    fun shareLink(file: File) = "${fileURL(file)}/link"
 
     fun getUUIDArchiveFiles(driveId: Int): String = "${DRIVE_API}$driveId/file/archive"
 
