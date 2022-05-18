@@ -370,8 +370,8 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi("${ApiRoutes.getMySharedFiles(driveId, sortType)}&${pagination(page)}", GET, okHttpClient = okHttpClient)
     }
 
-    fun cancelAction(action: CancellableAction): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.cancelAction(action.driveId), POST, mapOf("cancel_id" to action.cancelId))
+    fun undoAction(action: CancellableAction): ApiResponse<Boolean> {
+        return callApi(ApiRoutes.undoAction(action.driveId), POST, mapOf("cancel_id" to action.cancelId))
     }
 
     fun performCancellableBulkOperation(bulkOperation: BulkOperation): ApiResponse<CancellableAction> {

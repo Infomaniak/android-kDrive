@@ -62,6 +62,11 @@ object ApiRoutes {
     fun forceFolderAccess(file: File) = "${accessUrl(file)}/force"
     //endregion
 
+    /** Action **/
+    //region Action
+    fun undoAction(driveId: Int) = "${v2URL(driveId)}/cancel"
+    //endregion
+
     /** Activities **/
     //region Activities
     private const val activitiesActions = "actions[]=file_create" +
@@ -205,6 +210,4 @@ object ApiRoutes {
     fun upgradeDrive(driveId: Int): String = "${SHOP_URL}drive/$driveId"
 
     fun orderDrive(): String = "${SHOP_URL}drive"
-
-    fun cancelAction(driveId: Int): String = "${DRIVE_API}$driveId/cancel"
 }

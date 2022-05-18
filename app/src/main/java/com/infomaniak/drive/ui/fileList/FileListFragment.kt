@@ -268,10 +268,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
                     val onCancelActionClicked: (() -> Unit)? = if (allowCancellation) ({
                         lifecycleScope.launch(Dispatchers.IO) {
-                            if (ApiRepository.cancelAction(action).data == true && isResumed) {
-                                withContext(Dispatchers.Main) {
-                                    refreshActivities()
-                                }
+                            if (ApiRepository.undoAction(action).data == true && isResumed) {
+                                withContext(Dispatchers.Main) { refreshActivities() }
                             }
                         }
                     }) else null
