@@ -37,7 +37,7 @@ object ApiRoutes {
 
     private fun fileURLv2(driveId: Int) = "${v2URL(driveId)}/files"
 
-    private fun fileURLv2(file: File) = fileURLv2(file.driveId, file.id)
+    fun fileURLv2(file: File) = fileURLv2(file.driveId, file.id)
 
     private fun fileURLv2(driveId: Int, fileId: FileId) = "${fileURLv2(driveId)}/${fileId}"
 
@@ -194,8 +194,6 @@ object ApiRoutes {
     //endregion
 
     fun postFileShare(file: File) = "${fileURL(file)}/share"
-
-    fun deleteFile(file: File) = fileURL(file)
 
     fun uploadFile(driveId: Int, folderId: Int) = "${DRIVE_API}$driveId/file/$folderId/upload"
 

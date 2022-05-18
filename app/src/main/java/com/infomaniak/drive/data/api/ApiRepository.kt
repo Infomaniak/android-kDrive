@@ -171,7 +171,7 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun deleteFile(file: File): ApiResponse<CancellableAction> {
-        return callApi(ApiRoutes.deleteFile(file), DELETE)
+        return callApi(ApiRoutes.fileURLv2(file), DELETE)
     }
 
     fun renameFile(file: File, newName: String): ApiResponse<CancellableAction> {
