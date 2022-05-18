@@ -112,7 +112,9 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun getLastPictures(driveId: Int, page: Int = 1): ApiResponse<ArrayList<File>> {
-        return callApi("${ApiRoutes.getLastPictures(driveId)}&${pagination(page)}", GET)
+        val type = ExtensionType.IMAGE.value
+        val url = "${ApiRoutes.searchFiles(driveId, File.SortType.RECENT)}&type=$type&${pagination(page)}"
+        return callApi(url, GET)
     }
 
     fun getValidChunks(driveId: Int, folderId: Int, uploadIdentifier: String): ApiResponse<ValidChunks> {

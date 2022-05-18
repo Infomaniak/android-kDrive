@@ -31,10 +31,6 @@ object ApiRoutes {
 
     private fun orderQuery(order: SortType) = "order_for[${order.orderBy}]=${order.order}&order_by=${order.orderBy}"
 
-    private val with = with("children")
-
-    private fun with(target: String) = "with=$target,rights,collaborative_folder,favorite,mobile,share_link,categories"
-
     private fun v2URL(driveId: Int) = "${DRIVE_API_V2}${driveId}"
 
     private fun fileURL(file: File) = "${DRIVE_API}${file.driveId}/file/${file.id}"
@@ -196,9 +192,6 @@ object ApiRoutes {
     fun showOffice(file: File) = "${OFFICE_URL}${file.driveId}/${file.id}"
 
     fun shareLink(file: File) = "${fileURL(file)}/link"
-
-    fun getLastPictures(driveId: Int) =
-        "${DRIVE_API}$driveId/file/search?order=desc&order_by=last_modified_at&converted_type=image&$with"
 
     fun restoreTrashFile(file: File) = "${trashURL(file)}/restore"
 
