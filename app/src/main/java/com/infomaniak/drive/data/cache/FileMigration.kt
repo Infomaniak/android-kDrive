@@ -145,11 +145,17 @@ class FileMigration : RealmMigration {
             // Dropbox migration
             val dropboxValiditySchema = schema.create(DropBoxValidity::class.java.simpleName).apply {
                 addField(DropBoxValidity::date.name, Date::class.java)
-                addField(DropBoxValidity::hasExpired.name, Boolean::class.java)
+                with(DropBoxValidity::hasExpired.name) {
+                    addField(this, Boolean::class.java).setNullable(this, true)
+                }
             }
             val dropboxSizeSchema = schema.create(DropBoxSize::class.java.simpleName).apply {
-                addField(DropBoxSize::limit.name, Long::class.java)
-                addField(DropBoxSize::remaining.name, Long::class.java)
+                with(DropBoxSize::limit.name) {
+                    addField(this, Long::class.java).setNullable(this, true)
+                }
+                with(DropBoxSize::remaining.name) {
+                    addField(this, Long::class.java).setNullable(this, true)
+                }
             }
             val dropboxCapabilitiesSchema = schema.create(DropBoxCapabilities::class.java.simpleName).apply {
                 addField(DropBoxCapabilities::hasPassword.name, Boolean::class.java, FieldAttribute.REQUIRED)
@@ -167,9 +173,11 @@ class FileMigration : RealmMigration {
                 addField(DropBox::uuid.name, String::class.java, FieldAttribute.REQUIRED)
                 addField(DropBox::createdAt.name, Date::class.java)
                 addField(DropBox::createdBy.name, Int::class.java, FieldAttribute.REQUIRED)
-                addField(DropBox::lastUploadedAt.name, Long::class.java)
                 addField(DropBox::collaborativeUsersCount.name, Int::class.java, FieldAttribute.REQUIRED)
                 addField(DropBox::updatedAt.name, Date::class.java)
+                with(DropBox::lastUploadedAt.name) {
+                    addField(this, Long::class.java).setNullable(this, true)
+                }
             }
 
             // FileVersion migration
@@ -224,6 +232,14 @@ class FileMigration : RealmMigration {
                 addRealmObjectField(ShareLink::capabilities.name, shareLinkCapabilities)
             }
 
+            // FileCategory migration
+            schema.get(FileCategory::class.java.simpleName)?.apply {
+                renameField("id", FileCategory::categoryId.name)
+                renameField("iaCategoryUserValidation", FileCategory::userValidation.name)
+                renameField("isGeneratedByIa", FileCategory::isGeneratedByAI.name)
+                renameField("addedToFileAt", FileCategory::addedAt.name)
+            }
+
             // File migration
             schema.get(File::class.java.simpleName)?.apply {
                 removeField("collaborativeFolder")
@@ -232,14 +248,15 @@ class FileMigration : RealmMigration {
                 removeField("lastAccessedAt")
                 removeField("nbVersion")
                 removeField("sizeWithVersions")
+                removeField("shareLink")
 
                 renameField("convertedType", File::extensionType.name)
-                renameField("createdAt", File::extensionType.name)
+                renameField("createdAt", File::addedAt.name)
                 renameField("fileCreatedAt", File::createdAt.name)
                 renameField("nameNaturalSorting", File::sortedName.name)
                 renameField("onlyoffice", File::hasOnlyoffice.name)
-                renameField("shareLink", File::sharelink.name)
 
+                addField(File::parentId.name, Int::class.java, FieldAttribute.REQUIRED)
                 addRealmObjectField(File::conversion.name, fileConversionSchema)
                 addRealmObjectField(File::dropbox.name, dropboxSchema)
                 addRealmObjectField(File::version.name, fileVersionSchema)
@@ -252,6 +269,8 @@ class FileMigration : RealmMigration {
             }
 
             // Set embedded objects
+            schema.get(ShareLinkCapabilities::class.java.simpleName)?.isEmbedded = true
+            schema.get(ShareLink::class.java.simpleName)?.isEmbedded = true
             schema.get(DropBoxValidity::class.java.simpleName)?.isEmbedded = true
             schema.get(DropBoxSize::class.java.simpleName)?.isEmbedded = true
             schema.get(DropBoxCapabilities::class.java.simpleName)?.isEmbedded = true
