@@ -65,8 +65,7 @@ class SearchViewModel : ViewModel() {
             val apiResponse = ApiRepository.searchFiles(
                 driveId = AccountUtils.currentDriveId,
                 query = query,
-                order = order.order,
-                orderBy = order.orderBy,
+                sortType = order,
                 page = page,
                 date = formatDate(),
                 type = formatType(),
@@ -86,7 +85,7 @@ class SearchViewModel : ViewModel() {
         return dateFilter?.let { it.start.timestamp() to it.end.timestamp() }
     }
 
-    private fun formatType() = typeFilter?.name?.lowercase()
+    private fun formatType() = typeFilter?.value?.lowercase()
 
     private fun formatCategories(): String? {
         return categoriesFilter?.joinToString(

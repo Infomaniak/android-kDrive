@@ -93,7 +93,7 @@ class FileControllerTest : KDriveTest() {
         deleteTestFile(remoteFile)
 
         // Search the deleted file
-        with(ApiRepository.searchFiles(userDrive.driveId, remoteFile.name, order.order, order.orderBy, 1)) {
+        with(ApiRepository.searchFiles(userDrive.driveId, remoteFile.name, order, 1)) {
             assertTrue(isSuccess(), "Api response must be a success")
             assertTrue(data.isNullOrEmpty(), "Founded files should be empty")
         }

@@ -162,6 +162,11 @@ object ApiRoutes {
     fun updateFolderColor(file: File) = "${fileURLv2(file)}/color"
     //endregion
 
+    /** Search **/
+    //region Search
+    fun searchFiles(driveId: Int, sortType: SortType) = "${fileURLv2(driveId)}/search?$fileWithQuery&${orderQuery(sortType)}"
+    //endregion
+
     /** Root Directory **/
     //region Root Directory
     fun bulkAction(driveId: Int): String = "${fileURLv2(driveId)}/bulk"
@@ -194,8 +199,6 @@ object ApiRoutes {
 
     fun getLastPictures(driveId: Int) =
         "${DRIVE_API}$driveId/file/search?order=desc&order_by=last_modified_at&converted_type=image&$with"
-
-    fun searchFiles(driveId: Int) = "${DRIVE_API}$driveId/file/search?$with"
 
     fun restoreTrashFile(file: File) = "${trashURL(file)}/restore"
 

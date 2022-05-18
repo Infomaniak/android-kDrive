@@ -426,17 +426,16 @@ object FileController {
     ) {
         val order = SortType.NAME_AZ
         val apiResponse = ApiRepository.searchFiles(
-            userDrive.driveId,
-            query,
-            order.order,
-            order.orderBy,
-            page,
+            driveId = userDrive.driveId,
+            query = query,
+            sortType = order,
+            page = page,
             okHttpClient = KDriveHttpClient.getHttpClient(userDrive.userId)
         )
 
         if (apiResponse.isSuccess()) {
             when {
-                apiResponse.data?.isNullOrEmpty() == true -> onResponse(arrayListOf())
+                apiResponse.data.isNullOrEmpty() -> onResponse(arrayListOf())
                 apiResponse.data!!.size < ApiRepository.PER_PAGE -> onResponse(apiResponse.data ?: arrayListOf())
                 else -> {
                     onResponse(apiResponse.data ?: arrayListOf())
