@@ -125,6 +125,9 @@
         <argument
             android:name="hideActions"
             app:argType="boolean" />
+        <argument
+            android:name="shouldDeleteMovedFiles"
+            app:argType="boolean" />
     </fragment>
 
     <fragment

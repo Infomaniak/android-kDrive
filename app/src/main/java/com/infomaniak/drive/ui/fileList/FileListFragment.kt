@@ -503,7 +503,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     private fun File.displayFile() {
         val fileList = fileAdapter.getFileObjectsList(mainViewModel.realm)
-        Utils.displayFile(mainViewModel, findNavController(), this, fileList)
+        Utils.displayFile(mainViewModel, findNavController(), this, fileList, isFromFileList = true)
     }
 
     private fun checkIfNoFiles() {

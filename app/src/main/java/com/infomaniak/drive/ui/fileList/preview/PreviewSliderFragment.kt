@@ -487,6 +487,14 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         mainViewModel.moveFile(currentFile, destinationFolder)
             .observe(viewLifecycleOwner) { apiResponse ->
                 if (apiResponse.isSuccess()) {
+                    if (navigationArgs.shouldDeleteMovedFiles) {
+                        mainViewModel.currentPreviewFileList.remove(currentFile.id)
+                        if (previewSliderAdapter.deleteFile(currentFile)) {
+                            findNavController().popBackStack()
+                        } else {
+                            toggleBottomSheet(true)
+                        }
+                    }
                     mainViewModel.refreshActivities.value = true
                     showSnackbar(getString(R.string.allFileMove, currentFile.name, destinationFolder.name))
                 } else {
