@@ -267,7 +267,6 @@ fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
     itemList: List<Shareable>,
     notShareableUserIds: ArrayList<Int> = arrayListOf(),
     notShareableEmails: ArrayList<String> = arrayListOf(),
-    notShareableTeamIds: ArrayList<Int> = arrayListOf(),
     onDataPassed: (item: Shareable) -> Unit
 ): AvailableShareableItemsAdapter {
     setDropDownBackgroundResource(R.drawable.background_popup)
@@ -275,8 +274,7 @@ fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
         context = context,
         itemList = ArrayList(itemList),
         notShareableUserIds = notShareableUserIds,
-        notShareableEmails = notShareableEmails,
-        notShareableTeamIds = notShareableTeamIds
+        notShareableEmails = notShareableEmails
     ) { item ->
         onDataPassed(item)
     }
@@ -365,9 +363,9 @@ fun FragmentActivity.requestCredentials(onSuccess: () -> Unit) {
 fun Fragment.openOnlyOfficeDocument(file: File) {
     if (file.conversion?.whenOnlyoffice == true) {
         findNavController().navigate(
-			R.id.notSupportedExtensionBottomSheetDialog, 
-			NotSupportedExtensionBottomSheetDialogArgs(file.id).toBundle()
-	)
+            R.id.notSupportedExtensionBottomSheetDialog,
+            NotSupportedExtensionBottomSheetDialogArgs(file.id).toBundle()
+        )
     } else {
         requireContext().openOnlyOfficeActivity(file)
     }

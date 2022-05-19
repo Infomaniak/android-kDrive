@@ -124,9 +124,13 @@ class FileShareDetailsFragment : Fragment() {
                 share.teams.sort()
                 availableShareableItemsAdapter.apply {
                     fileShareViewModel.availableShareableItems.value?.let { setAll(it) }
-                    notShareableUserIds = ArrayList(share.users.map { it.id } + share.invitations.map { it.userId })
+
+                    val userIds = share.users.map { it.id } +
+                            share.invitations.mapNotNull { it.user?.id } +
+                            share.teams.map { team -> team.id }
+
+                    notShareableUserIds = ArrayList(userIds)
                     notShareableEmails = ArrayList(share.invitations.map { invitation -> invitation.email })
-                    notShareableTeamIds = ArrayList(share.teams.map { team -> team.id })
                 }
 
                 sharedUsersTitle.isVisible = true
@@ -171,10 +175,9 @@ class FileShareDetailsFragment : Fragment() {
             }
         }
 
-        getBackNavigationResult<ShareableItems>(SHARE_SELECTION_KEY) { (invitations, teams, users) ->
+        getBackNavigationResult<Boolean>(SHARE_SELECTION_KEY) {
             fileShareViewModel.currentFile.value?.let { currentFile ->
                 file = currentFile
-                sharedItemsAdapter.putAll(ArrayList(invitations + teams + users))
                 refreshUi()
             }
         }
@@ -293,8 +296,7 @@ class FileShareDetailsFragment : Fragment() {
             FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToFileShareAddUserDialog(
                 sharedItem = element,
                 notShareableUserIds = notShareableUserIds.toIntArray(),
-                notShareableEmails = notShareableEmails.toTypedArray(),
-                notShareableTeamIds = notShareableTeamIds.toIntArray(),
+                notShareableEmails = notShareableEmails.toTypedArray()
             )
         )
     }

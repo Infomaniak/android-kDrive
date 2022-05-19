@@ -34,9 +34,10 @@ open class DriveUser(
     var displayName: String = "",
     var avatar: String = "",
     var email: String = "",
-    override var permission: String = "",
-    var status: String = "",
     var type: String = "",
+
+    /** Never used */
+    override var right: String = "",
 ) : RealmObject(), Parcelable, Shareable {
 
     constructor(user: User) : this() {
@@ -47,7 +48,7 @@ open class DriveUser(
     fun isExternalUser(): Boolean = type == Type.SHARED.value
 
     fun getUserAvatar(): String {
-        return if (avatar.isNotBlank()) avatar else avatarUrl.toString()
+        return avatar.ifBlank { avatarUrl.toString() }
     }
 
     fun getInitials(): String {

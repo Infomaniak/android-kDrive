@@ -28,9 +28,9 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.RelativeCornerSize
 import com.google.android.material.shape.ShapeAppearanceModel
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File.FolderPermission
 import com.infomaniak.drive.data.models.Permission
+import com.infomaniak.drive.data.models.Share.UserFileAccess
 import com.infomaniak.drive.data.models.Shareable.ShareablePermission
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.loadAvatar
@@ -45,7 +45,7 @@ class PermissionsAdapter(
     var selectionPosition: Int? = null,
     private var currentUser: User? = null,
     private var isExternalUser: Boolean = false,
-    private var sharedUsers: ArrayList<DriveUser> = ArrayList(),
+    private var sharedUsers: ArrayList<UserFileAccess> = ArrayList(),
     private val onPermissionChanged: (newPermission: Permission) -> Unit,
 ) : RecyclerView.Adapter<ViewHolder>() {
 
@@ -60,7 +60,7 @@ class PermissionsAdapter(
         notifyItemRangeInserted(0, newPermissions.size)
     }
 
-    fun setUsers(users: ArrayList<DriveUser>) {
+    fun setUsers(users: ArrayList<UserFileAccess>) {
         sharedUsers = users
     }
 
@@ -113,10 +113,10 @@ class PermissionsAdapter(
     private fun View.setupInheritPermissionUi() {
         if (sharedUsers.isNotEmpty()) {
 
-            sharedUsers.firstOrNull()?.let { firstUser -> mainIcon.loadAvatar(firstUser) }
+            sharedUsers.firstOrNull()?.let { firstUser -> firstUser.user?.let { mainIcon.loadAvatar(it) } }
 
             secondIcon.apply {
-                sharedUsers.getOrNull(1)?.let { user ->
+                sharedUsers.getOrNull(1)?.user?.let { user ->
                     isVisible = true
                     loadAvatar(user)
                 }

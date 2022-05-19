@@ -46,7 +46,7 @@ class FileShareViewModel : ViewModel() {
     }
 
     fun postFileShare(file: File, body: Map<String, Any?>) = liveData(Dispatchers.IO) {
-        emit(ApiRepository.postFileShare(file, body))
+        emit(ApiRepository.addMultiAccess(file, body))
     }
 
     fun editFileShareLink(file: File, shareLink: ShareLink) = liveData(Dispatchers.IO) {

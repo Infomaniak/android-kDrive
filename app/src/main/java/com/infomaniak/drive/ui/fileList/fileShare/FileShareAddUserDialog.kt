@@ -56,7 +56,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
     private lateinit var availableUsersAdapter: AvailableShareableItemsAdapter
     private val fileShareViewModel: FileShareViewModel by navGraphViewModels(R.id.fileShareDetailsFragment)
     private val navigationArgs: FileShareAddUserDialogArgs by navArgs()
-    private val selectedItems: ShareableItems = ShareableItems()
+    private val selectedItems: Share = Share()
 
     private var selectedPermission: Shareable.ShareablePermission = Shareable.ShareablePermission.READ
         set(value) {
@@ -85,7 +85,6 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
             itemList = fileShareViewModel.availableShareableItems.value ?: AccountUtils.getCurrentDrive().getDriveUsers(),
             notShareableUserIds = navigationArgs.notShareableUserIds.toMutableList() as ArrayList<Int>,
             notShareableEmails = navigationArgs.notShareableEmails.toMutableList() as ArrayList<String>,
-            notShareableTeamIds = navigationArgs.notShareableTeamIds.toMutableList() as ArrayList<Int>
         ) { element ->
             userAutoCompleteTextView.setText("")
             addToSharedElementList(element)
@@ -139,10 +138,10 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                     }
                 }
                 is DriveUser -> {
-                    users.add(element)
+                    driveUsers.add(element)
                     availableUsersAdapter.notShareableUserIds.add(element.id)
                     createChip(element).setOnClickListener {
-                        users.remove(element)
+                        driveUsers.remove(element)
                         availableUsersAdapter.notShareableUserIds.remove(element.id)
                         selectedItemsChipGroup.removeView(it)
                     }
@@ -195,16 +194,9 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
     }
 
     private fun createShareAndCloseDialog(file: File, body: MutableMap<String, Serializable>) {
-        body += "lang" to Locale.getDefault().language
-        body += "message" to shareMessage.text.toString()
-
         fileShareViewModel.postFileShare(file, body).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
-                // TODO - Temp hack because API doesn't return permission yet
-                apiResponse.data?.valid?.users?.forEach {
-                    it.permission = selectedPermission.apiValue
-                }
-                setBackNavigationResult(SHARE_SELECTION_KEY, apiResponse.data?.valid)
+                setBackNavigationResult(SHARE_SELECTION_KEY, true)
             } else {
                 Utils.showSnackbar(requireView(), apiResponse.translateError())
             }
@@ -219,9 +211,11 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
         fileShareViewModel.currentFile.value?.let { file ->
             val body = mutableMapOf(
                 "emails" to ArrayList(selectedItems.invitations.map { it.email }),
-                "user_ids" to ArrayList(selectedItems.users.map { it.id }),
+                "user_ids" to ArrayList(selectedItems.driveUsers.map { it.id }),
                 "team_ids" to ArrayList(selectedItems.teams.map { it.id }),
-                "right" to newPermission
+                "right" to newPermission,
+                "lang" to Locale.getDefault().language,
+                "message" to shareMessage.text.toString(),
             )
 
             fileShareViewModel.postFileShareCheck(file, body).observe(viewLifecycleOwner) { apiResponse ->

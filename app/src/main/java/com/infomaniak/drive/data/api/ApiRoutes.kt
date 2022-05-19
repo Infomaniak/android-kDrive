@@ -33,21 +33,19 @@ object ApiRoutes {
 
     private fun v2URL(driveId: Int) = "${DRIVE_API_V2}${driveId}"
 
-    private fun fileURL(file: File) = "${DRIVE_API}${file.driveId}/file/${file.id}"
+    private fun fileURL(driveId: Int) = "${v2URL(driveId)}/files"
 
-    private fun fileURLv2(driveId: Int) = "${v2URL(driveId)}/files"
+    fun fileURL(file: File) = fileURL(file.driveId, file.id)
 
-    fun fileURLv2(file: File) = fileURLv2(file.driveId, file.id)
-
-    private fun fileURLv2(driveId: Int, fileId: FileId) = "${fileURLv2(driveId)}/${fileId}"
+    private fun fileURL(driveId: Int, fileId: FileId) = "${fileURL(driveId)}/${fileId}"
 
     fun trashURL(file: File) = "${v2URL(file.driveId)}/trash/${file.id}"
 
     fun getAllDrivesData() = "${DRIVE_API}init?with=drives,users,teams,ips,categories"
 
     /** Access/Invitation */
-    //region Access/Invitation
-    private fun accessUrl(file: File) = "${fileURLv2(file)}/access"
+    //region File Access/Invitation
+    fun accessUrl(file: File) = "${fileURL(file)}/access"
 
     fun fileInvitationAccess(file: File, invitationId: Int) = "${v2URL(file.driveId)}/files/invitations/$invitationId"
 
@@ -76,12 +74,12 @@ object ApiRoutes {
             "&actions[]=comment_create"
 
     fun getLastActivities(driveId: Int) =
-        "${fileURLv2(driveId)}/activities?$activitiesWithQuery,user&depth=unlimited&$activitiesActions"
+        "${fileURL(driveId)}/activities?$activitiesWithQuery,user&depth=unlimited&$activitiesActions"
 
-    fun getFileActivities(file: File) = "${fileURLv2(file)}/activities"
+    fun getFileActivities(file: File) = "${fileURL(file)}/activities"
 
     fun getFileActivities(driveId: Int, fileIds: String, fromDate: Long) =
-        "${fileURLv2(driveId)}/activities/batch?$activitiesWithQuery&file_ids=$fileIds&from_date=$fromDate" +
+        "${fileURL(driveId)}/activities/batch?$activitiesWithQuery&file_ids=$fileIds&from_date=$fromDate" +
                 "&actions[]=file_rename" +
                 "&actions[]=file_update"
 
@@ -95,18 +93,18 @@ object ApiRoutes {
 
     fun category(driveId: Int, categoryId: Int) = "${categories(driveId)}/$categoryId"
 
-    fun fileCategory(file: File, categoryId: Int) = "${fileURLv2(file)}/categories/$categoryId"
+    fun fileCategory(file: File, categoryId: Int) = "${fileURL(file)}/categories/$categoryId"
 
-    fun fileCategory(driveId: Int, categoryId: Int) = "${fileURLv2(driveId)}/categories/$categoryId"
+    fun fileCategory(driveId: Int, categoryId: Int) = "${fileURL(driveId)}/categories/$categoryId"
     //endregion
 
     /** Comment **/
     //region Comment
     private const val withComments = "with=user,likes,responses,responses.user,responses.likes"
 
-    fun fileComments(file: File) = "${fileURLv2(file)}/comments?$withComments"
+    fun fileComments(file: File) = "${fileURL(file)}/comments?$withComments"
 
-    fun fileComment(file: File, commentId: Int) = "${fileURLv2(file)}/comments/$commentId"
+    fun fileComment(file: File, commentId: Int) = "${fileURL(file)}/comments/$commentId"
 
     fun answerComment(file: File, commentId: Int) = "${fileComment(file, commentId)}?$withComments"
 
@@ -117,58 +115,58 @@ object ApiRoutes {
 
     /** Dropbox **/
     //region Dropbox
-    fun dropBox(file: File) = "${fileURLv2(file)}/dropbox"
+    fun dropBox(file: File) = "${fileURL(file)}/dropbox"
     //endregion
 
     /** Favorite **/
     //region Favorite
-    fun getFavoriteFiles(driveId: Int, order: SortType) = "${fileURLv2(driveId)}/favorites?$fileWithQuery&${orderQuery(order)}"
+    fun getFavoriteFiles(driveId: Int, order: SortType) = "${fileURL(driveId)}/favorites?$fileWithQuery&${orderQuery(order)}"
 
-    fun favorite(file: File) = "${fileURLv2(file)}/favorite"
+    fun favorite(file: File) = "${fileURL(file)}/favorite"
     //endregion
 
     /** File/Directory **/
     //region File/Directory
     fun getFolderFiles(driveId: Int, parentId: Int, order: SortType) =
-        "${fileURLv2(driveId, parentId)}/files?$fileWithQuery&${orderQuery(order)}"
+        "${fileURL(driveId, parentId)}/files?$fileWithQuery&${orderQuery(order)}"
 
-    fun getFileDetails(file: File) = "${fileURLv2(file)}?$fileExtraWithQuery"
+    fun getFileDetails(file: File) = "${fileURL(file)}?$fileExtraWithQuery"
 
-    fun createFolder(driveId: Int, parentId: Int) = "${fileURLv2(driveId, parentId)}/directory?$fileWithQuery"
+    fun createFolder(driveId: Int, parentId: Int) = "${fileURL(driveId, parentId)}/directory?$fileWithQuery"
 
-    fun createOfficeFile(driveId: Int, folderId: Int) = "${fileURLv2(driveId, folderId)}/file?$fileWithQuery"
+    fun createOfficeFile(driveId: Int, folderId: Int) = "${fileURL(driveId, folderId)}/file?$fileWithQuery"
 
-    fun thumbnailFile(file: File) = "${fileURLv2(file)}/thumbnail?t=${file.lastModifiedAt}"
+    fun thumbnailFile(file: File) = "${fileURL(file)}/thumbnail?t=${file.lastModifiedAt}"
 
-    fun imagePreviewFile(file: File) = "${fileURLv2(file)}/preview?quality=80&t=${file.lastModifiedAt}"
+    fun imagePreviewFile(file: File) = "${fileURL(file)}/preview?quality=80&t=${file.lastModifiedAt}"
 
-    fun downloadFile(file: File) = "${fileURLv2(file)}/download"
+    fun downloadFile(file: File) = "${fileURL(file)}/download"
 
-    fun convertFile(file: File): String = "${fileURLv2(file)}/convert?$fileWithQuery"
+    fun convertFile(file: File): String = "${fileURL(file)}/convert?$fileWithQuery"
 
-    fun moveFile(file: File, newParentId: Int) = "${fileURLv2(file)}/move/$newParentId"
+    fun moveFile(file: File, newParentId: Int) = "${fileURL(file)}/move/$newParentId"
 
-    fun duplicateFile(file: File) = "${fileURLv2(file)}/duplicate?$fileWithQuery"
+    fun duplicateFile(file: File) = "${fileURL(file)}/duplicate?$fileWithQuery"
 
-    fun copyFile(file: File, destinationId: Int) = "${fileURLv2(file)}/copy/$destinationId?$fileWithQuery"
+    fun copyFile(file: File, destinationId: Int) = "${fileURL(file)}/copy/$destinationId?$fileWithQuery"
 
-    fun renameFile(file: File) = "${fileURLv2(file)}/rename"
+    fun renameFile(file: File) = "${fileURL(file)}/rename"
 
-    fun getFileCount(file: File) = "${fileURLv2(file)}/count"
+    fun getFileCount(file: File) = "${fileURL(file)}/count"
 
-    fun getFolderSize(file: File, depth: String) = "${fileURLv2(file)}/size?depth=$depth"
+    fun getFolderSize(file: File, depth: String) = "${fileURL(file)}/size?depth=$depth"
 
-    fun updateFolderColor(file: File) = "${fileURLv2(file)}/color"
+    fun updateFolderColor(file: File) = "${fileURL(file)}/color"
     //endregion
 
     /** Search **/
     //region Search
-    fun searchFiles(driveId: Int, sortType: SortType) = "${fileURLv2(driveId)}/search?$fileWithQuery&${orderQuery(sortType)}"
+    fun searchFiles(driveId: Int, sortType: SortType) = "${fileURL(driveId)}/search?$fileWithQuery&${orderQuery(sortType)}"
     //endregion
 
     /** Share link **/
     //region Share link
-    fun shareLink(file: File) = "${fileURLv2(file)}/link"
+    fun shareLink(file: File) = "${fileURL(file)}/link"
     //endregion
 
     /** Trash **/
@@ -188,17 +186,15 @@ object ApiRoutes {
 
     /** Root Directory **/
     //region Root Directory
-    fun bulkAction(driveId: Int): String = "${fileURLv2(driveId)}/bulk"
+    fun bulkAction(driveId: Int): String = "${fileURL(driveId)}/bulk"
 
-    fun getLastModifiedFiles(driveId: Int) = "${fileURLv2(driveId)}/last_modified?$fileWithQuery"
+    fun getLastModifiedFiles(driveId: Int) = "${fileURL(driveId)}/last_modified?$fileWithQuery"
 
-    fun createTeamFolder(driveId: Int) = "${fileURLv2(driveId)}/team_directory?$fileWithQuery"
+    fun createTeamFolder(driveId: Int) = "${fileURL(driveId)}/team_directory?$fileWithQuery"
 
     fun getMySharedFiles(driveId: Int, sortType: SortType) =
-        "${fileURLv2(driveId)}/my_shared?${orderQuery(sortType)}&$fileWithQuery,users"
+        "${fileURL(driveId)}/my_shared?${orderQuery(sortType)}&$fileWithQuery,users"
     //endregion
-
-    fun postFileShare(file: File) = "${fileURL(file)}/share"
 
     fun uploadFile(driveId: Int, folderId: Int) = "${DRIVE_API}$driveId/file/$folderId/upload"
 

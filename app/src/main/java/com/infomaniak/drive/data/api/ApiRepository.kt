@@ -171,7 +171,7 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun deleteFile(file: File): ApiResponse<CancellableAction> {
-        return callApi(ApiRoutes.fileURLv2(file), DELETE)
+        return callApi(ApiRoutes.fileURL(file), DELETE)
     }
 
     fun renameFile(file: File, newName: String): ApiResponse<CancellableAction> {
@@ -257,8 +257,8 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.checkFileShare(file), POST, body)
     }
 
-    fun postFileShare(file: File, body: Map<String, Any?>): ApiResponse<ShareResults> {
-        return callApi(ApiRoutes.postFileShare(file), POST, body)
+    fun addMultiAccess(file: File, body: Map<String, Any?>): ApiResponse<ShareableItems> {
+        return callApi(ApiRoutes.accessUrl(file), POST, body)
     }
 
     fun deleteFileShare(file: File, shareableItem: Shareable): ApiResponse<Boolean> {
