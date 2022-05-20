@@ -21,6 +21,7 @@ import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.file.sharelink.ShareLinkCapabilities
+import com.infomaniak.lib.core.utils.Utils.enumValueOfOrNull
 import io.realm.RealmObject
 import io.realm.annotations.Ignore
 import io.realm.annotations.RealmClass
@@ -31,15 +32,16 @@ import java.util.*
 @RealmClass(embedded = true)
 open class ShareLink(
     var url: String = "",
+    @SerializedName("right")
     var _right: String = ShareLinkFilePermission.RESTRICTED.name,
     @SerializedName("valid_until") var validUntil: Date? = null,
     var capabilities: ShareLinkCapabilities? = null,
 ) : RealmObject(), Parcelable {
 
-    var right
-        get() = ShareLinkFilePermission.valueOf(_right)
+    inline var right
+        get() = enumValueOfOrNull<ShareLinkFilePermission>(_right)
         set(value) {
-            _right = value.name
+            value?.let { _right = value.name }
         }
 
     /**
