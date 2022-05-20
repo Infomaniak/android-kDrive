@@ -25,6 +25,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
@@ -32,6 +33,7 @@ import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
@@ -58,18 +60,13 @@ class AccessDeniedBottomSheetDialog : InformationBottomSheetDialog() {
             actionButton.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red_error))
             actionButton.setOnClickListener {
                 actionButton.showProgress()
-                informationBottomSheetViewModel.enableFolderAccess(navigationArgs.fileId)
+                informationBottomSheetViewModel.forceFolderAccess(navigationArgs.folderId)
                     .observe(viewLifecycleOwner) { apiResponse ->
                         if (apiResponse.data == null) {
                             Utils.showSnackbar(requireView(), apiResponse.translateError())
                         } else {
-                            apiResponse.data?.let { file ->
-                                safeNavigate(
-                                    AccessDeniedBottomSheetDialogDirections.actionAccessDeniedBottomSheetFragmentToFileListFragment(
-                                        folderId = file.id,
-                                        folderName = file.name
-                                    )
-                                )
+                            apiResponse.data?.let { hasAccess ->
+                                if (hasAccess) navigateToTargetFolder() else closeAndShowRightError()
                             }
                         }
                         actionButton.hideProgress(R.string.buttonConfirmNotify)
@@ -84,10 +81,24 @@ class AccessDeniedBottomSheetDialog : InformationBottomSheetDialog() {
         }
     }
 
+    private fun navigateToTargetFolder() {
+        safeNavigate(
+            AccessDeniedBottomSheetDialogDirections.actionAccessDeniedBottomSheetFragmentToFileListFragment(
+                folderId = navigationArgs.folderId,
+                folderName = navigationArgs.folderName
+            )
+        )
+    }
+
+    private fun closeAndShowRightError() {
+        showSnackbar(R.string.errorRightModification, true)
+        findNavController().popBackStack()
+    }
+
     class InformationBottomSheetViewModel : ViewModel() {
 
-        fun enableFolderAccess(fileId: Int): LiveData<ApiResponse<File>> = liveData(Dispatchers.IO) {
-            emit(ApiRepository.postFolderAccess(File(id = fileId, driveId = AccountUtils.currentDriveId)))
+        fun forceFolderAccess(folderId: Int): LiveData<ApiResponse<Boolean>> = liveData(Dispatchers.IO) {
+            emit(ApiRepository.forceFolderAccess(File(id = folderId, driveId = AccountUtils.currentDriveId)))
         }
     }
 }

@@ -318,7 +318,7 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(url, GET)
     }
 
-    fun postFolderAccess(file: File): ApiResponse<File> {
+    fun forceFolderAccess(file: File): ApiResponse<Boolean> {
         return callApi(ApiRoutes.forceFolderAccess(file), POST)
     }
 

@@ -613,12 +613,15 @@
             android:defaultValue="false"
             app:argType="boolean" />
         <argument
-            android:name="fileId"
+            android:name="folderId"
             android:defaultValue="-1"
             app:argType="integer" />
         <action
             android:id="@+id/action_accessDeniedBottomSheetFragment_to_fileListFragment"
             app:destination="@id/fileListFragment" />
+        <argument
+            android:name="folderName"
+            app:argType="string" />
     </dialog>
 
     <dialog
