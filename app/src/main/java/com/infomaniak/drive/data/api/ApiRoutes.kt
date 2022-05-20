@@ -41,7 +41,10 @@ object ApiRoutes {
 
     fun trashURL(file: File) = "${v2URL(file.driveId)}/trash/${file.id}"
 
+    /** V1 */
+    //region V1
     fun getAllDrivesData() = "${DRIVE_API}init?with=drives,users,teams,ips,categories"
+    //endregion
 
     /** Access/Invitation */
     //region File Access/Invitation

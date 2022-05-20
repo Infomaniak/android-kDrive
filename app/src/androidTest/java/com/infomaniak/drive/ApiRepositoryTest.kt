@@ -116,9 +116,9 @@ class ApiRepositoryTest : KDriveTest() {
         with(createCategory(userDrive.driveId, name, color)) {
             assertFalse(isSuccess())
             assertEquals(
-                "Category already exist error",
-                error?.description,
-                "Error description should be 'category already exist error'"
+                "category_already_exist_error",
+                error?.code,
+                "Error code should be 'category_already_exist_error'"
             )
         }
 
@@ -408,7 +408,7 @@ class ApiRepositoryTest : KDriveTest() {
             with(createShareLink(testFile, body)) {
                 assertApiResponseData(this)
                 assertNotNull(data?.capabilities, "The data's capabilities cannot be null")
-                assertEquals("public", data!!.right.name.lowercase(), "Permission should be public")
+                assertEquals(ShareLink.ShareLinkFilePermission.PUBLIC, data!!.right, "Permission should be public")
 
                 with(data?.capabilities!!) {
                     assertTrue(canDownload, "Can downloads should be true")
@@ -442,7 +442,7 @@ class ApiRepositoryTest : KDriveTest() {
             with(ApiRepository.getShareLink(testFile)) {
                 assertApiResponseData(this)
                 assertNotNull(data?.capabilities, "The data's capabilities cannot be null")
-                assertEquals("public", data!!.right.name.lowercase(), "Permission should be public")
+                assertEquals(ShareLink.ShareLinkFilePermission.PUBLIC, data!!.right, "Permission should be public")
 
                 with(data?.capabilities!!) {
                     assertFalse(canDownload, "can downloads should be false")
