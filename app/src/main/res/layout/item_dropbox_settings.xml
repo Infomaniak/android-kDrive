@@ -260,7 +260,7 @@
                 android:id="@+id/limitStorageValue"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="number|none" />
+                android:inputType="numberDecimal|none"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
