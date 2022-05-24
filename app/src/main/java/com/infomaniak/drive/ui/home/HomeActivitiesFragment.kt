@@ -28,7 +28,6 @@ import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.utils.safeNavigate
@@ -115,7 +114,7 @@ class HomeActivitiesFragment : Fragment() {
                 it?.let { (apiResponse, mergedActivities) ->
                     if (apiResponse.page == 1 && itemCount > 0) clean()
                     addAll(mergedActivities)
-                    isComplete = (apiResponse.data?.size ?: 0) < ApiRepository.PER_PAGE
+                    isComplete = apiResponse.isLastPage()
                 } ?: also {
                     isComplete = true
                     addAll(arrayListOf())
