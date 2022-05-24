@@ -165,9 +165,11 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     }
 
     private fun getMultiSelectBottomSheetArguments(areAllFromTheSameFolder: Boolean): Bundle {
-        val (fileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
+        val (fileIds, exceptFileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
         return MultiSelectActionsBottomSheetDialogArgs(
-            fileIds = fileIds,
+            parentId = mainViewModel.currentFolder?.value?.id!!,
+            fileIds = if (isAllSelected) intArrayOf() else fileIds,
+            exceptFileIds = if (isAllSelected) exceptFileIds else intArrayOf(),
             onlyFolders = onlyFolders,
             onlyFavorite = onlyFavorite,
             onlyOffline = onlyOffline,
