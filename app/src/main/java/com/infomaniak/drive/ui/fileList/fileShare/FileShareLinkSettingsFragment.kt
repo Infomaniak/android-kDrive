@@ -99,12 +99,9 @@ class FileShareLinkSettingsFragment : Fragment() {
 
     private fun setupAddPassword() {
         addPasswordSwitch?.setOnCheckedChangeListener { _, isChecked ->
-            if (shareLink.right == ShareLink.ShareLinkFilePermission.PUBLIC) {
-                passwordTextLayout.isVisible = isChecked
-            } else if (shareLink.right == ShareLink.ShareLinkFilePermission.PASSWORD) {
-                passwordTextLayout.isGone = true
-                newPasswordButton.isVisible = isChecked
-            }
+            val actionPasswordVisible = shareLink.right == ShareLink.ShareLinkFilePermission.PASSWORD
+            newPasswordButton.isVisible = actionPasswordVisible && isChecked
+            passwordTextLayout.isVisible = !actionPasswordVisible && isChecked
         }
     }
 
