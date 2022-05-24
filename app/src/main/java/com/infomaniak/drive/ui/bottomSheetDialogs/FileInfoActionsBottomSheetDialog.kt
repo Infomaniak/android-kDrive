@@ -186,8 +186,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
     }
 
-    override fun copyPublicLink() {
-        super.copyPublicLink()
+    override fun sharePublicLink() {
+        super.sharePublicLink()
         fileInfoActionsView.createPublicCopyLink(onSuccess = {
             it?.shareLink?.let { shareLink -> context?.shareText(shareLink) }
             findNavController().popBackStack()

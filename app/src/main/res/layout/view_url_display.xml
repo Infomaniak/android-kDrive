@@ -54,7 +54,7 @@
         style="@style/IconButton"
         android:layout_width="38dp"
         android:layout_height="38dp"
-        android:contentDescription="@string/buttonCopyPublicLink"
+        android:contentDescription="@string/buttonSharePublicLink"
         app:icon="@drawable/ic_share_file"
         app:iconSize="22dp"
         app:layout_constraintBottom_toBottomOf="parent"

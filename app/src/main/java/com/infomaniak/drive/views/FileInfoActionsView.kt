@@ -115,7 +115,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                 }
 
                 (rights?.canBecomeLink == true && isOnline || currentFile.shareLink != null || !file.collaborativeFolder.isNullOrBlank()).let { publicLinkEnabled ->
-                    copyPublicLink.isEnabled = publicLinkEnabled
+                    sharePublicLink.isEnabled = publicLinkEnabled
                     disabledPublicLink.isGone = publicLinkEnabled
                     if (!file.collaborativeFolder.isNullOrBlank()) {
                         copyPublicLinkText.text = context.getString(R.string.buttonCopyLink)
@@ -197,7 +197,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         displayInfo.setOnClickListener { onItemClickListener.displayInfoClicked() }
         fileRights.setOnClickListener { onItemClickListener.fileRightsClicked() }
         sendCopy.setOnClickListener { if (currentFile.isFolder()) openAddFileBottom() else shareFile() }
-        copyPublicLink.setOnClickListener { onItemClickListener.copyPublicLink() }
+        sharePublicLink.setOnClickListener { onItemClickListener.sharePublicLink() }
         openWith.setOnClickListener { onItemClickListener.openWithClicked() }
         downloadFile.setOnClickListener { onItemClickListener.downloadFileClicked() }
         manageCategories.setOnClickListener { onItemClickListener.manageCategoriesClicked(currentFile.id) }
@@ -385,7 +385,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         addFavorites.isEnabled = true
         addFavoritesIcon.isEnabled = file.isFavorite
         addFavoritesText.setText(if (file.isFavorite) R.string.buttonRemoveFavorites else R.string.buttonAddFavorites)
-        copyPublicLinkText.setText(if (file.shareLink == null) R.string.buttonCreatePublicLink else R.string.buttonCopyPublicLink)
+        copyPublicLinkText.setText(if (file.shareLink == null) R.string.buttonCreatePublicLink else R.string.buttonSharePublicLink)
 
         when {
             isPendingOffline && file.currentProgress in 0..99 -> {
@@ -440,7 +440,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
         fun addFavoritesClicked() = trackActionEvent("favorite", (!currentFile.isFavorite).toFloat())
         fun colorFolderClicked(color: String) = application?.trackEvent("colorFolder", TrackerAction.CLICK, "switch")
-        fun copyPublicLink() = trackActionEvent("copyShareLink")
+        fun sharePublicLink() = trackActionEvent("copyShareLink")
         fun displayInfoClicked()
         fun downloadFileClicked() = trackActionEvent("download")
         fun dropBoxClicked(isDropBox: Boolean) = trackActionEvent("convertToDropbox", isDropBox.toFloat())

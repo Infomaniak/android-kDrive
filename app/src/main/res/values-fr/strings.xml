@@ -110,7 +110,6 @@
     <string name="buttonConvertToDropBox">Convertir en boîte de dépôt</string>
     <string name="buttonCopy">Copier</string>
     <string name="buttonCopyLink">Copier le lien</string>
-    <string name="buttonCopyPublicLink">Copier le lien public</string>
     <string name="buttonCreate">Créer</string>
     <string name="buttonCreateFolder">Créer le dossier</string>
     <string name="buttonCreateOnlyOfficeCopy">Créer une copie .%s</string>
@@ -158,6 +157,7 @@
     <string name="buttonSendCopy">Envoyer une copie</string>
     <string name="buttonSettingsLockApp">Activer le verrouillage</string>
     <string name="buttonShare">Partager</string>
+    <string name="buttonSharePublicLink">Partager le lien public</string>
     <string name="buttonSignIn">Créer un compte</string>
     <string name="buttonStopUpload">Stopper l’importation de ce fichier</string>
     <string name="buttonSwitchDrive">Changer de drive</string>
