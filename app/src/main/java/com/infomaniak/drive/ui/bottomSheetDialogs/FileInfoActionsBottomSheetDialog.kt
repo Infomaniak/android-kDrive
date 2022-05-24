@@ -189,7 +189,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override fun copyPublicLink() {
         super.copyPublicLink()
         fileInfoActionsView.createPublicCopyLink(onSuccess = {
-            showSnackbar(R.string.fileInfoLinkCopiedToClipboard, true)
+            it?.shareLink?.let { shareLink -> context?.shareText(shareLink) }
             findNavController().popBackStack()
         }, onError = { translatedError -> showSnackbar(translatedError, true) })
     }

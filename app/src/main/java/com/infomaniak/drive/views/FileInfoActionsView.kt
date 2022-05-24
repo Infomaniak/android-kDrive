@@ -277,11 +277,9 @@ class FileInfoActionsView @JvmOverloads constructor(
     fun createPublicCopyLink(onSuccess: ((file: File?) -> Unit)? = null, onError: ((translatedError: String) -> Unit)? = null) {
         when {
             currentFile.collaborativeFolder != null -> {
-                copyPublicLink(currentFile.collaborativeFolder!!)
                 onSuccess?.invoke(currentFile)
             }
             currentFile.shareLink != null -> {
-                copyPublicLink(currentFile.shareLink!!)
                 onSuccess?.invoke(currentFile)
             }
             else -> {
@@ -308,7 +306,6 @@ class FileInfoActionsView @JvmOverloads constructor(
         CoroutineScope(Dispatchers.IO).launch {
             FileController.updateFile(currentFile.id) { it.shareLink = url }
         }
-        copyPublicLink(url)
         currentFile.shareLink = url
         refreshBottomSheetUi(currentFile)
     }
