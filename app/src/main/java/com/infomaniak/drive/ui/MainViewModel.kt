@@ -34,7 +34,6 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.ShareLink.ShareLinkFilePermission
-import com.infomaniak.drive.data.models.ShareLink.ShareLinkSettings
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
@@ -97,9 +96,10 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     }
 
     fun createShareLink(
-        file: File,
-        body: ShareLinkSettings = ShareLinkSettings(right = ShareLinkFilePermission.PUBLIC, canDownload = true, canEdit = false)
+        file: File
     ) = liveData(Dispatchers.IO) {
+
+        val body = ShareLink().ShareLinkSettings(right = ShareLinkFilePermission.PUBLIC, canDownload = true, canEdit = false)
         val apiResponse = ApiRepository.createShareLink(file, body)
         if (apiResponse.isSuccess()) {
             FileController.updateFile(file.id) { it.sharelink = apiResponse.data }

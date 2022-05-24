@@ -29,6 +29,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.gson.JsonObject
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
@@ -208,7 +209,11 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         var currentPermission: Permission? = null
 
         fun editFileShareLinkOfficePermission(file: File, canEdit: Boolean) = liveData(Dispatchers.IO) {
-            emit(ApiRepository.updateShareLink(file, ShareLinkSettings(canEdit = canEdit)))
+            val body = JsonObject().apply { addProperty(ShareLinkSettings::canEdit.name, canEdit) }
+            val apiResponse = ApiRepository.updateShareLink(file, body)
+            if (apiResponse.data == true) FileController.updateShareLinkWithRemote(file.id)
+            emit(apiResponse)
+
         }
 
         fun deleteFileShare(file: File, shareable: Shareable) = liveData(Dispatchers.IO) {

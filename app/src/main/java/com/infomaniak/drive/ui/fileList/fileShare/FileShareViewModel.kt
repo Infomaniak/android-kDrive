@@ -50,24 +50,14 @@ class FileShareViewModel : ViewModel() {
     }
 
     fun editFileShareLink(file: File, shareLink: ShareLink) = liveData(Dispatchers.IO) {
-        val body = ShareLink.ShareLinkSettings(
-            right = shareLink.newRight,
-            canDownload = shareLink.capabilities?.canDownload,
-            canComment = shareLink.capabilities?.canComment,
-            canSeeInfo = shareLink.capabilities?.canSeeInfo,
-        )
+        val shareLinkSettings = shareLink.ShareLinkSettings()
 
-        if (AccountUtils.getCurrentDrive()?.pack != Drive.DrivePack.FREE.value) {
-            body.validUntil = shareLink.validUntil
+        shareLinkSettings.validUntil =
+            if (AccountUtils.getCurrentDrive()?.pack != Drive.DrivePack.FREE.value) shareLink.validUntil else null
+
+        with(ApiRepository.updateShareLink(file, shareLinkSettings.toJsonElement())) {
+            if (data == true) FileController.updateShareLinkWithRemote(file.id)
+            emit(this)
         }
-
-        when {
-            shareLink.newPassword.isNullOrBlank() -> {
-                if (shareLink.right == ShareLink.ShareLinkFilePermission.PASSWORD) body.right = null
-            }
-            else -> body.password = shareLink.newPassword
-        }
-
-        emit(ApiRepository.updateShareLink(file, body))
     }
 }

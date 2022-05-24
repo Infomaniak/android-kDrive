@@ -395,7 +395,7 @@ class ApiRepositoryTest : KDriveTest() {
         @Test
         @DisplayName("Create a custom share link, update it then delete it")
         fun shareLinkTest() {
-            val body = ShareLink.ShareLinkSettings(
+            val body = ShareLink().ShareLinkSettings(
                 right = ShareLink.ShareLinkFilePermission.PUBLIC,
                 canDownload = true,
                 canEdit = false,
@@ -421,21 +421,22 @@ class ApiRepositoryTest : KDriveTest() {
             }
 
             // Get the share link
-            with(ApiRepository.getShareLink(testFile)) {
+            val shareLink = ApiRepository.getShareLink(testFile)
+            with(shareLink) {
                 assertApiResponseData(this)
                 assertFalse(data?.url.isNullOrBlank(), "Sharelink url cannot be null")
             }
 
             // Modifies the share link
             updateShareLink(
-                testFile, ShareLink.ShareLinkSettings(
+                testFile, shareLink.data!!.ShareLinkSettings(
                     right = ShareLink.ShareLinkFilePermission.PUBLIC,
                     canDownload = false,
                     canEdit = true,
                     canSeeStats = true,
                     canComment = false,
                     canSeeInfo = false
-                )
+                ).toJsonElement()
             ).let(::assertApiResponseData)
 
             // Makes sure modification has been made

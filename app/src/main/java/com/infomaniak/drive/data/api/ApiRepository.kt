@@ -245,7 +245,7 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.shareLink(file), POST, body)
     }
 
-    fun updateShareLink(file: File, body: ShareLink.ShareLinkSettings): ApiResponse<Boolean> {
+    fun updateShareLink(file: File, body: JsonElement): ApiResponse<Boolean> {
         return callApi(ApiRoutes.shareLink(file), PUT, body)
     }
 

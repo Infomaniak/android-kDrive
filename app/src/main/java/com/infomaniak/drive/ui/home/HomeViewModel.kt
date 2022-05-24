@@ -67,7 +67,7 @@ class HomeViewModel : ViewModel() {
                 }
 
                 when {
-                    data?.isNullOrEmpty() == true -> emit(null)
+                    data.isNullOrEmpty() -> emit(null)
                     else -> {
                         val mergeAndCleanActivities = mergeAndCleanActivities(data)
                         lastActivities.addAll(data)

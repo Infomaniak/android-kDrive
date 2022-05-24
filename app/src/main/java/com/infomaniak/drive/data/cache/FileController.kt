@@ -217,6 +217,16 @@ object FileController {
         }
     }
 
+    fun updateShareLinkWithRemote(fileId: Int) {
+        getRealmInstance().use { realm ->
+            getFileProxyById(fileId, customRealm = realm)?.let { fileProxy ->
+                ApiRepository.getShareLink(fileProxy).data?.let { shareLink ->
+                    realm.executeTransaction { fileProxy.sharelink = shareLink }
+                }
+            }
+        }
+    }
+
     fun updateDropBox(fileId: Int, newDropBox: DropBox?) {
         updateFile(fileId) { fileProxy ->
             fileProxy.dropbox = newDropBox
