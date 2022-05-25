@@ -397,7 +397,6 @@
     <string name="fileDetailsInfosTotalSizeTitle">Size (with versions)</string>
     <string name="fileDetailsNoComments">No comments at this time</string>
     <string name="fileInfoInputDuplicateFile">Copy name</string>
-    <string name="fileInfoLinkCopiedToClipboard">Link copied to the clipboard</string>
     <plurals name="fileListAddFavoritesConfirmationSnackbar">
         <item quantity="one">One file successfully added to favorites</item>
         <item quantity="other">%d files successfully added to favorites</item>

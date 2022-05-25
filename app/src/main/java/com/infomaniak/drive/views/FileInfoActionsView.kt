@@ -315,11 +315,6 @@ class FileInfoActionsView @JvmOverloads constructor(
         copyPublicLinkLoader.isVisible = show
     }
 
-    private fun copyPublicLink(url: String) {
-        showCopyPublicLinkLoader(false)
-        Utils.copyToClipboard(context, url)
-    }
-
     /**
      * This allows you to update when necessary, each time you return to the application.
      * To be called only in the [Lifecycle.Event.ON_RESUME].

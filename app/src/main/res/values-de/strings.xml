@@ -383,7 +383,6 @@
     <string name="fileDetailsInfosTotalSizeTitle">Grösse (mit Versionen)</string>
     <string name="fileDetailsNoComments">Derzeit kein Kommentar</string>
     <string name="fileInfoInputDuplicateFile">Bezeichnung der Kopie</string>
-    <string name="fileInfoLinkCopiedToClipboard">Link in Zwischenablage kopiert</string>
     <plurals name="fileListAddFavoritesConfirmationSnackbar">
         <item quantity="one">Datei erfolgreich zu Favoriten hinzugefügt</item>
         <item quantity="other">%d Dateien erfolgreich zu Favoriten hinzugefügt</item>
