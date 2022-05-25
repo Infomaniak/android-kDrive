@@ -70,12 +70,13 @@ object ApiRoutes {
     fun forceFolderAccess(file: File) = "${accessUrl(file)}/force"
     //endregion
 
-    /** Action **/
+    /** Action */
+
     //region Action
     fun undoAction(driveId: Int) = "${v2URL(driveId)}/cancel"
     //endregion
 
-    /** Activities **/
+    /** Activities */
     //region Activities
     private const val activitiesActions = "actions[]=file_create" +
             "&actions[]=file_update" +
@@ -96,7 +97,7 @@ object ApiRoutes {
     fun getTrashedFilesActivities(file: File) = "${trashURL(file)}/activities"
     //endregion
 
-    /** Category **/
+    /** Category */
     //region Category
 
     fun categories(driveId: Int) = "${v2URL(driveId)}/categories"
@@ -108,7 +109,7 @@ object ApiRoutes {
     fun fileCategory(driveId: Int, categoryId: Int) = "${fileURL(driveId)}/categories/$categoryId"
     //endregion
 
-    /** Comment **/
+    /** Comment */
     //region Comment
     private const val withComments = "with=user,likes,responses,responses.user,responses.likes"
 
@@ -123,19 +124,19 @@ object ApiRoutes {
     fun unLikeComment(file: File, commentId: Int) = "${fileComment(file, commentId)}/unlike"
     //endregion
 
-    /** Dropbox **/
+    /** Dropbox */
     //region Dropbox
     fun dropBox(file: File) = "${fileURL(file)}/dropbox"
     //endregion
 
-    /** Favorite **/
+    /** Favorite */
     //region Favorite
     fun getFavoriteFiles(driveId: Int, order: SortType) = "${fileURL(driveId)}/favorites?$fileWithQuery&${orderQuery(order)}"
 
     fun favorite(file: File) = "${fileURL(file)}/favorite"
     //endregion
 
-    /** File/Directory **/
+    /** File/Directory */
     //region File/Directory
     fun getFolderFiles(driveId: Int, parentId: Int, order: SortType) =
         "${fileURL(driveId, parentId)}/files?$fileWithQuery&${orderQuery(order)}"
@@ -169,17 +170,17 @@ object ApiRoutes {
     fun updateFolderColor(file: File) = "${fileURL(file)}/color"
     //endregion
 
-    /** Search **/
+    /** Search */
     //region Search
     fun searchFiles(driveId: Int, sortType: SortType) = "${fileURL(driveId)}/search?$fileWithQuery&${orderQuery(sortType)}"
     //endregion
 
-    /** Share link **/
+    /** Share link */
     //region Share link
     fun shareLink(file: File) = "${fileURL(file)}/link"
     //endregion
 
-    /** Trash **/
+    /** Trash */
     //region Trash
     fun driveTrash(driveId: Int, order: SortType) = "${v2URL(driveId)}/trash?${orderQuery(order)}&$fileWithQuery"
 
@@ -194,9 +195,25 @@ object ApiRoutes {
     fun restoreTrashFile(file: File) = "${trashURL(file)}/restore"
     //endregion
 
-    /** Root Directory **/
+    /** Upload */
+    //region Upload
+    private fun uploadSessionUrl(driveId: Int) = "${v2URL(driveId)}/upload/session"
+
+    fun getSession(driveId: Int, uploadToken: String) = "${uploadSessionUrl(driveId)}/$uploadToken"
+
+    fun startUploadSession(driveId: Int) = "${uploadSessionUrl(driveId)}/start"
+
+    fun addChunkToSession(driveId: Int, uploadToken: String) = "${uploadSessionUrl(driveId)}/$uploadToken/chunk"
+
+    fun closeSession(driveId: Int, uploadToken: String) = "${uploadSessionUrl(driveId)}/$uploadToken/finish"
+
+    fun uploadFile(driveId: Int, folderId: Int) = "${DRIVE_API}$driveId/file/$folderId/upload"
+    //endregion
+
+    /** Root Directory */
+
     //region Root Directory
-    fun bulkAction(driveId: Int): String = "${fileURL(driveId)}/bulk"
+    fun bulkAction(driveId: Int) = "${fileURL(driveId)}/bulk"
 
     fun getLastModifiedFiles(driveId: Int) = "${fileURL(driveId)}/last_modified?$fileWithQuery"
 
@@ -206,11 +223,12 @@ object ApiRoutes {
         "${fileURL(driveId)}/my_shared?${orderQuery(sortType)}&$fileWithQuery,users"
     //endregion
 
-    fun uploadFile(driveId: Int, folderId: Int) = "${DRIVE_API}$driveId/file/$folderId/upload"
+    /** Others */
+    //region Others
+    fun upgradeDrive(driveId: Int) = "${SHOP_URL}drive/$driveId"
+
+    fun orderDrive() = "${SHOP_URL}drive"
 
     fun showOffice(file: File) = "${OFFICE_URL}${file.driveId}/${file.id}"
-
-    fun upgradeDrive(driveId: Int): String = "${SHOP_URL}drive/$driveId"
-
-    fun orderDrive(): String = "${SHOP_URL}drive"
+    //endregion
 }
