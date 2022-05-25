@@ -50,6 +50,8 @@ object ApiRoutes {
     //region Archive
     fun buildArchive(driveId: Int): String = "${fileURL(driveId)}/archives"
 
+    fun getUUIDArchiveFiles(driveId: Int): String = "${DRIVE_API}$driveId/file/archive"
+
     fun downloadArchiveFiles(driveId: Int, uuid: String): String = "${buildArchive(driveId)}/$uuid"
     //endregion
 
@@ -71,7 +73,6 @@ object ApiRoutes {
     //endregion
 
     /** Action */
-
     //region Action
     fun undoAction(driveId: Int) = "${v2URL(driveId)}/cancel"
     //endregion
@@ -211,7 +212,6 @@ object ApiRoutes {
     //endregion
 
     /** Root Directory */
-
     //region Root Directory
     fun bulkAction(driveId: Int) = "${fileURL(driveId)}/bulk"
 

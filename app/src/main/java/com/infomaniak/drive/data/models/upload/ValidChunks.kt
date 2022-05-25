@@ -15,19 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.data.models
+package com.infomaniak.drive.data.models.upload
 
 import com.google.gson.annotations.SerializedName
 
 data class ValidChunks(
-    @SerializedName("number_of_expected_chunks")
-    val expectedChunksCount: Int,
-    @SerializedName("size_to_upload")
-    val sizeToUpload: Long,
-    @SerializedName("uploaded_chunk_count")
-    val uploadedChunkCount: Int,
+    @SerializedName("expected_chunks")
+	val expectedChunksCount: Int,
+    @SerializedName("uploading_chunks")
+	val uploadedChunkCount: Int,
+    @SerializedName("failed_chunks")
+	val failedChunks: Long,
+    @SerializedName("expected_size")
+	val expectedSize: Long,
     @SerializedName("uploaded_size")
-    val uploadedSize: Long,
-    @SerializedName("valid_chunks")
-    val validChunks: ArrayList<Int>
-)
+	val uploadedSize: Long,
+    val chunks: ArrayList<UploadSegment>
+) {
+    inline val validChunksIds get() = chunks.map { it.number }
+}
+}
