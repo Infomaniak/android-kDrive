@@ -45,7 +45,7 @@ open class UploadFile(
     var fileModifiedAt: Date = Date(),
     var fileName: String = "",
     var fileSize: Long = 0L,
-    var identifier: String = UUID.randomUUID().toString(),
+    var uploadToken: String? = null,
     var remoteFolder: Int = -1,
     var remoteSubFolder: String? = null,
     var type: String = Type.SYNC.name,
@@ -81,10 +81,10 @@ open class UploadFile(
 
     fun replaceOnConflict() = isSync() || isSyncOffline() || isCloudStorage()
 
-    fun refreshIdentifier() {
+    fun resetUploadToken() {
         getRealmInstance().use { realm ->
             syncFileByUriQuery(realm, uri).findFirst()?.apply {
-                realm.executeTransaction { identifier = UUID.randomUUID().toString() }
+                realm.executeTransaction { uploadToken = null }
             }
         }
     }

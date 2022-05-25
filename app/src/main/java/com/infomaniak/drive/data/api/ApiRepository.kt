@@ -23,9 +23,10 @@ import com.infomaniak.drive.data.api.ApiRoutes.activitiesWithQuery
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
-import com.infomaniak.drive.data.models.upload.UploadSegment
+import com.infomaniak.drive.data.models.upload.UploadSegment.ChunkStatus
 import com.infomaniak.drive.data.models.upload.UploadSession
-import com.infomaniak.drive.data.models.upload.UploadSession.*
+import com.infomaniak.drive.data.models.upload.UploadSession.StartSessionBody
+import com.infomaniak.drive.data.models.upload.UploadSession.StartUploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.lib.core.api.ApiRepositoryCore
 import com.infomaniak.lib.core.models.ApiResponse
@@ -121,8 +122,8 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(url, GET)
     }
 
-    fun getUploadSegments(driveId: Int, uploadToken: String): ApiResponse<List<UploadSegment>> {
-        return callApi(ApiRoutes.getSession(driveId, uploadToken), GET)
+    fun getValidChunks(driveId: Int, uploadToken: String): ApiResponse<ValidChunks> {
+        return callApi("${ApiRoutes.getSession(driveId, uploadToken)}?status[]=${ChunkStatus.OK}&with=chunks", GET)
     }
 
     fun startUploadSession(driveId: Int, body: StartSessionBody): ApiResponse<StartUploadSession> {

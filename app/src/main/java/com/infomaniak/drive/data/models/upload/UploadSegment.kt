@@ -21,10 +21,24 @@ import com.google.gson.annotations.SerializedName
 import java.util.*
 
 data class UploadSegment(
-    @SerializedName("chunk_number") val chunkNumber: Int,
-    val status: String,
+    val number: Int,
+    val status: ChunkStatus,
     @SerializedName("created_at") val createdAt: Date,
     val size: Long,
     /** Chunk uploaded md5 hash, computed */
     val hash: String
-)
+) {
+
+    enum class ChunkStatus {
+        @SerializedName("error")
+        ERROR,
+
+        @SerializedName("ok")
+        OK,
+
+        @SerializedName("uploading")
+        UPLOADING;
+
+        override fun toString() = name.lowercase()
+    }
+}

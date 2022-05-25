@@ -28,23 +28,23 @@ open class UploadSession(
     open val message: String? = null
 ) {
 
-    data class StartUploadSession(
+    class StartUploadSession(
         @SerializedName("directory_id") val directoryId: Long?,
         @SerializedName("directory_path") val directoryPath: String?,
         @SerializedName("file_name") val fileName: String?,
-        override val file: File,
-        override val token: String,
-        override val isSuccess: Boolean,
-        override val message: String? = null
+        file: File,
+        token: String,
+        isSuccess: Boolean,
+        message: String? = null
     ) : UploadSession(file, token, isSuccess, message)
 
     data class StartSessionBody(
         val conflict: UploadTask.Companion.ConflictOption,
-        @SerializedName("created_at") val createdAt: Long,
-        @SerializedName("directory_id") val directoryId: Long,
+        @SerializedName("created_at") val createdAt: Long?,
+        @SerializedName("directory_id") val directoryId: Int,
         @SerializedName("directory_path") val subDirectoryPath: String,
         @SerializedName("file_name") val fileName: String,
-        @SerializedName("last_modified_at") val lastModifiedAt: String,
+        @SerializedName("last_modified_at") val lastModifiedAt: Long,
         @SerializedName("total_chunks") val totalChunks: Int,
         @SerializedName("total_size") val totalSize: Long,
     )
