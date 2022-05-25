@@ -23,6 +23,10 @@ import com.infomaniak.drive.data.api.ApiRoutes.activitiesWithQuery
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
+import com.infomaniak.drive.data.models.upload.UploadSegment
+import com.infomaniak.drive.data.models.upload.UploadSession
+import com.infomaniak.drive.data.models.upload.UploadSession.*
+import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.lib.core.api.ApiRepositoryCore
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
@@ -115,6 +119,22 @@ object ApiRepository : ApiRepositoryCore() {
         val type = ExtensionType.IMAGE.value
         val url = "${ApiRoutes.searchFiles(driveId, File.SortType.RECENT)}&type=$type&${pagination(page)}"
         return callApi(url, GET)
+    }
+
+    fun getUploadSegments(driveId: Int, uploadToken: String): ApiResponse<List<UploadSegment>> {
+        return callApi(ApiRoutes.getSession(driveId, uploadToken), GET)
+    }
+
+    fun startUploadSession(driveId: Int, body: StartSessionBody): ApiResponse<StartUploadSession> {
+        return callApi(ApiRoutes.startUploadSession(driveId), POST, body)
+    }
+
+    fun finishSession(driveId: Int, uploadToken: String): ApiResponse<UploadSession> {
+        return callApi(ApiRoutes.closeSession(driveId, uploadToken), POST)
+    }
+
+    fun cancelSession(driveId: Int, uploadToken: String): ApiResponse<Boolean> {
+        return callApi(ApiRoutes.getSession(driveId, uploadToken), DELETE)
     }
 
     fun getValidChunks(driveId: Int, folderId: Int, uploadIdentifier: String): ApiResponse<ValidChunks> {
