@@ -291,7 +291,14 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             } else {
                 ""
             }
-            customSelection = "$selection AND $IMAGES_BUCKET_ID = ? $isNotPending"
+
+            var isNotTrashed = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                "AND ${MediaStore.Images.Media.IS_TRASHED} = 0"
+            } else {
+                ""
+            }
+
+            customSelection = "$selection AND $IMAGES_BUCKET_ID = ? $isNotPending $isNotTrashed"
             customArgs = args + mediaFolder.id.toString()
 
             val getLastImagesOperation = getLocalLastMediasAsync(
@@ -309,7 +316,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 } else {
                     ""
                 }
-                customSelection = "$selection AND $VIDEO_BUCKET_ID = ? $isNotPending"
+                isNotTrashed = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    "AND ${MediaStore.Video.Media.IS_TRASHED} = 0"
+                } else {
+                    ""
+                }
+                customSelection = "$selection AND $VIDEO_BUCKET_ID = ? $isNotPending $isNotTrashed"
 
                 val getLastVideosOperation = getLocalLastMediasAsync(
                     syncSettings = syncSettings,
