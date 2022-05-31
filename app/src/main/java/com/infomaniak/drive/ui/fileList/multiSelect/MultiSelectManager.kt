@@ -57,7 +57,8 @@ class MultiSelectManager {
         }
     }
 
-    fun isSelectedFile(file: File): Boolean = file.isUsable() && selectedItemsIds.contains(file.id)
+    fun isSelectedFile(file: File): Boolean =
+        file.isUsable() && ((selectedItemsIds.contains(file.id) && !isSelectAllOn) || (!exceptedItemsIds.contains(file.id) && isSelectAllOn))
 
     fun performCancellableBulkOperation(bulkOperation: BulkOperation): LiveData<ApiResponse<CancellableAction>> {
         return liveData(Dispatchers.IO) { emit(ApiRepository.performCancellableBulkOperation(bulkOperation)) }
