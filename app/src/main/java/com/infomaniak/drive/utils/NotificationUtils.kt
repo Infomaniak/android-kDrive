@@ -32,6 +32,7 @@ object NotificationUtils {
     const val UPLOAD_STATUS_ID = 2
     const val CURRENT_UPLOAD_ID = 3
     const val FILE_OBSERVE_ID = 4
+    const val UPLOAD_FAILED_ID = 5
 
     const val ELAPSED_TIME = 500L
 

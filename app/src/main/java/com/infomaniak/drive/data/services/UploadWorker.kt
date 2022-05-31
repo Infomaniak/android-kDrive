@@ -39,6 +39,7 @@ import com.infomaniak.drive.data.services.UploadWorkerThrowable.runUploadCatchin
 import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.data.sync.UploadNotifications.exceptionNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.setupCurrentUploadNotification
+import com.infomaniak.drive.data.sync.UploadNotifications.showFailedFilesNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.syncSettingsActivityPendingIntent
 import com.infomaniak.drive.utils.*
@@ -62,6 +63,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     var currentUploadFile: UploadFile? = null
     var currentUploadTask: UploadTask? = null
     var uploadedCount = 0
+    var failedFiles = mutableSetOf<String>()
 
     override suspend fun doWork(): Result {
 
@@ -129,6 +131,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     private suspend fun startSyncFiles(): Result = withContext(Dispatchers.IO) {
         val uploadFiles = UploadFile.getAllPendingUploads()
         val lastUploadedCount = inputData.getInt(LAST_UPLOADED_COUNT, 0)
+        failedFiles = inputData.getStringArray(LAST_FAILED_SET)?.toMutableSet() ?: mutableSetOf()
         var pendingCount = uploadFiles.size
         var successCount = 0
 
@@ -139,28 +142,50 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         for (uploadFile in uploadFiles) {
             Log.d(TAG, "startSyncFiles> upload ${uploadFile.fileName}")
             if (uploadFile.initUpload(pendingCount)) successCount++
+            else {
+                failedFiles.add(uploadFile.uri)
+                Log.e("gibran", "startSyncFiles - The value errorCount++ for file: ${uploadFile.fileName}")
+                Log.e("gibran", "startSyncFiles - The value failedFiles is: ${failedFiles} with count ${failedFiles.count()}")
+            }
             pendingCount--
 
             if (uploadFile.isSync() && UploadFile.getAllPendingPriorityFilesCount() > 0) break
         }
 
         uploadedCount = successCount + lastUploadedCount
+        val failedCount = failedFiles.count()
+
+        Log.e("gibran", "startSyncFiles: ====");
+        Log.e("gibran", "startSyncFiles - The value uploadFiles.count() is: ${uploadFiles.count()}")
+        Log.e("gibran", "startSyncFiles - The value uploadedCount is: ${uploadedCount}")
+        Log.e("gibran", "startSyncFiles - The value successCount is: ${successCount}")
+        Log.e("gibran", "startSyncFiles - The value lastUploadedCount is: ${lastUploadedCount}")
+        Log.e("gibran", "startSyncFiles - The value failedCount is: ${failedCount}")
 
         Log.d(TAG, "startSyncFiles: finish with $uploadedCount uploaded")
 
-        if (uploadedCount > 0) {
-            currentUploadFile?.showUploadedFilesNotification(applicationContext, uploadedCount)
-            Result.success()
-        } else {
+        if (uploadedCount == 0) {
             currentUploadFile?.exceptionNotification(applicationContext)
             Result.failure()
+        } else {
+            currentUploadFile?.showUploadedFilesNotification(applicationContext, uploadedCount)
+            if (failedCount > 0) {
+                Log.e("gibran", "startSyncFiles: showing failed notif with amount: $failedCount");
+                currentUploadFile?.showFailedFilesNotification(applicationContext, failedCount)
+                Result.failure()
+            } else {
+                Result.success()
+            }
         }
     }
 
     private suspend fun checkIfNeedReSync(syncSettings: SyncSettings?) {
         syncSettings?.let { checkLocalLastMedias(it) }
         if (UploadFile.getAllPendingUploadsCount() > 0) {
-            val data = Data.Builder().putInt(LAST_UPLOADED_COUNT, uploadedCount).build()
+            val data = Data.Builder()
+                .putInt(LAST_UPLOADED_COUNT, uploadedCount)
+                .putStringArray(LAST_FAILED_SET, failedFiles.toTypedArray())
+                .build()
             applicationContext.syncImmediately(data, true)
         }
     }
@@ -418,6 +443,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         const val UPLOAD_FOLDER = "upload_folder"
 
         private const val LAST_UPLOADED_COUNT = "last_uploaded_count"
+        private const val LAST_FAILED_SET = "last_failed_set"
 
         private const val MAX_RETRY_COUNT = 3
         private const val CHECK_LOCAL_LAST_MEDIAS_DELAY = 10_000L // 10s (in ms)

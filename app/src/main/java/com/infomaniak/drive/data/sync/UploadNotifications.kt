@@ -26,6 +26,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.menu.settings.SyncSettingsActivity
@@ -124,6 +125,16 @@ object UploadNotifications {
             context = context,
             titleRes = R.string.uploadErrorTitle,
             messageRes = R.string.anErrorHasOccurred
+        )
+    }
+
+    fun UploadFile.showFailedFilesNotification(context: Context, failedCount: Int) {
+        showNotification(
+            context = context,
+            title = context.getString(R.string.uploadErrorTitle),
+            description = "Bip Bop - Error $failedCount file(s)",
+            notificationId = NotificationUtils.UPLOAD_FAILED_ID,
+            contentIntent = progressPendingIntent(context)
         )
     }
 

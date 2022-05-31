@@ -23,6 +23,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.DocumentsContract
 import android.provider.MediaStore
+import android.util.Log
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -149,6 +150,7 @@ open class UploadFile(
                 driveIds?.let { oneOf(UploadFile::driveId.name, it) }
                 isNull(UploadFile::uploadAt.name)
                 isNull(UploadFile::deletedAt.name)
+                Log.e("gibran", "pendingUploadsQuery - The value count() is: ${count()}")
             }
         }
 
@@ -200,7 +202,9 @@ open class UploadFile(
 
         fun getCurrentUserPendingUploadsCount(folderId: Int? = null): Int {
             return getRealmInstance().use { realm ->
-                pendingUploadsQuery(realm, folderId, true, driveIds = currentDriveAndSharedWithMeIds()).count().toInt()
+                val pendingUploadsQuery = pendingUploadsQuery(realm, folderId, true, driveIds = currentDriveAndSharedWithMeIds())
+                Log.e("gibran", "getCurrentUserPendingUploadsCount - The value pendingUploadsQuery.findAll() is: ${pendingUploadsQuery.findAll().map { it.fileName }}")
+                pendingUploadsQuery.count().toInt()
             }
         }
 
