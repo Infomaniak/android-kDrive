@@ -118,7 +118,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                     sharePublicLink.isEnabled = publicLinkEnabled
                     disabledPublicLink.isGone = publicLinkEnabled
                     if (!file.collaborativeFolder.isNullOrBlank()) {
-                        copyPublicLinkText.text = context.getString(R.string.buttonCopyLink)
+                        sharePublicLinkText.text = context.getString(R.string.buttonShareDropboxLink)
                     }
                 }
 
@@ -311,7 +311,7 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     private fun showCopyPublicLinkLoader(show: Boolean) {
-        copyPublicLinkLayout.isGone = show
+        sharePublicLinkLayout.isGone = show
         copyPublicLinkLoader.isVisible = show
     }
 
@@ -380,7 +380,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         addFavorites.isEnabled = true
         addFavoritesIcon.isEnabled = file.isFavorite
         addFavoritesText.setText(if (file.isFavorite) R.string.buttonRemoveFavorites else R.string.buttonAddFavorites)
-        copyPublicLinkText.setText(if (file.shareLink == null) R.string.buttonCreatePublicLink else R.string.buttonSharePublicLink)
+        sharePublicLinkText.setText(if (file.shareLink == null) R.string.buttonCreatePublicLink else R.string.buttonSharePublicLink)
 
         when {
             isPendingOffline && file.currentProgress in 0..99 -> {
