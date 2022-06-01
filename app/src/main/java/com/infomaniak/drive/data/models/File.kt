@@ -101,6 +101,8 @@ open class File(
     var type: String = "file",
     var users: @WriteWith<IntRealmListParceler> RealmList<Int> = RealmList(),
     var visibility: String = "",
+    @SerializedName("added_at")
+    var addedAt: Long = 0L,
     var categories: @RawValue RealmList<FileCategory> = RealmList(),
 
     var responseAt: Long = 0,
@@ -393,6 +395,8 @@ open class File(
         NAME_ZA("desc", "files.path", R.string.sortNameZA),
         OLDER("asc", "last_modified_at", R.string.sortOlder),
         RECENT("desc", "last_modified_at", R.string.sortRecent),
+        OLDEST_ADDED("asc", "added_at", R.string.sortOldestAdded),
+        MOST_RECENT_ADDED("desc", "added_at", R.string.sortMostRecentAdded),
         OLDER_TRASHED("asc", "deleted_at", R.string.sortOlder),
         RECENT_TRASHED("desc", "deleted_at", R.string.sortRecent),
         SMALLER("asc", "files.size", R.string.sortSmaller),

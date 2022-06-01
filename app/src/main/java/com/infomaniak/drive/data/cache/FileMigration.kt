@@ -32,7 +32,7 @@ import java.util.*
 
 class FileMigration : RealmMigration {
     companion object {
-        const val bddVersion = 3L // Must be bumped when the schema changes
+        const val bddVersion = 4L // Must be bumped when the schema changes
 
         const val LOGOUT_CURRENT_USER_TAG = "logout_current_user_tag"
     }
@@ -124,6 +124,15 @@ class FileMigration : RealmMigration {
             schema.get(File::class.java.simpleName)?.apply {
                 addField("_color", String::class.java)
                 addField("versionCode", Int::class.java)
+            }
+            oldVersionTemp++
+        }
+
+        // Migrated to version 4:
+        // - Added new field (Added at) in File table
+        if (oldVersionTemp == 3L) {
+            schema.get(File::class.java.simpleName)?.apply {
+                addField("addedAt", Long::class.java)
             }
             oldVersionTemp++
         }

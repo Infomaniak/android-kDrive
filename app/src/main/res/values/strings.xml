@@ -642,9 +642,11 @@
     <string name="sortDay">Per day</string>
     <string name="sortExtension">Extension</string>
     <string name="sortMonth">Per month</string>
+    <string name="sortMostRecentAdded">Most recently added</string>
     <string name="sortNameAZ">Name: from A to Z</string>
     <string name="sortNameZA">Name: from Z to A</string>
     <string name="sortOlder">Older</string>
+    <string name="sortOldestAdded">Oldest added</string>
     <string name="sortRecent">Newer</string>
     <string name="sortSmaller">Smaller</string>
     <string name="sortTitle">Sort</string>
