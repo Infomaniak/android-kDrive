@@ -270,13 +270,11 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- TODO We are waiting for the production -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/formCreate"
         android:layout_width="match_parent"
         android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground"
-        android:visibility="gone">
+        android:background="?selectableItemBackground">
 
         <ImageView
             android:id="@+id/formCreateIcon"
