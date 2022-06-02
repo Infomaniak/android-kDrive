@@ -63,12 +63,14 @@ object FileController {
 
     private val minDateToIgnoreCache = Calendar.getInstance().apply { add(Calendar.MONTH, -2) }.timeInMillis / 1000 // 3 month
 
-    private fun getFileById(realm: Realm, fileId: Int): File? {
-        return realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst() ?: let {
-            var folderProxy: File? = null
-            realm.executeTransaction { folderProxy = if (fileId == ROOT_ID) realm.copyToRealm(ROOT_FILE) else null }
-            folderProxy
+    private fun initRootFolderIfNeeded(realm: Realm) {
+        if (getFileById(realm, ROOT_ID) == null) {
+            realm.executeTransaction { realm.copyToRealm(ROOT_FILE) }
         }
+    }
+
+    private fun getFileById(realm: Realm, fileId: Int): File? {
+        return realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst()
     }
 
     // https://github.com/realm/realm-java/issues/1862
@@ -595,6 +597,8 @@ object FileController {
         }
 
         val operation: (Realm) -> Pair<File, ArrayList<File>>? = { realm ->
+            if (parentId == ROOT_ID) initRootFolderIfNeeded(realm)
+
             var result: Pair<File, ArrayList<File>>? = null
             val folderProxy = getFileById(realm, parentId)
             val localFolderWithoutChildren = folderProxy?.let { realm.copyFromRealm(it, 1) }
