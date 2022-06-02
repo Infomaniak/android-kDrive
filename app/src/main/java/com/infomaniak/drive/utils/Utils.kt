@@ -214,13 +214,13 @@ object Utils {
         clipboard?.setPrimaryClip(ClipData.newPlainText(text, text))
     }
 
-    fun Context.moveFileClicked(currentFolderId: Int?, selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
+    fun Context.moveFileClicked(disabledFolderId: Int?, selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
         Intent(this, SelectFolderActivity::class.java).apply {
             putExtras(
                 SelectFolderActivityArgs(
                     userId = AccountUtils.currentUserId,
                     userDriveId = AccountUtils.currentDriveId,
-                    currentFolderId = currentFolderId ?: -1,
+                    disabledFolderId = disabledFolderId ?: -1,
                     customArgs = bundleOf(SelectFolderActivity.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE)
                 ).toBundle()
             )

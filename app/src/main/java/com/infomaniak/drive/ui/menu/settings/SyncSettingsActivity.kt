@@ -149,7 +149,7 @@ class SyncSettingsActivity : BaseActivity() {
                     SelectFolderActivityArgs(
                         userId = selectDriveViewModel.selectedUserId.value!!,
                         userDriveId = selectDriveViewModel.selectedDrive.value?.id!!,
-                        currentFolderId = Utils.ROOT_ID,
+                        disabledFolderId = Utils.ROOT_ID,
                     ).toBundle()
                 )
                 selectFolderResultLauncher.launch(this)

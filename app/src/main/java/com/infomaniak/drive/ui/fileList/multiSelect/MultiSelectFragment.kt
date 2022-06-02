@@ -176,8 +176,8 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         ).toBundle()
     }
 
-    fun moveFiles(folderId: Int?) {
-        requireContext().moveFileClicked(folderId, selectFolderResultLauncher)
+    fun moveFiles(disabledFolderId: Int?) {
+        requireContext().moveFileClicked(disabledFolderId, selectFolderResultLauncher)
     }
 
     fun deleteFiles(allSelectedFilesCount: Int? = null) {
