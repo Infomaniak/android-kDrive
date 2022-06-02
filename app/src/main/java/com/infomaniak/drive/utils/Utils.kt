@@ -190,7 +190,7 @@ object Utils {
         navController: NavController,
         selectedFile: File,
         fileList: ArrayList<File>,
-        isSharedWithMe: Boolean = false
+        isSharedWithMe: Boolean = false,
     ) {
         mainViewModel.currentPreviewFileList = fileList.associateBy { it.id } as LinkedHashMap<Int, File>
         val bundle = PreviewSliderFragmentArgs(
