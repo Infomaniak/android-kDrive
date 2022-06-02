@@ -208,10 +208,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 val size = descriptorSize?.let { if (mediaSize > it) mediaSize else it } ?: mediaSize // TODO Temporary solution
                 startUploadFile(size)
             } else {
-                UploadFile.deleteIfExists(uri)
-                false
+                null
             }
-        } ?: false
+        } ?: run {
+            UploadFile.deleteIfExists(uri)
+            false
+        }
     }
 
     private suspend fun UploadFile.startUploadFile(size: Long): Boolean {
