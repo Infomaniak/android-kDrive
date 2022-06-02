@@ -288,12 +288,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             Log.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.name}_${mediaFolder.id}")
 
             // Sync media folder
-            var isNotPending = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                "AND ${MediaStore.Images.Media.IS_PENDING} = 0"
-            } else {
-                ""
-            }
-            customSelection = "$selection AND $IMAGES_BUCKET_ID = ? $isNotPending"
+            customSelection = "$selection AND $IMAGES_BUCKET_ID = ? ${moreCustomConditions()}"
             customArgs = args + mediaFolder.id.toString()
 
             val getLastImagesOperation = getLocalLastMediasAsync(
@@ -306,12 +301,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             jobs.add(getLastImagesOperation)
 
             if (syncSettings.syncVideo) {
-                isNotPending = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    "AND ${MediaStore.Video.Media.IS_PENDING} = 0"
-                } else {
-                    ""
-                }
-                customSelection = "$selection AND $VIDEO_BUCKET_ID = ? $isNotPending"
+                customSelection = "$selection AND $VIDEO_BUCKET_ID = ? ${moreCustomConditions()}"
 
                 val getLastVideosOperation = getLocalLastMediasAsync(
                     syncSettings = syncSettings,
@@ -325,6 +315,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
 
         jobs.joinAll()
+    }
+
+    private fun moreCustomConditions(): String = when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> "AND ${MediaStore.MediaColumns.IS_PENDING} = 0 AND ${MediaStore.MediaColumns.IS_TRASHED} = 0"
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> "AND ${MediaStore.MediaColumns.IS_PENDING} = 0"
+        else -> ""
     }
 
     private fun CoroutineScope.updateUploadCountNotification(uploadFile: UploadFile, pendingCount: Int) {
