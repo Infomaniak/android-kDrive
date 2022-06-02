@@ -204,13 +204,22 @@ open class UploadFile(
             }
         }
 
-        fun update(uri: String, transaction: (uploadFile: UploadFile) -> Unit): Boolean {
+        fun UploadFile.updateFileSize(newFileSize: Long) {
             getRealmInstance().use { realm ->
-                return syncFileByUriQuery(realm, uri).findFirst()?.let { uploadFile ->
-                    realm.executeTransaction { transaction(uploadFile) }
-                    true
-                } ?: false
+                syncFileByUriQuery(realm, uri).findFirst()?.let { uploadFile ->
+                    realm.executeTransaction { uploadFile.fileSize = newFileSize }
+                }
             }
+            fileSize = newFileSize
+        }
+
+        fun UploadFile.updateUploadToken(newUploadToken: String) {
+            getRealmInstance().use { realm ->
+                syncFileByUriQuery(realm, uri).findFirst()?.let { uploadFile ->
+                    realm.executeTransaction { uploadFile.uploadToken = newUploadToken }
+                }
+            }
+            uploadToken = newUploadToken
         }
 
         fun getLastDate(context: Context): Date {

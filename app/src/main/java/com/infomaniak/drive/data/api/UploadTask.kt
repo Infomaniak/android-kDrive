@@ -28,6 +28,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.models.UploadFile.Companion.updateUploadToken
 import com.infomaniak.drive.data.models.upload.UploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.data.services.UploadWorker
@@ -358,8 +359,7 @@ class UploadTask(
         )
 
         with(ApiRepository.startUploadSession(driveId, sessionBody)) {
-            uploadFile.uploadToken = data?.token
-            if (isSuccess()) UploadFile.update(uri) { it.uploadToken = data?.token }
+            if (isSuccess()) data?.token?.let { uploadFile.updateUploadToken(it) }
             else manageUploadErrors()
         }
     }
