@@ -191,15 +191,13 @@ object Utils {
         selectedFile: File,
         fileList: ArrayList<File>,
         isSharedWithMe: Boolean = false,
-        isFromFileList: Boolean = false
     ) {
         mainViewModel.currentPreviewFileList = fileList.associateBy { it.id } as LinkedHashMap<Int, File>
         val bundle = PreviewSliderFragmentArgs(
             fileId = selectedFile.id,
             driveId = selectedFile.driveId,
             isSharedWithMe = isSharedWithMe,
-            hideActions = selectedFile.isFromActivities,
-            shouldDeleteMovedFiles = isFromFileList
+            hideActions = selectedFile.isFromActivities
         ).toBundle()
         val navOptions = NavOptions.Builder()
             .setEnterAnim(R.anim.fragment_open_enter)
