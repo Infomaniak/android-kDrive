@@ -384,11 +384,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { apiResponse ->
             onApiResponse()
             if (apiResponse.isSuccess()) {
-                if (previewSliderAdapter.deleteFile(currentFile)) {
-                    findNavController().popBackStack()
-                } else {
-                    toggleBottomSheet(true)
-                }
+                removeFileInSlider()
                 mainViewModel.currentPreviewFileList.remove(currentFile.id)
                 showSnackbar(R.string.snackbarLeaveShareConfirmation)
             } else {
@@ -449,11 +445,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             onApiResponse()
             if (apiResponse.isSuccess()) {
                 mainViewModel.currentPreviewFileList.remove(currentFile.id)
-                if (previewSliderAdapter.deleteFile(currentFile)) {
-                    findNavController().popBackStack()
-                } else {
-                    toggleBottomSheet(true)
-                }
+                removeFileInSlider()
                 val title = resources.getQuantityString(
                     R.plurals.snackbarMoveTrashConfirmation,
                     1,
@@ -489,12 +481,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 if (apiResponse.isSuccess()) {
                     if (findNavController().previousBackStackEntry?.destination?.id == R.id.fileListFragment) {
                         mainViewModel.currentPreviewFileList.remove(currentFile.id)
-                        if (previewSliderAdapter.deleteFile(currentFile)) {
-                            // Closes bottom sheet of the moved file
-                            findNavController().popBackStack()
-                        } else {
-                            toggleBottomSheet(true)
-                        }
+                        removeFileInSlider()
                     }
                     mainViewModel.refreshActivities.value = true
                     showSnackbar(getString(R.string.allFileMove, currentFile.name, destinationFolder.name))
@@ -502,6 +489,14 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                     showSnackbar(R.string.errorMove)
                 }
             }
+    }
+
+    private fun removeFileInSlider() {
+        if (previewSliderAdapter.deleteFile(currentFile)) {
+            findNavController().popBackStack()
+        } else {
+            toggleBottomSheet(true)
+        }
     }
 
     companion object {
