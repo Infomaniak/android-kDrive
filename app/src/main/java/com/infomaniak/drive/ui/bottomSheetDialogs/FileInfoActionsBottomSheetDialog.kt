@@ -188,8 +188,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun sharePublicLink() {
         super.sharePublicLink()
-        fileInfoActionsView.createPublicCopyLink(onSuccess = {
-            it?.shareLink?.let { shareLink -> context?.shareText(shareLink) }
+        fileInfoActionsView.createPublicShareLink(onSuccess = {
+            context?.shareText(it)
             findNavController().popBackStack()
         }, onError = { translatedError -> showSnackbar(translatedError, true) })
     }

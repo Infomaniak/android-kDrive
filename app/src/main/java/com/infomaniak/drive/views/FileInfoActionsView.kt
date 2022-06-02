@@ -274,13 +274,13 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
     }
 
-    fun createPublicCopyLink(onSuccess: ((file: File?) -> Unit)? = null, onError: ((translatedError: String) -> Unit)? = null) {
+    fun createPublicShareLink(onSuccess: ((shareLink: String) -> Unit)? = null, onError: ((translatedError: String) -> Unit)? = null) {
         when {
             currentFile.collaborativeFolder != null -> {
-                onSuccess?.invoke(currentFile)
+                onSuccess?.invoke(currentFile.collaborativeFolder!!)
             }
             currentFile.shareLink != null -> {
-                onSuccess?.invoke(currentFile)
+                onSuccess?.invoke(currentFile.shareLink!!)
             }
             else -> {
                 showCopyPublicLinkLoader(true)
@@ -289,7 +289,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                         postShareResponse?.isSuccess() == true -> {
                             postShareResponse.data?.url?.let { url ->
                                 updateFilePublicLink(url)
-                                onSuccess?.invoke(currentFile)
+                                onSuccess?.invoke(currentFile.shareLink!!)
                             }
                         }
                         else -> {
