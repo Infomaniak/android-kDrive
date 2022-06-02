@@ -385,7 +385,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             onApiResponse()
             if (apiResponse.isSuccess()) {
                 removeFileInSlider()
-                mainViewModel.currentPreviewFileList.remove(currentFile.id)
                 showSnackbar(R.string.snackbarLeaveShareConfirmation)
             } else {
                 showSnackbar(apiResponse.translatedError)
@@ -444,7 +443,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { apiResponse ->
             onApiResponse()
             if (apiResponse.isSuccess()) {
-                mainViewModel.currentPreviewFileList.remove(currentFile.id)
                 removeFileInSlider()
                 val title = resources.getQuantityString(
                     R.plurals.snackbarMoveTrashConfirmation,
@@ -479,10 +477,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         mainViewModel.moveFile(currentFile, destinationFolder)
             .observe(viewLifecycleOwner) { apiResponse ->
                 if (apiResponse.isSuccess()) {
-                    if (findNavController().previousBackStackEntry?.destination?.id == R.id.fileListFragment) {
-                        mainViewModel.currentPreviewFileList.remove(currentFile.id)
-                        removeFileInSlider()
-                    }
+                    // Because if we are on the favorite view we do not want to remove it for example
+                    if (findNavController().previousBackStackEntry?.destination?.id == R.id.fileListFragment) removeFileInSlider()
                     mainViewModel.refreshActivities.value = true
                     showSnackbar(getString(R.string.allFileMove, currentFile.name, destinationFolder.name))
                 } else {
@@ -492,6 +488,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     private fun removeFileInSlider() {
+        mainViewModel.currentPreviewFileList.remove(currentFile.id)
         if (previewSliderAdapter.deleteFile(currentFile)) {
             findNavController().popBackStack()
         } else {
