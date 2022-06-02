@@ -286,7 +286,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             Log.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.name}_${mediaFolder.id}")
 
             // Sync media folder
-            customSelection = "$selection AND $IMAGES_BUCKET_ID = ? ${getConditions()}"
+            customSelection = "$selection AND $IMAGES_BUCKET_ID = ? ${moreCustomConditions()}"
             customArgs = args + mediaFolder.id.toString()
 
             val getLastImagesOperation = getLocalLastMediasAsync(
@@ -299,7 +299,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             jobs.add(getLastImagesOperation)
 
             if (syncSettings.syncVideo) {
-                customSelection = "$selection AND $VIDEO_BUCKET_ID = ? ${getConditions()}"
+                customSelection = "$selection AND $VIDEO_BUCKET_ID = ? ${moreCustomConditions()}"
 
                 val getLastVideosOperation = getLocalLastMediasAsync(
                     syncSettings = syncSettings,
@@ -315,7 +315,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         jobs.joinAll()
     }
 
-    private fun getConditions(): String = when {
+    private fun moreCustomConditions(): String = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> "AND ${MediaStore.MediaColumns.IS_PENDING} = 0 AND ${MediaStore.Images.Media.IS_TRASHED} = 0"
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> "AND ${MediaStore.MediaColumns.IS_PENDING} = 0"
         else -> ""
