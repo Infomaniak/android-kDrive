@@ -214,7 +214,8 @@ object Utils {
         clipboard?.setPrimaryClip(ClipData.newPlainText(text, text))
     }
 
-    fun Context.moveFileClicked(disabledFolderId: Int?, selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
+    fun Context.moveFileClicked(disabledFolderId: Int?, selectFolderResultLauncher: ActivityResultLauncher<Intent>, mainViewModel: MainViewModel) {
+        mainViewModel.ignoreSyncOffline = true
         Intent(this, SelectFolderActivity::class.java).apply {
             putExtras(
                 SelectFolderActivityArgs(

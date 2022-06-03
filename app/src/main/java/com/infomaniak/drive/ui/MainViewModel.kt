@@ -66,6 +66,8 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     val updateOfflineFile = SingleLiveEvent<FileId>()
     val updateVisibleFiles = MutableLiveData<Boolean>()
 
+    var ignoreSyncOffline = false
+
     private var getFileDetailsJob = Job()
     private var syncOfflineFilesJob = Job()
 
@@ -208,10 +210,15 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         val apiResponse = ApiRepository.moveFile(file, newParent)
         if (apiResponse.isSuccess()) {
             FileController.getRealmInstance().use { realm ->
-                file.getStoredFile(getContext())?.let { if (it.exists()) it.delete() }
+                file.getStoredFile(getContext())?.let { ioFile ->
+                    if (ioFile.exists()) {
+                        if (file.isOffline) ioFile.renameTo(java.io.File("${newParent.getRemotePath()}/${file.name}"))
+                        else ioFile.delete()
+                    }
+                }
+
                 FileController.removeFile(file.id, recursive = false, customRealm = realm)
                 FileController.updateFile(newParent.id, realm) { localFolder ->
-                    file.isOffline = false
                     // Ignore expired transactions when it's suspended
                     // In case the phone is slow or in standby, the transaction can create an IllegalStateException
                     // because realm will not be available anymore, the transaction is resumed afterwards

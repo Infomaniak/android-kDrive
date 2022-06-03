@@ -240,7 +240,9 @@ class MainActivity : BaseActivity() {
         }
 
         launchAllUpload(drivePermissions)
-        launchSyncOffline()
+
+        if (!mainViewModel.ignoreSyncOffline) launchSyncOffline()
+        else mainViewModel.ignoreSyncOffline = false
 
         AppSettings.appLaunches++
 
