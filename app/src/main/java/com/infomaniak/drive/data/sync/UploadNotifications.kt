@@ -26,7 +26,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.UploadFile
-import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.menu.settings.SyncSettingsActivity
@@ -128,28 +127,24 @@ object UploadNotifications {
         )
     }
 
-    fun UploadFile.showFailedFilesNotification(context: Context, failedCount: Int) {
+    fun UploadFile.showUploadedFilesNotification(context: Context, uploadedCount: Int, failedCount: Int) {
+        val description = arrayListOf<String>().apply {
+            if (uploadedCount > 0) add(generateDescription(context, R.plurals.allUploadFinishedDescription, uploadedCount))
+            if (failedCount > 0) add(generateDescription(context, R.plurals.importFailedDescription, failedCount))
+        }.joinToString(". ")
+        val titleResId = if (uploadedCount > 0) R.string.allUploadFinishedTitle else R.string.uploadErrorTitle
+
         showNotification(
             context = context,
-            title = context.getString(R.string.uploadErrorTitle),
-            description = "Bip Bop - Error $failedCount file(s)",
-            notificationId = NotificationUtils.UPLOAD_FAILED_ID,
+            title = context.getString(titleResId),
+            description = description,
+            notificationId = NotificationUtils.UPLOAD_STATUS_ID,
             contentIntent = progressPendingIntent(context)
         )
     }
 
-    fun UploadFile.showUploadedFilesNotification(context: Context, uploadedFilesCount: Int) {
-        showNotification(
-            context = context,
-            title = context.getString(R.string.allUploadFinishedTitle),
-            description = context.resources.getQuantityString(
-                R.plurals.allUploadFinishedDescription,
-                uploadedFilesCount,
-                if (uploadedFilesCount == 1) this.fileName else uploadedFilesCount
-            ),
-            notificationId = NotificationUtils.UPLOAD_STATUS_ID,
-            contentIntent = progressPendingIntent(context)
-        )
+    private fun UploadFile.generateDescription(context: Context, resId: Int, count: Int): String {
+        return context.resources.getQuantityString(resId, count, if (count == 1) this.fileName else count)
     }
 
     fun showCancelledByUserNotification(context: Context) {

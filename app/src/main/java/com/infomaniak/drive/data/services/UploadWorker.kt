@@ -37,9 +37,7 @@ import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.UploadWorkerThrowable.runUploadCatching
 import com.infomaniak.drive.data.sync.UploadNotifications
-import com.infomaniak.drive.data.sync.UploadNotifications.exceptionNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.setupCurrentUploadNotification
-import com.infomaniak.drive.data.sync.UploadNotifications.showFailedFilesNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.syncSettingsActivityPendingIntent
 import com.infomaniak.drive.utils.*
@@ -141,12 +139,10 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         for (uploadFile in uploadFiles) {
             Log.d(TAG, "startSyncFiles> upload ${uploadFile.fileName}")
+
             if (uploadFile.initUpload(pendingCount)) successCount++
-            else {
-                failedFiles.add(uploadFile.uri)
-                Log.e("gibran", "startSyncFiles - The value errorCount++ for file: ${uploadFile.fileName}")
-                Log.e("gibran", "startSyncFiles - The value failedFiles is: ${failedFiles} with count ${failedFiles.count()}")
-            }
+            else failedFiles.add(uploadFile.uri)
+
             pendingCount--
 
             if (uploadFile.isSync() && UploadFile.getAllPendingPriorityFilesCount() > 0) break
@@ -155,28 +151,10 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         uploadedCount = successCount + lastUploadedCount
         val failedCount = failedFiles.count()
 
-        Log.e("gibran", "startSyncFiles: ====");
-        Log.e("gibran", "startSyncFiles - The value uploadFiles.count() is: ${uploadFiles.count()}")
-        Log.e("gibran", "startSyncFiles - The value uploadedCount is: ${uploadedCount}")
-        Log.e("gibran", "startSyncFiles - The value successCount is: ${successCount}")
-        Log.e("gibran", "startSyncFiles - The value lastUploadedCount is: ${lastUploadedCount}")
-        Log.e("gibran", "startSyncFiles - The value failedCount is: ${failedCount}")
-
         Log.d(TAG, "startSyncFiles: finish with $uploadedCount uploaded")
 
-        if (uploadedCount == 0) {
-            currentUploadFile?.exceptionNotification(applicationContext)
-            Result.failure()
-        } else {
-            currentUploadFile?.showUploadedFilesNotification(applicationContext, uploadedCount)
-            if (failedCount > 0) {
-                Log.e("gibran", "startSyncFiles: showing failed notif with amount: $failedCount");
-                currentUploadFile?.showFailedFilesNotification(applicationContext, failedCount)
-                Result.failure()
-            } else {
-                Result.success()
-            }
-        }
+        currentUploadFile?.showUploadedFilesNotification(applicationContext, uploadedCount, failedCount)
+        if (uploadedCount > 0) Result.success() else Result.failure()
     }
 
     private suspend fun checkIfNeedReSync(syncSettings: SyncSettings?) {

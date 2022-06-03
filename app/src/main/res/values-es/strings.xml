@@ -452,6 +452,10 @@
     <string name="homeNoPictures">Todavía no hay imágenes</string>
     <string name="homeSeeAllImages">Ver todas mis imágenes</string>
     <string name="homeTitle">Recepción</string>
+    <plurals name="importFailedDescription">
+        <item quantity="one">%1$s no pudo ser importado</item>
+        <item quantity="other">No se han podido importar %1$d archivos</item>
+    </plurals>
     <string name="inputExpirationDate">Fecha de caducidad</string>
     <string name="inputExpirationTime">Tiempo de expiración</string>
     <string name="lastEditsTitle">Últimas modificaciones</string>
