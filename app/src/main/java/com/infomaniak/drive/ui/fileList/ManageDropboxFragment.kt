@@ -111,11 +111,9 @@ open class ManageDropboxFragment : Fragment() {
             setupSwitches(dropBox)
 
             dropBox.limitFileSize?.let { size ->
-                val formattedSize = DecimalFormat(
-                    "0.##",
-                    DecimalFormatSymbols.getInstance(Locale.ENGLISH)
-                ).format(Utils.convertBytesToGigaBytes(size))
-                limitStorageValue.setText(formattedSize)
+                DecimalFormat("0.##", DecimalFormatSymbols.getInstance(Locale.ENGLISH))
+                    .format(Utils.convertBytesToGigaBytes(size))
+                    .also { limitStorageValue.setText(it) }
             }
 
             if (dropBox.password) {
