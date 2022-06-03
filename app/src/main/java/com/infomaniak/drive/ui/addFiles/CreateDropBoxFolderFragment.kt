@@ -174,7 +174,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
                         limitStorageValueLayout.error = getString(R.string.allEmptyInputError)
                         result = false
                     }
-                    this.toLong() < 1 -> {
+                    this.toDoubleOrNull() != null && this.toDouble() == 0.0 -> {
                         limitStorageValueLayout.error = getString(R.string.createDropBoxLimitFileSizeError)
                         result = false
                     }
