@@ -70,7 +70,7 @@ class UploadMigration : RealmMigration {
 
         //region Migrate to version 4: Update fields with api v2
         if (oldVersionTemp == 3L) {
-            schema.get(SyncSettings::class.java.simpleName)!!
+            schema.get(UploadFile::class.java.simpleName)!!
                 .addField(UploadFile::uploadToken.name, String::class.java)
                 .removeField("identifier")
             oldVersionTemp++
