@@ -141,11 +141,9 @@ class UploadTask(
             if (totalChunks > TOTAL_CHUNKS) throw TotalChunksExceededException()
 
             val uploadedChunks = uploadFile.getValidChunks()
+            val isNewUploadSession = uploadedChunks?.let { needToResetUpload(it) } ?: true
 
-            val needRestartUpload = uploadedChunks?.let { needToResetUpload(it) } ?: run {
-                uploadFile.prepareUploadSession(totalChunks)
-                false
-            }
+            if (isNewUploadSession) uploadFile.prepareUploadSession(totalChunks)
 
             Sentry.addBreadcrumb(Breadcrumb().apply {
                 category = UploadWorker.BREADCRUMB_TAG
@@ -160,7 +158,7 @@ class UploadTask(
 
             for (chunkNumber in 1..totalChunks) {
                 requestSemaphore.acquire()
-                if (validChunksIds?.contains(chunkNumber) == true && !needRestartUpload) {
+                if (validChunksIds?.contains(chunkNumber) == true && !isNewUploadSession) {
                     Log.d("kDrive", "chunk:$chunkNumber ignored")
                     input.skip(chunkSize.toLong())
                     requestSemaphore.release()
