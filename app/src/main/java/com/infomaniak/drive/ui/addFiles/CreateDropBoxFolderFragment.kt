@@ -40,7 +40,6 @@ import kotlinx.android.synthetic.main.fragment_create_folder.*
 import kotlinx.android.synthetic.main.item_dropbox_settings.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import okhttp3.internal.toLongOrDefault
 
 class CreateDropBoxFolderFragment : CreateFolderFragment() {
 
@@ -174,7 +173,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
                         limitStorageValueLayout.error = getString(R.string.allEmptyInputError)
                         result = false
                     }
-                    this.toDoubleOrNull() != null && this.toDouble() == 0.0 -> {
+                    this.toDoubleOrNull() == 0.0 -> {
                         limitStorageValueLayout.error = getString(R.string.createDropBoxLimitFileSizeError)
                         result = false
                     }
