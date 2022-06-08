@@ -206,8 +206,8 @@ object Utils {
         navController.navigate(R.id.previewSliderFragment, bundle, navOptions)
     }
 
-    fun convertBytesToGigaBytes(gigaByte: Long) = (gigaByte / 1024.0.pow(3)).toLong()
-    fun convertGigaByteToBytes(bytes: Long) = (bytes * 1024.0.pow(3)).toLong()
+    fun convertBytesToGigaBytes(bytes: Long) = (bytes / 1024.0.pow(3))
+    fun convertGigaByteToBytes(gigaBytes: Double) = (gigaBytes * 1024.0.pow(3)).toLong()
 
     fun copyToClipboard(context: Context, text: String) {
         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
