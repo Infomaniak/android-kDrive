@@ -24,6 +24,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import android.provider.OpenableColumns
+import android.text.Selection.setSelection
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
@@ -97,13 +98,9 @@ class SaveExternalFilesActivity : BaseActivity() {
     }
 
     private fun TextInputEditText.selectAllButFileExtension() {
-        setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) {
-                val fileName = (text ?: "").toString()
-                val endIndex = fileName.substringBeforeLast(".").length
-                post { setSelection(0, endIndex) }
-            }
-        }
+        val fileName = (text ?: "").toString()
+        val endIndex = fileName.substringBeforeLast(".").length
+        post { setSelection(0, endIndex) }
     }
 
     private fun isAuth(): Boolean {
