@@ -211,10 +211,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         if (apiResponse.isSuccess()) {
             FileController.getRealmInstance().use { realm ->
                 file.getStoredFile(getContext())?.let { ioFile ->
-                    if (ioFile.exists()) {
-                        if (file.isOffline) ioFile.renameTo(java.io.File("${newParent.getRemotePath()}/${file.name}"))
-                        else ioFile.delete()
-                    }
+                    if (ioFile.exists()) moveIfOfflineFileOrDelete(file, ioFile, newParent)
                 }
 
                 FileController.removeFile(file.id, recursive = false, customRealm = realm)
@@ -230,6 +227,11 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             onSuccess?.invoke(file.id)
         }
         emit(apiResponse)
+    }
+
+    private fun moveIfOfflineFileOrDelete(file: File, ioFile: java.io.File, newParent: File) {
+        if (file.isOffline) ioFile.renameTo(java.io.File("${newParent.getRemotePath()}/${file.name}"))
+        else ioFile.delete()
     }
 
     fun renameFile(file: File, newName: String) = liveData(Dispatchers.IO) {
