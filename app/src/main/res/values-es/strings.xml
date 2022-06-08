@@ -509,6 +509,7 @@
     <string name="noDriveTitle">¡Todavía no tienes kDrive!</string>
     <string name="noFilesDescription">Esta carpeta está vacía. Pulsa la tecla + para agregar archivos aquí.</string>
     <string name="noFilesDescriptionNoNetwork">No se puede recuperar la información de la carpeta. Comprueba tu conexión de red o vuelve a intentarlo más tarde.</string>
+    <string name="noFilesDescriptionSelectFolder">Esta carpeta está vacía.</string>
     <string name="noMediaFolderTitle">No hay carpetas de medios disponibles</string>
     <string name="noSelectMediaFolders">No hay carpeta seleccionada</string>
     <string name="noSyncFolderNotificationDescription">Pulse aquí para configurar las carpetas a sincronizar</string>
