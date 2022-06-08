@@ -109,8 +109,6 @@
     <string name="buttonConfirmNotify">Bestätigen und benachrichtigen</string>
     <string name="buttonConvertToDropBox">In Briefkasten umwandeln</string>
     <string name="buttonCopy">Kopieren</string>
-    <string name="buttonCopyLink">Link kopieren</string>
-    <string name="buttonCopyPublicLink">Öffentlichen Link kopieren</string>
     <string name="buttonCreate">Erstellen</string>
     <string name="buttonCreateFolder">Ordner erstellen</string>
     <string name="buttonCreateOnlyOfficeCopy">Eine .%s-Kopie erstellen</string>
@@ -158,6 +156,8 @@
     <string name="buttonSendCopy">Kopie versenden</string>
     <string name="buttonSettingsLockApp">Sperre aktivieren</string>
     <string name="buttonShare">Freigeben</string>
+    <string name="buttonShareDropboxLink">Link teilen</string>
+    <string name="buttonSharePublicLink">Öffentlichen Link freigeben</string>
     <string name="buttonSignIn">Konto anlegen</string>
     <string name="buttonStopUpload">Import dieser Datei abbrechen</string>
     <string name="buttonSwitchDrive">Drive wechseln</string>
@@ -383,7 +383,6 @@
     <string name="fileDetailsInfosTotalSizeTitle">Grösse (mit Versionen)</string>
     <string name="fileDetailsNoComments">Derzeit kein Kommentar</string>
     <string name="fileInfoInputDuplicateFile">Bezeichnung der Kopie</string>
-    <string name="fileInfoLinkCopiedToClipboard">Link in Zwischenablage kopiert</string>
     <plurals name="fileListAddFavoritesConfirmationSnackbar">
         <item quantity="one">Datei erfolgreich zu Favoriten hinzugefügt</item>
         <item quantity="other">%d Dateien erfolgreich zu Favoriten hinzugefügt</item>

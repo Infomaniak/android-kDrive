@@ -109,8 +109,6 @@
     <string name="buttonConfirmNotify">Conferma e notifica</string>
     <string name="buttonConvertToDropBox">Converti in deposito file</string>
     <string name="buttonCopy">Copia</string>
-    <string name="buttonCopyLink">Copia il link</string>
-    <string name="buttonCopyPublicLink">Copia il link pubblico</string>
     <string name="buttonCreate">Crea</string>
     <string name="buttonCreateFolder">Crea la cartella</string>
     <string name="buttonCreateOnlyOfficeCopy">Creare una copia .%s</string>
@@ -158,6 +156,8 @@
     <string name="buttonSendCopy">Invia una copia</string>
     <string name="buttonSettingsLockApp">Attiva il blocco</string>
     <string name="buttonShare">Condividi</string>
+    <string name="buttonShareDropboxLink">Condividi il link</string>
+    <string name="buttonSharePublicLink">Condividere il link pubblico</string>
     <string name="buttonSignIn">Crea un account</string>
     <string name="buttonStopUpload">Arresta l’importazione del file</string>
     <string name="buttonSwitchDrive">Cambia drive</string>
@@ -383,7 +383,6 @@
     <string name="fileDetailsInfosTotalSizeTitle">Dimensioni (con le versioni)</string>
     <string name="fileDetailsNoComments">Al momento non ci sono commenti</string>
     <string name="fileInfoInputDuplicateFile">Nome della copia</string>
-    <string name="fileInfoLinkCopiedToClipboard">Link copiato negli Appunti</string>
     <plurals name="fileListAddFavoritesConfirmationSnackbar">
         <item quantity="one">File aggiunto ai preferiti con successo</item>
         <item quantity="other">%d file aggiunti ai preferiti con successo</item>

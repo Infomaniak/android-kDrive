@@ -322,10 +322,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         FileController.getParentFile(currentFile.id)?.let { folder -> navigateToParentFolder(folder, mainViewModel) }
     }
 
-    override fun copyPublicLink() {
-        bottomSheetFileInfos.createPublicCopyLink(onSuccess = { file ->
-            previewSliderAdapter.updateFile(currentFile.id) { it.shareLink = file?.shareLink }
-            showSnackbar(R.string.fileInfoLinkCopiedToClipboard)
+    override fun sharePublicLink() {
+        bottomSheetFileInfos.createPublicShareLink(onSuccess = { shareLink ->
+            previewSliderAdapter.updateFile(currentFile.id) { it.shareLink = shareLink }
+            context?.shareText(shareLink)
             toggleBottomSheet(true)
         }, onError = { translatedError ->
             showSnackbar(translatedError)

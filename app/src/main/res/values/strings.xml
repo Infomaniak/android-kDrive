@@ -123,8 +123,6 @@
     <string name="buttonConfirmNotify">Confirm and notify</string>
     <string name="buttonConvertToDropBox">Convert to drop box</string>
     <string name="buttonCopy">Copy</string>
-    <string name="buttonCopyLink">Copy link</string>
-    <string name="buttonCopyPublicLink">Copy public link</string>
     <string name="buttonCreate">Create</string>
     <string name="buttonCreateFolder">Create folder</string>
     <string name="buttonCreateOnlyOfficeCopy">Create a .%s copy</string>
@@ -172,6 +170,8 @@
     <string name="buttonSendCopy">Send a copy</string>
     <string name="buttonSettingsLockApp">Enable the lock</string>
     <string name="buttonShare">Share</string>
+    <string name="buttonShareDropboxLink">Share link</string>
+    <string name="buttonSharePublicLink">Share public link</string>
     <string name="buttonSignIn">Create an account</string>
     <string name="buttonStopUpload">Stop uploading this file</string>
     <string name="buttonSwitchDrive">Change drive</string>
@@ -397,7 +397,6 @@
     <string name="fileDetailsInfosTotalSizeTitle">Size (with versions)</string>
     <string name="fileDetailsNoComments">No comments at this time</string>
     <string name="fileInfoInputDuplicateFile">Copy name</string>
-    <string name="fileInfoLinkCopiedToClipboard">Link copied to the clipboard</string>
     <plurals name="fileListAddFavoritesConfirmationSnackbar">
         <item quantity="one">One file successfully added to favorites</item>
         <item quantity="other">%d files successfully added to favorites</item>

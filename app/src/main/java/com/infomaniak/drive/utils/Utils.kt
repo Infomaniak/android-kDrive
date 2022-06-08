@@ -209,11 +209,6 @@ object Utils {
     fun convertBytesToGigaBytes(bytes: Long) = (bytes / 1024.0.pow(3))
     fun convertGigaByteToBytes(gigaBytes: Double) = (gigaBytes * 1024.0.pow(3)).toLong()
 
-    fun copyToClipboard(context: Context, text: String) {
-        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
-        clipboard?.setPrimaryClip(ClipData.newPlainText(text, text))
-    }
-
     fun Context.moveFileClicked(currentFolderId: Int?, selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
         Intent(this, SelectFolderActivity::class.java).apply {
             putExtras(
