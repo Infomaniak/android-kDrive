@@ -378,11 +378,11 @@ fun Context.openOnlyOfficeActivity(file: File) {
     })
 }
 
-fun Fragment.navigateToParentFolder(folder: File, mainViewModel: MainViewModel) {
+fun Fragment.navigateToParentFolder(folderId: Int, mainViewModel: MainViewModel) {
     with(findNavController()) {
         popBackStack(R.id.homeFragment, false)
         (requireActivity() as MainActivity).bottomNavigation.findViewById<View>(R.id.fileListFragment).performClick()
-        mainViewModel.navigateFileListToFolderId(this, folder.id)
+        mainViewModel.navigateFileListToFolderId(this, folderId)
     }
 }
 
