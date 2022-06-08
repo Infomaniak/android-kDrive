@@ -364,7 +364,7 @@
             android:defaultValue=""
             app:argType="string" />
         <argument
-            android:name="currentFolderId"
+            android:name="disabledFolderId"
             android:defaultValue="-1"
             app:argType="integer" />
         <argument

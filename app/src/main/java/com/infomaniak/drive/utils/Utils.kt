@@ -209,13 +209,14 @@ object Utils {
     fun convertBytesToGigaBytes(bytes: Long) = (bytes / 1024.0.pow(3))
     fun convertGigaByteToBytes(gigaBytes: Double) = (gigaBytes * 1024.0.pow(3)).toLong()
 
-    fun Context.moveFileClicked(currentFolderId: Int?, selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
+    fun Context.moveFileClicked(disabledFolderId: Int?, selectFolderResultLauncher: ActivityResultLauncher<Intent>, mainViewModel: MainViewModel) {
+        mainViewModel.ignoreSyncOffline = true
         Intent(this, SelectFolderActivity::class.java).apply {
             putExtras(
                 SelectFolderActivityArgs(
                     userId = AccountUtils.currentUserId,
                     userDriveId = AccountUtils.currentDriveId,
-                    currentFolderId = currentFolderId ?: -1,
+                    disabledFolderId = disabledFolderId ?: -1,
                     customArgs = bundleOf(SelectFolderActivity.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE)
                 ).toBundle()
             )
