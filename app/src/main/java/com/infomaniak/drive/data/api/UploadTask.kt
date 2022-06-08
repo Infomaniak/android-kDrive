@@ -95,12 +95,19 @@ class UploadTask(
 
         } catch (exception: TotalChunksExceededException) {
             exception.printStackTrace()
-            notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
             Sentry.withScope { scope ->
                 scope.level = SentryLevel.WARNING
                 scope.setExtra("half heap", "${getAvailableHalfHeapMemory()}")
                 scope.setExtra("available ram memory", "${context.getAvailableMemory().availMem}")
                 scope.setExtra("available service memory", "${context.getAvailableMemory().threshold}")
+                Sentry.captureException(exception)
+            }
+        } catch (exception: UploadNotTerminated) {
+            exception.printStackTrace()
+            notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
+            Sentry.withScope { scope ->
+                scope.level = SentryLevel.WARNING
+                scope.setExtra("data", gson.toJson(uploadFile))
                 Sentry.captureException(exception)
             }
         } catch (exception: Exception) {
@@ -369,6 +376,13 @@ class UploadTask(
             this?.error?.code.equals("object_not_found") -> throw FolderNotFoundException()
             this?.error?.code.equals("quota_exceeded_error") -> throw QuotaExceededException()
             this?.error?.code.equals("not_authorized") -> throw NotAuthorizedException()
+            this?.error?.code.equals("upload_not_terminated") -> {
+                // Upload finish with 0 chunks uploaded
+                // Upload finish with a different expected number of chunks
+                uploadFile.uploadToken?.let { ApiRepository.cancelSession(uploadFile.driveId, it) }
+                uploadFile.resetUploadToken()
+                throw UploadNotTerminated("Upload finish with 0 chunks uploaded or a different expected number of chunks")
+            }
             this?.error?.code.equals("upload_error") -> {
                 uploadFile.resetUploadToken()
                 throw UploadErrorException()
@@ -399,6 +413,7 @@ class UploadTask(
     class QuotaExceededException : Exception()
     class TotalChunksExceededException : Exception()
     class UploadErrorException : Exception()
+    class UploadNotTerminated(message: String) : Exception(message)
     class WrittenBytesExceededException : Exception()
 
     companion object {
