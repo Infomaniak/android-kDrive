@@ -435,7 +435,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
         fun addFavoritesClicked() = trackActionEvent("favorite", (!currentFile.isFavorite).toFloat())
         fun colorFolderClicked(color: String) = application?.trackEvent("colorFolder", TrackerAction.CLICK, "switch")
-        fun sharePublicLink() = trackActionEvent("copyShareLink")
+        fun sharePublicLink() = trackActionEvent("shareLink")
         fun displayInfoClicked()
         fun downloadFileClicked() = trackActionEvent("download")
         fun dropBoxClicked(isDropBox: Boolean) = trackActionEvent("convertToDropbox", isDropBox.toFloat())
