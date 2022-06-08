@@ -90,9 +90,11 @@ class HomeActivitiesFragment : Fragment() {
                     )
                 }
                 onFileClicked = { currentFile, validPreviewFiles ->
-                    if (currentFile.isTrashed()) {
-                        showSnackbar(R.string.errorPreviewTrash, true)
-                    } else Utils.displayFile(mainViewModel, findNavController(), currentFile, validPreviewFiles)
+                    when {
+                        currentFile.isTrashed() -> showSnackbar(R.string.errorPreviewTrash, true)
+                        currentFile.isFolder() -> navigateToParentFolder(currentFile, mainViewModel)
+                        else -> Utils.displayFile(mainViewModel, findNavController(), currentFile, validPreviewFiles)
+                    }
                 }
             }
         }
