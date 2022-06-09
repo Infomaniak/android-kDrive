@@ -112,6 +112,7 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.viewpager2:viewpager2:1.1.0-beta01'
+    implementation 'androidx.webkit:webkit:1.4.0'
 
     def exoplayer_version = '2.17.1'
     implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
