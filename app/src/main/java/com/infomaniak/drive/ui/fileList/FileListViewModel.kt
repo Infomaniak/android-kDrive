@@ -173,22 +173,23 @@ class FileListViewModel : ViewModel() {
         pendingJob = Job()
 
         return liveData(Dispatchers.IO + pendingJob) {
-            val uploadRealm = UploadFile.getRealmInstance()
-            val positions = arrayListOf<Pair<Position, FileId>>()
-            val realmUploadFiles =
-                if (isFileType) UploadFile.getAllPendingUploads(customRealm = uploadRealm)
-                else UploadFile.getAllPendingFolders(realm = uploadRealm)
+            UploadFile.getRealmInstance().use { uploadRealm ->
+                val positions = arrayListOf<Pair<Position, FileId>>()
+                val realmUploadFiles =
+                    if (isFileType) UploadFile.getAllPendingUploads(customRealm = uploadRealm)
+                    else UploadFile.getAllPendingFolders(realm = uploadRealm)
 
-            adapterPendingFileIds.forEachIndexed { index, fileId ->
-                pendingJob.ensureActive()
-                val uploadExists = realmUploadFiles?.any { uploadFile ->
-                    isFileType && fileId == uploadFile.uri.hashCode() || !isFileType && fileId == uploadFile.remoteFolder
+                adapterPendingFileIds.forEachIndexed { index, fileId ->
+                    pendingJob.ensureActive()
+                    val uploadExists = realmUploadFiles?.any { uploadFile ->
+                        isFileType && fileId == uploadFile.uri.hashCode() || !isFileType && fileId == uploadFile.remoteFolder
+                    }
+                    if (uploadExists == false) positions.add(index to fileId)
                 }
-                if (uploadExists == false) positions.add(index to fileId)
-            }
 
-            pendingJob.ensureActive()
-            emit(positions)
+                pendingJob.ensureActive()
+                emit(positions)
+            }
         }
     }
 
