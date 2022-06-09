@@ -59,6 +59,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
 
         webView.apply {
             settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
             loadUrl(url, headers)
 
             webViewClient = object : WebViewClient() {
