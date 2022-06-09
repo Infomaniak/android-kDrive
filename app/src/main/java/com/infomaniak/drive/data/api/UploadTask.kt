@@ -370,20 +370,20 @@ class UploadTask(
     }
 
     private fun <T> ApiResponse<T>?.manageUploadErrors() {
-        when {
-            this?.error?.code.equals("file_already_exists_error") -> Unit
-            this?.error?.code.equals("lock_error") -> throw LockErrorException()
-            this?.error?.code.equals("object_not_found") -> throw FolderNotFoundException()
-            this?.error?.code.equals("quota_exceeded_error") -> throw QuotaExceededException()
-            this?.error?.code.equals("not_authorized") -> throw NotAuthorizedException()
-            this?.error?.code.equals("upload_not_terminated") -> {
+        when (this?.error?.code) {
+            "file_already_exists_error" -> Unit
+            "lock_error" -> throw LockErrorException()
+            "object_not_found" -> throw FolderNotFoundException()
+            "quota_exceeded_error" -> throw QuotaExceededException()
+            "not_authorized" -> throw NotAuthorizedException()
+            "upload_not_terminated" -> {
                 // Upload finish with 0 chunks uploaded
                 // Upload finish with a different expected number of chunks
                 uploadFile.uploadToken?.let { ApiRepository.cancelSession(uploadFile.driveId, it) }
                 uploadFile.resetUploadToken()
                 throw UploadNotTerminated("Upload finish with 0 chunks uploaded or a different expected number of chunks")
             }
-            this?.error?.code.equals("upload_error") -> {
+            "upload_error" -> {
                 uploadFile.resetUploadToken()
                 throw UploadErrorException()
             }
