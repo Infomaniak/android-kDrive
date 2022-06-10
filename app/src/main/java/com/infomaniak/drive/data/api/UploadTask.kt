@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.api
 
-import android.R
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -119,20 +118,7 @@ class UploadTask(
         return@withContext false
     }
 
-    private suspend fun onFinish(uri: Uri) {
-        uploadNotification.apply {
-            setOngoing(false)
-            setContentText("100%")
-            setSmallIcon(R.drawable.stat_sys_upload_done)
-            setProgress(0, 0, false)
-            notificationManagerCompat.notify(CURRENT_UPLOAD_ID, build())
-        }
-        shareProgress(100, true)
-        ApiRepository.finishSession(uploadFile.driveId, uploadFile.uploadToken!!)
-        UploadFile.uploadFinished(uri)
-        notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
-    }
-
+    @Suppress("BlockingMethodInNonBlockingContext")
     private suspend fun launchTask(coroutineScope: CoroutineScope) = withContext(Dispatchers.IO) {
         val uri = uploadFile.getUriObject()
         val fileInputStream = context.contentResolver.openInputStream(uploadFile.getOriginalUri(context))
@@ -194,6 +180,20 @@ class UploadTask(
         onFinish(uri)
     }
 
+    private suspend fun onFinish(uri: Uri) {
+        uploadNotification.apply {
+            setOngoing(false)
+            setContentText("100%")
+            setSmallIcon(android.R.drawable.stat_sys_upload_done)
+            setProgress(0, 0, false)
+            notificationManagerCompat.notify(CURRENT_UPLOAD_ID, build())
+        }
+        shareProgress(100, true)
+        ApiRepository.finishSession(uploadFile.driveId, uploadFile.uploadToken!!)
+        UploadFile.uploadFinished(uri)
+        notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
+    }
+
     private fun CoroutineScope.uploadChunkRequest(
         requestSemaphore: Semaphore,
         data: ByteArray,
@@ -231,7 +231,7 @@ class UploadTask(
                     Sentry.withScope { scope ->
                         scope.level = SentryLevel.WARNING
                         scope.setExtra("fileSize", "$fileSize")
-                        Sentry.captureMessage("Max chunk size exceeded, file size exceed ${TOTAL_CHUNKS * CHUNK_MAX_SIZE}")
+                        Sentry.captureMessage("Max chunk size exceeded, file size exceed $MAX_TOTAL_CHUNKS_SIZE")
                     }
                     throw AllowedFileSizeExceededException()
                 }
@@ -421,8 +421,9 @@ class UploadTask(
 
         var chunkSize: Int = 1 * 1024 * 1024 // Chunk 1 Mo
         private const val CHUNK_MAX_SIZE: Int = 50 * 1024 * 1024 // 50 Mo and max file size to upload 500Gb
-        private const val OPTIMAL_TOTAL_CHUNKS = 200
-        private const val TOTAL_CHUNKS = 10_000
+        private const val OPTIMAL_TOTAL_CHUNKS: Int = 200
+        private const val TOTAL_CHUNKS: Int = 10_000
+        private const val MAX_TOTAL_CHUNKS_SIZE: Long = CHUNK_MAX_SIZE.toLong() * TOTAL_CHUNKS.toLong()
 
         enum class ConflictOption {
             @SerializedName("error")
