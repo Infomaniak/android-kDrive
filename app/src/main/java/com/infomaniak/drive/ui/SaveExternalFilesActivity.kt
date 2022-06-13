@@ -38,6 +38,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
@@ -99,7 +100,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private fun TextInputEditText.selectAllButFileExtension() {
         val fileName = (text ?: "").toString()
-        val endIndex = fileName.substringBeforeLast(".").length
+        val endIndex = fileName.getFileName().length
         post { setSelection(0, endIndex) }
     }
 

@@ -38,6 +38,8 @@ import com.infomaniak.drive.utils.RealmListParceler.IntRealmListParceler
 import com.infomaniak.drive.utils.Utils.INDETERMINATE_PROGRESS
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.contains
+import com.infomaniak.drive.utils.getFileExtension
+import com.infomaniak.drive.utils.getFileName
 import com.infomaniak.lib.core.BuildConfig
 import io.realm.RealmList
 import io.realm.RealmObject
@@ -199,10 +201,9 @@ open class File(
     }
 
     fun getFileName(): String {
-        val fileExtension = getFileExtension() ?: ""
         return when {
-            fileExtension.isBlank() || isFolder() -> name
-            else -> name.substringBeforeLast(fileExtension)
+            isFolder() -> name
+            else -> name.getFileName()
         }
     }
 
@@ -210,10 +211,7 @@ open class File(
         return if (path.isBlank() && id != ROOT_ID) FileController.generateAndSavePath(id, userDrive) else path
     }
 
-    fun getFileExtension(): String? {
-        val extension = name.substringAfterLast('.')
-        return if (extension == name) null else ".$extension"
-    }
+    fun getFileExtension(): String? = name.getFileExtension()
 
     fun isBookmark() = name.endsWith(".url") || name.endsWith(".webloc")
 
