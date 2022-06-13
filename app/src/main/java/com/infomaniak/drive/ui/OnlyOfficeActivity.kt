@@ -26,7 +26,12 @@ import android.print.*
 import android.webkit.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
+import androidx.webkit.WebSettingsCompat
+import androidx.webkit.WebSettingsCompat.FORCE_DARK_OFF
+import androidx.webkit.WebSettingsCompat.FORCE_DARK_ON
+import androidx.webkit.WebViewFeature
 import com.infomaniak.drive.R
+import com.infomaniak.drive.utils.isNightModeEnabled
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import kotlinx.android.synthetic.main.activity_only_office.*
@@ -50,8 +55,11 @@ class OnlyOfficeActivity : AppCompatActivity() {
 
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
 
+        setDarkMode()
+
         webView.apply {
             settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
             loadUrl(url, headers)
 
             webViewClient = object : WebViewClient() {
@@ -78,6 +86,19 @@ class OnlyOfficeActivity : AppCompatActivity() {
             setDownloadListener { url, _, _, _, _ ->
                 if (url.endsWith(".pdf")) sendToPrintPDF(url, filename) else openUrl(url)
             }
+        }
+    }
+
+    @SuppressLint("RequiresFeature")
+    private fun setDarkMode() {
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK) &&
+            WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK_STRATEGY)
+        ) {
+            WebSettingsCompat.setForceDarkStrategy(webView.settings, WebSettingsCompat.DARK_STRATEGY_WEB_THEME_DARKENING_ONLY)
+            WebSettingsCompat.setForceDark(
+                webView.settings,
+                if (resources.isNightModeEnabled()) FORCE_DARK_ON else FORCE_DARK_OFF
+            )
         }
     }
 
