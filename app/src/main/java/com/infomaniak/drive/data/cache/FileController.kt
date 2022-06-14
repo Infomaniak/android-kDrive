@@ -675,6 +675,8 @@ object FileController {
         // Save to realm
         localFolderProxy?.let {
             it.realm.executeTransaction {
+                // Remove old children
+                localFolderProxy.children.clear()
                 // Add children
                 localFolderProxy.children.addAll(remoteFiles)
                 // Update folder properties
