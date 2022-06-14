@@ -73,6 +73,8 @@ open class UploadFile(
         }
     }
 
+    fun isPriority() = type != Type.SYNC.name
+
     fun isSync() = type == Type.SYNC.name
 
     fun isSyncOffline() = type == Type.SYNC_OFFLINE.name

@@ -173,8 +173,8 @@ class FileListViewModel : ViewModel() {
         pendingJob = Job()
 
         return liveData(Dispatchers.IO + pendingJob) {
+            val positions = arrayListOf<Pair<Position, FileId>>()
             UploadFile.getRealmInstance().use { uploadRealm ->
-                val positions = arrayListOf<Pair<Position, FileId>>()
                 val realmUploadFiles =
                     if (isFileType) UploadFile.getAllPendingUploads(customRealm = uploadRealm)
                     else UploadFile.getAllPendingFolders(realm = uploadRealm)
@@ -188,8 +188,8 @@ class FileListViewModel : ViewModel() {
                 }
 
                 pendingJob.ensureActive()
-                emit(positions)
             }
+            emit(positions)
         }
     }
 
