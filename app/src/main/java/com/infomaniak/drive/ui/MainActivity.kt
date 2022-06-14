@@ -234,15 +234,12 @@ class MainActivity : BaseActivity() {
         if (isKeyguardSecure() && AppSettings.appSecurityLock) {
             val lastCloseAppWithTolerance = Date(lastCloseApp.time + SECURITY_APP_TOLERANCE)
             val now = Date()
-            if (now.after(lastCloseAppWithTolerance)) {
-                startActivity(Intent(this, LockActivity::class.java))
-            }
+            if (now.after(lastCloseAppWithTolerance)) startActivity(Intent(this, LockActivity::class.java))
         }
 
         launchAllUpload(drivePermissions)
 
-        if (!mainViewModel.ignoreSyncOffline) launchSyncOffline()
-        else mainViewModel.ignoreSyncOffline = false
+        if (!mainViewModel.ignoreSyncOffline) launchSyncOffline() else mainViewModel.ignoreSyncOffline = false
 
         AppSettings.appLaunches++
 
@@ -252,6 +249,11 @@ class MainActivity : BaseActivity() {
         startContentObserverService()
 
         handleDeletionOfUploadedPhotos()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        lastCloseApp = Date()
     }
 
     private fun handleDeletionOfUploadedPhotos() {
