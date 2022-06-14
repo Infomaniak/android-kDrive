@@ -62,8 +62,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     var currentUploadFile: UploadFile? = null
     var currentUploadTask: UploadTask? = null
     var uploadedCount = 0
-//    var failedFiles = mutableSetOf<String>()
-//    var successFiles = mutableSetOf<String>()
     private var failedNames = arrayListOf<String>()
     private var successNames = arrayListOf<String>()
 
@@ -132,8 +130,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private suspend fun startSyncFiles(): Result = withContext(Dispatchers.IO) {
         val uploadFiles = UploadFile.getAllPendingUploads()
-//        val lastUploadedCount = inputData.getInt(LAST_UPLOADED_COUNT, 0)
-//        failedFiles = inputData.getStringArray(LAST_FAILED_SET)?.toMutableSet() ?: mutableSetOf()
         failedNames = ArrayList(inputData.getStringArray(LAST_FAILED_NAMES)?.toList() ?: listOf())
         successNames = ArrayList(inputData.getStringArray(LAST_SUCCESS_NAMES)?.toList() ?: listOf())
         var pendingCount = uploadFiles.size

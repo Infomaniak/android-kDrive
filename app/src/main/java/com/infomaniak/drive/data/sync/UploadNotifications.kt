@@ -132,12 +132,6 @@ object UploadNotifications {
         successNames: ArrayList<String>,
         failedNames: ArrayList<String>
     ) {
-//        val description = arrayListOf<String>().apply {
-//            if (uploadedCount > 0) add(generateDescription(context, R.plurals.allUploadFinishedDescription, uploadedCount))
-//            if (failedCount > 0) add(generateDescription(context, R.plurals.importFailedDescription, failedCount))
-//        }.joinToString(". ")
-//        val titleResId = if (uploadedCount > 0) R.string.allUploadFinishedTitle else R.string.uploadErrorTitle
-
         val failedCount = failedNames.count()
         val successCount = successNames.count()
         val total = successCount + failedCount
@@ -174,10 +168,6 @@ object UploadNotifications {
             contentIntent = pendingIntent,
             actionIntent = pendingIntent
         )
-    }
-
-    private fun UploadFile.generateDescription(context: Context, resId: Int, count: Int): String {
-        return context.resources.getQuantityString(resId, count, if (count == 1) this.fileName else count)
     }
 
     fun showCancelledByUserNotification(context: Context) {
