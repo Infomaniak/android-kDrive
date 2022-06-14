@@ -165,12 +165,14 @@ object UploadNotifications {
 
         val titleResId = if (successCount > 0) R.string.allUploadFinishedTitle else R.string.uploadErrorTitle
 
+        val pendingIntent = progressPendingIntent(context)
         showNotification(
             context = context,
             title = context.getString(titleResId),
             description = description,
             notificationId = NotificationUtils.UPLOAD_STATUS_ID,
-            contentIntent = progressPendingIntent(context)
+            contentIntent = pendingIntent,
+            actionIntent = pendingIntent
         )
     }
 
@@ -192,7 +194,8 @@ object UploadNotifications {
         title: String,
         description: String,
         notificationId: Int,
-        contentIntent: PendingIntent? = null
+        contentIntent: PendingIntent? = null,
+        actionIntent: PendingIntent? = null
     ) {
         val notificationManagerCompat = NotificationManagerCompat.from(context)
         context.uploadNotification().apply {
@@ -201,6 +204,7 @@ object UploadNotifications {
             setContentTitle(title)
             setStyle(NotificationCompat.BigTextStyle().bigText(description))
             setContentIntent(contentIntent)
+            addAction(NotificationCompat.Action(R.drawable.ic_export, context.getString(R.string.locateButton), actionIntent))
             notificationManagerCompat.notify(notificationId, this.build())
         }
     }
