@@ -689,6 +689,14 @@
     <string name="uploadFileSizeExceeded">Die zulässige Gesamtgröße der Datei wurde überschritten.</string>
     <string name="uploadFolderNotFoundError">Ordner gelöscht oder inexistent</string>
     <string name="uploadFolderNotFoundSyncDisabledError">Die automatische Sicherung wurde deaktiviert, da der Zielordner nicht mehr existiert</string>
+    <plurals name="uploadImportedOtherAmount">
+        <item quantity="one">+1 andere Datei</item>
+        <item quantity="other">%d andere Dateien</item>
+    </plurals>
+    <plurals name="uploadImportedFailedAmount">
+        <item quantity="one">1 Import von insgesamt %1$d fehlgeschlagen</item>
+        <item quantity="other">%2$d Importe von insgesamt %1$d sind fehlgeschlagen</item>
+    </plurals>
     <string name="uploadInProgressCancelAllUploadTitle">Importe abbrechen</string>
     <string name="uploadInProgressCancelFileUploadTitle">%s abbrechen?</string>
     <string name="uploadInProgressNoFile">Derzeit kein Upload im Gange</string>

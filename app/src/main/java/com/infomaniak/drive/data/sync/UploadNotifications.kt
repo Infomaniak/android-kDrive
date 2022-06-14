@@ -127,12 +127,43 @@ object UploadNotifications {
         )
     }
 
-    fun UploadFile.showUploadedFilesNotification(context: Context, uploadedCount: Int, failedCount: Int) {
-        val description = arrayListOf<String>().apply {
-            if (uploadedCount > 0) add(generateDescription(context, R.plurals.allUploadFinishedDescription, uploadedCount))
-            if (failedCount > 0) add(generateDescription(context, R.plurals.importFailedDescription, failedCount))
-        }.joinToString(". ")
-        val titleResId = if (uploadedCount > 0) R.string.allUploadFinishedTitle else R.string.uploadErrorTitle
+    fun UploadFile.showUploadedFilesNotification(
+        context: Context,
+        successNames: ArrayList<String>,
+        failedNames: ArrayList<String>
+    ) {
+//        val description = arrayListOf<String>().apply {
+//            if (uploadedCount > 0) add(generateDescription(context, R.plurals.allUploadFinishedDescription, uploadedCount))
+//            if (failedCount > 0) add(generateDescription(context, R.plurals.importFailedDescription, failedCount))
+//        }.joinToString(". ")
+//        val titleResId = if (uploadedCount > 0) R.string.allUploadFinishedTitle else R.string.uploadErrorTitle
+
+        val failedCount = failedNames.count()
+        val successCount = successNames.count()
+        val total = successCount + failedCount
+        val description = when {
+            failedCount > 0 -> {
+                val failedList = failedNames.joinToString("\n")
+                val message =
+                    context.resources.getQuantityString(R.plurals.uploadImportedFailedAmount, failedCount, total, failedCount)
+                "$message.\n$failedList"
+            }
+            successCount == 1 -> {
+                context.resources.getQuantityString(R.plurals.allUploadFinishedDescription, 1, this.fileName)
+            }
+            else -> {
+                arrayListOf<String>().apply {
+                    add(context.resources.getQuantityString(R.plurals.allUploadFinishedDescription, successCount, successCount))
+                    add(successNames.take(5).joinToString("\n"))
+                    val otherCount = successCount - 5
+                    if (otherCount > 0) {
+                        add(context.resources.getQuantityString(R.plurals.uploadImportedOtherAmount, otherCount, otherCount))
+                    }
+                }.joinToString("\n")
+            }
+        }
+
+        val titleResId = if (successCount > 0) R.string.allUploadFinishedTitle else R.string.uploadErrorTitle
 
         showNotification(
             context = context,

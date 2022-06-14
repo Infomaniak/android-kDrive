@@ -54,6 +54,7 @@ import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.*
 import java.util.*
+import kotlin.collections.ArrayList
 
 class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
     private lateinit var contentResolver: ContentResolver
@@ -61,7 +62,10 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     var currentUploadFile: UploadFile? = null
     var currentUploadTask: UploadTask? = null
     var uploadedCount = 0
-    var failedFiles = mutableSetOf<String>()
+//    var failedFiles = mutableSetOf<String>()
+//    var successFiles = mutableSetOf<String>()
+    private var failedNames = arrayListOf<String>()
+    private var successNames = arrayListOf<String>()
 
     override suspend fun doWork(): Result {
 
@@ -128,10 +132,11 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private suspend fun startSyncFiles(): Result = withContext(Dispatchers.IO) {
         val uploadFiles = UploadFile.getAllPendingUploads()
-        val lastUploadedCount = inputData.getInt(LAST_UPLOADED_COUNT, 0)
-        failedFiles = inputData.getStringArray(LAST_FAILED_SET)?.toMutableSet() ?: mutableSetOf()
+//        val lastUploadedCount = inputData.getInt(LAST_UPLOADED_COUNT, 0)
+//        failedFiles = inputData.getStringArray(LAST_FAILED_SET)?.toMutableSet() ?: mutableSetOf()
+        failedNames = ArrayList(inputData.getStringArray(LAST_FAILED_NAMES)?.toList() ?: listOf())
+        successNames = ArrayList(inputData.getStringArray(LAST_SUCCESS_NAMES)?.toList() ?: listOf())
         var pendingCount = uploadFiles.size
-        var successCount = 0
 
         if (pendingCount > 0) applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
 
@@ -140,20 +145,19 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         for (uploadFile in uploadFiles) {
             Log.d(TAG, "startSyncFiles> upload ${uploadFile.fileName}")
 
-            if (uploadFile.initUpload(pendingCount)) successCount++
-            else failedFiles.add(uploadFile.uri)
+            if (uploadFile.initUpload(pendingCount)) successNames.add(uploadFile.fileName) else failedNames.add(uploadFile.fileName)
 
             pendingCount--
 
             if (uploadFile.isSync() && UploadFile.getAllPendingPriorityFilesCount() > 0) break
         }
 
-        uploadedCount = successCount + lastUploadedCount
-        val failedCount = failedFiles.count()
+        uploadedCount = successNames.count()
+//        val failedCount = failedNames.count()
 
         Log.d(TAG, "startSyncFiles: finish with $uploadedCount uploaded")
 
-        currentUploadFile?.showUploadedFilesNotification(applicationContext, uploadedCount, failedCount)
+        currentUploadFile?.showUploadedFilesNotification(applicationContext, successNames, failedNames)
         if (uploadedCount > 0) Result.success() else Result.failure()
     }
 
@@ -162,7 +166,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         if (UploadFile.getAllPendingUploadsCount() > 0) {
             val data = Data.Builder()
                 .putInt(LAST_UPLOADED_COUNT, uploadedCount)
-                .putStringArray(LAST_FAILED_SET, failedFiles.toTypedArray())
+                .putStringArray(LAST_FAILED_NAMES, failedNames.toTypedArray())
+                .putStringArray(LAST_SUCCESS_NAMES, successNames.toTypedArray())
                 .build()
             applicationContext.syncImmediately(data, true)
         }
@@ -421,7 +426,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         const val UPLOAD_FOLDER = "upload_folder"
 
         private const val LAST_UPLOADED_COUNT = "last_uploaded_count"
-        private const val LAST_FAILED_SET = "last_failed_set"
+        private const val LAST_FAILED_NAMES = "last_failed_names"
+        private const val LAST_SUCCESS_NAMES = "last_success_names"
 
         private const val MAX_RETRY_COUNT = 3
         private const val CHECK_LOCAL_LAST_MEDIAS_DELAY = 10_000L // 10s (in ms)
