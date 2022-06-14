@@ -100,6 +100,24 @@ open class UploadFile(
         }
     }
 
+    fun updateFileSize(newFileSize: Long) {
+        getRealmInstance().use { realm ->
+            syncFileByUriQuery(realm, uri).findFirst()?.let { uploadFile ->
+                realm.executeTransaction { uploadFile.fileSize = newFileSize }
+            }
+        }
+        fileSize = newFileSize
+    }
+
+    fun updateUploadToken(newUploadToken: String) {
+        getRealmInstance().use { realm ->
+            syncFileByUriQuery(realm, uri).findFirst()?.let { uploadFile ->
+                realm.executeTransaction { uploadFile.uploadToken = newUploadToken }
+            }
+        }
+        uploadToken = newUploadToken
+    }
+
     enum class Type {
         SYNC, UPLOAD, SHARED_FILE, SYNC_OFFLINE, CLOUD_STORAGE
     }
@@ -202,24 +220,6 @@ open class UploadFile(
                     }
                 }
             }
-        }
-
-        fun UploadFile.updateFileSize(newFileSize: Long) {
-            getRealmInstance().use { realm ->
-                syncFileByUriQuery(realm, uri).findFirst()?.let { uploadFile ->
-                    realm.executeTransaction { uploadFile.fileSize = newFileSize }
-                }
-            }
-            fileSize = newFileSize
-        }
-
-        fun UploadFile.updateUploadToken(newUploadToken: String) {
-            getRealmInstance().use { realm ->
-                syncFileByUriQuery(realm, uri).findFirst()?.let { uploadFile ->
-                    realm.executeTransaction { uploadFile.uploadToken = newUploadToken }
-                }
-            }
-            uploadToken = newUploadToken
         }
 
         fun getLastDate(context: Context): Date {
