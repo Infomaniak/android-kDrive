@@ -23,7 +23,8 @@ import java.util.*
 data class UploadSegment(
     val number: Int,
     val status: ChunkStatus,
-    @SerializedName("created_at") val createdAt: Date,
+    @SerializedName("created_at")
+    val createdAt: Date,
     val size: Long,
     /** Chunk uploaded md5 hash, computed */
     val hash: String
