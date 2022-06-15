@@ -23,12 +23,16 @@ import android.os.Bundle
 import android.os.CancellationSignal
 import android.os.ParcelFileDescriptor
 import android.print.*
-import android.webkit.*
+import android.webkit.CookieManager
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebSettingsCompat.FORCE_DARK_OFF
 import androidx.webkit.WebSettingsCompat.FORCE_DARK_ON
+import androidx.webkit.WebViewClientCompat
 import androidx.webkit.WebViewFeature
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.isNightModeEnabled
@@ -62,16 +66,10 @@ class OnlyOfficeActivity : AppCompatActivity() {
             settings.domStorageEnabled = true
             loadUrl(url, headers)
 
-            webViewClient = object : WebViewClient() {
-                override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest): Boolean {
+            webViewClient = object : WebViewClientCompat() {
+                override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                     popBackIfNeeded(request.url.toString())
-                    view?.loadUrl(request.url.toString(), headers)
-                    return true
-                }
-
-                override fun shouldOverrideUrlLoading(view: WebView?, url: String): Boolean {
-                    popBackIfNeeded(url)
-                    view?.loadUrl(url, headers)
+                    view.loadUrl(request.url.toString(), headers)
                     return true
                 }
             }

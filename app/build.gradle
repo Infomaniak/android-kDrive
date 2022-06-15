@@ -120,7 +120,7 @@ dependencies {
     implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
     implementation "com.google.android.exoplayer:extension-okhttp:$exoplayer_version"
 
-    implementation 'com.airbnb.android:lottie:5.1.1'
+    implementation 'com.airbnb.android:lottie:5.2.0'
     implementation 'com.github.MikeOrtiz:TouchImageView:3.2.0'
     implementation 'com.tbuonomo:dotsindicator:4.2'
     implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
@@ -129,7 +129,7 @@ dependencies {
     implementation 'io.realm:android-adapters:4.0.0'
 
     standardImplementation 'com.google.android.play:core:1.10.3'
-    standardImplementation 'com.google.firebase:firebase-messaging-ktx:23.0.4'
+    standardImplementation 'com.google.firebase:firebase-messaging-ktx:23.0.5'
 
     implementation 'com.googlecode.plist:dd-plist:1.23'
 
