@@ -169,7 +169,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         }.observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 apiResponse.data?.let { archiveUUID ->
-                    val downloadURL = Uri.parse(ApiRoutes.downloadArchiveFiles(AccountUtils.currentDriveId, archiveUUID.id))
+                    val downloadURL = Uri.parse(ApiRoutes.downloadArchiveFiles(AccountUtils.currentDriveId, archiveUUID.uuid))
                     requireContext().startDownloadFile(downloadURL, ARCHIVE_FILE_NAME)
                 }
             } else {

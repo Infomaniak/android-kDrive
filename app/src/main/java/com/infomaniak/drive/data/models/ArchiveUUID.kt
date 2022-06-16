@@ -19,22 +19,22 @@ package com.infomaniak.drive.data.models
 
 import com.google.gson.annotations.SerializedName
 
-data class ArchiveUUID(val id: String) {
+data class ArchiveUUID(@SerializedName("id") val uuid: String) {
 
     class ArchiveBody private constructor(
-        /** Array of files to exclude from the request; only used when [parentId] is set, meaningless otherwise */
-        @SerializedName("except_file_ids")
-        var exceptFileIds: IntArray? = null,
-
         /** Array of files to include in the request; required without [parentId]. */
         @SerializedName("file_ids")
         var fileIds: IntArray? = null,
 
         /** The directory containing the files to include in the request; required without [fileIds]. */
         @SerializedName("parent_id")
-        var parentId: Int? = null
+        var parentId: Int? = null,
+
+        /** Array of files to exclude from the request; only used when [parentId] is set, meaningless otherwise */
+        @SerializedName("except_file_ids")
+        var exceptFileIds: IntArray? = null,
     ) {
-        constructor(fileIds: IntArray) : this(null, fileIds, null)
-        constructor(parentId: Int, exceptFileIds: IntArray) : this(exceptFileIds, null, parentId)
+        constructor(fileIds: IntArray) : this(fileIds, null, null)
+        constructor(parentId: Int, exceptFileIds: IntArray) : this(null, parentId, exceptFileIds)
     }
 }
