@@ -503,6 +503,6 @@ fun Activity.getAdjustedColumnNumber(expectedItemSize: Int, minColumns: Int = 2,
     return min(max(minColumns, screenWidth / expectedItemSize), maxColumns)
 }
 
-fun <T> ApiResponse<ArrayList<T>>.isLastPage() = data != null && data!!.size < itemsPerPage
+fun <T> ApiResponse<ArrayList<T>>.isLastPage() = (data?.size ?: 0) < itemsPerPage
 
 operator fun Regex.contains(input: String) = containsMatchIn(input)

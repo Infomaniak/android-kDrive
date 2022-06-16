@@ -66,12 +66,12 @@ class PicturesViewModel : ViewModel() {
     ) {
         val data = apiResponse.data
         val isFirstPage = page == 1
-        val isComplete = apiResponse.isLastPage()
 
         if (data.isNullOrEmpty()) {
             emit(null)
         } else {
             FileController.storePicturesDrive(data, isFirstPage)
+            val isComplete = apiResponse.isLastPage()
             emit(data to isComplete)
         }
 
