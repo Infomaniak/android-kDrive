@@ -252,8 +252,8 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onPause() {
-        super.onPause()
         lastCloseApp = Date()
+        super.onPause()
     }
 
     private fun handleDeletionOfUploadedPhotos() {
