@@ -37,7 +37,7 @@ class SelectCategoriesViewModel : ViewModel() {
             with(ApiRepository.addCategory(file, categoryId)) {
                 if (isSuccess()) {
                     FileController.updateFile(file.id) {
-                        it.categories.add(FileCategory(categoryId, userId = AccountUtils.currentUserId, addedToFileAt = Date()))
+                        it.categories?.add(FileCategory(categoryId, userId = AccountUtils.currentUserId, addedToFileAt = Date()))
                     }
                 }
                 emit(this)
@@ -50,7 +50,7 @@ class SelectCategoriesViewModel : ViewModel() {
             with(ApiRepository.removeCategory(file, categoryId)) {
                 if (isSuccess()) {
                     FileController.updateFile(file.id) { localFile ->
-                        localFile.categories.find(categoryId)?.deleteFromRealm()
+                        localFile.categories?.find(categoryId)?.deleteFromRealm()
                     }
                 }
                 emit(this)
