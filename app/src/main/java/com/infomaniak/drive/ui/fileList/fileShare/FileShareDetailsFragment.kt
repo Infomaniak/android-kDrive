@@ -97,7 +97,7 @@ class FileShareDetailsFragment : Fragment() {
                 openAddUserDialog(selectedElement)
             },
         )
-        availableShareableItemsAdapter.notShareableUserIds.addAll(file.users)
+        availableShareableItemsAdapter.notShareableIds.addAll(file.users)
     }
 
     private fun setToolbarTitle() {
@@ -129,7 +129,7 @@ class FileShareDetailsFragment : Fragment() {
                             share.invitations.mapNotNull { it.user?.id } +
                             share.teams.map { team -> team.id }
 
-                    notShareableUserIds = ArrayList(userIds)
+                    notShareableIds = ArrayList(userIds)
                     notShareableEmails = ArrayList(share.invitations.map { invitation -> invitation.email })
                 }
 
@@ -295,7 +295,7 @@ class FileShareDetailsFragment : Fragment() {
         safeNavigate(
             FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToFileShareAddUserDialog(
                 sharedItem = element,
-                notShareableUserIds = notShareableUserIds.toIntArray(),
+                notShareableIds = notShareableIds.toIntArray(),
                 notShareableEmails = notShareableEmails.toTypedArray()
             )
         )

@@ -68,7 +68,7 @@ class SearchViewModel : ViewModel() {
                 sortType = order,
                 page = page,
                 date = formatDate(),
-                type = formatType(),
+                type = typeFilter?.value,
                 categories = formatCategories(),
             )
 
@@ -84,8 +84,6 @@ class SearchViewModel : ViewModel() {
         fun Date.timestamp(): String = (time / 1_000L).toString()
         return dateFilter?.let { it.start.timestamp() to it.end.timestamp() }
     }
-
-    private fun formatType() = typeFilter?.value?.lowercase()
 
     private fun formatCategories(): String? {
         return categoriesFilter?.joinToString(

@@ -265,7 +265,7 @@ fun String.isEmail(): Boolean = Patterns.EMAIL_ADDRESS.matcher(this).matches()
 fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
     context: Context,
     itemList: List<Shareable>,
-    notShareableUserIds: ArrayList<Int> = arrayListOf(),
+    notShareableIds: ArrayList<Int> = arrayListOf(),
     notShareableEmails: ArrayList<String> = arrayListOf(),
     onDataPassed: (item: Shareable) -> Unit
 ): AvailableShareableItemsAdapter {
@@ -273,7 +273,7 @@ fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
     val availableUsersAdapter = AvailableShareableItemsAdapter(
         context = context,
         itemList = ArrayList(itemList),
-        notShareableUserIds = notShareableUserIds,
+        notShareableIds = notShareableIds,
         notShareableEmails = notShareableEmails
     ) { item ->
         onDataPassed(item)

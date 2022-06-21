@@ -83,7 +83,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
         availableUsersAdapter = userAutoCompleteTextView.setupAvailableShareableItems(
             context = requireContext(),
             itemList = fileShareViewModel.availableShareableItems.value ?: AccountUtils.getCurrentDrive().getDriveUsers(),
-            notShareableUserIds = navigationArgs.notShareableUserIds.toMutableList() as ArrayList<Int>,
+            notShareableIds = navigationArgs.notShareableIds.toMutableList() as ArrayList<Int>,
             notShareableEmails = navigationArgs.notShareableEmails.toMutableList() as ArrayList<String>,
         ) { element ->
             userAutoCompleteTextView.setText("")
@@ -139,10 +139,10 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                 }
                 is DriveUser -> {
                     driveUsers.add(element)
-                    availableUsersAdapter.notShareableUserIds.add(element.id)
+                    availableUsersAdapter.notShareableIds.add(element.id)
                     createChip(element).setOnClickListener {
                         driveUsers.remove(element)
-                        availableUsersAdapter.notShareableUserIds.remove(element.id)
+                        availableUsersAdapter.notShareableIds.remove(element.id)
                         selectedItemsChipGroup.removeView(it)
                     }
                 }
