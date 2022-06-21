@@ -25,6 +25,7 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.view.View
+import android.view.WindowManager
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -155,7 +156,10 @@ object Utils {
             .setNegativeButton(R.string.buttonCancel) { _, _ -> }
             .setCancelable(false)
             .create()
-            .also { it.show() }
+            .apply {
+                window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+                show()
+            }
 
         val buttonPositive = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
 

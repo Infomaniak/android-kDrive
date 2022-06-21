@@ -33,9 +33,11 @@ import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.textfield.TextInputEditText
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
@@ -91,6 +93,14 @@ class SaveExternalFilesActivity : BaseActivity() {
         fetchSelectedDrive()
         fetchFolder()
         setupSaveButton()
+
+        fileNameEdit.selectAllButFileExtension()
+    }
+
+    private fun TextInputEditText.selectAllButFileExtension() {
+        val fileName = (text ?: "").toString()
+        val endIndex = File(name = fileName).getFileName().length
+        post { setSelection(0, endIndex) }
     }
 
     private fun isAuth(): Boolean {
