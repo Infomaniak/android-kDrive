@@ -45,6 +45,8 @@ data class Share(
         var type: String = ""
     ) : Parcelable, Shareable {
 
+        fun isExternalUser(): Boolean = type == DriveUser.Type.SHARED.value
+
         enum class UserFileAccessStatus {
             /** User has access to the Drive */
             @SerializedName("active")
