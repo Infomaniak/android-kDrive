@@ -98,9 +98,14 @@ class SaveExternalFilesActivity : BaseActivity() {
     }
 
     private fun TextInputEditText.selectAllButFileExtension() {
-        val fileName = (text ?: "").toString()
-        val endIndex = File(name = fileName).getFileName().length
-        post { setSelection(0, endIndex) }
+        setOnFocusChangeListener { _, hasFocus ->
+            if (saveExternalFilesViewModel.firstFocus.value == true && hasFocus) {
+                saveExternalFilesViewModel.firstFocus.value = false
+                val fileName = (text ?: "").toString()
+                val endIndex = File(name = fileName).getFileName().length
+                post { setSelection(0, endIndex) }
+            }
+        }
     }
 
     private fun isAuth(): Boolean {
@@ -432,6 +437,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     class SaveExternalFilesViewModel : ViewModel() {
         val folderId = MutableLiveData<Int?>()
+        val firstFocus = MutableLiveData(true)
     }
 
     companion object {
