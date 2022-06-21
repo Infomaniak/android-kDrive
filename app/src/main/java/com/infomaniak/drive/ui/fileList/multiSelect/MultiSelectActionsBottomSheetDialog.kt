@@ -61,6 +61,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         configureAvailableOffline()
         configureDownload()
         configureDuplicateFile()
+        configureMoveFile()
         configureRestoreFileIn()
         configureRestoreFileToOriginalPlace()
         configureDeletePermanently()
@@ -145,6 +146,10 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         duplicateFile.setOnClickListener { onActionSelected(SelectDialogAction.DUPLICATE) }
     }
 
+    protected open fun configureMoveFile() {
+        moveFile.setOnClickListener { onActionSelected(SelectDialogAction.MOVE) }
+    }
+
     protected open fun configureRestoreFileIn() {
         restoreFileIn.isGone = true
     }
@@ -196,6 +201,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
             SelectDialogAction.ADD_OFFLINE -> BulkOperationType.ADD_OFFLINE
             SelectDialogAction.REMOVE_OFFLINE -> BulkOperationType.REMOVE_OFFLINE
             SelectDialogAction.DUPLICATE -> BulkOperationType.COPY
+            SelectDialogAction.MOVE -> BulkOperationType.MOVE
             SelectDialogAction.RESTORE_IN -> BulkOperationType.RESTORE_IN
             SelectDialogAction.RESTORE_TO_ORIGIN -> BulkOperationType.RESTORE_TO_ORIGIN
             SelectDialogAction.DELETE_PERMANENTLY -> BulkOperationType.DELETE_PERMANENTLY
@@ -209,6 +215,9 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
                 when (finalType) {
                     BulkOperationType.COLOR_FOLDER -> openColorFolderBottomSheetDialog(null)
                     BulkOperationType.COPY -> duplicateFiles()
+                    BulkOperationType.MOVE -> {
+                        moveFiles(if (navigationArgs.areAllFromTheSameFolder) mainViewModel.currentFolder.value?.id else null)
+                    }
                     BulkOperationType.RESTORE_IN -> restoreIn()
                     BulkOperationType.RESTORE_TO_ORIGIN, BulkOperationType.DELETE_PERMANENTLY -> {
                         performBulkOperation(finalType, areAllFromTheSameFolder = false)
@@ -224,6 +233,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         ADD_FAVORITES, REMOVE_FAVORITES,
         ADD_OFFLINE, REMOVE_OFFLINE,
         DUPLICATE,
+        MOVE,
         COLOR_FOLDER,
         RESTORE_IN, RESTORE_TO_ORIGIN, DELETE_PERMANENTLY,
     }

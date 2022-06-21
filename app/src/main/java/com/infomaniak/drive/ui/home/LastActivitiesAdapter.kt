@@ -158,7 +158,7 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
     }
 
     private fun List<View>.setOnClick(file: File?, validPreviewFiles: ArrayList<File>) = forEach {
-        if (file == null || file.isFolder()) {
+        if (file == null) {
             it.isClickable = false
         } else {
             it.setOnClickListener { onFileClicked?.invoke(file, validPreviewFiles) }

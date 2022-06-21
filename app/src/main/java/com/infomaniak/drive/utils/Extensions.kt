@@ -144,20 +144,13 @@ fun Activity.setColorStatusBar(appBar: Boolean = false) = with(window) {
 }
 
 fun Activity.setColorNavigationBar(appBar: Boolean = false) = with(window) {
-    val color = if (appBar) R.color.appBar else R.color.background
-    when (resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)) {
-        Configuration.UI_MODE_NIGHT_YES -> {
-            navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, color)
-            lightNavigationBar(false)
-        }
-        else -> {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, color)
-                lightNavigationBar(true)
-            } else {
-                navigationBarColor = Color.BLACK
-            }
-        }
+    val nightModeEnabled = resources.isNightModeEnabled()
+    if (nightModeEnabled || Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val color = if (appBar) R.color.appBar else R.color.background
+        navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, color)
+        lightNavigationBar(!nightModeEnabled)
+    } else {
+        navigationBarColor = Color.BLACK
     }
 }
 

@@ -27,7 +27,6 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
-import com.google.android.material.checkbox.MaterialCheckBox
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
@@ -242,16 +241,17 @@ open class FileAdapter(
         }
     }
 
-    override fun onBindViewHolder(holder: FileViewHolder, position: Int, payloads: List<Any>) {
+    override fun onBindViewHolder(holder: FileViewHolder, position: Int, payloads: List<Any>) = with(holder.itemView) {
         if (payloads.firstOrNull() is Int && getItemViewType(position) != VIEW_TYPE_LOADING) {
             val progress = payloads.first() as Int
             val file = getFile(position).apply { currentProgress = progress }
             if (progress != Utils.INDETERMINATE_PROGRESS || !file.isPendingOffline(holder.itemView.context)) {
-                holder.itemView.apply {
-                    setupFileProgress(file, true)
-                    checkIfEnableFile(file)
-                }
+                setupFileProgress(file, true)
+                checkIfEnableFile(file)
             }
+        } else if (payloads.firstOrNull() is Boolean) {
+            val isChecked = payloads.first() as Boolean
+            fileChecked.isChecked = isChecked
         } else {
             super.onBindViewHolder(holder, position, payloads)
         }
@@ -284,7 +284,7 @@ open class FileAdapter(
 
             setupFileChecked(file)
             setupMenuButton(file)
-            setupCardClicksListeners(file)
+            setupCardClicksListeners(file, position)
         }
     }
 
@@ -297,7 +297,7 @@ open class FileAdapter(
 
     private fun MaterialCardView.displayFileChecked(file: File, isGrid: Boolean) = with(multiSelectManager) {
         fileChecked.apply {
-            isChecked = if (isSelectAllOn) !exceptedItemsIds.contains(file.id) else isSelectedFile(file)
+            isChecked = isSelectedFile(file)
             isVisible = true
         }
         filePreview.isVisible = isGrid
@@ -324,16 +324,16 @@ open class FileAdapter(
         }
     }
 
-    private fun MaterialCardView.setupCardClicksListeners(file: File) = with(multiSelectManager) {
+    private fun MaterialCardView.setupCardClicksListeners(file: File, position: Int) = with(multiSelectManager) {
 
-        fun MaterialCheckBox.selectFile() {
-            isChecked = !isChecked
-            onFileSelected(file, isChecked)
+        fun selectFile() {
+            onFileSelected(file, !isSelectedFile(file))
+            notifyItemChanged(position, isSelectedFile(file))
         }
 
         setOnClickListener {
             if (isMultiSelectOn) {
-                fileChecked.selectFile()
+                selectFile()
             } else {
                 onFileClicked?.invoke(file)
             }
@@ -345,7 +345,7 @@ open class FileAdapter(
                     fileChecked.isChecked = false
                     openMultiSelect?.invoke()
                 }
-                fileChecked.selectFile()
+                selectFile()
                 true
             } else {
                 false

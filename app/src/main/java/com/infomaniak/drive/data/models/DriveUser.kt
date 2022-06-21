@@ -47,9 +47,7 @@ open class DriveUser(
 
     fun isExternalUser(): Boolean = type == Type.SHARED.value
 
-    fun getUserAvatar(): String {
-        return avatar.ifBlank { avatarUrl.toString() }
-    }
+    fun getUserAvatar() = avatar.ifBlank { avatarUrl.toString() }
 
     fun getInitials(): String {
         displayName.split(" ").let { initials ->

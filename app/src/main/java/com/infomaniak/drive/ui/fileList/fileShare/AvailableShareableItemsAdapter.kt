@@ -44,7 +44,7 @@ import kotlinx.android.synthetic.main.item_user.view.*
 class AvailableShareableItemsAdapter(
     context: Context,
     private var itemList: ArrayList<Shareable>,
-    var notShareableUserIds: ArrayList<Int> = arrayListOf(),
+    var notShareableIds: ArrayList<Int> = arrayListOf(),
     var notShareableEmails: ArrayList<String> = arrayListOf(),
     private val onItemClick: (item: Shareable) -> Unit,
 ) : ArrayAdapter<Shareable>(context, R.layout.item_user, itemList), Filterable {
@@ -64,7 +64,7 @@ class AvailableShareableItemsAdapter(
 
     fun removeFromNotShareables(item: Shareable) {
         when (item) {
-            is DriveUser, is Team -> notShareableUserIds.remove(item.id)
+            is DriveUser, is Team -> notShareableIds.remove(item.id)
             is Invitation -> notShareableEmails.remove(item.email)
         }
     }
@@ -135,7 +135,7 @@ class AvailableShareableItemsAdapter(
                         it.getFilterValue().standardize()
                             .contains(searchTerm) || ((it is DriveUser) && it.email.standardize().contains(searchTerm))
                     }.filterNot { displayedItem ->
-                        notShareableUserIds.any { it == displayedItem.id } ||
+                        notShareableIds.any { it == displayedItem.id } ||
                                 notShareableEmails.any { displayedItem is DriveUser && it == displayedItem.email }
                     }
                 return FilterResults().apply {
@@ -166,9 +166,9 @@ class AvailableShareableItemsAdapter(
 
     private fun Shareable.isShareable(): Boolean {
         return when (this) {
-            is DriveUser -> !notShareableUserIds.contains(this.id) && !notShareableEmails.contains(this.email)
-            is Invitation -> !notShareableUserIds.contains(this.user?.id) && !notShareableEmails.contains(this.email)
-            is Team -> !notShareableUserIds.contains(this.id)
+            is DriveUser -> !notShareableIds.contains(this.id) && !notShareableEmails.contains(this.email)
+            is Invitation -> !notShareableIds.contains(this.user?.id) && !notShareableEmails.contains(this.email)
+            is Team -> !notShareableIds.contains(this.id)
             else -> true
         }
     }
