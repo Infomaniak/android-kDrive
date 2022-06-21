@@ -262,19 +262,6 @@ fun Array<Int>.getNearestValue(number: Int): Int {
 
 fun String.isEmail(): Boolean = Patterns.EMAIL_ADDRESS.matcher(this).matches()
 
-fun String.getFileExtension(): String? {
-    val extension = this.substringAfterLast('.')
-    return if (extension == this) null else ".$extension"
-}
-
-fun String.getFileName(): String {
-    val fileExtension = getFileExtension() ?: ""
-    return when {
-        fileExtension.isBlank() -> this
-        else -> substringBeforeLast(fileExtension)
-    }
-}
-
 fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
     context: Context,
     itemList: List<Shareable>,

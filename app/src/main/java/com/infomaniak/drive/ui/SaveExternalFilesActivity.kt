@@ -24,7 +24,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import android.provider.OpenableColumns
-import android.text.Selection.setSelection
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
@@ -100,7 +99,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private fun TextInputEditText.selectAllButFileExtension() {
         val fileName = (text ?: "").toString()
-        val endIndex = fileName.getFileName().length
+        val endIndex = File(name = fileName).getFileName().length
         post { setSelection(0, endIndex) }
     }
 
