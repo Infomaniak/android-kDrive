@@ -28,5 +28,6 @@ import java.util.*
 @RealmClass(embedded = true)
 open class DropBoxValidity(
     var date: Date? = null,
-    @SerializedName("has_expired") var hasExpired: Boolean? = null,
+    @SerializedName("has_expired")
+    var hasExpired: Boolean? = null,
 ) : RealmObject(), Parcelable

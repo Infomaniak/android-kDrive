@@ -24,6 +24,8 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 open class TeamDetails(
-    @SerializedName("drive_id") var driveId: Int = -1,
-    @SerializedName("users_count") var usersCount: Int = 0
+    @SerializedName("drive_id")
+    var driveId: Int = -1,
+    @SerializedName("users_count")
+    var usersCount: Int = 0
 ) : RealmObject(), Parcelable

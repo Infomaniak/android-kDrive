@@ -27,10 +27,16 @@ data class FileComment(
     var liked: Boolean,
     var likes: ArrayList<DriveUser>?,
     val responses: List<FileComment>,
-    @SerializedName("parent_id") val parentId: Int,
-    @SerializedName("updated_at") val updatedAt: Date,
-    @SerializedName("created_at") val createdAt: Date,
-    @SerializedName("likes_count") var likesCount: Int,
-    @SerializedName("is_resolved") val isResolved: Boolean,
-    @SerializedName("responses_count") val responsesCount: Int
+    @SerializedName("parent_id")
+    val parentId: Int,
+    @SerializedName("updated_at")
+    val updatedAt: Date,
+    @SerializedName("created_at")
+    val createdAt: Date,
+    @SerializedName("likes_count")
+    var likesCount: Int,
+    @SerializedName("is_resolved")
+    val isResolved: Boolean,
+    @SerializedName("responses_count")
+    val responsesCount: Int
 )

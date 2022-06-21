@@ -24,7 +24,8 @@ import java.util.*
 
 @RealmClass(embedded = true)
 open class FileCategory(
-    @SerializedName("category_id") var categoryId: Int = -1,
+    @SerializedName("category_id")
+    var categoryId: Int = -1,
     @SerializedName("user_validation")
     var userValidation: String = "", // State of user validation after auto assignment from AI
     @SerializedName("is_generated_by_ai")

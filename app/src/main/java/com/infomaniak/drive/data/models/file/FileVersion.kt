@@ -26,7 +26,9 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 @RealmClass(embedded = true)
 open class FileVersion(
-    @SerializedName("is_multiple") var isMultiple: Boolean = false,
+    @SerializedName("is_multiple")
+    var isMultiple: Boolean = false,
     var number: Int = 0,
-    @SerializedName("total_size") var totalSize: Long = 0,
+    @SerializedName("total_size")
+    var totalSize: Long = 0,
 ) : RealmObject(), Parcelable
