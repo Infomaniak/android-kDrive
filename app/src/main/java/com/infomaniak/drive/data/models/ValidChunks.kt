@@ -20,9 +20,14 @@ package com.infomaniak.drive.data.models
 import com.google.gson.annotations.SerializedName
 
 data class ValidChunks(
-    @SerializedName("number_of_expected_chunks") val expectedChunksCount: Int,
-    @SerializedName("size_to_upload") val sizeToUpload: Long,
-    @SerializedName("uploaded_chunk_count") val uploadedChunkCount: Int,
-    @SerializedName("uploaded_size") val uploadedSize: Long,
-    @SerializedName("valid_chunks") val validChunks: ArrayList<Int>
+    @SerializedName("number_of_expected_chunks")
+    val expectedChunksCount: Int,
+    @SerializedName("size_to_upload")
+    val sizeToUpload: Long,
+    @SerializedName("uploaded_chunk_count")
+    val uploadedChunkCount: Int,
+    @SerializedName("uploaded_size")
+    val uploadedSize: Long,
+    @SerializedName("valid_chunks")
+    val validChunks: ArrayList<Int>
 )

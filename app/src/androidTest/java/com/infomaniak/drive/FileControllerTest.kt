@@ -1,9 +1,9 @@
 package com.infomaniak.drive
 
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.api.ApiRepository.addMultiAccess
 import com.infomaniak.drive.data.api.ApiRepository.getDirectoryFiles
 import com.infomaniak.drive.data.api.ApiRepository.getLastModifiedFiles
-import com.infomaniak.drive.data.api.ApiRepository.addMultiAccess
 import com.infomaniak.drive.data.api.ApiRepository.renameFile
 import com.infomaniak.drive.data.cache.FileController.FAVORITES_FILE_ID
 import com.infomaniak.drive.data.cache.FileController.getFilesFromCacheOrDownload

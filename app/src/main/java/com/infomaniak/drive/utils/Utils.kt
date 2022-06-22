@@ -18,7 +18,9 @@
 package com.infomaniak.drive.utils
 
 import android.app.Dialog
-import android.content.*
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -213,7 +215,11 @@ object Utils {
     fun convertBytesToGigaBytes(bytes: Long) = (bytes / 1024.0.pow(3))
     fun convertGigaByteToBytes(gigaBytes: Double) = (gigaBytes * 1024.0.pow(3)).toLong()
 
-    fun Context.moveFileClicked(disabledFolderId: Int?, selectFolderResultLauncher: ActivityResultLauncher<Intent>, mainViewModel: MainViewModel) {
+    fun Context.moveFileClicked(
+        disabledFolderId: Int?,
+        selectFolderResultLauncher: ActivityResultLauncher<Intent>,
+        mainViewModel: MainViewModel
+    ) {
         mainViewModel.ignoreSyncOffline = true
         Intent(this, SelectFolderActivity::class.java).apply {
             putExtras(
