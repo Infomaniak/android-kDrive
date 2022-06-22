@@ -218,12 +218,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private suspend fun UploadFile.startUploadFile(size: Long): Boolean {
         return if (size != 0L) {
-            if (fileSize != size) {
-                UploadFile.update(uri) {
-                    it.fileSize = size
-                    fileSize = size
-                }
-            }
+            if (fileSize != size) updateFileSize(size)
 
             currentUploadTask = UploadTask(context = applicationContext, uploadFile = this, worker = this@UploadWorker)
             currentUploadTask!!.start().also {
