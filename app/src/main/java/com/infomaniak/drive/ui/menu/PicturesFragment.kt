@@ -33,7 +33,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.WorkInfo
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.databinding.FragmentMenuPicturesBinding
@@ -232,15 +231,8 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
 
     override fun getAllSelectedFilesCount(): Int? = null
 
-    fun onMoveButtonClicked() {
-        // TODO: Use `parentId` when https://github.com/Infomaniak/android-kDrive/issues/532 is merged
-        val folderId = if (multiSelectManager.selectedItems.count() == 1) {
-            FileController.getParentFileProxy(multiSelectManager.selectedItems[0].id, mainViewModel.realm)?.id
-        } else {
-            null
-        }
-
-        moveFiles(folderId)
+    fun onMoveButtonClicked() = with(multiSelectManager.selectedItems) {
+        moveFiles(disabledFolderId = if (count() == 1) first()?.parentId else null)
     }
 
     override fun performBulkOperation(

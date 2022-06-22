@@ -66,7 +66,13 @@ class SelectFolderActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_select_folder)
         setSaveButton(customArgs)
-        disabledFolderId?.let { initiateNavigationToCurrentFolder(it, currentUserDrive) } ?: Unit
+
+        disabledFolderId?.let { folderId ->
+            // Simply navigate when the folder exists in the local database
+            FileController.getFileProxyById(folderId, customRealm = mainViewModel.realm)?.let {
+                initiateNavigationToCurrentFolder(folderId, currentUserDrive)
+            }
+        }
     }
 
     private fun Int.getIntOrNull(): Int? = if (this <= 0) null else this
