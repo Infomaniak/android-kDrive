@@ -484,7 +484,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             safeNavigate(
                 FileListFragmentDirections.actionFileListFragmentToAccessDeniedBottomSheetFragment(
                     isAdmin = AccountUtils.getCurrentDrive()?.isUserAdmin() ?: false,
-                    fileId = id,
+                    folderId = id,
+                    folderName = name
                 )
             )
         } else {
