@@ -199,7 +199,13 @@
         android:label="MultiSelectActionsBottomSheetDialog"
         tools:layout="@layout/fragment_bottom_sheet_multi_select_actions">
         <argument
+            android:name="parentId"
+            app:argType="integer" />
+        <argument
             android:name="fileIds"
+            app:argType="integer[]" />
+        <argument
+            android:name="exceptFileIds"
             app:argType="integer[]" />
         <argument
             android:name="onlyFolders"

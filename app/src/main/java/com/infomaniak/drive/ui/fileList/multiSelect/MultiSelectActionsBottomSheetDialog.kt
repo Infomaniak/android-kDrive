@@ -32,6 +32,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialog.Companion.openColorFolderBottomSheetDialog
@@ -138,7 +139,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
                 }
             }
 
-            isVisible = navigationArgs.fileIds.isNotEmpty()
+            isVisible = navigationArgs.fileIds.isNotEmpty() || navigationArgs.isAllSelected
         }
     }
 
@@ -166,13 +167,14 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         if (navigationArgs.areAllFromTheSameFolder) downloadArchive() else downloadFiles()
     }
 
-    private fun downloadArchive() {
+    private fun downloadArchive() = with(navigationArgs) {
+        val archiveBody = if (isAllSelected) ArchiveBody(parentId, exceptFileIds) else ArchiveBody(fileIds)
         liveData(Dispatchers.IO) {
-            emit(ApiRepository.getUUIDArchiveFiles(AccountUtils.currentDriveId, navigationArgs.fileIds))
+            emit(ApiRepository.buildArchive(AccountUtils.currentDriveId, archiveBody))
         }.observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
-                apiResponse.data?.let {
-                    val downloadURL = Uri.parse(ApiRoutes.downloadArchiveFiles(AccountUtils.currentDriveId, it.uuid))
+                apiResponse.data?.let { archiveUUID ->
+                    val downloadURL = Uri.parse(ApiRoutes.downloadArchiveFiles(AccountUtils.currentDriveId, archiveUUID.uuid))
                     requireContext().startDownloadFile(downloadURL, ARCHIVE_FILE_NAME)
                 }
             } else {

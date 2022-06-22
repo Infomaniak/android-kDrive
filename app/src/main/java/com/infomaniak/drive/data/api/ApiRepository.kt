@@ -21,6 +21,7 @@ import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
 import com.infomaniak.drive.data.api.ApiRoutes.activitiesWithQuery
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.lib.core.api.ApiRepositoryCore
@@ -389,8 +390,8 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.bulkAction(bulkOperation.parent.driveId), POST, bulkOperation.toMap())
     }
 
-    fun getUUIDArchiveFiles(driveId: Int, fileIds: IntArray): ApiResponse<ArchiveUUID> {
-        return callApi(ApiRoutes.getUUIDArchiveFiles(driveId), POST, mapOf("file_ids" to fileIds))
+    fun buildArchive(driveId: Int, archiveBody: ArchiveBody): ApiResponse<ArchiveUUID> {
+        return callApi(ApiRoutes.buildArchive(driveId), POST, archiveBody)
     }
 
     private fun pagination(page: Int, perPage: Int = PER_PAGE) = "page=$page&per_page=$perPage"

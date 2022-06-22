@@ -46,8 +46,15 @@ object ApiRoutes {
     fun getAllDrivesData() = "${DRIVE_API}init?with=drives,users,teams,ips,categories"
     //endregion
 
+    /** Archive */
+    //region Archive
+    fun buildArchive(driveId: Int): String = "${fileURL(driveId)}/archives"
+
+    fun downloadArchiveFiles(driveId: Int, uuid: String): String = "${buildArchive(driveId)}/$uuid"
+    //endregion
+
     /** Access/Invitation */
-    //region File Access/Invitation
+    //region Access/Invitation
     fun accessUrl(file: File) = "${fileURL(file)}/access"
 
     fun fileInvitationAccess(file: File, invitationId: Int) = "${v2URL(file.driveId)}/files/invitations/$invitationId"
@@ -202,10 +209,6 @@ object ApiRoutes {
     fun uploadFile(driveId: Int, folderId: Int) = "${DRIVE_API}$driveId/file/$folderId/upload"
 
     fun showOffice(file: File) = "${OFFICE_URL}${file.driveId}/${file.id}"
-
-    fun getUUIDArchiveFiles(driveId: Int): String = "${DRIVE_API}$driveId/file/archive"
-
-    fun downloadArchiveFiles(driveId: Int, uuid: String): String = "${DRIVE_API}$driveId/file/archive/$uuid/download"
 
     fun upgradeDrive(driveId: Int): String = "${SHOP_URL}drive/$driveId"
 
