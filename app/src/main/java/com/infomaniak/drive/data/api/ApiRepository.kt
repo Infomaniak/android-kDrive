@@ -57,6 +57,15 @@ object ApiRepository : ApiRepositoryCore() {
             "&actions[]=collaborative_folder_update" +
             "&actions[]=collaborative_folder_delete"
 
+    private const val ADDITIONAL_ACTIONS = "&actions[]=file_access" +
+            "&actions[]=comment_create" +
+            "&actions[]=comment_update" +
+            "&actions[]=comment_delete" +
+            "&actions[]=comment_like" +
+            "&actions[]=comment_unlike" +
+            "&actions[]=comment_resolve" +
+            "&actions[]=share_link_show"
+
     fun getAllDrivesData(
         okHttpClient: OkHttpClient
     ): ApiResponse<DriveInfo> {
@@ -92,7 +101,8 @@ object ApiRepository : ApiRepositoryCore() {
         okHttpClient: OkHttpClient = HttpClient.okHttpClientLongTimeout,
     ): ApiResponse<ArrayList<FileActivity>> {
         val queries = if (forFileList) "&depth=children&from_date=${file.responseAt}&$activitiesWithQuery" else "&with=user"
-        val url = "${ApiRoutes.getFileActivities(file)}?${pagination(page)}$queries" + if (forFileList) ACTIONS else ""
+        val url = "${ApiRoutes.getFileActivities(file)}?${pagination(page)}$queries$ACTIONS" +
+                if (forFileList) "" else ADDITIONAL_ACTIONS
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
