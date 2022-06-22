@@ -91,7 +91,7 @@ class HomeActivitiesFragment : Fragment() {
                 onFileClicked = { currentFile, validPreviewFiles ->
                     when {
                         currentFile.isTrashed() -> showSnackbar(R.string.errorPreviewTrash, true)
-                        currentFile.isFolder() -> navigateToParentFolder(currentFile, mainViewModel)
+                        currentFile.isFolder() -> navigateToParentFolder(currentFile.id, mainViewModel)
                         else -> Utils.displayFile(mainViewModel, findNavController(), currentFile, validPreviewFiles)
                     }
                 }

@@ -34,4 +34,3 @@ data class ValidChunks(
 ) {
     inline val validChunksIds get() = chunks.map { it.number }
 }
-}
