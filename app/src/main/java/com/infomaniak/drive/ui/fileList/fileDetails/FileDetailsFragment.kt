@@ -54,21 +54,20 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         return inflater.inflate(R.layout.fragment_file_details, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(navigationArgs) {
         super.onViewCreated(view, savedInstanceState)
 
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        FileController.getFileById(navigationArgs.fileId, navigationArgs.userDrive)?.let { file -> setFile(file) }
+        FileController.getFileById(fileId, userDrive)?.let(::setFile)
 
-        mainViewModel.getFileDetails(navigationArgs.fileId, navigationArgs.userDrive)
-            .observe(viewLifecycleOwner) { fileResponse ->
-                fileResponse?.let { setFile(it) }
+        mainViewModel.getFileDetails(fileId, userDrive).observe(viewLifecycleOwner) { fileResponse ->
+            fileResponse?.let(::setFile)
 
-                mainViewModel.getFileShare(navigationArgs.fileId).observe(viewLifecycleOwner) { shareResponse ->
-                    shareResponse.data?.let { fileDetailsViewModel.currentFileShare.value = it }
-                }
+            mainViewModel.getFileShare(fileId).observe(viewLifecycleOwner) { shareResponse ->
+                shareResponse.data?.let { fileDetailsViewModel.currentFileShare.value = it }
             }
+        }
     }
 
     override fun onStart() {

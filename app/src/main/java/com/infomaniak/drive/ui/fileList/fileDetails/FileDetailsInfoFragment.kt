@@ -172,7 +172,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
     private fun setupPathLocationButton() {
         FileController.getParentFile(this.file.id)?.let { folder ->
             pathLocationButton.isVisible = true
-            pathLocationButton.setOnClickListener { navigateToParentFolder(folder, mainViewModel) }
+            pathLocationButton.setOnClickListener { navigateToParentFolder(folder.id, mainViewModel) }
         }
     }
 

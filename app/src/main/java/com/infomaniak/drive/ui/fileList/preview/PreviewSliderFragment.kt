@@ -319,7 +319,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun goToFolder() {
-        FileController.getParentFile(currentFile.id)?.let { folder -> navigateToParentFolder(folder, mainViewModel) }
+        FileController.getParentFile(currentFile.id)?.let { folder -> navigateToParentFolder(folder.id, mainViewModel) }
     }
 
     override fun sharePublicLink() {
