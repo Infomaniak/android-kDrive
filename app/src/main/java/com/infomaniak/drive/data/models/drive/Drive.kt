@@ -87,6 +87,8 @@ open class Drive(
     val teams: DriveTeamsCategories
         get() = _teams ?: DriveTeamsCategories()
 
+    inline val isFreePack get() = pack == DrivePack.FREE.value
+
     fun convertToFile(rootName: String? = null): File {
         return File(
             id = if (rootName == null) id else Utils.ROOT_ID,
