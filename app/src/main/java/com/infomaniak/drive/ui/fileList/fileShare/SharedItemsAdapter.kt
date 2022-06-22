@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.Share.UserFileAccess
 import com.infomaniak.drive.utils.loadAny
 import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.lib.core.views.ViewHolder
@@ -48,7 +49,7 @@ class SharedItemsAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = itemList[position]
         holder.itemView.apply {
-            if (item.id != file.createdBy && file.rights?.share == true) {
+            if (item.id != file.createdBy && file.rights?.canShare == true) {
                 setOnClickListener { onItemClicked(item) }
                 chevron.isVisible = true
             } else {
@@ -56,39 +57,41 @@ class SharedItemsAdapter(
             }
 
             when (item) {
-                is DriveUser -> bindDriveUser(item)
+                is UserFileAccess -> bindDriveUser(item)
                 is Invitation -> bindInvitation(item)
                 is Team -> bindTeam(item)
             }
         }
     }
 
-    private fun View.bindDriveUser(driveUser: DriveUser) {
-        name.text = driveUser.displayName
-        infos.text = driveUser.email
-        avatar.loadAvatar(driveUser)
+    private fun View.bindDriveUser(userFileAccess: UserFileAccess) {
+        name.text = userFileAccess.name
+        infos.text = userFileAccess.email
+        userFileAccess.user?.let { avatar.loadAvatar(it) }
 
-        rightsValue.setText(driveUser.getFilePermission().translation)
+        rightsValue.setText(userFileAccess.getFilePermission().translation)
+
         externalUserLabel.apply {
-            if (driveUser.isExternalUser()) {
+            if (userFileAccess.isExternalUser()) {
                 text = context.getString(
-                    if (driveUser.status == "pending") R.string.shareUserNotAccepted
+                    if (userFileAccess.status == UserFileAccess.UserFileAccessStatus.PENDING) R.string.shareUserNotAccepted
                     else R.string.shareUserExternal
                 )
                 isVisible = true
             } else isGone = true
         }
-        if (file.createdBy == driveUser.id) {
+
+        if (file.createdBy == userFileAccess.id) {
             rightsValue.setTextColor(ContextCompat.getColor(context, R.color.secondaryText))
         }
     }
 
     private fun View.bindInvitation(invitation: Invitation) {
-        if (invitation.displayName.isNullOrEmpty()) {
+        if (invitation.name.isEmpty()) {
             name.text = invitation.email
             infos.isGone = true
         } else {
-            name.text = invitation.displayName
+            name.text = invitation.name
             infos.text = invitation.email
             infos.isVisible = true
         }
@@ -101,7 +104,7 @@ class SharedItemsAdapter(
             isVisible = true
         }
 
-        if (invitation.id != file.createdBy && file.rights?.share == true) {
+        if (invitation.id != file.createdBy && file.rights?.canShare == true) {
             setOnClickListener { onItemClicked(invitation) }
         }
     }
@@ -156,7 +159,7 @@ class SharedItemsAdapter(
     fun updateItemPermission(shareable: Shareable, newPermission: Shareable.ShareablePermission) {
         val index = getIndexOfShareable(shareable.id)
         itemList.getOrNull(index)?.apply {
-            permission = newPermission.apiValue
+            right = newPermission.apiValue
             notifyItemChanged(index)
         }
     }

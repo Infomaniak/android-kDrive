@@ -34,14 +34,10 @@ open class DriveUser(
     var displayName: String = "",
     var avatar: String = "",
     var email: String = "",
-    override var permission: String = "",
-    @SerializedName("invit_drive")
-    var invitDrive: Boolean = false,
-    @SerializedName("invit_drive_id")
-    var invitDriveId: Int = -1,
-    var role: String = "",
-    var status: String = "",
     var type: String = "",
+
+    /** Never used */
+    override var right: String = "",
 ) : RealmObject(), Parcelable, Shareable {
 
     constructor(user: User) : this() {

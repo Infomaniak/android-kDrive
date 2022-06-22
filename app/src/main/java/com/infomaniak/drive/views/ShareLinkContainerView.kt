@@ -52,7 +52,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
         currentFile = file
         this.shareLink = shareLink
         isVisible = true
-        urlValue = file.shareLink ?: ""
+        urlValue = file.sharelink?.url ?: ""
 
         selectUi(file.isDropBox())
 
@@ -125,13 +125,13 @@ class ShareLinkContainerView @JvmOverloads constructor(
         val resId = R.string.shareLinkPublicRightDescription
 
         val permission = context.getString(
-            if (shareLink?.canEdit == true) R.string.shareLinkOfficePermissionWriteTitle
+            if (shareLink?.capabilities?.canEdit == true) R.string.shareLinkOfficePermissionWriteTitle
             else R.string.shareLinkOfficePermissionReadTitle
         ).lowercase()
 
         val fileName = currentFile.getTypeName(context)
 
-        val password = if (shareLink?.permission == ShareLink.ShareLinkFilePermission.PASSWORD) {
+        val password = if (shareLink?.right == ShareLink.ShareLinkFilePermission.PASSWORD) {
             context.getString(R.string.shareLinkPublicRightDescriptionPassword)
         } else {
             ""
@@ -146,7 +146,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
         return context.getString(resId, permission, fileName, password, validityDate)
     }
 
-    private fun File.getTypeName(context: Context): String = context.getString(getTypeName(isFolder(), onlyoffice))
+    private fun File.getTypeName(context: Context): String = context.getString(getTypeName(isFolder(), hasOnlyoffice))
 
     companion object {
 

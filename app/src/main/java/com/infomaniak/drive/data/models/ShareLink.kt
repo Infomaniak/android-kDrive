@@ -18,34 +18,44 @@
 package com.infomaniak.drive.data.models
 
 import android.os.Parcelable
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.file.sharelink.ShareLinkCapabilities
+import com.infomaniak.lib.core.utils.ApiController.gson
+import com.infomaniak.lib.core.utils.Utils.enumValueOfOrNull
+import io.realm.RealmObject
+import io.realm.annotations.Ignore
+import io.realm.annotations.RealmClass
 import kotlinx.android.parcel.Parcelize
 import java.util.*
 
 @Parcelize
-data class ShareLink(
-    val url: String = "",
-    val name: String = "",
-    val path: String = "",
-    val type: String = "",
-    var password: String? = null,
-    val onlyoffice: Boolean = false,
-    var permission: ShareLinkFilePermission = ShareLinkFilePermission.RESTRICTED,
-    @SerializedName("file_id") val fileId: Int = 0,
-    @SerializedName("created_by") val createdBy: Int = 0,
-    @SerializedName("created_at") val createdAt: Long = 0,
-    @SerializedName("updated_at") val updatedAt: Long = 0,
-    @SerializedName("mime_type") val mimeType: String = "",
-    @SerializedName("valid_until") var validUntil: Date? = null,
-    @SerializedName("can_edit") var canEdit: Boolean = false,
-    @SerializedName("show_stats") val showStats: Boolean = false,
-    @SerializedName("converted_type") val convertedType: String = "",
-    @SerializedName("block_comments") var blockComments: Boolean = true,
-    @SerializedName("block_downloads") var blockDownloads: Boolean = false,
-    @SerializedName("block_information") var blockInformation: Boolean = true,
-    @SerializedName("onlyoffice_convert_extension") val onlyofficeConvertExtension: Boolean = false
-) : Parcelable {
+@RealmClass(embedded = true)
+open class ShareLink(
+    var url: String = "",
+    @SerializedName("right")
+    var _right: String = ShareLinkFilePermission.RESTRICTED.name,
+    @SerializedName("valid_until")
+    var validUntil: Date? = null,
+    var capabilities: ShareLinkCapabilities? = null,
+) : RealmObject(), Parcelable {
+
+    inline var right
+        get() = enumValueOfOrNull<ShareLinkFilePermission>(_right)
+        set(value) {
+            value?.let { _right = value.name }
+        }
+
+    /**
+     * Local properties
+     */
+    @Ignore
+    var newPassword: String? = null
+
+    @Ignore
+    var newRight: ShareLinkFilePermission? = null
 
     @Parcelize
     enum class ShareLinkFilePermission(
@@ -160,5 +170,31 @@ data class ShareLink(
             R.string.shareLinkOfficePermissionWriteFolderDescription,
             true
         )
+    }
+
+    inner class ShareLinkSettings(
+        @SerializedName("can_comment")
+        var canComment: Boolean? = capabilities?.canComment,
+        @SerializedName("can_download")
+        var canDownload: Boolean? = capabilities?.canDownload,
+        @SerializedName("can_edit")
+        var canEdit: Boolean? = capabilities?.canEdit,
+        @SerializedName("can_see_info")
+        var canSeeInfo: Boolean? = capabilities?.canSeeInfo,
+        @SerializedName("can_see_stats")
+        var canSeeStats: Boolean? = capabilities?.canSeeStats,
+        var password: String? = newPassword,
+        var right: ShareLinkFilePermission? = newRight,
+        @SerializedName("valid_until")
+        var validUntil: Date? = this@ShareLink.validUntil,
+    ) {
+        fun toJsonElement(): JsonObject {
+            return with(gson.newBuilder().serializeNulls().create()) {
+                JsonParser.parseString(toJson(this@ShareLinkSettings)).asJsonObject.apply {
+                    if (password == null) remove(ShareLinkSettings::password.name)
+                    if (right == null) remove(ShareLinkSettings::right.name)
+                }
+            }
+        }
     }
 }

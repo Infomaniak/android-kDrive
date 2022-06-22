@@ -55,7 +55,7 @@ class NotSupportedExtensionBottomSheetDialog : InformationBottomSheetDialog() {
             }
 
             actionButton.initProgress(this)
-            actionButton.text = getString(R.string.buttonCreateOnlyOfficeCopy, currentFile.onlyofficeConvertExtension)
+            actionButton.text = getString(R.string.buttonCreateOnlyOfficeCopy, currentFile.conversion?.onlyofficeExtension)
             actionButton.setOnClickListener {
                 actionButton.showProgress()
                 mainViewModel.convertFile(currentFile).observe(viewLifecycleOwner) { apiResponse ->

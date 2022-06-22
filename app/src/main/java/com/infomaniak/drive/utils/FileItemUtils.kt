@@ -41,7 +41,7 @@ import androidx.core.view.isVisible
 import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.models.ConvertedType
+import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.VisibilityType
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED_CATEGORIES
@@ -115,7 +115,7 @@ private fun View.displayDriveIcon(file: File, viewHolder: FileViewHolder?) {
 
 private fun View.displayFileIcon(file: File, isGrid: Boolean) {
     val fileType = file.getFileType()
-    val isGraphic = fileType == ConvertedType.IMAGE || fileType == ConvertedType.VIDEO
+    val isGraphic = fileType == ExtensionType.IMAGE || fileType == ExtensionType.VIDEO
 
     when {
         file.hasThumbnail && (isGrid || isGraphic) -> {
@@ -194,7 +194,7 @@ fun File.getFolderIcon(): Pair<Int, String?> {
         VisibilityType.IS_TEAM_SPACE -> R.drawable.ic_folder_common_documents to null
         VisibilityType.IS_TEAM_SPACE_FOLDER -> R.drawable.ic_folder_common_documents to getCommonFolderDefaultColor()
         VisibilityType.IS_SHARED_SPACE -> R.drawable.ic_folder_shared to null
-        VisibilityType.IS_COLLABORATIVE_FOLDER -> R.drawable.ic_folder_dropbox to color
+        VisibilityType.IS_DROPBOX -> R.drawable.ic_folder_dropbox to color
         else -> R.drawable.ic_folder_filled to color
     }
 }

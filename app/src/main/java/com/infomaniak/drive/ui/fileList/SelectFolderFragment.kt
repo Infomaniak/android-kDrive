@@ -56,7 +56,7 @@ class SelectFolderFragment : FileListFragment() {
         toolbar.menu.findItem(R.id.addFolderItem).apply {
             setOnMenuItemClickListener {
                 val selectFolderActivity = requireActivity() as? SelectFolderActivity
-                if (FileController.getFileById(folderId, userDrive)?.rights?.newFolder == true) {
+                if (FileController.getFileById(folderId, userDrive)?.rights?.canCreateDirectory == true) {
                     selectFolderActivity?.hideSaveButton()
                     trackNewElementEvent("createFolderOnTheFly")
                     safeNavigate(
@@ -91,7 +91,7 @@ class SelectFolderFragment : FileListFragment() {
                 showSaveButton()
                 val currentFolderRights = FileController.getFileById(folderId, userDrive)?.rights ?: Rights()
                 val enable = folderId != selectFolderViewModel.disableSelectedFolderId
-                        && (currentFolderRights.moveInto || currentFolderRights.newFile)
+                        && (currentFolderRights.canMoveInto || currentFolderRights.canCreateFile)
                 enableSaveButton(enable)
             }
         }

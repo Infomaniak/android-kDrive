@@ -26,7 +26,7 @@ import io.realm.RealmMigration
 
 class UploadMigration : RealmMigration {
     companion object {
-        const val bddVersion = 3L // Must be bumped when the schema changes
+        const val bddVersion = 4L // Must be bumped when the schema changes
     }
 
     override fun migrate(realm: DynamicRealm, oldVersion: Long, newVersion: Long) {
@@ -35,7 +35,7 @@ class UploadMigration : RealmMigration {
         // DynamicRealm exposes an editable schema
         val schema = realm.schema
 
-        // Migrate to version 1: Create table MediaFolder and remove some fields
+        //region Migrate to version 1: Create table MediaFolder and remove some fields
         if (oldVersionTemp == 0L) {
             // Add MediaFolder table
             schema.create(MediaFolder::class.java.simpleName)!!
@@ -48,8 +48,9 @@ class UploadMigration : RealmMigration {
                 .removeField("syncScreenshot")
             oldVersionTemp++
         }
+        //endregion
 
-        // Migrate to version 2: Add new fields in UploadFile and SyncSettings table
+        //region Migrate to version 2: Add new fields in UploadFile and SyncSettings table
         if (oldVersionTemp == 1L) {
             schema.get(UploadFile::class.java.simpleName)!!
                 .addField(UploadFile::remoteSubFolder.name, String::class.java)
@@ -57,12 +58,23 @@ class UploadMigration : RealmMigration {
                 .addField(SyncSettings::createDatedSubFolders.name, Boolean::class.java, FieldAttribute.REQUIRED)
             oldVersionTemp++
         }
+        //endregion
 
-        // Migrate to version 3: Add new field in SyncSetting table
+        //region Migrate to version 3: Add new field in SyncSetting table
         if (oldVersionTemp == 2L) {
             schema.get(SyncSettings::class.java.simpleName)!!
                 .addField(SyncSettings::deleteAfterSync.name, Boolean::class.java, FieldAttribute.REQUIRED)
             oldVersionTemp++
         }
+        //endregion
+
+        //region Migrate to version 4: Update fields with api v2
+        if (oldVersionTemp == 3L) {
+            schema.get(UploadFile::class.java.simpleName)!!
+                .addField(UploadFile::uploadToken.name, String::class.java)
+                .removeField("identifier")
+            oldVersionTemp++
+        }
+        //endregion
     }
 }

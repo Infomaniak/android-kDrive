@@ -60,9 +60,9 @@ class SaveExternalUriAdapter(val uris: ArrayList<Uri>) : RecyclerView.Adapter<Vi
                         val name = initAndGetFileName(uri, cursor)
                         val file = File(
                             id = uri.hashCode(),
-                            isFromUploads = true,
                             name = name,
-                            path = uri.toString()
+                            path = uri.toString(),
+                            isFromUploads = true
                         )
 
                         fileName.text = name

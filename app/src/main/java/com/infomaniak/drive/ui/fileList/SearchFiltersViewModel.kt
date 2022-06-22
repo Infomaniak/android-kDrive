@@ -18,7 +18,7 @@
 package com.infomaniak.drive.ui.fileList
 
 import androidx.lifecycle.ViewModel
-import com.infomaniak.drive.data.models.ConvertedType
+import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.SearchCategoriesOwnershipFilter
 import com.infomaniak.drive.data.models.SearchDateFilter
 import com.infomaniak.drive.data.models.drive.Category
@@ -28,7 +28,7 @@ class SearchFiltersViewModel : ViewModel() {
 
     var useInitialValues: Boolean = true
     val date = SingleLiveEvent<SearchDateFilter?>()
-    val type = SingleLiveEvent<ConvertedType?>()
+    val type = SingleLiveEvent<ExtensionType?>()
     var categories: List<Category>? = null
     var categoriesOwnership: SearchCategoriesOwnershipFilter? = null
 

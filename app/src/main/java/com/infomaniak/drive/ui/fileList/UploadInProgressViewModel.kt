@@ -99,10 +99,10 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
                             files.add(
                                 File(
                                     id = uploadFile.uri.hashCode(),
-                                    isFromUploads = true,
                                     name = uploadFile.fileName,
                                     path = uploadFile.uri,
                                     size = size,
+                                    isFromUploads = true,
                                 )
                             )
                         }
@@ -112,9 +112,9 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
                     files.add(
                         File(
                             id = uploadFile.uri.hashCode(),
-                            isFromUploads = true,
                             name = uploadFile.fileName,
                             path = uploadFile.uri,
+                            isFromUploads = true,
                         )
                     )
 
@@ -129,10 +129,10 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
                 files.add(
                     File(
                         id = uploadFile.uri.hashCode(),
-                        isFromUploads = true,
                         name = uploadFile.fileName,
                         path = uploadFile.uri,
                         size = uri.toFile().length(),
+                        isFromUploads = true,
                     )
                 )
             }
@@ -147,15 +147,15 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
         val (name, type) = if (fileId == Utils.ROOT_ID) {
             Utils.getRootName(context) to File.Type.DRIVE.value
         } else {
-            folder.name to File.Type.FOLDER.value
+            folder.name to File.Type.DIRECTORY.value
         }
 
         return File(
             id = fileId,
-            isFromUploads = true,
             name = name,
             path = folder.getRemotePath(userDrive),
-            type = type
+            type = type,
+            isFromUploads = true
         )
     }
 }

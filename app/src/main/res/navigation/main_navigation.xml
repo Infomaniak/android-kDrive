@@ -199,7 +199,13 @@
         android:label="MultiSelectActionsBottomSheetDialog"
         tools:layout="@layout/fragment_bottom_sheet_multi_select_actions">
         <argument
+            android:name="parentId"
+            app:argType="integer" />
+        <argument
             android:name="fileIds"
+            app:argType="integer[]" />
+        <argument
+            android:name="exceptFileIds"
             app:argType="integer[]" />
         <argument
             android:name="onlyFolders"
@@ -500,14 +506,11 @@
             android:name="sharedItem"
             app:argType="com.infomaniak.drive.data.models.Shareable" />
         <argument
-            android:name="notShareableUserIds"
+            android:name="notShareableIds"
             app:argType="integer[]" />
         <argument
             android:name="notShareableEmails"
             app:argType="string[]" />
-        <argument
-            android:name="notShareableTeamIds"
-            app:argType="integer[]" />
         <action
             android:id="@+id/action_fileShareAddUserDialog_to_selectPermissionBottomSheetDialog"
             app:destination="@id/selectPermissionBottomSheetDialog" />
@@ -602,7 +605,7 @@
         tools:layout="@layout/fragment_bottom_sheet_select">
         <argument
             android:name="type"
-            app:argType="com.infomaniak.drive.data.models.ConvertedType"
+            app:argType="com.infomaniak.drive.data.models.ExtensionType"
             app:nullable="true" />
     </dialog>
 
@@ -616,12 +619,15 @@
             android:defaultValue="false"
             app:argType="boolean" />
         <argument
-            android:name="fileId"
+            android:name="folderId"
             android:defaultValue="-1"
             app:argType="integer" />
         <action
             android:id="@+id/action_accessDeniedBottomSheetFragment_to_fileListFragment"
             app:destination="@id/fileListFragment" />
+        <argument
+            android:name="folderName"
+            app:argType="string" />
     </dialog>
 
     <dialog

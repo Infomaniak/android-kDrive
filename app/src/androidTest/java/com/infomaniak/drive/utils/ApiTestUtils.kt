@@ -28,7 +28,6 @@ import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.CreateFile
 import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.ApiController
@@ -63,12 +62,8 @@ object ApiTestUtils {
         }
     }
 
-    fun getShareLink(file: File): ApiResponse<ShareLink> {
-        return ApiController.callApi(ApiRoutes.shareLink(file), ApiController.ApiMethod.GET)
-    }
-
     fun getCategory(driveId: Int): ApiResponse<Array<Category>> {
-        return ApiController.callApi(ApiRoutes.createCategory(driveId), ApiController.ApiMethod.GET)
+        return ApiController.callApi(ApiRoutes.categories(driveId), ApiController.ApiMethod.GET)
     }
 
     // Creates a file, puts it in trash and returns it

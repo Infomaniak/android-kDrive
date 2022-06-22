@@ -24,14 +24,12 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 data class Invitation(
     override var id: Int = -1,
-    val role: String = "",
-    val type: String = "",
-    val email: String = "",
+    val name: String = "",
+    override var right: String = "",
+    val color: Int? = null,
     val status: String = "",
-    val avatar: String = "",
-    override var permission: String = "",
-    @SerializedName("user_id") val userId: Int = -1,
-    @SerializedName("invit_drive") val invitDrive: Boolean = false,
-    @SerializedName("display_name") val displayName: String? = null,
-    @SerializedName("invit_drive_id") val invitDriveId: Int = -1,
+    val email: String = "",
+    val user: DriveUser? = null,
+    @SerializedName("invitation_drive_id")
+    val invitationDriveId: Int = -1,
 ) : Parcelable, Shareable

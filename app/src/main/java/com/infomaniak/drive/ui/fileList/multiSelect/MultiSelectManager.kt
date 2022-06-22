@@ -76,12 +76,20 @@ class MultiSelectManager {
             if (!it.isFavorite) onlyFavorite = false
             if (!it.isOffline) onlyOffline = false
         }
-        return MenuNavArgs(fileIds.toIntArray(), onlyFolders, onlyFavorite, onlyOffline, isSelectAllOn)
+        return MenuNavArgs(
+            fileIds = fileIds.toIntArray(),
+            exceptFileIds = exceptedItemsIds.toIntArray(),
+            onlyFolders = onlyFolders,
+            onlyFavorite = onlyFavorite,
+            onlyOffline = onlyOffline,
+            isAllSelected = isSelectAllOn
+        )
     }
 
     @Suppress("ArrayInDataClass")
     data class MenuNavArgs(
         val fileIds: IntArray,
+        val exceptFileIds: IntArray,
         val onlyFolders: Boolean,
         val onlyFavorite: Boolean,
         val onlyOffline: Boolean,

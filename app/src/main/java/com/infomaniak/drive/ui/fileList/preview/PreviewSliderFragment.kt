@@ -319,13 +319,12 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun goToFolder() {
-        FileController.getParentFile(currentFile.id)?.let { folder -> navigateToParentFolder(folder, mainViewModel) }
+        FileController.getParentFile(currentFile.id)?.let { folder -> navigateToParentFolder(folder.id, mainViewModel) }
     }
 
     override fun sharePublicLink() {
-        bottomSheetFileInfos.createPublicShareLink(onSuccess = { shareLink ->
-            previewSliderAdapter.updateFile(currentFile.id) { it.shareLink = shareLink }
-            context?.shareText(shareLink)
+        bottomSheetFileInfos.createPublicShareLink(onSuccess = { sharelinkUrl ->
+            context?.shareText(sharelinkUrl)
             toggleBottomSheet(true)
         }, onError = { translatedError ->
             showSnackbar(translatedError)
@@ -409,8 +408,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) {
-        val folderId = mainViewModel.currentFolder.value?.id
-        mainViewModel.duplicateFile(currentFile, folderId, result).observe(viewLifecycleOwner) { apiResponse ->
+        mainViewModel.duplicateFile(currentFile, result).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 apiResponse.data?.let { file ->
                     mainViewModel.currentPreviewFileList[file.id] = file

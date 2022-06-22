@@ -44,6 +44,7 @@ import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.VisibilityType.IS_SHARED_SPACE
 import com.infomaniak.drive.data.models.File.VisibilityType.IS_TEAM_SPACE
+import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
@@ -109,41 +110,41 @@ class FileInfoActionsView @JvmOverloads constructor(
                 displayInfo.isEnabled = isOnline
                 disabledInfo.isGone = isOnline
 
-                (rights?.share == true && isOnline).let { rightsEnabled ->
+                (rights?.canShare == true && isOnline).let { rightsEnabled ->
                     fileRights.isEnabled = rightsEnabled
                     disabledFileRights.isGone = rightsEnabled
                 }
 
-                (rights?.canBecomeLink == true && isOnline || currentFile.shareLink != null || !file.collaborativeFolder.isNullOrBlank()).let { publicLinkEnabled ->
+                (rights?.canBecomeShareLink == true && isOnline || currentFile.sharelink != null || !file.dropbox?.url.isNullOrBlank()).let { publicLinkEnabled ->
                     sharePublicLink.isEnabled = publicLinkEnabled
                     disabledPublicLink.isGone = publicLinkEnabled
-                    if (!file.collaborativeFolder.isNullOrBlank()) {
+                    if (!file.dropbox?.url.isNullOrBlank()) {
                         sharePublicLinkText.text = context.getString(R.string.buttonShareDropboxLink)
                     }
                 }
 
-                ((file.isFolder() && rights?.newFile == true && rights.newFolder) || !file.isFolder()).let { sendCopyEnabled ->
+                ((file.isFolder() && rights?.canCreateFile == true && rights.canCreateDirectory) || !file.isFolder()).let { sendCopyEnabled ->
                     sendCopy.isEnabled = sendCopyEnabled
                     disabledSendCopy.isGone = sendCopyEnabled
                 }
 
-                addFavorites.isVisible = rights?.canFavorite == true
+                addFavorites.isVisible = rights?.canUseFavorite == true
                 availableOffline.isGone = isSharedWithMe || currentFile.getOfflineFile(context) == null
-                deleteFile.isVisible = rights?.delete == true
-                downloadFile.isVisible = rights?.read == true
-                duplicateFile.isGone = rights?.read == false
+                deleteFile.isVisible = rights?.canDelete == true
+                downloadFile.isVisible = rights?.canRead == true
+                duplicateFile.isGone = rights?.canRead == false
                         || isSharedWithMe
                         || currentFile.getVisibilityType() == IS_TEAM_SPACE
                         || currentFile.getVisibilityType() == IS_SHARED_SPACE
-                editDocument.isVisible = (currentFile.onlyoffice && rights?.write == true)
-                        || (currentFile.onlyofficeConvertExtension != null)
-                leaveShare.isVisible = rights?.leave == true
-                moveFile.isVisible = rights?.move == true && !isSharedWithMe
-                renameFile.isVisible = rights?.rename == true && !isSharedWithMe
+                editDocument.isVisible = (currentFile.hasOnlyoffice && rights?.canWrite == true)
+                        || (currentFile.conversion?.whenOnlyoffice == true)
+                leaveShare.isVisible = rights?.canLeave == true
+                moveFile.isVisible = rights?.canMove == true && !isSharedWithMe
+                renameFile.isVisible = rights?.canRename == true && !isSharedWithMe
                 goToFolder.isVisible = isGoToFolderVisible()
             }
 
-            if (currentFile.isDropBox() || currentFile.rights?.canBecomeCollab == true) {
+            if (currentFile.isDropBox() || currentFile.rights?.canBecomeDropbox == true) {
                 dropBoxText.text = context.getString(
                     if (currentFile.isDropBox()) R.string.buttonManageDropBox else R.string.buttonConvertToDropBox
                 )
@@ -274,22 +275,21 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
     }
 
-    fun createPublicShareLink(onSuccess: ((shareLink: String) -> Unit)? = null, onError: ((translatedError: String) -> Unit)? = null) {
+    fun createPublicShareLink(
+        onSuccess: ((sharelinkUrl: String) -> Unit)? = null,
+        onError: ((translatedError: String) -> Unit)? = null
+    ) {
         when {
-            currentFile.collaborativeFolder != null -> {
-                onSuccess?.invoke(currentFile.collaborativeFolder!!)
-            }
-            currentFile.shareLink != null -> {
-                onSuccess?.invoke(currentFile.shareLink!!)
-            }
+            currentFile.dropbox != null -> onSuccess?.invoke(currentFile.dropbox?.url!!)
+            currentFile.sharelink != null -> onSuccess?.invoke(currentFile.sharelink?.url!!)
             else -> {
                 showCopyPublicLinkLoader(true)
-                mainViewModel.postFileShareLink(currentFile).observe(ownerFragment) { postShareResponse ->
+                mainViewModel.createShareLink(currentFile).observe(ownerFragment) { postShareResponse ->
                     when {
                         postShareResponse?.isSuccess() == true -> {
-                            postShareResponse.data?.url?.let { url ->
-                                updateFilePublicLink(url)
-                                onSuccess?.invoke(currentFile.shareLink!!)
+                            postShareResponse.data?.let { sharelink ->
+                                updateFilePublicLink(sharelink)
+                                onSuccess?.invoke(sharelink.url)
                             }
                         }
                         else -> {
@@ -302,11 +302,11 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
     }
 
-    private fun updateFilePublicLink(url: String) {
+    private fun updateFilePublicLink(shareLink: ShareLink) {
         CoroutineScope(Dispatchers.IO).launch {
-            FileController.updateFile(currentFile.id) { it.shareLink = url }
+            FileController.updateFile(currentFile.id) { it.sharelink = shareLink }
         }
-        currentFile.shareLink = url
+        currentFile.sharelink = shareLink
         refreshBottomSheetUi(currentFile)
     }
 
@@ -380,7 +380,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         addFavorites.isEnabled = true
         addFavoritesIcon.isEnabled = file.isFavorite
         addFavoritesText.setText(if (file.isFavorite) R.string.buttonRemoveFavorites else R.string.buttonAddFavorites)
-        sharePublicLinkText.setText(if (file.shareLink == null) R.string.buttonCreatePublicLink else R.string.buttonSharePublicLink)
+        sharePublicLinkText.setText(if (file.sharelink == null) R.string.buttonCreatePublicLink else R.string.buttonSharePublicLink)
 
         when {
             isPendingOffline && file.currentProgress in 0..99 -> {
@@ -485,7 +485,11 @@ class FileInfoActionsView @JvmOverloads constructor(
             return true
         }
 
-        fun moveFileClicked(folderId: Int?, selectFolderResultLauncher: ActivityResultLauncher<Intent>, mainViewModel: MainViewModel) {
+        fun moveFileClicked(
+            folderId: Int?,
+            selectFolderResultLauncher: ActivityResultLauncher<Intent>,
+            mainViewModel: MainViewModel
+        ) {
             trackActionEvent("move")
             context.moveFileClicked(folderId, selectFolderResultLauncher, mainViewModel)
         }

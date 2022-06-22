@@ -19,9 +19,10 @@ package com.infomaniak.drive
 
 import android.util.Log
 import com.google.gson.JsonObject
-import com.infomaniak.drive.BuildConfig.DRIVE_API
+import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRepository.addCategory
 import com.infomaniak.drive.data.api.ApiRepository.createCategory
+import com.infomaniak.drive.data.api.ApiRepository.createShareLink
 import com.infomaniak.drive.data.api.ApiRepository.createTeamFolder
 import com.infomaniak.drive.data.api.ApiRepository.deleteCategory
 import com.infomaniak.drive.data.api.ApiRepository.deleteDropBox
@@ -39,32 +40,28 @@ import com.infomaniak.drive.data.api.ApiRepository.getFileActivities
 import com.infomaniak.drive.data.api.ApiRepository.getFileComments
 import com.infomaniak.drive.data.api.ApiRepository.getFileCount
 import com.infomaniak.drive.data.api.ApiRepository.getFileDetails
-import com.infomaniak.drive.data.api.ApiRepository.getFileShare
 import com.infomaniak.drive.data.api.ApiRepository.getLastActivities
 import com.infomaniak.drive.data.api.ApiRepository.getMySharedFiles
-import com.infomaniak.drive.data.api.ApiRepository.getTrashFile
+import com.infomaniak.drive.data.api.ApiRepository.getTrashedFile
 import com.infomaniak.drive.data.api.ApiRepository.getUserProfile
 import com.infomaniak.drive.data.api.ApiRepository.moveFile
 import com.infomaniak.drive.data.api.ApiRepository.postFavoriteFile
 import com.infomaniak.drive.data.api.ApiRepository.postFileComment
-import com.infomaniak.drive.data.api.ApiRepository.postFileCommentLike
-import com.infomaniak.drive.data.api.ApiRepository.postFileCommentUnlike
-import com.infomaniak.drive.data.api.ApiRepository.postFileShareCheck
-import com.infomaniak.drive.data.api.ApiRepository.postFileShareLink
+import com.infomaniak.drive.data.api.ApiRepository.postLikeComment
 import com.infomaniak.drive.data.api.ApiRepository.postRestoreTrashFile
+import com.infomaniak.drive.data.api.ApiRepository.postUnlikeComment
 import com.infomaniak.drive.data.api.ApiRepository.putFileComment
-import com.infomaniak.drive.data.api.ApiRepository.putFileShareLink
 import com.infomaniak.drive.data.api.ApiRepository.removeCategory
 import com.infomaniak.drive.data.api.ApiRepository.updateDropBox
-import com.infomaniak.drive.data.api.ApiRoutes.postFileShare
+import com.infomaniak.drive.data.api.ApiRepository.updateShareLink
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponseData
 import com.infomaniak.drive.utils.ApiTestUtils.createDropBoxForTest
 import com.infomaniak.drive.utils.ApiTestUtils.createFileForTest
 import com.infomaniak.drive.utils.ApiTestUtils.createFolderWithName
 import com.infomaniak.drive.utils.ApiTestUtils.deleteTestFile
 import com.infomaniak.drive.utils.ApiTestUtils.getCategory
-import com.infomaniak.drive.utils.ApiTestUtils.getShareLink
 import com.infomaniak.drive.utils.ApiTestUtils.putNewFileInTrash
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import org.junit.jupiter.api.*
@@ -119,9 +116,9 @@ class ApiRepositoryTest : KDriveTest() {
         with(createCategory(userDrive.driveId, name, color)) {
             assertFalse(isSuccess())
             assertEquals(
-                "Category already exist error",
-                error?.description,
-                "Error description should be 'category already exist error'"
+                "category_already_exist_error",
+                error?.code,
+                "Error code should be 'category_already_exist_error'"
             )
         }
 
@@ -170,7 +167,7 @@ class ApiRepositoryTest : KDriveTest() {
         // Create File to put it in trash
         val fileToDelete = putNewFileInTrash()
         // Get the deleted File from the trash, info should be the same
-        with(getTrashFile(fileToDelete, File.SortType.RECENT, 1)) {
+        with(getTrashedFile(fileToDelete)) {
             assertApiResponseData(this)
             assertEquals(fileToDelete.id, data?.id, "file id should be the same")
         }
@@ -231,7 +228,7 @@ class ApiRepositoryTest : KDriveTest() {
     @DisplayName("Retrieve shared remote file")
     fun mySharedFileTest() {
         val order = File.SortType.BIGGER
-        assertApiResponseData(getMySharedFiles(okHttpClient, userDrive.driveId, order.order, order.orderBy, 1))
+        assertApiResponseData(getMySharedFiles(okHttpClient, userDrive.driveId, order, 1))
     }
 
     @Nested
@@ -345,7 +342,7 @@ class ApiRepositoryTest : KDriveTest() {
             }
 
             // Likes the comment
-            with(postFileCommentLike(testFile, commentID)) {
+            with(postLikeComment(testFile, commentID)) {
                 assertApiResponseData(this)
                 assertTrue(data ?: false)
             }
@@ -359,7 +356,7 @@ class ApiRepositoryTest : KDriveTest() {
             }
 
             // Unlike the comment
-            with(postFileCommentUnlike(testFile, commentID)) {
+            with(postUnlikeComment(testFile, commentID)) {
                 assertApiResponseData(this)
                 assertTrue(data ?: false)
             }
@@ -376,7 +373,7 @@ class ApiRepositoryTest : KDriveTest() {
         @DisplayName("Copy the test file to root folder")
         fun duplicateFile() {
             val copyName = "testCopy-$randomSuffix"
-            val copyFile = duplicateFile(testFile, copyName, ROOT_ID).let {
+            val copyFile = duplicateFile(testFile, copyName).let {
                 assertApiResponseData(it)
                 assertEquals(copyName, it.data?.name, "The copy name should be equal to $copyName")
                 assertNotEquals(testFile.id, it.data?.id, "The id should be different from the original file")
@@ -385,7 +382,7 @@ class ApiRepositoryTest : KDriveTest() {
             }
 
             // Duplicate one more time with same name and location
-            with(duplicateFile(testFile, copyName, ROOT_ID)) {
+            with(duplicateFile(testFile, copyName)) {
                 assertApiResponseData(this)
                 assertEquals("$copyName (1)", data?.name, "The copy name should be equal to $copyName (1)")
                 deleteTestFile(data!!)
@@ -398,56 +395,64 @@ class ApiRepositoryTest : KDriveTest() {
         @Test
         @DisplayName("Create a custom share link, update it then delete it")
         fun shareLinkTest() {
-            // TODO Changes for api-v2 : boolean instead of "true", "false", and can_edit instead of canEdit
-            val body = mapOf(
-                "permission" to "public",
-                "block_downloads" to "false",
-                "canEdit" to "false",
-                "show_stats" to "false",
-                "block_comments" to "false",
-                "block_information" to "false"
+            val body = ShareLink().ShareLinkSettings(
+                right = ShareLink.ShareLinkFilePermission.PUBLIC,
+                canDownload = true,
+                canEdit = false,
+                canSeeStats = false,
+                canComment = true,
+                canSeeInfo = true
             )
 
             // Creates the share link
-            with(postFileShareLink(testFile, body)) {
+            with(createShareLink(testFile, body)) {
                 assertApiResponseData(this)
-                assertEquals("public", data!!.permission.name.lowercase(), "Permission should be public")
-                assertFalse(data!!.blockDownloads, "Block downloads should be false")
-                assertFalse(data!!.canEdit, "Can edit should be false")
-                assertFalse(data!!.showStats, "Show stats should be false")
-                assertFalse(data!!.blockDownloads, "Block comments should be false")
-                assertFalse(data!!.blockInformation, "Block information should be false")
+                assertNotNull(data?.capabilities, "The data's capabilities cannot be null")
+                assertEquals(ShareLink.ShareLinkFilePermission.PUBLIC, data!!.right, "Permission should be public")
+
+                with(data?.capabilities!!) {
+                    assertTrue(canDownload, "Can downloads should be true")
+                    assertFalse(canEdit, "Can edit should be false")
+                    assertFalse(canSeeStats, "Show stats should be false")
+                    assertTrue(canComment, "Can comments should be true")
+                    assertTrue(canSeeInfo, "Can see information should be true")
+                }
+
             }
 
             // Get the share link
-            with(getFileShare(okHttpClient, testFile)) {
+            val shareLink = ApiRepository.getShareLink(testFile)
+            with(shareLink) {
                 assertApiResponseData(this)
-                assertEquals("/${testFile.name}", data!!.path, "Path should be the name of the file")
+                assertFalse(data?.url.isNullOrBlank(), "Sharelink url cannot be null")
             }
 
             // Modifies the share link
-            with(
-                putFileShareLink(
-                    testFile, mapOf(
-                        "permission" to "public",
-                        "block_downloads" to true,
-                        "can_edit" to true,
-                        "show_stats" to true,
-                        "block_comments" to true,
-                        "block_information" to true
-                    )
-                )
-            ) { assertApiResponseData(this) }
+            updateShareLink(
+                testFile, shareLink.data!!.ShareLinkSettings(
+                    right = ShareLink.ShareLinkFilePermission.PUBLIC,
+                    canDownload = false,
+                    canEdit = true,
+                    canSeeStats = true,
+                    canComment = false,
+                    canSeeInfo = false
+                ).toJsonElement()
+            ).let(::assertApiResponseData)
 
             // Makes sure modification has been made
-            with(getShareLink(testFile)) {
+            with(ApiRepository.getShareLink(testFile)) {
                 assertApiResponseData(this)
-                assertEquals("public", data!!.permission.name.lowercase(), "Permission should be public")
-                assertTrue(data!!.blockDownloads, "block downloads should be true")
-                assertTrue(data!!.canEdit, "can edit should be true")
-                assertTrue(data!!.showStats, "show stats should be true")
-                assertTrue(data!!.blockDownloads, "block comments should be true")
-                assertTrue(data!!.blockInformation, "Block information should be true")
+                assertNotNull(data?.capabilities, "The data's capabilities cannot be null")
+                assertEquals(ShareLink.ShareLinkFilePermission.PUBLIC, data!!.right, "Permission should be public")
+
+                with(data?.capabilities!!) {
+                    assertFalse(canDownload, "can downloads should be false")
+                    assertTrue(canEdit, "can edit should be true")
+                    assertTrue(canSeeStats, "show stats should be true")
+                    assertFalse(canComment, "can comments should be false")
+                    assertFalse(canSeeInfo, "can see information should be false")
+                }
+
             }
 
             // Delete the shareLink
@@ -456,17 +461,18 @@ class ApiRepositoryTest : KDriveTest() {
                 assertTrue(data!!)
             }
 
-            assertFalse(postFileShareCheck(testFile, body).isSuccess(), "Share link check should fail")
+            assertFalse(ApiRepository.getShareLink(testFile).isSuccess(), "Share link check should fail")
         }
 
-        @Test
-        @DisplayName("Create a default share link on test file")
+        //        @Test
+//        @DisplayName("Create a default share link on test file")
         fun shareLink() {
-            val fileShareLink = postFileShare(testFile)
-            assertTrue(
-                fileShareLink.contains("$DRIVE_API[0-9]+/file/[0-9]+/share".toRegex()),
-                "Link should match regex '$DRIVE_API[0-9]+/file/[0-9]+/share/'",
-            )
+            //TODO
+//            val fileShareLink = postFileShare(testFile)
+//            assertTrue(
+//                fileShareLink.contains("$DRIVE_API[0-9]+/file/[0-9]+/share".toRegex()),
+//                "Link should match regex '$DRIVE_API[0-9]+/file/[0-9]+/share/'",
+//            )
         }
 
         @Test
@@ -480,7 +486,7 @@ class ApiRepositoryTest : KDriveTest() {
             addCategory(testFile, category!!.id)
             with(getFileDetails(testFile)) {
                 assertApiResponseData(this)
-                assertNotNull(data!!.categories.find { it.id == category.id }, "The test category should be found")
+                assertNotNull(data!!.categories.find { it.categoryId == category.id }, "The test category should be found")
             }
 
             // Delete the category before removing it from the test file
@@ -546,9 +552,9 @@ class ApiRepositoryTest : KDriveTest() {
                 }
 
                 // Makes sure the folder contains the file
-                with(getFileDetails(this)) {
+                with(getFileDetails(file)) {
                     assertNotNull(data)
-                    assertTrue(data!!.children.contains(file), "The file should be contained in the test folder")
+                    assertEquals(data?.parentId, id, "The file should be contained in the test folder")
                 }
             }
         }
@@ -563,7 +569,7 @@ class ApiRepositoryTest : KDriveTest() {
 
             // Add a dropBox with default body and get its id
             val dropboxId = createDropBoxForTest(testFolder, maxSize).let {
-                assertTrue(it.emailWhenFinished, "Email when finished must be true")
+                assertTrue(it.hasNotification, "Email when finished must be true")
                 assertEquals(maxSize, it.limitFileSize, "Limit file size should be $maxSize")
                 it.id
             }
@@ -571,7 +577,7 @@ class ApiRepositoryTest : KDriveTest() {
             // Get the dropbox
             with(getDropBox(testFolder)) {
                 assertApiResponseData(this)
-                assertEquals(folderName, data!!.alias, "Dropbox name should be '$folderName'")
+                assertEquals(folderName, data!!.name, "Dropbox name should be '$folderName'")
                 assertEquals(dropboxId, data!!.id, "Dropbox id should be $dropboxId")
             }
         }
@@ -594,7 +600,7 @@ class ApiRepositoryTest : KDriveTest() {
 
             // Make sure the dropbox has been updated
             with(getDropBox(testFolder)) {
-                assertFalse(data?.emailWhenFinished ?: true, "Email when finished should be false")
+                assertFalse(data?.hasNotification ?: true, "Email when finished should be false")
                 assertEquals(maxSize * 2, data?.limitFileSize, "Limit file size should be ${maxSize * 2}")
             }
         }

@@ -180,7 +180,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             title = R.string.modalCreateFileTitle,
             fieldName = R.string.hintInputFileName,
             positiveButton = R.string.buttonCreate,
-            iconRes = office.convertedType.icon
+            iconRes = office.extensionType.icon
         ) { dialog, name ->
             trackNewElement(office.getEventName())
             val createFile = CreateFile(name, office.extension)

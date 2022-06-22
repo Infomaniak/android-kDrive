@@ -21,9 +21,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import com.infomaniak.drive.data.api.ApiRepository
-import com.infomaniak.drive.data.api.ApiRepository.PER_PAGE
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.ui.fileList.FileListFragment
+import com.infomaniak.drive.utils.isLastPage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 
@@ -41,7 +41,7 @@ class RecentChangesViewModel : ViewModel() {
             val apiResponse = ApiRepository.getLastModifiedFiles(driveId, currentPage)
             if (apiResponse.isSuccess()) {
                 apiResponse.data?.let { data ->
-                    val isComplete = data.size < PER_PAGE
+                    val isComplete = apiResponse.isLastPage()
                     val isFirstPage = currentPage == 1
                     FileController.storeRecentChanges(data, isFirstPage)
                     emit(FileListFragment.FolderFilesResult(files = data, isComplete = isComplete, page = currentPage))

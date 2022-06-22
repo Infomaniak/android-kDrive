@@ -63,7 +63,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                     null
                 }
                 inDriveRoot -> File(driveId = navigationArgs.driveId, type = File.Type.DRIVE.value)
-                else -> File(id = folderId, name = folderName, driveId = navigationArgs.driveId)
+                else -> File(id = folderId, driveId = navigationArgs.driveId, name = folderName)
             }
         )
         setNoFilesLayout = SetNoFilesLayout()

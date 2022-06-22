@@ -24,7 +24,6 @@ import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
-import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.FolderPermission.*
 import com.infomaniak.drive.data.models.Permission
@@ -74,8 +73,8 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
     }
 
     private fun createDropBoxFolder() {
-        createDropBox(onDropBoxCreated = { file, dropBox ->
-            mainViewModel.createDropBoxSuccess.value = dropBox
+        createDropBox(onDropBoxCreated = { file ->
+            mainViewModel.createDropBoxSuccess.value = file.dropbox
             if (newFolderViewModel.currentPermission == ONLY_ME) {
                 findNavController().popBackStack(R.id.newFolderFragment, true)
             } else {
@@ -88,7 +87,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
     }
 
     private fun createDropBox(
-        onDropBoxCreated: (file: File, dropBox: DropBox) -> Unit,
+        onDropBoxCreated: (file: File) -> Unit,
         onError: (translatedError: String) -> Unit,
     ) {
         if (!isValid()) return
@@ -106,8 +105,8 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
                     .observe(viewLifecycleOwner) { apiResponse ->
                         when (apiResponse?.result) {
                             ApiResponse.Status.SUCCESS -> apiResponse.data?.let { dropBox ->
-                                file.collaborativeFolder = dropBox.url
-                                onDropBoxCreated(file, dropBox)
+                                file.dropbox = dropBox
+                                onDropBoxCreated(file)
                             }
                             else -> onError(getString(apiResponse.translateError()))
                         }

@@ -48,10 +48,10 @@ import java.util.*
 class FileShareLinkSettingsFragment : Fragment() {
     private val navigationArgs: FileShareLinkSettingsFragmentArgs by navArgs()
     private val shareViewModel: FileShareViewModel by viewModels()
-    private var defaultCalendarTimestamp: Date = Date().endOfTheDay()
+    private val shareLink: ShareLink by lazy { navigationArgs.shareLink }
 
+    private var defaultCalendarTimestamp: Date = Date().endOfTheDay()
     private lateinit var officePermission: ShareLink.EditPermission
-    private lateinit var shareLink: ShareLink
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_file_share_link_settings, container, false)
@@ -60,11 +60,7 @@ class FileShareLinkSettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        shareLink = navigationArgs.shareLink
-        officePermission = when {
-            navigationArgs.isFolder -> if (shareLink.canEdit) ShareLink.OfficeFolderPermission.WRITE else ShareLink.OfficeFolderPermission.READ
-            else -> if (shareLink.canEdit) ShareLink.OfficeFilePermission.WRITE else ShareLink.OfficeFilePermission.READ
-        }
+        initOfficePermission()
 
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
@@ -72,13 +68,21 @@ class FileShareLinkSettingsFragment : Fragment() {
 
         getBackNavigationResult<Bundle>(SelectPermissionBottomSheetDialog.OFFICE_EDITING_RIGHTS_NAV_KEY) { bundle ->
             officePermission = bundle.getParcelable(PERMISSION_BUNDLE_KEY)!!
-            shareLink.canEdit = officePermission.apiValue
+            shareLink.capabilities?.canEdit = officePermission.apiValue
             setupShareLinkSettingsUi()
         }
 
         setupUiListeners()
         setupFreeAccountUi()
         setupShareLinkSettingsUi()
+    }
+
+    private fun initOfficePermission() {
+        val canEdit = shareLink.capabilities?.canEdit == true
+        officePermission = when {
+            navigationArgs.isFolder -> if (canEdit) ShareLink.OfficeFolderPermission.WRITE else ShareLink.OfficeFolderPermission.READ
+            else -> if (canEdit) ShareLink.OfficeFilePermission.WRITE else ShareLink.OfficeFilePermission.READ
+        }
     }
 
     private fun setupUiListeners() {
@@ -95,12 +99,9 @@ class FileShareLinkSettingsFragment : Fragment() {
 
     private fun setupAddPassword() {
         addPasswordSwitch?.setOnCheckedChangeListener { _, isChecked ->
-            if (shareLink.permission == ShareLink.ShareLinkFilePermission.PUBLIC) {
-                passwordTextLayout.isVisible = isChecked
-            } else if (shareLink.permission == ShareLink.ShareLinkFilePermission.PASSWORD) {
-                passwordTextLayout.isGone = true
-                newPasswordButton.isVisible = isChecked
-            }
+            val actionPasswordVisible = shareLink.right == ShareLink.ShareLinkFilePermission.PASSWORD
+            newPasswordButton.isVisible = actionPasswordVisible && isChecked
+            passwordTextLayout.isVisible = !actionPasswordVisible && isChecked
         }
     }
 
@@ -121,19 +122,19 @@ class FileShareLinkSettingsFragment : Fragment() {
 
     private fun setupAllowDownload() {
         allowDownloadValue.setOnCheckedChangeListener { _, isChecked ->
-            shareLink.blockDownloads = !isChecked
+            shareLink.capabilities?.canDownload = isChecked
         }
     }
 
     private fun setupBlockComments() {
         blockCommentsValue.setOnCheckedChangeListener { _, isChecked ->
-            shareLink.blockComments = isChecked
+            shareLink.capabilities?.canComment = !isChecked
         }
     }
 
     private fun setupBlockUsers() {
         blockUsersConsultValue.setOnCheckedChangeListener { _, isChecked ->
-            shareLink.blockInformation = isChecked
+            shareLink.capabilities?.canSeeInfo = !isChecked
         }
     }
 
@@ -178,12 +179,12 @@ class FileShareLinkSettingsFragment : Fragment() {
 
             val password = passwordEditText.text
             if (password?.isNotBlank() == true) shareLink.apply {
-                this.password = password.toString()
-                this.permission = ShareLink.ShareLinkFilePermission.PASSWORD
+                this.newPassword = password.toString()
+                this.newRight = ShareLink.ShareLinkFilePermission.PASSWORD
             }
 
         } else {
-            shareLink.permission = ShareLink.ShareLinkFilePermission.PUBLIC
+            shareLink.newRight = ShareLink.ShareLinkFilePermission.PUBLIC
         }
 
         return isValid
@@ -221,70 +222,67 @@ class FileShareLinkSettingsFragment : Fragment() {
         }
     }
 
-    private fun setupShareLinkSettingsUi() {
-        shareLink.apply {
-
-            if (navigationArgs.isOnlyOfficeFile || navigationArgs.isFolder) {
-                rightsTitle.isVisible = true
-                fileShareLinkRights.isVisible = true
-                rightsValue.setText(officePermission.translation)
-                rightsIcon.setImageResource(officePermission.icon)
-            } else {
-                rightsTitle.isGone = true
-                fileShareLinkRights.isGone = true
-            }
-
-            allowDownloadValue.isChecked = !blockDownloads
-            blockCommentsValue.isChecked = blockComments
-            blockUsersConsultValue.isChecked = blockInformation
-
-            if (permission == ShareLink.ShareLinkFilePermission.PASSWORD) {
-                passwordTextLayout.isGone = true
-                newPasswordButton.isVisible = true
-                addPasswordSwitch.isChecked = true
-            }
-            addPasswordDescription.text = getString(
-                R.string.shareLinkPasswordRightDescription,
-                context?.getString(getTypeName(navigationArgs.isFolder, navigationArgs.isOnlyOfficeFile))
-            )
-
-            addExpirationDateSwitch.isChecked = shareLink.validUntil != null
-            expirationDateInput.init(
-                fragmentManager = parentFragmentManager,
-                defaultDate = defaultCalendarTimestamp,
-                onDateSet = {
-                    val validUntil = Calendar.getInstance().apply {
-                        val date = Date(it)
-                        set(
-                            date.year(),
-                            date.month(),
-                            date.day(),
-                            defaultCalendarTimestamp.hours(),
-                            defaultCalendarTimestamp.minutes(),
-                        )
-                    }.time
-                    shareLink.validUntil = validUntil
-                    defaultCalendarTimestamp = validUntil
-                },
-            )
-            expirationTimeInput.init(
-                fragmentManager = parentFragmentManager,
-                defaultDate = defaultCalendarTimestamp,
-                onDateSet = { hours, minutes ->
-                    val validUntil = Calendar.getInstance().apply {
-                        set(
-                            defaultCalendarTimestamp.year(),
-                            defaultCalendarTimestamp.month(),
-                            defaultCalendarTimestamp.day(),
-                            hours,
-                            minutes,
-                        )
-                    }.time
-                    shareLink.validUntil = validUntil
-                    defaultCalendarTimestamp = validUntil
-                },
-            )
+    private fun setupShareLinkSettingsUi() = with(shareLink) {
+        if (navigationArgs.isOnlyOfficeFile || navigationArgs.isFolder) {
+            rightsTitle.isVisible = true
+            fileShareLinkRights.isVisible = true
+            rightsValue.setText(officePermission.translation)
+            rightsIcon.setImageResource(officePermission.icon)
+        } else {
+            rightsTitle.isGone = true
+            fileShareLinkRights.isGone = true
         }
+
+        allowDownloadValue.isChecked = capabilities?.canDownload == true
+        blockCommentsValue.isChecked = capabilities?.canComment != true
+        blockUsersConsultValue.isChecked = capabilities?.canSeeInfo != true
+
+        if (right == ShareLink.ShareLinkFilePermission.PASSWORD) {
+            passwordTextLayout.isGone = true
+            newPasswordButton.isVisible = true
+            addPasswordSwitch.isChecked = true
+        }
+        addPasswordDescription.text = getString(
+            R.string.shareLinkPasswordRightDescription,
+            context?.getString(getTypeName(navigationArgs.isFolder, navigationArgs.isOnlyOfficeFile))
+        )
+
+        addExpirationDateSwitch.isChecked = shareLink.validUntil != null
+        expirationDateInput.init(
+            fragmentManager = parentFragmentManager,
+            defaultDate = defaultCalendarTimestamp,
+            onDateSet = {
+                val validUntil = Calendar.getInstance().apply {
+                    val date = Date(it)
+                    set(
+                        date.year(),
+                        date.month(),
+                        date.day(),
+                        defaultCalendarTimestamp.hours(),
+                        defaultCalendarTimestamp.minutes(),
+                    )
+                }.time
+                shareLink.validUntil = validUntil
+                defaultCalendarTimestamp = validUntil
+            },
+        )
+        expirationTimeInput.init(
+            fragmentManager = parentFragmentManager,
+            defaultDate = defaultCalendarTimestamp,
+            onDateSet = { hours, minutes ->
+                val validUntil = Calendar.getInstance().apply {
+                    set(
+                        defaultCalendarTimestamp.year(),
+                        defaultCalendarTimestamp.month(),
+                        defaultCalendarTimestamp.day(),
+                        hours,
+                        minutes,
+                    )
+                }.time
+                shareLink.validUntil = validUntil
+                defaultCalendarTimestamp = validUntil
+            },
+        )
     }
 
     private fun Context.trackShareSettingsEvent(

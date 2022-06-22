@@ -67,7 +67,7 @@ class HomeViewModel : ViewModel() {
                 }
 
                 when {
-                    data?.isNullOrEmpty() == true -> emit(null)
+                    data.isNullOrEmpty() -> emit(null)
                     else -> {
                         val mergeAndCleanActivities = mergeAndCleanActivities(data)
                         lastActivities.addAll(data)
@@ -85,7 +85,7 @@ class HomeViewModel : ViewModel() {
                     ApiResponse(
                         data = localActivities,
                         page = 1,
-                        pages = 1,
+                        itemsPerPage = localActivities.size + 1,
                         result = SUCCESS
                     ) to mergeAndCleanActivities
                 )

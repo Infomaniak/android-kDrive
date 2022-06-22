@@ -33,6 +33,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.ShareLink.ShareLinkFilePermission
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
@@ -96,14 +97,14 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    fun postFileShareLink(
-        file: File,
-        // TODO Changes for api-v2 : boolean instead of "true", "false", and can_edit instead of canEdit
-        body: Map<String, String> = mapOf("permission" to "public", "block_downloads" to "false", "canEdit" to "false")
+    fun createShareLink(
+        file: File
     ) = liveData(Dispatchers.IO) {
-        val apiResponse = ApiRepository.postFileShareLink(file, body)
+
+        val body = ShareLink().ShareLinkSettings(right = ShareLinkFilePermission.PUBLIC, canDownload = true, canEdit = false)
+        val apiResponse = ApiRepository.createShareLink(file, body)
         if (apiResponse.isSuccess()) {
-            FileController.updateFile(file.id) { it.shareLink = apiResponse.data?.url }
+            FileController.updateFile(file.id) { it.sharelink = apiResponse.data }
         }
         emit(apiResponse)
     }
@@ -125,15 +126,18 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             "password" to password
         )
         validUntil?.let { body.put("valid_until", validUntil) }
-        emit(ApiRepository.postDropBox(file, body))
+
+        with(ApiRepository.postDropBox(file, body)) {
+            if (isSuccess()) FileController.updateDropBox(file.id, data)
+            emit(this)
+        }
     }
 
     fun updateDropBox(file: File, newDropBox: DropBox) = liveData(Dispatchers.IO) {
         val data = JsonObject().apply {
-            addProperty("email_when_finished", newDropBox.newEmailWhenFinished)
+            addProperty("email_when_finished", newDropBox.newHasNotification)
             addProperty("valid_until", newDropBox.newValidUntil?.time?.let { it / 1000 })
             addProperty("limit_file_size", newDropBox.newLimitFileSize)
-            addProperty("with_limit_file_size", newDropBox.withLimitFileSize)
 
             if (newDropBox.newPassword && !newDropBox.newPasswordValue.isNullOrBlank()) {
                 addProperty("password", newDropBox.newPasswordValue)
@@ -142,8 +146,10 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
                 addProperty("password", password)
             }
         }
-        val apiResponse = ApiRepository.updateDropBox(file, data)
-        emit(apiResponse)
+        with(ApiRepository.updateDropBox(file, data)) {
+            if (isSuccess()) FileController.updateDropBox(file.id, newDropBox)
+            emit(this)
+        }
     }
 
     fun deleteDropBox(file: File) = liveData(Dispatchers.IO) {
@@ -153,10 +159,14 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     fun deleteFileShareLink(file: File) = liveData(Dispatchers.IO) {
         val apiResponse = ApiRepository.deleteFileShareLink(file)
         if (apiResponse.isSuccess()) FileController.updateFile(file.id) {
-            it.shareLink = null
-            it.rights?.canBecomeLink = true
+            it.sharelink = null
+            it.rights?.canBecomeShareLink = true
         }
         emit(apiResponse)
+    }
+
+    fun getShareLink(file: File) = liveData(Dispatchers.IO) {
+        emit(ApiRepository.getShareLink(file))
     }
 
     fun getFileShare(fileId: Int, userDrive: UserDrive? = null) = liveData(Dispatchers.IO) {
@@ -262,13 +272,24 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    fun duplicateFile(
+    fun copyFile(
         file: File,
-        folderId: Int? = null,
+        destinationId: Int? = null,
         copyName: String?,
         onSuccess: ((apiResponse: ApiResponse<File>) -> Unit)? = null,
     ) = liveData(Dispatchers.IO) {
-        ApiRepository.duplicateFile(file, copyName, folderId ?: Utils.ROOT_ID).let { apiResponse ->
+        ApiRepository.copyFile(file, copyName, destinationId ?: Utils.ROOT_ID).let { apiResponse ->
+            if (apiResponse.isSuccess()) onSuccess?.invoke(apiResponse)
+            emit(apiResponse)
+        }
+    }
+
+    fun duplicateFile(
+        file: File,
+        copyName: String?,
+        onSuccess: ((apiResponse: ApiResponse<File>) -> Unit)? = null,
+    ) = liveData(Dispatchers.IO) {
+        ApiRepository.duplicateFile(file, copyName).let { apiResponse ->
             if (apiResponse.isSuccess()) onSuccess?.invoke(apiResponse)
             emit(apiResponse)
         }

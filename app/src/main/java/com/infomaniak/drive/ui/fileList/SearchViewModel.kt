@@ -20,7 +20,7 @@ package com.infomaniak.drive.ui.fileList
 import androidx.lifecycle.*
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.ConvertedType
+import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.SearchCategoriesOwnershipFilter
@@ -51,7 +51,7 @@ class SearchViewModel : ViewModel() {
     var previousSearch: String? = null
 
     var dateFilter: SearchDateFilter? = null
-    var typeFilter: ConvertedType? = null
+    var typeFilter: ExtensionType? = null
     var categoriesFilter: List<Category>? = null
     var categoriesOwnershipFilter: SearchCategoriesOwnershipFilter? = null
 
@@ -65,11 +65,10 @@ class SearchViewModel : ViewModel() {
             val apiResponse = ApiRepository.searchFiles(
                 driveId = AccountUtils.currentDriveId,
                 query = query,
-                order = order.order,
-                orderBy = order.orderBy,
+                sortType = order,
                 page = page,
                 date = formatDate(),
-                type = formatType(),
+                type = typeFilter?.value,
                 categories = formatCategories(),
             )
 
@@ -85,8 +84,6 @@ class SearchViewModel : ViewModel() {
         fun Date.timestamp(): String = (time / 1_000L).toString()
         return dateFilter?.let { it.start.timestamp() to it.end.timestamp() }
     }
-
-    private fun formatType() = typeFilter?.name?.lowercase()
 
     private fun formatCategories(): String? {
         return categoriesFilter?.joinToString(

@@ -1,9 +1,9 @@
 package com.infomaniak.drive
 
 import com.infomaniak.drive.data.api.ApiRepository
-import com.infomaniak.drive.data.api.ApiRepository.getFileListForFolder
+import com.infomaniak.drive.data.api.ApiRepository.addMultiAccess
+import com.infomaniak.drive.data.api.ApiRepository.getDirectoryFiles
 import com.infomaniak.drive.data.api.ApiRepository.getLastModifiedFiles
-import com.infomaniak.drive.data.api.ApiRepository.postFileShare
 import com.infomaniak.drive.data.api.ApiRepository.renameFile
 import com.infomaniak.drive.data.cache.FileController.FAVORITES_FILE_ID
 import com.infomaniak.drive.data.cache.FileController.getFilesFromCacheOrDownload
@@ -93,7 +93,7 @@ class FileControllerTest : KDriveTest() {
         deleteTestFile(remoteFile)
 
         // Search the deleted file
-        with(ApiRepository.searchFiles(userDrive.driveId, remoteFile.name, order.order, order.orderBy, 1)) {
+        with(ApiRepository.searchFiles(userDrive.driveId, remoteFile.name, order, 1)) {
             assertTrue(isSuccess(), "Api response must be a success")
             assertTrue(data.isNullOrEmpty(), "Founded files should be empty")
         }
@@ -148,7 +148,7 @@ class FileControllerTest : KDriveTest() {
             "permission" to Shareable.ShareablePermission.READ,
             "lang" to Locale.getDefault().language,
         )
-        assertApiResponseData(postFileShare(file, body))
+        assertApiResponseData(addMultiAccess(file, body))
 
         // Get remote files
         val remoteFiles = arrayListOf<File>()
@@ -251,11 +251,11 @@ class FileControllerTest : KDriveTest() {
     @DisplayName("Check if realm root contains files")
     fun getTestFileListForFolder() {
         // Get the file list of root folder
-        with(getFileListForFolder(okHttpClient, userDrive.driveId, Utils.ROOT_ID, order = File.SortType.NAME_AZ)) {
+        with(getDirectoryFiles(okHttpClient, userDrive.driveId, Utils.ROOT_ID, order = File.SortType.NAME_AZ)) {
             assertApiResponseData(this)
 
             // Use non null assertion because data nullability has been checked in assertApiResponse()
-            assertTrue(data!!.children.isNotEmpty(), "Root folder should contains files")
+            assertFalse(data.isNullOrEmpty(), "Root folder should contains files")
         }
     }
 
