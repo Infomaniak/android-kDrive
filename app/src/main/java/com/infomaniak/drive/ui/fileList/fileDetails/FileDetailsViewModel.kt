@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.fileList.fileDetails
 import androidx.lifecycle.*
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.utils.isLastPage
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -83,7 +84,7 @@ class FileDetailsViewModel : ViewModel() {
                 if (isSuccess()) {
                     when {
                         data.isNullOrEmpty() -> emit(null)
-                        page == pages || data!!.count() < itemsPerPage -> emit(this) // TODO delete second condition for api-v2
+                        isLastPage() -> emit(this)
                         else -> {
                             emit(this)
                             recursive(page + 1)

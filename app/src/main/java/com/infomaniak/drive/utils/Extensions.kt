@@ -76,6 +76,7 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomShe
 import com.infomaniak.drive.ui.fileList.UploadInProgressFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.MatomoUtils.trackShareRightsEvent
+import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.lightNavigationBar
@@ -494,5 +495,7 @@ fun Activity.getAdjustedColumnNumber(expectedItemSize: Int, minColumns: Int = 2,
     val screenWidth = getScreenSizeInDp().x
     return min(max(minColumns, screenWidth / expectedItemSize), maxColumns)
 }
+
+fun <T> ApiResponse<ArrayList<T>>.isLastPage() = (data?.size ?: 0) < itemsPerPage
 
 operator fun Regex.contains(input: String) = containsMatchIn(input)

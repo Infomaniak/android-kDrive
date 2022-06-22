@@ -22,6 +22,7 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.IsComplete
+import com.infomaniak.drive.utils.isLastPage
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -65,12 +66,12 @@ class PicturesViewModel : ViewModel() {
     ) {
         val data = apiResponse.data
         val isFirstPage = page == 1
-        val isComplete = (data?.size ?: 0) < ApiRepository.PER_PAGE
 
         if (data.isNullOrEmpty()) {
             emit(null)
         } else {
             FileController.storePicturesDrive(data, isFirstPage)
+            val isComplete = apiResponse.isLastPage()
             emit(data to isComplete)
         }
 

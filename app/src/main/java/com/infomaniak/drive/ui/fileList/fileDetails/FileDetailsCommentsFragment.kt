@@ -107,7 +107,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
             fileDetailsViewModel.getFileComments(currentFile).observe(viewLifecycleOwner) { apiResponse ->
                 apiResponse?.data?.let { comments ->
                     addAll(comments)
-                    isComplete = apiResponse.page == apiResponse.pages
+                    isComplete = apiResponse.isLastPage()
                 } ?: also {
                     isComplete = true
                 }
