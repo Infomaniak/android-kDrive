@@ -26,8 +26,8 @@ object ApiRoutes {
 
     private const val fileWithQuery = "with=capabilities,categories,conversion,dropbox,is_favorite,sharelink,sorted_name"
     private const val fileExtraWithQuery = "$fileWithQuery,path,users,version"
-    const val activitiesWithQuery =
-        "with=file,file.capabilities,file.categories,file.conversion,file.dropbox,file.is_favorite,file.sharelink,file.sorted_name"
+    const val activitiesWithQuery = "with=file,file.capabilities,file.categories,file.conversion,file.dropbox," +
+            "file.is_favorite,file.sharelink,file.sorted_name"
 
     private fun orderQuery(order: SortType) = "order_for[${order.orderBy}]=${order.order}&order_by=${order.orderBy}"
 

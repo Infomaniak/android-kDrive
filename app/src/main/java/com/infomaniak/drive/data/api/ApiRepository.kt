@@ -96,6 +96,7 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
+    // For sync offline service
     fun getFileActivities(
         driveId: Int,
         fileIds: List<Int>,
