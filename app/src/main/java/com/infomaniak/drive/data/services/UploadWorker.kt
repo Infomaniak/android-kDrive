@@ -149,7 +149,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
 
         uploadedCount = successNames.count()
-//        val failedCount = failedNames.count()
 
         Log.d(TAG, "startSyncFiles: finish with $uploadedCount uploaded")
 
