@@ -54,7 +54,6 @@ import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.*
 import java.util.*
-import kotlin.collections.ArrayList
 
 class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
     private lateinit var contentResolver: ContentResolver
@@ -62,8 +61,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     var currentUploadFile: UploadFile? = null
     var currentUploadTask: UploadTask? = null
     var uploadedCount = 0
-    private var failedNames = arrayListOf<String>()
-    private var successNames = arrayListOf<String>()
+    private val failedNames by lazy { inputData.getStringArray(LAST_FAILED_NAMES)?.toMutableList() ?: mutableListOf() }
+    private val successNames by lazy { inputData.getStringArray(LAST_SUCCESS_NAMES)?.toMutableList() ?: mutableListOf() }
 
     override suspend fun doWork(): Result {
 
@@ -130,8 +129,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private suspend fun startSyncFiles(): Result = withContext(Dispatchers.IO) {
         val uploadFiles = UploadFile.getAllPendingUploads()
-        failedNames = ArrayList(inputData.getStringArray(LAST_FAILED_NAMES)?.toList() ?: listOf())
-        successNames = ArrayList(inputData.getStringArray(LAST_SUCCESS_NAMES)?.toList() ?: listOf())
         var pendingCount = uploadFiles.size
 
         if (pendingCount > 0) applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
@@ -160,7 +157,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         syncSettings?.let { checkLocalLastMedias(it) }
         if (UploadFile.getAllPendingUploadsCount() > 0) {
             val data = Data.Builder()
-                .putInt(LAST_UPLOADED_COUNT, uploadedCount)
                 .putStringArray(LAST_FAILED_NAMES, failedNames.toTypedArray())
                 .putStringArray(LAST_SUCCESS_NAMES, successNames.toTypedArray())
                 .build()
@@ -271,7 +267,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val selection = "( ${SyncUtils.DATE_TAKEN} >= ? " +
                 "OR ${MediaStore.MediaColumns.DATE_ADDED} >= ? " +
                 "OR ${MediaStore.MediaColumns.DATE_MODIFIED} = ? )"
-        val jobs = arrayListOf<Deferred<Any?>>()
+        val jobs = mutableListOf<Deferred<Any?>>()
         var customSelection: String
         var customArgs: Array<String>
 
@@ -420,7 +416,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         const val CANCELLED_BY_USER = "cancelled_by_user"
         const val UPLOAD_FOLDER = "upload_folder"
 
-        private const val LAST_UPLOADED_COUNT = "last_uploaded_count"
         private const val LAST_FAILED_NAMES = "last_failed_names"
         private const val LAST_SUCCESS_NAMES = "last_success_names"
 
@@ -446,16 +441,16 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         fun Context.trackUploadWorkerProgress(): LiveData<MutableList<WorkInfo>> {
             return WorkManager.getInstance(this).getWorkInfosLiveData(
-                WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(TAG))
-                    .addStates(arrayListOf(WorkInfo.State.RUNNING))
+                WorkQuery.Builder.fromUniqueWorkNames(mutableListOf(TAG))
+                    .addStates(mutableListOf(WorkInfo.State.RUNNING))
                     .build()
             )
         }
 
         fun Context.trackUploadWorkerSucceeded(): LiveData<MutableList<WorkInfo>> {
             return WorkManager.getInstance(this).getWorkInfosLiveData(
-                WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(TAG))
-                    .addStates(arrayListOf(WorkInfo.State.SUCCEEDED))
+                WorkQuery.Builder.fromUniqueWorkNames(mutableListOf(TAG))
+                    .addStates(mutableListOf(WorkInfo.State.SUCCEEDED))
                     .build()
             )
         }

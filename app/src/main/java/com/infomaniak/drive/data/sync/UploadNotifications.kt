@@ -38,6 +38,8 @@ import io.sentry.Sentry
 
 object UploadNotifications {
 
+    private const val FAILED_FILES_LIMIT = 5
+
     val pendingIntentFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
     } else {
@@ -129,8 +131,8 @@ object UploadNotifications {
 
     fun UploadFile.showUploadedFilesNotification(
         context: Context,
-        successNames: ArrayList<String>,
-        failedNames: ArrayList<String>
+        successNames: MutableList<String>,
+        failedNames: MutableList<String>
     ) {
         val failedCount = failedNames.count()
         val successCount = successNames.count()
@@ -146,14 +148,21 @@ object UploadNotifications {
                 context.resources.getQuantityString(R.plurals.allUploadFinishedDescription, 1, this.fileName)
             }
             else -> {
-                arrayListOf<String>().apply {
-                    add(context.resources.getQuantityString(R.plurals.allUploadFinishedDescription, successCount, successCount))
-                    add(successNames.take(5).joinToString("\n"))
-                    val otherCount = successCount - 5
+                val desc = context.resources.getQuantityString(R.plurals.allUploadFinishedDescription, successCount, successCount)
+                StringBuilder().apply {
+                    appendLine(desc)
+                    for (file in successNames.take(FAILED_FILES_LIMIT)) appendLine(file)
+                    val otherCount = successCount - FAILED_FILES_LIMIT
                     if (otherCount > 0) {
-                        add(context.resources.getQuantityString(R.plurals.uploadImportedOtherAmount, otherCount, otherCount))
+                        appendLine(
+                            context.resources.getQuantityString(
+                                R.plurals.uploadImportedOtherAmount,
+                                otherCount,
+                                otherCount
+                            )
+                        )
                     }
-                }.joinToString("\n")
+                }.toString()
             }
         }
 
