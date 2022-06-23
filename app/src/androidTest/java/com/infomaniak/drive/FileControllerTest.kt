@@ -22,6 +22,7 @@ import com.infomaniak.drive.utils.ApiTestUtils.createFileForTest
 import com.infomaniak.drive.utils.ApiTestUtils.deleteTestFile
 import com.infomaniak.drive.utils.Env
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.lib.core.utils.Utils.getDefaultAcceptedLanguage
 import io.realm.Realm
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
@@ -145,8 +146,8 @@ class FileControllerTest : KDriveTest() {
         val file = createFileForTest()
         val body = mutableMapOf(
             "emails" to listOf(Env.INVITE_USER_NAME),
-            "permission" to Shareable.ShareablePermission.READ,
-            "lang" to Locale.getDefault().language,
+            "right" to Shareable.ShareablePermission.READ,
+            "lang" to getDefaultAcceptedLanguage(),
         )
         assertApiResponseData(addMultiAccess(file, body))
 
