@@ -25,7 +25,9 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.work.*
+import com.google.gson.reflect.TypeToken
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.api.ProgressResponseBody
 import com.infomaniak.drive.data.cache.FileController
@@ -36,37 +38,50 @@ import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.MediaUtils
 import com.infomaniak.drive.utils.MediaUtils.isMedia
 import com.infomaniak.drive.utils.NotificationUtils.downloadProgressNotification
+import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
+import com.infomaniak.lib.core.utils.ApiController
+import io.sentry.Sentry
 import kotlinx.coroutines.*
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import java.io.BufferedInputStream
+import java.io.File as IOFile
 
 class DownloadWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
 
     private var notificationManagerCompat: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)
+    private var file: File? = null
+    private var offlineFile: IOFile? = null
+
+    private val fileId: Int by lazy { inputData.getInt(FILE_ID, 0) }
+    private val fileName: String by lazy { inputData.getString(FILE_NAME) ?: "" }
+    private val userDrive: UserDrive by lazy {
+        UserDrive(
+            userId = inputData.getInt(USER_ID, AccountUtils.currentUserId),
+            driveId = inputData.getInt(DRIVE_ID, AccountUtils.currentDriveId)
+        )
+    }
 
     override suspend fun doWork(): Result {
-        val fileId = inputData.getInt(FILE_ID, 0)
-        val userId = inputData.getInt(USER_ID, AccountUtils.currentUserId)
-        val driveId = inputData.getInt(DRIVE_ID, AccountUtils.currentDriveId)
-        val userDrive = UserDrive(userId, driveId)
-        val file = FileController.getFileById(fileId, userDrive)
-        val offlineFile = file?.getOfflineFile(applicationContext, userId)
+        file = FileController.getFileById(fileId, userDrive)
+        offlineFile = file?.getOfflineFile(applicationContext, userDrive.userId)
 
         return try {
-            if (file != null && offlineFile != null) {
-                initOfflineDownload(file, offlineFile, userDrive)
-            } else {
-                throw Exception("Realm file or offline file not found")
-            }
+            initOfflineDownload()
+
         } catch (exception: CancellationException) {
             exception.printStackTrace()
-            if (offlineFile?.exists() == true && !file.isIntactFile(offlineFile)) offlineFile.delete()
-            notifyDownloadCancelled(fileId)
+            offlineFile?.let {
+                if (it.exists() && file?.isIntactFile(it) == false) it.delete()
+            }
+            notifyDownloadCancelled()
+            Result.failure()
+        } catch (exception: RemoteFileException) {
+            Sentry.captureException(exception)
             Result.failure()
         } catch (exception: Exception) {
             exception.printStackTrace()
@@ -74,36 +89,36 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
         }
     }
 
-    private suspend fun initOfflineDownload(file: File, offlineFile: java.io.File, userDrive: UserDrive): Result {
-        val cacheFile = file.getCacheFile(applicationContext, userDrive)
+    private suspend fun initOfflineDownload(): Result {
+        val cacheFile = file?.getCacheFile(applicationContext, userDrive)
 
-        if (file.isOfflineAndIntact(offlineFile)) return Result.success()
+        offlineFile?.let { if (file?.isOfflineAndIntact(it) == true) return Result.success() }
 
-        val firstUpdate = workDataOf(PROGRESS to 0, FILE_ID to file.id)
+        val firstUpdate = workDataOf(PROGRESS to 0, FILE_ID to fileId)
         setProgress(firstUpdate)
 
-        if (offlineFile.exists()) offlineFile.delete()
-        if (cacheFile.exists()) cacheFile.delete()
+        if (offlineFile?.exists() == true) offlineFile?.delete()
+        if (cacheFile?.exists() == true) cacheFile.delete()
 
         val cancelPendingIntent = WorkManager.getInstance(applicationContext).createCancelPendingIntent(id)
         val cancelAction =
             NotificationCompat.Action(null, applicationContext.getString(R.string.buttonCancel), cancelPendingIntent)
         val downloadNotification = applicationContext.downloadProgressNotification().apply {
             setOngoing(true)
-            setContentTitle(file.name)
+            setContentTitle(fileName)
             addAction(cancelAction)
-            setForeground(ForegroundInfo(file.id, build()))
+            setForeground(ForegroundInfo(fileId, build()))
         }
 
-        return startOfflineDownload(file, downloadNotification, offlineFile, userDrive)
+        if (file == null || offlineFile == null) getFileFromRemote()
+
+        return startOfflineDownload(downloadNotification)
     }
 
     private suspend fun startOfflineDownload(
-        file: File,
         downloadNotification: NotificationCompat.Builder,
-        offlineFile: java.io.File,
-        userDrive: UserDrive
     ): Result = withContext(Dispatchers.IO) {
+        val (file, offlineFile) = file!! to offlineFile!!
         val lastUpdate = workDataOf(PROGRESS to 100, FILE_ID to file.id)
         val okHttpClient = KDriveHttpClient.getHttpClient(userDrive.userId, null)
         val response = downloadFileResponse(
@@ -142,7 +157,14 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
         } else Result.failure()
     }
 
-    private fun notifyDownloadCancelled(fileId: Int) {
+    private fun getFileFromRemote() {
+        val fileDetails = ApiRepository.getFileDetails(File(id = fileId, driveId = userDrive.driveId))
+        val responseGsonType = object : TypeToken<ApiResponse<File>>() {}.type
+        file = fileDetails.data ?: throw RemoteFileException(ApiController.gson.toJson(fileDetails, responseGsonType))
+        offlineFile = file?.getOfflineFile(applicationContext, userDrive.driveId)
+    }
+
+    private fun notifyDownloadCancelled() {
         Intent().apply {
             action = DownloadReceiver.TAG
             putExtra(DownloadReceiver.CANCELLED_FILE_ID, fileId)
@@ -150,10 +172,13 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
         }
     }
 
+    class RemoteFileException(data: String) : Exception(data)
+
     companion object {
         const val TAG = "DownloadWorker"
         const val DRIVE_ID = "drive_id"
         const val FILE_ID = "file_id"
+        const val FILE_NAME = "file_name"
         const val PROGRESS = "progress"
         const val USER_ID = "user_id"
 
@@ -173,7 +198,7 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
         @Throws(Exception::class)
         fun saveRemoteData(
             response: Response,
-            outputFile: java.io.File? = null,
+            outputFile: IOFile? = null,
             outputStream: AutoCloseOutputStream? = null,
             onFinish: (() -> Unit)? = null
         ) {
