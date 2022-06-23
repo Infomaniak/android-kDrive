@@ -85,7 +85,7 @@ class HomeViewModel : ViewModel() {
                     ApiResponse(
                         data = localActivities,
                         page = 1,
-                        pages = 1,
+                        itemsPerPage = localActivities.size + 1,
                         result = SUCCESS
                     ) to mergeAndCleanActivities
                 )

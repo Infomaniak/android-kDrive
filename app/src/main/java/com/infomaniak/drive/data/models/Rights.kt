@@ -26,22 +26,38 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 @RealmClass(embedded = true)
 open class Rights(
-    @SerializedName("can_become_dropbox") var canBecomeDropbox: Boolean = false,
-    @SerializedName("can_become_sharelink") var canBecomeShareLink: Boolean = false,
-    @SerializedName("can_create_directory") var canCreateDirectory: Boolean = false,
-    @SerializedName("can_create_file") var canCreateFile: Boolean = false,
-    @SerializedName("can_delete") var canDelete: Boolean = false,
-    @SerializedName("can_leave") var canLeave: Boolean = false,
-    @SerializedName("can_move") var canMove: Boolean = false,
-    @SerializedName("can_move_into") var canMoveInto: Boolean = false,
-    @SerializedName("can_read") var canRead: Boolean = false,
-    @SerializedName("can_rename") var canRename: Boolean = false,
-    @SerializedName("can_share") var canShare: Boolean = false,
-    @SerializedName("can_show") var canShow: Boolean = false,
-    @SerializedName("can_upload") var canUpload: Boolean = false,
-    @SerializedName("can_use_favorite") var canUseFavorite: Boolean = false,
-    @SerializedName("can_use_team") var canUseTeam: Boolean = false,
-    @SerializedName("can_write") var canWrite: Boolean = false,
+    @SerializedName("can_become_dropbox")
+    var canBecomeDropbox: Boolean = false,
+    @SerializedName("can_become_sharelink")
+    var canBecomeShareLink: Boolean = false,
+    @SerializedName("can_create_directory")
+    var canCreateDirectory: Boolean = false,
+    @SerializedName("can_create_file")
+    var canCreateFile: Boolean = false,
+    @SerializedName("can_delete")
+    var canDelete: Boolean = false,
+    @SerializedName("can_leave")
+    var canLeave: Boolean = false,
+    @SerializedName("can_move")
+    var canMove: Boolean = false,
+    @SerializedName("can_move_into")
+    var canMoveInto: Boolean = false,
+    @SerializedName("can_read")
+    var canRead: Boolean = false,
+    @SerializedName("can_rename")
+    var canRename: Boolean = false,
+    @SerializedName("can_share")
+    var canShare: Boolean = false,
+    @SerializedName("can_show")
+    var canShow: Boolean = false,
+    @SerializedName("can_upload")
+    var canUpload: Boolean = false,
+    @SerializedName("can_use_favorite")
+    var canUseFavorite: Boolean = false,
+    @SerializedName("can_use_team")
+    var canUseTeam: Boolean = false,
+    @SerializedName("can_write")
+    var canWrite: Boolean = false,
     var right: String = "",
 ) : RealmObject(), Parcelable {
 

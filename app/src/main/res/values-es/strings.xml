@@ -109,8 +109,6 @@
     <string name="buttonConfirmNotify">Confirmar y notificar</string>
     <string name="buttonConvertToDropBox">Convertir en buzón de depósito</string>
     <string name="buttonCopy">Copiar</string>
-    <string name="buttonCopyLink">Copiar el enlace</string>
-    <string name="buttonCopyPublicLink">Copiar el enlace público</string>
     <string name="buttonCreate">Crear</string>
     <string name="buttonCreateFolder">Crear la carpeta</string>
     <string name="buttonCreateOnlyOfficeCopy">Crear una copia .%s</string>
@@ -158,6 +156,8 @@
     <string name="buttonSendCopy">Enviar una copia</string>
     <string name="buttonSettingsLockApp">Activar el bloqueo</string>
     <string name="buttonShare">Compartir</string>
+    <string name="buttonShareDropboxLink">Comparte el enlace</string>
+    <string name="buttonSharePublicLink">Compartir el enlace público</string>
     <string name="buttonSignIn">Crear una cuenta</string>
     <string name="buttonStopUpload">Detener la importación de este archivo</string>
     <string name="buttonSwitchDrive">Cambiar de drive</string>
@@ -383,7 +383,6 @@
     <string name="fileDetailsInfosTotalSizeTitle">Tamaño (con las versiones)</string>
     <string name="fileDetailsNoComments">Todavía no hay comentarios</string>
     <string name="fileInfoInputDuplicateFile">Nombre de la copia</string>
-    <string name="fileInfoLinkCopiedToClipboard">Enlace copiado en el portapapeles</string>
     <plurals name="fileListAddFavoritesConfirmationSnackbar">
         <item quantity="one">Un archivo añadido a favoritos correctamente</item>
         <item quantity="other">%d archivos añadidos a favoritos correctamente</item>
@@ -509,6 +508,7 @@
     <string name="noDriveTitle">¡Todavía no tienes kDrive!</string>
     <string name="noFilesDescription">Esta carpeta está vacía. Pulsa la tecla + para agregar archivos aquí.</string>
     <string name="noFilesDescriptionNoNetwork">No se puede recuperar la información de la carpeta. Comprueba tu conexión de red o vuelve a intentarlo más tarde.</string>
+    <string name="noFilesDescriptionSelectFolder">Esta carpeta está vacía.</string>
     <string name="noMediaFolderTitle">No hay carpetas de medios disponibles</string>
     <string name="noSelectMediaFolders">No hay carpeta seleccionada</string>
     <string name="noSyncFolderNotificationDescription">Pulse aquí para configurar las carpetas a sincronizar</string>

@@ -56,7 +56,7 @@ object FileController {
     private const val PICTURES_FILE_ID = -3
 
     private val ROOT_FILE get() = File(ROOT_ID, name = "Root", driveId = AccountUtils.currentDriveId)
-    private val FAVORITES_FILE = File(FAVORITES_FILE_ID, name = "Favoris")
+    private val FAVORITES_FILE = File(FAVORITES_FILE_ID, name = "Favorites")
     private val MY_SHARES_FILE = File(MY_SHARES_FILE_ID, name = "My Shares")
     private val PICTURES_FILE = File(PICTURES_FILE_ID, name = "Pictures")
     private val RECENT_CHANGES_FILE = File(RECENT_CHANGES_FILE_ID, name = "Recent changes")
@@ -367,11 +367,23 @@ object FileController {
     }
 
     fun getFileDetails(fileId: Int, userDrive: UserDrive): File? {
+        fun getRemoteParentDetails(remoteFile: File, userDrive: UserDrive, realm: Realm) {
+            ApiRepository.getFileDetails(File(id = remoteFile.parentId, driveId = userDrive.driveId)).data?.let {
+                it.children = RealmList(remoteFile)
+                insertOrUpdateFile(realm, it)
+            }
+        }
+
         return getRealmInstance(userDrive).use { realm ->
             val apiResponse = ApiRepository.getFileDetails(File(id = fileId, driveId = userDrive.driveId))
             if (apiResponse.isSuccess()) {
                 apiResponse.data?.let { remoteFile ->
-                    insertOrUpdateFile(realm, remoteFile, getFileProxyById(fileId, customRealm = realm))
+                    val localParentProxy = getParentFile(fileId, realm = realm)
+                    if (localParentProxy == null) {
+                        getRemoteParentDetails(remoteFile, userDrive, realm)
+                    } else {
+                        insertOrUpdateFile(realm, remoteFile, getFileProxyById(fileId, customRealm = realm))
+                    }
                     remoteFile
                 }
             } else {
@@ -675,6 +687,8 @@ object FileController {
         // Save to realm
         localFolderProxy?.let {
             it.realm.executeTransaction {
+                // Remove old children
+                localFolderProxy.children.clear()
                 // Add children
                 localFolderProxy.children.addAll(remoteFiles)
                 // Update folder properties

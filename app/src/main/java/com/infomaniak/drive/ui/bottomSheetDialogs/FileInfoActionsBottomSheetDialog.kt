@@ -163,7 +163,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun goToFolder() {
-        FileController.getParentFile(currentFile.id)?.let { folder -> navigateToParentFolder(folder, mainViewModel) }
+        FileController.getParentFile(currentFile.id)?.let { folder -> navigateToParentFolder(folder.id, mainViewModel) }
     }
 
     override fun dropBoxClicked(isDropBox: Boolean) {
@@ -186,10 +186,10 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
     }
 
-    override fun copyPublicLink() {
-        super.copyPublicLink()
-        fileInfoActionsView.createPublicCopyLink(onSuccess = {
-            showSnackbar(R.string.fileInfoLinkCopiedToClipboard, true)
+    override fun sharePublicLink() {
+        super.sharePublicLink()
+        fileInfoActionsView.createPublicShareLink(onSuccess = {
+            context?.shareText(it)
             findNavController().popBackStack()
         }, onError = { translatedError -> showSnackbar(translatedError, true) })
     }

@@ -39,6 +39,7 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDia
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
+import com.infomaniak.lib.core.utils.Utils.getDefaultAcceptedLanguage
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.hideProgress
@@ -50,7 +51,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.Serializable
-import java.util.*
 
 class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
     private lateinit var availableUsersAdapter: AvailableShareableItemsAdapter
@@ -83,7 +83,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
         availableUsersAdapter = userAutoCompleteTextView.setupAvailableShareableItems(
             context = requireContext(),
             itemList = fileShareViewModel.availableShareableItems.value ?: AccountUtils.getCurrentDrive().getDriveUsers(),
-            notShareableUserIds = navigationArgs.notShareableUserIds.toMutableList() as ArrayList<Int>,
+            notShareableIds = navigationArgs.notShareableIds.toMutableList() as ArrayList<Int>,
             notShareableEmails = navigationArgs.notShareableEmails.toMutableList() as ArrayList<String>,
         ) { element ->
             userAutoCompleteTextView.setText("")
@@ -139,10 +139,10 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                 }
                 is DriveUser -> {
                     driveUsers.add(element)
-                    availableUsersAdapter.notShareableUserIds.add(element.id)
+                    availableUsersAdapter.notShareableIds.add(element.id)
                     createChip(element).setOnClickListener {
                         driveUsers.remove(element)
-                        availableUsersAdapter.notShareableUserIds.remove(element.id)
+                        availableUsersAdapter.notShareableIds.remove(element.id)
                         selectedItemsChipGroup.removeView(it)
                     }
                 }
@@ -214,7 +214,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                 "user_ids" to ArrayList(selectedItems.driveUsers.map { it.id }),
                 "team_ids" to ArrayList(selectedItems.teams.map { it.id }),
                 "right" to newPermission,
-                "lang" to Locale.getDefault().language,
+                "lang" to getDefaultAcceptedLanguage(),
                 "message" to shareMessage.text.toString(),
             )
 

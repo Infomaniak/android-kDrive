@@ -52,7 +52,7 @@ class SelectFolderActivity : BaseActivity() {
         val userId = navigationArgs.userId
         val driveId = navigationArgs.userDriveId
         val customArgs = navigationArgs.customArgs
-        val currentFolderId = navigationArgs.currentFolderId.getIntOrNull()
+        val disabledFolderId = navigationArgs.disabledFolderId.getIntOrNull()
         val currentUserDrive = UserDrive(userId, driveId)
 
         mainViewModel.selectFolderUserDrive = currentUserDrive
@@ -60,13 +60,19 @@ class SelectFolderActivity : BaseActivity() {
         selectFolderViewModel.apply {
             userDrive = currentUserDrive
             currentDrive = DriveInfosController.getDrives(userId, driveId).firstOrNull()
-            disableSelectedFolderId = currentFolderId
+            disableSelectedFolderId = disabledFolderId
         }
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_select_folder)
         setSaveButton(customArgs)
-        currentFolderId?.let { initiateNavigationToCurrentFolder(it, currentUserDrive) } ?: Unit
+
+        disabledFolderId?.let { folderId ->
+            // Simply navigate when the folder exists in the local database
+            FileController.getFileProxyById(folderId, customRealm = mainViewModel.realm)?.let {
+                initiateNavigationToCurrentFolder(folderId, currentUserDrive)
+            }
+        }
     }
 
     private fun Int.getIntOrNull(): Int? = if (this <= 0) null else this

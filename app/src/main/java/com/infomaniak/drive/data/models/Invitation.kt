@@ -30,5 +30,6 @@ data class Invitation(
     val status: String = "",
     val email: String = "",
     val user: DriveUser? = null,
-    @SerializedName("invitation_drive_id") val invitationDriveId: Int = -1,
+    @SerializedName("invitation_drive_id")
+    val invitationDriveId: Int = -1,
 ) : Parcelable, Shareable

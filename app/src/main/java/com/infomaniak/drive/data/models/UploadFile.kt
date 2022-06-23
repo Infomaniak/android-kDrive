@@ -73,8 +73,6 @@ open class UploadFile(
         }
     }
 
-    fun isPriority() = type != Type.SYNC.name
-
     fun isSync() = type == Type.SYNC.name
 
     fun isSyncOffline() = type == Type.SYNC_OFFLINE.name
@@ -100,6 +98,24 @@ open class UploadFile(
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> MediaStore.setRequireOriginal(uriObject)
             else -> uriObject
         }
+    }
+
+    fun updateFileSize(newFileSize: Long) {
+        getRealmInstance().use { realm ->
+            syncFileByUriQuery(realm, uri).findFirst()?.let { uploadFile ->
+                realm.executeTransaction { uploadFile.fileSize = newFileSize }
+            }
+        }
+        fileSize = newFileSize
+    }
+
+    fun updateUploadToken(newUploadToken: String) {
+        getRealmInstance().use { realm ->
+            syncFileByUriQuery(realm, uri).findFirst()?.let { uploadFile ->
+                realm.executeTransaction { uploadFile.uploadToken = newUploadToken }
+            }
+        }
+        uploadToken = newUploadToken
     }
 
     enum class Type {
@@ -204,24 +220,6 @@ open class UploadFile(
                     }
                 }
             }
-        }
-
-        fun UploadFile.updateFileSize(newFileSize: Long) {
-            getRealmInstance().use { realm ->
-                syncFileByUriQuery(realm, uri).findFirst()?.let { uploadFile ->
-                    realm.executeTransaction { uploadFile.fileSize = newFileSize }
-                }
-            }
-            fileSize = newFileSize
-        }
-
-        fun UploadFile.updateUploadToken(newUploadToken: String) {
-            getRealmInstance().use { realm ->
-                syncFileByUriQuery(realm, uri).findFirst()?.let { uploadFile ->
-                    realm.executeTransaction { uploadFile.uploadToken = newUploadToken }
-                }
-            }
-            uploadToken = newUploadToken
         }
 
         fun getLastDate(context: Context): Date {

@@ -37,7 +37,8 @@ open class ShareLink(
     var url: String = "",
     @SerializedName("right")
     var _right: String = ShareLinkFilePermission.RESTRICTED.name,
-    @SerializedName("valid_until") var validUntil: Date? = null,
+    @SerializedName("valid_until")
+    var validUntil: Date? = null,
     var capabilities: ShareLinkCapabilities? = null,
 ) : RealmObject(), Parcelable {
 
@@ -172,14 +173,20 @@ open class ShareLink(
     }
 
     inner class ShareLinkSettings(
-        @SerializedName("can_comment") var canComment: Boolean? = capabilities?.canComment,
-        @SerializedName("can_download") var canDownload: Boolean? = capabilities?.canDownload,
-        @SerializedName("can_edit") var canEdit: Boolean? = capabilities?.canEdit,
-        @SerializedName("can_see_info") var canSeeInfo: Boolean? = capabilities?.canSeeInfo,
-        @SerializedName("can_see_stats") var canSeeStats: Boolean? = capabilities?.canSeeStats,
+        @SerializedName("can_comment")
+        var canComment: Boolean? = capabilities?.canComment,
+        @SerializedName("can_download")
+        var canDownload: Boolean? = capabilities?.canDownload,
+        @SerializedName("can_edit")
+        var canEdit: Boolean? = capabilities?.canEdit,
+        @SerializedName("can_see_info")
+        var canSeeInfo: Boolean? = capabilities?.canSeeInfo,
+        @SerializedName("can_see_stats")
+        var canSeeStats: Boolean? = capabilities?.canSeeStats,
         var password: String? = newPassword,
         var right: ShareLinkFilePermission? = newRight,
-        @SerializedName("valid_until") var validUntil: Date? = this@ShareLink.validUntil,
+        @SerializedName("valid_until")
+        var validUntil: Date? = this@ShareLink.validUntil,
     ) {
         fun toJsonElement(): JsonObject {
             return with(gson.newBuilder().serializeNulls().create()) {

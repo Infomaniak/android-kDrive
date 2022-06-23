@@ -109,8 +109,6 @@
     <string name="buttonConfirmNotify">Confirmer et notifier</string>
     <string name="buttonConvertToDropBox">Convertir en boîte de dépôt</string>
     <string name="buttonCopy">Copier</string>
-    <string name="buttonCopyLink">Copier le lien</string>
-    <string name="buttonCopyPublicLink">Copier le lien public</string>
     <string name="buttonCreate">Créer</string>
     <string name="buttonCreateFolder">Créer le dossier</string>
     <string name="buttonCreateOnlyOfficeCopy">Créer une copie .%s</string>
@@ -158,6 +156,8 @@
     <string name="buttonSendCopy">Envoyer une copie</string>
     <string name="buttonSettingsLockApp">Activer le verrouillage</string>
     <string name="buttonShare">Partager</string>
+    <string name="buttonShareDropboxLink">Partager le lien</string>
+    <string name="buttonSharePublicLink">Partager le lien public</string>
     <string name="buttonSignIn">Créer un compte</string>
     <string name="buttonStopUpload">Stopper l’importation de ce fichier</string>
     <string name="buttonSwitchDrive">Changer de drive</string>
@@ -383,7 +383,6 @@
     <string name="fileDetailsInfosTotalSizeTitle">Taille (avec les versions)</string>
     <string name="fileDetailsNoComments">Aucun commentaire pour le moment</string>
     <string name="fileInfoInputDuplicateFile">Nom de la copie</string>
-    <string name="fileInfoLinkCopiedToClipboard">Lien copié dans le presse-papiers</string>
     <plurals name="fileListAddFavoritesConfirmationSnackbar">
         <item quantity="one">Un fichier ajouté aux favoris avec succès</item>
         <item quantity="other">%d fichiers ajoutés aux favoris avec succès</item>
@@ -509,6 +508,7 @@
     <string name="noDriveTitle">Vous n’avez pas encore de kDrive !</string>
     <string name="noFilesDescription">Ce dossier est vide. Appuyez sur le bouton + pour ajouter des fichiers ici.</string>
     <string name="noFilesDescriptionNoNetwork">Impossible de récupérer les informations du dossier. Veuillez vérifier votre connexion réseau ou réessayez ultérieurement.</string>
+    <string name="noFilesDescriptionSelectFolder">Ce dossier est vide.</string>
     <string name="noMediaFolderTitle">Aucun dossier de médias disponible</string>
     <string name="noSelectMediaFolders">Aucun dossier sélectionné</string>
     <string name="noSyncFolderNotificationDescription">Cliquez-ici pour configurer les dossiers à synchroniser</string>

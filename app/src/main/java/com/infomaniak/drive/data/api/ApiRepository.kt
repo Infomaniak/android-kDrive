@@ -21,6 +21,7 @@ import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
 import com.infomaniak.drive.data.api.ApiRoutes.activitiesWithQuery
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.data.models.upload.UploadSegment.ChunkStatus
@@ -62,6 +63,15 @@ object ApiRepository : ApiRepositoryCore() {
             "&actions[]=collaborative_folder_update" +
             "&actions[]=collaborative_folder_delete"
 
+    private const val ADDITIONAL_ACTIONS = "&actions[]=file_access" +
+            "&actions[]=comment_create" +
+            "&actions[]=comment_update" +
+            "&actions[]=comment_delete" +
+            "&actions[]=comment_like" +
+            "&actions[]=comment_unlike" +
+            "&actions[]=comment_resolve" +
+            "&actions[]=share_link_show"
+
     fun getAllDrivesData(
         okHttpClient: OkHttpClient
     ): ApiResponse<DriveInfo> {
@@ -97,10 +107,12 @@ object ApiRepository : ApiRepositoryCore() {
         okHttpClient: OkHttpClient = HttpClient.okHttpClientLongTimeout,
     ): ApiResponse<ArrayList<FileActivity>> {
         val queries = if (forFileList) "&depth=children&from_date=${file.responseAt}&$activitiesWithQuery" else "&with=user"
-        val url = "${ApiRoutes.getFileActivities(file)}?${pagination(page)}$queries" + if (forFileList) ACTIONS else ""
+        val url = "${ApiRoutes.getFileActivities(file)}?${pagination(page)}$queries$ACTIONS" +
+                if (forFileList) "" else ADDITIONAL_ACTIONS
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
+    // For sync offline service
     fun getFileActivities(
         driveId: Int,
         fileIds: List<Int>,
@@ -339,7 +351,7 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(url, GET)
     }
 
-    fun postFolderAccess(file: File): ApiResponse<File> {
+    fun forceFolderAccess(file: File): ApiResponse<Boolean> {
         return callApi(ApiRoutes.forceFolderAccess(file), POST)
     }
 
@@ -399,8 +411,8 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.bulkAction(bulkOperation.parent.driveId), POST, bulkOperation.toMap())
     }
 
-    fun getUUIDArchiveFiles(driveId: Int, fileIds: IntArray): ApiResponse<ArchiveUUID> {
-        return callApi(ApiRoutes.getUUIDArchiveFiles(driveId), POST, mapOf("file_ids" to fileIds))
+    fun buildArchive(driveId: Int, archiveBody: ArchiveBody): ApiResponse<ArchiveUUID> {
+        return callApi(ApiRoutes.buildArchive(driveId), POST, archiveBody)
     }
 
     private fun pagination(page: Int, perPage: Int = PER_PAGE) = "page=$page&per_page=$perPage"

@@ -57,7 +57,11 @@ class MultiSelectManager {
         }
     }
 
-    fun isSelectedFile(file: File): Boolean = file.isUsable() && selectedItemsIds.contains(file.id)
+    fun isSelectedFile(file: File): Boolean {
+        return if (file.isUsable()) {
+            if (isSelectAllOn) !exceptedItemsIds.contains(file.id) else selectedItemsIds.contains(file.id)
+        } else false
+    }
 
     fun performCancellableBulkOperation(bulkOperation: BulkOperation): LiveData<ApiResponse<CancellableAction>> {
         return liveData(Dispatchers.IO) { emit(ApiRepository.performCancellableBulkOperation(bulkOperation)) }
@@ -72,12 +76,20 @@ class MultiSelectManager {
             if (!it.isFavorite) onlyFavorite = false
             if (!it.isOffline) onlyOffline = false
         }
-        return MenuNavArgs(fileIds.toIntArray(), onlyFolders, onlyFavorite, onlyOffline, isSelectAllOn)
+        return MenuNavArgs(
+            fileIds = fileIds.toIntArray(),
+            exceptFileIds = exceptedItemsIds.toIntArray(),
+            onlyFolders = onlyFolders,
+            onlyFavorite = onlyFavorite,
+            onlyOffline = onlyOffline,
+            isAllSelected = isSelectAllOn
+        )
     }
 
     @Suppress("ArrayInDataClass")
     data class MenuNavArgs(
         val fileIds: IntArray,
+        val exceptFileIds: IntArray,
         val onlyFolders: Boolean,
         val onlyFavorite: Boolean,
         val onlyOffline: Boolean,

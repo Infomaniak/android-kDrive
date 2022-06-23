@@ -70,11 +70,11 @@ class FileMigration : RealmMigration {
         // - Modified field (Rights) in File table (remove PrimaryKey & Id, and switched to Embedded)
         if (oldVersionTemp == 1L) {
             val fileCategorySchema = schema.create(FileCategory::class.java.simpleName).apply {
-                addField(FileCategory::categoryId.name, Int::class.java, FieldAttribute.REQUIRED)
-                addField(FileCategory::userValidation.name, String::class.java, FieldAttribute.REQUIRED)
-                addField(FileCategory::isGeneratedByAI.name, Boolean::class.java, FieldAttribute.REQUIRED)
+                addField("id", Int::class.java, FieldAttribute.REQUIRED)
+                addField("iaCategoryUserValidation", String::class.java, FieldAttribute.REQUIRED)
+                addField("isGeneratedByIa", Boolean::class.java, FieldAttribute.REQUIRED)
                 addField(FileCategory::userId.name, Int::class.java).setNullable(FileCategory::userId.name, true)
-                addField(FileCategory::addedAt.name, Date::class.java, FieldAttribute.REQUIRED)
+                addField("addedToFileAt", Date::class.java, FieldAttribute.REQUIRED)
             }
             schema.get(File::class.java.simpleName)?.apply {
                 addRealmListField(File::categories.name, fileCategorySchema)
@@ -140,7 +140,6 @@ class FileMigration : RealmMigration {
         // - Added new field (FileConversion) in File table
         // - Added new field (FileVersion) in File table
         // - Added new field (ShareLink) in File table
-
         if (oldVersionTemp == 3L) {
             // Dropbox migration
             val dropboxValiditySchema = schema.create(DropBoxValidity::class.java.simpleName).apply {

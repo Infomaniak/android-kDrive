@@ -210,7 +210,7 @@
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/copyPublicLink"
+                android:id="@+id/sharePublicLink"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_rowWeight="1"
@@ -225,34 +225,34 @@
                 app:cardElevation="0dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/copyPublicLinkLayout"
+                    android:id="@+id/sharePublicLinkLayout"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
                     <ImageView
-                        android:id="@+id/copyPublicLinkIcon"
+                        android:id="@+id/sharePublicLinkIcon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/marginStandardVerySmall"
                         android:src="@drawable/ic_link"
-                        app:layout_constraintBottom_toTopOf="@id/copyPublicLinkText"
+                        app:layout_constraintBottom_toTopOf="@id/sharePublicLinkText"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         tools:ignore="ContentDescription" />
 
                     <TextView
-                        android:id="@+id/copyPublicLinkText"
+                        android:id="@+id/sharePublicLinkText"
                         style="@style/Subtitle2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="@dimen/marginStandardVerySmall"
                         android:gravity="center"
-                        android:text="@string/buttonCopyPublicLink"
+                        android:text="@string/buttonSharePublicLink"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/copyPublicLinkIcon" />
+                        app:layout_constraintTop_toBottomOf="@id/sharePublicLinkIcon" />
 
                     <View
                         android:id="@+id/disabledPublicLink"

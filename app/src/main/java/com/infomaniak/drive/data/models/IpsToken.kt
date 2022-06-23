@@ -22,5 +22,6 @@ import java.util.*
 
 class IpsToken(
     val uuid: String,
-    @SerializedName("valid_until") val validUntil: Date,
+    @SerializedName("valid_until")
+    val validUntil: Date,
 )

@@ -97,7 +97,7 @@ class FileShareDetailsFragment : Fragment() {
                 openAddUserDialog(selectedElement)
             },
         )
-        availableShareableItemsAdapter.notShareableUserIds.addAll(file.users)
+        availableShareableItemsAdapter.notShareableIds.addAll(file.users)
     }
 
     private fun setToolbarTitle() {
@@ -112,7 +112,7 @@ class FileShareDetailsFragment : Fragment() {
     }
 
     private fun refreshUi() {
-        //FIXME Need refactor
+        //TODO Need refactor
         sharedItemsAdapter = SharedItemsAdapter(file) { shareable -> openSelectPermissionDialog(shareable) }
         sharedUsersRecyclerView.adapter = sharedItemsAdapter
 
@@ -129,7 +129,7 @@ class FileShareDetailsFragment : Fragment() {
                             share.invitations.mapNotNull { it.user?.id } +
                             share.teams.map { team -> team.id }
 
-                    notShareableUserIds = ArrayList(userIds)
+                    notShareableIds = ArrayList(userIds)
                     notShareableEmails = ArrayList(share.invitations.map { invitation -> invitation.email })
                 }
 
@@ -277,7 +277,7 @@ class FileShareDetailsFragment : Fragment() {
     private fun openSelectPermissionDialog(shareable: Shareable) {
 
         val permissionsGroup = when {
-            shareable is Invitation || (shareable is DriveUser && shareable.isExternalUser()) -> PermissionsGroup.EXTERNAL_USERS_RIGHTS
+            shareable is Invitation || (shareable is DriveUser && shareable.isExternalUser) -> PermissionsGroup.EXTERNAL_USERS_RIGHTS
             else -> PermissionsGroup.USERS_RIGHTS
         }
 
@@ -295,7 +295,7 @@ class FileShareDetailsFragment : Fragment() {
         safeNavigate(
             FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToFileShareAddUserDialog(
                 sharedItem = element,
-                notShareableUserIds = notShareableUserIds.toIntArray(),
+                notShareableIds = notShareableIds.toIntArray(),
                 notShareableEmails = notShareableEmails.toTypedArray()
             )
         )

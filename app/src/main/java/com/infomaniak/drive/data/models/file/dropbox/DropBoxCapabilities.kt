@@ -26,10 +26,14 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 @RealmClass(embedded = true)
 open class DropBoxCapabilities(
-    @SerializedName("has_password") var hasPassword: Boolean = false,
-    @SerializedName("has_notification") var hasNotification: Boolean = false,
-    @SerializedName("has_validity") var hasValidity: Boolean = false,
-    @SerializedName("has_size_limit") var hasSizeLimit: Boolean = false,
+    @SerializedName("has_password")
+    var hasPassword: Boolean = false,
+    @SerializedName("has_notification")
+    var hasNotification: Boolean = false,
+    @SerializedName("has_validity")
+    var hasValidity: Boolean = false,
+    @SerializedName("has_size_limit")
+    var hasSizeLimit: Boolean = false,
     var validity: DropBoxValidity? = null,
     var size: DropBoxSize? = null,
 ) : RealmObject(), Parcelable

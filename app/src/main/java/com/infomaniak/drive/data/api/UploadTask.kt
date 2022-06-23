@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.api
 
-import android.R
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -28,7 +27,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.data.models.UploadFile
-import com.infomaniak.drive.data.models.UploadFile.Companion.updateUploadToken
 import com.infomaniak.drive.data.models.upload.UploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.data.services.UploadWorker
@@ -119,20 +117,7 @@ class UploadTask(
         return@withContext false
     }
 
-    private suspend fun onFinish(uri: Uri) {
-        uploadNotification.apply {
-            setOngoing(false)
-            setContentText("100%")
-            setSmallIcon(R.drawable.stat_sys_upload_done)
-            setProgress(0, 0, false)
-            notificationManagerCompat.notify(CURRENT_UPLOAD_ID, build())
-        }
-        shareProgress(100, true)
-        ApiRepository.finishSession(uploadFile.driveId, uploadFile.uploadToken!!)
-        UploadFile.uploadFinished(uri)
-        notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
-    }
-
+    @Suppress("BlockingMethodInNonBlockingContext")
     private suspend fun launchTask(coroutineScope: CoroutineScope) = withContext(Dispatchers.IO) {
         val uri = uploadFile.getUriObject()
         val fileInputStream = context.contentResolver.openInputStream(uploadFile.getOriginalUri(context))
@@ -194,6 +179,20 @@ class UploadTask(
         onFinish(uri)
     }
 
+    private suspend fun onFinish(uri: Uri) {
+        uploadNotification.apply {
+            setOngoing(false)
+            setContentText("100%")
+            setSmallIcon(android.R.drawable.stat_sys_upload_done)
+            setProgress(0, 0, false)
+            notificationManagerCompat.notify(CURRENT_UPLOAD_ID, build())
+        }
+        shareProgress(100, true)
+        ApiRepository.finishSession(uploadFile.driveId, uploadFile.uploadToken!!)
+        UploadFile.uploadFinished(uri)
+        notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
+    }
+
     private fun CoroutineScope.uploadChunkRequest(
         requestSemaphore: Semaphore,
         data: ByteArray,
@@ -231,7 +230,7 @@ class UploadTask(
                     Sentry.withScope { scope ->
                         scope.level = SentryLevel.WARNING
                         scope.setExtra("fileSize", "$fileSize")
-                        Sentry.captureMessage("Max chunk size exceeded, file size exceed ${TOTAL_CHUNKS * CHUNK_MAX_SIZE}")
+                        Sentry.captureMessage("Max chunk size exceeded, file size exceed $MAX_TOTAL_CHUNKS_SIZE")
                     }
                     throw AllowedFileSizeExceededException()
                 }
@@ -370,20 +369,20 @@ class UploadTask(
     }
 
     private fun <T> ApiResponse<T>?.manageUploadErrors() {
-        when {
-            this?.error?.code.equals("file_already_exists_error") -> Unit
-            this?.error?.code.equals("lock_error") -> throw LockErrorException()
-            this?.error?.code.equals("object_not_found") -> throw FolderNotFoundException()
-            this?.error?.code.equals("quota_exceeded_error") -> throw QuotaExceededException()
-            this?.error?.code.equals("not_authorized") -> throw NotAuthorizedException()
-            this?.error?.code.equals("upload_not_terminated") -> {
+        when (this?.error?.code) {
+            "file_already_exists_error" -> Unit
+            "lock_error" -> throw LockErrorException()
+            "object_not_found" -> throw FolderNotFoundException()
+            "quota_exceeded_error" -> throw QuotaExceededException()
+            "not_authorized" -> throw NotAuthorizedException()
+            "upload_not_terminated" -> {
                 // Upload finish with 0 chunks uploaded
                 // Upload finish with a different expected number of chunks
                 uploadFile.uploadToken?.let { ApiRepository.cancelSession(uploadFile.driveId, it) }
                 uploadFile.resetUploadToken()
                 throw UploadNotTerminated("Upload finish with 0 chunks uploaded or a different expected number of chunks")
             }
-            this?.error?.code.equals("upload_error") -> {
+            "upload_error" -> {
                 uploadFile.resetUploadToken()
                 throw UploadErrorException()
             }
@@ -421,8 +420,9 @@ class UploadTask(
 
         var chunkSize: Int = 1 * 1024 * 1024 // Chunk 1 Mo
         private const val CHUNK_MAX_SIZE: Int = 50 * 1024 * 1024 // 50 Mo and max file size to upload 500Gb
-        private const val OPTIMAL_TOTAL_CHUNKS = 200
-        private const val TOTAL_CHUNKS = 10_000
+        private const val OPTIMAL_TOTAL_CHUNKS: Int = 200
+        private const val TOTAL_CHUNKS: Int = 10_000
+        private const val MAX_TOTAL_CHUNKS_SIZE: Long = CHUNK_MAX_SIZE.toLong() * TOTAL_CHUNKS.toLong()
 
         enum class ConflictOption {
             @SerializedName("error")

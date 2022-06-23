@@ -23,6 +23,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import com.infomaniak.drive.R
+import com.infomaniak.drive.utils.isLastPage
 import kotlinx.android.synthetic.main.fragment_file_details.*
 import kotlinx.android.synthetic.main.fragment_file_details_activities.*
 
@@ -44,7 +45,7 @@ class FileDetailsActivitiesFragment : FileDetailsSubFragment() {
                 fileDetailsViewModel.getFileActivities(file).observe(viewLifecycleOwner) { apiResponse ->
                     apiResponse?.data?.let { activities ->
                         addAll(activities)
-                        isComplete = apiResponse.page == apiResponse.pages
+                        isComplete = apiResponse.isLastPage()
                     } ?: also {
                         isComplete = true
                     }

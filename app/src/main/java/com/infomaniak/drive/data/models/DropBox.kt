@@ -34,11 +34,16 @@ open class DropBox(
     var capabilities: DropBoxCapabilities? = null,
     var url: String = "",
     var uuid: String = "",
-    @SerializedName("created_at") var createdAt: Date? = null,
-    @SerializedName("created_by") var createdBy: Int = -1,
-    @SerializedName("last_uploaded_at") var lastUploadedAt: Long? = null,
-    @SerializedName("nb_users") var collaborativeUsersCount: Int = 0,
-    @SerializedName("updated_at") var updatedAt: Date? = null,
+    @SerializedName("created_at")
+    var createdAt: Date? = null,
+    @SerializedName("created_by")
+    var createdBy: Int = -1,
+    @SerializedName("last_uploaded_at")
+    var lastUploadedAt: Long? = null,
+    @SerializedName("nb_users")
+    var collaborativeUsersCount: Int = 0,
+    @SerializedName("updated_at")
+    var updatedAt: Date? = null,
 ) : RealmObject(), Parcelable {
 
     inline val hasNotification: Boolean get() = capabilities?.hasNotification == true //when someone upload a file

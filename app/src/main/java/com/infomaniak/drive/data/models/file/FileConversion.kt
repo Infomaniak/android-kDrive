@@ -28,8 +28,12 @@ import kotlinx.android.parcel.RawValue
 @Parcelize
 @RealmClass(embedded = true)
 open class FileConversion(
-    @SerializedName("when_download") var whenDownload: Boolean = false,
-    @SerializedName("download_extensions") var downloadExtensions: @RawValue RealmList<String> = RealmList(),
-    @SerializedName("when_onlyoffice") var whenOnlyoffice: Boolean = false,
-    @SerializedName("onlyoffice_extension") var onlyofficeExtension: String? = null,
+    @SerializedName("when_download")
+    var whenDownload: Boolean = false,
+    @SerializedName("download_extensions")
+    var downloadExtensions: @RawValue RealmList<String> = RealmList(),
+    @SerializedName("when_onlyoffice")
+    var whenOnlyoffice: Boolean = false,
+    @SerializedName("onlyoffice_extension")
+    var onlyofficeExtension: String? = null,
 ) : RealmObject(), Parcelable

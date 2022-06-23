@@ -35,7 +35,6 @@ import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
-import com.infomaniak.drive.data.models.UploadFile.Companion.updateFileSize
 import com.infomaniak.drive.data.services.UploadWorkerThrowable.runUploadCatching
 import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.data.sync.UploadNotifications.exceptionNotification
@@ -141,9 +140,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             Log.d(TAG, "startSyncFiles> upload ${uploadFile.fileName}")
             if (uploadFile.initUpload(pendingCount)) successCount++
             pendingCount--
-            if (!uploadFile.isPriority() && UploadFile.getAllPendingPriorityFilesCount() > 0) {
-                break
-            }
+
+            if (uploadFile.isSync() && UploadFile.getAllPendingPriorityFilesCount() > 0) break
         }
 
         uploadedCount = successCount + lastUploadedCount
@@ -211,10 +209,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 val size = descriptorSize?.let { if (mediaSize > it) mediaSize else it } ?: mediaSize // TODO Temporary solution
                 startUploadFile(size)
             } else {
-                UploadFile.deleteIfExists(uri)
-                false
+                null
             }
-        } ?: false
+        } ?: run {
+            UploadFile.deleteIfExists(uri)
+            false
+        }
     }
 
     private suspend fun UploadFile.startUploadFile(size: Long): Boolean {
@@ -284,12 +284,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             Log.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.name}_${mediaFolder.id}")
 
             // Sync media folder
-            var isNotPending = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                "AND ${MediaStore.Images.Media.IS_PENDING} = 0"
-            } else {
-                ""
-            }
-            customSelection = "$selection AND $IMAGES_BUCKET_ID = ? $isNotPending"
+            customSelection = "$selection AND $IMAGES_BUCKET_ID = ? ${moreCustomConditions()}"
             customArgs = args + mediaFolder.id.toString()
 
             val getLastImagesOperation = getLocalLastMediasAsync(
@@ -302,12 +297,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             jobs.add(getLastImagesOperation)
 
             if (syncSettings.syncVideo) {
-                isNotPending = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    "AND ${MediaStore.Video.Media.IS_PENDING} = 0"
-                } else {
-                    ""
-                }
-                customSelection = "$selection AND $VIDEO_BUCKET_ID = ? $isNotPending"
+                customSelection = "$selection AND $VIDEO_BUCKET_ID = ? ${moreCustomConditions()}"
 
                 val getLastVideosOperation = getLocalLastMediasAsync(
                     syncSettings = syncSettings,
@@ -321,6 +311,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
 
         jobs.joinAll()
+    }
+
+    private fun moreCustomConditions(): String = when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> "AND ${MediaStore.MediaColumns.IS_PENDING} = 0 AND ${MediaStore.MediaColumns.IS_TRASHED} = 0"
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> "AND ${MediaStore.MediaColumns.IS_PENDING} = 0"
+        else -> ""
     }
 
     private fun CoroutineScope.updateUploadCountNotification(uploadFile: UploadFile, pendingCount: Int) {

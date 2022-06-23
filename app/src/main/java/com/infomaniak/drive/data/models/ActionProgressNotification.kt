@@ -23,6 +23,8 @@ data class ActionProgressNotification(
     override val uid: String,
     override val action: Action,
     val progress: ActionProgress,
-    @SerializedName("drive_id") override val driveId: Int,
-    @SerializedName("action_uuid") val actionUuid: String,
+    @SerializedName("drive_id")
+    override val driveId: Int,
+    @SerializedName("action_uuid")
+    val actionUuid: String,
 ) : Notification

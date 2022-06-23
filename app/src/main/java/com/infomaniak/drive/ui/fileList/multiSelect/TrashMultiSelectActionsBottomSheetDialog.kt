@@ -44,6 +44,10 @@ class TrashMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDi
         duplicateFile.isGone = true
     }
 
+    override fun configureMoveFile() {
+        moveFile.isGone = true
+    }
+
     override fun configureRestoreFileIn() {
         restoreFileIn.apply {
             isVisible = true

@@ -39,7 +39,6 @@ import kotlinx.android.synthetic.main.fragment_create_folder.*
 import kotlinx.android.synthetic.main.item_dropbox_settings.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import okhttp3.internal.toLongOrDefault
 
 class CreateDropBoxFolderFragment : CreateFolderFragment() {
 
@@ -98,7 +97,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
         val emailWhenFinished = emailWhenFinishedSwitch.isChecked
         val validUntil = if (expirationDateSwitch.isChecked) expirationDateInput.getCurrentTimestampValue() else null
         val password = passwordTextInput.text.toString()
-        val limitFileSize = Utils.convertGigaByteToBytes(limitStorageValue.text.toString().toLongOrDefault(1))
+        val limitFileSize = Utils.convertGigaByteToBytes(limitStorageValue.text.toString().toDoubleOrNull() ?: 1.0)
 
         createFolder(false) { file, _ ->
             file?.let {
@@ -173,7 +172,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
                         limitStorageValueLayout.error = getString(R.string.allEmptyInputError)
                         result = false
                     }
-                    this.toLong() < 1 -> {
+                    this.toDoubleOrNull() == 0.0 -> {
                         limitStorageValueLayout.error = getString(R.string.createDropBoxLimitFileSizeError)
                         result = false
                     }

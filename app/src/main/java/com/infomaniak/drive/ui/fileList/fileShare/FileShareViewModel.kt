@@ -25,7 +25,6 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.Shareable
-import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.utils.AccountUtils
 import kotlinx.coroutines.Dispatchers
 
@@ -50,10 +49,9 @@ class FileShareViewModel : ViewModel() {
     }
 
     fun editFileShareLink(file: File, shareLink: ShareLink) = liveData(Dispatchers.IO) {
-        val shareLinkSettings = shareLink.ShareLinkSettings()
-
-        shareLinkSettings.validUntil =
-            if (AccountUtils.getCurrentDrive()?.pack != Drive.DrivePack.FREE.value) shareLink.validUntil else null
+        val shareLinkSettings = shareLink.ShareLinkSettings().apply {
+            validUntil = if (AccountUtils.getCurrentDrive()?.isFreePack == true) null else shareLink.validUntil
+        }
 
         with(ApiRepository.updateShareLink(file, shareLinkSettings.toJsonElement())) {
             if (data == true) FileController.updateShareLinkWithRemote(file.id)

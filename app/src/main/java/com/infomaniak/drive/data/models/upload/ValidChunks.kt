@@ -20,11 +20,16 @@ package com.infomaniak.drive.data.models.upload
 import com.google.gson.annotations.SerializedName
 
 data class ValidChunks(
-    @SerializedName("expected_chunks") val expectedChunksCount: Int,
-    @SerializedName("uploading_chunks") val uploadedChunkCount: Int,
-    @SerializedName("failed_chunks") val failedChunks: Long,
-    @SerializedName("expected_size") val expectedSize: Long,
-    @SerializedName("uploaded_size") val uploadedSize: Long,
+    @SerializedName("expected_chunks")
+    val expectedChunksCount: Int,
+    @SerializedName("uploading_chunks")
+    val uploadedChunkCount: Int,
+    @SerializedName("failed_chunks")
+    val failedChunks: Long,
+    @SerializedName("expected_size")
+    val expectedSize: Long,
+    @SerializedName("uploaded_size")
+    val uploadedSize: Long,
     val chunks: ArrayList<UploadSegment>
 ) {
     inline val validChunksIds get() = chunks.map { it.number }

@@ -319,13 +319,12 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun goToFolder() {
-        FileController.getParentFile(currentFile.id)?.let { folder -> navigateToParentFolder(folder, mainViewModel) }
+        FileController.getParentFile(currentFile.id)?.let { folder -> navigateToParentFolder(folder.id, mainViewModel) }
     }
 
-    override fun copyPublicLink() {
-        bottomSheetFileInfos.createPublicCopyLink(onSuccess = { file ->
-            previewSliderAdapter.updateFile(currentFile.id) { it.sharelink = file?.sharelink }
-            showSnackbar(R.string.fileInfoLinkCopiedToClipboard)
+    override fun sharePublicLink() {
+        bottomSheetFileInfos.createPublicShareLink(onSuccess = { sharelinkUrl ->
+            context?.shareText(sharelinkUrl)
             toggleBottomSheet(true)
         }, onError = { translatedError ->
             showSnackbar(translatedError)
@@ -384,12 +383,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { apiResponse ->
             onApiResponse()
             if (apiResponse.isSuccess()) {
-                if (previewSliderAdapter.deleteFile(currentFile)) {
-                    findNavController().popBackStack()
-                } else {
-                    toggleBottomSheet(true)
-                }
-                mainViewModel.currentPreviewFileList.remove(currentFile.id)
+                removeFileInSlider()
                 showSnackbar(R.string.snackbarLeaveShareConfirmation)
             } else {
                 showSnackbar(apiResponse.translatedError)
@@ -447,12 +441,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { apiResponse ->
             onApiResponse()
             if (apiResponse.isSuccess()) {
-                mainViewModel.currentPreviewFileList.remove(currentFile.id)
-                if (previewSliderAdapter.deleteFile(currentFile)) {
-                    findNavController().popBackStack()
-                } else {
-                    toggleBottomSheet(true)
-                }
+                removeFileInSlider()
                 val title = resources.getQuantityString(
                     R.plurals.snackbarMoveTrashConfirmation,
                     1,
@@ -486,12 +475,23 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         mainViewModel.moveFile(currentFile, destinationFolder)
             .observe(viewLifecycleOwner) { apiResponse ->
                 if (apiResponse.isSuccess()) {
+                    // Because if we are on the favorite view we do not want to remove it for example
+                    if (findNavController().previousBackStackEntry?.destination?.id == R.id.fileListFragment) removeFileInSlider()
                     mainViewModel.refreshActivities.value = true
                     showSnackbar(getString(R.string.allFileMove, currentFile.name, destinationFolder.name))
                 } else {
                     showSnackbar(R.string.errorMove)
                 }
             }
+    }
+
+    private fun removeFileInSlider() {
+        mainViewModel.currentPreviewFileList.remove(currentFile.id)
+        if (previewSliderAdapter.deleteFile(currentFile)) {
+            findNavController().popBackStack()
+        } else {
+            toggleBottomSheet(true)
+        }
     }
 
     companion object {

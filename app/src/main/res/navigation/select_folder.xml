@@ -138,7 +138,7 @@
             android:name="sharedItem"
             app:argType="com.infomaniak.drive.data.models.Shareable" />
         <argument
-            android:name="notShareableUserIds"
+            android:name="notShareableIds"
             app:argType="integer[]" />
         <argument
             android:name="notShareableEmails"
