@@ -607,10 +607,6 @@
     <string name="shareLinkSettingsAddExpirationDateDescription">The share link will only work until the expiry date.</string>
     <string name="shareLinkSettingsAllowDownloadDescription">Users will be able to download files using this link.</string>
     <string name="shareLinkSettingsAllowDownloadTitle">Download from the share link</string>
-    <string name="shareLinkSettingsBlockCommentsDescription">Users with access to the files will not be able to read any comments.</string>
-    <string name="shareLinkSettingsBlockCommentsTitle">Enable this option to prevent users from reading comments</string>
-    <string name="shareLinkSettingsBlockUsersConsultDescription">Users with access to the files will not be able to read any comments.</string>
-    <string name="shareLinkSettingsBlockUsersConsultTitle">Enable this option to prevent users from seeing who is viewing the files</string>
     <string name="shareLinkTypeDocument">document</string>
     <string name="shareLinkTypeFile">file</string>
     <string name="shareLinkTypeFolder">folder</string>
@@ -705,13 +701,13 @@
     <string name="uploadFileSizeExceeded">The total allowed file size has been exceeded.</string>
     <string name="uploadFolderNotFoundError">Deleted or non-existent folder</string>
     <string name="uploadFolderNotFoundSyncDisabledError">Automatic backup has been disabled because the destination folder no longer exists</string>
-    <plurals name="uploadImportedOtherAmount">
-        <item quantity="one">+1 other file</item>
-        <item quantity="other">+%d other files</item>
-    </plurals>
     <plurals name="uploadImportedFailedAmount">
         <item quantity="one">1 import failed out of a total of %1$d</item>
         <item quantity="other">%2$d imports failed out of a total of %1$d</item>
+    </plurals>
+    <plurals name="uploadImportedOtherAmount">
+        <item quantity="one">+1 other file</item>
+        <item quantity="other">+%d other files</item>
     </plurals>
     <string name="uploadInProgressCancelAllUploadTitle">Cancel uploads</string>
     <string name="uploadInProgressCancelFileUploadTitle">Cancel %s?</string>

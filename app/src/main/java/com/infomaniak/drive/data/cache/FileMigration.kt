@@ -218,9 +218,7 @@ class FileMigration : RealmMigration {
             val shareLinkCapabilities = schema.create(ShareLinkCapabilities::class.java.simpleName).apply {
                 addField(ShareLinkCapabilities::canEdit.name, Boolean::class.java, FieldAttribute.REQUIRED)
                 addField(ShareLinkCapabilities::canSeeStats.name, Boolean::class.java, FieldAttribute.REQUIRED)
-                addField(ShareLinkCapabilities::canSeeInfo.name, Boolean::class.java, FieldAttribute.REQUIRED)
                 addField(ShareLinkCapabilities::canDownload.name, Boolean::class.java, FieldAttribute.REQUIRED)
-                addField(ShareLinkCapabilities::canComment.name, Boolean::class.java, FieldAttribute.REQUIRED)
             }
 
             // ShareLink migration

@@ -30,10 +30,6 @@ open class ShareLinkCapabilities(
     var canEdit: Boolean = false,
     @SerializedName("can_see_stats")
     var canSeeStats: Boolean = false,
-    @SerializedName("can_see_info")
-    var canSeeInfo: Boolean = false,
     @SerializedName("can_download")
     var canDownload: Boolean = false,
-    @SerializedName("can_comment")
-    var canComment: Boolean = false,
 ) : RealmObject(), Parcelable
