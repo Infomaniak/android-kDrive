@@ -128,6 +128,8 @@ class UiSettings(private val context: Context) {
                 File.SortType.NAME_ZA.name -> File.SortType.NAME_ZA
                 File.SortType.OLDER.name -> File.SortType.OLDER
                 File.SortType.RECENT.name -> File.SortType.RECENT
+                File.SortType.OLDEST_ADDED.name -> File.SortType.OLDEST_ADDED
+                File.SortType.MOST_RECENT_ADDED.name -> File.SortType.MOST_RECENT_ADDED
                 File.SortType.BIGGER.name -> File.SortType.BIGGER
                 File.SortType.SMALLER.name -> File.SortType.SMALLER
                 //File.SortType.EXTENSION.name -> File.SortType.EXTENSION

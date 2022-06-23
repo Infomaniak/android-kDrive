@@ -397,6 +397,8 @@ open class File(
         NAME_ZA("desc", "path", R.string.sortNameZA),
         OLDER("asc", "last_modified_at", R.string.sortOlder),
         RECENT("desc", "last_modified_at", R.string.sortRecent),
+        OLDEST_ADDED("asc", "added_at", R.string.sortOldestAdded),
+        MOST_RECENT_ADDED("desc", "added_at", R.string.sortMostRecentAdded),
         OLDER_TRASHED("asc", "deleted_at", R.string.sortOlder),
         RECENT_TRASHED("desc", "deleted_at", R.string.sortRecent),
         SMALLER("asc", "size", R.string.sortSmaller),
