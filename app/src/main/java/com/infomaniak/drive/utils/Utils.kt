@@ -266,6 +266,7 @@ object Utils {
         if (file.isPendingOffline(context)) workManager.cancelAllWorkByTag(file.getWorkerTag())
         val inputData = workDataOf(
             DownloadWorker.FILE_ID to file.id,
+            DownloadWorker.FILE_NAME to file.name,
             DownloadWorker.USER_ID to userDrive.userId,
             DownloadWorker.DRIVE_ID to userDrive.driveId,
         )
