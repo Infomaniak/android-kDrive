@@ -19,7 +19,7 @@ package com.infomaniak.drive.data.models
 
 import com.google.gson.annotations.SerializedName
 
-data class ArchiveUUID(@SerializedName("id") val uuid: String) {
+data class ArchiveUUID(val uuid: String) {
 
     class ArchiveBody private constructor(
         /** Array of files to include in the request; required without [parentId]. */
