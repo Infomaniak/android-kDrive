@@ -593,10 +593,6 @@
     <string name="shareLinkSettingsAddExpirationDateDescription">Der Freigabelink kann nicht mehr verwendet werden, wenn das Datum verstrichen ist.</string>
     <string name="shareLinkSettingsAllowDownloadDescription">Benutzer können die Dateien über diesen Link herunter- bzw. heraufladen.</string>
     <string name="shareLinkSettingsAllowDownloadTitle">Download über den Freigabelink</string>
-    <string name="shareLinkSettingsBlockCommentsDescription">Benutzer, die Zugang zu den Dateien besitzen, können die Kommentare nicht lesen.</string>
-    <string name="shareLinkSettingsBlockCommentsTitle">Aktivieren Sie diese Option, wenn Benutzer keine Kommentare lesen sollen</string>
-    <string name="shareLinkSettingsBlockUsersConsultDescription">Benutzer, die Zugang zu den Dateien besitzen, können die Kommentare nicht lesen.</string>
-    <string name="shareLinkSettingsBlockUsersConsultTitle">Aktivieren Sie diese Option, wenn Benutzer nicht sehen sollen, wer die Dateien abruft</string>
     <string name="shareLinkTypeDocument">Dokument</string>
     <string name="shareLinkTypeFile">Datei</string>
     <string name="shareLinkTypeFolder">Ordner</string>
@@ -691,13 +687,13 @@
     <string name="uploadFileSizeExceeded">Die zulässige Gesamtgröße der Datei wurde überschritten.</string>
     <string name="uploadFolderNotFoundError">Ordner gelöscht oder inexistent</string>
     <string name="uploadFolderNotFoundSyncDisabledError">Die automatische Sicherung wurde deaktiviert, da der Zielordner nicht mehr existiert</string>
-    <plurals name="uploadImportedOtherAmount">
-        <item quantity="one">+1 andere Datei</item>
-        <item quantity="other">%d andere Dateien</item>
-    </plurals>
     <plurals name="uploadImportedFailedAmount">
         <item quantity="one">1 Import von insgesamt %1$d fehlgeschlagen</item>
         <item quantity="other">%2$d Importe von insgesamt %1$d sind fehlgeschlagen</item>
+    </plurals>
+    <plurals name="uploadImportedOtherAmount">
+        <item quantity="one">+1 andere Datei</item>
+        <item quantity="other">%d andere Dateien</item>
     </plurals>
     <string name="uploadInProgressCancelAllUploadTitle">Importe abbrechen</string>
     <string name="uploadInProgressCancelFileUploadTitle">%s abbrechen?</string>

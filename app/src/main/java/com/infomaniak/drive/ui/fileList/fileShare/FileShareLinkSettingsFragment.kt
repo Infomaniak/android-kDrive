@@ -90,8 +90,6 @@ class FileShareLinkSettingsFragment : Fragment() {
         setupExpirationDate()
         setupNewPassword()
         setupAllowDownload()
-        setupBlockComments()
-        setupBlockUsers()
         setupUpgradeOffer()
         setupSaveButton()
         setupFileShareLinkRights()
@@ -123,18 +121,6 @@ class FileShareLinkSettingsFragment : Fragment() {
     private fun setupAllowDownload() {
         allowDownloadValue.setOnCheckedChangeListener { _, isChecked ->
             shareLink.capabilities?.canDownload = isChecked
-        }
-    }
-
-    private fun setupBlockComments() {
-        blockCommentsValue.setOnCheckedChangeListener { _, isChecked ->
-            shareLink.capabilities?.canComment = !isChecked
-        }
-    }
-
-    private fun setupBlockUsers() {
-        blockUsersConsultValue.setOnCheckedChangeListener { _, isChecked ->
-            shareLink.capabilities?.canSeeInfo = !isChecked
         }
     }
 
@@ -234,8 +220,6 @@ class FileShareLinkSettingsFragment : Fragment() {
         }
 
         allowDownloadValue.isChecked = capabilities?.canDownload == true
-        blockCommentsValue.isChecked = capabilities?.canComment != true
-        blockUsersConsultValue.isChecked = capabilities?.canSeeInfo != true
 
         if (right == ShareLink.ShareLinkFilePermission.PASSWORD) {
             passwordTextLayout.isGone = true
