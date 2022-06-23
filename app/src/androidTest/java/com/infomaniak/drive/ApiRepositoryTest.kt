@@ -400,8 +400,6 @@ class ApiRepositoryTest : KDriveTest() {
                 canDownload = true,
                 canEdit = false,
                 canSeeStats = false,
-                canComment = true,
-                canSeeInfo = true
             )
 
             // Creates the share link
@@ -414,8 +412,6 @@ class ApiRepositoryTest : KDriveTest() {
                     assertTrue(canDownload, "Can downloads should be true")
                     assertFalse(canEdit, "Can edit should be false")
                     assertFalse(canSeeStats, "Show stats should be false")
-                    assertTrue(canComment, "Can comments should be true")
-                    assertTrue(canSeeInfo, "Can see information should be true")
                 }
 
             }
@@ -433,9 +429,7 @@ class ApiRepositoryTest : KDriveTest() {
                     right = ShareLink.ShareLinkFilePermission.PUBLIC,
                     canDownload = false,
                     canEdit = true,
-                    canSeeStats = true,
-                    canComment = false,
-                    canSeeInfo = false
+                    canSeeStats = true
                 ).toJsonElement()
             ).let(::assertApiResponseData)
 
@@ -449,8 +443,6 @@ class ApiRepositoryTest : KDriveTest() {
                     assertFalse(canDownload, "can downloads should be false")
                     assertTrue(canEdit, "can edit should be true")
                     assertTrue(canSeeStats, "show stats should be true")
-                    assertFalse(canComment, "can comments should be false")
-                    assertFalse(canSeeInfo, "can see information should be false")
                 }
 
             }
