@@ -37,7 +37,6 @@ import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.UploadWorkerThrowable.runUploadCatching
 import com.infomaniak.drive.data.sync.UploadNotifications
-import com.infomaniak.drive.data.sync.UploadNotifications.exceptionNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.setupCurrentUploadNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.syncSettingsActivityPendingIntent
@@ -62,6 +61,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     var currentUploadFile: UploadFile? = null
     var currentUploadTask: UploadTask? = null
     var uploadedCount = 0
+    private val failedNames by lazy { inputData.getStringArray(LAST_FAILED_NAMES)?.toMutableList() ?: mutableListOf() }
+    private val successNames by lazy { inputData.getStringArray(LAST_SUCCESS_NAMES)?.toMutableList() ?: mutableListOf() }
 
     override suspend fun doWork(): Result {
 
@@ -128,9 +129,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private suspend fun startSyncFiles(): Result = withContext(Dispatchers.IO) {
         val uploadFiles = UploadFile.getAllPendingUploads()
-        val lastUploadedCount = inputData.getInt(LAST_UPLOADED_COUNT, 0)
         var pendingCount = uploadFiles.size
-        var successCount = 0
 
         if (pendingCount > 0) applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
 
@@ -138,29 +137,29 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         for (uploadFile in uploadFiles) {
             Log.d(TAG, "startSyncFiles> upload ${uploadFile.fileName}")
-            if (uploadFile.initUpload(pendingCount)) successCount++
+
+            if (uploadFile.initUpload(pendingCount)) successNames.add(uploadFile.fileName) else failedNames.add(uploadFile.fileName)
+
             pendingCount--
 
             if (uploadFile.isSync() && UploadFile.getAllPendingPriorityFilesCount() > 0) break
         }
 
-        uploadedCount = successCount + lastUploadedCount
+        uploadedCount = successNames.count()
 
         Log.d(TAG, "startSyncFiles: finish with $uploadedCount uploaded")
 
-        if (uploadedCount > 0) {
-            currentUploadFile?.showUploadedFilesNotification(applicationContext, uploadedCount)
-            Result.success()
-        } else {
-            currentUploadFile?.exceptionNotification(applicationContext)
-            Result.failure()
-        }
+        currentUploadFile?.showUploadedFilesNotification(applicationContext, successNames, failedNames)
+        if (uploadedCount > 0) Result.success() else Result.failure()
     }
 
     private suspend fun checkIfNeedReSync(syncSettings: SyncSettings?) {
         syncSettings?.let { checkLocalLastMedias(it) }
         if (UploadFile.getAllPendingUploadsCount() > 0) {
-            val data = Data.Builder().putInt(LAST_UPLOADED_COUNT, uploadedCount).build()
+            val data = Data.Builder()
+                .putStringArray(LAST_FAILED_NAMES, failedNames.toTypedArray())
+                .putStringArray(LAST_SUCCESS_NAMES, successNames.toTypedArray())
+                .build()
             applicationContext.syncImmediately(data, true)
         }
     }
@@ -268,7 +267,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val selection = "( ${SyncUtils.DATE_TAKEN} >= ? " +
                 "OR ${MediaStore.MediaColumns.DATE_ADDED} >= ? " +
                 "OR ${MediaStore.MediaColumns.DATE_MODIFIED} = ? )"
-        val jobs = arrayListOf<Deferred<Any?>>()
+        val jobs = mutableListOf<Deferred<Any?>>()
         var customSelection: String
         var customArgs: Array<String>
 
@@ -417,7 +416,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         const val CANCELLED_BY_USER = "cancelled_by_user"
         const val UPLOAD_FOLDER = "upload_folder"
 
-        private const val LAST_UPLOADED_COUNT = "last_uploaded_count"
+        private const val LAST_FAILED_NAMES = "last_failed_names"
+        private const val LAST_SUCCESS_NAMES = "last_success_names"
 
         private const val MAX_RETRY_COUNT = 3
         private const val CHECK_LOCAL_LAST_MEDIAS_DELAY = 10_000L // 10s (in ms)
@@ -441,16 +441,16 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         fun Context.trackUploadWorkerProgress(): LiveData<MutableList<WorkInfo>> {
             return WorkManager.getInstance(this).getWorkInfosLiveData(
-                WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(TAG))
-                    .addStates(arrayListOf(WorkInfo.State.RUNNING))
+                WorkQuery.Builder.fromUniqueWorkNames(mutableListOf(TAG))
+                    .addStates(mutableListOf(WorkInfo.State.RUNNING))
                     .build()
             )
         }
 
         fun Context.trackUploadWorkerSucceeded(): LiveData<MutableList<WorkInfo>> {
             return WorkManager.getInstance(this).getWorkInfosLiveData(
-                WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(TAG))
-                    .addStates(arrayListOf(WorkInfo.State.SUCCEEDED))
+                WorkQuery.Builder.fromUniqueWorkNames(mutableListOf(TAG))
+                    .addStates(mutableListOf(WorkInfo.State.SUCCEEDED))
                     .build()
             )
         }

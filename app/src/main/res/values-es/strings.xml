@@ -452,6 +452,10 @@
     <string name="homeNoPictures">Todavía no hay imágenes</string>
     <string name="homeSeeAllImages">Ver todas mis imágenes</string>
     <string name="homeTitle">Recepción</string>
+    <plurals name="importFailedDescription">
+        <item quantity="one">%1$s no pudo ser importado</item>
+        <item quantity="other">No se han podido importar %1$d archivos</item>
+    </plurals>
     <string name="inputExpirationDate">Fecha de caducidad</string>
     <string name="inputExpirationTime">Tiempo de expiración</string>
     <string name="lastEditsTitle">Últimas modificaciones</string>
@@ -685,6 +689,14 @@
     <string name="uploadFileSizeExceeded">Se ha superado el tamaño total de archivo permitido.</string>
     <string name="uploadFolderNotFoundError">Carpeta eliminada o no existe</string>
     <string name="uploadFolderNotFoundSyncDisabledError">Se ha desactivado la copia de seguridad automática porque la carpeta de destino ya no existe</string>
+    <plurals name="uploadImportedOtherAmount">
+        <item quantity="one">+1 otro archivo</item>
+        <item quantity="other">%d otros archivos</item>
+    </plurals>
+    <plurals name="uploadImportedFailedAmount">
+        <item quantity="one">1 importación fallida de un total de %1$d</item>
+        <item quantity="other">%2$d importaciones fallidas de un total de %1$d</item>
+    </plurals>
     <string name="uploadInProgressCancelAllUploadTitle">Anular las importaciones</string>
     <string name="uploadInProgressCancelFileUploadTitle">¿Anular %s?</string>
     <string name="uploadInProgressNoFile">No hay cargas en curso</string>
