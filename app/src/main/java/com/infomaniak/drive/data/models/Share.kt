@@ -42,10 +42,10 @@ data class Share(
         var status: UserFileAccessStatus,
         var email: String = "",
         var user: DriveUser? = null,
-        var type: String = ""
+        var role: DriveUser.Role,
     ) : Parcelable, Shareable {
 
-        fun isExternalUser(): Boolean = type == DriveUser.Type.SHARED.value
+        inline val isExternalUser get() = role == DriveUser.Role.EXTERNAL
 
         enum class UserFileAccessStatus {
             /** User has access to the Drive */

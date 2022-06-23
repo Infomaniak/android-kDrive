@@ -72,7 +72,7 @@ class SharedItemsAdapter(
         rightsValue.setText(userFileAccess.getFilePermission().translation)
 
         externalUserLabel.apply {
-            if (userFileAccess.isExternalUser()) {
+            if (userFileAccess.isExternalUser) {
                 text = context.getString(
                     if (userFileAccess.status == UserFileAccess.UserFileAccessStatus.PENDING) R.string.shareUserNotAccepted
                     else R.string.shareUserExternal
