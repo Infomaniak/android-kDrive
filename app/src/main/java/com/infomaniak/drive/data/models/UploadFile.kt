@@ -177,7 +177,7 @@ open class UploadFile(
         }
 
         fun getAllPendingPriorityFilesCount(): Long {
-            return pendingUploadsQuery(getRealmInstance()).notEqualTo(UploadFile::type.name, Type.SYNC.name).count()
+            return getRealmInstance().use { pendingUploadsQuery(it).notEqualTo(UploadFile::type.name, Type.SYNC.name).count() }
         }
 
         fun getAllPendingFolders(realm: Realm): RealmResults<UploadFile>? {

@@ -33,12 +33,15 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.drive.utils.Utils
+import io.realm.Realm
 import io.realm.RealmResults
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
 
 class UploadInProgressViewModel(application: Application) : AndroidViewModel(application) {
+
+    val realmUpload: Realm by lazy { UploadFile.getRealmInstance() }
 
     private inline val context: Context get() = getApplication<Application>().applicationContext
 
@@ -157,5 +160,10 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
             type = type,
             isFromUploads = true
         )
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        realmUpload.close()
     }
 }

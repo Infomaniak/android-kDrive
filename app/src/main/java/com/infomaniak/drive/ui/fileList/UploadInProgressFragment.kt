@@ -36,7 +36,6 @@ import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWork
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerSucceeded
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import io.realm.Realm
 import io.realm.RealmResults
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -48,7 +47,6 @@ import kotlinx.coroutines.withContext
 class UploadInProgressFragment : FileListFragment() {
 
     private val drivePermissions: DrivePermissions by lazy { DrivePermissions() }
-    private val realmUpload: Realm by lazy { UploadFile.getRealmInstance() }
     private val uploadInProgressViewModel: UploadInProgressViewModel by viewModels()
 
     override var enabledMultiSelectMode: Boolean = false
@@ -157,11 +155,6 @@ class UploadInProgressFragment : FileListFragment() {
         }
     }
 
-    override fun onDestroy() {
-        realmUpload.close()
-        super.onDestroy()
-    }
-
     private fun whenAnUploadIsDone(position: Int, fileId: Int) {
         if (fileAdapter.fileList.getOrNull(position)?.id == fileId) {
             fileAdapter.deleteAt(position)
@@ -230,7 +223,7 @@ class UploadInProgressFragment : FileListFragment() {
             val isFromPendingFolders =
                 findNavController().previousBackStackEntry?.destination?.id == R.id.uploadInProgressFragment
 
-            return if (UploadFile.getAllPendingFoldersCount(realmUpload) in 0..1 && isFromPendingFolders) {
+            return if (UploadFile.getAllPendingFoldersCount(uploadInProgressViewModel.realmUpload) in 0..1 && isFromPendingFolders) {
                 val lastIndex = findNavController().backQueue.lastIndex
                 val previousDestinationId = findNavController().backQueue[lastIndex - 2].destination.id
                 findNavController().popBackStack(previousDestinationId, false)
@@ -267,7 +260,7 @@ class UploadInProgressFragment : FileListFragment() {
         }
 
         private fun downloadPendingFolders() {
-            UploadFile.getAllPendingFolders(realmUpload)?.let { pendingFolders ->
+            UploadFile.getAllPendingFolders(uploadInProgressViewModel.realmUpload)?.let { pendingFolders ->
                 if (pendingFolders.count() == 1) navigateToFirstFolder(pendingFolders) else showPendingFolders()
             } ?: noFilesLayout.toggleVisibility(true)
         }
