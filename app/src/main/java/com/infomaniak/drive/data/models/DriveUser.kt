@@ -20,6 +20,7 @@ package com.infomaniak.drive.data.models
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.lib.core.models.user.User
+import com.infomaniak.lib.core.utils.Utils.enumValueOfOrNull
 import com.infomaniak.lib.core.utils.firstOrEmpty
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
@@ -27,25 +28,27 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 open class DriveUser(
-    @PrimaryKey override var id: Int = -1,
+    @PrimaryKey final override var id: Int = -1,
     @SerializedName("avatar_url")
     var avatarUrl: String? = "",
     @SerializedName("display_name")
     var displayName: String = "",
     var avatar: String = "",
     var email: String = "",
-    var type: String = "",
-
+    @SerializedName("role")
+    private var _role: String = "",
     /** Never used */
     override var right: String = "",
 ) : RealmObject(), Parcelable, Shareable {
+
+    val role get() = enumValueOfOrNull<Role>(_role)
+
+    inline val isExternalUser get() = role == Role.EXTERNAL
 
     constructor(user: User) : this() {
         id = user.id
         displayName = user.displayName ?: ""
     }
-
-    fun isExternalUser(): Boolean = type == Type.SHARED.value
 
     fun getUserAvatar() = avatar.ifBlank { avatarUrl.toString() }
 
@@ -57,8 +60,14 @@ open class DriveUser(
         }
     }
 
-    enum class Type(val value: String) {
-        MAIN("main"),
-        SHARED("shared")
+    enum class Role {
+        @SerializedName("admin")
+        ADMIN,
+
+        @SerializedName("user")
+        USER,
+
+        @SerializedName("external")
+        EXTERNAL
     }
 }
