@@ -24,13 +24,14 @@ import java.util.*
 
 @RealmClass(embedded = true)
 open class FileCategory(
-    var id: Int = -1,
-    @SerializedName("ia_category_user_validation")
-    var iaCategoryUserValidation: String = "",
-    @SerializedName("is_generated_by_ia")
-    var isGeneratedByIa: Boolean = false,
+    @SerializedName("category_id")
+    var categoryId: Int = -1,
+    @SerializedName("user_validation")
+    var userValidation: String = "", // State of user validation after auto assignment from AI
+    @SerializedName("is_generated_by_ai")
+    var isGeneratedByAI: Boolean = false,
     @SerializedName("user_id")
     var userId: Int? = null,
-    @SerializedName("added_to_file_at")
-    var addedToFileAt: Date = Date(),
+    @SerializedName("added_at")
+    var addedAt: Date = Date(), // Date when the category was added to file
 ) : RealmObject()

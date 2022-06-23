@@ -20,6 +20,8 @@ package com.infomaniak.drive.data.models
 import com.google.gson.annotations.SerializedName
 
 data class FileCheckResult(
-    @SerializedName("user_id") val userId: Int,
-    @SerializedName("is_conflict") val isConflict: Boolean
+    @SerializedName("user_id")
+    val userId: Int,
+    @SerializedName("is_conflict")
+    val isConflict: Boolean
 )

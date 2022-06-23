@@ -19,7 +19,6 @@ package com.infomaniak.drive.data.models
 
 import android.graphics.Color
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.utils.RealmListParceler.IntRealmListParceler
 import com.infomaniak.drive.utils.RealmListParceler.TeamDetailsRealmListParceler
@@ -31,12 +30,15 @@ import kotlinx.android.parcel.WriteWith
 
 @Parcelize
 open class Team(
+    /** Team File Access */
     @PrimaryKey override var id: Int = -1,
     var name: String = "",
+    override var right: String = "",
+    var color: Int = -1,
+    var status: String = "",
+    /** Only team */
     var users: @WriteWith<IntRealmListParceler> RealmList<Int> = RealmList(),
     var details: @WriteWith<TeamDetailsRealmListParceler> RealmList<TeamDetails> = RealmList(),
-    @SerializedName("color") var color: Int = -1,
-    @SerializedName("right") override var permission: String = "",
 ) : RealmObject(), Parcelable, Shareable, Comparable<Team> {
 
     fun isAllUsers(): Boolean = id == 0

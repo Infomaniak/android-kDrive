@@ -19,42 +19,61 @@ package com.infomaniak.drive.data.models
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import com.infomaniak.drive.data.models.file.dropbox.DropBoxCapabilities
+import io.realm.RealmObject
+import io.realm.annotations.Ignore
+import io.realm.annotations.RealmClass
 import kotlinx.android.parcel.Parcelize
 import java.util.*
 
 @Parcelize
-data class DropBox(
-    val id: Int,
-    val url: String,
-    val uuid: String,
-    val alias: String,
-    val user: DriveUser,
-    val password: Boolean,
-    @SerializedName("created_by") val createdBy: Int,
-    @SerializedName("created_at") val createdAt: Date,
-    @SerializedName("updated_at") val updatedAt: Date?,
-    @SerializedName("valid_until") val validUntil: Date?,
-    @SerializedName("limit_remaining") val limitRemaining: Long?,
-    @SerializedName("limit_file_size") val limitFileSize: Long?,
-    @SerializedName("last_uploaded_at") val lastUploadedAt: Long?,
-    @SerializedName("email_when_finished") val emailWhenFinished: Boolean,
-    @SerializedName("collaborative_users_count") val collaborativeUsersCount: Int
-) : Parcelable {
+@RealmClass(embedded = true)
+open class DropBox(
+    var id: Int = -1,
+    var name: String = "",
+    var capabilities: DropBoxCapabilities? = null,
+    var url: String = "",
+    var uuid: String = "",
+    @SerializedName("created_at")
+    var createdAt: Date? = null,
+    @SerializedName("created_by")
+    var createdBy: Int = -1,
+    @SerializedName("last_uploaded_at")
+    var lastUploadedAt: Long? = null,
+    @SerializedName("nb_users")
+    var collaborativeUsersCount: Int = 0,
+    @SerializedName("updated_at")
+    var updatedAt: Date? = null,
+) : RealmObject(), Parcelable {
+
+    inline val hasNotification: Boolean get() = capabilities?.hasNotification == true //when someone upload a file
+    inline val hasPassword: Boolean get() = capabilities?.hasPassword == true
+    inline val limitFileSize: Long? get() = capabilities?.size?.limit
+    inline val validUntil: Date? get() = capabilities?.validity?.date
+
     /**
      * Local
      */
+    @Ignore
     var newPassword = false
+
+    @Ignore
     var newPasswordValue: String? = null
-    var newEmailWhenFinished = false
+
+    @Ignore
+    var newHasNotification = false
+
+    @Ignore
     var newLimitFileSize: Long? = null
-    var withLimitFileSize = false
+
+    @Ignore
     var newValidUntil: Date? = null
 
     fun initLocalValue() {
-        newPassword = password
-        newEmailWhenFinished = emailWhenFinished
+        newPassword = hasPassword
+        newHasNotification = hasNotification
         newLimitFileSize = limitFileSize
-        withLimitFileSize = limitFileSize != null
         newValidUntil = validUntil
     }
+
 }

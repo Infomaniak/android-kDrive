@@ -24,7 +24,7 @@ import kotlinx.android.parcel.Parcelize
 
 interface Shareable : Parcelable {
     var id: Int
-    var permission: String
+    var right: String
 
     fun getFilterValue(): String {
         return when (this) {
@@ -37,9 +37,9 @@ interface Shareable : Parcelable {
 
     fun getFilePermission(): ShareablePermission {
         return when {
-            permission.equals(ShareablePermission.READ.toString(), true) -> ShareablePermission.READ
-            permission.equals(ShareablePermission.WRITE.toString(), true) -> ShareablePermission.WRITE
-            permission.equals(ShareablePermission.MANAGE.toString(), true) -> ShareablePermission.MANAGE
+            right.equals(ShareablePermission.READ.toString(), true) -> ShareablePermission.READ
+            right.equals(ShareablePermission.WRITE.toString(), true) -> ShareablePermission.WRITE
+            right.equals(ShareablePermission.MANAGE.toString(), true) -> ShareablePermission.MANAGE
             else -> ShareablePermission.READ
         }
     }

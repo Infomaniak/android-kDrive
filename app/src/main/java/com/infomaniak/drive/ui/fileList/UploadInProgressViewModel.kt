@@ -33,12 +33,15 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.drive.utils.Utils
+import io.realm.Realm
 import io.realm.RealmResults
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
 
 class UploadInProgressViewModel(application: Application) : AndroidViewModel(application) {
+
+    val realmUpload: Realm by lazy { UploadFile.getRealmInstance() }
 
     private inline val context: Context get() = getApplication<Application>().applicationContext
 
@@ -99,10 +102,10 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
                             files.add(
                                 File(
                                     id = uploadFile.uri.hashCode(),
-                                    isFromUploads = true,
                                     name = uploadFile.fileName,
                                     path = uploadFile.uri,
                                     size = size,
+                                    isFromUploads = true,
                                 )
                             )
                         }
@@ -112,9 +115,9 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
                     files.add(
                         File(
                             id = uploadFile.uri.hashCode(),
-                            isFromUploads = true,
                             name = uploadFile.fileName,
                             path = uploadFile.uri,
+                            isFromUploads = true,
                         )
                     )
 
@@ -129,10 +132,10 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
                 files.add(
                     File(
                         id = uploadFile.uri.hashCode(),
-                        isFromUploads = true,
                         name = uploadFile.fileName,
                         path = uploadFile.uri,
                         size = uri.toFile().length(),
+                        isFromUploads = true,
                     )
                 )
             }
@@ -147,15 +150,20 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
         val (name, type) = if (fileId == Utils.ROOT_ID) {
             Utils.getRootName(context) to File.Type.DRIVE.value
         } else {
-            folder.name to File.Type.FOLDER.value
+            folder.name to File.Type.DIRECTORY.value
         }
 
         return File(
             id = fileId,
-            isFromUploads = true,
             name = name,
             path = folder.getRemotePath(userDrive),
-            type = type
+            type = type,
+            isFromUploads = true
         )
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        realmUpload.close()
     }
 }

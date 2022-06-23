@@ -123,8 +123,6 @@
     <string name="buttonConfirmNotify">Confirm and notify</string>
     <string name="buttonConvertToDropBox">Convert to drop box</string>
     <string name="buttonCopy">Copy</string>
-    <string name="buttonCopyLink">Copy link</string>
-    <string name="buttonCopyPublicLink">Copy public link</string>
     <string name="buttonCreate">Create</string>
     <string name="buttonCreateFolder">Create folder</string>
     <string name="buttonCreateOnlyOfficeCopy">Create a .%s copy</string>
@@ -172,6 +170,8 @@
     <string name="buttonSendCopy">Send a copy</string>
     <string name="buttonSettingsLockApp">Enable the lock</string>
     <string name="buttonShare">Share</string>
+    <string name="buttonShareDropboxLink">Share link</string>
+    <string name="buttonSharePublicLink">Share public link</string>
     <string name="buttonSignIn">Create an account</string>
     <string name="buttonStopUpload">Stop uploading this file</string>
     <string name="buttonSwitchDrive">Change drive</string>
@@ -397,7 +397,6 @@
     <string name="fileDetailsInfosTotalSizeTitle">Size (with versions)</string>
     <string name="fileDetailsNoComments">No comments at this time</string>
     <string name="fileInfoInputDuplicateFile">Copy name</string>
-    <string name="fileInfoLinkCopiedToClipboard">Link copied to the clipboard</string>
     <plurals name="fileListAddFavoritesConfirmationSnackbar">
         <item quantity="one">One file successfully added to favorites</item>
         <item quantity="other">%d files successfully added to favorites</item>
@@ -467,6 +466,10 @@
     <string name="homeNoPictures">No image at this time</string>
     <string name="homeSeeAllImages">View all my images</string>
     <string name="homeTitle">Welcome</string>
+    <plurals name="importFailedDescription">
+        <item quantity="one">%1$s could not be imported</item>
+        <item quantity="other">%1$d files could not be imported</item>
+    </plurals>
     <string name="inputExpirationDate">Expiry date</string>
     <string name="inputExpirationTime">Expiration time</string>
     <string name="lastEditsTitle">Most recent changes</string>
@@ -523,6 +526,7 @@
     <string name="noDriveTitle">You don’t have a kDrive yet!</string>
     <string name="noFilesDescription">This folder is empty. Click the + button to add files here.</string>
     <string name="noFilesDescriptionNoNetwork">Unable to retrieve information from the folder. Please check your network connection or try again later.</string>
+    <string name="noFilesDescriptionSelectFolder">This folder is empty.</string>
     <string name="noMediaFolderTitle">No media folders available</string>
     <string name="noSelectMediaFolders">No folder selected</string>
     <string name="noSyncFolderNotificationDescription">Click here to configure the folders to synchronize</string>
@@ -701,6 +705,14 @@
     <string name="uploadFileSizeExceeded">The total allowed file size has been exceeded.</string>
     <string name="uploadFolderNotFoundError">Deleted or non-existent folder</string>
     <string name="uploadFolderNotFoundSyncDisabledError">Automatic backup has been disabled because the destination folder no longer exists</string>
+    <plurals name="uploadImportedOtherAmount">
+        <item quantity="one">+1 other file</item>
+        <item quantity="other">+%d other files</item>
+    </plurals>
+    <plurals name="uploadImportedFailedAmount">
+        <item quantity="one">1 import failed out of a total of %1$d</item>
+        <item quantity="other">%2$d imports failed out of a total of %1$d</item>
+    </plurals>
     <string name="uploadInProgressCancelAllUploadTitle">Cancel uploads</string>
     <string name="uploadInProgressCancelFileUploadTitle">Cancel %s?</string>
     <string name="uploadInProgressNoFile">No upload in progress</string>

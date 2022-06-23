@@ -19,10 +19,16 @@ package com.infomaniak.drive.data.api
 
 import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
-import com.infomaniak.drive.data.api.ApiRoutes.withFile
+import com.infomaniak.drive.data.api.ApiRoutes.activitiesWithQuery
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
+import com.infomaniak.drive.data.models.upload.UploadSegment.ChunkStatus
+import com.infomaniak.drive.data.models.upload.UploadSession
+import com.infomaniak.drive.data.models.upload.UploadSession.StartSessionBody
+import com.infomaniak.drive.data.models.upload.UploadSession.StartUploadSession
+import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.lib.core.api.ApiRepositoryCore
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
@@ -82,14 +88,14 @@ object ApiRepository : ApiRepositoryCore() {
 
     fun deleteFavoriteFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.favorite(file), DELETE)
 
-    fun getFileListForFolder(
+    fun getDirectoryFiles(
         okHttpClient: OkHttpClient,
         driveId: Int,
         parentId: Int,
         page: Int = 1,
         order: File.SortType
-    ): ApiResponse<File> {
-        val url = "${ApiRoutes.getFileListForFolder(driveId, parentId, order)}&${pagination(page)}"
+    ): ApiResponse<List<File>> {
+        val url = "${ApiRoutes.getFolderFiles(driveId, parentId, order)}&${pagination(page)}"
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
@@ -100,10 +106,21 @@ object ApiRepository : ApiRepositoryCore() {
         forFileList: Boolean,
         okHttpClient: OkHttpClient = HttpClient.okHttpClientLongTimeout,
     ): ApiResponse<ArrayList<FileActivity>> {
-        val queries = if (forFileList) "&depth=children&from_date=${file.responseAt}&$withFile" else "&with=user"
+        val queries = if (forFileList) "&depth=children&from_date=${file.responseAt}&$activitiesWithQuery" else "&with=user"
         val url = "${ApiRoutes.getFileActivities(file)}?${pagination(page)}$queries$ACTIONS" +
                 if (forFileList) "" else ADDITIONAL_ACTIONS
         return callApi(url, GET, okHttpClient = okHttpClient)
+    }
+
+    // For sync offline service
+    fun getFileActivities(
+        driveId: Int,
+        fileIds: List<Int>,
+        fromDate: Long,
+        okHttpClient: OkHttpClient = HttpClient.okHttpClientLongTimeout,
+    ): ApiResponse<ArrayList<FileActivity>> {
+        val formattedFileIds = fileIds.joinToString(",") { it.toString() }
+        return callApi(ApiRoutes.getFileActivities(driveId, formattedFileIds, fromDate), GET, okHttpClient = okHttpClient)
     }
 
     fun getLastModifiedFiles(driveId: Int, page: Int = 1): ApiResponse<ArrayList<File>> {
@@ -112,7 +129,25 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun getLastPictures(driveId: Int, page: Int = 1): ApiResponse<ArrayList<File>> {
-        return callApi("${ApiRoutes.getLastPictures(driveId)}&${pagination(page)}", GET)
+        val type = ExtensionType.IMAGE.value
+        val url = "${ApiRoutes.searchFiles(driveId, File.SortType.RECENT)}&type=$type&${pagination(page)}"
+        return callApi(url, GET)
+    }
+
+    fun getValidChunks(driveId: Int, uploadToken: String): ApiResponse<ValidChunks> {
+        return callApi("${ApiRoutes.getSession(driveId, uploadToken)}?status[]=${ChunkStatus.OK}&with=chunks", GET)
+    }
+
+    fun startUploadSession(driveId: Int, body: StartSessionBody): ApiResponse<StartUploadSession> {
+        return callApi(ApiRoutes.startUploadSession(driveId), POST, body)
+    }
+
+    fun finishSession(driveId: Int, uploadToken: String): ApiResponse<UploadSession> {
+        return callApi(ApiRoutes.closeSession(driveId, uploadToken), POST)
+    }
+
+    fun cancelSession(driveId: Int, uploadToken: String): ApiResponse<Boolean> {
+        return callApi(ApiRoutes.getSession(driveId, uploadToken), DELETE)
     }
 
     fun getValidChunks(driveId: Int, folderId: Int, uploadIdentifier: String): ApiResponse<ValidChunks> {
@@ -126,12 +161,11 @@ object ApiRepository : ApiRepositoryCore() {
         parentId: Int,
         name: String,
         onlyForMe: Boolean = false,
-        share: Boolean = false
     ): ApiResponse<File> {
         return callApi(
             ApiRoutes.createFolder(driveId, parentId),
             POST,
-            mapOf("name" to name, "only_for_me" to onlyForMe, "share" to share),
+            mapOf("name" to name, "only_for_me" to onlyForMe),
             okHttpClient = okHttpClient
         )
     }
@@ -146,36 +180,31 @@ object ApiRepository : ApiRepositoryCore() {
         name: String,
         forAllUsers: Boolean = false
     ): ApiResponse<File> {
-        return callApi(
-            ApiRoutes.createTeamFolder(driveId),
-            POST,
-            mapOf("name" to name, "for_all_user" to forAllUsers),
-            okHttpClient = okHttpClient
-        )
+        val body = mapOf("name" to name, "for_all_user" to forAllUsers)
+        return callApi(ApiRoutes.createTeamFolder(driveId), POST, body, okHttpClient = okHttpClient)
     }
 
     fun searchFiles(
         driveId: Int,
         query: String? = null,
-        order: String,
-        orderBy: String,
+        sortType: File.SortType,
         page: Int,
         date: Pair<String, String>? = null,
         type: String? = null,
         categories: String? = null,
         okHttpClient: OkHttpClient = HttpClient.okHttpClient
     ): ApiResponse<ArrayList<File>> {
-        var url = "${ApiRoutes.searchFiles(driveId)}&order=$order&order_by=$orderBy&${pagination(page)}"
-        if (query != null) url += "&query=$query"
+        var url = "${ApiRoutes.searchFiles(driveId, sortType)}&${pagination(page)}"
+        if (!query.isNullOrBlank()) url += "&query=$query"
         if (date != null) url += "&modified_at=custom&from=${date.first}&until=${date.second}"
-        if (type != null) url += "&converted_type=$type"
+        if (type != null) url += "&type=$type"
         if (categories != null) url += "&category=$categories"
 
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
     fun deleteFile(file: File): ApiResponse<CancellableAction> {
-        return callApi(ApiRoutes.deleteFile(file), DELETE)
+        return callApi(ApiRoutes.fileURL(file), DELETE)
     }
 
     fun renameFile(file: File, newName: String): ApiResponse<CancellableAction> {
@@ -186,9 +215,14 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.updateFolderColor(file), POST, mapOf("color" to color))
     }
 
-    fun duplicateFile(file: File, copyName: String?, folderId: Int): ApiResponse<File> {
+    fun copyFile(file: File, copyName: String?, destinationId: Int): ApiResponse<File> {
         val body = if (copyName == null) mapOf() else mapOf("name" to copyName)
-        return callApi(ApiRoutes.duplicateFile(file, folderId), POST, body)
+        return callApi(ApiRoutes.copyFile(file, destinationId), POST, body)
+    }
+
+    fun duplicateFile(file: File, duplicateName: String?): ApiResponse<File> {
+        val body = if (duplicateName == null) mapOf() else mapOf("name" to duplicateName)
+        return callApi(ApiRoutes.duplicateFile(file), POST, body)
     }
 
     fun moveFile(file: File, newParent: File): ApiResponse<CancellableAction> {
@@ -208,32 +242,44 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun getFileComments(file: File, page: Int): ApiResponse<ArrayList<FileComment>> {
-        val url = "${ApiRoutes.commentFile(file)}?with=like,response&${pagination(page)}"
+        val url = "${ApiRoutes.fileComments(file)}&${pagination(page)}"
         return callApi(url, GET)
     }
 
     fun postFileComment(file: File, body: String): ApiResponse<FileComment> {
-        return callApi(ApiRoutes.commentFile(file), POST, mapOf("body" to body))
+        return callApi(ApiRoutes.fileComments(file), POST, mapOf("body" to body))
+    }
+
+    fun answerComment(file: File, commentId: Int, body: String): ApiResponse<FileComment> {
+        return callApi(ApiRoutes.answerComment(file, commentId), POST, mapOf("body" to body))
     }
 
     fun putFileComment(file: File, commentId: Int, body: String): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.updateComment(file, commentId), PUT, mapOf("body" to body))
+        return callApi(ApiRoutes.fileComment(file, commentId), PUT, mapOf("body" to body))
     }
 
     fun deleteFileComment(file: File, commentId: Int): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.updateComment(file, commentId), DELETE)
+        return callApi(ApiRoutes.fileComment(file, commentId), DELETE)
     }
 
-    fun postFileCommentLike(file: File, commentId: Int): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.likeCommentFile(file, commentId), POST)
+    fun postLikeComment(file: File, commentId: Int): ApiResponse<Boolean> {
+        return callApi(ApiRoutes.likeComment(file, commentId), POST)
     }
 
-    fun postFileCommentUnlike(file: File, commentId: Int): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.unLikeCommentFile(file, commentId), POST)
+    fun postUnlikeComment(file: File, commentId: Int): ApiResponse<Boolean> {
+        return callApi(ApiRoutes.unLikeComment(file, commentId), POST)
     }
 
-    fun postFileShareLink(file: File, body: Map<String, String>): ApiResponse<ShareLink> {
+    fun getShareLink(file: File): ApiResponse<ShareLink> {
+        return callApi(ApiRoutes.shareLink(file), GET)
+    }
+
+    fun createShareLink(file: File, body: ShareLink.ShareLinkSettings): ApiResponse<ShareLink> {
         return callApi(ApiRoutes.shareLink(file), POST, body)
+    }
+
+    fun updateShareLink(file: File, body: JsonElement): ApiResponse<Boolean> {
+        return callApi(ApiRoutes.shareLink(file), PUT, body)
     }
 
     fun deleteFileShareLink(file: File): ApiResponse<Boolean> {
@@ -244,16 +290,16 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.checkFileShare(file), POST, body)
     }
 
-    fun postFileShare(file: File, body: Map<String, Any?>): ApiResponse<ShareResults> {
-        return callApi(ApiRoutes.postFileShare(file), POST, body)
+    fun addMultiAccess(file: File, body: Map<String, Any?>): ApiResponse<ShareableItems> {
+        return callApi(ApiRoutes.accessUrl(file), POST, body)
     }
 
     fun deleteFileShare(file: File, shareableItem: Shareable): ApiResponse<Boolean> {
         return callApi(
             when (shareableItem) {
-                is Team -> ApiRoutes.updateFileSharedTeam(file, shareableItem)
-                is Invitation -> ApiRoutes.updateFileSharedInvitation(file, shareableItem)
-                else -> ApiRoutes.updateFileSharedUser(file, shareableItem as DriveUser)
+                is Team -> ApiRoutes.teamAccess(file, shareableItem.id)
+                is Invitation -> ApiRoutes.fileInvitationAccess(file, shareableItem.id)
+                else -> ApiRoutes.userAccess(file, shareableItem.id)
             }, DELETE
         )
     }
@@ -261,40 +307,43 @@ object ApiRepository : ApiRepositoryCore() {
     fun putFileShare(file: File, shareableItem: Shareable, body: Map<String, String>): ApiResponse<Boolean> {
         return callApi(
             when (shareableItem) {
-                is Team -> ApiRoutes.updateFileSharedTeam(file, shareableItem)
-                is Invitation -> ApiRoutes.updateFileSharedInvitation(file, shareableItem)
-                else -> ApiRoutes.updateFileSharedUser(file, shareableItem as DriveUser)
+                is Team -> ApiRoutes.teamAccess(file, shareableItem.id)
+                is Invitation -> ApiRoutes.fileInvitationAccess(file, shareableItem.id)
+                else -> ApiRoutes.userAccess(file, shareableItem.id)
             }, PUT, body
         )
     }
 
-    fun putFileShareLink(file: File, body: Map<String, Any?>): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.shareLink(file), PUT, body)
-    }
-
     fun createCategory(driveId: Int, name: String, color: String): ApiResponse<Category> {
         val body = mapOf("name" to name, "color" to color)
-        return callApi(ApiRoutes.createCategory(driveId), POST, body)
+        return callApi(ApiRoutes.categories(driveId), POST, body)
     }
 
     fun editCategory(driveId: Int, categoryId: Int, name: String?, color: String): ApiResponse<Category> {
         val body = arrayMapOf("color" to color).apply {
             name?.let { put("name", it) }
         }
-        return callApi(ApiRoutes.updateCategory(driveId, categoryId), PATCH, body)
+        return callApi(ApiRoutes.category(driveId, categoryId), PUT, body)
     }
 
     fun deleteCategory(driveId: Int, categoryId: Int): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.updateCategory(driveId, categoryId), DELETE)
+        return callApi(ApiRoutes.category(driveId, categoryId), DELETE)
     }
 
     fun addCategory(file: File, categoryId: Int): ApiResponse<Unit> {
-        val body = mapOf("id" to categoryId)
-        return callApi(ApiRoutes.addCategory(file), POST, body)
+        return callApi(ApiRoutes.fileCategory(file, categoryId), POST)
+    }
+
+    fun addCategory(driveId: Int, categoryId: Int, fileIds: List<Int>) {
+        return callApi(ApiRoutes.fileCategory(driveId, categoryId), POST, mapOf("file_ids" to fileIds))
     }
 
     fun removeCategory(file: File, categoryId: Int): ApiResponse<Unit> {
-        return callApi(ApiRoutes.removeCategory(file, categoryId), DELETE)
+        return callApi(ApiRoutes.fileCategory(file, categoryId), DELETE)
+    }
+
+    fun removeCategory(driveId: Int, categoryId: Int, fileIds: List<Int>): ApiResponse<Unit> {
+        return callApi(ApiRoutes.fileCategory(driveId, categoryId), DELETE, mapOf("file_ids" to fileIds))
     }
 
     fun getLastActivities(driveId: Int, page: Int): ApiResponse<ArrayList<FileActivity>> {
@@ -302,8 +351,8 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(url, GET)
     }
 
-    fun postFolderAccess(file: File): ApiResponse<File> {
-        return callApi(ApiRoutes.postFolderAccess(file), POST)
+    fun forceFolderAccess(file: File): ApiResponse<Boolean> {
+        return callApi(ApiRoutes.forceFolderAccess(file), POST)
     }
 
     fun getDropBox(file: File): ApiResponse<DropBox> {
@@ -327,11 +376,15 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun getDriveTrash(driveId: Int, order: File.SortType, page: Int): ApiResponse<ArrayList<File>> {
-        return callApi("${ApiRoutes.getDriveFileTrashedListForFolder(driveId, order)}&${pagination(page)}", GET)
+        return callApi("${ApiRoutes.driveTrash(driveId, order)}&${pagination(page)}", GET)
     }
 
-    fun getTrashFile(file: File, order: File.SortType, page: Int): ApiResponse<File> {
-        return callApi("${ApiRoutes.getFileTrashedListForFolder(file, order)}&${pagination(page)}", GET)
+    fun getTrashedFile(file: File): ApiResponse<File> {
+        return callApi(ApiRoutes.trashedFile(file), GET)
+    }
+
+    fun getTrashedFolderFiles(file: File, order: File.SortType, page: Int): ApiResponse<List<File>> {
+        return callApi("${ApiRoutes.trashedFolderFiles(file, order)}&${pagination(page)}", GET)
     }
 
     fun postRestoreTrashFile(file: File, body: Map<String, Int>?): ApiResponse<Any> =
@@ -339,32 +392,27 @@ object ApiRepository : ApiRepositoryCore() {
 
     fun emptyTrash(driveId: Int): ApiResponse<Boolean> = callApi(ApiRoutes.emptyTrash(driveId), DELETE)
 
-    fun deleteTrashFile(file: File): ApiResponse<Any> = callApi(ApiRoutes.deleteTrashFile(file), DELETE)
+    fun deleteTrashFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.trashURL(file), DELETE)
 
     fun getMySharedFiles(
         okHttpClient: OkHttpClient,
         driveId: Int,
-        order: String,
-        orderBy: String,
+        sortType: File.SortType,
         page: Int
     ): ApiResponse<ArrayList<File>> {
-        return callApi(
-            "${ApiRoutes.getMySharedFiles(driveId)}&order=$order&order_by=$orderBy&${pagination(page)}",
-            GET,
-            okHttpClient = okHttpClient
-        )
+        return callApi("${ApiRoutes.getMySharedFiles(driveId, sortType)}&${pagination(page)}", GET, okHttpClient = okHttpClient)
     }
 
-    fun cancelAction(action: CancellableAction): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.cancelAction(action.driveId), POST, mapOf("cancel_id" to action.cancelId))
+    fun undoAction(action: CancellableAction): ApiResponse<Boolean> {
+        return callApi(ApiRoutes.undoAction(action.driveId), POST, mapOf("cancel_id" to action.cancelId))
     }
 
     fun performCancellableBulkOperation(bulkOperation: BulkOperation): ApiResponse<CancellableAction> {
-        return callApi(ApiRoutes.bulkAction(bulkOperation.parent), POST, bulkOperation.toMap())
+        return callApi(ApiRoutes.bulkAction(bulkOperation.parent.driveId), POST, bulkOperation.toMap())
     }
 
-    fun getUUIDArchiveFiles(driveId: Int, fileIds: IntArray): ApiResponse<ArchiveUUID> {
-        return callApi(ApiRoutes.getUUIDArchiveFiles(driveId), POST, mapOf("file_ids" to fileIds))
+    fun buildArchive(driveId: Int, archiveBody: ArchiveBody): ApiResponse<ArchiveUUID> {
+        return callApi(ApiRoutes.buildArchive(driveId), POST, archiveBody)
     }
 
     private fun pagination(page: Int, perPage: Int = PER_PAGE) = "page=$page&per_page=$perPage"

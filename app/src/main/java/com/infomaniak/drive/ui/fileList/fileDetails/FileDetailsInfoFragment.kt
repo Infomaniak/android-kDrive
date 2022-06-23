@@ -35,7 +35,6 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Permission
-import com.infomaniak.drive.data.models.Share
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
@@ -64,18 +63,18 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
 
             this.file = file
 
-            setupShareLink(fileDetailsViewModel.currentFileShare.value)
+            file.sharelink?.let { setupShareLink() }
             setupCategoriesContainer(file.getCategories())
             displayUsersAvatars()
             setupShareButton()
             setupPathLocationButton()
 
-            if (file.createdAt.isPositive()) {
-                addedDateValue.text = file.getCreatedAt().format(ShareLinkContainerView.formatFullDate)
+            if (file.addedAt.isPositive()) {
+                addedDateValue.text = file.getAddedAt().format(ShareLinkContainerView.formatFullDate)
                 addedDate.isVisible = true
             }
 
-            if (file.fileCreatedAt.isPositive()) {
+            if (file.createdAt.isPositive()) {
                 creationDateValue.text = file.getFileCreatedAt().format(ShareLinkContainerView.formatFullDate)
                 creationDate.isVisible = true
             }
@@ -86,19 +85,14 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
 
             if (file.isFolder()) displayFolderContentCount(file)
 
-            file.sizeWithVersions?.let {
-                totalSizeValue.text = Formatter.formatFileSize(context, it)
+            file.version?.let {
+                totalSizeValue.text = Formatter.formatFileSize(context, it.totalSize)
                 totalSize.isVisible = true
             }
             file.size?.let {
                 originalSizeValue.text = Formatter.formatFileSize(context, it)
                 originalSize.isVisible = true
             }
-        }
-
-        fileDetailsViewModel.currentFileShare.observe(viewLifecycleOwner) { share ->
-            setPath(share.path)
-            setupShareLink(share)
         }
 
         setBackActionHandlers()
@@ -163,7 +157,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
     }
 
     private fun setupShareButton() {
-        if (file.rights?.share == true) {
+        if (file.rights?.canShare == true) {
             shareButton.isVisible = true
             shareButton.setOnClickListener {
                 parentFragment?.safeNavigate(
@@ -178,14 +172,14 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
     private fun setupPathLocationButton() {
         FileController.getParentFile(this.file.id)?.let { folder ->
             pathLocationButton.isVisible = true
-            pathLocationButton.setOnClickListener { navigateToParentFolder(folder, mainViewModel) }
+            pathLocationButton.setOnClickListener { navigateToParentFolder(folder.id, mainViewModel) }
         }
     }
 
-    private fun setupShareLink(share: Share?) {
+    private fun setupShareLink() {
         when {
             file.isDropBox() -> setupDropBoxShareLink()
-            file.rights?.canBecomeLink == true || file.shareLink?.isNotBlank() == true -> setupNormalShareLink(share)
+            file.rights?.canBecomeShareLink == true || file.sharelink?.url?.isNotBlank() == true -> setupNormalShareLink()
             else -> hideShareLinkView()
         }
     }
@@ -195,11 +189,11 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         shareLinkContainer.setup(file)
     }
 
-    private fun setupNormalShareLink(share: Share?) {
+    private fun setupNormalShareLink() {
         showShareLinkView()
         shareLinkContainer.setup(
             file = file,
-            shareLink = share?.link,
+            shareLink = file.sharelink,
             onTitleClicked = { newShareLink -> handleOnShareLinkTitleClicked(newShareLink) },
             onSettingsClicked = { newShareLink -> handleOnShareLinkSettingsClicked(newShareLink) })
     }
@@ -208,7 +202,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         shareLink = newShareLink
         val (permissionsGroup, currentPermission) = selectPermissions(
             isFolder = file.isFolder(),
-            isOnlyOffice = file.onlyoffice,
+            isOnlyOffice = file.hasOnlyoffice,
             shareLinkExist = newShareLink != null,
         )
         findNavController().navigate(
@@ -227,7 +221,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
                 fileId = file.id,
                 driveId = file.driveId,
                 shareLink = newShareLink,
-                isOnlyOfficeFile = file.onlyoffice,
+                isOnlyOfficeFile = file.hasOnlyoffice,
                 isFolder = file.isFolder(),
             )
         )
@@ -305,7 +299,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
     }
 
     private fun createShareLink() {
-        mainViewModel.postFileShareLink(file).observe(viewLifecycleOwner) { apiResponse ->
+        mainViewModel.createShareLink(file).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 shareLinkContainer.update(apiResponse.data)
             } else {

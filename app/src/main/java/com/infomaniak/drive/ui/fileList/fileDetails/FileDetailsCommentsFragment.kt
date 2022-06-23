@@ -107,11 +107,11 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
             fileDetailsViewModel.getFileComments(currentFile).observe(viewLifecycleOwner) { apiResponse ->
                 apiResponse?.data?.let { comments ->
                     addAll(comments)
-                    isComplete = apiResponse.page == apiResponse.pages
+                    isComplete = apiResponse.isLastPage()
                 } ?: also {
                     isComplete = true
                 }
-                noCommentsLayout.toggleVisibility(itemList.count() == 0, showRefreshButton = false)
+                noCommentsLayout.toggleVisibility(itemList.isEmpty(), showRefreshButton = false)
             }
 
             onEditClicked = { comment ->

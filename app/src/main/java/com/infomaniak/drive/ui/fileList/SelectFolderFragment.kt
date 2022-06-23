@@ -46,6 +46,7 @@ class SelectFolderFragment : FileListFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         userDrive = selectFolderViewModel.userDrive
+        setNoFilesLayout = SetNoFilesLayout()
         super.onViewCreated(view, savedInstanceState)
 
         folderName = if (folderId == ROOT_ID) selectFolderViewModel.currentDrive?.name ?: "/" else navigationArgs.folderName
@@ -55,7 +56,7 @@ class SelectFolderFragment : FileListFragment() {
         toolbar.menu.findItem(R.id.addFolderItem).apply {
             setOnMenuItemClickListener {
                 val selectFolderActivity = requireActivity() as? SelectFolderActivity
-                if (FileController.getFileById(folderId, userDrive)?.rights?.newFolder == true) {
+                if (FileController.getFileById(folderId, userDrive)?.rights?.canCreateDirectory == true) {
                     selectFolderActivity?.hideSaveButton()
                     trackNewElementEvent("createFolderOnTheFly")
                     safeNavigate(
@@ -90,7 +91,7 @@ class SelectFolderFragment : FileListFragment() {
                 showSaveButton()
                 val currentFolderRights = FileController.getFileById(folderId, userDrive)?.rights ?: Rights()
                 val enable = folderId != selectFolderViewModel.disableSelectedFolderId
-                        && (currentFolderRights.moveInto || currentFolderRights.newFile)
+                        && (currentFolderRights.canMoveInto || currentFolderRights.canCreateFile)
                 enableSaveButton(enable)
             }
         }
@@ -98,5 +99,14 @@ class SelectFolderFragment : FileListFragment() {
 
     private fun onBackPressed() {
         if (folderId == ROOT_ID) requireActivity().finish() else Utils.ignoreCreateFolderBackStack(findNavController(), true)
+    }
+
+    private inner class SetNoFilesLayout : () -> Unit {
+        override fun invoke() {
+            noFilesLayout.setup(
+                title = R.string.noFilesDescriptionSelectFolder,
+                initialListView = fileRecyclerView
+            )
+        }
     }
 }

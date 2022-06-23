@@ -170,7 +170,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             safeNavigate(
                 FileListFragmentDirections.actionFileListFragmentToDropBoxResultBottomSheetDialog(
                     url = dropBox.url,
-                    name = dropBox.alias
+                    name = dropBox.name
                 )
             )
         }
@@ -268,10 +268,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
                     val onCancelActionClicked: (() -> Unit)? = if (allowCancellation) ({
                         lifecycleScope.launch(Dispatchers.IO) {
-                            if (ApiRepository.cancelAction(action).data == true && isResumed) {
-                                withContext(Dispatchers.Main) {
-                                    refreshActivities()
-                                }
+                            if (ApiRepository.undoAction(action).data == true && isResumed) {
+                                withContext(Dispatchers.Main) { refreshActivities() }
                             }
                         }
                     }) else null
@@ -486,7 +484,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             safeNavigate(
                 FileListFragmentDirections.actionFileListFragmentToAccessDeniedBottomSheetFragment(
                     isAdmin = AccountUtils.getCurrentDrive()?.isUserAdmin() ?: false,
-                    fileId = id,
+                    folderId = id,
+                    folderName = name
                 )
             )
         } else {

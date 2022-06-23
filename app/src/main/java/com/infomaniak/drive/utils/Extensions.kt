@@ -76,6 +76,7 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomShe
 import com.infomaniak.drive.ui.fileList.UploadInProgressFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.MatomoUtils.trackShareRightsEvent
+import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.lightNavigationBar
@@ -144,20 +145,13 @@ fun Activity.setColorStatusBar(appBar: Boolean = false) = with(window) {
 }
 
 fun Activity.setColorNavigationBar(appBar: Boolean = false) = with(window) {
-    val color = if (appBar) R.color.appBar else R.color.background
-    when (resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK)) {
-        Configuration.UI_MODE_NIGHT_YES -> {
-            navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, color)
-            lightNavigationBar(false)
-        }
-        else -> {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, color)
-                lightNavigationBar(true)
-            } else {
-                navigationBarColor = Color.BLACK
-            }
-        }
+    val nightModeEnabled = resources.isNightModeEnabled()
+    if (nightModeEnabled || Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val color = if (appBar) R.color.appBar else R.color.background
+        navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, color)
+        lightNavigationBar(!nightModeEnabled)
+    } else {
+        navigationBarColor = Color.BLACK
     }
 }
 
@@ -265,18 +259,16 @@ fun String.isEmail(): Boolean = Patterns.EMAIL_ADDRESS.matcher(this).matches()
 fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
     context: Context,
     itemList: List<Shareable>,
-    notShareableUserIds: ArrayList<Int> = arrayListOf(),
+    notShareableIds: ArrayList<Int> = arrayListOf(),
     notShareableEmails: ArrayList<String> = arrayListOf(),
-    notShareableTeamIds: ArrayList<Int> = arrayListOf(),
     onDataPassed: (item: Shareable) -> Unit
 ): AvailableShareableItemsAdapter {
     setDropDownBackgroundResource(R.drawable.background_popup)
     val availableUsersAdapter = AvailableShareableItemsAdapter(
         context = context,
         itemList = ArrayList(itemList),
-        notShareableUserIds = notShareableUserIds,
-        notShareableEmails = notShareableEmails,
-        notShareableTeamIds = notShareableTeamIds
+        notShareableIds = notShareableIds,
+        notShareableEmails = notShareableEmails
     ) { item ->
         onDataPassed(item)
     }
@@ -363,7 +355,7 @@ fun FragmentActivity.requestCredentials(onSuccess: () -> Unit) {
 }
 
 fun Fragment.openOnlyOfficeDocument(file: File) {
-    if (file.onlyofficeConvertExtension?.isNotBlank() == true) {
+    if (file.conversion?.whenOnlyoffice == true) {
         findNavController().navigate(
             R.id.notSupportedExtensionBottomSheetDialog,
             NotSupportedExtensionBottomSheetDialogArgs(file.id).toBundle()
@@ -380,11 +372,11 @@ fun Context.openOnlyOfficeActivity(file: File) {
     })
 }
 
-fun Fragment.navigateToParentFolder(folder: File, mainViewModel: MainViewModel) {
+fun Fragment.navigateToParentFolder(folderId: Int, mainViewModel: MainViewModel) {
     with(findNavController()) {
         popBackStack(R.id.homeFragment, false)
         (requireActivity() as MainActivity).bottomNavigation.findViewById<View>(R.id.fileListFragment).performClick()
-        mainViewModel.navigateFileListToFolderId(this, folder.id)
+        mainViewModel.navigateFileListToFolderId(this, folderId)
     }
 }
 
@@ -486,7 +478,7 @@ fun RealmList<Category>.find(id: Int): Category? {
 }
 
 fun RealmList<FileCategory>.find(id: Int): FileCategory? {
-    return where().equalTo(FileCategory::id.name, id).findFirst()
+    return where().equalTo(FileCategory::categoryId.name, id).findFirst()
 }
 
 fun MaterialCardView.setCornersRadius(topCornerRadius: Float, bottomCornerRadius: Float) {
@@ -503,5 +495,7 @@ fun Activity.getAdjustedColumnNumber(expectedItemSize: Int, minColumns: Int = 2,
     val screenWidth = getScreenSizeInDp().x
     return min(max(minColumns, screenWidth / expectedItemSize), maxColumns)
 }
+
+fun <T> ApiResponse<ArrayList<T>>.isLastPage() = (data?.size ?: 0) < itemsPerPage
 
 operator fun Regex.contains(input: String) = containsMatchIn(input)

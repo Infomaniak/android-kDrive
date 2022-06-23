@@ -109,8 +109,6 @@
     <string name="buttonConfirmNotify">Confirmer et notifier</string>
     <string name="buttonConvertToDropBox">Convertir en boîte de dépôt</string>
     <string name="buttonCopy">Copier</string>
-    <string name="buttonCopyLink">Copier le lien</string>
-    <string name="buttonCopyPublicLink">Copier le lien public</string>
     <string name="buttonCreate">Créer</string>
     <string name="buttonCreateFolder">Créer le dossier</string>
     <string name="buttonCreateOnlyOfficeCopy">Créer une copie .%s</string>
@@ -158,6 +156,8 @@
     <string name="buttonSendCopy">Envoyer une copie</string>
     <string name="buttonSettingsLockApp">Activer le verrouillage</string>
     <string name="buttonShare">Partager</string>
+    <string name="buttonShareDropboxLink">Partager le lien</string>
+    <string name="buttonSharePublicLink">Partager le lien public</string>
     <string name="buttonSignIn">Créer un compte</string>
     <string name="buttonStopUpload">Stopper l’importation de ce fichier</string>
     <string name="buttonSwitchDrive">Changer de drive</string>
@@ -383,7 +383,6 @@
     <string name="fileDetailsInfosTotalSizeTitle">Taille (avec les versions)</string>
     <string name="fileDetailsNoComments">Aucun commentaire pour le moment</string>
     <string name="fileInfoInputDuplicateFile">Nom de la copie</string>
-    <string name="fileInfoLinkCopiedToClipboard">Lien copié dans le presse-papiers</string>
     <plurals name="fileListAddFavoritesConfirmationSnackbar">
         <item quantity="one">Un fichier ajouté aux favoris avec succès</item>
         <item quantity="other">%d fichiers ajoutés aux favoris avec succès</item>
@@ -453,6 +452,10 @@
     <string name="homeNoPictures">Aucune image pour le moment</string>
     <string name="homeSeeAllImages">Voir toutes mes images</string>
     <string name="homeTitle">Accueil</string>
+    <plurals name="importFailedDescription">
+        <item quantity="one">%1$s n’a pas pu être importé</item>
+        <item quantity="other">%1$d fichiers n’ont pas pu être importés</item>
+    </plurals>
     <string name="inputExpirationDate">Date d’expiration</string>
     <string name="inputExpirationTime">Heure d’expiration</string>
     <string name="lastEditsTitle">Dernières modifications</string>
@@ -509,6 +512,7 @@
     <string name="noDriveTitle">Vous n’avez pas encore de kDrive !</string>
     <string name="noFilesDescription">Ce dossier est vide. Appuyez sur le bouton + pour ajouter des fichiers ici.</string>
     <string name="noFilesDescriptionNoNetwork">Impossible de récupérer les informations du dossier. Veuillez vérifier votre connexion réseau ou réessayez ultérieurement.</string>
+    <string name="noFilesDescriptionSelectFolder">Ce dossier est vide.</string>
     <string name="noMediaFolderTitle">Aucun dossier de médias disponible</string>
     <string name="noSelectMediaFolders">Aucun dossier sélectionné</string>
     <string name="noSyncFolderNotificationDescription">Cliquez-ici pour configurer les dossiers à synchroniser</string>
@@ -687,6 +691,14 @@
     <string name="uploadFileSizeExceeded">La taille totale autorisée du fichier a été dépassée.</string>
     <string name="uploadFolderNotFoundError">Dossier supprimé ou inexistant</string>
     <string name="uploadFolderNotFoundSyncDisabledError">La sauvegarde automatique a été désactivée car le dossier de destination n’existe plus</string>
+    <plurals name="uploadImportedOtherAmount">
+        <item quantity="one">+1 autre fichier</item>
+        <item quantity="other">+%d autres fichiers</item>
+    </plurals>
+    <plurals name="uploadImportedFailedAmount">
+        <item quantity="one">1 importation a échoué sur un total de %1$d</item>
+        <item quantity="other">%2$d importations ont échoué sur un total de %1$d</item>
+    </plurals>
     <string name="uploadInProgressCancelAllUploadTitle">Annuler les imports</string>
     <string name="uploadInProgressCancelFileUploadTitle">Annuler %s ?</string>
     <string name="uploadInProgressNoFile">Aucune importation en cours</string>

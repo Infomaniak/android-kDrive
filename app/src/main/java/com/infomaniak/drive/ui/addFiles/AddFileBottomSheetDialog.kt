@@ -180,7 +180,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             title = R.string.modalCreateFileTitle,
             fieldName = R.string.hintInputFileName,
             positiveButton = R.string.buttonCreate,
-            iconRes = office.convertedType.icon
+            iconRes = office.extensionType.icon
         ) { dialog, name ->
             trackNewElement(office.getEventName())
             val createFile = CreateFile(name, office.extension)
@@ -203,12 +203,17 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         val clipData = data?.clipData
         val uri = data?.data
         var launchSync = false
+        var errorCount = 0
 
         try {
             if (clipData != null) {
                 val count = clipData.itemCount
                 for (i in 0 until count) {
-                    initUpload(clipData.getItemAt(i).uri)
+                    runCatching {
+                        initUpload(clipData.getItemAt(i).uri)
+                    }.onFailure {
+                        errorCount++
+                    }
                     launchSync = true
                 }
             } else if (uri != null) {
@@ -216,8 +221,11 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                 launchSync = true
             }
         } catch (exception: Exception) {
-            showSnackbar(R.string.errorDeviceStorage, true)
+            errorCount++
         } finally {
+            if (errorCount > 0) {
+                showSnackbar(resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount), true)
+            }
             if (launchSync) requireContext().syncImmediately()
         }
     }

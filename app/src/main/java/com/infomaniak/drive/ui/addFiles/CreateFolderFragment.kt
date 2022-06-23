@@ -30,10 +30,10 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.api.ErrorCode.Companion.formatError
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
-import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.FolderPermission
 import com.infomaniak.drive.data.models.Share
+import com.infomaniak.drive.data.models.Share.UserFileAccess
 import com.infomaniak.drive.data.models.Team
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter
@@ -73,7 +73,7 @@ open class CreateFolderFragment : Fragment() {
         }
     }
 
-    protected fun canInherit(userList: ArrayList<DriveUser>, teamList: ArrayList<Team>): Boolean {
+    protected fun canInherit(userList: ArrayList<UserFileAccess>, teamList: ArrayList<Team>): Boolean {
         return userList.size > 1 || teamList.isNotEmpty()
     }
 

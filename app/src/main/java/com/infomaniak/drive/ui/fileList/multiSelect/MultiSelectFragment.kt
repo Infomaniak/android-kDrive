@@ -165,9 +165,11 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     }
 
     private fun getMultiSelectBottomSheetArguments(areAllFromTheSameFolder: Boolean): Bundle {
-        val (fileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
+        val (fileIds, exceptFileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
         return MultiSelectActionsBottomSheetDialogArgs(
-            fileIds = fileIds,
+            parentId = mainViewModel.currentFolder.value?.id!!,
+            fileIds = if (isAllSelected) intArrayOf() else fileIds,
+            exceptFileIds = if (isAllSelected) exceptFileIds else intArrayOf(),
             onlyFolders = onlyFolders,
             onlyFavorite = onlyFavorite,
             onlyOffline = onlyOffline,
@@ -176,8 +178,8 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         ).toBundle()
     }
 
-    fun moveFiles(folderId: Int?) {
-        requireContext().moveFileClicked(folderId, selectFolderResultLauncher)
+    fun moveFiles(disabledFolderId: Int?) {
+        requireContext().moveFileClicked(disabledFolderId, selectFolderResultLauncher, mainViewModel)
     }
 
     fun deleteFiles(allSelectedFilesCount: Int? = null) {
@@ -349,9 +351,9 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             BulkOperationType.COPY -> {
                 val fileName = file.getFileName()
                 mediator.addSource(
-                    duplicateFile(
+                    copyFile(
                         file = file,
-                        folderId = destinationFolder!!.id,
+                        destinationId = destinationFolder!!.id,
                         copyName = getString(R.string.allDuplicateFileName, fileName, file.getFileExtension()),
                         onSuccess = { it.data?.let { file -> onIndividualActionSuccess(type, file) } },
                     ),

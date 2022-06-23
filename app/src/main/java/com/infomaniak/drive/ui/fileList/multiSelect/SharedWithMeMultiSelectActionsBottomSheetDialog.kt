@@ -40,4 +40,8 @@ class SharedWithMeMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottom
     override fun configureDuplicateFile() {
         duplicateFile.isGone = true
     }
+
+    override fun configureMoveFile() {
+        moveFile.isGone = true
+    }
 }

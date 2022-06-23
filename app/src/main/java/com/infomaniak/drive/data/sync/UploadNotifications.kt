@@ -38,6 +38,8 @@ import io.sentry.Sentry
 
 object UploadNotifications {
 
+    private const val FAILED_FILES_LIMIT = 5
+
     val pendingIntentFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
     } else {
@@ -127,17 +129,53 @@ object UploadNotifications {
         )
     }
 
-    fun UploadFile.showUploadedFilesNotification(context: Context, uploadedFilesCount: Int) {
+    fun UploadFile.showUploadedFilesNotification(
+        context: Context,
+        successNames: MutableList<String>,
+        failedNames: MutableList<String>
+    ) {
+        val failedCount = failedNames.count()
+        val successCount = successNames.count()
+        val total = successCount + failedCount
+        val description = when {
+            failedCount > 0 -> {
+                val failedList = failedNames.joinToString("\n")
+                val message =
+                    context.resources.getQuantityString(R.plurals.uploadImportedFailedAmount, failedCount, total, failedCount)
+                "$message.\n$failedList"
+            }
+            successCount == 1 -> {
+                context.resources.getQuantityString(R.plurals.allUploadFinishedDescription, 1, this.fileName)
+            }
+            else -> {
+                val desc = context.resources.getQuantityString(R.plurals.allUploadFinishedDescription, successCount, successCount)
+                StringBuilder().apply {
+                    appendLine(desc)
+                    for (file in successNames.take(FAILED_FILES_LIMIT)) appendLine(file)
+                    val otherCount = successCount - FAILED_FILES_LIMIT
+                    if (otherCount > 0) {
+                        appendLine(
+                            context.resources.getQuantityString(
+                                R.plurals.uploadImportedOtherAmount,
+                                otherCount,
+                                otherCount
+                            )
+                        )
+                    }
+                }.toString()
+            }
+        }
+
+        val titleResId = if (successCount > 0) R.string.allUploadFinishedTitle else R.string.uploadErrorTitle
+
+        val pendingIntent = progressPendingIntent(context)
         showNotification(
             context = context,
-            title = context.getString(R.string.allUploadFinishedTitle),
-            description = context.resources.getQuantityString(
-                R.plurals.allUploadFinishedDescription,
-                uploadedFilesCount,
-                if (uploadedFilesCount == 1) this.fileName else uploadedFilesCount
-            ),
+            title = context.getString(titleResId),
+            description = description,
             notificationId = NotificationUtils.UPLOAD_STATUS_ID,
-            contentIntent = progressPendingIntent(context)
+            contentIntent = pendingIntent,
+            actionIntent = pendingIntent
         )
     }
 
@@ -155,7 +193,8 @@ object UploadNotifications {
         title: String,
         description: String,
         notificationId: Int,
-        contentIntent: PendingIntent? = null
+        contentIntent: PendingIntent? = null,
+        actionIntent: PendingIntent? = null
     ) {
         val notificationManagerCompat = NotificationManagerCompat.from(context)
         context.uploadNotification().apply {
@@ -164,6 +203,7 @@ object UploadNotifications {
             setContentTitle(title)
             setStyle(NotificationCompat.BigTextStyle().bigText(description))
             setContentIntent(contentIntent)
+            addAction(NotificationCompat.Action(R.drawable.ic_export, context.getString(R.string.locateButton), actionIntent))
             notificationManagerCompat.notify(notificationId, this.build())
         }
     }

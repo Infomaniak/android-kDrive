@@ -23,8 +23,10 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class CancellableAction(
-    @SerializedName("cancel_id") val cancelId: String,
-    @SerializedName("cancel_valid_until") val cancelValidUntil: Long,
+    @SerializedName("cancel_id")
+    val cancelId: String,
+    @SerializedName("cancel_valid_until")
+    val cancelValidUntil: Long,
     var driveId: Int
 ) : Parcelable {
 

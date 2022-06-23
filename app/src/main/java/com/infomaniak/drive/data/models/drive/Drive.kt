@@ -87,14 +87,16 @@ open class Drive(
     val teams: DriveTeamsCategories
         get() = _teams ?: DriveTeamsCategories()
 
+    inline val isFreePack get() = pack == DrivePack.FREE.value
+
     fun convertToFile(rootName: String? = null): File {
         return File(
             id = if (rootName == null) id else Utils.ROOT_ID,
             driveId = id,
-            lastModifiedAt = createdAt,
             name = rootName ?: name,
-            rights = Rights(newFile = true),
-            type = File.Type.DRIVE.value
+            type = File.Type.DRIVE.value,
+            lastModifiedAt = createdAt,
+            rights = Rights(canCreateFile = true)
         ).apply { driveColor = preferences.color }
     }
 

@@ -33,9 +33,11 @@ import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.textfield.TextInputEditText
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
@@ -91,6 +93,19 @@ class SaveExternalFilesActivity : BaseActivity() {
         fetchSelectedDrive()
         fetchFolder()
         setupSaveButton()
+
+        fileNameEdit.selectAllButFileExtension()
+    }
+
+    private fun TextInputEditText.selectAllButFileExtension() {
+        setOnFocusChangeListener { _, hasFocus ->
+            if (saveExternalFilesViewModel.firstFocus.value == true && hasFocus) {
+                saveExternalFilesViewModel.firstFocus.value = false
+                val fileName = (text ?: "").toString()
+                val endIndex = File(name = fileName).getFileName().length
+                post { setSelection(0, endIndex) }
+            }
+        }
     }
 
     private fun isAuth(): Boolean {
@@ -171,7 +186,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                         SelectFolderActivityArgs(
                             userId = selectDriveViewModel.selectedUserId.value!!,
                             userDriveId = selectDriveViewModel.selectedDrive.value?.id!!,
-                            currentFolderId = saveExternalFilesViewModel.folderId.value ?: -1,
+                            disabledFolderId = saveExternalFilesViewModel.folderId.value ?: -1,
                         ).toBundle()
                     )
                     selectFolderResultLauncher.launch(this)
@@ -422,6 +437,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     class SaveExternalFilesViewModel : ViewModel() {
         val folderId = MutableLiveData<Int?>()
+        val firstFocus = MutableLiveData(true)
     }
 
     companion object {

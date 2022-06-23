@@ -24,7 +24,7 @@ import com.infomaniak.drive.R
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-enum class ConvertedType(val value: String, @DrawableRes val icon: Int, @StringRes val searchFilterName: Int) : Parcelable {
+enum class ExtensionType(val value: String, @DrawableRes val icon: Int, @StringRes val searchFilterName: Int) : Parcelable {
     ARCHIVE("archive", R.drawable.ic_file_zip, R.string.allArchive),
     AUDIO("audio", R.drawable.ic_file_audio, R.string.allAudio),
     CODE("code", R.drawable.ic_file_code, R.string.allCode),

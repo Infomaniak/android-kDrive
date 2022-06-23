@@ -198,7 +198,7 @@ class MainActivity : BaseActivity() {
     private fun setupMainFab(navController: NavController) {
         mainFab.setOnClickListener { navController.navigate(R.id.addFileBottomSheetDialog) }
         mainViewModel.currentFolder.observe(this) { file ->
-            mainFab.isEnabled = file?.rights?.newFile == true
+            mainFab.isEnabled = file?.rights?.canCreateFile == true
         }
     }
 
@@ -234,13 +234,12 @@ class MainActivity : BaseActivity() {
         if (isKeyguardSecure() && AppSettings.appSecurityLock) {
             val lastCloseAppWithTolerance = Date(lastCloseApp.time + SECURITY_APP_TOLERANCE)
             val now = Date()
-            if (now.after(lastCloseAppWithTolerance)) {
-                startActivity(Intent(this, LockActivity::class.java))
-            }
+            if (now.after(lastCloseAppWithTolerance)) startActivity(Intent(this, LockActivity::class.java))
         }
 
         launchAllUpload(drivePermissions)
-        launchSyncOffline()
+
+        if (!mainViewModel.ignoreSyncOffline) launchSyncOffline() else mainViewModel.ignoreSyncOffline = false
 
         AppSettings.appLaunches++
 
@@ -250,6 +249,11 @@ class MainActivity : BaseActivity() {
         startContentObserverService()
 
         handleDeletionOfUploadedPhotos()
+    }
+
+    override fun onPause() {
+        lastCloseApp = Date()
+        super.onPause()
     }
 
     private fun handleDeletionOfUploadedPhotos() {

@@ -24,7 +24,6 @@ import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
-import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.FolderPermission.*
 import com.infomaniak.drive.data.models.Permission
@@ -40,7 +39,6 @@ import kotlinx.android.synthetic.main.fragment_create_folder.*
 import kotlinx.android.synthetic.main.item_dropbox_settings.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import okhttp3.internal.toLongOrDefault
 
 class CreateDropBoxFolderFragment : CreateFolderFragment() {
 
@@ -75,8 +73,8 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
     }
 
     private fun createDropBoxFolder() {
-        createDropBox(onDropBoxCreated = { file, dropBox ->
-            mainViewModel.createDropBoxSuccess.value = dropBox
+        createDropBox(onDropBoxCreated = { file ->
+            mainViewModel.createDropBoxSuccess.value = file.dropbox
             if (newFolderViewModel.currentPermission == ONLY_ME) {
                 findNavController().popBackStack(R.id.newFolderFragment, true)
             } else {
@@ -89,7 +87,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
     }
 
     private fun createDropBox(
-        onDropBoxCreated: (file: File, dropBox: DropBox) -> Unit,
+        onDropBoxCreated: (file: File) -> Unit,
         onError: (translatedError: String) -> Unit,
     ) {
         if (!isValid()) return
@@ -99,7 +97,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
         val emailWhenFinished = emailWhenFinishedSwitch.isChecked
         val validUntil = if (expirationDateSwitch.isChecked) expirationDateInput.getCurrentTimestampValue() else null
         val password = passwordTextInput.text.toString()
-        val limitFileSize = Utils.convertGigaByteToBytes(limitStorageValue.text.toString().toLongOrDefault(1))
+        val limitFileSize = Utils.convertGigaByteToBytes(limitStorageValue.text.toString().toDoubleOrNull() ?: 1.0)
 
         createFolder(false) { file, _ ->
             file?.let {
@@ -107,8 +105,8 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
                     .observe(viewLifecycleOwner) { apiResponse ->
                         when (apiResponse?.result) {
                             ApiResponse.Status.SUCCESS -> apiResponse.data?.let { dropBox ->
-                                file.collaborativeFolder = dropBox.url
-                                onDropBoxCreated(file, dropBox)
+                                file.dropbox = dropBox
+                                onDropBoxCreated(file)
                             }
                             else -> onError(getString(apiResponse.translateError()))
                         }
@@ -174,7 +172,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
                         limitStorageValueLayout.error = getString(R.string.allEmptyInputError)
                         result = false
                     }
-                    this.toLong() < 1 -> {
+                    this.toDoubleOrNull() == 0.0 -> {
                         limitStorageValueLayout.error = getString(R.string.createDropBoxLimitFileSizeError)
                         result = false
                     }

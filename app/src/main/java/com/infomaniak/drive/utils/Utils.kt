@@ -18,13 +18,16 @@
 package com.infomaniak.drive.utils
 
 import android.app.Dialog
-import android.content.*
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.view.View
+import android.view.WindowManager
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -155,7 +158,10 @@ object Utils {
             .setNegativeButton(R.string.buttonCancel) { _, _ -> }
             .setCancelable(false)
             .create()
-            .also { it.show() }
+            .apply {
+                window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+                show()
+            }
 
         val buttonPositive = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
 
@@ -190,7 +196,7 @@ object Utils {
         navController: NavController,
         selectedFile: File,
         fileList: ArrayList<File>,
-        isSharedWithMe: Boolean = false
+        isSharedWithMe: Boolean = false,
     ) {
         mainViewModel.currentPreviewFileList = fileList.associateBy { it.id } as LinkedHashMap<Int, File>
         val bundle = PreviewSliderFragmentArgs(
@@ -206,21 +212,21 @@ object Utils {
         navController.navigate(R.id.previewSliderFragment, bundle, navOptions)
     }
 
-    fun convertBytesToGigaBytes(gigaByte: Long) = (gigaByte / 1024.0.pow(3)).toLong()
-    fun convertGigaByteToBytes(bytes: Long) = (bytes * 1024.0.pow(3)).toLong()
+    fun convertBytesToGigaBytes(bytes: Long) = (bytes / 1024.0.pow(3))
+    fun convertGigaByteToBytes(gigaBytes: Double) = (gigaBytes * 1024.0.pow(3)).toLong()
 
-    fun copyToClipboard(context: Context, text: String) {
-        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
-        clipboard?.setPrimaryClip(ClipData.newPlainText(text, text))
-    }
-
-    fun Context.moveFileClicked(currentFolderId: Int?, selectFolderResultLauncher: ActivityResultLauncher<Intent>) {
+    fun Context.moveFileClicked(
+        disabledFolderId: Int?,
+        selectFolderResultLauncher: ActivityResultLauncher<Intent>,
+        mainViewModel: MainViewModel
+    ) {
+        mainViewModel.ignoreSyncOffline = true
         Intent(this, SelectFolderActivity::class.java).apply {
             putExtras(
                 SelectFolderActivityArgs(
                     userId = AccountUtils.currentUserId,
                     userDriveId = AccountUtils.currentDriveId,
-                    currentFolderId = currentFolderId ?: -1,
+                    disabledFolderId = disabledFolderId ?: -1,
                     customArgs = bundleOf(SelectFolderActivity.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE)
                 ).toBundle()
             )
@@ -260,6 +266,7 @@ object Utils {
         if (file.isPendingOffline(context)) workManager.cancelAllWorkByTag(file.getWorkerTag())
         val inputData = workDataOf(
             DownloadWorker.FILE_ID to file.id,
+            DownloadWorker.FILE_NAME to file.name,
             DownloadWorker.USER_ID to userDrive.userId,
             DownloadWorker.DRIVE_ID to userDrive.driveId,
         )

@@ -138,14 +138,11 @@
             android:name="sharedItem"
             app:argType="com.infomaniak.drive.data.models.Shareable" />
         <argument
-            android:name="notShareableUserIds"
+            android:name="notShareableIds"
             app:argType="integer[]" />
         <argument
             android:name="notShareableEmails"
             app:argType="string[]" />
-        <argument
-            android:name="notShareableTeamIds"
-            app:argType="integer[]" />
         <action
             android:id="@+id/action_fileShareAddUserDialog_to_selectPermissionBottomSheetDialog"
             app:destination="@id/selectPermissionBottomSheetDialog" />

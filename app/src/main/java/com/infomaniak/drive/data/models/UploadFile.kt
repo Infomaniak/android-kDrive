@@ -45,7 +45,7 @@ open class UploadFile(
     var fileModifiedAt: Date = Date(),
     var fileName: String = "",
     var fileSize: Long = 0L,
-    var identifier: String = UUID.randomUUID().toString(),
+    var uploadToken: String? = null,
     var remoteFolder: Int = -1,
     var remoteSubFolder: String? = null,
     var type: String = Type.SYNC.name,
@@ -81,10 +81,10 @@ open class UploadFile(
 
     fun replaceOnConflict() = isSync() || isSyncOffline() || isCloudStorage()
 
-    fun refreshIdentifier() {
+    fun resetUploadToken() {
         getRealmInstance().use { realm ->
             syncFileByUriQuery(realm, uri).findFirst()?.apply {
-                realm.executeTransaction { identifier = UUID.randomUUID().toString() }
+                realm.executeTransaction { uploadToken = null }
             }
         }
     }
@@ -98,6 +98,24 @@ open class UploadFile(
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> MediaStore.setRequireOriginal(uriObject)
             else -> uriObject
         }
+    }
+
+    fun updateFileSize(newFileSize: Long) {
+        getRealmInstance().use { realm ->
+            syncFileByUriQuery(realm, uri).findFirst()?.let { uploadFile ->
+                realm.executeTransaction { uploadFile.fileSize = newFileSize }
+            }
+        }
+        fileSize = newFileSize
+    }
+
+    fun updateUploadToken(newUploadToken: String) {
+        getRealmInstance().use { realm ->
+            syncFileByUriQuery(realm, uri).findFirst()?.let { uploadFile ->
+                realm.executeTransaction { uploadFile.uploadToken = newUploadToken }
+            }
+        }
+        uploadToken = newUploadToken
     }
 
     enum class Type {
@@ -159,7 +177,7 @@ open class UploadFile(
         }
 
         fun getAllPendingPriorityFilesCount(): Long {
-            return pendingUploadsQuery(getRealmInstance()).notEqualTo(UploadFile::type.name, Type.SYNC.name).count()
+            return getRealmInstance().use { pendingUploadsQuery(it).notEqualTo(UploadFile::type.name, Type.SYNC.name).count() }
         }
 
         fun getAllPendingFolders(realm: Realm): RealmResults<UploadFile>? {
@@ -201,15 +219,6 @@ open class UploadFile(
                         syncFile.uploadAt = Date()
                     }
                 }
-            }
-        }
-
-        fun update(uri: String, transaction: (uploadFile: UploadFile) -> Unit): Boolean {
-            getRealmInstance().use { realm ->
-                return syncFileByUriQuery(realm, uri).findFirst()?.let { uploadFile ->
-                    realm.executeTransaction { transaction(uploadFile) }
-                    true
-                } ?: false
             }
         }
 

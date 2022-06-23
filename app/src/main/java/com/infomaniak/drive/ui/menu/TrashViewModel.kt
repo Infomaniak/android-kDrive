@@ -34,20 +34,20 @@ class TrashViewModel : ViewModel() {
     val removeFileId = SingleLiveEvent<Int>()
     private var getDeletedFilesJob: Job = Job()
 
-    fun getTrashFile(file: File, order: File.SortType): LiveData<FileListFragment.FolderFilesResult?> {
+    fun getTrashedFolderFiles(file: File, order: File.SortType): LiveData<FileListFragment.FolderFilesResult?> {
         getDeletedFilesJob.cancel()
         getDeletedFilesJob = Job()
         return liveData(Dispatchers.IO + getDeletedFilesJob) {
             suspend fun recursive(page: Int) {
-                val apiResponse = ApiRepository.getTrashFile(file, order, page)
+                val apiResponse = ApiRepository.getTrashedFolderFiles(file, order, page)
                 if (apiResponse.isSuccess()) {
                     val data = apiResponse.data
                     when {
                         data == null -> Unit
-                        data.children.size < ApiRepository.PER_PAGE -> emit(
+                        data.size < ApiRepository.PER_PAGE -> emit(
                             FileListFragment.FolderFilesResult(
                                 parentFolder = file,
-                                files = ArrayList(data.children),
+                                files = ArrayList(data),
                                 isComplete = true,
                                 page = page
                             )
@@ -56,7 +56,7 @@ class TrashViewModel : ViewModel() {
                             emit(
                                 FileListFragment.FolderFilesResult(
                                     parentFolder = file,
-                                    files = ArrayList(data.children),
+                                    files = ArrayList(data),
                                     isComplete = false,
                                     page = page
                                 )

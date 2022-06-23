@@ -15,14 +15,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.data.models
+package com.infomaniak.drive.data.models.file
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import io.realm.RealmObject
+import io.realm.annotations.RealmClass
+import kotlinx.android.parcel.Parcelize
 
-data class ValidChunks(
-    @SerializedName("number_of_expected_chunks") val expectedChunksCount: Int,
-    @SerializedName("size_to_upload") val sizeToUpload: Long,
-    @SerializedName("uploaded_chunk_count") val uploadedChunkCount: Int,
-    @SerializedName("uploaded_size") val uploadedSize: Long,
-    @SerializedName("valid_chunks") val validChunks: ArrayList<Int>
-)
+@Parcelize
+@RealmClass(embedded = true)
+open class FileVersion(
+    @SerializedName("is_multiple")
+    var isMultiple: Boolean = false,
+    var number: Int = 0,
+    @SerializedName("total_size")
+    var totalSize: Long = 0,
+) : RealmObject(), Parcelable

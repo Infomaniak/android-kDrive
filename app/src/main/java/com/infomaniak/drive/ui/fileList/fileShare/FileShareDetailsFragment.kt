@@ -77,7 +77,7 @@ class FileShareDetailsFragment : Fragment() {
             setAvailableShareableItems()
             setToolbarTitle()
             sharedUsersTitle.isGone = true
-            setupShareLink()
+            setupShareLink(file.sharelink)
             refreshUi()
             setBackActionHandlers()
             setBackPressedHandlers()
@@ -97,12 +97,12 @@ class FileShareDetailsFragment : Fragment() {
                 openAddUserDialog(selectedElement)
             },
         )
-        availableShareableItemsAdapter.notShareableUserIds.addAll(file.users)
+        availableShareableItemsAdapter.notShareableIds.addAll(file.users)
     }
 
     private fun setToolbarTitle() {
         fileShareCollapsingToolbarLayout.title = getString(
-            if (file.type == File.Type.FOLDER.value) {
+            if (file.type == File.Type.DIRECTORY.value) {
                 R.string.fileShareDetailsFolderTitle
             } else {
                 R.string.fileShareDetailsFileTitle
@@ -112,26 +112,34 @@ class FileShareDetailsFragment : Fragment() {
     }
 
     private fun refreshUi() {
+        //TODO Need refactor
         sharedItemsAdapter = SharedItemsAdapter(file) { shareable -> openSelectPermissionDialog(shareable) }
         sharedUsersRecyclerView.adapter = sharedItemsAdapter
 
         mainViewModel.getFileShare(file.id).observe(viewLifecycleOwner) { (_, data) ->
             data?.let { share ->
-                val itemList = if (share.canUseTeam) allUserList + allTeams else allUserList
+                val itemList = if (file.rights?.canUseTeam == true) allUserList + allTeams else allUserList
                 fileShareViewModel.availableShareableItems.value = ArrayList(itemList)
 
                 share.teams.sort()
                 availableShareableItemsAdapter.apply {
                     fileShareViewModel.availableShareableItems.value?.let { setAll(it) }
-                    notShareableUserIds = ArrayList(share.users.map { it.id } + share.invitations.map { it.userId })
+
+                    val userIds = share.users.map { it.id } +
+                            share.invitations.mapNotNull { it.user?.id } +
+                            share.teams.map { team -> team.id }
+
+                    notShareableIds = ArrayList(userIds)
                     notShareableEmails = ArrayList(share.invitations.map { invitation -> invitation.email })
-                    notShareableTeamIds = ArrayList(share.teams.map { team -> team.id })
                 }
 
                 sharedUsersTitle.isVisible = true
-                sharedItemsAdapter.setAll(ArrayList(share.invitations + share.teams + share.users))
-                setupShareLink(share.link)
+                sharedItemsAdapter.setAll(ArrayList(share.members))
             }
+        }
+
+        mainViewModel.getShareLink(file).observe(viewLifecycleOwner) {
+            it?.data?.let(::setupShareLink)
         }
     }
 
@@ -167,10 +175,9 @@ class FileShareDetailsFragment : Fragment() {
             }
         }
 
-        getBackNavigationResult<ShareableItems>(SHARE_SELECTION_KEY) { (invitations, teams, users) ->
+        getBackNavigationResult<Boolean>(SHARE_SELECTION_KEY) {
             fileShareViewModel.currentFile.value?.let { currentFile ->
                 file = currentFile
-                sharedItemsAdapter.putAll(ArrayList(invitations + teams + users))
                 refreshUi()
             }
         }
@@ -190,7 +197,7 @@ class FileShareDetailsFragment : Fragment() {
     private fun setupShareLink(shareLink: ShareLink? = null) {
         when {
             file.isDropBox() -> setupDropBoxShareLink()
-            file.rights?.canBecomeLink == true || file.shareLink?.isNotBlank() == true -> setupNormalShareLink(shareLink)
+            file.rights?.canBecomeShareLink == true || file.sharelink?.url?.isNotBlank() == true -> setupNormalShareLink(shareLink)
             else -> hideShareLinkView()
         }
     }
@@ -213,7 +220,7 @@ class FileShareDetailsFragment : Fragment() {
         shareLink = newShareLink
         val (permissionsGroup, currentPermission) = FileDetailsInfoFragment.selectPermissions(
             isFolder = file.isFolder(),
-            isOnlyOffice = file.onlyoffice,
+            isOnlyOffice = file.hasOnlyoffice,
             shareLinkExist = shareLink != null,
         )
         safeNavigate(
@@ -232,7 +239,7 @@ class FileShareDetailsFragment : Fragment() {
                 fileId = file.id,
                 driveId = file.driveId,
                 shareLink = newShareLink,
-                isOnlyOfficeFile = file.onlyoffice,
+                isOnlyOfficeFile = file.hasOnlyoffice,
                 isFolder = file.isFolder(),
             )
         )
@@ -247,7 +254,7 @@ class FileShareDetailsFragment : Fragment() {
     }
 
     private fun createShareLink() {
-        mainViewModel.postFileShareLink(file).observe(viewLifecycleOwner) { apiResponse ->
+        mainViewModel.createShareLink(file).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 shareLinkContainer.update(apiResponse.data)
             } else {
@@ -270,7 +277,7 @@ class FileShareDetailsFragment : Fragment() {
     private fun openSelectPermissionDialog(shareable: Shareable) {
 
         val permissionsGroup = when {
-            shareable is Invitation || (shareable is DriveUser && shareable.isExternalUser()) -> PermissionsGroup.EXTERNAL_USERS_RIGHTS
+            shareable is Invitation || (shareable is DriveUser && shareable.isExternalUser) -> PermissionsGroup.EXTERNAL_USERS_RIGHTS
             else -> PermissionsGroup.USERS_RIGHTS
         }
 
@@ -288,9 +295,8 @@ class FileShareDetailsFragment : Fragment() {
         safeNavigate(
             FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToFileShareAddUserDialog(
                 sharedItem = element,
-                notShareableUserIds = notShareableUserIds.toIntArray(),
-                notShareableEmails = notShareableEmails.toTypedArray(),
-                notShareableTeamIds = notShareableTeamIds.toIntArray(),
+                notShareableIds = notShareableIds.toIntArray(),
+                notShareableEmails = notShareableEmails.toTypedArray()
             )
         )
     }

@@ -32,6 +32,8 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.Category
+import com.infomaniak.drive.data.models.file.FileConversion
+import com.infomaniak.drive.data.models.file.FileVersion
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmListParceler.FileRealmListParceler
 import com.infomaniak.drive.utils.RealmListParceler.IntRealmListParceler
@@ -53,70 +55,70 @@ import java.util.*
 @Parcelize
 open class File(
     @PrimaryKey var id: Int = 0,
-    var children: @WriteWith<FileRealmListParceler> RealmList<File> = RealmList(),
-    @SerializedName("collaborative_folder")
-    var collaborativeFolder: String? = null,
-    @SerializedName("color")
-    private var _color: String? = null,
-    @SerializedName("converted_type")
-    var convertedType: String = "",
-    @SerializedName("created_at")
-    var createdAt: Long = 0,
-    @SerializedName("created_by")
-    var createdBy: Int = 0,
-    @SerializedName("deleted_at")
-    var deletedAt: Long = 0,
-    @SerializedName("deleted_by")
-    var deletedBy: Int = 0,
+    @SerializedName("parent_id")
+    var parentId: Int = 0,
     @SerializedName("drive_id")
     var driveId: Int = 0,
-    @SerializedName("file_created_at")
-    var fileCreatedAt: Long = 0,
-    @SerializedName("has_thumbnail")
-    var hasThumbnail: Boolean = false,
-    @SerializedName("has_version")
-    var hasVersion: Boolean = false,
-    @SerializedName("is_favorite")
-    var isFavorite: Boolean = false,
-    @SerializedName("last_accessed_at")
-    var lastAccessedAt: Long = 0,
+    var name: String = "",
+    @SerializedName("sorted_name")
+    var sortedName: String = name,
+    var path: String = "", // remote path or Uri for uploadFile
+    var type: String = "file",
+    var status: String? = null,
+    var visibility: String = "",
+    @SerializedName("created_by")
+    var createdBy: Int = 0,
+    @SerializedName("created_at")
+    var createdAt: Long = 0,
+    @SerializedName("added_at")
+    var addedAt: Long = 0,
     @SerializedName("last_modified_at")
     var lastModifiedAt: Long = 0,
-    var name: String = "",
-    @SerializedName("name_natural_sorting")
-    var nameNaturalSorting: String = name,
-    @SerializedName("nb_version")
-    var nbVersion: Int = 0,
-    var onlyoffice: Boolean = false,
-    @SerializedName("onlyoffice_convert_extension")
-    var onlyofficeConvertExtension: String? = null,
-    var path: String = "", // Uri
-    var rights: Rights? = null,
-    @SerializedName("share_link")
-    var shareLink: String? = null,
-    var size: Long? = null,
-    @SerializedName("size_with_version")
-    var sizeWithVersions: Long? = null,
-    var status: String? = null,
-    var type: String = "file",
+    @SerializedName("deleted_by")
+    var deletedBy: Int = 0,
+    @SerializedName("deleted_at")
+    var deletedAt: Long = 0,
     var users: @WriteWith<IntRealmListParceler> RealmList<Int> = RealmList(),
-    var visibility: String = "",
-    @SerializedName("added_at")
-    var addedAt: Long = 0L,
+    @SerializedName("is_favorite")
+    var isFavorite: Boolean = false,
+    var sharelink: ShareLink? = null,
+    @SerializedName("capabilities")
+    var rights: Rights? = null,
     var categories: @RawValue RealmList<FileCategory> = RealmList(),
 
-    var responseAt: Long = 0,
+    /**
+     * DIRECTORY ONLY
+     */
+    @SerializedName("color")
+    private var _color: String? = null,
+    var dropbox: DropBox? = null,
 
     /**
-     * Local
+     * FILE ONLY
      */
+    var size: Long? = null,
+    @SerializedName("has_thumbnail")
+    var hasThumbnail: Boolean = false,
+    @SerializedName("has_onlyoffice")
+    var hasOnlyoffice: Boolean = false,
+    @SerializedName("extension_type")
+    var extensionType: String = "",
+    var version: FileVersion? = null,
+    var conversion: FileConversion? = null,
+
+    /**
+     * LOCAL
+     */
+    var children: @WriteWith<FileRealmListParceler> RealmList<File> = RealmList(),
     var isComplete: Boolean = false,
     var isFromActivities: Boolean = false,
     var isFromSearch: Boolean = false,
     var isFromUploads: Boolean = false,
     var isOffline: Boolean = false,
     var versionCode: Int = 0,
-) : RealmObject(), Parcelable {
+    var responseAt: Long = 0,
+
+    ) : RealmObject(), Parcelable {
 
     @LinkingObjects("children")
     val localParent: RealmResults<File>? = null
@@ -142,10 +144,10 @@ open class File(
     }
 
     fun isOnlyOfficePreview(): Boolean {
-        return onlyoffice || onlyofficeConvertExtension != null
+        return hasOnlyoffice || conversion?.whenOnlyoffice == true
     }
 
-    fun isDropBox() = getVisibilityType() == VisibilityType.IS_COLLABORATIVE_FOLDER
+    fun isDropBox() = getVisibilityType() == VisibilityType.IS_DROPBOX
 
     fun isTrashed(): Boolean {
         return status?.contains("trash") == true
@@ -161,23 +163,23 @@ open class File(
 
     fun onlyOfficeUrl() = "${BuildConfig.AUTOLOG_URL}?url=" + ApiRoutes.showOffice(this)
 
-    fun getFileType(): ConvertedType {
-        return if (isFromUploads) getFileTypeFromExtension() else when (convertedType) {
-            ConvertedType.ARCHIVE.value -> ConvertedType.ARCHIVE
-            ConvertedType.AUDIO.value -> ConvertedType.AUDIO
-            ConvertedType.CODE.value -> if (isBookmark()) ConvertedType.URL else ConvertedType.CODE
-            ConvertedType.FONT.value -> ConvertedType.FONT
-            ConvertedType.IMAGE.value -> ConvertedType.IMAGE
-            ConvertedType.PDF.value -> ConvertedType.PDF
-            ConvertedType.PRESENTATION.value -> ConvertedType.PRESENTATION
-            ConvertedType.SPREADSHEET.value -> ConvertedType.SPREADSHEET
-            ConvertedType.TEXT.value -> ConvertedType.TEXT
-            ConvertedType.VIDEO.value -> ConvertedType.VIDEO
-            ConvertedType.FORM.value -> ConvertedType.FORM
+    fun getFileType(): ExtensionType {
+        return if (isFromUploads) getFileTypeFromExtension() else when (extensionType) {
+            ExtensionType.ARCHIVE.value -> ExtensionType.ARCHIVE
+            ExtensionType.AUDIO.value -> ExtensionType.AUDIO
+            ExtensionType.CODE.value -> if (isBookmark()) ExtensionType.URL else ExtensionType.CODE
+            ExtensionType.FONT.value -> ExtensionType.FONT
+            ExtensionType.IMAGE.value -> ExtensionType.IMAGE
+            ExtensionType.PDF.value -> ExtensionType.PDF
+            ExtensionType.PRESENTATION.value -> ExtensionType.PRESENTATION
+            ExtensionType.SPREADSHEET.value -> ExtensionType.SPREADSHEET
+            ExtensionType.TEXT.value -> ExtensionType.TEXT
+            ExtensionType.VIDEO.value -> ExtensionType.VIDEO
+            ExtensionType.FORM.value -> ExtensionType.FORM
             else -> when {
-                isFolder() -> ConvertedType.FOLDER
-                isBookmark() -> ConvertedType.URL
-                else -> ConvertedType.UNKNOWN
+                isFolder() -> ExtensionType.FOLDER
+                isBookmark() -> ExtensionType.URL
+                else -> ExtensionType.UNKNOWN
             }
         }
     }
@@ -188,12 +190,12 @@ open class File(
 
     fun getLastModifiedInMilliSecond() = lastModifiedAt * 1000
 
-    fun getCreatedAt(): Date {
-        return Date(createdAt * 1000)
+    fun getAddedAt(): Date {
+        return Date(addedAt * 1000)
     }
 
     fun getFileCreatedAt(): Date {
-        return Date(fileCreatedAt * 1000)
+        return Date(createdAt * 1000)
     }
 
     fun getDeletedAt(): Date {
@@ -282,7 +284,7 @@ open class File(
     }
 
     fun isDisabled(): Boolean {
-        return rights?.read == false && rights?.show == false
+        return rights?.canRead == false && rights?.canShow == false
     }
 
     fun isRoot(): Boolean {
@@ -307,7 +309,7 @@ open class File(
 
     enum class Type(val value: String) {
         FILE("file"),
-        FOLDER("dir"),
+        DIRECTORY("dir"),
         DRIVE("drive");
     }
 
@@ -320,7 +322,7 @@ open class File(
             "is_shared_space" -> VisibilityType.IS_SHARED_SPACE
             else -> {
                 when {
-                    !collaborativeFolder.isNullOrBlank() -> VisibilityType.IS_COLLABORATIVE_FOLDER
+                    dropbox != null -> VisibilityType.IS_DROPBOX
                     users.size > 1 -> VisibilityType.IS_SHARED
                     else -> VisibilityType.IS_PRIVATE
                 }
@@ -336,9 +338,9 @@ open class File(
 
     private fun getSortedCategoriesIds(): List<Int> {
         return if (isManaged) {
-            categories.sort(FileCategory::addedToFileAt.name).map { it.id }
+            categories.sort(FileCategory::addedAt.name).map { it.categoryId }
         } else {
-            categories.sortedBy { it.addedToFileAt }.map { it.id }
+            categories.sortedBy { it.addedAt }.map { it.categoryId }
         }
     }
 
@@ -374,7 +376,7 @@ open class File(
     enum class VisibilityType {
         ROOT,
         IS_PRIVATE,
-        IS_COLLABORATIVE_FOLDER,
+        IS_DROPBOX,
         IS_SHARED,
         IS_SHARED_SPACE,
         IS_TEAM_SPACE,
@@ -382,25 +384,25 @@ open class File(
         IS_IN_TEAM_SPACE_FOLDER;
     }
 
-    enum class Office(val convertedType: ConvertedType, val extension: String) {
-        DOCS(ConvertedType.TEXT, "docx"),
-        POINTS(ConvertedType.PRESENTATION, "pptx"),
-        GRIDS(ConvertedType.SPREADSHEET, "xlsx"),
-        FORM(ConvertedType.FORM, "docxf"),
-        TXT(ConvertedType.TEXT, "txt")
+    enum class Office(val extensionType: ExtensionType, val extension: String) {
+        DOCS(ExtensionType.TEXT, "docx"),
+        POINTS(ExtensionType.PRESENTATION, "pptx"),
+        GRIDS(ExtensionType.SPREADSHEET, "xlsx"),
+        FORM(ExtensionType.FORM, "docxf"),
+        TXT(ExtensionType.TEXT, "txt")
     }
 
     enum class SortType(val order: String, val orderBy: String, val translation: Int) {
-        NAME_AZ("asc", "files.path", R.string.sortNameAZ),
-        NAME_ZA("desc", "files.path", R.string.sortNameZA),
+        NAME_AZ("asc", "path", R.string.sortNameAZ),
+        NAME_ZA("desc", "path", R.string.sortNameZA),
         OLDER("asc", "last_modified_at", R.string.sortOlder),
         RECENT("desc", "last_modified_at", R.string.sortRecent),
         OLDEST_ADDED("asc", "added_at", R.string.sortOldestAdded),
         MOST_RECENT_ADDED("desc", "added_at", R.string.sortMostRecentAdded),
         OLDER_TRASHED("asc", "deleted_at", R.string.sortOlder),
         RECENT_TRASHED("desc", "deleted_at", R.string.sortRecent),
-        SMALLER("asc", "files.size", R.string.sortSmaller),
-        BIGGER("desc", "files.size", R.string.sortBigger),
+        SMALLER("asc", "size", R.string.sortSmaller),
+        BIGGER("desc", "size", R.string.sortBigger),
         // EXTENSION("asc", "extension", R.string.sortExtension); // TODO: Awaiting API
     }
 
@@ -475,18 +477,18 @@ open class File(
          * This is not the only method in this case, search this comment in the project, and you'll see.
          * Realm's Github issue: https://github.com/realm/realm-java/issues/7637
          */
-        fun File.getFileTypeFromExtension(): ConvertedType {
+        fun File.getFileTypeFromExtension(): ExtensionType {
             return when (getMimeType()) {
-                in Regex("application/(zip|rar|x-tar|.*compressed|.*archive)") -> ConvertedType.ARCHIVE
-                in Regex("audio/") -> ConvertedType.AUDIO
-                in Regex("image/") -> ConvertedType.IMAGE
-                in Regex("/pdf") -> ConvertedType.PDF
-                in Regex("presentation") -> ConvertedType.PRESENTATION
-                in Regex("spreadsheet|excel|comma-separated-values") -> ConvertedType.SPREADSHEET
-                in Regex("document|text/plain|msword") -> ConvertedType.TEXT
-                in Regex("video/") -> ConvertedType.VIDEO
-                in Regex("text/|application/") -> ConvertedType.CODE
-                else -> if (getFileExtension() == ".${Office.FORM.extension}") ConvertedType.FORM else ConvertedType.UNKNOWN
+                in Regex("application/(zip|rar|x-tar|.*compressed|.*archive)") -> ExtensionType.ARCHIVE
+                in Regex("audio/") -> ExtensionType.AUDIO
+                in Regex("image/") -> ExtensionType.IMAGE
+                in Regex("/pdf") -> ExtensionType.PDF
+                in Regex("presentation") -> ExtensionType.PRESENTATION
+                in Regex("spreadsheet|excel|comma-separated-values") -> ExtensionType.SPREADSHEET
+                in Regex("document|text/plain|msword") -> ExtensionType.TEXT
+                in Regex("video/") -> ExtensionType.VIDEO
+                in Regex("text/|application/") -> ExtensionType.CODE
+                else -> if (getFileExtension() == ".${Office.FORM.extension}") ExtensionType.FORM else ExtensionType.UNKNOWN
             }
         }
     }

@@ -22,14 +22,14 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.ConvertedType
+import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.*
 
 class SearchFilterTypeBottomSheetAdapter(
-    private val types: List<ConvertedType>,
-    private val selectedType: ConvertedType?,
-    private val onTypeClicked: (type: ConvertedType) -> Unit
+    private val types: List<ExtensionType>,
+    private val selectedType: ExtensionType?,
+    private val onTypeClicked: (type: ExtensionType) -> Unit
 ) : RecyclerView.Adapter<ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
