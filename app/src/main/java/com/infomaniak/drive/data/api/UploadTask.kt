@@ -26,6 +26,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
+import com.google.gson.reflect.TypeToken
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.upload.UploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
@@ -355,7 +356,7 @@ class UploadTask(
             conflict = if (replaceOnConflict()) ConflictOption.VERSION else ConflictOption.RENAME,
             createdAt = if (fileCreatedAt == null) null else fileCreatedAt!!.time / 1000,
             directoryId = remoteFolder,
-            fileName = encodedName(),
+            fileName = fileName,
             lastModifiedAt = fileModifiedAt.time / 1000,
             subDirectoryPath = remoteSubFolder ?: "",
             totalChunks = totalChunks,
@@ -386,7 +387,11 @@ class UploadTask(
                 uploadFile.resetUploadToken()
                 throw UploadErrorException()
             }
-            else -> throw this?.error?.description?.let(::Exception) ?: Exception("an error has occurred")
+            else -> {
+                val responseType = object : TypeToken<ApiResponse<T>>() {}.type
+                val responseJson = gson.toJson(this, responseType)
+                throw this?.error?.description?.let(::Exception) ?: Exception(responseJson)
+            }
         }
     }
 
