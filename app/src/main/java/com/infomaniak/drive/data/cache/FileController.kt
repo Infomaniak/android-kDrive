@@ -670,7 +670,7 @@ object FileController {
 
         if (apiResponse.isSuccess()) {
             apiResponse.data?.let { remoteFiles ->
-                saveRemoteFiles(localFolderProxy, apiResponse)
+                saveRemoteFiles(localFolderProxy, apiResponse, page)
                 result = (localFolder!! to if (withChildren) ArrayList(remoteFiles) else arrayListOf())
             }
         } else if (page == 1 && localFolderProxy != null) {
@@ -680,7 +680,7 @@ object FileController {
         return result
     }
 
-    private fun saveRemoteFiles(localFolderProxy: File?, apiResponse: ApiResponse<List<File>>) {
+    private fun saveRemoteFiles(localFolderProxy: File?, apiResponse: ApiResponse<List<File>>, page: Int) {
         val remoteFiles = apiResponse.data!!
         // Restore same children data
         keepSubFolderChildren(localFolderProxy?.children, remoteFiles)
@@ -688,7 +688,7 @@ object FileController {
         localFolderProxy?.let {
             it.realm.executeTransaction {
                 // Remove old children
-                localFolderProxy.children.clear()
+                if (page == 1) localFolderProxy.children.clear()
                 // Add children
                 localFolderProxy.children.addAll(remoteFiles)
                 // Update folder properties
