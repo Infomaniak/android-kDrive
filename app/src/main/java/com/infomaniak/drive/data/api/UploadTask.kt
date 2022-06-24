@@ -386,7 +386,11 @@ class UploadTask(
                 uploadFile.resetUploadToken()
                 throw UploadErrorException()
             }
-            else -> throw this?.error?.description?.let(::Exception) ?: Exception("an error has occurred")
+            else -> {
+                val responseType = object : TypeToken<ApiResponse<T>>() {}.type
+                val responseJson = gson.toJson(this, responseType)
+                throw this?.error?.description?.let(::Exception) ?: Exception(responseJson)
+            }
         }
     }
 
