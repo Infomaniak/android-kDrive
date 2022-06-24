@@ -34,7 +34,6 @@ import io.realm.*
 import io.realm.annotations.PrimaryKey
 import io.realm.kotlin.oneOf
 import java.io.File
-import java.net.URLEncoder
 import java.util.*
 
 open class UploadFile(
@@ -53,16 +52,8 @@ open class UploadFile(
     var userId: Int = -1
 ) : RealmObject() {
 
-    fun encodedName(): String = URLEncoder.encode(fileName, "UTF-8")
-
     fun createSubFolder(parent: String, createDatedSubFolders: Boolean) {
-        remoteSubFolder = when {
-            createDatedSubFolders -> {
-                val date = fileModifiedAt.format("yyyy/MM/")
-                "$parent/$date${encodedName()}"
-            }
-            else -> "$parent/${encodedName()}"
-        }
+        remoteSubFolder = parent + if (createDatedSubFolders) "/${fileModifiedAt.format("yyyy/MM")}" else ""
     }
 
     fun store() {

@@ -23,10 +23,11 @@ import com.infomaniak.drive.data.models.UploadFile
 import io.realm.DynamicRealm
 import io.realm.FieldAttribute
 import io.realm.RealmMigration
+import java.net.URLEncoder
 
 class UploadMigration : RealmMigration {
     companion object {
-        const val bddVersion = 4L // Must be bumped when the schema changes
+        const val bddVersion = 5L // Must be bumped when the schema changes
     }
 
     override fun migrate(realm: DynamicRealm, oldVersion: Long, newVersion: Long) {
@@ -74,6 +75,19 @@ class UploadMigration : RealmMigration {
                 .addField(UploadFile::uploadToken.name, String::class.java)
                 .removeField("identifier")
             oldVersionTemp++
+        }
+        //endregion
+
+        //region Migrate to version 5: Migrate remoteSubFolder with api v2
+        if (oldVersionTemp == 4L) {
+            realm.where(UploadFile::class.java.simpleName)
+                .equalTo(UploadFile::type.name, UploadFile.Type.SYNC.name)
+                .findAll()?.onEach { uploadFile ->
+                    val fileName = uploadFile.getString("fileName")
+                    val encodedName = URLEncoder.encode(fileName, "UTF-8")
+                    val subFolder = uploadFile.getString("remoteSubFolder")
+                    uploadFile.setString("remoteSubFolder", subFolder.substringBeforeLast(encodedName))
+                }
         }
         //endregion
     }

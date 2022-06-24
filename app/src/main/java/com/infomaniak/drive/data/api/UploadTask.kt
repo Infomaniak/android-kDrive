@@ -26,6 +26,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
+import com.google.gson.reflect.TypeToken
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.upload.UploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
@@ -355,7 +356,7 @@ class UploadTask(
             conflict = if (replaceOnConflict()) ConflictOption.VERSION else ConflictOption.RENAME,
             createdAt = if (fileCreatedAt == null) null else fileCreatedAt!!.time / 1000,
             directoryId = remoteFolder,
-            fileName = encodedName(),
+            fileName = fileName,
             lastModifiedAt = fileModifiedAt.time / 1000,
             subDirectoryPath = remoteSubFolder ?: "",
             totalChunks = totalChunks,
