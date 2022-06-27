@@ -190,7 +190,10 @@ class MainActivity : BaseActivity() {
             })
             mainViewModel.isInternetAvailable.value = isAvailable
             if (isAvailable) {
-                lifecycleScope.launch { AccountUtils.updateCurrentUserAndDrives(this@MainActivity) }
+                lifecycleScope.launch {
+                    AccountUtils.updateCurrentUserAndDrives(this@MainActivity)
+                    mainViewModel.restartUploadWorkerIfNeeded()
+                }
             }
         }
     }

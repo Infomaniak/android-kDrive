@@ -102,16 +102,20 @@ object SyncUtils {
 
     fun Context.isSyncActive(isRunning: Boolean = true): Boolean {
         return WorkManager.getInstance(this).getWorkInfos(
-            WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(UploadWorker.TAG))
-                .addStates(arrayListOf(if (isRunning) WorkInfo.State.RUNNING else WorkInfo.State.ENQUEUED))
-                .build()
+            UploadWorker.uploadWorkerQuery(listOf(if (isRunning) WorkInfo.State.RUNNING else WorkInfo.State.ENQUEUED))
+        ).get()?.isNotEmpty() == true
+    }
+
+    fun Context.isSyncScheduled(): Boolean {
+        return WorkManager.getInstance(this).getWorkInfos(
+            UploadWorker.uploadWorkerQuery(listOf(WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED, WorkInfo.State.BLOCKED))
         ).get()?.isNotEmpty() == true
     }
 
     private fun Context.isAutoSyncActive(): Boolean {
         return WorkManager.getInstance(this).getWorkInfos(
-            WorkQuery.Builder.fromUniqueWorkNames(arrayListOf(PeriodicUploadWorker.TAG))
-                .addStates(arrayListOf(WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED))
+            WorkQuery.Builder.fromUniqueWorkNames(listOf(PeriodicUploadWorker.TAG))
+                .addStates(listOf(WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED))
                 .build()
         ).get()?.isNotEmpty() == true
     }
