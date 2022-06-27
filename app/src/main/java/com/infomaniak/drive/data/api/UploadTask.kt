@@ -247,7 +247,8 @@ class UploadTask(
     }
 
     private fun needToResetUpload(uploadedChunks: ValidChunks): Boolean = with(uploadedChunks) {
-        val previousChunkSize = uploadedSize.toInt() / chunks.count()
+        val uploadedChunksCount = chunks.count()
+        val previousChunkSize = if (uploadedChunksCount == 0) 0 else uploadedSize.toInt() / uploadedChunksCount
 
         if (expectedSize != uploadFile.fileSize || previousChunkSize != chunkSize) {
             uploadFile.resetUploadToken()
