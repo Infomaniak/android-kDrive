@@ -38,6 +38,7 @@ import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
 import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
 import com.infomaniak.drive.utils.getAvailableMemory
+import com.infomaniak.lib.core.R
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.ApiController.gson
@@ -189,7 +190,9 @@ class UploadTask(
             notificationManagerCompat.notify(CURRENT_UPLOAD_ID, build())
         }
         shareProgress(100, true)
-        ApiRepository.finishSession(uploadFile.driveId, uploadFile.uploadToken!!)
+        with(ApiRepository.finishSession(uploadFile.driveId, uploadFile.uploadToken!!)) {
+            if (!isSuccess()) manageUploadErrors()
+        }
         UploadFile.uploadFinished(uri)
         notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
     }
@@ -371,6 +374,7 @@ class UploadTask(
     }
 
     private fun <T> ApiResponse<T>?.manageUploadErrors() {
+        if (this?.translatedError == R.string.connectionError) throw NetworkException()
         when (this?.error?.code) {
             "file_already_exists_error" -> Unit
             "lock_error" -> throw LockErrorException()
@@ -380,7 +384,11 @@ class UploadTask(
             "upload_not_terminated" -> {
                 // Upload finish with 0 chunks uploaded
                 // Upload finish with a different expected number of chunks
-                uploadFile.uploadToken?.let { ApiRepository.cancelSession(uploadFile.driveId, it) }
+                uploadFile.uploadToken?.let {
+                    with(ApiRepository.cancelSession(uploadFile.driveId, it)) {
+                        if (!isSuccess()) manageUploadErrors()
+                    }
+                }
                 uploadFile.resetUploadToken()
                 throw UploadNotTerminated("Upload finish with 0 chunks uploaded or a different expected number of chunks")
             }
@@ -414,6 +422,7 @@ class UploadTask(
     class AllowedFileSizeExceededException : Exception()
     class FolderNotFoundException : Exception()
     class LockErrorException : Exception()
+    class NetworkException : Exception()
     class NotAuthorizedException : Exception()
     class QuotaExceededException : Exception()
     class TotalChunksExceededException : Exception()
