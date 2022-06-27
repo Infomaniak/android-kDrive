@@ -429,6 +429,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 .build()
         }
 
+        fun uploadWorkerQuery(states: List<WorkInfo.State>): WorkQuery {
+            return WorkQuery.Builder.fromUniqueWorkNames(listOf(TAG))
+                .addStates(states)
+                .build()
+        }
+
         fun Context.showSyncConfigNotification() {
             val pendingIntent = syncSettingsActivityPendingIntent()
             val notificationManagerCompat = NotificationManagerCompat.from(this)
@@ -440,19 +446,15 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
 
         fun Context.trackUploadWorkerProgress(): LiveData<MutableList<WorkInfo>> {
-            return WorkManager.getInstance(this).getWorkInfosLiveData(
-                WorkQuery.Builder.fromUniqueWorkNames(mutableListOf(TAG))
-                    .addStates(mutableListOf(WorkInfo.State.RUNNING))
-                    .build()
-            )
+            return trackUploadWorker(listOf(WorkInfo.State.RUNNING))
         }
 
         fun Context.trackUploadWorkerSucceeded(): LiveData<MutableList<WorkInfo>> {
-            return WorkManager.getInstance(this).getWorkInfosLiveData(
-                WorkQuery.Builder.fromUniqueWorkNames(mutableListOf(TAG))
-                    .addStates(mutableListOf(WorkInfo.State.SUCCEEDED))
-                    .build()
-            )
+            return trackUploadWorker(listOf(WorkInfo.State.SUCCEEDED))
+        }
+
+        private fun Context.trackUploadWorker(states: List<WorkInfo.State>): LiveData<MutableList<WorkInfo>> {
+            return WorkManager.getInstance(this).getWorkInfosLiveData(uploadWorkerQuery(states))
         }
     }
 }

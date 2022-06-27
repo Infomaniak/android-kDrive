@@ -84,7 +84,7 @@ object UploadWorkerThrowable {
                     exception is UploadTask.NotAuthorizedException ||
                     exception is UploadTask.UploadErrorException -> Result.retry()
 
-            exception.isNetworkException() -> {
+            exception.isNetworkException() || exception is UploadTask.NetworkException -> {
                 currentUploadFile?.networkErrorNotification(applicationContext)
                 Result.retry()
             }

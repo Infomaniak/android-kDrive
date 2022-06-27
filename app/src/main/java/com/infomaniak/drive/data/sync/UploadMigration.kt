@@ -85,8 +85,10 @@ class UploadMigration : RealmMigration {
                 .findAll()?.onEach { uploadFile ->
                     val fileName = uploadFile.getString("fileName")
                     val encodedName = URLEncoder.encode(fileName, "UTF-8")
-                    val subFolder = uploadFile.getString("remoteSubFolder")
-                    uploadFile.setString("remoteSubFolder", subFolder.substringBeforeLast(encodedName))
+
+                    uploadFile.getString("remoteSubFolder")?.let { subFolder ->
+                        uploadFile.setString("remoteSubFolder", subFolder.substringBeforeLast(encodedName))
+                    }
                 }
         }
         //endregion

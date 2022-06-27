@@ -38,6 +38,8 @@ import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
 import com.infomaniak.drive.utils.MediaUtils.isMedia
+import com.infomaniak.drive.utils.SyncUtils.isSyncScheduled
+import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import io.realm.Realm
@@ -305,6 +307,12 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             .addStates(arrayListOf(WorkInfo.State.RUNNING, WorkInfo.State.SUCCEEDED))
             .build()
     )
+
+    suspend fun restartUploadWorkerIfNeeded() = withContext(Dispatchers.IO) {
+        if (UploadFile.getAllPendingUploadsCount() > 0 && !getContext().isSyncScheduled()) {
+            getContext().syncImmediately()
+        }
+    }
 
     suspend fun removeOfflineFile(
         file: File,
