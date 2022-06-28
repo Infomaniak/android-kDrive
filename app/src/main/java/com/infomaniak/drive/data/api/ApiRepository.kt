@@ -134,25 +134,21 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(url, GET)
     }
 
-    fun getValidChunks(driveId: Int, uploadToken: String): ApiResponse<ValidChunks> {
-        return callApi("${ApiRoutes.getSession(driveId, uploadToken)}?status[]=${ChunkStatus.OK}&with=chunks", GET)
+    fun getValidChunks(driveId: Int, uploadToken: String, okHttpClient: OkHttpClient): ApiResponse<ValidChunks> {
+        val url = "${ApiRoutes.getSession(driveId, uploadToken)}?status[]=${ChunkStatus.OK}&with=chunks"
+        return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
-    fun startUploadSession(driveId: Int, body: StartSessionBody): ApiResponse<StartUploadSession> {
-        return callApi(ApiRoutes.startUploadSession(driveId), POST, body)
+    fun startUploadSession(driveId: Int, body: StartSessionBody, okHttpClient: OkHttpClient): ApiResponse<StartUploadSession> {
+        return callApi(ApiRoutes.startUploadSession(driveId), POST, body, okHttpClient = okHttpClient)
     }
 
-    fun finishSession(driveId: Int, uploadToken: String): ApiResponse<UploadSession> {
-        return callApi(ApiRoutes.closeSession(driveId, uploadToken), POST)
+    fun finishSession(driveId: Int, uploadToken: String, okHttpClient: OkHttpClient): ApiResponse<UploadSession> {
+        return callApi(ApiRoutes.closeSession(driveId, uploadToken), POST, okHttpClient = okHttpClient)
     }
 
-    fun cancelSession(driveId: Int, uploadToken: String): ApiResponse<Boolean> {
-        return callApi(ApiRoutes.getSession(driveId, uploadToken), DELETE)
-    }
-
-    fun getValidChunks(driveId: Int, folderId: Int, uploadIdentifier: String): ApiResponse<ValidChunks> {
-        val url = "${ApiRoutes.uploadFile(driveId, folderId)}/$uploadIdentifier?with=valid_chunks"
-        return callApi(url, GET)
+    fun cancelSession(driveId: Int, uploadToken: String, okHttpClient: OkHttpClient): ApiResponse<Boolean> {
+        return callApi(ApiRoutes.getSession(driveId, uploadToken), DELETE, okHttpClient = okHttpClient)
     }
 
     fun createFolder(
