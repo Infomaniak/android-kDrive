@@ -187,6 +187,9 @@ class UploadTask(
     }
 
     private suspend fun onFinish(uri: Uri, okHttpClient: OkHttpClient) {
+        with(ApiRepository.finishSession(uploadFile.driveId, uploadFile.uploadToken!!, okHttpClient)) {
+            if (!isSuccess()) manageUploadErrors(okHttpClient)
+        }
         uploadNotification.apply {
             setOngoing(false)
             setContentText("100%")
@@ -195,9 +198,6 @@ class UploadTask(
             notificationManagerCompat.notify(CURRENT_UPLOAD_ID, build())
         }
         shareProgress(100, true)
-        with(ApiRepository.finishSession(uploadFile.driveId, uploadFile.uploadToken!!, okHttpClient)) {
-            if (!isSuccess()) manageUploadErrors(okHttpClient)
-        }
         UploadFile.uploadFinished(uri)
         notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
     }
