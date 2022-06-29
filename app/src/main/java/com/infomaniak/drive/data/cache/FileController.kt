@@ -625,7 +625,7 @@ object FileController {
                     || minDateToIgnoreCache >= folderProxy.responseAt
 
             if (needToDownload && !ignoreCloud) {
-                result = downloadAndSaveFiles(
+                result = realm.downloadAndSaveFiles(
                     localFolderProxy = folderProxy,
                     order = order,
                     page = page,
@@ -649,7 +649,7 @@ object FileController {
             .findAll()
     }
 
-    private fun downloadAndSaveFiles(
+    private fun Realm.downloadAndSaveFiles(
         localFolderProxy: File?,
         order: SortType,
         page: Int,
@@ -667,11 +667,13 @@ object FileController {
 
         val apiResponse = ApiRepository.getDirectoryFiles(okHttpClient, driveId, parentId, page, order)
         val localFolder = localFolderProxy?.realm?.copyFromRealm(localFolderProxy, 1)
+            ?: ApiRepository.getFileDetails(File(id = parentId, driveId = driveId)).data
 
         if (apiResponse.isSuccess()) {
-            apiResponse.data?.let { remoteFiles ->
-                saveRemoteFiles(localFolderProxy, apiResponse, page)
-                result = (localFolder!! to if (withChildren) ArrayList(remoteFiles) else arrayListOf())
+            val remoteFiles = apiResponse.data
+            if (remoteFiles != null && localFolder != null) {
+                saveRemoteFiles(localFolderProxy, localFolder, apiResponse, page)
+                result = (localFolder to if (withChildren) ArrayList(remoteFiles) else arrayListOf())
             }
         } else if (page == 1 && localFolderProxy != null) {
             val localSortedFolderFiles = if (withChildren) getLocalSortedFolderFiles(localFolderProxy, order) else arrayListOf()
@@ -680,21 +682,33 @@ object FileController {
         return result
     }
 
-    private fun saveRemoteFiles(localFolderProxy: File?, apiResponse: ApiResponse<List<File>>, page: Int) {
+    private fun Realm.saveRemoteFiles(
+        localFolderProxy: File?,
+        remoteFolder: File?,
+        apiResponse: ApiResponse<List<File>>,
+        page: Int
+    ) {
         val remoteFiles = apiResponse.data!!
+
+        // Save remote folder if doesn't exists locally
+        var newLocalFolderProxy: File? = null
+        if (localFolderProxy == null && remoteFolder != null) {
+            executeTransaction { newLocalFolderProxy = copyToRealm(remoteFolder) }
+        }
+
         // Restore same children data
         keepSubFolderChildren(localFolderProxy?.children, remoteFiles)
         // Save to realm
-        localFolderProxy?.let {
-            it.realm.executeTransaction {
+        (localFolderProxy ?: newLocalFolderProxy)?.let { folderProxy ->
+            executeTransaction {
                 // Remove old children
-                if (page == 1) localFolderProxy.children.clear()
+                if (page == 1) folderProxy.children.clear()
                 // Add children
-                localFolderProxy.children.addAll(remoteFiles)
+                folderProxy.children.addAll(remoteFiles)
                 // Update folder properties
-                if (remoteFiles.size < ApiRepository.PER_PAGE) localFolderProxy.isComplete = true
-                localFolderProxy.responseAt = apiResponse.responseAt
-                localFolderProxy.versionCode = BuildConfig.VERSION_CODE
+                if (remoteFiles.size < ApiRepository.PER_PAGE) folderProxy.isComplete = true
+                folderProxy.responseAt = apiResponse.responseAt
+                folderProxy.versionCode = BuildConfig.VERSION_CODE
             }
         }
     }
