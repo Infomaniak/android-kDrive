@@ -686,11 +686,11 @@ object FileController {
         localFolderProxy: File?,
         remoteFolder: File?,
         apiResponse: ApiResponse<List<File>>,
-        page: Int
+        page: Int,
     ) {
         val remoteFiles = apiResponse.data!!
 
-        // Save remote folder if doesn't exists locally
+        // Save remote folder if it doesn't exist locally
         var newLocalFolderProxy: File? = null
         if (localFolderProxy == null && remoteFolder != null) {
             executeTransaction { newLocalFolderProxy = copyToRealm(remoteFolder) }
