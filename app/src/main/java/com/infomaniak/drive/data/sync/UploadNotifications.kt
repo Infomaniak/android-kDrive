@@ -29,7 +29,6 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.menu.settings.SyncSettingsActivity
-import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.NotificationUtils
 import com.infomaniak.drive.utils.NotificationUtils.uploadNotification
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
@@ -39,6 +38,10 @@ import io.sentry.Sentry
 object UploadNotifications {
 
     private const val FAILED_FILES_LIMIT = 5
+
+    const val INTENT_DESTINATION_USER_ID = "intent_destination_user_id"
+    const val INTENT_DESTINATION_DRIVE_ID = "intent_destination_drive_id"
+    const val INTENT_DESTINATION_FOLDER_ID = "intent_folder_id_progress"
 
     val pendingIntentFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
@@ -53,7 +56,7 @@ object UploadNotifications {
             pendingCount,
             pendingCount
         )
-        val contentIntent = progressPendingIntent(context)
+        val contentIntent = progressPendingIntent(context, isUploadInProgress = true)
         showNotification(context, pendingTitle, pendingDescription, NotificationUtils.UPLOAD_SERVICE_ID, contentIntent)
     }
 
@@ -203,7 +206,9 @@ object UploadNotifications {
             setContentTitle(title)
             setStyle(NotificationCompat.BigTextStyle().bigText(description))
             setContentIntent(contentIntent)
-            addAction(NotificationCompat.Action(R.drawable.ic_export, context.getString(R.string.locateButton), actionIntent))
+            actionIntent?.let {
+                addAction(NotificationCompat.Action(R.drawable.ic_export, context.getString(R.string.locateButton), it))
+            }
             notificationManagerCompat.notify(notificationId, this.build())
         }
     }
@@ -222,19 +227,17 @@ object UploadNotifications {
         )
     }
 
-    private fun UploadFile.progressPendingIntent(context: Context): PendingIntent? {
-        val destination = when (AccountUtils.currentUser) {
-            null -> LaunchActivity::class.java
-            else -> MainActivity::class.java
-        }
+    private fun UploadFile.progressPendingIntent(context: Context, isUploadInProgress: Boolean = false): PendingIntent? {
+        val destination = if (isUploadInProgress) MainActivity::class.java else LaunchActivity::class.java
         val intent = Intent(context, destination).clearStack().apply {
-            putExtra(MainActivity.INTENT_SHOW_PROGRESS, remoteFolder)
+            if (!isUploadInProgress) {
+                putExtra(INTENT_DESTINATION_USER_ID, userId)
+                putExtra(INTENT_DESTINATION_DRIVE_ID, driveId)
+            }
+            putExtra(INTENT_DESTINATION_FOLDER_ID, remoteFolder)
         }
 
-        return PendingIntent.getActivity(
-            context, 0,
-            intent, pendingIntentFlags
-        )
+        return PendingIntent.getActivity(context, 0, intent, pendingIntentFlags)
     }
 
     fun Context.syncSettingsActivityPendingIntent(): PendingIntent {
