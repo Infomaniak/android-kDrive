@@ -234,10 +234,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         }
 
         requireContext().trackUploadWorkerSucceeded().observe(viewLifecycleOwner) {
-            if (!isDownloading || isUploading) {
-                if (isUploading) retryLoadingActivities = true
-                activitiesRefreshTimer.start()
-            }
+            if (isUploading) retryLoadingActivities = true
+            if (!isDownloading || isUploading) activitiesRefreshTimer.start()
         }
 
         mainViewModel.refreshActivities.observe(viewLifecycleOwner) {
