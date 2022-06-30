@@ -207,7 +207,7 @@ object UploadNotifications {
             setStyle(NotificationCompat.BigTextStyle().bigText(description))
             setContentIntent(contentIntent)
             actionIntent?.let {
-                addAction(NotificationCompat.Action(R.drawable.ic_export, context.getString(R.string.locateButton), actionIntent))
+                addAction(NotificationCompat.Action(R.drawable.ic_export, context.getString(R.string.locateButton), it))
             }
             notificationManagerCompat.notify(notificationId, this.build())
         }

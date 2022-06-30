@@ -67,7 +67,6 @@ class LaunchActivity : AppCompatActivity() {
                 }
             }
 
-
             startActivity(Intent(this@LaunchActivity, destinationClass).apply {
                 if (destinationClass == MainActivity::class.java && destinationFolderId != 0) {
                     putExtra(UploadNotifications.INTENT_DESTINATION_FOLDER_ID, destinationFolderId)
