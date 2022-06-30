@@ -24,6 +24,7 @@ import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.AppSettings
+import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.login.MigrationActivity
 import com.infomaniak.drive.ui.login.MigrationActivity.Companion.getOldkDriveUser
@@ -36,11 +37,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class LaunchActivity : AppCompatActivity() {
+
+    private val destinationFolderId by lazy { intent?.getIntExtra(UploadNotifications.INTENT_DESTINATION_FOLDER_ID, 0) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycleScope.launch {
 
             logoutCurrentUserIfNeeded() // Rights v2 migration temporary fix
+            handleNotificationDestinationIntent()
 
             val destinationClass = when {
                 AccountUtils.requestCurrentUser() == null -> {
@@ -61,7 +66,13 @@ class LaunchActivity : AppCompatActivity() {
                     }
                 }
             }
-            startActivity(Intent(this@LaunchActivity, destinationClass))
+
+
+            startActivity(Intent(this@LaunchActivity, destinationClass).apply {
+                if (destinationClass == MainActivity::class.java && destinationFolderId != 0) {
+                    putExtra(UploadNotifications.INTENT_DESTINATION_FOLDER_ID, destinationFolderId)
+                }
+            })
         }
         trackScreen()
     }
@@ -69,6 +80,18 @@ class LaunchActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+    }
+
+    private fun handleNotificationDestinationIntent() {
+        intent?.let {
+            val destinationUserId = it.getIntExtra(UploadNotifications.INTENT_DESTINATION_USER_ID, 0)
+            val destinationDriveId = it.getIntExtra(UploadNotifications.INTENT_DESTINATION_DRIVE_ID, 0)
+
+            if (destinationUserId != 0 && destinationDriveId != 0) {
+                AccountUtils.currentUserId = destinationUserId
+                AccountUtils.currentDriveId = destinationDriveId
+            }
+        }
     }
 
     private suspend fun logoutCurrentUserIfNeeded() = withContext(Dispatchers.IO) {

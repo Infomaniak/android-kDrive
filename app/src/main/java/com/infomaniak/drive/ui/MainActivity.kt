@@ -62,6 +62,7 @@ import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.data.services.UploadWorker
+import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.launchInAppReview
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.*
@@ -166,7 +167,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun handleShowProgressIntent(navController: NavController) {
-        intent?.getIntExtra(INTENT_SHOW_PROGRESS, 0)?.let { folderId ->
+        intent?.getIntExtra(UploadNotifications.INTENT_DESTINATION_FOLDER_ID, 0)?.let { folderId ->
             if (folderId > 0) {
                 Sentry.addBreadcrumb(Breadcrumb().apply {
                     category = UploadWorker.BREADCRUMB_TAG
@@ -449,6 +450,5 @@ class MainActivity : BaseActivity() {
     companion object {
         private const val SYNCED_FILES_DELETION_FILES_AMOUNT = 10
         private const val SECURITY_APP_TOLERANCE = 1 * 60 * 1000 // 1min (ms)
-        const val INTENT_SHOW_PROGRESS = "intent_folder_id_progress"
     }
 }

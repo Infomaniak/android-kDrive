@@ -315,7 +315,7 @@ class UploadTask(
         if (uploadNotificationElapsedTime >= ELAPSED_TIME) {
             uploadNotification.apply {
                 val intent = Intent(context, MainActivity::class.java).apply {
-                    putExtra(MainActivity.INTENT_SHOW_PROGRESS, uploadFile.remoteFolder)
+                    putExtra(UploadNotifications.INTENT_DESTINATION_FOLDER_ID, uploadFile.remoteFolder)
                 }
                 val pendingIntent = PendingIntent.getActivity(
                     context, 0,
