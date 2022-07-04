@@ -27,6 +27,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.work.Data
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
@@ -53,8 +54,8 @@ class UploadInProgressFragment : FileListFragment() {
     override var hideBackButtonWhenRoot: Boolean = false
     override var showPendingFiles = false
 
-    private var pendingUploadFiles = arrayListOf<UploadFile>()
-    private var pendingFiles = arrayListOf<File>()
+    private var pendingUploadFiles = mutableListOf<UploadFile>()
+    private var pendingFiles = mutableListOf<File>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         downloadFiles = DownloadFiles()
@@ -189,18 +190,23 @@ class UploadInProgressFragment : FileListFragment() {
         lifecycleScope.launch(Dispatchers.IO) {
             var needPopBackStack = false
             uploadFile?.let {
-                UploadFile.deleteAll(arrayListOf(it))
+                it.initOkHttpClient()
+                it.uploadToken?.let { token ->
+                    ApiRepository.cancelSession(AccountUtils.currentDriveId, token, it.okHttpClient)
+                }
+                UploadFile.deleteAll(listOf(it))
                 needPopBackStack = true
             }
             folderId?.let {
+                UploadFile.cancelAllPendingFilesSessions(folderId = it)
                 if (isPendingFolders()) UploadFile.deleteAll(null)
-                else UploadFile.deleteAll(it)
+                else UploadFile.deleteAll(folderId = it)
 
                 fileRecyclerView.post {
                     fileAdapter.setFiles(arrayListOf())
                 }
 
-                needPopBackStack = UploadFile.getCurrentUserPendingUploadsCount(it) == 0
+                needPopBackStack = UploadFile.getCurrentUserPendingUploadsCount(folderId = it) == 0
             }
 
             withContext(Dispatchers.Main) {
