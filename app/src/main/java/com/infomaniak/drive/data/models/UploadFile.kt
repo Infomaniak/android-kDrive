@@ -28,6 +28,7 @@ import androidx.core.net.toUri
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.sync.UploadMigration
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.lib.core.utils.format
 import io.realm.*
@@ -51,6 +52,14 @@ open class UploadFile(
     var uploadAt: Date? = null,
     var userId: Int = -1
 ) : RealmObject() {
+
+    @Ignore
+    lateinit var okHttpClient: OkHttpClient
+        private set
+
+    suspend fun initOkHttpClient() {
+        okHttpClient = KDriveHttpClient.getHttpClient(userId = userId, timeout = 120)
+    }
 
     fun createSubFolder(parent: String, createDatedSubFolders: Boolean) {
         remoteSubFolder = parent + if (createDatedSubFolders) "/${fileModifiedAt.format("yyyy/MM")}" else ""
