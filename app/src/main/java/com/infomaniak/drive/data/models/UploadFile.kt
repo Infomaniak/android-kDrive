@@ -126,11 +126,13 @@ open class UploadFile(
     fun deleteIfExists(keepFile: Boolean = false) {
         getRealmInstance().use { realm ->
             syncFileByUriQuery(realm, uri).findFirst()?.let { uploadFileProxy ->
+                // Cancel session if exists
                 uploadFileProxy.uploadToken?.let {
                     with(ApiRepository.cancelSession(uploadFileProxy.driveId, it, okHttpClient)) {
                         if (translatedError == R.string.connectionError) throw UploadTask.NetworkException()
                     }
                 }
+                // Delete in realm
                 realm.executeTransaction {
                     if (uploadFileProxy.isValid) {
                         if (keepFile) uploadFileProxy.deletedAt = Date() else uploadFileProxy.deleteFromRealm()
