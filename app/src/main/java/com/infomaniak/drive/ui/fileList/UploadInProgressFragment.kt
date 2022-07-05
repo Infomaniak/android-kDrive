@@ -203,7 +203,7 @@ class UploadInProgressFragment : FileListFragment() {
                 else UploadFile.deleteAll(folderId = it)
 
                 fileRecyclerView.post {
-                    fileAdapter.setFiles(arrayListOf())
+                    fileAdapter.setFiles(listOf())
                 }
 
                 needPopBackStack = UploadFile.getCurrentUserPendingUploadsCount(folderId = it) == 0
@@ -253,7 +253,7 @@ class UploadInProgressFragment : FileListFragment() {
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
         override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             if (!drivePermissions.checkWriteStoragePermission()) return
-            if (ignoreCache) fileAdapter.setFiles(arrayListOf())
+            if (ignoreCache) fileAdapter.setFiles(listOf())
 
             showLoadingTimer.start()
             fileAdapter.isComplete = false

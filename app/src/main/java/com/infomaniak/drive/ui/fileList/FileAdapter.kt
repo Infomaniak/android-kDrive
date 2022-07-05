@@ -148,7 +148,7 @@ open class FileAdapter(
         if (fileList.isManaged) super.updateData(null)
     }
 
-    fun setFiles(newItemList: ArrayList<File>) {
+    fun setFiles(newItemList: List<File>) {
         fileList = RealmList(*newItemList.toTypedArray())
         hideLoading()
         notifyDataSetChanged()

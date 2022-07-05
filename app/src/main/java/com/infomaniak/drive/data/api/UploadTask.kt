@@ -128,7 +128,7 @@ class UploadTask(
         checkLimitParallelRequest()
 
         BufferedInputStream(fileInputStream, chunkSize).use { input ->
-            val waitingCoroutines = arrayListOf<Job>()
+            val waitingCoroutines = mutableListOf<Job>()
             val requestSemaphore = Semaphore(limitParallelRequest)
             val totalChunks = ceil(uploadFile.fileSize.toDouble() / chunkSize).toInt()
 
