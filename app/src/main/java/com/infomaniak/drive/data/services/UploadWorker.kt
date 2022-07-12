@@ -58,11 +58,12 @@ import java.util.*
 class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
     private lateinit var contentResolver: ContentResolver
 
+    private val failedNames by lazy { inputData.getStringArray(LAST_FAILED_NAMES)?.toMutableList() ?: mutableListOf() }
+    private val successNames by lazy { inputData.getStringArray(LAST_SUCCESS_NAMES)?.toMutableList() ?: mutableListOf() }
+
     var currentUploadFile: UploadFile? = null
     var currentUploadTask: UploadTask? = null
     var uploadedCount = 0
-    private val failedNames by lazy { inputData.getStringArray(LAST_FAILED_NAMES)?.toMutableList() ?: mutableListOf() }
-    private val successNames by lazy { inputData.getStringArray(LAST_SUCCESS_NAMES)?.toMutableList() ?: mutableListOf() }
 
     override suspend fun doWork(): Result {
 
@@ -170,6 +171,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         currentUploadFile = this@initUpload
         applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
         updateUploadCountNotification(this@initUpload, pendingCount)
+        initOkHttpClient()
 
         try {
             if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
@@ -186,15 +188,16 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     private suspend fun UploadFile.initUploadSchemeFile(uri: Uri): Boolean {
         val cacheFile = uri.toFile().apply {
             if (!exists()) {
-                UploadFile.deleteIfExists(uri)
+                deleteIfExists()
                 return false
             }
         }
 
-        return startUploadFile(cacheFile.length()).also {
-            UploadFile.deleteIfExists(uri)
-
-            if (!isSyncOffline()) cacheFile.delete()
+        return startUploadFile(cacheFile.length()).also { isUploaded ->
+            if (isUploaded) {
+                deleteIfExists()
+                if (!isSyncOffline()) cacheFile.delete()
+            }
         }
     }
 
@@ -211,7 +214,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 null
             }
         } ?: run {
-            UploadFile.deleteIfExists(uri)
+            deleteIfExists()
             false
         }
     }
@@ -226,7 +229,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             }
 
         } else {
-            UploadFile.deleteIfExists(getUriObject())
+            deleteIfExists()
             Log.d("kDrive", "$TAG > $fileName deleted size:$size")
             Sentry.withScope { scope ->
                 scope.setExtra("data", ApiController.gson.toJson(this))
@@ -239,7 +242,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     private fun UploadFile.handleException(exception: Exception, uri: Uri) {
         when (exception) {
             is SecurityException, is IllegalStateException, is IllegalArgumentException -> {
-                UploadFile.deleteIfExists(uri)
+                deleteIfExists()
 
                 if (exception is IllegalStateException) {
                     Sentry.withScope { scope ->
@@ -363,7 +366,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         Log.d(TAG, "getLocalLastMediasAsync > ${mediaFolder.name}/$fileName found")
 
         if (fileName != null && UploadFile.canUpload(uri, fileModifiedAt) && fileSize > 0) {
-            UploadFile.deleteIfExists(uri)
             UploadFile(
                 uri = uri.toString(),
                 driveId = syncSettings.driveId,
@@ -374,6 +376,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 remoteFolder = syncSettings.syncFolder,
                 userId = syncSettings.userId
             ).apply {
+                deleteIfExists()
                 createSubFolder(mediaFolder.name, syncSettings.createDatedSubFolders)
                 store()
             }

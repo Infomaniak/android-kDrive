@@ -33,7 +33,6 @@ import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.ui.MainActivity
-import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
 import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
@@ -49,7 +48,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -88,7 +86,7 @@ class UploadTask(
             launchTask(this)
             return@withContext true
         } catch (exception: FileNotFoundException) {
-            UploadFile.deleteIfExists(uploadFile.getUriObject(), keepFile = uploadFile.isSync())
+            uploadFile.deleteIfExists(keepFile = uploadFile.isSync())
             Sentry.withScope { scope ->
                 scope.level = SentryLevel.WARNING
                 scope.setExtra("data", gson.toJson(uploadFile))
@@ -125,22 +123,21 @@ class UploadTask(
     private suspend fun launchTask(coroutineScope: CoroutineScope) = withContext(Dispatchers.IO) {
         val uri = uploadFile.getUriObject()
         val fileInputStream = context.contentResolver.openInputStream(uploadFile.getOriginalUri(context))
-        val okHttpClient = KDriveHttpClient.getHttpClient(userId = uploadFile.userId, timeout = 120)
 
         initChunkSize(uploadFile.fileSize)
         checkLimitParallelRequest()
 
         BufferedInputStream(fileInputStream, chunkSize).use { input ->
-            val waitingCoroutines = arrayListOf<Job>()
+            val waitingCoroutines = mutableListOf<Job>()
             val requestSemaphore = Semaphore(limitParallelRequest)
             val totalChunks = ceil(uploadFile.fileSize.toDouble() / chunkSize).toInt()
 
             if (totalChunks > TOTAL_CHUNKS) throw TotalChunksExceededException()
 
-            val uploadedChunks = uploadFile.getValidChunks(okHttpClient)
+            val uploadedChunks = uploadFile.getValidChunks()
             val isNewUploadSession = uploadedChunks?.let { needToResetUpload(it) } ?: true
 
-            if (isNewUploadSession) uploadFile.prepareUploadSession(totalChunks, okHttpClient)
+            if (isNewUploadSession) uploadFile.prepareUploadSession(totalChunks)
 
             Sentry.addBreadcrumb(Breadcrumb().apply {
                 category = UploadWorker.BREADCRUMB_TAG
@@ -176,19 +173,19 @@ class UploadTask(
                 Log.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url data size:${data.size}")
 
                 waitingCoroutines.add(
-                    coroutineScope.uploadChunkRequest(requestSemaphore, data.toRequestBody(), url, okHttpClient)
+                    coroutineScope.uploadChunkRequest(requestSemaphore, data.toRequestBody(), url)
                 )
             }
             waitingCoroutines.joinAll()
         }
 
         coroutineScope.ensureActive()
-        onFinish(uri, okHttpClient)
+        onFinish(uri)
     }
 
-    private suspend fun onFinish(uri: Uri, okHttpClient: OkHttpClient) {
-        with(ApiRepository.finishSession(uploadFile.driveId, uploadFile.uploadToken!!, okHttpClient)) {
-            if (!isSuccess()) manageUploadErrors(okHttpClient)
+    private suspend fun onFinish(uri: Uri) = with(uploadFile) {
+        with(ApiRepository.finishSession(driveId, uploadToken!!, okHttpClient)) {
+            if (!isSuccess()) manageUploadErrors()
         }
         uploadNotification.apply {
             setOngoing(false)
@@ -205,8 +202,7 @@ class UploadTask(
     private fun CoroutineScope.uploadChunkRequest(
         requestSemaphore: Semaphore,
         requestBody: RequestBody,
-        url: String,
-        okHttpClient: OkHttpClient
+        url: String
     ) = launch(Dispatchers.IO) {
         val uploadRequestBody = ProgressRequestBody(requestBody) { currentBytes, bytesWritten, contentLength ->
             launch {
@@ -220,8 +216,8 @@ class UploadTask(
             .headers(HttpUtils.getHeaders(contentType = null))
             .post(uploadRequestBody).build()
 
-        val response = okHttpClient.newCall(request).execute()
-        manageApiResponse(response, okHttpClient)
+        val response = uploadFile.okHttpClient.newCall(request).execute()
+        manageApiResponse(response)
         requestSemaphore.release()
     }
 
@@ -267,7 +263,7 @@ class UploadTask(
         return false
     }
 
-    private fun manageApiResponse(response: Response, okHttpClient: OkHttpClient) {
+    private fun manageApiResponse(response: Response) {
         response.use {
             val bodyResponse = it.body?.string()
             Log.i("UploadTask", "response successful ${it.isSuccessful}")
@@ -278,7 +274,7 @@ class UploadTask(
                 } catch (e: Exception) {
                     null
                 }
-                apiResponse.manageUploadErrors(okHttpClient)
+                apiResponse.manageUploadErrors()
             }
         }
     }
@@ -357,11 +353,11 @@ class UploadTask(
         }
     }
 
-    private fun UploadFile.getValidChunks(okHttpClient: OkHttpClient): ValidChunks? {
+    private fun UploadFile.getValidChunks(): ValidChunks? {
         return uploadToken?.let { ApiRepository.getValidChunks(uploadFile.driveId, it, okHttpClient).data }
     }
 
-    private fun UploadFile.prepareUploadSession(totalChunks: Int, okHttpClient: OkHttpClient) {
+    private fun UploadFile.prepareUploadSession(totalChunks: Int) {
         val sessionBody = UploadSession.StartSessionBody(
             conflict = if (replaceOnConflict()) ConflictOption.VERSION else ConflictOption.RENAME,
             createdAt = if (fileCreatedAt == null) null else fileCreatedAt!!.time / 1000,
@@ -375,11 +371,11 @@ class UploadTask(
 
         with(ApiRepository.startUploadSession(driveId, sessionBody, okHttpClient)) {
             if (isSuccess()) data?.token?.let { uploadFile.updateUploadToken(it) }
-            else manageUploadErrors(okHttpClient)
+            else manageUploadErrors()
         }
     }
 
-    private fun <T> ApiResponse<T>?.manageUploadErrors(okHttpClient: OkHttpClient) {
+    private fun <T> ApiResponse<T>?.manageUploadErrors() {
         if (this?.translatedError == R.string.connectionError) throw NetworkException()
         when (this?.error?.code) {
             "file_already_exists_error" -> Unit
@@ -391,9 +387,10 @@ class UploadTask(
                 // Upload finish with 0 chunks uploaded
                 // Upload finish with a different expected number of chunks
                 uploadFile.uploadToken?.let {
-                    ApiRepository.cancelSession(uploadFile.driveId, it, okHttpClient)
+                    with(ApiRepository.cancelSession(uploadFile.driveId, it, uploadFile.okHttpClient)) {
+                        if (data == true) uploadFile.resetUploadToken()
+                    }
                 }
-                uploadFile.resetUploadToken()
                 throw UploadNotTerminated("Upload finish with 0 chunks uploaded or a different expected number of chunks")
             }
             "upload_error" -> {
