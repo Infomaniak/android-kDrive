@@ -281,18 +281,17 @@ class SaveExternalFilesActivity : BaseActivity() {
         if (intent.hasExtra(Intent.EXTRA_TEXT)) {
             val extension = if (intent.getStringExtra(Intent.EXTRA_TEXT)?.isValidUrl() == true) ".url" else ".txt"
             val name = (intent.getStringExtra(Intent.EXTRA_SUBJECT) ?: "").let {
-                if (it.isEmpty()) Date().format(FORMAT_NEW_FILE)
-                else it
+                it.ifEmpty { Date().format(FORMAT_NEW_FILE) }
             } + extension
 
-            fileNameEdit.setText(name)
+            fileNameEdit.setText(name.trim())
             showEditText = true
 
         } else {
             (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let { uri ->
                 currentUri = uri
                 showEditText = true
-                fileNameEdit.setText(uri.fileName())
+                fileNameEdit.setText(uri.fileName().trim())
             }
         }
 
