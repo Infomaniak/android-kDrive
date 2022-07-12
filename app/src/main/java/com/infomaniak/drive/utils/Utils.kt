@@ -175,7 +175,7 @@ object Utils {
         }
 
         buttonPositive.setOnClickListener {
-            onPositiveButtonClicked(dialog, nameEditText.text.toString())
+            onPositiveButtonClicked(dialog, nameEditText.text.toString().trim())
             it.isEnabled = false
             dialog.getButton(AlertDialog.BUTTON_NEGATIVE).isEnabled = false
         }

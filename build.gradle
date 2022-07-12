@@ -1,8 +1,8 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
 
-    ext.kotlin_version = '1.7.0'
-    ext.navigation_version = '2.4.2'
+    ext.kotlin_version = '1.7.10'
+    ext.navigation_version = '2.5.0'
     ext.java_version = JavaVersion.VERSION_1_8
 
     repositories {
@@ -14,8 +14,8 @@ buildscript {
         classpath 'io.realm:realm-gradle-plugin:10.10.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.android.tools.build:gradle:7.2.1'
-        classpath 'com.google.gms:google-services:4.3.12'
-        classpath 'de.mannodermaus.gradle.plugins:android-junit5:1.8.2.0'
+        classpath 'com.google.gms:google-services:4.3.13'
+        classpath 'de.mannodermaus.gradle.plugins:android-junit5:1.8.2.1'
     }
 }
 
