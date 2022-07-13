@@ -229,8 +229,8 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.getFileShare(file), GET, okHttpClient = okHttpClient)
     }
 
-    fun getFileDetails(file: File): ApiResponse<File> {
-        return callApi(ApiRoutes.getFileDetails(file), GET)
+    fun getFileDetails(file: File, okHttpClient: OkHttpClient = HttpClient.okHttpClient): ApiResponse<File> {
+        return callApi(ApiRoutes.getFileDetails(file), GET, okHttpClient = okHttpClient)
     }
 
     fun getFileCount(file: File): ApiResponse<FileCount> {

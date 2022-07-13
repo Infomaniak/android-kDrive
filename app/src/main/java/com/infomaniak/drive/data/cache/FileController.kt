@@ -39,6 +39,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
 import java.util.*
 
 object FileController {
@@ -47,7 +48,7 @@ object FileController {
 
     // Bump this when we want to force-refresh files that are too old.
     // Example: We did it when we added Categories & Colored folders, to automatically display them when updating the app.
-    private const val MIN_VERSION_CODE = 4_02_000_00
+    private const val MIN_VERSION_CODE = 4_02_000_08
 
     const val ROOT_ID = Utils.ROOT_ID
     const val FAVORITES_FILE_ID = -1
@@ -63,10 +64,10 @@ object FileController {
 
     private val minDateToIgnoreCache = Calendar.getInstance().apply { add(Calendar.MONTH, -2) }.timeInMillis / 1000 // 3 month
 
-    private fun initRootFolderIfNeeded(realm: Realm) {
-        if (getFileById(realm, ROOT_ID) == null) {
-            realm.executeTransaction { realm.copyToRealm(ROOT_FILE) }
-        }
+    private fun refreshRootFolder(realm: Realm, driveId: Int, okHttpClient: OkHttpClient) {
+        val remoteRootFolder = ApiRepository.getFileDetails(File(id = ROOT_ID, driveId = driveId), okHttpClient).data
+        val rootFolder = remoteRootFolder ?: getFileById(realm, ROOT_ID) ?: ROOT_FILE
+        realm.executeTransaction { realm.copyToRealmOrUpdate(rootFolder) }
     }
 
     private fun getFileById(realm: Realm, fileId: Int): File? {
@@ -609,10 +610,8 @@ object FileController {
         }
 
         val operation: (Realm) -> Pair<File, ArrayList<File>>? = { realm ->
-            if (parentId == ROOT_ID) initRootFolderIfNeeded(realm)
-
             var result: Pair<File, ArrayList<File>>? = null
-            val folderProxy = getFileById(realm, parentId)
+            var folderProxy = getFileById(realm, parentId)
             val localFolderWithoutChildren = folderProxy?.let { realm.copyFromRealm(it, 1) }
             val hasDuplicatesFiles = folderProxy?.children?.where()?.let(::hasDuplicatesFiles) ?: false
 
@@ -625,12 +624,23 @@ object FileController {
                     || minDateToIgnoreCache >= folderProxy.responseAt
 
             if (needToDownload && !ignoreCloud) {
+                val (okHttpClient, driveId) = if (userDrive == null) {
+                    HttpClient.okHttpClient to AccountUtils.currentDriveId
+                } else {
+                    runBlocking { KDriveHttpClient.getHttpClient(userDrive.userId) } to userDrive.driveId
+                }
+
+                if (parentId == ROOT_ID) {
+                    refreshRootFolder(realm, driveId, okHttpClient)
+                    folderProxy = getFileById(realm, parentId)
+                }
                 result = realm.downloadAndSaveFiles(
                     localFolderProxy = folderProxy,
                     order = order,
                     page = page,
                     parentId = parentId,
-                    userDrive = userDrive,
+                    driveId = driveId,
+                    okHttpClient = okHttpClient,
                     withChildren = withChildren
                 )
             } else if (page == 1 && localFolderWithoutChildren != null) {
@@ -654,16 +664,12 @@ object FileController {
         order: SortType,
         page: Int,
         parentId: Int,
-        userDrive: UserDrive?,
+        driveId: Int,
+        okHttpClient: OkHttpClient,
         withChildren: Boolean
     ): Pair<File, ArrayList<File>>? {
         var result: Pair<File, ArrayList<File>>? = null
 
-        val (okHttpClient, driveId) = if (userDrive == null) {
-            HttpClient.okHttpClient to AccountUtils.currentDriveId
-        } else {
-            runBlocking { KDriveHttpClient.getHttpClient(userDrive.userId) } to userDrive.driveId
-        }
 
         val apiResponse = ApiRepository.getDirectoryFiles(okHttpClient, driveId, parentId, page, order)
         val localFolder = localFolderProxy?.realm?.copyFromRealm(localFolderProxy, 1)
