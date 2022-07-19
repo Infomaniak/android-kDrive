@@ -97,12 +97,12 @@
         android:layout_height="wrap_content"
         android:layout_marginVertical="@dimen/marginStandardMedium"
         android:gravity="center"
+        android:text="@string/allPackAvailability"
         android:textSize="12sp"
         android:visibility="gone"
         app:layout_constraintEnd_toStartOf="@id/end"
         app:layout_constraintStart_toStartOf="@id/start"
         app:layout_constraintTop_toBottomOf="@id/urlDisplay"
-        tools:text="@string/allPackAvailability"
         tools:visibility="visible" />
 
 

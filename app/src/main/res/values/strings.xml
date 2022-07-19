@@ -25,9 +25,6 @@
     <string name="notification_channel_id_upload_download" translatable="false">upload_download_channel_id</string>
     <string name="notification_channel_id_upload_service" translatable="false">sync_service_channel_id</string>
 
-    <string name="packsSoloTeamPro" translatable="false">Solo, Team &amp; Pro</string>
-    <string name="packsTeamPro" translatable="false">Team &amp; Pro</string>
-
     <string name="fileDetailsInfoFolderContentTemplate" translatable="false">%1s &amp; %2s</string>
 
     <string name="aboutAppVersionTitle">kDrive application</string>
@@ -77,7 +74,7 @@
     <string name="allOfficeGrids">Table</string>
     <string name="allOfficeNote">Text</string>
     <string name="allOfficePoints">Presentation</string>
-    <string name="allPackAvailability">Available for %s plans only 🚀</string>
+    <string name="allPackAvailability">Available for Solo, Team &amp; Pro plans only 🚀</string>
     <string name="allPasswordHint">Password</string>
     <string name="allPathTitle">Location</string>
     <string name="allPdf">PDF</string>
