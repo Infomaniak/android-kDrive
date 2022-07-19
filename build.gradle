@@ -19,7 +19,10 @@ buildscript {
     }
 }
 
-plugins { id 'io.sentry.android.gradle' version '3.0.0-rc.3' }
+plugins {
+    id 'io.sentry.android.gradle' version '3.0.0-rc.3'
+    id 'org.jetbrains.kotlin.plugin.serialization' version "$kotlin_version" apply false
+}
 
 allprojects {
     repositories {
