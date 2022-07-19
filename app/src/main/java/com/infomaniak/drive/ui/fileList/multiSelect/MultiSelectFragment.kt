@@ -105,12 +105,22 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         super.onViewCreated(view, savedInstanceState)
     }
 
-    fun openMultiSelect() {
+    override fun onResume() {
+        super.onResume()
+        with(multiSelectManager) {
+            if (isMultiSelectOn) {
+                openMultiSelect(notify = false)
+                updateMultiSelect?.invoke()
+            }
+        }
+    }
+
+    fun openMultiSelect(notify: Boolean = true) {
         swipeRefresh?.isEnabled = false
 
         multiSelectManager.isMultiSelectOn = true
 
-        adapter?.apply { notifyItemRangeChanged(0, itemCount) }
+        if (notify) adapter?.apply { notifyItemRangeChanged(0, itemCount) }
 
         multiSelectToolbar?.isGone = true
         multiSelectLayout?.root?.isVisible = true
