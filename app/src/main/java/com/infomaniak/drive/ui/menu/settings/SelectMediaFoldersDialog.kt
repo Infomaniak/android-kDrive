@@ -36,8 +36,8 @@ import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.IsComplete
 import com.infomaniak.drive.utils.MediaFoldersProvider
-import com.infomaniak.drive.views.DividerItemDecorator
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
+import com.infomaniak.lib.core.views.DividerItemDecorator
 import io.realm.Realm
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_media_folders.*
 import kotlinx.coroutines.Dispatchers
