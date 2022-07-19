@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui
 
 import android.app.Application
-import android.content.ContentResolver
 import android.content.Context
 import android.provider.MediaStore
 import androidx.collection.arrayMapOf
@@ -45,6 +44,7 @@ import com.infomaniak.lib.core.networking.HttpClient
 import io.realm.Realm
 import io.sentry.Sentry
 import kotlinx.coroutines.*
+
 
 class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
@@ -340,36 +340,34 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     fun deleteSynchronizedFilesOnDevice(filesToDelete: ArrayList<UploadFile>) = viewModelScope.launch(Dispatchers.IO) {
         val fileDeleted = arrayListOf<UploadFile>()
         filesToDelete.forEach { uploadFile ->
-            val uri = uploadFile.getUriObject()
-            if (!uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
-                try {
-                    SyncUtils.checkDocumentProviderPermissions(getContext(), uri)
-                    val query = getContext().contentResolver.query(uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null)
-                    query?.use { cursor ->
-                        if (cursor.moveToFirst()) {
-                            var columnIndex: Int? = null
-                            var pathname: String? = null
-                            try {
-                                columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-                                pathname = cursor.getString(columnIndex)
-                                java.io.File(pathname).delete()
-                                getContext().contentResolver.delete(uri, null, null)
-                                fileDeleted.add(uploadFile)
-                            } catch (nullPointerException: NullPointerException) {
-                                Sentry.withScope { scope ->
-                                    scope.setExtra("columnIndex", columnIndex.toString())
-                                    scope.setExtra("pathname", pathname.toString())
-                                    scope.setExtra("uploadFileUri", uploadFile.uri)
-                                    Sentry.captureException(Exception("deleteSynchronizedFilesOnDevice()"))
-                                }
+            try {
+                val uri = uploadFile.getUriObject()
+                val query = getContext().contentResolver.query(uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null)
+                query?.use { cursor ->
+                    if (cursor.moveToFirst()) {
+                        var columnIndex: Int? = null
+                        var pathname: String? = null
+                        try {
+                            columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+                            pathname = cursor.getString(columnIndex)
+                            java.io.File(pathname).delete()
+                            getContext().contentResolver.delete(uri, null, null)
+                        } catch (nullPointerException: NullPointerException) {
+                            Sentry.withScope { scope ->
+                                scope.setExtra("columnIndex", columnIndex.toString())
+                                scope.setExtra("pathname", pathname.toString())
+                                scope.setExtra("uploadFileUri", uploadFile.uri)
+                                Sentry.captureException(Exception("deleteSynchronizedFilesOnDevice()"))
                             }
+                        } finally {
+                            fileDeleted.add(uploadFile)
                         }
                     }
-                } catch (exception: SecurityException) {
-                    Sentry.captureException(exception)
-                    exception.printStackTrace()
-                    fileDeleted.add(uploadFile)
                 }
+            } catch (exception: SecurityException) {
+                Sentry.captureException(exception)
+                exception.printStackTrace()
+                fileDeleted.add(uploadFile)
             }
         }
         UploadFile.deleteAll(fileDeleted)

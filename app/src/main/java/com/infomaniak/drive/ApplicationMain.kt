@@ -68,7 +68,6 @@ import okhttp3.OkHttpClient
 import org.matomo.sdk.Tracker
 import java.util.*
 
-@ExperimentalCoilApi
 class ApplicationMain : Application(), ImageLoaderFactory {
 
     val matomoTracker: Tracker by lazy { buildTracker() }
