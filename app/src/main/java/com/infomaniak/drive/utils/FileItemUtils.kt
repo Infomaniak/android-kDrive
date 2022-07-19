@@ -48,6 +48,7 @@ import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED
 import com.infomaniak.drive.ui.fileList.FileViewHolder
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.views.CategoryIconView
+import com.infomaniak.lib.core.utils.FormatterFileSize
 import com.infomaniak.lib.core.utils.format
 import io.sentry.Sentry
 import kotlinx.android.synthetic.main.cardview_file_grid.view.filePreview2
