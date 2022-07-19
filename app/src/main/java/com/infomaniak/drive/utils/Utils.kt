@@ -42,7 +42,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.work.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.BulkOperationType
@@ -285,34 +284,6 @@ object Utils {
     }
 
     fun getInvalidFileNameCharacter(fileName: String): String? = Regex("[\\\\/:*?\"<>|]").find(fileName)?.value
-
-    fun showSnackbar(
-        view: View,
-        title: String,
-        anchorView: View? = null,
-        actionButtonTitle: Int = R.string.buttonCancel,
-        onActionClicked: (() -> Unit)? = null
-    ) {
-        Snackbar.make(view, title, Snackbar.LENGTH_LONG).apply {
-            anchorView?.let { this.anchorView = it }
-            onActionClicked?.let { action ->
-                setAction(actionButtonTitle) {
-                    action()
-                }
-            }
-            show()
-        }
-    }
-
-    fun showSnackbar(
-        view: View,
-        title: Int,
-        anchorView: View? = null,
-        actionButtonTitle: Int = R.string.buttonCancel,
-        onActionClicked: (() -> Unit)? = null
-    ) {
-        showSnackbar(view, view.context.getString(title), anchorView, actionButtonTitle, onActionClicked)
-    }
 
     fun copyDataToUploadCache(context: Context, file: java.io.File, fileModifiedAt: Date): Uri {
         val folder = java.io.File(context.cacheDir, UploadWorker.UPLOAD_FOLDER).apply { if (!exists()) mkdirs() }

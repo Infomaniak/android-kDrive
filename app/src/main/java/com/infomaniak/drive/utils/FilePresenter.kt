@@ -28,6 +28,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.Companion.getCloudAndFileUris
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.fileList.FileListFragmentDirections
+import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.activity_main.*
@@ -62,8 +63,7 @@ object FilePresenter {
 
             if (url.isValidUrl()) requireContext().openUrl(url) else Exception("It's not a valid url")
         }.onFailure {
-            requireActivity()
-                .showSnackbar(requireContext().getString(R.string.errorGetBookmarkURL), anchorView = requireActivity().mainFab)
+            requireActivity().showSnackbar(requireContext().getString(R.string.errorGetBookmarkURL), requireActivity().mainFab)
         }
     }
 

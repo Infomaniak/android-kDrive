@@ -79,6 +79,7 @@ import com.infomaniak.drive.utils.MatomoUtils.trackShareRightsEvent
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpUtils
+import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.lightNavigationBar
 import com.infomaniak.lib.core.utils.lightStatusBar
 import com.infomaniak.lib.core.utils.loadAvatar
@@ -285,36 +286,6 @@ fun Collection<DriveUser>.removeCommonUsers(intersectedUsers: ArrayList<Int>): A
     return this.filterNot { availableUser ->
         intersectedUsers.any { it == availableUser.id }
     } as ArrayList<DriveUser>
-}
-
-fun Activity.showSnackbar(
-    title: Int,
-    anchorView: View? = null,
-    actionButtonTitle: Int = R.string.buttonCancel,
-    onActionClicked: (() -> Unit)? = null
-) {
-    Utils.showSnackbar(
-        view = window.decorView.findViewById(android.R.id.content),
-        title = title,
-        anchorView = anchorView,
-        actionButtonTitle = actionButtonTitle,
-        onActionClicked = onActionClicked
-    )
-}
-
-fun Activity.showSnackbar(
-    title: String,
-    anchorView: View? = null,
-    actionButtonTitle: Int = R.string.buttonCancel,
-    onActionClicked: (() -> Unit)? = null
-) {
-    Utils.showSnackbar(
-        view = window.decorView.findViewById(android.R.id.content),
-        title = title,
-        anchorView = anchorView,
-        actionButtonTitle = actionButtonTitle,
-        onActionClicked = onActionClicked
-    )
 }
 
 fun Fragment.showSnackbar(

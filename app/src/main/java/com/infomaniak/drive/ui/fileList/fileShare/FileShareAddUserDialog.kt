@@ -39,13 +39,10 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDia
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
+import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.Utils.getDefaultAcceptedLanguage
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
-import com.infomaniak.lib.core.utils.hideProgress
-import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_file_share.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -198,7 +195,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
             if (apiResponse.isSuccess()) {
                 setBackNavigationResult(SHARE_SELECTION_KEY, true)
             } else {
-                Utils.showSnackbar(requireView(), apiResponse.translateError())
+                SnackbarUtils.showSnackbar(requireView(), apiResponse.translateError())
             }
             shareButton.hideProgress(R.string.buttonShare)
         }
@@ -229,7 +226,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                         }
                     }
                 } else {
-                    Utils.showSnackbar(requireView(), apiResponse.translateError())
+                    SnackbarUtils.showSnackbar(requireView(), apiResponse.translateError())
                     shareButton.hideProgress(R.string.buttonShare)
                 }
             }

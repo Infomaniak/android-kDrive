@@ -37,6 +37,7 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.getBackNavigationResult
 import com.infomaniak.drive.utils.showSnackbar
+import com.infomaniak.lib.core.utils.SnackbarUtils
 import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_file_list.*
 
@@ -117,7 +118,7 @@ class TrashFragment : FileSubTypeListFragment() {
                 trashViewModel.emptyTrash(AccountUtils.currentDriveId).observe(viewLifecycleOwner) { apiResponse ->
                     dialog.dismiss()
                     if (apiResponse.data == true) {
-                        Utils.showSnackbar(requireView(), R.string.snackbarEmptyTrashConfirmation)
+                        SnackbarUtils.showSnackbar(requireView(), R.string.snackbarEmptyTrashConfirmation)
                         onRefresh()
                     } else {
                         showSnackbar(apiResponse.translateError())

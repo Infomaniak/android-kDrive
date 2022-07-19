@@ -41,14 +41,10 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.fileList.fileDetails.CreateOrEditCategoryAdapter.Companion.COLORS
 import com.infomaniak.drive.utils.MatomoUtils.trackCategoriesEvent
-import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.find
 import com.infomaniak.drive.utils.getScreenSizeInDp
 import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.utils.hideProgress
-import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.showProgress
-import com.infomaniak.lib.core.utils.toDp
+import com.infomaniak.lib.core.utils.*
 import kotlinx.android.synthetic.main.fragment_create_or_edit_category.*
 import kotlinx.coroutines.Dispatchers
 import kotlin.math.max
@@ -146,7 +142,7 @@ class CreateOrEditCategoryFragment : Fragment() {
                     data?.id?.let(::addCategory)
                 } else {
                     saveButton.hideProgress(R.string.buttonSave)
-                    Utils.showSnackbar(requireView(), translateError())
+                    SnackbarUtils.showSnackbar(requireView(), translateError())
                 }
             }
         }
@@ -160,7 +156,7 @@ class CreateOrEditCategoryFragment : Fragment() {
                         findNavController().popBackStack()
                     } else {
                         saveButton.hideProgress(R.string.buttonSave)
-                        Utils.showSnackbar(requireView(), translateError())
+                        SnackbarUtils.showSnackbar(requireView(), translateError())
                     }
                 }
             }
@@ -178,7 +174,7 @@ class CreateOrEditCategoryFragment : Fragment() {
                     findNavController().popBackStack()
                 } else {
                     saveButton.hideProgress(R.string.buttonSave)
-                    Utils.showSnackbar(requireView(), translateError())
+                    SnackbarUtils.showSnackbar(requireView(), translateError())
                 }
             }
         }
