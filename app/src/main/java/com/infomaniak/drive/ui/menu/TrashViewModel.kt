@@ -24,7 +24,7 @@ import androidx.lifecycle.liveData
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.FileListFragment
-import com.infomaniak.drive.utils.SingleLiveEvent
+import com.infomaniak.lib.core.utils.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 
@@ -110,5 +110,4 @@ class TrashViewModel : ViewModel() {
     fun cancelTrashFileJob() {
         getDeletedFilesJob.cancel()
     }
-
 }

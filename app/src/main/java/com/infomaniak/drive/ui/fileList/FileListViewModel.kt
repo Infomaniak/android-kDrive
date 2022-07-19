@@ -30,7 +30,7 @@ import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
 import com.infomaniak.drive.utils.Position
-import com.infomaniak.drive.utils.SingleLiveEvent
+import com.infomaniak.lib.core.utils.SingleLiveEvent
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

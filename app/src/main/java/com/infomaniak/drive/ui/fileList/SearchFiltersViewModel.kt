@@ -22,7 +22,7 @@ import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.SearchCategoriesOwnershipFilter
 import com.infomaniak.drive.data.models.SearchDateFilter
 import com.infomaniak.drive.data.models.drive.Category
-import com.infomaniak.drive.utils.SingleLiveEvent
+import com.infomaniak.lib.core.utils.SingleLiveEvent
 
 class SearchFiltersViewModel : ViewModel() {
 
