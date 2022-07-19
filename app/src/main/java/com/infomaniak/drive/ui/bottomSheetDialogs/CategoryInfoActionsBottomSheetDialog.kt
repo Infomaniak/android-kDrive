@@ -39,6 +39,7 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.find
 import com.infomaniak.drive.utils.setBackNavigationResult
 import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.utils.SnackbarUtils
 import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_category_info_actions.*
 import kotlinx.coroutines.Dispatchers
@@ -97,7 +98,7 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
             dismissDialog()
             if (apiResponse.isSuccess()) {
                 setBackNavigationResult(DELETE_CATEGORY_NAV_KEY, categoryId)
-            } else Utils.showSnackbar(requireView(), apiResponse.translateError())
+            } else SnackbarUtils.showSnackbar(requireView(), apiResponse.translateError())
         }
     }
 

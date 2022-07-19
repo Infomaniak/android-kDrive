@@ -32,13 +32,9 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.utils.hideProgress
-import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.showProgress
+import com.infomaniak.lib.core.utils.*
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 import kotlinx.coroutines.Dispatchers
 
@@ -63,7 +59,7 @@ class AccessDeniedBottomSheetDialog : InformationBottomSheetDialog() {
                 informationBottomSheetViewModel.forceFolderAccess(navigationArgs.folderId)
                     .observe(viewLifecycleOwner) { apiResponse ->
                         if (apiResponse.data == null) {
-                            Utils.showSnackbar(requireView(), apiResponse.translateError())
+                            SnackbarUtils.showSnackbar(requireView(), apiResponse.translateError())
                         } else {
                             apiResponse.data?.let { hasAccess ->
                                 if (hasAccess) navigateToTargetFolder() else closeAndShowRightError()

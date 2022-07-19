@@ -43,10 +43,14 @@ import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.SelectedSt
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.UiCategory
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode.MANAGED_CATEGORIES
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode.SELECTED_CATEGORIES
-import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackCategoriesEvent
+import com.infomaniak.drive.utils.getBackNavigationResult
+import com.infomaniak.drive.utils.getName
+import com.infomaniak.drive.utils.setBackNavigationResult
+import com.infomaniak.drive.utils.setCornersRadius
 import com.infomaniak.drive.views.DebouncingTextWatcher
 import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.utils.SnackbarUtils
 import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_select_categories.*
 import kotlinx.android.synthetic.main.item_search_view.*
@@ -280,7 +284,7 @@ class SelectCategoriesFragment : Fragment() {
         val isSelected = if (apiResponse.isSuccess()) {
             isAdding
         } else {
-            Utils.showSnackbar(requireView(), apiResponse.translateError())
+            SnackbarUtils.showSnackbar(requireView(), apiResponse.translateError())
             !isAdding
         }
         categoriesAdapter.selectCategory(id, isSelected, usageMode)

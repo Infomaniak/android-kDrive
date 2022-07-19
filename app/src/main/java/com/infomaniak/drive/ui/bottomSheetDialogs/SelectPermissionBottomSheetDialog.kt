@@ -40,10 +40,10 @@ import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.Shareable.ShareablePermission
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter
 import com.infomaniak.drive.utils.MatomoUtils.trackShareRightsEvent
-import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setBackNavigationResult
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.utils.SnackbarUtils
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress
@@ -198,7 +198,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         if (apiResponse.data == true) {
             setBackNavigationResult(key, bundle)
         } else {
-            Utils.showSnackbar(requireView(), errorMessage)
+            SnackbarUtils.showSnackbar(requireView(), errorMessage)
         }
         saveButton.hideProgress(R.string.buttonSave)
     }
