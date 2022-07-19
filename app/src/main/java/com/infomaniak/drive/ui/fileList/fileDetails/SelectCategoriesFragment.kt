@@ -280,7 +280,7 @@ class SelectCategoriesFragment : Fragment() {
         }
     }
 
-    private fun updateAdapterAfterAddingOrRemovingCategory(id: Int, apiResponse: ApiResponse<Unit>, isAdding: Boolean) {
+    private fun updateAdapterAfterAddingOrRemovingCategory(id: Int, apiResponse: ApiResponse<*>, isAdding: Boolean) {
         val isSelected = if (apiResponse.isSuccess()) {
             isAdding
         } else {
