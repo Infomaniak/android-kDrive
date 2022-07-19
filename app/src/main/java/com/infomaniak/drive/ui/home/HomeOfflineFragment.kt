@@ -49,7 +49,7 @@ class HomeOfflineFragment : OfflineFileFragment() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        fileRecyclerView.adapter = fileAdapter
+        fileRecyclerView?.adapter = fileAdapter
     }
 
     override fun setupFileAdapter() {
