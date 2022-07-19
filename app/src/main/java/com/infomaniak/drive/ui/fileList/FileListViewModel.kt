@@ -17,7 +17,9 @@
  */
 package com.infomaniak.drive.ui.fileList
 
+import android.app.Application
 import androidx.lifecycle.*
+import com.infomaniak.drive.ApplicationMain
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
@@ -35,10 +37,13 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-class FileListViewModel : ViewModel() {
+class FileListViewModel(application: Application) : AndroidViewModel(application) {
+
+    private inline val context get() = getApplication<ApplicationMain>().applicationContext
 
     private var getFilesJob: Job = Job()
     private var getFolderActivitiesJob: Job = Job()
+    private var checkOfflineFilesJob = Job()
 
     lateinit var sortType: SortType
 
@@ -143,6 +148,26 @@ class FileListViewModel : ViewModel() {
                 runBlocking { emit(files to isComplete) }
             }
         }
+    }
+
+    fun updateOfflineFilesIfNeeded(folder: File, files: List<File>) {
+        if (folder.getOfflineFile(context)?.exists() == true && FileController.getFolderOfflineFilesCount(folder.id) == 0L) {
+            checkOfflineFilesJob.cancel()
+            checkOfflineFilesJob = Job()
+
+            viewModelScope.launch(Dispatchers.IO + checkOfflineFilesJob) {
+                FileController.getRealmInstance().use {
+                    it.executeTransaction { realm ->
+                        files.filterNot { file -> file.isFolder() }.forEach { file ->
+                            if (!file.isOffline && file.getOfflineFile(context)?.exists() == true && isActive) {
+                                FileController.getFileProxyById(file.id, customRealm = realm)?.isOffline = true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
     }
 
     @Synchronized

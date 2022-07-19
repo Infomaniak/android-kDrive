@@ -777,6 +777,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                     fileAdapter.isComplete = result.isComplete
                     fileAdapter.hideLoading()
                     refreshActivities()
+                    result.parentFolder?.let { folder -> fileListViewModel.updateOfflineFilesIfNeeded(folder, result.files) }
 
                 } ?: run {
                     changeNoFilesLayoutVisibility(

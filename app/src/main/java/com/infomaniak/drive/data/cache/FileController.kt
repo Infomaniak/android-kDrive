@@ -141,6 +141,15 @@ object FileController {
         }
     }
 
+    fun getFolderOfflineFilesCount(folderId: Int): Long {
+        return getRealmInstance().use { realm ->
+            realm.where(File::class.java)
+                .equalTo(File::parentId.name, folderId)
+                .equalTo(File::isOffline.name, true)
+                .count()
+        }
+    }
+
     fun removeFile(
         fileId: Int,
         keepFileCaches: ArrayList<Int> = arrayListOf(),
