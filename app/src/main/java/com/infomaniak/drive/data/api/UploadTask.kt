@@ -393,14 +393,19 @@ class UploadTask(
                 }
                 throw UploadNotTerminated("Upload finish with 0 chunks uploaded or a different expected number of chunks")
             }
+            "upload_token_is_not_valid",
             "upload_error" -> {
                 uploadFile.resetUploadToken()
                 throw UploadErrorException()
             }
             else -> {
                 val responseType = object : TypeToken<ApiResponse<T>>() {}.type
-                val responseJson = gson.toJson(this, responseType) + this?.translatedError?.let(context::getString)
-                throw this?.error?.description?.let(::Exception) ?: Exception(responseJson)
+                val responseJson = gson.toJson(this, responseType)
+                val translatedError = when (this?.translatedError) {
+                    0, null -> ""
+                    else -> context.getString(translatedError)
+                }
+                throw this?.error?.description?.let(::Exception) ?: Exception("$responseJson $translatedError")
             }
         }
     }

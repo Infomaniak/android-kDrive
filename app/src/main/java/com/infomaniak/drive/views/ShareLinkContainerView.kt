@@ -58,7 +58,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
 
         if (!file.isDropBox()) {
             titleContainer.setOnClickListener { onTitleClicked?.invoke(this.shareLink) }
-            shareLinkSettings.setOnClickListener { onSettingsClicked?.invoke(this.shareLink!!) }
+            shareLinkSettings.setOnClickListener { this.shareLink?.let { shareLink -> onSettingsClicked?.invoke(shareLink) } }
             shareLinkButton.setOnClickListener { this.shareLink?.url?.let(context::shareText) }
         }
     }

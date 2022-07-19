@@ -178,8 +178,6 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
     }
 
     private fun configPicturesLayoutManager() {
-
-
         val numPicturesColumns = requireActivity().getAdjustedColumnNumber(150, minColumns = 3, maxColumns = 15)
 
         val gridLayoutManager = GridLayoutManager(requireContext(), numPicturesColumns).apply {
@@ -193,7 +191,7 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
             }
         }
 
-        picturesRecyclerView.layoutManager = gridLayoutManager
+        picturesRecyclerView?.layoutManager = gridLayoutManager
     }
 
     private fun loadMorePictures(driveId: Int, forceDownload: Boolean = false) {
