@@ -393,7 +393,7 @@ class UploadTask(
                 }
                 throw UploadNotTerminated("Upload finish with 0 chunks uploaded or a different expected number of chunks")
             }
-            "upload_error" -> {
+            "upload_error", "upload_token_is_not_valid" -> {
                 uploadFile.resetUploadToken()
                 throw UploadErrorException()
             }
