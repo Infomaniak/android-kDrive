@@ -133,7 +133,9 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginTop="@dimen/marginStandardMedium"
-            android:background="@color/divider" />
+            android:background="@color/divider"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
         <com.infomaniak.drive.views.CategoriesContainerView
             android:id="@+id/categoriesContainer"

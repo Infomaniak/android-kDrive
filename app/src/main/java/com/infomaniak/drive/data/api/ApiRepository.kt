@@ -335,7 +335,7 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.fileCategory(driveId, categoryId), POST, mapOf("file_ids" to fileIds))
     }
 
-    fun removeCategory(file: File, categoryId: Int): ApiResponse<Unit> {
+    fun removeCategory(file: File, categoryId: Int): ApiResponse<Boolean> {
         return callApi(ApiRoutes.fileCategory(file, categoryId), DELETE)
     }
 

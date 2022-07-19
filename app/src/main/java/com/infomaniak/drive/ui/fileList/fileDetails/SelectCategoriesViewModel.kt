@@ -45,7 +45,7 @@ class SelectCategoriesViewModel : ViewModel() {
         }
     }
 
-    fun removeCategory(file: File, categoryId: Int): LiveData<ApiResponse<Unit>> {
+    fun removeCategory(file: File, categoryId: Int): LiveData<ApiResponse<Boolean>> {
         return liveData(Dispatchers.IO) {
             with(ApiRepository.removeCategory(file, categoryId)) {
                 if (isSuccess()) {

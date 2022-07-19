@@ -496,13 +496,13 @@ class ApiRepositoryTest : KDriveTest() {
             val category = createCategory(userDrive.driveId, "testRemoveCategory-$randomSuffix", "#000").data
             assertNotNull(category, "Category should not be null")
             // Add the category to the test file
-            addCategory(testFile, category!!.id)
+            assertApiResponseData(addCategory(testFile, category!!.id))
             // Remove the category
-            removeCategory(testFile, category.id)
+            assertApiResponseData(removeCategory(testFile, category.id))
             // Make sure the category is removed
             with(getFileDetails(testFile)) {
                 assertApiResponseData(this)
-                assertTrue(data!!.categories.isNullOrEmpty(), "The test file should not have a category")
+                assertTrue(data!!.categories.isEmpty(), "The test file should not have a category")
             }
             // Delete the test category
             deleteCategory(userDrive.driveId, category.id)
