@@ -44,7 +44,10 @@ import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import io.realm.Realm
 import io.sentry.Sentry
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
@@ -329,10 +332,10 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    suspend fun syncOfflineFiles() {
+    fun syncOfflineFiles() {
         syncOfflineFilesJob.cancel()
         syncOfflineFilesJob = Job()
-        runInterruptible(Dispatchers.IO + syncOfflineFilesJob) {
+        viewModelScope.launch(Dispatchers.IO + syncOfflineFilesJob) {
             SyncOfflineUtils.startSyncOffline(getContext(), syncOfflineFilesJob)
         }
     }

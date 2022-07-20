@@ -78,7 +78,6 @@ import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -102,9 +101,7 @@ class MainActivity : BaseActivity() {
 
     private val fileObserver: FileObserver by lazy {
         fun onEvent() {
-            CoroutineScope(Dispatchers.IO).launch {
-                mainViewModel.syncOfflineFiles()
-            }
+            mainViewModel.syncOfflineFiles()
         }
 
         val offlineFolder = File.getOfflineFolder(this)
@@ -354,9 +351,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun launchSyncOffline() {
-        lifecycleScope.launch {
-            if (drivePermissions.checkWriteStoragePermission(false)) mainViewModel.syncOfflineFiles()
-        }
+        if (drivePermissions.checkWriteStoragePermission(false)) mainViewModel.syncOfflineFiles()
     }
 
     override fun onStop() {
