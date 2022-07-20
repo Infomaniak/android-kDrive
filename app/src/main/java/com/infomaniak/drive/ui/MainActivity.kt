@@ -320,11 +320,14 @@ class MainActivity : BaseActivity() {
         }
 
         when (destination.id) {
-            R.id.fileDetailsFragment, R.id.fileShareLinkSettingsFragment -> {
+            R.id.fileDetailsFragment -> {
+                setColorNavigationBar(true)
+            }
+            R.id.fileShareLinkSettingsFragment -> {
                 setColorStatusBar(destination.id == R.id.fileShareLinkSettingsFragment)
                 setColorNavigationBar(true)
             }
-            R.id.downloadProgressDialog, R.id.previewSliderFragment -> Unit
+            R.id.downloadProgressDialog, R.id.previewSliderFragment, R.id.selectPermissionBottomSheetDialog -> Unit
             else -> {
                 setColorStatusBar()
                 setColorNavigationBar()
