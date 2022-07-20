@@ -74,7 +74,6 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         super.onStart()
         activity?.window?.apply {
             statusBarColor = Color.TRANSPARENT
-            lightStatusBar(false)
             toggleEdgeToEdge(true)
 
             // Corrects the layout so it still takes into account system bars in edge-to-edge mode
@@ -94,12 +93,6 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         super.onPause()
         // TODO Understand why we need to do this
         toolbar.setNavigationIconTint(ContextCompat.getColor(requireContext(), R.color.primary))
-
-        activity?.window?.apply {
-            if (context?.resources?.isNightModeEnabled() == false) {
-                lightStatusBar(true)
-            }
-        }
     }
 
     override fun onStop() {
@@ -109,6 +102,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
 
     private fun setFile(file: File) {
         fileDetailsViewModel.currentFile.value = file
+        requireActivity().window.lightStatusBar(context?.resources?.isNightModeEnabled() == false && !file.hasThumbnail)
         subtitleToolbar.title.text = file.name
         subtitleToolbar.subTitle.text = file.getLastModifiedAt().format(getString(R.string.allLastModifiedFilePattern))
         setBannerThumbnail(file)
@@ -127,7 +121,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
 
                     // If in Light mode, change the status icons color to match the background.
                     // If in Dark mode, the icons stay white all along, no need to check.
-                    if (context?.resources?.isNightModeEnabled() == false) activity?.window?.lightStatusBar(!isExpanded)
+                    if (context?.resources?.isNightModeEnabled() == false && file.hasThumbnail) activity?.window?.lightStatusBar(!isExpanded)
                 }
             }
         })
