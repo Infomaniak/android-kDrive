@@ -249,7 +249,7 @@
     <string name="errorDestinationAlreadyExists">El destino ya existe</string>
     <string name="errorDeviceStorage">Insuficiente almacenamiento telefónico disponible</string>
     <string name="errorDownload">Error al descargar</string>
-    <string name="errorDownloadPermission">Debe añadir al menos un archivo que tiene permiso para descargar</string>
+    <string name="errorDownloadInsufficientSpace">No se puede descargar: espacio insuficiente</string>
     <string name="errorDuplicate">Error al duplicar</string>
     <string name="errorFileCreate">Error al crear el archivo. Comprueba el nombre del archivo y tus derechos sobre la carpeta.</string>
     <string name="errorFileLocked">El archivo está actualmente abierto por un usuario y no puede ser modificado</string>

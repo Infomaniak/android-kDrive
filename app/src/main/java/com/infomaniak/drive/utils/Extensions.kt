@@ -79,19 +79,18 @@ import com.infomaniak.drive.utils.MatomoUtils.trackShareRightsEvent
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpUtils
+import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
-import com.infomaniak.lib.core.utils.lightNavigationBar
-import com.infomaniak.lib.core.utils.lightStatusBar
-import com.infomaniak.lib.core.utils.loadAvatar
-import com.infomaniak.lib.core.utils.safeNavigate
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.android.synthetic.main.item_user.view.*
+import kotlinx.coroutines.*
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
+
 
 typealias FileId = Int
 typealias IsComplete = Boolean
@@ -386,7 +385,33 @@ fun Context.startDownloadFile(downloadURL: Uri, fileName: String) {
         setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
     }
 
-    (getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager).enqueue(request)
+    val downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+    val downloadReference = downloadManager.enqueue(request)
+
+    handleDownloadManagerErrors(downloadReference, downloadManager)
+}
+
+private fun Context.handleDownloadManagerErrors(downloadReference: Long, downloadManager: DownloadManager) {
+    fun checkStatus(cursor: Cursor) {
+        val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
+        val reason = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_REASON))
+        if (status == DownloadManager.STATUS_FAILED) {
+            when (reason) {
+                DownloadManager.ERROR_INSUFFICIENT_SPACE -> showToast(R.string.errorDownloadInsufficientSpace)
+                else -> showToast(R.string.errorDownload)
+            }
+        }
+    }
+
+    CoroutineScope(Dispatchers.Default).launch {
+        delay(1000)
+        DownloadManager.Query().apply {
+            setFilterById(downloadReference)
+            downloadManager.query(this).also {
+                if (it.moveToFirst()) withContext(Dispatchers.Main) { checkStatus(it) }
+            }
+        }
+    }
 }
 
 fun View.setUploadFileInProgress(title: Int, onClickListener: () -> Unit) {

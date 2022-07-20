@@ -249,7 +249,7 @@
     <string name="errorDestinationAlreadyExists">La destination existe déjà</string>
     <string name="errorDeviceStorage">Stockage disponible du téléphone insuffisant</string>
     <string name="errorDownload">Erreur lors du téléchargement</string>
-    <string name="errorDownloadPermission">Vous devez ajouter au moins un fichier que vous avez la permission de télécharger</string>
+    <string name="errorDownloadInsufficientSpace">Téléchargement impossible : Espace insuffisant</string>
     <string name="errorDuplicate">Erreur lors de la duplication</string>
     <string name="errorFileCreate">Erreur lors de la création du fichier. Vérifiez le nom du fichier et vos droits sur le dossier.</string>
     <string name="errorFileLocked">Le fichier est actuellement ouvert par un utilisateur et ne peut être modifié</string>
