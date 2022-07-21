@@ -25,7 +25,7 @@ data class UploadSegment(
     val status: ChunkStatus,
     @SerializedName("created_at")
     val createdAt: Date,
-    val size: Long,
+    val size: Int,
     /** Chunk uploaded md5 hash, computed */
     val hash: String
 ) {
