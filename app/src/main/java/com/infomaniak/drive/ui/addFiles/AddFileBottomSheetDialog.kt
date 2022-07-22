@@ -46,6 +46,7 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
 import com.infomaniak.drive.utils.MatomoUtils.trackNewElementEvent
+import com.infomaniak.drive.utils.OcrUtils.getOcrConfiguration
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.FORMAT_NEW_FILE
 import com.infomaniak.lib.core.utils.format
@@ -156,13 +157,9 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun scanDocuments() {
         trackNewElement("scan")
-        removeOldScanFiles()
-        ScanFlow.scanWithConfiguration(activity, ScanConfiguration())
+        val scanConfiguration = ScanConfiguration().apply { ocrConfiguration = context?.getOcrConfiguration() }
+        ScanFlow.scanWithConfiguration(activity, scanConfiguration)
         dismiss()
-    }
-
-    private fun removeOldScanFiles() {
-        context?.getExternalFilesDir(null)?.listFiles()?.forEach { if (it.isFile) it.delete() }
     }
 
     private fun createFolder() {

@@ -130,6 +130,7 @@ dependencies {
 
     def geniusscansdk_version = '4.5.2'
     implementation "com.geniusscansdk:gssdk-core:$geniusscansdk_version"
+    implementation "com.geniusscansdk:gssdk-ocr:$geniusscansdk_version"
     implementation "com.geniusscansdk:gssdk-scanflow:$geniusscansdk_version"
 
     implementation 'io.realm:android-adapters:4.0.0'
