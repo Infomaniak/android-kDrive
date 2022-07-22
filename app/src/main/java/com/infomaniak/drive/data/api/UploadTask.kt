@@ -97,7 +97,7 @@ class UploadTask(
             exception.printStackTrace()
             Sentry.withScope { scope ->
                 scope.level = SentryLevel.WARNING
-                scope.setExtra("half heap", "${getAvailableHalfHeapMemory()}")
+                scope.setExtra("half heap", "${getAvailableHalfMemory()}")
                 scope.setExtra("available ram memory", "${context.getAvailableMemory().availMem}")
                 scope.setExtra("available service memory", "${context.getAvailableMemory().threshold}")
                 Sentry.captureException(exception)
@@ -125,19 +125,22 @@ class UploadTask(
         val fileInputStream = context.contentResolver.openInputStream(uploadFile.getOriginalUri(context))
 
         initChunkSize(uploadFile.fileSize)
-        checkLimitParallelRequest()
+
+        val uploadedChunks = uploadFile.getValidChunks()
+        val isNewUploadSession = uploadedChunks?.needToResetUpload() ?: true
+        val totalChunks = ceil(uploadFile.fileSize.toDouble() / chunkSize).toInt()
+
+        if (isNewUploadSession) {
+            uploadFile.prepareUploadSession(totalChunks)
+        } else {
+            chunkSize = uploadedChunks!!.validChuckSize
+        }
 
         BufferedInputStream(fileInputStream, chunkSize).use { input ->
             val waitingCoroutines = mutableListOf<Job>()
             val requestSemaphore = Semaphore(limitParallelRequest)
-            val totalChunks = ceil(uploadFile.fileSize.toDouble() / chunkSize).toInt()
 
             if (totalChunks > TOTAL_CHUNKS) throw TotalChunksExceededException()
-
-            val uploadedChunks = uploadFile.getValidChunks()
-            val isNewUploadSession = uploadedChunks?.let { needToResetUpload(it) } ?: true
-
-            if (isNewUploadSession) uploadFile.prepareUploadSession(totalChunks)
 
             Sentry.addBreadcrumb(Breadcrumb().apply {
                 category = UploadWorker.BREADCRUMB_TAG
@@ -225,9 +228,8 @@ class UploadTask(
         val fileChunkSize = ceil(fileSize.toDouble() / OPTIMAL_TOTAL_CHUNKS).toInt()
 
         when {
-            fileChunkSize in chunkSize..CHUNK_MAX_SIZE -> {
-                chunkSize = fileChunkSize
-            }
+            fileChunkSize < CHUNK_MIN_SIZE -> chunkSize = CHUNK_MIN_SIZE
+            fileChunkSize <= CHUNK_MAX_SIZE -> chunkSize = fileChunkSize
             fileChunkSize > CHUNK_MAX_SIZE -> {
                 val totalChunks = ceil(fileSize.toDouble() / CHUNK_MAX_SIZE)
                 if (totalChunks <= TOTAL_CHUNKS) {
@@ -243,24 +245,24 @@ class UploadTask(
             }
         }
 
-        val availableHeapMemory = getAvailableHalfHeapMemory()
-        if (chunkSize >= availableHeapMemory) {
-            chunkSize = ceil(availableHeapMemory.toDouble() / limitParallelRequest).toInt()
+        val availableHalfMemory = getAvailableHalfMemory()
+
+        if (chunkSize >= availableHalfMemory) {
+            chunkSize = availableHalfMemory.toInt()
         }
 
         if (chunkSize == 0) throw OutOfMemoryError("chunk size is 0")
+
+        if (chunkSize * limitParallelRequest >= availableHalfMemory) {
+            limitParallelRequest = 1 // We limit it to 1 because if we have more it throws OOF exceptions
+        }
     }
 
-    private fun needToResetUpload(uploadedChunks: ValidChunks): Boolean = with(uploadedChunks) {
-        val uploadedChunksCount = chunks.count()
-        val previousChunkSize = if (uploadedChunksCount == 0) 0 else uploadedSize.toInt() / uploadedChunksCount
-
-        if (expectedSize != uploadFile.fileSize || previousChunkSize != chunkSize) {
+    private fun ValidChunks.needToResetUpload(): Boolean {
+        return if (expectedSize != uploadFile.fileSize || validChuckSize != chunkSize) {
             uploadFile.resetUploadToken()
-            return true
-        }
-
-        return false
+            true
+        } else false
     }
 
     private fun manageApiResponse(response: Response) {
@@ -347,12 +349,6 @@ class UploadTask(
         )
     }
 
-    private fun checkLimitParallelRequest() = getAvailableHalfHeapMemory().let { availableHalfMemory ->
-        if (chunkSize * limitParallelRequest >= availableHalfMemory) {
-            limitParallelRequest = 1 // We limit it to 1 because if we have more it throws OOF exceptions
-        }
-    }
-
     private fun UploadFile.getValidChunks(): ValidChunks? {
         return uploadToken?.let { ApiRepository.getValidChunks(uploadFile.driveId, it, okHttpClient).data }
     }
@@ -415,11 +411,10 @@ class UploadTask(
     }
 
     /**
-     * Returns half the available memory in the heap, to avoid [OutOfMemoryError]
-     * It can vary depending on the available ram memory in the device
+     * Returns half the available memory in the ram, to avoid [OutOfMemoryError]
      * @return half available memory
      */
-    private fun getAvailableHalfHeapMemory() = Runtime.getRuntime().freeMemory() / 2
+    private fun getAvailableHalfMemory() = context.getAvailableMemory().availMem / 2
 
     fun previousChunkBytesWritten() = previousChunkBytesWritten
 
@@ -439,11 +434,13 @@ class UploadTask(
     companion object {
         private val progressMutex = Mutex()
 
-        var chunkSize: Int = 1 * 1024 * 1024 // Chunk 1 Mo
+        private const val CHUNK_MIN_SIZE: Int = 1 * 1024 * 1024
         private const val CHUNK_MAX_SIZE: Int = 50 * 1024 * 1024 // 50 Mo and max file size to upload 500Gb
         private const val OPTIMAL_TOTAL_CHUNKS: Int = 200
         private const val TOTAL_CHUNKS: Int = 10_000
         private const val MAX_TOTAL_CHUNKS_SIZE: Long = CHUNK_MAX_SIZE.toLong() * TOTAL_CHUNKS.toLong()
+
+        var chunkSize: Int = CHUNK_MIN_SIZE
 
         enum class ConflictOption {
             @SerializedName("error")
