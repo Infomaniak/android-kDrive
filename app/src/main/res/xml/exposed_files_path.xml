@@ -22,4 +22,7 @@
     <external-media-path
         name="@string/EXPOSED_OFFLINE_DIR"
         path="offline_storage/" />
+    <external-files-path
+        name="files"
+        path="/" />
 </paths>

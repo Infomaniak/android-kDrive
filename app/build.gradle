@@ -27,6 +27,8 @@ android {
         buildConfigField 'String', 'SHOP_URL', '"https://shop.infomaniak.com/order/"'
         buildConfigField 'String', 'SUPPORT_URL', '"https://support.infomaniak.com/"'
 
+        buildConfigField 'String', 'GENIUS_SCAN_KEY', '"533c5006525609000457025839525a0e4a0a5c025b5b53570b575f48534a5946076b55540e050f0451000601"'
+
         resValue 'string', 'ACCOUNT_TYPE', 'com.infomaniak.drive'
         resValue 'string', 'CLOUD_STORAGE_AUTHORITY', 'com.infomaniak.drive.documents'
         resValue 'string', 'FILE_AUTHORITY', 'com.infomaniak.drive.files'
@@ -122,9 +124,14 @@ dependencies {
 
     implementation 'com.airbnb.android:lottie:5.2.0'
     implementation 'com.github.MikeOrtiz:TouchImageView:3.2.1'
+    implementation 'com.github.rubensousa:gravitysnaphelper:2.2.2'
     implementation 'com.tbuonomo:dotsindicator:4.2'
     implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
-    implementation 'com.github.rubensousa:gravitysnaphelper:2.2.2'
+
+    def geniusscansdk_version = '4.5.2'
+    implementation "com.geniusscansdk:gssdk-core:$geniusscansdk_version"
+    implementation "com.geniusscansdk:gssdk-ocr:$geniusscansdk_version"
+    implementation "com.geniusscansdk:gssdk-scanflow:$geniusscansdk_version"
 
     implementation 'io.realm:android-adapters:4.0.0'
 
