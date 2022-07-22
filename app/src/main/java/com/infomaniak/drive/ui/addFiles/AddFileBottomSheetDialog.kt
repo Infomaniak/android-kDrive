@@ -31,6 +31,8 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.geniusscansdk.scanflow.ScanConfiguration
+import com.geniusscansdk.scanflow.ScanFlow
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.UploadTask
@@ -150,7 +152,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun scanDocuments() {
         trackNewElement("scan")
-        // TODO find a good lib
+        ScanFlow.scanWithConfiguration(activity, ScanConfiguration())
         dismiss()
     }
 

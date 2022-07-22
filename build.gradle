@@ -29,6 +29,7 @@ allprojects {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
+        maven { url 'https://s3.amazonaws.com/tgl.maven' }
         jcenter() // Only for io.realm:android-adapters
     }
 }

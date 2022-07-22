@@ -107,8 +107,7 @@
         android:id="@+id/documentScanning"
         android:layout_width="match_parent"
         android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground"
-        android:visibility="gone">
+        android:background="?selectableItemBackground">
 
         <ImageView
             android:id="@+id/documentScanningIcon"

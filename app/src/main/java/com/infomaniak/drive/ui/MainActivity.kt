@@ -39,6 +39,7 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.get
 import androidx.core.view.isVisible
@@ -51,6 +52,7 @@ import androidx.navigation.fragment.NavHostFragment
 import coil.ImageLoader
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
+import com.geniusscansdk.scanflow.ScanFlow
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.navigation.NavigationBarItemView
 import com.infomaniak.drive.BuildConfig
@@ -225,6 +227,29 @@ class MainActivity : BaseActivity() {
                     navController.navigate(R.id.updateAvailableBottomSheetDialog)
                     updateAvailableShow = true
                 }
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
+        if (requestCode == ScanFlow.SCAN_REQUEST) {
+            try {
+                val scanResult = ScanFlow.getScanResultFromActivityResult(intent)
+
+                val uri = FileProvider.getUriForFile(
+                    this@MainActivity, getString(R.string.FILE_AUTHORITY),
+                    scanResult.multiPageDocument!!
+                )
+
+                Intent(this, SaveExternalFilesActivity::class.java).apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    type = "*/*"
+                    startActivity(this)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // There was an error during the scan flow. Check the exception for more details.
             }
         }
     }
