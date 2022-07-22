@@ -26,6 +26,7 @@ import android.view.LayoutInflater
 import androidx.core.database.getLongOrNull
 import androidx.core.net.toUri
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -33,11 +34,10 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.databinding.DialogImportFilesBinding
+import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
-import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -47,6 +47,7 @@ import java.util.*
 class ImportFilesDialog : DialogFragment() {
 
     private val dialogBinding by lazy { DialogImportFilesBinding.inflate(LayoutInflater.from(context)) }
+    private val mainViewModel: MainViewModel by activityViewModels()
     private val navArgs: ImportFilesDialogArgs by navArgs()
     private val importCount by lazy { navArgs.importIntent.clipData?.itemCount ?: 1 }
 
@@ -69,10 +70,11 @@ class ImportFilesDialog : DialogFragment() {
         val errorCount = importCount - successCount
 
         if (errorCount > 0) {
-            val errorMessage =
-                requireActivity().resources.getQuantityString(R.plurals.importFailedDescription, errorCount, errorCount)
-            requireActivity().showSnackbar(errorMessage, requireActivity().mainFab)
+            val errorMessage = resources.getQuantityString(R.plurals.importFailedDescription, errorCount, errorCount)
+            showSnackbar(errorMessage, true)
         }
+
+        if (successCount > 0) mainViewModel.refreshActivities.value = true
 
         currentImportFile?.delete()
     }
