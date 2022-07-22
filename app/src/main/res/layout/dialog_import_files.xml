@@ -32,5 +32,5 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginStart="@dimen/marginStandardMedium"
-        tools:text="Importation de 1 fichier(s) en cours" />
+        tools:text="@tools:sample/lorem" />
 </LinearLayout>
