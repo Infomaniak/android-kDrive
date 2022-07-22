@@ -1,6 +1,6 @@
 kDrive est le Cloud le plus sécurisé pour collaborer en ligne et accéder à vos documents et vos fichiers sur tous vos appareils. Vos données sont exclusivement stockées en Suisse dans les datacenters écologiques de l’hébergeur leader de Suisse.
 
-L’offre gratuite avec ik.me offre 3 Go de stockage et pour seulement 5 euros / mois, vous pouvez stocker jusque’à 2 To de données dans un Cloud qui respecte votre vie privée.
+L’offre gratuite avec ik.me offre 15 Go de stockage et pour seulement 5 euros / mois, vous pouvez stocker jusque’à 2 To de données dans un Cloud qui respecte votre vie privée.
 
 Avec l’app kDrive, vous pouvez :
 - Gérer, partager et consulter vos documents, photos, vidéos et fichiers audio
