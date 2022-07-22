@@ -380,6 +380,25 @@
             app:nullable="true" />
     </activity>
 
+    <activity
+        android:id="@+id/saveExternalFilesActivity"
+        android:name="com.infomaniak.drive.ui.SaveExternalFilesActivity"
+        android:label="SaveExternalFilesActivity"
+        tools:layout="@layout/activity_save_external_file">
+        <argument
+            android:name="userId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <argument
+            android:name="userDriveId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <argument
+            android:name="folderId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+    </activity>
+
     <dialog
         android:id="@+id/addFileBottomSheetDialog"
         android:name="com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialog"

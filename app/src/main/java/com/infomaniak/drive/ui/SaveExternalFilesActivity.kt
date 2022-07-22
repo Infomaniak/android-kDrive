@@ -33,6 +33,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.navArgs
 import com.google.android.material.textfield.TextInputEditText
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -63,6 +64,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private val selectDriveViewModel: SelectDriveViewModel by viewModels()
     private val saveExternalFilesViewModel: SaveExternalFilesViewModel by viewModels()
+    private val navigationArgs: SaveExternalFilesActivityArgs by navArgs()
 
     private lateinit var saveExternalUriAdapter: SaveExternalUriAdapter
 
@@ -134,8 +136,7 @@ class SaveExternalFilesActivity : BaseActivity() {
         }
         val currentUserDrives = DriveInfosController.getDrives(AccountUtils.currentUserId)
         if (currentUserDrives.size > 1) activeSelectDrive()
-
-        var (userId, driveId) = UiSettings(this).getSaveExternalFilesPref()
+        var (userId, driveId) = getSelectedFolder()
         var drive = DriveInfosController.getDrives(userId, driveId).firstOrNull()
         if (drive == null) {
             userId = AccountUtils.currentUserId
@@ -155,7 +156,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 saveButton.isEnabled = false
                 pathTitle.isVisible = true
                 setupSelectPath()
-                UiSettings(this@SaveExternalFilesActivity).getSaveExternalFilesPref().let { (userId, driveId, folderId) ->
+                getSelectedFolder().let { (userId, driveId, folderId) ->
                     saveExternalFilesViewModel.folderId.value = if (userId == selectedUserId.value && driveId == drive.id) {
                         folderId
                     } else {
@@ -167,6 +168,13 @@ class SaveExternalFilesActivity : BaseActivity() {
             }
         }
     }
+
+    private fun getSelectedFolder(): Triple<Int, Int, Int> {
+        return if (canSaveExternalFilesPref()) UiSettings(this).getSaveExternalFilesPref()
+        else Triple(navigationArgs.userId, navigationArgs.userDriveId, navigationArgs.folderId)
+    }
+
+    private fun canSaveExternalFilesPref() = navigationArgs.userId == -1
 
     private fun displaySelectedDrive(drive: Drive) {
         driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(drive.preferences.color))
@@ -230,7 +238,9 @@ class SaveExternalFilesActivity : BaseActivity() {
                     val driveId = selectedDrive.value?.id!!
                     val folderId = saveExternalFilesViewModel.folderId.value!!
 
-                    UiSettings(this@SaveExternalFilesActivity).setSaveExternalFilesPref(userId, driveId, folderId)
+                    if (canSaveExternalFilesPref()) {
+                        UiSettings(this@SaveExternalFilesActivity).setSaveExternalFilesPref(userId, driveId, folderId)
+                    }
                     lifecycleScope.launch(Dispatchers.IO) {
                         if (storeFiles(userId, driveId, folderId)) {
                             syncImmediately()

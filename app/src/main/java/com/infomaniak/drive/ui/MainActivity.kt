@@ -66,6 +66,7 @@ import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.launchInAppReview
+import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackScreen
@@ -87,6 +88,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
+
 
 class MainActivity : BaseActivity() {
 
@@ -144,9 +146,10 @@ class MainActivity : BaseActivity() {
         LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
     }
 
+    private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
+
     private fun setupNavController(): NavController {
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
-        return navHostFragment.navController.apply {
+        return getNavHostFragment().navController.apply {
             if (currentDestination == null) navigate(graph.startDestinationId)
         }
     }
@@ -235,26 +238,37 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
-        if (requestCode == ScanFlow.SCAN_REQUEST && resultCode == RESULT_OK) {
-            try {
-                val geniusScanFile = ScanFlow.getScanResultFromActivityResult(intent).multiPageDocument!!
-                val newName = "scan_${Date().format(FORMAT_NEW_FILE)}.${geniusScanFile.extension}"
-                val scanFile = java.io.File(geniusScanFile.parent, newName)
-                geniusScanFile.renameTo(scanFile)
+        if (requestCode == ScanFlow.SCAN_REQUEST && resultCode == RESULT_OK) scanResultProcessing(intent)
+    }
 
-                val uri = FileProvider.getUriForFile(this@MainActivity, getString(R.string.FILE_AUTHORITY), scanFile)
+    private fun scanResultProcessing(intent: Intent?) {
+        try {
+            val geniusScanFile = ScanFlow.getScanResultFromActivityResult(intent).multiPageDocument!!
+            val newName = "scan_${Date().format(FORMAT_NEW_FILE)}.${geniusScanFile.extension}"
+            val scanFile = java.io.File(geniusScanFile.parent, newName)
+            geniusScanFile.renameTo(scanFile)
 
-                Intent(this, SaveExternalFilesActivity::class.java).apply {
-                    action = Intent.ACTION_SEND
-                    putExtra(Intent.EXTRA_STREAM, uri)
-                    type = "/pdf"
-                    startActivity(this)
-                }
-            } catch (exception: Exception) {
-                exception.printStackTrace()
-                Sentry.captureException(exception)
-                showSnackbar(R.string.anErrorHasOccurred)
+            val uri = FileProvider.getUriForFile(this@MainActivity, getString(R.string.FILE_AUTHORITY), scanFile)
+
+            val fileListFragment = getNavHostFragment().childFragmentManager.fragments.getOrNull(0) as? FileListFragment
+
+            Intent(this, SaveExternalFilesActivity::class.java).apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_STREAM, uri)
+                putExtras(
+                    SaveExternalFilesActivityArgs(
+                        userId = AccountUtils.currentUserId,
+                        userDriveId = AccountUtils.currentDriveId,
+                        folderId = fileListFragment?.folderId ?: -1
+                    ).toBundle()
+                )
+                type = "/pdf"
+                startActivity(this)
             }
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+            Sentry.captureException(exception)
+            showSnackbar(R.string.anErrorHasOccurred)
         }
     }
 
