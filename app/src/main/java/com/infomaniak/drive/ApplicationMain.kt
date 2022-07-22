@@ -68,7 +68,6 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import org.matomo.sdk.Tracker
-import java.io.File
 import java.util.*
 
 class ApplicationMain : Application(), ImageLoaderFactory {

@@ -235,7 +235,7 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
-        if (requestCode == ScanFlow.SCAN_REQUEST) {
+        if (requestCode == ScanFlow.SCAN_REQUEST && resultCode == RESULT_OK) {
             try {
                 val geniusScanFile = ScanFlow.getScanResultFromActivityResult(intent).multiPageDocument!!
                 val newName = "scan_${Date().format(FORMAT_NEW_FILE)}.${geniusScanFile.extension}"

@@ -23,20 +23,21 @@ import com.infomaniak.drive.R
 import java.io.File
 import java.io.FileOutputStream
 
-object OcrUtils {
+object GeniusScanUtils {
 
-    private val listLang = arrayOf(
-        Pair("eng", R.raw.eng),
+    private val supportedLanguages = arrayOf(
         Pair("fra", R.raw.fra),
-        Pair("ita", R.raw.ita),
         Pair("deu", R.raw.deu),
+        Pair("eng", R.raw.eng),
+        Pair("ita", R.raw.ita),
         Pair("spa", R.raw.spa)
     )
 
     fun Context.getOcrConfiguration(): ScanConfiguration.OcrConfiguration {
         copyOcrDataFiles()
+
         return ScanConfiguration.OcrConfiguration().apply {
-            languages = listLang.map { it.first }
+            languages = supportedLanguages.map { it.first }
             languagesDirectory = getOCRdataDirectory()
         }
     }
@@ -48,7 +49,7 @@ object OcrUtils {
         if (ocrDirectory.exists()) return
         ocrDirectory.mkdir()
 
-        listLang.forEach { (lang, res) ->
+        supportedLanguages.forEach { (lang, res) ->
             resources?.openRawResource(res).use { inputStream ->
                 FileOutputStream(File(ocrDirectory, "$lang.traineddata")).use {
                     inputStream?.copyTo(it)
@@ -57,6 +58,10 @@ object OcrUtils {
         }
     }
 
-    private fun Context.getOCRdataDirectory() = java.io.File(getExternalFilesDir(null), "ocr_dir")
+    private fun Context.getOCRdataDirectory() = File(getExternalFilesDir(null), "ocr_dir")
+
+    fun Context.removeOldScanFiles() {
+        getExternalFilesDir(null)?.listFiles()?.forEach { if (it.isFile) it.delete() }
+    }
 
 }

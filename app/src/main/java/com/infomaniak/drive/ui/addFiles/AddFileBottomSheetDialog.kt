@@ -26,6 +26,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.documentfile.provider.DocumentFile
@@ -45,8 +46,9 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
+import com.infomaniak.drive.utils.GeniusScanUtils.getOcrConfiguration
+import com.infomaniak.drive.utils.GeniusScanUtils.removeOldScanFiles
 import com.infomaniak.drive.utils.MatomoUtils.trackNewElementEvent
-import com.infomaniak.drive.utils.OcrUtils.getOcrConfiguration
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.FORMAT_NEW_FILE
 import com.infomaniak.lib.core.utils.format
@@ -157,7 +159,15 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun scanDocuments() {
         trackNewElement("scan")
-        val scanConfiguration = ScanConfiguration().apply { ocrConfiguration = context?.getOcrConfiguration() }
+        context?.removeOldScanFiles()
+        val scanConfiguration = ScanConfiguration().apply {
+            context?.let {
+                backgroundColor = ContextCompat.getColor(it, R.color.previewBackground)
+                foregroundColor = ContextCompat.getColor(it, R.color.white)
+                highlightColor = ContextCompat.getColor(it, R.color.accent)
+                ocrConfiguration = it.getOcrConfiguration()
+            }
+        }
         ScanFlow.scanWithConfiguration(activity, scanConfiguration)
         dismiss()
     }
