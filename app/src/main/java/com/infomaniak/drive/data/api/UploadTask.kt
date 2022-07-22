@@ -247,15 +247,15 @@ class UploadTask(
 
         val availableHalfMemory = getAvailableHalfMemory()
 
-        if (chunkSize * limitParallelRequest >= availableHalfMemory) {
-            limitParallelRequest = 1 // We limit it to 1 because if we have more it throws OOF exceptions
-        }
-
         if (chunkSize >= availableHalfMemory) {
             chunkSize = availableHalfMemory.toInt()
         }
 
         if (chunkSize == 0) throw OutOfMemoryError("chunk size is 0")
+
+        if (chunkSize * limitParallelRequest >= availableHalfMemory) {
+            limitParallelRequest = 1 // We limit it to 1 because if we have more it throws OOF exceptions
+        }
     }
 
     private fun ValidChunks.needToResetUpload(): Boolean {
