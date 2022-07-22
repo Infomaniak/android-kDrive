@@ -68,11 +68,13 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import org.matomo.sdk.Tracker
+import java.io.File
 import java.util.*
 
 class ApplicationMain : Application(), ImageLoaderFactory {
 
     val matomoTracker: Tracker by lazy { buildTracker() }
+    var geniusScanIsReady = false
 
     override fun onCreate() {
         super.onCreate()
@@ -106,10 +108,13 @@ class ApplicationMain : Application(), ImageLoaderFactory {
 
         runBlocking { initRealm() }
 
-        try {
+        geniusScanIsReady = try {
             GeniusScanSDK.init(this, BuildConfig.GENIUS_SCAN_KEY)
-        } catch (e: LicenseException) {
+            true
+        } catch (licenseException: LicenseException) {
+            licenseException.printStackTrace()
             Log.e("GeniusScanSDK", "The license is expired or invalid")
+            false
         }
 
         AccountUtils.reloadApp = { bundle ->

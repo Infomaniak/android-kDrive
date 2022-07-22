@@ -27,6 +27,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.FileProvider
+import androidx.core.view.isVisible
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -34,6 +35,7 @@ import androidx.navigation.fragment.findNavController
 import com.geniusscansdk.scanflow.ScanConfiguration
 import com.geniusscansdk.scanflow.ScanFlow
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.drive.ApplicationMain
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.models.CreateFile
@@ -106,6 +108,8 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         gridsCreate.setOnClickListener { createFile(File.Office.GRIDS) }
         formCreate.setOnClickListener { createFile(File.Office.FORM) }
         noteCreate.setOnClickListener { createFile(File.Office.TXT) }
+
+        documentScanning.isVisible = (context?.applicationContext as ApplicationMain).geniusScanIsReady
     }
 
     override fun onDismiss(dialog: DialogInterface) {
@@ -152,8 +156,13 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun scanDocuments() {
         trackNewElement("scan")
+        removeOldScanFiles()
         ScanFlow.scanWithConfiguration(activity, ScanConfiguration())
         dismiss()
+    }
+
+    private fun removeOldScanFiles() {
+        context?.getExternalFilesDir(null)?.listFiles()?.forEach { if (it.isFile) it.delete() }
     }
 
     private fun createFolder() {

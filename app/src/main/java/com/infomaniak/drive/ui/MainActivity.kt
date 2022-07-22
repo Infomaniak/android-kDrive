@@ -73,9 +73,12 @@ import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.Utils.getRootName
+import com.infomaniak.lib.core.utils.FORMAT_NEW_FILE
 import com.infomaniak.lib.core.utils.LiveDataNetworkStatus
+import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
+import com.infomaniak.lib.core.utils.format
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -234,22 +237,23 @@ class MainActivity : BaseActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
         if (requestCode == ScanFlow.SCAN_REQUEST) {
             try {
-                val scanResult = ScanFlow.getScanResultFromActivityResult(intent)
+                val geniusScanFile = ScanFlow.getScanResultFromActivityResult(intent).multiPageDocument!!
+                val newName = "scan_${Date().format(FORMAT_NEW_FILE)}.${geniusScanFile.extension}"
+                val scanFile = java.io.File(geniusScanFile.parent, newName)
+                geniusScanFile.renameTo(scanFile)
 
-                val uri = FileProvider.getUriForFile(
-                    this@MainActivity, getString(R.string.FILE_AUTHORITY),
-                    scanResult.multiPageDocument!!
-                )
+                val uri = FileProvider.getUriForFile(this@MainActivity, getString(R.string.FILE_AUTHORITY), scanFile)
 
                 Intent(this, SaveExternalFilesActivity::class.java).apply {
                     action = Intent.ACTION_SEND
                     putExtra(Intent.EXTRA_STREAM, uri)
-                    type = "*/*"
+                    type = "/pdf"
                     startActivity(this)
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                // There was an error during the scan flow. Check the exception for more details.
+            } catch (exception: Exception) {
+                exception.printStackTrace()
+                Sentry.captureException(exception)
+                showSnackbar(R.string.anErrorHasOccurred)
             }
         }
     }
