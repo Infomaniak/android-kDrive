@@ -25,19 +25,19 @@ import java.io.FileOutputStream
 
 object GeniusScanUtils {
 
-    private val supportedLanguages = arrayOf(
-        Pair("fra", R.raw.fra),
-        Pair("deu", R.raw.deu),
-        Pair("eng", R.raw.eng),
-        Pair("ita", R.raw.ita),
-        Pair("spa", R.raw.spa)
+    private val supportedLanguages = mapOf(
+        "fra" to R.raw.fra,
+        "deu" to R.raw.deu,
+        "eng" to R.raw.eng,
+        "ita" to R.raw.ita,
+        "spa" to R.raw.spa
     )
 
     fun Context.getOcrConfiguration(): ScanConfiguration.OcrConfiguration {
         copyOcrDataFiles()
 
         return ScanConfiguration.OcrConfiguration().apply {
-            languages = supportedLanguages.map { it.first }
+            languages = supportedLanguages.keys.toList()
             languagesDirectory = getOCRdataDirectory()
         }
     }

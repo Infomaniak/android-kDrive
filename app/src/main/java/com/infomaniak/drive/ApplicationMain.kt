@@ -57,6 +57,7 @@ import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.clearStack
 import com.infomaniak.lib.login.ApiToken
+import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryOptions
 import io.sentry.android.core.SentryAndroid
@@ -113,6 +114,7 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         } catch (licenseException: LicenseException) {
             licenseException.printStackTrace()
             Log.e("GeniusScanSDK", "The license is expired or invalid")
+            Sentry.captureException(licenseException)
             false
         }
 
