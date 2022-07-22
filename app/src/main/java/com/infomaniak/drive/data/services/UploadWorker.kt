@@ -64,6 +64,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     var currentUploadFile: UploadFile? = null
     var currentUploadTask: UploadTask? = null
     var uploadedCount = 0
+    var pendingCount = 0
 
     override suspend fun doWork(): Result {
 
@@ -130,7 +131,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private suspend fun startSyncFiles(): Result = withContext(Dispatchers.IO) {
         val uploadFiles = UploadFile.getAllPendingUploads()
-        var pendingCount = uploadFiles.size
+        pendingCount = uploadFiles.size
 
         if (pendingCount > 0) applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
 
@@ -170,7 +171,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         currentUploadFile = this@initUpload
         applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
-        updateUploadCountNotification(this@initUpload, pendingCount)
+        updateUploadCountNotification(applicationContext, this@initUpload, pendingCount)
         initOkHttpClient()
 
         try {
@@ -321,15 +322,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         else -> ""
     }
 
-    private fun CoroutineScope.updateUploadCountNotification(uploadFile: UploadFile, pendingCount: Int) {
-        launch {
-            // We wait a little otherwise it is too fast and the notification may not be updated
-            delay(NotificationUtils.ELAPSED_TIME)
-            ensureActive()
-            uploadFile.setupCurrentUploadNotification(applicationContext, pendingCount)
-        }
-    }
-
     private fun CoroutineScope.getLocalLastMediasAsync(
         syncSettings: SyncSettings,
         contentUri: Uri,
@@ -436,6 +428,15 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             return WorkQuery.Builder.fromUniqueWorkNames(listOf(TAG))
                 .addStates(states)
                 .build()
+        }
+
+        fun CoroutineScope.updateUploadCountNotification(context: Context, uploadFile: UploadFile, pendingCount: Int) {
+            launch {
+                // We wait a little otherwise it is too fast and the notification may not be updated
+                delay(NotificationUtils.ELAPSED_TIME)
+                ensureActive()
+                uploadFile.setupCurrentUploadNotification(context, pendingCount)
+            }
         }
 
         fun Context.showSyncConfigNotification() {

@@ -436,6 +436,11 @@
                                 <LayoutPositions />
                               </value>
                             </entry>
+                            <entry key="action_fileListFragment_to_importFileDialog">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
                             <entry key="action_fileListFragment_to_previewSliderFragment">
                               <value>
                                 <LayoutPositions />
@@ -561,6 +566,18 @@
                               </value>
                             </entry>
                           </map>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
+                  <entry key="importFileDialog">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="764" />
+                            <option name="y" value="5967" />
+                          </Point>
                         </option>
                       </LayoutPositions>
                     </value>

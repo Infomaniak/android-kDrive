@@ -49,11 +49,11 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.Companion.getCloudAndFileUris
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
-import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragmentArgs
+import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.lib.core.utils.showToast
 import kotlinx.android.synthetic.main.dialog_download_progress.view.*
 import kotlinx.android.synthetic.main.dialog_name_prompt.view.*
@@ -286,8 +286,7 @@ object Utils {
     fun getInvalidFileNameCharacter(fileName: String): String? = Regex("[\\\\/:*?\"<>|]").find(fileName)?.value
 
     fun copyDataToUploadCache(context: Context, file: java.io.File, fileModifiedAt: Date): Uri {
-        val folder = java.io.File(context.cacheDir, UploadWorker.UPLOAD_FOLDER).apply { if (!exists()) mkdirs() }
-        val outputFile = java.io.File(folder, file.toUri().hashCode().toString()).apply {
+        val outputFile = java.io.File(context.uploadFolder, file.toUri().hashCode().toString()).apply {
             if (exists()) delete()
             setLastModified(fileModifiedAt.time)
         }

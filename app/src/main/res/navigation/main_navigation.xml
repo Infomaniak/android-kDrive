@@ -91,6 +91,9 @@
         <action
             android:id="@+id/action_fileListFragment_to_downloadProgressDialog"
             app:destination="@id/downloadProgressDialog" />
+        <action
+            android:id="@+id/action_fileListFragment_to_importFileDialog"
+            app:destination="@id/importFileDialog" />
     </fragment>
 
     <fragment
@@ -965,6 +968,22 @@
             android:name="isOpenBookmark"
             android:defaultValue="false"
             app:argType="boolean" />
+    </dialog>
+
+    <dialog
+        android:id="@+id/importFileDialog"
+        android:name="com.infomaniak.drive.ui.addFiles.ImportFilesDialog"
+        android:label="ImportFileDialog"
+        tools:layout="@layout/dialog_import_files">
+        <argument
+            android:name="folderId"
+            app:argType="integer" />
+        <argument
+            android:name="driveId"
+            app:argType="integer" />
+        <argument
+            android:name="importIntent"
+            app:argType="android.content.Intent" />
     </dialog>
 
     <fragment
