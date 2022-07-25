@@ -376,9 +376,9 @@ class UploadTask(
         when (this?.error?.code) {
             "file_already_exists_error" -> Unit
             "lock_error" -> throw LockErrorException()
-            "object_not_found" -> throw FolderNotFoundException()
             "quota_exceeded_error" -> throw QuotaExceededException()
             "not_authorized" -> throw NotAuthorizedException()
+            "upload_destination_not_found_error", "upload_destination_not_writable_error" -> throw FolderNotFoundException()
             "upload_not_terminated" -> {
                 // Upload finish with 0 chunks uploaded
                 // Upload finish with a different expected number of chunks
