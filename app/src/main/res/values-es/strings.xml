@@ -43,6 +43,7 @@
     <string name="allDisabled">Desactivado</string>
     <string name="allDuplicateFileName">%1$s - Copiado%2$s</string>
     <string name="allEmptyInputError">Este campo no puede estar vacío</string>
+    <string name="allErrorFeatureNotAvailableInFdroid">Función no disponible desde F-Droid</string>
     <string name="allFileAddFavoris">%s añadido a favoritos</string>
     <string name="allFileAddRightError">No tienes los derechos para acceder a los archivos en esta carpeta.</string>
     <string name="allFileDeleteFavoris">%s eliminado de favoritos</string>

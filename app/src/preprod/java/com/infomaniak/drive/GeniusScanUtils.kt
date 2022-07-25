@@ -19,9 +19,24 @@ package com.infomaniak.drive
 
 import android.app.Activity
 import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.infomaniak.drive.ui.MainActivity
 
-fun Context.checkUpdateIsAvailable(onResult: (updateIsAvailable: Boolean) -> Unit) {
-    onResult(false)
+object GeniusScanUtils {
+
+    const val SCAN_REQUEST = -1
+
+    fun Context.initGeniusScanSdk() = true
+
+    fun Activity.startScanFlow() {
+        MaterialAlertDialogBuilder(this, R.style.DialogStyle)
+            .setTitle(R.string.allErrorFeatureNotAvailableInFdroid)
+            .setPositiveButton("Ok") { _: DialogInterface?, _: Int -> }
+            .show()
+    }
+
+    fun MainActivity.scanResultProcessing(intent: Intent?) = Unit
+
 }
-
-fun Activity.launchInAppReview() = Unit

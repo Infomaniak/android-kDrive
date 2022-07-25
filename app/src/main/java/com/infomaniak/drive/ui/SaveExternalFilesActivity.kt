@@ -207,7 +207,9 @@ class SaveExternalFilesActivity : BaseActivity() {
     private fun fetchFolder() = with(selectDriveViewModel) {
         saveExternalFilesViewModel.folderId.observe(this@SaveExternalFilesActivity) { folderId ->
 
-            val folder = if (selectedUserId.value == null || selectedDrive.value?.id == null || folderId == null) {
+            val folder = if (selectedUserId.value == null || selectedDrive.value?.id == null
+                || folderId == null || folderId < 1
+            ) {
                 null
             } else {
                 val userDrive = UserDrive(userId = selectedUserId.value!!, driveId = selectedDrive.value!!.id)

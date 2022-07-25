@@ -23,7 +23,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
-import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationManagerCompat
 import coil.ImageLoader
@@ -34,9 +33,8 @@ import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import com.facebook.stetho.Stetho
 import com.facebook.stetho.okhttp3.StethoInterceptor
-import com.geniusscansdk.core.GeniusScanSDK
-import com.geniusscansdk.core.LicenseException
 import com.infomaniak.drive.BuildConfig.DRIVE_API
+import com.infomaniak.drive.GeniusScanUtils.initGeniusScanSdk
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.services.MqttClientWrapper
@@ -57,7 +55,6 @@ import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.clearStack
 import com.infomaniak.lib.login.ApiToken
-import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryOptions
 import io.sentry.android.core.SentryAndroid
@@ -108,15 +105,7 @@ class ApplicationMain : Application(), ImageLoaderFactory {
 
         runBlocking { initRealm() }
 
-        geniusScanIsReady = try {
-            GeniusScanSDK.init(this, BuildConfig.GENIUS_SCAN_KEY)
-            true
-        } catch (licenseException: LicenseException) {
-            licenseException.printStackTrace()
-            Log.e("GeniusScanSDK", "The license is expired or invalid")
-            Sentry.captureException(licenseException)
-            false
-        }
+        geniusScanIsReady = initGeniusScanSdk()
 
         AccountUtils.reloadApp = { bundle ->
             val intent = Intent(this, LaunchActivity::class.java)

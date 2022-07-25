@@ -30,6 +30,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import io.realm.*
@@ -50,7 +51,6 @@ object FileController {
     // Example: We did it when we added Categories & Colored folders, to automatically display them when updating the app.
     private const val MIN_VERSION_CODE = 4_02_000_08
 
-    const val ROOT_ID = Utils.ROOT_ID
     const val FAVORITES_FILE_ID = -1
     const val MY_SHARES_FILE_ID = -2
     const val RECENT_CHANGES_FILE_ID = -4
