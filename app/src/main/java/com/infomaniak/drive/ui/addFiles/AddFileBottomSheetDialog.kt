@@ -32,10 +32,9 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.geniusscansdk.scanflow.ScanConfiguration
-import com.geniusscansdk.scanflow.ScanFlow
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.ApplicationMain
+import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.CreateFile
 import com.infomaniak.drive.data.models.File
@@ -45,8 +44,6 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListFragmentDirections
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
-import com.infomaniak.drive.utils.GeniusScanUtils.getOcrConfiguration
-import com.infomaniak.drive.utils.GeniusScanUtils.removeOldScanFiles
 import com.infomaniak.drive.utils.MatomoUtils.trackNewElementEvent
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.FORMAT_NEW_FILE
@@ -155,16 +152,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun scanDocuments() {
         trackNewElement("scan")
-        context?.removeOldScanFiles()
-        val scanConfiguration = ScanConfiguration().apply {
-            context?.let {
-                backgroundColor = ContextCompat.getColor(it, R.color.previewBackground)
-                foregroundColor = ContextCompat.getColor(it, R.color.white)
-                highlightColor = ContextCompat.getColor(it, R.color.accent)
-                ocrConfiguration = it.getOcrConfiguration()
-            }
-        }
-        ScanFlow.scanWithConfiguration(activity, scanConfiguration)
+        activity?.startScanFlow()
         dismiss()
     }
 

@@ -54,6 +54,7 @@
     <string name="allDisabled">Disabled</string>
     <string name="allDuplicateFileName">%1$s - Copy%2$s</string>
     <string name="allEmptyInputError">This field cannot be empty</string>
+    <string name="allErrorFeatureNotAvailableInFdroid">Feature not available since F-Droid</string>
     <string name="allFileAddFavoris">%s added to favorites</string>
     <string name="allFileAddRightError">You’re not authorised to add files to this folder.</string>
     <string name="allFileDeleteFavoris">%s deleted from favorites</string>

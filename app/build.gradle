@@ -56,6 +56,13 @@ android {
         standard {
             dimension 'distribution'
             apply plugin: 'com.google.gms.google-services'
+
+            dependencies {
+                def geniusscansdk_version = '4.5.2'
+                implementation "com.geniusscansdk:gssdk-core:$geniusscansdk_version"
+                implementation "com.geniusscansdk:gssdk-ocr:$geniusscansdk_version"
+                implementation "com.geniusscansdk:gssdk-scanflow:$geniusscansdk_version"
+            }
         }
         fdroid { dimension 'distribution' }
         preprod {
@@ -116,7 +123,7 @@ dependencies {
     implementation 'androidx.viewpager2:viewpager2:1.1.0-beta01'
     implementation 'androidx.webkit:webkit:1.4.0'
 
-    def exoplayer_version = '2.18.0'
+    def exoplayer_version = '2.18.1'
     implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer-ui:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
@@ -127,11 +134,6 @@ dependencies {
     implementation 'com.github.rubensousa:gravitysnaphelper:2.2.2'
     implementation 'com.tbuonomo:dotsindicator:4.2'
     implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
-
-    def geniusscansdk_version = '4.5.2'
-    implementation "com.geniusscansdk:gssdk-core:$geniusscansdk_version"
-    implementation "com.geniusscansdk:gssdk-ocr:$geniusscansdk_version"
-    implementation "com.geniusscansdk:gssdk-scanflow:$geniusscansdk_version"
 
     implementation 'io.realm:android-adapters:4.0.0'
 
