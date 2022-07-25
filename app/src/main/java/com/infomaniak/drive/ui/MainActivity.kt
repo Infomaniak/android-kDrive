@@ -39,7 +39,6 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.get
 import androidx.core.view.isVisible
@@ -52,12 +51,10 @@ import androidx.navigation.fragment.NavHostFragment
 import coil.ImageLoader
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
-import com.geniusscansdk.scanflow.ScanFlow
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.navigation.NavigationBarItemView
-import com.infomaniak.drive.BuildConfig
-import com.infomaniak.drive.R
-import com.infomaniak.drive.checkUpdateIsAvailable
+import com.infomaniak.drive.*
+import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
@@ -65,7 +62,6 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.UploadNotifications
-import com.infomaniak.drive.launchInAppReview
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.*
@@ -74,12 +70,9 @@ import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.Utils.getRootName
-import com.infomaniak.lib.core.utils.FORMAT_NEW_FILE
 import com.infomaniak.lib.core.utils.LiveDataNetworkStatus
-import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
-import com.infomaniak.lib.core.utils.format
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -238,39 +231,10 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
-        if (requestCode == ScanFlow.SCAN_REQUEST && resultCode == RESULT_OK) scanResultProcessing(intent)
+        if (requestCode == GeniusScanUtils.SCAN_REQUEST && resultCode == RESULT_OK) scanResultProcessing(intent)
     }
 
-    private fun scanResultProcessing(intent: Intent?) {
-        try {
-            val geniusScanFile = ScanFlow.getScanResultFromActivityResult(intent).multiPageDocument!!
-            val newName = "scan_${Date().format(FORMAT_NEW_FILE)}.${geniusScanFile.extension}"
-            val scanFile = java.io.File(geniusScanFile.parent, newName)
-            geniusScanFile.renameTo(scanFile)
-
-            val uri = FileProvider.getUriForFile(this@MainActivity, getString(R.string.FILE_AUTHORITY), scanFile)
-
-            val fileListFragment = getNavHostFragment().childFragmentManager.fragments.getOrNull(0) as? FileListFragment
-
-            Intent(this, SaveExternalFilesActivity::class.java).apply {
-                action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_STREAM, uri)
-                putExtras(
-                    SaveExternalFilesActivityArgs(
-                        userId = AccountUtils.currentUserId,
-                        userDriveId = AccountUtils.currentDriveId,
-                        folderId = fileListFragment?.folderId ?: -1
-                    ).toBundle()
-                )
-                type = "/pdf"
-                startActivity(this)
-            }
-        } catch (exception: Exception) {
-            exception.printStackTrace()
-            Sentry.captureException(exception)
-            showSnackbar(R.string.anErrorHasOccurred)
-        }
-    }
+    fun getFileListFragment() = getNavHostFragment().childFragmentManager.fragments.getOrNull(0) as? FileListFragment
 
     override fun onResume() {
         super.onResume()
