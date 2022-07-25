@@ -24,5 +24,4 @@ fun Context.checkUpdateIsAvailable(onResult: (updateIsAvailable: Boolean) -> Uni
     onResult(false)
 }
 
-fun Activity.launchInAppReview() {
-}
+fun Activity.launchInAppReview() = Unit
