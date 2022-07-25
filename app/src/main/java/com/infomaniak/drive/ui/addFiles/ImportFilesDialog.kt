@@ -54,6 +54,11 @@ class ImportFilesDialog : DialogFragment() {
     private var currentImportFile: IoFile? = null
     private var successCount = 0
 
+    private val documentProjection = arrayOf(
+        DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+        DocumentsContract.Document.COLUMN_LAST_MODIFIED
+    )
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val countMessage = requireContext().resources.getQuantityString(R.plurals.fileDetailsInfoFile, importCount, importCount)
         dialogBinding.contentText.text = "${getString(R.string.uploadInProgressTitle)} $countMessage"
@@ -113,37 +118,21 @@ class ImportFilesDialog : DialogFragment() {
 
     private suspend fun initUpload(uri: Uri) = withContext(Dispatchers.IO) {
         requireContext().contentResolver.apply {
-            val documentProjection = arrayOf(
-                DocumentsContract.Document.COLUMN_DISPLAY_NAME,
-                DocumentsContract.Document.COLUMN_LAST_MODIFIED
-            )
             query(uri, documentProjection, null, null, null)?.use { cursor ->
                 if (cursor.moveToFirst()) {
                     val fileName = SyncUtils.getFileName(cursor)
                     val fileModifiedIndex = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_LAST_MODIFIED)
-                    val fileModifiedAt = cursor.getLongOrNull(fileModifiedIndex)
-                        ?.let(::Date) ?: Date()
-
-                    val memoryInfo = requireContext().getAvailableMemory()
-                    val isLowMemory = memoryInfo.lowMemory || memoryInfo.availMem < UploadTask.chunkSize
+                    val fileModifiedAt = cursor.getLongOrNull(fileModifiedIndex)?.let(::Date) ?: Date()
 
                     when {
-                        isLowMemory -> withContext(Dispatchers.Main) {
+                        isLowMemory() -> withContext(Dispatchers.Main) {
                             showSnackbar(R.string.uploadOutOfMemoryError, true)
                         }
                         fileName == null -> withContext(Dispatchers.Main) {
                             showSnackbar(R.string.anErrorHasOccurred, true)
                         }
                         else -> {
-                            val outputFile = IoFile(requireContext().uploadFolder, uri.hashCode().toString()).apply {
-                                if (exists()) delete()
-                                setLastModified(fileModifiedAt.time)
-                                createNewFile()
-                                currentImportFile = this
-                                context?.contentResolver?.openInputStream(uri)?.use { inputStream ->
-                                    outputStream().use { inputStream.copyTo(it) }
-                                }
-                            }
+                            val outputFile = getOutputFile(uri, fileModifiedAt)
 
                             if (isActive) {
                                 UploadFile(
@@ -164,6 +153,23 @@ class ImportFilesDialog : DialogFragment() {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private fun isLowMemory(): Boolean {
+        val memoryInfo = requireContext().getAvailableMemory()
+        return memoryInfo.lowMemory || memoryInfo.availMem < UploadTask.chunkSize
+    }
+
+    private fun getOutputFile(uri: Uri, fileModifiedAt: Date): IoFile {
+        return IoFile(requireContext().uploadFolder, uri.hashCode().toString()).apply {
+            if (exists()) delete()
+            setLastModified(fileModifiedAt.time)
+            createNewFile()
+            currentImportFile = this
+            context?.contentResolver?.openInputStream(uri)?.use { inputStream ->
+                outputStream().use { inputStream.copyTo(it) }
             }
         }
     }
