@@ -51,7 +51,7 @@ class ImportFilesDialog : DialogFragment() {
     private val navArgs: ImportFilesDialogArgs by navArgs()
     private val importCount by lazy { navArgs.importIntent.clipData?.itemCount ?: 1 }
 
-    private var currentImportFile: IoFile? = null
+    private var currentImportFile: IOFile? = null
     private var successCount = 0
 
     private val documentProjection = arrayOf(
@@ -162,8 +162,8 @@ class ImportFilesDialog : DialogFragment() {
         return memoryInfo.lowMemory || memoryInfo.availMem < UploadTask.chunkSize
     }
 
-    private fun getOutputFile(uri: Uri, fileModifiedAt: Date): IoFile {
-        return IoFile(requireContext().uploadFolder, uri.hashCode().toString()).apply {
+    private fun getOutputFile(uri: Uri, fileModifiedAt: Date): IOFile {
+        return IOFile(requireContext().uploadFolder, uri.hashCode().toString()).apply {
             if (exists()) delete()
             setLastModified(fileModifiedAt.time)
             createNewFile()

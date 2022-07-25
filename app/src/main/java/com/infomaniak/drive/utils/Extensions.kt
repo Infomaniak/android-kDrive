@@ -93,9 +93,9 @@ import kotlin.math.roundToInt
 
 
 typealias FileId = Int
+typealias IOFile = java.io.File
 typealias IsComplete = Boolean
 typealias Position = Int
-typealias IoFile = java.io.File
 
 fun Context.getAvailableMemory(): ActivityManager.MemoryInfo {
     val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
