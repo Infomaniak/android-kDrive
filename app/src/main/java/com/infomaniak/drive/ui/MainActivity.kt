@@ -230,8 +230,9 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
-        if (requestCode == GeniusScanUtils.SCAN_REQUEST && resultCode == RESULT_OK) scanResultProcessing(intent)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == GeniusScanUtils.SCAN_REQUEST && resultCode == RESULT_OK) scanResultProcessing(data)
     }
 
     fun getFileListFragment() = getNavHostFragment().childFragmentManager.fragments.getOrNull(0) as? FileListFragment
