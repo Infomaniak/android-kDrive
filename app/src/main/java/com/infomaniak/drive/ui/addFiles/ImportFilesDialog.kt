@@ -60,8 +60,8 @@ class ImportFilesDialog : DialogFragment() {
     )
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val countMessage = requireContext().resources.getQuantityString(R.plurals.fileDetailsInfoFile, importCount, importCount)
-        dialogBinding.contentText.text = "${getString(R.string.uploadInProgressTitle)} $countMessage"
+        val countMessage = requireContext().resources.getQuantityString(R.plurals.preparingToUpload, importCount, importCount)
+        dialogBinding.description.text = countMessage
 
         return MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
             .setView(dialogBinding.root)

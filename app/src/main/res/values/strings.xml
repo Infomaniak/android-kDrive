@@ -550,6 +550,10 @@
     <string name="onBoardingTitle2">Work together in one place and become more efficient</string>
     <string name="onBoardingTitle3">Save your memories securely</string>
     <string name="picturesNoFile">No photo at this time</string>
+    <plurals name="preparingToUpload">
+        <item quantity="one">Preparing to upload 1 file</item>
+        <item quantity="other">Preparing to upload %d files</item>
+    </plurals>
     <string name="previewDownloadIndication">Loading in progress, please wait…</string>
     <string name="previewLoadError">Unable to load preview</string>
     <string name="previewNoPreview">This file appears to have no preview.</string>

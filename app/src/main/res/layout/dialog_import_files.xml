@@ -19,7 +19,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="@dimen/marginStandardMedium">
+    android:padding="@dimen/marginStandardMedium"
+    tools:context=".ui.addFiles.ImportFilesDialog">
 
     <ProgressBar
         android:layout_width="@dimen/marginLarge"
@@ -27,10 +28,10 @@
         android:indeterminate="true" />
 
     <TextView
-        android:id="@+id/contentText"
+        android:id="@+id/description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginStart="@dimen/marginStandardMedium"
-        tools:text="@tools:sample/lorem" />
+        tools:text="@string/uploadInProgressTitle" />
 </LinearLayout>
