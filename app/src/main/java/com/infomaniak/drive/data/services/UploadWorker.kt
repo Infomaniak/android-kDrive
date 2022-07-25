@@ -203,8 +203,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     }
 
     private suspend fun UploadFile.initUploadSchemeContent(uri: Uri): Boolean {
-        SyncUtils.checkDocumentProviderPermissions(applicationContext, uri)
-
         return contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val mediaSize = SyncUtils.getFileSize(cursor)

@@ -20,7 +20,6 @@ package com.infomaniak.drive.utils
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
-import android.net.Uri
 import android.os.Build
 import android.provider.DocumentsContract
 import android.provider.MediaStore
@@ -175,13 +174,4 @@ object SyncUtils {
         cancelPeriodicSync()
     }
 
-    /**
-     * Check if uri is document and retain persistable uri
-     * @throws SecurityException : Doesn't retain access to the URI if the associated document is moved or deleted
-     */
-    fun checkDocumentProviderPermissions(context: Context, uri: Uri) {
-        if (DocumentsContract.isDocumentUri(context, uri)) {
-            context.contentResolver?.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-    }
 }
