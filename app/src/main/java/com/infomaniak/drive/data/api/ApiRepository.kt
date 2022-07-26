@@ -130,6 +130,8 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun getLastGallery(driveId: Int, page: Int = 1): ApiResponse<ArrayList<File>> {
+        val types = "&types[]=${ExtensionType.IMAGE.value}&types[]=${ExtensionType.VIDEO.value}"
+        val url = "${ApiRoutes.searchFiles(driveId, File.SortType.RECENT)}$types&${pagination(page)}"
         return callApi(url, GET)
     }
 

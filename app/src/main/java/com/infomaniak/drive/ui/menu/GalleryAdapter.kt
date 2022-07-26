@@ -17,13 +17,13 @@
  */
 package com.infomaniak.drive.ui.menu
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager
 import com.infomaniak.drive.utils.loadAny
@@ -78,6 +78,7 @@ class GalleryAdapter(
 
     private fun LoaderCardView.displayThumbnail(file: File) {
         stop()
+        videoViews.isVisible = file.getFileType() == ExtensionType.VIDEO
         preview.apply {
             loadAny(file.thumbnail())
             contentDescription = file.name
@@ -153,7 +154,7 @@ class GalleryAdapter(
         return addItemList
     }
 
-    fun addDuplicatedImages(context: Context) {
+    fun addDuplicatedImages() {
         var newestSectionTitle = itemList.firstOrNull()
         var index = 1
         for (file in duplicatedList) {

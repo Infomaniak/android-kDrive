@@ -440,11 +440,11 @@
     <string name="folderColorDescription">Cambia il colore delle tue cartelle per personalizzare e organizzare meglio il tuo kDrive a tuo piacimento.</string>
     <string name="folderColorTitle">Colore delle cartelle</string>
     <string name="folderDescription">Cartella personale o condivisa</string>
+    <string name="galleryTitle">Galleria</string>
     <string name="hintInputDirName">Nome della cartella</string>
     <string name="hintInputFileName">Nome del file</string>
     <string name="homeLastActivities">Attività recente</string>
     <string name="homeLastFilesTitle">Le mie ultime modifiche</string>
-    <string name="homeMyLastPictures">Le mie ultime immagini</string>
     <string name="homeNetworkUnavailableDescription">Se il dispositivo è offline gli elementi potrebbero non essere visibili.</string>
     <string name="homeNoActivities">Al momento non ci sono attività</string>
     <string name="homeNoActivitiesDescription">Dopo avere aggiunto i file, troverai le ultime attività svolte da te e dagli altri utenti del tuo kDrive.</string>

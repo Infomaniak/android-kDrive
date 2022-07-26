@@ -279,7 +279,7 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY) {
             val oldTotal = galleryAdapter.itemList.size
             val oldFirstItem = galleryAdapter.itemList.firstOrNull()
 
-            galleryAdapter.addDuplicatedImages(requireContext())
+            galleryAdapter.addDuplicatedImages()
             val newTotal = galleryAdapter.itemList.count()
             val newFirstItem = galleryAdapter.itemList.firstOrNull()
 

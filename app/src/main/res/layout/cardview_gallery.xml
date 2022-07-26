@@ -42,6 +42,36 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="ContentDescription" />
 
+        <View
+            android:id="@+id/videoBackgroundGradient"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/background_video_gallery_view"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <ImageView
+            android:id="@+id/videoDuration"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_margin="@dimen/marginStandardVerySmall"
+            android:contentDescription="@string/allVideo"
+            android:src="@drawable/ic_play_video"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/videoViews"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:constraint_referenced_ids="videoBackgroundGradient,videoDuration"
+            tools:visibility="visible" />
+
         <com.google.android.material.checkbox.MaterialCheckBox
             android:id="@+id/mediaChecked"
             android:layout_width="26dp"
