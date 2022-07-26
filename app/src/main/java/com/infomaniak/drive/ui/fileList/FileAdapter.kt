@@ -251,7 +251,10 @@ open class FileAdapter(
             }
         } else if (payloads.firstOrNull() is Boolean) {
             val isChecked = payloads.first() as Boolean
+            val isGrid = viewHolderType == DisplayType.GRID
             fileChecked.isChecked = isChecked
+            fileChecked.isVisible = isGrid || isChecked
+            filePreview.isVisible = isGrid || !isChecked
         } else {
             super.onBindViewHolder(holder, position, payloads)
         }
@@ -298,9 +301,9 @@ open class FileAdapter(
     private fun MaterialCardView.displayFileChecked(file: File, isGrid: Boolean) = with(multiSelectManager) {
         fileChecked.apply {
             isChecked = isSelectedFile(file)
-            isVisible = true
+            isVisible = isGrid || isSelectedFile(file)
         }
-        filePreview.isVisible = isGrid
+        filePreview.isVisible = isGrid || !isSelectedFile(file)
     }
 
     private fun MaterialCardView.displayFilePreview() {
