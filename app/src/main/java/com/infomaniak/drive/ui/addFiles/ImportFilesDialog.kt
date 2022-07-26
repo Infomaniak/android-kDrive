@@ -75,7 +75,7 @@ class ImportFilesDialog : DialogFragment() {
         val errorCount = importCount - successCount
 
         if (errorCount > 0) {
-            val errorMessage = resources.getQuantityString(R.plurals.importFailedDescription, errorCount, errorCount)
+            val errorMessage = resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount)
             showSnackbar(errorMessage, true)
         }
 
@@ -91,8 +91,7 @@ class ImportFilesDialog : DialogFragment() {
 
         try {
             if (clipData != null) {
-                val count = clipData.itemCount
-                for (i in 0 until count) {
+                for (i in 0 until clipData.itemCount) {
                     runCatching {
                         initUpload(clipData.getItemAt(i).uri)
                     }.onFailure {

@@ -26,7 +26,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
@@ -41,7 +40,6 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.ui.fileList.FileListFragmentDirections
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
 import com.infomaniak.drive.utils.MatomoUtils.trackNewElementEvent
@@ -204,11 +202,12 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private fun onSelectFilesResult(data: Intent?) {
         data?.let {
             findNavController().navigate(
-                FileListFragmentDirections.actionFileListFragmentToImportFileDialog(
+                R.id.importFileDialog,
+                ImportFilesDialogArgs(
                     folderId = currentFolderFile.id,
                     driveId = currentFolderFile.driveId,
                     importIntent = data
-                )
+                ).toBundle()
             )
         }
     }

@@ -91,9 +91,6 @@
         <action
             android:id="@+id/action_fileListFragment_to_downloadProgressDialog"
             app:destination="@id/downloadProgressDialog" />
-        <action
-            android:id="@+id/action_fileListFragment_to_importFileDialog"
-            app:destination="@id/importFileDialog" />
     </fragment>
 
     <fragment
