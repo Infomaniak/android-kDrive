@@ -71,9 +71,9 @@ class EspressoHomeUiTest : KDriveUiTest() {
     @DisplayName("Check the pictures tabs is correctly displayed when selected")
     @Test
     fun picturesTabIsDisplayed() {
-        clickOnHomeTabs(R.id.homePicturesButton)
+        clickOnHomeTabs(R.id.homeGalleryButton)
         try {
-            checkViewVisibility(true, R.id.picture)
+            checkViewVisibility(true, R.id.preview)
         } catch (error: Throwable) {
             checkViewVisibility(true, stringRes = R.string.picturesNoFile)
         }
