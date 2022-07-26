@@ -463,10 +463,6 @@
     <string name="homeNoPictures">No image at this time</string>
     <string name="homeSeeAllImages">View all my images</string>
     <string name="homeTitle">Welcome</string>
-    <plurals name="importFailedDescription">
-        <item quantity="one">%1$s could not be imported</item>
-        <item quantity="other">%1$d files could not be imported</item>
-    </plurals>
     <string name="inputExpirationDate">Expiry date</string>
     <string name="inputExpirationTime">Expiration time</string>
     <string name="lastEditsTitle">Most recent changes</string>
@@ -551,6 +547,10 @@
     <string name="onBoardingTitle2">Work together in one place and become more efficient</string>
     <string name="onBoardingTitle3">Save your memories securely</string>
     <string name="picturesNoFile">No photo at this time</string>
+    <plurals name="preparingToUpload">
+        <item quantity="one">Preparing to upload 1 file</item>
+        <item quantity="other">Preparing to upload %d files</item>
+    </plurals>
     <string name="previewDownloadIndication">Loading in progress, please wait…</string>
     <string name="previewLoadError">Unable to load preview</string>
     <string name="previewNoPreview">This file appears to have no preview.</string>

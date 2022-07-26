@@ -93,6 +93,7 @@ import kotlin.math.roundToInt
 
 
 typealias FileId = Int
+typealias IOFile = java.io.File
 typealias IsComplete = Boolean
 typealias Position = Int
 

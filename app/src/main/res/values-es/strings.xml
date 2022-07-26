@@ -452,10 +452,6 @@
     <string name="homeNoPictures">Todavía no hay imágenes</string>
     <string name="homeSeeAllImages">Ver todas mis imágenes</string>
     <string name="homeTitle">Recepción</string>
-    <plurals name="importFailedDescription">
-        <item quantity="one">%1$s no pudo ser importado</item>
-        <item quantity="other">No se han podido importar %1$d archivos</item>
-    </plurals>
     <string name="inputExpirationDate">Fecha de caducidad</string>
     <string name="inputExpirationTime">Tiempo de expiración</string>
     <string name="lastEditsTitle">Últimas modificaciones</string>
@@ -540,6 +536,10 @@
     <string name="onBoardingTitle2">Trabaja en grupo en un mismo lugar y gana en eficacia</string>
     <string name="onBoardingTitle3">Haz copia de seguridad de tus recuerdos</string>
     <string name="picturesNoFile">Todavía no hay fotos</string>
+    <plurals name="preparingToUpload">
+        <item quantity="one">Preparando la importación de 1 archivo</item>
+        <item quantity="other">Preparando la importación de %d archivos</item>
+    </plurals>
     <string name="previewDownloadIndication">Cambio en curso, espera…</string>
     <string name="previewLoadError">No se puede cargar la vista previa</string>
     <string name="previewNoPreview">Parece que este archivo no tiene vista previa.</string>

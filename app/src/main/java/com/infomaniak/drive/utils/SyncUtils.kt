@@ -20,12 +20,12 @@ package com.infomaniak.drive.utils
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
-import android.net.Uri
 import android.os.Build
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
+import androidx.core.database.getStringOrNull
 import androidx.fragment.app.FragmentActivity
 import androidx.work.*
 import com.infomaniak.drive.data.models.SyncSettings
@@ -42,10 +42,12 @@ object SyncUtils {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.MediaColumns.DATE_TAKEN
         else "datetaken"
 
+    inline val Context.uploadFolder get() = java.io.File(cacheDir, UploadWorker.UPLOAD_FOLDER).apply { if (!exists()) mkdirs() }
+
     fun getFileName(cursor: Cursor): String? {
         val columnIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
         return when {
-            columnIndex != -1 -> cursor.getString(columnIndex)
+            columnIndex != -1 -> cursor.getStringOrNull(columnIndex)
             else -> null
         }
     }
@@ -172,13 +174,4 @@ object SyncUtils {
         cancelPeriodicSync()
     }
 
-    /**
-     * Check if uri is document and retain persistable uri
-     * @throws SecurityException : Doesn't retain access to the URI if the associated document is moved or deleted
-     */
-    fun checkDocumentProviderPermissions(context: Context, uri: Uri) {
-        if (DocumentsContract.isDocumentUri(context, uri)) {
-            context.contentResolver?.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-    }
 }

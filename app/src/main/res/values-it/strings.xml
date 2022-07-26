@@ -452,10 +452,6 @@
     <string name="homeNoPictures">Al momento non ci sono immagini</string>
     <string name="homeSeeAllImages">Mostra tutte le mie immagini</string>
     <string name="homeTitle">Home</string>
-    <plurals name="importFailedDescription">
-        <item quantity="one">%1$s non può essere importato</item>
-        <item quantity="other">%1$d file non possono essere importati</item>
-    </plurals>
     <string name="inputExpirationDate">Data di scadenza</string>
     <string name="inputExpirationTime">Tempo di scadenza</string>
     <string name="lastEditsTitle">Ultime modifiche</string>
@@ -540,6 +536,10 @@
     <string name="onBoardingTitle2">Collabora su una stessa punto e accresci la tua efficienza</string>
     <string name="onBoardingTitle3">Salva i tuoi ricordi in modo sicuro</string>
     <string name="picturesNoFile">Al momento non ci sono foto</string>
+    <plurals name="preparingToUpload">
+        <item quantity="one">Preparazione all’importazione di 1 file</item>
+        <item quantity="other">Preparazione all’importazione di %d file</item>
+    </plurals>
     <string name="previewDownloadIndication">Modifica in corso, attendere prego…</string>
     <string name="previewLoadError">Impossibile caricare l’anteprima</string>
     <string name="previewNoPreview">Sembra che il file non abbia anteprima.</string>

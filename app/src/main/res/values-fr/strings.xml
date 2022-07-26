@@ -452,10 +452,6 @@
     <string name="homeNoPictures">Aucune image pour le moment</string>
     <string name="homeSeeAllImages">Voir toutes mes images</string>
     <string name="homeTitle">Accueil</string>
-    <plurals name="importFailedDescription">
-        <item quantity="one">%1$s n’a pas pu être importé</item>
-        <item quantity="other">%1$d fichiers n’ont pas pu être importés</item>
-    </plurals>
     <string name="inputExpirationDate">Date d’expiration</string>
     <string name="inputExpirationTime">Heure d’expiration</string>
     <string name="lastEditsTitle">Dernières modifications</string>
@@ -540,6 +536,10 @@
     <string name="onBoardingTitle2">Travaillez ensemble au même endroit et gagnez en efficacité</string>
     <string name="onBoardingTitle3">Sauvegardez vos souvenirs en sécurité</string>
     <string name="picturesNoFile">Aucune photo pour le moment</string>
+    <plurals name="preparingToUpload">
+        <item quantity="one">Préparation de l’importation de 1 fichier</item>
+        <item quantity="other">Préparation de l’importation de %d fichiers</item>
+    </plurals>
     <string name="previewDownloadIndication">Chargement en cours, merci de patienter…</string>
     <string name="previewLoadError">Impossible de charger l’aperçu</string>
     <string name="previewNoPreview">Il semblerait que ce fichier n’ait pas d’aperçu.</string>

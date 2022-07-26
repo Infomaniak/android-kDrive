@@ -26,10 +26,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
-import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -37,7 +35,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.ApplicationMain
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.models.CreateFile
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
@@ -51,7 +48,6 @@ import com.infomaniak.lib.core.utils.FORMAT_NEW_FILE
 import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_add_file.*
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -74,8 +70,8 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private val selectFilesResultLauncher = registerForActivityResult(StartActivityForResult()) {
+        findNavController().popBackStack()
         it.whenResultIsOk { data -> onSelectFilesResult(data) }
-        dismiss()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -142,10 +138,8 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         if (uploadFilesPermissions.checkSyncPermissions()) {
             trackNewElement("uploadFile")
             documentUpload.isEnabled = false
-            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
                 type = "*/*"
-                flags = (Intent.FLAG_GRANT_READ_URI_PERMISSION
-                        or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
                 putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
                 addCategory(Intent.CATEGORY_OPENABLE)
             }
@@ -206,33 +200,15 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun onSelectFilesResult(data: Intent?) {
-        val clipData = data?.clipData
-        val uri = data?.data
-        var launchSync = false
-        var errorCount = 0
-
-        try {
-            if (clipData != null) {
-                val count = clipData.itemCount
-                for (i in 0 until count) {
-                    runCatching {
-                        initUpload(clipData.getItemAt(i).uri)
-                    }.onFailure {
-                        errorCount++
-                    }
-                    launchSync = true
-                }
-            } else if (uri != null) {
-                initUpload(uri)
-                launchSync = true
-            }
-        } catch (exception: Exception) {
-            errorCount++
-        } finally {
-            if (errorCount > 0) {
-                showSnackbar(resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount), true)
-            }
-            if (launchSync) requireContext().syncImmediately()
+        data?.let {
+            findNavController().navigate(
+                R.id.importFileDialog,
+                ImportFilesDialogArgs(
+                    folderId = currentFolderFile.id,
+                    driveId = currentFolderFile.driveId,
+                    importIntent = data
+                ).toBundle()
+            )
         }
     }
 
@@ -260,42 +236,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         } catch (exception: Exception) {
             exception.printStackTrace()
             showSnackbar(R.string.errorDeviceStorage, true)
-        }
-    }
-
-    @Throws(Exception::class)
-    private fun initUpload(uri: Uri) {
-        DocumentFile.fromSingleUri(requireContext(), uri)?.let { documentFile ->
-            val fileName = documentFile.name
-            val fileSize = documentFile.length()
-            val fileModifiedAt = Date(documentFile.lastModified())
-
-            val memoryInfo = requireContext().getAvailableMemory()
-            val isLowMemory = memoryInfo.lowMemory || memoryInfo.availMem < UploadTask.chunkSize
-
-            when {
-                isLowMemory -> {
-                    showSnackbar(R.string.uploadOutOfMemoryError, true)
-                }
-                fileName == null -> {
-                    showSnackbar(R.string.anErrorHasOccurred, true)
-                }
-                else -> {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        UploadFile(
-                            uri = uri.toString(),
-                            driveId = currentFolderFile.driveId,
-                            fileCreatedAt = fileModifiedAt,
-                            fileModifiedAt = fileModifiedAt,
-                            fileName = fileName,
-                            fileSize = fileSize,
-                            remoteFolder = currentFolderFile.id,
-                            type = UploadFile.Type.UPLOAD.name,
-                            userId = currentUserId,
-                        ).store()
-                    }
-                }
-            }
         }
     }
 

@@ -95,7 +95,6 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
 
             if (uri.scheme.equals(ContentResolver.SCHEME_CONTENT)) {
                 try {
-                    SyncUtils.checkDocumentProviderPermissions(context, uri)
                     context.contentResolver?.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
                         if (cursor.moveToFirst()) {
                             val size = SyncUtils.getFileSize(cursor)

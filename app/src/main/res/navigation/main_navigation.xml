@@ -986,6 +986,22 @@
             app:argType="boolean" />
     </dialog>
 
+    <dialog
+        android:id="@+id/importFileDialog"
+        android:name="com.infomaniak.drive.ui.addFiles.ImportFilesDialog"
+        android:label="ImportFileDialog"
+        tools:layout="@layout/dialog_import_files">
+        <argument
+            android:name="folderId"
+            app:argType="integer" />
+        <argument
+            android:name="driveId"
+            app:argType="integer" />
+        <argument
+            android:name="importIntent"
+            app:argType="android.content.Intent" />
+    </dialog>
+
     <fragment
         android:id="@+id/menuPicturesFragment"
         android:name="com.infomaniak.drive.ui.menu.MenuPicturesFragment"
