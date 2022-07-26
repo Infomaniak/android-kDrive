@@ -30,7 +30,7 @@
         android:layout_height="wrap_content">
 
         <ImageView
-            android:id="@+id/picture"
+            android:id="@+id/preview"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:adjustViewBounds="true"
@@ -43,7 +43,7 @@
             tools:ignore="ContentDescription" />
 
         <com.google.android.material.checkbox.MaterialCheckBox
-            android:id="@+id/pictureChecked"
+            android:id="@+id/mediaChecked"
             android:layout_width="26dp"
             android:layout_height="26dp"
             android:layout_marginStart="@dimen/marginStandardSmall"

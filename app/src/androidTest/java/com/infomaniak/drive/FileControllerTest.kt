@@ -7,13 +7,13 @@ import com.infomaniak.drive.data.api.ApiRepository.getLastModifiedFiles
 import com.infomaniak.drive.data.api.ApiRepository.renameFile
 import com.infomaniak.drive.data.cache.FileController.FAVORITES_FILE_ID
 import com.infomaniak.drive.data.cache.FileController.getFilesFromCacheOrDownload
+import com.infomaniak.drive.data.cache.FileController.getGalleryDrive
 import com.infomaniak.drive.data.cache.FileController.getMySharedFiles
 import com.infomaniak.drive.data.cache.FileController.getOfflineFiles
-import com.infomaniak.drive.data.cache.FileController.getPicturesDrive
 import com.infomaniak.drive.data.cache.FileController.removeFile
 import com.infomaniak.drive.data.cache.FileController.saveFavoritesFiles
 import com.infomaniak.drive.data.cache.FileController.searchFiles
-import com.infomaniak.drive.data.cache.FileController.storePicturesDrive
+import com.infomaniak.drive.data.cache.FileController.storeGalleryDrive
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.utils.AccountUtils
@@ -181,16 +181,16 @@ class FileControllerTest : KDriveTest() {
     @DisplayName("Retrieve remote picture then store it in realm and compare results")
     fun getPictures_CanGetRemoteSavedFilesFromRealm() {
         // Get remote pictures
-        val apiResponseData = ApiRepository.getLastPictures(Env.DRIVE_ID, 1).let {
+        val apiResponseData = ApiRepository.getLastGallery(Env.DRIVE_ID, 1).let {
             assertApiResponseData(it)
             it.data!!
         }
 
         // Store remote pictures
-        storePicturesDrive(apiResponseData, customRealm = realm)
+        storeGalleryDrive(apiResponseData, customRealm = realm)
 
         // Get saved remote files from realm
-        with(getPicturesDrive(realm)) {
+        with(getGalleryDrive(realm)) {
             assertTrue(isNotEmpty(), "local pictures cannot be empty ")
 
             // Compare remote pictures with local pictures

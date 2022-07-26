@@ -21,23 +21,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.menu.PicturesFragment">
+    tools:context=".ui.menu.GalleryFragment">
 
     <com.infomaniak.drive.ui.menu.RecyclerViewFastScroller
-        android:id="@+id/pictureFastScroller"
+        android:id="@+id/galleryFastScroller"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipChildren="false"
         app:disableTrackTouch="true"
-        app:handleDrawable="@drawable/pictures_fast_scrollbar_thumb"
+        app:handleDrawable="@drawable/gallery_fast_scrollbar_thumb"
         app:handleHeight="40dp"
         app:handleVisibilityDuration="1000"
         app:handleWidth="35dp"
-        app:popupDrawable="@drawable/pictures_fast_scrollbar_popup"
+        app:popupDrawable="@drawable/gallery_fast_scrollbar_popup"
         app:popupTextStyle="@style/Subtitle2">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/picturesRecyclerView"
+            android:id="@+id/galleryRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
@@ -52,7 +52,7 @@
         android:fillViewport="true">
 
         <com.infomaniak.drive.views.NoItemsLayoutView
-            android:id="@+id/noPicturesLayout"
+            android:id="@+id/noGalleryLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"

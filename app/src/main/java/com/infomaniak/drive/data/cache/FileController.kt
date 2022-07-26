@@ -54,12 +54,12 @@ object FileController {
     const val FAVORITES_FILE_ID = -1
     const val MY_SHARES_FILE_ID = -2
     const val RECENT_CHANGES_FILE_ID = -4
-    private const val PICTURES_FILE_ID = -3
+    private const val GALLERY_FILE_ID = -3
 
     private val ROOT_FILE get() = File(ROOT_ID, name = "Root", driveId = AccountUtils.currentDriveId)
     private val FAVORITES_FILE = File(FAVORITES_FILE_ID, name = "Favorites")
     private val MY_SHARES_FILE = File(MY_SHARES_FILE_ID, name = "My Shares")
-    private val PICTURES_FILE = File(PICTURES_FILE_ID, name = "Pictures")
+    private val GALLERY_FILE = File(GALLERY_FILE_ID, name = "Gallery")
     private val RECENT_CHANGES_FILE = File(RECENT_CHANGES_FILE_ID, name = "Recent changes")
 
     private val minDateToIgnoreCache = Calendar.getInstance().apply { add(Calendar.MONTH, -2) }.timeInMillis / 1000 // 3 month
@@ -497,10 +497,10 @@ object FileController {
         return activityResults
     }
 
-    fun getPicturesDrive(customRealm: Realm? = null): ArrayList<File> {
+    fun getGalleryDrive(customRealm: Realm? = null): ArrayList<File> {
         val operation: (Realm) -> ArrayList<File> = { realm ->
-            realm.where(File::class.java).equalTo(File::id.name, PICTURES_FILE_ID).findFirst()?.let { picturesFolder ->
-                realm.copyFromRealm(picturesFolder.children, 1) as ArrayList<File>
+            realm.where(File::class.java).equalTo(File::id.name, GALLERY_FILE_ID).findFirst()?.let { galleryFolder ->
+                realm.copyFromRealm(galleryFolder.children, 1) as ArrayList<File>
             } ?: arrayListOf()
         }
         return customRealm?.let(operation) ?: getRealmInstance().use(operation)
@@ -548,13 +548,13 @@ object FileController {
         }
     }
 
-    fun storePicturesDrive(pictures: List<File>, isFirstPage: Boolean = false, customRealm: Realm? = null) {
+    fun storeGalleryDrive(mediaList: List<File>, isFirstPage: Boolean = false, customRealm: Realm? = null) {
         val block: (Realm) -> Unit = {
             it.executeTransaction { realm ->
-                val picturesFolder = realm.where(File::class.java).equalTo(File::id.name, PICTURES_FILE_ID).findFirst()
-                    ?: realm.copyToRealm(PICTURES_FILE)
-                if (isFirstPage) picturesFolder.children = RealmList()
-                picturesFolder.children.addAll(realm, pictures)
+                val galleryFolder = realm.where(File::class.java).equalTo(File::id.name, GALLERY_FILE_ID).findFirst()
+                    ?: realm.copyToRealm(GALLERY_FILE)
+                if (isFirstPage) galleryFolder.children = RealmList()
+                galleryFolder.children.addAll(realm, mediaList)
             }
         }
         customRealm?.let(block) ?: getRealmInstance().use(block)

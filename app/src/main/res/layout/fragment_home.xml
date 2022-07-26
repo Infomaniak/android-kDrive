@@ -136,7 +136,7 @@
                         android:text="@string/offlineFileTitle" />
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/homePicturesButton"
+                        android:id="@+id/homeGalleryButton"
                         style="@style/ButtonToggleGroupAlternative"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"

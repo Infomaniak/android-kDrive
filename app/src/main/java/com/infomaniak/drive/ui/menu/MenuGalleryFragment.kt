@@ -27,20 +27,20 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.appbar.AppBarLayout
 import com.infomaniak.drive.R
-import com.infomaniak.drive.databinding.FragmentMenuPicturesBinding
+import com.infomaniak.drive.databinding.FragmentMenuGalleryBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
-import com.infomaniak.drive.ui.fileList.multiSelect.PicturesMultiSelectActionsBottomSheetDialog
+import com.infomaniak.drive.ui.fileList.multiSelect.GalleryMultiSelectActionsBottomSheetDialog
 
-class MenuPicturesFragment : Fragment() {
+class MenuGalleryFragment : Fragment() {
 
-    private lateinit var binding: FragmentMenuPicturesBinding
+    private lateinit var binding: FragmentMenuGalleryBinding
 
-    private var picturesFragment = PicturesFragment()
+    private var galleryFragment = GalleryFragment()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        binding = FragmentMenuPicturesBinding.inflate(inflater, container, false).apply {
+        binding = FragmentMenuGalleryBinding.inflate(inflater, container, false).apply {
             toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
-            swipeRefreshLayout.setOnRefreshListener { picturesFragment.onRefreshPictures() }
+            swipeRefreshLayout.setOnRefreshListener { galleryFragment.onRefreshGallery() }
         }
 
         binding.multiSelectLayout.apply {
@@ -51,13 +51,13 @@ class MenuPicturesFragment : Fragment() {
         return binding.root
     }
 
-    private fun MultiSelectLayoutBinding.setMultiSelectClickListeners() = with(picturesFragment) {
+    private fun MultiSelectLayoutBinding.setMultiSelectClickListeners() = with(galleryFragment) {
         toolbarMultiSelect.setNavigationOnClickListener { closeMultiSelect() }
         moveButtonMultiSelect.setOnClickListener { onMoveButtonClicked() }
         deleteButtonMultiSelect.setOnClickListener { deleteFiles() }
         menuButtonMultiSelect.setOnClickListener {
             onMenuButtonClicked(
-                multiSelectBottomSheet = PicturesMultiSelectActionsBottomSheetDialog(),
+                multiSelectBottomSheet = GalleryMultiSelectActionsBottomSheetDialog(),
                 areAllFromTheSameFolder = false,
             )
         }
@@ -66,22 +66,22 @@ class MenuPicturesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        ViewCompat.requestApplyInsets(binding.pictureListCoordinator)
+        ViewCompat.requestApplyInsets(binding.galleryListCoordinator)
 
         with(childFragmentManager) {
-            (findFragmentByTag(PicturesFragment.TAG) as? PicturesFragment)?.let {
-                picturesFragment = it
+            (findFragmentByTag(GalleryFragment.TAG) as? GalleryFragment)?.let {
+                galleryFragment = it
             } ?: run {
                 beginTransaction()
-                    .replace(R.id.picturesFragmentView, picturesFragment, PicturesFragment.TAG)
+                    .replace(R.id.galleryFragmentView, galleryFragment, GalleryFragment.TAG)
                     .commit()
             }
         }
 
-        picturesFragment.menuPicturesBinding = binding
+        galleryFragment.menuGalleryBinding = binding
 
         binding.appBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
-            picturesFragment.setScrollbarTrackOffset(binding.appBar.totalScrollRange + verticalOffset)
+            galleryFragment.setScrollbarTrackOffset(binding.appBar.totalScrollRange + verticalOffset)
         })
     }
 }

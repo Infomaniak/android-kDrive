@@ -71,10 +71,10 @@ class NoItemsLayoutView @JvmOverloads constructor(
             this.isVisible = true
             viewsToDisable?.forEach { it.isEnabled = false }
             initialListView.isGone = true
-            noItemsIconLayout.icon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_no_network))
-            noItemsTitle.setText(R.string.noFilesDescriptionNoNetwork)
 
             if (noNetwork) {
+                noItemsIconLayout.icon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_no_network))
+                noItemsTitle.setText(R.string.noFilesDescriptionNoNetwork)
                 if (showRefreshButton) {
                     noItemsRefreshButton.isVisible = true
                     noItemsRefreshButton.setOnClickListener { onNetworkUnavailableRefresh?.invoke() }

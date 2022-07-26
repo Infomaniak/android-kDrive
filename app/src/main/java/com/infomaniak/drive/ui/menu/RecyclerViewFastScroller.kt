@@ -115,8 +115,8 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
 
     // defaults to be used throughout this class. All these values can be overriden in the individual methods provided for the main class
     private object Defaults {
-        val popupDrawableInt: Int = R.drawable.pictures_fast_scrollbar_popup
-        val handleDrawableInt: Int = R.drawable.pictures_fast_scrollbar_thumb
+        val popupDrawableInt: Int = R.drawable.gallery_fast_scrollbar_popup
+        val handleDrawableInt: Int = R.drawable.gallery_fast_scrollbar_thumb
         val handleSize: Int = R.dimen.defaultHandleSize
         val textStyle: Int = R.style.FastScrollerDefaultTextAppearance
         val popupPosition: PopupPosition = PopupPosition.BEFORE_TRACK

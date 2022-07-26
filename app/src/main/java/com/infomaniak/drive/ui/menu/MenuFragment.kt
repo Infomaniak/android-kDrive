@@ -109,8 +109,8 @@ class MenuFragment : Fragment() {
                 safeNavigate(MenuFragmentDirections.actionMenuFragmentToMySharesFragment())
             }
 
-            pictures.setOnClickListener {
-                safeNavigate(MenuFragmentDirections.actionMenuFragmentToMenuPicturesFragment())
+            gallery.setOnClickListener {
+                safeNavigate(MenuFragmentDirections.actionMenuFragmentToMenuGalleryFragment())
             }
 
             trashbin.setOnClickListener {
