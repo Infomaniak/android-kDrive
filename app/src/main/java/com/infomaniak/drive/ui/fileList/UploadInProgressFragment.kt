@@ -28,7 +28,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.work.Data
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
-import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
@@ -42,8 +41,7 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.navigateToUploadView
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import io.realm.RealmResults
-import io.sentry.Sentry
-import io.sentry.SentryLevel
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -142,6 +140,7 @@ class UploadInProgressFragment : FileListFragment() {
                         fileAdapter.deleteAt(position)
                     }
                 }
+
             }
         }
     }
@@ -280,22 +279,20 @@ class UploadInProgressFragment : FileListFragment() {
             val isSharedWithMe = AccountUtils.currentDriveId != uploadFile.driveId
             val userDrive = UserDrive(driveId = uploadFile.driveId, sharedWithMe = isSharedWithMe)
 
-            FileController.getFileById(uploadFile.remoteFolder, userDrive)?.let { folder ->
-                navigateToUploadView(uploadFile.remoteFolder, folder.name)
-            } ?: run {
-                Sentry.withScope { scope ->
-                    scope.level = SentryLevel.WARNING
-                    scope.setExtra("currentDriveId", "${AccountUtils.currentDriveId}")
-                    scope.setExtra("driveId", "${uploadFile.driveId}")
-                    scope.setExtra("pendingFoldersCount", "${pendingFolders.count()}")
-                    scope.setExtra("remoteFolder", "${uploadFile.remoteFolder}")
-                    scope.setExtra("userDrive", "$userDrive")
-                    Sentry.captureMessage("Any folder found")
+            swipeRefreshLayout.isRefreshing = true
+            uploadInProgressViewModel.getFolder(uploadFile.remoteFolder, userDrive).observe(viewLifecycleOwner) {
+                swipeRefreshLayout.isRefreshing = false
+                it?.let { folder ->
+                    navigateToUploadView(uploadFile.remoteFolder, folder.name)
+                } ?: run {
+                    popBackStack()
+                    requireActivity().showSnackbar(R.string.uploadFolderNotFoundError, requireActivity().mainFab)
                 }
             }
         }
 
         private fun showPendingFolders() {
+            swipeRefreshLayout.isRefreshing = true
             uploadInProgressViewModel.getPendingFolders().observe(viewLifecycleOwner) {
                 it?.let { uploadFolders ->
                     pendingFiles = uploadFolders
@@ -310,6 +307,7 @@ class UploadInProgressFragment : FileListFragment() {
         }
 
         private fun downloadPendingFilesByFolderId() {
+            swipeRefreshLayout.isRefreshing = true
             uploadInProgressViewModel.getPendingFiles(folderId).observe(viewLifecycleOwner) {
                 it?.let { (files, uploadFiles) ->
                     pendingUploadFiles = uploadFiles

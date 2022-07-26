@@ -25,6 +25,7 @@ import android.util.ArrayMap
 import androidx.core.net.toFile
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.liveData
+import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
@@ -38,12 +39,28 @@ import io.realm.RealmResults
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 
 class UploadInProgressViewModel(application: Application) : AndroidViewModel(application) {
 
     val realmUpload: Realm by lazy { UploadFile.getRealmInstance() }
 
     private inline val context: Context get() = getApplication<Application>().applicationContext
+    private val getFolderJob = Job()
+
+    fun getFolder(folderId: Int, userDrive: UserDrive) = liveData(getFolderJob + Dispatchers.IO) {
+        val localFolder = FileController.getFileById(folderId, userDrive)
+        var remoteFolder: File? = null
+
+        if (localFolder == null) {
+            with(ApiRepository.getFileDetails(File(id = folderId, driveId = userDrive.driveId))) {
+                if (error?.code == "object_not_found") UploadFile.deleteAll(folderId, permanently = true)
+                remoteFolder = data
+            }
+        }
+
+        emit(localFolder ?: remoteFolder)
+    }
 
     fun getPendingFolders() = liveData<ArrayList<File>>(Dispatchers.IO) {
         UploadFile.getRealmInstance().use { realm ->
@@ -81,7 +98,7 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
             }
 
             val userDrive = UserDrive(driveId = driveId, sharedWithMe = isSharedWithMe, driveName = driveName)
-            files.add(createFolderFile(uploadFile.remoteFolder, userDrive))
+            createFolderFile(uploadFile.remoteFolder, userDrive)?.let(files::add)
         }
 
         return files
@@ -143,8 +160,10 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
         return files
     }
 
-    private fun createFolderFile(fileId: Int, userDrive: UserDrive): File {
-        val folder = FileController.getFileById(fileId, userDrive)!!
+    private fun createFolderFile(fileId: Int, userDrive: UserDrive): File? {
+        val folder = FileController.getFileById(fileId, userDrive)
+            ?: FileController.getFileDetails(fileId, userDrive)
+            ?: return null
 
         val (name, type) = if (fileId == Utils.ROOT_ID) {
             Utils.getRootName(context) to File.Type.DRIVE.value
