@@ -168,6 +168,7 @@
     <string name="buttonUpgradeOffer">Mejorar mi oferta</string>
     <string name="buttonUpload">Importar desde el teléfono</string>
     <string name="buttonValid">Validar</string>
+    <string name="cameraAccessDeniedDescription">El acceso a tu cámara está desactivado. Puedes cambiar este parámetro en los ajustes.</string>
     <string name="categoriesFilterTitle">Categorías</string>
     <string name="categoryBanking">Banco</string>
     <string name="categoryBill">Factura</string>

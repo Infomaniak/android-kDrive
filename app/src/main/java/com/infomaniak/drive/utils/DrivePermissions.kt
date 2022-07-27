@@ -19,6 +19,7 @@ package com.infomaniak.drive.utils
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -52,6 +53,17 @@ class DrivePermissions {
         } else {
             arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
+
+        fun Activity.resultPermissions(authorized: Boolean, permissions: Array<String>, message: Int) {
+            if (!authorized && !requestPermissionsIsPossible(permissions)) {
+                MaterialAlertDialogBuilder(this, R.style.DialogStyle)
+                    .setTitle(R.string.androidPermissionTitle)
+                    .setMessage(message)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.buttonAuthorize) { _: DialogInterface?, _: Int -> startAppSettingsConfig() }
+                    .show()
+            }
+        }
     }
 
     private lateinit var batteryPermissionResultLauncher: ActivityResultLauncher<Intent>
@@ -62,18 +74,20 @@ class DrivePermissions {
 
     fun registerPermissions(activity: FragmentActivity, onPermissionResult: ((authorized: Boolean) -> Unit)? = null) {
         this.activity = activity
-        registerForActivityResult = activity.registerForActivityResult(RequestMultiplePermissions()) { permissions ->
-            val authorized = permissions.values.all { it == true }
-            resultPermissions(onPermissionResult, authorized)
+        registerForActivityResult = activity.registerForActivityResult(RequestMultiplePermissions()) { authorizedPermissions ->
+            val authorized = authorizedPermissions.values.all { it }
+            onPermissionResult?.invoke(authorized)
+            activity.resultPermissions(authorized, permissions, R.string.allPermissionNeeded)
         }
     }
 
     fun registerPermissions(fragment: Fragment, onPermissionResult: ((authorized: Boolean) -> Unit)? = null) {
         activity = fragment.requireActivity()
         registerForActivityResult =
-            fragment.registerForActivityResult(RequestMultiplePermissions()) { permissions ->
-                val authorized = permissions.values.all { it == true }
-                resultPermissions(onPermissionResult, authorized)
+            fragment.registerForActivityResult(RequestMultiplePermissions()) { authorizedPermissions ->
+                val authorized = authorizedPermissions.values.all { it }
+                onPermissionResult?.invoke(authorized)
+                activity.resultPermissions(authorized, permissions, R.string.allPermissionNeeded)
             }
     }
 
@@ -85,18 +99,6 @@ class DrivePermissions {
             val isAboveApi31 = Build.VERSION.SDK_INT > Build.VERSION_CODES.S
             val hasPermission = it.resultCode == RESULT_OK || (isAboveApi31 && checkBatteryLifePermission(false))
             onPermissionResult(hasPermission)
-        }
-    }
-
-    private fun resultPermissions(onPermissionResult: ((authorized: Boolean) -> Unit)?, authorized: Boolean) {
-        onPermissionResult?.invoke(authorized)
-        if (!authorized && !activity.requestPermissionsIsPossible(permissions)) {
-            MaterialAlertDialogBuilder(activity, R.style.DialogStyle)
-                .setTitle(R.string.androidPermissionTitle)
-                .setMessage(R.string.allPermissionNeeded)
-                .setCancelable(false)
-                .setPositiveButton(R.string.buttonAuthorize) { _: DialogInterface?, _: Int -> activity.startAppSettingsConfig() }
-                .show()
         }
     }
 
