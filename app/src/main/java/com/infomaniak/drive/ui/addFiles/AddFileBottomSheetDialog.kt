@@ -58,7 +58,8 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private lateinit var currentFolderFile: File
     private val mainViewModel: MainViewModel by activityViewModels()
 
-    private lateinit var openCameraPermissions: DrivePermissions
+    private lateinit var openCameraWritePermissions: DrivePermissions
+    private lateinit var openCameraPermissions: CameraPermissions
     private lateinit var uploadFilesPermissions: DrivePermissions
 
     private var mediaPhotoPath = ""
@@ -88,7 +89,10 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
         currentFolder.setFileItem(currentFolderFile)
 
-        openCameraPermissions = DrivePermissions().apply {
+        openCameraWritePermissions = DrivePermissions().apply {
+            registerPermissions(this@AddFileBottomSheetDialog) { authorized -> if (authorized) openCamera() }
+        }
+        openCameraPermissions = CameraPermissions().apply {
             registerPermissions(this@AddFileBottomSheetDialog) { authorized -> if (authorized) openCamera() }
         }
         uploadFilesPermissions = DrivePermissions().apply {
@@ -114,7 +118,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun openCamera() {
-        if (openCameraPermissions.checkSyncPermissions()) {
+        if (openCameraWritePermissions.checkSyncPermissions() && openCameraPermissions.checkCameraPermission()) {
             trackNewElement("takePhotoOrVideo")
             openCamera.isEnabled = false
             try {
