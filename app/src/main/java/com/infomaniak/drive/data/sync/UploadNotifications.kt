@@ -37,7 +37,7 @@ import io.sentry.Sentry
 
 object UploadNotifications {
 
-    private const val FAILED_FILES_LIMIT = 5
+    const val NOTIFICATION_FILES_LIMIT = 5
 
     const val INTENT_DESTINATION_USER_ID = "intent_destination_user_id"
     const val INTENT_DESTINATION_DRIVE_ID = "intent_destination_drive_id"
@@ -134,11 +134,11 @@ object UploadNotifications {
 
     fun UploadFile.showUploadedFilesNotification(
         context: Context,
+        successCount: Int,
         successNames: MutableList<String>,
+        failedCount: Int,
         failedNames: MutableList<String>
     ) {
-        val failedCount = failedNames.count()
-        val successCount = successNames.count()
         val total = successCount + failedCount
         val description = when {
             failedCount > 0 -> {
@@ -154,8 +154,8 @@ object UploadNotifications {
                 val desc = context.resources.getQuantityString(R.plurals.allUploadFinishedDescription, successCount, successCount)
                 StringBuilder().apply {
                     appendLine(desc)
-                    for (file in successNames.take(FAILED_FILES_LIMIT)) appendLine(file)
-                    val otherCount = successCount - FAILED_FILES_LIMIT
+                    for (file in successNames.take(NOTIFICATION_FILES_LIMIT)) appendLine(file)
+                    val otherCount = successCount - NOTIFICATION_FILES_LIMIT
                     if (otherCount > 0) {
                         appendLine(
                             context.resources.getQuantityString(
