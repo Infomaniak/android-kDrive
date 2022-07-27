@@ -15,17 +15,11 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fastScrollPopup"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="@drawable/gallery_fast_scrollbar_popup"
-    android:elevation="10dp"
-    android:gravity="center"
-    android:minWidth="56dp"
-    android:minHeight="56dp"
-    android:padding="@dimen/defaultPopupPadding"
-    android:scaleX="0"
-    android:scaleY="0"
-    tools:text="A" />
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:angle="270"
+        android:endColor="#4D000000"
+        android:startColor="#00000000"
+        android:type="linear" />
+</shape>

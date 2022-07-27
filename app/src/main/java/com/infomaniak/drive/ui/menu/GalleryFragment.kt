@@ -35,52 +35,52 @@ import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.services.DownloadWorker
-import com.infomaniak.drive.databinding.FragmentMenuPicturesBinding
+import com.infomaniak.drive.databinding.FragmentMenuGalleryBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import com.infomaniak.lib.core.utils.setPagination
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.cardview_picture.*
-import kotlinx.android.synthetic.main.fragment_pictures.*
+import kotlinx.android.synthetic.main.cardview_gallery.*
+import kotlinx.android.synthetic.main.fragment_gallery.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
+class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY) {
 
-    private val picturesViewModel: PicturesViewModel by viewModels()
-    private lateinit var picturesAdapter: PicturesAdapter
+    private val galleryViewModel: GalleryViewModel by viewModels()
+    private lateinit var galleryAdapter: GalleryAdapter
 
     private var paginationListener: RecyclerView.OnScrollListener? = null
-    private var isDownloadingPictures = false
+    private var isDownloadingGallery = false
 
-    var menuPicturesBinding: FragmentMenuPicturesBinding? = null
+    var menuGalleryBinding: FragmentMenuGalleryBinding? = null
 
     private val refreshTimer: CountDownTimer by lazy {
-        createRefreshTimer { menuPicturesBinding?.swipeRefreshLayout?.isRefreshing = true }
+        createRefreshTimer { menuGalleryBinding?.swipeRefreshLayout?.isRefreshing = true }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_pictures, container, false)
+        return inflater.inflate(R.layout.fragment_gallery, container, false)
     }
 
-    override fun initMultiSelectLayout(): MultiSelectLayoutBinding? = menuPicturesBinding?.multiSelectLayout
-    override fun initMultiSelectToolbar(): CollapsingToolbarLayout? = menuPicturesBinding?.collapsingToolbarLayout
-    override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = menuPicturesBinding?.swipeRefreshLayout
+    override fun initMultiSelectLayout(): MultiSelectLayoutBinding? = menuGalleryBinding?.multiSelectLayout
+    override fun initMultiSelectToolbar(): CollapsingToolbarLayout? = menuGalleryBinding?.collapsingToolbarLayout
+    override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = menuGalleryBinding?.swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         setupPagination()
 
-        val isCurrentlyInGallery = menuPicturesBinding != null
+        val isCurrentlyInGallery = menuGalleryBinding != null
 
-        noPicturesLayout.setup(
+        noGalleryLayout.setup(
             icon = R.drawable.ic_images,
             title = R.string.picturesNoFile,
-            initialListView = picturesRecyclerView,
+            initialListView = galleryFastScroller,
         )
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, isCurrentlyInGallery) {
@@ -92,12 +92,12 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
             updateMultiSelect = { onItemSelected() }
         }
 
-        val isPicturesAdapterInitialized = ::picturesAdapter.isInitialized
-        if (!isPicturesAdapterInitialized) {
-            picturesAdapter = PicturesAdapter(
+        val isGalleryAdapterInitialized = ::galleryAdapter.isInitialized
+        if (!isGalleryAdapterInitialized) {
+            galleryAdapter = GalleryAdapter(
                 multiSelectManager = multiSelectManager,
                 onFileClicked = { file ->
-                    Utils.displayFile(mainViewModel, findNavController(), file, picturesAdapter.pictureList)
+                    Utils.displayFile(mainViewModel, findNavController(), file, galleryAdapter.galleryList)
                 },
             ).apply {
                 numberItemLoader = NUMBER_ITEMS_LOADER
@@ -109,8 +109,8 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
 
         if (isCurrentlyInGallery) multiSelectManager.isMultiSelectAuthorized = true
 
-        picturesRecyclerView.adapter = picturesAdapter
-        configPicturesLayoutManager()
+        galleryRecyclerView.adapter = galleryAdapter
+        configGalleryLayoutManager()
 
         mainViewModel.observeDownloadOffline(requireContext()).observe(viewLifecycleOwner) { workInfoList ->
             if (workInfoList.isEmpty()) return@observe
@@ -121,50 +121,50 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
             if (fileId == 0) return@observe
 
             val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 100)
-            if (progress == 100) picturesAdapter.updateOfflineStatus(fileId)
+            if (progress == 100) galleryAdapter.updateOfflineStatus(fileId)
         }
 
-        if (!isPicturesAdapterInitialized) {
+        if (!isGalleryAdapterInitialized) {
             if (isCurrentlyInGallery) refreshTimer.start()
-            loadMorePictures(AccountUtils.currentDriveId, true)
+            loadMoreGallery(AccountUtils.currentDriveId, true)
         }
 
         observeApiResultPagination()
     }
 
-    private fun observeApiResultPagination() = with(picturesAdapter) {
-        picturesViewModel.picturesApiResult.observe(viewLifecycleOwner) {
-            it?.let { (pictures, isComplete) ->
+    private fun observeApiResultPagination() = with(galleryAdapter) {
+        galleryViewModel.galleryApiResult.observe(viewLifecycleOwner) {
+            it?.let { (galleryFiles, isComplete) ->
                 stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
-                val pictureList = formatList(pictures)
-                picturesRecyclerView.post { addAll(pictureList) }
+                val galleryList = formatList(galleryFiles)
+                galleryRecyclerView.post { addAll(galleryList) }
                 this.isComplete = isComplete
-                noPicturesLayout.toggleVisibility(pictureList.isEmpty())
+                noGalleryLayout.toggleVisibility(galleryList.isEmpty())
             } ?: run {
                 isComplete = true
-                noPicturesLayout.toggleVisibility(
+                noGalleryLayout.toggleVisibility(
                     noNetwork = mainViewModel.isInternetAvailable.value == false,
-                    isVisible = pictureList.isEmpty(),
+                    isVisible = galleryList.isEmpty(),
                     showRefreshButton = true,
                 )
             }
 
             onDownloadFinished()
 
-            isDownloadingPictures = false
+            isDownloadingGallery = false
         }
     }
 
     private fun setupPagination() {
-        picturesRecyclerView.apply {
+        galleryRecyclerView.apply {
             paginationListener?.let(::removeOnScrollListener)
             paginationListener = setPagination(
                 whenLoadMoreIsPossible = {
-                    if (!picturesAdapter.isComplete && !isDownloadingPictures) {
-                        picturesViewModel.lastPicturesPage++
-                        picturesViewModel.lastPicturesLastPage++
+                    if (!galleryAdapter.isComplete && !isDownloadingGallery) {
+                        galleryViewModel.lastGalleryPage++
+                        galleryViewModel.lastGalleryLastPage++
 
-                        loadMorePictures(AccountUtils.currentDriveId)
+                        loadMoreGallery(AccountUtils.currentDriveId)
                     }
                 },
                 triggerOffset = 100
@@ -174,56 +174,56 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        configPicturesLayoutManager()
+        configGalleryLayoutManager()
     }
 
-    private fun configPicturesLayoutManager() {
-        val numPicturesColumns = requireActivity().getAdjustedColumnNumber(150, minColumns = 3, maxColumns = 15)
+    private fun configGalleryLayoutManager() {
+        val numGalleryColumns = requireActivity().getAdjustedColumnNumber(150, minColumns = 3, maxColumns = 15)
 
-        val gridLayoutManager = GridLayoutManager(requireContext(), numPicturesColumns).apply {
+        val gridLayoutManager = GridLayoutManager(requireContext(), numGalleryColumns).apply {
             spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                 override fun getSpanSize(position: Int): Int {
                     return when {
-                        position == 0 || picturesAdapter.itemList.getOrNull(position) is String -> numPicturesColumns
+                        position == 0 || galleryAdapter.itemList.getOrNull(position) is String -> numGalleryColumns
                         else -> 1
                     }
                 }
             }
         }
 
-        picturesRecyclerView?.layoutManager = gridLayoutManager
+        galleryRecyclerView?.layoutManager = gridLayoutManager
     }
 
-    private fun loadMorePictures(driveId: Int, forceDownload: Boolean = false) {
-        picturesAdapter.apply {
+    private fun loadMoreGallery(driveId: Int, forceDownload: Boolean = false) {
+        galleryAdapter.apply {
             if (forceDownload) {
-                picturesViewModel.apply {
-                    lastPicturesPage = 1
-                    lastPicturesLastPage = 1
+                galleryViewModel.apply {
+                    lastGalleryPage = 1
+                    lastGalleryLastPage = 1
                 }
                 clean()
             }
 
             showLoading()
             isComplete = false
-            isDownloadingPictures = true
+            isDownloadingGallery = true
 
             val ignoreCloud = mainViewModel.isInternetAvailable.value == false
-            picturesViewModel.loadMorePictures.value = driveId to ignoreCloud
+            galleryViewModel.loadMoreGallery.value = driveId to ignoreCloud
         }
     }
 
     private fun onDownloadFinished() {
-        menuPicturesBinding?.let { binding ->
+        menuGalleryBinding?.let { binding ->
             refreshTimer.cancel()
             binding.swipeRefreshLayout.isRefreshing = false
         }
     }
 
-    fun onRefreshPictures() {
+    fun onRefreshGallery() {
         if (isResumed) {
-            picturesAdapter.clearPictures()
-            loadMorePictures(AccountUtils.currentDriveId, true)
+            galleryAdapter.clearGallery()
+            loadMoreGallery(AccountUtils.currentDriveId, true)
         }
     }
 
@@ -249,19 +249,19 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
     override fun onIndividualActionSuccess(type: BulkOperationType, data: Any) {
         when (type) {
             BulkOperationType.TRASH -> {
-                runBlocking(Dispatchers.Main) { picturesAdapter.deleteByFileId(data as Int) }
+                runBlocking(Dispatchers.Main) { galleryAdapter.deleteByFileId(data as Int) }
             }
             BulkOperationType.COPY -> {
-                picturesAdapter.duplicatedList.add(0, data as File)
+                galleryAdapter.duplicatedList.add(0, data as File)
             }
             BulkOperationType.ADD_FAVORITES -> {
                 lifecycleScope.launch(Dispatchers.Main) {
-                    picturesAdapter.notifyFileChanged(data as Int) { it.isFavorite = true }
+                    galleryAdapter.notifyFileChanged(data as Int) { it.isFavorite = true }
                 }
             }
             BulkOperationType.REMOVE_FAVORITES -> {
                 lifecycleScope.launch(Dispatchers.Main) {
-                    picturesAdapter.notifyFileChanged(data as Int) { it.isFavorite = false }
+                    galleryAdapter.notifyFileChanged(data as Int) { it.isFavorite = false }
                 }
             }
             BulkOperationType.ADD_OFFLINE, BulkOperationType.REMOVE_OFFLINE,
@@ -276,28 +276,28 @@ class PicturesFragment : MultiSelectFragment(MATOMO_CATEGORY) {
     override fun onAllIndividualActionsFinished(type: BulkOperationType) {
 
         if (type == BulkOperationType.COPY) {
-            val oldTotal = picturesAdapter.itemList.size
-            val oldFirstItem = picturesAdapter.itemList.firstOrNull()
+            val oldTotal = galleryAdapter.itemList.size
+            val oldFirstItem = galleryAdapter.itemList.firstOrNull()
 
-            picturesAdapter.addDuplicatedImages(requireContext())
-            val newTotal = picturesAdapter.itemList.count()
-            val newFirstItem = picturesAdapter.itemList.firstOrNull()
+            galleryAdapter.addDuplicatedImages()
+            val newTotal = galleryAdapter.itemList.count()
+            val newFirstItem = galleryAdapter.itemList.firstOrNull()
 
             val positionStart = if (oldFirstItem != newFirstItem) 0 else 1
-            picturesAdapter.notifyItemRangeInserted(positionStart, newTotal - oldTotal)
+            galleryAdapter.notifyItemRangeInserted(positionStart, newTotal - oldTotal)
         }
     }
 
     override fun updateFileProgressByFileId(fileId: Int, progress: Int, onComplete: ((position: Int, file: File) -> Unit)?) {
-        picturesAdapter.updateFileProgressByFileId(fileId, progress, onComplete)
+        galleryAdapter.updateFileProgressByFileId(fileId, progress, onComplete)
     }
 
     fun setScrollbarTrackOffset(offset: Int) {
-        pictureFastScroller?.trackMarginEnd = offset
+        galleryFastScroller?.trackMarginEnd = offset
     }
 
     companion object {
-        const val TAG = "PicturesFragment"
+        const val TAG = "GalleryFragment"
         const val MATOMO_CATEGORY = "picturesFileAction"
         private const val NUMBER_ITEMS_LOADER = 13
     }

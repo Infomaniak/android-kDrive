@@ -321,8 +321,8 @@
             app:popEnterAnim="@anim/fragment_open_enter"
             app:popExitAnim="@anim/fragment_open_exit" />
         <action
-            android:id="@+id/action_menuFragment_to_menuPicturesFragment"
-            app:destination="@id/menuPicturesFragment"
+            android:id="@+id/action_menuFragment_to_menuGalleryFragment"
+            app:destination="@id/menuGalleryFragment"
             app:enterAnim="@anim/fragment_open_enter"
             app:exitAnim="@anim/fragment_open_exit"
             app:popEnterAnim="@anim/fragment_open_enter"
@@ -1003,9 +1003,9 @@
     </dialog>
 
     <fragment
-        android:id="@+id/menuPicturesFragment"
-        android:name="com.infomaniak.drive.ui.menu.MenuPicturesFragment"
-        android:label="MenuPicturesFragment"
-        tools:layout="@layout/fragment_menu_pictures" />
+        android:id="@+id/menuGalleryFragment"
+        android:name="com.infomaniak.drive.ui.menu.MenuGalleryFragment"
+        android:label="MenuGalleryFragment"
+        tools:layout="@layout/fragment_menu_gallery" />
 
 </navigation>

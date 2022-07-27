@@ -49,7 +49,6 @@ class HomeActivitiesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        homeTabsTitle.setText(R.string.homeLastActivities)
         initAdapter()
         AccountUtils.getCurrentDrive()?.let { currentDrive -> getLastActivities(currentDrive.id) }
     }

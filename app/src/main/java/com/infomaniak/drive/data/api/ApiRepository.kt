@@ -129,9 +129,9 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(url, GET)
     }
 
-    fun getLastPictures(driveId: Int, page: Int = 1): ApiResponse<ArrayList<File>> {
-        val type = ExtensionType.IMAGE.value
-        val url = "${ApiRoutes.searchFiles(driveId, File.SortType.RECENT)}&type=$type&${pagination(page)}"
+    fun getLastGallery(driveId: Int, page: Int = 1): ApiResponse<ArrayList<File>> {
+        val types = "&types[]=${ExtensionType.IMAGE.value}&types[]=${ExtensionType.VIDEO.value}"
+        val url = "${ApiRoutes.searchFiles(driveId, File.SortType.RECENT)}$types&${pagination(page)}"
         return callApi(url, GET)
     }
 

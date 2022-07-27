@@ -17,13 +17,13 @@
  */
 package com.infomaniak.drive.ui.menu
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager
 import com.infomaniak.drive.utils.loadAny
@@ -32,15 +32,15 @@ import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.LoaderCardView
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.cardview_picture.view.*
+import kotlinx.android.synthetic.main.cardview_gallery.view.*
 import kotlinx.android.synthetic.main.title_recycler_section.view.*
 
-class PicturesAdapter(
+class GalleryAdapter(
     private val multiSelectManager: MultiSelectManager,
     private val onFileClicked: (file: File) -> Unit,
 ) : LoaderAdapter<Any>(), RecyclerViewFastScroller.OnPopupTextUpdate {
 
-    var pictureList: ArrayList<File> = arrayListOf()
+    var galleryList: ArrayList<File> = arrayListOf()
     var duplicatedList: ArrayList<File> = arrayListOf()
 
     private var lastSectionTitle = ""
@@ -52,9 +52,9 @@ class PicturesAdapter(
     override fun getItemViewType(position: Int): Int {
         return when {
             super.getItemViewType(position) == VIEW_TYPE_LOADING -> {
-                if (position == 0) DisplayType.TITLE.layout else DisplayType.PICTURE.layout
+                if (position == 0) DisplayType.TITLE.layout else DisplayType.PREVIEW.layout
             }
-            itemList[position] is File -> DisplayType.PICTURE.layout
+            itemList[position] is File -> DisplayType.PREVIEW.layout
             else -> DisplayType.TITLE.layout
         }
     }
@@ -65,11 +65,11 @@ class PicturesAdapter(
                 if (position == 0) holder.itemView.title.resetLoader() else (holder.itemView as LoaderCardView).start()
             }
             getItemViewType(position) == DisplayType.TITLE.layout -> holder.itemView.title.text = (itemList[position] as String)
-            getItemViewType(position) == DisplayType.PICTURE.layout -> bindPictureDisplayType(position, holder)
+            getItemViewType(position) == DisplayType.PREVIEW.layout -> bindGalleryDisplayType(position, holder)
         }
     }
 
-    private fun bindPictureDisplayType(position: Int, holder: ViewHolder) = with((holder.itemView as LoaderCardView)) {
+    private fun bindGalleryDisplayType(position: Int, holder: ViewHolder) = with((holder.itemView as LoaderCardView)) {
         val file = (itemList[position] as File)
         displayThumbnail(file)
         handleCheckmark(file)
@@ -78,14 +78,15 @@ class PicturesAdapter(
 
     private fun LoaderCardView.displayThumbnail(file: File) {
         stop()
-        picture.apply {
+        videoViews.isVisible = file.getFileType() == ExtensionType.VIDEO
+        preview.apply {
             loadAny(file.thumbnail())
             contentDescription = file.name
         }
     }
 
     private fun LoaderCardView.handleCheckmark(file: File) {
-        pictureChecked.apply {
+        mediaChecked.apply {
 
             isClickable = false
 
@@ -102,7 +103,7 @@ class PicturesAdapter(
 
         setOnClickListener {
             if (isMultiSelectOn) {
-                pictureChecked.onFileSelected(file)
+                mediaChecked.onFileSelected(file)
             } else {
                 onFileClicked(file)
             }
@@ -110,7 +111,7 @@ class PicturesAdapter(
 
         setOnLongClickListener {
             if (isMultiSelectAuthorized) {
-                pictureChecked.onFileSelected(file)
+                mediaChecked.onFileSelected(file)
                 if (!isMultiSelectOn) openMultiSelect?.invoke()
                 true
             } else {
@@ -137,11 +138,11 @@ class PicturesAdapter(
         updateMultiSelect?.invoke()
     }
 
-    fun formatList(newPictureList: ArrayList<File>): ArrayList<Any> {
-        pictureList.addAll(newPictureList)
+    fun formatList(newGalleryList: ArrayList<File>): ArrayList<Any> {
+        galleryList.addAll(newGalleryList)
         val addItemList: ArrayList<Any> = arrayListOf()
 
-        for (file in newPictureList) {
+        for (file in newGalleryList) {
             val month = file.getMonth()
             if (lastSectionTitle != month) {
                 addItemList.add(month)
@@ -153,11 +154,11 @@ class PicturesAdapter(
         return addItemList
     }
 
-    fun addDuplicatedImages(context: Context) {
+    fun addDuplicatedImages() {
         var newestSectionTitle = itemList.firstOrNull()
         var index = 1
         for (file in duplicatedList) {
-            pictureList.add(0, file)
+            galleryList.add(0, file)
 
             val month = file.getMonth()
             if (newestSectionTitle != month) {
@@ -180,16 +181,16 @@ class PicturesAdapter(
         return getLastModifiedAt().format("MMMM yyyy").capitalizeFirstChar()
     }
 
-    fun clearPictures() {
+    fun clearGallery() {
         itemList.clear()
-        pictureList.clear()
+        galleryList.clear()
         lastSectionTitle = ""
         notifyDataSetChanged()
     }
 
     fun deleteByFileId(fileId: Int) {
         indexOf(fileId)?.let(::deleteAt)
-        pictureList.indexOfFirstOrNull { (it as? File)?.id == fileId }?.let(pictureList::removeAt)
+        galleryList.indexOfFirstOrNull { (it as? File)?.id == fileId }?.let(galleryList::removeAt)
     }
 
     fun deleteAt(position: Int) {
@@ -240,7 +241,7 @@ class PicturesAdapter(
 
     enum class DisplayType(val layout: Int) {
         TITLE(R.layout.title_recycler_section),
-        PICTURE(R.layout.cardview_picture),
+        PREVIEW(R.layout.cardview_gallery),
     }
 
     override fun onChange(position: Int): CharSequence {

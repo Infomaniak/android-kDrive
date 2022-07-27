@@ -451,11 +451,11 @@
     <string name="folderColorDescription">Change the colour of your folders to personalise and better organise your kDrive to your liking.</string>
     <string name="folderColorTitle">Folder Colour</string>
     <string name="folderDescription">Private or shared folder</string>
+    <string name="galleryTitle">Gallery</string>
     <string name="hintInputDirName">Folder name</string>
     <string name="hintInputFileName">File name</string>
     <string name="homeLastActivities">Recent activity</string>
     <string name="homeLastFilesTitle">My most recent changes</string>
-    <string name="homeMyLastPictures">My most recent images</string>
     <string name="homeNetworkUnavailableDescription">Items may not be visible if the device is offline.</string>
     <string name="homeNoActivities">No activity at this time</string>
     <string name="homeNoActivitiesDescription">When files are added, you will see your latest activities here and those of the other users of your kDrive.</string>

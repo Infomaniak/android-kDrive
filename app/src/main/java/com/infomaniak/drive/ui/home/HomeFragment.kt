@@ -37,7 +37,7 @@ import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWork
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
-import com.infomaniak.drive.ui.menu.PicturesFragment
+import com.infomaniak.drive.ui.menu.GalleryFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.TabViewPagerUtils.FragmentTab
 import com.infomaniak.drive.utils.TabViewPagerUtils.getFragment
@@ -57,12 +57,12 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         arguments = FileListFragmentArgs(folderId = 1, folderName = "").toBundle()
     }
 
-    private val picturesFragment = PicturesFragment()
+    private val galleryFragment = GalleryFragment()
 
     private val tabsHome = arrayListOf(
         FragmentTab(HomeActivitiesFragment(), R.id.homeActivitiesButton),
         FragmentTab(offlineFragment, R.id.homeOfflineButton),
-        FragmentTab(picturesFragment, R.id.homePicturesButton),
+        FragmentTab(galleryFragment, R.id.homeGalleryButton),
     )
 
     companion object {
@@ -126,7 +126,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
             (activity as? MainActivity)?.bottomNavigation?.apply {
                 val bottomNavigationOffset = layoutParams.height + marginBottom + marginTop + 10.toPx()
-                picturesFragment.setScrollbarTrackOffset(
+                galleryFragment.setScrollbarTrackOffset(
                     appBarLayout?.totalScrollRange ?: 0 + verticalOffset + bottomNavigationOffset
                 )
             }
@@ -148,7 +148,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             val downloadRequired = forceDownload || mustRefreshUi
             (homeViewPager.getFragment(0) as? HomeActivitiesFragment)?.getLastActivities(currentDrive.id, downloadRequired)
             (homeViewPager.getFragment(1) as? HomeOfflineFragment)?.reloadOffline()
-            (homeViewPager.getFragment(2) as? PicturesFragment)?.onRefreshPictures()
+            (homeViewPager.getFragment(2) as? GalleryFragment)?.onRefreshGallery()
 
             setDriveHeader(currentDrive)
             notEnoughStorage.setup(currentDrive)

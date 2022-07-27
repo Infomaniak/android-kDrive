@@ -440,11 +440,11 @@
     <string name="folderColorDescription">Ändern Sie die Farbe Ihrer Ordner, um Ihr kDrive nach Ihren Wünschen zu gestalten und besser zu organisieren.</string>
     <string name="folderColorTitle">Ordnerfarben</string>
     <string name="folderDescription">Privater oder freigegebener Ordner</string>
+    <string name="galleryTitle">Galerie</string>
     <string name="hintInputDirName">Name des Ordners</string>
     <string name="hintInputFileName">Name der Datei</string>
     <string name="homeLastActivities">Kürzliche Aktivität</string>
     <string name="homeLastFilesTitle">Meine letzten Änderungen</string>
-    <string name="homeMyLastPictures">Meine letzten Bilder</string>
     <string name="homeNetworkUnavailableDescription">Wenn das Gerät nicht verbunden ist, können bestimmte Elemente nicht sichtbar sein.</string>
     <string name="homeNoActivities">Derzeit keine Aktivität</string>
     <string name="homeNoActivitiesDescription">Sobald Dateien hinzugefügt werden, werden hier die letzten Aktivitäten von Ihnen und den anderen Benutzern Ihres kDrive angezeigt.</string>
