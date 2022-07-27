@@ -37,6 +37,7 @@ import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.UploadWorkerThrowable.runUploadCatching
 import com.infomaniak.drive.data.sync.UploadNotifications
+import com.infomaniak.drive.data.sync.UploadNotifications.NOTIFICATION_FILES_LIMIT
 import com.infomaniak.drive.data.sync.UploadNotifications.setupCurrentUploadNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.syncSettingsActivityPendingIntent
@@ -60,6 +61,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private val failedNames by lazy { inputData.getStringArray(LAST_FAILED_NAMES)?.toMutableList() ?: mutableListOf() }
     private val successNames by lazy { inputData.getStringArray(LAST_SUCCESS_NAMES)?.toMutableList() ?: mutableListOf() }
+    private var failedCount = inputData.getInt(LAST_FAILED_COUNT, 0)
+    private var successCount = inputData.getInt(LAST_SUCCESS_COUNT, 0)
 
     var currentUploadFile: UploadFile? = null
     var currentUploadTask: UploadTask? = null
@@ -140,18 +143,24 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         for (uploadFile in uploadFiles) {
             Log.d(TAG, "startSyncFiles> upload ${uploadFile.fileName}")
 
-            if (uploadFile.initUpload(pendingCount)) successNames.add(uploadFile.fileName) else failedNames.add(uploadFile.fileName)
+            if (uploadFile.initUpload(pendingCount)) {
+                successNames.add(uploadFile.fileName)
+                successCount++
+            } else {
+                failedNames.add(uploadFile.fileName)
+                failedCount++
+            }
 
             pendingCount--
 
             if (uploadFile.isSync() && UploadFile.getAllPendingPriorityFilesCount() > 0) break
         }
 
-        uploadedCount = successNames.count()
+        uploadedCount = successCount
 
         Log.d(TAG, "startSyncFiles: finish with $uploadedCount uploaded")
 
-        currentUploadFile?.showUploadedFilesNotification(applicationContext, successNames, failedNames)
+        currentUploadFile?.showUploadedFilesNotification(applicationContext, successCount, successNames, failedCount, failedNames)
         if (uploadedCount > 0) Result.success() else Result.failure()
     }
 
@@ -159,8 +168,10 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         syncSettings?.let { checkLocalLastMedias(it) }
         if (UploadFile.getAllPendingUploadsCount() > 0) {
             val data = Data.Builder()
-                .putStringArray(LAST_FAILED_NAMES, failedNames.toTypedArray())
-                .putStringArray(LAST_SUCCESS_NAMES, successNames.toTypedArray())
+                .putInt(LAST_FAILED_COUNT, failedCount)
+                .putInt(LAST_SUCCESS_COUNT, successCount)
+                .putStringArray(LAST_FAILED_NAMES, failedNames.take(NOTIFICATION_FILES_LIMIT).toTypedArray())
+                .putStringArray(LAST_SUCCESS_NAMES, successNames.take(NOTIFICATION_FILES_LIMIT).toTypedArray())
                 .build()
             applicationContext.syncImmediately(data, true)
         }
@@ -409,7 +420,9 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         const val CANCELLED_BY_USER = "cancelled_by_user"
         const val UPLOAD_FOLDER = "upload_folder"
 
+        private const val LAST_FAILED_COUNT = "last_failed_count"
         private const val LAST_FAILED_NAMES = "last_failed_names"
+        private const val LAST_SUCCESS_COUNT = "last_success_count"
         private const val LAST_SUCCESS_NAMES = "last_success_names"
 
         private const val MAX_RETRY_COUNT = 3
