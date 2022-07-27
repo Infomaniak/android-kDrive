@@ -384,21 +384,21 @@ object FileController {
             }
         }
 
-        return getRealmInstance(userDrive).use { realm ->
-            val apiResponse = ApiRepository.getFileDetails(File(id = fileId, driveId = userDrive.driveId))
-            if (apiResponse.isSuccess()) {
-                apiResponse.data?.let { remoteFile ->
+        val apiResponse = ApiRepository.getFileDetails(File(id = fileId, driveId = userDrive.driveId))
+        return if (apiResponse.isSuccess()) {
+            apiResponse.data?.let { remoteFile ->
+                getRealmInstance(userDrive).use { realm ->
                     val localParentProxy = getParentFile(fileId, realm = realm)
                     if (localParentProxy == null) {
                         getRemoteParentDetails(remoteFile, userDrive, realm)
                     } else {
                         insertOrUpdateFile(realm, remoteFile, getFileProxyById(fileId, customRealm = realm))
                     }
-                    remoteFile
                 }
-            } else {
-                null
+                remoteFile
             }
+        } else {
+            null
         }
     }
 
