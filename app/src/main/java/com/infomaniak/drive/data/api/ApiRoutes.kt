@@ -31,15 +31,15 @@ object ApiRoutes {
 
     private fun orderQuery(order: SortType) = "order_for[${order.orderBy}]=${order.order}&order_by=${order.orderBy}"
 
-    private fun v2URL(driveId: Int) = "${DRIVE_API_V2}${driveId}"
+    private fun driveURL(driveId: Int) = "${DRIVE_API_V2}${driveId}"
 
-    private fun fileURL(driveId: Int) = "${v2URL(driveId)}/files"
+    private fun filesURL(driveId: Int) = "${driveURL(driveId)}/files"
+
+    private fun fileURL(driveId: Int, fileId: FileId) = "${filesURL(driveId)}/${fileId}"
 
     fun fileURL(file: File) = fileURL(file.driveId, file.id)
 
-    private fun fileURL(driveId: Int, fileId: FileId) = "${fileURL(driveId)}/${fileId}"
-
-    fun trashURL(file: File) = "${v2URL(file.driveId)}/trash/${file.id}"
+    fun trashURL(file: File) = "${driveURL(file.driveId)}/trash/${file.id}"
 
     /** V1 */
     //region V1
@@ -48,7 +48,7 @@ object ApiRoutes {
 
     /** Archive */
     //region Archive
-    fun buildArchive(driveId: Int): String = "${fileURL(driveId)}/archives"
+    fun buildArchive(driveId: Int): String = "${filesURL(driveId)}/archives"
 
     fun getUUIDArchiveFiles(driveId: Int): String = "${DRIVE_API_V1}$driveId/file/archive"
 
@@ -59,7 +59,7 @@ object ApiRoutes {
     //region Access/Invitation
     fun accessUrl(file: File) = "${fileURL(file)}/access"
 
-    fun fileInvitationAccess(file: File, invitationId: Int) = "${v2URL(file.driveId)}/files/invitations/$invitationId"
+    fun fileInvitationAccess(file: File, invitationId: Int) = "${driveURL(file.driveId)}/files/invitations/$invitationId"
 
     fun getFileShare(file: File) = "${accessUrl(file)}?with=user"
 
@@ -74,7 +74,7 @@ object ApiRoutes {
 
     /** Action */
     //region Action
-    fun undoAction(driveId: Int) = "${v2URL(driveId)}/cancel"
+    fun undoAction(driveId: Int) = "${driveURL(driveId)}/cancel"
     //endregion
 
     /** Activities */
@@ -86,12 +86,12 @@ object ApiRoutes {
             "&actions[]=comment_create"
 
     fun getLastActivities(driveId: Int) =
-        "${fileURL(driveId)}/activities?$activitiesWithQuery,user&depth=unlimited&$activitiesActions"
+        "${filesURL(driveId)}/activities?$activitiesWithQuery,user&depth=unlimited&$activitiesActions"
 
     fun getFileActivities(file: File) = "${fileURL(file)}/activities"
 
     fun getFileActivities(driveId: Int, fileIds: String, fromDate: Long) =
-        "${fileURL(driveId)}/activities/batch?$activitiesWithQuery&file_ids=$fileIds&from_date=$fromDate" +
+        "${filesURL(driveId)}/activities/batch?$activitiesWithQuery&file_ids=$fileIds&from_date=$fromDate" +
                 "&actions[]=file_rename" +
                 "&actions[]=file_update"
 
@@ -101,13 +101,13 @@ object ApiRoutes {
     /** Category */
     //region Category
 
-    fun categories(driveId: Int) = "${v2URL(driveId)}/categories"
+    fun categories(driveId: Int) = "${driveURL(driveId)}/categories"
 
     fun category(driveId: Int, categoryId: Int) = "${categories(driveId)}/$categoryId"
 
     fun fileCategory(file: File, categoryId: Int) = "${fileURL(file)}/categories/$categoryId"
 
-    fun fileCategory(driveId: Int, categoryId: Int) = "${fileURL(driveId)}/categories/$categoryId"
+    fun fileCategory(driveId: Int, categoryId: Int) = "${filesURL(driveId)}/categories/$categoryId"
     //endregion
 
     /** Comment */
@@ -132,7 +132,7 @@ object ApiRoutes {
 
     /** Favorite */
     //region Favorite
-    fun getFavoriteFiles(driveId: Int, order: SortType) = "${fileURL(driveId)}/favorites?$fileWithQuery&${orderQuery(order)}"
+    fun getFavoriteFiles(driveId: Int, order: SortType) = "${filesURL(driveId)}/favorites?$fileWithQuery&${orderQuery(order)}"
 
     fun favorite(file: File) = "${fileURL(file)}/favorite"
     //endregion
@@ -173,7 +173,7 @@ object ApiRoutes {
 
     /** Search */
     //region Search
-    fun searchFiles(driveId: Int, sortType: SortType) = "${fileURL(driveId)}/search?$fileWithQuery&${orderQuery(sortType)}"
+    fun searchFiles(driveId: Int, sortType: SortType) = "${filesURL(driveId)}/search?$fileWithQuery&${orderQuery(sortType)}"
     //endregion
 
     /** Share link */
@@ -183,9 +183,9 @@ object ApiRoutes {
 
     /** Trash */
     //region Trash
-    fun driveTrash(driveId: Int, order: SortType) = "${v2URL(driveId)}/trash?${orderQuery(order)}&$fileWithQuery"
+    fun driveTrash(driveId: Int, order: SortType) = "${driveURL(driveId)}/trash?${orderQuery(order)}&$fileWithQuery"
 
-    fun emptyTrash(driveId: Int) = "${v2URL(driveId)}/trash"
+    fun emptyTrash(driveId: Int) = "${driveURL(driveId)}/trash"
 
     fun trashedFile(file: File) = "${trashURL(file)}?$fileExtraWithQuery"
 
@@ -198,7 +198,7 @@ object ApiRoutes {
 
     /** Upload */
     //region Upload
-    private fun uploadSessionUrl(driveId: Int) = "${v2URL(driveId)}/upload/session"
+    private fun uploadSessionUrl(driveId: Int) = "${driveURL(driveId)}/upload/session"
 
     fun getSession(driveId: Int, uploadToken: String) = "${uploadSessionUrl(driveId)}/$uploadToken"
 
@@ -213,14 +213,14 @@ object ApiRoutes {
 
     /** Root Directory */
     //region Root Directory
-    fun bulkAction(driveId: Int) = "${fileURL(driveId)}/bulk"
+    fun bulkAction(driveId: Int) = "${filesURL(driveId)}/bulk"
 
-    fun getLastModifiedFiles(driveId: Int) = "${fileURL(driveId)}/last_modified?$fileWithQuery"
+    fun getLastModifiedFiles(driveId: Int) = "${filesURL(driveId)}/last_modified?$fileWithQuery"
 
-    fun createTeamFolder(driveId: Int) = "${fileURL(driveId)}/team_directory?$fileWithQuery"
+    fun createTeamFolder(driveId: Int) = "${filesURL(driveId)}/team_directory?$fileWithQuery"
 
     fun getMySharedFiles(driveId: Int, sortType: SortType) =
-        "${fileURL(driveId)}/my_shared?${orderQuery(sortType)}&$fileWithQuery,users"
+        "${filesURL(driveId)}/my_shared?${orderQuery(sortType)}&$fileWithQuery,users"
     //endregion
 
     /** Others */
