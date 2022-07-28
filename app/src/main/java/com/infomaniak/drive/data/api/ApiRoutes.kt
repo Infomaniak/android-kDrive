@@ -43,14 +43,14 @@ object ApiRoutes {
 
     /** V1 */
     //region V1
-    fun getAllDrivesData() = "${DRIVE_API}init?with=drives,users,teams,ips,categories"
+    fun getAllDrivesData() = "${DRIVE_API_V1}init?with=drives,users,teams,ips,categories"
     //endregion
 
     /** Archive */
     //region Archive
     fun buildArchive(driveId: Int): String = "${fileURL(driveId)}/archives"
 
-    fun getUUIDArchiveFiles(driveId: Int): String = "${DRIVE_API}$driveId/file/archive"
+    fun getUUIDArchiveFiles(driveId: Int): String = "${DRIVE_API_V1}$driveId/file/archive"
 
     fun downloadArchiveFiles(driveId: Int, uuid: String): String = "${buildArchive(driveId)}/$uuid"
     //endregion
@@ -208,7 +208,7 @@ object ApiRoutes {
 
     fun closeSession(driveId: Int, uploadToken: String) = "${uploadSessionUrl(driveId)}/$uploadToken/finish"
 
-    fun uploadFile(driveId: Int, folderId: Int) = "${DRIVE_API}$driveId/file/$folderId/upload"
+    fun uploadFile(driveId: Int, folderId: Int) = "${DRIVE_API_V1}$driveId/file/$folderId/upload"
     //endregion
 
     /** Root Directory */
