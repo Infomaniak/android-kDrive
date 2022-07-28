@@ -50,8 +50,6 @@ object ApiRoutes {
     //region Archive
     fun buildArchive(driveId: Int): String = "${filesURL(driveId)}/archives"
 
-    fun getUUIDArchiveFiles(driveId: Int): String = "${DRIVE_API_V1}$driveId/file/archive"
-
     fun downloadArchiveFiles(driveId: Int, uuid: String): String = "${buildArchive(driveId)}/$uuid"
     //endregion
 
