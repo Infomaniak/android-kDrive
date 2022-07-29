@@ -492,18 +492,19 @@ class CloudStorageProvider : DocumentsProvider() {
         val parentFolderId = getFileIdFromDocumentId(parentDocumentId)
         val userDrive = createUserDrive(parentDocumentId)
 
-        val uploadUrl = ApiRoutes.uploadFile(driveId, parentFolderId) +
-                "?total_size=0" +
+        val uploadUrl = ApiRoutes.uploadFile(driveId) +
+                "?directory_id=$parentFolderId" +
+                "&total_size=0" +
                 "&file_name=${URLEncoder.encode(displayName, "UTF-8")}" +
                 "&last_modified_at=${Date().time / 1_000L}" +
                 "&conflict=" + UploadTask.Companion.ConflictOption.RENAME.toString()
 
-        val apiResponse = ApiController.callApi<ApiResponse<List<File>>>(
+        val apiResponse = ApiController.callApi<ApiResponse<File>>(
             uploadUrl,
-            ApiController.ApiMethod.PUT,
+            ApiController.ApiMethod.POST,
             okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(userDrive.userId, 120) }
         )
-        val file = apiResponse.data?.firstOrNull()
+        val file = apiResponse.data
 
         if (apiResponse.isSuccess() && file != null) {
             FileController.addFileTo(parentFolderId, file, userDrive)
