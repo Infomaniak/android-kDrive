@@ -33,7 +33,7 @@ import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import com.facebook.stetho.Stetho
 import com.facebook.stetho.okhttp3.StethoInterceptor
-import com.infomaniak.drive.BuildConfig.DRIVE_API
+import com.infomaniak.drive.BuildConfig.DRIVE_API_V2
 import com.infomaniak.drive.GeniusScanUtils.initGeniusScanSdk
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
 import com.infomaniak.drive.data.models.UiSettings
@@ -137,7 +137,7 @@ class ApplicationMain : Application(), ImageLoaderFactory {
                 OkHttpClient.Builder().apply {
                     addInterceptor(Interceptor { chain ->
                         var request = chain.request()
-                        if (request.url.toString().contains(DRIVE_API) || request.url.toString().contains(INFOMANIAK_API)) {
+                        if (request.url.toString().contains(DRIVE_API_V2) || request.url.toString().contains(INFOMANIAK_API)) {
                             request = request.newBuilder().headers(HttpUtils.getHeaders()).removeHeader("Cache-Control").build()
                         }
                         chain.proceed(request)
