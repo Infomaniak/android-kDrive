@@ -243,7 +243,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             Log.d("kDrive", "$TAG > $fileName deleted size:$size")
             Sentry.withScope { scope ->
                 scope.setExtra("data", ApiController.gson.toJson(this))
-                Sentry.captureMessage("$fileName deleted size:$size")
+                scope.setExtra("fileName", fileName)
+                Sentry.captureMessage("Deleted file with size 0")
             }
             false
         }
