@@ -111,7 +111,7 @@ object SyncOfflineUtils {
                 fileModifiedAt = fileModifiedAt,
                 fileName = file.name,
                 fileSize = offlineFile.length(),
-                remoteFolder = FileController.getParentFile(file.id, realm = realm)!!.id,
+                remoteFolder = file.parentId,
                 type = UploadFile.Type.SYNC_OFFLINE.name,
                 userId = userDrive.userId,
             ).store()

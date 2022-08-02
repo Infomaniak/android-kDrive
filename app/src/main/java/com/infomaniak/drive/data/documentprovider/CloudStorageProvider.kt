@@ -523,8 +523,7 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     private fun writeDataFile(context: Context, file: File, userDrive: UserDrive, accessMode: Int): ParcelFileDescriptor? {
-        val parentFileId = FileController.getParentFile(file.id, userDrive)?.id ?: return null
-        val tempFile = createTempFile(parentFileId, file.name)
+        val tempFile = createTempFile(file.parentId, file.name)
         val handler = Handler(context.mainLooper)
 
         return ParcelFileDescriptor.open(tempFile, accessMode, handler) { exception: IOException? ->
@@ -536,7 +535,7 @@ class CloudStorageProvider : DocumentsProvider() {
                         fileCreatedAt = Date(),
                         fileName = file.name,
                         fileSize = tempFile.length(),
-                        remoteFolder = parentFileId,
+                        remoteFolder = file.parentId,
                         type = UploadFile.Type.CLOUD_STORAGE.name,
                         userId = userDrive.userId,
                     ).store()
