@@ -172,13 +172,13 @@ class PinchToZoomRecyclerView @JvmOverloads constructor(
             return false
         }
 
-        override fun onScaleBegin(detector: ScaleGestureDetector?): Boolean {
+        override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
             preScaleFactor = scaleFactor
             parent.requestDisallowInterceptTouchEvent(true)
             return true
         }
 
-        override fun onScaleEnd(detector: ScaleGestureDetector?) {
+        override fun onScaleEnd(detector: ScaleGestureDetector) {
             disallowParentInterceptTouch = scaleFactor != MIN_SCALE
             parent.requestDisallowInterceptTouchEvent(disallowParentInterceptTouch)
         }
@@ -186,12 +186,12 @@ class PinchToZoomRecyclerView @JvmOverloads constructor(
 
     private inner class GestureListener : GestureDetector.SimpleOnGestureListener() {
 
-        override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
+        override fun onSingleTapConfirmed(motionEvent: MotionEvent): Boolean {
             onClicked?.invoke()
-            return super.onSingleTapConfirmed(e)
+            return super.onSingleTapConfirmed(motionEvent)
         }
 
-        override fun onDoubleTap(e: MotionEvent?): Boolean {
+        override fun onDoubleTap(motionEvent: MotionEvent): Boolean {
             scaleFactor = if (scaleFactor == maxScale) minScale else maxScale
             disallowParentInterceptTouch = scaleFactor != MIN_SCALE
 
