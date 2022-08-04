@@ -20,6 +20,7 @@ package com.infomaniak.drive
 import android.app.Application
 import android.app.PendingIntent
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Build
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
@@ -73,8 +74,15 @@ class ApplicationMain : Application(), ImageLoaderFactory {
     val matomoTracker: Tracker by lazy { buildTracker() }
     var geniusScanIsReady = false
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        setDefaultLocal()
+    }
+
     override fun onCreate() {
         super.onCreate()
+
+        setDefaultLocal()
 
         AppCompatDelegate.setDefaultNightMode(UiSettings(this).nightMode)
 
@@ -125,6 +133,18 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         initNotificationChannel()
         HttpClient.init(tokenInterceptorListener())
         MqttClientWrapper.init(applicationContext)
+    }
+
+    private fun setDefaultLocal() = with(resources) {
+        if (Locale.getDefault().language in acceptedLocale) return@with
+
+        Locale.setDefault(defaultLocale)
+        configuration.setLocale(defaultLocale)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            createConfigurationContext(configuration)
+        } else {
+            updateConfiguration(configuration, displayMetrics)
+        }
     }
 
     override fun newImageLoader(): ImageLoader {
@@ -188,5 +208,8 @@ class ApplicationMain : Application(), ImageLoaderFactory {
 
     private companion object {
         const val COIL_CACHE_DIR = "coil_cache"
+
+        private val acceptedLocale = arrayOf("fr", "de", "it", "en", "es")
+        private val defaultLocale = Locale.ENGLISH
     }
 }

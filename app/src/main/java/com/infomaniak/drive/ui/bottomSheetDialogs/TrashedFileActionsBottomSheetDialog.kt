@@ -96,8 +96,7 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
                     trackTrashEvent("deleteFromTrash")
                     dialog.dismiss()
                     if (apiResponse.data == true) {
-                        val title = resources.getQuantityString(R.plurals.snackbarDeleteConfirmation, 1, currentTrashedFile.name)
-                        showSnackbar(title)
+                        showSnackbar(getString(R.string.snackbarDeleteConfirmation, currentTrashedFile.name))
                         dismissAndRemoveFileFromList()
                     } else {
                         showSnackbar(R.string.errorDelete)

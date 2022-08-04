@@ -413,6 +413,10 @@
     </plurals>
     <string name="fileListMoveInProgressSnackbar">Desplazamiento en curso: %1$d/%2$d</string>
     <string name="fileListMoveStartedSnackbar">Comienzan los desplazamientos</string>
+    <plurals name="fileListMoveTrashConfirmationSnackbar">
+        <item quantity="one">Un elemento desplazado en el contenedor</item>
+        <item quantity="other">%d elementos enviados a la papelera</item>
+    </plurals>
     <plurals name="fileListMultiSelectedTitle">
         <item quantity="one">%d seleccionado</item>
         <item quantity="other">%d seleccionados</item>
@@ -614,17 +618,11 @@
         <item quantity="one">No se ha podido importar un archivo</item>
         <item quantity="other">No se han podido importar %d archivos</item>
     </plurals>
-    <plurals name="snackbarDeleteConfirmation">
-        <item quantity="one">%s eliminado definitivamente</item>
-        <item quantity="other">%d elementos eliminados definitivamente</item>
-    </plurals>
+    <string name="snackbarDeleteConfirmation">%s eliminado definitivamente</string>
     <string name="snackbarEmptyTrashConfirmation">Se ha vaciado la papelera</string>
     <string name="snackbarFileCreateConfirmation">Archivo creado correctamente</string>
     <string name="snackbarLeaveShareConfirmation">Se ha salido del uso compartido</string>
-    <plurals name="snackbarMoveTrashConfirmation">
-        <item quantity="one">%s enviado a la papelera</item>
-        <item quantity="other">%d elementos enviados a la papelera</item>
-    </plurals>
+    <string name="snackbarMoveTrashConfirmation">%s enviado a la papelera</string>
     <string name="sortBigger">Mayor tamaño</string>
     <string name="sortDay">Por día</string>
     <string name="sortExtension">Extensión</string>
@@ -672,6 +670,10 @@
     <string name="trashActionRestoreFileOriginalPlace">Restaurar en el emplazamiento original</string>
     <string name="trashNoFile">No se ha eliminado ningún archivo</string>
     <string name="trashTitle">Papelera</string>
+    <plurals name="trashedFileDeletedPermanentlyConfirmationSnackbar">
+        <item quantity="one">Un elemento eliminado definitivamente</item>
+        <item quantity="other">%d elementos eliminados definitivamente</item>
+    </plurals>
     <plurals name="trashedFileRestoreFileInSuccess">
         <item quantity="one">%1$s restaurado en %2$s</item>
         <item quantity="other">%1$s elementos restaurados en %2$s</item>

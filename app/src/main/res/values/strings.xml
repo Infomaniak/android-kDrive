@@ -424,6 +424,10 @@
     </plurals>
     <string name="fileListMoveInProgressSnackbar">Moves in progress: %1$d/%2$d</string>
     <string name="fileListMoveStartedSnackbar">Moves started</string>
+    <plurals name="fileListMoveTrashConfirmationSnackbar">
+        <item quantity="one">An item moved to the trash</item>
+        <item quantity="other">%d items moved to the trash</item>
+    </plurals>
     <plurals name="fileListMultiSelectedTitle">
         <item quantity="one">%d selected</item>
         <item quantity="other">%d selected</item>
@@ -625,17 +629,11 @@
         <item quantity="one">A file could not be imported</item>
         <item quantity="other">%d files could not be imported</item>
     </plurals>
-    <plurals name="snackbarDeleteConfirmation">
-        <item quantity="one">%s deleted permanently</item>
-        <item quantity="other">%d items deleted permanently</item>
-    </plurals>
+    <string name="snackbarDeleteConfirmation">%s deleted permanently</string>
     <string name="snackbarEmptyTrashConfirmation">Recycle bin has been emptied</string>
     <string name="snackbarFileCreateConfirmation">File created successfully</string>
     <string name="snackbarLeaveShareConfirmation">Sharing has stopped</string>
-    <plurals name="snackbarMoveTrashConfirmation">
-        <item quantity="one">%s moved to the trash</item>
-        <item quantity="other">%d items moved to the trash</item>
-    </plurals>
+    <string name="snackbarMoveTrashConfirmation">%s moved to the trash</string>
     <string name="sortBigger">Larger</string>
     <string name="sortDay">Per day</string>
     <string name="sortExtension">Extension</string>
@@ -683,6 +681,10 @@
     <string name="trashActionRestoreFileOriginalPlace">Recover to the original location</string>
     <string name="trashNoFile">No deleted files</string>
     <string name="trashTitle">Trash</string>
+    <plurals name="trashedFileDeletedPermanentlyConfirmationSnackbar">
+        <item quantity="one">One item permanently deleted</item>
+        <item quantity="other">%d items deleted permanently</item>
+    </plurals>
     <plurals name="trashedFileRestoreFileInSuccess">
         <item quantity="one">%1$s recovered in %2$s</item>
         <item quantity="other">%1$d items recovered in %2$s</item>

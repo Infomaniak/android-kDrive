@@ -138,33 +138,22 @@ object UploadNotifications {
         successNames: MutableList<String>,
         failedCount: Int,
         failedNames: MutableList<String>
-    ) {
+    ) = with(context.resources) {
         val total = successCount + failedCount
         val description = when {
             failedCount > 0 -> {
                 val failedList = failedNames.joinToString("\n")
-                val message =
-                    context.resources.getQuantityString(R.plurals.uploadImportedFailedAmount, failedCount, total, failedCount)
+                val message = getQuantityString(R.plurals.uploadImportedFailedAmount, failedCount, total, failedCount)
                 "$message.\n$failedList"
             }
-            successCount == 1 -> {
-                context.resources.getQuantityString(R.plurals.allUploadFinishedDescription, 1, this.fileName)
-            }
+            successCount == 1 -> getQuantityString(R.plurals.allUploadFinishedDescription, 1, fileName)
             else -> {
-                val desc = context.resources.getQuantityString(R.plurals.allUploadFinishedDescription, successCount, successCount)
+                val description = getQuantityString(R.plurals.allUploadFinishedDescription, successCount, successCount.toString())
                 StringBuilder().apply {
-                    appendLine(desc)
+                    appendLine(description)
                     for (file in successNames.take(NOTIFICATION_FILES_LIMIT)) appendLine(file)
                     val otherCount = successCount - NOTIFICATION_FILES_LIMIT
-                    if (otherCount > 0) {
-                        appendLine(
-                            context.resources.getQuantityString(
-                                R.plurals.uploadImportedOtherAmount,
-                                otherCount,
-                                otherCount
-                            )
-                        )
-                    }
+                    if (otherCount > 0) appendLine(getQuantityString(R.plurals.uploadImportedOtherAmount, otherCount, otherCount))
                 }.toString()
             }
         }

@@ -109,7 +109,7 @@ object Utils {
         val message: String = context.resources.getQuantityString(
             if (fromTrash) R.plurals.modalDeleteDescription
             else R.plurals.modalMoveTrashDescription,
-            if (fileName == null) fileCount else 1,
+            fileCount,
             fileName ?: fileCount
         )
         val button: Int = if (fromTrash) R.string.buttonDelete else R.string.buttonMove
