@@ -30,7 +30,7 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 enum class BulkOperationType(@StringRes val title: Int, @PluralsRes val successMessage: Int) : Parcelable {
-    TRASH(R.string.fileListDeletionInProgressSnackbar, R.plurals.snackbarMoveTrashConfirmation),
+    TRASH(R.string.fileListDeletionInProgressSnackbar, R.plurals.fileListMoveTrashConfirmationSnackbar),
     MOVE(R.string.fileListMoveInProgressSnackbar, R.plurals.fileListMoveFileConfirmationSnackbar),
     COPY(R.string.fileListCopyInProgressSnackbar, R.plurals.fileListDuplicationConfirmationSnackbar),
     COLOR_FOLDER(0, R.plurals.fileListColorFolderConfirmationSnackbar),
@@ -42,7 +42,7 @@ enum class BulkOperationType(@StringRes val title: Int, @PluralsRes val successM
 
     RESTORE_IN(0, successMessage = R.plurals.trashedFileRestoreFileInSuccess),
     RESTORE_TO_ORIGIN(0, successMessage = R.plurals.trashedFileRestoreFileToOriginalPlaceSuccess),
-    DELETE_PERMANENTLY(0, successMessage = R.plurals.snackbarDeleteConfirmation);
+    DELETE_PERMANENTLY(0, successMessage = R.plurals.trashedFileDeletedPermanentlyConfirmationSnackbar);
 
     fun getNotificationBuilder(context: Context): NotificationCompat.Builder {
         return when (this) {

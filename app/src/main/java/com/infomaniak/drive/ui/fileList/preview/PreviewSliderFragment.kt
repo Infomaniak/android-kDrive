@@ -442,12 +442,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             onApiResponse()
             if (apiResponse.isSuccess()) {
                 removeFileInSlider()
-                val title = resources.getQuantityString(
-                    R.plurals.snackbarMoveTrashConfirmation,
-                    1,
-                    currentFile.name
-                )
-                showSnackbar(title)
+                showSnackbar(getString(R.string.snackbarMoveTrashConfirmation, currentFile.name))
                 mainViewModel.deleteFileFromHome.value = true
             } else {
                 showSnackbar(R.string.errorDelete)

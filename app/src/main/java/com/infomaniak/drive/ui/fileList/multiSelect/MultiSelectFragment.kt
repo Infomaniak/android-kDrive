@@ -236,7 +236,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             BulkOperationType.TRASH -> Utils.createConfirmation(
                 context = this,
                 title = getString(R.string.modalMoveTrashTitle),
-                message = resources.getQuantityString(R.plurals.modalMoveTrashDescription, fileCount, fileCount),
+                message = resources.getQuantityString(R.plurals.modalMoveTrashDescription, 2, fileCount),
                 autoDismiss = false,
                 isDeletion = true,
                 onConfirmation = sendActions,

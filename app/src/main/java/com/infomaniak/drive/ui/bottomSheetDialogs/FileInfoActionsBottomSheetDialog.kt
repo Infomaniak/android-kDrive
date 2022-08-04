@@ -300,11 +300,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                 onApiResponse()
                 if (apiResponse.isSuccess()) {
                     mainViewModel.refreshActivities.value = true
-                    val title = resources.getQuantityString(
-                        R.plurals.snackbarMoveTrashConfirmation,
-                        1,
-                        currentFile.name
-                    )
+                    val title = getString(R.string.snackbarMoveTrashConfirmation, currentFile.name)
                     transmitActionAndPopBack(title, apiResponse.data?.setDriveAndReturn(currentFile.driveId))
                 } else {
                     transmitActionAndPopBack(getString(R.string.errorDelete))

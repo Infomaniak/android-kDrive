@@ -384,6 +384,7 @@ class MainActivity : BaseActivity() {
         super.onSaveInstanceState(savedInstanceState)
         savedInstanceState.putBundle("nav_state", findNavController(R.id.hostFragment).saveState())
     }
+
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         findNavController(R.id.hostFragment).restoreState(savedInstanceState.getBundle("nav_state"))
