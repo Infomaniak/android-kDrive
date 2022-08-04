@@ -380,16 +380,6 @@ class MainActivity : BaseActivity() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(downloadReceiver)
     }
 
-    override fun onSaveInstanceState(savedInstanceState: Bundle) {
-        super.onSaveInstanceState(savedInstanceState)
-        savedInstanceState.putBundle("nav_state", findNavController(R.id.hostFragment).saveState())
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        findNavController(R.id.hostFragment).restoreState(savedInstanceState.getBundle("nav_state"))
-    }
-
     private fun displayInformationPanel() {
         if (!hasDisplayedInformationPanel) {
             UiSettings(this).apply {

@@ -135,16 +135,15 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         MqttClientWrapper.init(applicationContext)
     }
 
-    private fun setDefaultLocal() {
-        if (Locale.getDefault().language in acceptedLocale) return
+    private fun setDefaultLocal() = with(resources) {
+        if (Locale.getDefault().language in acceptedLocale) return@with
 
-        val config = resources.configuration
         Locale.setDefault(defaultLocale)
-        config.setLocale(defaultLocale)
+        configuration.setLocale(defaultLocale)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            createConfigurationContext(config)
+            createConfigurationContext(configuration)
         } else {
-            resources.updateConfiguration(config, resources.displayMetrics)
+            updateConfiguration(configuration, displayMetrics)
         }
     }
 
