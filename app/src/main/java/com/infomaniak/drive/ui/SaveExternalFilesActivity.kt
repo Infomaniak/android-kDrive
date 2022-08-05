@@ -169,9 +169,13 @@ class SaveExternalFilesActivity : BaseActivity() {
         }
     }
 
-    private fun getSelectedFolder(): Triple<Int, Int, Int> {
+    private fun getSelectedFolder(): Triple<Int, Int, Int?> {
         return if (canSaveExternalFilesPref()) UiSettings(this).getSaveExternalFilesPref()
-        else Triple(navigationArgs.userId, navigationArgs.userDriveId, navigationArgs.folderId)
+        else Triple(
+            navigationArgs.userId,
+            navigationArgs.userDriveId,
+            if (navigationArgs.folderId >= 1) navigationArgs.folderId else null
+        )
     }
 
     private fun canSaveExternalFilesPref() = navigationArgs.userId == -1
@@ -208,7 +212,7 @@ class SaveExternalFilesActivity : BaseActivity() {
         saveExternalFilesViewModel.folderId.observe(this@SaveExternalFilesActivity) { folderId ->
 
             val folder = if (selectedUserId.value == null || selectedDrive.value?.id == null
-                || folderId == null || folderId < 1
+                || folderId == null
             ) {
                 null
             } else {
