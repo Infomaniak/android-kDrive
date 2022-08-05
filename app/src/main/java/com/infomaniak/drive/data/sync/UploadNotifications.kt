@@ -148,7 +148,7 @@ object UploadNotifications {
             }
             successCount == 1 -> getQuantityString(R.plurals.allUploadFinishedDescription, 1, fileName)
             else -> {
-                val description = getQuantityString(R.plurals.allUploadFinishedDescription, successCount, successCount.toString())
+                val description = getQuantityString(R.plurals.allUploadFinishedDescription, successCount, successCount)
                 StringBuilder().apply {
                     appendLine(description)
                     for (file in successNames.take(NOTIFICATION_FILES_LIMIT)) appendLine(file)
