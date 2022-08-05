@@ -50,6 +50,7 @@ import com.infomaniak.drive.ui.menu.settings.SelectDriveViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackCurrentUserId
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import io.sentry.Sentry
@@ -174,7 +175,7 @@ class SaveExternalFilesActivity : BaseActivity() {
         else Triple(
             navigationArgs.userId,
             navigationArgs.userDriveId,
-            if (navigationArgs.folderId >= 1) navigationArgs.folderId else null
+            if (navigationArgs.folderId >= Utils.ROOT_ID) navigationArgs.folderId else null
         )
     }
 
