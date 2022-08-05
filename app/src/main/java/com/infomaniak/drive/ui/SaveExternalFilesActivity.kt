@@ -50,6 +50,7 @@ import com.infomaniak.drive.ui.menu.settings.SelectDriveViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackCurrentUserId
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import io.sentry.Sentry
@@ -169,9 +170,13 @@ class SaveExternalFilesActivity : BaseActivity() {
         }
     }
 
-    private fun getSelectedFolder(): Triple<Int, Int, Int> {
+    private fun getSelectedFolder(): Triple<Int, Int, Int?> {
         return if (canSaveExternalFilesPref()) UiSettings(this).getSaveExternalFilesPref()
-        else Triple(navigationArgs.userId, navigationArgs.userDriveId, navigationArgs.folderId)
+        else Triple(
+            navigationArgs.userId,
+            navigationArgs.userDriveId,
+            if (navigationArgs.folderId >= Utils.ROOT_ID) navigationArgs.folderId else null
+        )
     }
 
     private fun canSaveExternalFilesPref() = navigationArgs.userId == -1
@@ -208,7 +213,7 @@ class SaveExternalFilesActivity : BaseActivity() {
         saveExternalFilesViewModel.folderId.observe(this@SaveExternalFilesActivity) { folderId ->
 
             val folder = if (selectedUserId.value == null || selectedDrive.value?.id == null
-                || folderId == null || folderId < 1
+                || folderId == null
             ) {
                 null
             } else {

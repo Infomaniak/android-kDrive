@@ -23,6 +23,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import com.google.gson.reflect.TypeToken
 import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsBottomSheetDialog.Companion.manufacturerWarning
+import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.ApiController
 
 class UiSettings(private val context: Context) {
@@ -38,12 +39,12 @@ class UiSettings(private val context: Context) {
         }
     }
 
-    fun getSaveExternalFilesPref(): Triple<Int, Int, Int> {
+    fun getSaveExternalFilesPref(): Triple<Int, Int, Int?> {
         val uiSettings = getUiSettings()
         val userId = uiSettings.getInt("saveExternalFilesPref_userId", -1)
         val driveId = uiSettings.getInt("saveExternalFilesPref_driveId", -1)
         val folderId = uiSettings.getInt("saveExternalFilesPref_folderId", -1)
-        return Triple(userId, driveId, folderId)
+        return Triple(userId, driveId, if (folderId >= Utils.ROOT_ID) folderId else null)
     }
 
     fun setSaveExternalFilesPref(userId: Int, driveId: Int, folderId: Int) {
