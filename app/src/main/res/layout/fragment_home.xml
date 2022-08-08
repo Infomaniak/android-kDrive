@@ -161,7 +161,8 @@
             android:id="@+id/homeViewPager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:nestedScrollingEnabled="true" />
+            android:nestedScrollingEnabled="true"
+            android:saveEnabled="false" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 

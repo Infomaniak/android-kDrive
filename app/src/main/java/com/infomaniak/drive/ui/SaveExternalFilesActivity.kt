@@ -361,6 +361,11 @@ class SaveExternalFilesActivity : BaseActivity() {
             exception.printStackTrace()
             showSnackbar(R.string.anErrorHasOccurred)
             Sentry.withScope { scope ->
+                val fileName = fileNameEdit.text.toString()
+                val outputFile = getOutputFile(fileName)
+                scope.setExtra("fileName", fileName)
+                scope.setExtra("sharedFolderExists", sharedFolder.exists().toString())
+                scope.setExtra("outputFile", outputFile.toString())
                 scope.level = SentryLevel.WARNING
                 Sentry.captureException(exception)
             }
@@ -372,7 +377,7 @@ class SaveExternalFilesActivity : BaseActivity() {
         intent.getStringExtra(Intent.EXTRA_TEXT)?.let { text ->
             val fileName = fileNameEdit.text.toString()
             val lastModified = Date()
-            val outputFile = java.io.File(sharedFolder, fileName).also { if (it.exists()) it.delete() }
+            val outputFile = getOutputFile(fileName)
 
             if (outputFile.createNewFile()) {
                 outputFile.setLastModified(lastModified.time)
@@ -405,6 +410,8 @@ class SaveExternalFilesActivity : BaseActivity() {
         return false
     }
 
+    private fun getOutputFile(fileName: String) = java.io.File(sharedFolder, fileName).also { if (it.exists()) it.delete() }
+
     private fun store(uri: Uri, fileName: String?, userId: Int, driveId: Int, folderId: Int): Boolean {
         contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
@@ -414,7 +421,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 try {
                     if (fileName == null) return false
 
-                    val outputFile = java.io.File(sharedFolder, fileName).also { if (it.exists()) it.delete() }
+                    val outputFile = getOutputFile(fileName)
 
                     if (outputFile.createNewFile()) {
                         outputFile.setLastModified(fileModifiedAt.time)

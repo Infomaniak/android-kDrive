@@ -39,6 +39,7 @@ import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
 import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
 import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.lib.core.R
+import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.ApiController.gson
@@ -275,7 +276,7 @@ class UploadTask(
                 val apiResponse = try {
                     gson.fromJson(bodyResponse, ApiResponse::class.java)
                 } catch (e: Exception) {
-                    null
+                    ApiResponse<Any>(error = ApiError(description = bodyResponse))
                 }
                 apiResponse.manageUploadErrors()
             }
