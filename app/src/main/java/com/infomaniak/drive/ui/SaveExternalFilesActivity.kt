@@ -416,7 +416,6 @@ class SaveExternalFilesActivity : BaseActivity() {
         contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
-                val fileSize = SyncUtils.getFileSize(cursor)
 
                 try {
                     if (fileName == null) return false
@@ -437,7 +436,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                             driveId = driveId,
                             remoteFolder = folderId,
                             type = UploadFile.Type.SHARED_FILE.name,
-                            fileSize = fileSize,
+                            fileSize = outputFile.length(),
                             fileName = fileName,
                             fileCreatedAt = fileCreatedAt,
                             fileModifiedAt = fileModifiedAt
