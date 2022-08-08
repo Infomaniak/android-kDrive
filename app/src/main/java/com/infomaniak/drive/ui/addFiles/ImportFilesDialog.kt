@@ -28,6 +28,7 @@ import androidx.core.net.toUri
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
@@ -111,7 +112,7 @@ class ImportFilesDialog : DialogFragment() {
                     showSnackbar(resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount), true)
                 }
             }
-            dismiss()
+            lifecycleScope.launchWhenResumed { findNavController().popBackStack() }
         }
     }
 

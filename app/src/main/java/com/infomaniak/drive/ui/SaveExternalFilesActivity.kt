@@ -361,6 +361,10 @@ class SaveExternalFilesActivity : BaseActivity() {
             exception.printStackTrace()
             showSnackbar(R.string.anErrorHasOccurred)
             Sentry.withScope { scope ->
+                val fileName = fileNameEdit.text.toString()
+                val outputFile = java.io.File(sharedFolder, fileName).also { if (it.exists()) it.delete() }
+                scope.setExtra("fileName", fileName)
+                scope.setExtra("outputFile", outputFile.toString())
                 scope.level = SentryLevel.WARNING
                 Sentry.captureException(exception)
             }

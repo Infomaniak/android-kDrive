@@ -123,14 +123,14 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             homeViewPager.setCurrentItem(UiSettings(requireContext()).lastHomeSelectedTab, false)
         }
 
-        appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
+        appBarLayout.addOnOffsetChangedListener { _, verticalOffset ->
             (activity as? MainActivity)?.bottomNavigation?.apply {
                 val bottomNavigationOffset = layoutParams.height + marginBottom + marginTop + 10.toPx()
                 galleryFragment.setScrollbarTrackOffset(
-                    appBarLayout?.totalScrollRange ?: 0 + verticalOffset + bottomNavigationOffset
+                    appBarLayout?.totalScrollRange ?: (0 + verticalOffset + bottomNavigationOffset)
                 )
             }
-        })
+        }
     }
 
     override fun onResume() {
