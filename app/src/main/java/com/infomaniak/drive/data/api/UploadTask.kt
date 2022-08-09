@@ -384,13 +384,14 @@ class UploadTask(
 
     private fun <T> ApiResponse<T>?.manageUploadErrors() {
         if (this?.translatedError == R.string.connectionError) throw NetworkException()
-        when (this?.error?.code) {
+        when (if (this?.error?.code == "bad_request_error") this.error?.description else this?.error?.code) {
             "file_already_exists_error" -> Unit
             "lock_error" -> throw LockErrorException()
             "quota_exceeded_error" -> throw QuotaExceededException()
             "not_authorized" -> throw NotAuthorizedException()
             "upload_destination_not_found_error", "upload_destination_not_writable_error" -> throw FolderNotFoundException()
-            "upload_not_terminated" -> {
+            "upload_not_terminated",
+            "upload_not_terminated_error" -> {
                 // Upload finish with 0 chunks uploaded
                 // Upload finish with a different expected number of chunks
                 uploadFile.uploadToken?.let {
@@ -401,6 +402,7 @@ class UploadTask(
                 throw UploadNotTerminated("Upload finish with 0 chunks uploaded or a different expected number of chunks")
             }
             "upload_token_is_not_valid",
+            "upload_token_is_not_valid_error",
             "upload_error" -> {
                 uploadFile.resetUploadToken()
                 throw UploadErrorException()

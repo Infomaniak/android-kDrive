@@ -56,6 +56,7 @@ class LaunchActivity : AppCompatActivity() {
                 }
                 else -> {
                     application.trackCurrentUserId()
+                    // When DriveInfosController is migrated
                     if (DriveInfosController.getDrivesCount(AccountUtils.currentUserId) == 0L) {
                         AccountUtils.updateCurrentUserAndDrives(this@LaunchActivity)
                     }

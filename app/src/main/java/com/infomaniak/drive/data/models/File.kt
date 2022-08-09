@@ -47,6 +47,7 @@ import io.realm.RealmResults
 import io.realm.annotations.Ignore
 import io.realm.annotations.LinkingObjects
 import io.realm.annotations.PrimaryKey
+import io.sentry.Sentry
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.parcel.RawValue
 import kotlinx.android.parcel.WriteWith
@@ -340,7 +341,14 @@ open class File(
         return if (isManaged) {
             categories.sort(FileCategory::addedAt.name).map { it.categoryId }
         } else {
-            categories.sortedBy { it.addedAt }.map { it.categoryId }
+            runCatching {
+                categories.sortedBy { it.addedAt }.map { it.categoryId }
+            }.onFailure {
+                Sentry.withScope { scope ->
+                    scope.setExtra("categories", categories.joinToString { "id: ${it.categoryId} addedAt: ${it.addedAt}" })
+                    Sentry.captureException(it)
+                }
+            }.getOrDefault(emptyList())
         }
     }
 
