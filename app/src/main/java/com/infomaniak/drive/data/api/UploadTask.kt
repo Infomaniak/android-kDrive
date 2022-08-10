@@ -414,7 +414,7 @@ class UploadTask(
                     0, null -> ""
                     else -> context.getString(translatedError)
                 }
-                throw this?.error?.description?.let(::Exception) ?: Exception("$responseJson $translatedError")
+                throw Exception("$responseJson $translatedError")
             }
         }
     }

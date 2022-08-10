@@ -205,7 +205,7 @@ class UploadInProgressFragment : FileListFragment() {
                 if (isPendingFolders()) UploadFile.deleteAll(null)
                 else UploadFile.deleteAll(folderId = it)
 
-                fileRecyclerView.post {
+                fileRecyclerView?.post {
                     fileAdapter.setFiles(listOf())
                 }
 
