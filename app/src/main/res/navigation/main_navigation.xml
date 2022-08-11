@@ -88,9 +88,6 @@
         <action
             android:id="@+id/action_fileListFragment_to_dropBoxResultBottomSheetDialog"
             app:destination="@id/dropBoxResultBottomSheetDialog" />
-        <action
-            android:id="@+id/action_fileListFragment_to_downloadProgressDialog"
-            app:destination="@id/downloadProgressDialog" />
     </fragment>
 
     <fragment

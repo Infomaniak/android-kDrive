@@ -15,8 +15,8 @@ android {
         applicationId 'com.infomaniak.drive'
         minSdkVersion 21
         targetSdkVersion 32
-        versionCode 4_02_003_01
-        versionName '4.2.3'
+        versionCode 4_02_004_01
+        versionName '4.2.4'
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         buildConfigField 'String', 'CLIENT_ID', '"9473D73C-C20F-4971-9E10-D957C563FA68"'

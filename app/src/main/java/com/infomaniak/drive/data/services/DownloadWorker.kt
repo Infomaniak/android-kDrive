@@ -30,6 +30,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.api.ProgressResponseBody
+import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
@@ -79,6 +80,8 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
                 if (it.exists() && file?.isIntactFile(it) == false) it.delete()
             }
             notifyDownloadCancelled()
+            Result.failure()
+        } catch (exception: UploadTask.NetworkException) {
             Result.failure()
         } catch (exception: RemoteFileException) {
             Sentry.captureException(exception)
@@ -159,8 +162,18 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
 
     private fun getFileFromRemote() {
         val fileDetails = ApiRepository.getFileDetails(File(id = fileId, driveId = userDrive.driveId))
-        val responseGsonType = object : TypeToken<ApiResponse<File>>() {}.type
-        file = fileDetails.data ?: throw RemoteFileException(ApiController.gson.toJson(fileDetails, responseGsonType))
+        val data = fileDetails.data
+        file = if (data != null) {
+            data
+        } else {
+            val translatedError = fileDetails.translatedError
+            if (translatedError == R.string.connectionError) throw UploadTask.NetworkException()
+
+            val responseGsonType = object : TypeToken<ApiResponse<File>>() {}.type
+            val translatedErrorText = if (translatedError == 0) "" else applicationContext.getString(translatedError)
+            val responseJson = ApiController.gson.toJson(fileDetails, responseGsonType)
+            throw RemoteFileException("$responseJson $translatedErrorText")
+        }
         offlineFile = file?.getOfflineFile(applicationContext, userDrive.driveId)
     }
 
