@@ -33,6 +33,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.ApplicationMain
+import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.CreateFile
@@ -40,6 +41,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
 import com.infomaniak.drive.utils.MatomoUtils.trackNewElementEvent
@@ -67,6 +69,17 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private val captureMediaResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { onCaptureMediaResult() }
+        dismiss()
+    }
+
+    private val scanFlowResultLauncher = registerForActivityResult(StartActivityForResult()) { activityResult ->
+        activityResult.whenResultIsOk {
+            it?.let { data ->
+                val fileListFragment = parentFragment?.childFragmentManager?.fragments?.getOrNull(0) as? FileListFragment
+                val folderId = fileListFragment?.folderId ?: -1
+                scanResultProcessing(data, folderId)
+            }
+        }
         dismiss()
     }
 
@@ -155,8 +168,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun scanDocuments() {
         trackNewElement("scan")
-        activity?.startScanFlow()
-        dismiss()
+        context?.startScanFlow(scanFlowResultLauncher)
     }
 
     private fun createFolder() {
