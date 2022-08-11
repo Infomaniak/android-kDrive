@@ -168,7 +168,6 @@ object SyncUtils {
     }
 
     fun Context.disableAutoSync() {
-        UploadFile.deleteAllSyncFile()
         UploadFile.removeAppSyncSettings()
         cancelContentObserver()
         cancelPeriodicSync()
