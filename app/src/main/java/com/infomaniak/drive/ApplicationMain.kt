@@ -36,7 +36,6 @@ import com.facebook.stetho.Stetho
 import com.facebook.stetho.okhttp3.StethoInterceptor
 import com.infomaniak.drive.BuildConfig.DRIVE_API_V2
 import com.infomaniak.drive.GeniusScanUtils.initGeniusScanSdk
-import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.services.MqttClientWrapper
