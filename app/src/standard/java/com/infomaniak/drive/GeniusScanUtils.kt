@@ -145,9 +145,8 @@ object GeniusScanUtils {
         }
     }
 
-    @Throws(Exception::class)
     private fun Intent.getScanResult(): ScanResult {
-        (getSerializableExtra(ERROR_KEY) as? java.lang.Exception)?.let { throw it }
+        (getSerializableExtra(ERROR_KEY) as? Exception)?.let { throw it }
 
         return getSerializableExtra(SCAN_RESULT_KEY) as ScanResult
     }
