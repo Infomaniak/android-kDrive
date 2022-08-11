@@ -17,17 +17,18 @@
  */
 package com.infomaniak.drive
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.fragment.app.Fragment
 import com.geniusscansdk.core.GeniusScanSDK
 import com.geniusscansdk.core.LicenseException
+import com.geniusscansdk.scanflow.ScanActivity
 import com.geniusscansdk.scanflow.ScanConfiguration
-import com.geniusscansdk.scanflow.ScanFlow
-import com.infomaniak.drive.ui.MainActivity
+import com.geniusscansdk.scanflow.ScanResult
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.utils.AccountUtils
@@ -41,7 +42,9 @@ import java.util.*
 
 object GeniusScanUtils {
 
-    const val SCAN_REQUEST = ScanFlow.SCAN_REQUEST
+    private const val SCAN_CONFIGURATION_KEY = "SCAN_CONFIGURATION_KEY"
+    private const val SCAN_RESULT_KEY = "SCAN_RESULT_KEY"
+    private const val ERROR_KEY = "ERROR_KEY"
 
     private val supportedLanguages = mapOf(
         "fra" to R.raw.fra,
@@ -92,34 +95,34 @@ object GeniusScanUtils {
         false
     }
 
-    fun Activity.startScanFlow() {
+    fun Context.startScanFlow(resultLauncher: ActivityResultLauncher<Intent>) {
         removeOldScanFiles()
         val scanConfiguration = ScanConfiguration().apply {
-            backgroundColor = ContextCompat.getColor(baseContext, R.color.previewBackground)
-            foregroundColor = ContextCompat.getColor(baseContext, R.color.white)
-            highlightColor = ContextCompat.getColor(baseContext, R.color.accent)
+            backgroundColor = ContextCompat.getColor(this@startScanFlow, R.color.previewBackground)
+            foregroundColor = ContextCompat.getColor(this@startScanFlow, R.color.white)
+            highlightColor = ContextCompat.getColor(this@startScanFlow, R.color.accent)
             ocrConfiguration = getOcrConfiguration()
         }
-        ScanFlow.scanWithConfiguration(this, scanConfiguration)
+        scanWithConfiguration(scanConfiguration, resultLauncher)
     }
 
-    fun MainActivity.scanResultProcessing(intent: Intent?) {
+    fun Fragment.scanResultProcessing(intent: Intent, folderId: Int) {
         try {
-            val geniusScanFile = ScanFlow.getScanResultFromActivityResult(intent).multiPageDocument!!
+            val geniusScanFile = intent.getScanResult().multiPageDocument!!
             val newName = "scan_${Date().format(FORMAT_NEW_FILE)}.${geniusScanFile.extension}"
             val scanFile = File(geniusScanFile.parent, newName)
             geniusScanFile.renameTo(scanFile)
 
-            val uri = FileProvider.getUriForFile(this, getString(R.string.FILE_AUTHORITY), scanFile)
+            val uri = FileProvider.getUriForFile(requireContext(), getString(R.string.FILE_AUTHORITY), scanFile)
 
-            Intent(this, SaveExternalFilesActivity::class.java).apply {
+            Intent(requireContext(), SaveExternalFilesActivity::class.java).apply {
                 action = Intent.ACTION_SEND
                 putExtra(Intent.EXTRA_STREAM, uri)
                 putExtras(
                     SaveExternalFilesActivityArgs(
                         userId = AccountUtils.currentUserId,
                         userDriveId = AccountUtils.currentDriveId,
-                        folderId = getFileListFragment()?.folderId ?: -1
+                        folderId = folderId
                     ).toBundle()
                 )
                 type = "/pdf"
@@ -130,6 +133,22 @@ object GeniusScanUtils {
             Sentry.captureException(exception)
             showSnackbar(R.string.anErrorHasOccurred)
         }
+    }
+
+    private fun Context.scanWithConfiguration(
+        scanConfiguration: ScanConfiguration,
+        resultLauncher: ActivityResultLauncher<Intent>
+    ) {
+        Intent(this, ScanActivity::class.java).apply {
+            putExtra(SCAN_CONFIGURATION_KEY, scanConfiguration)
+            resultLauncher.launch(this)
+        }
+    }
+
+    private fun Intent.getScanResult(): ScanResult {
+        (getSerializableExtra(ERROR_KEY) as? Exception)?.let { throw it }
+
+        return getSerializableExtra(SCAN_RESULT_KEY) as ScanResult
     }
 
 }

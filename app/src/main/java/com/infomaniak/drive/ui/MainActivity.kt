@@ -53,8 +53,9 @@ import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.navigation.NavigationBarItemView
-import com.infomaniak.drive.*
-import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
+import com.infomaniak.drive.BuildConfig
+import com.infomaniak.drive.R
+import com.infomaniak.drive.checkUpdateIsAvailable
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
@@ -62,7 +63,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.UploadNotifications
-import com.infomaniak.drive.ui.fileList.FileListFragment
+import com.infomaniak.drive.launchInAppReview
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackScreen
@@ -229,13 +230,6 @@ class MainActivity : BaseActivity() {
             }
         }
     }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == GeniusScanUtils.SCAN_REQUEST && resultCode == RESULT_OK) scanResultProcessing(data)
-    }
-
-    fun getFileListFragment() = getNavHostFragment().childFragmentManager.fragments.getOrNull(0) as? FileListFragment
 
     override fun onResume() {
         super.onResume()
