@@ -494,5 +494,3 @@ fun Activity.getAdjustedColumnNumber(expectedItemSize: Int, minColumns: Int = 2,
 }
 
 fun <T> ApiResponse<ArrayList<T>>.isLastPage() = (data?.size ?: 0) < itemsPerPage
-
-operator fun Regex.contains(input: String) = containsMatchIn(input)
