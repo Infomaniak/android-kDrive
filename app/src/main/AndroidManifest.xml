@@ -88,6 +88,7 @@
 
         <activity
             android:name=".ui.fileList.SelectFolderActivity"
+            android:configChanges="orientation|screenSize|layoutDirection"
             android:label="@string/selectFolderTitle" />
 
         <activity android:name=".ui.OnlyOfficeActivity" />
