@@ -76,6 +76,7 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomShe
 import com.infomaniak.drive.ui.fileList.UploadInProgressFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.MatomoUtils.trackShareRightsEvent
+import com.infomaniak.drive.utils.Utils.regexInvalidSystemChar
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpUtils
@@ -370,12 +371,11 @@ fun Drive?.getDriveUsers(): List<DriveUser> = this?.users?.let { categories ->
 } ?: listOf()
 
 fun Context.startDownloadFile(downloadURL: Uri, fileName: String) {
-    var formattedFileName = fileName.replace(Regex("[\\\\/:*?\"<>|%]"), "_")
-
-    // fix IllegalArgumentException only on Android 10 if multi dot
-    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
-        formattedFileName = formattedFileName.replace(regex = "\\.{2,}".toRegex(), replacement = ".")
+    val formattedFileName = fileName.replace(regexInvalidSystemChar, "_").replace("%", "_").let {
+        // fix IllegalArgumentException only on Android 10 if multi dot
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) it.replace(Regex("\\.{2,}"), ".") else it
     }
+
     val request = DownloadManager.Request(downloadURL).apply {
         setTitle(formattedFileName)
         setDescription(getString(R.string.app_name))
@@ -394,8 +394,8 @@ fun Context.startDownloadFile(downloadURL: Uri, fileName: String) {
 
 private fun Context.handleDownloadManagerErrors(downloadReference: Long, downloadManager: DownloadManager) {
     fun checkStatus(cursor: Cursor) {
-        val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
-        val reason = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_REASON))
+        val status = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
+        val reason = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_REASON))
         if (status == DownloadManager.STATUS_FAILED) {
             when (reason) {
                 DownloadManager.ERROR_INSUFFICIENT_SPACE -> showToast(R.string.errorDownloadInsufficientSpace)
