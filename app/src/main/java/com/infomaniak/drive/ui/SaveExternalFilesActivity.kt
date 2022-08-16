@@ -35,6 +35,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.observe
 import androidx.navigation.navArgs
 import com.google.android.material.textfield.TextInputEditText
 import com.infomaniak.drive.R
@@ -380,6 +381,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 val fileName = fileNameEdit.text.toString()
                 val outputFile = getOutputFile(fileName)
                 scope.setExtra("fileName", fileName)
+                scope.setExtra("lifecycleState", lifecycle.currentState.name)
                 scope.setExtra("sharedFolderExists", sharedFolder.exists().toString())
                 scope.setExtra("outputFile", outputFile.toString())
                 scope.level = SentryLevel.WARNING
