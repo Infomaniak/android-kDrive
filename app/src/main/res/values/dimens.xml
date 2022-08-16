@@ -24,6 +24,8 @@
     <dimen name="categoryIconOverlap">-8dp</dimen>
     <dimen name="coloredChipSize">56dp</dimen>
 
+    <integer name="defaultMaxLengthFileName">254</integer>
+
     <!--fastScroller-->
     <dimen name="defaultHandleSize">18dp</dimen>
     <dimen name="defaultPopupPadding">16dp</dimen>

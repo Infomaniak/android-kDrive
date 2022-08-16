@@ -24,6 +24,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import android.provider.OpenableColumns
+import android.text.InputFilter
+import android.text.Spanned
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
@@ -293,6 +295,20 @@ class SaveExternalFilesActivity : BaseActivity() {
             fileNameEdit.showOrHideEmptyError()
             checkEnabledSaveButton()
         }
+
+        fileNameEdit.filters = arrayOf(
+            object : InputFilter {
+                override fun filter(
+                    source: CharSequence?,
+                    start: Int,
+                    end: Int,
+                    dest: Spanned?,
+                    dstart: Int,
+                    dend: Int
+                ): CharSequence? = source?.replace(Regex("/"), "")
+            },
+            *fileNameEdit.filters
+        )
 
         var showEditText = false
 
