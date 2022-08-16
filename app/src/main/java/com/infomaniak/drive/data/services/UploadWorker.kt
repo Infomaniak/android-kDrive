@@ -192,7 +192,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 initUploadSchemeContent(uri)
             }
         } catch (exception: Exception) {
-            handleException(exception, uri)
+            handleException(exception)
             false
         }
     }
@@ -250,7 +250,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private fun UploadFile.handleException(exception: Exception, uri: Uri) {
+    private fun UploadFile.handleException(exception: Exception) {
         when (exception) {
             is SecurityException, is IllegalStateException, is IllegalArgumentException -> {
                 deleteIfExists()

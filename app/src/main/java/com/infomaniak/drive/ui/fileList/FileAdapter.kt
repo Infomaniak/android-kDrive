@@ -45,6 +45,7 @@ import io.realm.RealmList
 import io.realm.RealmRecyclerViewAdapter
 import kotlinx.android.synthetic.main.cardview_file_list.view.*
 import kotlinx.android.synthetic.main.item_file.view.*
+import java.util.*
 
 open class FileAdapter(
     private val multiSelectManager: MultiSelectManager,
@@ -230,8 +231,11 @@ open class FileAdapter(
     override fun getItemCount() = fileList.size + if (showLoading) 1 else 0
 
     override fun getItemId(position: Int): Long {
-        val file = fileList.getOrNull(position)
-        return if (hasStableIds() && file != null) file.id.toLong() else super.getItemId(position)
+        return if (hasStableIds()) {
+            fileList.getOrNull(position)?.id?.toLong() ?: UUID.randomUUID().hashCode().toLong()
+        } else {
+            super.getItemId(position)
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileViewHolder {
