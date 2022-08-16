@@ -105,6 +105,7 @@ open class File(
     @SerializedName("extension_type")
     var extensionType: String = "",
     var version: FileVersion? = null,
+    @SerializedName("conversion_capabilities")
     var conversion: FileConversion? = null,
 
     /**
