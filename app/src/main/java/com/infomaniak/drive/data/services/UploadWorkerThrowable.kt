@@ -26,6 +26,7 @@ import com.infomaniak.drive.data.sync.UploadNotifications.folderNotFoundNotifica
 import com.infomaniak.drive.data.sync.UploadNotifications.lockErrorNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.networkErrorNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.outOfMemoryNotification
+import com.infomaniak.drive.data.sync.UploadNotifications.productMaintenanceExceptionNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.quotaExceededNotification
 import com.infomaniak.drive.utils.NotificationUtils
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
@@ -68,6 +69,10 @@ object UploadWorkerThrowable {
         } catch (exception: UploadTask.LockErrorException) {
             currentUploadFile?.lockErrorNotification(applicationContext)
             Result.retry()
+
+        } catch (exception: UploadTask.ProductMaintenanceException) {
+            currentUploadFile?.productMaintenanceExceptionNotification(applicationContext)
+            Result.failure()
 
         } catch (exception: Exception) {
             handleGenericException(exception)

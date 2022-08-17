@@ -25,6 +25,7 @@ import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.MainActivity
@@ -110,6 +111,18 @@ object UploadNotifications {
         uploadInterruptedNotification(context, R.string.errorFileLocked)
     }
 
+    fun UploadFile.productMaintenanceExceptionNotification(context: Context) {
+        val drive = DriveInfosController.getDrives(userId, driveId).firstOrNull()
+        val description = context.resources.getQuantityString(R.plurals.driveMaintenanceTitle, 1, drive?.name)
+        showNotification(
+            context = context,
+            title = context.getString(R.string.uploadInterruptedErrorTitle),
+            description = description,
+            notificationId = NotificationUtils.UPLOAD_STATUS_ID,
+            contentIntent = progressPendingIntent(context)
+        )
+    }
+
     fun permissionErrorNotification(context: Context) {
         val mainActivityIntent = PendingIntent.getActivity(
             context, 0,
@@ -160,14 +173,13 @@ object UploadNotifications {
 
         val titleResId = if (successCount > 0) R.string.allUploadFinishedTitle else R.string.uploadErrorTitle
 
-        val pendingIntent = progressPendingIntent(context)
         showNotification(
             context = context,
             title = context.getString(titleResId),
             description = description,
             notificationId = NotificationUtils.UPLOAD_STATUS_ID,
-            contentIntent = pendingIntent,
-            actionIntent = pendingIntent
+            contentIntent = progressPendingIntent(context),
+            locateButton = true,
         )
     }
 
@@ -186,7 +198,7 @@ object UploadNotifications {
         description: String,
         notificationId: Int,
         contentIntent: PendingIntent? = null,
-        actionIntent: PendingIntent? = null
+        locateButton: Boolean = false
     ) {
         val notificationManagerCompat = NotificationManagerCompat.from(context)
         context.uploadNotification().apply {
@@ -195,8 +207,10 @@ object UploadNotifications {
             setContentTitle(title)
             setStyle(NotificationCompat.BigTextStyle().bigText(description))
             setContentIntent(contentIntent)
-            actionIntent?.let {
-                addAction(NotificationCompat.Action(R.drawable.ic_export, context.getString(R.string.locateButton), it))
+            if (locateButton) {
+                addAction(
+                    NotificationCompat.Action(R.drawable.ic_export, context.getString(R.string.locateButton), contentIntent)
+                )
             }
             notificationManagerCompat.notify(notificationId, this.build())
         }
