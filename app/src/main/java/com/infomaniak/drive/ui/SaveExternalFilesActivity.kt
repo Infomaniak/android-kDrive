@@ -35,7 +35,6 @@ import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.observe
 import androidx.navigation.navArgs
 import com.google.android.material.textfield.TextInputEditText
 import com.infomaniak.drive.R
@@ -92,7 +91,10 @@ class SaveExternalFilesActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_save_external_file)
 
-        if (!isAuth()) return
+        if (!isAuth() || isExtrasNull()) {
+            finish()
+            return
+        }
 
         setupDrivePermissions()
         activeDefaultUser()
@@ -118,10 +120,20 @@ class SaveExternalFilesActivity : BaseActivity() {
     private fun isAuth(): Boolean {
         if (AccountUtils.currentUserId == -1) {
             startActivity(Intent(this, LaunchActivity::class.java))
-            finish()
             return false
         }
         return true
+    }
+
+    private fun isExtrasNull(): Boolean {
+        if (intent?.extras == null) {
+            Sentry.withScope { scope ->
+                scope.level = SentryLevel.WARNING
+                Sentry.captureException(IllegalStateException("Activity $this has null extras in $intent"))
+            }
+            return true
+        }
+        return false
     }
 
     private fun setupDrivePermissions() {
