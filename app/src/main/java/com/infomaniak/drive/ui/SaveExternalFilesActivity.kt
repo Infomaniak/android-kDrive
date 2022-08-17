@@ -35,7 +35,6 @@ import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.observe
 import androidx.navigation.navArgs
 import com.google.android.material.textfield.TextInputEditText
 import com.infomaniak.drive.R
