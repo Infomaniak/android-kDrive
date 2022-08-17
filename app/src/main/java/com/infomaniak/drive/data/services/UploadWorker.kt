@@ -255,13 +255,16 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             is SecurityException, is IllegalStateException, is IllegalArgumentException -> {
                 deleteIfExists()
 
-                if (exception is IllegalStateException) {
-                    Sentry.withScope { scope ->
-                        scope.setExtra("data", ApiController.gson.toJson(this))
+                // If is an ACTION_OPEN_DOCUMENT exception and the file is older than August 17, 2022 we ignore sentry
+                if (fileModifiedAt < Date(1660736262000) && exception.message?.contains("ACTION_OPEN_DOCUMENT") == true) return
+
+                Sentry.withScope { scope ->
+                    scope.setExtra("data", ApiController.gson.toJson(this))
+                    if (exception is IllegalStateException) {
                         Sentry.captureMessage("The file is either partially downloaded or corrupted")
+                    } else {
+                        Sentry.captureException(exception)
                     }
-                } else {
-                    Sentry.captureException(exception)
                 }
             }
             else -> throw exception
