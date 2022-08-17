@@ -382,16 +382,16 @@ class UploadTask(
         }
     }
 
-    private fun <T> ApiResponse<T>?.manageUploadErrors() {
-        if (this?.translatedError == R.string.connectionError) throw NetworkException()
-        when (if (this?.error?.code == "bad_request_error") this.error?.description else this?.error?.code) {
+    private fun <T> ApiResponse<T>.manageUploadErrors() {
+        if (translatedError == R.string.connectionError) throw NetworkException()
+        when (if (error?.code == "bad_request_error") this.error?.description else error?.code) {
             "file_already_exists_error" -> Unit
             "lock_error" -> throw LockErrorException()
-            "quota_exceeded_error" -> throw QuotaExceededException()
             "not_authorized" -> throw NotAuthorizedException()
+            "product_maintenance" -> throw ProductMaintenanceException()
+            "quota_exceeded_error" -> throw QuotaExceededException()
             "upload_destination_not_found_error", "upload_destination_not_writable_error" -> throw FolderNotFoundException()
-            "upload_not_terminated",
-            "upload_not_terminated_error" -> {
+            "upload_not_terminated", "upload_not_terminated_error" -> {
                 // Upload finish with 0 chunks uploaded
                 // Upload finish with a different expected number of chunks
                 uploadFile.uploadToken?.let {
@@ -401,20 +401,24 @@ class UploadTask(
                 }
                 throw UploadNotTerminated("Upload finish with 0 chunks uploaded or a different expected number of chunks")
             }
-            "upload_token_is_not_valid",
             "invalid_upload_token_error",
-            "upload_error" -> {
+            "unexpected_error",
+            "upload_error",
+            "upload_failed_error",
+            "upload_token_is_not_valid" -> {
                 uploadFile.resetUploadToken()
                 throw UploadErrorException()
             }
             else -> {
-                val responseType = object : TypeToken<ApiResponse<T>>() {}.type
-                val responseJson = gson.toJson(this, responseType)
-                val translatedError = when (this?.translatedError) {
-                    0, null -> ""
-                    else -> context.getString(translatedError)
+                if (error == null && translatedError != R.string.serverError) {
+                    uploadFile.resetUploadToken()
+                    throw UploadErrorException()
+                } else {
+                    val responseType = object : TypeToken<ApiResponse<T>>() {}.type
+                    val responseJson = gson.toJson(this, responseType)
+                    val translatedError = if (translatedError == 0) "" else context.getString(translatedError)
+                    throw Exception("$responseJson translatedError: $translatedError")
                 }
-                throw Exception("$responseJson $translatedError")
             }
         }
     }
@@ -438,6 +442,7 @@ class UploadTask(
     class LockErrorException : Exception()
     class NetworkException : Exception()
     class NotAuthorizedException : Exception()
+    class ProductMaintenanceException : Exception()
     class QuotaExceededException : Exception()
     class TotalChunksExceededException : Exception()
     class UploadErrorException : Exception()
