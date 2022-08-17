@@ -84,8 +84,7 @@ open class PreviewVideoFragment : PreviewFragment() {
 
     override fun onResume() {
         super.onResume()
-        if (noCurrentFile()) return
-        if (exoPlayer == null && !noCurrentFile()) initializePlayer()
+        if (!noCurrentFile() && exoPlayer == null) initializePlayer()
     }
 
     override fun onPause() {
