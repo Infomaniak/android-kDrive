@@ -84,7 +84,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
-        if (mainViewModel.currentPreviewFileList.isEmpty()) {
+        if (noPreviewList()) {
             findNavController().popBackStack()
             return null
         }
@@ -184,6 +184,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     override fun onPause() {
         super.onPause()
+        if (noPreviewList()) return
         previewSliderViewModel.currentPreview = currentFile
         bottomSheetFileInfos.removeOfflineObservations(this)
     }
@@ -201,6 +202,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
         super.onDestroy()
     }
+
+    private fun noPreviewList() = mainViewModel.currentPreviewFileList.isEmpty()
 
     private fun clearEdgeToEdge() {
         toggleSystemBar(true)
