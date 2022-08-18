@@ -23,7 +23,6 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
-import android.provider.OpenableColumns
 import android.text.InputFilter
 import android.text.Spanned
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
@@ -483,9 +482,18 @@ class SaveExternalFilesActivity : BaseActivity() {
     }
 
     private fun Uri.fileName(): String {
-        return contentResolver.query(this, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
-            if (cursor.moveToFirst()) SyncUtils.getFileName(cursor) else ""
-        } ?: ""
+        return runCatching {
+            contentResolver.query(this, null, null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) SyncUtils.getFileName(cursor) else ""
+            } ?: ""
+        }.getOrElse { exception ->
+            // Add sentry logs for java.lang.UnsupportedOperationException: Queries are not supported.
+            Sentry.withScope { scope ->
+                scope.setExtra("data", "$this")
+                Sentry.captureException(exception)
+            }
+            ""
+        }
     }
 
     class SaveExternalFilesViewModel : ViewModel() {
