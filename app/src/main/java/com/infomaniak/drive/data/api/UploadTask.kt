@@ -402,7 +402,6 @@ class UploadTask(
                 throw UploadNotTerminated("Upload finish with 0 chunks uploaded or a different expected number of chunks")
             }
             "invalid_upload_token_error",
-            "unexpected_error",
             "upload_error",
             "upload_failed_error",
             "upload_token_is_not_valid" -> {

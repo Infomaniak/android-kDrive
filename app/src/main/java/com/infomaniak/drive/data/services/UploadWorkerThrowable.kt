@@ -94,7 +94,9 @@ object UploadWorkerThrowable {
                 Result.retry()
             }
 
-            exception is IOException -> {
+            else -> {
+                exception.printStackTrace()
+                currentUploadFile?.exceptionNotification(applicationContext)
                 Sentry.withScope { scope ->
                     scope.level = SentryLevel.WARNING
                     scope.setExtra("uploadFile", ApiController.gson.toJson(currentUploadFile ?: ""))
@@ -102,14 +104,7 @@ object UploadWorkerThrowable {
                     scope.setExtra("lastProgress", "${currentUploadTask?.lastProgress()}")
                     Sentry.captureException(exception)
                 }
-                Result.retry()
-            }
-
-            else -> {
-                exception.printStackTrace()
-                currentUploadFile?.exceptionNotification(applicationContext)
-                Sentry.captureException(exception)
-                Result.failure()
+                if (exception is IOException) Result.retry() else Result.failure()
             }
         }
     }
