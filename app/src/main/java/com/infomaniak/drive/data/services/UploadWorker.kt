@@ -215,14 +215,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private suspend fun UploadFile.initUploadSchemeContent(uri: Uri): Boolean {
         return contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
-            if (cursor.moveToFirst()) {
-                val mediaSize = SyncUtils.getFileSize(cursor)
-                val descriptorSize = fileDescriptorSize(getOriginalUri(applicationContext))
-                val size = descriptorSize?.let { if (mediaSize > it) mediaSize else it } ?: mediaSize // TODO Temporary solution
-                startUploadFile(size)
-            } else {
-                null
-            }
+            if (cursor.moveToFirst()) startUploadFile(uri.getFileSize(cursor)) else null
         } ?: run {
             deleteIfExists()
             false
@@ -366,7 +359,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
         val fileName = SyncUtils.getFileName(cursor)
-        val fileSize = fileDescriptorSize(uri) ?: SyncUtils.getFileSize(cursor)
+        val fileSize = uri.getFileSize(cursor)
 
         Log.d(TAG, "getLocalLastMediasAsync > ${mediaFolder.name}/$fileName found")
 
@@ -392,10 +385,30 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private fun fileDescriptorSize(uri: Uri): Long? {
-        return try {
-            contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize }
-        } catch (exception: Exception) {
+    private fun Uri.getFileSize(cursor: Cursor) = calculateFileSize(this) ?: SyncUtils.getFileSize(cursor)
+
+    /**
+     * Calculate file size from an uri
+     * The size in MediaStore is often wrong on some devices, so we calculate it
+     * @param uri Uri of the file
+     * @return the size result
+     */
+    private fun calculateFileSize(uri: Uri): Long? {
+        return runCatching {
+            contentResolver.openInputStream(uri)?.use { inputStream ->
+                var currentSize: Int
+                val byteArray = ByteArray(1024)
+                var fileSize = 0L
+                while (inputStream.read(byteArray).also { currentSize = it } != -1) {
+                    fileSize += currentSize
+                }
+                fileSize
+            }
+        }.getOrElse { exception ->
+            Sentry.withScope { scope ->
+                scope.level = SentryLevel.WARNING
+                Sentry.captureException(exception)
+            }
             null
         }
     }
