@@ -65,8 +65,11 @@ object FileController {
     private val minDateToIgnoreCache = Calendar.getInstance().apply { add(Calendar.MONTH, -2) }.timeInMillis / 1000 // 3 month
 
     private fun refreshRootFolder(realm: Realm, driveId: Int, okHttpClient: OkHttpClient) {
-        val remoteRootFolder = ApiRepository.getFileDetails(File(id = ROOT_ID, driveId = driveId), okHttpClient).data
-        val rootFolder = remoteRootFolder ?: getFileById(realm, ROOT_ID) ?: ROOT_FILE
+        val localRoot = getFileById(realm, ROOT_ID)
+        val remoteRootFolder = ApiRepository.getFileDetails(File(id = ROOT_ID, driveId = driveId), okHttpClient).data?.apply {
+            localRoot?.let { keepOldLocalFilesData(it,this) }
+        }
+        val rootFolder = remoteRootFolder ?: localRoot ?: ROOT_FILE
         realm.executeTransaction { realm.copyToRealmOrUpdate(rootFolder) }
     }
 
