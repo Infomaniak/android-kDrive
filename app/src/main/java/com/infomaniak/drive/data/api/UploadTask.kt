@@ -124,64 +124,64 @@ class UploadTask(
     @Suppress("BlockingMethodInNonBlockingContext")
     private suspend fun launchTask(coroutineScope: CoroutineScope) = withContext(Dispatchers.IO) {
         val uri = uploadFile.getUriObject()
-        val fileInputStream = context.contentResolver.openInputStream(uploadFile.getOriginalUri(context))
+        context.contentResolver.openInputStream(uploadFile.getOriginalUri(context)).use { fileInputStream ->
+            initChunkSize(uploadFile.fileSize)
 
-        initChunkSize(uploadFile.fileSize)
+            val uploadedChunks = uploadFile.getValidChunks()
+            val isNewUploadSession = uploadedChunks?.needToResetUpload() ?: true
+            val totalChunks = ceil(uploadFile.fileSize.toDouble() / chunkSize).toInt()
 
-        val uploadedChunks = uploadFile.getValidChunks()
-        val isNewUploadSession = uploadedChunks?.needToResetUpload() ?: true
-        val totalChunks = ceil(uploadFile.fileSize.toDouble() / chunkSize).toInt()
-
-        if (isNewUploadSession) {
-            uploadFile.prepareUploadSession(totalChunks)
-        } else {
-            chunkSize = uploadedChunks!!.validChuckSize
-        }
-
-        BufferedInputStream(fileInputStream, chunkSize).use { input ->
-            val waitingCoroutines = mutableListOf<Job>()
-            val requestSemaphore = Semaphore(limitParallelRequest)
-
-            if (totalChunks > TOTAL_CHUNKS) throw TotalChunksExceededException()
-
-            Sentry.addBreadcrumb(Breadcrumb().apply {
-                category = UploadWorker.BREADCRUMB_TAG
-                message = "start ${uploadFile.fileName} with $totalChunks chunks and $uploadedChunks uploadedChunks"
-                level = SentryLevel.INFO
-            })
-
-            Log.d("kDrive", " upload task started with total chunk: $totalChunks, valid: $uploadedChunks")
-
-            val validChunksIds = uploadedChunks?.validChunksIds
-            previousChunkBytesWritten = uploadedChunks?.uploadedSize ?: 0
-
-            for (chunkNumber in 1..totalChunks) {
-                requestSemaphore.acquire()
-                if (validChunksIds?.contains(chunkNumber) == true && !isNewUploadSession) {
-                    Log.d("kDrive", "chunk:$chunkNumber ignored")
-                    input.skip(chunkSize.toLong())
-                    requestSemaphore.release()
-                    continue
-                }
-
-                Log.i("kDrive", "Upload > ${uploadFile.fileName} chunk:$chunkNumber has permission")
-                var data = ByteArray(chunkSize)
-                val count = input.read(data, 0, chunkSize)
-                if (count == -1) {
-                    requestSemaphore.release()
-                    continue
-                }
-
-                data = if (count == chunkSize) data else data.copyOf(count)
-
-                val url = uploadFile.uploadUrl(chunkNumber = chunkNumber, currentChunkSize = count)
-                Log.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url data size:${data.size}")
-
-                waitingCoroutines.add(
-                    coroutineScope.uploadChunkRequest(requestSemaphore, data.toRequestBody(), url)
-                )
+            if (isNewUploadSession) {
+                uploadFile.prepareUploadSession(totalChunks)
+            } else {
+                chunkSize = uploadedChunks!!.validChuckSize
             }
-            waitingCoroutines.joinAll()
+
+            BufferedInputStream(fileInputStream, chunkSize).use { input ->
+                val waitingCoroutines = mutableListOf<Job>()
+                val requestSemaphore = Semaphore(limitParallelRequest)
+
+                if (totalChunks > TOTAL_CHUNKS) throw TotalChunksExceededException()
+
+                Sentry.addBreadcrumb(Breadcrumb().apply {
+                    category = UploadWorker.BREADCRUMB_TAG
+                    message = "start ${uploadFile.fileName} with $totalChunks chunks and $uploadedChunks uploadedChunks"
+                    level = SentryLevel.INFO
+                })
+
+                Log.d("kDrive", " upload task started with total chunk: $totalChunks, valid: $uploadedChunks")
+
+                val validChunksIds = uploadedChunks?.validChunksIds
+                previousChunkBytesWritten = uploadedChunks?.uploadedSize ?: 0
+
+                for (chunkNumber in 1..totalChunks) {
+                    requestSemaphore.acquire()
+                    if (validChunksIds?.contains(chunkNumber) == true && !isNewUploadSession) {
+                        Log.d("kDrive", "chunk:$chunkNumber ignored")
+                        input.skip(chunkSize.toLong())
+                        requestSemaphore.release()
+                        continue
+                    }
+
+                    Log.i("kDrive", "Upload > ${uploadFile.fileName} chunk:$chunkNumber has permission")
+                    var data = ByteArray(chunkSize)
+                    val count = input.read(data, 0, chunkSize)
+                    if (count == -1) {
+                        requestSemaphore.release()
+                        continue
+                    }
+
+                    data = if (count == chunkSize) data else data.copyOf(count)
+
+                    val url = uploadFile.uploadUrl(chunkNumber = chunkNumber, currentChunkSize = count)
+                    Log.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url data size:${data.size}")
+
+                    waitingCoroutines.add(
+                        coroutineScope.uploadChunkRequest(requestSemaphore, data.toRequestBody(), url)
+                    )
+                }
+                waitingCoroutines.joinAll()
+            }
         }
 
         coroutineScope.ensureActive()
@@ -262,7 +262,7 @@ class UploadTask(
 
     private fun ValidChunks.needToResetUpload(): Boolean {
         return if (expectedSize != uploadFile.fileSize || validChuckSize != chunkSize) {
-            uploadFile.resetUploadToken()
+            uploadFile.resetUploadTokenAndCancelSession()
             true
         } else false
     }
@@ -290,7 +290,7 @@ class UploadTask(
         previousChunkBytesWritten += currentBytes
 
         if (previousChunkBytesWritten > uploadFile.fileSize) {
-            uploadFile.resetUploadToken()
+            uploadFile.resetUploadTokenAndCancelSession()
             Sentry.withScope { scope ->
                 scope.setExtra("data", gson.toJson(uploadFile))
                 scope.setExtra("file size", "${uploadFile.fileSize}")
@@ -394,23 +394,19 @@ class UploadTask(
             "upload_not_terminated", "upload_not_terminated_error" -> {
                 // Upload finish with 0 chunks uploaded
                 // Upload finish with a different expected number of chunks
-                uploadFile.uploadToken?.let {
-                    with(ApiRepository.cancelSession(uploadFile.driveId, it, uploadFile.okHttpClient)) {
-                        if (data == true) uploadFile.resetUploadToken()
-                    }
-                }
+                uploadFile.resetUploadTokenAndCancelSession()
                 throw UploadNotTerminated("Upload finish with 0 chunks uploaded or a different expected number of chunks")
             }
             "invalid_upload_token_error",
             "upload_error",
             "upload_failed_error",
             "upload_token_is_not_valid" -> {
-                uploadFile.resetUploadToken()
+                uploadFile.resetUploadTokenAndCancelSession()
                 throw UploadErrorException()
             }
             else -> {
                 if (error == null && translatedError != R.string.serverError) {
-                    uploadFile.resetUploadToken()
+                    uploadFile.resetUploadTokenAndCancelSession()
                     throw UploadErrorException()
                 } else {
                     val responseType = object : TypeToken<ApiResponse<T>>() {}.type
@@ -418,6 +414,14 @@ class UploadTask(
                     val translatedError = if (translatedError == 0) "" else context.getString(translatedError)
                     throw Exception("$responseJson translatedError: $translatedError")
                 }
+            }
+        }
+    }
+
+    private fun UploadFile.resetUploadTokenAndCancelSession() {
+        uploadToken?.let {
+            with(ApiRepository.cancelSession(driveId, it, okHttpClient)) {
+                if (data != null) resetUploadToken()
             }
         }
     }
