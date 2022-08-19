@@ -345,9 +345,11 @@ class SaveExternalFilesActivity : BaseActivity() {
     }
 
     private fun handleSendMultiple() {
-        val uris = intent.getParcelableArrayListExtra<Parcelable>(Intent.EXTRA_STREAM)?.map { it as Uri } ?: arrayListOf()
+        val uris = intent.getParcelableArrayListExtra<Parcelable>(Intent.EXTRA_STREAM)
+            ?.map { it as Uri to it.fileName() }
+            ?: emptyList()
 
-        saveExternalUriAdapter = SaveExternalUriAdapter(uris as ArrayList<Uri>)
+        saveExternalUriAdapter = SaveExternalUriAdapter(uris.toMutableList())
 
         fileNames.adapter = saveExternalUriAdapter
         fileNames.isVisible = true
@@ -376,8 +378,8 @@ class SaveExternalFilesActivity : BaseActivity() {
             when {
                 isMultiple -> {
                     val adapter = fileNames.adapter as SaveExternalUriAdapter
-                    adapter.uris.forEach { uri ->
-                        if (!store(uri, saveExternalUriAdapter.getFileName(uri), userId, driveId, folderId)) return false
+                    adapter.uris.forEach { (uri, name) ->
+                        if (!store(uri, name, userId, driveId, folderId)) return false
                     }
                     true
                 }
@@ -484,8 +486,8 @@ class SaveExternalFilesActivity : BaseActivity() {
     private fun Uri.fileName(): String {
         return runCatching {
             contentResolver.query(this, null, null, null, null)?.use { cursor ->
-                if (cursor.moveToFirst()) SyncUtils.getFileName(cursor) else ""
-            } ?: ""
+                if (cursor.moveToFirst()) SyncUtils.getFileName(cursor) else null
+            } ?: toString().substringAfterLast("/")
         }.getOrElse { exception ->
             // Add sentry logs for java.lang.UnsupportedOperationException: Queries are not supported.
             Sentry.withScope { scope ->
