@@ -330,14 +330,14 @@ class SaveExternalFilesActivity : BaseActivity() {
                 it.ifEmpty { Date().format(FORMAT_NEW_FILE) }
             } + extension
 
-            fileNameEdit.setText(name.trim())
+            fileNameEdit.setText(name)
             showEditText = true
 
         } else {
             (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let { uri ->
                 currentUri = uri
                 showEditText = true
-                fileNameEdit.setText(uri.fileName().trim())
+                fileNameEdit.setText(uri.fileName())
             }
         }
 
@@ -384,14 +384,14 @@ class SaveExternalFilesActivity : BaseActivity() {
                     true
                 }
                 intent.hasExtra(Intent.EXTRA_TEXT) -> storeText(userId, driveId, folderId)
-                else -> store(currentUri!!, fileNameEdit.text.toString(), userId, driveId, folderId)
+                else -> store(currentUri!!, fileNameEdit.text.toString().trim(), userId, driveId, folderId)
 
             }
         } catch (exception: Exception) {
             exception.printStackTrace()
             showSnackbar(R.string.anErrorHasOccurred)
             Sentry.withScope { scope ->
-                val fileName = fileNameEdit.text.toString()
+                val fileName = fileNameEdit.text.toString().trim()
                 val outputFile = getOutputFile(fileName)
                 scope.setExtra("fileName", fileName)
                 scope.setExtra("lifecycleState", lifecycle.currentState.name)
@@ -406,7 +406,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private fun storeText(userId: Int, driveId: Int, folderId: Int): Boolean {
         intent.getStringExtra(Intent.EXTRA_TEXT)?.let { text ->
-            val fileName = fileNameEdit.text.toString()
+            val fileName = fileNameEdit.text.toString().trim()
             val lastModified = Date()
             val outputFile = getOutputFile(fileName)
 
