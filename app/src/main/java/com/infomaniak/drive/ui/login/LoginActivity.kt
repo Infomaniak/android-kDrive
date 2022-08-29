@@ -117,6 +117,10 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    override fun onBackPressed() {
+        if (introViewpager.currentItem == 0) super.onBackPressed() else introViewpager.currentItem -= 1
+    }
+
     private fun authenticateUser(authCode: String) {
         lifecycleScope.launch {
             infomaniakLogin.getToken(
