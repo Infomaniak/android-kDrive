@@ -56,6 +56,8 @@ import com.infomaniak.lib.core.utils.lightNavigationBar
 import com.infomaniak.lib.core.utils.lightStatusBar
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.toggleEdgeToEdge
+import io.sentry.Sentry
+import io.sentry.SentryLevel
 import kotlinx.android.synthetic.main.fragment_preview_slider.*
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.Dispatchers
@@ -160,7 +162,17 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         mainViewModel.currentPreviewFileList.let { files ->
             previewSliderAdapter.setFiles(ArrayList(files.values))
             val position = previewSliderAdapter.getPosition(currentFile)
-            viewPager.setCurrentItem(position, false)
+            runCatching {
+                viewPager.setCurrentItem(position, false)
+            }.onFailure {
+                Sentry.withScope { scope ->
+                    scope.setExtra("currentFile", "id: ${currentFile.id} name: ${currentFile.name}")
+                    scope.setExtra("files.values", files.values.joinToString { "id: ${it.id} name: ${it.name}" })
+                    Sentry.captureException(it)
+                }
+                currentFile = files.values.first()
+                viewPager.setCurrentItem(0, false)
+            }
         }
 
         configureBottomSheetFileInfo()
