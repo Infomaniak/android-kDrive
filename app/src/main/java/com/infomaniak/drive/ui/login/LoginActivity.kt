@@ -168,8 +168,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun launchNoDriveActivity() {
-        val intent = Intent(this, NoDriveActivity::class.java)
-        startActivity(intent)
+        Intent(this, NoDriveActivity::class.java).apply { startActivity(this) }
         connectButton?.hideProgress(R.string.connect)
         signInButton.isEnabled = true
     }

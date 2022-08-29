@@ -141,27 +141,26 @@ class SettingsFragment : Fragment() {
         themeSettingsValue.setText(themeTextValue)
     }
 
-    private fun openAppNotificationSettings() {
-        val context = requireContext()
-        val intent = Intent().apply {
+    private fun openAppNotificationSettings() = with(requireContext()) {
+        Intent().apply {
             when {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
                     action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
-                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                    putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
                 }
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP -> {
                     action = "android.settings.APP_NOTIFICATION_SETTINGS"
-                    putExtra("app_package", context.packageName)
-                    putExtra("app_uid", context.applicationInfo.uid)
+                    putExtra("app_package", packageName)
+                    putExtra("app_uid", applicationInfo.uid)
                 }
                 else -> {
                     action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
                     addCategory(Intent.CATEGORY_DEFAULT)
-                    data = Uri.parse("package:" + context.packageName)
+                    data = Uri.parse("package:$packageName")
                 }
             }
+            startActivity(this)
         }
-        startActivity(intent)
     }
 
     private fun trackSettingsEvent(trackerName: String) {

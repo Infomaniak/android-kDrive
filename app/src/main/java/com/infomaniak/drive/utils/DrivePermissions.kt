@@ -158,13 +158,11 @@ class DrivePermissions {
     @SuppressLint("BatteryLife")
     @RequiresApi(Build.VERSION_CODES.M)
     private fun Context.requestBatteryOptimizationPermission() {
-        val intent = Intent(
-            Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-            Uri.parse("package:$packageName")
-        )
-
         try {
-            batteryPermissionResultLauncher.launch(intent)
+            Intent(
+                Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                Uri.parse("package:$packageName")
+            ).apply { batteryPermissionResultLauncher.launch(this) }
         } catch (activityNotFoundException: ActivityNotFoundException) {
             try {
                 batteryPermissionResultLauncher.launch(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))

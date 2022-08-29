@@ -118,10 +118,11 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         geniusScanIsReady = initGeniusScanSdk()
 
         AccountUtils.reloadApp = { bundle ->
-            val intent = Intent(this, LaunchActivity::class.java)
-                .apply { putExtras(bundle) }
-                .clearStack()
-            startActivity(intent)
+            Intent(this, LaunchActivity::class.java).apply {
+                putExtras(bundle)
+                clearStack()
+                startActivity(this)
+            }
         }
 
         InfomaniakCore.init(
