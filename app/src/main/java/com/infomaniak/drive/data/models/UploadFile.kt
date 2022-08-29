@@ -38,6 +38,7 @@ import io.realm.*
 import io.realm.annotations.Ignore
 import io.realm.annotations.PrimaryKey
 import io.realm.kotlin.oneOf
+import io.sentry.Sentry
 import okhttp3.OkHttpClient
 import java.io.File
 import java.util.*
@@ -157,7 +158,18 @@ open class UploadFile(
 
         private inline val Realm.uploadTable get() = where(UploadFile::class.java)
 
-        fun getRealmInstance(): Realm = Realm.getInstance(realmConfiguration)
+        fun getRealmInstance(): Realm {
+            return runCatching {
+                Realm.getInstance(realmConfiguration)
+            }.getOrElse { exception ->
+                // Temporary fix, Issue https://github.com/realm/realm-java/issues/7706
+                Sentry.captureException(exception)
+                // Delete the database because it could be corrupted
+                Realm.deleteRealm(realmConfiguration)
+                // Create a new database
+                Realm.getInstance(realmConfiguration)
+            }
+        }
 
         private fun syncFileByUriQuery(realm: Realm, uri: String): RealmQuery<UploadFile> {
             return realm.uploadTable.equalTo(UploadFile::uri.name, uri)
