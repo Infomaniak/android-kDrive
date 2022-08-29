@@ -346,7 +346,8 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private fun handleSendMultiple() {
         val uris = intent.getParcelableArrayListExtra<Parcelable>(Intent.EXTRA_STREAM)
-            ?.map { it as Uri to it.fileName() }
+            ?.filterIsInstance<Uri>()
+            ?.map { it to it.fileName() }
             ?: emptyList()
 
         saveExternalUriAdapter = SaveExternalUriAdapter(uris.toMutableList())

@@ -384,7 +384,7 @@ class UploadTask(
 
     private fun <T> ApiResponse<T>.manageUploadErrors() {
         if (translatedError == R.string.connectionError) throw NetworkException()
-        when (if (error?.code == "bad_request_error") this.error?.description else error?.code) {
+        when (error?.code) {
             "file_already_exists_error" -> Unit
             "lock_error" -> throw LockErrorException()
             "not_authorized" -> throw NotAuthorizedException()
