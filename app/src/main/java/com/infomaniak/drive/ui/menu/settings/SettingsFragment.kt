@@ -17,8 +17,8 @@
  */
 package com.infomaniak.drive.ui.menu.settings
 
+import android.annotation.SuppressLint
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -141,27 +141,19 @@ class SettingsFragment : Fragment() {
         themeSettingsValue.setText(themeTextValue)
     }
 
-    private fun openAppNotificationSettings() {
-        val context = requireContext()
-        val intent = Intent().apply {
+    @SuppressLint("InlinedApi")
+    private fun openAppNotificationSettings() = with(requireContext()) {
+        Intent().apply {
+            action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
             when {
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
-                    action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
-                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                }
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP -> {
-                    action = "android.settings.APP_NOTIFICATION_SETTINGS"
-                    putExtra("app_package", context.packageName)
-                    putExtra("app_uid", context.applicationInfo.uid)
-                }
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
                 else -> {
-                    action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                    addCategory(Intent.CATEGORY_DEFAULT)
-                    data = Uri.parse("package:" + context.packageName)
+                    putExtra("app_package", packageName)
+                    putExtra("app_uid", applicationInfo.uid)
                 }
             }
+            startActivity(this)
         }
-        startActivity(intent)
     }
 
     private fun trackSettingsEvent(trackerName: String) {
