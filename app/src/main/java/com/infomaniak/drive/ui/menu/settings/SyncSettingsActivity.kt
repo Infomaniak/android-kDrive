@@ -90,9 +90,7 @@ class SyncSettingsActivity : BaseActivity() {
 
         selectDriveViewModel.apply {
             selectedUserId.value = oldSyncSettings?.userId
-            selectedDrive.value = oldSyncSettings?.run {
-                DriveInfosController.getDrives(userId, driveId).firstOrNull()
-            }
+            selectedDrive.value = oldSyncSettings?.run { DriveInfosController.getDrive(userId, driveId) }
         }
 
         syncSettingsViewModel.apply {

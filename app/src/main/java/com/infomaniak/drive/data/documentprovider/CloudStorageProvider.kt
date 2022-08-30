@@ -807,7 +807,7 @@ class CloudStorageProvider : DocumentsProvider() {
             val currentUserId = userDrive.userId
             val currentDriveId = userDrive.driveId
 
-            DriveInfosController.getDrives(currentUserId, currentDriveId, userDrive.sharedWithMe).firstOrNull()?.let { drive ->
+            DriveInfosController.getDrive(currentUserId, currentDriveId)?.let { drive ->
                 val baseContentUri = "content://${context.getString(R.string.CLOUD_STORAGE_AUTHORITY)}/document/"
                 val sharedId = if (drive.sharedWithMe) "${SHARED_WITHME_FOLDER_ID}$SEPARATOR" else ""
                 val content = "$currentUserId$SEPARATOR$sharedId${drive.name}$DRIVE_SEPARATOR$currentDriveId/${file.id}"

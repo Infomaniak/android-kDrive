@@ -43,8 +43,6 @@ import com.infomaniak.drive.views.ShareLinkContainerView
 import com.infomaniak.drive.views.UserAvatarView
 import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.utils.safeNavigate
-import io.sentry.Sentry
-import io.sentry.SentryLevel
 import kotlinx.android.synthetic.main.fragment_file_details.*
 import kotlinx.android.synthetic.main.fragment_file_details_infos.*
 
@@ -139,21 +137,10 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
 
     @SuppressLint("SetTextI18n")
     private fun setPath(path: String) {
-        try {
-            val drive = DriveInfosController.getDrives(AccountUtils.currentUserId, driveId = file.driveId).first()
-            driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(drive.preferences.color))
-            pathValue.text = "${drive.name}${path.substringBeforeLast("/")}"
-            pathView.isVisible = true
-        } catch (noSuchElementException: NoSuchElementException) {
-            Sentry.withScope { scope ->
-                scope.level = SentryLevel.FATAL
-                scope.setExtra("file.driveId", file.driveId.toString())
-                DriveInfosController.getDrives(AccountUtils.currentUserId).forEachIndexed { i, drive ->
-                    scope.setExtra("DriveId$i", drive.id.toString())
-                }
-                Sentry.captureException(noSuchElementException)
-            }
-        }
+        val drive = DriveInfosController.getDrive(AccountUtils.currentUserId, driveId = file.driveId)!!
+        driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(drive.preferences.color))
+        pathValue.text = "${drive.name}${path.substringBeforeLast("/")}"
+        pathView.isVisible = true
     }
 
     private fun setupShareButton() {

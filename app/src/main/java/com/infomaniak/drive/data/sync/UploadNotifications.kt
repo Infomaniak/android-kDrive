@@ -112,7 +112,7 @@ object UploadNotifications {
     }
 
     fun UploadFile.productMaintenanceExceptionNotification(context: Context) {
-        val drive = DriveInfosController.getDrives(userId, driveId).firstOrNull()
+        val drive = DriveInfosController.getDrive(userId, driveId)
         val description = context.resources.getQuantityString(R.plurals.driveMaintenanceTitle, 1, drive?.name)
         showNotification(
             context = context,

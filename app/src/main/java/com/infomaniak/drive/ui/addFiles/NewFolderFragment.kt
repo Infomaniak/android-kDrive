@@ -67,7 +67,7 @@ class NewFolderFragment : Fragment() {
 
     private fun initCommonFolder() {
         val drive = newFolderViewModel.userDrive?.let {
-            DriveInfosController.getDrives(it.userId, driveId = it.driveId).firstOrNull()
+            DriveInfosController.getDrive(it.userId, it.driveId)
         } ?: AccountUtils.getCurrentDrive()
 
         if (drive?.canCreateTeamFolder == true) {
