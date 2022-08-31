@@ -61,8 +61,7 @@ class EspressoHomeUiTest : KDriveUiTest() {
     @Test
     fun offlineTabIsDisplayed() {
         clickOnHomeTabs(R.id.homeOfflineButton)
-        val isOfflineFilesEmpty =
-            FileController.getOfflineFiles(File.SortType.NAME_AZ, customRealm = uiRealm).isNullOrEmpty()
+        val isOfflineFilesEmpty = FileController.getOfflineFiles(File.SortType.NAME_AZ, customRealm = uiRealm).isEmpty()
         checkViewVisibility(isOfflineFilesEmpty, R.id.noFilesLayout)
         checkViewVisibility(isOfflineFilesEmpty, stringRes = R.string.offlineFileNoFile)
         checkViewVisibility(!isOfflineFilesEmpty, R.id.toggleDisplayButton)

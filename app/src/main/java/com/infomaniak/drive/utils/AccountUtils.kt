@@ -274,7 +274,7 @@ object AccountUtils : CredentialManager {
     }
 
     private fun getFirstDrive(): Drive? {
-        val currentDrive = DriveInfosController.getDrive(currentUserId, maintenance = false)
+        val currentDrive = DriveInfosController.getDrive(currentUserId, sharedWithMe = false, maintenance = false)
         currentDrive?.let { currentDriveId = it.id }
         return currentDrive
     }
