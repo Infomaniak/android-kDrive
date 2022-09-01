@@ -57,7 +57,6 @@ import com.infomaniak.lib.core.utils.lightStatusBar
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.toggleEdgeToEdge
 import io.sentry.Sentry
-import io.sentry.SentryLevel
 import kotlinx.android.synthetic.main.fragment_preview_slider.*
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.Dispatchers

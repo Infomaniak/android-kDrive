@@ -152,7 +152,7 @@ class SaveExternalFilesActivity : BaseActivity() {
         val currentUserDrives = DriveInfosController.getDrives(AccountUtils.currentUserId)
         if (currentUserDrives.size > 1) activeSelectDrive()
         var (userId, driveId) = getSelectedFolder()
-        var drive = DriveInfosController.getDrives(userId, driveId).firstOrNull()
+        var drive = DriveInfosController.getDrive(userId, driveId)
         if (drive == null) {
             userId = AccountUtils.currentUserId
             drive = AccountUtils.getCurrentDrive()

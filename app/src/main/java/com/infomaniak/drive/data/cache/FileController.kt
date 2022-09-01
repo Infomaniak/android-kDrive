@@ -67,7 +67,7 @@ object FileController {
     private fun refreshRootFolder(realm: Realm, driveId: Int, okHttpClient: OkHttpClient) {
         val localRoot = getFileById(realm, ROOT_ID)
         val remoteRootFolder = ApiRepository.getFileDetails(File(id = ROOT_ID, driveId = driveId), okHttpClient).data?.apply {
-            localRoot?.let { keepOldLocalFilesData(it,this) }
+            localRoot?.let { keepOldLocalFilesData(it, this) }
         }
         val rootFolder = remoteRootFolder ?: localRoot ?: ROOT_FILE
         realm.executeTransaction { realm.copyToRealmOrUpdate(rootFolder) }

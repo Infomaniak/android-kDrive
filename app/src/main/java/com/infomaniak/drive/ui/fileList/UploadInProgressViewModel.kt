@@ -89,10 +89,9 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
             val isSharedWithMe = driveId != AccountUtils.currentDriveId
 
             val driveName = if (isSharedWithMe && drivesNames[driveId] == null) {
-                val drive = DriveInfosController.getDrives(AccountUtils.currentUserId, driveId, null).first()
+                val drive = DriveInfosController.getDrive(AccountUtils.currentUserId, driveId)!!
                 drivesNames[driveId] = drive.name
                 drive.name
-
             } else {
                 drivesNames[driveId]
             }

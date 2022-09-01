@@ -78,11 +78,9 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
             fileListViewModel.cancelDownloadFiles()
             when {
                 file.isDrive() -> {
-                    DriveInfosController.getDrives(AccountUtils.currentUserId, file.driveId, sharedWithMe = true).firstOrNull()
-                        ?.let { currentDrive ->
-                            if (currentDrive.maintenance) openMaintenanceDialog(currentDrive.name)
-                            else openSharedWithMeFolder(file)
-                        }
+                    DriveInfosController.getDrive(AccountUtils.currentUserId, file.driveId)?.let { currentDrive ->
+                        if (currentDrive.maintenance) openMaintenanceDialog(currentDrive.name) else openSharedWithMeFolder(file)
+                    }
                 }
                 file.isFolder() -> openSharedWithMeFolder(file)
                 else -> {

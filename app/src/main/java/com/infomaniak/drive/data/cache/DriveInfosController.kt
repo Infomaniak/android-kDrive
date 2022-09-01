@@ -129,6 +129,19 @@ object DriveInfosController {
         }
     }
 
+    fun getDrive(
+        userId: Int,
+        driveId: Int? = null,
+        sharedWithMe: Boolean? = null,
+        maintenance: Boolean? = null
+    ): Drive? {
+        return getRealmInstance().use { realm ->
+            realm.copyFromRealm(
+                getDrivesQuery(realm, userId, driveId, sharedWithMe, maintenance).findAll(), 1
+            ).firstOrNull()
+        }
+    }
+
     fun getDrivesCount(
         userId: Int,
         driveId: Int? = null,

@@ -59,7 +59,7 @@ class SelectFolderActivity : BaseActivity() {
 
         selectFolderViewModel.apply {
             userDrive = currentUserDrive
-            currentDrive = DriveInfosController.getDrives(userId, driveId).firstOrNull()
+            currentDrive = DriveInfosController.getDrive(userId, driveId)
             disableSelectedFolderId = disabledFolderId
         }
 
