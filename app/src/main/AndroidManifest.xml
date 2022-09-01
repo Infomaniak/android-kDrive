@@ -69,6 +69,10 @@
         android:theme="@style/AppTheme">
 
         <meta-data
+            android:name="io.sentry.auto-init"
+            android:value="false" />
+
+        <meta-data
             android:name="io.sentry.dsn"
             android:value="https://b466d0f977d74c2d9244610a858c91fe@sentry.infomaniak.com/3" />
 
