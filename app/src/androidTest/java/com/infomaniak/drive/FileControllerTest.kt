@@ -3,7 +3,6 @@ package com.infomaniak.drive
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRepository.addMultiAccess
 import com.infomaniak.drive.data.api.ApiRepository.getDirectoryFiles
-import com.infomaniak.drive.data.api.ApiRepository.getLastModifiedFiles
 import com.infomaniak.drive.data.api.ApiRepository.renameFile
 import com.infomaniak.drive.data.cache.FileController.FAVORITES_FILE_ID
 import com.infomaniak.drive.data.cache.FileController.getFilesFromCacheOrDownload
@@ -266,10 +265,9 @@ class FileControllerTest : KDriveTest() {
         val newName = "renamed file $randomSuffix"
         val file = createFileForTest()
         assertApiResponseData(renameFile(file, newName))
-        with(getLastModifiedFiles(userDrive.driveId)) {
+        with(ApiRepository.getFileDetails(file)) {
             assertApiResponseData(this)
-            assertEquals(file.id, data!!.first().id, "Last modified file should have id ${file.id}")
-            assertEquals(newName, data!!.first().name, "File should be named '$newName'")
+            assertTrue(data?.name == newName, "File's name should be $newName")
         }
         deleteTestFile(file)
     }

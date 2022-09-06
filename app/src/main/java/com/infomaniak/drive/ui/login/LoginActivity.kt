@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.login
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
@@ -115,10 +116,10 @@ class LoginActivity : AppCompatActivity() {
             trackAccountEvent("openCreationWebview")
             openUrl(ApiRoutes.orderDrive())
         }
-    }
 
-    override fun onBackPressed() {
-        if (introViewpager.currentItem == 0) super.onBackPressed() else introViewpager.currentItem -= 1
+        onBackPressedDispatcher.addCallback {
+            if (introViewpager.currentItem == 0) finish() else introViewpager.currentItem -= 1
+        }
     }
 
     private fun authenticateUser(authCode: String) {

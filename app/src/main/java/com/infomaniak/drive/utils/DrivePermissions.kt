@@ -48,10 +48,18 @@ import io.sentry.SentryLevel
 class DrivePermissions {
 
     companion object {
-        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_MEDIA_LOCATION)
-        } else {
-            arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        val permissions = when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> arrayOf(
+                Manifest.permission.ACCESS_MEDIA_LOCATION,
+                Manifest.permission.POST_NOTIFICATIONS,
+                Manifest.permission.READ_MEDIA_IMAGES,
+                Manifest.permission.READ_MEDIA_VIDEO
+            )
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> arrayOf(
+                Manifest.permission.ACCESS_MEDIA_LOCATION,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            else -> arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
 
         fun Activity.resultPermissions(authorized: Boolean, permissions: Array<String>, message: Int) {
@@ -72,12 +80,17 @@ class DrivePermissions {
 
     private val backgroundSyncPermissionsBottomSheetDialog by lazy { BackgroundSyncPermissionsBottomSheetDialog() }
 
+    private val permissionNeeded = when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> R.string.allPermissionNeededAndroid13
+        else -> R.string.allPermissionNeeded
+    }
+
     fun registerPermissions(activity: FragmentActivity, onPermissionResult: ((authorized: Boolean) -> Unit)? = null) {
         this.activity = activity
         registerForActivityResult = activity.registerForActivityResult(RequestMultiplePermissions()) { authorizedPermissions ->
             val authorized = authorizedPermissions.values.all { it }
             onPermissionResult?.invoke(authorized)
-            activity.resultPermissions(authorized, permissions, R.string.allPermissionNeeded)
+            activity.resultPermissions(authorized, permissions, permissionNeeded)
         }
     }
 
@@ -87,7 +100,7 @@ class DrivePermissions {
             fragment.registerForActivityResult(RequestMultiplePermissions()) { authorizedPermissions ->
                 val authorized = authorizedPermissions.values.all { it }
                 onPermissionResult?.invoke(authorized)
-                activity.resultPermissions(authorized, permissions, R.string.allPermissionNeeded)
+                activity.resultPermissions(authorized, permissions, permissionNeeded)
             }
     }
 

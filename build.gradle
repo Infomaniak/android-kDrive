@@ -3,7 +3,7 @@ buildscript {
 
     ext.kotlin_version = '1.7.10'
     ext.navigation_version = '2.5.1'
-    ext.java_version = JavaVersion.VERSION_1_8
+    ext.java_version = JavaVersion.VERSION_11
 
     repositories {
         google()
@@ -13,14 +13,14 @@ buildscript {
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$navigation_version"
         classpath 'io.realm:realm-gradle-plugin:10.11.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.android.tools.build:gradle:7.2.2'
+        classpath 'com.android.tools.build:gradle:7.3.0-rc01'
         classpath 'com.google.gms:google-services:4.3.13'
         classpath 'de.mannodermaus.gradle.plugins:android-junit5:1.8.2.1'
     }
 }
 
 plugins {
-    id 'io.sentry.android.gradle' version '3.1.4'
+    id 'io.sentry.android.gradle' version '3.1.5'
     id 'org.jetbrains.kotlin.plugin.serialization' version "$kotlin_version" apply false
 }
 
