@@ -27,6 +27,7 @@ import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.webkit.WebSettingsCompat
@@ -151,11 +152,10 @@ class OnlyOfficeActivity : AppCompatActivity() {
         (this.getSystemService(Context.PRINT_SERVICE) as PrintManager).apply {
             print("PRINT_ONLYOFFICE_PDF_SERVICE", printDocumentAdapter, null)
         }
-    }
 
-    override fun onBackPressed() {
-        if (webView.canGoBack()) webView.goBack() else finish()
-        super.onBackPressed()
+        onBackPressedDispatcher.addCallback {
+            if (webView.canGoBack()) webView.goBack() else finish()
+        }
     }
 
     private fun popBackIfNeeded(url: String) {
