@@ -26,7 +26,6 @@
     <string name="accessDeniedDescriptionIsNotAdmin">Veuillez contacter un administrateur du kDrive pour modifier vos droits.</string>
     <string name="accessDeniedTitle">Vous n’avez pas l’autorisation d’accéder à ce dossier.</string>
     <string name="addCategoriesTitle">Ajouter des catégories</string>
-    <string name="addFileSelectUploadFile">Sélectionner un fichier à importer</string>
     <string name="addPassword">Protéger avec un mot de passe</string>
     <string name="alertRemoveUserDescription">Êtes vous sûr(e) de vouloir retirer l’utilisateur “%s” de cette application ?</string>
     <string name="alertRemoveUserTitle">Retirer l’utilisateur</string>

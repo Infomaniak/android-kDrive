@@ -21,9 +21,7 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.net.Uri
 import android.os.Bundle
-import android.provider.DocumentsContract
 import android.view.LayoutInflater
-import androidx.core.database.getLongOrNull
 import androidx.core.net.toUri
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
@@ -37,6 +35,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.databinding.DialogImportFilesBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.SyncUtils.getFileDates
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import kotlinx.coroutines.Dispatchers
@@ -50,15 +49,10 @@ class ImportFilesDialog : DialogFragment() {
     private val dialogBinding by lazy { DialogImportFilesBinding.inflate(LayoutInflater.from(context)) }
     private val mainViewModel: MainViewModel by activityViewModels()
     private val navArgs: ImportFilesDialogArgs by navArgs()
-    private val importCount by lazy { navArgs.importIntent.clipData?.itemCount ?: 1 }
+    private val importCount by lazy { navArgs.uris.size }
 
     private var currentImportFile: IOFile? = null
     private var successCount = 0
-
-    private val documentProjection = arrayOf(
-        DocumentsContract.Document.COLUMN_DISPLAY_NAME,
-        DocumentsContract.Document.COLUMN_LAST_MODIFIED
-    )
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val countMessage = requireContext().resources.getQuantityString(R.plurals.preparingToUpload, importCount, importCount)
@@ -86,70 +80,55 @@ class ImportFilesDialog : DialogFragment() {
     }
 
     private suspend fun importFiles() {
-        val clipData = navArgs.importIntent.clipData
-        val uri = navArgs.importIntent.data
         var errorCount = 0
-
-        try {
-            if (clipData != null) {
-                for (i in 0 until clipData.itemCount) {
-                    runCatching {
-                        initUpload(clipData.getItemAt(i).uri)
-                    }.onFailure {
-                        it.printStackTrace()
-                        errorCount++
-                    }
-                }
-            } else if (uri != null) {
+        navArgs.uris.forEach { uri ->
+            runCatching {
                 initUpload(uri)
+            }.onFailure {
+                it.printStackTrace()
+                errorCount++
             }
-        } catch (exception: Exception) {
-            exception.printStackTrace()
-            errorCount++
-        } finally {
-            if (errorCount > 0) {
-                withContext(Dispatchers.Main) {
-                    showSnackbar(resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount), true)
-                }
-            }
-            lifecycleScope.launchWhenResumed { findNavController().popBackStack() }
         }
+
+        if (errorCount > 0) {
+            withContext(Dispatchers.Main) {
+                showSnackbar(resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount), true)
+            }
+        }
+        lifecycleScope.launchWhenResumed { findNavController().popBackStack() }
     }
 
     private suspend fun initUpload(uri: Uri) = withContext(Dispatchers.IO) {
-        requireContext().contentResolver.apply {
-            query(uri, documentProjection, null, null, null)?.use { cursor ->
-                if (cursor.moveToFirst()) {
-                    val fileName = SyncUtils.getFileName(cursor)
-                    val fileModifiedIndex = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_LAST_MODIFIED)
-                    val fileModifiedAt = cursor.getLongOrNull(fileModifiedIndex)?.let(::Date) ?: Date()
+        requireContext().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val fileName = SyncUtils.getFileName(cursor)
+                val (fileCreatedAt, fileModifiedAt) = getFileDates(cursor)
 
-                    when {
-                        isLowMemory() -> withContext(Dispatchers.Main) {
-                            showSnackbar(R.string.uploadOutOfMemoryError, true)
-                        }
-                        fileName == null -> withContext(Dispatchers.Main) {
-                            showSnackbar(R.string.anErrorHasOccurred, true)
-                        }
-                        else -> {
-                            val outputFile = getOutputFile(uri, fileModifiedAt)
+                when {
+                    isLowMemory() -> withContext(Dispatchers.Main) {
+                        showSnackbar(R.string.uploadOutOfMemoryError, true)
+                    }
+                    fileName == null -> withContext(Dispatchers.Main) {
+                        showSnackbar(R.string.anErrorHasOccurred, true)
+                    }
+                    else -> {
+                        val outputFile = getOutputFile(uri, fileModifiedAt)
 
-                            if (isActive) {
-                                UploadFile(
-                                    uri = outputFile.toUri().toString(),
-                                    driveId = navArgs.driveId,
-                                    fileCreatedAt = fileModifiedAt,
-                                    fileModifiedAt = fileModifiedAt,
-                                    fileName = fileName,
-                                    fileSize = outputFile.length(),
-                                    remoteFolder = navArgs.folderId,
-                                    type = UploadFile.Type.UPLOAD.name,
-                                    userId = AccountUtils.currentUserId,
-                                ).store()
-                                successCount++
-                                currentImportFile = null
-                                context?.syncImmediately()
-                            }
+                        if (isActive) {
+                            UploadFile(
+                                uri = outputFile.toUri().toString(),
+                                driveId = navArgs.driveId,
+                                fileCreatedAt = fileCreatedAt,
+                                fileModifiedAt = fileModifiedAt,
+                                fileName = fileName,
+                                fileSize = outputFile.length(),
+                                remoteFolder = navArgs.folderId,
+                                type = UploadFile.Type.UPLOAD.name,
+                                userId = AccountUtils.currentUserId,
+                            ).store()
+                            successCount++
+                            currentImportFile = null
+                            context?.syncImmediately()
                         }
                     }
                 }
