@@ -80,12 +80,17 @@ class DrivePermissions {
 
     private val backgroundSyncPermissionsBottomSheetDialog by lazy { BackgroundSyncPermissionsBottomSheetDialog() }
 
+    private val permissionNeeded = when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> R.string.allPermissionNeededAndroid13
+        else -> R.string.allPermissionNeeded
+    }
+
     fun registerPermissions(activity: FragmentActivity, onPermissionResult: ((authorized: Boolean) -> Unit)? = null) {
         this.activity = activity
         registerForActivityResult = activity.registerForActivityResult(RequestMultiplePermissions()) { authorizedPermissions ->
             val authorized = authorizedPermissions.values.all { it }
             onPermissionResult?.invoke(authorized)
-            activity.resultPermissions(authorized, permissions, R.string.allPermissionNeeded)
+            activity.resultPermissions(authorized, permissions, permissionNeeded)
         }
     }
 
@@ -95,7 +100,7 @@ class DrivePermissions {
             fragment.registerForActivityResult(RequestMultiplePermissions()) { authorizedPermissions ->
                 val authorized = authorizedPermissions.values.all { it }
                 onPermissionResult?.invoke(authorized)
-                activity.resultPermissions(authorized, permissions, R.string.allPermissionNeeded)
+                activity.resultPermissions(authorized, permissions, permissionNeeded)
             }
     }
 
