@@ -995,8 +995,8 @@
             android:name="driveId"
             app:argType="integer" />
         <argument
-            android:name="importIntent"
-            app:argType="android.content.Intent" />
+            android:name="uris"
+            app:argType="android.net.Uri[]" />
     </dialog>
 
     <fragment

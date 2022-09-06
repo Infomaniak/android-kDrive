@@ -37,7 +37,6 @@
     <string name="accessDeniedDescriptionIsNotAdmin">Please contact a kDrive administrator to amend your access rights.</string>
     <string name="accessDeniedTitle">You’re not authorised to access this folder.</string>
     <string name="addCategoriesTitle">Add categories</string>
-    <string name="addFileSelectUploadFile">Select a file to upload</string>
     <string name="addPassword">Protect with a password</string>
     <string name="alertRemoveUserDescription">Are you sure you want to remove the user “%s” from this application?</string>
     <string name="alertRemoveUserTitle">Remove user</string>

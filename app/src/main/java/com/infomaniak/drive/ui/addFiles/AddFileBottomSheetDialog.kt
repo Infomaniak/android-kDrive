@@ -25,6 +25,7 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
@@ -83,9 +84,9 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         dismiss()
     }
 
-    private val selectFilesResultLauncher = registerForActivityResult(StartActivityForResult()) {
+    private val selectFilesResultLauncher = registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
         findNavController().popBackStack()
-        it.whenResultIsOk { data -> onSelectFilesResult(data) }
+        onSelectFilesResult(uris)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -156,13 +157,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         if (uploadFilesPermissions.checkSyncPermissions()) {
             trackNewElement("uploadFile")
             documentUpload.isEnabled = false
-            val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-                type = "*/*"
-                putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-                addCategory(Intent.CATEGORY_OPENABLE)
-            }
-            val chooserIntent = Intent.createChooser(intent, getString(R.string.addFileSelectUploadFile))
-            selectFilesResultLauncher.launch(chooserIntent)
+            selectFilesResultLauncher.launch("*/*")
         }
     }
 
@@ -216,17 +211,15 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun onSelectFilesResult(data: Intent?) {
-        data?.let {
-            findNavController().navigate(
-                R.id.importFileDialog,
-                ImportFilesDialogArgs(
-                    folderId = currentFolderFile.id,
-                    driveId = currentFolderFile.driveId,
-                    importIntent = data
-                ).toBundle()
-            )
-        }
+    private fun onSelectFilesResult(uris: List<Uri>) {
+        findNavController().navigate(
+            R.id.importFileDialog,
+            ImportFilesDialogArgs(
+                folderId = currentFolderFile.id,
+                driveId = currentFolderFile.driveId,
+                uris = uris.toTypedArray()
+            ).toBundle()
+        )
     }
 
     private fun onCaptureMediaResult() {
