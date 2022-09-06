@@ -3,7 +3,7 @@ buildscript {
 
     ext.kotlin_version = '1.7.10'
     ext.navigation_version = '2.5.1'
-    ext.java_version = JavaVersion.VERSION_1_8
+    ext.java_version = JavaVersion.VERSION_11
 
     repositories {
         google()
