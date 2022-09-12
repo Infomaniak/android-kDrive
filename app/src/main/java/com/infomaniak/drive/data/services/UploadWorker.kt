@@ -417,10 +417,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         // Catch Api>=29 for exception {Volume external_primary not found}, Adding logs to get more information
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && exception is IllegalArgumentException) {
             Sentry.withScope { scope ->
+                scope.level = SentryLevel.ERROR
                 val volumeNames = MediaStore.getExternalVolumeNames(applicationContext).joinToString()
                 scope.setExtra("uri", contentUri.toString())
                 scope.setExtra("folder", mediaFolder.name)
                 scope.setExtra("volume names", volumeNames)
+                Sentry.captureMessage("getLocalLastMediasAsync() ERROR")
             }
         }
     }
