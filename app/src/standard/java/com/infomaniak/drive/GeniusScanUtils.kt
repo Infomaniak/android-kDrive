@@ -86,7 +86,7 @@ object GeniusScanUtils {
     }
 
     fun Context.initGeniusScanSdk() = try {
-        GeniusScanSDK.init(this, BuildConfig.GENIUS_SCAN_KEY)
+        GeniusScanSDK.init(this, GeniusScanEnv.GENIUS_SCAN_KEY)
         true
     } catch (licenseException: LicenseException) {
         licenseException.printStackTrace()
