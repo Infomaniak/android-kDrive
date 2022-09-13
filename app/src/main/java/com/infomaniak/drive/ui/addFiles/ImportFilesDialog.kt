@@ -38,6 +38,8 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.getFileDates
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
+import io.sentry.Sentry
+import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -86,6 +88,11 @@ class ImportFilesDialog : DialogFragment() {
                 initUpload(uri)
             }.onFailure {
                 it.printStackTrace()
+                Sentry.withScope { scope ->
+                    scope.level = SentryLevel.ERROR
+                    scope.setExtra("uri", uri.toString())
+                    Sentry.captureException(it)
+                }
                 errorCount++
             }
         }

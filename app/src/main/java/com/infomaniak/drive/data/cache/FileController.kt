@@ -29,7 +29,6 @@ import com.infomaniak.drive.data.models.FileActivity.FileActivityType
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.RealmModules
-import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
@@ -124,7 +123,7 @@ object FileController {
         val folder = file.localParent?.createSnapshot()?.firstOrNull { it.id > 0 }
         return when {
             folder == null -> ""
-            folder.id == Utils.ROOT_ID -> (userDrive.driveName ?: "") + "/${file.name}"
+            folder.id == ROOT_ID -> (userDrive.driveName ?: "") + "/${file.name}"
             else -> generatePath(folder, userDrive) + "/${file.name}"
         }
     }
@@ -586,7 +585,7 @@ object FileController {
         val block: (Realm) -> Unit = { realm ->
             realm.executeTransaction {
                 realm.where(File::class.java)
-                    .greaterThan(File::id.name, Utils.ROOT_ID)
+                    .greaterThan(File::id.name, ROOT_ID)
                     .isEmpty(File::localParent.name)
                     .findAll().deleteAllFromRealm()
             }

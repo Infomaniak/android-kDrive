@@ -159,8 +159,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             it?.let { intentFolderId ->
                 FileController.getFileById(intentFolderId)?.let { file ->
                     findNavController().navigate(
-                        FileListFragmentDirections
-                            .fileListFragmentToFileListFragment(file.id, file.name)
+                        FileListFragmentDirections.fileListFragmentToFileListFragment(file.id, file.name)
                     )
                 }
             }
