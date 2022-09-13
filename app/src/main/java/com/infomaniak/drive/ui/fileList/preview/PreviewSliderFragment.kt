@@ -505,6 +505,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     companion object {
 
+        fun Fragment.getPageNumberChip() = (parentFragment as? PreviewSliderFragment)?.pageNumberChip
+
         fun Fragment.toggleFullscreen() {
             (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
         }
