@@ -123,8 +123,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         formCreate.setOnClickListener { createFile(File.Office.FORM) }
         noteCreate.setOnClickListener { createFile(File.Office.TXT) }
 
-        val geniusScanIsReady = (context?.applicationContext as ApplicationMain).geniusScanIsReady
-        documentScanning.isVisible = geniusScanIsReady && AccountUtils.currentUser?.isStaff == true
+        documentScanning.isVisible = (context?.applicationContext as ApplicationMain).geniusScanIsReady
     }
 
     override fun onDismiss(dialog: DialogInterface) {
