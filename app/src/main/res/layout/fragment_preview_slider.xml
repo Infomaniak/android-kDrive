@@ -58,6 +58,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/marginStandardMedium"
             android:backgroundTint="#80111C28"
+            android:clickable="false"
             android:textColor="@color/white"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
