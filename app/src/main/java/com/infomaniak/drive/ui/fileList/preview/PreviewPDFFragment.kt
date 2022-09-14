@@ -32,6 +32,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.getPageNumberChip
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.utils.PdfCore
@@ -111,7 +112,7 @@ class PreviewPDFFragment : PreviewFragment() {
         withContext(Dispatchers.Main) {
             downloadLayout.isGone = true
             pdfViewRecycler.isVisible = true
-            pageNumberChip.isVisible = true
+            getPageNumberChip()?.isVisible = true
             previewPDFAdapter = PreviewPDFAdapter(pdfCore)
             pdfViewRecycler.adapter = previewPDFAdapter
             previewPDFAdapter?.itemCount?.let { updatePageNumber(totalPage = it) }
@@ -129,7 +130,7 @@ class PreviewPDFFragment : PreviewFragment() {
 
     fun updatePageNumber(currentPage: Int = 1, totalPage: Int) {
         if (currentPage >= 1) {
-            pageNumberChip.text = getString(R.string.previewPdfPages, currentPage, totalPage)
+            getPageNumberChip()?.text = getString(R.string.previewPdfPages, currentPage, totalPage)
         }
     }
 

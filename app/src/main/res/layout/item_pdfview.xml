@@ -22,4 +22,5 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:layout_marginVertical="@dimen/marginStandardSmall"
-    tools:ignore="ContentDescription" />
+    tools:ignore="ContentDescription"
+    tools:srcCompat="@tools:sample/backgrounds/scenic" />
