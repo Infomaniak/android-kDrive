@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.os.Bundle
 import android.os.CancellationSignal
@@ -39,6 +40,9 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.isNightModeEnabled
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
+import com.infomaniak.lib.core.utils.showToast
+import io.sentry.Sentry
+import io.sentry.SentryLevel
 import kotlinx.android.synthetic.main.activity_only_office.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -150,7 +154,15 @@ class OnlyOfficeActivity : AppCompatActivity() {
         }
 
         (this.getSystemService(Context.PRINT_SERVICE) as PrintManager).apply {
-            print("PRINT_ONLYOFFICE_PDF_SERVICE", printDocumentAdapter, null)
+            try {
+                print("PRINT_ONLYOFFICE_PDF_SERVICE", printDocumentAdapter, null)
+            } catch (activityNotFoundException: ActivityNotFoundException) {
+                showToast(R.string.allActivityNotFoundError)
+                Sentry.withScope { scope ->
+                    scope.level = SentryLevel.WARNING
+                    Sentry.captureException(activityNotFoundException)
+                }
+            }
         }
 
         onBackPressedDispatcher.addCallback {
