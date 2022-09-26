@@ -33,6 +33,7 @@ import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.services.UploadWorker.Companion.updateUploadCountNotification
 import com.infomaniak.drive.data.sync.UploadNotifications
+import com.infomaniak.drive.data.sync.UploadNotifications.progressPendingIntent
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
@@ -315,14 +316,7 @@ class UploadTask(
         if (uploadNotificationElapsedTime >= ELAPSED_TIME) {
             updatePendingCountNotificationIfNeeded()
             uploadNotification.apply {
-                val intent = Intent(context, MainActivity::class.java).apply {
-                    putExtra(UploadNotifications.INTENT_DESTINATION_FOLDER_ID, uploadFile.remoteFolder)
-                }
-                val pendingIntent = PendingIntent.getActivity(
-                    context, 0,
-                    intent, UploadNotifications.pendingIntentFlags
-                )
-                setContentIntent(pendingIntent)
+                setContentIntent(uploadFile.progressPendingIntent(context))
                 setContentText("${currentProgress}%")
                 setProgress(100, currentProgress, false)
                 notificationManagerCompat.notify(CURRENT_UPLOAD_ID, build())
@@ -344,7 +338,7 @@ class UploadTask(
     private fun CoroutineScope.updatePendingCountNotificationIfNeeded() {
         val latestPendingCount = UploadFile.getAllPendingUploadsCount()
         if (worker.pendingCount != latestPendingCount) {
-            updateUploadCountNotification(context, uploadFile, latestPendingCount)
+            updateUploadCountNotification(context, latestPendingCount)
             worker.pendingCount = latestPendingCount
         }
     }
