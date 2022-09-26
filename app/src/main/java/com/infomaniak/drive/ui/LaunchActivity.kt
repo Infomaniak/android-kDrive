@@ -90,6 +90,19 @@ class LaunchActivity : AppCompatActivity() {
             if (destinationUserId != 0 && destinationDriveId != 0) {
                 AccountUtils.currentUserId = destinationUserId
                 AccountUtils.currentDriveId = destinationDriveId
+            } else {
+                it.data?.let { uri -> uri.path?.let { path -> processDeepLink(path) } }
+            }
+        }
+    }
+
+    private fun processDeepLink(path: String) {
+        Regex("/app/[a-z]+/(\\d+)/[a-z]*/?[a-z]*/?[a-z]*/?(\\d+)/?[a-z]*/?[a-z]*/?(\\d*)").find(path)?.let { match ->
+            var (driveId, folderId, fileId) = match.destructured
+            if (fileId.isEmpty()) fileId = folderId
+
+            if (DriveInfosController.getDrive(AccountUtils.currentUserId, driveId.toInt(), maintenance = false) != null) {
+                AccountUtils.currentDriveId = driveId.toInt()
             }
         }
     }

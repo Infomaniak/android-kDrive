@@ -138,6 +138,21 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="https" />
+                <data android:host="drive.infomaniak.com" />
+                <data android:host="kdrive.infomaniak.com" />
+
+                <data android:pathPattern="/app/drive/.*/files/..*" />
+                <data android:pathPattern="/app/drive/.*/files/.*/preview/./..*" />
+                <data android:pathPattern="/app/drive/.*/redirect/..*" />
+                <data android:pathPattern="/app/office/.*/..*" />
+            </intent-filter>
         </activity>
 
         <activity
