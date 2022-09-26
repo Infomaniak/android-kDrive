@@ -162,9 +162,12 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
 
     private fun getFileFromRemote() {
         val fileDetails = ApiRepository.getFileDetails(File(id = fileId, driveId = userDrive.driveId))
-        val data = fileDetails.data
-        file = if (data != null) {
-            data
+        val remoteFile = fileDetails.data
+        file = if (fileDetails.isSuccess() && remoteFile != null) {
+            FileController.getRealmInstance(userDrive).use { realm ->
+                FileController.updateExistingFile(newFile = remoteFile, realm = realm)
+            }
+            remoteFile
         } else {
             val translatedError = fileDetails.translatedError
             if (translatedError == R.string.connectionError) throw UploadTask.NetworkException()
