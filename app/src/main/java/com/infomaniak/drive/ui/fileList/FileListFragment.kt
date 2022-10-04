@@ -158,20 +158,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         mainViewModel.navigateFileListToFolderId.observe(viewLifecycleOwner) {
             it?.let { intentFolderId ->
                 FileController.getFileById(intentFolderId)?.let { file ->
-                    if (file.isFolder()) {
-                        findNavController().navigate(
-                            FileListFragmentDirections.fileListFragmentToFileListFragment(file.id, file.name)
-                        )
-                    } else {
-                        FileController.getFileById(file.parentId)?.let { parentFolder ->
-                            findNavController().navigate(
-                                FileListFragmentDirections.fileListFragmentToFileListFragment(
-                                    parentFolder.id,
-                                    parentFolder.name
-                                )
-                            )
-                        }
-                    }
+                    if (file.isFolder()) file.openFolder() else file.displayFile(withCurrentFiles = false)
                 }
             }
         }
@@ -449,11 +436,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                     when {
                         file.isFolder() -> file.openFolder()
                         file.isBookmark() -> openBookmark(file)
-                        else -> {
-                            val trackerName = "preview" + file.getFileType().value.capitalizeFirstChar()
-                            trackEvent("preview", TrackerAction.CLICK, trackerName)
-                            file.displayFile()
-                        }
+                        else -> file.displayFile()
                     }
                 } else {
                     refreshActivities()
@@ -511,8 +494,9 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         }
     }
 
-    private fun File.displayFile() {
-        val fileList = fileAdapter.getFileObjectsList(mainViewModel.realm)
+    private fun File.displayFile(withCurrentFiles: Boolean = true) {
+        trackEvent("preview", TrackerAction.CLICK, "preview${getFileType().value.capitalizeFirstChar()}")
+        val fileList = if (withCurrentFiles) fileAdapter.getFileObjectsList(mainViewModel.realm) else listOf(this)
         Utils.displayFile(mainViewModel, findNavController(), this, fileList)
     }
 
