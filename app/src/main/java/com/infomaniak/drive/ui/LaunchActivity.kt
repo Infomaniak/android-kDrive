@@ -109,12 +109,8 @@ class LaunchActivity : AppCompatActivity() {
             val driveId = pathDriveId.toInt()
             val fileId = if (pathFileId.isEmpty()) pathFolderId.toInt() else pathFileId.toInt()
 
-            if (DriveInfosController.getDrive(AccountUtils.currentUserId, driveId = driveId, maintenance = false) != null) {
-                setOpenSpecificFile(driveId = driveId, fileId = fileId)
-            } else {
-                DriveInfosController.getDrive(driveId = driveId, maintenance = false)?.let {
-                    setOpenSpecificFile(userId = it.userId, driveId = driveId, fileId = fileId)
-                }
+            DriveInfosController.getDrive(driveId = driveId, maintenance = false)?.let {
+                setOpenSpecificFile(userId = it.userId, driveId = driveId, fileId = fileId)
             }
 
             Sentry.addBreadcrumb(Breadcrumb().apply {
@@ -125,9 +121,9 @@ class LaunchActivity : AppCompatActivity() {
         }
     }
 
-    private fun setOpenSpecificFile(userId: Int? = null, driveId: Int, fileId: Int) {
-        userId?.let { AccountUtils.currentUserId = it }
-        AccountUtils.currentDriveId = driveId
+    private fun setOpenSpecificFile(userId: Int, driveId: Int, fileId: Int) {
+        if (userId != AccountUtils.currentUserId) AccountUtils.currentUserId = userId
+        if (driveId != AccountUtils.currentDriveId) AccountUtils.currentDriveId = driveId
         extrasOpenSpecificFile = MainActivityArgs(destinationFileId = fileId).toBundle()
     }
 
