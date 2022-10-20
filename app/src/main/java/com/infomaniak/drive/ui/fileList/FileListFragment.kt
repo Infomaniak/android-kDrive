@@ -107,21 +107,6 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         }
     }
 
-    companion object {
-        const val REFRESH_FAVORITE_FILE = "force_list_refresh"
-        const val CANCELLABLE_MAIN_KEY = "cancellable_main"
-        const val CANCELLABLE_TITLE_KEY = "cancellable_message"
-        const val CANCELLABLE_ACTION_KEY = "cancellable_action"
-        const val SORT_TYPE_OPTION_KEY = "sort_type_option"
-
-        const val ACTIVITIES_REFRESH_DELAY = 5_000L
-
-        // Beware, if this value is modified, the Categories' layouts should be modified accordingly.
-        const val MAX_DISPLAYED_CATEGORIES = 3
-
-        const val MATOMO_CATEGORY = "fileListFileAction"
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (!fileListViewModel.sortTypeIsInitialized()) {
@@ -835,4 +820,19 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     open fun onRestartItemsClicked() = Unit
 
     open fun onCloseItemsClicked() = Unit
+
+    companion object {
+        const val REFRESH_FAVORITE_FILE = "force_list_refresh"
+        const val CANCELLABLE_MAIN_KEY = "cancellable_main"
+        const val CANCELLABLE_TITLE_KEY = "cancellable_message"
+        const val CANCELLABLE_ACTION_KEY = "cancellable_action"
+        const val SORT_TYPE_OPTION_KEY = "sort_type_option"
+
+        const val ACTIVITIES_REFRESH_DELAY = 5_000L
+
+        // Beware, if this value is modified, the Categories' layouts should be modified accordingly.
+        const val MAX_DISPLAYED_CATEGORIES = 3
+
+        const val MATOMO_CATEGORY = "fileListFileAction"
+    }
 }

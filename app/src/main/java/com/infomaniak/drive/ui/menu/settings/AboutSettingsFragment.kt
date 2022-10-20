@@ -30,12 +30,6 @@ import kotlinx.android.synthetic.main.fragment_settings_about.*
 
 class AboutSettingsFragment : Fragment() {
 
-    companion object {
-        const val GDPR_URL = "https://infomaniak.com/gtl/rgpd"
-        const val GITHUB_URL = "https://github.com/Infomaniak/android-kDrive"
-        const val GPL_LICENSE_URL = "https://www.gnu.org/licenses/gpl-3.0.html"
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_settings_about, container, false)
     }
@@ -60,5 +54,11 @@ class AboutSettingsFragment : Fragment() {
         }
 
         appVersionDescription.text = "v ${BuildConfig.VERSION_NAME} build ${BuildConfig.VERSION_CODE}"
+    }
+
+    companion object {
+        const val GDPR_URL = "https://infomaniak.com/gtl/rgpd"
+        const val GITHUB_URL = "https://github.com/Infomaniak/android-kDrive"
+        const val GPL_LICENSE_URL = "https://www.gnu.org/licenses/gpl-3.0.html"
     }
 }

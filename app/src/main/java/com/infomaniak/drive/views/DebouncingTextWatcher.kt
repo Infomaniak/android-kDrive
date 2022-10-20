@@ -27,14 +27,11 @@ import kotlinx.coroutines.launch
 
 class DebouncingTextWatcher(
     lifecycle: Lifecycle,
-    private val onDebouncingQueryTextChange: (String?) -> Unit
+    private val onDebouncingQueryTextChange: (String?) -> Unit,
 ) : TextWatcher {
+
     private val coroutineScope = lifecycle.coroutineScope
     private var searchJob: Job? = null
-
-    companion object {
-        const val DEBOUNCE_DELAY: Long = 300
-    }
 
     override fun afterTextChanged(s: Editable?) {}
 
@@ -53,5 +50,9 @@ class DebouncingTextWatcher(
             }
         }
         return false
+    }
+
+    companion object {
+        const val DEBOUNCE_DELAY: Long = 300
     }
 }

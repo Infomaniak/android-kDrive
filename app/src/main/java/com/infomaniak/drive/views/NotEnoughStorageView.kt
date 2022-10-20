@@ -34,15 +34,11 @@ import kotlinx.android.synthetic.main.view_not_enough_storage.view.*
 class NotEnoughStorageView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     init {
         inflate(context, R.layout.view_not_enough_storage, this)
-    }
-
-    companion object {
-        const val STORAGE_ALERT_MIN_PERCENTAGE = 90
     }
 
     @SuppressLint("SetTextI18n")
@@ -78,5 +74,9 @@ class NotEnoughStorageView @JvmOverloads constructor(
                 this@NotEnoughStorageView.isGone = true
             }
         }
+    }
+
+    companion object {
+        const val STORAGE_ALERT_MIN_PERCENTAGE = 90
     }
 }
