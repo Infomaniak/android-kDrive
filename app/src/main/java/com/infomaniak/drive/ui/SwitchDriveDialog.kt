@@ -23,6 +23,7 @@ import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.ui.bottomSheetDialogs.DriveBlockedBottomSheetDialogArgs
 import com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialogArgs
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.MatomoUtils.trackEvent
@@ -41,12 +42,18 @@ class SwitchDriveDialog : SelectBottomSheetDialog() {
         selectRecyclerView.adapter = SwitchDriveBottomSheetAdapter(driveList) { drive ->
             context?.applicationContext?.trackEvent("drive", TrackerAction.CLICK, "switch")
             findNavController().popBackStack()
-            // TODO - Implement drive blocked BottomSheetDialog (for invoice issues) - Awaiting API attributes
             if (drive.maintenance) {
-                findNavController().navigate(
-                    R.id.driveMaintenanceBottomSheetFragment,
-                    DriveMaintenanceBottomSheetDialogArgs(drive.name).toBundle()
-                )
+                if (drive.isTechnicalMaintenance) {
+                    findNavController().navigate(
+                        R.id.driveMaintenanceBottomSheetFragment,
+                        DriveMaintenanceBottomSheetDialogArgs(drive.name).toBundle()
+                    )
+                } else {
+                    findNavController().navigate(
+                        R.id.driveBlockedBottomSheetFragment,
+                        DriveBlockedBottomSheetDialogArgs(drive.id).toBundle()
+                    )
+                }
             } else {
                 AccountUtils.currentDriveId = drive.id
                 (activity as? MainActivity)?.saveLastNavigationItemSelected()

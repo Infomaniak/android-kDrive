@@ -663,11 +663,7 @@
         tools:layout="@layout/fragment_bottom_sheet_information">
         <argument
             android:name="driveId"
-            android:defaultValue="0"
             app:argType="integer" />
-        <argument
-            android:name="expirationDate"
-            app:argType="long" />
     </dialog>
 
     <dialog

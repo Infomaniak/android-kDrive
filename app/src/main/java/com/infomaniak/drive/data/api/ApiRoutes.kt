@@ -228,6 +228,8 @@ object ApiRoutes {
 
     fun orderDrive() = "${SHOP_URL}drive"
 
+    fun renewDrive(accountId: Int) = "${MANAGER_URL}$accountId/accounts/accounting/renewal"
+
     fun showOffice(file: File) = "${OFFICE_URL}${file.driveId}/${file.id}"
     //endregion
 }
