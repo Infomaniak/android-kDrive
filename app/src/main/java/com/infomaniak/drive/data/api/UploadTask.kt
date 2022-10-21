@@ -28,6 +28,7 @@ import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
 import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.models.upload.UploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.data.services.UploadWorker
@@ -388,7 +389,13 @@ class UploadTask(
             "file_already_exists_error" -> Unit
             "lock_error" -> throw LockErrorException()
             "not_authorized" -> throw NotAuthorizedException()
-            "product_maintenance" -> throw ProductMaintenanceException()
+            "product_maintenance" -> {
+                if (error?.context?.get("reason")?.asString == Drive.MaintenanceReason.TECHNICAL.value) {
+                    throw ProductMaintenanceException()
+                } else {
+                    throw ProductBlockedException()
+                }
+            }
             "quota_exceeded_error" -> throw QuotaExceededException()
             "upload_destination_not_found_error", "upload_destination_not_writable_error" -> throw FolderNotFoundException()
             "upload_not_terminated", "upload_not_terminated_error" -> {
@@ -398,6 +405,7 @@ class UploadTask(
                 throw UploadNotTerminated("Upload finish with 0 chunks uploaded or a different expected number of chunks")
             }
             "invalid_upload_token_error",
+            "object_not_found",
             "upload_error",
             "upload_failed_error",
             "upload_token_is_not_valid" -> {
@@ -445,6 +453,7 @@ class UploadTask(
     class LockErrorException : Exception()
     class NetworkException : Exception()
     class NotAuthorizedException : Exception()
+    class ProductBlockedException : Exception()
     class ProductMaintenanceException : Exception()
     class QuotaExceededException : Exception()
     class TotalChunksExceededException : Exception()

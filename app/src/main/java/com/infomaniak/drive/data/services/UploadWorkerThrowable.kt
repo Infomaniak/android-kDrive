@@ -70,8 +70,12 @@ object UploadWorkerThrowable {
             currentUploadFile?.lockErrorNotification(applicationContext)
             Result.retry()
 
+        } catch (exception: UploadTask.ProductBlockedException) {
+            currentUploadFile?.productMaintenanceExceptionNotification(applicationContext, false)
+            Result.failure()
+
         } catch (exception: UploadTask.ProductMaintenanceException) {
-            currentUploadFile?.productMaintenanceExceptionNotification(applicationContext)
+            currentUploadFile?.productMaintenanceExceptionNotification(applicationContext, true)
             Result.failure()
 
         } catch (exception: Exception) {

@@ -111,9 +111,10 @@ object UploadNotifications {
         uploadInterruptedNotification(context, R.string.errorFileLocked)
     }
 
-    fun UploadFile.productMaintenanceExceptionNotification(context: Context) {
+    fun UploadFile.productMaintenanceExceptionNotification(context: Context, isTechnicalMaintenance: Boolean) {
         val drive = DriveInfosController.getDrive(userId, driveId)
-        val description = context.resources.getQuantityString(R.plurals.driveBlockedTitle, 1, drive?.name)
+        val title = if (isTechnicalMaintenance) R.plurals.driveMaintenanceTitle else R.plurals.driveBlockedTitle
+        val description = context.resources.getQuantityString(title, 1, drive?.name)
         showNotification(
             context = context,
             title = context.getString(R.string.uploadInterruptedErrorTitle),
