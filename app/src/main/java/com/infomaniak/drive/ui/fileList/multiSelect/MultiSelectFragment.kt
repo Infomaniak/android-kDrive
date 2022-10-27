@@ -54,6 +54,7 @@ import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.Utils.moveFileClicked
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
+import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking

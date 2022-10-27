@@ -72,6 +72,7 @@ import com.infomaniak.drive.utils.Utils.getRootName
 import com.infomaniak.lib.core.utils.LiveDataNetworkStatus
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
+import com.infomaniak.lib.core.utils.whenResultIsOk
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
