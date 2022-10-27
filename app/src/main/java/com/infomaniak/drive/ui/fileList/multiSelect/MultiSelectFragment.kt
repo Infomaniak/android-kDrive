@@ -48,11 +48,15 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.ARE_ALL_F
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.BULK_OPERATION_CUSTOM_TAG
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSelectResult
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.BulkOperationsUtils
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
 import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
+import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.moveFileClicked
+import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
+import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
