@@ -168,7 +168,7 @@ class MainActivity : BaseActivity() {
         navigationArgs?.let {
             if (it.destinationFileId > 0) {
                 bottomNavigation.findViewById<View>(R.id.fileListFragment).performClick()
-                mainViewModel.navigateFileListToFolderId(navController, it.destinationFileId)
+                mainViewModel.navigateFileListTo(navController, it.destinationFileId)
             }
         }
     }

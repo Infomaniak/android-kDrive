@@ -155,12 +155,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             }
         }
 
-        mainViewModel.navigateFileListToFolderId.observe(viewLifecycleOwner) {
-            it?.let { intentFolderId ->
-                FileController.getFileById(intentFolderId)?.let { file ->
-                    if (file.isFolder()) file.openFolder() else file.displayFile(withCurrentFiles = false)
-                }
-            }
+        mainViewModel.navigateFileListTo.observe(viewLifecycleOwner) {
+            it?.let { file -> if (file.isFolder()) file.openFolder() else file.displayFile(withCurrentFiles = false) }
         }
 
         mainViewModel.createDropBoxSuccess.observe(viewLifecycleOwner) { dropBox ->

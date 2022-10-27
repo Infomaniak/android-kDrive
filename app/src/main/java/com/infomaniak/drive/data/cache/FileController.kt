@@ -378,7 +378,7 @@ object FileController {
         } ?: ArrayList()
     }
 
-    fun getFileDetails(fileId: Int, userDrive: UserDrive): File? {
+    fun getFileDetails(fileId: Int, userDrive: UserDrive = UserDrive()): File? {
         fun getRemoteParentDetails(remoteFile: File, userDrive: UserDrive, realm: Realm) {
             ApiRepository.getFileDetails(File(id = remoteFile.parentId, driveId = userDrive.driveId)).data?.let {
                 it.children = RealmList(remoteFile)
