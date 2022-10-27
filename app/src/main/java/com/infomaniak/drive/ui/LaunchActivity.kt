@@ -50,6 +50,7 @@ class LaunchActivity : AppCompatActivity() {
 
             logoutCurrentUserIfNeeded() // Rights v2 migration temporary fix
             handleNotificationDestinationIntent()
+            handleDeeplink()
 
             val destinationClass = when {
                 AccountUtils.requestCurrentUser() == null -> {
@@ -97,10 +98,12 @@ class LaunchActivity : AppCompatActivity() {
                     driveId = it.destinationDriveId,
                     fileId = it.destinationRemoteFolderId
                 )
-            } else {
-                intent.data?.let { uri -> uri.path?.let { path -> processDeepLink(path) } }
             }
         }
+    }
+
+    private fun handleDeeplink() {
+        intent.data?.let { uri -> uri.path?.let { path -> processDeepLink(path) } }
     }
 
     private fun processDeepLink(path: String) {
