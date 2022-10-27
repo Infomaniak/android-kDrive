@@ -49,6 +49,7 @@ import com.infomaniak.drive.utils.Utils.openWithIntent
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.safeNavigate
+import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_file_info_actions.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

@@ -361,10 +361,6 @@ fun Fragment.navigateToUploadView(folderId: Int, folderName: String? = null) {
     )
 }
 
-fun ActivityResult.whenResultIsOk(completion: (Intent?) -> Unit) {
-    if (resultCode == Activity.RESULT_OK) data.let(completion::invoke)
-}
-
 fun Drive?.getDriveUsers(): List<DriveUser> = this?.users?.let { categories ->
     return@let DriveInfosController.getUsers(ArrayList(categories.drive + categories.account))
 } ?: listOf()
