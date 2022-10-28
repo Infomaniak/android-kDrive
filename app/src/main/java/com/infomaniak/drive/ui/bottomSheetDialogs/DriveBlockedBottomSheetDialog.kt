@@ -22,13 +22,16 @@ import android.view.View
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
+import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.utils.toPx
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 
 class DriveBlockedBottomSheetDialog : InformationBottomSheetDialog() {
 
-    private val navigationArgs: DriveMaintenanceBottomSheetDialogArgs by navArgs()
+    private val navigationArgs: DriveBlockedBottomSheetDialogArgs by navArgs()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -39,13 +42,12 @@ class DriveBlockedBottomSheetDialog : InformationBottomSheetDialog() {
             setImageResource(R.drawable.ic_drive_blocked)
         }
 
-        title.text = resources.getQuantityString(R.plurals.driveBlockedTitle, 1, navigationArgs.driveName)
-        description.text = resources.getQuantityString(R.plurals.driveBlockedDescription, 1, navigationArgs.driveName)
+        val drive = DriveInfosController.getDrive(AccountUtils.currentUserId, driveId = navigationArgs.driveId)!!
+        title.text = resources.getQuantityString(R.plurals.driveBlockedTitle, 1, drive.name)
+        description.text = resources.getQuantityString(R.plurals.driveBlockedDescription, 1, drive.getUpdatedAt().format())
         actionButton.apply {
             setText(R.string.buttonRenew)
-            setOnClickListener {
-                requireContext().openUrl(ApiRoutes.orderDrive()) // Open renew URL from product, TODO : Awaiting invoices scope
-            }
+            setOnClickListener { requireContext().openUrl(ApiRoutes.renewDrive(drive.accountId)) }
         }
         secondaryActionButton.setText(R.string.buttonClose)
     }

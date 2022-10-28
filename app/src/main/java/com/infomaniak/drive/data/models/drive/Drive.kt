@@ -24,6 +24,7 @@ import com.infomaniak.drive.utils.Utils
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
+import java.util.*
 
 open class Drive(
 
@@ -32,6 +33,8 @@ open class Drive(
     /**
      * User data
      */
+    @SerializedName("account_admin")
+    var accountAdmin: Boolean = false,
     @SerializedName("can_add_user")
     var canAddUser: Boolean = false,
     @SerializedName("can_create_team_folder")
@@ -60,6 +63,8 @@ open class Drive(
     var usedSize: Long = 0,
     var id: Int = -1,
     var maintenance: Boolean = false,
+    @SerializedName("maintenance_reason")
+    var maintenanceReason: String = "",
     var pack: String = "",
     var size: Long = 0,
     var version: String = "",
@@ -89,6 +94,8 @@ open class Drive(
 
     inline val isFreePack get() = pack == DrivePack.FREE.value
 
+    inline val isTechnicalMaintenance get() = maintenanceReason == MaintenanceReason.TECHNICAL.value
+
     fun convertToFile(rootName: String? = null): File {
         return File(
             id = if (rootName == null) id else Utils.ROOT_ID,
@@ -101,6 +108,8 @@ open class Drive(
     }
 
     fun isUserAdmin(): Boolean = role == "admin"
+
+    fun getUpdatedAt(): Date = Date(updatedAt * 1000)
 
     override fun equals(other: Any?): Boolean {
         return if (other is Drive) {
@@ -117,5 +126,12 @@ open class Drive(
         SOLO("solo"),
         TEAM("team"),
         PRO("pro"),
+    }
+
+    enum class MaintenanceReason(val value: String) {
+        NOT_RENEW("not_renew"),
+        DEMO_END("demo_end"),
+        INVOICE_OVERDUE("invoice_overdue"),
+        TECHNICAL("technical"),
     }
 }

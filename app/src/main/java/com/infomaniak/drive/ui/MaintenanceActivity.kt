@@ -27,41 +27,45 @@ import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
+import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.activity_no_drive.*
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
 import kotlinx.coroutines.launch
 
 class MaintenanceActivity : AppCompatActivity() {
 
-    private val isTechnicalMaintenance: Boolean = true // TODO - Default value to true until API available for invoice issues
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_no_drive)
 
-        noDriveIconLayout.icon.setImageResource(if (isTechnicalMaintenance) R.drawable.ic_maintenance else R.drawable.ic_drive_blocked)
-
         DriveInfosController.getDrives(AccountUtils.currentUserId).apply {
-            noDriveTitle.text = resources.getQuantityString(
-                if (isTechnicalMaintenance) R.plurals.driveMaintenanceTitle else R.plurals.driveBlockedTitle,
-                this.size,
-                this.firstOrNull()?.name
-            )
-            noDriveDescription.text = if (isTechnicalMaintenance) {
-                getString(R.string.driveMaintenanceDescription)
-            } else resources.getQuantityString(
-                R.plurals.driveBlockedDescription,
-                this.size,
-                "todo" // TODO - Get drive expiration date
-            )
-        }
+            val firstDrive = first()
 
-        noDriveActionButton.apply {
-            if (isTechnicalMaintenance) {
-                isGone = true
+            noDriveIconLayout.icon.setImageResource(if (firstDrive.isTechnicalMaintenance) R.drawable.ic_maintenance else R.drawable.ic_drive_blocked)
+
+            noDriveTitle.text = resources.getQuantityString(
+                if (firstDrive.isTechnicalMaintenance) R.plurals.driveMaintenanceTitle else R.plurals.driveBlockedTitle,
+                this.size,
+                firstDrive.name
+            )
+
+            noDriveDescription.text = if (firstDrive.isTechnicalMaintenance) {
+                getString(R.string.driveMaintenanceDescription)
             } else {
-                noDriveActionButton.text = getString(R.string.buttonRenew)
-                setOnClickListener { openUrl(ApiRoutes.orderDrive()) }
+                resources.getQuantityString(
+                    R.plurals.driveBlockedDescription,
+                    this.size,
+                    firstDrive.getUpdatedAt().format()
+                )
+            }
+
+            noDriveActionButton.apply {
+                if (firstDrive.isTechnicalMaintenance) {
+                    isGone = true
+                } else {
+                    noDriveActionButton.text = getString(R.string.buttonRenew)
+                    setOnClickListener { openUrl(ApiRoutes.renewDrive(firstDrive.accountId)) }
+                }
             }
         }
 
