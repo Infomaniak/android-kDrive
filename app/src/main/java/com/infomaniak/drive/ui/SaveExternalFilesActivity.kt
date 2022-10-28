@@ -51,7 +51,6 @@ import com.infomaniak.drive.ui.menu.settings.SelectDriveViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MatomoUtils.trackCurrentUserId
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import io.sentry.Sentry
@@ -185,15 +184,22 @@ class SaveExternalFilesActivity : BaseActivity() {
     }
 
     private fun getSelectedFolder(): Triple<Int, Int, Int?> {
-        return if (canSaveExternalFilesPref()) UiSettings(this).getSaveExternalFilesPref()
-        else Triple(
-            navigationArgs.userId,
-            navigationArgs.userDriveId,
-            if (navigationArgs.folderId >= Utils.ROOT_ID) navigationArgs.folderId else null
-        )
+        return if (canUseExternalFilesPref()) {
+            UiSettings(this).getSaveExternalFilesPref()
+        } else {
+            val folderId = if (navigationArgs.folderId == -1) {
+                UiSettings(this).getSaveExternalFilesPref().third
+            } else {
+                navigationArgs.folderId
+            }
+
+            Triple(navigationArgs.userId, navigationArgs.userDriveId, folderId)
+        }
     }
 
-    private fun canSaveExternalFilesPref() = navigationArgs.userId == -1
+    private fun canUseExternalFilesPref() = navigationArgs.userId == -1
+
+    private fun canSaveFilesPref() = canUseExternalFilesPref() || navigationArgs.folderId == -1
 
     private fun displaySelectedDrive(drive: Drive) {
         driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(drive.preferences.color))
@@ -259,7 +265,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                     val driveId = selectedDrive.value?.id!!
                     val folderId = saveExternalFilesViewModel.folderId.value!!
 
-                    if (canSaveExternalFilesPref()) {
+                    if (canSaveFilesPref()) {
                         UiSettings(this@SaveExternalFilesActivity).setSaveExternalFilesPref(userId, driveId, folderId)
                     }
                     lifecycleScope.launch(Dispatchers.IO) {
