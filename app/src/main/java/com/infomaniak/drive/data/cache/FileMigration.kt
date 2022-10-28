@@ -35,11 +35,6 @@ import io.sentry.SentryLevel
 import java.util.*
 
 class FileMigration : RealmMigration {
-    companion object {
-        const val bddVersion = 4L // Must be bumped when the schema changes
-
-        const val LOGOUT_CURRENT_USER_TAG = "logout_current_user_tag"
-    }
 
     override fun migrate(realm: DynamicRealm, oldVersion: Long, newVersion: Long) {
         var oldVersionTemp = oldVersion
@@ -301,5 +296,10 @@ class FileMigration : RealmMigration {
             // Logout current user
             AccountUtils.reloadApp?.invoke(bundleOf(LOGOUT_CURRENT_USER_TAG to true))
         }
+    }
+
+    companion object {
+        const val bddVersion = 4L // Must be bumped when the schema changes
+        const val LOGOUT_CURRENT_USER_TAG = "logout_current_user_tag"
     }
 }

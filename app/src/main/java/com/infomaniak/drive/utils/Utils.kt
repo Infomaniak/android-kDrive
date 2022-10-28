@@ -195,7 +195,7 @@ object Utils {
         mainViewModel: MainViewModel,
         navController: NavController,
         selectedFile: File,
-        fileList: ArrayList<File>,
+        fileList: List<File>,
         isSharedWithMe: Boolean = false,
     ) {
         mainViewModel.currentPreviewFileList = fileList.associateBy { it.id } as LinkedHashMap<Int, File>

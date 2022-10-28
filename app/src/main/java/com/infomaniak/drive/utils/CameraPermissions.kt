@@ -29,10 +29,6 @@ import com.infomaniak.lib.core.utils.hasPermissions
 
 class CameraPermissions {
 
-    companion object {
-        val cameraPermission = arrayOf(Manifest.permission.CAMERA)
-    }
-
     private lateinit var registerForActivityResult: ActivityResultLauncher<Array<String>>
     private lateinit var activity: FragmentActivity
 
@@ -55,5 +51,9 @@ class CameraPermissions {
                 false
             }
         }
+    }
+
+    companion object {
+        val cameraPermission = arrayOf(Manifest.permission.CAMERA)
     }
 }

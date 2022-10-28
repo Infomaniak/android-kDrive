@@ -26,9 +26,6 @@ import io.realm.RealmMigration
 import java.net.URLEncoder
 
 class UploadMigration : RealmMigration {
-    companion object {
-        const val bddVersion = 5L // Must be bumped when the schema changes
-    }
 
     override fun migrate(realm: DynamicRealm, oldVersion: Long, newVersion: Long) {
         var oldVersionTemp = oldVersion
@@ -92,5 +89,9 @@ class UploadMigration : RealmMigration {
                 }
         }
         //endregion
+    }
+
+    companion object {
+        const val bddVersion = 5L // Must be bumped when the schema changes
     }
 }

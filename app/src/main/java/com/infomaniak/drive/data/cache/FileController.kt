@@ -43,6 +43,7 @@ import okhttp3.OkHttpClient
 import java.util.*
 
 object FileController {
+
     private const val REALM_DB_FILE = "kDrive-%s-%s.realm"
     private const val REALM_DB_SHARES_WITH_ME = "kDrive-%s-%s-shares.realm"
 
@@ -378,7 +379,7 @@ object FileController {
         } ?: ArrayList()
     }
 
-    fun getFileDetails(fileId: Int, userDrive: UserDrive): File? {
+    fun getFileDetails(fileId: Int, userDrive: UserDrive = UserDrive()): File? {
         fun getRemoteParentDetails(remoteFile: File, userDrive: UserDrive, realm: Realm) {
             ApiRepository.getFileDetails(File(id = remoteFile.parentId, driveId = userDrive.driveId)).data?.let {
                 it.children = RealmList(remoteFile)
@@ -680,7 +681,6 @@ object FileController {
         withChildren: Boolean
     ): Pair<File, ArrayList<File>>? {
         var result: Pair<File, ArrayList<File>>? = null
-
 
         val apiResponse = ApiRepository.getDirectoryFiles(okHttpClient, driveId, parentId, page, order)
         val localFolder = localFolderProxy?.realm?.copyFromRealm(localFolderProxy, 1)

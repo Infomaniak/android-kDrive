@@ -28,6 +28,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.ui.LaunchActivity
+import com.infomaniak.drive.ui.LaunchActivityArgs
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.menu.settings.SyncSettingsActivity
 import com.infomaniak.drive.utils.NotificationUtils
@@ -40,24 +41,21 @@ object UploadNotifications {
 
     const val NOTIFICATION_FILES_LIMIT = 5
 
-    const val INTENT_DESTINATION_USER_ID = "intent_destination_user_id"
-    const val INTENT_DESTINATION_DRIVE_ID = "intent_destination_drive_id"
-    const val INTENT_DESTINATION_FOLDER_ID = "intent_folder_id_progress"
-
     val pendingIntentFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
     } else {
         PendingIntent.FLAG_UPDATE_CURRENT
     }
 
-    fun UploadFile.setupCurrentUploadNotification(context: Context, pendingCount: Int) {
+    fun setupCurrentUploadNotification(context: Context, pendingCount: Int) {
         val pendingTitle = context.getString(R.string.uploadInProgressTitle)
         val pendingDescription = context.resources.getQuantityString(
             R.plurals.uploadInProgressNumberFile,
             pendingCount,
             pendingCount
         )
-        val contentIntent = progressPendingIntent(context, isUploadInProgress = true)
+        val intent = Intent(context, LaunchActivity::class.java).clearStack()
+        val contentIntent = PendingIntent.getActivity(context, 0, intent, pendingIntentFlags)
         showNotification(context, pendingTitle, pendingDescription, NotificationUtils.UPLOAD_SERVICE_ID, contentIntent)
     }
 
@@ -112,7 +110,7 @@ object UploadNotifications {
     }
 
     fun UploadFile.productMaintenanceExceptionNotification(context: Context, isTechnicalMaintenance: Boolean) {
-        val drive = DriveInfosController.getDrive(userId, driveId)
+        val drive = DriveInfosController.getDrive(userId = userId, driveId = driveId)
         val title = if (isTechnicalMaintenance) R.plurals.driveMaintenanceTitle else R.plurals.driveBlockedTitle
         val description = context.resources.getQuantityString(title, 1, drive?.name)
         showNotification(
@@ -231,14 +229,15 @@ object UploadNotifications {
         )
     }
 
-    private fun UploadFile.progressPendingIntent(context: Context, isUploadInProgress: Boolean = false): PendingIntent? {
-        val destination = if (isUploadInProgress) MainActivity::class.java else LaunchActivity::class.java
-        val intent = Intent(context, destination).clearStack().apply {
-            if (!isUploadInProgress) {
-                putExtra(INTENT_DESTINATION_USER_ID, userId)
-                putExtra(INTENT_DESTINATION_DRIVE_ID, driveId)
-            }
-            putExtra(INTENT_DESTINATION_FOLDER_ID, remoteFolder)
+    fun UploadFile.progressPendingIntent(context: Context): PendingIntent {
+        val intent = Intent(context, LaunchActivity::class.java).clearStack().apply {
+            putExtras(
+                LaunchActivityArgs(
+                    destinationUserId = userId,
+                    destinationDriveId = driveId,
+                    destinationRemoteFolderId = remoteFolder
+                ).toBundle()
+            )
         }
 
         return PendingIntent.getActivity(context, 0, intent, pendingIntentFlags)

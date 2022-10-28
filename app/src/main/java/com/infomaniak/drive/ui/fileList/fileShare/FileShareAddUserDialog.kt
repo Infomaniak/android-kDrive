@@ -50,6 +50,7 @@ import kotlinx.coroutines.withContext
 import java.io.Serializable
 
 class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
+
     private lateinit var availableUsersAdapter: AvailableShareableItemsAdapter
     private val fileShareViewModel: FileShareViewModel by navGraphViewModels(R.id.fileShareDetailsFragment)
     private val navigationArgs: FileShareAddUserDialogArgs by navArgs()
@@ -61,10 +62,6 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
             filePermissionsValue.setText(value.translation)
             field = value
         }
-
-    companion object {
-        const val SHARE_SELECTION_KEY = "selection_dialog_dismissed"
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_bottom_sheet_file_share, container, false)
@@ -266,5 +263,9 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
             .setPositiveButton(R.string.buttonShare) { _, _ ->
                 onConflictApproved()
             }.show()
+    }
+
+    companion object {
+        const val SHARE_SELECTION_KEY = "selection_dialog_dismissed"
     }
 }

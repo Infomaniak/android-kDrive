@@ -132,5 +132,4 @@ class DownloadProgressDialog : DialogFragment() {
         const val OPEN_WITH = "open_with"
         const val OPEN_BOOKMARK = "open_bookmark"
     }
-
 }

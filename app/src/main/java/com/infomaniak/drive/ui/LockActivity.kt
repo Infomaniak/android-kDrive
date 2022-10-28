@@ -27,10 +27,6 @@ import kotlinx.android.synthetic.main.activity_lock.*
 
 class LockActivity : AppCompatActivity() {
 
-    companion object {
-        const val FACE_ID_LOG_TAG = "Face ID"
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lock)
@@ -58,5 +54,9 @@ class LockActivity : AppCompatActivity() {
     private fun startMainActivity() {
         startActivity(Intent(this, MainActivity::class.java))
         finish()
+    }
+
+    companion object {
+        const val FACE_ID_LOG_TAG = "Face ID"
     }
 }

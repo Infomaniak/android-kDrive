@@ -61,8 +61,6 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
-import com.infomaniak.drive.data.services.UploadWorker
-import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.launchInAppReview
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.*
@@ -83,10 +81,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
 
-
 class MainActivity : BaseActivity() {
 
     private val mainViewModel: MainViewModel by viewModels()
+    private val navigationArgs: MainActivityArgs? by lazy { intent?.extras?.let { MainActivityArgs.fromBundle(it) } }
     private lateinit var downloadReceiver: DownloadReceiver
 
     private var lastCloseApp = Date()
@@ -127,7 +125,7 @@ class MainActivity : BaseActivity() {
         val navController = setupNavController()
 
         setupBottomNavigation(navController)
-        handleShowProgressIntent(navController)
+        handleNavigateToDestinationFileId(navController)
         listenToNetworkStatus()
 
         navController.addOnDestinationChangedListener { _, dest, args -> onDestinationChanged(dest, args) }
@@ -165,17 +163,11 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun handleShowProgressIntent(navController: NavController) {
-        intent?.getIntExtra(UploadNotifications.INTENT_DESTINATION_FOLDER_ID, 0)?.let { folderId ->
-            if (folderId > 0) {
-                Sentry.addBreadcrumb(Breadcrumb().apply {
-                    category = UploadWorker.BREADCRUMB_TAG
-                    message = "Upload notification has been clicked"
-                    level = SentryLevel.INFO
-                })
-
+    private fun handleNavigateToDestinationFileId(navController: NavController) {
+        navigationArgs?.let {
+            if (it.destinationFileId > 0) {
                 bottomNavigation.findViewById<View>(R.id.fileListFragment).performClick()
-                mainViewModel.navigateFileListToFolderId(navController, folderId)
+                mainViewModel.navigateFileListTo(navController, it.destinationFileId)
             }
         }
     }
