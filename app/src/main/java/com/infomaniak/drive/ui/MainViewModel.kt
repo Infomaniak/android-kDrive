@@ -86,6 +86,9 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             popBackStack(R.id.homeFragment, false)
             navigate(R.id.fileListFragment)
         }
+
+        if (fileId == Utils.ROOT_ID) return
+
         // Emit destination folder id
         viewModelScope.launch(Dispatchers.IO) {
             val file = FileController.getFileById(fileId) ?: FileController.getFileDetails(fileId) ?: return@launch

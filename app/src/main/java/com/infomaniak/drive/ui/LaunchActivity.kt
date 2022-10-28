@@ -31,6 +31,7 @@ import com.infomaniak.drive.ui.login.MigrationActivity.Companion.getOldkDriveUse
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.MatomoUtils.trackCurrentUserId
 import com.infomaniak.drive.utils.MatomoUtils.trackScreen
+import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.isKeyguardSecure
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
@@ -107,10 +108,10 @@ class LaunchActivity : AppCompatActivity() {
     }
 
     private fun processDeepLink(path: String) {
-        Regex("/app/[a-z]+/(\\d+)/[a-z]*/?[a-z]*/?[a-z]*/?(\\d+)/?[a-z]*/?[a-z]*/?(\\d*)").find(path)?.let { match ->
+        Regex("/app/[a-z]+/(\\d+)/[a-z]*/?[a-z]*/?[a-z]*/?(\\d*)/?[a-z]*/?[a-z]*/?(\\d*)").find(path)?.let { match ->
             val (pathDriveId, pathFolderId, pathFileId) = match.destructured
             val driveId = pathDriveId.toInt()
-            val fileId = if (pathFileId.isEmpty()) pathFolderId.toInt() else pathFileId.toInt()
+            val fileId = if (pathFileId.isEmpty()) pathFolderId.toIntOrNull() ?: ROOT_ID else pathFileId.toInt()
 
             DriveInfosController.getDrive(driveId = driveId, maintenance = false)?.let {
                 setOpenSpecificFile(userId = it.userId, driveId = driveId, fileId = fileId)
