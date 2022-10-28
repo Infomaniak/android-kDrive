@@ -49,7 +49,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-
 class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     var selectFolderUserDrive: UserDrive? = null

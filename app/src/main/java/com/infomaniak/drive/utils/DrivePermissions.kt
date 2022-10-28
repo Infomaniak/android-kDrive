@@ -47,33 +47,6 @@ import io.sentry.SentryLevel
 
 class DrivePermissions {
 
-    companion object {
-        val permissions = when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> arrayOf(
-                Manifest.permission.ACCESS_MEDIA_LOCATION,
-                Manifest.permission.POST_NOTIFICATIONS,
-                Manifest.permission.READ_MEDIA_IMAGES,
-                Manifest.permission.READ_MEDIA_VIDEO
-            )
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> arrayOf(
-                Manifest.permission.ACCESS_MEDIA_LOCATION,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            )
-            else -> arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        }
-
-        fun Activity.resultPermissions(authorized: Boolean, permissions: Array<String>, message: Int) {
-            if (!authorized && !requestPermissionsIsPossible(permissions)) {
-                MaterialAlertDialogBuilder(this, R.style.DialogStyle)
-                    .setTitle(R.string.androidPermissionTitle)
-                    .setMessage(message)
-                    .setCancelable(false)
-                    .setPositiveButton(R.string.buttonAuthorize) { _: DialogInterface?, _: Int -> startAppSettingsConfig() }
-                    .show()
-            }
-        }
-    }
-
     private lateinit var batteryPermissionResultLauncher: ActivityResultLauncher<Intent>
     private lateinit var registerForActivityResult: ActivityResultLauncher<Array<String>>
     private lateinit var activity: FragmentActivity
@@ -181,6 +154,33 @@ class DrivePermissions {
                     scope.level = SentryLevel.WARNING
                     Sentry.captureException(exception)
                 }
+            }
+        }
+    }
+
+    companion object {
+        val permissions = when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> arrayOf(
+                Manifest.permission.ACCESS_MEDIA_LOCATION,
+                Manifest.permission.POST_NOTIFICATIONS,
+                Manifest.permission.READ_MEDIA_IMAGES,
+                Manifest.permission.READ_MEDIA_VIDEO
+            )
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> arrayOf(
+                Manifest.permission.ACCESS_MEDIA_LOCATION,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            else -> arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
+
+        fun Activity.resultPermissions(authorized: Boolean, permissions: Array<String>, message: Int) {
+            if (!authorized && !requestPermissionsIsPossible(permissions)) {
+                MaterialAlertDialogBuilder(this, R.style.DialogStyle)
+                    .setTitle(R.string.androidPermissionTitle)
+                    .setMessage(message)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.buttonAuthorize) { _: DialogInterface?, _: Int -> startAppSettingsConfig() }
+                    .show()
             }
         }
     }

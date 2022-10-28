@@ -65,10 +65,6 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         FragmentTab(galleryFragment, R.id.homeGalleryButton),
     )
 
-    companion object {
-        const val MERGE_FILE_ACTIVITY_DELAY = 3600 * 12000 // 12h (ms)
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
@@ -163,5 +159,9 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onRefresh() {
         updateUi(forceDownload = true)
         homeSwipeRefreshLayout.isRefreshing = false
+    }
+
+    companion object {
+        const val MERGE_FILE_ACTIVITY_DELAY = 3600 * 12000 // 12h (ms)
     }
 }

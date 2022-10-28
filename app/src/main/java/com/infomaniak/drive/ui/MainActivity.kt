@@ -83,7 +83,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
 
-
 class MainActivity : BaseActivity() {
 
     private val mainViewModel: MainViewModel by viewModels()
