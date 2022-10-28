@@ -2,7 +2,7 @@
 buildscript {
 
     ext.kotlin_version = '1.7.20'
-    ext.navigation_version = '2.5.2'
+    ext.navigation_version = '2.5.3'
     ext.java_version = JavaVersion.VERSION_11
 
     repositories {

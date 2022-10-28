@@ -17,8 +17,8 @@ android {
         applicationId 'com.infomaniak.drive'
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 4_02_008_01
-        versionName '4.2.8'
+        versionCode 4_02_009_01
+        versionName '4.2.9'
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         buildConfigField 'String', 'CLIENT_ID', '"9473D73C-C20F-4971-9E10-D957C563FA68"'
@@ -139,13 +139,13 @@ dependencies {
     standardImplementation 'com.google.android.play:core:1.10.3'
     standardImplementation 'com.google.firebase:firebase-messaging-ktx:23.1.0'
 
-    implementation 'com.googlecode.plist:dd-plist:1.24'
+    implementation 'com.googlecode.plist:dd-plist:1.25'
 
     implementation 'com.github.hannesa2:paho.mqtt.android:3.5.1'
     implementation 'com.github.matomo-org:matomo-sdk-android:4.1.4'
 
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.10.0'
-    testImplementation 'io.github.serpro69:kotlin-faker:1.11.0'
+    testImplementation 'io.github.serpro69:kotlin-faker:1.12.0'
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
 
     def espresso_version = '3.4.0'
@@ -160,7 +160,7 @@ dependencies {
     androidTestImplementation "androidx.test:rules:$androidx_test_version"
     androidTestImplementation "androidx.test:runner:$androidx_test_version"
 
-    def jupiter_version = '5.9.0'
+    def jupiter_version = '5.9.1'
     androidTestImplementation "org.junit.jupiter:junit-jupiter-api:$jupiter_version"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$jupiter_version"
 
