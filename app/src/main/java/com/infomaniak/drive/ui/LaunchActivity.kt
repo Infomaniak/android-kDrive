@@ -30,7 +30,9 @@ import com.infomaniak.drive.ui.login.MigrationActivity
 import com.infomaniak.drive.ui.login.MigrationActivity.Companion.getOldkDriveUser
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.MatomoUtils.trackCurrentUserId
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.MatomoUtils.trackScreen
+import com.infomaniak.drive.utils.TrackerAction
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.isKeyguardSecure
 import io.sentry.Breadcrumb
@@ -122,6 +124,7 @@ class LaunchActivity : AppCompatActivity() {
                 message = "DeepLink: $path"
                 level = SentryLevel.INFO
             })
+            trackEvent("deepLink", TrackerAction.CLICK, path)
         }
     }
 
