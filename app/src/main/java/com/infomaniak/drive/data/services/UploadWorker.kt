@@ -182,7 +182,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         currentUploadFile = this@initUpload
         applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
-        updateUploadCountNotification(applicationContext, this@initUpload, pendingCount)
+        updateUploadCountNotification(applicationContext, pendingCount)
         initOkHttpClient()
 
         try {
@@ -460,12 +460,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 .build()
         }
 
-        fun CoroutineScope.updateUploadCountNotification(context: Context, uploadFile: UploadFile, pendingCount: Int) {
+        fun CoroutineScope.updateUploadCountNotification(context: Context, pendingCount: Int) {
             launch {
                 // We wait a little otherwise it is too fast and the notification may not be updated
                 delay(NotificationUtils.ELAPSED_TIME)
                 ensureActive()
-                uploadFile.setupCurrentUploadNotification(context, pendingCount)
+                setupCurrentUploadNotification(context, pendingCount)
             }
         }
 

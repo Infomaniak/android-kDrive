@@ -55,15 +55,15 @@ object DriveInfosController {
 
     private fun getDrivesQuery(
         realm: Realm,
-        userId: Int,
+        userId: Int?,
         driveId: Int?,
         sharedWithMe: Boolean?,
         maintenance: Boolean?
     ): RealmQuery<Drive> {
         return realm.where(Drive::class.java)
             .sort(Drive::id.name, Sort.ASCENDING)
-            .equalTo(Drive::userId.name, userId)
             .apply {
+                userId?.let { equalTo(Drive::userId.name, it) }
                 driveId?.let { equalTo(Drive::id.name, it) }
                 sharedWithMe?.let { equalTo(Drive::sharedWithMe.name, it) }
                 maintenance?.let { equalTo(Drive::maintenance.name, it) }
@@ -118,7 +118,7 @@ object DriveInfosController {
     }
 
     fun getDrives(
-        userId: Int,
+        userId: Int? = null,
         driveId: Int? = null,
         sharedWithMe: Boolean? = false,
         maintenance: Boolean? = null
@@ -130,7 +130,7 @@ object DriveInfosController {
     }
 
     fun getDrive(
-        userId: Int,
+        userId: Int? = null,
         driveId: Int? = null,
         sharedWithMe: Boolean? = null,
         maintenance: Boolean? = null

@@ -24,21 +24,28 @@ import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.AppSettings
-import com.infomaniak.drive.data.sync.UploadNotifications
+import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.login.MigrationActivity
 import com.infomaniak.drive.ui.login.MigrationActivity.Companion.getOldkDriveUser
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.MatomoUtils.trackCurrentUserId
+import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.MatomoUtils.trackScreen
+import com.infomaniak.drive.utils.TrackerAction
+import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.isKeyguardSecure
+import io.sentry.Breadcrumb
+import io.sentry.Sentry
+import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class LaunchActivity : AppCompatActivity() {
 
-    private val destinationFolderId by lazy { intent?.getIntExtra(UploadNotifications.INTENT_DESTINATION_FOLDER_ID, 0) }
+    private val navigationArgs: LaunchActivityArgs? by lazy { intent?.extras?.let { LaunchActivityArgs.fromBundle(it) } }
+    private var extrasOpenSpecificFile: Bundle? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +53,7 @@ class LaunchActivity : AppCompatActivity() {
 
             logoutCurrentUserIfNeeded() // Rights v2 migration temporary fix
             handleNotificationDestinationIntent()
+            handleDeeplink()
 
             val destinationClass = when {
                 AccountUtils.requestCurrentUser() == null -> {
@@ -57,10 +65,10 @@ class LaunchActivity : AppCompatActivity() {
                 else -> {
                     application.trackCurrentUserId()
                     // When DriveInfosController is migrated
-                    if (DriveInfosController.getDrivesCount(AccountUtils.currentUserId) == 0L) {
+                    if (DriveInfosController.getDrivesCount(userId = AccountUtils.currentUserId) == 0L) {
                         AccountUtils.updateCurrentUserAndDrives(this@LaunchActivity)
                     }
-                    if (DriveInfosController.getDrives(AccountUtils.currentUserId).all { it.maintenance }) {
+                    if (DriveInfosController.getDrives(userId = AccountUtils.currentUserId).all { it.maintenance }) {
                         MaintenanceActivity::class.java
                     } else {
                         MainActivity::class.java
@@ -69,9 +77,7 @@ class LaunchActivity : AppCompatActivity() {
             }
 
             startActivity(Intent(this@LaunchActivity, destinationClass).apply {
-                if (destinationClass == MainActivity::class.java && destinationFolderId != 0) {
-                    putExtra(UploadNotifications.INTENT_DESTINATION_FOLDER_ID, destinationFolderId)
-                }
+                if (destinationClass == MainActivity::class.java) extrasOpenSpecificFile?.let { putExtras(it) }
             })
         }
         trackScreen()
@@ -83,15 +89,49 @@ class LaunchActivity : AppCompatActivity() {
     }
 
     private fun handleNotificationDestinationIntent() {
-        intent?.let {
-            val destinationUserId = it.getIntExtra(UploadNotifications.INTENT_DESTINATION_USER_ID, 0)
-            val destinationDriveId = it.getIntExtra(UploadNotifications.INTENT_DESTINATION_DRIVE_ID, 0)
-
-            if (destinationUserId != 0 && destinationDriveId != 0) {
-                AccountUtils.currentUserId = destinationUserId
-                AccountUtils.currentDriveId = destinationDriveId
+        navigationArgs?.let {
+            if (it.destinationUserId != 0 && it.destinationDriveId != 0) {
+                Sentry.addBreadcrumb(Breadcrumb().apply {
+                    category = UploadWorker.BREADCRUMB_TAG
+                    message = "Upload notification has been clicked"
+                    level = SentryLevel.INFO
+                })
+                setOpenSpecificFile(
+                    userId = it.destinationUserId,
+                    driveId = it.destinationDriveId,
+                    fileId = it.destinationRemoteFolderId
+                )
             }
         }
+    }
+
+    private fun handleDeeplink() {
+        intent.data?.let { uri -> uri.path?.let { path -> processDeepLink(path) } }
+    }
+
+    private fun processDeepLink(path: String) {
+        Regex("/app/[a-z]+/(\\d+)/[a-z]*/?[a-z]*/?[a-z]*/?(\\d*)/?[a-z]*/?[a-z]*/?(\\d*)").find(path)?.let { match ->
+            val (pathDriveId, pathFolderId, pathFileId) = match.destructured
+            val driveId = pathDriveId.toInt()
+            val fileId = if (pathFileId.isEmpty()) pathFolderId.toIntOrNull() ?: ROOT_ID else pathFileId.toInt()
+
+            DriveInfosController.getDrive(driveId = driveId, maintenance = false)?.let {
+                setOpenSpecificFile(userId = it.userId, driveId = driveId, fileId = fileId)
+            }
+
+            Sentry.addBreadcrumb(Breadcrumb().apply {
+                category = UploadWorker.BREADCRUMB_TAG
+                message = "DeepLink: $path"
+                level = SentryLevel.INFO
+            })
+            trackEvent("deepLink", TrackerAction.CLICK, path)
+        }
+    }
+
+    private fun setOpenSpecificFile(userId: Int, driveId: Int, fileId: Int) {
+        if (userId != AccountUtils.currentUserId) AccountUtils.currentUserId = userId
+        if (driveId != AccountUtils.currentDriveId) AccountUtils.currentDriveId = driveId
+        extrasOpenSpecificFile = MainActivityArgs(destinationFileId = fileId).toBundle()
     }
 
     private suspend fun logoutCurrentUserIfNeeded() = withContext(Dispatchers.IO) {

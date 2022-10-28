@@ -347,7 +347,7 @@ fun Fragment.navigateToParentFolder(folderId: Int, mainViewModel: MainViewModel)
     with(findNavController()) {
         popBackStack(R.id.homeFragment, false)
         (requireActivity() as MainActivity).bottomNavigation.findViewById<View>(R.id.fileListFragment).performClick()
-        mainViewModel.navigateFileListToFolderId(this, folderId)
+        mainViewModel.navigateFileListTo(this, folderId)
     }
 }
 

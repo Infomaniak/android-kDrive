@@ -65,7 +65,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     val createDropBoxSuccess = SingleLiveEvent<DropBox>()
 
-    val navigateFileListToFolderId = SingleLiveEvent<FileId>()
+    val navigateFileListTo = SingleLiveEvent<File>()
 
     val deleteFileFromHome = SingleLiveEvent<Boolean>()
     val refreshActivities = SingleLiveEvent<Boolean>()
@@ -79,14 +79,20 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     private fun getContext() = getApplication<ApplicationMain>()
 
-    fun navigateFileListToFolderId(navController: NavController, folderId: Int) {
+    fun navigateFileListTo(navController: NavController, fileId: Int) {
         // Clear FileListFragment stack
         with(navController) {
             popBackStack(R.id.homeFragment, false)
             navigate(R.id.fileListFragment)
         }
+
+        if (fileId == Utils.ROOT_ID) return
+
         // Emit destination folder id
-        if (folderId > Utils.ROOT_ID) navigateFileListToFolderId.value = folderId
+        viewModelScope.launch(Dispatchers.IO) {
+            val file = FileController.getFileById(fileId) ?: FileController.getFileDetails(fileId) ?: return@launch
+            if (fileId > Utils.ROOT_ID) navigateFileListTo.postValue(file)
+        }
     }
 
     fun createMultiSelectMediator(): MediatorLiveData<Pair<Int, Int>> {
@@ -102,12 +108,10 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    fun createShareLink(
-        file: File
-    ) = liveData(Dispatchers.IO) {
-
+    fun createShareLink(file: File) = liveData(Dispatchers.IO) {
         val body = ShareLink().ShareLinkSettings(right = ShareLinkFilePermission.PUBLIC, canDownload = true, canEdit = false)
         val apiResponse = ApiRepository.createShareLink(file, body)
+
         if (apiResponse.isSuccess()) {
             FileController.updateFile(file.id) { it.sharelink = apiResponse.data }
         }
