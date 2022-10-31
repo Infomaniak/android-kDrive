@@ -40,7 +40,6 @@
     <string name="allDateCustom">Personnalisé</string>
     <string name="allDeletedFilePattern">\'Supprimé le \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Désactivé</string>
-    <string name="allDuplicateFileName">%1$s - Copie%2$s</string>
     <string name="allEmptyInputError">Ce champ ne peut pas être vide</string>
     <string name="allErrorFeatureNotAvailableInFdroid">Fonctionnalité indisponible depuis F-Droid</string>
     <string name="allFileAddFavoris">%s ajouté aux favoris</string>

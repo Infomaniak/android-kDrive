@@ -500,16 +500,13 @@ class FileInfoActionsView @JvmOverloads constructor(
 
         fun duplicateFileClicked() {
             currentFile.apply {
-                val fileName = getFileName()
-                val copyName = context.getString(R.string.allDuplicateFileName, fileName, getFileExtension() ?: "")
-
                 Utils.createPromptNameDialog(
                     context = context,
                     title = R.string.buttonDuplicate,
                     fieldName = R.string.fileInfoInputDuplicateFile,
                     positiveButton = R.string.buttonCopy,
-                    fieldValue = copyName,
-                    selectedRange = fileName.length
+                    fieldValue = name,
+                    selectedRange = getFileName().length
                 ) { dialog, name ->
                     onDuplicateFile(name) {
                         trackActionEvent("copy")

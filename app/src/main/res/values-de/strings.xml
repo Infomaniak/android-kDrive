@@ -40,7 +40,6 @@
     <string name="allDateCustom">Kundenspezifisch</string>
     <string name="allDeletedFilePattern">\'Gelöscht am \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Deaktiviert</string>
-    <string name="allDuplicateFileName">%1$s - Kopie%2$s</string>
     <string name="allEmptyInputError">Dieses Feld darf nicht leer sein</string>
     <string name="allErrorFeatureNotAvailableInFdroid">Funktion nicht verfügbar seit F-Droid</string>
     <string name="allFileAddFavoris">%s zu Favoriten hinzugefügt</string>

@@ -350,12 +350,11 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                 )
             }
             BulkOperationType.COPY -> {
-                val fileName = file.getFileName()
                 mediator.addSource(
                     copyFile(
                         file = file,
                         destinationId = destinationFolder!!.id,
-                        copyName = getString(R.string.allDuplicateFileName, fileName, file.getFileExtension()),
+                        copyName = file.name,
                         onSuccess = { it.data?.let { file -> onIndividualActionSuccess(type, file) } },
                     ),
                     updateMultiSelectMediator(mediator),
