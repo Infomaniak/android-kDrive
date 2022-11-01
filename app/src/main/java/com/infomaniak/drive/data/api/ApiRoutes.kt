@@ -25,8 +25,8 @@ import com.infomaniak.drive.utils.FileId
 object ApiRoutes {
 
     private const val fileWithQuery =
-        "with=capabilities,categories,conversion_capabilities,dropbox,is_favorite,sharelink,sorted_name"
-    private const val fileExtraWithQuery = "$fileWithQuery,path,users,version"
+        "with=capabilities,categories,conversion_capabilities,dropbox,is_favorite,sharelink,sorted_name,path"
+    private const val fileExtraWithQuery = "$fileWithQuery,users,version"
     const val activitiesWithQuery = "with=file,file.capabilities,file.categories,file.conversion_capabilities,file.dropbox," +
             "file.is_favorite,file.sharelink,file.sorted_name"
 
