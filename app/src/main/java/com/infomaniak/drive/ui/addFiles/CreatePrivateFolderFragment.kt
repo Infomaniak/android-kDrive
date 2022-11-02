@@ -20,10 +20,10 @@ package com.infomaniak.drive.ui.addFiles
 import android.os.Bundle
 import android.view.View
 import androidx.navigation.fragment.findNavController
+import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File.FolderPermission.*
 import com.infomaniak.drive.data.models.Permission
-import com.infomaniak.drive.utils.MatomoUtils.trackNewElementEvent
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_create_folder.*

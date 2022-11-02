@@ -31,13 +31,13 @@ import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.Utils.getDefaultAcceptedLanguage
@@ -106,7 +106,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
         shareButton.initProgress(this)
         shareButton.setOnClickListener {
             shareButton.showProgress()
-            context?.applicationContext?.trackEvent("shareAndRights", TrackerAction.CLICK, "inviteUser")
+            trackShareRightsEvent("inviteUser")
             checkShare(selectedPermission) { file, body ->
                 createShareAndCloseDialog(file, body)
             }

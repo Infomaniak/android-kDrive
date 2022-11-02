@@ -36,6 +36,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.navArgs
 import com.google.android.material.textfield.TextInputEditText
+import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
@@ -49,7 +50,6 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.menu.settings.SelectDriveDialog
 import com.infomaniak.drive.ui.menu.settings.SelectDriveViewModel
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.MatomoUtils.trackCurrentUserId
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
@@ -96,7 +96,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
         setupDrivePermissions()
         activeDefaultUser()
-        application.trackCurrentUserId()
+        trackUserId(AccountUtils.currentUserId)
         fetchSelectedDrive()
         fetchFolder()
         setupSaveButton()

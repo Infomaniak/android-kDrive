@@ -21,11 +21,11 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
+import com.infomaniak.drive.MatomoDrive.trackAccountEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.menu.UserAdapter
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.MatomoUtils.trackAccountEvent
 import com.infomaniak.lib.core.models.user.User
 import kotlinx.android.synthetic.main.view_switch_settings.*
 

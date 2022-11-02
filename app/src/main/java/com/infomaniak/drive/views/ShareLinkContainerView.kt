@@ -22,10 +22,10 @@ import android.util.AttributeSet
 import android.widget.FrameLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
-import com.infomaniak.drive.utils.MatomoUtils.trackShareRightsEvent
 import com.infomaniak.drive.utils.shareText
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.view_share_link_container.view.*
@@ -76,11 +76,11 @@ class ShareLinkContainerView @JvmOverloads constructor(
                 shareLinkSwitch.isGone = true
             }
             shareLink == null && urlValue.isBlank() -> {
-                context?.applicationContext?.trackShareRightsEvent("restrictedShareLink")
+                context?.trackShareRightsEvent("restrictedShareLink")
                 setRestrictedUi()
             }
             else -> {
-                context?.applicationContext?.trackShareRightsEvent("publicShareLink")
+                context?.trackShareRightsEvent("publicShareLink")
                 setPublicUi()
             }
         }

@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.fileList.multiSelect
 
 import android.app.Dialog
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -34,6 +33,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
+import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.FileController
@@ -50,7 +50,6 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSelectResult
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.Utils.moveFileClicked
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
@@ -226,7 +225,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         val selectedFiles = multiSelectManager.getValidSelectedItems(type)
         val fileCount = (allSelectedFilesCount?.minus(multiSelectManager.exceptedItemsIds.size)) ?: selectedFiles.size
 
-        applicationContext?.trackBulkActionEvent(matomoCategory, type, fileCount)
+        trackBulkActionEvent(matomoCategory, type, fileCount)
 
         val sendActions: (dialog: Dialog?) -> Unit = sendActions(
             type, areAllFromTheSameFolder, fileCount, selectedFiles, destinationFolder, color
@@ -501,11 +500,11 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         }
     }
 
-    private fun Context.trackBulkActionEvent(category: String, action: BulkOperationType, modifiedFileNumber: Int) {
+    private fun trackBulkActionEvent(category: String, action: BulkOperationType, modifiedFileNumber: Int) {
 
         fun BulkOperationType.toMatomoString(): String = name.lowercase().capitalizeFirstChar()
 
-        val trackerName = "bulk" + (if (modifiedFileNumber == 1) "Single" else "") + action.toMatomoString()
-        trackEvent(category, TrackerAction.CLICK, trackerName, modifiedFileNumber.toFloat())
+        val name = "bulk" + (if (modifiedFileNumber == 1) "Single" else "") + action.toMatomoString()
+        trackEvent(category, name, value = modifiedFileNumber.toFloat())
     }
 }

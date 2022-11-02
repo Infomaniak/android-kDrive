@@ -61,6 +61,7 @@ import com.google.android.material.shape.CornerFamily
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.DriveUser
@@ -75,7 +76,6 @@ import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.UploadInProgressFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
-import com.infomaniak.drive.utils.MatomoUtils.trackShareRightsEvent
 import com.infomaniak.drive.utils.Utils.regexInvalidSystemChar
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
@@ -444,7 +444,7 @@ fun View.updateUploadFileInProgress(pendingFilesCount: Int) {
 }
 
 fun Context.shareText(text: String) {
-    applicationContext?.trackShareRightsEvent("shareButton")
+    trackShareRightsEvent("shareButton")
     val intent = Intent().apply {
         action = Intent.ACTION_SEND
         putExtra(Intent.EXTRA_TEXT, text)

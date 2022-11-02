@@ -38,12 +38,11 @@ import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.upstream.FileDataSource
 import com.google.android.exoplayer2.util.EventLogger
 import com.google.android.exoplayer2.util.Util
+import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
-import com.infomaniak.drive.utils.TrackerAction
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
 import kotlinx.android.synthetic.main.fragment_preview_others.*
@@ -207,6 +206,6 @@ open class PreviewVideoFragment : PreviewFragment() {
     }
 
     private fun trackMediaPlayerEvent(name: String, value: Float? = null) {
-        trackEvent("mediaPlayer", TrackerAction.CLICK, name, value)
+        trackEvent("mediaPlayer", name, value = value)
     }
 }

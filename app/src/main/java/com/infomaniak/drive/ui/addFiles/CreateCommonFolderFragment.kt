@@ -23,6 +23,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
+import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
@@ -31,7 +32,6 @@ import com.infomaniak.drive.data.models.File.FolderPermission.ALL_DRIVE_USERS
 import com.infomaniak.drive.data.models.File.FolderPermission.SPECIFIC_USERS
 import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.MatomoUtils.trackNewElementEvent
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.hideKeyboard
 import com.infomaniak.lib.core.utils.hideProgress

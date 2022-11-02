@@ -54,6 +54,7 @@ import coil.transform.CircleCropTransformation
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.navigation.NavigationBarItemView
 import com.infomaniak.drive.BuildConfig
+import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
 import com.infomaniak.drive.checkUpdateIsAvailable
 import com.infomaniak.drive.data.models.AppSettings
@@ -64,7 +65,6 @@ import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.launchInAppReview
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.MatomoUtils.trackScreen
 import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
@@ -291,7 +291,7 @@ class MainActivity : BaseActivity() {
         })
 
         with(destination) {
-            application.trackScreen(displayName.substringAfter("${BuildConfig.APPLICATION_ID}:id"), label.toString())
+            trackScreen(displayName.substringAfter("${BuildConfig.APPLICATION_ID}:id"), label.toString())
         }
 
         val shouldHideBottomNavigation = navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldHideBottomNavigation

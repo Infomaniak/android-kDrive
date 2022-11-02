@@ -36,16 +36,17 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.ApplicationMain
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
+import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.CreateFile
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.File.Office
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
-import com.infomaniak.drive.utils.MatomoUtils.trackNewElementEvent
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.FORMAT_NEW_FILE
 import com.infomaniak.lib.core.utils.format
@@ -117,11 +118,11 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         documentUpload.setOnClickListener { uploadFiles() }
         documentScanning.setOnClickListener { scanDocuments() }
         folderCreate.setOnClickListener { createFolder() }
-        docsCreate.setOnClickListener { createFile(File.Office.DOCS) }
-        pointsCreate.setOnClickListener { createFile(File.Office.POINTS) }
-        gridsCreate.setOnClickListener { createFile(File.Office.GRIDS) }
-        formCreate.setOnClickListener { createFile(File.Office.FORM) }
-        noteCreate.setOnClickListener { createFile(File.Office.TXT) }
+        docsCreate.setOnClickListener { createFile(Office.DOCS) }
+        pointsCreate.setOnClickListener { createFile(Office.POINTS) }
+        gridsCreate.setOnClickListener { createFile(Office.GRIDS) }
+        formCreate.setOnClickListener { createFile(Office.FORM) }
+        noteCreate.setOnClickListener { createFile(Office.TXT) }
 
         documentScanning.isVisible = (context?.applicationContext as ApplicationMain).geniusScanIsReady
     }
@@ -175,17 +176,17 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         dismiss()
     }
 
-    private fun File.Office.getEventName(): String {
+    private fun Office.getEventName(): String {
         return when (this) {
-            File.Office.DOCS -> "createText"
-            File.Office.POINTS -> "createPresentation"
-            File.Office.GRIDS -> "createTable"
-            File.Office.TXT -> "createNote"
-            File.Office.FORM -> "createForm"
+            Office.DOCS -> "createText"
+            Office.POINTS -> "createPresentation"
+            Office.GRIDS -> "createTable"
+            Office.TXT -> "createNote"
+            Office.FORM -> "createForm"
         }
     }
 
-    private fun createFile(office: File.Office) {
+    private fun createFile(office: Office) {
         Utils.createPromptNameDialog(
             context = requireContext(),
             title = R.string.modalCreateFileTitle,

@@ -32,16 +32,15 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.infomaniak.drive.MatomoDrive.toFloat
+import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
-import com.infomaniak.drive.utils.MatomoUtils.trackEventWithBooleanValue
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.drive.utils.TrackerAction
 import com.infomaniak.drive.utils.isKeyguardSecure
 import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_settings.*
@@ -65,7 +64,7 @@ class SettingsFragment : Fragment() {
 
         onlyWifiSyncValue.isChecked = AppSettings.onlyWifiSync
         onlyWifiSyncValue.setOnCheckedChangeListener { _, isChecked ->
-            context?.applicationContext?.trackEventWithBooleanValue("settings", "onlyWifiTransfer", isChecked)
+            trackSettingsEvent("onlyWifiTransfer", isChecked)
             AppSettings.onlyWifiSync = isChecked
             requireActivity().launchAllUpload(drivePermissions)
         }
@@ -116,10 +115,10 @@ class SettingsFragment : Fragment() {
                 defaultNightMode = nightMode[which]!!
             }
             .setPositiveButton(R.string.buttonConfirm) { _, _ ->
-                trackSettingsEvent("theme${themeSettingsValue.text}")
                 UiSettings(requireContext()).nightMode = defaultNightMode
                 AppCompatDelegate.setDefaultNightMode(defaultNightMode)
                 setThemeSettingsValue()
+                trackSettingsEvent("theme${themeSettingsValue.text}")
             }
             .setNegativeButton(R.string.buttonCancel) { _, _ -> }
             .setCancelable(false).show()
@@ -156,7 +155,7 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    private fun trackSettingsEvent(trackerName: String) {
-        trackEvent("settings", TrackerAction.CLICK, trackerName)
+    private fun trackSettingsEvent(name: String, value: Boolean? = null) {
+        trackEvent("settings", name, value = value?.toFloat())
     }
 }

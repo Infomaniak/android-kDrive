@@ -21,6 +21,9 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.infomaniak.drive.MatomoDrive.trackEvent
+import com.infomaniak.drive.MatomoDrive.trackScreen
+import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.AppSettings
@@ -29,10 +32,6 @@ import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.login.MigrationActivity
 import com.infomaniak.drive.ui.login.MigrationActivity.Companion.getOldkDriveUser
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.MatomoUtils.trackCurrentUserId
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
-import com.infomaniak.drive.utils.MatomoUtils.trackScreen
-import com.infomaniak.drive.utils.TrackerAction
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.isKeyguardSecure
 import io.sentry.Breadcrumb
@@ -63,7 +62,7 @@ class LaunchActivity : AppCompatActivity() {
                     LockActivity::class.java
                 }
                 else -> {
-                    application.trackCurrentUserId()
+                    trackUserId(AccountUtils.currentUserId)
                     // When DriveInfosController is migrated
                     if (DriveInfosController.getDrivesCount(userId = AccountUtils.currentUserId) == 0L) {
                         AccountUtils.updateCurrentUserAndDrives(this@LaunchActivity)
@@ -124,7 +123,7 @@ class LaunchActivity : AppCompatActivity() {
                 message = "DeepLink: $path"
                 level = SentryLevel.INFO
             })
-            trackEvent("deepLink", TrackerAction.CLICK, path)
+            trackEvent("deepLink", path)
         }
     }
 

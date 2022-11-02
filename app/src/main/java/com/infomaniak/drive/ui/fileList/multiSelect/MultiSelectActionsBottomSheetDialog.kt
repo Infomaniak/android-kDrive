@@ -28,6 +28,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.liveData
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -37,7 +38,6 @@ import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialog.Companion.openColorFolderBottomSheetDialog
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_multi_select_actions.*
 import kotlinx.coroutines.Dispatchers
 
@@ -134,7 +134,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         downloadFile.apply {
             setOnClickListener {
                 if (drivePermissions.checkWriteStoragePermission()) {
-                    context?.applicationContext?.trackEvent(matomoCategory, TrackerAction.CLICK, "bulkDownload")
+                    trackEvent(matomoCategory, "bulkDownload")
                     download()
                 }
             }

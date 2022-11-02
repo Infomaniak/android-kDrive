@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui.fileList.fileShare
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -28,6 +27,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.drive.MatomoDrive.toFloat
+import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
@@ -35,7 +36,6 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.MatomoUtils.trackEventWithBooleanValue
 import com.infomaniak.drive.utils.getBackNavigationResult
 import com.infomaniak.drive.utils.showOrHideEmptyError
 import com.infomaniak.drive.utils.showSnackbar
@@ -135,8 +135,10 @@ class FileShareLinkSettingsFragment : Fragment() {
             initProgress(this@FileShareLinkSettingsFragment)
             setOnClickListener {
                 showProgress()
-                context?.applicationContext?.trackShareSettingsEvent(
-                    addPasswordSwitch?.isChecked, expirationDateSwitch?.isChecked, allowDownloadValue?.isChecked
+                trackShareRightsEvents(
+                    protectWithPassword = addPasswordSwitch?.isChecked,
+                    expirationDate = expirationDateSwitch?.isChecked,
+                    downloadFromLink = allowDownloadValue?.isChecked,
                 )
                 val isValid = checkPasswordStatus()
                 if (!isValid) {
@@ -269,14 +271,9 @@ class FileShareLinkSettingsFragment : Fragment() {
         )
     }
 
-    private fun Context.trackShareSettingsEvent(
-        protectWithPassword: Boolean?,
-        expirationDate: Boolean?,
-        downloadFromLink: Boolean?
-    ) {
-        val category = "shareAndRights"
-        trackEventWithBooleanValue(category, "protectWithPassword", protectWithPassword)
-        trackEventWithBooleanValue(category, "expirationDateLink", expirationDate)
-        trackEventWithBooleanValue(category, "downloadFromLink", downloadFromLink)
+    private fun trackShareRightsEvents(protectWithPassword: Boolean?, expirationDate: Boolean?, downloadFromLink: Boolean?) {
+        trackShareRightsEvent("protectWithPassword", value = protectWithPassword?.toFloat())
+        trackShareRightsEvent("expirationDateLink", value = expirationDate?.toFloat())
+        trackShareRightsEvent("downloadFromLink", value = downloadFromLink?.toFloat())
     }
 }

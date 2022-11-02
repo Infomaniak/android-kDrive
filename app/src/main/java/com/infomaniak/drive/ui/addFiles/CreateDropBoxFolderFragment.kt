@@ -22,12 +22,12 @@ import android.view.View
 import android.widget.CompoundButton
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
+import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.FolderPermission.*
 import com.infomaniak.drive.data.models.Permission
-import com.infomaniak.drive.utils.MatomoUtils.trackNewElementEvent
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.animateRotation
 import com.infomaniak.drive.utils.showOrHideEmptyError
