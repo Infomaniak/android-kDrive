@@ -48,7 +48,7 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.FORMAT_NEW_FILE
-import com.infomaniak.lib.core.utils.Utils.FilePicker
+import com.infomaniak.lib.core.utils.FilePicker
 import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_add_file.*
