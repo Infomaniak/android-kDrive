@@ -140,7 +140,7 @@ dependencies {
     standardImplementation 'com.google.android.play:core:1.10.3'
     standardImplementation 'com.google.firebase:firebase-messaging-ktx:23.1.0'
 
-    implementation 'com.googlecode.plist:dd-plist:1.25'
+    implementation 'com.googlecode.plist:dd-plist:1.26'
 
     implementation 'com.github.hannesa2:paho.mqtt.android:3.5.1'
 
