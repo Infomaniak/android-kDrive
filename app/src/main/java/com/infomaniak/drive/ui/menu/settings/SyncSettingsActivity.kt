@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui.menu.settings
 
-import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -33,6 +32,8 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.infomaniak.drive.MatomoDrive.toFloat
+import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
@@ -45,12 +46,12 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
-import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
-import com.infomaniak.drive.utils.MatomoUtils.trackEventWithBooleanValue
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.whenResultIsOk
 import com.infomaniak.lib.core.utils.*
 import kotlinx.android.synthetic.main.activity_sync_settings.*
 import kotlinx.coroutines.Dispatchers
@@ -281,17 +282,18 @@ class SyncSettingsActivity : BaseActivity() {
                 && allSyncedFoldersCount > 0
     }
 
-    private fun Context.trackPhotoSyncSettingsEvent(category: String, syncSettings: SyncSettings) {
+    private fun trackPhotoSyncEvents(syncSettings: SyncSettings) {
+
         val dateName = when (syncSettingsViewModel.saveOldPictures.value!!) {
             SavePicturesDate.SINCE_NOW -> "syncNew"
             SavePicturesDate.SINCE_FOREVER -> "syncAll"
             SavePicturesDate.SINCE_DATE -> "syncFromDate"
         }
 
-        trackEventWithBooleanValue(category, "deleteAfterImport", syncSettings.deleteAfterSync)
-        trackEventWithBooleanValue(category, "createDatedFolders", syncSettings.createDatedSubFolders)
-        trackEventWithBooleanValue(category, "importVideo", syncSettings.syncVideo)
-        trackEvent(category, TrackerAction.CLICK, dateName)
+        trackPhotoSyncEvent("deleteAfterImport", syncSettings.deleteAfterSync)
+        trackPhotoSyncEvent("createDatedFolders", syncSettings.createDatedSubFolders)
+        trackPhotoSyncEvent("importVideo", syncSettings.syncVideo)
+        trackPhotoSyncEvent(dateName)
     }
 
     private fun saveSettings() {
@@ -302,7 +304,6 @@ class SyncSettingsActivity : BaseActivity() {
                 SavePicturesDate.SINCE_FOREVER -> Date(0)
                 SavePicturesDate.SINCE_DATE -> syncSettingsViewModel.customDate.value ?: Date()
             }
-            val trackerCategory = "photoSync"
             if (activateSyncSwitch.isChecked) {
                 val syncSettings = SyncSettings(
                     userId = selectDriveViewModel.selectedUserId.value!!,
@@ -313,18 +314,15 @@ class SyncSettingsActivity : BaseActivity() {
                     createDatedSubFolders = createDatedSubFoldersSwitch.isChecked,
                     deleteAfterSync = deletePicturesAfterSyncSwitch.isChecked
                 )
-                application.trackPhotoSyncSettingsEvent(trackerCategory, syncSettings)
+                trackPhotoSyncEvents(syncSettings)
                 syncSettings.setIntervalType(syncSettingsViewModel.syncIntervalType.value!!)
                 UploadFile.setAppSyncSettings(syncSettings)
                 activateAutoSync(syncSettings)
             } else {
                 disableAutoSync()
             }
-            application.trackEvent(
-                trackerCategory,
-                TrackerAction.CLICK,
-                if (activateSyncSwitch.isChecked) "enabled" else "disabled"
-            )
+
+            trackPhotoSyncEvent(if (activateSyncSwitch.isChecked) "enabled" else "disabled")
 
             withContext(Dispatchers.Main) {
                 onBackPressed()
@@ -360,5 +358,9 @@ class SyncSettingsActivity : BaseActivity() {
         val saveOldPictures = MutableLiveData<SavePicturesDate>()
         val syncIntervalType = MutableLiveData<IntervalType>()
         val syncFolder = MutableLiveData<Int?>()
+    }
+
+    private fun trackPhotoSyncEvent(name: String, value: Boolean? = null) {
+        trackEvent("photoSync", name, value = value?.toFloat())
     }
 }

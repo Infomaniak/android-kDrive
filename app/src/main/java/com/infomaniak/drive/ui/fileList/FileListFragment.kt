@@ -39,6 +39,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.WorkInfo
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.appbar.MaterialToolbar
+import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
@@ -59,7 +60,6 @@ import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.FilePresenter.openBookmark
 import com.infomaniak.drive.utils.FilePresenter.openBookmarkIntent
-import com.infomaniak.drive.utils.MatomoUtils.trackEvent
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -368,7 +368,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     private fun setupToggleDisplayButton() {
         binding.toggleDisplayButton.setOnClickListener {
             val newListMode = !UiSettings(requireContext()).listMode
-            trackEvent("displayStyle", TrackerAction.CLICK, if (newListMode) "viewList" else "viewGrid")
+            trackEvent("displayStyle", if (newListMode) "viewList" else "viewGrid")
             UiSettings(requireContext()).listMode = newListMode
             fileListViewModel.isListMode.value = newListMode
         }
@@ -476,7 +476,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     }
 
     private fun File.displayFile(withCurrentFiles: Boolean = true) {
-        trackEvent("preview", TrackerAction.CLICK, "preview${getFileType().value.capitalizeFirstChar()}")
+        trackEvent("preview", "preview${getFileType().value.capitalizeFirstChar()}")
         val fileList = if (withCurrentFiles) fileAdapter.getFileObjectsList(mainViewModel.realm) else listOf(this)
         Utils.displayFile(mainViewModel, findNavController(), this, fileList)
     }
@@ -697,7 +697,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     private inner class SortFiles : () -> Unit {
         override fun invoke() {
             getBackNavigationResult<SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
-                trackEvent("fileList", TrackerAction.CLICK, newSortType.name)
+                trackEvent("fileList", newSortType.name)
                 fileListViewModel.sortType = newSortType
                 if (::binding.isInitialized) binding.sortButton.setText(fileListViewModel.sortType.translation)
 

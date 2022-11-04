@@ -28,6 +28,8 @@ import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.infomaniak.drive.BuildConfig
+import com.infomaniak.drive.MatomoDrive.trackAccountEvent
+import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -36,8 +38,6 @@ import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.MatomoUtils.trackAccountEvent
-import com.infomaniak.drive.utils.MatomoUtils.trackCurrentUserId
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.models.ApiResponse
@@ -131,7 +131,7 @@ class LoginActivity : AppCompatActivity() {
                     lifecycleScope.launch(Dispatchers.IO) {
                         when (val user = authenticateUser(this@LoginActivity, it)) {
                             is User -> {
-                                application.trackCurrentUserId()
+                                trackUserId(AccountUtils.currentUserId)
                                 trackAccountEvent("loggedIn")
                                 launchMainActivity()
                             }

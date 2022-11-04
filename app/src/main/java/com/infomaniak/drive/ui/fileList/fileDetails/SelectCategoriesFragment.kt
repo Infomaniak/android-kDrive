@@ -30,6 +30,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.drive.MatomoDrive.trackCategoriesEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -43,7 +44,6 @@ import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.SelectedSt
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.UiCategory
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode.MANAGED_CATEGORIES
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode.SELECTED_CATEGORIES
-import com.infomaniak.drive.utils.MatomoUtils.trackCategoriesEvent
 import com.infomaniak.drive.utils.getBackNavigationResult
 import com.infomaniak.drive.utils.getName
 import com.infomaniak.drive.utils.setBackNavigationResult

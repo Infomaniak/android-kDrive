@@ -32,6 +32,7 @@ import androidx.lifecycle.liveData
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
+import com.infomaniak.drive.MatomoDrive.trackCategoriesEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
@@ -40,7 +41,6 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.fileList.fileDetails.CreateOrEditCategoryAdapter.Companion.COLORS
-import com.infomaniak.drive.utils.MatomoUtils.trackCategoriesEvent
 import com.infomaniak.drive.utils.find
 import com.infomaniak.drive.utils.getScreenSizeInDp
 import com.infomaniak.lib.core.models.ApiResponse
