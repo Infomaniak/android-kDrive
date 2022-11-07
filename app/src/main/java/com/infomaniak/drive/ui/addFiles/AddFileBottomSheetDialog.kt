@@ -25,7 +25,6 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
@@ -49,6 +48,7 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.FORMAT_NEW_FILE
+import com.infomaniak.lib.core.utils.FilePicker
 import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.whenResultIsOk
@@ -86,10 +86,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         dismiss()
     }
 
-    private val selectFilesResultLauncher = registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
-        findNavController().popBackStack()
-        onSelectFilesResult(uris)
-    }
+    private val filePicker = FilePicker(this)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return (mainViewModel.currentFolderOpenAddFileBottom.value ?: mainViewModel.currentFolder.value)?.let {
@@ -158,8 +155,22 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         if (uploadFilesPermissions.checkSyncPermissions()) {
             trackNewElement("uploadFile")
             documentUpload.isEnabled = false
-            selectFilesResultLauncher.launch("*/*")
+            filePicker.open { uris ->
+                findNavController().popBackStack()
+                onSelectFilesResult(uris)
+            }
         }
+    }
+
+    private fun onSelectFilesResult(uris: List<Uri>) {
+        findNavController().navigate(
+            R.id.importFileDialog,
+            ImportFilesDialogArgs(
+                folderId = currentFolderFile.id,
+                driveId = currentFolderFile.driveId,
+                uris = uris.toTypedArray()
+            ).toBundle()
+        )
     }
 
     private fun scanDocuments() {
@@ -210,17 +221,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                     dismiss()
                 }
         }
-    }
-
-    private fun onSelectFilesResult(uris: List<Uri>) {
-        findNavController().navigate(
-            R.id.importFileDialog,
-            ImportFilesDialogArgs(
-                folderId = currentFolderFile.id,
-                driveId = currentFolderFile.driveId,
-                uris = uris.toTypedArray()
-            ).toBundle()
-        )
     }
 
     private fun onCaptureMediaResult() {
