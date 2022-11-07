@@ -51,7 +51,6 @@ import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.whenResultIsOk
 import com.infomaniak.lib.core.utils.*
 import kotlinx.android.synthetic.main.activity_sync_settings.*
 import kotlinx.coroutines.Dispatchers

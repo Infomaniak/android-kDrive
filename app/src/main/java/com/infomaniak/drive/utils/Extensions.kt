@@ -42,7 +42,6 @@ import android.view.animation.Animation
 import android.view.animation.RotateAnimation
 import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
-import androidx.activity.result.ActivityResult
 import androidx.annotation.DrawableRes
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
@@ -359,10 +358,6 @@ fun Fragment.navigateToUploadView(folderId: Int, folderName: String? = null) {
             folderName = folderName ?: getString(R.string.uploadInProgressTitle),
         ).toBundle(),
     )
-}
-
-fun ActivityResult.whenResultIsOk(completion: (Intent?) -> Unit) {
-    if (resultCode == Activity.RESULT_OK) data.let(completion::invoke)
 }
 
 fun Drive?.getDriveUsers(): List<DriveUser> = this?.users?.let { categories ->

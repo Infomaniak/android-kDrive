@@ -37,8 +37,12 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.menu.TrashViewModel
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.setFileItem
+import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_trashed_file_actions.*
 
 class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
