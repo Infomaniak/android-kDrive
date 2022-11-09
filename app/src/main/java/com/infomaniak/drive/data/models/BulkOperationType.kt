@@ -34,6 +34,7 @@ enum class BulkOperationType(@StringRes val title: Int, @PluralsRes val successM
     MOVE(R.string.fileListMoveInProgressSnackbar, R.plurals.fileListMoveFileConfirmationSnackbar),
     COPY(R.string.fileListCopyInProgressSnackbar, R.plurals.fileListDuplicationConfirmationSnackbar),
     COLOR_FOLDER(0, R.plurals.fileListColorFolderConfirmationSnackbar),
+    MANAGE_CATEGORIES(0, 0),
 
     ADD_OFFLINE(0, successMessage = R.plurals.fileListAddOfflineConfirmationSnackbar),
     REMOVE_OFFLINE(0, successMessage = R.plurals.fileListRemoveOfflineConfirmationSnackbar),

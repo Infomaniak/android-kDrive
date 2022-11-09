@@ -676,6 +676,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                     fileAdapter.notifyFileChanged(data as Int) { file -> if (!file.isManaged) file.isFavorite = true }
                 }
             }
+            BulkOperationType.MANAGE_CATEGORIES,
             BulkOperationType.COPY,
             BulkOperationType.COLOR_FOLDER,
             BulkOperationType.ADD_OFFLINE,
