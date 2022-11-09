@@ -25,6 +25,40 @@
     <include layout="@layout/view_bottom_sheet_separator" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/manageCategories"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/buttonHeight"
+        android:background="?selectableItemBackground"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <ImageView
+            android:id="@+id/manageCategoriesIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/marginStandard"
+            android:src="@drawable/ic_category"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            android:id="@+id/manageCategoriesText"
+            style="@style/Subtitle1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/marginStandardMedium"
+            android:layout_marginEnd="@dimen/marginStandard"
+            android:text="@string/manageCategoriesTitle"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/manageCategoriesIcon"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/addFavorites"
         android:layout_width="match_parent"
         android:layout_height="@dimen/buttonHeight"
