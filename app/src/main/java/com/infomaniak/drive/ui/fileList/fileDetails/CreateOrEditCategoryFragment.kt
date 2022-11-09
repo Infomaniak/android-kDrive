@@ -40,6 +40,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.drive.Category
+import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.fileDetails.CreateOrEditCategoryAdapter.Companion.COLORS
 import com.infomaniak.drive.utils.find
 import com.infomaniak.drive.utils.getScreenSizeInDp
@@ -56,7 +57,10 @@ class CreateOrEditCategoryFragment : Fragment() {
     private val navigationArgs: CreateOrEditCategoryFragmentArgs by navArgs()
 
     private val colorsAdapter: CreateOrEditCategoryAdapter by lazy { CreateOrEditCategoryAdapter() }
-    private lateinit var file: File
+    private val driveId: Int
+        get() = files.first().driveId
+
+    private lateinit var files: List<File>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         inflater.inflate(R.layout.fragment_create_or_edit_category, container, false)
@@ -64,11 +68,11 @@ class CreateOrEditCategoryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(navigationArgs) {
         super.onViewCreated(view, savedInstanceState)
 
-        file = FileController.getFileById(fileId) ?: run {
+        files = filesId?.map { fileId -> FileController.getFileById(fileId) }?.filterNotNull() ?: listOf()
+        if (files.isEmpty()) {
             findNavController().popBackStack()
             return@with
         }
-
         setCategoryName()
         configureColorsAdapter()
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
@@ -133,7 +137,7 @@ class CreateOrEditCategoryFragment : Fragment() {
 
     private fun createCategory() {
         createOrEditCategoryViewModel.createCategory(
-            driveId = file.driveId,
+            driveId = driveId,
             name = categoryNameValueInput.text.toString(),
             color = COLORS[colorsAdapter.selectedPosition],
         ).observe(viewLifecycleOwner) { apiResponse ->
@@ -149,7 +153,7 @@ class CreateOrEditCategoryFragment : Fragment() {
     }
 
     private fun addCategory(categoryId: Int) {
-        selectCategoriesViewModel.addCategory(file, categoryId)
+        selectCategoriesViewModel.addCategory(categoryId)
             .observe(viewLifecycleOwner) { apiResponse ->
                 with(apiResponse) {
                     if (isSuccess()) {
@@ -164,9 +168,9 @@ class CreateOrEditCategoryFragment : Fragment() {
 
     private fun editCategory(categoryId: Int) {
         createOrEditCategoryViewModel.editCategory(
-            driveId = file.driveId,
+            driveId = driveId,
             categoryId = categoryId,
-            name = categoryNameValueInput.text.toString().let { if (it.isEmpty()) null else it },
+            name = categoryNameValueInput.text.toString().let { it.ifEmpty { null } },
             color = COLORS[colorsAdapter.selectedPosition],
         ).observe(viewLifecycleOwner) { apiResponse ->
             with(apiResponse) {

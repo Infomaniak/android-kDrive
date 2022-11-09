@@ -21,9 +21,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileCategory
+import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.drive.Category
+import com.infomaniak.drive.data.models.drive.CategoryRights
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.find
 import com.infomaniak.lib.core.models.ApiResponse
@@ -32,29 +36,78 @@ import java.util.*
 
 class SelectCategoriesViewModel : ViewModel() {
 
-    fun addCategory(file: File, categoryId: Int): LiveData<ApiResponse<Unit>> {
-        return liveData(Dispatchers.IO) {
-            with(ApiRepository.addCategory(file, categoryId)) {
-                if (isSuccess()) {
-                    FileController.updateFile(file.id) {
-                        it.categories.add(FileCategory(categoryId, userId = AccountUtils.currentUserId, addedAt = Date()))
-                    }
-                }
-                emit(this)
+    lateinit var filesCategories: List<FileCategory>
+    lateinit var selectedFiles: List<File>
+    lateinit var selectedCategories: List<Category>
+    lateinit var categoryRights: CategoryRights
+
+    fun init(
+        usageMode: CategoriesUsageMode,
+        categories: IntArray?,
+        filesId: IntArray?,
+        userDrive: UserDrive,
+    ): LiveData<Boolean> = liveData(Dispatchers.IO) {
+
+        categoryRights = if (usageMode == CategoriesUsageMode.SELECTED_CATEGORIES) {
+            selectedCategories = DriveInfosController.getCategoriesFromIds(userDrive.driveId, categories?.toTypedArray() ?: emptyArray())
+            CategoryRights()
+        } else {
+            val files = filesId?.toList()?.mapNotNull { fileId -> FileController.getFileById(fileId, userDrive) } ?: emptyList()
+            if (files.isEmpty()) {
+                emit(false)
+                return@liveData
             }
+
+            selectedFiles = files
+            filesCategories = findCommonCategoriesOfFiles()
+
+            DriveInfosController.getCategoryRights(userDrive.driveId)
+        }
+
+        emit(true)
+    }
+
+    private fun findCommonCategoriesOfFiles(): List<FileCategory> {
+        fun File.getCategoriesMap() = categories.associateBy { it.categoryId }
+
+        var categoryIdsInCommon = selectedFiles.firstOrNull()?.getCategoriesMap() ?: return emptyList()
+
+        selectedFiles.forEachIndexed { index, file ->
+            if (index == 0) return@forEachIndexed
+            if (file.categories.isEmpty()) return emptyList()
+
+            val fileCategoryMap = file.getCategoriesMap()
+            categoryIdsInCommon = categoryIdsInCommon.filterKeys { fileCategoryMap.containsKey(it) }
+
+            if (categoryIdsInCommon.isEmpty()) return emptyList()
+        }
+
+        return categoryIdsInCommon.values.toList()
+    }
+
+    fun removeCategory(categoryId: Int) = liveData(Dispatchers.IO) {
+        val file = selectedFiles.first()
+
+        with(ApiRepository.removeCategory(file, categoryId)) {
+            if (isSuccess()) {
+                FileController.updateFile(file.id) { localFile ->
+                    localFile.categories.find(categoryId)?.deleteFromRealm()
+                }
+            }
+            emit(this)
         }
     }
 
-    fun removeCategory(file: File, categoryId: Int): LiveData<ApiResponse<Boolean>> {
-        return liveData(Dispatchers.IO) {
-            with(ApiRepository.removeCategory(file, categoryId)) {
-                if (isSuccess()) {
-                    FileController.updateFile(file.id) { localFile ->
-                        localFile.categories.find(categoryId)?.deleteFromRealm()
-                    }
+    fun addCategory(categoryId: Int): LiveData<ApiResponse<Unit>> = liveData(Dispatchers.IO) {
+        val file = selectedFiles.first()
+
+        with(ApiRepository.addCategory(file, categoryId)) {
+            if (isSuccess()) {
+                FileController.updateFile(file.id) {
+                    it.categories.add(FileCategory(categoryId, userId = AccountUtils.currentUserId, addedAt = Date()))
                 }
-                emit(this)
             }
+            emit(this)
         }
     }
 }

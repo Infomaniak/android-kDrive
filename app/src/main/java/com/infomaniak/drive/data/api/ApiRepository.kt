@@ -331,11 +331,11 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.fileCategory(file, categoryId), POST)
     }
 
-    fun addCategory(driveId: Int, categoryId: Int, fileIds: List<Int>) {
+    fun addCategory(driveId: Int, categoryId: Int, fileIds: List<Int>): ApiResponse<Unit> {
         return callApi(ApiRoutes.fileCategory(driveId, categoryId), POST, mapOf("file_ids" to fileIds))
     }
 
-    fun removeCategory(file: File, categoryId: Int): ApiResponse<Boolean> {
+    fun removeCategory(file: File, categoryId: Int): ApiResponse<Unit> {
         return callApi(ApiRoutes.fileCategory(file, categoryId), DELETE)
     }
 

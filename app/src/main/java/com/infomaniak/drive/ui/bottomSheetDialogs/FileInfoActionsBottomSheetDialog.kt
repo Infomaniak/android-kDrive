@@ -34,6 +34,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
@@ -43,6 +44,7 @@ import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_T
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.REFRESH_FAVORITE_FILE
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
+import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragmentArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntent
@@ -203,13 +205,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun manageCategoriesClicked(fileId: Int) {
-        safeNavigate(
-            FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToSelectCategoriesFragment(
-                fileId = fileId,
-                categoriesUsageMode = CategoriesUsageMode.MANAGED_CATEGORIES,
-                userDrive = navigationArgs.userDrive
-            )
-        )
+        openManageCategoriesBottomSheetDialog(intArrayOf(fileId), navigationArgs.userDrive)
     }
 
     override fun colorFolderClicked(color: String) {
@@ -370,6 +366,13 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     companion object {
+
+        fun Fragment.openManageCategoriesBottomSheetDialog(filesIds: IntArray, userDrive: UserDrive) {
+            val usageMode = CategoriesUsageMode.MANAGED_CATEGORIES
+            val args = SelectCategoriesFragmentArgs(usageMode, filesIds, userDrive)
+
+            safeNavigate(R.id.selectCategoriesFragment, args.toBundle())
+        }
 
         fun Fragment.openColorFolderBottomSheetDialog(color: String?) {
             if (AccountUtils.getCurrentDrive()?.pack == Drive.DrivePack.FREE.value) {
