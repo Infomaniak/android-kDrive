@@ -137,7 +137,7 @@ class MenuFragment : Fragment() {
                     .setPositiveButton(R.string.buttonConfirm) { _, _ ->
                         lifecycleScope.launch(Dispatchers.IO) {
                             if (UploadFile.getAppSyncSettings()?.userId == currentUser.id) UploadFile.deleteAllSyncFile()
-                            AccountUtils.removeUser(requireContext(), currentUser)
+                            AccountUtils.removeUserAndDeleteToken(requireContext(), currentUser)
                         }
                     }
                     .setNegativeButton(R.string.buttonCancel) { _, _ -> }

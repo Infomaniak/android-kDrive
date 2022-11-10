@@ -128,7 +128,7 @@ object AccountUtils : CredentialManager {
                 if (result != ApiResponse.Status.ERROR && data != null) {
                     handleDrivesData(context, fromMaintenance, fromCloudStorage, user, data as DriveInfo)
                 } else if (error?.code?.equals("no_drive") == true) {
-                    removeUser(context, user)
+                    removeUserAndDeleteToken(context, user)
                 }
             }
         }
@@ -195,7 +195,7 @@ object AccountUtils : CredentialManager {
         }
     }
 
-    suspend fun removeUser(context: Context, user: User) {
+    suspend fun removeUserAndDeleteToken(context: Context, user: User) {
         initInfomaniakLogin(context).deleteToken(
             KDriveHttpClient.getHttpClient(user.id),
             user.apiToken,
@@ -204,6 +204,10 @@ object AccountUtils : CredentialManager {
             },
         )
 
+        removeUser(context, user)
+    }
+
+    suspend fun removeUser(context: Context, user: User) {
         userDatabase.userDao().delete(user)
         FileController.deleteUserDriveFiles(user.id)
 
