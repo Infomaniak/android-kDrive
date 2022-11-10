@@ -195,23 +195,24 @@ object AccountUtils : CredentialManager {
         }
     }
 
-    suspend fun removeUser(context: Context, userRemoved: User) {
+    suspend fun removeUser(context: Context, user: User) {
         initInfomaniakLogin(context).deleteToken(
-            KDriveHttpClient.getHttpClient(userRemoved.id),
-            userRemoved.apiToken,
+            KDriveHttpClient.getHttpClient(user.id),
+            user.apiToken,
             onError = {
                 Log.e("deleteTokenError", "Api response error : ${LoginActivity.getLoginErrorDescription(context, it)}")
-            })
+            },
+        )
 
-        userDatabase.userDao().delete(userRemoved)
-        FileController.deleteUserDriveFiles(userRemoved.id)
+        userDatabase.userDao().delete(user)
+        FileController.deleteUserDriveFiles(user.id)
 
-        if (UploadFile.getAppSyncSettings()?.userId == userRemoved.id) {
+        if (UploadFile.getAppSyncSettings()?.userId == user.id) {
             Sentry.captureMessage(DISABLE_AUTO_SYNC)
             context.disableAutoSync()
         }
 
-        if (currentUserId == userRemoved.id) {
+        if (currentUserId == user.id) {
             requestCurrentUser()
             currentDriveId = -1
 
