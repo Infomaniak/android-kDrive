@@ -267,7 +267,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         categoryId: Int,
         files: List<File>,
         isAdding: Boolean,
-    ): LiveData<ApiResponse<Unit>> = liveData(Dispatchers.IO) {
+    ): LiveData<ApiResponse<*>> = liveData(Dispatchers.IO) {
         with(manageApiCategory(driveId, categoryId, files, isAdding)) {
             if (isSuccess()) {
                 files.forEach { file ->
@@ -290,12 +290,12 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         categoryId: Int,
         files: List<File>,
         isAdding: Boolean,
-    ): ApiResponse<Unit> {
+    ): ApiResponse<*> {
         return if (files.size == 1) {
             if (isAdding) {
-                ApiRepository.addCategory(files.single(), driveId)
+                ApiRepository.addCategory(files.single(), categoryId)
             } else {
-                ApiRepository.removeCategory(files.single(), driveId)
+                ApiRepository.removeCategory(files.single(), categoryId)
             }
         } else {
             val filesIds = files.map { it.id }
@@ -321,7 +321,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 //            }
 //        }
 
-    fun addCategory(file: File, categoryId: Int): LiveData<ApiResponse<Unit>> = liveData(Dispatchers.IO) {
+    fun addCategory(file: File, categoryId: Int): LiveData<ApiResponse<ShareableItems.FeedbackAccessResource<Int, Nothing>>> = liveData(Dispatchers.IO) {
         with(ApiRepository.addCategory(file, categoryId)) {
             if (isSuccess()) {
                 FileController.updateFile(file.id) {

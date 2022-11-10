@@ -327,19 +327,27 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.category(driveId, categoryId), DELETE)
     }
 
-    fun addCategory(file: File, categoryId: Int): ApiResponse<Unit> {
+    fun addCategory(file: File, categoryId: Int): ApiResponse<ShareableItems.FeedbackAccessResource<Int, Nothing>> {
         return callApi(ApiRoutes.fileCategory(file, categoryId), POST)
     }
 
-    fun addCategory(driveId: Int, categoryId: Int, fileIds: List<Int>): ApiResponse<Unit> {
+    fun addCategory(
+        driveId: Int,
+        categoryId: Int,
+        fileIds: List<Int>
+    ): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Nothing>>> {
         return callApi(ApiRoutes.fileCategory(driveId, categoryId), POST, mapOf("file_ids" to fileIds))
     }
 
-    fun removeCategory(file: File, categoryId: Int): ApiResponse<Unit> {
+    fun removeCategory(file: File, categoryId: Int): ApiResponse<Boolean> {
         return callApi(ApiRoutes.fileCategory(file, categoryId), DELETE)
     }
 
-    fun removeCategory(driveId: Int, categoryId: Int, fileIds: List<Int>): ApiResponse<Unit> {
+    fun removeCategory(
+        driveId: Int,
+        categoryId: Int,
+        fileIds: List<Int>
+    ): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Nothing>>> {
         return callApi(ApiRoutes.fileCategory(driveId, categoryId), DELETE, mapOf("file_ids" to fileIds))
     }
 
