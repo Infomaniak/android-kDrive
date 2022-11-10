@@ -34,6 +34,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.data.services.MqttClientWrapper
+import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.auth.CredentialManager
@@ -45,6 +46,7 @@ import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.room.UserDatabase
 import com.infomaniak.lib.login.ApiToken
+import com.infomaniak.lib.login.InfomaniakLogin
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -194,6 +196,13 @@ object AccountUtils : CredentialManager {
     }
 
     suspend fun removeUser(context: Context, userRemoved: User) {
+        initInfomaniakLogin(context).deleteToken(
+            KDriveHttpClient.getHttpClient(userRemoved.id),
+            userRemoved.apiToken,
+            onError = {
+                Log.e("deleteTokenError", "Api response error : ${LoginActivity.getLoginErrorDescription(context, it)}")
+            })
+
         userDatabase.userDao().delete(userRemoved)
         FileController.deleteUserDriveFiles(userRemoved.id)
 
@@ -301,4 +310,8 @@ object AccountUtils : CredentialManager {
     }
 
     fun isEnableAppSync(): Boolean = UploadFile.getAppSyncSettings() != null
+
+    fun initInfomaniakLogin(context: Context): InfomaniakLogin {
+        return InfomaniakLogin(context, appUID = BuildConfig.APPLICATION_ID, clientID = BuildConfig.CLIENT_ID)
+    }
 }
