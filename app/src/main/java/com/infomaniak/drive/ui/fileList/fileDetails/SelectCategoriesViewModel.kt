@@ -20,7 +20,6 @@ package com.infomaniak.drive.ui.fileList.fileDetails
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
-import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
@@ -28,11 +27,7 @@ import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.CategoryRights
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.find
-import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.coroutines.Dispatchers
-import java.util.*
 
 class SelectCategoriesViewModel : ViewModel() {
 
@@ -83,31 +78,5 @@ class SelectCategoriesViewModel : ViewModel() {
         }
 
         return categoryIdsInCommon.values.toList()
-    }
-
-    fun removeCategory(categoryId: Int) = liveData(Dispatchers.IO) {
-        val file = selectedFiles.first()
-
-        with(ApiRepository.removeCategory(file, categoryId)) {
-            if (isSuccess()) {
-                FileController.updateFile(file.id) { localFile ->
-                    localFile.categories.find(categoryId)?.deleteFromRealm()
-                }
-            }
-            emit(this)
-        }
-    }
-
-    fun addCategory(categoryId: Int): LiveData<ApiResponse<Unit>> = liveData(Dispatchers.IO) {
-        val file = selectedFiles.first()
-
-        with(ApiRepository.addCategory(file, categoryId)) {
-            if (isSuccess()) {
-                FileController.updateFile(file.id) {
-                    it.categories.add(FileCategory(categoryId, userId = AccountUtils.currentUserId, addedAt = Date()))
-                }
-            }
-            emit(this)
-        }
     }
 }

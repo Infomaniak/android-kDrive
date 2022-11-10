@@ -25,6 +25,7 @@ import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
@@ -52,6 +53,7 @@ import kotlin.math.max
 
 class CreateOrEditCategoryFragment : Fragment() {
 
+    private val mainViewModel: MainViewModel by activityViewModels()
     private val createOrEditCategoryViewModel: CreateOrEditCategoryViewModel by viewModels()
     private val selectCategoriesViewModel: SelectCategoriesViewModel by viewModels()
     private val navigationArgs: CreateOrEditCategoryFragmentArgs by navArgs()
@@ -153,17 +155,16 @@ class CreateOrEditCategoryFragment : Fragment() {
     }
 
     private fun addCategory(categoryId: Int) {
-        selectCategoriesViewModel.addCategory(categoryId)
-            .observe(viewLifecycleOwner) { apiResponse ->
-                with(apiResponse) {
-                    if (isSuccess()) {
-                        findNavController().popBackStack()
-                    } else {
-                        saveButton.hideProgress(R.string.buttonSave)
-                        SnackbarUtils.showSnackbar(requireView(), translateError())
-                    }
+        mainViewModel.manageCategory(driveId, categoryId, files, true).observe(viewLifecycleOwner) { apiResponse ->
+            with(apiResponse) {
+                if (isSuccess()) {
+                    findNavController().popBackStack()
+                } else {
+                    saveButton.hideProgress(R.string.buttonSave)
+                    SnackbarUtils.showSnackbar(requireView(), translateError())
                 }
             }
+        }
     }
 
     private fun editCategory(categoryId: Int) {

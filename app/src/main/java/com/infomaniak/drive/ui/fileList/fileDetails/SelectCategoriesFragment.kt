@@ -27,6 +27,7 @@ import androidx.core.text.HtmlCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -35,6 +36,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.drive.Category
+import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.SelectedState
@@ -52,6 +54,7 @@ import java.util.*
 
 class SelectCategoriesFragment : Fragment() {
 
+    private val mainViewModel: MainViewModel by activityViewModels()
     private val selectCategoriesViewModel: SelectCategoriesViewModel by viewModels()
     private val navigationArgs: SelectCategoriesFragmentArgs by navArgs()
 
@@ -87,7 +90,7 @@ class SelectCategoriesFragment : Fragment() {
 
     private fun setCategoriesAdapter(canEditCategory: Boolean, canDeleteCategory: Boolean) {
         categoriesAdapter = CategoriesAdapter(
-            onCategoryChanged = { id, isSelected -> if (isSelected) addCategory(id) else removeCategory(id) }
+            onCategoryChanged = { id, isSelected -> manageCategory(id, isSelected) }
         ).apply {
             this.canEditCategory = canEditCategory
             this.canDeleteCategory = canDeleteCategory
@@ -242,29 +245,52 @@ class SelectCategoriesFragment : Fragment() {
         createCategoryRowSeparator.isVisible = isVisible && categoriesAdapter.filteredCategories.isNotEmpty()
     }
 
-    private fun addCategory(id: Int) {
-        trackCategoriesEvent("assign")
+//    private fun addCategory(id: Int) {
+//        trackCategoriesEvent("assign")
+//        if (usageMode == SELECTED_CATEGORIES) {
+//            categoriesAdapter.selectCategory(id, true, usageMode)
+//            return
+//        }
+//
+//        mainViewModel.addCategory(
+//            selectCategoriesViewModel.selectedFiles.first().driveId,
+//            id,
+//            selectCategoriesViewModel.selectedFiles.map { it.id })
+//            .observe(viewLifecycleOwner) { apiResponse ->
+//                updateAdapterAfterAddingOrRemovingCategory(id, apiResponse, true)
+//            }
+//    }
+
+    private fun manageCategory(categoryId: Int, isAdding: Boolean) {
+        trackCategoriesEvent(if (isAdding) "assign" else "remove")
         if (usageMode == SELECTED_CATEGORIES) {
-            categoriesAdapter.selectCategory(id, true, usageMode)
+            categoriesAdapter.selectCategory(categoryId, isAdding, usageMode)
             return
         }
 
-        selectCategoriesViewModel.addCategory(id).observe(viewLifecycleOwner) { apiResponse ->
-            updateAdapterAfterAddingOrRemovingCategory(id, apiResponse, true)
+        with(selectCategoriesViewModel.selectedFiles) {
+            val driveId = first().driveId
+
+            mainViewModel.manageCategory(driveId, categoryId, this, isAdding).observe(viewLifecycleOwner) { apiResponse ->
+                updateAdapterAfterAddingOrRemovingCategory(categoryId, apiResponse, isAdding)
+            }
         }
     }
-
-    private fun removeCategory(id: Int) {
-        trackCategoriesEvent("remove")
-        if (usageMode == SELECTED_CATEGORIES) {
-            categoriesAdapter.selectCategory(id, false, usageMode)
-            return
-        }
-
-        selectCategoriesViewModel.removeCategory(id).observe(viewLifecycleOwner) { apiResponse ->
-            updateAdapterAfterAddingOrRemovingCategory(id, apiResponse, false)
-        }
-    }
+//
+//    private fun removeCategory(id: Int) {
+//        trackCategoriesEvent("remove")
+//        if (usageMode == SELECTED_CATEGORIES) {
+//            categoriesAdapter.selectCategory(id, false, usageMode)
+//            return
+//        }
+//
+//        mainViewModel.removeCategory(
+//            selectCategoriesViewModel.selectedFiles.first().driveId,
+//            id,
+//            selectCategoriesViewModel.selectedFiles.map { it.id }).observe(viewLifecycleOwner) { apiResponse ->
+//            updateAdapterAfterAddingOrRemovingCategory(id, apiResponse, false)
+//        }
+//    }
 
     private fun updateAdapterAfterAddingOrRemovingCategory(id: Int, apiResponse: ApiResponse<*>, isAdding: Boolean) {
         val isSelected = if (apiResponse.isSuccess()) {
