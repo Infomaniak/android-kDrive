@@ -321,14 +321,16 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 //            }
 //        }
 
-    fun addCategory(file: File, categoryId: Int): LiveData<ApiResponse<ShareableItems.FeedbackAccessResource<Int, Nothing>>> = liveData(Dispatchers.IO) {
-        with(ApiRepository.addCategory(file, categoryId)) {
-            if (isSuccess()) {
-                FileController.updateFile(file.id) {
-                    it.categories.add(FileCategory(categoryId, userId = AccountUtils.currentUserId, addedAt = Date()))
+    fun addCategory(file: File, categoryId: Int): LiveData<ApiResponse<ShareableItems.FeedbackAccessResource<Int, Nothing>>> {
+        return liveData(Dispatchers.IO) {
+            with(ApiRepository.addCategory(file, categoryId)) {
+                if (isSuccess()) {
+                    FileController.updateFile(file.id) {
+                        it.categories.add(FileCategory(categoryId, userId = AccountUtils.currentUserId, addedAt = Date()))
+                    }
                 }
+                emit(this)
             }
-            emit(this)
         }
     }
 
