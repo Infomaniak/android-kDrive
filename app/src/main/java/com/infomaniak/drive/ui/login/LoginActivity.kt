@@ -95,11 +95,12 @@ class LoginActivity : AppCompatActivity() {
                     signInButton.isInvisible = !showConnectButton
                 }
             })
+
+            nextButton.setOnClickListener { currentItem++ }
         }
 
-        dotsIndicator.setViewPager2(introViewpager)
+        dotsIndicator.attachTo(introViewpager)
 
-        nextButton.setOnClickListener { introViewpager.currentItem = introViewpager.currentItem + 1 }
 
         connectButton.apply {
             initProgress(this@LoginActivity)
