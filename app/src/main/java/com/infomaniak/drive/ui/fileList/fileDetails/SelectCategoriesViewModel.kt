@@ -47,13 +47,12 @@ class SelectCategoriesViewModel : ViewModel() {
             selectedCategories = DriveInfosController.getCategoriesFromIds(userDrive.driveId, categories?.toTypedArray() ?: emptyArray())
             CategoryRights()
         } else {
-            val files = filesId?.toList()?.mapNotNull { fileId -> FileController.getFileById(fileId, userDrive) } ?: emptyList()
-            if (files.isEmpty()) {
+            selectedFiles = filesId?.toList()?.mapNotNull { fileId -> FileController.getFileById(fileId, userDrive) } ?: emptyList()
+            if (selectedFiles.isEmpty()) {
                 emit(false)
                 return@liveData
             }
 
-            selectedFiles = files
             filesCategories = findCommonCategoriesOfFiles()
 
             DriveInfosController.getCategoryRights(userDrive.driveId)
