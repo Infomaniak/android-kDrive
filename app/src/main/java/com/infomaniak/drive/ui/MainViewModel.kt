@@ -285,79 +285,24 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    private fun manageApiCategory(
-        driveId: Int,
-        categoryId: Int,
-        files: List<File>,
-        isAdding: Boolean,
-    ): ApiResponse<*> {
-        return if (files.size == 1) {
-            if (isAdding) {
-                ApiRepository.addCategory(files.single(), categoryId)
-            } else {
-                ApiRepository.removeCategory(files.single(), categoryId)
-            }
-        } else {
-            val filesIds = files.map { it.id }
-
-            if (isAdding) {
-                ApiRepository.addCategory(driveId, categoryId, filesIds)
-            } else {
-                ApiRepository.removeCategory(driveId, categoryId, filesIds)
-            }
-        }
+    private fun manageApiCategory(driveId: Int, categoryId: Int, files: List<File>, isAdding: Boolean) = if (files.size == 1) {
+        manageCategoryOnOneFile(files.single(), categoryId, isAdding)
+    } else {
+        manageCategoryOnFiles(driveId, categoryId, files.map { it.id }, isAdding)
     }
 
-//        fun addCategory(driveId: Int, categoryId: Int, filesId: List<Int>): LiveData<ApiResponse<Unit>> = liveData(Dispatchers.IO) {
-//            with(ApiRepository.addCategory(driveId, categoryId, filesId)) {
-//                if (isSuccess()) {
-//                    filesId.forEach { fileId ->
-//                        FileController.updateFile(fileId) {
-//                            it.categories.add(FileCategory(categoryId, userId = AccountUtils.currentUserId, addedAt = Date()))
-//                        }
-//                    }
-//                }
-//                emit(this)
-//            }
-//        }
-
-    fun addCategory(file: File, categoryId: Int): LiveData<ApiResponse<ShareableItems.FeedbackAccessResource<Int, Nothing>>> {
-        return liveData(Dispatchers.IO) {
-            with(ApiRepository.addCategory(file, categoryId)) {
-                if (isSuccess()) {
-                    FileController.updateFile(file.id) {
-                        it.categories.add(FileCategory(categoryId, userId = AccountUtils.currentUserId, addedAt = Date()))
-                    }
-                }
-                emit(this)
-            }
-        }
+    // TODO: Change the return type to feedbackResource when removeCategory will be changed in prod
+    private fun manageCategoryOnOneFile(file: File, categoryId: Int, isAdding: Boolean) = if (isAdding) {
+        ApiRepository.addCategory(file, categoryId)
+    } else {
+        ApiRepository.removeCategory(file, categoryId)
     }
 
-//    fun removeCategory(driveId: Int, categoryId: Int, filesId: List<Int>) = liveData(Dispatchers.IO) {
-//        with(ApiRepository.removeCategory(driveId, categoryId, filesId)) {
-//            if (isSuccess()) {
-//                filesId.forEach { fileId ->
-//                    FileController.updateFile(fileId) { localFile ->
-//                        localFile.categories.find(categoryId)?.deleteFromRealm()
-//                    }
-//                }
-//            }
-//            emit(this)
-//        }
-//    }
-//
-//    // TODO remove ?
-//    fun removeCategory(file: File, categoryId: Int) = liveData(Dispatchers.IO) {
-//        with(ApiRepository.removeCategory(file, categoryId)) {
-//            if (isSuccess()) {
-//                FileController.updateFile(file.id) { localFile ->
-//                    localFile.categories.find(categoryId)?.deleteFromRealm()
-//                }
-//            }
-//            emit(this)
-//        }
-//    }
+    private fun manageCategoryOnFiles(driveId: Int, categoryId: Int, filesIds: List<Int>, isAdding: Boolean) = if (isAdding) {
+        ApiRepository.addCategory(driveId, categoryId, filesIds)
+    } else {
+        ApiRepository.removeCategory(driveId, categoryId, filesIds)
+    }
 
     fun deleteFile(file: File, userDrive: UserDrive? = null, onSuccess: ((fileId: Int) -> Unit)? = null) =
         liveData(Dispatchers.IO) {

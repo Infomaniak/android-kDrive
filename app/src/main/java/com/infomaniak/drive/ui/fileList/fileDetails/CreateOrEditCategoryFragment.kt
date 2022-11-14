@@ -55,7 +55,6 @@ class CreateOrEditCategoryFragment : Fragment() {
 
     private val mainViewModel: MainViewModel by activityViewModels()
     private val createOrEditCategoryViewModel: CreateOrEditCategoryViewModel by viewModels()
-    private val selectCategoriesViewModel: SelectCategoriesViewModel by viewModels()
     private val navigationArgs: CreateOrEditCategoryFragmentArgs by navArgs()
 
     private val colorsAdapter: CreateOrEditCategoryAdapter by lazy { CreateOrEditCategoryAdapter() }
