@@ -117,7 +117,7 @@ open class CreateFolderFragment : Fragment() {
         createFolderButton.showProgress()
         newFolderViewModel.currentFolderId.value?.let { parentId ->
             newFolderViewModel.createFolder(
-                folderNameValueInput.text.toString(),
+                folderNameValueInput.text.toString().trim(),
                 parentId,
                 onlyForMe = onlyForMe
             ).observe(viewLifecycleOwner) { apiResponse ->
