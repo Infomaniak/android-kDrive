@@ -24,44 +24,38 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.utils.find
-import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.coroutines.Dispatchers
 
 class CreateOrEditCategoryViewModel : ViewModel() {
-    val driveId: Int
-        get() = selectedFiles.firstOrNull()?.driveId ?: -1
-
     lateinit var selectedFiles: List<File>
+
+    val driveId: Int
+        get() = selectedFiles.first().driveId
 
     fun init(filesId: IntArray?): LiveData<Boolean> = liveData(Dispatchers.IO) {
         selectedFiles = filesId?.toList()?.mapNotNull { fileId -> FileController.getFileById(fileId) } ?: emptyList()
         if (selectedFiles.isEmpty()) emit(true)
     }
 
-    fun createCategory(driveId: Int, name: String, color: String): LiveData<ApiResponse<Category>> {
-        return liveData(Dispatchers.IO) {
-            with(ApiRepository.createCategory(driveId, name, color)) {
-                if (isSuccess()) DriveInfosController.updateDrive { it.categories.add(data) }
-                emit(this)
-            }
+    fun createCategory(name: String, color: String) = liveData(Dispatchers.IO) {
+        with(ApiRepository.createCategory(driveId, name, color)) {
+            if (isSuccess()) DriveInfosController.updateDrive { it.categories.add(data) }
+            emit(this)
         }
     }
 
-    fun editCategory(driveId: Int, categoryId: Int, name: String?, color: String): LiveData<ApiResponse<Category>> {
-        return liveData(Dispatchers.IO) {
-            with(ApiRepository.editCategory(driveId, categoryId, name, color)) {
-                if (isSuccess()) {
-                    DriveInfosController.updateDrive { localDrive ->
-                        localDrive.categories.apply {
-                            find(categoryId)?.deleteFromRealm()
-                            add(data)
-                        }
+    fun editCategory(categoryId: Int, name: String?, color: String) = liveData(Dispatchers.IO) {
+        with(ApiRepository.editCategory(driveId, categoryId, name, color)) {
+            if (isSuccess()) {
+                DriveInfosController.updateDrive { localDrive ->
+                    localDrive.categories.apply {
+                        find(categoryId)?.deleteFromRealm()
+                        add(data)
                     }
                 }
-                emit(this)
             }
+            emit(this)
         }
     }
 }

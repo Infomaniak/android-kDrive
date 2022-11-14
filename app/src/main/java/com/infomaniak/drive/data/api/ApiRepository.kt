@@ -331,12 +331,9 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.fileCategory(file, categoryId), POST)
     }
 
-    fun addCategory(
-        driveId: Int,
-        categoryId: Int,
-        fileIds: List<Int>
-    ): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Nothing>>> {
-        return callApi(ApiRoutes.fileCategory(driveId, categoryId), POST, mapOf("file_ids" to fileIds))
+    fun addCategory(categoryId: Int, files: List<File>): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Nothing>>> {
+        val driveId = files.first().driveId
+        return callApi(ApiRoutes.fileCategory(driveId, categoryId), POST, mapOf("file_ids" to files.map { it.id }))
     }
 
     fun removeCategory(file: File, categoryId: Int): ApiResponse<Boolean> {
@@ -344,11 +341,11 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun removeCategory(
-        driveId: Int,
         categoryId: Int,
-        fileIds: List<Int>
+        files: List<File>,
     ): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Nothing>>> {
-        return callApi(ApiRoutes.fileCategory(driveId, categoryId), DELETE, mapOf("file_ids" to fileIds))
+        val driveId = files.first().driveId
+        return callApi(ApiRoutes.fileCategory(driveId, categoryId), DELETE, mapOf("file_ids" to files.map { it.id }))
     }
 
     fun getLastActivities(driveId: Int, page: Int): ApiResponse<ArrayList<FileActivity>> {

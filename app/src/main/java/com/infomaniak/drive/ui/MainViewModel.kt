@@ -262,16 +262,11 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         emit(FileController.updateFolderColor(file, color))
     }
 
-    fun manageCategory(
-        driveId: Int,
-        categoryId: Int,
-        files: List<File>,
-        isAdding: Boolean,
-    ): LiveData<ApiResponse<*>> = liveData(Dispatchers.IO) {
-        with(manageApiCategory(driveId, categoryId, files, isAdding)) {
-            if (isSuccess()) {
-                files.forEach { file ->
-                    FileController.updateFile(file.id) {
+    fun manageCategory(categoryId: Int, files: List<File>, isAdding: Boolean) = liveData(Dispatchers.IO) {
+        with(manageCategoryApiCall(categoryId, files, isAdding)) {
+            data?.forEach { feedbackResource ->
+                if (feedbackResource.result) {
+                    FileController.updateFile(feedbackResource.id) {
                         if (isAdding) {
                             it.categories.add(FileCategory(categoryId, userId = AccountUtils.currentUserId, addedAt = Date()))
                         } else {
@@ -285,23 +280,10 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    private fun manageApiCategory(driveId: Int, categoryId: Int, files: List<File>, isAdding: Boolean) = if (files.size == 1) {
-        manageCategoryOnOneFile(files.single(), categoryId, isAdding)
+    private fun manageCategoryApiCall(categoryId: Int, files: List<File>, isAdding: Boolean) = if (isAdding) {
+        ApiRepository.addCategory(categoryId, files)
     } else {
-        manageCategoryOnFiles(driveId, categoryId, files.map { it.id }, isAdding)
-    }
-
-    // TODO: Change the return type to feedbackResource when removeCategory will be changed in prod
-    private fun manageCategoryOnOneFile(file: File, categoryId: Int, isAdding: Boolean) = if (isAdding) {
-        ApiRepository.addCategory(file, categoryId)
-    } else {
-        ApiRepository.removeCategory(file, categoryId)
-    }
-
-    private fun manageCategoryOnFiles(driveId: Int, categoryId: Int, filesIds: List<Int>, isAdding: Boolean) = if (isAdding) {
-        ApiRepository.addCategory(driveId, categoryId, filesIds)
-    } else {
-        ApiRepository.removeCategory(driveId, categoryId, filesIds)
+        ApiRepository.removeCategory(categoryId, files)
     }
 
     fun deleteFile(file: File, userDrive: UserDrive? = null, onSuccess: ((fileId: Int) -> Unit)? = null) =

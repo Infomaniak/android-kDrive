@@ -123,7 +123,6 @@ class CreateOrEditCategoryFragment : Fragment() {
 
     private fun createCategory() = with(createOrEditCategoryViewModel) {
         createCategory(
-            driveId = driveId,
             name = categoryNameValueInput.text.toString(),
             color = COLORS[colorsAdapter.selectedPosition],
         ).observe(viewLifecycleOwner) { apiResponse ->
@@ -139,7 +138,7 @@ class CreateOrEditCategoryFragment : Fragment() {
     }
 
     private fun addCategory(categoryId: Int) = with(createOrEditCategoryViewModel) {
-        mainViewModel.manageCategory(driveId, categoryId, selectedFiles, true).observe(viewLifecycleOwner) { apiResponse ->
+        mainViewModel.manageCategory(categoryId, selectedFiles, true).observe(viewLifecycleOwner) { apiResponse ->
             with(apiResponse) {
                 if (isSuccess()) {
                     findNavController().popBackStack()
@@ -153,7 +152,6 @@ class CreateOrEditCategoryFragment : Fragment() {
 
     private fun editCategory(categoryId: Int) = with(createOrEditCategoryViewModel) {
         editCategory(
-            driveId = driveId,
             categoryId = categoryId,
             name = categoryNameValueInput.text.toString().let { it.ifEmpty { null } },
             color = COLORS[colorsAdapter.selectedPosition],
