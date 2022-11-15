@@ -60,6 +60,7 @@ import com.google.android.material.shape.CornerFamily
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -81,6 +82,7 @@ import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.lib.login.InfomaniakLogin
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.item_file.view.*
@@ -488,3 +490,7 @@ fun Activity.getAdjustedColumnNumber(expectedItemSize: Int, minColumns: Int = 2,
 }
 
 fun <T> ApiResponse<ArrayList<T>>.isLastPage() = (data?.size ?: 0) < itemsPerPage
+
+fun Context.getInfomaniakLogin(): InfomaniakLogin {
+    return InfomaniakLogin(this, appUID = BuildConfig.APPLICATION_ID, clientID = BuildConfig.CLIENT_ID)
+}

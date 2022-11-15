@@ -37,6 +37,7 @@ import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.getInfomaniakLogin
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.models.ApiResponse
@@ -82,7 +83,7 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        infomaniakLogin = AccountUtils.initInfomaniakLogin(this)
+        infomaniakLogin = getInfomaniakLogin()
 
         introViewpager.apply {
             adapter = IntroPagerAdapter(supportFragmentManager, lifecycle)
@@ -95,12 +96,11 @@ class LoginActivity : AppCompatActivity() {
                     signInButton.isInvisible = !showConnectButton
                 }
             })
-
-            nextButton.setOnClickListener { currentItem++ }
         }
 
-        dotsIndicator.attachTo(introViewpager)
+        dotsIndicator.setViewPager2(introViewpager)
 
+        nextButton.setOnClickListener { introViewpager.currentItem = introViewpager.currentItem + 1 }
 
         connectButton.apply {
             initProgress(this@LoginActivity)

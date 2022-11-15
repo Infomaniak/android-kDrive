@@ -46,13 +46,9 @@ import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.room.UserDatabase
 import com.infomaniak.lib.login.ApiToken
-import com.infomaniak.lib.login.InfomaniakLogin
 import io.sentry.Sentry
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 
@@ -196,13 +192,15 @@ object AccountUtils : CredentialManager {
     }
 
     suspend fun removeUserAndDeleteToken(context: Context, user: User) {
-        initInfomaniakLogin(context).deleteToken(
-            KDriveHttpClient.getHttpClient(user.id),
-            user.apiToken,
-            onError = {
-                Log.e("deleteTokenError", "Api response error : ${LoginActivity.getLoginErrorDescription(context, it)}")
-            },
-        )
+        CoroutineScope(Dispatchers.IO).launch {
+            context.getInfomaniakLogin().deleteToken(
+                HttpClient.okHttpClientNoInterceptor,
+                user.apiToken,
+                onError = {
+                    Log.e("deleteTokenError", "Api response error : ${LoginActivity.getLoginErrorDescription(context, it)}")
+                }
+            )
+        }
 
         removeUser(context, user)
     }
@@ -315,8 +313,4 @@ object AccountUtils : CredentialManager {
     }
 
     fun isEnableAppSync(): Boolean = UploadFile.getAppSyncSettings() != null
-
-    fun initInfomaniakLogin(context: Context): InfomaniakLogin {
-        return InfomaniakLogin(context, appUID = BuildConfig.APPLICATION_ID, clientID = BuildConfig.CLIENT_ID)
-    }
 }
