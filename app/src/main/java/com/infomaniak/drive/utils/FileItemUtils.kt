@@ -161,7 +161,7 @@ private fun Context.getTintedDrawable(viewHolder: FileViewHolder?, icon: Int, ti
 }
 
 private fun View.displayCategories(file: File) {
-    val canReadCategoryOnFile = DriveInfosController.getCategoryRights().canReadCategoryOnFile
+    val canReadCategoryOnFile = DriveInfosController.getCategoryRights(file.driveId).canReadCategoryOnFile
     val categories = file.getCategories()
 
     (categoriesLayout as LinearLayout).apply {
