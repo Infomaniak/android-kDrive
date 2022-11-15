@@ -74,11 +74,17 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
 
     protected open fun configureManageCategories(areIndividualActionsVisible: Boolean) {
         if (areIndividualActionsVisible) {
+            disabledManageCategories.isGone = computeManageCategoriesAvailability()
             manageCategories.apply {
                 setOnClickListener { onActionSelected(SelectDialogAction.MANAGE_CATEGORIES) }
                 isVisible = true
             }
         }
+    }
+
+    private fun computeManageCategoriesAvailability() = navigationArgs.fileIds.any {
+        val file = FileController.getFileProxyById(fileId = it, customRealm = mainViewModel.realm)
+        file?.isDisabled() == false
     }
 
     protected open fun configureAddFavorites(areIndividualActionsVisible: Boolean) {
