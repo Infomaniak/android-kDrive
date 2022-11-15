@@ -36,6 +36,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.data.models.ShareLink
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.utils.*
@@ -130,7 +131,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         getBackNavigationResult<List<Int>>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) { ids ->
             fileDetailsViewModel.currentFile.value?.let {
                 file = it
-                setupCategoriesContainer(DriveInfosController.getCurrentDriveCategoriesFromIds(ids.toTypedArray()))
+                setupCategoriesContainer(DriveInfosController.getCategoriesFromIds(file.driveId, ids.toTypedArray()))
             }
         }
     }
@@ -249,7 +250,8 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         runCatching {
             findNavController().navigate(
                 FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectCategoriesFragment(
-                    fileId = fileId, categoriesUsageMode = CategoriesUsageMode.MANAGED_CATEGORIES
+                    fileId = fileId, categoriesUsageMode = CategoriesUsageMode.MANAGED_CATEGORIES,
+                    userDrive = UserDrive(driveId = file.driveId)
                 )
             )
         }

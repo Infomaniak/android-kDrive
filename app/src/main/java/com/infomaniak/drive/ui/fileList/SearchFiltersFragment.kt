@@ -138,7 +138,7 @@ class SearchFiltersFragment : Fragment() {
                 categories = null
                 categoriesOwnership = null
             } else {
-                categories = DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray())
+                categories = DriveInfosController.getCategoriesFromIds(categoriesIds = it.toTypedArray())
                 if (categoriesOwnership == null) categoriesOwnership = SearchCategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES
             }
             updateCategoriesUi()
