@@ -53,14 +53,13 @@ object DriveInfosController {
         add(drive)
     }
 
-    private fun getDrivesQuery(
-        realm: Realm,
+    private fun Realm.getDrivesQuery(
         userId: Int?,
         driveId: Int?,
-        sharedWithMe: Boolean?,
-        maintenance: Boolean?
+        sharedWithMe: Boolean? = null,
+        maintenance: Boolean? = null
     ): RealmQuery<Drive> {
-        return realm.where(Drive::class.java)
+        return where(Drive::class.java)
             .sort(Drive::id.name, Sort.ASCENDING)
             .apply {
                 userId?.let { equalTo(Drive::userId.name, it) }
@@ -102,7 +101,7 @@ object DriveInfosController {
 
     fun updateDrive(transaction: (drive: Drive) -> Unit) {
         getRealmInstance().use { realm ->
-            getCurrentDrive(realm)?.let { drive -> realm.executeTransaction { if (drive.isValid) transaction(drive) } }
+            realm.getCurrentDrive()?.let { drive -> realm.executeTransaction { if (drive.isValid) transaction(drive) } }
         }
     }
 
@@ -124,7 +123,7 @@ object DriveInfosController {
         maintenance: Boolean? = null
     ): ArrayList<Drive> {
         return getRealmInstance().use { realm ->
-            val driveList = realm.copyFromRealm(getDrivesQuery(realm, userId, driveId, sharedWithMe, maintenance).findAll(), 1)
+            val driveList = realm.copyFromRealm(realm.getDrivesQuery(userId, driveId, sharedWithMe, maintenance).findAll(), 1)
             driveList?.let { ArrayList(it) } ?: ArrayList()
         }
     }
@@ -136,9 +135,7 @@ object DriveInfosController {
         maintenance: Boolean? = null
     ): Drive? {
         return getRealmInstance().use { realm ->
-            realm.copyFromRealm(
-                getDrivesQuery(realm, userId, driveId, sharedWithMe, maintenance).findAll(), 1
-            ).firstOrNull()
+            realm.getDrivesQuery(userId, driveId, sharedWithMe, maintenance).findFirst()?.let { realm.copyFromRealm(it, 1) }
         }
     }
 
@@ -147,7 +144,7 @@ object DriveInfosController {
         driveId: Int? = null,
         sharedWithMe: Boolean? = false,
         maintenance: Boolean? = null
-    ) = getRealmInstance().use { getDrivesQuery(it, userId, driveId, sharedWithMe, maintenance).count() }
+    ) = getRealmInstance().use { it.getDrivesQuery(userId, driveId, sharedWithMe, maintenance).count() }
 
     fun hasSingleDrive(userId: Int): Boolean = getDrivesCount(userId) == 1L
 
@@ -165,7 +162,7 @@ object DriveInfosController {
 
     fun getCurrentDriveCategories(): List<Category> {
         val categories = getRealmInstance().use { realm ->
-            getCurrentDrive(realm)?.categories?.let {
+            realm.getCurrentDrive()?.categories?.let {
                 val categories = it.where()
                     .sort(Category::userUsageCount.name, Sort.DESCENDING)
                     .findAll()
@@ -180,7 +177,7 @@ object DriveInfosController {
         if (categoriesIds.isEmpty()) return emptyList()
 
         val categories = getRealmInstance().use { realm ->
-            getCurrentDrive(realm)?.categories?.let {
+            realm.getCurrentDrive()?.categories?.let {
                 val categories = it.where()
                     .oneOf(Category::id.name, categoriesIds)
                     .findAll()
@@ -193,19 +190,15 @@ object DriveInfosController {
             .let { orderList -> categories.sortedBy { orderList[it.id] } }
     }
 
-    fun getCategoryRights(): CategoryRights {
+    fun getCategoryRights(driveId: Int = AccountUtils.currentDriveId): CategoryRights {
         return getRealmInstance().use { realm ->
-            getCurrentDrive(realm)?.categoryRights?.let { realm.copyFromRealm(it, 0) }
+            realm.getDrivesQuery(AccountUtils.currentUserId, driveId).findFirst()?.let { drive ->
+                drive.categoryRights.let { realm.copyFromRealm(it, 0) }
+            }
         } ?: CategoryRights()
     }
 
-    private fun getCurrentDrive(customRealm: Realm? = null): Drive? {
-        val block: (Realm) -> Drive? = { realm ->
-            realm.where(Drive::class.java)
-                .equalTo(Drive::userId.name, AccountUtils.currentUserId)
-                .equalTo(Drive::id.name, AccountUtils.currentDriveId)
-                .findFirst()
-        }
-        return customRealm?.let(block) ?: getRealmInstance().use(block)
+    private fun Realm.getCurrentDrive(): Drive? {
+        return getDrivesQuery(AccountUtils.currentUserId, AccountUtils.currentDriveId).findFirst()
     }
 }

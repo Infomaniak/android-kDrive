@@ -407,6 +407,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }.getOrElse { exception ->
             Sentry.withScope { scope ->
                 scope.level = SentryLevel.WARNING
+                scope.setExtra("uri", uri.toString())
                 Sentry.captureException(exception)
             }
             null

@@ -225,7 +225,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
     }
 
     private fun setupCategoriesContainer(categories: List<Category>) {
-        val rights = DriveInfosController.getCategoryRights()
+        val rights = DriveInfosController.getCategoryRights(file.driveId)
 
         if (file.id.isPositive() && rights.canReadCategoryOnFile) {
             categoriesDivider.isVisible = true
