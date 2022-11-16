@@ -27,7 +27,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
-import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.trackAccountEvent
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.R
@@ -38,6 +37,7 @@ import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.getInfomaniakLogin
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.models.ApiResponse
@@ -59,7 +59,7 @@ import kotlinx.coroutines.withContext
 
 class LoginActivity : AppCompatActivity() {
 
-    private lateinit var infomaniakLogin: InfomaniakLogin
+    private val infomaniakLogin: InfomaniakLogin by lazy { getInfomaniakLogin() }
 
     private val webViewLoginResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
         with(result) {
@@ -82,8 +82,6 @@ class LoginActivity : AppCompatActivity() {
         lockOrientationForSmallScreens()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-
-        infomaniakLogin = InfomaniakLogin(context = this, appUID = BuildConfig.APPLICATION_ID, clientID = BuildConfig.CLIENT_ID)
 
         introViewpager.apply {
             adapter = IntroPagerAdapter(supportFragmentManager, lifecycle)
@@ -146,14 +144,7 @@ class LoginActivity : AppCompatActivity() {
                         }
                     }
                 },
-                onError = {
-                    val error = when (it) {
-                        InfomaniakLogin.ErrorStatus.SERVER -> R.string.serverError
-                        InfomaniakLogin.ErrorStatus.CONNECTION -> R.string.connectionError
-                        else -> R.string.anErrorHasOccurred
-                    }
-                    showError(getString(error))
-                },
+                onError = { showError(getLoginErrorDescription(this@LoginActivity, it)) },
             )
         }
     }
@@ -224,6 +215,16 @@ class LoginActivity : AppCompatActivity() {
 
         private fun getErrorResponse(@StringRes text: Int): ApiResponse<Any> {
             return ApiResponse(result = ApiResponse.Status.ERROR, translatedError = text)
+        }
+
+        fun getLoginErrorDescription(context: Context, error: InfomaniakLogin.ErrorStatus): String {
+            return context.getString(
+                when (error) {
+                    InfomaniakLogin.ErrorStatus.SERVER -> R.string.serverError
+                    InfomaniakLogin.ErrorStatus.CONNECTION -> R.string.connectionError
+                    else -> R.string.anErrorHasOccurred
+                }
+            )
         }
     }
 }

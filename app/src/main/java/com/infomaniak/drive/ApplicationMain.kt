@@ -196,7 +196,7 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         }
 
         CoroutineScope(Dispatchers.IO).launch {
-            AccountUtils.removeUser(this@ApplicationMain, user)
+            AccountUtils.removeUserAndDeleteToken(this@ApplicationMain, user)
         }
     }
 

@@ -137,7 +137,7 @@ class LaunchActivity : AppCompatActivity() {
         intent.extras?.getBoolean(FileMigration.LOGOUT_CURRENT_USER_TAG)?.let { needLogoutCurrentUser ->
             if (needLogoutCurrentUser) {
                 if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
-                AccountUtils.currentUser?.let { AccountUtils.removeUser(this@LaunchActivity, it) }
+                AccountUtils.currentUser?.let { AccountUtils.removeUserAndDeleteToken(this@LaunchActivity, it) }
             }
         }
     }

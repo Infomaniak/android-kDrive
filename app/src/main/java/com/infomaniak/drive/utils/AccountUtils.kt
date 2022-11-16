@@ -34,6 +34,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.data.services.MqttClientWrapper
+import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.auth.CredentialManager
@@ -46,11 +47,8 @@ import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.room.UserDatabase
 import com.infomaniak.lib.login.ApiToken
 import io.sentry.Sentry
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 
@@ -126,7 +124,7 @@ object AccountUtils : CredentialManager {
                 if (result != ApiResponse.Status.ERROR && data != null) {
                     handleDrivesData(context, fromMaintenance, fromCloudStorage, user, data as DriveInfo)
                 } else if (error?.code?.equals("no_drive") == true) {
-                    removeUser(context, user)
+                    removeUserAndDeleteToken(context, user)
                 }
             }
         }
@@ -193,16 +191,30 @@ object AccountUtils : CredentialManager {
         }
     }
 
-    suspend fun removeUser(context: Context, userRemoved: User) {
-        userDatabase.userDao().delete(userRemoved)
-        FileController.deleteUserDriveFiles(userRemoved.id)
+    suspend fun removeUserAndDeleteToken(context: Context, user: User) {
+        CoroutineScope(Dispatchers.IO).launch {
+            context.getInfomaniakLogin().deleteToken(
+                HttpClient.okHttpClientNoInterceptor,
+                user.apiToken,
+                onError = {
+                    Log.e("deleteTokenError", "Api response error : ${LoginActivity.getLoginErrorDescription(context, it)}")
+                }
+            )
+        }
 
-        if (UploadFile.getAppSyncSettings()?.userId == userRemoved.id) {
+        removeUser(context, user)
+    }
+
+    suspend fun removeUser(context: Context, user: User) {
+        userDatabase.userDao().delete(user)
+        FileController.deleteUserDriveFiles(user.id)
+
+        if (UploadFile.getAppSyncSettings()?.userId == user.id) {
             Sentry.captureMessage(DISABLE_AUTO_SYNC)
             context.disableAutoSync()
         }
 
-        if (currentUserId == userRemoved.id) {
+        if (currentUserId == user.id) {
             requestCurrentUser()
             currentDriveId = -1
 
