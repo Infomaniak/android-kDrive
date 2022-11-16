@@ -132,7 +132,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                     disabledSendCopy.isGone = sendCopyEnabled
                 }
 
-                addFavorites.isVisible = rights?.canUseFavorite == true
+                addFavorites.isVisible = rights?.canUseFavorite == true && !isSharedWithMe
                 availableOffline.isGone = isSharedWithMe || currentFile.getOfflineFile(context) == null
                 deleteFile.isVisible = rights?.canDelete == true
                 downloadFile.isVisible = rights?.canRead == true
@@ -163,7 +163,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                 sendCopyText.setText(R.string.buttonAdd)
                 availableOffline.isGone = true
                 openWith.isGone = true
-                coloredFolder.isVisible = currentFile.isAllowedToBeColored()
+                coloredFolder.isVisible = currentFile.isAllowedToBeColored() && !isSharedWithMe
             }
         }
     }
