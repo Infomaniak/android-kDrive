@@ -37,6 +37,7 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterDateBottomSheetDia
 import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterTypeBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.toPx
@@ -138,7 +139,7 @@ class SearchFiltersFragment : Fragment() {
                 categories = null
                 categoriesOwnership = null
             } else {
-                categories = DriveInfosController.getCurrentDriveCategoriesFromIds(it.toTypedArray())
+                categories = DriveInfosController.getCategoriesFromIds(AccountUtils.currentDriveId, it.toTypedArray())
                 if (categoriesOwnership == null) categoriesOwnership = SearchCategoriesOwnershipFilter.BELONG_TO_ALL_CATEGORIES
             }
             updateCategoriesUi()

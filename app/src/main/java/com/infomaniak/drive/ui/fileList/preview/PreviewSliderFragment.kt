@@ -414,6 +414,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             PreviewSliderFragmentDirections.actionPreviewSliderFragmentToSelectCategoriesFragment(
                 fileId = fileId,
                 categoriesUsageMode = CategoriesUsageMode.MANAGED_CATEGORIES,
+                userDrive = UserDrive(driveId = currentFile.driveId)
             )
         )
     }

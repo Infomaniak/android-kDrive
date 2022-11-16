@@ -44,10 +44,7 @@ import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.SelectedSt
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.UiCategory
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode.MANAGED_CATEGORIES
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode.SELECTED_CATEGORIES
-import com.infomaniak.drive.utils.getBackNavigationResult
-import com.infomaniak.drive.utils.getName
-import com.infomaniak.drive.utils.setBackNavigationResult
-import com.infomaniak.drive.utils.setCornersRadius
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.DebouncingTextWatcher
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.SnackbarUtils
@@ -66,6 +63,8 @@ class SelectCategoriesFragment : Fragment() {
     private lateinit var file: File
     private lateinit var selectedCategories: List<Category>
 
+    private val driveId: Int by lazy { navigationArgs.userDrive?.driveId ?: AccountUtils.currentDriveId }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         inflater.inflate(R.layout.fragment_select_categories, container, false)
 
@@ -76,17 +75,20 @@ class SelectCategoriesFragment : Fragment() {
             usageMode = categoriesUsageMode
 
             if (usageMode == SELECTED_CATEGORIES) {
-                selectedCategories =
-                    DriveInfosController.getCurrentDriveCategoriesFromIds(categories?.toTypedArray() ?: arrayOf())
+                selectedCategories = DriveInfosController.getCategoriesFromIds(driveId, categories?.toTypedArray() ?: arrayOf())
             } else {
-                file = FileController.getFileById(fileId) ?: run {
+                file = FileController.getFileById(fileId, userDrive = userDrive) ?: run {
                     findNavController().popBackStack()
                     return
                 }
             }
         }
 
-        val categoryRights = if (usageMode == MANAGED_CATEGORIES) DriveInfosController.getCategoryRights() else CategoryRights()
+        val categoryRights = if (usageMode == MANAGED_CATEGORIES) {
+            DriveInfosController.getCategoryRights(driveId)
+        } else {
+            CategoryRights()
+        }
         with(categoryRights) {
             setCategoriesAdapter(canEditCategory, canDeleteCategory)
             setAddCategoryButton(canCreateCategory)
@@ -164,7 +166,7 @@ class SelectCategoriesFragment : Fragment() {
     }
 
     private fun CategoriesAdapter.updateFileCategoriesModeUi() {
-        val uiCategories = DriveInfosController.getCurrentDriveCategories().map { category ->
+        val uiCategories = DriveInfosController.getDriveCategories(driveId).map { category ->
             val fileCategory = file.categories.find { it.categoryId == category.id }
             createUiCategory(
                 category = category,
@@ -192,7 +194,7 @@ class SelectCategoriesFragment : Fragment() {
     }
 
     private fun CategoriesAdapter.updateSelectedCategoriesModeUi() {
-        val uiCategories = DriveInfosController.getCurrentDriveCategories().map { category ->
+        val uiCategories = DriveInfosController.getDriveCategories(driveId).map { category ->
             val selectedCategory = selectedCategories.find { it.id == category.id }
             createUiCategory(
                 category = category,

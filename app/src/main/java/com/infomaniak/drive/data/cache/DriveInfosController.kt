@@ -160,28 +160,32 @@ object DriveInfosController {
         return teamList.filter { drive.teams.account.contains(it.id) }
     }
 
-    fun getCurrentDriveCategories(): List<Category> {
+    fun getDriveCategories(driveId: Int): List<Category> {
         val categories = getRealmInstance().use { realm ->
-            realm.getCurrentDrive()?.categories?.let {
-                val categories = it.where()
-                    .sort(Category::userUsageCount.name, Sort.DESCENDING)
-                    .findAll()
-                realm.copyFromRealm(categories, 0)
+            realm.getDrivesQuery(AccountUtils.currentUserId, driveId).findFirst()?.let { drive ->
+                drive.categories.let {
+                    val categories = it.where()
+                        .sort(Category::userUsageCount.name, Sort.DESCENDING)
+                        .findAll()
+                    realm.copyFromRealm(categories, 0)
+                }
             }
         } ?: emptyList()
 
         return categories
     }
 
-    fun getCurrentDriveCategoriesFromIds(categoriesIds: Array<Int>): List<Category> {
+    fun getCategoriesFromIds(driveId: Int, categoriesIds: Array<Int>): List<Category> {
         if (categoriesIds.isEmpty()) return emptyList()
 
         val categories = getRealmInstance().use { realm ->
-            realm.getCurrentDrive()?.categories?.let {
-                val categories = it.where()
-                    .oneOf(Category::id.name, categoriesIds)
-                    .findAll()
-                realm.copyFromRealm(categories, 0)
+            realm.getDrivesQuery(AccountUtils.currentUserId, driveId).findFirst()?.let { drive ->
+                drive.categories.let {
+                    val categories = it.where()
+                        .oneOf(Category::id.name, categoriesIds)
+                        .findAll()
+                    realm.copyFromRealm(categories, 0)
+                }
             }
         } ?: emptyList()
 

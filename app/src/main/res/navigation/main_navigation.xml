@@ -883,6 +883,11 @@
             app:argType="integer[]"
             app:nullable="true" />
         <argument
+            android:name="userDrive"
+            android:defaultValue="@null"
+            app:argType="com.infomaniak.drive.data.models.UserDrive"
+            app:nullable="true" />
+        <argument
             android:name="categoriesUsageMode"
             app:argType="com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode" />
         <action

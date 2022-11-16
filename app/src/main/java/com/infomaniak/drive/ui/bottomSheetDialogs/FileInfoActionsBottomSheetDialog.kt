@@ -207,6 +207,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToSelectCategoriesFragment(
                 fileId = fileId,
                 categoriesUsageMode = CategoriesUsageMode.MANAGED_CATEGORIES,
+                userDrive = navigationArgs.userDrive
             )
         )
     }
