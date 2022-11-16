@@ -59,7 +59,7 @@ import kotlinx.coroutines.withContext
 
 class LoginActivity : AppCompatActivity() {
 
-    private lateinit var infomaniakLogin: InfomaniakLogin
+    private val infomaniakLogin: InfomaniakLogin by lazy { getInfomaniakLogin() }
 
     private val webViewLoginResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
         with(result) {
@@ -82,8 +82,6 @@ class LoginActivity : AppCompatActivity() {
         lockOrientationForSmallScreens()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
-
-        infomaniakLogin = getInfomaniakLogin()
 
         introViewpager.apply {
             adapter = IntroPagerAdapter(supportFragmentManager, lifecycle)
