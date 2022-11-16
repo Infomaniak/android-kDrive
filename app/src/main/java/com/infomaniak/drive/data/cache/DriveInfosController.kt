@@ -175,7 +175,7 @@ object DriveInfosController {
         return categories
     }
 
-    fun getCategoriesFromIds(driveId: Int = AccountUtils.currentDriveId, categoriesIds: Array<Int>): List<Category> {
+    fun getCategoriesFromIds(driveId: Int, categoriesIds: Array<Int>): List<Category> {
         if (categoriesIds.isEmpty()) return emptyList()
 
         val categories = getRealmInstance().use { realm ->
