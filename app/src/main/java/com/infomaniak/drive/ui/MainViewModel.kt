@@ -263,7 +263,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     }
 
     fun manageCategory(categoryId: Int, files: List<File>, isAdding: Boolean) = liveData(Dispatchers.IO) {
-        with(manageCategoryApiCall(categoryId, files, isAdding)) {
+        with(manageCategoryApiCall(files, categoryId, isAdding)) {
             data?.forEach { feedbackResource ->
                 if (feedbackResource.result) {
                     FileController.updateFile(feedbackResource.id) {
@@ -280,10 +280,10 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    private fun manageCategoryApiCall(categoryId: Int, files: List<File>, isAdding: Boolean) = if (isAdding) {
-        ApiRepository.addCategory(categoryId, files)
+    private fun manageCategoryApiCall(files: List<File>, categoryId: Int, isAdding: Boolean) = if (isAdding) {
+        ApiRepository.addCategory(files, categoryId)
     } else {
-        ApiRepository.removeCategory(categoryId, files)
+        ApiRepository.removeCategory(files, categoryId)
     }
 
     fun deleteFile(file: File, userDrive: UserDrive? = null, onSuccess: ((fileId: Int) -> Unit)? = null) =

@@ -331,7 +331,7 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.fileCategory(file, categoryId), POST)
     }
 
-    fun addCategory(categoryId: Int, files: List<File>): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Nothing>>> {
+    fun addCategory(files: List<File>, categoryId: Int): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Nothing>>> {
         val driveId = files.first().driveId
         return callApi(ApiRoutes.fileCategory(driveId, categoryId), POST, mapOf("file_ids" to files.map { it.id }))
     }
@@ -341,8 +341,8 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun removeCategory(
-        categoryId: Int,
         files: List<File>,
+        categoryId: Int,
     ): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Nothing>>> {
         val driveId = files.first().driveId
         return callApi(ApiRoutes.fileCategory(driveId, categoryId), DELETE, mapOf("file_ids" to files.map { it.id }))
