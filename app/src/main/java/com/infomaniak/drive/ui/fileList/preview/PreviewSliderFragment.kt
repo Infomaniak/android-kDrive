@@ -412,7 +412,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     override fun manageCategoriesClicked(fileId: Int) {
         safeNavigate(
             PreviewSliderFragmentDirections.actionPreviewSliderFragmentToSelectCategoriesFragment(
-                filesId = intArrayOf(fileId),
+                filesIds = intArrayOf(fileId),
                 categoriesUsageMode = CategoriesUsageMode.MANAGED_CATEGORIES,
                 userDrive = UserDrive(driveId = currentFile.driveId)
             )

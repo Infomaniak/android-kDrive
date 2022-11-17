@@ -71,7 +71,12 @@ class SelectCategoriesFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         usageMode = categoriesUsageMode
 
-        selectCategoriesViewModel.init(usageMode, categories, filesId, userDrive ?: UserDrive()).observe(viewLifecycleOwner) { isSuccess ->
+        selectCategoriesViewModel.init(
+            usageMode,
+            categories,
+            filesIds,
+            userDrive ?: UserDrive()
+        ).observe(viewLifecycleOwner) { isSuccess ->
             if (isSuccess) {
                 with(selectCategoriesViewModel.categoryRights) {
                     setCategoriesAdapter(canEditCategory, canDeleteCategory)
@@ -170,7 +175,7 @@ class SelectCategoriesFragment : Fragment() {
                 safeNavigate(
                     R.id.categoryInfoActionsBottomSheetDialog,
                     CategoryInfoActionsBottomSheetDialogArgs(
-                        filesId = navigationArgs.filesId,
+                        filesIds = navigationArgs.filesIds,
                         categoryId = id,
                         categoryName = name,
                         categoryColor = color,
@@ -208,7 +213,7 @@ class SelectCategoriesFragment : Fragment() {
     private fun navigateToCreateCategory() {
         safeNavigate(
             SelectCategoriesFragmentDirections.actionSelectCategoriesFragmentToCreateOrEditCategoryFragment(
-                filesId = navigationArgs.filesId,
+                filesIds = navigationArgs.filesIds,
                 categoryId = CreateOrEditCategoryFragment.CREATE_CATEGORY_ID,
                 categoryName = searchView.text.toString(),
                 categoryColor = null,

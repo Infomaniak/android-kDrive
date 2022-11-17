@@ -369,7 +369,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
         fun Fragment.openManageCategoriesBottomSheetDialog(filesIds: IntArray, userDrive: UserDrive? = null) {
             val usageMode = CategoriesUsageMode.MANAGED_CATEGORIES
-            val args = SelectCategoriesFragmentArgs(categoriesUsageMode = usageMode, filesId = filesIds, userDrive = userDrive)
+            val args = SelectCategoriesFragmentArgs(categoriesUsageMode = usageMode, filesIds = filesIds, userDrive = userDrive)
 
             safeNavigate(R.id.selectCategoriesFragment, args.toBundle())
         }

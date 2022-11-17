@@ -60,7 +60,7 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
         editCategory.setOnClickListener {
             safeNavigate(
                 CategoryInfoActionsBottomSheetDialogDirections.actionCategoryInfoActionsBottomSheetDialogToCreateOrEditCategoryFragment(
-                    filesId = filesId,
+                    filesIds = filesIds,
                     categoryIsPredefined = categoryIsPredefined,
                     categoryId = categoryId,
                     categoryName = if (categoryIsPredefined) "" else categoryName,

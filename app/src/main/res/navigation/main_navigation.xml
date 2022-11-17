@@ -874,7 +874,7 @@
         android:label="SelectCategoriesFragment"
         tools:layout="@layout/fragment_select_categories">
         <argument
-            android:name="filesId"
+            android:name="filesIds"
             android:defaultValue="@null"
             app:argType="integer[]"
             app:nullable="true" />
@@ -919,7 +919,7 @@
         android:label="CategoryInfoActionsBottomSheetDialog"
         tools:layout="@layout/fragment_bottom_sheet_category_info_actions">
         <argument
-            android:name="filesId"
+            android:name="filesIds"
             android:defaultValue="@null"
             app:argType="integer[]"
             app:nullable="true" />
@@ -946,7 +946,7 @@
         android:label="CreateOrEditCategoryFragment"
         tools:layout="@layout/fragment_create_or_edit_category">
         <argument
-            android:name="filesId"
+            android:name="filesIds"
             android:defaultValue="@null"
             app:argType="integer[]"
             app:nullable="true" />

@@ -63,7 +63,7 @@ class CreateOrEditCategoryFragment : Fragment() {
         editCategoryWarning.isGone = isCreateCategory
         setSaveButton(isCreateCategory)
 
-        createOrEditCategoryViewModel.init(filesId).observe(viewLifecycleOwner) { hasNoFiles ->
+        createOrEditCategoryViewModel.init(filesIds).observe(viewLifecycleOwner) { hasNoFiles ->
             if (hasNoFiles) findNavController().popBackStack()
         }
     }

@@ -250,7 +250,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         runCatching {
             findNavController().navigate(
                 FileDetailsFragmentDirections.actionFileDetailsFragmentToSelectCategoriesFragment(
-                    filesId = intArrayOf(fileId),
+                    filesIds = intArrayOf(fileId),
                     categoriesUsageMode = CategoriesUsageMode.MANAGED_CATEGORIES,
                     userDrive = UserDrive(driveId = file.driveId)
                 )

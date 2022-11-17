@@ -39,7 +39,7 @@ class SelectCategoriesViewModel : ViewModel() {
     fun init(
         usageMode: CategoriesUsageMode,
         categories: IntArray?,
-        filesId: IntArray?,
+        filesIds: IntArray?,
         userDrive: UserDrive,
     ): LiveData<Boolean> = liveData(Dispatchers.IO) {
 
@@ -51,7 +51,7 @@ class SelectCategoriesViewModel : ViewModel() {
 
             CategoryRights()
         } else {
-            selectedFiles = filesId?.toList()?.mapNotNull { fileId ->
+            selectedFiles = filesIds?.toList()?.mapNotNull { fileId ->
                 FileController.getFileById(fileId, userDrive)
             } ?: emptyList()
 
