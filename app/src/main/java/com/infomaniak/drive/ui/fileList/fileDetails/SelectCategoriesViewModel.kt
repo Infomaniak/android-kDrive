@@ -44,10 +44,17 @@ class SelectCategoriesViewModel : ViewModel() {
     ): LiveData<Boolean> = liveData(Dispatchers.IO) {
 
         categoryRights = if (usageMode == CategoriesUsageMode.SELECTED_CATEGORIES) {
-            selectedCategories = DriveInfosController.getCategoriesFromIds(userDrive.driveId, categories?.toTypedArray() ?: emptyArray())
+            selectedCategories = DriveInfosController.getCategoriesFromIds(
+                userDrive.driveId,
+                categories?.toTypedArray() ?: emptyArray()
+            )
+
             CategoryRights()
         } else {
-            selectedFiles = filesId?.toList()?.mapNotNull { fileId -> FileController.getFileById(fileId, userDrive) } ?: emptyList()
+            selectedFiles = filesId?.toList()?.mapNotNull { fileId ->
+                FileController.getFileById(fileId, userDrive)
+            } ?: emptyList()
+
             if (selectedFiles.isEmpty()) {
                 emit(false)
                 return@liveData

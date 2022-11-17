@@ -35,6 +35,7 @@ import com.infomaniak.drive.MatomoDrive.trackCategoriesEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialog
@@ -70,7 +71,7 @@ class SelectCategoriesFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         usageMode = categoriesUsageMode
 
-        selectCategoriesViewModel.init(usageMode, categories, filesId).observe(viewLifecycleOwner) { isSuccess ->
+        selectCategoriesViewModel.init(usageMode, categories, filesId, userDrive ?: UserDrive()).observe(viewLifecycleOwner) { isSuccess ->
             if (isSuccess) {
                 with(selectCategoriesViewModel.categoryRights) {
                     setCategoriesAdapter(canEditCategory, canDeleteCategory)
