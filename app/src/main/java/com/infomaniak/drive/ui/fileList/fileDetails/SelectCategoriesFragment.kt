@@ -60,16 +60,15 @@ class SelectCategoriesFragment : Fragment() {
     private val navigationArgs: SelectCategoriesFragmentArgs by navArgs()
 
     private lateinit var categoriesAdapter: CategoriesAdapter
-    private lateinit var usageMode: CategoriesUsageMode
 
     private val driveId: Int by lazy { navigationArgs.userDrive?.driveId ?: AccountUtils.currentDriveId }
+    private val usageMode: CategoriesUsageMode by lazy { navigationArgs.categoriesUsageMode }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         inflater.inflate(R.layout.fragment_select_categories, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(navigationArgs) {
         super.onViewCreated(view, savedInstanceState)
-        usageMode = categoriesUsageMode
 
         selectCategoriesViewModel.init(
             usageMode,
@@ -96,7 +95,7 @@ class SelectCategoriesFragment : Fragment() {
 
     private fun setCategoriesAdapter(canEditCategory: Boolean, canDeleteCategory: Boolean) {
         categoriesAdapter = CategoriesAdapter(
-            onCategoryChanged = { id, isSelected -> manageCategory(id, isSelected) }
+            onCategoryChanged = { id, isSelected -> manageCategory(id, isAdding = isSelected) }
         ).apply {
             this.canEditCategory = canEditCategory
             this.canDeleteCategory = canDeleteCategory

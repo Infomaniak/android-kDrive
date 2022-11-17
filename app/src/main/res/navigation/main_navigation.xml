@@ -185,9 +185,6 @@
         <action
             android:id="@+id/action_fileInfoActionsBottomSheetDialog_to_downloadProgressDialog"
             app:destination="@id/downloadProgressDialog" />
-        <action
-            android:id="@+id/action_fileInfoActionsBottomSheetDialog_to_selectCategoriesFragment"
-            app:destination="@id/selectCategoriesFragment" />
     </dialog>
 
     <dialog

@@ -29,6 +29,7 @@ import com.infomaniak.drive.data.models.upload.UploadSession
 import com.infomaniak.drive.data.models.upload.UploadSession.StartSessionBody
 import com.infomaniak.drive.data.models.upload.UploadSession.StartUploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.api.ApiRepositoryCore
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
@@ -327,12 +328,12 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.category(driveId, categoryId), DELETE)
     }
 
-    fun addCategory(file: File, categoryId: Int): ApiResponse<ShareableItems.FeedbackAccessResource<Int, Nothing>> {
+    fun addCategory(file: File, categoryId: Int): ApiResponse<ShareableItems.FeedbackAccessResource<Int, Unit>> {
         return callApi(ApiRoutes.fileCategory(file, categoryId), POST)
     }
 
-    fun addCategory(files: List<File>, categoryId: Int): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Nothing>>> {
-        val driveId = files.first().driveId
+    fun addCategory(files: List<File>, categoryId: Int): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Unit>>> {
+        val driveId = files.firstOrNull()?.driveId ?: AccountUtils.currentDriveId
         return callApi(ApiRoutes.fileCategory(driveId, categoryId), POST, mapOf("file_ids" to files.map { it.id }))
     }
 
@@ -343,8 +344,8 @@ object ApiRepository : ApiRepositoryCore() {
     fun removeCategory(
         files: List<File>,
         categoryId: Int,
-    ): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Nothing>>> {
-        val driveId = files.first().driveId
+    ): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Unit>>> {
+        val driveId = files.firstOrNull()?.driveId ?: AccountUtils.currentDriveId
         return callApi(ApiRoutes.fileCategory(driveId, categoryId), DELETE, mapOf("file_ids" to files.map { it.id }))
     }
 

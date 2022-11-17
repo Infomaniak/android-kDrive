@@ -31,7 +31,8 @@ import kotlinx.coroutines.Dispatchers
 
 class SelectCategoriesViewModel : ViewModel() {
 
-    lateinit var filesCategories: List<FileCategory>
+    val filesCategories: List<FileCategory> by lazy { findCommonCategoriesOfFiles() }
+
     lateinit var selectedFiles: List<File>
     lateinit var selectedCategories: List<Category>
     lateinit var categoryRights: CategoryRights
@@ -60,8 +61,6 @@ class SelectCategoriesViewModel : ViewModel() {
                 return@liveData
             }
 
-            filesCategories = findCommonCategoriesOfFiles()
-
             DriveInfosController.getCategoryRights(userDrive.driveId)
         }
 
@@ -69,18 +68,18 @@ class SelectCategoriesViewModel : ViewModel() {
     }
 
     private fun findCommonCategoriesOfFiles(): List<FileCategory> {
+        if (selectedFiles.size == 1) return selectedFiles.single().categories
+
         fun File.getCategoriesMap() = categories.associateBy { it.categoryId }
 
         var categoryIdsInCommon = selectedFiles.firstOrNull()?.getCategoriesMap() ?: return emptyList()
 
         selectedFiles.forEachIndexed { index, file ->
+            if (file.categories.isEmpty() || categoryIdsInCommon.isEmpty()) return emptyList()
             if (index == 0) return@forEachIndexed
-            if (file.categories.isEmpty()) return emptyList()
 
-            val fileCategoryMap = file.getCategoriesMap()
-            categoryIdsInCommon = categoryIdsInCommon.filterKeys { fileCategoryMap.containsKey(it) }
-
-            if (categoryIdsInCommon.isEmpty()) return emptyList()
+            val fileCategoriesMap = file.getCategoriesMap()
+            categoryIdsInCommon = categoryIdsInCommon.filterKeys { fileCategoriesMap.containsKey(it) }
         }
 
         return categoryIdsInCommon.values.toList()

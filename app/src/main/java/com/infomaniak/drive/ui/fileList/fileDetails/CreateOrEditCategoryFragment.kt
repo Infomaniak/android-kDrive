@@ -137,8 +137,12 @@ class CreateOrEditCategoryFragment : Fragment() {
         }
     }
 
-    private fun addCategory(categoryId: Int) = with(createOrEditCategoryViewModel) {
-        mainViewModel.manageCategory(categoryId, selectedFiles, true).observe(viewLifecycleOwner) { apiResponse ->
+    private fun addCategory(categoryId: Int) {
+        mainViewModel.manageCategory(
+            categoryId = categoryId,
+            files = createOrEditCategoryViewModel.selectedFiles,
+            isAdding = true
+        ).observe(viewLifecycleOwner) { apiResponse ->
             with(apiResponse) {
                 if (isSuccess()) {
                     findNavController().popBackStack()
@@ -150,8 +154,8 @@ class CreateOrEditCategoryFragment : Fragment() {
         }
     }
 
-    private fun editCategory(categoryId: Int) = with(createOrEditCategoryViewModel) {
-        editCategory(
+    private fun editCategory(categoryId: Int) {
+        createOrEditCategoryViewModel.editCategory(
             categoryId = categoryId,
             name = categoryNameValueInput.text.toString().let { it.ifEmpty { null } },
             color = COLORS[colorsAdapter.selectedPosition],

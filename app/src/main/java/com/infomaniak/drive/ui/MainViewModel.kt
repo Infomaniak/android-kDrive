@@ -280,10 +280,12 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    private fun manageCategoryApiCall(files: List<File>, categoryId: Int, isAdding: Boolean) = if (isAdding) {
-        ApiRepository.addCategory(files, categoryId)
-    } else {
-        ApiRepository.removeCategory(files, categoryId)
+    private fun manageCategoryApiCall(
+        files: List<File>,
+        categoryId: Int,
+        isAdding: Boolean,
+    ): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Unit>>> {
+        return if (isAdding) ApiRepository.addCategory(files, categoryId) else ApiRepository.removeCategory(files, categoryId)
     }
 
     fun deleteFile(file: File, userDrive: UserDrive? = null, onSuccess: ((fileId: Int) -> Unit)? = null) =

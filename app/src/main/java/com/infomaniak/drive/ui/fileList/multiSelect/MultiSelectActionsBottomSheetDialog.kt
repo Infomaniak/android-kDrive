@@ -36,6 +36,7 @@ import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialog.Companion.openColorFolderBottomSheetDialog
+import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialog.Companion.openManageCategoriesBottomSheetDialog
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.BulkOperationsUtils
 import com.infomaniak.drive.utils.DrivePermissions
@@ -105,7 +106,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
 
     protected open fun configureColoredFolder(areIndividualActionsVisible: Boolean) {
         if (areIndividualActionsVisible) {
-            disabledColoredFolder.isGone = computeColoredFolderAvailability(navigationArgs.fileIds)
+            disabledColoredFolder.isGone = computeColoredFolderAvailability()
             coloredFolder.apply {
                 setOnClickListener { onActionSelected(SelectDialogAction.COLOR_FOLDER) }
                 isVisible = true
@@ -113,11 +114,9 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         }
     }
 
-    private fun computeColoredFolderAvailability(fileIds: IntArray): Boolean {
-        return fileIds.any {
-            val file = FileController.getFileProxyById(fileId = it, customRealm = mainViewModel.realm)
-            file?.isAllowedToBeColored() == true
-        }
+    private fun computeColoredFolderAvailability() = navigationArgs.fileIds.any {
+        val file = FileController.getFileProxyById(fileId = it, customRealm = mainViewModel.realm)
+        file?.isAllowedToBeColored() == true
     }
 
     protected open fun configureAvailableOffline() {

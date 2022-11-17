@@ -30,8 +30,7 @@ import kotlinx.coroutines.Dispatchers
 class CreateOrEditCategoryViewModel : ViewModel() {
     lateinit var selectedFiles: List<File>
 
-    val driveId: Int
-        get() = selectedFiles.first().driveId
+    val driveId: Int by lazy { selectedFiles.first().driveId }
 
     fun init(filesId: IntArray?): LiveData<Boolean> = liveData(Dispatchers.IO) {
         selectedFiles = filesId?.toList()?.mapNotNull { fileId -> FileController.getFileById(fileId) } ?: emptyList()
