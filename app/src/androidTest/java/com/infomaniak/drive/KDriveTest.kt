@@ -18,6 +18,7 @@
 package com.infomaniak.drive
 
 import android.content.Context
+import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.runner.permission.PermissionRequester
 import com.infomaniak.drive.data.api.ApiRepository
@@ -82,7 +83,9 @@ open class KDriveTest {
             okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(user.id) }
 
             setUpRealm()
-            grantPermissions(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                grantPermissions(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
         }
 
         @AfterAll
