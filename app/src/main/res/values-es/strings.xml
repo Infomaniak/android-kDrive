@@ -249,8 +249,6 @@
     <string name="errorDelete">Error al eliminar</string>
     <string name="errorDestinationAlreadyExists">El destino ya existe</string>
     <string name="errorDeviceStorage">Insuficiente almacenamiento telefónico disponible</string>
-    <string name="errorDownload">Error al descargar</string>
-    <string name="errorDownloadInsufficientSpace">No se puede descargar: espacio insuficiente</string>
     <string name="errorDuplicate">Error al duplicar</string>
     <string name="errorFileCreate">Error al crear el archivo. Comprueba el nombre del archivo y tus derechos sobre la carpeta.</string>
     <string name="errorFileLocked">El archivo está actualmente abierto por un usuario y no puede ser modificado</string>
@@ -413,7 +411,7 @@
     <string name="fileListMoveInProgressSnackbar">Desplazamiento en curso: %1$d/%2$d</string>
     <string name="fileListMoveStartedSnackbar">Comienzan los desplazamientos</string>
     <plurals name="fileListMoveTrashConfirmationSnackbar">
-        <item quantity="one">Un elemento desplazado en el contenedor</item>
+        <item quantity="one">Un elemento enviado a la papelera</item>
         <item quantity="other">%d elementos enviados a la papelera</item>
     </plurals>
     <plurals name="fileListMultiSelectedTitle">

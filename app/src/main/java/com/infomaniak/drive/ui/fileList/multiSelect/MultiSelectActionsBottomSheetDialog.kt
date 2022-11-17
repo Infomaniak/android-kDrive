@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui.fileList.multiSelect
 
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -37,7 +36,11 @@ import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialog.Companion.openColorFolderBottomSheetDialog
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.BulkOperationsUtils
+import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.showSnackbar
+import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_multi_select_actions.*
 import kotlinx.coroutines.Dispatchers
 
@@ -174,8 +177,8 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         }.observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 apiResponse.data?.let { archiveUUID ->
-                    val downloadURL = Uri.parse(ApiRoutes.downloadArchiveFiles(AccountUtils.currentDriveId, archiveUUID.uuid))
-                    requireContext().startDownloadFile(downloadURL, ARCHIVE_FILE_NAME)
+                    val downloadURL = ApiRoutes.downloadArchiveFiles(AccountUtils.currentDriveId, archiveUUID.uuid)
+                    DownloadManagerUtils.scheduleDownload(requireContext(), downloadURL, ARCHIVE_FILE_NAME)
                 }
             } else {
                 showSnackbar(apiResponse.translatedError)
@@ -187,9 +190,8 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
     private fun downloadFiles() {
         navigationArgs.fileIds.forEach { fileId ->
             FileController.getFileProxyById(fileId = fileId, customRealm = mainViewModel.realm)?.let { file ->
-                val downloadUrl = Uri.parse(ApiRoutes.downloadFile(file))
                 val fileName = if (file.isFolder()) "${file.name}.zip" else file.name
-                requireContext().startDownloadFile(downloadUrl, fileName)
+                DownloadManagerUtils.scheduleDownload(requireContext(), ApiRoutes.downloadFile(file), fileName)
             }
         }
         onActionSelected()

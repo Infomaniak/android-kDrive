@@ -249,8 +249,6 @@
     <string name="errorDelete">Erreur lors de la suppression</string>
     <string name="errorDestinationAlreadyExists">La destination existe déjà</string>
     <string name="errorDeviceStorage">Stockage disponible du téléphone insuffisant</string>
-    <string name="errorDownload">Erreur lors du téléchargement</string>
-    <string name="errorDownloadInsufficientSpace">Téléchargement impossible : Espace insuffisant</string>
     <string name="errorDuplicate">Erreur lors de la duplication</string>
     <string name="errorFileCreate">Erreur lors de la création du fichier. Vérifiez le nom du fichier et vos droits sur le dossier.</string>
     <string name="errorFileLocked">Le fichier est actuellement ouvert par un utilisateur et ne peut être modifié</string>
@@ -413,7 +411,7 @@
     <string name="fileListMoveInProgressSnackbar">Déplacements en cours : %1$d/%2$d</string>
     <string name="fileListMoveStartedSnackbar">Début des déplacements</string>
     <plurals name="fileListMoveTrashConfirmationSnackbar">
-        <item quantity="one">Un élément déplacé dans la poubelle</item>
+        <item quantity="one">Un élément déplacé dans la corbeille</item>
         <item quantity="other">%d éléments déplacés dans la corbeille</item>
     </plurals>
     <plurals name="fileListMultiSelectedTitle">

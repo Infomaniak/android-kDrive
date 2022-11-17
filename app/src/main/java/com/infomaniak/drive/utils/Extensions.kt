@@ -20,7 +20,6 @@ package com.infomaniak.drive.utils
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ActivityManager
-import android.app.DownloadManager
 import android.app.KeyguardManager
 import android.content.ContentUris
 import android.content.Context
@@ -32,7 +31,6 @@ import android.graphics.Color
 import android.graphics.Point
 import android.net.Uri
 import android.os.Build
-import android.os.Environment
 import android.provider.MediaStore
 import android.util.DisplayMetrics
 import android.util.Patterns
@@ -76,10 +74,8 @@ import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.UploadInProgressFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
-import com.infomaniak.drive.utils.Utils.regexInvalidSystemChar
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
-import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.login.InfomaniakLogin
@@ -365,51 +361,6 @@ fun Fragment.navigateToUploadView(folderId: Int, folderName: String? = null) {
 fun Drive?.getDriveUsers(): List<DriveUser> = this?.users?.let { categories ->
     return@let DriveInfosController.getUsers(ArrayList(categories.drive + categories.account))
 } ?: listOf()
-
-fun Context.startDownloadFile(downloadURL: Uri, fileName: String) {
-    val formattedFileName = fileName.replace(regexInvalidSystemChar, "_").replace("%", "_").let {
-        // fix IllegalArgumentException only on Android 10 if multi dot
-        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) it.replace(Regex("\\.{2,}"), ".") else it
-    }
-
-    val request = DownloadManager.Request(downloadURL).apply {
-        setTitle(formattedFileName)
-        setDescription(getString(R.string.app_name))
-        setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, formattedFileName)
-        HttpUtils.getHeaders(contentType = null).toMap().forEach { addRequestHeader(it.key, it.value) }
-        setAllowedNetworkTypes(DownloadManager.Request.NETWORK_MOBILE or DownloadManager.Request.NETWORK_WIFI)
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) setVisibleInDownloadsUi(true)
-        setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-    }
-
-    val downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-    val downloadReference = downloadManager.enqueue(request)
-
-    handleDownloadManagerErrors(downloadReference, downloadManager)
-}
-
-private fun Context.handleDownloadManagerErrors(downloadReference: Long, downloadManager: DownloadManager) {
-    fun checkStatus(cursor: Cursor) {
-        val status = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
-        val reason = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_REASON))
-        if (status == DownloadManager.STATUS_FAILED) {
-            when (reason) {
-                DownloadManager.ERROR_INSUFFICIENT_SPACE -> showToast(R.string.errorDownloadInsufficientSpace)
-                else -> showToast(R.string.errorDownload)
-            }
-        }
-    }
-
-    CoroutineScope(Dispatchers.Default).launch {
-        delay(1000)
-        DownloadManager.Query().apply {
-            setFilterById(downloadReference)
-            downloadManager.query(this).also {
-                if (it.moveToFirst()) withContext(Dispatchers.Main) { checkStatus(it) }
-            }
-        }
-    }
-}
 
 fun View.setUploadFileInProgress(title: Int, onClickListener: () -> Unit) {
     val radius = resources.getDimension(R.dimen.cardViewRadius)
