@@ -83,6 +83,7 @@ open class KDriveTest {
             okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(user.id) }
 
             setUpRealm()
+
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
                 grantPermissions(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
             }
