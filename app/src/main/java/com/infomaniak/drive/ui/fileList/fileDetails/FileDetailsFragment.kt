@@ -35,11 +35,15 @@ import com.google.android.material.appbar.AppBarLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.TabViewPagerUtils
 import com.infomaniak.drive.utils.TabViewPagerUtils.setup
+import com.infomaniak.drive.utils.getFolderIcon
+import com.infomaniak.drive.utils.isNightModeEnabled
+import com.infomaniak.drive.utils.loadAny
 import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior
 import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.utils.lightStatusBar
+import com.infomaniak.lib.core.utils.setMargins
 import com.infomaniak.lib.core.utils.toggleEdgeToEdge
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
 import kotlinx.android.synthetic.main.fragment_file_details.*
@@ -79,8 +83,8 @@ class FileDetailsFragment : FileDetailsSubFragment() {
             // Corrects the layout so it still takes into account system bars in edge-to-edge mode
             ViewCompat.setOnApplyWindowInsetsListener(requireView()) { view, windowInsets ->
                 with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
-                    toolbar.setMargin(top = top)
-                    view.setMargin(bottom = bottom)
+                    toolbar.setMargins(top = top)
+                    view.setMargins(bottom = bottom)
                 }
 
                 // Return CONSUMED if you don't want the window insets to keep being passed down to descendant views
