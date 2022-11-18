@@ -19,7 +19,6 @@ package com.infomaniak.drive.views
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
@@ -53,6 +52,7 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.moveFileClicked
+import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import com.infomaniak.lib.core.utils.safeNavigate
 import io.sentry.Sentry
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
@@ -275,9 +275,8 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     fun downloadFile(drivePermissions: DrivePermissions, onSuccess: () -> Unit) {
         if (drivePermissions.checkWriteStoragePermission()) {
-            val downloadURL = Uri.parse(ApiRoutes.downloadFile(currentFile))
             val fileName = if (currentFile.isFolder()) "${currentFile.name}.zip" else currentFile.name
-            context.startDownloadFile(downloadURL, fileName)
+            DownloadManagerUtils.scheduleDownload(context, ApiRoutes.downloadFile(currentFile), fileName)
             onSuccess()
         }
     }

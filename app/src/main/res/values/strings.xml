@@ -260,8 +260,6 @@
     <string name="errorDelete">Deletion error</string>
     <string name="errorDestinationAlreadyExists">Destination already exists</string>
     <string name="errorDeviceStorage">Insufficient phone storage</string>
-    <string name="errorDownload">Download error</string>
-    <string name="errorDownloadInsufficientSpace">Cannot download : Insufficient space</string>
     <string name="errorDuplicate">Duplication error</string>
     <string name="errorFileCreate">Error when creating file. Check the name of the file and your rights to the folder.</string>
     <string name="errorFileLocked">This file is currently opened by another user and cannot be modified</string>

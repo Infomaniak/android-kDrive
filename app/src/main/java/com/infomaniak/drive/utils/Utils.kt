@@ -54,6 +54,7 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragmentArgs
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
+import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import com.infomaniak.lib.core.utils.showToast
 import kotlinx.android.synthetic.main.dialog_download_progress.view.*
 import kotlinx.android.synthetic.main.dialog_name_prompt.view.*
@@ -68,7 +69,6 @@ object Utils {
     const val OTHER_ROOT_ID = -1
 
     const val INDETERMINATE_PROGRESS = -1
-    val regexInvalidSystemChar = Regex("[\\\\/:*?\"<>|\\x7F]|[\\x00-\\x1f]")
 
     fun createConfirmation(
         context: Context,
@@ -284,7 +284,7 @@ object Utils {
         workManager.enqueueUniqueWork(DownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
     }
 
-    fun getInvalidFileNameCharacter(fileName: String): String? = regexInvalidSystemChar.find(fileName)?.value
+    fun getInvalidFileNameCharacter(fileName: String): String? = DownloadManagerUtils.regexInvalidSystemChar.find(fileName)?.value
 
     fun copyDataToUploadCache(context: Context, file: java.io.File, fileModifiedAt: Date): Uri {
         val outputFile = java.io.File(context.uploadFolder, file.toUri().hashCode().toString()).apply {
