@@ -391,7 +391,7 @@ class SearchFragment : FileListFragment() {
             if (currentQuery.isEmpty() && filtersAdapter.filters.isEmpty()) {
                 fileAdapter.setFiles(arrayListOf())
                 searchViewModel.visibilityMode.value = VisibilityMode.RECENT_SEARCHES
-                swipeRefreshLayout.isRefreshing = false
+                swipeRefreshLayout?.isRefreshing = false
                 return
             }
 
@@ -400,11 +400,11 @@ class SearchFragment : FileListFragment() {
                 fileAdapter.setFiles(oldList)
                 searchViewModel.searchOldFileList = null
                 searchViewModel.visibilityMode.value = VisibilityMode.RESULTS
-                swipeRefreshLayout.isRefreshing = false
+                swipeRefreshLayout?.isRefreshing = false
                 return
             }
 
-            swipeRefreshLayout.isRefreshing = true
+            swipeRefreshLayout?.isRefreshing = true
             isDownloading = true
             searchViewModel.searchFileByName.value = currentQuery to fileListViewModel.sortType
         }
