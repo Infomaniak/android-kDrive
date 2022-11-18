@@ -27,7 +27,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.menu.OfflineFileFragment
 import com.infomaniak.drive.utils.SentryLinearLayoutManager
-import com.infomaniak.drive.utils.setMargin
+import com.infomaniak.lib.core.utils.setMargins
 import kotlinx.android.synthetic.main.fragment_file_list.*
 
 class HomeOfflineFragment : OfflineFileFragment() {
@@ -44,7 +44,7 @@ class HomeOfflineFragment : OfflineFileFragment() {
 
         val marginStandard = resources.getDimension(R.dimen.marginStandard).toInt()
         val marginStandardMedium = resources.getDimension(R.dimen.marginStandardMedium).toInt()
-        sortLayout.setMargin(left = marginStandard, right = marginStandard, top = marginStandardMedium)
+        sortLayout.setMargins(left = marginStandard, top = marginStandardMedium, right = marginStandard)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

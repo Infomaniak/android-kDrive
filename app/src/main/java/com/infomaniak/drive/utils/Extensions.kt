@@ -35,7 +35,6 @@ import android.provider.MediaStore
 import android.util.DisplayMetrics
 import android.util.Patterns
 import android.view.View
-import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.RotateAnimation
 import android.view.inputmethod.EditorInfo
@@ -76,14 +75,16 @@ import com.infomaniak.drive.ui.fileList.UploadInProgressFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
-import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.lib.core.utils.lightNavigationBar
+import com.infomaniak.lib.core.utils.lightStatusBar
+import com.infomaniak.lib.core.utils.loadAvatar
+import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.login.InfomaniakLogin
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.android.synthetic.main.item_user.view.*
-import kotlinx.coroutines.*
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -173,17 +174,6 @@ fun ImageView.animateRotation(isDeployed: Boolean = false) {
                 fillAfter = true
                 repeatCount = 0
             })
-}
-
-fun View.setMargin(left: Int? = null, top: Int? = null, right: Int? = null, bottom: Int? = null) {
-    val params = (layoutParams as? ViewGroup.MarginLayoutParams)
-    params?.setMargins(
-        left ?: params.leftMargin,
-        top ?: params.topMargin,
-        right ?: params.rightMargin,
-        bottom ?: params.bottomMargin
-    )
-    layoutParams = params
 }
 
 /**

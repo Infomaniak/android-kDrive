@@ -288,7 +288,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         view?.apply {
             ViewCompat.setOnApplyWindowInsetsListener(this) { _, windowInsets ->
                 with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
-                    header?.setMargin(top = top, right = right, left = left)
+                    header?.setMargins(left = left, top = top, right = right)
                     val topOffset = max(top, height - bottomSheetFileInfos.height)
                     bottomSheetBehavior.apply {
                         peekHeight = getDefaultPeekHeight() + bottom

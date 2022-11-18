@@ -29,7 +29,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.FileAdapter.Companion.setCorners
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setFileItem
-import com.infomaniak.drive.utils.setMargin
+import com.infomaniak.lib.core.utils.setMargins
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_file_list.view.*
 import kotlinx.android.synthetic.main.item_file.view.*
@@ -70,7 +70,7 @@ class SaveExternalUriAdapter(val uris: MutableList<Pair<Uri, String>>) : Recycle
         fileSize.isGone = true
         fileDate.isGone = true
 
-        fileCardView.setMargin(left = 0, right = 0)
+        fileCardView.setMargins(left = 0, right = 0)
         fileCardView.setCorners(position, itemCount)
 
         menuButton.apply {

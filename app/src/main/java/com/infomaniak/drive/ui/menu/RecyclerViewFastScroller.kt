@@ -618,14 +618,11 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
     private fun setTrackMargin() {
         with(trackView.layoutParams as MarginLayoutParams) {
             when (fastScrollDirection) {
-                FastScrollDirection.HORIZONTAL ->
-                    if (Build.VERSION.SDK_INT > 16) {
-                        marginStart = trackMarginStart
-                        marginEnd = trackMarginEnd
-                    } else
-                        setMargins(trackMarginStart, 0, trackMarginEnd, 0)
-                FastScrollDirection.VERTICAL ->
-                    setMargins(0, trackMarginStart, 0, trackMarginEnd)
+                FastScrollDirection.HORIZONTAL -> {
+                    marginStart = trackMarginStart
+                    marginEnd = trackMarginEnd
+                }
+                FastScrollDirection.VERTICAL -> setMargins(0, trackMarginStart, 0, trackMarginEnd)
             }
         }
     }
