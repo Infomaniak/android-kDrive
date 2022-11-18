@@ -121,7 +121,7 @@ object AccountUtils : CredentialManager {
 
         if (userResult != ApiResponse.Status.ERROR) {
             ApiRepository.getAllDrivesData(okHttpClient).apply {
-                if (result != ApiResponse.Status.ERROR && data != null) {
+                if (result != ApiResponse.Status.ERROR) {
                     handleDrivesData(context, fromMaintenance, fromCloudStorage, user, data as DriveInfo)
                 } else if (error?.code?.equals("no_drive") == true) {
                     removeUserAndDeleteToken(context, user)

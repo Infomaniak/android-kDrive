@@ -39,20 +39,29 @@ class MaintenanceActivity : AppCompatActivity() {
         setContentView(R.layout.activity_no_drive)
 
         DriveInfosController.getDrives(AccountUtils.currentUserId).apply {
-            val firstDrive = first()
+            val firstDrive = firstOrNull()
 
-            noDriveIconLayout.icon.setImageResource(if (firstDrive.isTechnicalMaintenance) R.drawable.ic_maintenance else R.drawable.ic_drive_blocked)
+            val icon = when {
+                firstDrive == null -> R.drawable.ic_no_network
+                firstDrive.isTechnicalMaintenance -> R.drawable.ic_maintenance
+                else -> R.drawable.ic_drive_blocked
+            }
+            noDriveIconLayout.icon.setImageResource(icon)
 
-            noDriveTitle.text = resources.getQuantityString(
-                if (firstDrive.isTechnicalMaintenance) R.plurals.driveMaintenanceTitle else R.plurals.driveBlockedTitle,
-                this.size,
-                firstDrive.name
-            )
-
-            noDriveDescription.text = if (firstDrive.isTechnicalMaintenance) {
-                getString(R.string.driveMaintenanceDescription)
+            val title = if (firstDrive == null) {
+                getString(R.string.errorNetwork)
             } else {
                 resources.getQuantityString(
+                    if (firstDrive.isTechnicalMaintenance) R.plurals.driveMaintenanceTitle else R.plurals.driveBlockedTitle,
+                    this.size,
+                    firstDrive.name)
+            }
+            noDriveTitle.text = title
+
+            noDriveDescription.text = when {
+                firstDrive == null -> getString(R.string.connectionError)
+                firstDrive.isTechnicalMaintenance -> getString(R.string.driveMaintenanceDescription)
+                else -> resources.getQuantityString(
                     R.plurals.driveBlockedDescription,
                     this.size,
                     firstDrive.getUpdatedAt().format()
@@ -60,11 +69,13 @@ class MaintenanceActivity : AppCompatActivity() {
             }
 
             noDriveActionButton.apply {
-                if (firstDrive.isTechnicalMaintenance) {
-                    isGone = true
-                } else {
-                    noDriveActionButton.text = getString(R.string.buttonRenew)
-                    setOnClickListener { openUrl(ApiRoutes.renewDrive(firstDrive.accountId)) }
+                when {
+                    firstDrive == null -> isGone = true
+                    firstDrive.isTechnicalMaintenance -> isGone = true
+                    else -> {
+                        noDriveActionButton.text = getString(R.string.buttonRenew)
+                        setOnClickListener { openUrl(ApiRoutes.renewDrive(firstDrive.accountId)) }
+                    }
                 }
             }
         }
