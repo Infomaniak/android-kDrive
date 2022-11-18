@@ -44,6 +44,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListFragment
+import com.infomaniak.drive.ui.menu.SharedWithMeFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
@@ -75,9 +76,11 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private val scanFlowResultLauncher = registerForActivityResult(StartActivityForResult()) { activityResult ->
         activityResult.whenResultIsOk {
             it?.let { data ->
-                val fileListFragment = parentFragment?.childFragmentManager?.fragments?.getOrNull(0) as? FileListFragment
-                val folderId = fileListFragment?.folderId ?: -1
-                scanResultProcessing(data, folderId)
+                val folder = when (parentFragment?.childFragmentManager?.fragments?.getOrNull(0)?.javaClass) {
+                    FileListFragment::class.java, SharedWithMeFragment::class.java -> currentFolderFile
+                    else -> null
+                }
+                scanResultProcessing(data, folder)
             }
         }
         dismiss()

@@ -24,4 +24,6 @@ import com.infomaniak.drive.data.models.drive.Drive
 class SelectDriveViewModel : ViewModel() {
     val selectedUserId = MutableLiveData<Int>()
     val selectedDrive = MutableLiveData<Drive>()
+
+    var showSharedWithMe: Boolean = false
 }

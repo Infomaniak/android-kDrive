@@ -89,7 +89,7 @@ class SyncSettingsActivity : BaseActivity() {
         oldSyncSettings = UploadFile.getAppSyncSettings()
 
         selectDriveViewModel.apply {
-            selectedUserId.value = oldSyncSettings?.userId
+            selectedUserId.value = oldSyncSettings?.userId ?: AccountUtils.currentUserId
             selectedDrive.value = oldSyncSettings?.run { DriveInfosController.getDrive(userId, driveId) }
         }
 
@@ -146,7 +146,8 @@ class SyncSettingsActivity : BaseActivity() {
                 putExtras(
                     SelectFolderActivityArgs(
                         userId = selectDriveViewModel.selectedUserId.value!!,
-                        userDriveId = selectDriveViewModel.selectedDrive.value?.id!!,
+                        driveId = selectDriveViewModel.selectedDrive.value?.id!!,
+                        folderId = syncSettingsViewModel.syncFolder.value ?: -1,
                         disabledFolderId = Utils.ROOT_ID,
                     ).toBundle()
                 )

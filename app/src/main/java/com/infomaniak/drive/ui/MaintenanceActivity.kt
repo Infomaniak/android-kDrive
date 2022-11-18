@@ -54,7 +54,8 @@ class MaintenanceActivity : AppCompatActivity() {
                 resources.getQuantityString(
                     if (firstDrive.isTechnicalMaintenance) R.plurals.driveMaintenanceTitle else R.plurals.driveBlockedTitle,
                     this.size,
-                    firstDrive.name)
+                    firstDrive.name
+                )
             }
             noDriveTitle.text = title
 

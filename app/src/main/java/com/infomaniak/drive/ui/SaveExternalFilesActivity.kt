@@ -160,6 +160,7 @@ class SaveExternalFilesActivity : BaseActivity() {
         selectDriveViewModel.apply {
             selectedUserId.value = userId
             selectedDrive.value = drive
+            showSharedWithMe = true
         }
     }
 
@@ -193,7 +194,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 navigationArgs.folderId
             }
 
-            Triple(navigationArgs.userId, navigationArgs.userDriveId, folderId)
+            Triple(navigationArgs.userId, navigationArgs.driveId, folderId)
         }
     }
 
@@ -219,8 +220,8 @@ class SaveExternalFilesActivity : BaseActivity() {
                     putExtras(
                         SelectFolderActivityArgs(
                             userId = selectDriveViewModel.selectedUserId.value!!,
-                            userDriveId = selectDriveViewModel.selectedDrive.value?.id!!,
-                            disabledFolderId = saveExternalFilesViewModel.folderId.value ?: -1,
+                            driveId = selectDriveViewModel.selectedDrive.value?.id!!,
+                            folderId = saveExternalFilesViewModel.folderId.value ?: -1,
                         ).toBundle()
                     )
                     selectFolderResultLauncher.launch(this)

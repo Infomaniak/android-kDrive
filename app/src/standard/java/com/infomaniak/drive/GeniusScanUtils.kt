@@ -29,14 +29,15 @@ import com.geniusscansdk.core.LicenseException
 import com.geniusscansdk.scanflow.ScanActivity
 import com.geniusscansdk.scanflow.ScanConfiguration
 import com.geniusscansdk.scanflow.ScanResult
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.lib.core.utils.FORMAT_NEW_FILE
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.format
 import io.sentry.Sentry
-import java.io.File
 import java.io.FileOutputStream
 import java.util.*
 
@@ -72,14 +73,14 @@ object GeniusScanUtils {
 
         supportedLanguages.forEach { (lang, res) ->
             resources?.openRawResource(res).use { inputStream ->
-                FileOutputStream(File(ocrDirectory, "$lang.traineddata")).use {
+                FileOutputStream(IOFile(ocrDirectory, "$lang.traineddata")).use {
                     inputStream?.copyTo(it)
                 }
             }
         }
     }
 
-    private fun Context.getOCRdataDirectory() = File(getExternalFilesDir(null), "ocr_dir")
+    private fun Context.getOCRdataDirectory() = IOFile(getExternalFilesDir(null), "ocr_dir")
 
     private fun Context.removeOldScanFiles() {
         getExternalFilesDir(null)?.listFiles()?.forEach { if (it.isFile) it.delete() }
@@ -106,11 +107,11 @@ object GeniusScanUtils {
         scanWithConfiguration(scanConfiguration, resultLauncher)
     }
 
-    fun Fragment.scanResultProcessing(intent: Intent, folderId: Int) {
+    fun Fragment.scanResultProcessing(intent: Intent, folder: File?) {
         try {
             val geniusScanFile = intent.getScanResult().multiPageDocument!!
             val newName = "scan_${Date().format(FORMAT_NEW_FILE)}.${geniusScanFile.extension}"
-            val scanFile = File(geniusScanFile.parent, newName)
+            val scanFile = IOFile(geniusScanFile.parent, newName)
             geniusScanFile.renameTo(scanFile)
 
             val uri = FileProvider.getUriForFile(requireContext(), getString(R.string.FILE_AUTHORITY), scanFile)
@@ -121,8 +122,8 @@ object GeniusScanUtils {
                 putExtras(
                     SaveExternalFilesActivityArgs(
                         userId = AccountUtils.currentUserId,
-                        userDriveId = AccountUtils.currentDriveId,
-                        folderId = folderId
+                        driveId = folder?.driveId ?: AccountUtils.currentDriveId,
+                        folderId = folder?.id ?: -1
                     ).toBundle()
                 )
                 type = "/pdf"

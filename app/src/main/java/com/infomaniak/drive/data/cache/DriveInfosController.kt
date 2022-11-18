@@ -60,7 +60,8 @@ object DriveInfosController {
         maintenance: Boolean? = null
     ): RealmQuery<Drive> {
         return where(Drive::class.java)
-            .sort(Drive::id.name, Sort.ASCENDING)
+            .sort(Drive::name.name, Sort.ASCENDING)
+            .sort(Drive::sharedWithMe.name, Sort.ASCENDING)
             .apply {
                 userId?.let { equalTo(Drive::userId.name, it) }
                 driveId?.let { equalTo(Drive::id.name, it) }

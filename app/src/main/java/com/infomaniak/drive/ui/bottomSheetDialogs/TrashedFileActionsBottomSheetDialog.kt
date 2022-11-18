@@ -80,7 +80,7 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
                 putExtras(
                     SelectFolderActivityArgs(
                         userId = AccountUtils.currentUserId,
-                        userDriveId = AccountUtils.currentDriveId
+                        driveId = AccountUtils.currentDriveId
                     ).toBundle()
                 )
                 selectFolderResultLauncher.launch(this)
