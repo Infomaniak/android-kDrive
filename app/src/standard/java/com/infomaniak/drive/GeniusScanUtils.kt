@@ -33,6 +33,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.IGeniusScanUtils
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.lib.core.utils.FORMAT_NEW_FILE
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
@@ -41,7 +42,7 @@ import io.sentry.Sentry
 import java.io.FileOutputStream
 import java.util.*
 
-object GeniusScanUtils {
+object GeniusScanUtils : IGeniusScanUtils {
 
     private const val SCAN_CONFIGURATION_KEY = "SCAN_CONFIGURATION_KEY"
     private const val SCAN_RESULT_KEY = "SCAN_RESULT_KEY"
@@ -86,7 +87,7 @@ object GeniusScanUtils {
         getExternalFilesDir(null)?.listFiles()?.forEach { if (it.isFile) it.delete() }
     }
 
-    fun Context.initGeniusScanSdk() = try {
+    override fun Context.initGeniusScanSdk() = try {
         GeniusScanSDK.init(this, GeniusScanEnv.GENIUS_SCAN_KEY)
         true
     } catch (licenseException: LicenseException) {
@@ -96,7 +97,7 @@ object GeniusScanUtils {
         false
     }
 
-    fun Context.startScanFlow(resultLauncher: ActivityResultLauncher<Intent>) {
+    override fun Context.startScanFlow(resultLauncher: ActivityResultLauncher<Intent>) {
         removeOldScanFiles()
         val scanConfiguration = ScanConfiguration().apply {
             backgroundColor = ContextCompat.getColor(this@startScanFlow, R.color.previewBackground)
@@ -107,7 +108,7 @@ object GeniusScanUtils {
         scanWithConfiguration(scanConfiguration, resultLauncher)
     }
 
-    fun Fragment.scanResultProcessing(intent: Intent, folder: File?) {
+    override fun Fragment.scanResultProcessing(intent: Intent, folder: File?) {
         try {
             val geniusScanFile = intent.getScanResult().multiPageDocument!!
             val newName = "scan_${Date().format(FORMAT_NEW_FILE)}.${geniusScanFile.extension}"
