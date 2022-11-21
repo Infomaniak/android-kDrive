@@ -17,24 +17,6 @@
  */
 package com.infomaniak.drive
 
-import android.content.Context
-import android.content.DialogInterface
-import android.content.Intent
-import androidx.activity.result.ActivityResultLauncher
-import androidx.fragment.app.Fragment
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.infomaniak.drive.utils.IGeniusScanUtils
 
-object GeniusScanUtils {
-
-    fun Context.initGeniusScanSdk() = true
-
-    fun Context.startScanFlow(resultLauncher: ActivityResultLauncher<Intent>) {
-        MaterialAlertDialogBuilder(this, R.style.DialogStyle)
-            .setTitle(R.string.allErrorFeatureNotAvailableInFdroid)
-            .setPositiveButton("Ok") { _: DialogInterface?, _: Int -> }
-            .show()
-    }
-
-    fun Fragment.scanResultProcessing(intent: Intent, folderId: Int) = Unit
-
-}
+object GeniusScanUtils : IGeniusScanUtils

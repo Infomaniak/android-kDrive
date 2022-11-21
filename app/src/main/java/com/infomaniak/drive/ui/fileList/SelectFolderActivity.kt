@@ -45,8 +45,9 @@ class SelectFolderActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val userId = navigationArgs.userId
-        val driveId = navigationArgs.userDriveId
+        val driveId = navigationArgs.driveId
         val customArgs = navigationArgs.customArgs
+        val currentFolderId = navigationArgs.folderId.getIntOrNull()
         val disabledFolderId = navigationArgs.disabledFolderId.getIntOrNull()
         val currentUserDrive = UserDrive(userId, driveId)
 
@@ -62,7 +63,7 @@ class SelectFolderActivity : BaseActivity() {
         setContentView(R.layout.activity_select_folder)
         setSaveButton(customArgs)
 
-        disabledFolderId?.let { folderId ->
+        currentFolderId?.let { folderId ->
             // Simply navigate when the folder exists in the local database
             FileController.getFileProxyById(folderId, customRealm = mainViewModel.realm)?.let {
                 initiateNavigationToCurrentFolder(folderId, currentUserDrive)
@@ -127,11 +128,6 @@ class SelectFolderActivity : BaseActivity() {
 
     fun hideSaveButton() {
         saveButton.isGone = true
-    }
-
-    companion object {
-        const val BULK_OPERATION_CUSTOM_TAG = "bulk_operation_type"
-        const val ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG = "are_all_from_the_same_folder"
     }
 
     class SelectFolderViewModel : ViewModel() {

@@ -52,6 +52,7 @@ import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
+import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragmentArgs
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.lib.core.utils.DownloadManagerUtils
@@ -225,9 +226,10 @@ object Utils {
             putExtras(
                 SelectFolderActivityArgs(
                     userId = AccountUtils.currentUserId,
-                    userDriveId = AccountUtils.currentDriveId,
+                    driveId = AccountUtils.currentDriveId,
+                    folderId = disabledFolderId ?: -1,
                     disabledFolderId = disabledFolderId ?: -1,
-                    customArgs = bundleOf(SelectFolderActivity.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE)
+                    customArgs = bundleOf(MultiSelectFragment.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE)
                 ).toBundle()
             )
             selectFolderResultLauncher.launch(this)

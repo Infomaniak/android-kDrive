@@ -44,8 +44,6 @@ import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
-import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG
-import com.infomaniak.drive.ui.fileList.SelectFolderActivity.Companion.BULK_OPERATION_CUSTOM_TAG
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSelectResult
 import com.infomaniak.drive.utils.AccountUtils
@@ -194,7 +192,8 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             putExtras(
                 SelectFolderActivityArgs(
                     userId = AccountUtils.currentUserId,
-                    userDriveId = AccountUtils.currentDriveId,
+                    driveId = AccountUtils.currentDriveId,
+                    folderId = mainViewModel.currentFolder.value?.id ?: -1,
                     customArgs = bundleOf(BULK_OPERATION_CUSTOM_TAG to BulkOperationType.COPY)
                 ).toBundle()
             )
@@ -207,7 +206,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             putExtras(
                 SelectFolderActivityArgs(
                     userId = AccountUtils.currentUserId,
-                    userDriveId = AccountUtils.currentDriveId,
+                    driveId = AccountUtils.currentDriveId,
                     customArgs = bundleOf(
                         BULK_OPERATION_CUSTOM_TAG to BulkOperationType.RESTORE_IN,
                         ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG to false,
@@ -510,5 +509,10 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
 
         val name = "bulk" + (if (modifiedFileNumber == 1) "Single" else "") + action.toMatomoString()
         trackEvent(category, name, value = modifiedFileNumber.toFloat())
+    }
+
+    companion object {
+        const val BULK_OPERATION_CUSTOM_TAG = "bulk_operation_type"
+        const val ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG = "are_all_from_the_same_folder"
     }
 }

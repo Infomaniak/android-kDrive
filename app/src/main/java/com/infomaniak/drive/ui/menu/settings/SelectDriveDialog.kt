@@ -26,6 +26,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.menu.UserAdapter
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.setUserView
@@ -38,7 +39,6 @@ class SelectDriveDialog : FullScreenBottomSheetDialog() {
 
     private val selectDriveViewModel: SelectDriveViewModel by activityViewModels()
     private lateinit var popupLayout: View
-    private lateinit var selectedUser: User
     private lateinit var popupWindow: PopupWindow
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -46,44 +46,45 @@ class SelectDriveDialog : FullScreenBottomSheetDialog() {
         return inflater.inflate(R.layout.fragment_bottom_sheet_select_drive, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(selectDriveViewModel) {
         super.onViewCreated(view, savedInstanceState)
-        selectedUser = AccountUtils.currentUser!!
 
-        toolbar.setNavigationOnClickListener {
+        toolbar.setNavigationOnClickListener { dismiss() }
+
+        val driveListAdapter = DriveListAdapter(getDriveList(), false) { newSelectedDrive ->
+            selectedDrive.value = newSelectedDrive
             dismiss()
         }
-
-        val driveListAdapter =
-            DriveListAdapter(DriveInfosController.getDrives(selectedUser.id), false) { selectedDrive ->
-                selectDriveViewModel.selectedUserId.value = selectedUser.id
-                selectDriveViewModel.selectedDrive.value = selectedDrive
-                dismiss()
-            }
         driveList.adapter = driveListAdapter
 
         AccountUtils.getAllUsers().observe(viewLifecycleOwner) { users ->
             if (users.size > 1) {
+                val selectedUser = users.find { it.id == selectedUserId.value } ?: users.first()
                 userCardview.setUserView(selectedUser) {
-                    popupWindow = PopupWindow(popupLayout, userCardview.width, ViewGroup.LayoutParams.WRAP_CONTENT)
-                    popupWindow.isOutsideTouchable = true
-                    popupWindow.isFocusable = true
-                    popupWindow.elevation = 20.0f
-                    popupWindow.showAsDropDown(userCardview)
+                    popupWindow = PopupWindow(popupLayout, userCardview.width, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                        isOutsideTouchable = true
+                        isFocusable = true
+                        elevation = 20.0f
+                        showAsDropDown(userCardview)
+                    }
                 }
                 userCardview.isVisible = true
 
                 popupLayout.usersRecyclerView.adapter = UserAdapter(users as ArrayList<User>, isCardview = false) { user ->
-                    selectedUser = user
-                    driveListAdapter.setDrives(DriveInfosController.getDrives((selectedUser.id)))
+                    selectedUserId.value = user.id
+                    driveListAdapter.setDrives(getDriveList())
 
-                    userCardview.setUserView(user) {
-                        popupWindow.showAsDropDown(userCardview)
-                    }
+                    userCardview.setUserView(user) { popupWindow.showAsDropDown(userCardview) }
 
                     popupWindow.dismiss()
                 }
+            } else {
+                selectedUserId.value = users.first().id
             }
         }
+    }
+
+    private fun SelectDriveViewModel.getDriveList(): ArrayList<Drive> {
+        return DriveInfosController.getDrives(selectedUserId.value, sharedWithMe = if (showSharedWithMe) null else false)
     }
 }
