@@ -289,7 +289,6 @@ open class FileAdapter(
                 else -> displayFilePreview()
             }
 
-            setupFileChecked(file)
             setupMenuButton(file)
             setupCardClicksListeners(file, position)
         }
@@ -313,10 +312,6 @@ open class FileAdapter(
     private fun MaterialCardView.displayFilePreview() {
         filePreview.isVisible = true
         fileChecked.isGone = true
-    }
-
-    private fun MaterialCardView.setupFileChecked(file: File) {
-        fileChecked.apply { setOnClickListener { onFileSelected(file, isChecked) } }
     }
 
     private fun MaterialCardView.setupMenuButton(file: File) {
