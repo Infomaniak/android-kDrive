@@ -20,7 +20,6 @@ package com.infomaniak.drive.data.models
 import android.content.Context
 import android.net.Uri
 import android.os.Parcelable
-import android.webkit.MimeTypeMap
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.work.WorkInfo
@@ -41,6 +40,7 @@ import com.infomaniak.drive.utils.Utils.INDETERMINATE_PROGRESS
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.BuildConfig
 import com.infomaniak.lib.core.utils.contains
+import com.infomaniak.lib.core.utils.guessMimeType
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.RealmResults
@@ -304,10 +304,7 @@ open class File(
         } != null
     }
 
-    fun getMimeType(): String {
-        val fileExtension = name.substringAfterLast(".")
-        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension) ?: "*/*"
-    }
+    fun getMimeType(): String = name.guessMimeType()
 
     enum class Type(val value: String) {
         FILE("file"),
