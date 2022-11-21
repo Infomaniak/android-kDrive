@@ -680,9 +680,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             BulkOperationType.COLOR_FOLDER,
             BulkOperationType.ADD_OFFLINE,
             BulkOperationType.REMOVE_OFFLINE,
-            BulkOperationType.REMOVE_FAVORITES -> {
-                // No-op
-            }
+            BulkOperationType.REMOVE_FAVORITES -> Unit
         }
     }
 

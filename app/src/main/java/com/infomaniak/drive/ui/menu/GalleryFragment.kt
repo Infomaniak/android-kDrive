@@ -268,9 +268,7 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY) {
             BulkOperationType.ADD_OFFLINE, BulkOperationType.REMOVE_OFFLINE,
             BulkOperationType.MOVE,
             BulkOperationType.COLOR_FOLDER,
-            BulkOperationType.RESTORE_IN, BulkOperationType.RESTORE_TO_ORIGIN, BulkOperationType.DELETE_PERMANENTLY -> {
-                // No-op
-            }
+            BulkOperationType.RESTORE_IN, BulkOperationType.RESTORE_TO_ORIGIN, BulkOperationType.DELETE_PERMANENTLY -> Unit
         }
     }
 
