@@ -19,7 +19,7 @@ package com.infomaniak.drive.data.api
 
 import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
-import com.infomaniak.drive.data.api.ApiRoutes.activitiesWithQuery
+import com.infomaniak.drive.data.api.ApiRoutes.activitiesWithExtraQuery
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
 import com.infomaniak.drive.data.models.drive.Category
@@ -108,7 +108,7 @@ object ApiRepository : ApiRepositoryCore() {
         forFileList: Boolean,
         okHttpClient: OkHttpClient = HttpClient.okHttpClientLongTimeout,
     ): ApiResponse<ArrayList<FileActivity>> {
-        val queries = if (forFileList) "&depth=children&from_date=${file.responseAt}&$activitiesWithQuery" else "&with=user"
+        val queries = if (forFileList) "&depth=children&from_date=${file.responseAt}&$activitiesWithExtraQuery" else "&with=user"
         val url = "${ApiRoutes.getFileActivities(file)}?${pagination(page)}$queries$ACTIONS" +
                 if (forFileList) "" else ADDITIONAL_ACTIONS
         return callApi(url, GET, okHttpClient = okHttpClient)
