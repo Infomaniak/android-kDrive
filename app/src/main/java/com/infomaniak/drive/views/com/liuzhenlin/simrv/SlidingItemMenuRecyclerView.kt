@@ -290,9 +290,7 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(
             val translationX = currentItem.getChildAt(0).translationX
             val itemMenuWidth = currentItem.getTag(TAG_ITEM_MENU_WIDTH) as Int
             when (translationX) {
-                0.0f -> { // itemView's menu is closed
-                    // No-op
-                }
+                0.0f -> Unit // itemView's menu is closed
                 -itemMenuWidth.toFloat() -> { // itemView's menu is totally opened
                     fullyOpenedItem = currentItem
                 }
