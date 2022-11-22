@@ -20,6 +20,7 @@ package com.infomaniak.drive.utils
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.drive.*
 import com.infomaniak.drive.data.models.file.FileConversion
+import com.infomaniak.drive.data.models.file.FileExternalImport
 import com.infomaniak.drive.data.models.file.FileVersion
 import com.infomaniak.drive.data.models.file.dropbox.DropBoxCapabilities
 import com.infomaniak.drive.data.models.file.dropbox.DropBoxSize
@@ -32,7 +33,7 @@ object RealmModules {
     @RealmModule(
         classes = [
             File::class, Rights::class, FileActivity::class, FileCategory::class,
-            ShareLink::class, DropBox::class, FileVersion::class, FileConversion::class,
+            ShareLink::class, DropBox::class, FileVersion::class, FileConversion::class, FileExternalImport::class,
             DropBoxCapabilities::class, ShareLinkCapabilities::class, DropBoxValidity::class, DropBoxSize::class
         ]
     )

@@ -111,6 +111,7 @@ object ApiRepository : ApiRepositoryCore() {
         val queries = if (forFileList) "&depth=children&from_date=${file.responseAt}&$activitiesWithExtraQuery" else "&with=user"
         val url = "${ApiRoutes.getFileActivities(file)}?${pagination(page)}$queries$ACTIONS" +
                 if (forFileList) "" else ADDITIONAL_ACTIONS
+
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 

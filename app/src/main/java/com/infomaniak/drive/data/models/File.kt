@@ -32,6 +32,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.file.FileConversion
+import com.infomaniak.drive.data.models.file.FileExternalImport
 import com.infomaniak.drive.data.models.file.FileVersion
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmListParceler.FileRealmListParceler
@@ -93,6 +94,7 @@ open class File(
     @SerializedName("color")
     private var _color: String? = null,
     var dropbox: DropBox? = null,
+    var externalImport: FileExternalImport? = null,
 
     /**
      * FILE ONLY
