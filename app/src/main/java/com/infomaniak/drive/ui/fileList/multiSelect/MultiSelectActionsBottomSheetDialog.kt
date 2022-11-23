@@ -36,6 +36,7 @@ import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialog.Companion.openColorFolderBottomSheetDialog
+import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialog.Companion.openManageCategoriesBottomSheetDialog
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.BulkOperationsUtils
 import com.infomaniak.drive.utils.DrivePermissions
@@ -60,6 +61,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
             fileIds.size in 1..BulkOperationsUtils.MIN_SELECTED && !isAllSelected
         }
 
+        configureManageCategories(areIndividualActionsVisible)
         configureAddFavorites(areIndividualActionsVisible)
         configureColoredFolder(areIndividualActionsVisible)
         configureAvailableOffline()
@@ -69,6 +71,21 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         configureRestoreFileIn()
         configureRestoreFileToOriginalPlace()
         configureDeletePermanently()
+    }
+
+    protected open fun configureManageCategories(areIndividualActionsVisible: Boolean) {
+        if (areIndividualActionsVisible) {
+            disabledManageCategories.isGone = computeManageCategoriesAvailability()
+            manageCategories.apply {
+                setOnClickListener { onActionSelected(SelectDialogAction.MANAGE_CATEGORIES) }
+                isVisible = true
+            }
+        }
+    }
+
+    private fun computeManageCategoriesAvailability() = navigationArgs.fileIds.any {
+        val file = FileController.getFileProxyById(fileId = it, customRealm = mainViewModel.realm)
+        file?.isDisabled() == false
     }
 
     protected open fun configureAddFavorites(areIndividualActionsVisible: Boolean) {
@@ -89,7 +106,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
 
     protected open fun configureColoredFolder(areIndividualActionsVisible: Boolean) {
         if (areIndividualActionsVisible) {
-            disabledColoredFolder.isGone = computeColoredFolderAvailability(navigationArgs.fileIds)
+            disabledColoredFolder.isGone = computeColoredFolderAvailability()
             coloredFolder.apply {
                 setOnClickListener { onActionSelected(SelectDialogAction.COLOR_FOLDER) }
                 isVisible = true
@@ -97,11 +114,9 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         }
     }
 
-    private fun computeColoredFolderAvailability(fileIds: IntArray): Boolean {
-        return fileIds.any {
-            val file = FileController.getFileProxyById(fileId = it, customRealm = mainViewModel.realm)
-            file?.isAllowedToBeColored() == true
-        }
+    private fun computeColoredFolderAvailability() = navigationArgs.fileIds.any {
+        val file = FileController.getFileProxyById(fileId = it, customRealm = mainViewModel.realm)
+        file?.isAllowedToBeColored() == true
     }
 
     protected open fun configureAvailableOffline() {
@@ -199,9 +214,10 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
 
     fun onActionSelected(type: SelectDialogAction? = null) {
         val finalType = when (type) {
-            SelectDialogAction.COLOR_FOLDER -> BulkOperationType.COLOR_FOLDER
+            SelectDialogAction.MANAGE_CATEGORIES -> BulkOperationType.MANAGE_CATEGORIES
             SelectDialogAction.ADD_FAVORITES -> BulkOperationType.ADD_FAVORITES
             SelectDialogAction.REMOVE_FAVORITES -> BulkOperationType.REMOVE_FAVORITES
+            SelectDialogAction.COLOR_FOLDER -> BulkOperationType.COLOR_FOLDER
             SelectDialogAction.ADD_OFFLINE -> BulkOperationType.ADD_OFFLINE
             SelectDialogAction.REMOVE_OFFLINE -> BulkOperationType.REMOVE_OFFLINE
             SelectDialogAction.DUPLICATE -> BulkOperationType.COPY
@@ -217,6 +233,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
                 closeMultiSelect()
             } else {
                 when (finalType) {
+                    BulkOperationType.MANAGE_CATEGORIES -> openManageCategoriesBottomSheetDialog(navigationArgs.fileIds)
                     BulkOperationType.COLOR_FOLDER -> openColorFolderBottomSheetDialog(null)
                     BulkOperationType.COPY -> duplicateFiles()
                     BulkOperationType.MOVE -> {
@@ -234,6 +251,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
     }
 
     enum class SelectDialogAction {
+        MANAGE_CATEGORIES,
         ADD_FAVORITES, REMOVE_FAVORITES,
         ADD_OFFLINE, REMOVE_OFFLINE,
         DUPLICATE,

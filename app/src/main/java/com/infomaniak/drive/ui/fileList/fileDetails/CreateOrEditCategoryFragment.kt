@@ -25,49 +25,34 @@ import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import com.infomaniak.drive.MatomoDrive.trackCategoriesEvent
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
-import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.drive.Category
+import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.fileDetails.CreateOrEditCategoryAdapter.Companion.COLORS
-import com.infomaniak.drive.utils.find
 import com.infomaniak.drive.utils.getScreenSizeInDp
-import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.*
 import kotlinx.android.synthetic.main.fragment_create_or_edit_category.*
-import kotlinx.coroutines.Dispatchers
 import kotlin.math.max
 
 class CreateOrEditCategoryFragment : Fragment() {
 
+    private val mainViewModel: MainViewModel by activityViewModels()
     private val createOrEditCategoryViewModel: CreateOrEditCategoryViewModel by viewModels()
-    private val selectCategoriesViewModel: SelectCategoriesViewModel by viewModels()
     private val navigationArgs: CreateOrEditCategoryFragmentArgs by navArgs()
 
     private val colorsAdapter: CreateOrEditCategoryAdapter by lazy { CreateOrEditCategoryAdapter() }
-    private lateinit var file: File
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         inflater.inflate(R.layout.fragment_create_or_edit_category, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(navigationArgs) {
         super.onViewCreated(view, savedInstanceState)
-
-        file = FileController.getFileById(fileId) ?: run {
-            findNavController().popBackStack()
-            return@with
-        }
 
         setCategoryName()
         configureColorsAdapter()
@@ -77,6 +62,10 @@ class CreateOrEditCategoryFragment : Fragment() {
         appBarTitle.title = getString(if (isCreateCategory) R.string.createCategoryTitle else R.string.editCategoryTitle)
         editCategoryWarning.isGone = isCreateCategory
         setSaveButton(isCreateCategory)
+
+        createOrEditCategoryViewModel.init(filesIds).observe(viewLifecycleOwner) { hasNoFiles ->
+            if (hasNoFiles) findNavController().popBackStack()
+        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -128,12 +117,12 @@ class CreateOrEditCategoryFragment : Fragment() {
         val screenWidth = requireActivity().getScreenSizeInDp().x
         val margins = resources.getDimensionPixelSize(R.dimen.marginStandardSmall).toDp() * 2
         val expectedItemSize = resources.getDimensionPixelSize(R.dimen.coloredChipSize).toDp()
+
         return max(minNumberOfColumns, (screenWidth - margins) / expectedItemSize)
     }
 
-    private fun createCategory() {
-        createOrEditCategoryViewModel.createCategory(
-            driveId = file.driveId,
+    private fun createCategory() = with(createOrEditCategoryViewModel) {
+        createCategory(
             name = categoryNameValueInput.text.toString(),
             color = COLORS[colorsAdapter.selectedPosition],
         ).observe(viewLifecycleOwner) { apiResponse ->
@@ -149,25 +138,10 @@ class CreateOrEditCategoryFragment : Fragment() {
     }
 
     private fun addCategory(categoryId: Int) {
-        selectCategoriesViewModel.addCategory(file, categoryId)
-            .observe(viewLifecycleOwner) { apiResponse ->
-                with(apiResponse) {
-                    if (isSuccess()) {
-                        findNavController().popBackStack()
-                    } else {
-                        saveButton.hideProgress(R.string.buttonSave)
-                        SnackbarUtils.showSnackbar(requireView(), translateError())
-                    }
-                }
-            }
-    }
-
-    private fun editCategory(categoryId: Int) {
-        createOrEditCategoryViewModel.editCategory(
-            driveId = file.driveId,
+        mainViewModel.manageCategory(
             categoryId = categoryId,
-            name = categoryNameValueInput.text.toString().let { if (it.isEmpty()) null else it },
-            color = COLORS[colorsAdapter.selectedPosition],
+            files = createOrEditCategoryViewModel.selectedFiles,
+            isAdding = true
         ).observe(viewLifecycleOwner) { apiResponse ->
             with(apiResponse) {
                 if (isSuccess()) {
@@ -180,29 +154,18 @@ class CreateOrEditCategoryFragment : Fragment() {
         }
     }
 
-    internal class CreateOrEditCategoryViewModel : ViewModel() {
-
-        fun createCategory(driveId: Int, name: String, color: String): LiveData<ApiResponse<Category>> {
-            return liveData(Dispatchers.IO) {
-                with(ApiRepository.createCategory(driveId, name, color)) {
-                    if (isSuccess()) DriveInfosController.updateDrive { it.categories.add(data) }
-                    emit(this)
-                }
-            }
-        }
-
-        fun editCategory(driveId: Int, categoryId: Int, name: String?, color: String): LiveData<ApiResponse<Category>> {
-            return liveData(Dispatchers.IO) {
-                with(ApiRepository.editCategory(driveId, categoryId, name, color)) {
-                    if (isSuccess()) {
-                        DriveInfosController.updateDrive { localDrive ->
-                            localDrive.categories.apply {
-                                find(categoryId)?.deleteFromRealm()
-                                add(data)
-                            }
-                        }
-                    }
-                    emit(this)
+    private fun editCategory(categoryId: Int) {
+        createOrEditCategoryViewModel.editCategory(
+            categoryId = categoryId,
+            name = categoryNameValueInput.text.toString().let { it.ifEmpty { null } },
+            color = COLORS[colorsAdapter.selectedPosition],
+        ).observe(viewLifecycleOwner) { apiResponse ->
+            with(apiResponse) {
+                if (isSuccess()) {
+                    findNavController().popBackStack()
+                } else {
+                    saveButton.hideProgress(R.string.buttonSave)
+                    SnackbarUtils.showSnackbar(requireView(), translateError())
                 }
             }
         }

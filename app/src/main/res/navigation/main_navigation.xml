@@ -185,9 +185,6 @@
         <action
             android:id="@+id/action_fileInfoActionsBottomSheetDialog_to_downloadProgressDialog"
             app:destination="@id/downloadProgressDialog" />
-        <action
-            android:id="@+id/action_fileInfoActionsBottomSheetDialog_to_selectCategoriesFragment"
-            app:destination="@id/selectCategoriesFragment" />
     </dialog>
 
     <dialog
@@ -874,9 +871,10 @@
         android:label="SelectCategoriesFragment"
         tools:layout="@layout/fragment_select_categories">
         <argument
-            android:name="fileId"
-            android:defaultValue="-1"
-            app:argType="integer" />
+            android:name="filesIds"
+            android:defaultValue="@null"
+            app:argType="integer[]"
+            app:nullable="true" />
         <argument
             android:name="categories"
             android:defaultValue="@null"
@@ -918,8 +916,10 @@
         android:label="CategoryInfoActionsBottomSheetDialog"
         tools:layout="@layout/fragment_bottom_sheet_category_info_actions">
         <argument
-            android:name="fileId"
-            app:argType="integer" />
+            android:name="filesIds"
+            android:defaultValue="@null"
+            app:argType="integer[]"
+            app:nullable="true" />
         <argument
             android:name="categoryId"
             app:argType="integer" />
@@ -943,8 +943,10 @@
         android:label="CreateOrEditCategoryFragment"
         tools:layout="@layout/fragment_create_or_edit_category">
         <argument
-            android:name="fileId"
-            app:argType="integer" />
+            android:name="filesIds"
+            android:defaultValue="@null"
+            app:argType="integer[]"
+            app:nullable="true" />
         <argument
             android:name="categoryIsPredefined"
             android:defaultValue="false"

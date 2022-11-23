@@ -48,6 +48,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.*
 
 class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
@@ -259,6 +260,32 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     fun updateFolderColor(file: File, color: String) = liveData(Dispatchers.IO) {
         emit(FileController.updateFolderColor(file, color))
+    }
+
+    fun manageCategory(categoryId: Int, files: List<File>, isAdding: Boolean) = liveData(Dispatchers.IO) {
+        with(manageCategoryApiCall(files, categoryId, isAdding)) {
+            data?.forEach { feedbackResource ->
+                if (feedbackResource.result) {
+                    FileController.updateFile(feedbackResource.id) {
+                        if (isAdding) {
+                            it.categories.add(FileCategory(categoryId, userId = AccountUtils.currentUserId, addedAt = Date()))
+                        } else {
+                            it.categories.find(categoryId)?.deleteFromRealm()
+                        }
+                    }
+                }
+            }
+
+            emit(this)
+        }
+    }
+
+    private fun manageCategoryApiCall(
+        files: List<File>,
+        categoryId: Int,
+        isAdding: Boolean,
+    ): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Unit>>> {
+        return if (isAdding) ApiRepository.addCategory(files, categoryId) else ApiRepository.removeCategory(files, categoryId)
     }
 
     fun deleteFile(file: File, userDrive: UserDrive? = null, onSuccess: ((fileId: Int) -> Unit)? = null) =

@@ -362,6 +362,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                     updateMultiSelectMediator(mediator),
                 )
             }
+            BulkOperationType.MANAGE_CATEGORIES -> Unit
             BulkOperationType.COLOR_FOLDER -> {
                 if (color != null && file.isAllowedToBeColored()) {
                     mediator.addSource(

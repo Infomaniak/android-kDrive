@@ -25,6 +25,10 @@ class SharedWithMeMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottom
     matomoCategory = SharedWithMeFragment.MATOMO_CATEGORY,
 ) {
 
+    override fun configureManageCategories(areIndividualActionsVisible: Boolean) {
+        manageCategories.isGone = true
+    }
+
     override fun configureAddFavorites(areIndividualActionsVisible: Boolean) {
         addFavorites.isGone = true
     }

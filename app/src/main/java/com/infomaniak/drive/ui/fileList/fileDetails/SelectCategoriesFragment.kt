@@ -27,6 +27,7 @@ import androidx.core.text.HtmlCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -34,10 +35,9 @@ import com.infomaniak.drive.MatomoDrive.trackCategoriesEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Category
-import com.infomaniak.drive.data.models.drive.CategoryRights
+import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.SelectedState
@@ -55,55 +55,47 @@ import java.util.*
 
 class SelectCategoriesFragment : Fragment() {
 
+    private val mainViewModel: MainViewModel by activityViewModels()
     private val selectCategoriesViewModel: SelectCategoriesViewModel by viewModels()
     private val navigationArgs: SelectCategoriesFragmentArgs by navArgs()
 
     private lateinit var categoriesAdapter: CategoriesAdapter
-    private lateinit var usageMode: CategoriesUsageMode
-    private lateinit var file: File
-    private lateinit var selectedCategories: List<Category>
 
     private val driveId: Int by lazy { navigationArgs.userDrive?.driveId ?: AccountUtils.currentDriveId }
+    private val usageMode: CategoriesUsageMode by lazy { navigationArgs.categoriesUsageMode }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         inflater.inflate(R.layout.fragment_select_categories, container, false)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(navigationArgs) {
         super.onViewCreated(view, savedInstanceState)
 
-        with(navigationArgs) {
-            usageMode = categoriesUsageMode
-
-            if (usageMode == SELECTED_CATEGORIES) {
-                selectedCategories = DriveInfosController.getCategoriesFromIds(driveId, categories?.toTypedArray() ?: arrayOf())
-            } else {
-                file = FileController.getFileById(fileId, userDrive = userDrive) ?: run {
-                    findNavController().popBackStack()
-                    return
+        selectCategoriesViewModel.init(
+            usageMode,
+            categories,
+            filesIds,
+            userDrive ?: UserDrive()
+        ).observe(viewLifecycleOwner) { isSuccess ->
+            if (isSuccess) {
+                with(selectCategoriesViewModel.categoryRights) {
+                    setCategoriesAdapter(canEditCategory, canDeleteCategory)
+                    setAddCategoryButton(canCreateCategory)
+                    configureSearchView(canCreateCategory)
                 }
+
+                configureToolbar()
+                requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { setBackNavResult() }
+                createCategoryRow.setOnClickListener { navigateToCreateCategory() }
+                setBackActionHandlers()
+            } else {
+                findNavController().popBackStack()
             }
         }
-
-        val categoryRights = if (usageMode == MANAGED_CATEGORIES) {
-            DriveInfosController.getCategoryRights(driveId)
-        } else {
-            CategoryRights()
-        }
-        with(categoryRights) {
-            setCategoriesAdapter(canEditCategory, canDeleteCategory)
-            setAddCategoryButton(canCreateCategory)
-            configureSearchView(canCreateCategory)
-        }
-
-        configureToolbar()
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { setBackNavResult() }
-        createCategoryRow.setOnClickListener { navigateToCreateCategory() }
-        setBackActionHandlers()
     }
 
     private fun setCategoriesAdapter(canEditCategory: Boolean, canDeleteCategory: Boolean) {
         categoriesAdapter = CategoriesAdapter(
-            onCategoryChanged = { id, isSelected -> if (isSelected) addCategory(id) else removeCategory(id) }
+            onCategoryChanged = { id, isSelected -> manageCategory(id, isAdding = isSelected) }
         ).apply {
             this.canEditCategory = canEditCategory
             this.canDeleteCategory = canDeleteCategory
@@ -167,7 +159,7 @@ class SelectCategoriesFragment : Fragment() {
 
     private fun CategoriesAdapter.updateFileCategoriesModeUi() {
         val uiCategories = DriveInfosController.getDriveCategories(driveId).map { category ->
-            val fileCategory = file.categories.find { it.categoryId == category.id }
+            val fileCategory = selectCategoriesViewModel.filesCategories.find { it.categoryId == category.id }
             createUiCategory(
                 category = category,
                 selectedState = if (fileCategory == null) SelectedState.NOT_SELECTED else SelectedState.SELECTED,
@@ -182,7 +174,7 @@ class SelectCategoriesFragment : Fragment() {
                 safeNavigate(
                     R.id.categoryInfoActionsBottomSheetDialog,
                     CategoryInfoActionsBottomSheetDialogArgs(
-                        fileId = file.id,
+                        filesIds = navigationArgs.filesIds,
                         categoryId = id,
                         categoryName = name,
                         categoryColor = color,
@@ -195,7 +187,7 @@ class SelectCategoriesFragment : Fragment() {
 
     private fun CategoriesAdapter.updateSelectedCategoriesModeUi() {
         val uiCategories = DriveInfosController.getDriveCategories(driveId).map { category ->
-            val selectedCategory = selectedCategories.find { it.id == category.id }
+            val selectedCategory = selectCategoriesViewModel.selectedCategories.find { it.id == category.id }
             createUiCategory(
                 category = category,
                 selectedState = if (selectedCategory == null) SelectedState.NOT_SELECTED else SelectedState.SELECTED,
@@ -220,7 +212,7 @@ class SelectCategoriesFragment : Fragment() {
     private fun navigateToCreateCategory() {
         safeNavigate(
             SelectCategoriesFragmentDirections.actionSelectCategoriesFragmentToCreateOrEditCategoryFragment(
-                fileId = file.id,
+                filesIds = navigationArgs.filesIds,
                 categoryId = CreateOrEditCategoryFragment.CREATE_CATEGORY_ID,
                 categoryName = searchView.text.toString(),
                 categoryColor = null,
@@ -258,27 +250,19 @@ class SelectCategoriesFragment : Fragment() {
         createCategoryRowSeparator.isVisible = isVisible && categoriesAdapter.filteredCategories.isNotEmpty()
     }
 
-    private fun addCategory(id: Int) {
-        trackCategoriesEvent("assign")
+    private fun manageCategory(categoryId: Int, isAdding: Boolean) {
+        trackCategoriesEvent(if (isAdding) "assign" else "remove")
         if (usageMode == SELECTED_CATEGORIES) {
-            categoriesAdapter.selectCategory(id, true, usageMode)
+            categoriesAdapter.selectCategory(categoryId, isAdding, usageMode)
             return
         }
 
-        selectCategoriesViewModel.addCategory(file, id).observe(viewLifecycleOwner) { apiResponse ->
-            updateAdapterAfterAddingOrRemovingCategory(id, apiResponse, true)
-        }
-    }
-
-    private fun removeCategory(id: Int) {
-        trackCategoriesEvent("remove")
-        if (usageMode == SELECTED_CATEGORIES) {
-            categoriesAdapter.selectCategory(id, false, usageMode)
-            return
-        }
-
-        selectCategoriesViewModel.removeCategory(file, id).observe(viewLifecycleOwner) { apiResponse ->
-            updateAdapterAfterAddingOrRemovingCategory(id, apiResponse, false)
+        mainViewModel.manageCategory(
+            categoryId = categoryId,
+            files = selectCategoriesViewModel.selectedFiles,
+            isAdding = isAdding
+        ).observe(viewLifecycleOwner) { apiResponse ->
+            updateAdapterAfterAddingOrRemovingCategory(categoryId, apiResponse, isAdding)
         }
     }
 

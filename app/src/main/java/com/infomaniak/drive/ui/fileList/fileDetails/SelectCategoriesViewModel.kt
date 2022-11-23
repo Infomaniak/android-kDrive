@@ -20,41 +20,69 @@ package com.infomaniak.drive.ui.fileList.fileDetails
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
-import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileCategory
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.find
-import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.drive.Category
+import com.infomaniak.drive.data.models.drive.CategoryRights
 import kotlinx.coroutines.Dispatchers
-import java.util.*
 
 class SelectCategoriesViewModel : ViewModel() {
 
-    fun addCategory(file: File, categoryId: Int): LiveData<ApiResponse<Unit>> {
-        return liveData(Dispatchers.IO) {
-            with(ApiRepository.addCategory(file, categoryId)) {
-                if (isSuccess()) {
-                    FileController.updateFile(file.id) {
-                        it.categories.add(FileCategory(categoryId, userId = AccountUtils.currentUserId, addedAt = Date()))
-                    }
-                }
-                emit(this)
+    lateinit var categoryRights: CategoryRights
+    lateinit var filesCategories: List<FileCategory>
+    lateinit var selectedCategories: List<Category>
+    lateinit var selectedFiles: List<File>
+
+    fun init(
+        usageMode: CategoriesUsageMode,
+        categories: IntArray?,
+        filesIds: IntArray?,
+        userDrive: UserDrive,
+    ): LiveData<Boolean> = liveData(Dispatchers.IO) {
+
+        categoryRights = if (usageMode == CategoriesUsageMode.SELECTED_CATEGORIES) {
+            selectedCategories = DriveInfosController.getCategoriesFromIds(
+                userDrive.driveId,
+                categories?.toTypedArray() ?: emptyArray()
+            )
+
+            CategoryRights()
+        } else {
+            selectedFiles = filesIds?.toList()?.mapNotNull { fileId ->
+                FileController.getFileById(fileId, userDrive)
+            } ?: emptyList()
+
+            if (selectedFiles.isEmpty()) {
+                emit(false)
+                return@liveData
             }
+
+            DriveInfosController.getCategoryRights(userDrive.driveId)
         }
+
+        filesCategories = findCommonCategoriesOfFiles()
+
+        emit(true)
     }
 
-    fun removeCategory(file: File, categoryId: Int): LiveData<ApiResponse<Boolean>> {
-        return liveData(Dispatchers.IO) {
-            with(ApiRepository.removeCategory(file, categoryId)) {
-                if (isSuccess()) {
-                    FileController.updateFile(file.id) { localFile ->
-                        localFile.categories.find(categoryId)?.deleteFromRealm()
-                    }
-                }
-                emit(this)
-            }
+    private fun findCommonCategoriesOfFiles(): List<FileCategory> {
+        if (selectedFiles.size == 1) return selectedFiles.single().categories
+
+        fun File.getCategoriesMap() = categories.associateBy { it.categoryId }
+
+        var categoryIdsInCommon = selectedFiles.firstOrNull()?.getCategoriesMap() ?: return emptyList()
+
+        selectedFiles.forEachIndexed { index, file ->
+            if (file.categories.isEmpty() || categoryIdsInCommon.isEmpty()) return emptyList()
+            if (index == 0) return@forEachIndexed
+
+            val fileCategoriesMap = file.getCategoriesMap()
+            categoryIdsInCommon = categoryIdsInCommon.filterKeys { fileCategoriesMap.containsKey(it) }
         }
+
+        return categoryIdsInCommon.values.toList()
     }
 }

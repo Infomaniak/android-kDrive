@@ -29,6 +29,7 @@ import com.infomaniak.drive.data.models.upload.UploadSession
 import com.infomaniak.drive.data.models.upload.UploadSession.StartSessionBody
 import com.infomaniak.drive.data.models.upload.UploadSession.StartUploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.api.ApiRepositoryCore
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
@@ -327,20 +328,25 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.category(driveId, categoryId), DELETE)
     }
 
-    fun addCategory(file: File, categoryId: Int): ApiResponse<Unit> {
+    fun addCategory(file: File, categoryId: Int): ApiResponse<ShareableItems.FeedbackAccessResource<Int, Unit>> {
         return callApi(ApiRoutes.fileCategory(file, categoryId), POST)
     }
 
-    fun addCategory(driveId: Int, categoryId: Int, fileIds: List<Int>) {
-        return callApi(ApiRoutes.fileCategory(driveId, categoryId), POST, mapOf("file_ids" to fileIds))
+    fun addCategory(files: List<File>, categoryId: Int): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Unit>>> {
+        val driveId = files.firstOrNull()?.driveId ?: AccountUtils.currentDriveId
+        return callApi(ApiRoutes.fileCategory(driveId, categoryId), POST, mapOf("file_ids" to files.map { it.id }))
     }
 
     fun removeCategory(file: File, categoryId: Int): ApiResponse<Boolean> {
         return callApi(ApiRoutes.fileCategory(file, categoryId), DELETE)
     }
 
-    fun removeCategory(driveId: Int, categoryId: Int, fileIds: List<Int>): ApiResponse<Unit> {
-        return callApi(ApiRoutes.fileCategory(driveId, categoryId), DELETE, mapOf("file_ids" to fileIds))
+    fun removeCategory(
+        files: List<File>,
+        categoryId: Int,
+    ): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Unit>>> {
+        val driveId = files.firstOrNull()?.driveId ?: AccountUtils.currentDriveId
+        return callApi(ApiRoutes.fileCategory(driveId, categoryId), DELETE, mapOf("file_ids" to files.map { it.id }))
     }
 
     fun getLastActivities(driveId: Int, page: Int): ApiResponse<ArrayList<FileActivity>> {
