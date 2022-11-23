@@ -31,11 +31,10 @@ import kotlinx.coroutines.Dispatchers
 
 class SelectCategoriesViewModel : ViewModel() {
 
-    val filesCategories: List<FileCategory> by lazy { findCommonCategoriesOfFiles() }
-
-    lateinit var selectedFiles: List<File>
-    lateinit var selectedCategories: List<Category>
     lateinit var categoryRights: CategoryRights
+    lateinit var filesCategories: List<FileCategory>
+    lateinit var selectedCategories: List<Category>
+    lateinit var selectedFiles: List<File>
 
     fun init(
         usageMode: CategoriesUsageMode,
@@ -63,6 +62,8 @@ class SelectCategoriesViewModel : ViewModel() {
 
             DriveInfosController.getCategoryRights(userDrive.driveId)
         }
+
+        filesCategories = findCommonCategoriesOfFiles()
 
         emit(true)
     }

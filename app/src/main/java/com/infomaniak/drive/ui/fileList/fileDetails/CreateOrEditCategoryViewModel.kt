@@ -34,7 +34,7 @@ class CreateOrEditCategoryViewModel : ViewModel() {
 
     fun init(filesId: IntArray?): LiveData<Boolean> = liveData(Dispatchers.IO) {
         selectedFiles = filesId?.toList()?.mapNotNull { fileId -> FileController.getFileById(fileId) } ?: emptyList()
-        if (selectedFiles.isEmpty()) emit(true)
+        emit(selectedFiles.isEmpty())
     }
 
     fun createCategory(name: String, color: String) = liveData(Dispatchers.IO) {
