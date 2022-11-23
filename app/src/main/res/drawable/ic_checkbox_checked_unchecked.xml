@@ -39,7 +39,7 @@
                 android:propertyName="strokeColor"
                 android:valueFrom="@color/primary"
                 android:valueTo="@color/border"
-                android:valueType="intType" />
+                android:valueType="colorType" />
         </aapt:attr>
     </target>
 
@@ -51,7 +51,7 @@
                 android:propertyName="fillColor"
                 android:valueFrom="@color/primary"
                 android:valueTo="#00000000"
-                android:valueType="intType" />
+                android:valueType="colorType" />
         </aapt:attr>
     </target>
 
