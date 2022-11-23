@@ -25,23 +25,23 @@ class SharedWithMeMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottom
     matomoCategory = SharedWithMeFragment.MATOMO_CATEGORY,
 ) {
 
-    override fun configureColoredFolder(areIndividualActionsVisible: Boolean) {
-        coloredFolder.isGone = true
-    }
-
     override fun configureAddFavorites(areIndividualActionsVisible: Boolean) {
         addFavorites.isGone = true
+    }
+
+    override fun configureColoredFolder(areIndividualActionsVisible: Boolean) {
+        coloredFolder.isGone = true
     }
 
     override fun configureAvailableOffline() {
         availableOffline.isGone = true
     }
 
-    override fun configureDuplicateFile() {
-        duplicateFile.isGone = true
-    }
-
     override fun configureMoveFile() {
         moveFile.isGone = true
+    }
+
+    override fun configureDuplicateFile() {
+        duplicateFile.isGone = true
     }
 }

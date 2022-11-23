@@ -60,15 +60,31 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
             fileIds.size in 1..BulkOperationsUtils.MIN_SELECTED && !isAllSelected
         }
 
-        configureColoredFolder(areIndividualActionsVisible)
         configureAddFavorites(areIndividualActionsVisible)
+        configureColoredFolder(areIndividualActionsVisible)
         configureAvailableOffline()
         configureDownload()
-        configureDuplicateFile()
         configureMoveFile()
+        configureDuplicateFile()
         configureRestoreFileIn()
         configureRestoreFileToOriginalPlace()
         configureDeletePermanently()
+    }
+
+    protected open fun configureAddFavorites(areIndividualActionsVisible: Boolean) {
+        val (text, action) = with(navigationArgs) {
+            addFavoritesIcon.isEnabled = onlyFavorite
+            if (onlyFavorite) {
+                R.string.buttonRemoveFavorites to SelectDialogAction.REMOVE_FAVORITES
+            } else {
+                R.string.buttonAddFavorites to SelectDialogAction.ADD_FAVORITES
+            }
+        }
+        addFavoritesText.setText(text)
+        addFavorites.apply {
+            setOnClickListener { onActionSelected(action) }
+            isVisible = areIndividualActionsVisible
+        }
     }
 
     protected open fun configureColoredFolder(areIndividualActionsVisible: Boolean) {
@@ -85,22 +101,6 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         return fileIds.any {
             val file = FileController.getFileProxyById(fileId = it, customRealm = mainViewModel.realm)
             file?.isAllowedToBeColored() == true
-        }
-    }
-
-    protected open fun configureAddFavorites(areIndividualActionsVisible: Boolean) {
-        val (text, action) = with(navigationArgs) {
-            addFavoritesIcon.isEnabled = onlyFavorite
-            if (onlyFavorite) {
-                R.string.buttonRemoveFavorites to SelectDialogAction.REMOVE_FAVORITES
-            } else {
-                R.string.buttonAddFavorites to SelectDialogAction.ADD_FAVORITES
-            }
-        }
-        addFavoritesText.setText(text)
-        addFavorites.apply {
-            setOnClickListener { onActionSelected(action) }
-            isVisible = areIndividualActionsVisible
         }
     }
 
@@ -146,12 +146,12 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         }
     }
 
-    protected open fun configureDuplicateFile() {
-        duplicateFile.setOnClickListener { onActionSelected(SelectDialogAction.DUPLICATE) }
-    }
-
     protected open fun configureMoveFile() {
         moveFile.setOnClickListener { onActionSelected(SelectDialogAction.MOVE) }
+    }
+
+    protected open fun configureDuplicateFile() {
+        duplicateFile.setOnClickListener { onActionSelected(SelectDialogAction.DUPLICATE) }
     }
 
     protected open fun configureRestoreFileIn() {

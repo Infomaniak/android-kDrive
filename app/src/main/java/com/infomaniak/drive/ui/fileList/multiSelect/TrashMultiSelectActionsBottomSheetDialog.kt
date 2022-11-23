@@ -40,12 +40,12 @@ class TrashMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDi
         downloadFile.isGone = true
     }
 
-    override fun configureDuplicateFile() {
-        duplicateFile.isGone = true
-    }
-
     override fun configureMoveFile() {
         moveFile.isGone = true
+    }
+
+    override fun configureDuplicateFile() {
+        duplicateFile.isGone = true
     }
 
     override fun configureRestoreFileIn() {
