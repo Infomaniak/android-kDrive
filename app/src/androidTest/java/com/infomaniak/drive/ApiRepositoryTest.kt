@@ -470,12 +470,10 @@ class ApiRepositoryTest : KDriveTest() {
         @Test
         @DisplayName("Add a category to the test file, then delete this category")
         fun addCategoryToFile() {
-            // Create a test category
-            val category = createCategory(userDrive.driveId, "testAddCategory-$randomSuffix", "#FFF").data
-            assertNotNull(category)
+            val category = createCategoryForTest()
 
             // Add the category to the test file
-            addCategory(testFile, category!!.id)
+            addCategory(testFile, category.id)
             with(getFileDetails(testFile)) {
                 assertApiResponseData(this)
                 assertNotNull(data!!.categories.find { it.categoryId == category.id }, "The test category should be found")
@@ -485,18 +483,17 @@ class ApiRepositoryTest : KDriveTest() {
             deleteCategory(userDrive.driveId, category.id)
             with(getFileDetails(testFile)) {
                 assertApiResponseData(this)
-                assertTrue(data!!.categories.isNullOrEmpty(), "The test file should not have category")
+                assertTrue(data!!.categories.isEmpty(), "The test file should not have category")
             }
         }
 
         @Test
         @DisplayName("Add a category to the test file, then remove this category from the file")
         fun removeCategoryToFile() {
-            // Create a test category
-            val category = createCategory(userDrive.driveId, "testRemoveCategory-$randomSuffix", "#000").data
-            assertNotNull(category, "Category should not be null")
+            val category = createCategoryForTest()
+
             // Add the category to the test file
-            assertApiResponseData(addCategory(testFile, category!!.id))
+            assertApiResponseData(addCategory(testFile, category.id))
             // Remove the category
             assertApiResponseData(removeCategory(testFile, category.id))
             // Make sure the category is removed
@@ -506,6 +503,37 @@ class ApiRepositoryTest : KDriveTest() {
             }
             // Delete the test category
             deleteCategory(userDrive.driveId, category.id)
+        }
+
+        @Test
+        @DisplayName("Adds a category to several files, then removes and deletes it")
+        fun manageCategoryOnManyFiles() {
+            val files = listOf(testFile, createFileForTest())
+            val category = createCategoryForTest()
+
+            // assert adding the category worked
+            checkCategoryCallsOnFiles(files, category.id, true)
+
+            // assert removing the category worked
+            checkCategoryCallsOnFiles(files, category.id, false)
+
+            deleteCategory(userDrive.driveId, category.id)
+        }
+
+        private fun createCategoryForTest() = with(createCategory(userDrive.driveId, "testCategory-$randomSuffix", "#FFF")) {
+            assertNotNull(data, "Category should not be null")
+            data!!
+        }
+
+        private fun checkCategoryCallsOnFiles(files: List<File>, categoryId: Int, isAdding: Boolean) {
+            val apiResponse = if (isAdding) addCategory(files, categoryId) else removeCategory(files, categoryId)
+
+            with(apiResponse) {
+                assertApiResponseData(this)
+                assertEquals(files.size, data?.size, "The data should have the same size as the files list")
+
+                data?.forEach { assertTrue(it.result, "Error message :${it.message}") }
+            }
         }
     }
 

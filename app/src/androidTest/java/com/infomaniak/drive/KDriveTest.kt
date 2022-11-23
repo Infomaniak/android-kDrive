@@ -23,13 +23,10 @@ import androidx.test.runner.permission.PermissionRequester
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.addUser
 import com.infomaniak.drive.utils.AccountUtils.getUserById
 import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponseData
-import com.infomaniak.drive.utils.Env
-import com.infomaniak.drive.utils.KDriveHttpClient
-import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
@@ -82,7 +79,8 @@ open class KDriveTest {
             okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(user.id) }
 
             setUpRealm()
-            grantPermissions(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+
+            grantPermissions()
         }
 
         @AfterAll
@@ -119,9 +117,9 @@ open class KDriveTest {
             }
         }
 
-        private fun grantPermissions(vararg permissions: String) {
+        private fun grantPermissions() {
             PermissionRequester().apply {
-                addPermissions(*permissions)
+                addPermissions(*DrivePermissions.permissions)
                 requestPermissions()
             }
         }
