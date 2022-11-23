@@ -66,8 +66,8 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         configureColoredFolder(areIndividualActionsVisible)
         configureAvailableOffline()
         configureDownload()
-        configureDuplicateFile()
         configureMoveFile()
+        configureDuplicateFile()
         configureRestoreFileIn()
         configureRestoreFileToOriginalPlace()
         configureDeletePermanently()
@@ -161,12 +161,12 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         }
     }
 
-    protected open fun configureDuplicateFile() {
-        duplicateFile.setOnClickListener { onActionSelected(SelectDialogAction.DUPLICATE) }
-    }
-
     protected open fun configureMoveFile() {
         moveFile.setOnClickListener { onActionSelected(SelectDialogAction.MOVE) }
+    }
+
+    protected open fun configureDuplicateFile() {
+        duplicateFile.setOnClickListener { onActionSelected(SelectDialogAction.DUPLICATE) }
     }
 
     protected open fun configureRestoreFileIn() {
