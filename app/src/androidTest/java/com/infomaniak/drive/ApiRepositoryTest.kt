@@ -530,7 +530,7 @@ class ApiRepositoryTest : KDriveTest() {
 
             with(apiResponse) {
                 assertApiResponseData(this)
-                assertEquals(files.size, data?.size, "The data should have the same size as the files' list")
+                assertEquals(files.size, data?.size, "The data should have the same size as the files list")
 
                 data?.forEach { assertTrue(it.result, "Error message :${it.message}") }
             }
