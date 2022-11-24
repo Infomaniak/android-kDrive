@@ -22,8 +22,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.core.os.bundleOf
 import androidx.lifecycle.LiveData
-import com.facebook.stetho.okhttp3.StethoInterceptor
-import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
@@ -39,24 +37,20 @@ import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.auth.CredentialManager
 import com.infomaniak.lib.core.auth.TokenAuthenticator
-import com.infomaniak.lib.core.auth.TokenInterceptor
-import com.infomaniak.lib.core.auth.TokenInterceptorListener
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.room.UserDatabase
-import com.infomaniak.lib.login.ApiToken
 import io.sentry.Sentry
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.withLock
 import okhttp3.OkHttpClient
-import java.util.concurrent.TimeUnit
 
-object AccountUtils : CredentialManager {
+object AccountUtils : CredentialManager() {
 
     private const val DISABLE_AUTO_SYNC = "AccountUtils: disableAutoSync"
 
-    private lateinit var userDatabase: UserDatabase
+    override lateinit var userDatabase: UserDatabase
     var reloadApp: ((bundle: Bundle) -> Unit)? = null
 
     fun init(context: Context) {
@@ -64,7 +58,7 @@ object AccountUtils : CredentialManager {
         Sentry.setUser(io.sentry.protocol.User().apply { id = currentUserId.toString() })
     }
 
-    var currentUserId: Int = AppSettings.getAppSettings()._currentUserId
+    override var currentUserId: Int = AppSettings.getAppSettings()._currentUserId
         set(userId) {
             field = userId
             GlobalScope.launch(Dispatchers.IO) {
@@ -80,7 +74,7 @@ object AccountUtils : CredentialManager {
             }
         }
 
-    var currentUser: User? = null
+    override var currentUser: User? = null
         set(user) {
             field = user
             currentUserId = user?.id ?: -1
@@ -233,51 +227,6 @@ object AccountUtils : CredentialManager {
 
     fun getAllUsersSync(): List<User> = userDatabase.userDao().getAllSync()
 
-    suspend fun setUserToken(user: User?, apiToken: ApiToken) {
-        user?.let {
-            it.apiToken = apiToken
-            userDatabase.userDao().update(it)
-        }
-    }
-
-    suspend fun getHttpClientUser(userId: Int, timeout: Long?, onRefreshTokenError: (user: User) -> Unit): OkHttpClient {
-        var user = getUserById(userId)
-        return OkHttpClient.Builder().apply {
-            if (BuildConfig.DEBUG) {
-                addNetworkInterceptor(StethoInterceptor())
-            }
-            timeout?.let {
-                callTimeout(timeout, TimeUnit.SECONDS)
-                readTimeout(timeout, TimeUnit.SECONDS)
-                writeTimeout(timeout, TimeUnit.SECONDS)
-                connectTimeout(timeout, TimeUnit.SECONDS)
-            }
-            val tokenInterceptorListener = object : TokenInterceptorListener {
-                override suspend fun onRefreshTokenSuccess(apiToken: ApiToken) {
-                    setUserToken(user, apiToken)
-                    if (currentUserId == userId) {
-                        currentUser = user
-                    }
-                }
-
-                override suspend fun onRefreshTokenError() {
-                    user?.let {
-                        onRefreshTokenError(it)
-                    }
-                }
-
-                override suspend fun getApiToken(): ApiToken {
-                    user = getUserById(userId)
-                    return user?.apiToken!!
-                }
-            }
-            addInterceptor(TokenInterceptor(tokenInterceptorListener))
-            authenticator(TokenAuthenticator(tokenInterceptorListener))
-        }.run {
-            build()
-        }
-    }
-
     fun getCurrentDrive(): Drive? {
         if (currentDriveId != currentDrive?.id) {
             currentDrive = DriveInfosController.getDrive(currentUserId, currentDriveId, maintenance = false) ?: getFirstDrive()
@@ -290,8 +239,6 @@ object AccountUtils : CredentialManager {
         currentDrive?.let { currentDriveId = it.id }
         return currentDrive
     }
-
-    suspend fun getUserById(id: Int): User? = userDatabase.userDao().findById(id)
 
     private fun resetApp(context: Context) {
         if (getAllUserCount() == 0) {

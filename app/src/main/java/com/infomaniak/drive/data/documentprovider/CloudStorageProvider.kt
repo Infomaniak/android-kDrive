@@ -46,7 +46,6 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
@@ -93,7 +92,7 @@ class CloudStorageProvider : DocumentsProvider() {
             cursor.addRoot(user.id.toString(), user.id.toString(), user.email)
             CoroutineScope(Dispatchers.IO).launch {
                 context?.let {
-                    val okHttpClient = KDriveHttpClient.getHttpClient(user.id)
+                    val okHttpClient = AccountUtils.getHttpClient(user.id)
                     AccountUtils.updateCurrentUserAndDrives(it, fromCloudStorage = true, okHttpClient = okHttpClient)
                 }
             }
@@ -322,7 +321,7 @@ class CloudStorageProvider : DocumentsProvider() {
         var parcel: ParcelFileDescriptor? = null
 
         try {
-            val okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(userId.toInt()) }
+            val okHttpClient = runBlocking { AccountUtils.getHttpClient(userId.toInt()) }
             val response = DownloadWorker.downloadFileResponse(file.thumbnail(), okHttpClient) {}
 
             if (response.isSuccessful) {
@@ -502,7 +501,7 @@ class CloudStorageProvider : DocumentsProvider() {
         val apiResponse = ApiController.callApi<ApiResponse<File>>(
             uploadUrl,
             ApiController.ApiMethod.POST,
-            okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(userDrive.userId, 120) }
+            okHttpClient = runBlocking { AccountUtils.getHttpClient(userDrive.userId, 120) }
         )
         val file = apiResponse.data
 
@@ -568,7 +567,7 @@ class CloudStorageProvider : DocumentsProvider() {
             }
 
             // Download data file
-            val okHttpClient = runBlocking { KDriveHttpClient.getHttpClient(userDrive.userId) }
+            val okHttpClient = runBlocking { AccountUtils.getHttpClient(userDrive.userId) }
             val response = DownloadWorker.downloadFileResponse(
                 fileUrl = ApiRoutes.downloadFile(file),
                 okHttpClient = okHttpClient

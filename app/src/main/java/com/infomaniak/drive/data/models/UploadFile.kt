@@ -30,7 +30,6 @@ import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.sync.UploadMigration
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.lib.core.R
 import com.infomaniak.lib.core.utils.format
@@ -64,7 +63,7 @@ open class UploadFile(
         private set
 
     suspend fun initOkHttpClient() {
-        okHttpClient = KDriveHttpClient.getHttpClient(userId = userId, timeout = 120)
+        okHttpClient = AccountUtils.getHttpClient(userId = userId, timeout = 120)
     }
 
     fun createSubFolder(parent: String, createDatedSubFolders: Boolean) {

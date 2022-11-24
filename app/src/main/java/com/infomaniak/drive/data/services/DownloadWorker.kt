@@ -35,7 +35,6 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.MediaUtils
 import com.infomaniak.drive.utils.MediaUtils.isMedia
 import com.infomaniak.drive.utils.NotificationUtils.downloadProgressNotification
@@ -123,7 +122,7 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
     ): Result = withContext(Dispatchers.IO) {
         val (file, offlineFile) = file!! to offlineFile!!
         val lastUpdate = workDataOf(PROGRESS to 100, FILE_ID to file.id)
-        val okHttpClient = KDriveHttpClient.getHttpClient(userDrive.userId, null)
+        val okHttpClient = AccountUtils.getHttpClient(userDrive.userId, null)
         val response = downloadFileResponse(
             fileUrl = ApiRoutes.downloadFile(file),
             okHttpClient = okHttpClient
