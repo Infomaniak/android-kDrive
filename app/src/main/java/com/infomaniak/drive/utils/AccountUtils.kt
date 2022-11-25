@@ -21,7 +21,6 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.core.os.bundleOf
-import androidx.lifecycle.LiveData
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
