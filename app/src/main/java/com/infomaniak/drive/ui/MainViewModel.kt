@@ -180,7 +180,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     }
 
     fun getFileShare(fileId: Int, userDrive: UserDrive? = null) = liveData(Dispatchers.IO) {
-        val okHttpClient = userDrive?.userId?.let { KDriveHttpClient.getHttpClient(it) } ?: HttpClient.okHttpClient
+        val okHttpClient = userDrive?.userId?.let { AccountUtils.getHttpClient(it) } ?: HttpClient.okHttpClient
         val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId
         val apiResponse = ApiRepository.getFileShare(okHttpClient, File(id = fileId, driveId = driveId))
         emit(apiResponse)

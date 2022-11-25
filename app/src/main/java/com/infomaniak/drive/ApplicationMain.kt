@@ -43,7 +43,6 @@ import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.data.sync.UploadNotifications.pendingIntentFlags
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.NotificationUtils.initNotificationChannel
 import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.lib.core.BuildConfig.INFOMANIAK_API
@@ -132,7 +131,7 @@ class ApplicationMain : Application(), ImageLoaderFactory {
             isDebug = BuildConfig.DEBUG
         )
 
-        KDriveHttpClient.onRefreshTokenError = refreshTokenError
+        AccountUtils.onRefreshTokenError = refreshTokenError
         initNotificationChannel()
         HttpClient.init(tokenInterceptorListener())
         MqttClientWrapper.init(applicationContext)

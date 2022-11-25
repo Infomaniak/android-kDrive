@@ -27,7 +27,6 @@ import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.Type
 import com.infomaniak.drive.data.models.FileActivity.FileActivityType
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.KDriveHttpClient
 import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.models.ApiResponse
@@ -435,7 +434,7 @@ object FileController {
             transaction(getFilesFromCache(MY_SHARES_FILE_ID, userDrive, sortType), true)
         } else {
             val apiResponse = ApiRepository.getMySharedFiles(
-                KDriveHttpClient.getHttpClient(userDrive.userId), userDrive.driveId, sortType, page
+                AccountUtils.getHttpClient(userDrive.userId), userDrive.driveId, sortType, page
             )
             if (apiResponse.isSuccess()) {
                 val apiResponseData = apiResponse.data
@@ -467,7 +466,7 @@ object FileController {
             query = query,
             sortType = order,
             page = page,
-            okHttpClient = KDriveHttpClient.getHttpClient(userDrive.userId)
+            okHttpClient = AccountUtils.getHttpClient(userDrive.userId)
         )
 
         if (apiResponse.isSuccess()) {
@@ -639,7 +638,7 @@ object FileController {
                 val (okHttpClient, driveId) = if (userDrive == null) {
                     HttpClient.okHttpClient to AccountUtils.currentDriveId
                 } else {
-                    runBlocking { KDriveHttpClient.getHttpClient(userDrive.userId) } to userDrive.driveId
+                    runBlocking { AccountUtils.getHttpClient(userDrive.userId) } to userDrive.driveId
                 }
 
                 if (parentId == ROOT_ID) {
@@ -784,7 +783,7 @@ object FileController {
         userDrive: UserDrive? = null
     ): Map<out Int, FileActivity> {
         val okHttpClient = runBlocking {
-            userDrive?.userId?.let { KDriveHttpClient.getHttpClient(it, 30) } ?: HttpClient.okHttpClientLongTimeout
+            userDrive?.userId?.let { AccountUtils.getHttpClient(it, 30) } ?: HttpClient.okHttpClientLongTimeout
         }
         val returnResponse = arrayMapOf<Int, FileActivity>()
         val apiResponse = ApiRepository.getFileActivities(folder, page, true, okHttpClient)
@@ -926,13 +925,13 @@ object FileController {
     }
 
     suspend fun createFolder(name: String, parentId: Int, onlyForMe: Boolean, userDrive: UserDrive?): ApiResponse<File> {
-        val okHttpClient = userDrive?.userId?.let { KDriveHttpClient.getHttpClient(it) } ?: HttpClient.okHttpClient
+        val okHttpClient = userDrive?.userId?.let { AccountUtils.getHttpClient(it) } ?: HttpClient.okHttpClient
         val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId
         return ApiRepository.createFolder(okHttpClient, driveId, parentId, name, onlyForMe)
     }
 
     suspend fun createCommonFolder(name: String, forAllUsers: Boolean, userDrive: UserDrive?): ApiResponse<File> {
-        val okHttpClient = userDrive?.userId?.let { KDriveHttpClient.getHttpClient(it) } ?: HttpClient.okHttpClient
+        val okHttpClient = userDrive?.userId?.let { AccountUtils.getHttpClient(it) } ?: HttpClient.okHttpClient
         val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId
         return ApiRepository.createTeamFolder(okHttpClient, driveId, name, forAllUsers)
     }
