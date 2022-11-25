@@ -221,10 +221,6 @@ object AccountUtils : CredentialManager() {
         }
     }
 
-    override fun getAllUsers(): LiveData<List<User>> = userDatabase.userDao().getAll()
-
-    private fun getAllUserCount(): Int = userDatabase.userDao().count()
-
     fun getAllUsersSync(): List<User> = userDatabase.userDao().getAllSync()
 
     fun getCurrentDrive(): Drive? {
