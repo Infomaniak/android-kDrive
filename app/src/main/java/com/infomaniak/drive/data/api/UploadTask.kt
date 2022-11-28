@@ -37,10 +37,10 @@ import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
 import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
 import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.lib.core.R
+import com.infomaniak.lib.core.api.ApiController.gson
 import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpUtils
-import com.infomaniak.lib.core.api.ApiController.gson
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel

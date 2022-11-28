@@ -51,8 +51,8 @@ import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.isPositive
-import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.api.ApiController
+import com.infomaniak.lib.core.models.ApiResponse
 import io.realm.Realm
 import io.sentry.Sentry
 import io.sentry.SentryLevel
