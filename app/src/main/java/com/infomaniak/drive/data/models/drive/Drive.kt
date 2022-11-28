@@ -126,6 +126,9 @@ open class Drive(
         SOLO("solo"),
         TEAM("team"),
         PRO("pro"),
+        KSUITE_STANDARD("ksuite_standard"),
+        KSUITE_PRO("ksuite_pro"),
+        KSUITE_ENTREPRISE("ksuite_entreprise"),
     }
 
     enum class MaintenanceReason(val value: String) {

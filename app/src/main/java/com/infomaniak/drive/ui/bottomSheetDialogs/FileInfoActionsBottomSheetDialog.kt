@@ -35,7 +35,6 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_ACTION_KEY
@@ -374,7 +373,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
 
         fun Fragment.openColorFolderBottomSheetDialog(color: String?) {
-            if (AccountUtils.getCurrentDrive()?.pack == Drive.DrivePack.FREE.value) {
+            if (AccountUtils.getCurrentDrive()?.isFreePack == true) {
                 safeNavigate(R.id.colorFolderUpgradeBottomSheetDialog)
             } else {
                 safeNavigate(
