@@ -28,7 +28,7 @@ import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.login.MigrationActivity.Companion.getOldkDriveUser
-import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
+import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.SyncUtils.activateSyncIfNeeded
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
@@ -48,7 +48,7 @@ class RebootReceiver : BroadcastReceiver() {
                 val pendingIntent = PendingIntent.getActivity(this, 0, openAppIntent, UploadNotifications.pendingIntentFlags)
                 val notificationManagerCompat = NotificationManagerCompat.from(context)
 
-                showGeneralNotification(getString(R.string.migrateNotificationTitle)).apply {
+                buildGeneralNotification(getString(R.string.migrateNotificationTitle)).apply {
                     setContentText(getString(R.string.migrateNotificationDescription))
                     setContentIntent(pendingIntent)
                     notificationManagerCompat.notify(UUID.randomUUID().hashCode(), build())

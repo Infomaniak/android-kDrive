@@ -44,11 +44,11 @@ import com.infomaniak.drive.data.sync.UploadNotifications.syncSettingsActivityPe
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaFoldersProvider.IMAGES_BUCKET_ID
 import com.infomaniak.drive.utils.MediaFoldersProvider.VIDEO_BUCKET_ID
+import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
-import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.uploadServiceNotification
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.lib.core.utils.ApiController
+import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.utils.hasPermissions
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
@@ -473,7 +473,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         fun Context.showSyncConfigNotification() {
             val pendingIntent = syncSettingsActivityPendingIntent()
             val notificationManagerCompat = NotificationManagerCompat.from(this)
-            showGeneralNotification(getString(R.string.noSyncFolderNotificationTitle)).apply {
+            buildGeneralNotification(getString(R.string.noSyncFolderNotificationTitle)).apply {
                 setContentText(getString(R.string.noSyncFolderNotificationDescription))
                 setContentIntent(pendingIntent)
                 notificationManagerCompat.notify(NotificationUtils.FILE_OBSERVE_ID, this.build())

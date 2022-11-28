@@ -24,7 +24,7 @@ import com.google.gson.reflect.TypeToken
 import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsBottomSheetDialog.Companion.manufacturerWarning
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.lib.core.utils.ApiController
+import com.infomaniak.lib.core.api.ApiController
 
 class UiSettings(private val context: Context) {
 

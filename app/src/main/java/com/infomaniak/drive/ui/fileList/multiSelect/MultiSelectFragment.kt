@@ -49,7 +49,7 @@ import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSele
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.BulkOperationsUtils
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
-import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
+import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.moveFileClicked
 import com.infomaniak.drive.utils.showSnackbar
@@ -487,7 +487,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             }
         } else {
             context?.let {
-                it.showGeneralNotification(
+                it.buildGeneralNotification(
                     title = getString(R.string.anErrorHasOccurred),
                     description = getString(R.string.snackBarInvalidFileNameError, invalidFileNameChar, file.name)
                 ).apply { NotificationManagerCompat.from(it).notify(UUID.randomUUID().hashCode(), build()) }

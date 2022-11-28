@@ -27,7 +27,7 @@ import com.infomaniak.drive.data.models.ActionProgressNotification
 import com.infomaniak.drive.data.models.IpsToken
 import com.infomaniak.drive.data.models.Notification
 import com.infomaniak.drive.utils.BulkOperationsUtils.isBulkOperationActive
-import com.infomaniak.lib.core.utils.ApiController.gson
+import com.infomaniak.lib.core.api.ApiController.gson
 import com.infomaniak.lib.core.utils.Utils
 import info.mqtt.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
