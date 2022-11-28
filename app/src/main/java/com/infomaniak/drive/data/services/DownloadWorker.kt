@@ -41,7 +41,7 @@ import com.infomaniak.drive.utils.NotificationUtils.downloadProgressNotification
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
-import com.infomaniak.lib.core.utils.ApiController
+import com.infomaniak.lib.core.api.ApiController
 import io.sentry.Sentry
 import kotlinx.coroutines.*
 import okhttp3.Interceptor

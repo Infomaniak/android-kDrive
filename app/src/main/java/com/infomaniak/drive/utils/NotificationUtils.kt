@@ -17,16 +17,15 @@
  */
 package com.infomaniak.drive.utils
 
-import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.infomaniak.drive.R
+import com.infomaniak.lib.core.utils.NotificationUtilsCore
 
-object NotificationUtils {
+object NotificationUtils : NotificationUtilsCore() {
 
     const val UPLOAD_SERVICE_ID = 1
     const val UPLOAD_STATUS_ID = 2
@@ -84,30 +83,23 @@ object NotificationUtils {
         }
     }
 
-    fun Context.showGeneralNotification(
+    fun Context.buildGeneralNotification(
         title: String,
         description: String? = null
     ): NotificationCompat.Builder {
-        val channelId = getString(R.string.notification_channel_id_general)
-        return NotificationCompat.Builder(this, channelId).apply {
-            setTicker(title)
-            setAutoCancel(true)
-            setContentTitle(title)
-            description?.let { setStyle(NotificationCompat.BigTextStyle().bigText(it)) }
-            setSmallIcon(DEFAULT_SMALL_ICON)
-        }
-    }
-
-    fun Context.cancelNotification(notificationId: Int) {
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.cancel(notificationId)
+        return buildNotification(
+            channelId = getString(R.string.notification_channel_id_general),
+            icon = DEFAULT_SMALL_ICON,
+            title = title,
+            description = description
+        )
     }
 
     fun Context.initNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channelList = ArrayList<NotificationChannel>()
 
-            val uploadServiceChannel = createNotificationChannel(
+            val uploadServiceChannel = buildNotificationChannel(
                 getString(R.string.notification_channel_id_upload_service),
                 getString(R.string.notificationUploadServiceChannelName),
                 NotificationManager.IMPORTANCE_MIN
@@ -116,7 +108,7 @@ object NotificationUtils {
             }
             channelList.add(uploadServiceChannel)
 
-            val uploadDownloadChannel = createNotificationChannel(
+            val uploadDownloadChannel = buildNotificationChannel(
                 getString(R.string.notification_channel_id_upload_download),
                 getString(R.string.notificationUploadDownloadChannelName),
                 NotificationManager.IMPORTANCE_DEFAULT
@@ -125,51 +117,28 @@ object NotificationUtils {
             }
             channelList.add(uploadDownloadChannel)
 
-            val sharedWithMeChannel = createNotificationChannel(
+            val sharedWithMeChannel = buildNotificationChannel(
                 getString(R.string.notification_channel_id_shared),
                 getString(R.string.notificationSharedWithMeChannelName),
                 NotificationManager.IMPORTANCE_DEFAULT
             )
             channelList.add(sharedWithMeChannel)
 
-            val commentChannel = createNotificationChannel(
+            val commentChannel = buildNotificationChannel(
                 getString(R.string.notification_channel_id_comment),
                 getString(R.string.notificationCommentChannelName),
                 NotificationManager.IMPORTANCE_HIGH
             )
             channelList.add(commentChannel)
 
-            val generalChannel = createNotificationChannel(
+            val generalChannel = buildNotificationChannel(
                 getString(R.string.notification_channel_id_general),
                 getString(R.string.notificationGeneralChannelName),
                 NotificationManager.IMPORTANCE_DEFAULT
             )
             channelList.add(generalChannel)
 
-            val notificationManager = getSystemService(Application.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannels(channelList)
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun Context.createNotificationChannel(
-        channelId: String,
-        name: String,
-        importance: Int
-    ): NotificationChannel {
-        return NotificationChannel(channelId, name, importance).apply {
-            when (importance) {
-                NotificationManager.IMPORTANCE_HIGH -> {
-                    enableLights(true)
-                    setShowBadge(true)
-                    lightColor = getColor(R.color.primary)
-                }
-                else -> {
-                    enableLights(false)
-                    setShowBadge(false)
-                    enableVibration(false)
-                }
-            }
+            createNotificationChannels(channelList)
         }
     }
 }

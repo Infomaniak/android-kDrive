@@ -30,7 +30,7 @@ import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.utils.ApiController
+import com.infomaniak.lib.core.api.ApiController
 import org.junit.jupiter.api.Assertions
 import java.util.*
 

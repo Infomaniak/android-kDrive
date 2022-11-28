@@ -33,8 +33,8 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.api.ApiRepositoryCore
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
-import com.infomaniak.lib.core.utils.ApiController.ApiMethod.*
-import com.infomaniak.lib.core.utils.ApiController.callApi
+import com.infomaniak.lib.core.api.ApiController.ApiMethod.*
+import com.infomaniak.lib.core.api.ApiController.callApi
 import okhttp3.OkHttpClient
 
 object ApiRepository : ApiRepositoryCore() {

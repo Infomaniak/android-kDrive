@@ -43,8 +43,8 @@ import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.data.sync.UploadNotifications.pendingIntentFlags
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.initNotificationChannel
-import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.lib.core.BuildConfig.INFOMANIAK_API
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.auth.TokenAuthenticator
@@ -184,7 +184,7 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         val openAppIntent = Intent(this, LaunchActivity::class.java).clearStack()
         val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, openAppIntent, pendingIntentFlags)
         val notificationManagerCompat = NotificationManagerCompat.from(this)
-        showGeneralNotification(getString(R.string.refreshTokenError)).apply {
+        buildGeneralNotification(getString(R.string.refreshTokenError)).apply {
             setContentIntent(pendingIntent)
             notificationManagerCompat.notify(UUID.randomUUID().hashCode(), build())
         }

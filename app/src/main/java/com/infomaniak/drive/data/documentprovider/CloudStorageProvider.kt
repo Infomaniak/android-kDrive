@@ -46,13 +46,13 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
-import com.infomaniak.drive.utils.NotificationUtils.showGeneralNotification
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.isPositive
 import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.utils.ApiController
+import com.infomaniak.lib.core.api.ApiController
 import io.realm.Realm
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -609,7 +609,7 @@ class CloudStorageProvider : DocumentsProvider() {
                 context.cancelNotification(syncPermissionNotifId)
 
                 // Display new notification
-                context.showGeneralNotification(context.getString(R.string.uploadPermissionError)).apply {
+                context.buildGeneralNotification(context.getString(R.string.uploadPermissionError)).apply {
                     setContentText(context.getString(R.string.cloudStorageMissingPermissionNotifDescription))
                     setContentIntent(
                         PendingIntent.getActivity(

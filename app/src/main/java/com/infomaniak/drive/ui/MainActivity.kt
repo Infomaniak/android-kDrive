@@ -69,7 +69,7 @@ import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.Utils.getRootName
-import com.infomaniak.lib.core.utils.LiveDataNetworkStatus
+import com.infomaniak.lib.core.networking.LiveDataNetworkStatus
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.whenResultIsOk
