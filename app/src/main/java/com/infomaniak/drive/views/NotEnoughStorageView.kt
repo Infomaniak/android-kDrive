@@ -61,7 +61,7 @@ class NotEnoughStorageView @JvmOverloads constructor(
                             context.openUrl(ApiRoutes.upgradeDrive(AccountUtils.currentDriveId))
                         }
                     }
-                    Drive.DrivePack.PRO.value, Drive.DrivePack.TEAM.value -> {
+                    else -> {
                         description.setText(R.string.notEnoughStorageDescription2)
                         upgradeOffer.isGone = true
                     }

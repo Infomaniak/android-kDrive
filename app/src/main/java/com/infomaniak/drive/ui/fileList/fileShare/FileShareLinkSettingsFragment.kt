@@ -32,7 +32,6 @@ import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
-import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
 import com.infomaniak.drive.utils.AccountUtils
@@ -194,7 +193,7 @@ class FileShareLinkSettingsFragment : Fragment() {
     }
 
     private fun setupFreeAccountUi() {
-        if (AccountUtils.getCurrentDrive()?.pack == Drive.DrivePack.FREE.value) {
+        if (AccountUtils.getCurrentDrive()?.isFreePack == true) {
 
             addPasswordLayout.apply {
                 addPasswordSwitch.isEnabled = false
