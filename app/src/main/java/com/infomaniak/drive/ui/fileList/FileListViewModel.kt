@@ -22,12 +22,9 @@ import androidx.lifecycle.*
 import com.infomaniak.drive.ApplicationMain
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.Type
-import com.infomaniak.drive.data.models.FileCount
-import com.infomaniak.drive.data.models.UploadFile
-import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
@@ -215,6 +212,12 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                 pendingJob.ensureActive()
             }
             emit(positions)
+        }
+    }
+
+    fun updateExternalImport(notification: ActionExternalImportNotification) {
+        viewModelScope.launch(Dispatchers.IO) {
+            FileController.updateExternalImport(notification.importId, notification.action)
         }
     }
 

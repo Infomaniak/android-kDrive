@@ -26,6 +26,8 @@ import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.Type
 import com.infomaniak.drive.data.models.FileActivity.FileActivityType
+import com.infomaniak.drive.data.models.file.FileExternalImport
+import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -835,6 +837,7 @@ object FileController {
             FileActivityType.FILE_MOVE_IN,
             FileActivityType.FILE_RESTORE -> {
                 if (returnResponse[fileId] == null && file != null) {
+                    if (file?.isImporting() == true) MqttClientWrapper.start(true)
                     realm.where(File::class.java).equalTo(File::id.name, currentFolder.id).findFirst()?.let { realmFolder ->
                         if (!realmFolder.children.contains(file)) {
                             addChild(realm, realmFolder, file!!)
@@ -959,6 +962,30 @@ object FileController {
             SortType.SMALLER -> sort(File::size.name, Sort.ASCENDING)
             SortType.BIGGER -> sort(File::size.name, Sort.DESCENDING)
             // SortType.EXTENSION -> sort(File::convertedType.name, Sort.ASCENDING) // TODO implement
+        }
+    }
+
+    fun updateExternalImport(id: Int, action: ActionExternalImport) {
+        getRealmInstance().use { realm ->
+            val file = realm.where(File::class.java)
+                .equalTo("${File::externalImport.name}.${FileExternalImport::id.name}", id)
+                .findFirst()
+
+            file?.let { oldFile ->
+                when (action) {
+                    ActionExternalImport.IMPORT_FINISH -> {
+                        realm.executeTransaction {
+                            oldFile.apply { externalImport?.status = FileExternalImport.FileExternalImportStatus.DONE.value }
+                        }
+                    }
+                    ActionExternalImport.CANCEL -> {
+                        realm.executeTransaction {
+                            oldFile.apply { externalImport?.status = FileExternalImport.FileExternalImportStatus.FAILED.value }
+                        }
+                    }
+                    else -> Unit
+                }
+            }
         }
     }
 }
