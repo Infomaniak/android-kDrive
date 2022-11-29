@@ -17,8 +17,15 @@
  */
 package com.infomaniak.drive.data.models
 
-interface Notification {
-    val uid: String
-    val action: Any
-    val driveId: Int
-}
+import com.google.gson.annotations.SerializedName
+
+data class ActionExternalImportNotification(
+    override val uid: String,
+    override val action: ActionExternalImport,
+    @SerializedName("drive_id")
+    override val driveId: Int,
+    @SerializedName("user_id")
+    val userId: Int,
+    @SerializedName("import_id")
+    val importId: Int
+) : Notification

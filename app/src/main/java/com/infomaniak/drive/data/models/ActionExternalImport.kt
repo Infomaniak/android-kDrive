@@ -17,8 +17,17 @@
  */
 package com.infomaniak.drive.data.models
 
-interface Notification {
-    val uid: String
-    val action: Any
-    val driveId: Int
+import com.google.gson.annotations.SerializedName
+
+enum class ActionExternalImport {
+    CANCEL,
+
+    @SerializedName("import_started")
+    IMPORT_STARTED,
+
+    @SerializedName("create_file")
+    CREATE_FILE,
+
+    @SerializedName("import_finish")
+    IMPORT_FINISH
 }
