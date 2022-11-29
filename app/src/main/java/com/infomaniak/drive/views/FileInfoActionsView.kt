@@ -134,7 +134,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
                 addFavorites.isVisible = rights?.canUseFavorite == true
                 availableOffline.isGone = isSharedWithMe || currentFile.getOfflineFile(context) == null
-                deleteFile.isVisible = rights?.canDelete == true
+                deleteFile.isVisible = rights?.canDelete == true && !file.isImporting()
                 downloadFile.isVisible = rights?.canRead == true
                 duplicateFile.isGone = rights?.canRead == false
                         || isSharedWithMe
@@ -144,7 +144,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                         || (currentFile.conversion?.whenOnlyoffice == true)
                 leaveShare.isVisible = rights?.canLeave == true
                 moveFile.isVisible = rights?.canMove == true && !isSharedWithMe
-                renameFile.isVisible = rights?.canRename == true && !isSharedWithMe
+                renameFile.isVisible = rights?.canRename == true && !isSharedWithMe && !file.isImporting()
                 goToFolder.isVisible = isGoToFolderVisible()
             }
 

@@ -80,8 +80,27 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_chainStyle="packed"
                 tools:ignore="ContentDescription" />
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/fileProgressionCardView"
+                style="@style/CircularIndicator"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_gravity="center"
+                android:layout_marginHorizontal="@dimen/marginStandard"
+                android:layout_marginTop="@dimen/marginStandard"
+                android:layout_marginBottom="@dimen/marginStandardMedium"
+                android:indeterminate="true"
+                android:minWidth="42dp"
+                android:minHeight="42dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@id/fileNameLayout"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
 
             <FrameLayout
                 android:id="@+id/progressLayout"

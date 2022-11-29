@@ -31,11 +31,8 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
-import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.setCornersRadius
-import com.infomaniak.drive.utils.setFileItem
-import com.infomaniak.drive.utils.setupFileProgress
 import com.infomaniak.lib.core.utils.toPx
 import com.infomaniak.lib.core.views.LoaderAdapter.Companion.VIEW_TYPE_LOADING
 import com.infomaniak.lib.core.views.LoaderAdapter.Companion.createLoadingViewHolder
@@ -286,6 +283,7 @@ open class FileAdapter(
             when {
                 uploadInProgress && !file.isPendingUploadFolder() -> displayStopUploadButton(position, file)
                 multiSelectManager.isMultiSelectOn -> displayFileChecked(file, isGrid)
+                file.isImporting() -> updateExternalImportInProgress(file, isGrid)
                 else -> displayFilePreview()
             }
 
@@ -306,7 +304,7 @@ open class FileAdapter(
             isChecked = isSelectedFile(file)
             isVisible = isGrid || isSelectedFile(file)
         }
-        filePreview.isVisible = isGrid || !isSelectedFile(file)
+        filePreview.isVisible = (isGrid || !isSelectedFile(file)) && !file.isImporting()
     }
 
     private fun MaterialCardView.displayFilePreview() {

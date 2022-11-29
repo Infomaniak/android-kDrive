@@ -94,6 +94,7 @@ open class File(
     @SerializedName("color")
     private var _color: String? = null,
     var dropbox: DropBox? = null,
+    @SerializedName("external_import")
     var externalImport: FileExternalImport? = null,
 
     /**
@@ -287,9 +288,9 @@ open class File(
         else getCacheFile(context).apply { if (exists()) delete() }
     }
 
-    fun isDisabled(): Boolean {
-        return rights?.canRead == false && rights?.canShow == false
-    }
+    fun isDisabled() = rights?.canRead == false && rights?.canShow == false
+
+    fun isImporting() = externalImport?.status == FileExternalImport.FileExternalImportStatus.IN_PROGRESS.value
 
     fun isRoot(): Boolean {
         return id == ROOT_ID

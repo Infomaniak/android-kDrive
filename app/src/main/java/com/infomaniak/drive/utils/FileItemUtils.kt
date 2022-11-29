@@ -51,7 +51,9 @@ import com.infomaniak.drive.views.CategoryIconView
 import com.infomaniak.lib.core.utils.FormatterFileSize
 import com.infomaniak.lib.core.utils.format
 import io.sentry.Sentry
-import kotlinx.android.synthetic.main.cardview_file_grid.view.filePreview2
+import kotlinx.android.synthetic.main.cardview_file_grid.view.*
+import kotlinx.android.synthetic.main.cardview_folder_grid.view.*
+import kotlinx.android.synthetic.main.fragment_preview_others.view.*
 import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.android.synthetic.main.item_file.view.categoriesLayout
 import kotlinx.android.synthetic.main.item_file.view.fileFavorite
@@ -69,10 +71,21 @@ fun View.setFileItem(file: File, isGrid: Boolean = false, viewHolder: FileViewHo
     fileName.text = file.name
     fileFavorite.isVisible = file.isFavorite
     progressLayout.isGone = true
+    displayFileProgression(file, isGrid)
     displayDate(file)
     displaySize(file)
     displayIcon(file, isGrid, viewHolder)
     displayCategories(file)
+}
+
+private fun View.displayFileProgression(file: File, isGrid: Boolean) {
+    val fileProgression = when {
+        isGrid && file.isFolder() -> fileProgressionCardView
+        !isGrid -> fileProgression
+        else -> null
+    }
+
+    fileProgression?.let { if (file.isImporting()) it.isVisible = true else it.isGone = true }
 }
 
 private fun View.displayDate(file: File) {
@@ -330,4 +343,10 @@ fun View.setupFileProgress(file: File, containsProgress: Boolean = false) {
         }
         else -> progressLayout.isGone = true
     }
+}
+
+fun View.updateExternalImportInProgress(file: File, isGrid: Boolean) {
+    if (!isGrid) fileDate.text = resources.getString(R.string.uploadInProgressTitle)
+    displayFileProgression(file, isGrid)
+    filePreview.isGone = true
 }
