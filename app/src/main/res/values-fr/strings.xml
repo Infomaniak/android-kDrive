@@ -99,6 +99,7 @@
     <string name="buttonAuthorize">Autoriser</string>
     <string name="buttonAvailableOffline">Disponible hors ligne</string>
     <string name="buttonBack">Retour</string>
+    <string name="buttonCancelImport">Annuler l’import</string>
     <string name="buttonChangeFolderColor">Modifier la couleur du dossier</string>
     <string name="buttonClear">Effacer</string>
     <string name="buttonClearFilters">Effacer les filtres</string>
@@ -245,7 +246,6 @@
     <string name="errorCache">Erreur lors de la mise en cache</string>
     <string name="errorCategoryAlreadyExists">Une catégorie avec le même nom existe déjà</string>
     <string name="errorConflict">Un élément du même nom existe déjà à cet emplacement</string>
-    <string name="errorConnection">Erreur de connexion</string>
     <string name="errorDelete">Erreur lors de la suppression</string>
     <string name="errorDestinationAlreadyExists">La destination existe déjà</string>
     <string name="errorDeviceStorage">Stockage disponible du téléphone insuffisant</string>

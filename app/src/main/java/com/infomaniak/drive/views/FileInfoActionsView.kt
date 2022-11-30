@@ -143,6 +143,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                 editDocument.isVisible = (currentFile.hasOnlyoffice && rights?.canWrite == true)
                         || (currentFile.conversion?.whenOnlyoffice == true)
                 leaveShare.isVisible = rights?.canLeave == true
+                cancelExternalImport.isVisible = file.isImporting()
                 moveFile.isVisible = rights?.canMove == true && !isSharedWithMe
                 renameFile.isVisible = rights?.canRename == true && !isSharedWithMe && !file.isImporting()
                 goToFolder.isVisible = isGoToFolderVisible()

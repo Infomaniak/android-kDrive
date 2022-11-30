@@ -110,6 +110,7 @@
     <string name="buttonAuthorize">Authorise</string>
     <string name="buttonAvailableOffline">Available offline</string>
     <string name="buttonBack">Back</string>
+    <string name="buttonCancelImport">Cancel import</string>
     <string name="buttonChangeFolderColor">Change folder colour</string>
     <string name="buttonClear">Clear</string>
     <string name="buttonClearFilters">Clear filters</string>
@@ -256,7 +257,6 @@
     <string name="errorCache">Caching error</string>
     <string name="errorCategoryAlreadyExists">A category with the same name already exists</string>
     <string name="errorConflict">An element with the same name already exists in this location</string>
-    <string name="errorConnection">Connection error</string>
     <string name="errorDelete">Deletion error</string>
     <string name="errorDestinationAlreadyExists">Destination already exists</string>
     <string name="errorDeviceStorage">Insufficient phone storage</string>

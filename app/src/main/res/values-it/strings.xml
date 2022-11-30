@@ -99,6 +99,7 @@
     <string name="buttonAuthorize">Autorizza</string>
     <string name="buttonAvailableOffline">Disponibile offline</string>
     <string name="buttonBack">Indietro</string>
+    <string name="buttonCancelImport">Annullare l\'importazione</string>
     <string name="buttonChangeFolderColor">Cambia il colore della cartella</string>
     <string name="buttonClear">Cancella</string>
     <string name="buttonClearFilters">Elimina i filtri</string>
@@ -245,7 +246,6 @@
     <string name="errorCache">Errore durante la memorizzazione nella cache</string>
     <string name="errorCategoryAlreadyExists">Esiste già una categoria con lo stesso nome</string>
     <string name="errorConflict">Un elemento con lo stesso nome esiste già in questa posizione</string>
-    <string name="errorConnection">Errore di connessione</string>
     <string name="errorDelete">Errore durante l’eliminazione</string>
     <string name="errorDestinationAlreadyExists">La destinazione è già esistente</string>
     <string name="errorDeviceStorage">Insufficiente memoria telefonica disponibile</string>
