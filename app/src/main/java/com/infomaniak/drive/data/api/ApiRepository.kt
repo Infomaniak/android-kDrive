@@ -419,5 +419,9 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.buildArchive(driveId), POST, archiveBody)
     }
 
+    fun cancelExternalImport(driveId: Int, importId: Int): ApiResponse<Boolean> {
+        return callApi(ApiRoutes.cancelExternalImport(driveId, importId), PUT)
+    }
+
     private fun pagination(page: Int, perPage: Int = PER_PAGE) = "page=$page&per_page=$perPage"
 }

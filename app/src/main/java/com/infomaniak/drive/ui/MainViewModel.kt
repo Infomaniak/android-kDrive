@@ -335,6 +335,10 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         emit(ApiRepository.convertFile(file))
     }
 
+    fun cancelExternalImport(importId: Int) = liveData(Dispatchers.IO) {
+        emit(ApiRepository.cancelExternalImport(AccountUtils.currentDriveId, importId))
+    }
+
     fun observeDownloadOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(
         WorkQuery.Builder
             .fromUniqueWorkNames(arrayListOf(DownloadWorker.TAG))

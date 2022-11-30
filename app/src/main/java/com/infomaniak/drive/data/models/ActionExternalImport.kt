@@ -20,8 +20,6 @@ package com.infomaniak.drive.data.models
 import com.google.gson.annotations.SerializedName
 
 enum class ActionExternalImport {
-    CANCEL,
-
     @SerializedName("import_started")
     IMPORT_STARTED,
 
@@ -29,5 +27,8 @@ enum class ActionExternalImport {
     CREATE_FILE,
 
     @SerializedName("import_finish")
-    IMPORT_FINISH
+    IMPORT_FINISH,
+
+    @SerializedName("cancel")
+    CANCEL
 }

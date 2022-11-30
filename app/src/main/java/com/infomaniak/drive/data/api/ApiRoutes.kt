@@ -181,6 +181,11 @@ object ApiRoutes {
     fun shareLink(file: File) = "${fileURL(file)}/link"
     //endregion
 
+    /** External import */
+    //region External import
+    fun cancelExternalImport(driveId: Int, importId: Int) = "${driveURL(driveId)}/imports/$importId/cancel"
+    //endregion
+
     /** Trash */
     //region Trash
     fun driveTrash(driveId: Int, order: SortType) = "${driveURL(driveId)}/trash?${orderQuery(order)}&$fileWithQuery"

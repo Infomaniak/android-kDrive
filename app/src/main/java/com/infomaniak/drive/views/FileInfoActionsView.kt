@@ -217,7 +217,12 @@ class FileInfoActionsView @JvmOverloads constructor(
             onItemClickListener.addFavoritesClicked()
         }
         leaveShare.setOnClickListener { onItemClickListener.leaveShare() }
-        // Use OnClickListener instead of OnCheckedChangeListener because the later is unnecessarily called on every
+        cancelExternalImport.setOnClickListener {
+            cancelExternalImportClicked(
+                onSuccess = { ownerFragment.findNavController().popBackStack() },
+                onError = { error -> ownerFragment.showSnackbar(error) })
+        }
+        // Use OnClickListener instead of OnCheckedChangeListener because the latter is unnecessarily called on every
         // refreshBottomSheetUI calls
         availableOfflineSwitch.setOnClickListener { view ->
             val downloadError = !onItemClickListener.availableOfflineSwitched(this, (view as SwitchMaterial).isChecked)
@@ -430,6 +435,23 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
     }
 
+    private fun cancelExternalImportClicked(
+        onSuccess: (() -> Unit)? = null,
+        onError: ((translatedError: String) -> Unit)? = null
+    ) {
+        onItemClickListener.cancelExternalImportClicked()
+
+        currentFile.externalImport?.id?.let { id ->
+            mainViewModel.cancelExternalImport(id).observe(ownerFragment) { apiResponse ->
+                if (apiResponse.isSuccess()) {
+                    onSuccess?.invoke()
+                } else {
+                    onError?.invoke(context.getString(apiResponse.translatedError))
+                }
+            }
+        }
+    }
+
     interface OnItemClickListener {
 
         val ownerFragment: Fragment
@@ -442,8 +464,8 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         fun addFavoritesClicked() = trackFileActionEvent("favorite", !currentFile.isFavorite)
+        fun cancelExternalImportClicked() = trackFileActionEvent("cancelExternalImport")
         fun colorFolderClicked(color: String) = context.trackEvent("colorFolder", "switch")
-        fun sharePublicLink() = trackFileActionEvent("shareLink")
         fun displayInfoClicked()
         fun downloadFileClicked() = trackFileActionEvent("download")
         fun dropBoxClicked(isDropBox: Boolean) = trackFileActionEvent("convertToDropbox", isDropBox)
@@ -458,6 +480,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun onRenameFile(newName: String, onApiResponse: () -> Unit)
         fun openWithClicked() = trackFileActionEvent("openWith")
         fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File)
+        fun sharePublicLink() = trackFileActionEvent("shareLink")
 
         fun editDocumentClicked() {
             trackFileActionEvent("edit")
