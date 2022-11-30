@@ -243,10 +243,9 @@ open class FileAdapter(
     }
 
     override fun onBindViewHolder(holder: FileViewHolder, position: Int, payloads: List<Any>) = with(holder.itemView) {
-        val file = getFile(position)
         if (payloads.firstOrNull() is Int && getItemViewType(position) != VIEW_TYPE_LOADING) {
             val progress = payloads.first() as Int
-            file.currentProgress = progress
+            val file = getFile(position).apply { currentProgress = progress }
             if (progress != Utils.INDETERMINATE_PROGRESS || !file.isPendingOffline(holder.itemView.context)) {
                 setupFileProgress(file, true)
                 checkIfEnableFile(file)
@@ -256,7 +255,7 @@ open class FileAdapter(
             val isGrid = viewHolderType == DisplayType.GRID
             fileChecked.isChecked = isChecked
             fileChecked.isVisible = isGrid || isChecked
-            filePreview.isVisible = (isGrid || !isChecked) && !file.isImporting()
+            filePreview.isVisible = (isGrid || !isChecked) && !getFile(position).isImporting()
         } else {
             super.onBindViewHolder(holder, position, payloads)
         }
