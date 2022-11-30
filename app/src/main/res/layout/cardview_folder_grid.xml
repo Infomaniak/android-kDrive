@@ -141,8 +141,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/fileFavorite"
                 app:layout_constraintHorizontal_chainStyle="packed"
-                app:layout_constraintStart_toEndOf="@id/progressLayout"
-                app:layout_constraintTop_toBottomOf="@id/filePreview">
+                app:layout_constraintStart_toEndOf="@id/progressLayout">
 
                 <TextView
                     android:id="@+id/fileName"

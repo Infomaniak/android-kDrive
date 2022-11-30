@@ -243,9 +243,10 @@ open class FileAdapter(
     }
 
     override fun onBindViewHolder(holder: FileViewHolder, position: Int, payloads: List<Any>) = with(holder.itemView) {
+        val file = getFile(position)
         if (payloads.firstOrNull() is Int && getItemViewType(position) != VIEW_TYPE_LOADING) {
             val progress = payloads.first() as Int
-            val file = getFile(position).apply { currentProgress = progress }
+            file.currentProgress = progress
             if (progress != Utils.INDETERMINATE_PROGRESS || !file.isPendingOffline(holder.itemView.context)) {
                 setupFileProgress(file, true)
                 checkIfEnableFile(file)
@@ -255,7 +256,7 @@ open class FileAdapter(
             val isGrid = viewHolderType == DisplayType.GRID
             fileChecked.isChecked = isChecked
             fileChecked.isVisible = isGrid || isChecked
-            filePreview.isVisible = isGrid || !isChecked
+            filePreview.isVisible = (isGrid || !isChecked) && !file.isImporting()
         } else {
             super.onBindViewHolder(holder, position, payloads)
         }
@@ -283,8 +284,7 @@ open class FileAdapter(
             when {
                 uploadInProgress && !file.isPendingUploadFolder() -> displayStopUploadButton(position, file)
                 multiSelectManager.isMultiSelectOn -> displayFileChecked(file, isGrid)
-                file.isImporting() -> updateExternalImportInProgress(file, isGrid)
-                else -> displayFilePreview()
+                else -> if (!file.isImporting()) displayFilePreview()
             }
 
             setupMenuButton(file)
