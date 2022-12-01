@@ -144,7 +144,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                         || (currentFile.conversion?.whenOnlyoffice == true)
                 leaveShare.isVisible = rights?.canLeave == true
                 cancelExternalImport.isVisible = file.isImporting()
-                moveFile.isVisible = rights?.canMove == true && !isSharedWithMe
+                moveFile.isVisible = rights?.canMove == true && !isSharedWithMe && !file.isImporting()
                 renameFile.isVisible = rights?.canRename == true && !isSharedWithMe && !file.isImporting()
                 goToFolder.isVisible = isGoToFolderVisible()
             }
@@ -220,7 +220,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         cancelExternalImport.setOnClickListener {
             cancelExternalImportClicked(
                 onSuccess = { ownerFragment.findNavController().popBackStack() },
-                onError = { error -> ownerFragment.showSnackbar(error) })
+                onError = { translatedError -> ownerFragment.showSnackbar(translatedError) })
         }
         // Use OnClickListener instead of OnCheckedChangeListener because the latter is unnecessarily called on every
         // refreshBottomSheetUI calls
