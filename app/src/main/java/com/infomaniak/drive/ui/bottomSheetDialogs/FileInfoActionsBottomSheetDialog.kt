@@ -355,6 +355,17 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             }
     }
 
+    override fun cancelExternalImportClicked() {
+        super.cancelExternalImportClicked()
+
+        currentFile.externalImport?.id?.let { id ->
+            mainViewModel.cancelExternalImport(id).observe(viewLifecycleOwner) { apiResponse ->
+                findNavController().popBackStack()
+                if (!apiResponse.isSuccess()) showSnackbar(requireContext().getString(apiResponse.translatedError))
+            }
+        }
+    }
+
     private fun File.showFavoritesResultSnackbar() {
         showSnackbar(getString(if (isFavorite) R.string.allFileAddFavoris else R.string.allFileDeleteFavoris, name), true)
     }

@@ -837,7 +837,7 @@ object FileController {
             FileActivityType.FILE_MOVE_IN,
             FileActivityType.FILE_RESTORE -> {
                 if (returnResponse[fileId] == null && file != null) {
-                    if (file?.isImporting() == true) MqttClientWrapper.start(true)
+                    if (file!!.isImporting()) MqttClientWrapper.start(true)
                     realm.where(File::class.java).equalTo(File::id.name, currentFolder.id).findFirst()?.let { realmFolder ->
                         if (!realmFolder.children.contains(file)) {
                             addChild(realm, realmFolder, file!!)
@@ -965,27 +965,25 @@ object FileController {
         }
     }
 
-    fun updateExternalImport(id: Int, action: ActionExternalImport) {
+    fun updateExternalImport(importId: Int, action: ActionExternalImport) {
         getRealmInstance().use { realm ->
-            val file = realm.where(File::class.java)
-                .equalTo("${File::externalImport.name}.${FileExternalImport::id.name}", id)
-                .findFirst()
-
-            file?.let { oldFile ->
-                when (action) {
-                    ActionExternalImport.IMPORT_FINISH -> {
-                        realm.executeTransaction {
-                            oldFile.apply { externalImport?.status = FileExternalImport.FileExternalImportStatus.DONE.value }
+            realm.where(File::class.java)
+                .equalTo("${File::externalImport.name}.${FileExternalImport::id.name}", importId)
+                .findFirst()?.let { file ->
+                    when (action) {
+                        ActionExternalImport.IMPORT_FINISH -> {
+                            realm.executeTransaction {
+                                file.apply { externalImport?.status = FileExternalImport.FileExternalImportStatus.DONE.value }
+                            }
                         }
-                    }
-                    ActionExternalImport.CANCEL -> {
-                        realm.executeTransaction {
-                            oldFile.apply { externalImport?.status = FileExternalImport.FileExternalImportStatus.FAILED.value }
+                        ActionExternalImport.CANCEL -> {
+                            realm.executeTransaction {
+                                file.apply { externalImport?.status = FileExternalImport.FileExternalImportStatus.CANCELED.value }
+                            }
                         }
+                        else -> Unit
                     }
-                    else -> Unit
                 }
-            }
         }
     }
 }

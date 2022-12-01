@@ -31,8 +31,11 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager
-import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
+import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.setCornersRadius
+import com.infomaniak.drive.utils.setFileItem
+import com.infomaniak.drive.utils.setupFileProgress
 import com.infomaniak.lib.core.utils.toPx
 import com.infomaniak.lib.core.views.LoaderAdapter.Companion.VIEW_TYPE_LOADING
 import com.infomaniak.lib.core.views.LoaderAdapter.Companion.createLoadingViewHolder

@@ -96,7 +96,8 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
                         if (appContext.isBulkOperationActive() || isExternalImportRunning) {
                             timer.start()
                         } else {
-                            unsubscribeAndDisconnect()
+                            currentToken?.let { unsubscribe(topicFor(it)) }
+                            client.disconnect()
                         }
                     }
                     timer.start()
@@ -143,14 +144,11 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
         }
 
         val notification = gson.fromJson(message.toString(), notificationClass)
-        if (notification.action == ActionExternalImport.IMPORT_FINISH) isExternalImportRunning = false
+        if (notification.action == ActionExternalImport.IMPORT_FINISH || notification.action == ActionExternalImport.CANCEL) {
+            isExternalImportRunning = false
+        }
 
         postValue(notification)
-    }
-
-    private fun unsubscribeAndDisconnect() {
-        currentToken?.let { unsubscribe(topicFor(it)) }
-        client.disconnect()
     }
 
     override fun deliveryComplete(token: IMqttDeliveryToken?) {}

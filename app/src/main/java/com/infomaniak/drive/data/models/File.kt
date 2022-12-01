@@ -288,9 +288,14 @@ open class File(
         else getCacheFile(context).apply { if (exists()) delete() }
     }
 
-    fun isDisabled() = rights?.canRead == false && rights?.canShow == false
+    fun isDisabled(): Boolean {
+        return rights?.canRead == false && rights?.canShow == false
+    }
 
-    fun isImporting() = externalImport?.status == FileExternalImport.FileExternalImportStatus.IN_PROGRESS.value
+    fun isImporting(): Boolean {
+        return externalImport?.status == FileExternalImport.FileExternalImportStatus.IN_PROGRESS.value ||
+                externalImport?.status == FileExternalImport.FileExternalImportStatus.WAITING.value
+    }
 
     fun isRoot(): Boolean {
         return id == ROOT_ID

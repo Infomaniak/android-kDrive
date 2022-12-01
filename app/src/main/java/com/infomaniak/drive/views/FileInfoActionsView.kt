@@ -217,11 +217,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             onItemClickListener.addFavoritesClicked()
         }
         leaveShare.setOnClickListener { onItemClickListener.leaveShare() }
-        cancelExternalImport.setOnClickListener {
-            cancelExternalImportClicked(
-                onSuccess = { ownerFragment.findNavController().popBackStack() },
-                onError = { translatedError -> ownerFragment.showSnackbar(translatedError) })
-        }
+        cancelExternalImport.setOnClickListener { onItemClickListener.cancelExternalImportClicked() }
         // Use OnClickListener instead of OnCheckedChangeListener because the latter is unnecessarily called on every
         // refreshBottomSheetUI calls
         availableOfflineSwitch.setOnClickListener { view ->
@@ -431,23 +427,6 @@ class FileInfoActionsView @JvmOverloads constructor(
                 }
             } else {
                 onError?.invoke(context.getString(R.string.errorRename))
-            }
-        }
-    }
-
-    private fun cancelExternalImportClicked(
-        onSuccess: (() -> Unit)? = null,
-        onError: ((translatedError: String) -> Unit)? = null
-    ) {
-        onItemClickListener.cancelExternalImportClicked()
-
-        currentFile.externalImport?.id?.let { id ->
-            mainViewModel.cancelExternalImport(id).observe(ownerFragment) { apiResponse ->
-                if (apiResponse.isSuccess()) {
-                    onSuccess?.invoke()
-                } else {
-                    onError?.invoke(context.getString(apiResponse.translatedError))
-                }
             }
         }
     }

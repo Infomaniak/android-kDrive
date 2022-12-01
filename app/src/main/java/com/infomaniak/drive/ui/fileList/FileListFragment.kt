@@ -232,7 +232,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                 when (notification) {
                     is ActionNotification -> refreshActivities()
                     is ActionExternalImportNotification -> {
-                            fileListViewModel.updateExternalImport(notification)
+                        fileListViewModel.updateExternalImport(notification)
                     }
                 }
             }
