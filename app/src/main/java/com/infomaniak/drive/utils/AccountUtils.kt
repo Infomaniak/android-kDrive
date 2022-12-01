@@ -236,7 +236,7 @@ object AccountUtils : CredentialManager() {
     }
 
     private fun resetApp(context: Context) {
-        if (getAllUserCount() == 0) {
+        if (getAllUsersCount() == 0) {
             AppSettings.removeAppSettings()
             UiSettings(context).removeUiSettings()
 
