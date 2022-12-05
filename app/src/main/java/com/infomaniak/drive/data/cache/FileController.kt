@@ -965,8 +965,8 @@ object FileController {
         }
     }
 
-    fun updateExternalImport(importId: Int, action: ActionExternalImport) {
-        getRealmInstance().use { realm ->
+    fun updateExternalImport(driveId: Int, importId: Int, action: ActionExternalImport) {
+        getRealmInstance(UserDrive(driveId = driveId)).use { realm ->
             realm.where(File::class.java)
                 .equalTo("${File::externalImport.name}.${FileExternalImport::id.name}", importId)
                 .findFirst()?.let { file ->

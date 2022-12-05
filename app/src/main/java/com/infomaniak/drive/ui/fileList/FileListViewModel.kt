@@ -217,7 +217,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
 
     fun updateExternalImport(notification: ActionExternalImportNotification) {
         viewModelScope.launch(Dispatchers.IO) {
-            FileController.updateExternalImport(notification.importId, notification.action)
+            with(notification) { FileController.updateExternalImport(driveId, importId, action) }
         }
     }
 

@@ -24,6 +24,7 @@ import androidx.lifecycle.LiveData
 import com.google.gson.JsonParser
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.isBulkOperationActive
+import com.infomaniak.drive.utils.isPositive
 import com.infomaniak.lib.core.api.ApiController.gson
 import com.infomaniak.lib.core.utils.Utils
 import info.mqtt.android.service.MqttAndroidClient
@@ -39,7 +40,7 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
     private lateinit var timer: CountDownTimer
     private var currentToken: IpsToken? = null
     private var isSubscribed: Boolean = false
-    private var isExternalImportRunning: Boolean = false
+    private var runningExternalImportCount: Int = 0
 
     private const val MQTT_USER = "ips:ips-public"
     private const val MQTT_PASS = "8QC5EwBqpZ2Z" // Yes it's normal, non-sensitive information
@@ -75,7 +76,7 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
     }
 
     fun start(isExternalImport: Boolean = false, completion: () -> Unit = {}) {
-        isExternalImportRunning = isExternalImport
+        if (isExternalImport) runningExternalImportCount++
         // If we are already connected, just run the BulkOperation immediately
         if (client.isConnected) {
             completion()
@@ -93,7 +94,7 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
 
                     // If there is no more active worker, stop MQTT
                     timer = Utils.createRefreshTimer(milliseconds = MQTT_AUTO_DISCONNECT_TIMER) {
-                        if (appContext.isBulkOperationActive() || isExternalImportRunning) {
+                        if (appContext.isBulkOperationActive() || runningExternalImportCount.isPositive()) {
                             timer.start()
                         } else {
                             currentToken?.let { unsubscribe(topicFor(it)) }
@@ -145,7 +146,7 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
 
         val notification = gson.fromJson(message.toString(), notificationClass)
         if (notification.action == ActionExternalImport.IMPORT_FINISH || notification.action == ActionExternalImport.CANCEL) {
-            isExternalImportRunning = false
+            runningExternalImportCount--
         }
 
         postValue(notification)
