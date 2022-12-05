@@ -33,6 +33,7 @@ import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.file.FileConversion
 import com.infomaniak.drive.data.models.file.FileExternalImport
+import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
 import com.infomaniak.drive.data.models.file.FileVersion
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmListParceler.FileRealmListParceler
@@ -293,8 +294,9 @@ open class File(
     }
 
     fun isImporting(): Boolean {
-        return externalImport?.status == FileExternalImport.FileExternalImportStatus.IN_PROGRESS.value ||
-                externalImport?.status == FileExternalImport.FileExternalImportStatus.WAITING.value
+        return externalImport?.status == FileExternalImportStatus.IN_PROGRESS.value ||
+                externalImport?.status == FileExternalImportStatus.WAITING.value ||
+                externalImport?.status == FileExternalImportStatus.CANCELING.value
     }
 
     fun isRoot(): Boolean {
