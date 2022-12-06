@@ -40,7 +40,7 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
     private lateinit var timer: CountDownTimer
     private var currentToken: IpsToken? = null
     private var isSubscribed: Boolean = false
-    private var runningExternalImportCount: Int = 0
+    private var runningExternalImportIds: MutableSet<Int> = mutableSetOf()
 
     private const val MQTT_USER = "ips:ips-public"
     private const val MQTT_PASS = "8QC5EwBqpZ2Z" // Yes it's normal, non-sensitive information
@@ -75,8 +75,9 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
         }
     }
 
-    fun start(isExternalImport: Boolean = false, completion: () -> Unit = {}) {
-        if (isExternalImport) runningExternalImportCount++
+    fun start(externalImportId: Int? = null, completion: () -> Unit = {}) {
+        externalImportId?.let { runningExternalImportIds.add(it) }
+
         // If we are already connected, just run the BulkOperation immediately
         if (client.isConnected) {
             completion()
@@ -94,7 +95,7 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
 
                     // If there is no more active worker, stop MQTT
                     timer = Utils.createRefreshTimer(milliseconds = MQTT_AUTO_DISCONNECT_TIMER) {
-                        if (appContext.isBulkOperationActive() || runningExternalImportCount.isPositive()) {
+                        if (appContext.isBulkOperationActive() || runningExternalImportIds.size.isPositive()) {
                             timer.start()
                         } else {
                             currentToken?.let { unsubscribe(topicFor(it)) }
@@ -146,7 +147,7 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
 
         val notification = gson.fromJson(message.toString(), notificationClass)
         if (notification.action == ActionExternalImport.IMPORT_FINISH || notification.action == ActionExternalImport.CANCEL) {
-            runningExternalImportCount--
+            runningExternalImportIds.remove((notification as ActionExternalImportNotification).importId)
         }
 
         postValue(notification)

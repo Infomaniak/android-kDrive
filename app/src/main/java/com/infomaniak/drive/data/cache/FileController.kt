@@ -733,11 +733,17 @@ object FileController {
     }
 
     private fun keepSubFolderChildren(localFolderChildren: List<File>?, remoteFolderChildren: List<File>) {
-        localFolderChildren?.filter { !it.children.isEmpty() || it.isOffline }?.map { oldFile ->
-            remoteFolderChildren.find { it.id == oldFile.id }?.apply {
-                if (oldFile.isFolder()) children = oldFile.children
-                isOffline = oldFile.isOffline
+        val oldChildren = localFolderChildren?.filter { it.children.isNotEmpty() || it.isOffline }
+        remoteFolderChildren.forEach { newFile ->
+            oldChildren?.find { it.id == newFile.id }?.let { oldFile ->
+                newFile.apply {
+                    if (oldFile.isFolder()) children = oldFile.children
+                    isOffline = oldFile.isOffline
+                }
             }
+
+            // Start mqtt listening if the new file is an external import to receive its status update
+            if (newFile.isImporting()) MqttClientWrapper.start(newFile.externalImport?.id)
         }
     }
 
@@ -838,7 +844,7 @@ object FileController {
             FileActivityType.FILE_MOVE_IN,
             FileActivityType.FILE_RESTORE -> {
                 if (returnResponse[fileId] == null && file != null) {
-                    if (file!!.isImporting()) MqttClientWrapper.start(true)
+                    if (file!!.isImporting()) MqttClientWrapper.start(file?.externalImport?.id)
                     realm.where(File::class.java).equalTo(File::id.name, currentFolder.id).findFirst()?.let { realmFolder ->
                         if (!realmFolder.children.contains(file)) {
                             addChild(realm, realmFolder, file!!)
