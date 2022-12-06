@@ -169,6 +169,7 @@
     <string name="buttonUpload">Importer depuis le téléphone</string>
     <string name="buttonValid">Valider</string>
     <string name="cameraAccessDeniedDescription">L’accès à votre caméra est désactivé, vous pouvez changer ce paramètre dans les réglages.</string>
+    <string name="cancelExternalImport">Annulation de l‘import externe</string>
     <string name="categoriesFilterTitle">Catégories</string>
     <string name="categoryBanking">Banque</string>
     <string name="categoryBill">Facture</string>

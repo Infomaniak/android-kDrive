@@ -336,7 +336,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     }
 
     fun cancelExternalImport(importId: Int) = liveData(Dispatchers.IO) {
-        emit(ApiRepository.cancelExternalImport(AccountUtils.currentDriveId, importId))
+        emit(FileController.cancelExternalImport(importId))
     }
 
     fun observeDownloadOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(

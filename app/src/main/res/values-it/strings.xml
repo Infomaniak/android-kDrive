@@ -169,6 +169,7 @@
     <string name="buttonUpload">Importa dal telefono</string>
     <string name="buttonValid">Convalida</string>
     <string name="cameraAccessDeniedDescription">L’accesso alla tua fotocamera è disattivato. Puoi modificare questo parametro dalle impostazioni.</string>
+    <string name="cancelExternalImport">Cancellazione dell‘importazione esterna</string>
     <string name="categoriesFilterTitle">Categorie</string>
     <string name="categoryBanking">Banca</string>
     <string name="categoryBill">Fattura</string>

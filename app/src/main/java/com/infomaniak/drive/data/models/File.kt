@@ -299,6 +299,8 @@ open class File(
                 externalImport?.status == FileExternalImportStatus.CANCELING.value
     }
 
+    fun isCancelingImport() = externalImport?.status == FileExternalImportStatus.CANCELING.value
+
     fun isRoot(): Boolean {
         return id == ROOT_ID
     }

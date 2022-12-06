@@ -75,7 +75,7 @@ fun View.setFileItem(file: File, isGrid: Boolean = false, viewHolder: FileViewHo
     displaySize(file)
     displayIcon(file, isGrid, viewHolder)
     displayCategories(file)
-    displayExternalImport(file.isImporting(), isGrid)
+    displayExternalImport(file, isGrid)
 }
 
 private fun View.displayDate(file: File) {
@@ -186,10 +186,20 @@ private fun View.displayCategories(file: File) {
     }
 }
 
-private fun View.displayExternalImport(isImporting: Boolean, isGrid: Boolean) {
-    if (isImporting && !isGrid) fileDate.text = resources.getString(R.string.uploadInProgressTitle)
-    val fileProgression = if (isGrid) fileProgressionCardView else fileProgression
-    fileProgression.isVisible = isImporting
+private fun View.displayExternalImport(file: File, isGrid: Boolean) {
+    val isImporting = file.isImporting()
+    if (isImporting && !isGrid) {
+        fileDate.text =
+            resources.getString(if (file.isCancelingImport()) R.string.cancelExternalImport else R.string.uploadInProgressTitle)
+    }
+    
+    val fileProgression = when {
+        !isGrid -> fileProgression
+        file.isFolder() -> fileProgressionCardView
+        else -> null
+    }
+
+    fileProgression?.isVisible = isImporting
     filePreview.isGone = isImporting
 }
 
