@@ -19,12 +19,34 @@ package com.infomaniak.drive.data.models
 
 import com.google.gson.annotations.SerializedName
 
-data class ActionProgressNotification(
-    override val uid: String,
-    override val action: Action,
-    val progress: ActionProgress,
+data class MqttNotification (
+    val uid: String,
+    val action: MqttAction,
     @SerializedName("drive_id")
-    override val driveId: Int,
+    val driveId: Int,
+
+    // Only for Action notification
+    @SerializedName("file_id")
+    val fileId: Int? = null,
+    @SerializedName("parent_id")
+    val parentId: Int? = null,
+    @SerializedName("simple_action")
+    val simpleAction: String? = null,
+
+    // Only for external import notification
+    @SerializedName("user_id")
+    val userId: Int? = null,
+    @SerializedName("import_id")
+    val importId: Int? = null,
+
+    // Only for action progress notification
     @SerializedName("action_uuid")
-    val actionUuid: String,
-) : Notification
+    val actionUuid: String? = null,
+    val progress: ActionProgress? = null,
+) {
+    fun isExternalImportNotification() = importId != null
+
+    fun isProgressNotification() = progress != null
+
+    fun isFileActionNotification() = fileId != null
+}

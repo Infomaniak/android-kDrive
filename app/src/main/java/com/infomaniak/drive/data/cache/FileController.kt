@@ -972,10 +972,10 @@ object FileController {
         }
     }
 
-    fun updateExternalImport(driveId: Int, importId: Int, action: ActionExternalImport) {
+    fun updateExternalImport(driveId: Int, importId: Int, action: MqttAction) {
         when (action) {
-            ActionExternalImport.IMPORT_FINISH -> FileExternalImportStatus.DONE
-            ActionExternalImport.CANCEL -> FileExternalImportStatus.CANCELED
+            MqttAction.EXTERNAL_IMPORT_FINISH -> FileExternalImportStatus.DONE
+            MqttAction.EXTERNAL_IMPORT_CANCEL -> FileExternalImportStatus.CANCELED
             else -> null
         }?.let { status -> updateExternalImportStatus(driveId, importId, status) }
     }
@@ -989,7 +989,7 @@ object FileController {
         return apiResponse
     }
 
-    private fun updateExternalImportStatus(driveId: Int, importId: Int, newStatus: FileExternalImportStatus) {
+    private fun updateExternalImportStatus(driveId: Int, importId: Int?, newStatus: FileExternalImportStatus) {
         getRealmInstance(UserDrive(driveId = driveId)).use { realm ->
             realm.where(File::class.java)
                 .equalTo("${File::externalImport.name}.${FileExternalImport::id.name}", importId)

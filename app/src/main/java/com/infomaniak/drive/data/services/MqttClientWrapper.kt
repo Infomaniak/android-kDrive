@@ -21,8 +21,9 @@ import android.content.Context
 import android.os.CountDownTimer
 import android.util.Log
 import androidx.lifecycle.LiveData
-import com.google.gson.JsonParser
-import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.IpsToken
+import com.infomaniak.drive.data.models.MqttAction
+import com.infomaniak.drive.data.models.MqttNotification
 import com.infomaniak.drive.utils.BulkOperationsUtils.isBulkOperationActive
 import com.infomaniak.drive.utils.isPositive
 import com.infomaniak.lib.core.api.ApiController.gson
@@ -30,7 +31,7 @@ import com.infomaniak.lib.core.utils.Utils
 import info.mqtt.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
 
-object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
+object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
 
     private const val MQTT_AUTO_DISCONNECT_TIMER = 5_000L
 
@@ -137,20 +138,13 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
     }
 
     override fun messageArrived(topic: String?, message: MqttMessage?) {
-        val jsonMessage = JsonParser.parseString(message.toString()).asJsonObject
+        with(gson.fromJson(message.toString(), MqttNotification::class.java)) {
+            if (action == MqttAction.EXTERNAL_IMPORT_FINISH || action == MqttAction.EXTERNAL_IMPORT_CANCEL) {
+                runningExternalImportIds.remove(importId)
+            }
 
-        val notificationClass = when {
-            jsonMessage.has("progress") -> ActionProgressNotification::class.java
-            jsonMessage.has("import_id") -> ActionExternalImportNotification::class.java
-            else -> ActionNotification::class.java
+            postValue(this)
         }
-
-        val notification = gson.fromJson(message.toString(), notificationClass)
-        if (notification.action == ActionExternalImport.IMPORT_FINISH || notification.action == ActionExternalImport.CANCEL) {
-            runningExternalImportIds.remove((notification as ActionExternalImportNotification).importId)
-        }
-
-        postValue(notification)
     }
 
     override fun deliveryComplete(token: IMqttDeliveryToken?) {}

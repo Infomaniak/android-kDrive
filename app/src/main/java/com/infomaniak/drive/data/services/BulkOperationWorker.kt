@@ -27,9 +27,8 @@ import androidx.work.ForegroundInfo
 import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
 import com.google.common.util.concurrent.ListenableFuture
-import com.infomaniak.drive.data.models.ActionProgressNotification
 import com.infomaniak.drive.data.models.BulkOperationType
-import com.infomaniak.drive.data.models.Notification
+import com.infomaniak.drive.data.models.MqttNotification
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import java.util.*
 
@@ -39,7 +38,7 @@ class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : Li
     private lateinit var bulkOperationNotification: NotificationCompat.Builder
     private lateinit var bulkOperationType: BulkOperationType
     private lateinit var notificationManagerCompat: NotificationManagerCompat
-    private var mqttNotificationsObserver: Observer<Notification>? = null
+    private var mqttNotificationsObserver: Observer<MqttNotification>? = null
 
     private lateinit var timer: CountDownTimer
     private lateinit var lastReception: Date
@@ -77,10 +76,10 @@ class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : Li
     }
 
     private fun launchObserver(onOperationFinished: () -> Unit) {
-        mqttNotificationsObserver = Observer<Notification> { notification ->
-            if (notification is ActionProgressNotification && notification.actionUuid == actionUuid) {
+        mqttNotificationsObserver = Observer<MqttNotification> { notification ->
+            if (notification.isProgressNotification() && notification.actionUuid == actionUuid) {
                 lastReception = Date()
-                if (notification.progress.todo == 0) {
+                if (notification.progress!!.todo == 0) {
                     onOperationFinished()
                 } else {
                     bulkOperationNotification.apply {

@@ -17,8 +17,39 @@
  */
 package com.infomaniak.drive.data.models
 
-interface Notification {
-    val uid: String
-    val action: Any
-    val driveId: Int
+import com.google.gson.annotations.SerializedName
+
+enum class MqttAction {
+    @SerializedName("file_move")
+    FILE_MOVE,
+
+    @SerializedName("file_trash")
+    FILE_TRASH,
+
+    @SerializedName("file_restore")
+    FILE_RESTORE,
+
+    @SerializedName("file_create")
+    FILE_CREATE,
+
+    @SerializedName("bulk_file_move")
+    BULK_FILE_MOVE,
+
+    @SerializedName("bulk_file_trash")
+    BULK_FILE_TRASH,
+
+    @SerializedName("bulk_file_copy")
+    BULK_FILE_COPY,
+
+    @SerializedName("import_started")
+    EXTERNAL_IMPORT_STARTED,
+
+    @SerializedName("create_file")
+    EXTERNAL_IMPORT_CREATE_FILE,
+
+    @SerializedName("import_finish")
+    EXTERNAL_IMPORT_FINISH,
+
+    @SerializedName("cancel")
+    EXTERNAL_IMPORT_CANCEL
 }
