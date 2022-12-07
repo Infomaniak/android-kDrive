@@ -180,7 +180,6 @@
     <string name="buttonUpload">Upload from phone</string>
     <string name="buttonValid">Validate</string>
     <string name="cameraAccessDeniedDescription">Access to your camera is disabled: you can change this in the Settings.</string>
-    <string name="cancelExternalImport">Canceling the external import</string>
     <string name="categoriesFilterTitle">Categories</string>
     <string name="categoryBanking">Banking</string>
     <string name="categoryBill">Bill</string>

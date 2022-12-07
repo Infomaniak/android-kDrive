@@ -296,7 +296,7 @@ open class File(
     fun isImporting(): Boolean {
         return externalImport?.status == FileExternalImportStatus.IN_PROGRESS.value ||
                 externalImport?.status == FileExternalImportStatus.WAITING.value ||
-                externalImport?.status == FileExternalImportStatus.CANCELING.value
+                isCancelingImport()
     }
 
     fun isCancelingImport() = externalImport?.status == FileExternalImportStatus.CANCELING.value

@@ -19,13 +19,13 @@ package com.infomaniak.drive.data.models
 
 import com.google.gson.annotations.SerializedName
 
-data class MqttNotification (
+data class MqttNotification(
     val uid: String,
     val action: MqttAction,
     @SerializedName("drive_id")
     val driveId: Int,
 
-    // Only for Action notification
+    // Only for File Action notification
     @SerializedName("file_id")
     val fileId: Int? = null,
     @SerializedName("parent_id")
@@ -46,7 +46,7 @@ data class MqttNotification (
 ) {
     fun isExternalImportNotification() = importId != null
 
-    fun isProgressNotification() = progress != null
-
     fun isFileActionNotification() = fileId != null
+
+    fun isProgressNotification() = progress != null
 }

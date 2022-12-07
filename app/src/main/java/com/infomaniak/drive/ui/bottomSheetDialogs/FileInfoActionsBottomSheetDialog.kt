@@ -360,8 +360,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
         currentFile.externalImport?.id?.let { id ->
             mainViewModel.cancelExternalImport(id).observe(viewLifecycleOwner) { apiResponse ->
+                if (!apiResponse.isSuccess()) showSnackbar(requireContext().getString(apiResponse.translatedError), true)
                 findNavController().popBackStack()
-                if (!apiResponse.isSuccess()) showSnackbar(requireContext().getString(apiResponse.translatedError))
             }
         }
     }

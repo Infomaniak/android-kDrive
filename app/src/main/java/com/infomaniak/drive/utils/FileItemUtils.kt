@@ -190,9 +190,9 @@ private fun View.displayExternalImport(file: File, isGrid: Boolean) {
     val isImporting = file.isImporting()
     if (isImporting && !isGrid) {
         fileDate.text =
-            resources.getString(if (file.isCancelingImport()) R.string.cancelExternalImport else R.string.uploadInProgressTitle)
+            resources.getString(if (file.isCancelingImport()) R.string.allCancellationInProgress else R.string.uploadInProgressTitle)
     }
-    
+
     val fileProgression = when {
         !isGrid -> fileProgression
         file.isFolder() -> fileProgressionCardView
