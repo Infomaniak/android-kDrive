@@ -345,7 +345,7 @@ object FileController {
 
     private fun getRealmConfiguration(dbName: String): RealmConfiguration {
         return RealmConfiguration.Builder()
-            .schemaVersion(FileMigration.bddVersion) // Must be bumped when the schema changes
+            .schemaVersion(FileMigration.dbVersion) // Must be bumped when the schema changes
             .migration(FileMigration())
             .modules(RealmModules.LocalFilesModule())
             .name(dbName)
