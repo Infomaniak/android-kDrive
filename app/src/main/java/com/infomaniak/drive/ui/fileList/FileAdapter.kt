@@ -280,6 +280,7 @@ open class FileAdapter(
                 setCorners(position, itemCount)
             }
 
+            fileChecked.isVisible = false
             setFileItem(file, isGrid, holder)
             checkIfEnableFile(file)
 
