@@ -25,13 +25,13 @@ import android.content.Intent
 import androidx.core.app.NotificationManagerCompat
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.MediaFolder
-import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.login.MigrationActivity.Companion.getOldkDriveUser
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.SyncUtils.activateSyncIfNeeded
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import com.infomaniak.lib.core.utils.NotificationUtilsCore
 import com.infomaniak.lib.core.utils.clearStack
 import com.infomaniak.lib.core.utils.hasPermissions
 import kotlinx.coroutines.CoroutineScope
@@ -45,7 +45,7 @@ class RebootReceiver : BroadcastReceiver() {
 
             if (!getOldkDriveUser().isEmpty) {
                 val openAppIntent = Intent(this, LaunchActivity::class.java).clearStack()
-                val pendingIntent = PendingIntent.getActivity(this, 0, openAppIntent, UploadNotifications.pendingIntentFlags)
+                val pendingIntent = PendingIntent.getActivity(this, 0, openAppIntent, NotificationUtilsCore.pendingIntentFlags)
                 val notificationManagerCompat = NotificationManagerCompat.from(context)
 
                 buildGeneralNotification(getString(R.string.migrateNotificationTitle)).apply {

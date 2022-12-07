@@ -40,7 +40,6 @@ import com.infomaniak.drive.MatomoDrive.buildTracker
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.services.MqttClientWrapper
-import com.infomaniak.drive.data.sync.UploadNotifications.pendingIntentFlags
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
@@ -53,6 +52,7 @@ import com.infomaniak.lib.core.auth.TokenInterceptorListener
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
+import com.infomaniak.lib.core.utils.NotificationUtilsCore.Companion.pendingIntentFlags
 import com.infomaniak.lib.core.utils.clearStack
 import com.infomaniak.lib.login.ApiToken
 import io.sentry.Sentry

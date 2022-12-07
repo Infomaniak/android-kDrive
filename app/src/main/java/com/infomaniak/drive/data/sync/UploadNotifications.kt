@@ -20,7 +20,6 @@ package com.infomaniak.drive.data.sync
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -34,18 +33,13 @@ import com.infomaniak.drive.ui.menu.settings.SyncSettingsActivity
 import com.infomaniak.drive.utils.NotificationUtils
 import com.infomaniak.drive.utils.NotificationUtils.uploadNotification
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
+import com.infomaniak.lib.core.utils.NotificationUtilsCore.Companion.pendingIntentFlags
 import com.infomaniak.lib.core.utils.clearStack
 import io.sentry.Sentry
 
 object UploadNotifications {
 
     const val NOTIFICATION_FILES_LIMIT = 5
-
-    val pendingIntentFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-    } else {
-        PendingIntent.FLAG_UPDATE_CURRENT
-    }
 
     fun setupCurrentUploadNotification(context: Context, pendingCount: Int) {
         val pendingTitle = context.getString(R.string.uploadInProgressTitle)
