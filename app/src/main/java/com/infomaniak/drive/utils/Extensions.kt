@@ -24,8 +24,6 @@ import android.app.KeyguardManager
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
-import android.content.res.Resources
 import android.database.Cursor
 import android.graphics.Color
 import android.graphics.Point
@@ -75,11 +73,8 @@ import com.infomaniak.drive.ui.fileList.UploadInProgressFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
+import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
-import com.infomaniak.lib.core.utils.lightNavigationBar
-import com.infomaniak.lib.core.utils.lightStatusBar
-import com.infomaniak.lib.core.utils.loadAvatar
-import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.login.InfomaniakLogin
 import io.realm.RealmList
 import kotlinx.android.synthetic.main.activity_main.*
@@ -130,21 +125,17 @@ fun Cursor.uri(contentUri: Uri): Uri {
 
 fun Number.isPositive(): Boolean = toLong() > 0
 
-fun Resources.isNightModeEnabled(): Boolean {
-    return configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-}
-
 fun Activity.setColorStatusBar(appBar: Boolean = false) = with(window) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         statusBarColor = ContextCompat.getColor(this@setColorStatusBar, if (appBar) R.color.appBar else R.color.background)
-        lightStatusBar(!resources.isNightModeEnabled())
+        lightStatusBar(!isNightModeEnabled())
     } else {
         statusBarColor = Color.BLACK
     }
 }
 
 fun Activity.setColorNavigationBar(appBar: Boolean = false) = with(window) {
-    val nightModeEnabled = resources.isNightModeEnabled()
+    val nightModeEnabled = isNightModeEnabled()
     if (nightModeEnabled || Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         val color = if (appBar) R.color.appBar else R.color.background
         navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, color)

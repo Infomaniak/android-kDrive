@@ -38,13 +38,9 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.TabViewPagerUtils
 import com.infomaniak.drive.utils.TabViewPagerUtils.setup
 import com.infomaniak.drive.utils.getFolderIcon
-import com.infomaniak.drive.utils.isNightModeEnabled
 import com.infomaniak.drive.utils.loadAny
 import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior
-import com.infomaniak.lib.core.utils.format
-import com.infomaniak.lib.core.utils.lightStatusBar
-import com.infomaniak.lib.core.utils.setMargins
-import com.infomaniak.lib.core.utils.toggleEdgeToEdge
+import com.infomaniak.lib.core.utils.*
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
 import kotlinx.android.synthetic.main.fragment_file_details.*
 import kotlinx.android.synthetic.main.fragment_file_details.view.*
@@ -106,7 +102,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
 
     private fun setFile(file: File) {
         fileDetailsViewModel.currentFile.value = file
-        requireActivity().window.lightStatusBar(context?.resources?.isNightModeEnabled() == false && !file.hasThumbnail)
+        requireActivity().window.lightStatusBar(context?.isNightModeEnabled() == false && !file.hasThumbnail)
         subtitleToolbar.title.text = file.name
         subtitleToolbar.subTitle.text = file.getLastModifiedAt().format(getString(R.string.allLastModifiedFilePattern))
         setBannerThumbnail(file)
@@ -125,7 +121,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
 
                     // If in Light mode, change the status icons color to match the background.
                     // If in Dark mode, the icons stay white all along, no need to check.
-                    if (context?.resources?.isNightModeEnabled() == false && file.hasThumbnail) activity?.window?.lightStatusBar(!isExpanded)
+                    if (context?.isNightModeEnabled() == false && file.hasThumbnail) activity?.window?.lightStatusBar(!isExpanded)
                 }
             }
         })
