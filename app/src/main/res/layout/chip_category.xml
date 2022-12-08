@@ -21,6 +21,8 @@
     android:layout_height="wrap_content"
     android:fontFamily="@font/suisseintl_medium"
     android:textColor="@color/white"
+    android:clickable="false"
+    android:focusable="false"
     tools:backgroundTint="@color/red"
     tools:context=".views.CategoriesContainerView"
     tools:text="@string/categoryHobbies" />
