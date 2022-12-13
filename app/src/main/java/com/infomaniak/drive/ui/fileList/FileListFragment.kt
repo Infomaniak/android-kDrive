@@ -25,6 +25,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
+import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
@@ -185,7 +186,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
         with(binding) {
             swipeRefreshLayout.setOnRefreshListener(this@FileListFragment)
-            collapsingToolbarLayout.title = folderName
+            setToolbarTitle()
             ViewCompat.requestApplyInsets(fileListCoordinator) // Restore coordinator state
         }
 
@@ -456,6 +457,10 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     }
 
     protected open fun homeClassName(): String? = null
+
+    protected fun setToolbarTitle(@StringRes rootTitleRes: Int? = null) {
+        collapsingToolbarLayout.title = if (folderId.isPositive() || rootTitleRes == null) folderName else getString(rootTitleRes)
+    }
 
     private fun File.openFolder() {
         if (isDisabled()) {
