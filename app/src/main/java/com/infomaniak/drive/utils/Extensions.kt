@@ -399,6 +399,7 @@ fun Category.getName(context: Context): String = when (name) {
     "PREDEF_CAT_HOBBIES" -> context.getString(R.string.categoryHobbies)
     "PREDEF_CAT_ID" -> context.getString(R.string.categoryID)
     "PREDEF_CAT_INSURANCE" -> context.getString(R.string.categoryInsurance)
+    "PREDEF_CAT_RESUME" -> context.getString(R.string.categoryResume)
     "PREDEF_CAT_QUOTATION" -> context.getString(R.string.categoryQuotation)
     "PREDEF_CAT_TAXATION" -> context.getString(R.string.categoryTaxation)
     "PREDEF_CAT_TRANSPORTATION" -> context.getString(R.string.categoryTransportation)
