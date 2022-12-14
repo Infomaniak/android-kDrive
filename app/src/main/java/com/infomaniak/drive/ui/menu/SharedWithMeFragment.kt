@@ -79,10 +79,10 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
             when {
                 file.isDrive() -> {
                     DriveInfosController.getDrive(AccountUtils.currentUserId, file.driveId)?.let { currentDrive ->
-                        if (currentDrive.maintenance) openMaintenanceDialog(currentDrive.name) else openSharedWithMeFolder(file)
+                        if (currentDrive.maintenance) openMaintenanceDialog(currentDrive.name) else file.openSharedWithMeFolder()
                     }
                 }
-                file.isFolder() -> openSharedWithMeFolder(file)
+                file.isFolder() -> file.openSharedWithMeFolder()
                 else -> {
                     val fileList = fileAdapter.getFileObjectsList(realm)
                     Utils.displayFile(mainViewModel, findNavController(), file, fileList, isSharedWithMe = true)
@@ -105,12 +105,13 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
         )
     }
 
-    private fun openSharedWithMeFolder(file: File) {
+    private fun File.openSharedWithMeFolder() {
         safeNavigate(
             SharedWithMeFragmentDirections.actionSharedWithMeFragmentSelf(
-                folderId = if (file.isDrive()) ROOT_ID else file.id,
-                folderName = file.name,
-                driveId = file.driveId
+                folderId = if (isDrive()) ROOT_ID else id,
+                folderName = name,
+                driveId = driveId,
+                canCreateFile = hasCreationRight()
             )
         )
     }
@@ -138,9 +139,11 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
 
     private inner class SetNoFilesLayout : () -> Unit {
         override fun invoke() {
+            val mustShowShareMessage = isCurrentFolderRoot() || !canCreateFile
+
             noFilesLayout.setup(
-                icon = R.drawable.ic_share,
-                title = R.string.sharedWithMeNoFile,
+                icon = if (mustShowShareMessage) R.drawable.ic_share else R.drawable.ic_folder_filled,
+                title = if (mustShowShareMessage) R.string.mySharesNoFile else R.string.noFilesDescription,
                 initialListView = fileRecyclerView
             )
         }

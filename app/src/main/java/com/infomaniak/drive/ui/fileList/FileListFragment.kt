@@ -81,6 +81,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     internal var folderId = ROOT_ID
     internal var folderName: String = "/"
+    internal var canCreateFile: Boolean = false
 
     private lateinit var activitiesRefreshTimer: CountDownTimer
     private var isDownloading = false
@@ -119,7 +120,9 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         folderId = navigationArgs.folderId
         folderName = if (folderId == ROOT_ID) AccountUtils.getCurrentDrive()?.name ?: "/" else navigationArgs.folderName
+        canCreateFile = navigationArgs.canCreateFile
         binding = FragmentFileListBinding.inflate(inflater, container, false)
+
         return binding.root
     }
 
@@ -158,7 +161,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         setNoFilesLayout()
 
         binding.toolbar.apply {
-            if (isRoot() && hideBackButtonWhenRoot) navigationIcon = null
+            if (isCurrentFolderRoot() && hideBackButtonWhenRoot) navigationIcon = null
 
             setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
@@ -462,10 +465,10 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     protected open fun homeClassName(): String? = null
 
     protected fun setToolbarTitle(@StringRes rootTitleRes: Int? = null) {
-        collapsingToolbarLayout.title = if (isRoot() && rootTitleRes != null) getString(rootTitleRes) else folderName
+        collapsingToolbarLayout.title = if (isCurrentFolderRoot() && rootTitleRes != null) getString(rootTitleRes) else folderName
     }
 
-    private fun isRoot() = folderId == ROOT_ID || folderId == OTHER_ROOT_ID
+    protected fun isCurrentFolderRoot() = folderId == ROOT_ID || folderId == OTHER_ROOT_ID
 
     private fun File.openFolder() {
         if (isDisabled()) {
@@ -483,6 +486,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                     folderId = id,
                     folderName = name,
                     shouldHideBottomNavigation = navigationArgs.shouldHideBottomNavigation,
+                    canCreateFile = hasCreationRight()
                 )
             )
         }
@@ -497,7 +501,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     private fun checkIfNoFiles() {
         changeNoFilesLayoutVisibility(
             hideFileList = fileAdapter.itemCount == 0,
-            changeControlsVisibility = !isRoot(),
+            changeControlsVisibility = !isCurrentFolderRoot(),
             ignoreOffline = true
         )
     }
@@ -724,7 +728,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     private inner class SetNoFilesLayout : () -> Unit {
         override fun invoke() {
             binding.noFilesLayout.setup(
-                title = R.string.noFilesDescriptionWithCreationRights,
+                title = if (canCreateFile) R.string.noFilesDescription else R.string.noFilesDescriptionSelectFolder,
                 initialListView = binding.fileRecyclerView
             ) {
                 fileListViewModel.cancelDownloadFiles()

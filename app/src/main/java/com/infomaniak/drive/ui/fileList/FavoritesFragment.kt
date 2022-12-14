@@ -62,14 +62,18 @@ class FavoritesFragment : FileListFragment() {
 
             onFileClicked = { file ->
                 if (file.isFolder()) {
-                    fileListViewModel.cancelDownloadFiles()
-                    safeNavigate(FavoritesFragmentDirections.actionFavoritesFragmentSelf(file.id, file.name))
+                    file.openFavoriteFolder()
                 } else {
                     val fileList = getFileObjectsList(mainViewModel.realm)
                     Utils.displayFile(mainViewModel, findNavController(), file, fileList)
                 }
             }
         }
+    }
+
+    private fun File.openFavoriteFolder() {
+        fileListViewModel.cancelDownloadFiles()
+        safeNavigate(FavoritesFragmentDirections.actionFavoritesFragmentSelf(id, name, hasCreationRight()))
     }
 
     private fun setupMultiSelectLayout() {
@@ -105,11 +109,13 @@ class FavoritesFragment : FileListFragment() {
 
     private inner class SetNoFilesLayout : () -> Unit {
         override fun invoke() {
-            noFilesLayout.setup(
-                icon = R.drawable.ic_star_filled,
-                title = R.string.favoritesNoFile,
-                initialListView = fileRecyclerView
-            )
+            val (title, icon) = when {
+                isCurrentFolderRoot() -> R.string.favoritesNoFile to R.drawable.ic_star_filled
+                canCreateFile -> R.string.noFilesDescription to R.drawable.ic_folder_filled
+                else -> R.string.noFilesDescriptionSelectFolder to R.drawable.ic_folder_filled
+            }
+
+            noFilesLayout.setup(icon = icon, title = title, initialListView = fileRecyclerView)
         }
     }
 

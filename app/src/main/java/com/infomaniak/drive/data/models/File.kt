@@ -373,6 +373,8 @@ open class File(
 
     fun getCommonFolderDefaultColor(): String = _color ?: "#5287FF" // R.drawable.ic_folder_common_documents tint color
 
+    fun hasCreationRight() = isFolder() && rights?.canCreateFile == true
+
     var color: String
         get() = _color ?: "#9F9F9F" // R.color.secondaryText
         set(color) {

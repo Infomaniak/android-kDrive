@@ -62,6 +62,10 @@
             android:name="shouldHideBottomNavigation"
             android:defaultValue="false"
             app:argType="boolean" />
+        <argument
+            android:name="canCreateFile"
+            android:defaultValue="false"
+            app:argType="boolean" />
         <action
             android:id="@+id/action_fileListFragment_to_previewSliderFragment"
             app:destination="@id/previewSliderFragment" />
@@ -266,6 +270,10 @@
             android:name="folderName"
             android:defaultValue="/"
             app:argType="string" />
+        <argument
+            android:name="canCreateFile"
+            android:defaultValue="false"
+            app:argType="boolean" />
         <action
             android:id="@+id/action_favoritesFragment_self"
             app:destination="@id/favoritesFragment" />
@@ -811,6 +819,10 @@
             android:name="driveId"
             android:defaultValue="0"
             app:argType="integer" />
+        <argument
+            android:name="canCreateFile"
+            android:defaultValue="false"
+            app:argType="boolean" />
         <action
             android:id="@+id/action_sharedWithMeFragment_to_sortFilesBottomSheetDialog"
             app:destination="@id/sortFilesBottomSheetDialog" />
