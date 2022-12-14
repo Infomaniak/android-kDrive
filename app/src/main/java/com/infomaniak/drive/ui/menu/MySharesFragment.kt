@@ -87,7 +87,7 @@ class MySharesFragment : FileSubTypeListFragment() {
         override fun invoke() {
             noFilesLayout.setup(
                 icon = if (isCurrentFolderRoot()) R.drawable.ic_share else R.drawable.ic_folder_filled,
-                title = if (isCurrentFolderRoot()) R.string.mySharesNoFile else R.string.noFilesDescription,
+                title = if (isCurrentFolderRoot()) R.string.mySharesNoFile else R.string.noFilesDescriptionWithCreationRights,
                 initialListView = fileRecyclerView
             )
         }

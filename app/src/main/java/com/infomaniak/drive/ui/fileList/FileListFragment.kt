@@ -728,7 +728,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     private inner class SetNoFilesLayout : () -> Unit {
         override fun invoke() {
             binding.noFilesLayout.setup(
-                title = if (canCreateFile) R.string.noFilesDescription else R.string.noFilesDescriptionSelectFolder,
+                title = if (canCreateFile) R.string.noFilesDescriptionWithCreationRights else R.string.noFilesDescription,
                 initialListView = binding.fileRecyclerView
             ) {
                 fileListViewModel.cancelDownloadFiles()

@@ -143,7 +143,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
 
             noFilesLayout.setup(
                 icon = if (mustShowShareMessage) R.drawable.ic_share else R.drawable.ic_folder_filled,
-                title = if (mustShowShareMessage) R.string.mySharesNoFile else R.string.noFilesDescription,
+                title = if (mustShowShareMessage) R.string.mySharesNoFile else R.string.noFilesDescriptionWithCreationRights,
                 initialListView = fileRecyclerView
             )
         }

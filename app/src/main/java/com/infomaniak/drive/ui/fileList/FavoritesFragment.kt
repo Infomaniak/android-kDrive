@@ -111,8 +111,8 @@ class FavoritesFragment : FileListFragment() {
         override fun invoke() {
             val (title, icon) = when {
                 isCurrentFolderRoot() -> R.string.favoritesNoFile to R.drawable.ic_star_filled
-                canCreateFile -> R.string.noFilesDescription to R.drawable.ic_folder_filled
-                else -> R.string.noFilesDescriptionSelectFolder to R.drawable.ic_folder_filled
+                canCreateFile -> R.string.noFilesDescriptionWithCreationRights to R.drawable.ic_folder_filled
+                else -> R.string.noFilesDescription to R.drawable.ic_folder_filled
             }
 
             noFilesLayout.setup(icon = icon, title = title, initialListView = fileRecyclerView)
