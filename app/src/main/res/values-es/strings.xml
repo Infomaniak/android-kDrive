@@ -99,6 +99,7 @@
     <string name="buttonAuthorize">Autorizar</string>
     <string name="buttonAvailableOffline">Disponible sin conexión</string>
     <string name="buttonBack">Volver</string>
+    <string name="buttonCancelImport">Cancelar la importación</string>
     <string name="buttonChangeFolderColor">Cambiar el color de la carpeta</string>
     <string name="buttonClear">Borrar</string>
     <string name="buttonClearFilters">Borrar los filtros</string>
@@ -179,6 +180,7 @@
     <string name="categoryInsurance">Seguro</string>
     <string name="categoryNameField">Nombre de la categoría</string>
     <string name="categoryQuotation">Presupuesto</string>
+    <string name="categoryResume">Curriculum vitae</string>
     <string name="categoryTaxation">Impuestos</string>
     <string name="categoryTransportation">Transporte</string>
     <string name="categoryWarranty">Garantía</string>
@@ -245,7 +247,6 @@
     <string name="errorCache">Error al almacenar en caché</string>
     <string name="errorCategoryAlreadyExists">Una categoría con el mismo nombre ya existe</string>
     <string name="errorConflict">Ya existe un elemento con el mismo nombre en esta ubicación</string>
-    <string name="errorConnection">Error de conexión</string>
     <string name="errorDelete">Error al eliminar</string>
     <string name="errorDestinationAlreadyExists">El destino ya existe</string>
     <string name="errorDeviceStorage">Insuficiente almacenamiento telefónico disponible</string>
@@ -508,9 +509,9 @@
     <string name="newFolderTitle">¿Qué deseas añadir?</string>
     <string name="noDriveDescription">Prueba kDrive gratis o conéctate con otra cuenta de usuario.</string>
     <string name="noDriveTitle">¡Todavía no tienes kDrive!</string>
-    <string name="noFilesDescription">Esta carpeta está vacía. Pulsa la tecla + para agregar archivos aquí.</string>
+    <string name="noFilesDescription">Esta carpeta está vacía.</string>
     <string name="noFilesDescriptionNoNetwork">No se puede recuperar la información de la carpeta. Comprueba tu conexión de red o vuelve a intentarlo más tarde.</string>
-    <string name="noFilesDescriptionSelectFolder">Esta carpeta está vacía.</string>
+    <string name="noFilesDescriptionWithCreationRights">Esta carpeta está vacía. Pulsa la tecla + para agregar archivos aquí.</string>
     <string name="noMediaFolderTitle">No hay carpetas de medios disponibles</string>
     <string name="noSelectMediaFolders">No hay carpeta seleccionada</string>
     <string name="noSyncFolderNotificationDescription">Pulse aquí para configurar las carpetas a sincronizar</string>

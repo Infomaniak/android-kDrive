@@ -99,6 +99,7 @@
     <string name="buttonAuthorize">Autoriser</string>
     <string name="buttonAvailableOffline">Disponible hors ligne</string>
     <string name="buttonBack">Retour</string>
+    <string name="buttonCancelImport">Annuler l’import</string>
     <string name="buttonChangeFolderColor">Modifier la couleur du dossier</string>
     <string name="buttonClear">Effacer</string>
     <string name="buttonClearFilters">Effacer les filtres</string>
@@ -179,6 +180,7 @@
     <string name="categoryInsurance">Assurance</string>
     <string name="categoryNameField">Nom de la catégorie</string>
     <string name="categoryQuotation">Devis</string>
+    <string name="categoryResume">CV</string>
     <string name="categoryTaxation">Impôts</string>
     <string name="categoryTransportation">Transport</string>
     <string name="categoryWarranty">Garantie</string>
@@ -245,7 +247,6 @@
     <string name="errorCache">Erreur lors de la mise en cache</string>
     <string name="errorCategoryAlreadyExists">Une catégorie avec le même nom existe déjà</string>
     <string name="errorConflict">Un élément du même nom existe déjà à cet emplacement</string>
-    <string name="errorConnection">Erreur de connexion</string>
     <string name="errorDelete">Erreur lors de la suppression</string>
     <string name="errorDestinationAlreadyExists">La destination existe déjà</string>
     <string name="errorDeviceStorage">Stockage disponible du téléphone insuffisant</string>
@@ -508,9 +509,9 @@
     <string name="newFolderTitle">Que souhaitez-vous ajouter ?</string>
     <string name="noDriveDescription">Tester kDrive gratuitement ou connectez-vous avec un autre compte utilisateur.</string>
     <string name="noDriveTitle">Vous n’avez pas encore de kDrive !</string>
-    <string name="noFilesDescription">Ce dossier est vide. Appuyez sur le bouton + pour ajouter des fichiers ici.</string>
+    <string name="noFilesDescription">Ce dossier est vide.</string>
     <string name="noFilesDescriptionNoNetwork">Impossible de récupérer les informations du dossier. Veuillez vérifier votre connexion réseau ou réessayez ultérieurement.</string>
-    <string name="noFilesDescriptionSelectFolder">Ce dossier est vide.</string>
+    <string name="noFilesDescriptionWithCreationRights">Ce dossier est vide. Appuyez sur le bouton + pour ajouter des fichiers ici.</string>
     <string name="noMediaFolderTitle">Aucun dossier de médias disponible</string>
     <string name="noSelectMediaFolders">Aucun dossier sélectionné</string>
     <string name="noSyncFolderNotificationDescription">Cliquez-ici pour configurer les dossiers à synchroniser</string>

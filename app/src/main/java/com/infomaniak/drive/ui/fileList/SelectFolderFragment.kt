@@ -104,7 +104,7 @@ class SelectFolderFragment : FileListFragment() {
     private inner class SetNoFilesLayout : () -> Unit {
         override fun invoke() {
             noFilesLayout.setup(
-                title = R.string.noFilesDescriptionSelectFolder,
+                title = R.string.noFilesDescription,
                 initialListView = fileRecyclerView
             )
         }

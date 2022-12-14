@@ -99,6 +99,7 @@
     <string name="buttonAuthorize">Erlauben</string>
     <string name="buttonAvailableOffline">Offline verfügbar</string>
     <string name="buttonBack">Zurück</string>
+    <string name="buttonCancelImport">Import abbrechen</string>
     <string name="buttonChangeFolderColor">Farbe des Ordners ändern</string>
     <string name="buttonClear">Löschen</string>
     <string name="buttonClearFilters">Filter zurücksetzen</string>
@@ -179,6 +180,7 @@
     <string name="categoryInsurance">Versicherung</string>
     <string name="categoryNameField">Bezeichnung der Kategorie</string>
     <string name="categoryQuotation">Angebot</string>
+    <string name="categoryResume">Lebenslauf</string>
     <string name="categoryTaxation">Steuer</string>
     <string name="categoryTransportation">Transport</string>
     <string name="categoryWarranty">Garantie</string>
@@ -245,7 +247,6 @@
     <string name="errorCache">Fehler bei der Zwischenspeicherung</string>
     <string name="errorCategoryAlreadyExists">Eine Kategorie mit dem gleichen Namen existiert bereits</string>
     <string name="errorConflict">An dieser Stelle existiert bereits ein Element mit demselben Namen</string>
-    <string name="errorConnection">Verbindungsfehler</string>
     <string name="errorDelete">Fehler beim Löschen</string>
     <string name="errorDestinationAlreadyExists">Das Ziel existiert bereits</string>
     <string name="errorDeviceStorage">Unzureichend verfügbarer Telefonspeicher</string>
@@ -508,9 +509,9 @@
     <string name="newFolderTitle">Was möchten Sie hinzufügen?</string>
     <string name="noDriveDescription">kDrive kostenlos testen oder sich mit einem anderen Benutzerkonto verbinden.</string>
     <string name="noDriveTitle">Sie haben kDrive noch nicht!</string>
-    <string name="noFilesDescription">Dieser Ordner ist leer. Klicken Sie auf den +Button, um hier Dateien hinzuzufügen.</string>
+    <string name="noFilesDescription">Dieser Ordner ist leer.</string>
     <string name="noFilesDescriptionNoNetwork">Die Informationen des Ordners können nicht wiederhergestellt werden. Bitte überprüfen Sie Ihre Netzwerkverbindung oder versuchen Sie es später noch einmal.</string>
-    <string name="noFilesDescriptionSelectFolder">Dieser Ordner ist leer.</string>
+    <string name="noFilesDescriptionWithCreationRights">Dieser Ordner ist leer. Klicken Sie auf den +Button, um hier Dateien hinzuzufügen.</string>
     <string name="noMediaFolderTitle">Keine Medienordner vorhanden</string>
     <string name="noSelectMediaFolders">Kein Ordner ausgewählt</string>
     <string name="noSyncFolderNotificationDescription">Klicken Sie hier, um die zu synchronisierenden Ordner zu konfigurieren</string>
