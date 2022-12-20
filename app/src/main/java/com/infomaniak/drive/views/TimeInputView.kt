@@ -28,11 +28,7 @@ import android.view.MotionEvent
 import android.widget.FrameLayout
 import androidx.fragment.app.FragmentManager
 import com.infomaniak.drive.R
-import com.infomaniak.drive.utils.isNightModeEnabled
-import com.infomaniak.lib.core.utils.FORMAT_DATE_HOUR_MINUTE
-import com.infomaniak.lib.core.utils.format
-import com.infomaniak.lib.core.utils.hours
-import com.infomaniak.lib.core.utils.minutes
+import com.infomaniak.lib.core.utils.*
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog.OnTimeSetListener
 import com.wdullaer.materialdatetimepicker.time.Timepoint
@@ -111,7 +107,7 @@ class TimeInputView @JvmOverloads constructor(
 
         // TODO : Waiting https://github.com/material-components/material-components-android/issues/366 (icon padding issue)
         TimePickerDialog.newInstance(this, hours, minutes, is24HourFormat(context)).apply {
-            isThemeDark = this@TimeInputView.resources.isNightModeEnabled()
+            isThemeDark = context?.isNightModeEnabled() == true
             setSelectableTimes(acceptableTimes)
             dismissOnPause(true)
             show(fragmentManager, this@TimeInputView.toString())
