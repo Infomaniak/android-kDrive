@@ -58,6 +58,7 @@ class FileMigration : RealmMigration {
                     addField(File::isFromUploads.name, Boolean::class.java, FieldAttribute.REQUIRED)
                 }
             }
+
             oldVersionTemp++
         }
 
@@ -125,6 +126,7 @@ class FileMigration : RealmMigration {
                 addField("_color", String::class.java)
                 addField("versionCode", Int::class.java)
             }
+
             oldVersionTemp++
         }
 
@@ -298,6 +300,8 @@ class FileMigration : RealmMigration {
 
             // Set embedded objects
             schema.get(FileExternalImport::class.java.simpleName)?.isEmbedded = true
+
+            oldVersionTemp++
         }
     }
 
