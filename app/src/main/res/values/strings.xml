@@ -110,6 +110,7 @@
     <string name="buttonAuthorize">Authorise</string>
     <string name="buttonAvailableOffline">Available offline</string>
     <string name="buttonBack">Back</string>
+    <string name="buttonCancelImport">Cancel import</string>
     <string name="buttonChangeFolderColor">Change folder colour</string>
     <string name="buttonClear">Clear</string>
     <string name="buttonClearFilters">Clear filters</string>
@@ -190,6 +191,7 @@
     <string name="categoryInsurance">Insurance</string>
     <string name="categoryNameField">Category name</string>
     <string name="categoryQuotation">Quotation</string>
+    <string name="categoryResume">Resume</string>
     <string name="categoryTaxation">Taxation</string>
     <string name="categoryTransportation">Transportation</string>
     <string name="categoryWarranty">Warranty</string>
@@ -256,7 +258,6 @@
     <string name="errorCache">Caching error</string>
     <string name="errorCategoryAlreadyExists">A category with the same name already exists</string>
     <string name="errorConflict">An element with the same name already exists in this location</string>
-    <string name="errorConnection">Connection error</string>
     <string name="errorDelete">Deletion error</string>
     <string name="errorDestinationAlreadyExists">Destination already exists</string>
     <string name="errorDeviceStorage">Insufficient phone storage</string>
@@ -519,9 +520,9 @@
     <string name="newFolderTitle">What would you like to add?</string>
     <string name="noDriveDescription">Try kDrive for free or log in with a different user account.</string>
     <string name="noDriveTitle">You don’t have a kDrive yet!</string>
-    <string name="noFilesDescription">This folder is empty. Click the + button to add files here.</string>
+    <string name="noFilesDescription">This folder is empty.</string>
     <string name="noFilesDescriptionNoNetwork">Unable to retrieve information from the folder. Please check your network connection or try again later.</string>
-    <string name="noFilesDescriptionSelectFolder">This folder is empty.</string>
+    <string name="noFilesDescriptionWithCreationRights">This folder is empty. Click the + button to add files here.</string>
     <string name="noMediaFolderTitle">No media folders available</string>
     <string name="noSelectMediaFolders">No folder selected</string>
     <string name="noSyncFolderNotificationDescription">Click here to configure the folders to synchronize</string>
