@@ -60,10 +60,10 @@ class SelectCategoriesViewModel : ViewModel() {
                 return@liveData
             }
 
+            filesCategories = findCommonCategoriesOfFiles()
+
             DriveInfosController.getCategoryRights(userDrive.driveId)
         }
-
-        filesCategories = findCommonCategoriesOfFiles()
 
         emit(true)
     }

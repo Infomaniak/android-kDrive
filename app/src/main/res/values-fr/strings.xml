@@ -180,6 +180,7 @@
     <string name="categoryInsurance">Assurance</string>
     <string name="categoryNameField">Nom de la catégorie</string>
     <string name="categoryQuotation">Devis</string>
+    <string name="categoryResume">CV</string>
     <string name="categoryTaxation">Impôts</string>
     <string name="categoryTransportation">Transport</string>
     <string name="categoryWarranty">Garantie</string>
@@ -508,9 +509,9 @@
     <string name="newFolderTitle">Que souhaitez-vous ajouter ?</string>
     <string name="noDriveDescription">Tester kDrive gratuitement ou connectez-vous avec un autre compte utilisateur.</string>
     <string name="noDriveTitle">Vous n’avez pas encore de kDrive !</string>
-    <string name="noFilesDescription">Ce dossier est vide. Appuyez sur le bouton + pour ajouter des fichiers ici.</string>
+    <string name="noFilesDescription">Ce dossier est vide.</string>
     <string name="noFilesDescriptionNoNetwork">Impossible de récupérer les informations du dossier. Veuillez vérifier votre connexion réseau ou réessayez ultérieurement.</string>
-    <string name="noFilesDescriptionSelectFolder">Ce dossier est vide.</string>
+    <string name="noFilesDescriptionWithCreationRights">Ce dossier est vide. Appuyez sur le bouton + pour ajouter des fichiers ici.</string>
     <string name="noMediaFolderTitle">Aucun dossier de médias disponible</string>
     <string name="noSelectMediaFolders">Aucun dossier sélectionné</string>
     <string name="noSyncFolderNotificationDescription">Cliquez-ici pour configurer les dossiers à synchroniser</string>

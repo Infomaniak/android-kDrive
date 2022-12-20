@@ -180,6 +180,7 @@
     <string name="categoryInsurance">Assicurazione</string>
     <string name="categoryNameField">Nome della categoria</string>
     <string name="categoryQuotation">Quotazione</string>
+    <string name="categoryResume">Curriculum</string>
     <string name="categoryTaxation">Imposte</string>
     <string name="categoryTransportation">Trasporto</string>
     <string name="categoryWarranty">Garanzia</string>
@@ -508,9 +509,9 @@
     <string name="newFolderTitle">Cosa vuoi aggiungere?</string>
     <string name="noDriveDescription">Prova kDrive gratuitamente o accedi con un altro account utente.</string>
     <string name="noDriveTitle">Non hai ancora kDrive!</string>
-    <string name="noFilesDescription">La cartella è vuota. Selezionare il pulsante + per aggiungere file.</string>
+    <string name="noFilesDescription">La cartella è vuota.</string>
     <string name="noFilesDescriptionNoNetwork">Impossibile recuperare le informazioni della cartella. Verificare la connessione di rete o riprovare più tardi.</string>
-    <string name="noFilesDescriptionSelectFolder">La cartella è vuota.</string>
+    <string name="noFilesDescriptionWithCreationRights">La cartella è vuota. Selezionare il pulsante + per aggiungere file.</string>
     <string name="noMediaFolderTitle">Nessuna cartella media disponibile</string>
     <string name="noSelectMediaFolders">Nessuna cartella selezionata</string>
     <string name="noSyncFolderNotificationDescription">Clicca qui per configurare le cartelle da sincronizzare</string>

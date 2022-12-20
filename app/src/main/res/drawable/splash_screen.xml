@@ -28,7 +28,7 @@
     <item android:bottom="60dp">
         <bitmap
             android:gravity="bottom"
-            android:src="@drawable/splashscreen_infomaniak" />
+            android:src="@drawable/splashscreen_branding_image_legacy" />
     </item>
 
 </layer-list>

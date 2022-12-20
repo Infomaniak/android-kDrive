@@ -285,15 +285,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun onDestinationChanged(destination: NavDestination, navigationArgs: Bundle?) {
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = "Navigation"
-            message = "Accessed to destination : ${destination.displayName}"
-            level = SentryLevel.INFO
-        })
-
-        with(destination) {
-            trackScreen(displayName.substringAfter("${BuildConfig.APPLICATION_ID}:id"), label.toString())
-        }
+        destination.addSentryBreadcrumb()
 
         val shouldHideBottomNavigation = navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldHideBottomNavigation
 
@@ -319,7 +311,7 @@ class MainActivity : BaseActivity() {
                 setColorNavigationBar(true)
             }
             R.id.fileShareLinkSettingsFragment -> {
-                setColorStatusBar(destination.id == R.id.fileShareLinkSettingsFragment)
+                setColorStatusBar(true)
                 setColorNavigationBar(true)
             }
             R.id.downloadProgressDialog, R.id.previewSliderFragment, R.id.selectPermissionBottomSheetDialog -> Unit
@@ -328,6 +320,22 @@ class MainActivity : BaseActivity() {
                 setColorNavigationBar()
             }
         }
+
+        destination.trackDestination()
+    }
+
+    @SuppressLint("RestrictedApi")
+    private fun NavDestination.addSentryBreadcrumb() {
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = "Navigation"
+            message = "Accessed to destination : $displayName"
+            level = SentryLevel.INFO
+        })
+    }
+
+    @SuppressLint("RestrictedApi")
+    private fun NavDestination.trackDestination() {
+        trackScreen(displayName.substringAfter("${BuildConfig.APPLICATION_ID}:id"), label.toString())
     }
 
     private fun handleBottomNavigationVisibility(destinationId: Int, shouldHideBottomNavigation: Boolean?) {

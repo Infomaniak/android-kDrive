@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.os.CancellationSignal
 import android.os.ParcelFileDescriptor
@@ -37,9 +38,9 @@ import androidx.webkit.WebSettingsCompat.FORCE_DARK_ON
 import androidx.webkit.WebViewClientCompat
 import androidx.webkit.WebViewFeature
 import com.infomaniak.drive.R
-import com.infomaniak.drive.utils.isNightModeEnabled
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
+import com.infomaniak.lib.core.utils.isNightModeEnabled
 import com.infomaniak.lib.core.utils.showToast
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -94,14 +95,18 @@ class OnlyOfficeActivity : AppCompatActivity() {
 
     @SuppressLint("RequiresFeature")
     private fun setDarkMode() {
-        if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK) &&
-            WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK_STRATEGY)
-        ) {
-            WebSettingsCompat.setForceDarkStrategy(webView.settings, WebSettingsCompat.DARK_STRATEGY_WEB_THEME_DARKENING_ONLY)
-            WebSettingsCompat.setForceDark(
-                webView.settings,
-                if (resources.isNightModeEnabled()) FORCE_DARK_ON else FORCE_DARK_OFF
-            )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
+            WebSettingsCompat.setAlgorithmicDarkeningAllowed(webView.settings, isNightModeEnabled())
+        } else {
+            if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK) &&
+                WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK_STRATEGY)
+            ) {
+                WebSettingsCompat.setForceDarkStrategy(webView.settings, WebSettingsCompat.DARK_STRATEGY_WEB_THEME_DARKENING_ONLY)
+                WebSettingsCompat.setForceDark(
+                    webView.settings,
+                    if (isNightModeEnabled()) FORCE_DARK_ON else FORCE_DARK_OFF
+                )
+            }
         }
     }
 
