@@ -43,7 +43,7 @@ class FavoritesFragment : FileListFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initParams()
         super.onViewCreated(view, savedInstanceState)
-        collapsingToolbarLayout.title = getString(R.string.favoritesTitle)
+        setToolbarTitle(R.string.favoritesTitle)
         setupAdapter()
         setupMultiSelectLayout()
     }

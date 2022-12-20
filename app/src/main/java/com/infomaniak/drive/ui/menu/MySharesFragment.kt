@@ -42,7 +42,7 @@ class MySharesFragment : FileSubTypeListFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initParams()
         super.onViewCreated(view, savedInstanceState)
-        collapsingToolbarLayout.title = getString(R.string.mySharesTitle)
+        setToolbarTitle(R.string.mySharesTitle)
         setupAdapter()
     }
 

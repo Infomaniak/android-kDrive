@@ -25,6 +25,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
+import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
@@ -157,7 +158,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         setNoFilesLayout()
 
         binding.toolbar.apply {
-            if ((folderId == ROOT_ID || folderId == OTHER_ROOT_ID) && hideBackButtonWhenRoot) navigationIcon = null
+            if (isRoot() && hideBackButtonWhenRoot) navigationIcon = null
 
             setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
@@ -185,7 +186,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
         with(binding) {
             swipeRefreshLayout.setOnRefreshListener(this@FileListFragment)
-            collapsingToolbarLayout.title = folderName
+            setToolbarTitle()
             ViewCompat.requestApplyInsets(fileListCoordinator) // Restore coordinator state
         }
 
@@ -457,6 +458,12 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     protected open fun homeClassName(): String? = null
 
+    protected fun setToolbarTitle(@StringRes rootTitleRes: Int? = null) {
+        collapsingToolbarLayout.title = if (isRoot() && rootTitleRes != null) getString(rootTitleRes) else folderName
+    }
+
+    private fun isRoot() = folderId == ROOT_ID || folderId == OTHER_ROOT_ID
+
     private fun File.openFolder() {
         if (isDisabled()) {
             safeNavigate(
@@ -487,7 +494,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     private fun checkIfNoFiles() {
         changeNoFilesLayoutVisibility(
             hideFileList = fileAdapter.itemCount == 0,
-            changeControlsVisibility = folderId != ROOT_ID && folderId != OTHER_ROOT_ID,
+            changeControlsVisibility = !isRoot(),
             ignoreOffline = true
         )
     }

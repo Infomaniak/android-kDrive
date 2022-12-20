@@ -34,7 +34,7 @@ open class OfflineFileFragment : FileSubTypeListFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initParams()
         super.onViewCreated(view, savedInstanceState)
-        collapsingToolbarLayout.title = getString(R.string.offlineFileTitle)
+        setToolbarTitle(R.string.offlineFileTitle)
         swipeRefreshLayout.isEnabled = false
     }
 
