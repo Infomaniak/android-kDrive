@@ -25,6 +25,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -468,7 +469,13 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         collapsingToolbarLayout.title = if (isCurrentFolderRoot() && rootTitleRes != null) getString(rootTitleRes) else folderName
     }
 
-    protected fun isCurrentFolderRoot() = folderId == ROOT_ID || folderId == OTHER_ROOT_ID
+    protected fun getNoFilesTitleAndIcon(@StringRes customTitle: Int? = null, @DrawableRes customIcon: Int? = null) = when {
+        isCurrentFolderRoot() && customIcon != null && customTitle != null -> customTitle to customIcon
+        canCreateFile -> R.string.noFilesDescriptionWithCreationRights to R.drawable.ic_folder_filled
+        else -> R.string.noFilesDescription to R.drawable.ic_folder_filled
+    }
+
+    private fun isCurrentFolderRoot() = folderId == ROOT_ID || folderId == OTHER_ROOT_ID
 
     private fun File.openFolder() {
         if (isDisabled()) {
@@ -727,10 +734,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     private inner class SetNoFilesLayout : () -> Unit {
         override fun invoke() {
-            binding.noFilesLayout.setup(
-                title = if (canCreateFile) R.string.noFilesDescriptionWithCreationRights else R.string.noFilesDescription,
-                initialListView = binding.fileRecyclerView
-            ) {
+            val (title, icon) = getNoFilesTitleAndIcon()
+            binding.noFilesLayout.setup(icon = icon, title = title, initialListView = binding.fileRecyclerView) {
                 fileListViewModel.cancelDownloadFiles()
                 downloadFiles(false, false)
             }

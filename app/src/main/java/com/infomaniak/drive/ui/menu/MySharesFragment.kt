@@ -51,6 +51,7 @@ class MySharesFragment : FileSubTypeListFragment() {
             downloadFiles = DownloadFiles()
             folderId = OTHER_ROOT_ID
         }
+        canCreateFile = true
         setNoFilesLayout = SetNoFilesLayout()
     }
 
@@ -85,11 +86,8 @@ class MySharesFragment : FileSubTypeListFragment() {
 
     private inner class SetNoFilesLayout : () -> Unit {
         override fun invoke() {
-            noFilesLayout.setup(
-                icon = if (isCurrentFolderRoot()) R.drawable.ic_share else R.drawable.ic_folder_filled,
-                title = if (isCurrentFolderRoot()) R.string.mySharesNoFile else R.string.noFilesDescriptionWithCreationRights,
-                initialListView = fileRecyclerView
-            )
+            val (title, icon) = getNoFilesTitleAndIcon(R.string.mySharesNoFile, R.drawable.ic_share)
+            noFilesLayout.setup(icon = icon, title = title, initialListView = fileRecyclerView)
         }
     }
 

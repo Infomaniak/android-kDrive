@@ -139,13 +139,8 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
 
     private inner class SetNoFilesLayout : () -> Unit {
         override fun invoke() {
-            val mustShowShareMessage = isCurrentFolderRoot() || !canCreateFile
-
-            noFilesLayout.setup(
-                icon = if (mustShowShareMessage) R.drawable.ic_share else R.drawable.ic_folder_filled,
-                title = if (mustShowShareMessage) R.string.mySharesNoFile else R.string.noFilesDescriptionWithCreationRights,
-                initialListView = fileRecyclerView
-            )
+            val (title, icon) = getNoFilesTitleAndIcon(R.string.sharedWithMeNoFile, R.drawable.ic_share)
+            noFilesLayout.setup(icon = icon, title = title, initialListView = fileRecyclerView)
         }
     }
 

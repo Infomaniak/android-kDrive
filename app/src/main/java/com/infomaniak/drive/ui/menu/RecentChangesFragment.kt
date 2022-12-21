@@ -79,11 +79,8 @@ class RecentChangesFragment : FileSubTypeListFragment() {
 
     private inner class SetNoFilesLayout : () -> Unit {
         override fun invoke() {
-            noFilesLayout.setup(
-                icon = R.drawable.ic_clock,
-                title = R.string.homeNoActivities,
-                initialListView = fileRecyclerView,
-            )
+            val (title, icon) = getNoFilesTitleAndIcon(R.string.homeNoActivities, R.drawable.ic_clock)
+            noFilesLayout.setup(icon = icon, title = title, initialListView = fileRecyclerView)
         }
     }
 

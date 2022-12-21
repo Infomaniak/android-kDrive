@@ -173,9 +173,10 @@ class TrashFragment : FileSubTypeListFragment() {
 
     private inner class SetNoFilesLayout : () -> Unit {
         override fun invoke() {
+            val (title, icon) = getNoFilesTitleAndIcon(R.string.trashNoFile, R.drawable.ic_delete)
             noFilesLayout.setup(
-                icon = R.drawable.ic_delete,
-                title = R.string.trashNoFile,
+                icon = icon,
+                title = title,
                 initialListView = fileRecyclerView,
                 viewsToDisable = if (folderId == ROOT_ID) listOf(emptyTrash) else null,
             )

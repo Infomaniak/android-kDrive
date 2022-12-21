@@ -60,9 +60,10 @@ open class OfflineFileFragment : FileSubTypeListFragment() {
 
     private inner class SetNoFilesLayout : () -> Unit {
         override fun invoke() {
+            val (title, icon) = getNoFilesTitleAndIcon(R.string.offlineFileNoFile, R.drawable.ic_offline)
             noFilesLayout.setup(
-                icon = R.drawable.ic_offline,
-                title = R.string.offlineFileNoFile,
+                icon = icon,
+                title = title,
                 description = R.string.offlineFileNoFileDescription,
                 initialListView = fileRecyclerView
             )
