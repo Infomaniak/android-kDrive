@@ -742,7 +742,7 @@ object FileController {
                 }
             }
 
-            // Start mqtt listening if the new file is an external import to receive its status update
+            // If the new file is an external import, start MQTT listening to receive its status updates.
             if (newFile.isImporting()) MqttClientWrapper.start(newFile.externalImport?.id)
         }
     }
@@ -844,7 +844,7 @@ object FileController {
             FileActivityType.FILE_MOVE_IN,
             FileActivityType.FILE_RESTORE -> {
                 if (returnResponse[fileId] == null && file != null) {
-                    if (file!!.isImporting()) MqttClientWrapper.start(file?.externalImport?.id)
+                    if (file!!.isImporting()) MqttClientWrapper.start(file!!.externalImport?.id)
                     realm.where(File::class.java).equalTo(File::id.name, currentFolder.id).findFirst()?.let { realmFolder ->
                         if (!realmFolder.children.contains(file)) {
                             addChild(realm, realmFolder, file!!)
@@ -989,7 +989,7 @@ object FileController {
         return apiResponse
     }
 
-    private fun updateExternalImportStatus(driveId: Int, importId: Int?, newStatus: FileExternalImportStatus) {
+    private fun updateExternalImportStatus(driveId: Int, importId: Int, newStatus: FileExternalImportStatus) {
         getRealmInstance(UserDrive(driveId = driveId)).use { realm ->
             realm.where(File::class.java)
                 .equalTo("${File::externalImport.name}.${FileExternalImport::id.name}", importId)

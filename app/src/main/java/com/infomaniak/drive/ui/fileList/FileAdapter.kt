@@ -24,6 +24,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isGone
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
@@ -258,7 +259,7 @@ open class FileAdapter(
             val isGrid = viewHolderType == DisplayType.GRID
             fileChecked.isChecked = isChecked
             fileChecked.isVisible = isGrid || isChecked
-            filePreview.isVisible = !getFile(position).isImporting() && (isGrid || !isChecked)
+            filePreview.isInvisible = getFile(position).isImporting() || (isChecked && !isGrid)
         } else {
             super.onBindViewHolder(holder, position, payloads)
         }
@@ -280,14 +281,13 @@ open class FileAdapter(
                 setCorners(position, itemCount)
             }
 
-            fileChecked.isVisible = false
             setFileItem(file, isGrid, holder)
             checkIfEnableFile(file)
 
             when {
                 uploadInProgress && !file.isPendingUploadFolder() -> displayStopUploadButton(position, file)
                 multiSelectManager.isMultiSelectOn -> displayFileChecked(file, isGrid)
-                else -> if (!file.isImporting()) displayFilePreview()
+                else -> fileChecked.isGone = true
             }
 
             setupMenuButton(file)
@@ -307,12 +307,7 @@ open class FileAdapter(
             isChecked = isSelectedFile(file)
             isVisible = isGrid || isSelectedFile(file)
         }
-        filePreview.isVisible = !file.isImporting() && (isGrid || !isSelectedFile(file))
-    }
-
-    private fun MaterialCardView.displayFilePreview() {
-        filePreview.isVisible = true
-        fileChecked.isGone = true
+        filePreview.isInvisible = file.isImporting() || (isSelectedFile(file) && !isGrid)
     }
 
     private fun MaterialCardView.setupMenuButton(file: File) {

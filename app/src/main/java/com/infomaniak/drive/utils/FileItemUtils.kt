@@ -37,6 +37,7 @@ import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.core.view.forEachIndexed
 import androidx.core.view.isGone
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import coil.load
 import com.infomaniak.drive.R
@@ -51,9 +52,7 @@ import com.infomaniak.drive.views.CategoryIconView
 import com.infomaniak.lib.core.utils.FormatterFileSize
 import com.infomaniak.lib.core.utils.format
 import io.sentry.Sentry
-import kotlinx.android.synthetic.main.cardview_file_grid.view.*
-import kotlinx.android.synthetic.main.cardview_folder_grid.view.*
-import kotlinx.android.synthetic.main.fragment_preview_others.view.*
+import kotlinx.android.synthetic.main.cardview_file_grid.view.filePreview2
 import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.android.synthetic.main.item_file.view.categoriesLayout
 import kotlinx.android.synthetic.main.item_file.view.fileFavorite
@@ -75,7 +74,7 @@ fun View.setFileItem(file: File, isGrid: Boolean = false, viewHolder: FileViewHo
     displaySize(file)
     displayIcon(file, isGrid, viewHolder)
     displayCategories(file)
-    displayExternalImport(file, isGrid)
+    displayExternalImport(file)
 }
 
 private fun View.displayDate(file: File) {
@@ -186,21 +185,14 @@ private fun View.displayCategories(file: File) {
     }
 }
 
-private fun View.displayExternalImport(file: File, isGrid: Boolean) {
+private fun View.displayExternalImport(file: File) {
     val isImporting = file.isImporting()
-    if (isImporting && !isGrid) {
-        fileDate.text =
-            resources.getString(if (file.isCancelingImport()) R.string.allCancellationInProgress else R.string.uploadInProgressTitle)
-    }
-
-    val fileProgression = when {
-        !isGrid -> fileProgression
-        file.isFolder() -> fileProgressionCardView
-        else -> null
-    }
-
     fileProgression?.isVisible = isImporting
-    filePreview.isGone = isImporting
+    filePreview.isInvisible = isImporting
+    if (isImporting) {
+        val importStatus = if (file.isCancelingImport()) R.string.allCancellationInProgress else R.string.uploadInProgressTitle
+        fileDate?.text = resources.getString(importStatus)
+    }
 }
 
 /**
@@ -283,7 +275,7 @@ private fun Context.getExternalRealPath(fileUri: Uri, isSchemeFile: Boolean, loc
 }
 
 private fun getBitmapFromPath(file: File, fileUri: Uri, thumbnailSize: Int, externalRealPath: String): Bitmap? {
-    val path = if (externalRealPath.isNotBlank()) externalRealPath else fileUri.path ?: return null
+    val path = externalRealPath.ifBlank { fileUri.path ?: return null }
 
     return if (file.getMimeType().contains("video")) {
         ThumbnailUtils.createVideoThumbnail(path, MediaStore.Video.Thumbnails.MICRO_KIND)

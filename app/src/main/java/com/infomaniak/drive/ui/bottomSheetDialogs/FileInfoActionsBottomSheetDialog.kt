@@ -358,11 +358,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override fun cancelExternalImportClicked() {
         super.cancelExternalImportClicked()
 
-        currentFile.externalImport?.id?.let { id ->
-            mainViewModel.cancelExternalImport(id).observe(viewLifecycleOwner) { apiResponse ->
-                if (!apiResponse.isSuccess()) showSnackbar(requireContext().getString(apiResponse.translatedError), true)
-                findNavController().popBackStack()
-            }
+        mainViewModel.cancelExternalImport(currentFile.externalImport!!.id).observe(viewLifecycleOwner) { apiResponse ->
+            if (!apiResponse.isSuccess()) showSnackbar(requireContext().getString(apiResponse.translatedError), true)
+            findNavController().popBackStack()
         }
     }
 

@@ -51,5 +51,5 @@ enum class MqttAction {
     EXTERNAL_IMPORT_FINISH,
 
     @SerializedName("cancel")
-    EXTERNAL_IMPORT_CANCEL
+    EXTERNAL_IMPORT_CANCEL,
 }
