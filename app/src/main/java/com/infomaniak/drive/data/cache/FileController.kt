@@ -980,16 +980,7 @@ object FileController {
         }?.let { status -> updateExternalImportStatus(driveId, importId, status) }
     }
 
-    fun cancelExternalImport(importId: Int): ApiResponse<Boolean> {
-        val driveId = AccountUtils.currentDriveId
-        val apiResponse = ApiRepository.cancelExternalImport(driveId, importId)
-
-        if (apiResponse.isSuccess()) updateExternalImportStatus(driveId, importId, FileExternalImportStatus.CANCELING)
-
-        return apiResponse
-    }
-
-    private fun updateExternalImportStatus(driveId: Int, importId: Int, newStatus: FileExternalImportStatus) {
+    fun updateExternalImportStatus(driveId: Int, importId: Int, newStatus: FileExternalImportStatus) {
         getRealmInstance(UserDrive(driveId = driveId)).use { realm ->
             realm.where(File::class.java)
                 .equalTo("${File::externalImport.name}.${FileExternalImport::id.name}", importId)

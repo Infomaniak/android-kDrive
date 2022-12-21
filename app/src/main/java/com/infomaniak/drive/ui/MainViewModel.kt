@@ -33,6 +33,7 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.ShareLink.ShareLinkFilePermission
+import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
@@ -336,7 +337,14 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     }
 
     fun cancelExternalImport(importId: Int) = liveData(Dispatchers.IO) {
-        emit(FileController.cancelExternalImport(importId))
+        val driveId = AccountUtils.currentDriveId
+        val apiResponse = ApiRepository.cancelExternalImport(driveId, importId)
+
+        if (apiResponse.isSuccess()) {
+            FileController.updateExternalImportStatus(driveId, importId, FileExternalImportStatus.CANCELING)
+        }
+
+        emit(apiResponse)
     }
 
     fun observeDownloadOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(
