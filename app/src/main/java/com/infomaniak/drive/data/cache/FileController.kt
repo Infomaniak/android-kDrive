@@ -822,15 +822,8 @@ object FileController {
     private fun FileActivity.applyFileActivity(realm: Realm, returnResponse: ArrayMap<Int, FileActivity>, currentFolder: File) {
         when (getAction()) {
             FileActivityType.FILE_DELETE,
-            FileActivityType.FILE_MOVE_OUT,
-            FileActivityType.FILE_TRASH -> {
-                if (returnResponse[fileId] == null || returnResponse[fileId]?.createdAt?.time == createdAt.time) { // Api fix
-                    getParentFile(fileId = fileId, realm = realm)?.let { parent ->
-                        if (parent.id == currentFolder.id) removeFile(fileId, customRealm = realm, recursive = false)
-                    }
-                    returnResponse[fileId] = this
-                }
-            }
+            FileActivityType.FILE_TRASH -> removeFileWhenEnteringFolder(true, realm, returnResponse, currentFolder)
+            FileActivityType.FILE_MOVE_OUT -> removeFileWhenEnteringFolder(false, realm, returnResponse, currentFolder)
             FileActivityType.FILE_CREATE,
             FileActivityType.FILE_MOVE_IN,
             FileActivityType.FILE_RESTORE -> {
@@ -869,6 +862,28 @@ object FileController {
                 }
             }
             else -> Unit
+        }
+    }
+
+    private fun FileActivity.removeFileWhenEnteringFolder(
+        isDeletionAction: Boolean,
+        realm: Realm,
+        returnResponse: ArrayMap<Int, FileActivity>,
+        currentFolder: File,
+    ) {
+        if (returnResponse[fileId] == null || returnResponse[fileId]?.createdAt?.time == createdAt.time) { // Api fix
+            getParentFile(fileId = fileId, realm = realm)?.let { localFolder ->
+                when {
+                    isDeletionAction && localFolder.id == currentFolder.id -> {
+                        removeFile(fileId, customRealm = realm, recursive = false)
+                    }
+                    localFolder.id != file?.parentId && localFolder.id == currentFolder.id -> {
+                        updateFile(localFolder.id, realm) { it.children.remove(file) }
+                    }
+                    else -> Unit
+                }
+            }
+            returnResponse[fileId] = this
         }
     }
 
