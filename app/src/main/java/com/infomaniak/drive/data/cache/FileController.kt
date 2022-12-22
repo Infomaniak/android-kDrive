@@ -733,9 +733,9 @@ object FileController {
     }
 
     private fun keepSubFolderChildren(localFolderChildren: List<File>?, remoteFolderChildren: List<File>) {
-        val oldChildren = localFolderChildren?.filter { it.children.isNotEmpty() || it.isOffline }
+        val oldChildren = localFolderChildren?.filter { it.children.isNotEmpty() || it.isOffline }?.associateBy { it.id }
         remoteFolderChildren.forEach { newFile ->
-            oldChildren?.find { it.id == newFile.id }?.let { oldFile ->
+            oldChildren?.get(newFile.id)?.let { oldFile ->
                 newFile.apply {
                     if (oldFile.isFolder()) children = oldFile.children
                     isOffline = oldFile.isOffline
