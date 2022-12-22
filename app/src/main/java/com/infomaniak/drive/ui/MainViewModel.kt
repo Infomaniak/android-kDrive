@@ -242,10 +242,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
                     runCatching { localFolder.children.remove(file) }
                 }
 
-                FileController.updateFile(newParent.id, realm) { localFolder ->
-                    // Same as above
-                    runCatching { localFolder.children.add(file.apply { parentId = localFolder.id }) }
-                }
+                FileController.addChild(newParent.id, file.apply { parentId = newParent.id }, realm)
             }
 
             onSuccess?.invoke(file.id)
