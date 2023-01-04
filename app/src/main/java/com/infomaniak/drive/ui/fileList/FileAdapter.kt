@@ -259,7 +259,7 @@ open class FileAdapter(
             val isGrid = viewHolderType == DisplayType.GRID
             fileChecked.isChecked = isChecked
             fileChecked.isVisible = isGrid || isChecked
-            filePreview.isInvisible = getFile(position).isImporting() || (isChecked && !isGrid)
+            filePreview.isInvisible = (isChecked && !isGrid) || getFile(position).isImporting()
         } else {
             super.onBindViewHolder(holder, position, payloads)
         }
