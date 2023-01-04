@@ -275,9 +275,11 @@ object FileController {
         }
     }
 
-    private fun addChild(realm: Realm, localFolder: File, file: File) {
-        if (localFolder.children.find { it.id == file.id } == null) {
-            realm.executeTransaction { localFolder.children.add(file) }
+    fun addChild(localFolderId: Int, newFile: File, realm: Realm) {
+        getFileById(realm, localFolderId)?.let { localFolder ->
+            if (!localFolder.children.contains(newFile)) {
+                realm.executeTransaction { localFolder.children.add(newFile) }
+            }
         }
     }
 
@@ -820,14 +822,21 @@ object FileController {
     }
 
     private fun FileActivity.applyFileActivity(realm: Realm, returnResponse: ArrayMap<Int, FileActivity>, currentFolder: File) {
-        when (getAction()) {
+        when (val action = getAction()) {
             FileActivityType.FILE_DELETE,
             FileActivityType.FILE_MOVE_OUT,
             FileActivityType.FILE_TRASH -> {
                 if (returnResponse[fileId] == null || returnResponse[fileId]?.createdAt?.time == createdAt.time) { // Api fix
-                    getParentFile(fileId = fileId, realm = realm)?.let { parent ->
-                        if (parent.id == currentFolder.id) removeFile(fileId, customRealm = realm, recursive = false)
+                    getParentFile(fileId = fileId, realm = realm)?.let { localFolder ->
+                        if (localFolder.id != currentFolder.id) return@let
+
+                        if (action == FileActivityType.FILE_MOVE_OUT) {
+                            updateFile(localFolder.id, realm) { it.children.remove(file) }
+                        } else {
+                            removeFile(fileId, customRealm = realm, recursive = false)
+                        }
                     }
+
                     returnResponse[fileId] = this
                 }
             }
@@ -837,7 +846,7 @@ object FileController {
                 if (returnResponse[fileId] == null && file != null) {
                     realm.where(File::class.java).equalTo(File::id.name, currentFolder.id).findFirst()?.let { realmFolder ->
                         if (!realmFolder.children.contains(file)) {
-                            addChild(realm, realmFolder, file!!)
+                            realm.executeTransaction { realmFolder.children.add(file) }
                         } else {
                             updateFileFromActivity(realm, this, realmFolder.id)
                         }
