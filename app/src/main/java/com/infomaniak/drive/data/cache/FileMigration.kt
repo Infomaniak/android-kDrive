@@ -20,6 +20,7 @@ package com.infomaniak.drive.data.cache
 import androidx.core.os.bundleOf
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.file.FileConversion
+import com.infomaniak.drive.data.models.file.FileExternalImport
 import com.infomaniak.drive.data.models.file.FileVersion
 import com.infomaniak.drive.data.models.file.dropbox.DropBoxCapabilities
 import com.infomaniak.drive.data.models.file.dropbox.DropBoxSize
@@ -57,6 +58,7 @@ class FileMigration : RealmMigration {
                     addField(File::isFromUploads.name, Boolean::class.java, FieldAttribute.REQUIRED)
                 }
             }
+
             oldVersionTemp++
         }
 
@@ -124,6 +126,7 @@ class FileMigration : RealmMigration {
                 addField("_color", String::class.java)
                 addField("versionCode", Int::class.java)
             }
+
             oldVersionTemp++
         }
 
@@ -269,8 +272,37 @@ class FileMigration : RealmMigration {
             schema.get(DropBox::class.java.simpleName)?.isEmbedded = true
             schema.get(FileVersion::class.java.simpleName)?.isEmbedded = true
             schema.get(FileConversion::class.java.simpleName)?.isEmbedded = true
+
+            oldVersionTemp++
         }
         //endregion
+
+        // Migrated to version 5:
+        // - Added new field (FileExternalImport) in File table
+        if (oldVersionTemp == 4L) {
+            // FileExternalImport migration
+            val fileExternalImportSchema = schema.create(FileExternalImport::class.java.simpleName).apply {
+                addField(FileExternalImport::id.name, Int::class.java, FieldAttribute.REQUIRED)
+                addField(FileExternalImport::application.name, String::class.java, FieldAttribute.REQUIRED)
+                addField(FileExternalImport::accountName.name, String::class.java, FieldAttribute.REQUIRED)
+                addField(FileExternalImport::status.name, String::class.java, FieldAttribute.REQUIRED)
+                addField(FileExternalImport::path.name, String::class.java, FieldAttribute.REQUIRED)
+                addField(FileExternalImport::directoryId.name, Int::class.java)
+                addField(FileExternalImport::hasSharedFiles.name, String::class.java, FieldAttribute.REQUIRED)
+                addField(FileExternalImport::createdAt.name, Long::class.java)
+                addField(FileExternalImport::updatedAt.name, Long::class.java)
+                addField(FileExternalImport::countSuccessFiles.name, Int::class.java)
+                addField(FileExternalImport::countFailedFiles.name, Int::class.java)
+            }
+
+            // File migration
+            schema.get(File::class.java.simpleName)?.addRealmObjectField(File::externalImport.name, fileExternalImportSchema)
+
+            // Set embedded objects
+            schema.get(FileExternalImport::class.java.simpleName)?.isEmbedded = true
+
+            oldVersionTemp++
+        }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -299,7 +331,7 @@ class FileMigration : RealmMigration {
     }
 
     companion object {
-        const val bddVersion = 4L // Must be bumped when the schema changes
+        const val dbVersion = 5L // Must be bumped when the schema changes
         const val LOGOUT_CURRENT_USER_TAG = "logout_current_user_tag"
     }
 }

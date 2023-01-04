@@ -99,7 +99,7 @@
     <string name="buttonAuthorize">Autorizza</string>
     <string name="buttonAvailableOffline">Disponibile offline</string>
     <string name="buttonBack">Indietro</string>
-    <string name="buttonCancelImport">Annullare l‘importazione</string>
+    <string name="buttonCancelImport">Annullare l’importazione</string>
     <string name="buttonChangeFolderColor">Cambia il colore della cartella</string>
     <string name="buttonClear">Cancella</string>
     <string name="buttonClearFilters">Elimina i filtri</string>

@@ -37,6 +37,7 @@ import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.core.view.forEachIndexed
 import androidx.core.view.isGone
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import coil.load
 import com.infomaniak.drive.R
@@ -73,6 +74,7 @@ fun View.setFileItem(file: File, isGrid: Boolean = false, viewHolder: FileViewHo
     displaySize(file)
     displayIcon(file, isGrid, viewHolder)
     displayCategories(file)
+    displayExternalImport(file)
 }
 
 private fun View.displayDate(file: File) {
@@ -183,6 +185,16 @@ private fun View.displayCategories(file: File) {
     }
 }
 
+private fun View.displayExternalImport(file: File) {
+    val isImporting = file.isImporting()
+    fileProgression?.isVisible = isImporting
+    filePreview.isInvisible = isImporting
+    if (isImporting) {
+        val importStatus = if (file.isCancelingImport()) R.string.allCancellationInProgress else R.string.uploadInProgressTitle
+        fileDate?.text = resources.getString(importStatus)
+    }
+}
+
 /**
  * This method is here, and not directly a class method in the File class, because of a supposed Realm bug.
  * When we try to put it in the File class, the app doesn't build anymore, because of a "broken method".
@@ -263,7 +275,7 @@ private fun Context.getExternalRealPath(fileUri: Uri, isSchemeFile: Boolean, loc
 }
 
 private fun getBitmapFromPath(file: File, fileUri: Uri, thumbnailSize: Int, externalRealPath: String): Bitmap? {
-    val path = if (externalRealPath.isNotBlank()) externalRealPath else fileUri.path ?: return null
+    val path = externalRealPath.ifBlank { fileUri.path ?: return null }
 
     return if (file.getMimeType().contains("video")) {
         ThumbnailUtils.createVideoThumbnail(path, MediaStore.Video.Thumbnails.MICRO_KIND)

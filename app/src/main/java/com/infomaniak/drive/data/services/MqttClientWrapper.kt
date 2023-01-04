@@ -21,18 +21,17 @@ import android.content.Context
 import android.os.CountDownTimer
 import android.util.Log
 import androidx.lifecycle.LiveData
-import com.google.gson.JsonParser
-import com.infomaniak.drive.data.models.ActionNotification
-import com.infomaniak.drive.data.models.ActionProgressNotification
 import com.infomaniak.drive.data.models.IpsToken
-import com.infomaniak.drive.data.models.Notification
+import com.infomaniak.drive.data.models.MqttAction
+import com.infomaniak.drive.data.models.MqttNotification
 import com.infomaniak.drive.utils.BulkOperationsUtils.isBulkOperationActive
+import com.infomaniak.drive.utils.isPositive
 import com.infomaniak.lib.core.api.ApiController.gson
 import com.infomaniak.lib.core.utils.Utils
 import info.mqtt.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
 
-object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
+object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
 
     private const val MQTT_AUTO_DISCONNECT_TIMER = 5_000L
 
@@ -42,6 +41,7 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
     private lateinit var timer: CountDownTimer
     private var currentToken: IpsToken? = null
     private var isSubscribed: Boolean = false
+    private var runningExternalImportIds: MutableSet<Int> = mutableSetOf()
 
     private const val MQTT_USER = "ips:ips-public"
     private const val MQTT_PASS = "8QC5EwBqpZ2Z" // Yes it's normal, non-sensitive information
@@ -76,7 +76,8 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
         }
     }
 
-    fun start(completion: () -> Unit) {
+    fun start(externalImportId: Int? = null, completion: () -> Unit = {}) {
+        externalImportId?.let { runningExternalImportIds.add(it) }
 
         // If we are already connected, just run the BulkOperation immediately
         if (client.isConnected) {
@@ -95,7 +96,7 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
 
                     // If there is no more active worker, stop MQTT
                     timer = Utils.createRefreshTimer(milliseconds = MQTT_AUTO_DISCONNECT_TIMER) {
-                        if (appContext.isBulkOperationActive()) {
+                        if (appContext.isBulkOperationActive() || runningExternalImportIds.size.isPositive()) {
                             timer.start()
                         } else {
                             currentToken?.let { unsubscribe(topicFor(it)) }
@@ -137,12 +138,13 @@ object MqttClientWrapper : MqttCallback, LiveData<Notification>() {
     }
 
     override fun messageArrived(topic: String?, message: MqttMessage?) {
-        val isProgress = JsonParser.parseString(message.toString()).asJsonObject.has("progress")
-        val notification = gson.fromJson(
-            message.toString(),
-            if (isProgress) ActionProgressNotification::class.java else ActionNotification::class.java
-        )
-        postValue(notification)
+        with(gson.fromJson(message.toString(), MqttNotification::class.java)) {
+            if (action == MqttAction.EXTERNAL_IMPORT_FINISH || action == MqttAction.EXTERNAL_IMPORT_CANCEL) {
+                runningExternalImportIds.remove(importId)
+            }
+
+            postValue(this)
+        }
     }
 
     override fun deliveryComplete(token: IMqttDeliveryToken?) {}

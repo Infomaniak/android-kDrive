@@ -229,7 +229,10 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         }
 
         MqttClientWrapper.observe(viewLifecycleOwner) { notification ->
-            if (notification is ActionNotification && notification.driveId == AccountUtils.currentDriveId) refreshActivities()
+            with(notification) {
+                if (isExternalImportNotification()) fileListViewModel.updateExternalImport(this)
+                if (driveId == AccountUtils.currentDriveId && isFileActionNotification()) refreshActivities()
+            }
         }
 
         setupBackActionHandler()

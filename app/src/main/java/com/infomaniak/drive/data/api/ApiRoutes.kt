@@ -25,10 +25,11 @@ import com.infomaniak.drive.utils.FileId
 object ApiRoutes {
 
     private const val fileWithQuery =
-        "with=capabilities,categories,conversion_capabilities,dropbox,is_favorite,sharelink,sorted_name,path"
+        "with=capabilities,categories,conversion_capabilities,dropbox,external_import,is_favorite,path,sharelink,sorted_name"
     private const val fileExtraWithQuery = "$fileWithQuery,users,version"
-    const val activitiesWithQuery = "with=file,file.capabilities,file.categories,file.conversion_capabilities,file.dropbox," +
-            "file.is_favorite,file.sharelink,file.sorted_name"
+    private const val activitiesWithQuery = "with=file,file.capabilities,file.categories,file.conversion_capabilities," +
+            "file.dropbox,file.is_favorite,file.sharelink,file.sorted_name"
+    const val activitiesWithExtraQuery = "$activitiesWithQuery,file.external_import"
 
     private fun orderQuery(order: SortType) = "order_for[${order.orderBy}]=${order.order}&order_by=${order.orderBy}"
 
@@ -178,6 +179,11 @@ object ApiRoutes {
     /** Share link */
     //region Share link
     fun shareLink(file: File) = "${fileURL(file)}/link"
+    //endregion
+
+    /** External import */
+    //region External import
+    fun cancelExternalImport(driveId: Int, importId: Int) = "${driveURL(driveId)}/imports/$importId/cancel"
     //endregion
 
     /** Trash */

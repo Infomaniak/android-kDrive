@@ -32,6 +32,8 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.file.FileConversion
+import com.infomaniak.drive.data.models.file.FileExternalImport
+import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
 import com.infomaniak.drive.data.models.file.FileVersion
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmListParceler.FileRealmListParceler
@@ -93,6 +95,8 @@ open class File(
     @SerializedName("color")
     private var _color: String? = null,
     var dropbox: DropBox? = null,
+    @SerializedName("external_import")
+    var externalImport: FileExternalImport? = null,
 
     /**
      * FILE ONLY
@@ -288,6 +292,16 @@ open class File(
     fun isDisabled(): Boolean {
         return rights?.canRead == false && rights?.canShow == false
     }
+
+    fun isImporting(): Boolean {
+        return externalImport?.let {
+            it.status == FileExternalImportStatus.IN_PROGRESS.value
+                    || it.status == FileExternalImportStatus.WAITING.value
+                    || isCancelingImport()
+        } ?: false
+    }
+
+    fun isCancelingImport() = externalImport?.status == FileExternalImportStatus.CANCELING.value
 
     fun isRoot(): Boolean {
         return id == ROOT_ID

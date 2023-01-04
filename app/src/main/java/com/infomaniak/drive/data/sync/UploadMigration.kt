@@ -44,6 +44,7 @@ class UploadMigration : RealmMigration {
             schema.get(SyncSettings::class.java.simpleName)!!
                 .removeField("syncPicture")
                 .removeField("syncScreenshot")
+
             oldVersionTemp++
         }
         //endregion
@@ -54,6 +55,7 @@ class UploadMigration : RealmMigration {
                 .addField(UploadFile::remoteSubFolder.name, String::class.java)
             schema.get(SyncSettings::class.java.simpleName)!!
                 .addField(SyncSettings::createDatedSubFolders.name, Boolean::class.java, FieldAttribute.REQUIRED)
+
             oldVersionTemp++
         }
         //endregion
@@ -62,6 +64,7 @@ class UploadMigration : RealmMigration {
         if (oldVersionTemp == 2L) {
             schema.get(SyncSettings::class.java.simpleName)!!
                 .addField(SyncSettings::deleteAfterSync.name, Boolean::class.java, FieldAttribute.REQUIRED)
+
             oldVersionTemp++
         }
         //endregion
@@ -71,6 +74,7 @@ class UploadMigration : RealmMigration {
             schema.get(UploadFile::class.java.simpleName)!!
                 .addField(UploadFile::uploadToken.name, String::class.java)
                 .removeField("identifier")
+
             oldVersionTemp++
         }
         //endregion
@@ -87,11 +91,13 @@ class UploadMigration : RealmMigration {
                         uploadFile.setString("remoteSubFolder", subFolder.substringBeforeLast(encodedName))
                     }
                 }
+
+            oldVersionTemp++
         }
         //endregion
     }
 
     companion object {
-        const val bddVersion = 5L // Must be bumped when the schema changes
+        const val dbVersion = 5L // Must be bumped when the schema changes
     }
 }

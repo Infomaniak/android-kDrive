@@ -134,7 +134,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
                 addFavorites.isVisible = rights?.canUseFavorite == true
                 availableOffline.isGone = isSharedWithMe || currentFile.getOfflineFile(context) == null
-                deleteFile.isVisible = rights?.canDelete == true
+                deleteFile.isVisible = rights?.canDelete == true && !file.isImporting()
                 downloadFile.isVisible = rights?.canRead == true
                 duplicateFile.isGone = rights?.canRead == false
                         || isSharedWithMe
@@ -143,8 +143,9 @@ class FileInfoActionsView @JvmOverloads constructor(
                 editDocument.isVisible = (currentFile.hasOnlyoffice && rights?.canWrite == true)
                         || (currentFile.conversion?.whenOnlyoffice == true)
                 leaveShare.isVisible = rights?.canLeave == true
-                moveFile.isVisible = rights?.canMove == true && !isSharedWithMe
-                renameFile.isVisible = rights?.canRename == true && !isSharedWithMe
+                cancelExternalImport.isVisible = file.isImporting()
+                moveFile.isVisible = rights?.canMove == true && !isSharedWithMe && !file.isImporting()
+                renameFile.isVisible = rights?.canRename == true && !isSharedWithMe && !file.isImporting()
                 goToFolder.isVisible = isGoToFolderVisible()
             }
 
@@ -216,7 +217,8 @@ class FileInfoActionsView @JvmOverloads constructor(
             onItemClickListener.addFavoritesClicked()
         }
         leaveShare.setOnClickListener { onItemClickListener.leaveShare() }
-        // Use OnClickListener instead of OnCheckedChangeListener because the later is unnecessarily called on every
+        cancelExternalImport.setOnClickListener { onItemClickListener.cancelExternalImportClicked() }
+        // Use OnClickListener instead of OnCheckedChangeListener because the latter is unnecessarily called on every
         // refreshBottomSheetUI calls
         availableOfflineSwitch.setOnClickListener { view ->
             val downloadError = !onItemClickListener.availableOfflineSwitched(this, (view as SwitchMaterial).isChecked)
@@ -441,8 +443,8 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         fun addFavoritesClicked() = trackFileActionEvent("favorite", !currentFile.isFavorite)
+        fun cancelExternalImportClicked() = trackFileActionEvent("cancelExternalImport")
         fun colorFolderClicked(color: String) = context.trackEvent("colorFolder", "switch")
-        fun sharePublicLink() = trackFileActionEvent("shareLink")
         fun displayInfoClicked()
         fun downloadFileClicked() = trackFileActionEvent("download")
         fun dropBoxClicked(isDropBox: Boolean) = trackFileActionEvent("convertToDropbox", isDropBox)
@@ -457,6 +459,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun onRenameFile(newName: String, onApiResponse: () -> Unit)
         fun openWithClicked() = trackFileActionEvent("openWith")
         fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File)
+        fun sharePublicLink() = trackFileActionEvent("shareLink")
 
         fun editDocumentClicked() {
             trackFileActionEvent("edit")

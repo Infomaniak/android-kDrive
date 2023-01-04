@@ -26,6 +26,9 @@ import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.Type
 import com.infomaniak.drive.data.models.FileActivity.FileActivityType
+import com.infomaniak.drive.data.models.file.FileExternalImport
+import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
+import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -344,7 +347,7 @@ object FileController {
 
     private fun getRealmConfiguration(dbName: String): RealmConfiguration {
         return RealmConfiguration.Builder()
-            .schemaVersion(FileMigration.bddVersion) // Must be bumped when the schema changes
+            .schemaVersion(FileMigration.dbVersion) // Must be bumped when the schema changes
             .migration(FileMigration())
             .modules(RealmModules.LocalFilesModule())
             .name(dbName)
@@ -732,11 +735,17 @@ object FileController {
     }
 
     private fun keepSubFolderChildren(localFolderChildren: List<File>?, remoteFolderChildren: List<File>) {
-        localFolderChildren?.filter { !it.children.isEmpty() || it.isOffline }?.map { oldFile ->
-            remoteFolderChildren.find { it.id == oldFile.id }?.apply {
-                if (oldFile.isFolder()) children = oldFile.children
-                isOffline = oldFile.isOffline
+        val oldChildren = localFolderChildren?.filter { it.children.isNotEmpty() || it.isOffline }?.associateBy { it.id }
+        remoteFolderChildren.forEach { newFile ->
+            oldChildren?.get(newFile.id)?.let { oldFile ->
+                newFile.apply {
+                    if (oldFile.isFolder()) children = oldFile.children
+                    isOffline = oldFile.isOffline
+                }
             }
+
+            // If the new file is an external import, start MQTT listening to receive its status updates.
+            if (newFile.isImporting()) MqttClientWrapper.start(newFile.externalImport?.id)
         }
     }
 
@@ -844,6 +853,7 @@ object FileController {
             FileActivityType.FILE_MOVE_IN,
             FileActivityType.FILE_RESTORE -> {
                 if (returnResponse[fileId] == null && file != null) {
+                    if (file!!.isImporting()) MqttClientWrapper.start(file!!.externalImport?.id)
                     realm.where(File::class.java).equalTo(File::id.name, currentFolder.id).findFirst()?.let { realmFolder ->
                         if (!realmFolder.children.contains(file)) {
                             realm.executeTransaction { realmFolder.children.add(file) }
@@ -968,6 +978,22 @@ object FileController {
             SortType.SMALLER -> sort(File::size.name, Sort.ASCENDING)
             SortType.BIGGER -> sort(File::size.name, Sort.DESCENDING)
             // SortType.EXTENSION -> sort(File::convertedType.name, Sort.ASCENDING) // TODO implement
+        }
+    }
+
+    fun updateExternalImport(driveId: Int, importId: Int, action: MqttAction) {
+        when (action) {
+            MqttAction.EXTERNAL_IMPORT_FINISH -> FileExternalImportStatus.DONE
+            MqttAction.EXTERNAL_IMPORT_CANCEL -> FileExternalImportStatus.CANCELED
+            else -> null
+        }?.let { status -> updateExternalImportStatus(driveId, importId, status) }
+    }
+
+    fun updateExternalImportStatus(driveId: Int, importId: Int, newStatus: FileExternalImportStatus) {
+        getRealmInstance(UserDrive(driveId = driveId)).use { realm ->
+            realm.where(File::class.java)
+                .equalTo("${File::externalImport.name}.${FileExternalImport::id.name}", importId)
+                .findFirst()?.let { file -> realm.executeTransaction { file.externalImport?.status = newStatus.value } }
         }
     }
 }
