@@ -294,9 +294,11 @@ open class File(
     }
 
     fun isImporting(): Boolean {
-        return externalImport?.status == FileExternalImportStatus.IN_PROGRESS.value ||
-                externalImport?.status == FileExternalImportStatus.WAITING.value ||
-                isCancelingImport()
+        return externalImport?.let {
+            it.status == FileExternalImportStatus.IN_PROGRESS.value
+                    || it.status == FileExternalImportStatus.WAITING.value
+                    || isCancelingImport()
+        } ?: false
     }
 
     fun isCancelingImport() = externalImport?.status == FileExternalImportStatus.CANCELING.value
