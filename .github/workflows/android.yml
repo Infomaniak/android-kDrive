@@ -61,12 +61,13 @@ jobs:
 
       - name: create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: reactivecircus/android-emulator-runner@v2.27.0
         with:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
           profile: Pixel 4
           arch: x86_64
+          disk-size: 6G
           avd-name: kdrive-test
           force-avd-creation: false
           disable-animations: false
@@ -95,12 +96,13 @@ jobs:
         run: ./gradlew testDebugUnitTest --stacktrace
 
       - name: Run instrumentation tests
-        uses: ReactiveCircus/android-emulator-runner@v2.22.0
+        uses: ReactiveCircus/android-emulator-runner@v2.27.0
         with:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
           profile: Pixel 4
           arch: x86_64
+          disk-size: 6G
           avd-name: kdrive-test
           force-avd-creation: false
           disable-animations: true
