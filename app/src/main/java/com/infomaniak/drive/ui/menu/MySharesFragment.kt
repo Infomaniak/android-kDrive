@@ -37,6 +37,9 @@ class MySharesFragment : FileSubTypeListFragment() {
     override var hideBackButtonWhenRoot: Boolean = false
     override var allowCancellation: Boolean = false
 
+    override val noItemsRootIcon = R.drawable.ic_share
+    override val noItemsRootTitle = R.string.mySharesNoFile
+
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -51,8 +54,6 @@ class MySharesFragment : FileSubTypeListFragment() {
             downloadFiles = DownloadFiles()
             folderId = OTHER_ROOT_ID
         }
-        canCreateFile = true
-        setNoFilesLayout = SetNoFilesLayout()
     }
 
     private fun setupAdapter() {
@@ -82,13 +83,6 @@ class MySharesFragment : FileSubTypeListFragment() {
 
     companion object {
         const val MATOMO_CATEGORY = "mySharesFileAction"
-    }
-
-    private inner class SetNoFilesLayout : () -> Unit {
-        override fun invoke() {
-            val (title, icon) = getNoFilesTitleAndIcon(R.string.mySharesNoFile, R.drawable.ic_share)
-            noFilesLayout.setup(icon = icon, title = title, initialListView = fileRecyclerView)
-        }
     }
 
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {

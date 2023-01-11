@@ -48,6 +48,9 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
     override var enabledMultiSelectMode: Boolean = true
     override var hideBackButtonWhenRoot: Boolean = false
 
+    override val noItemsRootIcon = R.drawable.ic_share
+    override val noItemsRootTitle = R.string.sharedWithMeNoFile
+
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -66,7 +69,6 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                 else -> File(id = folderId, driveId = navigationArgs.driveId, name = folderName)
             }
         )
-        setNoFilesLayout = SetNoFilesLayout()
 
         fileListViewModel.isSharedWithMe = true
         super.onViewCreated(view, savedInstanceState)
@@ -111,7 +113,6 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                 folderId = if (isDrive()) ROOT_ID else id,
                 folderName = name,
                 driveId = driveId,
-                canCreateFile = hasCreationRight()
             )
         )
     }
@@ -135,13 +136,6 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
 
     companion object {
         const val MATOMO_CATEGORY = "sharedWithMeFileAction"
-    }
-
-    private inner class SetNoFilesLayout : () -> Unit {
-        override fun invoke() {
-            val (title, icon) = getNoFilesTitleAndIcon(R.string.sharedWithMeNoFile, R.drawable.ic_share)
-            noFilesLayout.setup(icon = icon, title = title, initialListView = fileRecyclerView)
-        }
     }
 
     private inner class DownloadFiles() : (Boolean, Boolean) -> Unit {

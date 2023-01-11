@@ -56,12 +56,14 @@ class UploadInProgressFragment : FileListFragment() {
     override var hideBackButtonWhenRoot: Boolean = false
     override var showPendingFiles = false
 
+    override val noItemsIcon = R.drawable.ic_upload
+    override val noItemsTitle = R.string.uploadInProgressNoFile
+
     private var pendingUploadFiles = mutableListOf<UploadFile>()
     private var pendingFiles = mutableListOf<File>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         downloadFiles = DownloadFiles()
-        setNoFilesLayout = SetNoFilesLayout()
         drivePermissions.registerPermissions(this) { authorized ->
             if (!authorized) findNavController().popBackStack()
         }
@@ -241,16 +243,6 @@ class UploadInProgressFragment : FileListFragment() {
         }
 
         if (notIgnorePendingFoldersIfNeeded()) findNavController().popBackStack()
-    }
-
-    private inner class SetNoFilesLayout : () -> Unit {
-        override fun invoke() {
-            noFilesLayout.setup(
-                icon = R.drawable.ic_upload,
-                title = R.string.uploadInProgressNoFile,
-                initialListView = fileRecyclerView
-            )
-        }
     }
 
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {

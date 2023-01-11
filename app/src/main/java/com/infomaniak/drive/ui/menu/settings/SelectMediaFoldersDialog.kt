@@ -37,6 +37,7 @@ import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.IsComplete
 import com.infomaniak.drive.utils.MediaFoldersProvider
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
+import com.infomaniak.drive.views.NoItemsLayoutView
 import com.infomaniak.lib.core.views.DividerItemDecorator
 import io.realm.Realm
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_media_folders.*
@@ -45,10 +46,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runInterruptible
 
-class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
+class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), NoItemsLayoutView.INoItemsLayoutView {
 
     private val mediaViewModel: MediaViewModel by viewModels()
     private lateinit var mediaFoldersAdapter: MediaFoldersAdapter
+
+    override val noItemsIcon = R.drawable.ic_folder_filled
+    override val noItemsTitle = R.string.noMediaFolderTitle
+    override val noItemsInitialListView: View by lazy { mediaFolderList }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_bottom_sheet_select_media_folders, container, false)
@@ -63,6 +68,8 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
 
         swipeRefreshLayout.isEnabled = false
 
+        noMediaFolderLayout.iNoItemsLayoutView = this
+
         mediaFoldersAdapter = MediaFoldersAdapter { mediaFolder, isChecked ->
             lifecycleScope.launch(Dispatchers.IO) {
                 mediaFolder.enableSync(isChecked)
@@ -72,11 +79,6 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog() {
         ContextCompat.getDrawable(requireContext(), R.drawable.divider)?.let {
             mediaFolderList.addItemDecoration(DividerItemDecorator(it))
         }
-
-        noMediaFolderLayout.setup(
-            title = R.string.noMediaFolderTitle,
-            initialListView = mediaFolderList,
-        )
 
         val drivePermissions = DrivePermissions().apply {
             registerPermissions(this@SelectMediaFoldersDialog) { authorized -> if (authorized) loadFolders() else dismiss() }
