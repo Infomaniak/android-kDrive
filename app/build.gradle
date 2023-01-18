@@ -17,8 +17,8 @@ android {
         applicationId 'com.infomaniak.drive'
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 4_02_011_02
-        versionName '4.2.11'
+        versionCode 4_02_012_01
+        versionName '4.2.12'
 
         setProperty "archivesBaseName", "kdrive-" + getVersionName()
 
@@ -148,7 +148,7 @@ dependencies {
     testImplementation 'io.github.serpro69:kotlin-faker:1.13.0'
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
 
-    def espresso_version = '3.5.0'
+    def espresso_version = '3.5.1'
     androidTestImplementation("androidx.test.espresso:espresso-contrib:$espresso_version") {
         // WorkAround for dependencies issue (see https://github.com/android/android-test/issues/861)
         exclude group: 'org.checkerframework', module: 'checker'
@@ -158,7 +158,7 @@ dependencies {
     def androidx_test_version = '1.5.0'
     implementation "androidx.test:core-ktx:$androidx_test_version"
     androidTestImplementation "androidx.test:rules:$androidx_test_version"
-    androidTestImplementation "androidx.test:runner:$androidx_test_version"
+    androidTestImplementation "androidx.test:runner:1.5.2"
 
     def jupiter_version = '5.9.1'
     androidTestImplementation "org.junit.jupiter:junit-jupiter-api:$jupiter_version"
